@@ -1,0 +1,18 @@
+{
+    "strict": true,
+    "compilerOptions": {
+      "lib": ["ES2017", "DOM"],
+      "target": "es2017",
+      "module": "es6",
+      "sourceMap": true,
+      "outDir": "out"
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "src"
+      ],
+      "exclude": [
+        "node_modules"
+      ]
+  }
