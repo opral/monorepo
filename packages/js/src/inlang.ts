@@ -13,12 +13,15 @@ let inlangTranslations: Record<string, string>
 let inlangLocale: string | undefined
 
 /**
- * Loads the translations for a given locale via a network request.
+ * Loads the translations for a given locale via a network request for further
+ * use internally but also returns the translations for external usage.
  *
  * If the locale is undefined, no (new) translations are fetched. Previous fetches
  * are not overwridden but will not be used by the `t()` function.
  */
-export async function loadTranslations(locale: string | undefined) {
+export async function loadTranslations(
+    locale: string | undefined
+): Promise<Record<string, string>> {
     if (window === undefined) {
         throw Error(
             'Inlang only works in a browser environment where `window` is defined.'
@@ -47,7 +50,7 @@ export async function loadTranslations(locale: string | undefined) {
  * e.g. German, Spanish etc. does not need to be translated and for those locales no translations
  * exist.
  */
-export function t(text: string) {
+export function t(text: string): string {
     const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
     if (inlangLocale && inlangTranslations) {
         try {
