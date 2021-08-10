@@ -1,7 +1,7 @@
 /**
  * The record contains all translations for a given locale.
  */
-let inlangTranslations: Record<string, string>
+let inlangTranslations: Record<string, string> | null = null
 
 /**
  * The locale of the translations to be loaded and used.
@@ -12,30 +12,54 @@ let inlangTranslations: Record<string, string>
  */
 let inlangLocale: string | undefined
 
+let inlangProjectDomain: string | undefined
+
+async function postMissingTranslation(trimmedText: string): Promise<void> {
+    try {
+        await fetch('http://localhost:3000/api/missingTranslation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                projectDomain: inlangProjectDomain,
+                key: trimmedText,
+                locale: inlangLocale,
+            }),
+        })
+    } catch {
+        // pass
+    }
+}
+
 /**
  * Loads the translations for a given locale via a network request for further
  * use internally but also returns the translations for external usage.
+ *
+ * @param projectDomain
+ * @param locale
  *
  * If the locale is undefined, no (new) translations are fetched. Previous fetches
  * are not overwridden but will not be used by the `t()` function.
  */
 export async function loadTranslations(
+    projectDomain: string,
     locale: string | undefined
-): Promise<Record<string, string>> {
-    if (window === undefined) {
-        throw Error(
-            'Inlang only works in a browser environment where `window` is defined.'
-        )
-    }
-    const hostname = window.location.hostname.replace('wwww.', '')
+): Promise<Record<string, string> | null> {
     inlangLocale = locale
+    inlangProjectDomain = projectDomain
     // if the global locale is defined -> load the translation for that locale
     if (inlangLocale) {
-        inlangTranslations = await (
-            await fetch(
-                `https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${hostname}/${inlangLocale}.json`
+        try {
+            const response = await fetch(
+                `https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${inlangProjectDomain}/${inlangLocale}.json`
             )
-        ).json()
+            if (response.ok) {
+                inlangTranslations = await response.json()
+            }
+        } catch (e) {
+            console.log(e)
+        }
     }
     return inlangTranslations
 }
@@ -51,29 +75,24 @@ export async function loadTranslations(
  * exist.
  */
 export function t(text: string): string {
-    const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
-    if (inlangLocale && inlangTranslations) {
-        try {
-            if (inlangTranslations[trimmed]) {
-                return inlangTranslations[trimmed]
+    try {
+        const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
+        if (inlangLocale) {
+            if (inlangTranslations) {
+                if (inlangTranslations[trimmed]) {
+                    return inlangTranslations[trimmed]
+                }
+                // the key does not exist, thus post as missing translation
+                postMissingTranslation(trimmed)
             } else {
-                // missing translation detected.
-                // the fetch is async but it does not matter if an error occurs
-                // some missing translation requests will make it through
-                fetch('http://localhost:3000/api/missingTranslation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        projectId: 1,
-                        key: trimmed,
-                    }),
-                })
+                // high chance that its a new project without any
+                // tracked missing translations yet.
+                postMissingTranslation(trimmed)
             }
-        } catch (_a) {
-            return text
         }
+        return text
+    } catch {
+        // in any case return the fallback text
+        return text
     }
-    return text
 }

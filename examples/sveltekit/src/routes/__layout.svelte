@@ -1,3 +1,13 @@
+<script context="module">
+  import { loadTranslations, t } from "inlang";
+
+  export async function load() {
+    await loadTranslations("demo.sveltekit.inlang","de");
+    return {};
+  }
+
+</script>
+
 <script>
   import Header from "$lib/header/Header.svelte";
   import "../app.css";

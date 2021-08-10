@@ -1,6 +1,6 @@
 {
+  "compilerOptions": {
     "strict": true,
-    "compilerOptions": {
       "declaration": true,
       "lib": ["ES2017", "DOM"],
       "target": "es2017",
@@ -9,9 +9,7 @@
       "outDir": "out"
     },
     "include": [
-        "**/*.ts",
-        "**/*.tsx",
-        "src"
+        "src/**/*.ts",
       ],
       "exclude": [
         "node_modules"

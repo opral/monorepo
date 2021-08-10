@@ -1,11 +1,6 @@
 <script context="module">
   import { browser, dev } from "$app/env";
-  import { t, loadTranslations } from "inlang";
-
-  export async function load({ page, fetch }) {
-    await loadTranslations("de");
-    return {};
-  }
+  import { t } from "inlang";
 
   // we don't need any JS on this page, though we'll load
   // it in dev so that we get hot module replacement...
