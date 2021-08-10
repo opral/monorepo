@@ -75,11 +75,9 @@ typings/
 # FuseBox cache
 .fusebox/
 
-**/out
+# **/out
 examples/svelte/package-lock.json
 examples/sveltekit/package-lock.json
-packages/app/.DS_Store
-packages/app/package-lock.json
 
 **/.DS_Store
 .vscode
