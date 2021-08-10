@@ -8,7 +8,8 @@
   },
   "devDependencies": {
     "@sveltejs/kit": "next",
-    "svelte": "^3.34.0"
+    "svelte": "^3.34.0",
+    "@sveltejs/adapter-vercel": "next"
   },
   "type": "module",
   "dependencies": {
