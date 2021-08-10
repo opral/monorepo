@@ -82,3 +82,4 @@ packages/app/.DS_Store
 packages/app/package-lock.json
 
 **/.DS_Store
+.vscode
