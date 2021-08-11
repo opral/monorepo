@@ -1,18 +1,31 @@
 /**
+ * The locale of the current translations.
+ *
+ * Do not set the locale! Use `loadTranslations` instead to ensure that
+ * the translations for the locale are loaded.
+ *
+ * `t` always returns the provided `text` as fallback when currentLocale is `undefined`.
+ */
+export let currentLocale;
+/**
  * The record contains all translations for a given locale.
  */
-let inlangTranslations = null;
+let translations = null;
 /**
- * The locale of the translations to be loaded and used.
- *
- * Inlang considers an `undefined` locale to use the "development language" of
- * the project e.g. if your project is written in German, the development language
- * (fallback) language is German.
+ * The domain of the project.
  */
-let inlangLocale;
 let inlangProjectDomain;
+/**
+ * Contains the missingTranslations that have been tracked already
+ * in this session i.e. no need to make a new POST request.
+ */
+let trackedMissingTranslations;
 async function postMissingTranslation(trimmedText) {
     try {
+        if (trackedMissingTranslations[trimmedText] !== undefined) {
+            // has been reported already, thus return
+            return;
+        }
         await fetch('http://localhost:3000/api/missingTranslation', {
             method: 'POST',
             headers: {
@@ -21,9 +34,10 @@ async function postMissingTranslation(trimmedText) {
             body: JSON.stringify({
                 projectDomain: inlangProjectDomain,
                 key: trimmedText,
-                locale: inlangLocale,
+                locale: currentLocale,
             }),
         });
+        trackedMissingTranslations[trimmedText] = true;
     }
     catch (_a) {
         // pass
@@ -40,21 +54,22 @@ async function postMissingTranslation(trimmedText) {
  * are not overwridden but will not be used by the `t()` function.
  */
 export async function loadTranslations(projectDomain, locale) {
-    inlangLocale = locale;
+    currentLocale = locale;
     inlangProjectDomain = projectDomain;
+    trackedMissingTranslations = {};
     // if the global locale is defined -> load the translation for that locale
-    if (inlangLocale) {
+    if (currentLocale) {
         try {
-            const response = await fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${inlangProjectDomain}/${inlangLocale}.json`);
+            const response = await fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${inlangProjectDomain}/${currentLocale}.json`);
             if (response.ok) {
-                inlangTranslations = await response.json();
+                translations = await response.json();
             }
         }
         catch (e) {
             console.log(e);
         }
     }
-    return inlangTranslations;
+    return translations;
 }
 /**
  * Translates given text based on the loaded translations.
@@ -69,10 +84,10 @@ export async function loadTranslations(projectDomain, locale) {
 export function t(text) {
     try {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim();
-        if (inlangLocale) {
-            if (inlangTranslations) {
-                if (inlangTranslations[trimmed]) {
-                    return inlangTranslations[trimmed];
+        if (currentLocale) {
+            if (translations) {
+                if (translations[trimmed]) {
+                    return translations[trimmed];
                 }
                 // the key does not exist, thus post as missing translation
                 postMissingTranslation(trimmed);
