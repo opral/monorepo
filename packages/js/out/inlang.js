@@ -1,23 +1,27 @@
 /**
+ * The development locale -> "language of the app without translations".
+ */
+let DEVELOPMENT_LOCALE;
+/**
  * The locale of the current translations.
  *
- * Do not set the locale! Use `loadTranslations` instead to ensure that
- * the translations for the locale are loaded.
- *
- * `t` always returns the provided `text` as fallback when currentLocale is `undefined`.
+ * `loadTranslation()` sets the locale.
  */
-export let currentLocale;
+let SPECIFIED_LOCALE;
 /**
  * The record contains all translations for a given locale.
  */
-let translations = null;
+let TRANSLATIONS = {};
 /**
  * The domain of the project.
  */
-let inlangProjectDomain;
+let INLANG_PROJECT_DOMAIN;
 /**
  * Contains the missingTranslations that have been tracked already
  * in this session i.e. no need to make a new POST request.
+ *
+ * The format follows either the key exists indicated by not `undefined`.
+ * The boolean value is just a placeholder.
  */
 let trackedMissingTranslations;
 async function postMissingTranslation(trimmedText) {
@@ -32,9 +36,9 @@ async function postMissingTranslation(trimmedText) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                projectDomain: inlangProjectDomain,
+                projectDomain: INLANG_PROJECT_DOMAIN,
                 key: trimmedText,
-                locale: currentLocale,
+                locale: SPECIFIED_LOCALE,
             }),
         });
         trackedMissingTranslations[trimmedText] = true;
@@ -44,60 +48,79 @@ async function postMissingTranslation(trimmedText) {
     }
 }
 /**
- * Loads the translations for a given locale via a network request for further
- * use internally but also returns the translations for external usage.
+ * Loads the translations for a given locale.
  *
- * @param projectDomain
- * @param locale
+ * You must set the translations after loading the translations afterwards
+ * like so:
+ * ```JS
+ *  const translations = await loadTranslations(...args);
+ *  setTranslations(translations);
+ * ```
  *
- * If the locale is undefined, no (new) translations are fetched. Previous fetches
- * are not overwridden but will not be used by the `t()` function.
+ * The load and set API is especially useful for SSR and static site generation
+ * since the translations can be fetched beforehand and passed to the site.
+ *
+ *
+ * @param projectDomain The domain you specified when creating your inlang project.
+ * @param developmentLocale The locale in which the app is developed. All your text is
+ * english? Then your development locale is "en".
+ * @param locale The locale of the translations to be loaded. Your user is from Germany?
+ * Then the locale is "de". If the `developmentLocale` and `locale` are identical, pass
+ * both e.g. `loadTranslations("example.com", "en", "en")
+ *
  */
-export async function loadTranslations(projectDomain, locale) {
-    currentLocale = locale;
-    inlangProjectDomain = projectDomain;
+export async function loadTranslations(projectDomain, developmentLocale, locale) {
+    INLANG_PROJECT_DOMAIN = projectDomain;
+    DEVELOPMENT_LOCALE = developmentLocale;
+    SPECIFIED_LOCALE = locale;
     trackedMissingTranslations = {};
     // if the global locale is defined -> load the translation for that locale
-    if (currentLocale) {
+    if (SPECIFIED_LOCALE !== DEVELOPMENT_LOCALE) {
         try {
-            const response = await fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${inlangProjectDomain}/${currentLocale}.json`);
+            const response = await fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${INLANG_PROJECT_DOMAIN}/${SPECIFIED_LOCALE}.json`);
             if (response.ok) {
-                translations = await response.json();
+                return await response.json();
             }
         }
         catch (e) {
             console.log(e);
         }
     }
-    return translations;
+    return {};
+}
+/**
+ * Sets the translations internally which are used by the `t()` function.
+ *
+ * @param translations The translations as returned by `await loadTranslations(...args)`
+ */
+export function setTranslations(translations) {
+    TRANSLATIONS = translations;
 }
 /**
  * Translates given text based on the loaded translations.
  *
- * If the translations are `undefined`, or any error occurs, the provided (untranslated) text is
- * returned as fallback.
+ * If the text does not exist in the translations, or any error occurs, the provided
+ * (untranslated) text is returned as fallback.
  *
- * Sometimes the latter case is intentional. Your development language
- * e.g. German, Spanish etc. does not need to be translated and for those locales no translations
+ *  In case the fallback was unintentional, did you forget to set the translations via
+ * `setTranslations()` ?
+ *
+ * Sometimes the latter is intentional. Your development language e.g. German,
+ * Spanish etc. does not need to be translated and for those locales no translations
  * exist.
+ *
  */
 export function t(text) {
+    if (SPECIFIED_LOCALE === DEVELOPMENT_LOCALE) {
+        return text;
+    }
     try {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim();
-        if (currentLocale) {
-            if (translations) {
-                if (translations[trimmed]) {
-                    return translations[trimmed];
-                }
-                // the key does not exist, thus post as missing translation
-                postMissingTranslation(trimmed);
-            }
-            else {
-                // high chance that its a new project without any
-                // tracked missing translations yet.
-                postMissingTranslation(trimmed);
-            }
+        if (TRANSLATIONS[trimmed]) {
+            return TRANSLATIONS[trimmed];
         }
+        // the key does not exist, thus post as missing translation
+        postMissingTranslation(trimmed);
         return text;
     }
     catch (_a) {
