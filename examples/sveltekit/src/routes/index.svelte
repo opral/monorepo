@@ -4,8 +4,6 @@
 
 <script>
   import Counter from "$lib/Counter.svelte";
-
-  let user = "Jannes"
 </script>
 
 <svelte:head>
@@ -27,8 +25,6 @@
     try editing <strong>src/routes/index.svelte</strong>
   </h2>
  
-  <h3>{user}</h3>
-
   <Counter />
 </section>
 
