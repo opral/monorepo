@@ -30,7 +30,7 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
             // has been reported already, thus return
             return
         }
-        await fetch('http://localhost:3000/api/missingTranslation', {
+        await fetch('https://app.inlang.dev/api/missingTranslation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
