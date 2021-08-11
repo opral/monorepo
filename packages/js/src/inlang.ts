@@ -14,8 +14,11 @@ let SPECIFIED_LOCALE: string
 
 /**
  * The record contains all translations for a given locale.
+ *
+ * Can be undefined if you forgot to set the translations via
+ * `setTranslations()`.
  */
-let TRANSLATIONS: Translations = {}
+let TRANSLATIONS: Translations | undefined
 
 /**
  * The domain of the project.
@@ -98,6 +101,9 @@ export async function loadTranslations(
             console.log(e)
         }
     }
+    // return empty translations as the specified locale is
+    // identical to the development locale -> no translations
+    // need to be fetched.
     return {}
 }
 
@@ -127,6 +133,12 @@ export function setTranslations(translations: Translations): void {
 export function t(text: string): string {
     if (SPECIFIED_LOCALE === DEVELOPMENT_LOCALE) {
         return text
+    }
+    if (TRANSLATIONS === undefined) {
+        throw Error(`
+            The translations are undefined. Did you forget to set the translations
+            via setTranslations()?
+        `)
     }
     try {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
