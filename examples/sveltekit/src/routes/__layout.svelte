@@ -2,7 +2,7 @@
   import { loadTranslations, t } from "inlang";
 
   export async function load() {
-    await loadTranslations("demo.sveltekit.inlang","de");
+    await loadTranslations("demo.sveltekit.inlang.dev","de");
     return {};
   }
 

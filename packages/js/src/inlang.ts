@@ -1,7 +1,7 @@
 /**
  * The record contains all translations for a given locale.
  */
-let inlangTranslations: Record<string, string> | null = null
+let inlangTranslations: Record<string, string | undefined> | null = null
 
 /**
  * The locale of the translations to be loaded and used.
@@ -12,10 +12,23 @@ let inlangTranslations: Record<string, string> | null = null
  */
 let inlangLocale: string | undefined
 
+/**
+ * The domain of the project.
+ */
 let inlangProjectDomain: string | undefined
+
+/**
+ * Contains the missingTranslations that have been tracked already
+ * in this session i.e. no need to make a new POST request.
+ */
+let trackedMissingTranslations: Record<string, boolean | undefined>
 
 async function postMissingTranslation(trimmedText: string): Promise<void> {
     try {
+        if (trackedMissingTranslations[trimmedText] !== undefined) {
+            // has been reported already, thus return
+            return
+        }
         await fetch('http://localhost:3000/api/missingTranslation', {
             method: 'POST',
             headers: {
@@ -27,6 +40,7 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
                 locale: inlangLocale,
             }),
         })
+        trackedMissingTranslations[trimmedText] = true
     } catch {
         // pass
     }
@@ -45,9 +59,10 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
 export async function loadTranslations(
     projectDomain: string,
     locale: string | undefined
-): Promise<Record<string, string> | null> {
+): Promise<Record<string, string | undefined> | null> {
     inlangLocale = locale
     inlangProjectDomain = projectDomain
+    trackedMissingTranslations = {}
     // if the global locale is defined -> load the translation for that locale
     if (inlangLocale) {
         try {
@@ -80,7 +95,7 @@ export function t(text: string): string {
         if (inlangLocale) {
             if (inlangTranslations) {
                 if (inlangTranslations[trimmed]) {
-                    return inlangTranslations[trimmed]
+                    return inlangTranslations[trimmed] as string
                 }
                 // the key does not exist, thus post as missing translation
                 postMissingTranslation(trimmed)

@@ -20,13 +20,11 @@
 </svelte:head>
 
 <div class="content">
-  <h1>{t(`About this app`)}</h1>
+  <h1>{t("About this app")}</h1>
 
   <p>
-    {t(`
-    This is a SvelteKit app. You can make your own by typing the following into
-    your command line and following the prompts:
-    `)}
+    {t(`This is a SvelteKit app. You can make your own by typing the following into
+    your command line and following the prompts:`)}
   </p>
 
   <!-- TODO lose the @next! -->
