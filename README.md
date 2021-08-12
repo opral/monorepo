@@ -1,7 +1,7 @@
 # inlang
 Inlang makes i18n for your web apps as easy as:
 1. installing the package 
-2. `await loadTranslations(<locale>)` 
+2. `await loadTranslations(<your project domain>,<locale>)` 
 3. use the provided `t(<text>)` function
 4. (auto generate translations via the [inlang dashboard](https://app.inlang.dev)) 
 
