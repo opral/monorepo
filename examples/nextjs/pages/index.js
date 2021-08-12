@@ -4,14 +4,19 @@ import styles from '../styles/Home.module.css'
 import { t, loadTranslations, setTranslations } from 'inlang'
 
 export async function getStaticProps(context) {
-  const translations = await loadTranslations('demo.inlang.dev', "en", context.locale)
+  const translations = await loadTranslations('demo.inlang.dev', 'en', context.locale)
+  console.log(translations)
+  const hello = "World"
   return {
-    props: {translations}
+    props: {translations, hello}
   }
 }
 
-export default function Home( { translations} ) {
+export default function Home( { translations, hello } ) {
   setTranslations(translations)
+
+  const x = t('Find in-depth information about Next.js features and API.')
+  console.log(x)
   return (
     <div className={styles.container}>
       <Head>

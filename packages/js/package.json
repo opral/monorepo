@@ -3,6 +3,5 @@
     "version": "0.0.1",
     "main": "out/inlang.js",
     "types": "out/inlang.d.ts"
-
   }
   

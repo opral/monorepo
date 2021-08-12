@@ -14,14 +14,12 @@ import type { Translations } from './types';
  *
  *
  * @param projectDomain The domain you specified when creating your inlang project.
- * @param developmentLocale The locale in which the app is developed. All your text is
- * english? Then your development locale is "en".
  * @param locale The locale of the translations to be loaded. Your user is from Germany?
  * Then the locale is "de". If the `developmentLocale` and `locale` are identical, pass
  * both e.g. `loadTranslations("example.com", "en", "en")
  *
  */
-export declare function loadTranslations(projectDomain: string, developmentLocale: string, locale: string): Promise<Translations>;
+export declare function loadTranslations(projectDomain: string, locale: string): Promise<Translations>;
 /**
  * Sets the translations internally which are used by the `t()` function.
  *

@@ -1,11 +1,6 @@
 import type { Translations } from './types'
 
 /**
- * The development locale -> "language of the app without translations".
- */
-let DEVELOPMENT_LOCALE: string
-
-/**
  * The locale of the current translations.
  *
  * `loadTranslation()` sets the locale.
@@ -32,11 +27,11 @@ let INLANG_PROJECT_DOMAIN: string
  * The format follows either the key exists indicated by not `undefined`.
  * The boolean value is just a placeholder.
  */
-let trackedMissingTranslations: Record<string, boolean | undefined>
+let TRACKED_MISSING_TRANSLATIONS: Record<string, boolean | undefined>
 
 async function postMissingTranslation(trimmedText: string): Promise<void> {
     try {
-        if (trackedMissingTranslations[trimmedText] !== undefined) {
+        if (TRACKED_MISSING_TRANSLATIONS[trimmedText] !== undefined) {
             // has been reported already, thus return
             return
         }
@@ -51,7 +46,7 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
                 locale: SPECIFIED_LOCALE,
             }),
         })
-        trackedMissingTranslations[trimmedText] = true
+        TRACKED_MISSING_TRANSLATIONS[trimmedText] = true
     } catch {
         // pass
     }
@@ -72,8 +67,6 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
  *
  *
  * @param projectDomain The domain you specified when creating your inlang project.
- * @param developmentLocale The locale in which the app is developed. All your text is
- * english? Then your development locale is "en".
  * @param locale The locale of the translations to be loaded. Your user is from Germany?
  * Then the locale is "de". If the `developmentLocale` and `locale` are identical, pass
  * both e.g. `loadTranslations("example.com", "en", "en")
@@ -81,30 +74,27 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
  */
 export async function loadTranslations(
     projectDomain: string,
-    developmentLocale: string,
     locale: string
 ): Promise<Translations> {
     INLANG_PROJECT_DOMAIN = projectDomain
-    DEVELOPMENT_LOCALE = developmentLocale
     SPECIFIED_LOCALE = locale
-    trackedMissingTranslations = {}
-    // if the global locale is defined -> load the translation for that locale
-    if (SPECIFIED_LOCALE !== DEVELOPMENT_LOCALE) {
-        try {
-            const response = await fetch(
-                `https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${INLANG_PROJECT_DOMAIN}/${SPECIFIED_LOCALE}.json`
-            )
-            if (response.ok) {
-                return await response.json()
+    TRACKED_MISSING_TRANSLATIONS = {}
+    try {
+        const response = await fetch(
+            `https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${INLANG_PROJECT_DOMAIN}/${SPECIFIED_LOCALE}.json`
+        )
+        if (response.ok) {
+            return await response.json()
+        } else {
+            return {
+                _inlangError: await response.text(),
             }
-        } catch (e) {
-            console.log(e)
+        }
+    } catch (e) {
+        return {
+            _inlangError: e,
         }
     }
-    // return empty translations as the specified locale is
-    // identical to the development locale -> no translations
-    // need to be fetched.
-    return {}
 }
 
 /**
@@ -114,6 +104,11 @@ export async function loadTranslations(
  */
 export function setTranslations(translations: Translations): void {
     TRANSLATIONS = translations
+    if (TRANSLATIONS['_inlangError']) {
+        console.error(
+            `Error getting translations: ${TRANSLATIONS['_inlangError']}`
+        )
+    }
 }
 
 /**
@@ -131,14 +126,23 @@ export function setTranslations(translations: Translations): void {
  *
  */
 export function t(text: string): string {
-    if (SPECIFIED_LOCALE === DEVELOPMENT_LOCALE) {
-        return text
-    }
     if (TRANSLATIONS === undefined) {
-        throw Error(`
+        console.error(`
             The translations are undefined. Did you forget to set the translations
             via setTranslations()?
         `)
+        return text
+    }
+    // an error occured while fetching the translations which has been logged to
+    // console in setTranslations
+    else if (TRANSLATIONS['_inlangError']) {
+        return text
+    }
+    // no translations have been fetched since the locale is the development locale
+    else if (
+        TRANSLATIONS['_inlangProjectDevelopmentLanguage'] === SPECIFIED_LOCALE
+    ) {
+        return text
     }
     try {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
@@ -149,7 +153,7 @@ export function t(text: string): string {
         postMissingTranslation(trimmed)
         return text
     } catch {
-        // in any case return the fallback text
+        // if something goes wrong return the fallback text
         return text
     }
 }
