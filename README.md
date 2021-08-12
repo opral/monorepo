@@ -1,8 +1,11 @@
 # inlang
 Inlang makes i18n for your web apps as easy as:
-1. installing the package 
-   `npm install 'https://gitpkg.now.sh/samuelstroschein/inlang/packages/js?main'`
-   `yarn add 'https://gitpkg.now.sh/samuelstroschein/inlang/packages/js?main'`
+1. installing the package   
+
+   **NPM**    `npm install 'https://gitpkg.now.sh/samuelstroschein/inlang/packages/js?main'`  
+   **YARN**  `yarn add 'https://gitpkg.now.sh/samuelstroschein/inlang/packages/js?main'`
+   
+   
 3. `await loadTranslations(<your project domain>,<locale>)` 
 4. use the provided `t(<text>)` function
 5. (auto generate translations via the [inlang dashboard](https://app.inlang.dev)) 
