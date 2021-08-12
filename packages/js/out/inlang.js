@@ -75,6 +75,14 @@ export async function loadTranslations(projectDomain, locale) {
         if (response.ok) {
             return await response.json();
         }
+        else if (response.status === 403) {
+            return {
+                _inlangWarning: `
+                    Translations for the specified locale ${SPECIFIED_LOCALE} does not exist (yet).
+                    If the warning is unexpected, have you published your changes? 
+                `,
+            };
+        }
         else {
             return {
                 _inlangError: await response.text(),
@@ -96,6 +104,9 @@ export function setTranslations(translations) {
     TRANSLATIONS = translations;
     if (TRANSLATIONS['_inlangError']) {
         console.error(`Error getting translations: ${TRANSLATIONS['_inlangError']}`);
+    }
+    else if (TRANSLATIONS['_inlangWarning']) {
+        console.warn(TRANSLATIONS['_inlangWarning']);
     }
 }
 /**

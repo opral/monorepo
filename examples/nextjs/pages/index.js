@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css'
 import { t, loadTranslations, setTranslations } from 'inlang'
 
 export async function getStaticProps(context) {
-  const translations = await loadTranslations('demo.inlang.dev', 'en', context.locale)
+  const translations = await loadTranslations('demo.inlang.dev', context.locale)
   console.log(translations)
   const hello = "World"
   return {
