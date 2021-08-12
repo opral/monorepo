@@ -44,7 +44,7 @@ Read more about NextJS's `getStaticProps()` [here](https://nextjs.org/docs/basic
 
 The setup is done. 
 
-### Current limitations: 
+## Current limitations: 
 
 - Rendering html content in a `t('Click <a href="https://inlang.dev">here</a>')` function is only possible with 
   an external dependency which parses the string back to HTML. See [html-react-parser](https://www.npmjs.com/package/html-react-parser).
