@@ -145,7 +145,7 @@ export function t(text: string): string {
     }
     // no translations have been fetched since the locale is the development locale
     else if (
-        TRANSLATIONS['_inlangProjectDevelopmentLanguage'] === SPECIFIED_LOCALE
+        TRANSLATIONS['_inlangProjectDevelopmentLocale'] === SPECIFIED_LOCALE
     ) {
         return text
     }

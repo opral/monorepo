@@ -133,7 +133,7 @@ export function t(text) {
         return text;
     }
     // no translations have been fetched since the locale is the development locale
-    else if (TRANSLATIONS['_inlangProjectDevelopmentLanguage'] === SPECIFIED_LOCALE) {
+    else if (TRANSLATIONS['_inlangProjectDevelopmentLocale'] === SPECIFIED_LOCALE) {
         return text;
     }
     try {

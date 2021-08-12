@@ -3,20 +3,20 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { t, loadTranslations, setTranslations } from 'inlang'
 
-export async function getStaticProps(context) {
+export async function getServerSideProps(context) {
   const translations = await loadTranslations('demo.inlang.dev', context.locale)
-  console.log(translations)
-  const hello = "World"
+  setTranslations(translations)
   return {
-    props: {translations, hello}
+    props: {translations}
   }
 }
 
-export default function Home( { translations, hello } ) {
+export default function Home( { translations } ) {
   setTranslations(translations)
 
   const x = t('Find in-depth information about Next.js features and API.')
-  console.log(x)
+  console.log(`THIS IS X: ${x}`)
+
   return (
     <div className={styles.container}>
       <Head>
