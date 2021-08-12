@@ -1,9 +1,4 @@
 # NextJS Guide
-### Current limitations: 
-
-- Rendering html content in a `t('Click <a href="https://inlang.dev">here</a>')` function is only possible with 
-  an external dependency which parses the string back to HTML. See [html-react-parser](https://www.npmjs.com/package/html-react-parser).
-  Auto translating your content within XML tags such as `<a></a>` is possible already. 
 
 ### Requirements
 
@@ -47,6 +42,10 @@ Read more about NextJS's `getStaticProps()` [here](https://nextjs.org/docs/basic
 
 ### 3. Manage your translations at [inlang.dev](https://app.inlang.dev)
 
-That's all folks. The setup is done. 
+The setup is done. 
 
+### Current limitations: 
 
+- Rendering html content in a `t('Click <a href="https://inlang.dev">here</a>')` function is only possible with 
+  an external dependency which parses the string back to HTML. See [html-react-parser](https://www.npmjs.com/package/html-react-parser).
+  Auto translating your content within XML tags such as `<a></a>` is possible already.
