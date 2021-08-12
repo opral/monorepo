@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.t = exports.setTranslations = exports.loadTranslations = void 0;
 /**
  * The locale of the current translations.
  *
@@ -66,7 +69,7 @@ async function postMissingTranslation(trimmedText) {
  * both e.g. `loadTranslations("example.com", "en", "en")
  *
  */
-export async function loadTranslations(projectDomain, locale) {
+async function loadTranslations(projectDomain, locale) {
     INLANG_PROJECT_DOMAIN = projectDomain;
     SPECIFIED_LOCALE = locale;
     TRACKED_MISSING_TRANSLATIONS = {};
@@ -93,12 +96,13 @@ export async function loadTranslations(projectDomain, locale) {
         };
     }
 }
+exports.loadTranslations = loadTranslations;
 /**
  * Sets the translations internally which are used by the `t()` function.
  *
  * @param translations The translations as returned by `await loadTranslations(...args)`
  */
-export function setTranslations(translations) {
+function setTranslations(translations) {
     TRANSLATIONS = translations;
     if (TRANSLATIONS['_inlangError']) {
         console.error(`Inlang ERROR: getting translations: ${TRANSLATIONS['_inlangError']}`);
@@ -107,6 +111,7 @@ export function setTranslations(translations) {
         console.warn(TRANSLATIONS['_inlangWarning']);
     }
 }
+exports.setTranslations = setTranslations;
 /**
  * Translates given text based on the loaded translations.
  *
@@ -121,7 +126,7 @@ export function setTranslations(translations) {
  * exist.
  *
  */
-export function t(text) {
+function t(text) {
     if (TRANSLATIONS === undefined) {
         console.error(`Inlang ERROR: The translations are undefined. Did you forget to set the translations
         via setTranslations()?`);
@@ -150,4 +155,5 @@ export function t(text) {
         return text;
     }
 }
+exports.t = t;
 //# sourceMappingURL=inlang.js.map

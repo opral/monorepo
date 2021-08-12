@@ -4,7 +4,7 @@
       "declaration": true,
       "lib": ["ES2017", "DOM"],
       "target": "es2017",
-      "module": "es6",
+      "module": "CommonJS",
       "sourceMap": true,
       "outDir": "out"
     },
