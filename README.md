@@ -21,8 +21,8 @@ For better UX and SEO, the translations should be prefetched via SSR (Server Sid
 You can find an in depth documentation for the following frameworks: 
 
 - [x] [SvelteKit](documentation/sveltekit.md)
+- [x] [NextJS](documentation/nextjs.md)
 - [ ] React (TODO)
-- [ ] NextJS (TODO)
 - [ ] VueJS (TODO)
 - [ ] missing a framework? Open an issue :)
 
