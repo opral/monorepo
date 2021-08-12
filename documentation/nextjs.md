@@ -1,5 +1,10 @@
 # NextJS Guide
 
+**Video Tutorial**
+
+[![Video Tutorial](https://img.youtube.com/vi/fnmM-sih_7Y/0.jpg)](https://www.youtube.com/watch?v=fnmM-sih_7Y)
+
+
 ### Requirements
 
 1. You setup [internationalized routing](https://nextjs.org/docs/advanced-features/i18n-routing) in your NextJS app. 
