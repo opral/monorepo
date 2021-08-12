@@ -75,12 +75,10 @@ export async function loadTranslations(projectDomain, locale) {
         if (response.ok) {
             return await response.json();
         }
-        else if (response.status === 403) {
+        else if (response.status === 400) {
             return {
-                _inlangWarning: `
-                    Translations for the specified locale ${SPECIFIED_LOCALE} does not exist (yet).
-                    If the warning is unexpected, have you published your changes? 
-                `,
+                _inlangWarning: `Inlang WARNING: Translations for the specified locale ${SPECIFIED_LOCALE} does not exist (yet).
+                    If the warning is unexpected, have you published your changes?`,
             };
         }
         else {
@@ -103,7 +101,7 @@ export async function loadTranslations(projectDomain, locale) {
 export function setTranslations(translations) {
     TRANSLATIONS = translations;
     if (TRANSLATIONS['_inlangError']) {
-        console.error(`Error getting translations: ${TRANSLATIONS['_inlangError']}`);
+        console.error(`Inlang ERROR: getting translations: ${TRANSLATIONS['_inlangError']}`);
     }
     else if (TRANSLATIONS['_inlangWarning']) {
         console.warn(TRANSLATIONS['_inlangWarning']);
@@ -125,10 +123,8 @@ export function setTranslations(translations) {
  */
 export function t(text) {
     if (TRANSLATIONS === undefined) {
-        console.error(`
-            The translations are undefined. Did you forget to set the translations
-            via setTranslations()?
-        `);
+        console.error(`Inlang ERROR: The translations are undefined. Did you forget to set the translations
+        via setTranslations()?`);
         return text;
     }
     // an error occured while fetching the translations which has been logged to
