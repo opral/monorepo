@@ -2,7 +2,7 @@
 Inlang makes i18n for your web apps as easy as:
 1. installing the package   
 
-   **NPM**    `npm install inkang`  
+   **NPM**    `npm install inlang`  
    **YARN**  `yarn add inlang`
    
    
