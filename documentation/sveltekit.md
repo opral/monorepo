@@ -36,7 +36,7 @@ following to the [`load` function provided by SvelteKit](https://kit.svelte.dev/
 <!-- Your component goes here -->
 ```
 
-2. Use `t()` for text that should be translated
+### 2. Use `t()` for text that should be translated
 
 ```Svelte
 <script>
@@ -55,5 +55,6 @@ following to the [`load` function provided by SvelteKit](https://kit.svelte.dev/
   and following the prompts:`)}
 </p>
 
-
 ```
+
+### 3. Manage your translations at [inlang](https://app.inlang.dev)
