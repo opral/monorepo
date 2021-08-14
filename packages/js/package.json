@@ -2,6 +2,7 @@
     "name": "inlang",
     "version": "0.0.1-alpha.1",
     "main": "out/inlang.js",
-    "types": "out/inlang.d.ts"
+    "types": "out/inlang.d.ts",
+    "type": "module"
   }
   

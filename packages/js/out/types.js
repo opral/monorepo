@@ -1,5 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+export {};
 // /**
 //  * @param projectDomain The domain you specified when creating your inlang project.
 //  * @param developmentLocale The locale in which the app is developed. All your text is

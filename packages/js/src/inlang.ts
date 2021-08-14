@@ -35,17 +35,25 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
             // has been reported already, thus return
             return
         }
-        await fetch('https://app.inlang.dev/api/missingTranslation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                projectDomain: INLANG_PROJECT_DOMAIN,
-                key: trimmedText,
-                locale: SPECIFIED_LOCALE,
-            }),
-        })
+        const response = await fetch(
+            'https://app.inlang.dev/api/missingTranslation',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    projectDomain: INLANG_PROJECT_DOMAIN,
+                    key: trimmedText,
+                    locale: SPECIFIED_LOCALE,
+                }),
+            }
+        )
+        if (response.status === 404) {
+            console.error(
+                `Inlang ERROR: The project ${INLANG_PROJECT_DOMAIN} does not exist.`
+            )
+        }
         TRACKED_MISSING_TRANSLATIONS[trimmedText] = true
     } catch {
         // pass
