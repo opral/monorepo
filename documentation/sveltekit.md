@@ -58,3 +58,4 @@ following to the [`load` function provided by SvelteKit](https://kit.svelte.dev/
 ```
 
 ### 3. Manage your translations at [inlang](https://app.inlang.dev)
+![Inlang Dashboard](../inlang_dashboard.png)
