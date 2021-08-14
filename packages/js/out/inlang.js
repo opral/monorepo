@@ -1,6 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.t = exports.setTranslations = exports.loadTranslations = void 0;
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 /**
  * The locale of the current translations.
  *
@@ -26,28 +32,33 @@ let INLANG_PROJECT_DOMAIN;
  * The boolean value is just a placeholder.
  */
 let TRACKED_MISSING_TRANSLATIONS;
-async function postMissingTranslation(trimmedText) {
-    try {
-        if (TRACKED_MISSING_TRANSLATIONS[trimmedText] !== undefined) {
-            // has been reported already, thus return
-            return;
+function postMissingTranslation(trimmedText) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (TRACKED_MISSING_TRANSLATIONS[trimmedText] !== undefined) {
+                // has been reported already, thus return
+                return;
+            }
+            const response = yield fetch('https://app.inlang.dev/api/missingTranslation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    projectDomain: INLANG_PROJECT_DOMAIN,
+                    key: trimmedText,
+                    locale: SPECIFIED_LOCALE,
+                }),
+            });
+            if (response.status === 404) {
+                console.error(`Inlang ERROR: The project ${INLANG_PROJECT_DOMAIN} does not exist.`);
+            }
+            TRACKED_MISSING_TRANSLATIONS[trimmedText] = true;
         }
-        await fetch('https://app.inlang.dev/api/missingTranslation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                projectDomain: INLANG_PROJECT_DOMAIN,
-                key: trimmedText,
-                locale: SPECIFIED_LOCALE,
-            }),
-        });
-        TRACKED_MISSING_TRANSLATIONS[trimmedText] = true;
-    }
-    catch (_a) {
-        // pass
-    }
+        catch (_a) {
+            // pass
+        }
+    });
 }
 /**
  * Loads the translations for a given locale.
@@ -69,40 +80,41 @@ async function postMissingTranslation(trimmedText) {
  * both e.g. `loadTranslations("example.com", "en", "en")
  *
  */
-async function loadTranslations(projectDomain, locale) {
-    INLANG_PROJECT_DOMAIN = projectDomain;
-    SPECIFIED_LOCALE = locale;
-    TRACKED_MISSING_TRANSLATIONS = {};
-    try {
-        const response = await fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${INLANG_PROJECT_DOMAIN}/${SPECIFIED_LOCALE}.json`);
-        if (response.ok) {
-            return await response.json();
-        }
-        else if (response.status === 400) {
-            return {
-                _inlangWarning: `Inlang WARNING: Translations for the specified locale ${SPECIFIED_LOCALE} does not exist (yet).
+export function loadTranslations(projectDomain, locale) {
+    return __awaiter(this, void 0, void 0, function* () {
+        INLANG_PROJECT_DOMAIN = projectDomain;
+        SPECIFIED_LOCALE = locale;
+        TRACKED_MISSING_TRANSLATIONS = {};
+        try {
+            const response = yield fetch(`https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${INLANG_PROJECT_DOMAIN}/${SPECIFIED_LOCALE}.json`);
+            if (response.ok) {
+                return yield response.json();
+            }
+            else if (response.status === 400) {
+                return {
+                    _inlangWarning: `Inlang WARNING: Translations for the specified locale ${SPECIFIED_LOCALE} does not exist (yet).
                     If the warning is unexpected, have you published your changes?`,
-            };
+                };
+            }
+            else {
+                return {
+                    _inlangError: yield response.text(),
+                };
+            }
         }
-        else {
+        catch (e) {
             return {
-                _inlangError: await response.text(),
+                _inlangError: e,
             };
         }
-    }
-    catch (e) {
-        return {
-            _inlangError: e,
-        };
-    }
+    });
 }
-exports.loadTranslations = loadTranslations;
 /**
  * Sets the translations internally which are used by the `t()` function.
  *
  * @param translations The translations as returned by `await loadTranslations(...args)`
  */
-function setTranslations(translations) {
+export function setTranslations(translations) {
     TRANSLATIONS = translations;
     if (TRANSLATIONS['_inlangError']) {
         console.error(`Inlang ERROR: getting translations: ${TRANSLATIONS['_inlangError']}`);
@@ -111,7 +123,6 @@ function setTranslations(translations) {
         console.warn(TRANSLATIONS['_inlangWarning']);
     }
 }
-exports.setTranslations = setTranslations;
 /**
  * Translates given text based on the loaded translations.
  *
@@ -126,7 +137,7 @@ exports.setTranslations = setTranslations;
  * exist.
  *
  */
-function t(text) {
+export function t(text) {
     if (TRANSLATIONS === undefined) {
         console.error(`Inlang ERROR: The translations are undefined. Did you forget to set the translations
         via setTranslations()?`);
@@ -155,5 +166,4 @@ function t(text) {
         return text;
     }
 }
-exports.t = t;
 //# sourceMappingURL=inlang.js.map
