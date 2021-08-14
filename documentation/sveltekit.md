@@ -40,7 +40,7 @@ following to the [`load` function provided by SvelteKit](https://kit.svelte.dev/
 
 ```Svelte
 <script>
-
+  import { t } from "inlang"
 </script>
 
 <h1>{t(`About this app`)}</h1>
