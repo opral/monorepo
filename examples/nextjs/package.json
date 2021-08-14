@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "inlang": "https://gitpkg.now.sh/samuelstroschein/inlang/packages/js?main",
+    "inlang": "file:../../packages/js",
     "next": "11.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"

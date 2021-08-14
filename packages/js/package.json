@@ -1,20 +1,22 @@
 {
-    "name": "inlang",
-    "version": "0.0.1-alpha.1",
-    "main": "out/inlang.js",
-    "types": "out/inlang.d.ts",
-    "type": "module",
-    "description": "Internationalize your app in under 3 minutes.",
-    "keywords": [
-      "svelte sveltekit nextjs internationalize translate translation"
-    ],
-    "author": "Samuel Stroschein",
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/samuelstroschein/inlang.git"
-    },
-    "bugs": {
-      "url": "https://github.com/samuelstroschein/inlang/issues"
-    }
+  "name": "inlang",
+  "version": "0.0.1-alpha.2",
+  "main": "lib/cjs/inlang.js",
+  "types": "lib/cjs/inlang.d.ts",
+  "module": "lib/esm/inlang.js",
+  "description": "Internationalize your app in under 3 minutes.",
+  "keywords": [
+    "svelte sveltekit nextjs internationalize translate translation"
+  ],
+  "author": "Samuel Stroschein",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuelstroschein/inlang.git"
+  },
+  "bugs": {
+    "url": "https://github.com/samuelstroschein/inlang/issues"
+  },
+  "scripts": {
+    "build": "rm -fr lib/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json"
   }
-  
+}

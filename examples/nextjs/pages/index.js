@@ -1,10 +1,11 @@
-import { loadTranslations, setTranslations, t } from 'inlang'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
+import { loadTranslations, setTranslations, t } from 'inlang'
+
 export async function getStaticProps(context){
-  const translations = await loadTranslations("demo.inlang.dev", context.locale)
+  const translations = await loadTranslations("demo.nextjs.inlang.dev", context.locale)
   return {
     props: {
       translations
