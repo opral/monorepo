@@ -11,7 +11,9 @@ Inlang makes i18n for your web apps as easy as:
 5. (auto generate translations via the [inlang dashboard](https://app.inlang.dev)) 
 
 ```JavaScript
-await loadTranslations("de")
+import { loadTranslations, setTranslations, t } from 'inlang'
+
+setTranslations(await loadTranslations("de"))
 
 console.log(t("How is the weather in Berlin?"))
 
