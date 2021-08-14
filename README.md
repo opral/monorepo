@@ -13,7 +13,7 @@ Inlang makes i18n for your web apps as easy as:
 ```JavaScript
 import { loadTranslations, setTranslations, t } from 'inlang'
 
-setTranslations(await loadTranslations(<your domain>, "de"))
+setTranslations(await loadTranslations('<your domain>', "de"))
 
 console.log(t("How is the weather in Berlin?"))
 
