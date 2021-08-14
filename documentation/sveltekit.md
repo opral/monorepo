@@ -50,8 +50,7 @@ following to the [`load` function provided by SvelteKit](https://kit.svelte.dev/
   @html
 -->
 <p>
-		{@html t(`This is a <a href="https://kit.svelte.dev">SvelteKit</a> app. You can make your own by typing the
-		following into your command line and following the prompts:`)}
+  {@html t(`This is a <a href="https://kit.svelte.dev">SvelteKit</a> app. You can make      your own by typing the following into your command line and following the prompts:`)}
 </p>
 
 
