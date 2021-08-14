@@ -1,7 +1,8 @@
 import cookie from 'cookie';
 import { v4 as uuid } from '@lukeed/uuid';
+import type { Handle } from '@sveltejs/kit';
 
-export const handle = async ({ request, resolve }) => {
+export const handle: Handle = async ({ request, resolve }) => {
 	const cookies = cookie.parse(request.headers.cookie || '');
 	request.locals.userid = cookies.userid || uuid();
 

@@ -1,8 +1,9 @@
-<script context="module">
+<script context="module" lang="ts">
 	import { enhance } from '$lib/form';
+	import type { Load } from '@sveltejs/kit';
 
 	// see https://kit.svelte.dev/docs#loading
-	export const load = async ({ fetch }) => {
+	export const load: Load = async ({ fetch }) => {
 		const res = await fetch('/todos.json');
 
 		if (res.ok) {
@@ -21,13 +22,21 @@
 	};
 </script>
 
-<script>
+<script lang="ts">
 	import { scale } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
-	export let todos;
+	type Todo = {
+		uid: string;
+		created_at: Date;
+		text: string;
+		done: boolean;
+		pending_delete: boolean;
+	};
 
-	async function patch(res) {
+	export let todos: Todo[];
+
+	async function patch(res: Response) {
 		const todo = await res.json();
 
 		todos = todos.map((t) => {
@@ -97,12 +106,13 @@
 				action="/todos/{todo.uid}.json?_method=delete"
 				method="post"
 				use:enhance={{
+					pending: () => (todo.pending_delete = true),
 					result: () => {
 						todos = todos.filter((t) => t.uid !== todo.uid);
 					}
 				}}
 			>
-				<button class="delete" aria-label="Delete todo" />
+				<button class="delete" aria-label="Delete todo" disabled={todo.pending_delete} />
 			</form>
 		</div>
 	{/each}
