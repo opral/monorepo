@@ -19,3 +19,12 @@ test('Interpolate multiple variables', () => {
 test('Throw an error if variable does not exist.', () => {
     expect(() => interpolate('Hello {user}', {})).toThrow()
 })
+
+test('Throw an error if too many variables exist.', () => {
+    expect(() =>
+        interpolate('Hello {user}', {
+            user: 'Samuel',
+            day: 'Tuesday',
+        })
+    ).toThrow()
+})

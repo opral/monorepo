@@ -11,11 +11,16 @@ export function interpolate(
 ): string {
     let result = text
     for (const variable in variables) {
+        if (result.match(`{${variable}}`)?.length !== 1) {
+            throw Error(`Variable '${variable}' does not exist in ${text}.`)
+        }
         result = result.replace(`{${variable}}`, variables[variable])
     }
     const searchForMissingVariable = result.match('{.*}')
     if (searchForMissingVariable && searchForMissingVariable.length > 0) {
-        throw Error(`Missing variable '${searchForMissingVariable[0]}'`)
+        throw Error(
+            `Missing variable '${searchForMissingVariable[0]}' for ${text}`
+        )
     }
     return result
 }
