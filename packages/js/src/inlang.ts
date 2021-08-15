@@ -74,11 +74,6 @@ async function postMissingTranslation(trimmedText: string): Promise<void> {
  * since the translations can be fetched beforehand and passed to the site.
  *
  *
- * @param projectDomain The domain you specified when creating your inlang project.
- * @param locale The locale of the translations to be loaded. Your user is from Germany?
- * Then the locale is "de". If the `developmentLocale` and `locale` are identical, pass
- * both e.g. `loadTranslations("example.com", "en", "en")
- *
  */
 export async function loadTranslations(
     projectDomain: string,
@@ -132,15 +127,12 @@ export function setTranslations(translations: Translations): void {
  * If the text does not exist in the translations, or any error occurs, the provided
  * (untranslated) text is returned as fallback.
  *
- *  In case the fallback was unintentional, did you forget to set the translations via
- * `setTranslations()` ?
- *
  * Sometimes the latter is intentional. Your development language e.g. German,
  * Spanish etc. does not need to be translated and for those locales no translations
  * exist.
  *
  */
-export function t(text: string): string {
+export function t(text: string, variables?: Record<string, string>): string {
     if (TRANSLATIONS === undefined) {
         console.error(`Inlang ERROR: The translations are undefined. Did you forget to set the translations
         via setTranslations()?`)
