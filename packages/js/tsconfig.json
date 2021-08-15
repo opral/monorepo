@@ -10,5 +10,5 @@
         "outDir": "./lib/esm"
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules, test"]
 }
