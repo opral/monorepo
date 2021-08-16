@@ -1,4 +1,6 @@
-import type { Translations } from './types'
+import { MissingVariableError } from './errors'
+import { interpolate, requiresInterpolation } from './interpolate'
+import type { PluralRules, Translations } from './types'
 
 /**
  * The locale of the current translations.
@@ -132,7 +134,13 @@ export function setTranslations(translations: Translations): void {
  * exist.
  *
  */
-export function t(text: string, variables?: Record<string, string>): string {
+export function t(
+    text: string,
+    args: {
+        vars?: Record<string, string | number>
+        plural?: PluralRules
+    } = {}
+): string {
     if (TRANSLATIONS === undefined) {
         console.error(`Inlang ERROR: The translations are undefined. Did you forget to set the translations
         via setTranslations()?`)
@@ -151,13 +159,24 @@ export function t(text: string, variables?: Record<string, string>): string {
     }
     try {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
-        if (TRANSLATIONS[trimmed]) {
-            return TRANSLATIONS[trimmed] as string
+        if (TRANSLATIONS[trimmed] === undefined) {
+            // the key does not exist, thus post as missing translation
+            postMissingTranslation(trimmed)
+            return text
         }
-        // the key does not exist, thus post as missing translation
-        postMissingTranslation(trimmed)
-        return text
-    } catch {
+        let result = TRANSLATIONS[trimmed] as string
+        if (requiresInterpolation(result)) {
+            if (args.vars === undefined) {
+                throw new MissingVariableError(result)
+            }
+            result = interpolate(result, args.vars)
+        }
+        return result
+    } catch (e) {
+        // rethrow development errors
+        if (e instanceof MissingVariableError) {
+            throw e
+        }
         // if something goes wrong return the fallback text
         return text
     }
