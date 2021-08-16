@@ -1,9 +1,9 @@
 {
   "name": "inlang",
   "version": "0.0.1-alpha.2",
-  "main": "lib/cjs/inlang.js",
-  "types": "lib/cjs/inlang.d.ts",
-  "module": "lib/esm/inlang.js",
+  "main": "lib/cjs/index.js",
+  "types": "lib/cjs/index.d.ts",
+  "module": "lib/esm/index.js",
   "description": "Internationalize your app in under 3 minutes.",
   "keywords": [
     "svelte sveltekit nextjs internationalize translate translation"

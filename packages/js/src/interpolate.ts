@@ -16,7 +16,7 @@ export function interpolate(
         }
         result = result.replace(`{${variable}}`, variables[variable])
     }
-    const searchForMissingVariable = result.match('{.*}')
+    const searchForMissingVariable = result.match('{.*?}')
     if (searchForMissingVariable && searchForMissingVariable.length > 0) {
         throw Error(
             `Missing variable '${searchForMissingVariable[0]}' for ${text}`
