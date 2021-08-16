@@ -38,8 +38,14 @@ test('Interpolation with multiple variables', () => {
     expect(result).toEqual('You have 2 green todos')
 })
 
-// t('You clicked the button {num} times.', vars: { num: 2 }, pluralize: {
-//     zero: 'You have not clicked the button.',
-//     one: 'You clicked the button once.',
-//     two: 'You clicked the button twice.',
+// test('Pluralize with one variable', () => {
+//     const result = inlang.t('You clicked the button {num} times.', {
+//         vars: { num: 2 },
+//         plural: {
+//             zero: 'You have not clicked the button.',
+//             one: 'You clicked the button once.',
+//             two: 'You clicked the button twice.',
+//         },
+//     })
 // })
+
