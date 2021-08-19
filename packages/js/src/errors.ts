@@ -2,15 +2,25 @@ import { Locale } from './types'
 
 export abstract class InlangError extends Error {}
 
+export class UninitializedError extends InlangError {
+    constructor() {
+        super(`Inlang is not initialized. Did you forget to setTranslations()?`)
+    }
+}
+
 export class MissingVariableError extends InlangError {
     constructor(input: string, args: { specificVariable?: string } = {}) {
-        super(`Missing ${args.specificVariable ?? 'variable'} for ` + input)
+        super(
+            `Missing variable "${
+                args.specificVariable ?? 'variable'
+            }" for "${input}"`
+        )
     }
 }
 
 export class UnknownVariableError extends InlangError {
     constructor(input: string, args: { specificVariable?: string } = {}) {
-        super(`Unknown variable ${args.specificVariable} for + input`)
+        super(`Unknown variable "${args.specificVariable}" for "${input}"`)
     }
 }
 
