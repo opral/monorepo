@@ -4,7 +4,7 @@ import {
     UnknownError,
 } from './errors'
 import { InlangTextApi } from './inlangTextApi'
-import type { Locale, Translations } from './types'
+import type { Locale, TranslationsForLocale } from './types'
 
 /**
  * Initialize a new Inlang object with `Inlang.loadTranslations(...args)`
@@ -16,16 +16,9 @@ export class Inlang {
     #projectDomain: string
 
     /**
-     * The locale of the current translations.
+     * The locale of the with which the object has been created.
      */
     #locale: Locale
-
-    /**
-     * The development locale of the project.
-     *
-     * Is null if `loadTranslations` has an error.
-     */
-    #projectDevelopmentLocale: string | null
 
     /**
      * The record contains all translations for a given locale.
@@ -33,7 +26,7 @@ export class Inlang {
      * If something went wrong during the loading of the translations,
      * the variable will not be null.
      */
-    #translations: Translations | null
+    #translations: TranslationsForLocale | null
     #translationsError: InlangError | null
 
     /**
@@ -55,13 +48,11 @@ export class Inlang {
      */
     constructor(args: {
         projectDomain: string
-        projectDevelopmentLocale: string | null
         locale: Locale
-        translations: Translations | null
+        translations: TranslationsForLocale | null
         translationsError: InlangError | null
         textApi?: typeof InlangTextApi
     }) {
-        this.#projectDevelopmentLocale = args.projectDevelopmentLocale
         this.#locale = args.locale
         this.#translations = args.translations
         this.#projectDomain = args.projectDomain
@@ -84,7 +75,7 @@ export class Inlang {
         locale: Locale
         textApi?: typeof InlangTextApi
     }): Promise<Inlang> {
-        let translations: Translations | null = null
+        let translations: TranslationsForLocale | null = null
         let error: InlangError | null = null
         try {
             const response = await fetch(
@@ -107,8 +98,6 @@ export class Inlang {
             }
             return new Inlang({
                 projectDomain: args.projectDomain,
-                projectDevelopmentLocale:
-                    translations?.['_inlangProjectDevelopmentLocale'] ?? null,
                 locale: args.locale,
                 translations: translations,
                 translationsError: error,
@@ -150,35 +139,25 @@ export class Inlang {
     }
 
     translate(text: string): InlangTextApi {
-        // trimmed corrects formatting which can be corrupted due to template literal
+        // trimmed corrects formatting which can be corrupted due to template literal string
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
-        // the translation exists
-        if (this.#translations?.[trimmed]) {
-            return new this.#textApi(trimmed, {
-                translation: this.#translations[trimmed],
-                locale: this.#locale,
-            })
-        }
-        // if the locale is identical to the projectDevelopmentLocale
-        // then return the textApi without translations.
-        else if (this.#locale === this.#projectDevelopmentLocale) {
-            return new this.#textApi(trimmed, {
-                translation: undefined,
-                locale: this.#locale,
-            })
-        }
-        // Either an error happened during `loadTranslations` or
-        // the translation simply does not exist yet.
         if (this.#translations === null && this.#translationsError) {
             console.warn(this.#translationsError)
-        } else if (this.#trackedMissingTranslations[trimmed] === undefined) {
+        }
+        // if the translation is undefined and the developmentLocale does not equal
+        // the translation local -> post missing translation
+        else if (
+            this.#translations?.byKey[trimmed] === undefined &&
+            this.#locale !==
+                this.#translations?._metadata.projectDevelopmentLocale
+        ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)
         }
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
         return new this.#textApi(trimmed, {
-            translation: undefined,
+            translation: this.#translations?.byKey[trimmed],
             locale: this.#locale,
         })
     }

@@ -1,5 +1,5 @@
 import { MissingVariableError, UnknownVariableError } from './errors'
-import { Locale, PluralRules } from './types'
+import { Locale, PluralRules, SingleTranslation } from './types'
 
 export class InlangTextApi {
     // "Hello {user}, how are you?"
@@ -7,15 +7,23 @@ export class InlangTextApi {
     // "de"
     #locale: Locale
     // "Hallo {user}, wie geht es dir?"
-    #translation: string | undefined
+    #translation: SingleTranslation | undefined
     // ["user"]
     #variableKeys: string[]
     // { "user": "Samuel" }
-    #variables: Record<string, string | number> = {}
-    // "Hallo Samuel, wie geht es dir?"
+    #variables: Record<string, string | number | InlangTextApi> = {}
+    // "Hello Samuel, how are you?"
     #output: string
+    // "Hallo Samuel, wie geht es dir?"
+    // toString()
 
-    constructor(text: string, args: { translation?: string; locale: Locale }) {
+    constructor(
+        text: string,
+        args: {
+            translation?: SingleTranslation
+            locale: Locale
+        }
+    ) {
         this.#input = text
         this.#translation = args.translation
         this.#locale = args.locale
@@ -25,7 +33,7 @@ export class InlangTextApi {
             text.match(/{.*?}/g)?.map((e) => e.slice(1, e.length - 1)) ?? []
         // if undefined use original language as fallback
         // remove as unnecessary? output can be set from args.translation
-        this.#output = this.#translation ?? text
+        this.#output = args.translation ?? text
     }
 
     /**
@@ -34,14 +42,18 @@ export class InlangTextApi {
      * Interpolation has to happen at the end of the `pipeline` and is therefore
      * not happening directly in `.variables()`.
      */
-    #interpolate(): InlangTextApi {
-        for (const variable in this.#variables) {
-            this.#output = this.#output.replace(
+    static #interpolate(
+        input: string,
+        variables: Record<string, string | number | InlangTextApi>
+    ): string {
+        let result = input
+        for (const variable in variables) {
+            result = result.replace(
                 `{${variable}}`,
-                this.#variables[variable].toString() // toString in case its a number
+                variables[variable].toString() // toString in case its a number
             )
         }
-        return this
+        return result
     }
 
     /**
@@ -55,7 +67,7 @@ export class InlangTextApi {
         // variableskeys must be with const assertion; otherwise no typing. no solution
         // has been found yet to get static typing.
         // [key in typeof this.variables[number]]: string | number
-        variables: Record<string, string | number>
+        variables: Record<string, string | number | InlangTextApi>
     ): InlangTextApi {
         const missingVariables = this.#variableKeys.filter(
             (key) => variables[key] === undefined
@@ -77,6 +89,10 @@ export class InlangTextApi {
         return this
     }
 
+    /**
+     * @deprecated Does not translate text into different languages
+     * and is subject of change. Use as "playing around".
+     */
     plurals(num: number, plurals: PluralRules): InlangTextApi {
         // Zero should be zero in any language.
         if (num === 0) {
@@ -108,7 +124,7 @@ export class InlangTextApi {
      * @returns the output
      */
     toString() {
-        this.#interpolate()
+        this.#output = InlangTextApi.#interpolate(this.#output, this.#variables)
         return this.#output
     }
 }
