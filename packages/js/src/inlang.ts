@@ -18,7 +18,7 @@ export class Inlang {
     /**
      * The locale of the current translations.
      */
-    private locale: string
+    private locale: Locale
 
     /**
      * The development locale of the project.
@@ -56,7 +56,7 @@ export class Inlang {
     constructor(args: {
         projectDomain: string
         projectDevelopmentLocale: string | null
-        locale: string
+        locale: Locale
         translations: Translations | null
         translationsError: InlangError | null
         textApi?: typeof InlangTextApi
@@ -147,12 +147,16 @@ export class Inlang {
         if (this.translations?.[trimmed]) {
             return new this.textApi(trimmed, {
                 translation: this.translations[trimmed],
+                locale: this.locale,
             })
         }
         // if the locale is identical to the projectDevelopmentLocale
         // then return the textApi without translations.
         else if (this.locale === this.projectDevelopmentLocale) {
-            return new this.textApi(trimmed, { translation: undefined })
+            return new this.textApi(trimmed, {
+                translation: undefined,
+                locale: this.locale,
+            })
         }
         // Either an error happened during `loadTranslations` or
         // the translation simply does not exist yet.
@@ -164,6 +168,9 @@ export class Inlang {
         }
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
-        return new this.textApi(trimmed, { translation: undefined })
+        return new this.textApi(trimmed, {
+            translation: undefined,
+            locale: this.locale,
+        })
     }
 }

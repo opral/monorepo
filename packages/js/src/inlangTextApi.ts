@@ -1,8 +1,11 @@
 import { MissingVariableError, UnknownVariableError } from './errors'
+import { Locale, PluralRules } from './types'
 
 export class InlangTextApi {
     // "Hello {user}, how are you?"
     private input: string
+    // "de"
+    private locale: Locale
     // "Hallo {user}, wie geht es dir?"
     private translation: string | undefined
     // ["user"]
@@ -12,9 +15,10 @@ export class InlangTextApi {
     // "Hallo Samuel, wie geht es dir?"
     private output: string
 
-    constructor(text: string, args: { translation?: string } = {}) {
+    constructor(text: string, args: { translation?: string; locale: Locale }) {
         this.input = text
         this.translation = args.translation
+        this.locale = args.locale
         // slicing {user} -> user
         // regex with lookbehind is not supported in safari
         this.variableKeys =
@@ -36,7 +40,7 @@ export class InlangTextApi {
         // has been found yet to get static typing.
         // [key in typeof this.variables[number]]: string | number
         variables: Record<string, string | number>
-    ) {
+    ): InlangTextApi {
         const missingVariables = this.variableKeys.filter(
             (key) => variables[key] === undefined
         )
@@ -59,6 +63,33 @@ export class InlangTextApi {
                 `{${variable}}`,
                 this.variables[variable].toString() // toString in case its a number
             )
+        }
+        return this
+    }
+
+    plural(num: number, plurals: PluralRules): InlangTextApi {
+        // Zero should be zero in any language.
+        if (num === 0) {
+            this.output = plurals.zero ?? this.output
+            return this
+        }
+        const rule = new Intl.PluralRules(this.locale).select(num)
+        switch (rule) {
+            case 'zero':
+                this.output = plurals.zero ?? this.output
+                break
+            case 'one':
+                this.output = plurals.one ?? this.output
+                break
+            case 'two':
+                this.output = plurals.two ?? this.output
+                break
+            case 'few':
+                this.output = plurals.few ?? this.output
+                break
+            case 'many':
+                this.output = plurals.many ?? this.output
+                break
         }
         return this
     }
