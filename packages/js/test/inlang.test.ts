@@ -35,7 +35,7 @@ test('Existing translation. Expect translation', () => {
 test('Interpolation with one variable', () => {
     const result = inlang
         .translate('You have {num} todos')
-        .interpolate({
+        .variables({
             num: 2,
         })
         .toString()
@@ -45,7 +45,7 @@ test('Interpolation with one variable', () => {
 test('Interpolation with multiple variables', () => {
     const result = inlang
         .translate('You have {num} {color} todos')
-        .interpolate({ num: 2, color: 'green' })
+        .variables({ num: 2, color: 'green' })
         .toString()
     expect(result).toEqual('You have 2 green todos')
 })
