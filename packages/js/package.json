@@ -18,7 +18,7 @@
     },
     "scripts": {
         "build": "rm -fr lib/* && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-        "test": "jest --config jestconfig.json"
+        "test": "jest"
     },
     "devDependencies": {
         "@types/jest": "^27.0.1",
