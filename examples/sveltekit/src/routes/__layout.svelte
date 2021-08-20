@@ -2,7 +2,14 @@
 	import { setTranslations, loadTranslations } from 'inlang';
 
 	export async function load({ page }) {
-		setTranslations(await loadTranslations('demo.sveltekit.inlang.dev', page.params.lang));
+		if (page.params.lang) {
+			setTranslations(
+				await loadTranslations({
+					projectDomain: 'demo.sveltekit.inlang.dev',
+					locale: page.params.lang
+				})
+			);
+		}
 		return {};
 	}
 </script>

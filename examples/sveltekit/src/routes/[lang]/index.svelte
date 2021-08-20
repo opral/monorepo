@@ -4,6 +4,7 @@
 
 <script lang="ts">
 	import Counter from '$lib/Counter.svelte';
+	import { t } from 'inlang';
 </script>
 
 <svelte:head>
@@ -18,8 +19,7 @@
 				<img src="svelte-welcome.png" alt="Welcome" />
 			</picture>
 		</div>
-
-		to your new<br />SvelteKit app
+		{@html t(`{username} to your new<br />SvelteKit app`).variables({ username: 'Samuel' })}
 	</h1>
 
 	<h2>
