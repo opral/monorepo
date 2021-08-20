@@ -149,7 +149,7 @@ export class Inlang {
         else if (
             this.#translations?.byKey[trimmed] === undefined &&
             this.#locale !==
-                this.#translations?._metadata.projectDevelopmentLocale
+                this.#translations?.metadata.projectDevelopmentLocale
         ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)

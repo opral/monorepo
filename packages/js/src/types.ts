@@ -11,7 +11,7 @@ export type SingleTranslation = string
  * Note that keys can be undefined e.g. `translations["Phone"]` -> `undefined`.
  */
 export type TranslationsForLocale = {
-    _metadata: InlangMetadata
+    metadata: InlangMetadata
     byKey: {
         [key: string]: SingleTranslation | undefined
     }

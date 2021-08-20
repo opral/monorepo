@@ -2,7 +2,7 @@ import { Inlang } from '../src/inlang'
 import type { TranslationsForLocale } from '../src/types'
 
 const mockTranslations: TranslationsForLocale = {
-    _metadata: {
+    metadata: {
         projectDomain: 'test.dev',
         projectDevelopmentLocale: 'en',
         translationsLocale: 'de',
