@@ -8,12 +8,14 @@ let INLANG: Inlang | undefined
 /**
  * @summary
  * Initializes a new Inlang object containing the translations for the
- * given locale.
+ * given locale which is returned as JSON string. The latter allows to
+ * pass the translations from server-side to client-side necessary for
+ * Server Side Rendering (SSR).
  *
  * @param projectDomain The domain of the project.
  * @param locale The locale of the translations to be loaded.
  * @param textApi The text api to be used. If undefined `InlangTextApi` is used.
- * @returns Inlang instance
+ * @returns JSON which contains an instance of Inlang.
  *
  * @example
  * ```JS
@@ -23,19 +25,20 @@ let INLANG: Inlang | undefined
  * >>> "Bonjour Samuel"
  * ```
  */
-export function loadTranslations(args: {
+export async function loadTranslations(args: {
     projectDomain: string
     locale: Locale
     textApi?: typeof InlangTextApi
-}): Promise<Inlang> {
-    return Inlang.loadTranslations({ ...args })
+}): Promise<string> {
+    const instance = await Inlang.loadTranslations({ ...args })
+    return instance.toJson()
 }
 
 /**
  * @param inlangInstace An initialized Inlang object. Usually retrieved from `loadTranslations()`
  */
-export function setTranslations(inlangInstace: Inlang): void {
-    INLANG = inlangInstace
+export function setTranslations(inlangInstaceAsJson: string): void {
+    INLANG = Inlang.fromJson(inlangInstaceAsJson)
 }
 
 /**
@@ -46,11 +49,11 @@ export function setTranslations(inlangInstace: Inlang): void {
  * @example
  * ```JS
  * const nrTodos = 0
- * 
+ *
  * t("Hello {planet}, you have { num } todos.")
  *   .variables({ planet : "World", num: nrTodos })
  *   .plurals(nrTodos, { zero: "Hello { planet }, you have no todos."})
- * 
+ *
  * >>> "Hello World, you have no todos."
  * ```
  */

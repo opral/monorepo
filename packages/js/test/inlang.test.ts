@@ -55,3 +55,9 @@ test('Interpolation with multiple variables', () => {
         .toString()
     expect(result).toEqual('Du hast 2 grün Todos')
 })
+
+test('.toJson() and .fromJson()', () => {
+    const asJson = inlang.toJson()
+    const fromJson = Inlang.fromJson(asJson)
+    expect(fromJson).toEqual(inlang)
+})

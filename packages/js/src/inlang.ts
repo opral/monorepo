@@ -44,6 +44,7 @@ export class Inlang {
     #trackedMissingTranslations: Record<string, boolean | undefined> = {}
 
     /**
+     * Is supposed to be private but visible for testing.
      * @visibleForTesting
      */
     constructor(args: {
@@ -103,6 +104,14 @@ export class Inlang {
                 translationsError: error,
             })
         }
+    }
+
+    public static fromJson(json: string): Inlang {
+        return new Inlang({ ...JSON.parse(json) })
+    }
+
+    public toJson(): string {
+        return JSON.stringify(this)
     }
 
     async #postMissingTranslation(trimmedText: string): Promise<void> {
