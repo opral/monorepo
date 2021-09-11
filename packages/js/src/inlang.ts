@@ -32,6 +32,8 @@ export class Inlang {
     /**
      * The text api to use.
      */
+    // in the future: devs can extend this class and have customized
+    // text apis
     #textApi: typeof InlangTextApi
 
     /**
@@ -147,7 +149,7 @@ export class Inlang {
         }
     }
 
-    translate(text: string): InlangTextApi {
+    textApi(text: string): InlangTextApi {
         // trimmed corrects formatting which can be corrupted due to template literal string
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
         if (this.#translations === null && this.#translationsError) {

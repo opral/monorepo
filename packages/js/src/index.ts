@@ -43,8 +43,7 @@ export function setTranslations(inlangInstaceAsJson: string): void {
 
 /**
  *
- * @returns InlangTextApi which can be converted to a string via `toString()`.
- * Most of the times, toString is automatically called from the Frontent library.
+ * @returns translation
  *
  * @example
  * ```JS
@@ -52,14 +51,16 @@ export function setTranslations(inlangInstaceAsJson: string): void {
  *
  * t("Hello {planet}, you have { num } todos.")
  *   .variables({ planet : "World", num: nrTodos })
- *   .plurals(nrTodos, { zero: "Hello { planet }, you have no todos."})
  *
  * >>> "Hello World, you have no todos."
  * ```
  */
-export function t(text: string): InlangTextApi {
+export function t(
+    text: string,
+    options?: { vars?: Record<string, string | number> }
+): string {
     if (INLANG === undefined) {
         throw new UninitializedError()
     }
-    return INLANG.translate(text)
+    return INLANG.textApi(text).variables(options?.vars).toString()
 }

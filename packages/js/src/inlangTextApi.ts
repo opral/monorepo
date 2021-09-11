@@ -67,8 +67,11 @@ export class InlangTextApi {
         // variableskeys must be with const assertion; otherwise no typing. no solution
         // has been found yet to get static typing.
         // [key in typeof this.variables[number]]: string | number
-        variables: Record<string, string | number | InlangTextApi>
+        variables: Record<string, string | number | InlangTextApi> | undefined
     ): InlangTextApi {
+        if (variables === undefined) {
+            return this
+        }
         const missingVariables = this.#variableKeys.filter(
             (key) => variables[key] === undefined
         )
@@ -90,8 +93,8 @@ export class InlangTextApi {
     }
 
     /**
-     * @deprecated Does not translate text into different languages
-     * and is subject of change. Use as "playing around".
+     * @deprecated subject of breaking changes. Use as "playground"/
+     * base for better implementation.
      */
     plurals(num: number, plurals: PluralRules): InlangTextApi {
         // Zero should be zero in any language.

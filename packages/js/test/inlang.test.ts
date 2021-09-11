@@ -24,13 +24,13 @@ const inlang = new Inlang({
 
 test('Translation does not exist. Expect to return fallback', () => {
     const missingTranslation = 'This translations should not exist.'
-    const result = inlang.translate(missingTranslation).toString()
+    const result = inlang.textApi(missingTranslation).toString()
     expect(result).toEqual(missingTranslation)
 })
 
 test('Existing translation. Expect translation', () => {
     const text = 'About this app'
-    const result = inlang.translate(text).toString()
+    const result = inlang.textApi(text).toString()
     expect(result).toEqual(mockTranslations.byKey[text])
 })
 
@@ -40,7 +40,7 @@ test('Existing translation. Expect translation', () => {
 
 test('Interpolation with one variable', () => {
     const result = inlang
-        .translate('You have {num} todos')
+        .textApi('You have {num} todos')
         .variables({
             num: 2,
         })
@@ -50,8 +50,8 @@ test('Interpolation with one variable', () => {
 
 test('Interpolation with multiple variables', () => {
     const result = inlang
-        .translate('You have {num} {color} todos')
-        .variables({ num: 2, color: inlang.translate('green') })
+        .textApi('You have {num} {color} todos')
+        .variables({ num: 2, color: inlang.textApi('green') })
         .toString()
     expect(result).toEqual('Du hast 2 grün Todos')
 })
