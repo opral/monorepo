@@ -1,28 +1,24 @@
 import { Inlang } from '../src/inlang'
-import type { TranslationsForLocale } from '../src/types'
+// @ts-ignore
+import mockTranslations from '../locales/de'
 
-const mockTranslations: TranslationsForLocale = {
-    metadata: {
-        projectDomain: 'test.dev',
-        projectDevelopmentLocale: 'en',
-        translationsLocale: 'de',
+const inlang = new Inlang({
+    config: {
+        projectId: 'mock',
+        developmentLocale: 'en',
+        locales: ['de'],
     },
-    byKey: {
+    locale: 'en',
+    translations: {
         'About this app': 'Über diese App',
         'You have {num} todos': 'Du hast {num} Todos',
         'You have {num} {color} todos': 'Du hast {num} {color} Todos',
         green: 'grün',
     },
-}
-
-const inlang = new Inlang({
-    projectDomain: 'mock',
-    locale: 'en',
-    translations: mockTranslations,
-    translationsError: null,
 })
 
 test('Translation does not exist. Expect to return fallback', () => {
+    console.log(mockTranslations)
     const missingTranslation = 'This translations should not exist.'
     const result = inlang.textApi(missingTranslation).toString()
     expect(result).toEqual(missingTranslation)
@@ -31,7 +27,7 @@ test('Translation does not exist. Expect to return fallback', () => {
 test('Existing translation. Expect translation', () => {
     const text = 'About this app'
     const result = inlang.textApi(text).toString()
-    expect(result).toEqual(mockTranslations.byKey[text])
+    expect(result).toEqual(mockTranslations[text])
 })
 
 // test('Interpolation but variable is undefined -> throw an error ', () => {
@@ -54,10 +50,4 @@ test('Interpolation with multiple variables', () => {
         .variables({ num: 2, color: inlang.textApi('green') })
         .toString()
     expect(result).toEqual('Du hast 2 grün Todos')
-})
-
-test('.toJson() and .fromJson()', () => {
-    const asJson = inlang.toJson()
-    const fromJson = Inlang.fromJson(asJson)
-    expect(fromJson).toEqual(inlang)
 })

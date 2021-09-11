@@ -4,16 +4,13 @@ import {
     UnknownError,
 } from './errors'
 import { InlangTextApi } from './inlangTextApi'
-import type { Locale, TranslationsForLocale } from './types'
+import type { InlangProjectConfig, Locale } from './types'
 
 /**
  * Initialize a new Inlang object with `Inlang.loadTranslations(...args)`
  */
 export class Inlang {
-    /**
-     * The domain of the project.
-     */
-    #projectDomain: string
+    #config: InlangProjectConfig
 
     /**
      * The locale of the with which the object has been created.
@@ -26,14 +23,13 @@ export class Inlang {
      * If something went wrong during the loading of the translations,
      * the variable will not be null.
      */
-    #translations: TranslationsForLocale | null
-    #translationsError: InlangError | null
+    #translations: Record<string, string | undefined>
 
     /**
      * The text api to use.
      */
     // in the future: devs can extend this class and have customized
-    // text apis
+    // text apis? 
     #textApi: typeof InlangTextApi
 
     /**
@@ -50,71 +46,18 @@ export class Inlang {
      * @visibleForTesting
      */
     constructor(args: {
-        projectDomain: string
+        config: InlangProjectConfig
         locale: Locale
-        translations: TranslationsForLocale | null
-        translationsError: InlangError | null
+        translations: Record<string, string | undefined>
         textApi?: typeof InlangTextApi
     }) {
+        this.#config = args.config
         this.#locale = args.locale
         this.#translations = args.translations
-        this.#projectDomain = args.projectDomain
-        this.#translationsError = args.translationsError
         this.#textApi = args.textApi ?? InlangTextApi
     }
 
-    /**
-     * @summary
-     * Initializes a new Inlang object containing the translations for the
-     * given locale.
-     *
-     * @param projectDomain The domain of the project.
-     * @param locale The locale of the translations to be loaded.
-     * @param textApi The text api to be used. If undefined `InlangTextApi` is used.
-     * @returns Inlang instance.
-     */
-    public static async loadTranslations(args: {
-        projectDomain: string
-        locale: Locale
-        textApi?: typeof InlangTextApi
-    }): Promise<Inlang> {
-        let translations: TranslationsForLocale | null = null
-        let error: InlangError | null = null
-        try {
-            const response = await fetch(
-                `https://drfmuzfjhdfivrwkoabs.supabase.in/storage/v1/object/public/translations/${args.projectDomain}/${args.locale}.json`
-            )
-            if (response.ok) {
-                translations = await response.json()
-            } else if (response.status === 400) {
-                error = new TranslationsDoNotExistError({
-                    locale: args.locale,
-                })
-            } else {
-                error = new UnknownError(await response.text())
-            }
-        } catch (e) {
-            error = new UnknownError((e as Error).message)
-        } finally {
-            if (error) {
-                console.error(error)
-            }
-            return new Inlang({
-                projectDomain: args.projectDomain,
-                locale: args.locale,
-                translations: translations,
-                translationsError: error,
-            })
-        }
-    }
-
-    public static fromJson(json: string): Inlang {
-        return new Inlang({ ...JSON.parse(json) })
-    }
-
-    public toJson(): string {
-        return JSON.stringify(this)
-    }
+   
 
     async #postMissingTranslation(trimmedText: string): Promise<void> {
         try {
@@ -130,7 +73,7 @@ export class Inlang {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        projectDomain: this.#projectDomain,
+                        projectDomain: this.#config.projectId,
                         key: trimmedText,
                         locale: this.#locale,
                     }),
@@ -139,7 +82,7 @@ export class Inlang {
             if (response.status === 404) {
                 console.error(
                     `Inlang ERROR: The project ${
-                        this.#projectDomain
+                        this.#config.projectId
                     } does not exist.`
                 )
             }
@@ -152,15 +95,11 @@ export class Inlang {
     textApi(text: string): InlangTextApi {
         // trimmed corrects formatting which can be corrupted due to template literal string
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
-        if (this.#translations === null && this.#translationsError) {
-            console.warn(this.#translationsError)
-        }
         // if the translation is undefined and the developmentLocale does not equal
         // the translation local -> post missing translation
-        else if (
-            this.#translations?.byKey[trimmed] === undefined &&
-            this.#locale !==
-                this.#translations?.metadata.projectDevelopmentLocale
+        if (
+            this.#translations[trimmed] === undefined &&
+            this.#locale !== this.#translations.projectDevelopmentLocale
         ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)
@@ -168,7 +107,7 @@ export class Inlang {
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
         return new this.#textApi(trimmed, {
-            translation: this.#translations?.byKey[trimmed],
+            translation: this.#translations[trimmed],
             locale: this.#locale,
         })
     }

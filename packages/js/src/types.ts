@@ -5,22 +5,10 @@
 
 export type SingleTranslation = string
 
-/**
- * Translations are an object for a specific locale.
- *
- * Note that keys can be undefined e.g. `translations["Phone"]` -> `undefined`.
- */
-export type TranslationsForLocale = {
-    metadata: InlangMetadata
-    byKey: {
-        [key: string]: SingleTranslation | undefined
-    }
-}
-
-export type InlangMetadata = {
-    projectDomain: string
-    projectDevelopmentLocale: Locale
-    translationsLocale: Locale
+export type InlangProjectConfig = {
+    projectId: string
+    developmentLocale: Locale
+    locales: Locale[]
 }
 
 /**
