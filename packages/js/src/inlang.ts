@@ -1,16 +1,20 @@
-import {
-    InlangError,
-    TranslationsDoNotExistError,
-    UnknownError,
-} from './errors'
 import { InlangTextApi } from './inlangTextApi'
 import type { InlangProjectConfig, Locale } from './types'
 
 /**
- * Initialize a new Inlang object with `Inlang.loadTranslations(...args)`
+ * Use for fine-grained control of inlang by specifying the config.
+ *
+ * @example
+ * ```JS
+ * const t = new Inlang(config).translate
+ *
+ * // somewhere in your app
+ * t("hello world")
+ *
+ * ```
  */
 export class Inlang {
-    #config: InlangProjectConfig
+    #projectConfig: InlangProjectConfig
 
     /**
      * The locale of the with which the object has been created.
@@ -23,13 +27,16 @@ export class Inlang {
      * If something went wrong during the loading of the translations,
      * the variable will not be null.
      */
-    #translations: Record<string, string | undefined>
+    #translations: Record<
+        string,
+        Record<string, string | undefined> | undefined
+    >
 
     /**
      * The text api to use.
      */
     // in the future: devs can extend this class and have customized
-    // text apis? 
+    // text apis?
     #textApi: typeof InlangTextApi
 
     /**
@@ -46,18 +53,19 @@ export class Inlang {
      * @visibleForTesting
      */
     constructor(args: {
-        config: InlangProjectConfig
+        projectConfig: InlangProjectConfig
         locale: Locale
-        translations: Record<string, string | undefined>
+        translations: Record<
+            string,
+            Record<string, string | undefined> | undefined
+        >
         textApi?: typeof InlangTextApi
     }) {
-        this.#config = args.config
+        this.#projectConfig = args.projectConfig
         this.#locale = args.locale
         this.#translations = args.translations
         this.#textApi = args.textApi ?? InlangTextApi
     }
-
-   
 
     async #postMissingTranslation(trimmedText: string): Promise<void> {
         try {
@@ -73,7 +81,7 @@ export class Inlang {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        projectDomain: this.#config.projectId,
+                        projectDomain: this.#projectConfig.projectId,
                         key: trimmedText,
                         locale: this.#locale,
                     }),
@@ -82,7 +90,7 @@ export class Inlang {
             if (response.status === 404) {
                 console.error(
                     `Inlang ERROR: The project ${
-                        this.#config.projectId
+                        this.#projectConfig.projectId
                     } does not exist.`
                 )
             }
@@ -92,14 +100,17 @@ export class Inlang {
         }
     }
 
-    textApi(text: string): InlangTextApi {
-        // trimmed corrects formatting which can be corrupted due to template literal string
+    translate(
+        text: string,
+        args?: { vars?: Record<string, string | number> }
+    ): string {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
+        // trimmed corrects formatting which can be corrupted due to template literal string
         // if the translation is undefined and the developmentLocale does not equal
         // the translation local -> post missing translation
         if (
-            this.#translations[trimmed] === undefined &&
-            this.#locale !== this.#translations.projectDevelopmentLocale
+            this.#locale !== this.#projectConfig.developmentLocale &&
+            this.#translations[this.#locale]?.[trimmed] === undefined
         ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)
@@ -107,8 +118,10 @@ export class Inlang {
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
         return new this.#textApi(trimmed, {
-            translation: this.#translations[trimmed],
+            translation: this.#translations[this.#locale]?.[trimmed],
             locale: this.#locale,
         })
+            .variables(args?.vars)
+            .toString()
     }
 }
