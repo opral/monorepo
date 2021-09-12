@@ -1,6 +1,11 @@
 import { Inlang } from '../src/inlang'
-// @ts-ignore
-import mockTranslations from '../locales/de'
+
+const mockDeTranslations = {
+    'About this app': 'Über diese App',
+    'You have {num} todos': 'Du hast {num} Todos',
+    'You have {num} {color} todos': 'Du hast {num} {color} Todos',
+    green: 'grün',
+}
 
 const inlang = new Inlang({
     projectConfig: {
@@ -10,12 +15,7 @@ const inlang = new Inlang({
     },
     locale: 'de',
     translations: {
-        de: {
-            'About this app': 'Über diese App',
-            'You have {num} todos': 'Du hast {num} Todos',
-            'You have {num} {color} todos': 'Du hast {num} {color} Todos',
-            green: 'grün',
-        },
+        de: mockDeTranslations,
     },
 })
 
@@ -28,7 +28,7 @@ test('Translation does not exist. Expect to return fallback', () => {
 test('Existing translation. Expect translation', () => {
     const text = 'About this app'
     const result = inlang.translate(text)
-    expect(result).toEqual(mockTranslations[text])
+    expect(result).toEqual(mockDeTranslations[text])
 })
 
 // test('Interpolation but variable is undefined -> throw an error ', () => {
