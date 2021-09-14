@@ -1,5 +1,5 @@
 import { InlangTextApi } from './inlangTextApi'
-import type { InlangProjectConfig, Locale } from './types'
+import type { InlangProjectConfig, Locale, Translations } from './types'
 
 /**
  * Use for fine-grained control of inlang by specifying the config.
@@ -55,10 +55,7 @@ export class Inlang {
     constructor(args: {
         projectConfig: InlangProjectConfig
         locale: Locale
-        translations: Record<
-            string,
-            Record<string, string | undefined> | undefined
-        >
+        translations: Translations
         textApi?: typeof InlangTextApi
     }) {
         this.#projectConfig = args.projectConfig
@@ -110,7 +107,7 @@ export class Inlang {
         // the translation local -> post missing translation
         if (
             this.#locale !== this.#projectConfig.developmentLocale &&
-            this.#translations[this.#locale]?.[trimmed] === undefined
+            this.#translations[trimmed]?.[this.#locale] === undefined
         ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)
@@ -118,7 +115,7 @@ export class Inlang {
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
         return new this.#textApi(trimmed, {
-            translation: this.#translations[this.#locale]?.[trimmed],
+            translation: this.#translations[trimmed]?.[this.#locale],
             locale: this.#locale,
         })
             .variables(args?.vars)

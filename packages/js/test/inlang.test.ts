@@ -1,10 +1,11 @@
 import { Inlang } from '../src/inlang'
+import { Translations } from '../src/types'
 
-const mockDeTranslations = {
-    'About this app': 'Über diese App',
-    'You have {num} todos': 'Du hast {num} Todos',
-    'You have {num} {color} todos': 'Du hast {num} {color} Todos',
-    green: 'grün',
+const mockTranslations: Translations = {
+    'About this app': { de: 'Über diese App' },
+    'You have {num} todos': { de: 'Du hast {num} Todos' },
+    'You have {num} {color} todos': { de: 'Du hast {num} {color} Todos' },
+    green: { de: 'grün' },
 }
 
 const inlang = new Inlang({
@@ -14,9 +15,7 @@ const inlang = new Inlang({
         locales: ['de'],
     },
     locale: 'de',
-    translations: {
-        de: mockDeTranslations,
-    },
+    translations: mockTranslations,
 })
 
 test('Translation does not exist. Expect to return fallback', () => {
@@ -28,7 +27,7 @@ test('Translation does not exist. Expect to return fallback', () => {
 test('Existing translation. Expect translation', () => {
     const text = 'About this app'
     const result = inlang.translate(text)
-    expect(result).toEqual(mockDeTranslations[text])
+    expect(result).toEqual(mockTranslations[text]?.['de'])
 })
 
 // test('Interpolation but variable is undefined -> throw an error ', () => {
