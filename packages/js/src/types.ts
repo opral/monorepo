@@ -5,6 +5,24 @@
 
 export type SingleTranslation = string
 
+/**
+ * @example The key is the default language of the project.
+ * {
+ *   "Hello World": {
+ *     "de": "Hallo Welt"
+ *     "fr": "Bonjour le monde"
+ *   }
+ *   ...
+ * }
+ */
+export type Translations = {
+    [key: string]:
+        | {
+              [locale: string]: string | undefined
+          }
+        | undefined
+}
+
 export type InlangProjectConfig = {
     projectId: string
     developmentLocale: Locale
