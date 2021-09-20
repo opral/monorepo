@@ -1,5 +1,5 @@
 import { Inlang } from '../src/inlang'
-import { Translations } from '../src/types'
+import { InlangProjectConfig, Translations } from '../src/types'
 //@ts-ignore
 import translations from '../translations/translations'
 //@ts-ignore
@@ -8,7 +8,7 @@ import projectConfig from '../translations/config'
 const mockTranslations: Translations = translations
 
 const inlang = new Inlang({
-    projectConfig: projectConfig,
+    projectConfig: projectConfig as InlangProjectConfig,
     locale: 'de',
     translations: mockTranslations,
 })
