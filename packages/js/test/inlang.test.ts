@@ -1,19 +1,14 @@
 import { Inlang } from '../src/inlang'
-import { Locale, Translations } from '../src/types'
+import { Translations } from '../src/types'
+//@ts-ignore
+import translations from '../translations/translations'
+//@ts-ignore
+import projectConfig from '../translations/config'
 
-const mockTranslations: Translations = {
-    'About this app': { de: 'Über diese App' },
-    'You have {num} todos': { de: 'Du hast {num} Todos' },
-    'You have {num} {color} todos': { de: 'Du hast {num} {color} Todos' },
-    green: { de: 'grün' },
-}
+const mockTranslations: Translations = translations
 
 const inlang = new Inlang({
-    projectConfig: {
-        projectId: 'mock',
-        defaultLocale: 'en',
-        locales: ['de'] as Locale[],
-    },
+    projectConfig: projectConfig,
     locale: 'de',
     translations: mockTranslations,
 })

@@ -29,6 +29,8 @@ export type InlangProjectConfig = {
     locales: Locale[]
 }
 
+export type InlangTranslateArgs = { vars?: Record<string, string | number> }
+
 /**
  * Pluralization rule for the given locale.
  *

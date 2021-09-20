@@ -1,5 +1,5 @@
 import { InlangTextApi } from './inlangTextApi'
-import type { InlangProjectConfig, Locale, Translations } from './types'
+import type { InlangProjectConfig, InlangTranslateArgs, Locale, Translations } from './types'
 
 /**
  * Use for fine-grained control of inlang by specifying the config.
@@ -98,7 +98,7 @@ export class Inlang {
 
     translate(
         text: string,
-        args?: { vars?: Record<string, string | number> }
+        args?: InlangTranslateArgs
     ): string {
         const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
         // trimmed corrects formatting which can be corrupted due to template literal string
