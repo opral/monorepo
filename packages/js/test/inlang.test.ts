@@ -1,5 +1,5 @@
 import { Inlang } from '../src/inlang'
-import { Translations } from '../src/types'
+import { Locale, Translations } from '../src/types'
 
 const mockTranslations: Translations = {
     'About this app': { de: 'Über diese App' },
@@ -11,8 +11,8 @@ const mockTranslations: Translations = {
 const inlang = new Inlang({
     projectConfig: {
         projectId: 'mock',
-        developmentLocale: 'en',
-        locales: ['de'],
+        defaultLocale: 'en',
+        locales: ['de'] as Locale[],
     },
     locale: 'de',
     translations: mockTranslations,

@@ -78,9 +78,8 @@ export class Inlang {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        projectDomain: this.#projectConfig.projectId,
+                        projectId: this.#projectConfig.projectId,
                         key: trimmedText,
-                        locale: this.#locale,
                     }),
                 }
             )
@@ -106,7 +105,7 @@ export class Inlang {
         // if the translation is undefined and the developmentLocale does not equal
         // the translation local -> post missing translation
         if (
-            this.#locale !== this.#projectConfig.developmentLocale &&
+            this.#locale !== this.#projectConfig.defaultLocale &&
             this.#translations[trimmed]?.[this.#locale] === undefined
         ) {
             // the key does not exist, thus post as missing translation

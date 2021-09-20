@@ -25,7 +25,7 @@ export type Translations = {
 
 export type InlangProjectConfig = {
     projectId: string
-    developmentLocale: Locale
+    defaultLocale: Locale
     locales: Locale[]
 }
 
