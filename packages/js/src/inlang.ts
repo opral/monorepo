@@ -1,5 +1,10 @@
 import { InlangTextApi } from './inlangTextApi'
-import type { InlangProjectConfig, InlangTranslateArgs, Locale, Translations } from './types'
+import type {
+    InlangProjectConfig,
+    InlangTranslateArgs,
+    Locale,
+    Translations,
+} from './types'
 
 /**
  * Use for fine-grained control of inlang by specifying the config.
@@ -96,17 +101,15 @@ export class Inlang {
         }
     }
 
-    translate(
-        text: string,
-        args?: InlangTranslateArgs
-    ): string {
-        const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
+    translate(text: string, args?: InlangTranslateArgs): string {
         // trimmed corrects formatting which can be corrupted due to template literal string
-        // if the translation is undefined and the developmentLocale does not equal
-        // the translation local -> post missing translation
+        const trimmed = text.replace(/(?:\n(?:\s*))+/g, ' ').trim()
+        // if the translation is undefined for any of the projects locales,
+        // post it as missing (at least one) translation.
         if (
-            this.#locale !== this.#projectConfig.defaultLocale &&
-            this.#translations[trimmed]?.[this.#locale] === undefined
+            this.#projectConfig.locales.every(
+                (locale) => this.#translations[trimmed]?.[locale] !== undefined
+            ) === false
         ) {
             // the key does not exist, thus post as missing translation
             this.#postMissingTranslation(trimmed)
