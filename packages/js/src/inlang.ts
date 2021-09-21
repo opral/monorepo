@@ -24,7 +24,7 @@ export class Inlang {
     /**
      * The locale of the with which the object has been created.
      */
-    #locale: Locale
+    locale: Locale
 
     /**
      * The record contains all translations for a given locale.
@@ -64,7 +64,7 @@ export class Inlang {
         textApi?: typeof InlangTextApi
     }) {
         this.#projectConfig = args.projectConfig
-        this.#locale = args.locale
+        this.locale = args.locale
         this.#translations = args.translations
         this.#textApi = args.textApi ?? InlangTextApi
     }
@@ -117,8 +117,8 @@ export class Inlang {
         // in any case return the TextApi which will fallback to the input
         // but the user will see text.
         return new this.#textApi(trimmed, {
-            translation: this.#translations[trimmed]?.[this.#locale],
-            locale: this.#locale,
+            translation: this.#translations[trimmed]?.[this.locale],
+            locale: this.locale,
         })
             .variables(args?.vars)
             .toString()
