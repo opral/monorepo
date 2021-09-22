@@ -7,15 +7,13 @@ We have to identify what we should build. Help us by participating in [discussio
 
 ## Current state: proof of concept
 
-> :warning:	Do not use this on production apps. Expect lot's of breaking changes. 
+> :warning:	Do not use this on production apps. Expect breaking changes. 
 
-Video of current implementation: TODO  
-You can try out the proof of concept over at [app.inlang.dev](https://app.inlang.dev).  
-Documentation can be found [here](https://samuelstroschein.notion.site/Website-e53a3ce4798943febb00010128e64dc7)
+### Video Demo
+[![Demo Video](https://img.youtube.com/vi/mivXTx-cpcM/0.jpg)](https://www.youtube.com/watch?v=mivXTx-cpcM)
 
+ 
+Try the proof of concept by using [this repo](https://github.com/samuelstroschein/inlang-test-repository) as a template. 
 
-## Timeline
+And most importantly, [give feedback](https://github.com/samuelstroschein/inlang/discussions).
 
-- 21 September: Second prototype not requiring SSR (Server-Side-Rendering)
-- early September: A group of 6 students from DTU decide to build a product to i18n apps 
-- mid August: First prototype developed as [proof of concept](https://www.youtube.com/watch?v=6xzbc6QYzDs)
