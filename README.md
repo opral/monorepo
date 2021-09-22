@@ -1,36 +1,19 @@
-# inlang
-Inlang makes i18n for your web apps as easy as:
-1. installing the package   
+## Internationalization (i18n) of apps is too hard.
 
-   **NPM**    `npm install inlang`  
-   **YARN**  `yarn add inlang`
-   
-   
-3. `await loadTranslations(<your project domain>,<locale>)` 
-4. use the provided `t(<text>)` function
-5. (auto generate translations via the [inlang dashboard](https://app.inlang.dev)) 
+This project strives to lower the barrier(s) of i18ing your apps. What started out as a simple [tech demo](https://www.youtube.com/watch?v=6xzbc6QYzDs) turned into a bigger project of 6 students from the Technical University of Denmark. We are participating in [X-Tech](https://www.entrepreneurship.dtu.dk/education/x-tech-entrepreneurship) and have 10 weeks to build an MVP, helping you to i18n your app.
 
-```JavaScript
-import { loadTranslations, setTranslations, t } from 'inlang'
+### We need your help
+We have to identify what we should build. Help us by participating in [discussions](https://github.com/samuelstroschein/inlang/discussions), open issues, propose ideas, and most importantly, share the pain(s) you experienced with current i18n solutions, or why you did not i18n your app yet.
 
-setTranslations(await loadTranslations('<your domain>', "de"))
+## Current state: proof of concept
 
-console.log(t("How is the weather in Berlin?"))
+> :warning:	Do not use this on production apps. Expect breaking changes. 
 
->>> "Wie ist das Wetter in Berlin?"
-```
+### Video Demo
+[![Demo Video](https://img.youtube.com/vi/mivXTx-cpcM/0.jpg)](https://www.youtube.com/watch?v=mivXTx-cpcM)
 
-## Documentation
+ 
+Try the proof of concept by using [this repo](https://github.com/samuelstroschein/inlang-test-repository) as a template. 
 
-Head over to [app.inlang.dev](https://app.inlang.dev), create a project and follow the steps above. 
-
-For better UX and SEO, the translations should be prefetched via SSR (Server Side Rendering). 
-You can find an in depth documentation for the following frameworks: 
-
-- [x] [SvelteKit](documentation/sveltekit.md)
-- [x] [NextJS](documentation/nextjs.md)
-- [ ] React (TODO)
-- [ ] VueJS (TODO)
-- [ ] missing a framework? Open an issue :)
-
+And most importantly, [give feedback](https://github.com/samuelstroschein/inlang/discussions).
 
