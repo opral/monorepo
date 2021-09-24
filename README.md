@@ -1,5 +1,9 @@
 ## Internationalization (i18n) of apps is too hard.
 
+## Contribute
+
+This repo follows semantic git commits https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716 with the addition of `imp:` for improvments.
+
 This project strives to lower the barrier(s) of i18ing your apps. What started out as a simple [tech demo](https://www.youtube.com/watch?v=6xzbc6QYzDs) turned into a bigger project of 6 students from the Technical University of Denmark. We are participating in [X-Tech](https://www.entrepreneurship.dtu.dk/education/x-tech-entrepreneurship) and have 10 weeks to build an MVP, helping you to i18n your app.
 
 ### We need your help
