@@ -81,3 +81,13 @@ examples/sveltekit/package-lock.json
 
 **/.DS_Store
 .vscode
+
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env*
+.vercel
+.vercel_build_output
+package-lock.json
