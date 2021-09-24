@@ -1,9 +1,3 @@
-.DS_Store
 node_modules
-/build
-/.svelte-kit
-/package
-.env*
-.vercel
-.vercel_build_output
-package-lock.json
+# Keep environment variables out of version control
+.env
