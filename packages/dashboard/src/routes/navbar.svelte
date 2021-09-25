@@ -1,5 +1,4 @@
 <script lang="ts">
-	import './overflowmenu.css';
 	import UserAvatar32 from 'carbon-icons-svelte/lib/UserAvatar32';
 	import User24 from 'carbon-icons-svelte/lib/User24';
 	import Password24 from 'carbon-icons-svelte/lib/Password24';
@@ -35,21 +34,21 @@
 		<OverflowMenu icon={UserAvatar32} flipped class="w-48">
 			<OverflowMenuItem>
 				<div class="flex flex-row">
-					<User24 class="mr-2 pr-1"/>
-					<p class="mr-1"> Account</p>
-        </div>
+					<User24 class="mr-2 pr-1" />
+					<p class="mr-1">Account</p>
+				</div>
 			</OverflowMenuItem>
 			<OverflowMenuItem>
 				<div class="flex flex-row">
-					<Password24 class="mr-2 pr-1"/>
-					<p class="mr-1"> Access tokens</p>
-        </div>
+					<Password24 class="mr-2 pr-1" />
+					<p class="mr-1">Access tokens</p>
+				</div>
 			</OverflowMenuItem>
 			<OverflowMenuItem>
 				<div class="flex flex-row">
 					<Logout24 class="mr-2 pr-1" />
 					<p class="mr-1">Log out</p>
-        </div>
+				</div>
 			</OverflowMenuItem>
 		</OverflowMenu>
 	</HeaderUtilities>
