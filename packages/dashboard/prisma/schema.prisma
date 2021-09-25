@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+//provider is currently local file using sqlite
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -10,7 +8,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-//todo create org model for ownership of projects (like supabase. move po to org)
+
 model Organization {
   id          Int          @id @default(autoincrement())
   projects    Project[]    @relation
@@ -19,6 +17,7 @@ model Organization {
   users       User[]       @relation(name: "user")
   permissions Permission[]
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model User {
@@ -29,6 +28,7 @@ model User {
   isOwner        Organization? @relation(name: "owner")
   permissions    Permission[]
   createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Project {
@@ -42,6 +42,7 @@ model Project {
   textKeys      Key[]
   permissions   Permission[]
   createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Permission {
@@ -52,6 +53,7 @@ model Permission {
   userId         Int
   user           User         @relation(fields: [userId], references: [id])
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@id([organizationId, projectId, userId])
 }
@@ -63,6 +65,8 @@ model Key {
   key          String
   locale       String
   translations Translation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Translation {
@@ -72,4 +76,5 @@ model Translation {
   locale         String
   translatedText String?
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
