@@ -27,14 +27,14 @@
 	</div>
 
 	<HeaderNav>
-		<HeaderNavItem href="/projects" text="Projects" />
-		<HeaderNavItem href="/organizations" text="Organizations" />
+		<HeaderNavItem href="/" text="Projects" />
+		<HeaderNavItem href="/" text="Organizations" />
 	</HeaderNav>
 	<HeaderUtilities>
 		<HeaderAction icon={User24}>
-			<HeaderPanelLink href="/account"> Account </HeaderPanelLink>
-			<HeaderPanelLink href="/tokens"> Access tokens</HeaderPanelLink>
-			<HeaderPanelLink href="/signout">Log out</HeaderPanelLink>
+			<HeaderPanelLink href="/"> Account </HeaderPanelLink>
+			<HeaderPanelLink href="/"> Access tokens</HeaderPanelLink>
+			<HeaderPanelLink href="/">Log out</HeaderPanelLink>
 		</HeaderAction>
 </HeaderUtilities> 
 </Header>
