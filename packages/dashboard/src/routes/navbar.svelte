@@ -32,8 +32,8 @@
 	</HeaderNav>
 	<HeaderUtilities>
 		<HeaderAction icon={User24}>
-			<HeaderPanelLink href="/account">Account </HeaderPanelLink>
-			<HeaderPanelLink href="/tokens">Access tokens</HeaderPanelLink>
+			<HeaderPanelLink href="/account"> Account </HeaderPanelLink>
+			<HeaderPanelLink href="/tokens"> Access tokens</HeaderPanelLink>
 			<HeaderPanelLink href="/signout">Log out</HeaderPanelLink>
 		</HeaderAction>
 </HeaderUtilities> 
