@@ -9,16 +9,15 @@
 	import Members24 from 'carbon-icons-svelte/lib/Events24';
 	import Integration24 from 'carbon-icons-svelte/lib/Integration24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
-
 	import Navbar from './navbar.svelte';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
+    import navcss from 'carbon-components-svelte/css/white.css'
     let projectName = "bromb"
 </script>
 
 <Navbar />
 <SideNav isOpen={true} rail>
-    <!-- h1 has to be of same styling as sidenavlink -->
-    <h1 class="pl-16 h-8">{projectName}</h1> 
+    <p class="pt-2 pl-14 h-8 {navcss}.bx--side-nav__link-text} text-xl">{projectName}</p> 
 	<SideNavItems>
 		<SideNavLink icon={Home24} text="Home" href="/" />
 		<SideNavLink icon={Key24} text="Keys" href="/" />
