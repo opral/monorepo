@@ -8,7 +8,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 model Organization {
   id          Int          @id @default(autoincrement())
   projects    Project[]    @relation
