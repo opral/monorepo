@@ -11,13 +11,12 @@
 	} from 'carbon-components-svelte';
 	export let projectName: string;
 	export let organization: string;
-	export let progress = 40;
-	export let totalTranslations = 5;
 	export let noCharacters = 80;
 	export let noWords = 5;
 	export let projectId = '4252781c-e5d4-4116-abac-374780c5ee32';
 	export let activityLog = 'testactivity';
-	let languages = ['Afrikaans', 'Danish'];
+	export let languages = ['Afrikaans', 'Danish', 'French', 'Spanish', 'Norwegian', 'Swedish', 'Welsh', 'English', 'Italian', 'Portugese', 'Persian', 'Arabic', 'Russian', 'Finnish'];
+	export let langprogressions = [40, 20, 80, 100, 15, 2,8,29,60,75,20, 90, 50, 85, 8];
 </script>
 
 <section class=" -mt-16 pt-0 pr-24 pb-64 pl-24 m-0 w-full">
@@ -46,26 +45,19 @@
 	<div class="flex -mt-32">
 		<div class="mr-40 w-1/2">
 			<h3>Progress</h3>
-			<div class="mt-4">
-				<span class="mr-8" />
-				<div style="color:rgb(167,167,167)">{languages[0]}</div>
-				<ProgressBar value={progress} />
-				<div class="mt-4">
-					<a href="/" class="text-blue-700">Show all untranslated</a>
-					<a href="/" class="ml-24 text-blue-700">Show changed in last 7 days</a>
-				</div>
-			</div>
 			<div class="m-0">
-				<span class="mr-8" />
-				<div style="color:rgb(167,167,167)">{languages[1]}</div>
-				<ProgressBar value={20} />
-                <div class="m-0">
-					<a href="/" class="text-blue-700">Show all untranslated</a>
-					<a href="/" class="ml-24 text-blue-700">Show changed in last 7 days</a>
-				</div>
+				{#each languages as language, i}
+					<span class="mr-8" />
+					<div style="color:rgb(167,167,167)">{language[i]}</div>
+					<ProgressBar value={langprogressions[i]} />
+					<div class="m-0">
+						<a href="/" class="text-blue-700">Show all untranslated</a>
+						<a href="/" class="ml-24 text-blue-700">Show changed in last 7 days</a>
+					</div>
+				{/each}
 			</div>
 			<div class="mt-16">
-				<Pagination totalItems={totalTranslations} pageSize={5} />
+				<Pagination totalItems={languages.length} pageSize={5} />
 			</div>
 		</div>
 		<div class="-ml-16 w-1/2">
