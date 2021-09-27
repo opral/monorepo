@@ -20,7 +20,7 @@
 	let languages = ['Afrikaans', 'Danish'];
 </script>
 
-<section class="pt-0 pr-24 pb-24 pl-24 m-0 w-full">
+<section class=" -mt-16 pt-0 pr-24 pb-64 pl-24 m-0 w-full">
 	<div class="mt-32 mr-16 mb-0 flex align-middle flex-shrink-0">
 		<Breadcrumb>
 			<BreadcrumbItem href="/">Organizations</BreadcrumbItem>
@@ -32,7 +32,7 @@
 		<div class="flex align-middle mb-24">
 			<h3 class="flex align-middle mb-0">projName</h3>
 			<div class="ml-24 h-32 w-30">
-				<Button icon={Edit24} href="/">Open editor</Button>
+				<Button icon={Edit24} href="/" size="small">Open editor</Button>
 			</div>
 
 			<div class="ml-24 flex flex-col text-sm">
@@ -68,18 +68,18 @@
 				<Pagination totalItems={totalTranslations} pageSize={5} />
 			</div>
 		</div>
-		<div class="ml-40 w-1/2">
+		<div class="-ml-16 w-1/2">
 			<h3>Statistics</h3>
 			<div class="flex">
 				<div>
 					<div>
 						<div class="text-lg text-gray-500">Words</div>
-						<div>{noWords}</div>
+						<div class="text-lg">{noWords}</div>
 					</div>
 				</div>
 				<div class="ml-40">
 					<div class="text-lg text-gray-500">Characters</div>
-					<div>{noCharacters}</div>
+					<div class="text-lg">{noCharacters}</div>
 				</div>
 			</div>
 			<div>
