@@ -17,7 +17,8 @@
 		Column,
 		HeaderUtilities
 	} from 'carbon-components-svelte';
-
+  // export let avatar:
+  export let username:string; 
 	let isSideNavOpen = false;
 </script>
 
@@ -31,7 +32,7 @@
 		<HeaderNavItem href="/" text="Organizations" />
 	</HeaderNav>
 	<HeaderUtilities>
-		<HeaderAction icon={User24}>
+		<HeaderAction icon={User24} text={username}>
 			<HeaderPanelLink href="/"> Account </HeaderPanelLink>
 			<HeaderPanelLink href="/"> Access tokens</HeaderPanelLink>
 			<HeaderPanelLink href="/">Log out</HeaderPanelLink>

@@ -12,10 +12,11 @@
 	import Navbar from './navbar.svelte';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
     import navcss from 'carbon-components-svelte/css/white.css'
-    let projectName = "bromb"
+
+    export let projectName:string;
 </script>
 
-<Navbar />
+
 <SideNav isOpen={true} rail>
     <p class="pt-2 pl-14 h-8 {navcss}.bx--side-nav__link-text} text-xl">{projectName}</p> 
 	<SideNavItems>
