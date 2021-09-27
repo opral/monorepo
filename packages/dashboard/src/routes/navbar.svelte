@@ -5,7 +5,6 @@
 	import Logout24 from 'carbon-icons-svelte/lib/Logout24';
 	import {
 		Header,
-		HeaderGlobalAction,
 		HeaderNav,
 		HeaderNavItem,
 		HeaderAction,
