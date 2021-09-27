@@ -1,6 +1,5 @@
-//provider is currently local file using sqlite
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
