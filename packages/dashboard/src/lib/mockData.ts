@@ -1,3 +1,5 @@
+import Mock = jest.Mock;
+
 export const mockTranslations: MockTranslations = {
 	en: {
 		'some.key': 'Hello World',
@@ -18,8 +20,13 @@ export const mockProject: MockProject = {
 	name: 'mock-project',
 	translations: mockTranslations,
 	defaultLocale: 'en',
-	locales: ['en', 'fr', 'de']
+	locales: ['en', 'fr', 'de'],
+	machineTranslations: 123
 };
+
+export const mockOrganization: MockOrganization = {
+	machineTranslations: 1234
+}
 
 export type MockTranslations = {
 	[locale: string]:
@@ -36,4 +43,9 @@ export type MockProject = {
 	defaultLocale: string;
 	// locale includes defaultLocale
 	locales: string[];
+	machineTranslations: number;
 };
+
+export type MockOrganization = {
+	machineTranslations: number;
+}
