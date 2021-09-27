@@ -3,25 +3,25 @@
 
     import {Button, ButtonSet, Modal, Tab, TabContent, Tabs, TextArea} from "carbon-components-svelte";
 
-    export let open = false;
-    export let machineTranslation = true; // This should be local settings
+    export let isOpen = false;
+    export let isMachineTranslation = true; // This should be local settings
     // Default values for understanding, will be removed once implemented
     export let original = "Settings";
     export let translations = {de: "Einstillinger", da: "Indstillinger"}; // Sounds more fun than einstellungen
-    export let newTranslations = false; // Will be true when user submits new translations
+    export let hasNewTranslations = false; // Will be true when user submits new translations
 
     let originalTranslations = {...translations};
 </script>
 
 <Modal
-    bind:open
+        bind:isOpen
     modalHeading="Translation Card"
     size="sm"
     hasform
     primaryButtonText="Confirm translations"
     secondaryButtonText="Cancel"
-    on:click:button--secondary={() => (open = false)}
-    on:submit={() => {open = false; newTranslations = true}}
+    on:click:button--secondary={() => (isOpen = false)}
+    on:submit={() => {isOpen = false; hasNewTranslations = true}}
     preventCloseOnClickOutside
 >
         <Tabs>
@@ -34,7 +34,7 @@
                     <TextArea rows={10} labelText="Translated text:" bind:value={translations[lang]}/>
                     <ButtonSet>
                         <Button kind="secondary" on:click={() => translations[lang] = originalTranslations[lang]}>Reset</Button>
-                        <Button disabled={!machineTranslation} on:click={() => translations[lang] += " but cooler"}>Machine Translation</Button>
+                        <Button disabled={isMachineTranslation === false} on:click={() => translations[lang] += " but cooler"}>Machine Translation</Button>
                     </ButtonSet>
                     <TextArea rows={10} labelText="Original text:" disabled placeholder={original}/>
                 </TabContent>
