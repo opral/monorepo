@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
+// https://github.com/khalidx/typescript-cli-starter
 import program from 'commander'
 
 import { orderPizza } from './index'
- 
+
+
 program
   .version('0.1.0')
   .option('-p, --peppers', 'Add peppers')
@@ -11,6 +13,7 @@ program
   .option('-b, --bbq-sauce', 'Add bbq sauce')
   .option('-c, --cheese [type]', 'Add the specified type of cheese [marble]', 'marble')
   .parse(process.argv)
+
 
 orderPizza({
   peppers: program.peppers,
