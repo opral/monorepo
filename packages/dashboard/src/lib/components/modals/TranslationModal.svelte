@@ -14,7 +14,7 @@
 </script>
 
 <Modal
-        bind:isOpen
+        bind:open={isOpen}
     modalHeading="Translation Card"
     size="sm"
     hasform
