@@ -6,17 +6,27 @@
 	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import { Pagination } from 'carbon-components-svelte';
 
+	import { Tag } from 'carbon-components-svelte';
+
 	export let title = '';
 	export let description = '';
 	export let name = '';
 
-	function handleClick() {
-		// go to create an organisation page
+	// TODO
+	function goToCreatePage() {
+		// go to create an organisation or project page
+		if (name == 'organization') {
+			// go to create organisation page
+		} else if (name == 'project') {
+			// go to create project page
+		}
+	}
+	function showMore() {
+		// show more information about the selected organisation or project
 	}
 	function prev() {
 		// go to prev slide of organisations
 	}
-
 	function next() {
 		// go to next slide of organisations
 	}
@@ -27,20 +37,31 @@
 	<p>{description}</p>
 </div>
 
+<!-- TODO: implement search through the list of projects/organisations -->
 <div class="flex flex-row gap-64 justify-between" style="padding: 2rem;">
-	<Button kind="tertiary" on:click={handleClick}>Create {name}</Button>
+	<Button kind="tertiary" on:click={goToCreatePage}>Create {name}</Button>
 	<Search placeholder="Search {name}" />
 </div>
 
-<div class="flex flex-row justify-between" style="padding: 1rem;">
-	<p>labfrogs</p>
-	<Button kind="tertiary" on:click={handleClick}>More</Button>
+<!-- TODO: the projects/organisations should be read from a data file -->
+<div
+	class="flex flex-row justify-between"
+	style="padding-left: 2rem; padding-right: 2rem;padding-bottom: 2rem;"
+>
+	<div class="width-restriction gap-6 ">
+		<Tag type="blue">LA</Tag>
+		<p>labfrogs</p>
+	</div>
+	<Button kind="tertiary" on:click={showMore}>More</Button>
 </div>
 
+<!-- TODO: make pagination interactible -->
 <Pagination totalItems={102} page={4} />
 
-<!-- <div class="buttons">
-<Button kind="tertiary" iconDescription="Tooltip text" icon={ArrowLeft16} />
-<Button kind="tertiary" iconDescription="Tooltip text" icon={Number_1} />
-<Button kind="tertiary" iconDescription="Tooltip text" icon={ArrowRight16} />
-</div> -->
+<style>
+	.width-restriction {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+</style>
