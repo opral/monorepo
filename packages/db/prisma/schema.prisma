@@ -9,9 +9,8 @@ generator client {
 
 model Organization {
   id          Int          @id @default(autoincrement())
+  name        String
   projects    Project[]    @relation
-  owner_id    Int
-  owner       User         @relation(name: "owner", fields: [owner_id], references: [id])
   users       User[]       @relation(name: "user")
   permissions Permission[]
   created_at  DateTime     @default(now())
@@ -20,10 +19,11 @@ model Organization {
 
 model User {
   id              Int           @id @default(autoincrement())
+  name            String
   email           String        @unique
   organization_id Int
   organization    Organization  @relation("user", fields: [organization_id], references: [id])
-  is_owner        Organization? @relation(name: "owner")
+  isAdmin         Boolean
   permissions     Permission[]
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
