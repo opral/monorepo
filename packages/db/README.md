@@ -7,13 +7,16 @@
 0. Navigate to db directory
 1. `supabase stop`
 
-# Populate database with test data
-//todo
+# Seed database
+0. Navigate to db directory
+1. run `node src/seed.js`
+
+# Remove all data from database
+> :warning: only use on local dev environment
+0. Navigate to db directory
+1. run `node src/reset.js`
 
 # Migrating database
 0. Update schema.prisma file with updates
 1. Run `npx prisma format`
 2. Run `npx migrate dev`
-
-# Datamodel changes
-After changing the datamodel the Prisma Client should be re-generated using `prisma generate`
