@@ -14,3 +14,6 @@
 0. Update schema.prisma file with updates
 1. Run `npx prisma format`
 2. Run `npx migrate dev`
+
+# Datamodel changes
+After changing the datamodel the Prisma Client should be re-generated using `prisma generate`

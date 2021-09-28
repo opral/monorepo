@@ -10,46 +10,46 @@ generator client {
 model Organization {
   id          Int          @id @default(autoincrement())
   projects    Project[]    @relation
-  owner_id     Int
+  owner_id    Int
   owner       User         @relation(name: "owner", fields: [owner_id], references: [id])
   users       User[]       @relation(name: "user")
   permissions Permission[]
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @updatedAt
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 }
 
 model User {
-  id             Int           @id @default(autoincrement())
-  email          String        @unique
+  id              Int           @id @default(autoincrement())
+  email           String        @unique
   organization_id Int
-  organization   Organization  @relation("user", fields: [organization_id], references: [id])
+  organization    Organization  @relation("user", fields: [organization_id], references: [id])
   is_owner        Organization? @relation(name: "owner")
-  permissions    Permission[]
+  permissions     Permission[]
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
 }
 
 model Project {
-  id            Int          @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   api_key        String       @unique
-  name          String
+  name           String
   owner_id       Int
-  owner        Organization @relation(fields: [owner_id], references: [id])
+  owner          Organization @relation(fields: [owner_id], references: [id])
   default_locale String
-  locales       String
+  locales        String
   text_keys      Key[]
-  permissions   Permission[]
+  permissions    Permission[]
   created_at     DateTime     @default(now())
   updated_at     DateTime     @updatedAt
 }
 
 model Permission {
   organization_id Int
-  organization   Organization @relation(fields: [organization_id], references: [id])
+  organization    Organization @relation(fields: [organization_id], references: [id])
   project_id      Int
-  project        Project      @relation(fields: [project_id], references: [id])
+  project         Project      @relation(fields: [project_id], references: [id])
   user_id         Int
-  user           User         @relation(fields: [user_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id])
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt
 
@@ -58,20 +58,20 @@ model Permission {
 
 model Key {
   id           Int           @id @default(autoincrement())
-  project_id    Int
+  project_id   Int
   project      Project       @relation(fields: [project_id], references: [id])
   key          String
   locale       String
   translations Translation[]
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Translation {
-  id             Int      @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   key_id          Int
-  key            Key      @relation(fields: [key_id], references: [id])
-  locale         String
+  key             Key      @relation(fields: [key_id], references: [id])
+  locale          String
   translated_text String?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
