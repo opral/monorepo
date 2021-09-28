@@ -9,7 +9,6 @@
 	import Members24 from 'carbon-icons-svelte/lib/Events24';
 	import Integration24 from 'carbon-icons-svelte/lib/Integration24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
-	import Navbar from './navbar.svelte';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
     import navcss from 'carbon-components-svelte/css/white.css'
 
