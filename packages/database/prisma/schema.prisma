@@ -8,7 +8,7 @@ generator client {
 }
 
 model Organization {
-  id          Int          @id @default(autoincrement())
+  id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   projects    Project[]    @relation
   users       User[]       @relation(name: "user")
@@ -18,22 +18,21 @@ model Organization {
 }
 
 model User {
-  id              Int           @id @default(autoincrement())
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name            String
-  email           String        @unique
-  organization_id Int
-  organization    Organization  @relation("user", fields: [organization_id], references: [id])
-  isAdmin         Boolean
+  email           String         @unique
+  organization_id String         @db.Uuid
+  organizations   Organization[] @relation("user", fields: [organization_id], references: [id])
   permissions     Permission[]
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
 }
 
 model Project {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   api_key        String       @unique
   name           String
-  owner_id       Int
+  owner_id       String       @db.Uuid
   owner          Organization @relation(fields: [owner_id], references: [id])
   default_locale String
   locales        String
@@ -44,11 +43,11 @@ model Project {
 }
 
 model Permission {
-  organization_id Int
+  organization_id String       @db.Uuid
   organization    Organization @relation(fields: [organization_id], references: [id])
-  project_id      Int
+  project_id      String       @db.Uuid
   project         Project      @relation(fields: [project_id], references: [id])
-  user_id         Int
+  user_id         String       @db.Uuid
   user            User         @relation(fields: [user_id], references: [id])
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt
@@ -58,7 +57,7 @@ model Permission {
 
 model Key {
   id           Int           @id @default(autoincrement())
-  project_id   Int
+  project_id   String        @db.Uuid
   project      Project       @relation(fields: [project_id], references: [id])
   key          String
   locale       String
@@ -68,11 +67,11 @@ model Key {
 }
 
 model Translation {
-  id              Int      @id @default(autoincrement())
-  key_id          Int
-  key             Key      @relation(fields: [key_id], references: [id])
-  locale          String
-  translated_text String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  key_id     Int
+  key        Key      @relation(fields: [key_id], references: [id])
+  locale     String
+  text       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
