@@ -3,6 +3,8 @@
 -->
 <script lang="ts" context="module">
 	import '../app.postcss';
+	import Navbar from "./navbar.svelte";
+	import ProjectSidenav from "$lib/layout/ProjectSidenav.svelte";
 	// import { auth } from '$lib/services/auth';
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	// import { browser } from '$app/env';
@@ -38,6 +40,8 @@
 	// 		}
 	// 	});
 	// }
-</script>
 
-<slot />
+
+</script>
+<Navbar username="test"/>
+	<slot></slot>

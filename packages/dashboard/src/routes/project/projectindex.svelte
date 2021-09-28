@@ -15,12 +15,26 @@
 	export let noWords = 5;
 	export let projectId = '4252781c-e5d4-4116-abac-374780c5ee32';
 	export let activityLog = 'testactivity';
-	export let languages = ['Afrikaans', 'Danish', 'French', 'Spanish', 'Norwegian', 'Swedish', 'Welsh', 'English', 'Italian', 'Portugese', 'Persian', 'Arabic', 'Russian', 'Finnish'];
+	export let languages = [
+		'Afrikaans',
+		'Danish',
+		'French',
+		'Spanish',
+		'Norwegian',
+		'Swedish',
+		'Welsh',
+		'English',
+		'Italian',
+		'Portugese',
+		'Persian',
+		'Arabic',
+		'Russian',
+		'Finnish'
+	];
 	export let langprogressions = [40, 20, 80, 100, 15, 2, 8, 29, 60, 75, 20, 90, 50, 85, 8];
 </script>
 
-
-<section class=" -mt-16 pt-0 pr-24 pb-64 pl-24 m-0 w-full">
+<section class=" -ml-40 -mt-64 pt-0 pr-24 pb-64 pl-24 m-0 w-full">
 	<div class="mt-32 mr-16 mb-0 flex align-middle flex-shrink-0">
 		<Breadcrumb>
 			<BreadcrumbItem href="/">Organizations</BreadcrumbItem>
@@ -35,9 +49,9 @@
 				<Button icon={Edit24} href="/" size="small">Open editor</Button>
 			</div>
 
-			<div class="ml-24 flex flex-col text-sm">
+			<div class="ml-24 flex flex-row text-sm">
 				<p>Project ID:</p>
-				<div class="mt-4">
+				<div class="ml-2 -mt-2">
 					<CodeSnippet>{projectId}</CodeSnippet>
 				</div>
 			</div>
@@ -49,7 +63,7 @@
 			<div class="m-0">
 				{#each languages as language, i}
 					<span class="mr-8" />
-					<div style="color:rgb(167,167,167)">{languages[i]}</div>
+					<div>{languages[i]}</div>
 					<ProgressBar value={langprogressions[i]} />
 					<div class="m-0">
 						<a href="/" class="text-blue-700">Show all untranslated</a>
@@ -82,6 +96,3 @@
 		</div>
 	</div>
 </section>
-
-
-
