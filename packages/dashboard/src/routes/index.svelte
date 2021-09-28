@@ -1,5 +1,6 @@
 <script lang="ts">
-
+	import CreateEntity from '$lib/components/CreateEntity.svelte';
 </script>
 
-<p>Hello World</p>
+<CreateEntity title="Your projects" description="" name="project" />
+<!-- <CreateEntity title="Organizations" description="" name="organization" /> -->
