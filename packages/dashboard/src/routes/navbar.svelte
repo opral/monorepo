@@ -11,9 +11,6 @@
 		HeaderPanelLink,
 		SkipToContent,
 		Content,
-		Grid,
-		Row,
-		Column,
 		HeaderUtilities
 	} from 'carbon-components-svelte';
   // export let avatar:
@@ -30,7 +27,7 @@
 		<HeaderNavItem href="/" text="Projects" />
 		<HeaderNavItem href="/" text="Organizations" />
 	</HeaderNav>
-	<HeaderUtilities>
+	<HeaderUtilities class ="h-40">
 		<HeaderAction icon={User24} text={username}>
 			<HeaderPanelLink href="/"> Account </HeaderPanelLink>
 			<HeaderPanelLink href="/"> Access tokens</HeaderPanelLink>
@@ -40,11 +37,5 @@
 </Header>
 
 <Content>
-	<Grid>
-		<Row>
-			<Column>
-				<h1>Welcome</h1>
-			</Column>
-		</Row>
-	</Grid>
+	
 </Content>

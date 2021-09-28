@@ -9,6 +9,8 @@
 		Pagination,
 		Button
 	} from 'carbon-components-svelte';
+	let pageno:number;
+	export let pageSize=10;
 	export let projectName: string;
 	export let organization: string;
 	export let noCharacters = 80;
@@ -61,18 +63,20 @@
 		<div class="mr-40 w-1/2">
 			<h3>Progress</h3>
 			<div class="m-0">
-				{#each languages as language, i}
+				{#each {length: pageSize} as _, i}
 					<span class="mr-8" />
-					<div>{languages[i]}</div>
+					{#if i+pageSize*(pageno-1) < languages.length}
+					<div class ="font-bold text-base">{languages[i+pageSize*(pageno-1)]}</div>
 					<ProgressBar value={langprogressions[i]} />
-					<div class="m-0">
+					<div class="mt-4">
 						<a href="/" class="text-blue-700">Show all untranslated</a>
 						<a href="/" class="ml-24 text-blue-700">Show changed in last 7 days</a>
 					</div>
+				{/if}
 				{/each}
 			</div>
 			<div class="mt-16">
-				<Pagination totalItems={languages.length} pageSize={5} />
+				<Pagination totalItems={languages.length} pageSize={pageSize} bind:page={pageno} />
 			</div>
 		</div>
 		<div class="-ml-16 w-1/2">
