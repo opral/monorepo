@@ -1,20 +1,20 @@
 <script lang="ts" context="module">
-	import { auth } from '$lib/services/auth';
+	// import { auth } from '$lib/services/auth';
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 
-	export async function load({}: LoadInput): Promise<LoadOutput> {
-		// user is already logged in
-		if (auth.session()) {
-			return {
-				status: 302,
-				redirect: '/'
-			};
-		}
-		return {};
-	}
+	// export async function load({}: LoadInput): Promise<LoadOutput> {
+	// 	// user is already logged in
+	// 	if (auth.session()) {
+	// 		return {
+	// 			status: 302,
+	// 			redirect: '/'
+	// 		};
+	// 	}
+	// 	return {};
+	// }
 </script>
 
-<script lang="ts">
+<!-- <script lang="ts">
 	import Center from '$lib/components/Center.svelte';
 	import { Button, InlineLoading, TextInput, Tile } from 'carbon-components-svelte';
 
@@ -46,9 +46,11 @@
 			loading = false;
 		}
 	};
-</script>
+</script> -->
 
-<div class="w-full h-screen">
+<p>TODO re-implement</p>
+
+<!-- <div class="w-full h-screen">
 	<Center>
 		<Tile>
 			<div class="col-6 form-widget">
@@ -65,4 +67,4 @@
 			</div>
 		</Tile>
 	</Center>
-</div>
+</div> -->
