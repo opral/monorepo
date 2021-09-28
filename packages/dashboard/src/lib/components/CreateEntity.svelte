@@ -32,19 +32,19 @@
 	}
 </script>
 
-<div class="p-2">
+<div class="pl-8 pr-8 pt-8">
 	<h1>{title}</h1>
 	<p>{description}</p>
 </div>
 
 <!-- TODO: implement search through the list of projects/organisations -->
-<div class="flex flex-row gap-64 justify-between p-2">
+<div class="flex flex-row gap-64 justify-between p-8">
 	<Button kind="tertiary" on:click={goToCreatePage}>Create {name}</Button>
 	<Search placeholder="Search {name}" />
 </div>
 
 <!-- TODO: the projects/organisations should be read from a data file -->
-<div class="flex flex-row justify-between pl-2 pr-2 pb-2">
+<div class="flex flex-row justify-between pl-8 pr-8 pb-8">
 	<!-- <div class="width-restriction gap-6 "> -->
 	<div class="flex justify-between items-center gap-6">
 		<Tag type="blue">LA</Tag>
@@ -54,6 +54,6 @@
 </div>
 
 <!-- TODO: make pagination interactible -->
-<div class="p-2">
+<div class="pl-8 pr-8">
 	<Pagination totalItems={102} page={4} />
 </div>
