@@ -1,6 +1,6 @@
 <script>
 
-    import {Button, Link, Tab, TabContent, Tabs, Toggle} from "carbon-components-svelte";
+    import {Link, Tab, TabContent, Tabs, Toggle} from "carbon-components-svelte";
     import {mockOrganization, mockProject} from "$lib/mockData";
 
     let toggled = true; // TODO: Save the machine translations toggle locally
@@ -28,21 +28,9 @@
             </div>
         </TabContent>
         <TabContent>
-            <div class="toggle">
-                <Toggle labelText="Machine Translations" labelA="Disabled" labelB="Enabled" bind:toggled />
-            </div>
-            <div class="toggle">
-                <Toggle labelText="Automatically translate new keys" disabled={!toggled}/>
-            </div>
-            <div class="toggle">
-                <Toggle labelText="Automatically translate new languages" disabled={!toggled}/>
-            </div>
+            <Toggle class="mb-2" labelText="Machine Translations" labelA="Disabled" labelB="Enabled" bind:toggled />
+            <Toggle class="mb-2" labelText="Automatically translate new keys" disabled={!toggled}/>
+            <Toggle class="mb-2" labelText="Automatically translate new languages" disabled={!toggled}/>
         </TabContent>
     </div>
 </Tabs>
-
-<style>
-    .toggle {
-        padding-bottom: 20px;
-    }
-</style>
