@@ -8,6 +8,7 @@
 	import Edit32 from 'carbon-icons-svelte/lib/Edit32';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import { Pagination } from 'carbon-components-svelte';
+	import { Breadcrumb, BreadcrumbItem } from 'carbon-components-svelte';
 
 	import { Tag } from 'carbon-components-svelte';
 
@@ -43,11 +44,16 @@
 	}
 </script>
 
-<div style="padding-left: 2rem;padding-right:2rem; padding-top:2rem">
-	<p>Organizations / labfrogs / bromb / Keys</p>
+<div class="pl-8 pr-8 pt-8">
+	<Breadcrumb>
+		<BreadcrumbItem href="/">Organizations</BreadcrumbItem>
+		<BreadcrumbItem href="/reports">labfrogs</BreadcrumbItem>
+		<BreadcrumbItem href="/reports/2019" isCurrentPage>bromb</BreadcrumbItem>
+		<BreadcrumbItem href="/reports/2019/" isCurrentPage>Keys</BreadcrumbItem>
+	</Breadcrumb>
 </div>
 
-<div style="padding: 2rem;">
+<div class="p-8">
 	<h1>Keys</h1>
 	<p>All your translation keys will appear here. You can create, delete and edit them.</p>
 </div>
