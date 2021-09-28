@@ -1,8 +1,11 @@
 # Running the local database
 0. Make sure that Docker Compose is installed and running with elevated privileges
 1. Navigate to db directory
-2. `supabase start` database is now running
-3. To stop database: `supabase stop`
+2. `supabase start`
+
+# Stopping the local database
+0. Navigate to db directory
+1. `supabase stop`
 
 # Populate database with test data
 //todo
