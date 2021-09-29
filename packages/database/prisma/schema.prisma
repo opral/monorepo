@@ -19,7 +19,6 @@ model Organization {
 
 model User {
   id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name            String
   email           String         @unique
   organization_id String         @db.Uuid
   organizations   Organization[] @relation("user", fields: [organization_id], references: [id])
