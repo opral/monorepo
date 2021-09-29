@@ -7,71 +7,62 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Organization {
-  id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String
-  projects    Project[]    @relation
-  users       User[]       @relation(name: "user")
-  permissions Permission[]
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+model organization {
+  id            String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name          String
+  projects      project[]
+  admin_user_id String    @db.Uuid
+  admin         user      @relation("admin", fields: [admin_user_id], references: [id])
+  members       member[]
+  created_at    DateTime  @default(now())
 }
 
-model User {
-  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name            String
-  email           String         @unique
-  organization_id String         @db.Uuid
-  organizations   Organization[] @relation("user", fields: [organization_id], references: [id])
-  permissions     Permission[]
-  created_at      DateTime       @default(now())
-  updated_at      DateTime       @updatedAt
+model user {
+  id         String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name       String
+  email      String         @unique
+  admin_of   organization[] @relation("admin")
+  member_of  member[]
+  created_at DateTime       @default(now())
 }
 
-model Project {
-  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+model member {
+  organization_id String       @db.Uuid
+  organization    organization @relation(fields: [organization_id], references: [id])
+  user_id         String       @db.Uuid
+  user            user         @relation(fields: [user_id], references: [id])
+
+  @@id([organization_id, user_id])
+}
+
+model project {
+  id             String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
   api_key        String       @unique
   name           String
   owner_id       String       @db.Uuid
-  owner          Organization @relation(fields: [owner_id], references: [id])
+  owner          organization @relation(fields: [owner_id], references: [id])
   default_locale String
   locales        String
-  text_keys      Key[]
-  permissions    Permission[]
-  created_at     DateTime     @default(now())
-  updated_at     DateTime     @updatedAt
+  text_keys      key[]
+
+  created_at DateTime @default(now())
 }
 
-model Permission {
-  organization_id String       @db.Uuid
-  organization    Organization @relation(fields: [organization_id], references: [id])
-  project_id      String       @db.Uuid
-  project         Project      @relation(fields: [project_id], references: [id])
-  user_id         String       @db.Uuid
-  user            User         @relation(fields: [user_id], references: [id])
-  created_at      DateTime     @default(now())
-  updated_at      DateTime     @updatedAt
-
-  @@id([organization_id, project_id, user_id])
-}
-
-model Key {
+model key {
   id           Int           @id @default(autoincrement())
   project_id   String        @db.Uuid
-  project      Project       @relation(fields: [project_id], references: [id])
+  project      project       @relation(fields: [project_id], references: [id])
   key          String
   locale       String
-  translations Translation[]
+  translations translation[]
   created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
 }
 
-model Translation {
+model translation {
   id         Int      @id @default(autoincrement())
   key_id     Int
-  key        Key      @relation(fields: [key_id], references: [id])
+  key        key      @relation(fields: [key_id], references: [id])
   locale     String
   text       String
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
 }
