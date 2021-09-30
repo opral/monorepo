@@ -5,7 +5,11 @@ const config = {
 		extend: {
 			// color matching IBM Carbon Colors
 			colors: {
-				danger: '#da1e28'
+				danger: '#da1e28',
+				'success-high-contrast': '#42be65',
+				success: '#198038',
+				warning: '#f1c21b',
+				'warning-high-contrast': '#f1c21'
 			}
 		}
 	},
