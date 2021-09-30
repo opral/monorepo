@@ -43,9 +43,11 @@ model project {
   name           String
   owner_id       String       @db.Uuid
   owner          organization @relation(fields: [owner_id], references: [id])
+  /// The locale of development.
   default_locale String
-  locales        String
-  text_keys      key[]
+  /// Locales (contains default_locale)
+  locales        String[]
+  keys           key[]
 
   created_at DateTime @default(now())
 }
