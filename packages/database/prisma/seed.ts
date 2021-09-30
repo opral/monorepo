@@ -1,12 +1,40 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { createClient } from "@supabase/supabase-js";
+import { definitions } from "../types/definitions";
+
+/**
+ *
+ * @returns mock user id (uuid)
+ */
+async function createMockUser(): Promise<string> {
+  const anonKey =
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew";
+  const supabase = createClient("http://localhost:8000", anonKey);
+  const signUp = await supabase.auth.signUp({ email: "dev@inlang.dev" });
+  if (signUp.error) {
+    throw signUp.error;
+  } else if (signUp.data === null) {
+    throw "Mock user is null";
+  }
+  // manually upserting newly created user since no automatic
+  // insertion from the table `(supabase).auth.user` to `public.user` exists yet. 
+  const upsert = await supabase
+    .from<definitions["user"]>("user")
+    .upsert({ id: signUp!.user!.id, email: signUp!.user!.email! });
+  if (upsert.error){
+    throw upsert.error
+  }
+  return signUp!.user!.id;
+}
 
 async function main() {
+  const mockUserId = await createMockUser();
+  const prisma = new PrismaClient();
   await prisma.organization.create({
     data: {
       name: "Acne Inc",
       admin: {
-        create: { email: "dev@inlang.dev" },
+        connect: {},
       },
       projects: {
         create: {
