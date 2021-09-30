@@ -1,24 +1,22 @@
 <script lang="ts">
+	import { definitions } from '@inlang/database';
 	import {
 		Button,
-		Search,
 		DataTable,
 		PaginationNav,
 		Tag,
 		ProgressBar,
 		Tooltip,
 		Toolbar,
-		ToolbarMenu,
 		ToolbarContent,
 		ToolbarBatchActions,
-		ToolbarSearch,
-		ToolbarMenuItem
+		ToolbarSearch
 	} from 'carbon-components-svelte';
-	import { mockProject } from '$lib/mockData';
 	import Settings16 from 'carbon-icons-svelte/lib/Settings16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-
 	import LanguageModal from '$lib/components/modals/LanguageModal.svelte';
+	import { projectStore } from '$lib/stores/projectStore';
+	import ISO6391 from 'iso-639-1';
 
 	let showModifyLanguageModal = false;
 
@@ -28,27 +26,40 @@
 	 * Used to "communicate" with modal of which locale the
 	 * settings button has been pressed.
 	 */
-	let selectedLanguageModifyModal: string | null = null;
+	let selectedLanguageModifyModal: definitions['language']['iso_code'] | null = null;
 
 	let selectedRowIds: any = [];
 
-	function localeProgress() {
-		return Math.random() * 100;
+	/**
+	 * Calculates the progress based on number of reviewed translations.
+	 *
+	 * @returns percentage in xx.xx%
+	 */
+	function languageProgress(iso: definitions['language']['iso_code']) {
+		const allTranslations =
+			$projectStore.data?.translations.filter((translation) => translation.language_iso === iso) ??
+			[];
+		const missingReview = allTranslations.filter(
+			(translation) => translation.is_reviewed === false
+		);
+		return ((allTranslations.length - missingReview.length) / allTranslations.length) * 100;
 	}
 
-	function numWords(locale: string): number {
+	function numWords(iso: definitions['language']['iso_code']): number {
 		let result = 0;
-		Object.values(mockProject.translations[locale] ?? {}).forEach((string) => {
-			result += (string?.split(' ') ?? []).length;
-		});
+		$projectStore.data?.translations
+			.filter((translation) => translation.language_iso === iso)
+			.forEach((translation) => {
+				result += (translation.text.split(' ') ?? []).length;
+			});
 		return result;
 	}
 	function rows() {
-		return mockProject.locales.map((locale) => ({
-			id: locale,
-			name: locale,
-			words: numWords(locale),
-			progress: localeProgress()
+		return $projectStore.data?.languages.map((language) => ({
+			id: language.iso_code,
+			name: language.iso_code,
+			words: numWords(language.iso_code),
+			progress: languageProgress(language.iso_code)
 		}));
 	}
 </script>
@@ -92,18 +103,14 @@
 	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'name'}
 			<div class="flex items-center space-x-2">
-				<p class="text-sm">Placeholder</p>
+				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
 				<Tag>{cell.value}</Tag>
-				{#if cell.value === mockProject.defaultLocale}
+				{#if cell.value === $projectStore.data?.project.default_language_iso}
 					<Tag type="green">default</Tag>
 				{/if}
 			</div>
 		{:else if cell.key === 'progress'}
-			<ProgressBar
-				value={localeProgress()}
-				max={100}
-				helperText={localeProgress().toFixed() + '%'}
-			/>
+			<ProgressBar value={cell.value} max={100} helperText={cell.value.toFixed() + '%'} />
 		{:else if cell.key === 'settings'}
 			<Button
 				kind="ghost"
@@ -127,14 +134,14 @@
 	<LanguageModal
 		open={showModifyLanguageModal}
 		primaryButtonDisabled={true}
-		languageCode={selectedLanguageModifyModal}
+		languageIso={selectedLanguageModifyModal}
 		heading="Edit language"
 	/>
 {:else if showAddLanguageModal}
 	<LanguageModal
 		open={showAddLanguageModal}
 		primaryButtonDisabled={true}
-		languageCode=""
+		languageIso=""
 		heading="Add language"
 	/>
 {/if}

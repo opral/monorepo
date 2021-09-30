@@ -10,10 +10,6 @@
 	import { upsertUser } from '$lib/services/database';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
-		if (import.meta.env.VITE_PUBLIC_ENV_NAME === 'development') {
-			// skip auth layer in development (as no row level security is set up)
-			return {};
-		}
 		const user = auth.user();
 		if (user) {
 			const { error } = await upsertUser({ user: user });

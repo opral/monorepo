@@ -1,11 +1,12 @@
-import { createClient, PostgrestResponse, User } from '@supabase/supabase-js';
+import { createClient, User } from '@supabase/supabase-js';
+import type { DatabaseResponse } from '$lib/types/databaseResponse';
 import type { definitions } from '@inlang/database/types/definitions';
 
 const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const database = supabase;
+export const database = supabase;
 
 /**
  * Upserts the user to the database. Use for login/registration.
@@ -17,8 +18,9 @@ const database = supabase;
  */
 export async function upsertUser(args: {
 	user: User;
-}): Promise<PostgrestResponse<definitions['user']>> {
+}): Promise<DatabaseResponse<definitions['user']>> {
 	return database
 		.from<definitions['user']>('user')
-		.upsert({ id: args.user.id, email: args.user.email });
+		.upsert({ id: args.user.id, email: args.user.email })
+		.single();
 }
