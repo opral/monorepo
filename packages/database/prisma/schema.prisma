@@ -1,7 +1,7 @@
 datasource db {
   provider = "postgresql"
   // localhost database.
-  url      = "postgresql://postgres:developmentdevelopment@db.cqriunspsjhvrvcazqri.supabase.co:5432/postgres"
+  url      = "postgres://postgres:postgres@localhost:5432/postgres"
   //! production database
   // url      = env("PRODUCTION_DATABASE_URL")
 }
