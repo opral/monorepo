@@ -9,26 +9,29 @@
 		Tooltip,
 		Toolbar,
 		ToolbarContent,
-		ToolbarBatchActions,
 		ToolbarSearch
 	} from 'carbon-components-svelte';
-	import Settings16 from 'carbon-icons-svelte/lib/Settings16';
+	import Save16 from 'carbon-icons-svelte/lib/Save16';
+
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import LanguageModal from '$lib/components/modals/LanguageModal.svelte';
+	import CreateLanguageModal from '$lib/components/modals/CreateLanguageModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import ISO6391 from 'iso-639-1';
+	import SetDefaultLanguageModal from '$lib/components/modals/SetDefaultLanguageModal.svelte';
+	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
 
-	let showModifyLanguageModal = false;
+	// all modals are interacted with as object which alllows to pass
+	// values such as a language that should be deleted along.
+	let createLanguageModal: { show: boolean } = { show: false };
+	let deleteLanguageModal: { show: boolean; language?: definitions['language'] } = {
+		show: false
+	};
+	let setDefaultLanguageModal: { show: boolean; language?: definitions['language'] } = {
+		show: false
+	};
 
-	let showAddLanguageModal = false;
-
-	/**
-	 * Used to "communicate" with modal of which locale the
-	 * settings button has been pressed.
-	 */
-	let selectedLanguageModifyModal: definitions['language']['iso_code'] | null = null;
-
-	let selectedRowIds: any = [];
+	// as entered in the search bar
+	$: searchQuery = '';
 
 	/**
 	 * Calculates the progress based on number of reviewed translations.
@@ -54,38 +57,46 @@
 			});
 		return result;
 	}
-	function rows() {
-		return $projectStore.data?.languages.map((language) => ({
-			id: language.iso_code,
-			name: language.iso_code,
-			words: numWords(language.iso_code),
-			progress: languageProgress(language.iso_code)
-		}));
-	}
+
+	const headers = [
+		{ key: 'isoCode', value: 'Language' },
+		{ key: 'progress', value: 'Progress' },
+		{ key: 'words', value: 'Words' },
+		{ key: 'actions', empty: true }
+	];
+
+	// rows needs to be reactive. Otherwise, the rows do not update
+	// when projectStore.data changes or the search query
+	$: rows = () => {
+		let languages = $projectStore.data?.languages ?? [];
+		if (searchQuery !== '') {
+			languages = languages.filter((language) =>
+				ISO6391.getName(language.iso_code).toLowerCase().startsWith(searchQuery.toLowerCase())
+			);
+		}
+		// sorted alphabetically
+		return languages
+			.map((language) => ({
+				id: language.iso_code,
+				isoCode: language.iso_code,
+				words: numWords(language.iso_code),
+				progress: languageProgress(language.iso_code),
+				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_language_iso,
+				languageObject: language
+			}))
+			.sort((a, b) => ISO6391.getName(a.isoCode).localeCompare(ISO6391.getName(b.isoCode)));
+	};
 </script>
 
 <h1>Languages</h1>
 <p class="text-gray-600 mt-1 mb-3">Your project's languages.</p>
 
-<DataTable
-	batchSelection
-	bind:selectedRowIds
-	headers={[
-		{ key: 'name', value: 'Language' },
-		{ key: 'words', value: 'Words' },
-		{ key: 'progress', value: 'Progress' },
-		{ key: 'settings', empty: true }
-	]}
-	rows={rows()}
->
+<DataTable {headers} rows={rows()}>
 	<Toolbar>
 		<!-- Yes, the cancel button should be red too but haven't found a way to do so. -->
-		<ToolbarBatchActions class="bg-danger">
-			<Button icon={Delete16} kind="danger">Delete</Button>
-		</ToolbarBatchActions>
 		<ToolbarContent>
-			<ToolbarSearch />
-			<Button on:click={() => (showAddLanguageModal = true)}>Add language</Button>
+			<ToolbarSearch bind:value={searchQuery} />
+			<Button on:click={() => (createLanguageModal.show = true)}>Add language</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span slot="cell-header" let:header>
@@ -101,7 +112,7 @@
 		{/if}
 	</span>
 	<span slot="cell" let:row let:cell>
-		{#if cell.key === 'name'}
+		{#if cell.key === 'isoCode'}
 			<div class="flex items-center space-x-2">
 				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
 				<Tag>{cell.value}</Tag>
@@ -111,16 +122,34 @@
 			</div>
 		{:else if cell.key === 'progress'}
 			<ProgressBar value={cell.value} max={100} helperText={cell.value.toFixed() + '%'} />
-		{:else if cell.key === 'settings'}
-			<Button
-				kind="ghost"
-				icon={Settings16}
-				iconDescription="Settings"
-				on:click={() => {
-					selectedLanguageModifyModal = row.id;
-					showModifyLanguageModal = true;
-				}}
-			/>
+		{:else if cell.key === 'actions'}
+			<row class="flex-shrink">
+				{#if row.isDefaultLanguage === false}
+					<Button
+						kind="ghost"
+						icon={Save16}
+						iconDescription="Set as default language"
+						color="green"
+						on:click={() => {
+							setDefaultLanguageModal.language = row.languageObject;
+							setDefaultLanguageModal.show = true;
+						}}
+					/>
+				{:else}
+					<!-- ugly trick to align the delete button if the language is the default -->
+					<div class="w-12" />
+				{/if}
+				<Button
+					kind="danger-ghost"
+					disabled={row.isDefaultLanguage}
+					icon={Delete16}
+					iconDescription="Delete language"
+					on:click={() => {
+						deleteLanguageModal.language = row.languageObject;
+						deleteLanguageModal.show = true;
+					}}
+				/>
+			</row>
 		{:else}
 			{cell.value}
 		{/if}
@@ -130,26 +159,37 @@
 	<PaginationNav total={1} class="bottom" />
 </div>
 
-{#if showModifyLanguageModal && selectedLanguageModifyModal}
-	<LanguageModal
-		open={showModifyLanguageModal}
-		primaryButtonDisabled={true}
-		languageIso={selectedLanguageModifyModal}
-		heading="Edit language"
+<CreateLanguageModal
+	bind:open={createLanguageModal.show}
+	on:close={() => {
+		createLanguageModal.show = false;
+	}}
+/>
+
+{#if setDefaultLanguageModal.language}
+	<SetDefaultLanguageModal
+		bind:open={setDefaultLanguageModal.show}
+		language={setDefaultLanguageModal.language}
 		on:close={() => {
-			showModifyLanguageModal = false;
-			selectedLanguageModifyModal = null;
+			setDefaultLanguageModal.show = false;
+			// not setting language to undefined to animate
+			// the model disappering which would be prevented
+			// by a sudden removal of the modal html element
+			// through the if statement
 		}}
 	/>
-{:else if showAddLanguageModal}
-	<LanguageModal
-		open={showAddLanguageModal}
-		primaryButtonDisabled={true}
-		languageIso=""
-		heading="Add language"
+{/if}
+
+{#if deleteLanguageModal.language}
+	<DeleteLanguageModal
+		bind:open={deleteLanguageModal.show}
+		language={deleteLanguageModal.language}
 		on:close={() => {
-			showAddLanguageModal = false;
-			selectedLanguageModifyModal = null;
+			deleteLanguageModal.show = false;
+			// not setting language to undefined to animate
+			// the model disappering which would be prevented
+			// by a sudden removal of the modal html element
+			// through the if statement
 		}}
 	/>
 {/if}
