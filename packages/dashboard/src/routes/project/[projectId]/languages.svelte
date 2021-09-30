@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { definitions } from '@inlang/database';
+	import type { definitions } from '@inlang/database';
 	import {
 		Button,
 		DataTable,
@@ -136,6 +136,10 @@
 		primaryButtonDisabled={true}
 		languageIso={selectedLanguageModifyModal}
 		heading="Edit language"
+		on:close={() => {
+			showModifyLanguageModal = false;
+			selectedLanguageModifyModal = null;
+		}}
 	/>
 {:else if showAddLanguageModal}
 	<LanguageModal
@@ -143,5 +147,9 @@
 		primaryButtonDisabled={true}
 		languageIso=""
 		heading="Add language"
+		on:close={() => {
+			showAddLanguageModal = false;
+			selectedLanguageModifyModal = null;
+		}}
 	/>
 {/if}
