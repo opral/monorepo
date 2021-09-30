@@ -9,14 +9,14 @@ export function testReadProjs() {
 
 export async function test_getJson() {
     let sb = newSupabase()
-    let u = await login(sb)
+    let u = await login(sb, "")
     // u.then(x => getData(sb, x.id))
     let jsonStr = getData(sb, u.id)
     return jsonStr
 }
 
 /** http apis  */
-function newSupabase() {
+export function newSupabase() {
 
     // Create a single supabase client for interacting with your database
     let sb = createClient(
@@ -28,30 +28,30 @@ function newSupabase() {
 
 // https://supabase.io/docs/reference/javascript/select
 async function getData(sb: SupabaseClient, loggedInUserId: string) {
-    // const rr = sb.from("where userid=1").select("json")
     // userid => permissions=>projects=>id of translations
-    // const r = await sb.from('cities').select()
-    // const loggedInUserId = 'd0714948'
-    let { data, error } = await sb.from('users').select('user_id, name').eq('user_id', loggedInUserId)
+    let { data, error } = await sb.from('user').select('user_id, name').eq('user_id', loggedInUserId)
     return data
 }
 
+async function writeData(sb: SupabaseClient, loggedInUserId: string, json: String) {
+    // userid => permissions=>projects=>id of translations
+    // let { data, error } = await sb.from('user').select('user_id, name').eq('user_id', loggedInUserId)
 
-
+    // sb.from("").upsert("", "")
+    let { data, error } = await sb.from('messages').upsert({ id: 3 })
+    // return data
+}
 
 // todo : how to auth?
-async function login(sb: SupabaseClient) {
-    let { user, session, error } = await sb.auth.signIn({
+async function login(sb: SupabaseClient, jwt: string) {
+    let x = await sb.auth.api.getUser(jwt)
+    let user = x.user
+    /* let { user, session, error } = await sb.auth.signIn({
         email: 'example@email.com',
         password: 'example-password',
-    })
+    }) */
     // user.id
     // sb.auth.api.getUserByCookie("")
     // user.
     return user
-}
-
-/* from db table to json */
-function table2json() {
-
 }
