@@ -394,7 +394,7 @@ export interface paths {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
-          owner_id?: parameters["rowFilter.project.owner_id"];
+          organization_id?: parameters["rowFilter.project.organization_id"];
           default_language_iso?: parameters["rowFilter.project.default_language_iso"];
           created_at?: parameters["rowFilter.project.created_at"];
           /** Filtering Columns */
@@ -450,7 +450,7 @@ export interface paths {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
-          owner_id?: parameters["rowFilter.project.owner_id"];
+          organization_id?: parameters["rowFilter.project.organization_id"];
           default_language_iso?: parameters["rowFilter.project.default_language_iso"];
           created_at?: parameters["rowFilter.project.created_at"];
         };
@@ -470,7 +470,7 @@ export interface paths {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
-          owner_id?: parameters["rowFilter.project.owner_id"];
+          organization_id?: parameters["rowFilter.project.organization_id"];
           default_language_iso?: parameters["rowFilter.project.default_language_iso"];
           created_at?: parameters["rowFilter.project.created_at"];
         };
@@ -939,7 +939,7 @@ export interface definitions {
      * Note:
      * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
      */
-    owner_id: string;
+    organization_id: string;
     default_language_iso:
       | "ab"
       | "aa"
@@ -1385,7 +1385,7 @@ export interface parameters {
   "rowFilter.project.id": string;
   "rowFilter.project.api_key": string;
   "rowFilter.project.name": string;
-  "rowFilter.project.owner_id": string;
+  "rowFilter.project.organization_id": string;
   "rowFilter.project.default_language_iso": string;
   "rowFilter.project.created_at": string;
   /** translation */

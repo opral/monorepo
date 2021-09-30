@@ -1,7 +1,7 @@
 datasource db {
   provider = "postgresql"
   // localhost database.
-  url      = "postgres://postgres:postgres@localhost:5432/postgres"
+  url      = "postgresql://postgres:developmentdevelopment@db.cqriunspsjhvrvcazqri.supabase.co:5432/postgres"
   //! production database
   // url      = env("PRODUCTION_DATABASE_URL")
 }
@@ -41,8 +41,8 @@ model project {
   id                   String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
   api_key              String       @unique
   name                 String
-  owner_id             String       @db.Uuid
-  owner                organization @relation(fields: [owner_id], references: [id])
+  organization_id      String       @db.Uuid
+  organization         organization @relation(fields: [organization_id], references: [id])
   /// the default language must be included in `languages`
   default_language_iso iso_639_1
   keys                 key[]

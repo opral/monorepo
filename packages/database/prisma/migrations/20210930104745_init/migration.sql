@@ -33,7 +33,7 @@ CREATE TABLE "project" (
     "id" UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
     "api_key" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "owner_id" UUID NOT NULL,
+    "organization_id" UUID NOT NULL,
     "default_language_iso" "iso_639_1" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -87,7 +87,7 @@ ALTER TABLE "member" ADD CONSTRAINT "member_organization_id_fkey" FOREIGN KEY ("
 ALTER TABLE "member" ADD CONSTRAINT "member_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "project" ADD CONSTRAINT "project_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "project" ADD CONSTRAINT "project_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "language" ADD CONSTRAINT "language_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
