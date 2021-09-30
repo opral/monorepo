@@ -1,11 +1,13 @@
 <script lang="ts">
 	import UserAvatar32 from 'carbon-icons-svelte/lib/UserAvatar32';
 	import User24 from 'carbon-icons-svelte/lib/User24';
-	import Password24 from 'carbon-icons-svelte/lib/Password24';
-	import Logout24 from 'carbon-icons-svelte/lib/Logout24';
+	import Password32 from 'carbon-icons-svelte/lib/Password32';
+	import Logout32 from 'carbon-icons-svelte/lib/Logout32';
+	import white from 'carbon-components-svelte/css/white.css';
 	import {
 		Header,
 		HeaderNav,
+		HeaderPanelLinks,
 		HeaderNavItem,
 		HeaderAction,
 		HeaderPanelLink,
@@ -13,8 +15,8 @@
 		Content,
 		HeaderUtilities
 	} from 'carbon-components-svelte';
-  // export let avatar:
-  export let username:string; 
+	// export let avatar:
+	export let username: string;
 	let isSideNavOpen = false;
 </script>
 
@@ -22,20 +24,49 @@
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>
-
 	<HeaderNav>
 		<HeaderNavItem href="/" text="Projects" />
 		<HeaderNavItem href="/" text="Organizations" />
 	</HeaderNav>
-	<HeaderUtilities class ="h-40">
-		<HeaderAction icon={User24} text={username}>
-			<HeaderPanelLink href="/"> Account </HeaderPanelLink>
-			<HeaderPanelLink href="/"> Access tokens</HeaderPanelLink>
-			<HeaderPanelLink href="/">Log out</HeaderPanelLink>
+
+	<HeaderUtilities>
+		<HeaderAction icon={User24} text={username} class="bx--header__global">
+			<div class="bx--header-panel--expanded bx-switcher__item:nth-child(1)">
+				<HeaderPanelLinks>
+					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+						><div class="inline-flex">
+							<UserAvatar32 class="mr-4 -mt-1" />Account
+						</div></HeaderPanelLink
+					>
+					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+						><div class="inline-flex mb-4">
+							<Password32 class="mr-4 -mt-0.5" />Access tokens
+						</div></HeaderPanelLink
+					>
+					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+						><div class="inline-flex"><Logout32 class="mr-4 -mt-1" /> Log out</div></HeaderPanelLink
+					>
+				</HeaderPanelLinks>
+			</div>
 		</HeaderAction>
-</HeaderUtilities> 
+	</HeaderUtilities>
 </Header>
 
-<Content>
-	
-</Content>
+<Content />
+
+<style>
+	:global(.bx--header-panel--expanded) {
+		width: 180px;
+		height: 120px;
+	}
+	:global(.bx--switcher__item:nth-child(1)) {
+		margin-top: 0px;
+	}
+	:global(.bx--switcher__item) {
+		height: 40px;
+	}
+	:global(.bx--header__global) {
+		justify-content:center;
+		width: 160px;
+	}
+</style>
