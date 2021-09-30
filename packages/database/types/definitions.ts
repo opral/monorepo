@@ -18,8 +18,8 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
-          key?: parameters["rowFilter.key.key"];
-          locale?: parameters["rowFilter.key.locale"];
+          name?: parameters["rowFilter.key.name"];
+          description?: parameters["rowFilter.key.description"];
           created_at?: parameters["rowFilter.key.created_at"];
           /** Filtering Columns */
           select?: parameters["select"];
@@ -73,8 +73,8 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
-          key?: parameters["rowFilter.key.key"];
-          locale?: parameters["rowFilter.key.locale"];
+          name?: parameters["rowFilter.key.name"];
+          description?: parameters["rowFilter.key.description"];
           created_at?: parameters["rowFilter.key.created_at"];
         };
         header: {
@@ -92,13 +92,103 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
-          key?: parameters["rowFilter.key.key"];
-          locale?: parameters["rowFilter.key.locale"];
+          name?: parameters["rowFilter.key.name"];
+          description?: parameters["rowFilter.key.description"];
           created_at?: parameters["rowFilter.key.created_at"];
         };
         body: {
           /** key */
           key?: definitions["key"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
+  "/language": {
+    get: {
+      parameters: {
+        query: {
+          iso_code?: parameters["rowFilter.language.iso_code"];
+          project_id?: parameters["rowFilter.language.project_id"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["language"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** language */
+          language?: definitions["language"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          iso_code?: parameters["rowFilter.language.iso_code"];
+          project_id?: parameters["rowFilter.language.project_id"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          iso_code?: parameters["rowFilter.language.iso_code"];
+          project_id?: parameters["rowFilter.language.project_id"];
+        };
+        body: {
+          /** language */
+          language?: definitions["language"];
         };
         header: {
           /** Preference */
@@ -303,11 +393,10 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
-          created_at?: parameters["rowFilter.project.created_at"];
-          default_locale?: parameters["rowFilter.project.default_locale"];
-          locales?: parameters["rowFilter.project.locales"];
           name?: parameters["rowFilter.project.name"];
           owner_id?: parameters["rowFilter.project.owner_id"];
+          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          created_at?: parameters["rowFilter.project.created_at"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -360,11 +449,10 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
-          created_at?: parameters["rowFilter.project.created_at"];
-          default_locale?: parameters["rowFilter.project.default_locale"];
-          locales?: parameters["rowFilter.project.locales"];
           name?: parameters["rowFilter.project.name"];
           owner_id?: parameters["rowFilter.project.owner_id"];
+          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          created_at?: parameters["rowFilter.project.created_at"];
         };
         header: {
           /** Preference */
@@ -381,11 +469,10 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.project.id"];
           api_key?: parameters["rowFilter.project.api_key"];
-          created_at?: parameters["rowFilter.project.created_at"];
-          default_locale?: parameters["rowFilter.project.default_locale"];
-          locales?: parameters["rowFilter.project.locales"];
           name?: parameters["rowFilter.project.name"];
           owner_id?: parameters["rowFilter.project.owner_id"];
+          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          created_at?: parameters["rowFilter.project.created_at"];
         };
         body: {
           /** project */
@@ -408,7 +495,8 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          locale?: parameters["rowFilter.translation.locale"];
+          language_iso?: parameters["rowFilter.translation.language_iso"];
+          is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
           /** Filtering Columns */
@@ -463,7 +551,8 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          locale?: parameters["rowFilter.translation.locale"];
+          language_iso?: parameters["rowFilter.translation.language_iso"];
+          is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
         };
@@ -482,7 +571,8 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          locale?: parameters["rowFilter.translation.locale"];
+          language_iso?: parameters["rowFilter.translation.language_iso"];
+          is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
         };
@@ -508,7 +598,6 @@ export interface paths {
           id?: parameters["rowFilter.user.id"];
           email?: parameters["rowFilter.user.email"];
           created_at?: parameters["rowFilter.user.created_at"];
-          name?: parameters["rowFilter.user.name"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -562,7 +651,6 @@ export interface paths {
           id?: parameters["rowFilter.user.id"];
           email?: parameters["rowFilter.user.email"];
           created_at?: parameters["rowFilter.user.created_at"];
-          name?: parameters["rowFilter.user.name"];
         };
         header: {
           /** Preference */
@@ -580,7 +668,6 @@ export interface paths {
           id?: parameters["rowFilter.user.id"];
           email?: parameters["rowFilter.user.email"];
           created_at?: parameters["rowFilter.user.created_at"];
-          name?: parameters["rowFilter.user.name"];
         };
         body: {
           /** user */
@@ -611,9 +698,206 @@ export interface definitions {
      * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
      */
     project_id: string;
-    key: string;
-    locale: string;
+    name: string;
+    description?: string;
     created_at: string;
+  };
+  language: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    iso_code:
+      | "ab"
+      | "aa"
+      | "af"
+      | "ak"
+      | "sq"
+      | "am"
+      | "ar"
+      | "an"
+      | "hy"
+      | "as"
+      | "av"
+      | "ae"
+      | "ay"
+      | "az"
+      | "bm"
+      | "ba"
+      | "eu"
+      | "be"
+      | "bn"
+      | "bh"
+      | "bi"
+      | "bs"
+      | "br"
+      | "bg"
+      | "my"
+      | "ca"
+      | "km"
+      | "ch"
+      | "ce"
+      | "ny"
+      | "zh"
+      | "cu"
+      | "cv"
+      | "kw"
+      | "co"
+      | "cr"
+      | "hr"
+      | "cs"
+      | "da"
+      | "dv"
+      | "nl"
+      | "dz"
+      | "en"
+      | "eo"
+      | "et"
+      | "ee"
+      | "fo"
+      | "fj"
+      | "fi"
+      | "fr"
+      | "ff"
+      | "gd"
+      | "gl"
+      | "lg"
+      | "ka"
+      | "de"
+      | "ki"
+      | "el"
+      | "kl"
+      | "gn"
+      | "gu"
+      | "ht"
+      | "ha"
+      | "he"
+      | "hz"
+      | "hi"
+      | "ho"
+      | "hu"
+      | "is"
+      | "io"
+      | "ig"
+      | "id"
+      | "ia"
+      | "ie"
+      | "iu"
+      | "ik"
+      | "ga"
+      | "it"
+      | "ja"
+      | "jv"
+      | "kn"
+      | "kr"
+      | "ks"
+      | "kk"
+      | "rw"
+      | "kv"
+      | "kg"
+      | "ko"
+      | "kj"
+      | "ku"
+      | "ky"
+      | "lo"
+      | "la"
+      | "lv"
+      | "lb"
+      | "li"
+      | "ln"
+      | "lt"
+      | "lu"
+      | "mk"
+      | "mg"
+      | "ms"
+      | "ml"
+      | "mt"
+      | "gv"
+      | "mi"
+      | "mr"
+      | "mh"
+      | "ro"
+      | "mn"
+      | "na"
+      | "nv"
+      | "nd"
+      | "ng"
+      | "ne"
+      | "se"
+      | "no"
+      | "nb"
+      | "nn"
+      | "ii"
+      | "oc"
+      | "oj"
+      | "or"
+      | "om"
+      | "os"
+      | "pi"
+      | "pa"
+      | "ps"
+      | "fa"
+      | "pl"
+      | "pt"
+      | "qu"
+      | "rm"
+      | "rn"
+      | "ru"
+      | "sm"
+      | "sg"
+      | "sa"
+      | "sc"
+      | "sr"
+      | "sn"
+      | "sd"
+      | "si"
+      | "sk"
+      | "sl"
+      | "so"
+      | "st"
+      | "nr"
+      | "es"
+      | "su"
+      | "sw"
+      | "ss"
+      | "sv"
+      | "tl"
+      | "ty"
+      | "tg"
+      | "ta"
+      | "tt"
+      | "te"
+      | "th"
+      | "bo"
+      | "ti"
+      | "to"
+      | "ts"
+      | "tn"
+      | "tr"
+      | "tk"
+      | "tw"
+      | "ug"
+      | "uk"
+      | "ur"
+      | "uz"
+      | "ve"
+      | "vi"
+      | "vo"
+      | "wa"
+      | "cy"
+      | "fy"
+      | "wo"
+      | "xh"
+      | "yi"
+      | "yo"
+      | "za"
+      | "zu";
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
+     */
+    project_id: string;
   };
   member: {
     /**
@@ -650,15 +934,198 @@ export interface definitions {
      */
     id: string;
     api_key: string;
-    created_at: string;
-    default_locale: string;
-    locales: string;
     name: string;
     /**
      * Note:
      * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
      */
     owner_id: string;
+    default_language_iso:
+      | "ab"
+      | "aa"
+      | "af"
+      | "ak"
+      | "sq"
+      | "am"
+      | "ar"
+      | "an"
+      | "hy"
+      | "as"
+      | "av"
+      | "ae"
+      | "ay"
+      | "az"
+      | "bm"
+      | "ba"
+      | "eu"
+      | "be"
+      | "bn"
+      | "bh"
+      | "bi"
+      | "bs"
+      | "br"
+      | "bg"
+      | "my"
+      | "ca"
+      | "km"
+      | "ch"
+      | "ce"
+      | "ny"
+      | "zh"
+      | "cu"
+      | "cv"
+      | "kw"
+      | "co"
+      | "cr"
+      | "hr"
+      | "cs"
+      | "da"
+      | "dv"
+      | "nl"
+      | "dz"
+      | "en"
+      | "eo"
+      | "et"
+      | "ee"
+      | "fo"
+      | "fj"
+      | "fi"
+      | "fr"
+      | "ff"
+      | "gd"
+      | "gl"
+      | "lg"
+      | "ka"
+      | "de"
+      | "ki"
+      | "el"
+      | "kl"
+      | "gn"
+      | "gu"
+      | "ht"
+      | "ha"
+      | "he"
+      | "hz"
+      | "hi"
+      | "ho"
+      | "hu"
+      | "is"
+      | "io"
+      | "ig"
+      | "id"
+      | "ia"
+      | "ie"
+      | "iu"
+      | "ik"
+      | "ga"
+      | "it"
+      | "ja"
+      | "jv"
+      | "kn"
+      | "kr"
+      | "ks"
+      | "kk"
+      | "rw"
+      | "kv"
+      | "kg"
+      | "ko"
+      | "kj"
+      | "ku"
+      | "ky"
+      | "lo"
+      | "la"
+      | "lv"
+      | "lb"
+      | "li"
+      | "ln"
+      | "lt"
+      | "lu"
+      | "mk"
+      | "mg"
+      | "ms"
+      | "ml"
+      | "mt"
+      | "gv"
+      | "mi"
+      | "mr"
+      | "mh"
+      | "ro"
+      | "mn"
+      | "na"
+      | "nv"
+      | "nd"
+      | "ng"
+      | "ne"
+      | "se"
+      | "no"
+      | "nb"
+      | "nn"
+      | "ii"
+      | "oc"
+      | "oj"
+      | "or"
+      | "om"
+      | "os"
+      | "pi"
+      | "pa"
+      | "ps"
+      | "fa"
+      | "pl"
+      | "pt"
+      | "qu"
+      | "rm"
+      | "rn"
+      | "ru"
+      | "sm"
+      | "sg"
+      | "sa"
+      | "sc"
+      | "sr"
+      | "sn"
+      | "sd"
+      | "si"
+      | "sk"
+      | "sl"
+      | "so"
+      | "st"
+      | "nr"
+      | "es"
+      | "su"
+      | "sw"
+      | "ss"
+      | "sv"
+      | "tl"
+      | "ty"
+      | "tg"
+      | "ta"
+      | "tt"
+      | "te"
+      | "th"
+      | "bo"
+      | "ti"
+      | "to"
+      | "ts"
+      | "tn"
+      | "tr"
+      | "tk"
+      | "tw"
+      | "ug"
+      | "uk"
+      | "ur"
+      | "uz"
+      | "ve"
+      | "vi"
+      | "vo"
+      | "wa"
+      | "cy"
+      | "fy"
+      | "wo"
+      | "xh"
+      | "yi"
+      | "yo"
+      | "za"
+      | "zu";
+    created_at: string;
   };
   translation: {
     /**
@@ -671,7 +1138,192 @@ export interface definitions {
      * This is a Foreign Key to `key.id`.<fk table='key' column='id'/>
      */
     key_id: number;
-    locale: string;
+    language_iso:
+      | "ab"
+      | "aa"
+      | "af"
+      | "ak"
+      | "sq"
+      | "am"
+      | "ar"
+      | "an"
+      | "hy"
+      | "as"
+      | "av"
+      | "ae"
+      | "ay"
+      | "az"
+      | "bm"
+      | "ba"
+      | "eu"
+      | "be"
+      | "bn"
+      | "bh"
+      | "bi"
+      | "bs"
+      | "br"
+      | "bg"
+      | "my"
+      | "ca"
+      | "km"
+      | "ch"
+      | "ce"
+      | "ny"
+      | "zh"
+      | "cu"
+      | "cv"
+      | "kw"
+      | "co"
+      | "cr"
+      | "hr"
+      | "cs"
+      | "da"
+      | "dv"
+      | "nl"
+      | "dz"
+      | "en"
+      | "eo"
+      | "et"
+      | "ee"
+      | "fo"
+      | "fj"
+      | "fi"
+      | "fr"
+      | "ff"
+      | "gd"
+      | "gl"
+      | "lg"
+      | "ka"
+      | "de"
+      | "ki"
+      | "el"
+      | "kl"
+      | "gn"
+      | "gu"
+      | "ht"
+      | "ha"
+      | "he"
+      | "hz"
+      | "hi"
+      | "ho"
+      | "hu"
+      | "is"
+      | "io"
+      | "ig"
+      | "id"
+      | "ia"
+      | "ie"
+      | "iu"
+      | "ik"
+      | "ga"
+      | "it"
+      | "ja"
+      | "jv"
+      | "kn"
+      | "kr"
+      | "ks"
+      | "kk"
+      | "rw"
+      | "kv"
+      | "kg"
+      | "ko"
+      | "kj"
+      | "ku"
+      | "ky"
+      | "lo"
+      | "la"
+      | "lv"
+      | "lb"
+      | "li"
+      | "ln"
+      | "lt"
+      | "lu"
+      | "mk"
+      | "mg"
+      | "ms"
+      | "ml"
+      | "mt"
+      | "gv"
+      | "mi"
+      | "mr"
+      | "mh"
+      | "ro"
+      | "mn"
+      | "na"
+      | "nv"
+      | "nd"
+      | "ng"
+      | "ne"
+      | "se"
+      | "no"
+      | "nb"
+      | "nn"
+      | "ii"
+      | "oc"
+      | "oj"
+      | "or"
+      | "om"
+      | "os"
+      | "pi"
+      | "pa"
+      | "ps"
+      | "fa"
+      | "pl"
+      | "pt"
+      | "qu"
+      | "rm"
+      | "rn"
+      | "ru"
+      | "sm"
+      | "sg"
+      | "sa"
+      | "sc"
+      | "sr"
+      | "sn"
+      | "sd"
+      | "si"
+      | "sk"
+      | "sl"
+      | "so"
+      | "st"
+      | "nr"
+      | "es"
+      | "su"
+      | "sw"
+      | "ss"
+      | "sv"
+      | "tl"
+      | "ty"
+      | "tg"
+      | "ta"
+      | "tt"
+      | "te"
+      | "th"
+      | "bo"
+      | "ti"
+      | "to"
+      | "ts"
+      | "tn"
+      | "tr"
+      | "tk"
+      | "tw"
+      | "ug"
+      | "uk"
+      | "ur"
+      | "uz"
+      | "ve"
+      | "vi"
+      | "vo"
+      | "wa"
+      | "cy"
+      | "fy"
+      | "wo"
+      | "xh"
+      | "yi"
+      | "yo"
+      | "za"
+      | "zu";
+    is_reviewed: boolean;
     text: string;
     created_at: string;
   };
@@ -683,7 +1335,6 @@ export interface definitions {
     id: string;
     email: string;
     created_at: string;
-    name: string;
   };
 }
 
@@ -712,9 +1363,13 @@ export interface parameters {
   "body.key": definitions["key"];
   "rowFilter.key.id": string;
   "rowFilter.key.project_id": string;
-  "rowFilter.key.key": string;
-  "rowFilter.key.locale": string;
+  "rowFilter.key.name": string;
+  "rowFilter.key.description": string;
   "rowFilter.key.created_at": string;
+  /** language */
+  "body.language": definitions["language"];
+  "rowFilter.language.iso_code": string;
+  "rowFilter.language.project_id": string;
   /** member */
   "body.member": definitions["member"];
   "rowFilter.member.organization_id": string;
@@ -729,16 +1384,16 @@ export interface parameters {
   "body.project": definitions["project"];
   "rowFilter.project.id": string;
   "rowFilter.project.api_key": string;
-  "rowFilter.project.created_at": string;
-  "rowFilter.project.default_locale": string;
-  "rowFilter.project.locales": string;
   "rowFilter.project.name": string;
   "rowFilter.project.owner_id": string;
+  "rowFilter.project.default_language_iso": string;
+  "rowFilter.project.created_at": string;
   /** translation */
   "body.translation": definitions["translation"];
   "rowFilter.translation.id": string;
   "rowFilter.translation.key_id": string;
-  "rowFilter.translation.locale": string;
+  "rowFilter.translation.language_iso": string;
+  "rowFilter.translation.is_reviewed": string;
   "rowFilter.translation.text": string;
   "rowFilter.translation.created_at": string;
   /** user */
@@ -746,7 +1401,6 @@ export interface parameters {
   "rowFilter.user.id": string;
   "rowFilter.user.email": string;
   "rowFilter.user.created_at": string;
-  "rowFilter.user.name": string;
 }
 
 export interface operations {}

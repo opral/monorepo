@@ -1,9 +1,12 @@
 # Run the app (dashboard) locally
 
 0. get the env file from @samuelstroschein
-1. `npm install`
-2. `npm run dev`
-3. Open [localhost:3000](http://localhost:3000)
+1. open the `/database` directory in another terminal. 
+   and run `supabase start`
+2. in database run `npx prisma migrate dev` (if conflict: yes, delete all data)
+2. in dashboard: `npm install`
+3. in dashboard: `npm run dev`
+4. Open [localhost:3000](http://localhost:3000)
 
 ## Structure of the app
 

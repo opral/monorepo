@@ -10,7 +10,8 @@
 The `ANON_API_KEY` can be found in `/.supbase/docker/docker-compose.yaml`.  
 In case that an error occurs -> https://github.com/supabase/cli/issues/33
 
-`npx openapi-typescript http://localhost:8000/rest/v1/\?apikey\=<ANON_API_KEY> --output types/definitions.ts`
+- `npx openapi-typescript http://localhost:8000/rest/v1/\?apikey\=<ANON_API_KEY> --output types/definitions.ts`
+- with current anon key `http://localhost:8000/rest/v1/\?apikey\=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts`
 
 # Stopping the local database
 

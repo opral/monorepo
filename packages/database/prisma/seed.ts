@@ -1,46 +1,75 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-    const createManyOrganizations = await prisma.organization.createMany({
-        data: [
-            {id: 0, name: "Foo" }
-        ]
-    });
-    const createManyUsers = await prisma.user.createMany({
-        data: [
-            { id: 0, name: "Bob", email: "bob@inlang.dev", organization_id: 0, isAdmin: true },
-            { id: 1, name: "Caroline", email: "caroline@inlang.dev", organization_id: 0, isAdmin: false }
-        ]
-    });
-    const createManyProjects = await prisma.project.createMany({
-        data: [
-            { id: 0, api_key: "myapikey", name: "inlang app", owner_id: 0, default_locale: "en", locales: "de, da, fr" }
-        ]
-    });
-    const createManyPermissions = await prisma.permission.createMany({
-        data: [
-            { organization_id: 0, project_id: 0, user_id: 0 },
-            { organization_id: 0, project_id: 0, user_id: 1 }
-        ]
-    });
-    const createManyKeys = await prisma.key.createMany({
-        data: [
-            { id: 0, project_id: 0, key: "Welcome", locale: "en" },
-            { id: 1, project_id: 0, key: "About", locale: "en"},
-            { id: 2, project_id: 0, key: "log in", locale: "en" },
-            { id: 3, project_id: 0, key: "sign up", locale: "en" },
-            { id: 4, project_id: 0, key: "more information", locale: "en"}
-        ]
-    });
-    const createManyTranslations = await prisma.translation.createMany({
-        data: [
-            { id: 0, key_id: 0, locale: "da", translated_text: "Velkommen" },
-            { id: 1, key_id: 1, locale: "da", translated_text: "Om" },
-            { id: 2, key_id: 0, locale: "de", translated_text: "Wilkommen"}
-        ]
-    });
+  await prisma.organization.create({
+    data: {
+      name: "Acne Inc",
+      admin: {
+        create: { email: "dev@inlang.dev" },
+      },
+      projects: {
+        create: {
+          name: "dev-project",
+          api_key: "32j2f0onanf39-0001-9rj31nfwqm0-d0m02das",
+          default_language_iso: "en",
+          languages: {
+            createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
+          },
+          keys: {
+            create: [
+              {
+                name: "example.hello",
+                translations: {
+                  create: [
+                    {
+                      language_iso: "en",
+                      text: "Hello World",
+                    },
+                    {
+                      language_iso: "de",
+                      text: "Hallo Welt",
+                      is_reviewed: false,
+                    },
+                  ],
+                },
+              },
+              {
+                name: "welcome.first",
+                translations: {
+                  create: [
+                    {
+                      language_iso: "en",
+                      text: "We welcome you to our platform.",
+                      is_reviewed: true,
+                    },
+                    {
+                      language_iso: "de",
+                      text: "Willkommen zu unserer Platform",
+                      is_reviewed: true,
+                    },
+                  ],
+                },
+              },
+              {
+                name: "button.confirm",
+                translations: {
+                  create: [
+                    { language_iso: "en", text: "Confirm", is_reviewed: true },
+                    {
+                      language_iso: "de",
+                      text: "Bestätigen",
+                      is_reviewed: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
 }
 
 main();
