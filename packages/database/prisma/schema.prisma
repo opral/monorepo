@@ -22,7 +22,6 @@ model organization {
 
 model user {
   id         String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
-  name       String
   email      String         @unique
   admin_of   organization[] @relation("admin")
   member_of  member[]
