@@ -4,6 +4,7 @@ const config = {
 	theme: {
 		extend: {
 			// color matching IBM Carbon Colors
+			// https://www.carbondesignsystem.com/guidelines/color/usage/
 			colors: {
 				danger: '#da1e28',
 				'success-high-contrast': '#42be65',
