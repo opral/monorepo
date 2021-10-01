@@ -58,7 +58,8 @@
 		"ts-jest": "^27.0.4",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.0.0",
-		"typescript": "^4.4.3"
+		"typescript": "^4.4.3",
+		"@inlang/database": "file:../database"
 	},
 	"type": "module",
 	"dependencies": {

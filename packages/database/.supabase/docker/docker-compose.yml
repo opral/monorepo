@@ -1,4 +1,4 @@
-version: '3.6'
+version: "3.6"
 services:
   kong:
     container_name: supabase-kong
@@ -23,14 +23,14 @@ services:
       API_EXTERNAL_URL: http://localhost:8000
       GOTRUE_API_HOST: auth
       PORT: 9999
-      GOTRUE_DISABLE_SIGNUP: 'false'
+      GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_SITE_URL: http://localhost:8000
       GOTRUE_SMTP_HOST: mail
       GOTRUE_SMTP_PORT: 2500
       GOTRUE_SMTP_USER: GOTRUE_SMTP_USER
       GOTRUE_SMTP_PASS: GOTRUE_SMTP_PASS
       GOTRUE_SMTP_ADMIN_EMAIL: admin@email.com
-      GOTRUE_MAILER_AUTOCONFIRM: 'false'
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
       GOTRUE_MAILER_SUBJECTS_CONFIRMATION: Confirm Your Signup
       GOTRUE_MAILER_SUBJECTS_INVITE: You have been invited
       GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: Your Magic Link
@@ -70,7 +70,7 @@ services:
       PORT: 4000
       HOSTNAME: localhost
       # Disable JWT Auth locally. The JWT_SECRET will be ignored.
-      SECURE_CHANNELS: 'false'
+      SECURE_CHANNELS: "false"
       JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
   storage:
     image: supabase/storage-api:v0.9.1
@@ -85,7 +85,7 @@ services:
       POSTGREST_URL: http://rest:3000
       PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres?sslmode=disable
-      PGOPTIONS: '-c search_path=storage'
+      PGOPTIONS: "-c search_path=storage"
       FILE_SIZE_LIMIT: 52428800
       REGION: us-east-1 # region where your bucket is located
       GLOBAL_S3_BUCKET: supa-storage-testing # name of s3 bucket where you want to store objects
