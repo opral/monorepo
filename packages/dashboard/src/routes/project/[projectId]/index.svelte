@@ -32,15 +32,18 @@
 	<grid class="grid-cols-2 gap-10">
 		<column class="space-y-1">
 			<h3>Progress</h3>
-			{#each languages as language}
-				<span class="mr-8" />
-				<div class="font-bold text-base">{language.iso_code}</div>
-				<ProgressBar value={20} />
-				<div class="mt-4">
-					<a href="/" class="text-blue-700">Show all untranslated</a>
-					<a href="/" class="ml-24 text-blue-700">Show changed in last 7 days</a>
-				</div>
-			{/each}
+			<column class="space-y-4">
+				{#each languages as language}
+					<div>
+						<p class="font-bold text-base">{language.iso_code}</p>
+						<ProgressBar value={20} helperText="24%" />
+						<row class="justify-between">
+							<a href="/" class="text-blue-700">Show all un-reviewed translations</a>
+							<!-- <a href="/" class="text-blue-700">Show changed in last 7 days</a> -->
+						</row>
+					</div>
+				{/each}
+			</column>
 			<PaginationNav
 				total={$projectStore.data?.translations.length ?? 0}
 				shown={pageSize}
@@ -49,18 +52,16 @@
 		</column>
 		<column class="space-y-1">
 			<h3>Statistics</h3>
-			<div class="flex">
-				<div>
-					<div>
-						<div class="text-lg text-gray-500">Words</div>
-						<div class="text-lg">{noWords}</div>
-					</div>
-				</div>
-				<div class="ml-40">
+			<row class="justify-between max-w-xs">
+				<column>
+					<div class="text-lg text-gray-500">Words</div>
+					<div class="text-lg">{noWords}</div>
+				</column>
+				<column>
 					<div class="text-lg text-gray-500">Characters</div>
 					<div class="text-lg">{noCharacters}</div>
-				</div>
-			</div>
+				</column>
+			</row>
 		</column>
 	</grid>
 </section>
