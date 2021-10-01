@@ -4,7 +4,6 @@
 import program from 'commander'
 import { testReadProjs, test_getJson } from './api'
 
-import { orderPizza } from './index'
 
 /** binary entry  */
 

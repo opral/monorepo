@@ -7,7 +7,7 @@
     "typescript"
   ],
   "license": "MIT",
-  "main": "./dist/index.js",
+  "main": "./dist/bin.js",
   "bin": "./dist/bin.js",
   "files": [
     "dist/**/*",
