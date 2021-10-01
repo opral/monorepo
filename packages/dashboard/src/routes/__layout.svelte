@@ -3,11 +3,13 @@
 -->
 <script lang="ts" context="module">
 	import '../app.postcss';
+	// import { auth } from '$lib/services/auth';
 	import { auth } from '$lib/services/auth';
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
 	import { upsertUser } from '$lib/services/database';
+	import Navbar from '$lib/layout/navbar.svelte';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
@@ -43,4 +45,5 @@
 	}
 </script>
 
+<Navbar username="test" />
 <slot />

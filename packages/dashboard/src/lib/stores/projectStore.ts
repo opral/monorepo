@@ -1,4 +1,4 @@
-import { definitions } from '@inlang/database';
+import type { definitions } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';

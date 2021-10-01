@@ -2,9 +2,9 @@
 
 0. Make sure that Docker Compose [is installed](https://docs.docker.com/compose/install/) and running with elevated privileges.
 1. If not installed, install the [`supabase` cli](https://supabase.io/docs/guides/local-development).
-2. `supabase start` (can take multiple minutes)
-3. `npx prisma db push`
-4. (`npx prisma db seed` seeds the database)
+1. `supabase start` (can take multiple minutes)
+1. `npx prisma db push`
+1. (`npx prisma db seed` seeds the database)
 
 # Generating types
 
@@ -33,4 +33,9 @@ but can be invoked manually with:
 
 0. Update schema.prisma file with updates
 1. Run `npx prisma format`
-2. Run `npx migrate dev`
+1. Run `npx migrate dev`
+
+# Init database triggers
+
+0. triggers can only be dropped from supabase dashboard (to drop reset database by deleting docker container)
+1. Run `npx ts-node prisma/initTriggers.ts`

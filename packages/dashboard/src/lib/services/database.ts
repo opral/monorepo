@@ -1,6 +1,6 @@
 import { createClient, User } from '@supabase/supabase-js';
 import type { DatabaseResponse } from '$lib/types/databaseResponse';
-import type { definitions } from '@inlang/database/types/definitions';
+import type { definitions } from '@inlang/database';
 
 const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string;
