@@ -1,5 +1,3 @@
-import Mock = jest.Mock;
-
 export const mockTranslations: MockTranslations = {
 	en: {
 		'some.key': 'Hello World',
@@ -27,7 +25,7 @@ export const mockProject: MockProject = {
 export const mockOrganization: MockOrganization = {
 	machineTranslations: 1234,
 	name: 'mockname'
-}
+};
 
 export type MockTranslations = {
 	[locale: string]:
@@ -50,4 +48,4 @@ export type MockProject = {
 export type MockOrganization = {
 	machineTranslations: number;
 	name: string;
-}
+};
