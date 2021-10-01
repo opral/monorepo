@@ -32,8 +32,6 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
 
-	export let name = '';
-
 	let showAddEntityModal = false;
 	let showMoreModal = false;
 
@@ -42,12 +40,12 @@
 
 	let isLoading = true;
 
-	let projects: DatabaseResponse<definitions['project'][]>;
+	let organizations: DatabaseResponse<definitions['organization'][]>;
 
 	onMount(async () => {
-		projects = await database.from<definitions['project']>('project').select('*');
-		if (projects.error) {
-			alert(projects.error);
+		organizations = await database.from<definitions['organization']>('organization').select('*');
+		if (organizations.error) {
+			alert(organizations.error);
 		}
 		isLoading = false;
 	});
@@ -55,24 +53,31 @@
 	const headers = [
 		{ key: 'name', value: 'Name' },
 		{ key: 'more', empty: true }
+		//{ key: 'admin', value: 'Admin email' },
+		//{ key: 'num_projects', value: 'Number of projects' },
+		//{ key: 'members', value: 'Members in ' }
 	];
 
 	// rows needs to be reactive. Otherwise, the rows do not update
 	// when projectStore.data changes or the search query
 	$: rows = () => {
-		if (isLoading || projects.error || projects.data === null) {
+		if (isLoading || organizations.error || organizations.data === null) {
 			return [];
 		}
-		// TODO: sort the projects alphabetically
-		return projects.data.map((project) => ({
-			id: project.id,
-			name: project.name
+		// TODO: sort the organizations alphabetically
+		return organizations.data.map((organization) => ({
+			id: organization.id,
+			name: organization.name
+			//admin: organization.admin.email,
+			//num_projects: organization.projects.length,
+			//members: organization.members.length
 		}));
 	};
 </script>
 
 <div class="pl-8 pr-8 pt-8">
-	<h1>Projects</h1>
+	<h1>Your Organizations</h1>
+	<p>Organizations help you to easily share and manage projects within your company.</p>
 </div>
 
 {#if isLoading}
@@ -86,8 +91,8 @@
 				<Button icon={Delete16} kind="danger">Delete</Button>
 			</ToolbarBatchActions>
 			<ToolbarContent>
-				<ToolbarSearch placeholder="Search project" />
-				<Button on:click={() => (showAddEntityModal = true)}>Add project</Button>
+				<ToolbarSearch placeholder="Search organization" />
+				<Button on:click={() => (showAddEntityModal = true)}>Add organization</Button>
 			</ToolbarContent>
 		</Toolbar>
 		<span slot="cell" let:row let:cell>
@@ -118,10 +123,14 @@
 </div>
 
 <!-- TODO -->
-
 {#if showAddEntityModal}
-	<ProjectModal open={true} primaryButtonDisabled={true} heading="Add project" projectName="" />
+	<OrganizationModal
+		open={true}
+		primaryButtonDisabled={true}
+		heading="Add project"
+		organizationName=""
+	/>
 {/if}
 
 <!-- Do we need a more button? -->
-{#if showMoreModal && name == 'organization'}{:else if showMoreModal && name == 'project'}{/if}
+<!-- {#if showMoreModal}{/if} -->
