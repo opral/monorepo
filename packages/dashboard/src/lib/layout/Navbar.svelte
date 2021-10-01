@@ -19,7 +19,7 @@
 	let isSideNavOpen = false;
 </script>
 
-<Header company="inlang" bind:isSideNavOpen>
+<Header company="inlang" bind:isSideNavOpen href="/">
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>
