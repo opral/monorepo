@@ -2,7 +2,7 @@
 
 // https://github.com/khalidx/typescript-cli-starter
 import program from 'commander'
-import { testReadProjs } from './api'
+import { testReadProjs, test_getJson } from './api'
 
 import { orderPizza } from './index'
 
@@ -18,7 +18,8 @@ function entry() {
     .parse(process.argv)
 
 
-  testReadProjs()
+  // testReadProjs()
+  test_getJson()
 }
 
 entry()

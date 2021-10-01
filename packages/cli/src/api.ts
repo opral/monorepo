@@ -1,5 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
+let tok = ""
+
 export function testReadProjs() {
     let sb = newSupabase()
     let r = sb.from("projects").select("*") // works with policy
@@ -9,9 +11,10 @@ export function testReadProjs() {
 
 export async function test_getJson() {
     let sb = newSupabase()
-    let u = await login(sb, "")
+    let u = await login(sb, tok)
+    console.log(u)
     // u.then(x => getData(sb, x.id))
-    let jsonStr = getData(sb, u.id)
+    let jsonStr = ""// getData(sb, u.id)
     return jsonStr
 }
 
@@ -19,9 +22,13 @@ export async function test_getJson() {
 export function newSupabase() {
 
     // Create a single supabase client for interacting with your database
+    // let sb = createClient(
+    //     'https://jxaqemnoabezizetynth.supabase.co',
+    //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMTcxNDM1NywiZXhwIjoxOTQ3MjkwMzU3fQ.aKT6sg-vJjnCUNitwy9HrIpl1rVAaP9NWIc9K7WFu6w')
+
     let sb = createClient(
-        'https://jxaqemnoabezizetynth.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMTcxNDM1NywiZXhwIjoxOTQ3MjkwMzU3fQ.aKT6sg-vJjnCUNitwy9HrIpl1rVAaP9NWIc9K7WFu6w')
+        'https://cqriunspsjhvrvcazqri.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMjk5MDU0NCwiZXhwIjoxOTQ4NTY2NTQ0fQ.liAxCtDEkgqyslW1xtN5lpcUJMROiUj1Rsar67eoW00')
     // login(sb)
     return sb
 }
@@ -45,8 +52,9 @@ async function writeData(sb: SupabaseClient, loggedInUserId: string, json: Strin
 
 // todo : how to auth?
 async function login(sb: SupabaseClient, jwt: string) {
-    let x = await sb.auth.api.getUser(jwt)
-    // let user = sb.auth.session().access_token
+    let x = await sb.auth.api.getUser(jwt) // token works
+    let user = x.user
+    console.log(x.error)
     // user
     /* let { user, session, error } = await sb.auth.signIn({
         email: 'example@email.com',
