@@ -10,6 +10,7 @@
 	import { goto } from '$app/navigation';
 	import { upsertUser } from '$lib/services/database';
 	import Navbar from '$lib/layout/navbar.svelte';
+	import { Content } from 'carbon-components-svelte';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
@@ -46,4 +47,6 @@
 </script>
 
 <Navbar username="test" />
-<slot />
+<Content>
+	<slot />
+</Content>

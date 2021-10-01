@@ -4,17 +4,20 @@
 	import Language24 from 'carbon-icons-svelte/lib/Language24';
 	import Import24 from 'carbon-icons-svelte/lib/DocumentImport24';
 	import Export24 from 'carbon-icons-svelte/lib/DocumentExport24';
-	import Activity24 from 'carbon-icons-svelte/lib/Activity24';
 	import Members24 from 'carbon-icons-svelte/lib/Events24';
-	import Integration24 from 'carbon-icons-svelte/lib/Integration24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
-	import { projectStore } from '$lib/stores/projectStore';
 </script>
 
-<SideNav isOpen={true} fixed class="w-48">
-	<p class="pt-2 pl-4 h-6 bx--side-nav__link-text text-xl">{$projectStore.data?.project.name}</p>
+<!-- 
+	SideNav is not suppoes to be used as static element. 
+	Therefore, the margins have to be adjusted to escape the `Content` 
+	component from the outter layout. That is achieved by setting negative margins.
+
+	Should be changed long term. 
+-->
+<SideNav isOpen={true} fixed class="w-64 static p-4 -ml-12 -mt-8">
 	<SideNavItems>
 		<SideNavLink icon={Home24} text="Home" href="/project/{$page.params.projectId}" />
 		<SideNavLink icon={Key24} text="Keys" href="/project/{$page.params.projectId}/keys" />
