@@ -10,15 +10,14 @@
 		Pagination,
 		Button
 	} from 'carbon-components-svelte';
-	import { PageNumber16 } from 'carbon-icons-svelte';
 
 	let currentPageNumber: number = 0;
 	export let pageSize = 10;
 	let organization: string;
 	export let noCharacters = 80;
 	export let noWords = 5;
-	export let activityLog = 'testactivity';
-
+	/* 	export let activityLog = 'testactivity';
+	 */
 	$: languages =
 		$projectStore.data?.languages.slice(
 			currentPageNumber * pageSize,
@@ -34,7 +33,7 @@
 	<div class="mt-32 mr-16 mb-0 flex align-middle flex-shrink-0">
 		<Breadcrumb>
 			<BreadcrumbItem href="/">Organizations</BreadcrumbItem>
-			<BreadcrumbItem href="/">{$projectStore.data?.project}</BreadcrumbItem>
+			<BreadcrumbItem href="/">organizationName</BreadcrumbItem>
 			<BreadcrumbItem href="/">{$projectStore.data?.project.name}</BreadcrumbItem>
 		</Breadcrumb>
 	</div>
@@ -89,10 +88,10 @@
 					<div class="text-lg">{noCharacters}</div>
 				</div>
 			</div>
-			<div>
+			<!-- 	<div>
 				<h3 class="mt-12">Activity</h3>
 				<div class="mt-8">{activityLog}</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </section>
