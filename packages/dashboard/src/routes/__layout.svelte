@@ -11,15 +11,15 @@
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
-		if (user) {
-			const { error } = await upsertUser({ user: user });
-			if (error) {
-				throw error;
-			}
-		}
+		// if (user) {
+		// 	const { error } = await upsertUser({ user: user });
+		// 	if (error) {
+		// 		throw error;
+		// 	}
+		// }
 		// includes('auth') ensures that subroutes within /auth do not
 		// lead to constant redirects
-		else if (user === null && page.path.includes('auth') === false) {
+		if (user === null && page.path.includes('auth') === false) {
 			return {
 				status: 302,
 				redirect: '/auth'
