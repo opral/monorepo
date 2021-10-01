@@ -14,17 +14,25 @@
 </script>
 
 <SideNav isOpen={true} fixed class="w-48">
-	<p class="pt-2 pl-14 h-8 bx--side-nav__link-text text-xl">{$projectStore.data?.project.name}</p>
+	<p class="pt-2 pl-4 h-6 bx--side-nav__link-text text-xl">{$projectStore.data?.project.name}</p>
 	<SideNavItems>
 		<SideNavLink icon={Home24} text="Home" href="/project/{$page.params.projectId}" />
-		<SideNavLink icon={Key24} text="Keys" href="/" />
-		<SideNavLink icon={Language24} text="Languages" href="{$page.params.projectId}/languages" />
-		<SideNavLink icon={Import24} text="Import" href="/" />
-		<SideNavLink icon={Export24} text="Export" href="/" />
+		<SideNavLink icon={Key24} text="Keys" href="/project/{$page.params.projectId}/keys" />
+		<SideNavLink
+			icon={Language24}
+			text="Languages"
+			href="/project/{$page.params.projectId}/languages"
+		/>
+		<SideNavLink icon={Import24} text="Import" href="/project/{$page.params.projectId}/import" />
+		<SideNavLink icon={Export24} text="Export" href="/project/{$page.params.projectId}/export" />
 		<!-- 	<SideNavLink icon={Activity24} text="Activity" href="/" /> -->
-		<SideNavLink icon={Members24} text="Members" href="/" />
+		<SideNavLink icon={Members24} text="Members" href="/project/{$page.params.projectId}/members" />
 		<!-- 		<SideNavLink icon={Integration24} text="Integrations" href="/" />
  -->
-		<SideNavLink icon={Settings24} text="Settings" href="/" />
+		<SideNavLink
+			icon={Settings24}
+			text="Settings"
+			href="/project/{$page.params.projectId}/settings"
+		/>
 	</SideNavItems>
 </SideNav>
