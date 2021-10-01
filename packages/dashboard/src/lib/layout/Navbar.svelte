@@ -3,7 +3,6 @@
 	import User24 from 'carbon-icons-svelte/lib/User24';
 	import Password32 from 'carbon-icons-svelte/lib/Password32';
 	import Logout32 from 'carbon-icons-svelte/lib/Logout32';
-	import white from 'carbon-components-svelte/css/white.css';
 	import {
 		Header,
 		HeaderNav,
@@ -25,15 +24,19 @@
 		<SkipToContent />
 	</div>
 	<HeaderNav>
-		<HeaderNavItem href="/" text="Projects" />
-		<HeaderNavItem href="/" text="Organizations" />
+		<HeaderNavItem href="/project" text="Projects" />
+		<HeaderNavItem href="/organization" text="Organizations" />
 	</HeaderNav>
 
 	<HeaderUtilities>
-		<HeaderAction text={username} icon={User24} class="bx--header__global place-items-center flex-row-reverse s-dYWHY7G7-e5q">
+		<HeaderAction
+			text={username}
+			icon={User24}
+			class="bx--header__global place-items-center flex-row-reverse"
+		>
 			<div class="bx--header-panel--expanded bx-switcher__item:nth-child(1)">
 				<HeaderPanelLinks>
-					<HeaderPanelLink href="/" class="{white}.bx--switcher__item" style="height: 40px"
+					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
 						><div class="inline-flex">
 							<UserAvatar32 class="mr-4 -mt-1" />Account
 						</div></HeaderPanelLink
@@ -65,10 +68,7 @@
 	:global(.bx--switcher__item) {
 		height: 40px;
 	}
-	:global(.s-dYWHY7G7-e5q){
-		width:160px;
+	:global(.s-dYWHY7G7-e5q) {
+		width: 160px;
 	}
-	
-	
-
 </style>

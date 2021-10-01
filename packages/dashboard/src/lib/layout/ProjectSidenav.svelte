@@ -10,16 +10,16 @@
 	import Integration24 from 'carbon-icons-svelte/lib/Integration24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
-
-	export let projectName = 'testproject';
+	import { page } from '$app/stores';
+	import { projectStore } from '$lib/stores/projectStore';
 </script>
 
 <SideNav isOpen={true} fixed class="w-48">
-	<p class="pt-2 pl-14 h-8 bx--side-nav__link-text text-xl">{projectName}</p>
+	<p class="pt-2 pl-14 h-8 bx--side-nav__link-text text-xl">{$projectStore.data?.project.name}</p>
 	<SideNavItems>
-		<SideNavLink icon={Home24} text="Home" href="/" />
+		<SideNavLink icon={Home24} text="Home" href="/project/{$page.params.projectId}" />
 		<SideNavLink icon={Key24} text="Keys" href="/" />
-		<SideNavLink icon={Language24} text="Languages" href="/" />
+		<SideNavLink icon={Language24} text="Languages" href="{$page.params.projectId}/languages" />
 		<SideNavLink icon={Edit24} text="Editor" href="/" />
 		<SideNavLink icon={Import24} text="Import" href="/" />
 		<SideNavLink icon={Export24} text="Export" href="/" />
