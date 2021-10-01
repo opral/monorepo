@@ -25,7 +25,8 @@ export const mockProject: MockProject = {
 };
 
 export const mockOrganization: MockOrganization = {
-	machineTranslations: 1234
+	machineTranslations: 1234,
+	name: 'mockname'
 }
 
 export type MockTranslations = {
@@ -48,4 +49,5 @@ export type MockProject = {
 
 export type MockOrganization = {
 	machineTranslations: number;
+	name: string;
 }
