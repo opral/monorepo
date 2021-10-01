@@ -30,10 +30,10 @@
 	</HeaderNav>
 
 	<HeaderUtilities>
-		<HeaderAction icon={User24} text={username} class="bx--header__global">
+		<HeaderAction text={username} icon={User24} class="bx--header__global place-items-center flex-row-reverse s-dYWHY7G7-e5q">
 			<div class="bx--header-panel--expanded bx-switcher__item:nth-child(1)">
 				<HeaderPanelLinks>
-					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+					<HeaderPanelLink href="/" class="{white}.bx--switcher__item" style="height: 40px"
 						><div class="inline-flex">
 							<UserAvatar32 class="mr-4 -mt-1" />Account
 						</div></HeaderPanelLink
@@ -65,8 +65,10 @@
 	:global(.bx--switcher__item) {
 		height: 40px;
 	}
-	:global(.bx--header__global) {
-		justify-content:center;
-		width: 160px;
+	:global(.s-dYWHY7G7-e5q){
+		width:160px;
 	}
+	
+	
+
 </style>
