@@ -1,7 +1,7 @@
 <script>
 	import { Button, Row } from 'carbon-components-svelte';
 	import { Search } from 'carbon-components-svelte';
-	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRIght16';
+	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRight16';
 	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
 	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import { Pagination } from 'carbon-components-svelte';

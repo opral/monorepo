@@ -28,7 +28,8 @@ export function newSupabase() {
 
 // https://supabase.io/docs/reference/javascript/select
 async function getData(sb: SupabaseClient, loggedInUserId: string) {
-    // userid => permissions=>projects=>id of translations
+    // old: userid => permissions=>projects=>id of translations
+    //new : user -> org -> project -> keys
     let { data, error } = await sb.from('user').select('user_id, name').eq('user_id', loggedInUserId)
     return data
 }
@@ -45,7 +46,8 @@ async function writeData(sb: SupabaseClient, loggedInUserId: string, json: Strin
 // todo : how to auth?
 async function login(sb: SupabaseClient, jwt: string) {
     let x = await sb.auth.api.getUser(jwt)
-    let user = x.user
+    // let user = sb.auth.session().access_token
+    // user
     /* let { user, session, error } = await sb.auth.signIn({
         email: 'example@email.com',
         password: 'example-password',
