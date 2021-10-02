@@ -29,6 +29,8 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@inlang/database": "file:../database",
+    "@inlang/dashboard": "file:../dashboard",
     "@supabase/supabase-js": "^1.23.0",
     "commander": "^2.20.0"
   }

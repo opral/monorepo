@@ -4,6 +4,9 @@
 import program from 'commander'
 import { testReadProjs, test_getJson } from './api'
 
+import type { definitions } from '@inlang/database'
+// import type { definitions } from '../../database/types/definitions'
+
 
 /** binary entry  */
 

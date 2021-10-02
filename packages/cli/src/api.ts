@@ -1,12 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-
+import type { definitions } from '@inlang/database'
+// import {}  from "@inlang/dashboard/src/lib/stores/projectStore"
+// import * as i from '@inlang/'
 let tok = ""
 
 export function testReadProjs() {
     let sb = newSupabase()
     let r = sb.from("projects").select("*") // works with policy
     r.then(x => console.log(x))
-
 }
 
 export async function test_getJson() {
@@ -16,6 +17,7 @@ export async function test_getJson() {
     // u.then(x => getData(sb, x.id))
     let jsonStr = ""// getData(sb, u.id)
     return jsonStr
+
 }
 
 /** http apis  */
@@ -34,11 +36,18 @@ export function newSupabase() {
 }
 
 // https://supabase.io/docs/reference/javascript/select
-async function getData(sb: SupabaseClient, loggedInUserId: string) {
+async function readData(sb: SupabaseClient, loggedInUserId: string) {
     // old: userid => permissions=>projects=>id of translations
     //new : user -> org -> project -> keys
-    let { data, error } = await sb.from('user').select('user_id, name').eq('user_id', loggedInUserId)
-    return data
+    // const x: definitions['user'] | null = null
+    // x.id
+    // let usersO = await sb.from<definitions['user']>('user').select('*').eq('id', loggedInUserId).single()
+    // usersO.data.
+    // let orgO = await sb.from<definitions['organization']>('organization').select('*').eq('id', loggedInUserId).single()
+    // just select all projs,non authed will not be returned
+    let progO = await sb.from<definitions['project']>('project').select('*').eq('id', loggedInUserId).single()
+    // sometable.user.id.
+    // return usersO.data
 }
 
 async function writeData(sb: SupabaseClient, loggedInUserId: string, json: String) {
