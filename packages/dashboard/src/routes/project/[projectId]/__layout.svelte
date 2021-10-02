@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { Loading, InlineNotification } from 'carbon-components-svelte';
+	import { Loading, InlineNotification, Content } from 'carbon-components-svelte';
+	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
 
 	// each time the projectId changes, the project store
 	// is updated automatically to either get the data for the project
@@ -17,8 +18,13 @@
 {#if $projectStore.data === null && $projectStore.error === null}
 	<Loading />
 {:else}
-	<slot />
-	{#if $projectStore.error}
-		<InlineNotification title="Error:">{$projectStore.error.message}</InlineNotification>
-	{/if}
+	<row>
+		<ProjectSidenav />
+		<div class="flex-grow">
+			<slot />
+		</div>
+		{#if $projectStore.error}
+			<InlineNotification title="Error:">{$projectStore.error.message}</InlineNotification>
+		{/if}
+	</row>
 {/if}
