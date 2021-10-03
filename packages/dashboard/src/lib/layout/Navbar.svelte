@@ -11,7 +11,6 @@
 		HeaderAction,
 		HeaderPanelLink,
 		SkipToContent,
-		Content,
 		HeaderUtilities
 	} from 'carbon-components-svelte';
 	// export let avatar:
@@ -54,8 +53,6 @@
 		</HeaderAction>
 	</HeaderUtilities>
 </Header>
-
-<Content />
 
 <style>
 	:global(.bx--header-panel--expanded) {

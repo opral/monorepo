@@ -18,11 +18,13 @@
 {#if $projectStore.data === null && $projectStore.error === null}
 	<Loading />
 {:else}
-	<ProjectSidenav />
-	<Content>
-		<slot />
+	<row>
+		<ProjectSidenav />
+		<div class="flex-grow">
+			<slot />
+		</div>
 		{#if $projectStore.error}
 			<InlineNotification title="Error:">{$projectStore.error.message}</InlineNotification>
 		{/if}
-	</Content>
+	</row>
 {/if}
