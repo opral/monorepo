@@ -1,31 +1,30 @@
 import { PrismaClient } from "@prisma/client";
 import { supabase, mockUser } from "../local.config";
+import { definitions } from "../types/definitions";
 /**
  * Creates a mock user if the user does not exist yet.
  *
- * If the user exists, the function 'fails' silently. Which
- * is not problematic since seeding only requires that the user
- * with the specific `mockEmail` exists.
  */
-async function signInOrLogin(): Promise<void> {
+async function signUpMockUser(): Promise<void> {
+  // fails silenently if user exists already -> does not matter
   const signUp = await supabase.auth.signUp({
     email: mockUser.email,
     password: mockUser.password,
   });
-  if (signUp.user?.id === null) {
-    const signIn = await supabase.auth.signIn({
-      email: mockUser.email,
-      password: mockUser.password,
-    });
-    console.log(signIn);
-  }
-  if (signUp.error) {
-    console.warn(signUp.error);
+  const signIn = await supabase.auth.signIn({
+    email: mockUser.email,
+    password: mockUser.password,
+  });
+  if (signIn.error || signIn.user === null) {
+    console.error(signIn.error);
+
+    throw signIn.error ?? "user is null";
   }
 }
 
 async function main() {
-  await signInOrLogin();
+  console.log("applying seeds...");
+  await signUpMockUser();
   const prisma = new PrismaClient();
   await prisma.organization.create({
     data: {
@@ -93,6 +92,9 @@ async function main() {
       },
     },
   });
+  console.log("✅ applied seeds");
+  console.log(`➡️ Mock user email: ${mockUser.email}`);
+  console.log(`➡️ Mock user password: ${mockUser.password}`);
 }
 
 main().catch((e) => console.error(e));

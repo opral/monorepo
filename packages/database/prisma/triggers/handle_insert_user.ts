@@ -13,9 +13,9 @@ const prisma = new PrismaClient();
  * is also created in public.users.
  *
  */
-export async function handle_supabase_auth() {
+export async function handle_insert_user() {
   await prisma.$queryRawUnsafe(`
-  create or replace function public.handle_supabase_auth() 
+  create or replace function public.handle_insert_user() 
     returns trigger as $$
     begin
         insert into public.user (id, email)
@@ -32,7 +32,7 @@ export async function handle_supabase_auth() {
     await prisma.$queryRawUnsafe(`
       create trigger on_auth_user_created
       after insert on auth.users
-      for each row execute procedure public.handle_supabase_auth();
+      for each row execute procedure public.handle_insert_user();
     `);
   } catch (e) {
     // trigger exists already
@@ -55,5 +55,5 @@ export async function handle_supabase_auth() {
   // END;
   // $$;
   // `);
-  console.log("✅ applied trigger: handle_supabase_auth");
+  console.log("✅ applied trigger: handle_insert_user");
 }

@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
  * for that organization needs to be inserted.
  *
  */
-export async function handle_new_organization() {
+export async function handle_insert_organization() {
   await prisma.$queryRawUnsafe(`
-  create or replace function public.handle_new_organization() 
+  create or replace function public.handle_insert_organization() 
     returns trigger as $$
     begin
         insert into public.member (organization_id, user_id, role)
@@ -24,7 +24,7 @@ export async function handle_new_organization() {
   await prisma.$queryRawUnsafe(`
       create trigger on_organization_created
       after insert on public.organization
-      for each row execute procedure public.handle_new_organization();
+      for each row execute procedure public.handle_insert_organization();
     `);
-  console.log("✅ applied trigger: handle_new_organization");
+  console.log("✅ applied trigger: handle_insert_organization");
 }

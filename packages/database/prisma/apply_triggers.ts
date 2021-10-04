@@ -1,9 +1,9 @@
-import { handle_new_organization } from "./triggers/handle_new_organization";
-import { handle_supabase_auth } from "./triggers/handle_supabase_auth";
+import { handle_insert_organization } from "./triggers/handle_insert_organization";
+import { handle_insert_user } from "./triggers/handle_insert_user";
 
 async function main() {
-  await handle_supabase_auth();
-  await handle_new_organization();
+  await handle_insert_user();
+  await handle_insert_organization();
 }
 
 main().catch((e) => console.error(e));

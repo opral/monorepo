@@ -1,49 +1,51 @@
-# Running the local database
+# Inlang Database
 
-0. Make sure that Docker Compose [is installed](https://docs.docker.com/compose/install/) and running with elevated privileges.
-1. `npm install`
-2. `npm run start`
+This directory contains the schema for inlang, a local runnable version of the database for
+development purposes and auto generated types for type safety.
 
-To stop:
-`npm run stop`
+## Scripts
 
-# Generating types
+> :bulb: Docker needs to be installed on your computer and be assigned more than 2GB of RAM (on Mac/Windows).
 
-`npm run generate-types`
+- `npm start`  
+  Starts a local instance of the database with seeding and application of triggers and policies (ready to consume in front-end etc.).
 
-Note that `generate-types` expects the anon key as given in the docker compose.
-The `ANON_API_KEY` can be found in `/.supbase/docker/docker-compose.yaml`.  
-In case that an error occurs -> https://github.com/supabase/cli/issues/33
+- `npm stop`  
+  Stops the local instance of the database and removes all containers.
 
-**Manually:**
+- `npm dashboard`  
+  Opens a dashboard/table viewer for the data.
+  _Is currently using prisma studio; waiting for supabase local dashboard._
 
-- `npx openapi-typescript http://localhost:8000/rest/v1/\?apikey\=<ANON_API_KEY> --output types/definitions.ts`
-- with current local anon key `http://localhost:8000/rest/v1/\?apikey\=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts`
+- `npm test`  
+  Runs all tests in the `/test` directory
 
-# Stopping the local database
+- `npm generate-types`  
+  Extracts the types from the SQL schema. The local instance of the database has to be running to succeed.
 
-`supabase stop`
+- `npm seed`  
+  Seeds the database.
 
-# Seed database
+- `npm create-migration`
 
-Should happen automatically with `npm run start`
-but can be invoked manually with:
+  > :warning: Do not use the underlying command "npx prisma db migrate" without the "--create--only" flag. It bricks the database, see [stackoverflow](https://stackoverflow.com/questions/67551593/supabase-client-permission-denied-for-schema-public)
 
-`npx prisma db seed`
+  Creates migration files based on differences in the `schema.prisma` file the previous migrations **but does not push the changes**.
 
-# View data
+- `npm push`
 
-`npx prisma studio`
+  > :warning: Do not use on production instance! Use `npm deploy-to-production` instead.
 
-*Hopefully, the supabase dashboard can be run locally.* 
+  Pushes/applies the current schema to the database without taking migrations into account. Great for development purposes, horrible for the production instance.
 
-# Migrating database
+- `npm apply-triggers`  
+  The triggers are not covered by SQL migration files/prisma and have to be applied separately.
 
-0. Update schema.prisma file with updates
-1. Run `npx prisma format`
-1. Run `npx migrate deploy`
+- `npn apply-policies`  
+  Policies are not covered by SQL migration files/prisma and have to be applied separately.
 
-# Init database triggers
+- `npm deploy-to-production`
 
-0. triggers can only be dropped from supabase dashboard (to drop reset database by deleting docker container)
-1. Run `npm run apply-triggers`
+  > :warning: Ensure that the database url in prisma.schema is pointing to the production instance. **DO NOT LEAK THE PRODUCTION DATABASE URL WITH A GIT COMMIT**
+
+  Applies the migrations, triggers and policies to the database instance as defined in the database url in schema.prisma
