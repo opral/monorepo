@@ -11,43 +11,48 @@ generator client {
 }
 
 model organization {
-  id            String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
-  name          String
-  projects      project[]
-  admin_user_id String    @db.Uuid
-  admin         user      @relation("admin", fields: [admin_user_id], references: [id])
-  members       member[]
-  created_at    DateTime  @default(now())
+  id                 String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name               String
+  projects           project[]
+  // the user id is benefitial to insert an admin membership to the user
+  // who created the organization. It defaults to the auth.uid() and has no relation
+  created_by_user_id String    @default(dbgenerated("auth.uid()")) @db.Uuid
+  members            member[]
+  created_at         DateTime  @default(now())
 }
 
 model user {
-  id         String         @id @db.Uuid
-  email      String         @unique
-  admin_of   organization[] @relation("admin")
-  member_of  member[]
-  created_at DateTime       @default(now())
+  id          String   @id @db.Uuid
+  email       String   @unique
+  memberships member[]
+  created_at  DateTime @default(now())
 }
 
 model member {
   organization_id String       @db.Uuid
-  organization    organization @relation(fields: [organization_id], references: [id])
+  organization    organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   user_id         String       @db.Uuid
-  user            user         @relation(fields: [user_id], references: [id])
+  user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role            member_role
 
   @@id([organization_id, user_id])
 }
 
+/// only admin for now
+enum member_role {
+  admin
+}
+
 model project {
-  id                   String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
-  api_key              String       @unique
-  name                 String
-  organization_id      String       @db.Uuid
-  organization         organization @relation(fields: [organization_id], references: [id])
-  /// the default language must be included in `languages`
-  default_language_iso iso_639_1
-  keys                 key[]
-  created_at           DateTime     @default(now())
-  languages            language[]
+  id               String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  api_key          String       @unique
+  name             String
+  organization_id  String       @db.Uuid
+  organization     organization @relation(fields: [organization_id], references: [id])
+  default_iso_code iso_639_1
+  keys             key[]
+  created_at       DateTime     @default(now())
+  languages        language[]
 }
 
 model language {
@@ -70,14 +75,15 @@ model key {
 }
 
 model translation {
-  id           Int       @id @default(autoincrement())
-  key_id       Int
-  key          key       @relation(fields: [key_id], references: [id], onDelete: Cascade)
-  language_iso iso_639_1
-  is_reviewed  Boolean   @default(false)
+  key_id      Int
+  key         key       @relation(fields: [key_id], references: [id], onDelete: Cascade)
+  iso_code    iso_639_1
+  is_reviewed Boolean   @default(false)
   /// Contains the translation -> "Hallo Welt"
-  text         String
-  created_at   DateTime  @default(now())
+  text        String
+  created_at  DateTime  @default(now())
+
+  @@id([key_id, iso_code])
 }
 
 enum iso_639_1 {

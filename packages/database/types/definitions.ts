@@ -207,6 +207,7 @@ export interface paths {
         query: {
           organization_id?: parameters["rowFilter.member.organization_id"];
           user_id?: parameters["rowFilter.member.user_id"];
+          role?: parameters["rowFilter.member.role"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -259,6 +260,7 @@ export interface paths {
         query: {
           organization_id?: parameters["rowFilter.member.organization_id"];
           user_id?: parameters["rowFilter.member.user_id"];
+          role?: parameters["rowFilter.member.role"];
         };
         header: {
           /** Preference */
@@ -275,6 +277,7 @@ export interface paths {
         query: {
           organization_id?: parameters["rowFilter.member.organization_id"];
           user_id?: parameters["rowFilter.member.user_id"];
+          role?: parameters["rowFilter.member.role"];
         };
         body: {
           /** member */
@@ -297,7 +300,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.organization.id"];
           name?: parameters["rowFilter.organization.name"];
-          admin_user_id?: parameters["rowFilter.organization.admin_user_id"];
+          created_by_user_id?: parameters["rowFilter.organization.created_by_user_id"];
           created_at?: parameters["rowFilter.organization.created_at"];
           /** Filtering Columns */
           select?: parameters["select"];
@@ -351,7 +354,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.organization.id"];
           name?: parameters["rowFilter.organization.name"];
-          admin_user_id?: parameters["rowFilter.organization.admin_user_id"];
+          created_by_user_id?: parameters["rowFilter.organization.created_by_user_id"];
           created_at?: parameters["rowFilter.organization.created_at"];
         };
         header: {
@@ -369,7 +372,7 @@ export interface paths {
         query: {
           id?: parameters["rowFilter.organization.id"];
           name?: parameters["rowFilter.organization.name"];
-          admin_user_id?: parameters["rowFilter.organization.admin_user_id"];
+          created_by_user_id?: parameters["rowFilter.organization.created_by_user_id"];
           created_at?: parameters["rowFilter.organization.created_at"];
         };
         body: {
@@ -395,7 +398,7 @@ export interface paths {
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
-          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          default_iso_code?: parameters["rowFilter.project.default_iso_code"];
           created_at?: parameters["rowFilter.project.created_at"];
           /** Filtering Columns */
           select?: parameters["select"];
@@ -451,7 +454,7 @@ export interface paths {
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
-          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          default_iso_code?: parameters["rowFilter.project.default_iso_code"];
           created_at?: parameters["rowFilter.project.created_at"];
         };
         header: {
@@ -471,7 +474,7 @@ export interface paths {
           api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
-          default_language_iso?: parameters["rowFilter.project.default_language_iso"];
+          default_iso_code?: parameters["rowFilter.project.default_iso_code"];
           created_at?: parameters["rowFilter.project.created_at"];
         };
         body: {
@@ -493,9 +496,8 @@ export interface paths {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          language_iso?: parameters["rowFilter.translation.language_iso"];
+          iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
@@ -549,9 +551,8 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          language_iso?: parameters["rowFilter.translation.language_iso"];
+          iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
@@ -569,9 +570,8 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.translation.id"];
           key_id?: parameters["rowFilter.translation.key_id"];
-          language_iso?: parameters["rowFilter.translation.language_iso"];
+          iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
           created_at?: parameters["rowFilter.translation.created_at"];
@@ -681,6 +681,40 @@ export interface paths {
       responses: {
         /** No Content */
         204: never;
+      };
+    };
+  };
+  "/rpc/handle_new_organization": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/handle_supabase_auth": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
       };
     };
   };
@@ -912,6 +946,7 @@ export interface definitions {
      * This is a Foreign Key to `user.id`.<fk table='user' column='id'/>
      */
     user_id: string;
+    role: "admin";
   };
   organization: {
     /**
@@ -920,11 +955,7 @@ export interface definitions {
      */
     id: string;
     name: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `user.id`.<fk table='user' column='id'/>
-     */
-    admin_user_id: string;
+    created_by_user_id: string;
     created_at: string;
   };
   project: {
@@ -940,7 +971,7 @@ export interface definitions {
      * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
      */
     organization_id: string;
-    default_language_iso:
+    default_iso_code:
       | "ab"
       | "aa"
       | "af"
@@ -1131,14 +1162,14 @@ export interface definitions {
     /**
      * Note:
      * This is a Primary Key.<pk/>
-     */
-    id: number;
-    /**
-     * Note:
      * This is a Foreign Key to `key.id`.<fk table='key' column='id'/>
      */
     key_id: number;
-    language_iso:
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    iso_code:
       | "ab"
       | "aa"
       | "af"
@@ -1374,11 +1405,12 @@ export interface parameters {
   "body.member": definitions["member"];
   "rowFilter.member.organization_id": string;
   "rowFilter.member.user_id": string;
+  "rowFilter.member.role": string;
   /** organization */
   "body.organization": definitions["organization"];
   "rowFilter.organization.id": string;
   "rowFilter.organization.name": string;
-  "rowFilter.organization.admin_user_id": string;
+  "rowFilter.organization.created_by_user_id": string;
   "rowFilter.organization.created_at": string;
   /** project */
   "body.project": definitions["project"];
@@ -1386,13 +1418,12 @@ export interface parameters {
   "rowFilter.project.api_key": string;
   "rowFilter.project.name": string;
   "rowFilter.project.organization_id": string;
-  "rowFilter.project.default_language_iso": string;
+  "rowFilter.project.default_iso_code": string;
   "rowFilter.project.created_at": string;
   /** translation */
   "body.translation": definitions["translation"];
-  "rowFilter.translation.id": string;
   "rowFilter.translation.key_id": string;
-  "rowFilter.translation.language_iso": string;
+  "rowFilter.translation.iso_code": string;
   "rowFilter.translation.is_reviewed": string;
   "rowFilter.translation.text": string;
   "rowFilter.translation.created_at": string;
