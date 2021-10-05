@@ -6,7 +6,7 @@ CREATE TYPE "iso_639_1" AS ENUM ('ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an',
 
 -- CreateTable
 CREATE TABLE "organization" (
-    "id" UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "created_by_user_id" UUID NOT NULL DEFAULT auth.uid(),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -34,7 +34,7 @@ CREATE TABLE "member" (
 
 -- CreateTable
 CREATE TABLE "project" (
-    "id" UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "api_key" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "organization_id" UUID NOT NULL,
@@ -54,24 +54,24 @@ CREATE TABLE "language" (
 
 -- CreateTable
 CREATE TABLE "key" (
-    "id" SERIAL NOT NULL,
     "project_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "key_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "key_pkey" PRIMARY KEY ("project_id","name")
 );
 
 -- CreateTable
 CREATE TABLE "translation" (
-    "key_id" INTEGER NOT NULL,
+    "key_name" TEXT NOT NULL,
+    "project_id" UUID NOT NULL,
     "iso_code" "iso_639_1" NOT NULL,
     "is_reviewed" BOOLEAN NOT NULL DEFAULT false,
     "text" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "translation_pkey" PRIMARY KEY ("key_id","iso_code")
+    CONSTRAINT "translation_pkey" PRIMARY KEY ("key_name","iso_code")
 );
 
 -- CreateIndex
@@ -96,4 +96,7 @@ ALTER TABLE "language" ADD CONSTRAINT "language_project_id_fkey" FOREIGN KEY ("p
 ALTER TABLE "key" ADD CONSTRAINT "key_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "translation" ADD CONSTRAINT "translation_key_id_fkey" FOREIGN KEY ("key_id") REFERENCES "key"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "translation" ADD CONSTRAINT "translation_key_name_project_id_fkey" FOREIGN KEY ("key_name", "project_id") REFERENCES "key"("name", "project_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "translation" ADD CONSTRAINT "translation_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
