@@ -5,8 +5,8 @@
   "type": "commonjs",
   "types": "./types/definitions.ts",
   "scripts": {
-    "start": "docker-compose --file ./supabase/docker/docker-compose.yml up -d && npm run push && echo \"checking if all docker container are running:\" && docker-compose --file ./supabase/docker/docker-compose.yml up -d && npm run seed",
-    "stop": "docker-compose --file ./supabase/docker/docker-compose.yml down",
+    "start": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && npm run push && echo \"checking if all docker container are running:\" && docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && npm run seed",
+    "stop": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
     "dashboard": "npx prisma studio",
     "test": "jest",
     "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts",
