@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
 let tok = process.env['inlang_KEY'] as string;
+
 export function testReadProjs() {
     let sb = newSupabase()
     let r = sb.from("projects").select("*") // works with policy
