@@ -21,6 +21,7 @@
 	import { mockOrganization, mockProject } from '$lib/mockData';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
+	import Project from '../project/index.svelte';
 
 	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRIght16';
 	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
@@ -34,11 +35,13 @@
 
 	let showAddEntityModal = false;
 	let showMoreModal = false;
+	let goToProject = false;
 
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
+	let selectedOrg: string | '' = '';
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 
@@ -95,7 +98,12 @@
 				<Button on:click={() => (showAddEntityModal = true)}>Add organization</Button>
 			</ToolbarContent>
 		</Toolbar>
-		<span slot="cell" let:row let:cell>
+		<span
+			slot="cell"
+			let:row
+			let:cell
+			on:click={() => ((selectedOrg = row.id.toString()), (goToProject = true))}
+		>
 			{#if cell.key === 'name'}
 				<div class="flex items-center space-x-2">
 					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
@@ -130,6 +138,10 @@
 		heading="Add project"
 		organizationName=""
 	/>
+{/if}
+
+{#if goToProject}
+	<Project selectedOrganization={selectedOrg} />
 {/if}
 
 <!-- Do we need a more button? -->

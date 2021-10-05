@@ -44,8 +44,16 @@
 
 	let projects: DatabaseResponse<definitions['project'][]>;
 
+	export let selectedOrganization: string | '' = '';
+
+	// load the projects of the selected organization
 	onMount(async () => {
-		projects = await database.from<definitions['project']>('project').select('*');
+		if (projects.error) {
+			alert(projects.error);
+		}
+		projects = await database
+			.from<definitions['project']>('project')
+			.select('organization_id==selectedOrganization');
 		if (projects.error) {
 			alert(projects.error);
 		}
@@ -120,7 +128,13 @@
 <!-- TODO -->
 
 {#if showAddEntityModal}
-	<ProjectModal open={true} primaryButtonDisabled={true} heading="Add project" projectName="" />
+	<ProjectModal
+		open={true}
+		primaryButtonDisabled={true}
+		heading="Add project"
+		projectName=""
+		organizationId="selectedOrganization"
+	/>
 {/if}
 
 <!-- Do we need a more button? -->
