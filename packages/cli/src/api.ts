@@ -2,8 +2,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
 // import {}  from "@inlang/dashboard/src/lib/stores/projectStore"
 // import * as i from '@inlang/'
-let tok = ""
-
+// let tok = ""
+let tok = process.env['inlang_KEY'] as string;
 export function testReadProjs() {
     let sb = newSupabase()
     let r = sb.from("projects").select("*") // works with policy
@@ -14,6 +14,8 @@ export async function test_getJson() {
     let sb = newSupabase()
     let u = await login(sb, tok)
     console.log(u)
+    const dbR = await dbReadTrans(sb)
+    console.log(dbR)
     // u.then(x => getData(sb, x.id))
     let jsonStr = ""// getData(sb, u.id)
     return jsonStr
@@ -36,7 +38,7 @@ export function newSupabase() {
 }
 
 // https://supabase.io/docs/reference/javascript/select
-async function readData(sb: SupabaseClient, loggedInUserId: string) {
+async function readData(sb: SupabaseClient, loggedInUserId: string, text: string) {
     // old: userid => permissions=>projects=>id of translations
     //new : user -> org -> project -> keys
     // const x: definitions['user'] | null = null
@@ -50,7 +52,7 @@ async function readData(sb: SupabaseClient, loggedInUserId: string) {
     // return usersO.data
 }
 
-async function writeData(sb: SupabaseClient, loggedInUserId: string, json: String) {
+async function writeData(sb: SupabaseClient, loggedInUserId: string, text: string, json: String) {
     // userid => permissions=>projects=>id of translations
     // let { data, error } = await sb.from('user').select('user_id, name').eq('user_id', loggedInUserId)
 
@@ -73,4 +75,67 @@ async function login(sb: SupabaseClient, jwt: string) {
     // sb.auth.api.getUserByCookie("")
     // user.
     return user
+}
+
+// json file format 
+type jsonFormat = { key_id: string, text: string }
+
+function db2json() {
+    let e1
+}
+
+async function dbReadTrans(sb: SupabaseClient) {
+    // project
+    let prj = (await sb
+        .from<definitions['project']>('project')
+        .select('*')).data
+
+    console.log("prjs : ", prj)
+
+    let r = prj?.flatMap(async x => {
+        let id = x.id
+        let trans = await sb
+            .from<definitions['key']>('key')
+            .select('*')
+            .match({ project_id: id }).then(keys => {
+                let translations = sb
+                    .from<definitions['translation']>('translation')
+                    .select('*')
+                    .in('key_id', keys.data?.map((key) => key.id) ?? [])
+
+                return translations
+            })
+
+        return trans.data
+    })
+    return r;
+}
+
+type dbGetArgs = {
+    projectId: definitions['project']['id'];
+};
+
+async function dbRead(sb: SupabaseClient, args: dbGetArgs) {
+    // project
+    const project = await sb
+        .from<definitions['project']>('project')
+        .select('*')
+        .match({ id: args.projectId })
+        .single();
+    // in-efficient to query three times but doesn't matter for now
+    const languages = await sb
+        .from<definitions['language']>('language')
+        .select('*')
+        .match({ project_id: args.projectId });
+
+    const keys = await sb
+        .from<definitions['key']>('key')
+        .select('*')
+        .match({ project_id: args.projectId });
+
+    const translations = await sb
+        .from<definitions['translation']>('translation')
+        .select('*')
+        .in('key_id', keys.data?.map((key) => key.id) ?? []);
+
 }
