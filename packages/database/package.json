@@ -1,22 +1,36 @@
 {
-  "name": "db",
+  "name": "@inlang/database",
   "version": "1.0.0",
-  "type": "module",
   "description": "",
-  "main": "index.js",
+  "type": "commonjs",
+  "types": "./types/definitions.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "docker compose --file ./supabase/docker/docker-compose.yml up -d && npm run push && echo \"checking if all docker container are running:\" && docker compose --file ./supabase/docker/docker-compose.yml up -d && npm run seed",
+    "stop": "docker compose --file ./supabase/docker/docker-compose.yml down",
+    "dashboard": "npx prisma studio",
+    "test": "jest",
+    "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts",
+    "seed": "npm run apply-triggers && npm run apply-policies && ts-node prisma/seed.ts",
+    "create-migration": "npx prisma migrate dev --create-only",
+    "push": "npx prisma db push",
+    "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
+    "apply-triggers": "ts-node prisma/apply_triggers.ts",
+    "apply-policies": "ts-node prisma/apply_policies.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@prisma/client": "^3.1.1",
+    "@supabase/supabase-js": "^1.23.0",
+    "@types/jest": "^27.0.1",
     "@types/node": "^16.10.1",
+    "jest": "^27.0.6",
+    "jest-esm-transformer": "^1.0.0",
+    "openapi-typescript": "^4.3.0",
     "prisma": "^3.1.1",
+    "ts-jest": "^27.0.4",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
-  },
-  "dependencies": {
-    "@prisma/client": "^3.1.1"
   }
 }

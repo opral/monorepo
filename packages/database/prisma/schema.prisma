@@ -1,78 +1,274 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // localhost database.
+  url      = "postgres://postgres:postgres@localhost:5432/postgres"
+  //! production database
+  // url      = env("PRODUCTION_DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-model Organization {
-  id          Int          @id @default(autoincrement())
-  name        String
-  projects    Project[]    @relation
-  users       User[]       @relation(name: "user")
-  permissions Permission[]
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+model organization {
+  id                 String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name               String
+  projects           project[]
+  // the user id is benefitial to insert an admin membership to the user
+  // who created the organization. It defaults to the auth.uid() and has no relation
+  created_by_user_id String    @default(dbgenerated("auth.uid()")) @db.Uuid
+  members            member[]
+  created_at         DateTime  @default(now())
 }
 
-model User {
-  id              Int           @id @default(autoincrement())
-  name            String
-  email           String        @unique
-  organization_id Int
-  organization    Organization  @relation("user", fields: [organization_id], references: [id])
-  isAdmin         Boolean
-  permissions     Permission[]
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
+model user {
+  id          String   @id @db.Uuid
+  email       String   @unique
+  memberships member[]
+  created_at  DateTime @default(now())
 }
 
-model Project {
-  id             Int          @id @default(autoincrement())
-  api_key        String       @unique
-  name           String
-  owner_id       Int
-  owner          Organization @relation(fields: [owner_id], references: [id])
-  default_locale String
-  locales        String
-  text_keys      Key[]
-  permissions    Permission[]
-  created_at     DateTime     @default(now())
-  updated_at     DateTime     @updatedAt
+model member {
+  organization_id String       @db.Uuid
+  organization    organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  user_id         String       @db.Uuid
+  user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role            member_role
+
+  @@id([organization_id, user_id])
 }
 
-model Permission {
-  organization_id Int
-  organization    Organization @relation(fields: [organization_id], references: [id])
-  project_id      Int
-  project         Project      @relation(fields: [project_id], references: [id])
-  user_id         Int
-  user            User         @relation(fields: [user_id], references: [id])
-  created_at      DateTime     @default(now())
-  updated_at      DateTime     @updatedAt
-
-  @@id([organization_id, project_id, user_id])
+/// only admin for now
+enum member_role {
+  admin
 }
 
-model Key {
+model project {
+  id               String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  api_key          String       @unique
+  name             String
+  organization_id  String       @db.Uuid
+  organization     organization @relation(fields: [organization_id], references: [id])
+  default_iso_code iso_639_1
+  keys             key[]
+  created_at       DateTime     @default(now())
+  languages        language[]
+}
+
+model language {
+  iso_code   iso_639_1
+  project_id String    @db.Uuid
+  project    project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@id([project_id, iso_code])
+}
+
+model key {
   id           Int           @id @default(autoincrement())
-  project_id   Int
-  project      Project       @relation(fields: [project_id], references: [id])
-  key          String
-  locale       String
-  translations Translation[]
+  project_id   String        @db.Uuid
+  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// The name of the key e.g. "example.hello"
+  name         String
+  description  String?
+  translations translation[]
   created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
 }
 
-model Translation {
-  id              Int      @id @default(autoincrement())
-  key_id          Int
-  key             Key      @relation(fields: [key_id], references: [id])
-  locale          String
-  translated_text String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+model translation {
+  key_id      Int
+  key         key       @relation(fields: [key_id], references: [id], onDelete: Cascade)
+  iso_code    iso_639_1
+  is_reviewed Boolean   @default(false)
+  /// Contains the translation -> "Hallo Welt"
+  text        String
+  created_at  DateTime  @default(now())
+
+  @@id([key_id, iso_code])
+}
+
+enum iso_639_1 {
+  ab
+  aa
+  af
+  ak
+  sq
+  am
+  ar
+  an
+  hy
+  as
+  av
+  ae
+  ay
+  az
+  bm
+  ba
+  eu
+  be
+  bn
+  bh
+  bi
+  bs
+  br
+  bg
+  my
+  ca
+  km
+  ch
+  ce
+  ny
+  zh
+  cu
+  cv
+  kw
+  co
+  cr
+  hr
+  cs
+  da
+  dv
+  nl
+  dz
+  en
+  eo
+  et
+  ee
+  fo
+  fj
+  fi
+  fr
+  ff
+  gd
+  gl
+  lg
+  ka
+  de
+  ki
+  el
+  kl
+  gn
+  gu
+  ht
+  ha
+  he
+  hz
+  hi
+  ho
+  hu
+  is
+  io
+  ig
+  id
+  ia
+  ie
+  iu
+  ik
+  ga
+  it
+  ja
+  jv
+  kn
+  kr
+  ks
+  kk
+  rw
+  kv
+  kg
+  ko
+  kj
+  ku
+  ky
+  lo
+  la
+  lv
+  lb
+  li
+  ln
+  lt
+  lu
+  mk
+  mg
+  ms
+  ml
+  mt
+  gv
+  mi
+  mr
+  mh
+  ro
+  mn
+  na
+  nv
+  nd
+  ng
+  ne
+  se
+  no
+  nb
+  nn
+  ii
+  oc
+  oj
+  or
+  om
+  os
+  pi
+  pa
+  ps
+  fa
+  pl
+  pt
+  qu
+  rm
+  rn
+  ru
+  sm
+  sg
+  sa
+  sc
+  sr
+  sn
+  sd
+  si
+  sk
+  sl
+  so
+  st
+  nr
+  es
+  su
+  sw
+  ss
+  sv
+  tl
+  ty
+  tg
+  ta
+  tt
+  te
+  th
+  bo
+  ti
+  to
+  ts
+  tn
+  tr
+  tk
+  tw
+  ug
+  uk
+  ur
+  uz
+  ve
+  vi
+  vo
+  wa
+  cy
+  fy
+  wo
+  xh
+  yi
+  yo
+  za
+  zu
 }

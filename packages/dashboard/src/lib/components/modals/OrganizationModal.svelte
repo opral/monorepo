@@ -4,12 +4,9 @@
 	export let open = false;
 	export let primaryButtonDisabled = false;
 
-	export let heading: 'Add language' | 'Edit language';
+	export let heading = 'Add organization';
 
-	// type needs to change to : Locale | ''
-	export let languageCode: string | '' = '';
-
-	// export let countryCode
+	export let organizationName: string | '' = '';
 </script>
 
 <Modal
@@ -26,11 +23,11 @@
 >
 	<Form>
 		<FormGroup>
-			<TextInput labelText="language code (ISO 639-1)" bind:value={languageCode} />
+			<TextInput labelText="Organization name" bind:value={organizationName} />
 		</FormGroup>
 		<FormGroup disabled>
-			<TextInput labelText="country code (ISO 3166-1 alpha-2)" placeholder="coming soon..." />
+			<TextInput labelText="some other information" />
 		</FormGroup>
-		<Checkbox labelText="Default language of project" />
+		<Checkbox labelText="checkbox" />
 	</Form>
 </Modal>

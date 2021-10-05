@@ -1,6 +1,9 @@
-<script lang="ts">
-	import CreateEntity from '$lib/components/CreateEntity.svelte';
+<!-- redirecting the user to the projects -->
+<script lang="ts" context="module">
+	export async function load() {
+		return {
+			status: 302,
+			redirect: '/project'
+		};
+	}
 </script>
-
-<CreateEntity title="Your projects" description="" name="project" />
-<!-- <CreateEntity title="Organizations" description="" name="organization" /> -->
