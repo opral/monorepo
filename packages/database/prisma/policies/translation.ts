@@ -16,8 +16,8 @@ export async function translation_set_policies() {
         CREATE POLICY "user all" ON public.translation
         FOR ALL
         USING (
-            key_id IN (
-                SELECT id FROM key
+            (key_name, project_id) IN (
+                SELECT name, project_id FROM key
             )
         );
     `);
