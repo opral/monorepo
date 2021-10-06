@@ -15,8 +15,25 @@ beforeEach(async () => {
 }); 
 
 describe("policies/organization", () => {
-  test("User can slecect on organization table", async () => {
+  test("User can select on own organization", async () => {
     const organizations = await supabase.from<definitions["organization"]>("organization").select();
     expect(organizations.data?.length).toBeGreaterThanOrEqual(1);
-  })
+  });
+  test("User can create new organization", async () => {
+    const organization = await supabase.from<definitions["organization"]>("organization")
+      .insert({
+        name: "inlang", 
+        created_by_user_id: supabase.auth.user()!.id
+      },
+      { 
+        returning: "minimal"
+      });
+      expect(organization.status).toEqual(201);
+  });
+  test("Owner can delete organization", async () => {
+    const organization = await supabase.from<definitions["organization"]>("organization")
+      .delete()
+      .match({name: "inlang", created_by_user_id: supabase.auth.user()!.id});
+      expect(organization.status).toEqual(200);
+  });
 })

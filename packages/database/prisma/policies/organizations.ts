@@ -34,5 +34,15 @@ export async function organization_set_policies() {
             created_by_user_id = auth.uid()
         );
     `);
+    await prisma.$queryRawUnsafe(`
+        DROP POLICY IF EXISTS "owner delete organization" on public.organization;
+    `);
+    await prisma.$queryRawUnsafe(`
+        CREATE POLICY "owner for all organization" on public.organization
+        FOR ALL
+        USING (
+            created_by_user_id = auth.uid()
+        );
+    `);
     console.log("✅ applied policies for: organization table");
 }
