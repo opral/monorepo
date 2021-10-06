@@ -13,8 +13,10 @@ export async function projects_set_policies() {
         DROP POLICY IF EXISTS user_get_own_admin_projects ON public.project;
     `);
     await prisma.$queryRawUnsafe(`
-        CREATE POLICY user_get_own_admin_projects ON public.project USING (
-            uid() IN (
+        CREATE POLICY user_get_own_admin_projects ON public.project 
+        FOR ALL
+        USING (
+            auth.uid() IN (
                 SELECT member.user_id
                 FROM member
                 WHERE member.organization_id = project.organization_id AND member.role = 'admin'
@@ -23,10 +25,10 @@ export async function projects_set_policies() {
     `);
     await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS user_get_own_projects ON public.project;
-    `)
+    `);
     await prisma.$queryRawUnsafe(`
-        CREATE POLICY user_get_own_projects ON public.project FOR 
-        SELECT 
+        CREATE POLICY user_get_own_projects ON public.project 
+        FOR SELECT 
             USING (
                 auth.uid() IN (
                     SELECT member.user_id

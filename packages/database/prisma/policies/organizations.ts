@@ -12,10 +12,12 @@ export async function organization_set_policies() {
     `);
     await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS user_get_own_organizations on public.organization;
-    `)
+    `);
     await prisma.$queryRawUnsafe(`
-        CREATE POLICY user_get_own_organizations ON public.organization USING (
-            uid() IN (
+        CREATE POLICY user_get_own_organizations ON public.organization 
+        FOR SELECT
+        USING (
+            auth.uid() IN (
                 SELECT member.user_id
                 FROM member
                 WHERE member.organization_id = organization.id
