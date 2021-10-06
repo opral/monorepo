@@ -13,10 +13,10 @@ beforeEach(async () => {
   }
   expect(login.user?.email).toEqual(mockUser.email);
 });
-
-describe("policies/project_admin", () => {
-  test("Admin can act on project", async () => {
-    const projects = await supabase.from<definitions["project"]>("project").select();
-    expect(projects.data?.length).toBeGreaterThanOrEqual(1);
+console.log("uid: " + supabase.auth.user());
+describe("policies/organization", () => {
+  test("User can slecect on organization table", async () => {
+    const organizations = await supabase.from<definitions["organization"]>("organization").select();
+    expect(organizations.data?.length).toBeGreaterThanOrEqual(1);
   })
 })
