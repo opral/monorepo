@@ -12,7 +12,7 @@ beforeEach(async () => {
     throw login.error;
   }
   expect(login.user?.email).toEqual(mockUser.email);
-});
+}); 
 
 describe("policies/organization", () => {
   test("User can slecect on organization table", async () => {
