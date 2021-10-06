@@ -1,27 +1,73 @@
 <script lang="ts">
-	import { Modal, Form, FormGroup, TextInput, Checkbox } from 'carbon-components-svelte';
+	import {
+		Modal,
+		Form,
+		FormGroup,
+		TextInput,
+		Checkbox,
+		Select,
+		SelectItem
+	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import ISO6391 from 'iso-639-1';
 
 	export let open = false;
-	export let primaryButtonDisabled = false;
+	//export let primaryButtonDisabled = false;
+	let isLoading = false;
 
 	export let heading = 'Add project';
 
 	export let projectName: string | '' = '';
 	export let organizationId: string | '' = '';
+	//export let iso_code: string | '' = '';
+
+	let organizations: DatabaseResponse<definitions['organization'][]>;
+	let languageIso: definitions['language']['iso_code'];
+
+	function makeApiKey(length: number) {
+		var result = '';
+		var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-';
+		var charactersLength = characters.length;
+		for (var i = 0; i < length; i++) {
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		}
+		return result;
+	}
+
+	$: languageExistsInProject = $projectStore.data?.languages
+		.map((language) => language.iso_code)
+		.includes(languageIso);
+
+	// input must be iso 639-1 and not be contained in project langauges already
+	$: isValidInput = ISO6391.validate(languageIso);
+
+	// load the projects of the selected organization
+	onMount(async () => {
+		organizations = await database.from<definitions['organization']>('organization').select();
+
+		if (organizations.error) {
+			alert(organizations.error);
+		}
+		isLoading = false;
+	});
 
 	async function handleConfirm() {
-		const create = await database
-			.from<definitions['project']>('project')
-			.insert({ name: projectName, organization_id: organizationId });
+		console.log(organizationId);
+		console.log(projectName);
+		const create = await database.from<definitions['project']>('project').insert({
+			api_key: makeApiKey(40), //randomstring.generate(40),
+			name: projectName,
+			organization_id: organizationId,
+			default_iso_code: languageIso
+		});
 		if (create.error) {
 			alert(create.error);
-		} else {
-			projectStore.getData({ projectId: $page.params.projectId });
+			console.log(create.error);
 		}
 		// automatically closing the modal but leave time to
 		// let the user read the result status of the action
@@ -31,6 +77,7 @@
 	}
 </script>
 
+<!-- {console.log(rows_organizations())} -->
 <Modal
 	bind:open
 	modalHeading={heading}
@@ -47,15 +94,41 @@
 		<FormGroup>
 			<TextInput labelText="Project name" bind:value={projectName} />
 		</FormGroup>
-		<!-- <FormGroup>
-			<TextInput
+
+		<FormGroup>
+			<!-- <Select
 				labelText="In which organization do you want to put the project? "
-				bind:value={organizationName}
-			/>
-		</FormGroup> -->
-		<FormGroup disabled>
+				bind:value={organizationId}
+			>
+				<SelectItem disabled hidden value="organization name" text="Choose an option" />
+				{#if organizations}
+					{#each organizations.data || [] as organization}
+						<SelectItem value={organization.id} text={organization.name} />
+					{/each}
+				{/if}
+			</Select> -->
+			<select bind:value={organizationId}>
+				{#if organizations}
+					{#each organizations.data || [] as organization}
+						<option value={organization.id}>
+							{organization.name}
+						</option>
+					{/each}
+				{/if}
+			</select>
+		</FormGroup>
+		<TextInput
+			labelText="language code (ISO 639-1)"
+			bind:value={languageIso}
+			invalid={isValidInput === false || languageExistsInProject}
+			invalidText={languageExistsInProject
+				? 'Language already exists in this project.'
+				: 'The code must be an ISO 639-1 code.'}
+		/>
+
+		<!-- <FormGroup disabled>
 			<TextInput labelText="some other information" />
 		</FormGroup>
-		<Checkbox labelText="checkbox" />
+		<Checkbox labelText="checkbox" /> -->
 	</Form>
 </Modal>

@@ -41,7 +41,7 @@
 	$: searchQuery = '';
 
 	let isLoading = true;
-	let selectedOrg: string | '' = '';
+	let selectedOrgId: string;
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 
@@ -102,7 +102,7 @@
 			slot="cell"
 			let:row
 			let:cell
-			on:click={() => ((selectedOrg = row.id.toString()), (goToProject = true))}
+			on:click={() => ((selectedOrgId = row.id), (goToProject = true))}
 		>
 			{#if cell.key === 'name'}
 				<div class="flex items-center space-x-2">
@@ -132,16 +132,7 @@
 
 <!-- TODO -->
 {#if showAddEntityModal}
-	<OrganizationModal
-		open={true}
-		primaryButtonDisabled={true}
-		heading="Add project"
-		organizationName=""
-	/>
-{/if}
-
-{#if goToProject}
-	<Project selectedOrganization={selectedOrg} />
+	<OrganizationModal open={true} heading="Add project" organizationName="" />
 {/if}
 
 <!-- Do we need a more button? -->

@@ -13,8 +13,6 @@
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 
-	export let primaryButtonDisabled = false;
-
 	export let heading = 'Add organization';
 
 	export let organizationName: string | '' = '';
@@ -22,7 +20,7 @@
 	async function handleConfirm() {
 		const create = await database
 			.from<definitions['organization']>('organization')
-			.insert({ name: organizationName, admin_user_id: auth.user()?.id });
+			.insert({ name: organizationName, created_by_user_id: auth.user()?.id });
 		if (create.error) {
 			alert(create.error);
 		} else {
@@ -52,9 +50,9 @@
 		<FormGroup>
 			<TextInput labelText="Organization name" bind:value={organizationName} />
 		</FormGroup>
-		<FormGroup disabled>
+		<!-- <FormGroup disabled>
 			<TextInput labelText="some other information" />
 		</FormGroup>
-		<Checkbox labelText="checkbox" />
+		<Checkbox labelText="checkbox" /> -->
 	</Form>
 </Modal>

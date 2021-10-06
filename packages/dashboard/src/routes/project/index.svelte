@@ -28,34 +28,37 @@
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
-	import type { definitions } from '@inlang/database/types/definitions';
+	import type { definitions } from '@inlang/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
+	import { goto } from '$app/navigation';
 
-	export let name = '';
+	//export let name = '';
 
-	let showAddEntityModal = false;
+	let showAddOrganizationModal = false;
+	let showAddProjectModal = false;
 	let showMoreModal = false;
 
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
+	let selectedOrgId: string | null = null;
+	let selectedProjId: string | null = null;
 
 	let projects: DatabaseResponse<definitions['project'][]>;
-
-	export let selectedOrganization: string | '' = '';
+	let organizations: DatabaseResponse<definitions['organization'][]>;
 
 	// load the projects of the selected organization
 	onMount(async () => {
+		organizations = await database.from<definitions['organization']>('organization').select();
+		projects = await database.from<definitions['project']>('project').select();
+
 		if (projects.error) {
 			alert(projects.error);
 		}
-		projects = await database
-			.from<definitions['project']>('project')
-			.select('organization_id==selectedOrganization');
-		if (projects.error) {
-			alert(projects.error);
+		if (organizations.error) {
+			alert(organizations.error);
 		}
 		isLoading = false;
 	});
@@ -65,77 +68,125 @@
 		{ key: 'more', empty: true }
 	];
 
-	// rows needs to be reactive. Otherwise, the rows do not update
-	// when projectStore.data changes or the search query
-	$: rows = () => {
+	$: rows_projects = () => {
 		if (isLoading || projects.error || projects.data === null) {
 			return [];
 		}
 		// TODO: sort the projects alphabetically
-		return projects.data.map((project) => ({
-			id: project.id,
-			name: project.name
+		return projects.data
+			.filter((project) => {
+				if (selectedOrgId) {
+					return project.organization_id === selectedOrgId;
+				}
+				return true;
+			})
+			.map((project) => ({
+				id: project.id,
+				name: project.name
+			}));
+	};
+
+	$: rows_organizations = () => {
+		if (isLoading || organizations.error || organizations.data === null) {
+			return [];
+		}
+		// TODO: sort the organizations alphabetically
+		return organizations.data.map((organization) => ({
+			id: organization.id,
+			name: organization.name
 		}));
 	};
 </script>
-
-<div class="pl-8 pr-8 pt-8">
-	<h1>Projects</h1>
-</div>
 
 {#if isLoading}
 	<Loading />
 {/if}
 
-<div class="p-8">
-	<DataTable {headers} rows={rows()}>
-		<Toolbar>
-			<ToolbarBatchActions class="bg-danger">
-				<Button icon={Delete16} kind="danger">Delete</Button>
-			</ToolbarBatchActions>
-			<ToolbarContent>
-				<ToolbarSearch placeholder="Search project" />
-				<Button on:click={() => (showAddEntityModal = true)}>Add project</Button>
-			</ToolbarContent>
-		</Toolbar>
-		<span slot="cell" let:row let:cell>
-			{#if cell.key === 'name'}
-				<div class="flex items-center space-x-2">
-					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
-					<p class="text-sm">{cell.value}</p>
-				</div>
-			{:else if cell.key === 'more'}
-				<Button
-					kind="ghost"
-					icon={OverflowMenuHorizontal32}
-					iconDescription="More"
-					on:click={() => {
-						// selectedShowMoreModal = row.id;
-						showMoreModal = true;
-					}}
-				/>
-			{:else}
-				{cell.value}
-			{/if}
-		</span>
-	</DataTable>
-</div>
-<!-- TODO: make pagination interactible -->
-<div class="pl-8 pr-8">
-	<Pagination totalItems={102} page={4} />
-</div>
+<grid class="grid-cols-2">
+	<div class="p-2">
+		<div class="pt-8 pb-8">
+			<h1>Your Organizations</h1>
+		</div>
+		<DataTable {headers} rows={rows_organizations()}>
+			<Toolbar>
+				<ToolbarBatchActions class="bg-danger">
+					<Button icon={Delete16} kind="danger">Delete</Button>
+				</ToolbarBatchActions>
+				<ToolbarContent>
+					<ToolbarSearch placeholder="Search organization" />
+					<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
+				</ToolbarContent>
+			</Toolbar>
+			<span slot="cell" let:row let:cell on:click={() => (selectedOrgId = row.id)}>
+				{#if cell.key === 'name'}
+					<div class="flex items-center space-x-2">
+						<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+						<p class="text-sm">{cell.value}</p>
+					</div>
+				{:else if cell.key === 'more'}
+					<Button
+						kind="ghost"
+						icon={OverflowMenuHorizontal32}
+						iconDescription="More"
+						on:click={() => {
+							// selectedShowMoreModal = row.id;
+							showMoreModal = true;
+						}}
+					/>
+				{:else}
+					{cell.value}
+				{/if}
+			</span>
+		</DataTable>
+	</div>
 
-<!-- TODO -->
+	<div class="p-2">
+		<div class="pt-8 pb-8">
+			<h1>Projects</h1>
+		</div>
+		<DataTable {headers} rows={rows_projects()}>
+			<Toolbar>
+				<ToolbarBatchActions class="bg-danger">
+					<Button icon={Delete16} kind="danger">Delete</Button>
+				</ToolbarBatchActions>
+				<ToolbarContent>
+					<ToolbarSearch placeholder="Search project" />
+					<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
+				</ToolbarContent>
+			</Toolbar>
+			<span slot="cell" let:row let:cell on:click={() => goto(`/project/${row.id}`)}>
+				{#if cell.key === 'name'}
+					<div class="flex items-center space-x-2">
+						<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+						<p class="text-sm">{cell.value}</p>
+					</div>
+				{:else if cell.key === 'more'}
+					<Button
+						kind="ghost"
+						icon={OverflowMenuHorizontal32}
+						iconDescription="More"
+						on:click={() => {
+							// selectedShowMoreModal = row.id;
+							showMoreModal = true;
+						}}
+					/>
+				{:else}
+					{cell.value}
+				{/if}
+			</span>
+		</DataTable>
+	</div>
+</grid>
 
-{#if showAddEntityModal}
-	<ProjectModal
-		open={true}
-		primaryButtonDisabled={true}
-		heading="Add project"
-		projectName=""
-		organizationId="selectedOrganization"
-	/>
+{#if showAddProjectModal}
+	<ProjectModal open={true} heading="Add project" projectName="" />
+	{(showAddProjectModal = false)}
+{/if}
+
+{#if showAddOrganizationModal}
+	<OrganizationModal open={true} heading="Add organization" organizationName="" />
+	{(showAddOrganizationModal = false)}
 {/if}
 
 <!-- Do we need a more button? -->
-{#if showMoreModal && name == 'organization'}{:else if showMoreModal && name == 'project'}{/if}
+<!-- {#if showMoreModal && name == 'organization'}{:else if showMoreModal && name == 'project'}{/if} -->
