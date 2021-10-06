@@ -10,10 +10,10 @@ export async function key_set_policies() {
         ALTER TABLE public.key ENABLE ROW LEVEL SECURITY;
     `);
     await prisma.$queryRawUnsafe(`
-        DROP POLICY IF EXISTS "user select keys" ON public.key;
+        DROP POLICY IF EXISTS "user all keys" ON public.key;
     `)
     await prisma.$queryRawUnsafe(`
-        CREATE POLICY "user select keys" ON public.key
+        CREATE POLICY "user all keys" ON public.key
         FOR ALL
         USING (
             project_id IN (

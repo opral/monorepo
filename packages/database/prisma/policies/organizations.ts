@@ -24,5 +24,15 @@ export async function organization_set_policies() {
             ) 
         );
     `);
+    await prisma.$queryRawUnsafe(`
+        DROP POLICY IF EXISTS "user insert organization" ON public.organization;
+    `);
+    await prisma.$queryRawUnsafe(`
+        CREATE POLICY "user insert organization" ON public.organization 
+        FOR INSERT
+        WITH CHECK (
+            created_by_user_id = auth.uid()
+        );
+    `);
     console.log("✅ applied policies for: organization table");
 }
