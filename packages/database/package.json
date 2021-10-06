@@ -5,7 +5,7 @@
   "type": "commonjs",
   "types": "./types/definitions.ts",
   "scripts": {
-    "start": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && npm run push && echo \"checking if all docker container are running:\" && docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && npm run seed",
+    "start": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npm run push && npm run seed",
     "stop": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
     "dashboard": "npx prisma studio",
     "test": "jest",
