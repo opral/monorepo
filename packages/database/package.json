@@ -5,7 +5,7 @@
   "type": "commonjs",
   "types": "./types/definitions.ts",
   "scripts": {
-    "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npm run push && npm run seed  && npm test",
+    "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npm run push && npm run seed",
     "stop": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
     "dashboard": "npx prisma studio",
     "test": "jest",
@@ -13,7 +13,7 @@
     "seed": "npm run apply-triggers && npm run apply-policies && ts-node prisma/seed.ts",
     "create-migration": "npx prisma migrate dev --create-only",
     "push": "npx prisma db push",
-    "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
+    "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies && npm test",
     "apply-triggers": "ts-node prisma/apply_triggers.ts",
     "apply-policies": "ts-node prisma/apply_policies.ts"
   },
