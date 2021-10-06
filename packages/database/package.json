@@ -15,7 +15,7 @@
     "push": "npx prisma db push",
     "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
     "apply-triggers": "ts-node prisma/apply_triggers.ts",
-    "apply-policies": "ts-node prisma/apply_policies.ts && npm test"
+    "apply-policies": "ts-node prisma/apply_policies.ts"
   },
   "keywords": [],
   "author": "",
