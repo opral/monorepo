@@ -8,7 +8,6 @@ beforeEach(async () => {
     email: mockUser.email,
     password: mockUser.password,
   });
-  console.log("logged in user: " + login.user);
   if (login.error) {
     throw login.error;
   }
