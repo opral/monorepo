@@ -19,7 +19,7 @@ export async function projects_set_policies() {
             auth.uid() IN (
                 SELECT member.user_id
                 FROM member
-                WHERE member.organization_id = project.organization_id AND member.role = 'admin'
+                WHERE member.organization_id = organization_id AND member.role = 'admin'
             )
         );
     `);
@@ -33,7 +33,7 @@ export async function projects_set_policies() {
                 auth.uid() IN (
                     SELECT member.user_id
                     FROM member
-                    WHERE member.organization_id = project.organization_id
+                    WHERE member.organization_id = organization_id
                 )
         );
     `);

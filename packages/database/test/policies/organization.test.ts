@@ -8,12 +8,13 @@ beforeEach(async () => {
     email: mockUser.email,
     password: mockUser.password,
   });
+  console.log("logged in user: " + login.user);
   if (login.error) {
     throw login.error;
   }
   expect(login.user?.email).toEqual(mockUser.email);
 });
-console.log("uid: " + supabase.auth.user());
+
 describe("policies/organization", () => {
   test("User can slecect on organization table", async () => {
     const organizations = await supabase.from<definitions["organization"]>("organization").select();

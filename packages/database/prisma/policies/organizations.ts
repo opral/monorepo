@@ -11,7 +11,7 @@ export async function organization_set_policies() {
         ALTER TABLE public.organization ENABLE ROW LEVEL SECURITY;
     `);
     await prisma.$queryRawUnsafe(`
-        DROP POLICY IF EXISTS user_get_own_organizations on public.organization;
+        DROP POLICY IF EXISTS user_get_own_organizations ON public.organization;
     `);
     await prisma.$queryRawUnsafe(`
         CREATE POLICY user_get_own_organizations ON public.organization 
@@ -20,8 +20,8 @@ export async function organization_set_policies() {
             auth.uid() IN (
                 SELECT member.user_id
                 FROM member
-                WHERE member.organization_id = organization.id
-            )
+                WHERE member.organization_id = id
+            ) 
         );
     `);
     console.log("✅ applied policies for: organization table");
