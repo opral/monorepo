@@ -1,0 +1,38 @@
+{
+  "name": "inlang-cli",
+  "version": "1.0.0",
+  "description": "cli for inlang.",
+  "author": "doofin <8177dph@gmail.com>",
+  "keywords": [
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "./dist/bin.js",
+  "bin": "./dist/bin.js",
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.js"
+  ],
+  "scripts": {
+    "dev": "ts-node ./src/bin.ts",
+    "bin": "ts-node ./src/bin.ts",
+    "clean": "rimraf ./dist/ ./exec/",
+    "build": "npm run clean && tsc",
+    "test": "npm run build && ava --verbose",
+    "bundle": "npm run build && pkg . --out-dir ./exec/"
+  },
+  "devDependencies": {
+    "ava": "^2.2.0",
+    "pkg": "^4.4.0",
+    "rimraf": "^2.6.3",
+    "ts-node": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@inlang/dashboard": "file:../dashboard",
+    "@inlang/database": "file:../database",
+    "@supabase/supabase-js": "^1.23.0",
+    "commander": "^2.20.0",
+    "dotenv": "^10.0.0"
+  }
+}
