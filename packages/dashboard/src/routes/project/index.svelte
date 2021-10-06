@@ -16,15 +16,7 @@
 		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
-
-	import { projectStore } from '$lib/stores/projectStore';
-	import { mockOrganization, mockProject } from '$lib/mockData';
-	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
-
-	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRIght16';
-	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
-	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
