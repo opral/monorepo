@@ -13,7 +13,7 @@
     "seed": "npm run apply-triggers && npm run apply-policies && ts-node prisma/seed.ts",
     "create-migration": "npx prisma migrate dev --create-only",
     "push": "npx prisma db push",
-    "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies && npm test",
+    "deploy-to-production": "npm test && npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
     "apply-triggers": "ts-node prisma/apply_triggers.ts",
     "apply-policies": "ts-node prisma/apply_policies.ts"
   },
