@@ -18,6 +18,7 @@
 	export let organizationName: string | '' = '';
 
 	async function handleConfirm() {
+		open = false;
 		const create = await database
 			.from<definitions['organization']>('organization')
 			.insert({ name: organizationName, created_by_user_id: auth.user()?.id });

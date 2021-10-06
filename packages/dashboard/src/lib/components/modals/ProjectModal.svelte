@@ -57,6 +57,7 @@
 	});
 
 	async function handleConfirm() {
+		open = false;
 		console.log(organizationId);
 		console.log(projectName);
 		const create = await database.from<definitions['project']>('project').insert({

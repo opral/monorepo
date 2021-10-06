@@ -33,6 +33,9 @@
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
 
+	import { InlineNotification, Content } from 'carbon-components-svelte';
+	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
+
 	//export let name = '';
 
 	let showAddOrganizationModal = false;
@@ -102,7 +105,11 @@
 	<Loading />
 {/if}
 
-<grid class="grid-cols-2">
+<grid class="grid-cols-3">
+	<column class="space-y-1">
+		<ProjectSidenav />
+	</column>
+
 	<div class="p-2">
 		<div class="pt-8 pb-8">
 			<h1>Your Organizations</h1>
@@ -179,13 +186,15 @@
 </grid>
 
 {#if showAddProjectModal}
-	<ProjectModal open={true} heading="Add project" projectName="" />
-	{(showAddProjectModal = false)}
+	<ProjectModal bind:open={showAddProjectModal} heading="Add project" projectName="" />
 {/if}
 
 {#if showAddOrganizationModal}
-	<OrganizationModal open={true} heading="Add organization" organizationName="" />
-	{(showAddOrganizationModal = false)}
+	<OrganizationModal
+		bind:open={showAddOrganizationModal}
+		heading="Add organization"
+		organizationName=""
+	/>
 {/if}
 
 <!-- Do we need a more button? -->
