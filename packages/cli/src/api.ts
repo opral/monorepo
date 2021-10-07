@@ -14,6 +14,11 @@ export async function test_getJson() {
     let u = await login(sb, tok)
     console.log(u)
     const dbR = await dbReadTrans(sb)
+    let jsonlist = dbR?.map(async x => {
+        let r = await x;
+        const newLocal = r?.map(y => db2json(y));
+        return newLocal
+    })
     console.log(dbR)
     // u.then(x => getData(sb, x.id))
     let jsonStr = ""// getData(sb, u.id)
@@ -43,10 +48,11 @@ async function login(sb: SupabaseClient, jwt: string) {
 }
 
 // json file format 
-type jsonFormat = { key_id: string, text: string }
+type jsonFormat = { key_id: number, text: string }
 
-function db2json() {
-    let e1
+function db2json(x: definitions['translation']): jsonFormat {
+    let r = { key_id: x.key_id, text: x.text }
+    return r;
 }
 
 async function dbReadTrans(sb: SupabaseClient) {
@@ -59,6 +65,7 @@ async function dbReadTrans(sb: SupabaseClient) {
 
     let r = prj?.flatMap(async x => {
         let id = x.id
+        // todo not work to get translations field ?
         let trans = await sb
             .from<definitions['key']>('key')
             .select('*')
@@ -70,6 +77,7 @@ async function dbReadTrans(sb: SupabaseClient) {
 
                 return translations
             })
+
 
         return trans.data
     })
