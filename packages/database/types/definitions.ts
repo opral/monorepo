@@ -16,7 +16,6 @@ export interface paths {
     get: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
           name?: parameters["rowFilter.key.name"];
           description?: parameters["rowFilter.key.description"];
@@ -71,7 +70,6 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
           name?: parameters["rowFilter.key.name"];
           description?: parameters["rowFilter.key.description"];
@@ -90,7 +88,6 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          id?: parameters["rowFilter.key.id"];
           project_id?: parameters["rowFilter.key.project_id"];
           name?: parameters["rowFilter.key.name"];
           description?: parameters["rowFilter.key.description"];
@@ -496,7 +493,8 @@ export interface paths {
     get: {
       parameters: {
         query: {
-          key_id?: parameters["rowFilter.translation.key_id"];
+          key_name?: parameters["rowFilter.translation.key_name"];
+          project_id?: parameters["rowFilter.translation.project_id"];
           iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
@@ -551,7 +549,8 @@ export interface paths {
     delete: {
       parameters: {
         query: {
-          key_id?: parameters["rowFilter.translation.key_id"];
+          key_name?: parameters["rowFilter.translation.key_name"];
+          project_id?: parameters["rowFilter.translation.project_id"];
           iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
@@ -570,7 +569,8 @@ export interface paths {
     patch: {
       parameters: {
         query: {
-          key_id?: parameters["rowFilter.translation.key_id"];
+          key_name?: parameters["rowFilter.translation.key_name"];
+          project_id?: parameters["rowFilter.translation.project_id"];
           iso_code?: parameters["rowFilter.translation.iso_code"];
           is_reviewed?: parameters["rowFilter.translation.is_reviewed"];
           text?: parameters["rowFilter.translation.text"];
@@ -684,7 +684,7 @@ export interface paths {
       };
     };
   };
-  "/rpc/handle_new_organization": {
+  "/rpc/handle_insert_organization": {
     post: {
       parameters: {
         body: {
@@ -701,7 +701,7 @@ export interface paths {
       };
     };
   };
-  "/rpc/handle_supabase_auth": {
+  "/rpc/handle_insert_user": {
     post: {
       parameters: {
         body: {
@@ -725,13 +725,13 @@ export interface definitions {
     /**
      * Note:
      * This is a Primary Key.<pk/>
-     */
-    id: number;
-    /**
-     * Note:
      * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
      */
     project_id: string;
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
     name: string;
     description?: string;
     created_at: string;
@@ -1162,9 +1162,14 @@ export interface definitions {
     /**
      * Note:
      * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `key.id`.<fk table='key' column='id'/>
+     * This is a Foreign Key to `key.name`.<fk table='key' column='name'/>
      */
-    key_id: number;
+    key_name: string;
+    /**
+     * Note:
+     * This is a Foreign Key to `key.project_id`.<fk table='key' column='project_id'/>
+     */
+    project_id: string;
     /**
      * Note:
      * This is a Primary Key.<pk/>
@@ -1392,7 +1397,6 @@ export interface parameters {
   limit: string;
   /** key */
   "body.key": definitions["key"];
-  "rowFilter.key.id": string;
   "rowFilter.key.project_id": string;
   "rowFilter.key.name": string;
   "rowFilter.key.description": string;
@@ -1422,7 +1426,8 @@ export interface parameters {
   "rowFilter.project.created_at": string;
   /** translation */
   "body.translation": definitions["translation"];
-  "rowFilter.translation.key_id": string;
+  "rowFilter.translation.key_name": string;
+  "rowFilter.translation.project_id": string;
   "rowFilter.translation.iso_code": string;
   "rowFilter.translation.is_reviewed": string;
   "rowFilter.translation.text": string;
