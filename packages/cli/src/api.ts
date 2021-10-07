@@ -1,15 +1,16 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
+import { supabase } from './services/supabase';
 let tok = process.env['inlang_KEY'] as string;
 
 export function testReadProjs() {
-    let sb = newSupabase()
+    let sb = supabase
     let r = sb.from("projects").select("*") // works with policy
     r.then(x => console.log(x))
 }
 
 export async function test_getJson() {
-    let sb = newSupabase()
+    let sb = supabase
     let u = await login(sb, tok)
     console.log(u)
     const dbR = await dbReadTrans(sb)
@@ -20,13 +21,6 @@ export async function test_getJson() {
 
 }
 
-/** http apis  */
-export function newSupabase() {
-    let sb = createClient(
-        'https://cqriunspsjhvrvcazqri.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMjk5MDU0NCwiZXhwIjoxOTQ4NTY2NTQ0fQ.liAxCtDEkgqyslW1xtN5lpcUJMROiUj1Rsar67eoW00')
-    return sb
-}
 
 // https://supabase.io/docs/reference/javascript/select
 async function readData(sb: SupabaseClient, loggedInUserId: string, text: string) {
