@@ -51,7 +51,8 @@ async function login(sb: SupabaseClient, jwt: string) {
 type jsonFormat = { key_id: number, text: string }
 
 function db2json(x: definitions['translation']): jsonFormat {
-    let r = { key_id: x.key_id, text: x.text }
+    // let r = { key_id: x.key_id, text: x.text }
+    let r = { key_id: 1, text: x.text }
     return r;
 }
 
@@ -73,7 +74,7 @@ async function dbReadTrans(sb: SupabaseClient) {
                 let translations = sb
                     .from<definitions['translation']>('translation')
                     .select('*')
-                    .in('key_id', keys.data?.map((key) => key.id) ?? [])
+                // .in('key_id', keys.data?.map((key) => key.id) ?? [])
 
                 return translations
             })
@@ -110,7 +111,7 @@ export async function dbRead(sb: SupabaseClient, args: dbGetArgs) {
     const translations = await sb
         .from<definitions['translation']>('translation')
         .select('*')
-        .in('key_id', keys.data?.map((key) => key.id) ?? []);
+    // .in('key_id', keys.data?.map((key) => key.id) ?? []);
 
 }
 
