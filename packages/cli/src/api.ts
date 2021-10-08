@@ -1,18 +1,24 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
+import { supabase } from './services/supabase';
 let tok = process.env['inlang_KEY'] as string;
 
 export function testReadProjs() {
-    let sb = newSupabase()
+    let sb = supabase
     let r = sb.from("projects").select("*") // works with policy
     r.then(x => console.log(x))
 }
 
 export async function test_getJson() {
-    let sb = newSupabase()
+    let sb = supabase
     let u = await login(sb, tok)
     console.log(u)
     const dbR = await dbReadTrans(sb)
+    let jsonlist = dbR?.map(async x => {
+        let r = await x;
+        const newLocal = r?.map(y => db2json(y));
+        return newLocal
+    })
     console.log(dbR)
     // u.then(x => getData(sb, x.id))
     let jsonStr = ""// getData(sb, u.id)
@@ -20,13 +26,6 @@ export async function test_getJson() {
 
 }
 
-/** http apis  */
-export function newSupabase() {
-    let sb = createClient(
-        'https://cqriunspsjhvrvcazqri.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMjk5MDU0NCwiZXhwIjoxOTQ4NTY2NTQ0fQ.liAxCtDEkgqyslW1xtN5lpcUJMROiUj1Rsar67eoW00')
-    return sb
-}
 
 // https://supabase.io/docs/reference/javascript/select
 async function readData(sb: SupabaseClient, loggedInUserId: string, text: string) {
@@ -49,10 +48,12 @@ async function login(sb: SupabaseClient, jwt: string) {
 }
 
 // json file format 
-type jsonFormat = { key_id: string, text: string }
+type jsonFormat = { key_id: number, text: string }
 
-function db2json() {
-    let e1
+function db2json(x: definitions['translation']): jsonFormat {
+    // let r = { key_id: x.key_id, text: x.text }
+    let r = { key_id: 1, text: x.text }
+    return r;
 }
 
 async function dbReadTrans(sb: SupabaseClient) {
@@ -65,6 +66,7 @@ async function dbReadTrans(sb: SupabaseClient) {
 
     let r = prj?.flatMap(async x => {
         let id = x.id
+        // todo not work to get translations field ?
         let trans = await sb
             .from<definitions['key']>('key')
             .select('*')
@@ -72,10 +74,11 @@ async function dbReadTrans(sb: SupabaseClient) {
                 let translations = sb
                     .from<definitions['translation']>('translation')
                     .select('*')
-                    .in('key_id', keys.data?.map((key) => key.id) ?? [])
+                // .in('key_id', keys.data?.map((key) => key.id) ?? [])
 
                 return translations
             })
+
 
         return trans.data
     })
@@ -108,7 +111,7 @@ export async function dbRead(sb: SupabaseClient, args: dbGetArgs) {
     const translations = await sb
         .from<definitions['translation']>('translation')
         .select('*')
-        .in('key_id', keys.data?.map((key) => key.id) ?? []);
+    // .in('key_id', keys.data?.map((key) => key.id) ?? []);
 
 }
 

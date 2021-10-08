@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const supabase = createClient(
+export const supabase = createClient(
   process.env.VITE_PUBLIC_SUPABASE_URL as string,
   process.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string
 );
