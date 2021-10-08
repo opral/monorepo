@@ -1,57 +1,51 @@
 import type { definitions } from "@inlang/database";
 import { DatabaseResponse } from "@inlang/dashboard/src/lib/types/databaseResponse";
 import { database } from "@inlang/dashboard/src/lib/services/database";
-import { test_getJson } from "../api";
 
 let translations: DatabaseResponse<definitions["translation"][]>;
 
+type File = {
+  path: string;
+  content: Object;
+};
+
 type AdapterExport = {
-  files: Array<{
-    path?: string;
-    content?: Object;
-  }>; 
-} | undefined;
+  files: File[];
+};
 
-//create object for each locale, object has keys which are locales and values which are (paths, content)
-
+type AllTranslations = {
+  [locale: string]:
+    | undefined
+    | {
+        [key: string]: string | undefined;
+      };
+};
 export function exportI18nNext(
   translations: definitions["translation"][]
 ): AdapterExport {
-<<<<<<< HEAD
-  let existingIso =false;
-  file = translations.map((translation) => {
-    for(int i=0; i<Array.length; i++){
-      if(array.find("/".concat(translation.iso_code))){
-      ({ key: translation.key_name, translation.key_text}))
-    existingIso=true;
-    }
-    }
-    if(!existingIso) {
-      //add iso code and translation
-    }
+  let files: File[] = [];
+  let allTranslations: AllTranslations = {};
+  let localeExistsInObj: boolean;
 
-    
-};
-=======
-  let test: AdapterExport;
-  let exists: boolean;
-  
-  translations.map((translation) => {
-    exists=false;
-    for(let x of test?.files ?? []){
-      if(  x.path == "/".concat(translation.iso_code)){
-        exists=true;
-       x.content= new Object({key: translation.key_name, value: translation.text});
-        break;
-      }
+  for (const translation of translations) {
+    if (allTranslations[translation.iso_code] === undefined) {
+      // if the index is undefined, then initialize that index (locale) with an empty object
+      allTranslations[translation.iso_code] = {};
     }
-    if(!exists){
-      let bla = "/".concat(translation.iso_code);
-      test?.files.push( {path: bla, content: new Object({key: translation.key_name, value:translation.text})});
-    }
-  });
-  return test;
+    allTranslations[translation.iso_code]![translation.key_name] =
+      translation.text;
+  }
 
->>>>>>> 4b4ad1434be09e383771829eb6b65f20ce2902b4
+  // using in here because we want the keys in alltranslations (the iso codes)
+  // and not the values
+  for (const iso in allTranslations) {
+    files.push({
+      path: `${iso}.json`,
+      content: allTranslations[iso]!,
+    });
+  }
+
+  return {
+    files: files,
+  };
 }
-
