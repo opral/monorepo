@@ -15,12 +15,12 @@ beforeEach(async () => {
 }); 
 
 describe("policies/organization", () => {
-  test("User can select on own organization", async () => {
+  test("User can select on organizations they are member of", async () => {
     const organizations = await supabase.from<definitions["organization"]>("organization").select();
-    expect(organizations.data?.length).toBeGreaterThanOrEqual(1);
+    expect(organizations.data?.length).toEqual(2);
   });
   test("User can create new organization", async () => {
-    const organization = await supabase.from<definitions["organization"]>("organization")
+    await supabase.from<definitions["organization"]>("organization")
       .insert({
         name: "inlang", 
         created_by_user_id: supabase.auth.user()!.id
@@ -28,12 +28,37 @@ describe("policies/organization", () => {
       { 
         returning: "minimal"
       });
-      expect(organization.status).toEqual(201);
+    const organization = await supabase.from<definitions["organization"]>("organization")
+      .select()
+      .match({
+        name: "inlang"
+      })
+    expect(organization.data?.length).toEqual(1);
   });
   test("Owner can delete organization", async () => {
-    const organization = await supabase.from<definitions["organization"]>("organization")
+    await supabase.from<definitions["organization"]>("organization")
       .delete()
       .match({name: "inlang", created_by_user_id: supabase.auth.user()!.id});
-      expect(organization.status).toEqual(200);
+    const organization = await supabase.from<definitions["organization"]>("organization")
+      .select()
+      .match({
+        name: "inlang"
+      })
+    expect(organization.data?.length).toEqual(0);
+  });
+  test("User can't select from organization which they are not a member of", async () => {
+    const organization = await supabase.from<definitions["organization"]>("organization")
+    .select()
+    .match({name: "Bass Co."});
+    expect(organization.data?.length).toEqual(0);
+  });
+  test("Member can't delete organization which they are not owner of", async () => {
+    await supabase.from<definitions["organization"]>("organization")
+    .delete()
+    .match({name: "Color AS"});
+    const organization = await supabase.from<definitions["organization"]>("organization")
+    .select()
+    .match({name: "Color AS"})
+    expect(organization.data?.length).toEqual(1);
   });
 })

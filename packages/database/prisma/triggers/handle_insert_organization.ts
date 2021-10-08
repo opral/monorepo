@@ -13,7 +13,7 @@ export async function handle_insert_organization() {
     returns trigger as $$
     begin
         insert into public.member (organization_id, user_id, role)
-        values (new.id, new.created_by_user_id, 'admin');
+        values (new.id, new.created_by_user_id, 'ADMIN');
         return new;
     end;
     $$ language plpgsql security definer;

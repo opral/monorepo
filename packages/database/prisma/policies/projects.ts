@@ -16,10 +16,10 @@ export async function projects_set_policies() {
         CREATE POLICY user_get_own_admin_projects ON public.project 
         FOR ALL
         USING (
-            auth.uid() IN (
-                SELECT member.user_id
+            organization_id IN (
+                SELECT member.organization_id
                 FROM member
-                WHERE member.organization_id = organization_id AND member.role = 'admin'
+                WHERE member.user_id = auth.uid() AND member.role = 'ADMIN'
             )
         );
     `);
@@ -30,10 +30,10 @@ export async function projects_set_policies() {
         CREATE POLICY user_get_own_projects ON public.project 
         FOR SELECT 
             USING (
-                auth.uid() IN (
-                    SELECT member.user_id
+                organization_id IN (
+                    SELECT member.organization_id
                     FROM member
-                    WHERE member.organization_id = organization_id
+                    WHERE member.user_id = auth.uid()
                 )
         );
     `);

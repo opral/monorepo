@@ -14,9 +14,17 @@ beforeEach(async () => {
   expect(login.user?.email).toEqual(mockUser.email);
 });
 
-describe("policies/project_admin", () => {
-  test("Admin can act on project", async () => {
+describe("policies/project", () => {
+  test("Member can select projects", async () => {
     const projects = await supabase.from<definitions["project"]>("project").select();
-    expect(projects.data?.length).toBeGreaterThanOrEqual(1);
-  })
+    expect(projects.data?.length).toBeGreaterThanOrEqual(2);
+  });
+  test("User can not select projects which they are not memebr of", async () => {
+    const projects = await supabase.from<definitions["project"]>("project")
+      .select()
+      .match({
+        name: "bass-project"
+      });
+    expect(projects.data?.length).toEqual(0)
+  });
 })

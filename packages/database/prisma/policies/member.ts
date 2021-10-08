@@ -44,7 +44,7 @@ export async function member_set_policies() {
                 SELECT organization_id 
                 FROM member 
                 WHERE user_id = auth.uid() 
-                    AND role = 'admin'
+                    AND role = 'ADMIN'
                 )
         );
     `);*/
