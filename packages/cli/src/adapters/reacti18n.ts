@@ -12,11 +12,23 @@ type AdapterExport = {
 };
 
 //create object for each locale, object has keys which are locales and values which are (paths, content)
-/*
+
 export function exportI18nNext(
   translations: definitions["translation"][]
 ): AdapterExport {
-  translations.forEach (translation)
-  file = translations.map((translation) => ({ key: translation.key_name, translation.key_text}));
+  let existingIso =false;
+  file = translations.map((translation) => {
+    for(int i=0; i<Array.length; i++){
+      if(array.find("/".concat(translation.iso_code))){
+      ({ key: translation.key_name, translation.key_text}))
+    existingIso=true;
+    }
+    }
+    if(!existingIso) {
+      //add iso code and translation
+    }
+
+    
+};
 }
-*/
+
