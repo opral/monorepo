@@ -1,6 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
 import { supabase } from './services/supabase';
+import * as conv from './conversion'
+
 let tok = process.env['inlang_KEY'] as string;
 
 export function testReadProjs() {
@@ -16,7 +18,7 @@ export async function test_getJson() {
     const dbR = await dbReadTrans(sb)
     let jsonlist = dbR?.map(async x => {
         let r = await x;
-        const newLocal = r?.map(y => db2json(y));
+        const newLocal = r?.map(y => conv.db2json(y));
         return newLocal
     })
     console.log(dbR)
@@ -47,14 +49,6 @@ async function login(sb: SupabaseClient, jwt: string) {
     return user
 }
 
-// json file format 
-type jsonFormat = { key_id: number, text: string }
-
-function db2json(x: definitions['translation']): jsonFormat {
-    // let r = { key_id: x.key_id, text: x.text }
-    let r = { key_id: 1, text: x.text }
-    return r;
-}
 
 async function dbReadTrans(sb: SupabaseClient) {
     // project
@@ -65,22 +59,14 @@ async function dbReadTrans(sb: SupabaseClient) {
     console.log("prjs : ", prj)
 
     let r = prj?.flatMap(async x => {
-        let id = x.id
+        let pid = x.id
         // todo not work to get translations field ?
-        let trans = await sb
-            .from<definitions['key']>('key')
+        let translations = await sb
+            .from<definitions['translation']>('translation')
             .select('*')
-            .match({ project_id: id }).then(keys => {
-                let translations = sb
-                    .from<definitions['translation']>('translation')
-                    .select('*')
-                // .in('key_id', keys.data?.map((key) => key.id) ?? [])
+            .match({ id: pid })
 
-                return translations
-            })
-
-
-        return trans.data
+        return translations.data
     })
     return r;
 }
