@@ -1,32 +1,23 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, PostgrestResponse, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
 import { supabase } from './services/supabase';
+import { pgres2val } from './helpers'
 import * as conv from './conversion'
 
 let tok = process.env['inlang_KEY'] as string;
 
-export function testReadProjs() {
-    let sb = supabase
-    let r = sb.from("projects").select("*") // works with policy
-    r.then(x => console.log(x))
-}
 
-export async function test_getJson() {
+
+export async function download2prj(pid: string) {
     let sb = supabase
     let u = await login(sb, tok)
     console.log(u)
-    const dbR = await dbReadTrans(sb)
-    let jsonlist = dbR?.map(async x => {
-        let r = await x;
-        const newLocal = r?.map(y => conv.db2json(y));
-        return newLocal
-    })
-    console.log(dbR)
-    // u.then(x => getData(sb, x.id))
-    let jsonStr = ""// getData(sb, u.id)
-    return jsonStr
+    const dbR = await dbReadTrans(sb, pid)
 
+    // conv.json2file(jsonlist)
+    console.log(dbR)
 }
+
 
 
 // https://supabase.io/docs/reference/javascript/select
@@ -50,25 +41,20 @@ async function login(sb: SupabaseClient, jwt: string) {
 }
 
 
-async function dbReadTrans(sb: SupabaseClient) {
-    // project
+
+async function dbReadProj(sb: SupabaseClient) {
     let prj = (await sb
         .from<definitions['project']>('project')
         .select('*')).data
 
-    console.log("prjs : ", prj)
+}
+async function dbReadTrans(sb: SupabaseClient, projId: string) {
+    let translations = await sb
+        .from<definitions['translation']>('translation')
+        .select('*')
+        .match({ id: projId })
 
-    let r = prj?.flatMap(async x => {
-        let pid = x.id
-        // todo not work to get translations field ?
-        let translations = await sb
-            .from<definitions['translation']>('translation')
-            .select('*')
-            .match({ id: pid })
-
-        return translations.data
-    })
-    return r;
+    return pgres2val(translations)
 }
 
 type dbGetArgs = {

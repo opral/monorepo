@@ -8,6 +8,7 @@
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { page } from '$app/stores';
+	import { createEventDispatcher } from 'svelte';
 
 	export let open = false;
 
@@ -17,19 +18,22 @@
 
 	export let organizationName: string | '' = '';
 
+	let dispatch = createEventDispatcher();
+
 	async function handleConfirm() {
-		open = false;
+		console.log(organizationName);
+		console.log(auth.user()?.id);
 		const create = await database
 			.from<definitions['organization']>('organization')
 			.insert({ name: organizationName, created_by_user_id: auth.user()?.id });
 		if (create.error) {
-			alert(create.error);
-		} else {
-			projectStore.getData({ projectId: $page.params.projectId });
+			alert(create.error.message);
+			console.log('create error');
 		}
 		// automatically closing the modal but leave time to
 		// let the user read the result status of the action
 		setTimeout(() => {
+			dispatch('updateOrganizations');
 			open = false;
 		}, 1000);
 	}
