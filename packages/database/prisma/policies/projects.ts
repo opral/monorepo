@@ -21,7 +21,7 @@ export async function projects_set_policies() {
                 FROM member
                 WHERE member.user_id = auth.uid() AND member.role = 'ADMIN'
             )
-        );
+        )
     `);
     await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS user_get_own_projects ON public.project;
