@@ -1,8 +1,4 @@
 import type { definitions } from "@inlang/database";
-import { DatabaseResponse } from "@inlang/dashboard/src/lib/types/databaseResponse";
-import { database } from "@inlang/dashboard/src/lib/services/database";
-
-let translations: DatabaseResponse<definitions["translation"][]>;
 
 type File = {
   path: string;
@@ -25,7 +21,6 @@ export function exportI18nNext(
 ): AdapterExport {
   let files: File[] = [];
   let allTranslations: AllTranslations = {};
-  let localeExistsInObj: boolean;
 
   for (const translation of translations) {
     if (allTranslations[translation.iso_code] === undefined) {
@@ -35,7 +30,6 @@ export function exportI18nNext(
     allTranslations[translation.iso_code]![translation.key_name] =
       translation.text;
   }
-
   // using in here because we want the keys in alltranslations (the iso codes)
   // and not the values
   for (const iso in allTranslations) {
