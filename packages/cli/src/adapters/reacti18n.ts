@@ -17,6 +17,22 @@ type AdapterExport = {
 export function exportI18nNext(
   translations: definitions["translation"][]
 ): AdapterExport {
+<<<<<<< HEAD
+  let existingIso =false;
+  file = translations.map((translation) => {
+    for(int i=0; i<Array.length; i++){
+      if(array.find("/".concat(translation.iso_code))){
+      ({ key: translation.key_name, translation.key_text}))
+    existingIso=true;
+    }
+    }
+    if(!existingIso) {
+      //add iso code and translation
+    }
+
+    
+};
+=======
   let test: AdapterExport;
   let exists: boolean;
   
@@ -36,5 +52,6 @@ export function exportI18nNext(
   });
   return test;
 
+>>>>>>> 4b4ad1434be09e383771829eb6b65f20ce2902b4
 }
 
