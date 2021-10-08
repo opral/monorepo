@@ -87,7 +87,7 @@ model translation {
   text        String
   created_at  DateTime  @default(now())
 
-  @@id([key_name, iso_code])
+  @@id([project_id, key_name, iso_code])
 }
 
 enum iso_639_1 {
