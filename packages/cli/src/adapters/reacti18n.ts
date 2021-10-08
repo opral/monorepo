@@ -34,7 +34,7 @@ export function exportI18nNext(
   // and not the values
   for (const iso in allTranslations) {
     files.push({
-      path: `${iso}.json`,
+      path: `${iso}/translation.json`,
       content: allTranslations[iso]!,
     });
   }
