@@ -10,14 +10,24 @@ export async function translation_set_policies() {
         ALTER TABLE public.translation ENABLE ROW LEVEL SECURITY;
     `);
     await prisma.$queryRawUnsafe(`
+        DROP POLICY IF EXISTS "everyone can select translations" ON public.translation;
+    `);
+    await prisma.$queryRawUnsafe(`
+        CREATE POLICY "everyone can select translations" on public.translation
+        FOR SELECT
+        USING (
+            true
+        );
+    `);
+    await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS "user all" ON public.translation;
-    `)
+    `);
     await prisma.$queryRawUnsafe(`
         CREATE POLICY "user all" ON public.translation
         FOR ALL
         USING (
-            (key_name, project_id) IN (
-                SELECT name, project_id FROM key
+            (project_id) IN (
+                SELECT project_id FROM key
             )
         );
     `);

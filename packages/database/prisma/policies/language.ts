@@ -24,5 +24,20 @@ export async function language_set_policies() {
             ) 
         )
     `);
+    await prisma.$queryRawUnsafe(`
+        DROP POLICY IF EXISTS "admin full access" ON public.language;
+    `);
+    await prisma.$queryRawUnsafe(`
+        CREATE POLICY "admin full access" ON public.language
+        FOR ALL
+        USING (
+            project_id IN
+            (
+                SELECT project.id
+                FROM member LEFT JOIN project 
+                ON user_id = auth.uid() AND role = 'ADMIN'
+            ) 
+        );
+    `);
     console.log("✅ applied policies for: language table");
 }
