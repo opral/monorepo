@@ -15,6 +15,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import ISO6391 from 'iso-639-1';
+	import { createEventDispatcher } from 'svelte';
 
 	export let open = false;
 	//export let primaryButtonDisabled = false;
@@ -25,6 +26,8 @@
 	export let projectName: string | '' = '';
 	export let organizationId: string | '' = '';
 	//export let iso_code: string | '' = '';
+
+	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 	let languageIso: definitions['language']['iso_code'];
@@ -38,10 +41,6 @@
 		}
 		return result;
 	}
-
-	$: languageExistsInProject = $projectStore.data?.languages
-		.map((language) => language.iso_code)
-		.includes(languageIso);
 
 	// input must be iso 639-1 and not be contained in project langauges already
 	$: isValidInput = ISO6391.validate(languageIso);
@@ -57,7 +56,6 @@
 	});
 
 	async function handleConfirm() {
-		open = false;
 		console.log(organizationId);
 		console.log(projectName);
 		const create = await database.from<definitions['project']>('project').insert({
@@ -74,6 +72,7 @@
 		// let the user read the result status of the action
 		setTimeout(() => {
 			open = false;
+			dispatch('updateProjects');
 		}, 1000);
 	}
 </script>
@@ -121,10 +120,8 @@
 		<TextInput
 			labelText="language code (ISO 639-1)"
 			bind:value={languageIso}
-			invalid={isValidInput === false || languageExistsInProject}
-			invalidText={languageExistsInProject
-				? 'Language already exists in this project.'
-				: 'The code must be an ISO 639-1 code.'}
+			invalid={isValidInput === false}
+			invalidText={'The code must be an ISO 639-1 code.'}
 		/>
 
 		<!-- <FormGroup disabled>
