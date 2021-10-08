@@ -9,12 +9,19 @@ type AdapterExport = {
   files: File[];
 };
 
+/**
+ * a locale can be undefined e.g.
+ * "fr" does not exist in the project locales ["de", "en"]
+ * 
+ * a key can be undefined for a specific locale because 
+ * "example.hello" may not exist for "de", but for "en"
+ */
 type AllTranslations = {
   [locale: string]:
-    | undefined
-    | {
-        [key: string]: string | undefined;
-      };
+  | undefined
+  | {
+    [key: string]: string | undefined;
+  };
 };
 export function exportI18nNext(
   translations: definitions["translation"][]

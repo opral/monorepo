@@ -1,24 +1,20 @@
 import { createClient, PostgrestResponse, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
 import { supabase } from './services/supabase';
-import { pgres2val } from './helpers'
+import { pgResp2val } from './helpers'
 import * as conv from './conversion'
 
 let tok = process.env['inlang_KEY'] as string;
 
-
-
 export async function download2prj(pid: string) {
     let sb = supabase
-    let u = await login(sb, tok)
+    let u = await loginWithToken(sb, tok)
     console.log(u)
     const dbR = await dbReadTrans(sb, pid)
 
     // conv.json2file(jsonlist)
     console.log(dbR)
 }
-
-
 
 // https://supabase.io/docs/reference/javascript/select
 async function readData(sb: SupabaseClient, loggedInUserId: string, text: string) {
@@ -33,7 +29,7 @@ async function writeData(sb: SupabaseClient, loggedInUserId: string, text: strin
 }
 
 // todo : how to auth?
-async function login(sb: SupabaseClient, jwt: string) {
+async function loginWithToken(sb: SupabaseClient, jwt: string) {
     let x = await sb.auth.api.getUser(jwt) // token works
     let user = x.user
     console.log(x.error)
@@ -54,7 +50,7 @@ async function dbReadTrans(sb: SupabaseClient, projId: string) {
         .select('*')
         .match({ id: projId })
 
-    return pgres2val(translations)
+    return pgResp2val(translations)
 }
 
 type dbGetArgs = {
@@ -86,15 +82,6 @@ export async function dbRead(sb: SupabaseClient, args: dbGetArgs) {
     // .in('key_id', keys.data?.map((key) => key.id) ?? []);
 
 }
-
-    // old: userid => permissions=>projects=>id of translations
-    //new : user -> org -> project -> keys
-    // const x: definitions['user'] | null = null
-    // x.id
-    // let usersO = await sb.from<definitions['user']>('user').select('*').eq('id', loggedInUserId).single()
-    // usersO.data.
-    // let orgO = await sb.from<definitions['organization']>('organization').select('*').eq('id', loggedInUserId).single()
-    // just select all projs,non authed will not be returned
 
 
         // userid => permissions=>projects=>id of translations

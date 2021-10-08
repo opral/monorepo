@@ -2,6 +2,7 @@
 
 import program from 'commander'
 import { download2prj } from './api'
+import { readEnvir } from './services/supabase'
 
 
 /** binary entry  
@@ -23,7 +24,9 @@ function entry() {
   if (pid === null) console.log("please provide project id from dashboard")
 
   console.log(pid)
-  download2prj(pid)
+  // download2prj(pid)
+  readEnvir()
+  // token expire,please provide a new one from dashboard
 }
 
 entry()
