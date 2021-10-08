@@ -23,13 +23,13 @@ type AllTranslations = {
     [key: string]: string | undefined;
   };
 };
-export function exportI18nNext(
-  translations: definitions["translation"][]
-): AdapterExport {
+export function exportI18nNext(args: {
+  translations: definitions["translation"][];
+}): AdapterExport {
   let files: File[] = [];
   let allTranslations: AllTranslations = {};
 
-  for (const translation of translations) {
+  for (const translation of args.translations) {
     if (allTranslations[translation.iso_code] === undefined) {
       // if the index is undefined, then initialize that index (locale) with an empty object
       allTranslations[translation.iso_code] = {};
