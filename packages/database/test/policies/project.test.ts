@@ -42,7 +42,6 @@ describe("policies/project", () => {
         default_iso_code: "en",
         
       });
-      console.log(organization_insert.error);
     const projects = await supabase.from<definitions["project"]>("project")
       .select()
       .match({
