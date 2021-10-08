@@ -20,6 +20,7 @@ async function signUpMockUser(): Promise<void> {
 
     throw signIn.error ?? "user is null";
   }
+  console.log(signIn.user?.id)
 }
 
 async function main() {

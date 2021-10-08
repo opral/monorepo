@@ -17,9 +17,10 @@
 		Loading
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
+	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import type { definitions } from '@inlang/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
@@ -33,6 +34,7 @@
 	let showAddOrganizationModal = false;
 	let showAddProjectModal = false;
 	let showMoreModal = false;
+	let showAddMemberModal = false;
 
 	// as entered in the search bar
 	$: searchQuery = '';
@@ -57,6 +59,24 @@
 		}
 		isLoading = false;
 	});
+
+	async function handleOrganizationUpdate() {
+		organizations = await database.from<definitions['organization']>('organization').select();
+
+		if (organizations.error) {
+			alert(organizations.error);
+		}
+		isLoading = false;
+	}
+
+	async function handleProjectUpdate() {
+		projects = await database.from<definitions['project']>('project').select();
+
+		if (projects.error) {
+			alert(projects.error);
+		}
+		isLoading = false;
+	}
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
@@ -97,11 +117,7 @@
 	<Loading />
 {/if}
 
-<grid class="grid-cols-3">
-	<column class="space-y-1">
-		<ProjectSidenav />
-	</column>
-
+<grid class="grid-cols-2">
 	<div class="p-2">
 		<div class="pt-8 pb-8">
 			<h1>Your Organizations</h1>
@@ -160,12 +176,13 @@
 						<p class="text-sm">{cell.value}</p>
 					</div>
 				{:else if cell.key === 'more'}
+					<!-- TODO: add more button should be an add member button -->
 					<Button
 						kind="ghost"
 						icon={OverflowMenuHorizontal32}
 						iconDescription="More"
 						on:click={() => {
-							// selectedShowMoreModal = row.id;
+							// addMemberModal = row.id;
 							showMoreModal = true;
 						}}
 					/>
@@ -178,7 +195,12 @@
 </grid>
 
 {#if showAddProjectModal}
-	<ProjectModal bind:open={showAddProjectModal} heading="Add project" projectName="" />
+	<ProjectModal
+		bind:open={showAddProjectModal}
+		heading="Add project"
+		projectName=""
+		on:updateProjects={handleProjectUpdate}
+	/>
 {/if}
 
 {#if showAddOrganizationModal}
@@ -186,6 +208,7 @@
 		bind:open={showAddOrganizationModal}
 		heading="Add organization"
 		organizationName=""
+		on:updateOrganizations={handleOrganizationUpdate}
 	/>
 {/if}
 
