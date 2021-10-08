@@ -11,6 +11,6 @@ export function db2json(x: definitions['translation']): jsonFormat {
     return r;
 }
 
-export function json2file(x: jsonFormat[]) {
+export function json2file(x: jsonFormat[] | null) {
     fs.writeFile('', "", x => { })
 }

@@ -1,27 +1,29 @@
 #!/usr/bin/env node
 
-// https://github.com/khalidx/typescript-cli-starter
 import program from 'commander'
-import { testReadProjs, test_getJson } from './api'
-
-import type { definitions } from '@inlang/database'
-// import type { definitions } from '../../database/types/definitions'
+import { download2prj } from './api'
 
 
-/** binary entry  */
-
+/** binary entry  
+ * https://github.com/tj/commander.js/
+ * 
+*/
 function entry() {
+  const args = process.argv
   program
     .version('0.1.0')
-    .option('-p, --peppers', 'Add peppers')
-    .option('-P, --pineapple', 'Add pineapple')
-    .option('-b, --bbq-sauce', 'Add bbq sauce')
-    .option('-c, --cheese [type]', 'Add the specified type of cheese [marble]', 'marble')
-    .parse(process.argv)
+    .option('-p, --project', 'project id from dashboard')
+    .parse(args)
 
 
-  // testReadProjs()
-  test_getJson()
+  let argParsed = program.parse(args).opts()
+  let pid = args[3]
+  // if no 
+  if (!argParsed.project === null) pid = argParsed.project
+  if (pid === null) console.log("please provide project id from dashboard")
+
+  console.log(pid)
+  download2prj(pid)
 }
 
 entry()
