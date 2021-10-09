@@ -34,7 +34,7 @@ export async function key_set_policies() {
             project_id IN (
                 SELECT id
                 FROM project LEFT JOIN member on project.organization_id = member.organization_id
-                WHERE member.user_id = '335aaf0e-0015-4f31-adf1-9fa0de6dc5b2' AND member.role = 'ADMIN'
+                WHERE member.user_id = auth.uid() AND member.role = 'ADMIN'
             )
         );
     `);

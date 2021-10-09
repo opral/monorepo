@@ -34,8 +34,9 @@ export async function language_set_policies() {
             project_id IN
             (
                 SELECT project.id
-                FROM member LEFT JOIN project 
-                ON user_id = auth.uid() AND role = 'ADMIN'
+                FROM member LEFT JOIN project
+                ON member.organization_id = project.organization_id
+                WHERE user_id = auth.uid() AND role = 'ADMIN'
             ) 
         );
     `);

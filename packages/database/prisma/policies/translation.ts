@@ -27,7 +27,7 @@ export async function translation_set_policies() {
         FOR ALL
         USING (
             (project_id) IN (
-                SELECT project_id FROM key
+                SELECT project_id FROM project
             )
         );
     `);
