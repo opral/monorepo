@@ -62,7 +62,7 @@ async function getData(
 	const translations = await database
 		.from<definitions['translation']>('translation')
 		.select('*')
-		.in('key_id', keys.data?.map((key) => key.id) ?? []);
+		.in('key_name', keys.data?.map((key) => key.name) ?? []);
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.
 	let error: ProjectStoreInterface['error'] | null = null;

@@ -17,7 +17,7 @@
 		status = 'active';
 		const update = await database
 			.from<definitions['project']>('project')
-			.update({ default_language_iso: language.iso_code })
+			.update({ default_iso_code: language.iso_code })
 			.match({ id: language.project_id });
 		if (update.error) {
 			console.log(update.error);

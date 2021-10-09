@@ -1,31 +1,19 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, PostgrestResponse, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
+import { supabase } from './services/supabase';
+import { pgResp2val } from './helpers'
+import * as conv from './conversion'
+
 let tok = process.env['inlang_KEY'] as string;
 
-export function testReadProjs() {
-    let sb = newSupabase()
-    let r = sb.from("projects").select("*") // works with policy
-    r.then(x => console.log(x))
-}
-
-export async function test_getJson() {
-    let sb = newSupabase()
-    let u = await login(sb, tok)
+export async function download2prj(pid: string) {
+    let sb = supabase
+    let u = await loginWithToken(sb, tok)
     console.log(u)
-    const dbR = await dbReadTrans(sb)
+    const dbR = await dbReadTrans(sb, pid)
+
+    // conv.json2file(jsonlist)
     console.log(dbR)
-    // u.then(x => getData(sb, x.id))
-    let jsonStr = ""// getData(sb, u.id)
-    return jsonStr
-
-}
-
-/** http apis  */
-export function newSupabase() {
-    let sb = createClient(
-        'https://cqriunspsjhvrvcazqri.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMjk5MDU0NCwiZXhwIjoxOTQ4NTY2NTQ0fQ.liAxCtDEkgqyslW1xtN5lpcUJMROiUj1Rsar67eoW00')
-    return sb
 }
 
 // https://supabase.io/docs/reference/javascript/select
@@ -41,45 +29,28 @@ async function writeData(sb: SupabaseClient, loggedInUserId: string, text: strin
 }
 
 // todo : how to auth?
-async function login(sb: SupabaseClient, jwt: string) {
+async function loginWithToken(sb: SupabaseClient, jwt: string) {
     let x = await sb.auth.api.getUser(jwt) // token works
     let user = x.user
     console.log(x.error)
     return user
 }
 
-// json file format 
-type jsonFormat = { key_id: string, text: string }
 
-function db2json() {
-    let e1
-}
 
-async function dbReadTrans(sb: SupabaseClient) {
-    // project
+async function dbReadProj(sb: SupabaseClient) {
     let prj = (await sb
         .from<definitions['project']>('project')
         .select('*')).data
 
-    console.log("prjs : ", prj)
+}
+async function dbReadTrans(sb: SupabaseClient, projId: string) {
+    let translations = await sb
+        .from<definitions['translation']>('translation')
+        .select('*')
+        .match({ id: projId })
 
-    let r = prj?.flatMap(async x => {
-        let id = x.id
-        let trans = await sb
-            .from<definitions['key']>('key')
-            .select('*')
-            .match({ project_id: id }).then(keys => {
-                let translations = sb
-                    .from<definitions['translation']>('translation')
-                    .select('*')
-                    .in('key_id', keys.data?.map((key) => key.id) ?? [])
-
-                return translations
-            })
-
-        return trans.data
-    })
-    return r;
+    return pgResp2val(translations)
 }
 
 type dbGetArgs = {
@@ -108,18 +79,9 @@ export async function dbRead(sb: SupabaseClient, args: dbGetArgs) {
     const translations = await sb
         .from<definitions['translation']>('translation')
         .select('*')
-        .in('key_id', keys.data?.map((key) => key.id) ?? []);
+    // .in('key_id', keys.data?.map((key) => key.id) ?? []);
 
 }
-
-    // old: userid => permissions=>projects=>id of translations
-    //new : user -> org -> project -> keys
-    // const x: definitions['user'] | null = null
-    // x.id
-    // let usersO = await sb.from<definitions['user']>('user').select('*').eq('id', loggedInUserId).single()
-    // usersO.data.
-    // let orgO = await sb.from<definitions['organization']>('organization').select('*').eq('id', loggedInUserId).single()
-    // just select all projs,non authed will not be returned
 
 
         // userid => permissions=>projects=>id of translations

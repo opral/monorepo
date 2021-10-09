@@ -40,8 +40,7 @@
 	 */
 	function languageProgress(iso: definitions['language']['iso_code']) {
 		const allTranslations =
-			$projectStore.data?.translations.filter((translation) => translation.language_iso === iso) ??
-			[];
+			$projectStore.data?.translations.filter((translation) => translation.iso_code === iso) ?? [];
 		const missingReview = allTranslations.filter(
 			(translation) => translation.is_reviewed === false
 		);
@@ -51,7 +50,7 @@
 	function numWords(iso: definitions['language']['iso_code']): number {
 		let result = 0;
 		$projectStore.data?.translations
-			.filter((translation) => translation.language_iso === iso)
+			.filter((translation) => translation.iso_code === iso)
 			.forEach((translation) => {
 				result += (translation.text.split(' ') ?? []).length;
 			});
@@ -81,7 +80,7 @@
 				isoCode: language.iso_code,
 				words: numWords(language.iso_code),
 				progress: languageProgress(language.iso_code),
-				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_language_iso,
+				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_iso_code,
 				languageObject: language
 			}))
 			.sort((a, b) => ISO6391.getName(a.isoCode).localeCompare(ISO6391.getName(b.isoCode)));
@@ -116,7 +115,7 @@
 			<div class="flex items-center space-x-2">
 				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
 				<Tag>{cell.value}</Tag>
-				{#if cell.value === $projectStore.data?.project.default_language_iso}
+				{#if cell.value === $projectStore.data?.project.default_iso_code}
 					<Tag type="green">default</Tag>
 				{/if}
 			</div>
