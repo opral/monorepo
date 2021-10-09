@@ -1,48 +1,30 @@
 <script lang="ts">
 	import {
 		Button,
-		Search,
 		DataTable,
-		PaginationNav,
 		Tag,
-		ProgressBar,
-		Tooltip,
 		Toolbar,
-		ToolbarMenu,
 		ToolbarContent,
 		ToolbarBatchActions,
 		ToolbarSearch,
-		ToolbarMenuItem,
-		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
-	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
-	import AddMemberModal from '$lib/components/modals/AddMemberModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
-	import { onMount, afterUpdate } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { definitions } from '@inlang/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
 
-	import { InlineNotification, Content } from 'carbon-components-svelte';
-	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
-
-	//export let name = '';
-
-	let showAddOrganizationModal = false;
 	let showAddProjectModal = false;
-	let showMoreModal = false;
-	let showAddMemberModal = false;
+	// let showMoreModal = false;
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
 	let selectedOrgId: string | null = null;
-	let selectedProjId: string | null = null;
 
 	let projects: DatabaseResponse<definitions['project'][]>;
 	let organizations: DatabaseResponse<definitions['organization'][]>;
@@ -91,7 +73,8 @@
 			.map((project) => ({
 				id: project.id,
 				name: project.name,
-				organization: organizations.data?.filter((org) => org.id == project.organization_id)[0].name
+				organization: organizations.data?.filter((org) => org.id === project.organization_id)[0]
+					.name
 			}));
 	};
 </script>
@@ -133,10 +116,10 @@
 					iconDescription="More"
 					on:click={() => {
 						// addMemberModal = row.id;
-						showMoreModal = true;
+						// showMoreModal = true;
 					}}
 				/>
-			{:else if cell.key == 'organization'}
+			{:else if cell.key === 'organization'}
 				{cell.value}
 			{:else}
 				{cell.value}
