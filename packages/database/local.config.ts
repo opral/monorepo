@@ -6,7 +6,17 @@ const anonKey =
 
 export const supabase = createClient("http://localhost:8000", anonKey);
 
-export const mockUser = {
+export interface MockUser {
+  email: string;
+  password: string;
+}
+
+export const mockUser : MockUser = {
   email: "dev@account.com",
   password: "dev@account.com",
+};
+
+export const mockUser2 : MockUser = {
+  email: "user@account.com",
+  password: "user@account.com",
 };

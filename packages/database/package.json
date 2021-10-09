@@ -5,15 +5,15 @@
   "type": "commonjs",
   "types": "./types/definitions.ts",
   "scripts": {
-    "start": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npm run push && npm run seed",
-    "stop": "docker-compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
+    "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npm run push && npm run seed",
+    "stop": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
     "dashboard": "npx prisma studio",
     "test": "jest",
     "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts",
     "seed": "npm run apply-triggers && npm run apply-policies && ts-node prisma/seed.ts",
     "create-migration": "npx prisma migrate dev --create-only",
     "push": "npx prisma db push",
-    "deploy-to-production": "npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
+    "deploy-to-production": "npm test && npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
     "apply-triggers": "ts-node prisma/apply_triggers.ts",
     "apply-policies": "ts-node prisma/apply_policies.ts"
   },
