@@ -1,44 +1,80 @@
 <script lang="ts">
-    // TODO: Implement actual machine translation
+	import { Modal, TextArea } from 'carbon-components-svelte';
+	import { projectStore } from '$lib/stores/projectStore';
+	import { database } from '$lib/services/database';
+	import type { definitions } from '@inlang/database';
+	import { createEventDispatcher } from 'svelte';
 
-    import {Button, ButtonSet, Modal, Tab, TabContent, Tabs, TextArea} from "carbon-components-svelte";
+	export let open = false;
+	export let key = '';
+	export let translations = [];
 
-    export let isOpen = false;
-    export let isMachineTranslation = true; // This should be local settings
-    // Default values for understanding, will be removed once implemented
-    export let original = "Settings";
-    export let translations = {de: "Einstillinger", da: "Indstillinger"}; // Sounds more fun than einstellungen
-    export let hasNewTranslations = false; // Will be true when user submits new translations
+	$: isBaseTranslationMissing = !translations.some(
+		(t) => t.text !== '' && t.iso_code === $projectStore.data.project.default_iso_code
+	);
+	const dispatch = createEventDispatcher();
 
-    let originalTranslations = {...translations};
+	async function save() {
+		let query;
+		for (const t of translations) {
+			if (t.text !== '') {
+				if (
+					$projectStore.data.translations.some(
+						(translation) =>
+							translation.iso_code === t.iso_code &&
+							translation.key_name === key &&
+							translation.project_id === $projectStore.data.project.id
+					)
+				) {
+					query = await database
+						.from<definitions['translation']>('translation')
+						.update({ text: t.text })
+						.eq('key_name', t.key_name)
+						.eq('project_id', $projectStore.data.project.id)
+						.eq('iso_code', t.iso_code);
+				} else {
+					query = await database.from<definitions['translation']>('translation').insert({
+						project_id: $projectStore.data.project.id,
+						key_name: key,
+						iso_code: t.iso_code,
+						is_reviewed: false,
+						text: t.text
+					});
+				}
+				if (query.error) {
+					alert(query.error.message);
+				} else {
+					dispatch('updateRows');
+				}
+			}
+		}
+	}
 </script>
 
 <Modal
-        bind:isOpen
-    modalHeading="Translation Card"
-    size="sm"
-    hasform
-    primaryButtonText="Confirm translations"
-    secondaryButtonText="Cancel"
-    on:click:button--secondary={() => (isOpen = false)}
-    on:submit={() => {isOpen = false; hasNewTranslations = true}}
-    preventCloseOnClickOutside
+	bind:open
+	modalHeading={key}
+	size="sm"
+	primaryButtonText="Approve"
+	secondaryButtonText="Cancel"
+	on:click:button--secondary={() => {
+		open = false;
+	}}
+	on:submit={() => {
+		open = false;
+		save();
+	}}
+	preventCloseOnClickOutside
+	hasScrollingContent
+	shouldSubmitOnEnter={false}
 >
-        <Tabs>
-            {#each Object.keys(originalTranslations) as lang}
-                <Tab>{lang}</Tab>
-            {/each}
-            <div slot="content">
-                {#each Object.keys(originalTranslations) as lang}
-                <TabContent>
-                    <TextArea rows={10} labelText="Translated text:" bind:value={translations[lang]}/>
-                    <ButtonSet>
-                        <Button kind="secondary" on:click={() => translations[lang] = originalTranslations[lang]}>Reset</Button>
-                        <Button disabled={isMachineTranslation === false} on:click={() => translations[lang] += " but cooler"}>Machine Translation</Button>
-                    </ButtonSet>
-                    <TextArea rows={10} labelText="Original text:" disabled placeholder={original}/>
-                </TabContent>
-                {/each}
-            </div>
-        </Tabs>
+	<div>
+		{#each $projectStore.data.languages as lang, i}
+			<div class="flex items-center">
+				{#if translations.length > 0}
+					<TextArea labelText="{lang.iso_code}:" bind:value={translations[i].text} />
+				{/if}
+			</div>
+		{/each}
+	</div>
 </Modal>
