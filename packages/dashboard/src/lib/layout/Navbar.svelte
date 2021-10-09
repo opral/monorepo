@@ -24,7 +24,7 @@
 	</div>
 	<HeaderNav>
 		<HeaderNavItem href="/project" text="Projects" />
-		<!-- <HeaderNavItem href="/organization" text="Organizations" /> -->
+		<HeaderNavItem href="/organization" text="Organizations" />
 	</HeaderNav>
 
 	<HeaderUtilities>

@@ -18,7 +18,9 @@
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
+	import AddMemberModal from '$lib/components/modals/AddMemberModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
+	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount, afterUpdate } from 'svelte';
 	import type { definitions } from '@inlang/database';
@@ -35,7 +37,6 @@
 	let showAddProjectModal = false;
 	let showMoreModal = false;
 	let showAddMemberModal = false;
-
 	// as entered in the search bar
 	$: searchQuery = '';
 
@@ -60,15 +61,6 @@
 		isLoading = false;
 	});
 
-	async function handleOrganizationUpdate() {
-		organizations = await database.from<definitions['organization']>('organization').select();
-
-		if (organizations.error) {
-			alert(organizations.error);
-		}
-		isLoading = false;
-	}
-
 	async function handleProjectUpdate() {
 		projects = await database.from<definitions['project']>('project').select();
 
@@ -80,6 +72,7 @@
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
+		{ key: 'organization', value: 'Organization' },
 		{ key: 'more', empty: true }
 	];
 
@@ -97,19 +90,9 @@
 			})
 			.map((project) => ({
 				id: project.id,
-				name: project.name
+				name: project.name,
+				organization: organizations.data?.filter((org) => org.id == project.organization_id)[0].name
 			}));
-	};
-
-	$: rows_organizations = () => {
-		if (isLoading || organizations.error || organizations.data === null) {
-			return [];
-		}
-		// TODO: sort the organizations alphabetically
-		return organizations.data.map((organization) => ({
-			id: organization.id,
-			name: organization.name
-		}));
 	};
 </script>
 
@@ -117,82 +100,50 @@
 	<Loading />
 {/if}
 
-<grid class="grid-cols-2">
-	<div class="p-2">
-		<div class="pt-8 pb-8">
-			<h1>Your Organizations</h1>
-		</div>
-		<DataTable {headers} rows={rows_organizations()}>
-			<Toolbar>
-				<ToolbarBatchActions class="bg-danger">
-					<Button icon={Delete16} kind="danger">Delete</Button>
-				</ToolbarBatchActions>
-				<ToolbarContent>
-					<ToolbarSearch placeholder="Search organization" />
-					<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
-				</ToolbarContent>
-			</Toolbar>
-			<span slot="cell" let:row let:cell on:click={() => (selectedOrgId = row.id)}>
-				{#if cell.key === 'name'}
-					<div class="flex items-center space-x-2">
-						<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
-						<p class="text-sm">{cell.value}</p>
-					</div>
-				{:else if cell.key === 'more'}
-					<Button
-						kind="ghost"
-						icon={OverflowMenuHorizontal32}
-						iconDescription="More"
-						on:click={() => {
-							// selectedShowMoreModal = row.id;
-							showMoreModal = true;
-						}}
-					/>
-				{:else}
-					{cell.value}
-				{/if}
-			</span>
-		</DataTable>
+<div class="p-2">
+	<div class="pt-8 pb-8">
+		<h1>Projects</h1>
 	</div>
-
-	<div class="p-2">
-		<div class="pt-8 pb-8">
-			<h1>Projects</h1>
-		</div>
-		<DataTable {headers} rows={rows_projects()}>
-			<Toolbar>
-				<ToolbarBatchActions class="bg-danger">
-					<Button icon={Delete16} kind="danger">Delete</Button>
-				</ToolbarBatchActions>
-				<ToolbarContent>
-					<ToolbarSearch placeholder="Search project" />
-					<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
-				</ToolbarContent>
-			</Toolbar>
-			<span slot="cell" let:row let:cell on:click={() => goto(`/project/${row.id}`)}>
-				{#if cell.key === 'name'}
-					<div class="flex items-center space-x-2">
-						<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
-						<p class="text-sm">{cell.value}</p>
-					</div>
-				{:else if cell.key === 'more'}
-					<!-- TODO: add more button should be an add member button -->
-					<Button
-						kind="ghost"
-						icon={OverflowMenuHorizontal32}
-						iconDescription="More"
-						on:click={() => {
-							// addMemberModal = row.id;
-							showMoreModal = true;
-						}}
-					/>
-				{:else}
-					{cell.value}
-				{/if}
-			</span>
-		</DataTable>
-	</div>
-</grid>
+	<DataTable {headers} rows={rows_projects()}>
+		<Toolbar>
+			<ToolbarBatchActions class="bg-danger">
+				<Button icon={Delete16} kind="danger">Delete</Button>
+			</ToolbarBatchActions>
+			<ToolbarContent>
+				<ToolbarSearch placeholder="Search project" />
+				<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
+			</ToolbarContent>
+		</Toolbar>
+		<span
+			slot="cell"
+			let:row
+			let:cell
+			on:click={() => goto(`/project/${row.id}`)}
+			class="cursor-pointer"
+		>
+			{#if cell.key === 'name'}
+				<div class="flex items-center space-x-2">
+					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+					<p class="text-sm">{cell.value}</p>
+				</div>
+			{:else if cell.key === 'more'}
+				<Button
+					kind="ghost"
+					icon={OverflowMenuHorizontal32}
+					iconDescription="More"
+					on:click={() => {
+						// addMemberModal = row.id;
+						showMoreModal = true;
+					}}
+				/>
+			{:else if cell.key == 'organization'}
+				{cell.value}
+			{:else}
+				{cell.value}
+			{/if}
+		</span>
+	</DataTable>
+</div>
 
 {#if showAddProjectModal}
 	<ProjectModal
@@ -200,15 +151,6 @@
 		heading="Add project"
 		projectName=""
 		on:updateProjects={handleProjectUpdate}
-	/>
-{/if}
-
-{#if showAddOrganizationModal}
-	<OrganizationModal
-		bind:open={showAddOrganizationModal}
-		heading="Add organization"
-		organizationName=""
-		on:updateOrganizations={handleOrganizationUpdate}
 	/>
 {/if}
 

@@ -34,6 +34,7 @@
 	import { database } from '$lib/services/database';
 
 	let showAddEntityModal = false;
+	let showAddOrganizationModal = false;
 	let showMoreModal = false;
 	let goToProject = false;
 
@@ -52,6 +53,15 @@
 		}
 		isLoading = false;
 	});
+
+	async function handleOrganizationUpdate() {
+		organizations = await database.from<definitions['organization']>('organization').select();
+
+		if (organizations.error) {
+			alert(organizations.error);
+		}
+		isLoading = false;
+	}
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
@@ -95,9 +105,10 @@
 			</ToolbarBatchActions>
 			<ToolbarContent>
 				<ToolbarSearch placeholder="Search organization" />
-				<Button on:click={() => (showAddEntityModal = true)}>Add organization</Button>
+				<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
 			</ToolbarContent>
 		</Toolbar>
+		<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
 		<span
 			slot="cell"
 			let:row
@@ -130,9 +141,13 @@
 	<Pagination totalItems={102} page={4} />
 </div>
 
-<!-- TODO -->
-{#if showAddEntityModal}
-	<OrganizationModal open={true} heading="Add project" organizationName="" />
+{#if showAddOrganizationModal}
+	<OrganizationModal
+		bind:open={showAddOrganizationModal}
+		heading="Add project"
+		organizationName=""
+		on:updateOrganizations={handleOrganizationUpdate}
+	/>
 {/if}
 
 <!-- Do we need a more button? -->
