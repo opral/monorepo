@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import program from "commander";
 import { createClient } from "@supabase/supabase-js";
 import { definitions } from "@inlang/database";
