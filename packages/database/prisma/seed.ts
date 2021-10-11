@@ -85,6 +85,11 @@ async function main() {
                 translations: {
                   create: [
                     { iso_code: "en", text: "Confirm", is_reviewed: true },
+                    {
+                      iso_code: "de",
+                      text: "Bestätigen",
+                      is_reviewed: true,
+                    },
                   ],
                 },
               },
