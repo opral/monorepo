@@ -5,10 +5,12 @@ development purposes and auto generated types for type safety.
 
 ## Scripts
 
+> :warning: Some commands time out, don't work. Reason is unknown. Re-running the script usually works.
+
 > :bulb: Docker needs to be installed on your computer and be assigned more than 2GB of RAM (on Mac/Windows).
 
 - `npm start`  
-  Starts a local instance of the database with seeding and application of triggers and policies (ready to consume in front-end etc.).
+  Starts a local instance of the database with migrations, seeding and application of triggers and policies (ready to consume in front-end etc.).
 
 - `npm stop`  
   Stops the local instance of the database and removes all containers.
@@ -20,7 +22,12 @@ development purposes and auto generated types for type safety.
 - `npm test`  
   Runs all tests in the `/test` directory
 
-- `npm generate-types`  
+- `npm generate-types`
+
+  > :warning: Seems like this command only works when the schema has been applied with `npx prisma db push`.
+  > Thus, don't run `npm run start` but `docker-compose ...(see npm start script in packag.json)` followed by
+  > the push command and then this command.
+
   Extracts the types from the SQL schema. The local instance of the database has to be running to succeed.
 
 - `npm seed`  
@@ -30,13 +37,7 @@ development purposes and auto generated types for type safety.
 
   > :warning: Do not use the underlying command "npx prisma db migrate" without the "--create--only" flag. It bricks the database, see [stackoverflow](https://stackoverflow.com/questions/67551593/supabase-client-permission-denied-for-schema-public)
 
-  Creates migration files based on differences in the `schema.prisma` file the previous migrations **but does not push the changes**.
-
-- `npm push`
-
-  > :warning: Do not use on production instance! Use `npm deploy-to-production` instead.
-
-  Pushes/applies the current schema to the database without taking migrations into account. Great for development purposes, horrible for the production instance.
+  Creates migration files based on differences in the `schema.prisma` file the previous migrations.
 
 - `npm apply-triggers`  
   The triggers are not covered by SQL migration files/prisma and have to be applied separately.

@@ -1,7 +1,8 @@
 datasource db {
-  provider = "postgresql"
+  provider          = "postgresql"
   // localhost database.
-  url      = "postgres://postgres:postgres@localhost:5432/postgres"
+  url               = "postgres://postgres:postgres@localhost:5432/postgres"
+  shadowDatabaseUrl = "postgres://postgres:shadow@localhost:9432/postgres"
   //! production database
   // url      = env("PRODUCTION_DATABASE_URL")
 }
@@ -11,12 +12,13 @@ generator client {
 }
 
 model organization {
-  id                 String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name               String
   projects           project[]
   // the user id is benefitial to insert an admin membership to the user
-  // who created the organization. It defaults to the auth.uid() and has no relation
-  created_by_user_id String    @default(dbgenerated("auth.uid()")) @db.Uuid
+  // who created the organization. 
+  // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
+  created_by_user_id String    @db.Uuid
   members            member[]
   created_at         DateTime  @default(now())
 }
@@ -33,7 +35,7 @@ model member {
   organization    organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   user_id         String       @db.Uuid
   user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  role            member_role 
+  role            member_role
 
   @@id([organization_id, user_id])
 }
@@ -45,7 +47,7 @@ enum member_role {
 }
 
 model project {
-  id               String        @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   api_key          String        @unique
   name             String
   organization_id  String        @db.Uuid

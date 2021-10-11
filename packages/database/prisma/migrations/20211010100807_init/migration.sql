@@ -6,9 +6,9 @@ CREATE TYPE "iso_639_1" AS ENUM ('ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an',
 
 -- CreateTable
 CREATE TABLE "organization" (
-    "id" UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
-    "created_by_user_id" UUID NOT NULL DEFAULT auth.uid(),
+    "created_by_user_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "organization_pkey" PRIMARY KEY ("id")
@@ -34,7 +34,7 @@ CREATE TABLE "member" (
 
 -- CreateTable
 CREATE TABLE "project" (
-    "id" UUID NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "api_key" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "organization_id" UUID NOT NULL,

@@ -109,6 +109,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_PORT: 5432
+  db-shadow:
+    container_name: supabase-db-shadow
+    build:
+      context: ./postgres
+    ports:
+      - 9432:5432
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: shadow
+      POSTGRES_PORT: 5432
   mail:
     container_name: supabase-mail
     image: inbucket/inbucket:stable
