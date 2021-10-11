@@ -113,4 +113,4 @@ services:
     container_name: supabase-mail
     image: inbucket/inbucket:stable
     ports:
-      - 9000:9000
+      - 9002:9002
