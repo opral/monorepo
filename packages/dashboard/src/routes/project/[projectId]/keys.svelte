@@ -135,7 +135,6 @@
 	async function handleFinishBase(event) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
-		console.log(event.detail);
 		openTranslationModal(
 			$projectStore.data.translations.filter(
 				(t) => t.key_name === event.detail && t.project_id === $projectStore.data.project.id

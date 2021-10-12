@@ -1,6 +1,6 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
-import translate, { DeeplLanguages } from 'deepl';
+import { DeeplLanguages } from 'deepl';
 // import { supabaseServerSide } from './_services/supabase';
 
 dotenv.config();
@@ -18,7 +18,9 @@ export type TranslateResponseBody = {
 	targetLang: DeeplLanguages;
 };
 
-export type TranslateSupportedLanguages = DeeplLanguages;
+type deeplResponse = {
+	translations: { detected_source_lang: string; text: string }[];
+};
 
 export async function post(request: Request): Promise<EndpointOutput<TranslateResponseBody>> {
 	if (request.headers['content-type'] !== 'application/json') {
@@ -35,31 +37,40 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 	// 	};
 	// }
 	const translateRequest = (request.body as unknown) as TranslateRequestBody;
-	const result = await translate({
-		text: wrapVariablesInTags(translateRequest.text),
-		// source_lang: translateRequest.sourceLang,
-		target_lang: translateRequest.targetLang,
-		free_api: true,
-		auth_key: deeplKey,
-		formality: 'less',
-		tag_handling: ['xml'],
-		ignore_tags: ['variable']
+	const body =
+		'auth_key=' +
+		deeplKey +
+		'&text=' +
+		wrapVariablesInTags(translateRequest.text) +
+		'&target_lang=' +
+		translateRequest.targetLang +
+		'&source_lang=' +
+		translateRequest.sourceLang;
+
+	return new Promise((resolve, reject) => {
+		fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/x-www-form-urlencoded'
+			}),
+			body: body
+		})
+			.then((response: Response) => {
+				return response.json();
+			})
+			.then((response: deeplResponse) =>
+				resolve({
+					body: {
+						text: response.translations[0].text,
+						targetLang: translateRequest.targetLang
+					},
+					status: 200
+				})
+			)
+			.catch((error) => {
+				console.log(error);
+			});
 	});
-	if (result.status !== 200) {
-		return {
-			status: result.status
-		};
-	} else if (result.data.translations.length !== 1) {
-		return {
-			status: 500
-		};
-	}
-	return {
-		body: {
-			text: removeVariableTags(result.data.translations[0].text),
-			targetLang: translateRequest.targetLang
-		}
-	};
 }
 
 /**

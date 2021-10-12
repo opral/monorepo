@@ -7,11 +7,18 @@
 
 	export let open = false;
 	export let key = '';
-	export let translations = [];
+	export let translations: definitions['translations'][] = [];
 
 	$: isBaseTranslationMissing = !translations.some(
 		(t) => t.text !== '' && t.iso_code === $projectStore.data.project.default_iso_code
 	);
+
+	$: missingTranslations = $projectStore.data.languages.filter((language) =>
+		$projectStore.data.translations
+			.map((translation) => translation.iso_code)
+			.includes(language.iso_code === false)
+	);
+
 	const dispatch = createEventDispatcher();
 
 	async function save() {
@@ -69,11 +76,14 @@
 	shouldSubmitOnEnter={false}
 >
 	<div>
-		{#each $projectStore.data.languages as lang, i}
+		{#each translations as translation}
 			<div class="flex items-center">
-				{#if translations.length > 0}
-					<TextArea labelText="{lang.iso_code}:" bind:value={translations[i].text} />
-				{/if}
+				<TextArea labelText="{translation.iso_code}:" bind:value={translation.text} />
+			</div>
+		{/each}
+		{#each missingTranslations as miss}
+			<div class="flex items-center">
+				<TextArea labelText="{missingTranslations.iso_code}:" />
 			</div>
 		{/each}
 	</div>

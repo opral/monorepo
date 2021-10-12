@@ -9,6 +9,33 @@
 	import { createEventDispatcher } from 'svelte';
 	import { page } from '$app/stores';
 
+	const deeplLanguages = [
+		'BG',
+		'CS',
+		'DA',
+		'DE',
+		'EL',
+		'EN',
+		'ES',
+		'ET',
+		'FI',
+		'FR',
+		'HU',
+		'IT',
+		'JA',
+		'LT',
+		'LV',
+		'NL',
+		'PL',
+		'PT',
+		'RO',
+		'RU',
+		'SK',
+		'SL',
+		'SV',
+		'ZH'
+	];
+
 	export let open;
 	export let key;
 
@@ -21,21 +48,30 @@
 		let urls = [];
 		for (const l of $projectStore.data.languages) {
 			if (l.iso_code !== $projectStore.data.project.default_iso_code) {
-				let request: TranslateRequestBody = {
-					sourceLang: 'EN',
-					targetLang: l.iso_code.toUpperCase(),
-					text: text
-				};
-				urls.push({
-					url: '/api/translate',
-					params: {
-						method: 'post',
-						headers: new Headers({ 'content-type': 'application/json' }),
-						body: JSON.stringify(request)
-					}
-				});
+				if (deeplLanguages.indexOf(l.iso_code.toUpperCase()) !== -1) {
+					let request: TranslateRequestBody = {
+						sourceLang: 'EN',
+						targetLang: l.iso_code.toUpperCase(),
+						text: text
+					};
+					urls.push({
+						url: '/api/translate',
+						params: {
+							method: 'post',
+							headers: new Headers({ 'content-type': 'application/json' }),
+							body: JSON.stringify(request)
+						}
+					});
+				} else {
+					await database.from<definitions['translation']>('translation').insert({
+						key_name: key,
+						project_id: $projectStore.data.project.id,
+						iso_code: l.iso_code,
+						is_reviewed: false,
+						text: ''
+					});
+				}
 			} else {
-				console.log(l.iso_code);
 				await database.from<definitions['translation']>('translation').insert({
 					key_name: key,
 					project_id: $projectStore.data.project.id,
@@ -60,7 +96,6 @@
 
 				for (const r of json) {
 					r.then(async (v) => {
-						console.log(v);
 						await database.from<definitions['translation']>('translation').insert({
 							key_name: key,
 							project_id: $projectStore.data.project.id,
@@ -80,7 +115,15 @@
 					open = false;
 				}, 1000);
 			})
-			.catch((errors) => errors.forEach((isLoading = -1)));
+			.catch((errors) => {
+				console.log(errors);
+				isLoading = -1;
+				setTimeout(() => {
+					isLoading = 0;
+					translation = '';
+					open = false;
+				});
+			});
 	}
 </script>
 
