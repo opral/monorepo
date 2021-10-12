@@ -1,4 +1,6 @@
 import type { definitions } from "@inlang/database";
+import { database } from "@inlang/dashboard/src/lib/services/database";
+
 
 type File = {
   path: string;
@@ -41,7 +43,7 @@ export function exportI18nNext(args: {
   // and not the values
   for (const iso in allTranslations) {
     files.push({
-      path: `${iso}/translation.json`,
+      path: `./public/locales/${iso}/translation.json`,
       content: allTranslations[iso]!,
     });
   }
@@ -50,3 +52,13 @@ export function exportI18nNext(args: {
     files: files,
   };
 }
+
+/*
+  export async function importI18next( args: {obj: Object;}) {
+
+    console.log("obj");
+    console.log(args);
+    await database.from('messages').upsert({});
+
+  }
+*/
