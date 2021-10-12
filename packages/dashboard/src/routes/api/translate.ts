@@ -5,6 +5,7 @@ import { DeeplLanguages } from 'deepl';
 
 dotenv.config();
 
+const formality = "less"; // Hard coded formality option
 const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
 
 export type TranslateRequestBody = {
@@ -45,7 +46,9 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'&target_lang=' +
 		translateRequest.targetLang +
 		'&source_lang=' +
-		translateRequest.sourceLang;
+		translateRequest.sourceLang +
+		'formality=' +
+		formality;
 
 	return new Promise((resolve, reject) => {
 		fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
