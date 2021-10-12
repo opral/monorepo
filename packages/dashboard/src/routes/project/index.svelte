@@ -10,6 +10,8 @@
 		Loading
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
+	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
+	//import AddMemberModal from '$lib/components/modals/AddMemberModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
@@ -18,13 +20,21 @@
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
 
+	import { InlineNotification, Content } from 'carbon-components-svelte';
+	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
+	import { page } from '$app/stores';
+
+	//export let name = '';
+
+	let showAddOrganizationModal = false;
 	let showAddProjectModal = false;
 	// let showMoreModal = false;
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
-	let selectedOrgId: string | null = null;
+	let selectedOrgId: string | null = $page.query.get('organization');
+	let selectedProjId: string | null = null;
 
 	let projects: DatabaseResponse<definitions['project'][]>;
 	let organizations: DatabaseResponse<definitions['organization'][]>;
@@ -77,6 +87,8 @@
 					.name
 			}));
 	};
+
+	console.log($page.query.get('organization'));
 </script>
 
 {#if isLoading}

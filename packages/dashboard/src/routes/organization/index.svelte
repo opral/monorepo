@@ -32,6 +32,8 @@
 	import type { definitions } from '@inlang/database/types/definitions';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	let showAddEntityModal = false;
 	let showAddOrganizationModal = false;
@@ -109,12 +111,7 @@
 			</ToolbarContent>
 		</Toolbar>
 		<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
-		<span
-			slot="cell"
-			let:row
-			let:cell
-			on:click={() => ((selectedOrgId = row.id), (goToProject = true))}
-		>
+		<span slot="cell" let:row let:cell on:click={() => goto(`/project/?organization=${row.id}`)}>
 			{#if cell.key === 'name'}
 				<div class="flex items-center space-x-2">
 					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
