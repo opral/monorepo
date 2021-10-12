@@ -1,14 +1,8 @@
 <script lang="ts">
-	import Edit24 from 'carbon-icons-svelte/lib/Edit24';
 	import { projectStore } from '$lib/stores/projectStore';
 
 	import {
 		ProgressBar,
-		Breadcrumb,
-		BreadcrumbItem,
-		CodeSnippet,
-		Pagination,
-		Button,
 		PaginationNav
 	} from 'carbon-components-svelte';
 

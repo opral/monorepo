@@ -1,38 +1,24 @@
 <script lang="ts">
 	import {
 		Button,
-		Search,
 		DataTable,
-		PaginationNav,
 		Tag,
-		ProgressBar,
-		Tooltip,
 		Toolbar,
-		ToolbarMenu,
 		ToolbarContent,
 		ToolbarBatchActions,
 		ToolbarSearch,
-		ToolbarMenuItem,
 		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
 
-	import { projectStore } from '$lib/stores/projectStore';
-	import { mockOrganization, mockProject } from '$lib/mockData';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
-	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
-	import Project from '../project/index.svelte';
 
-	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRIght16';
-	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
-	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
 	import type { definitions } from '@inlang/database/types/definitions';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
 	let showAddEntityModal = false;
