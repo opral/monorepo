@@ -36,10 +36,10 @@
 		'ZH'
 	];
 
-	export let open;
-	export let key;
+	export let open: boolean;
+	export let key: string;
 
-	let translation;
+	let translation: string;
 	const dispatch = createEventDispatcher();
 	let isLoading = 0;
 

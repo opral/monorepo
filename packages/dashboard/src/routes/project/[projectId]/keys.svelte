@@ -26,17 +26,27 @@
 		{ key: 'description', value: 'Description' },
 		{ key: 'overflow', empty: true }
 	];
-	let selectedRowIds;
 
-	let search = '';
-	let fullRows = [];
+	type row = {
+		id: number,
+		key: string,
+		description: string,
+		translations: translation[]
+	};
 
-	$: rows = fullRows.filter((row) => row.key.indexOf(search) !== -1);
+	let selectedRowIds: number[];
 
-	let createTranslationModal = { open: false, translations: [], key: '' };
-	let createKeyModal = { open: false, rows: fullRows, largestTableId: 0 };
+	let search: string = '';
+	let fullRows: row[] = [];
 
-	function openTranslationModal(translations: [], key: string) {
+	type translation = definitions['translation'];
+
+	$: rows = fullRows.filter((row: row) => row.key.indexOf(search) !== -1);
+
+	let createTranslationModal: {open: boolean, translations: List<translation[]>, key: string} = { open: false, translations: [], key: '' };
+	let createKeyModal: {open: boolean} = { open: false};
+
+	function openTranslationModal(translations: translation[], key: string) {
 		const translationsImmutable = List(translations);
 		createTranslationModal.translations = translationsImmutable.toJS();
 		createTranslationModal.key = key;
@@ -47,37 +57,41 @@
 
 	function updateRows() {
 		fullRows = [];
-		for (let i = 0; i < $projectStore.data.keys.length; i++) {
-			let translations = [];
-			for (let j = 0; j < $projectStore.data.languages.length; j++) {
+		for (let i = 0; i < $projectStore.data!.keys.length; i++) {
+			let translations: translation[] = [];
+			for (let j = 0; j < $projectStore.data!.languages.length; j++) {
 				if (
-					$projectStore.data.translations.some(
-						(t) =>
-							t.key_name === $projectStore.data.keys[i].name &&
-							t.project_id === $projectStore.data.project.id &&
-							t.iso_code === $projectStore.data.languages[j].iso_code
+					$projectStore.data!.translations.some(
+						(t: translation) =>
+							t.key_name === $projectStore.data!.keys[i].name &&
+							t.project_id === $projectStore.data!.project.id &&
+							t.iso_code === $projectStore.data!.languages[j].iso_code
 					)
 				) {
 					translations.push({
-						key_name: $projectStore.data.keys[i].name,
-						iso_code: $projectStore.data.languages[j].iso_code,
-						is_reviewed: $projectStore.data.translations.filter(
-							(t) =>
-								t.key_name === $projectStore.data.keys[i].name &&
-								t.project_id === $projectStore.data.project.id &&
-								t.iso_code === $projectStore.data.languages[j].iso_code
+						key_name: $projectStore.data!.keys[i].name,
+						project_id: $projectStore.data!.project.id,
+						iso_code: $projectStore.data!.languages[j].iso_code,
+						created_at: '',
+						is_reviewed: $projectStore.data!.translations.filter(
+							(t: translation) =>
+								t.key_name === $projectStore.data!.keys[i].name &&
+								t.project_id === $projectStore.data!.project.id &&
+								t.iso_code === $projectStore.data!.languages[j].iso_code
 						)[0].is_reviewed,
-						text: $projectStore.data.translations.filter(
-							(t) =>
-								t.key_name === $projectStore.data.keys[i].name &&
-								t.project_id === $projectStore.data.project.id &&
-								t.iso_code === $projectStore.data.languages[j].iso_code
-						)[0].text
+						text: $projectStore.data!.translations.find(
+							(t: translation) =>
+								t.key_name === $projectStore.data!.keys[i].name &&
+								t.project_id === $projectStore.data!.project.id &&
+								t.iso_code === $projectStore.data!.languages[j].iso_code
+						)!.text
 					});
 				} else {
 					translations.push({
-						key_name: $projectStore.data.keys[i].name,
-						iso_code: $projectStore.data.languages[j].iso_code,
+						key_name: $projectStore.data!.keys[i].name,
+						project_id: $projectStore.data!.project.id,
+						created_at: '',
+						iso_code: $projectStore.data!.languages[j].iso_code,
 						is_reviewed: false,
 						text: ''
 					});
@@ -85,13 +99,11 @@
 			}
 			fullRows.push({
 				id: i,
-				database_id: $projectStore.data.keys[i].id,
-				key: $projectStore.data.keys[i].name,
-				description: $projectStore.data.keys[i].description,
+				key: $projectStore.data!.keys[i].name,
+				description: $projectStore.data!.keys[i].description ?? '',
 				translations: translations
 			});
 		}
-		createKeyModal.largestTableId = $projectStore.data.keys.length;
 		fullRows = fullRows; // Force update for reactive
 	}
 
@@ -101,7 +113,7 @@
 		databaseReady = true;
 	});
 
-	async function deleteKeys(rowIds) {
+	async function deleteKeys(rowIds: number[]) {
 		let key;
 		for (const rowId of rowIds) {
 			key = fullRows.filter((element) => element.id === rowId)[0].key;
@@ -109,7 +121,7 @@
 				.from<definitions['key']>('key')
 				.delete()
 				.eq('name', key)
-				.eq('project_id', $projectStore.data.project.id);
+				.eq('project_id', $projectStore.data!.project.id);
 			if (deleteReq.error) {
 				alert(deleteReq.error.message);
 			} else {
@@ -120,7 +132,7 @@
 		selectedRowIds = [];
 	}
 
-	async function handleCreateKey(event) {
+	async function handleCreateKey(event: {detail: string}) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
 		console.log(event.detail);
@@ -132,23 +144,33 @@
 		updateRows();
 	}
 
-	async function handleFinishBase(event) {
+	async function handleFinishBase(event: {detail: string}) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
 		openTranslationModal(
-			$projectStore.data.translations.filter(
-				(t) => t.key_name === event.detail && t.project_id === $projectStore.data.project.id
+			$projectStore.data!.translations.filter(
+				(t: translation) => t.key_name === event.detail && t.project_id === $projectStore.data!.project.id
 			),
 			event.detail
 		);
 	}
 
-	let createBaseTranslationModal = { open: false, key: '' };
+	let createBaseTranslationModal: {open: boolean, key: string} = { open: false, key: '' };
 
 	function openBaseModal(key: string) {
 		createBaseTranslationModal.key = key;
 		createBaseTranslationModal.open = true;
 	}
+
+
+function checkIfBase(row: any) {
+	return row.translations.find((t: translation) => t.iso_code === $projectStore.data!.project.default_iso_code).text === "" ?? false;
+}
+
+
+function openCreateKeyModal() {
+	createKeyModal.open = true;
+}
 </script>
 
 <div class="p-8">
@@ -165,12 +187,12 @@
 				</ToolbarBatchActions>
 				<ToolbarContent>
 					<ToolbarSearch placeholder="Search your translations" bind:value={search} />
-					<Button on:click={() => (createKeyModal.open = true)}>Create key</Button>
+					<Button on:click={() => openCreateKeyModal()}>Create key</Button>
 				</ToolbarContent>
 			</Toolbar>
 			<span slot="cell" let:row let:cell>
 				{#if cell.key === 'overflow'}
-					{#if row.translations.filter((t) => t.iso_code === $projectStore.data.project.default_iso_code)[0].text !== ''}
+					{#if !checkIfBase(row)}
 						<Button
 							on:click={() => openTranslationModal(row.translations, row.key)}
 							iconDescription="Modify translation"
@@ -202,8 +224,6 @@
 />
 <CreateKeyModal
 	bind:open={createKeyModal.open}
-	rows={createKeyModal.rows}
-	largestTableId={createKeyModal.largestTableId}
 	on:createKey={handleCreateKey}
 />
 <CreateBaseTranslationModal
