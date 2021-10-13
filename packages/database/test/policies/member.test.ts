@@ -15,17 +15,11 @@ beforeEach(async () => {
 });
 
 describe("policies/member", () => {
-    test("Member can only select themself", async () => {
-        const user = await supabase.from<definitions["user"]>("user")
-          .select();
+    test("Member can select coworkers", async () => {
         const members = await supabase.from<definitions["member"]>("member")
             .select();
-        let invalid = 0;
-        members.data!.forEach(m => {
-          if (m.user_id !== user.data![0].id) {
-            invalid++;
-          }
-        });
-        expect(invalid).toEqual(0); 
+        if (members.error) console.error(members.error.message);
+        console.log(members)
+        expect(members.data?.length).toEqual(3); 
     })
 })
