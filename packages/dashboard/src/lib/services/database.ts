@@ -1,6 +1,6 @@
 import { createClient, User } from '@supabase/supabase-js';
 import type { DatabaseResponse } from '$lib/types/databaseResponse';
-import type { definitions } from '@inlang/database';
+import type { definitions } from '../../../../database';
 
 const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string;
@@ -12,7 +12,7 @@ export const database = supabase;
  * Upserts the user to the database. Use for login/registration.
  *
  * Supabase has an internal `auth.user` table. Whatever supabase.auth
- * returns needs to be mirrored in the public.user table.
+ * returns needs to be mirrored in the public.user table.	
  * Long term, a postgres function could be used for that. Someone might think: that's what a view
  * is for! You're right, but a view does not work with Row-Level-Security.
  */

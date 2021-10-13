@@ -9,14 +9,6 @@ import { database } from "../../dashboard/src/lib/services/database"; // is this
 
 // anon local key, thus okay if it's hardcoded
 
-function ensureJSONExistence(filePath: string) {
-  var dirname = path.dirname(filePath);
-  if (fs.existsSync(dirname)) {
-    return true;
-  }
-  ensureJSONExistence(dirname);
-  fs.mkdirSync(dirname);
-}
 
 async function entry() {
   const args = process.argv;
@@ -27,8 +19,8 @@ async function entry() {
     .parse(args);
 
   let argParsed = program.parse(args).opts();
-  let pid = args[3];
-  let filepath = args[4];
+  let pid = args[4];
+  let filepath = args[6];
   if (!argParsed.project === null) {
     pid = argParsed.project;
     filepath = argParsed.file;
@@ -38,24 +30,27 @@ async function entry() {
   }
   //add all locales to list
   let localefiles: any = {};
+  console.log("this is filepath:", filepath)
 
   if (filepath.includes(".json")) {
-    let x = filepath.split("/")[0];
-    localefiles[x] = filepath;
+    let locale = filepath.split("/")[0];
+    localefiles[locale] = filepath;
   } else if (filepath === ".") {
-    //  console.log("filesync", fs.readFileSync("./"));
+    console.log("test");
     const locales = fs.readdirSync("./");
-    for (let x of locales) {
-      localefiles[x] = x.concat("translation.json");
+    for (let locale of locales) {
+      localefiles[locale] = locale.concat("/translation.json");
     }
   } else {
     console.error("Seems like there is an error in the filepath");
   }
 
-  for (let x in localefiles) {
+  for (let locale in localefiles) {
     // iterate over all locales
     //load in locale
-    const dataObject = JSON.parse(fs.readFileSync(filepath).toString()); // is it best practice that const has type any
+    const dataObject = JSON.parse(fs.readFileSync(localefiles[locale]).toString()); // is it best practice that const has type any
+    console.log(dataObject);
+    /*
     for (let y in dataObject) {
       database.from<definitions["key"]>("key").upsert({
         project_id: pid,
@@ -68,12 +63,13 @@ async function entry() {
       database.from<definitions["translation"]>("translation").upsert({
         key_name: z,
         project_id: pid,
-        iso_code: "en",
+        iso_code: <definitions['language']['iso_code']>locale,
         is_reviewed: false,
         text: dataObject[z],
         created_at: new Date().toLocaleString(),
       });
     }
+    */
   }
 }
 
