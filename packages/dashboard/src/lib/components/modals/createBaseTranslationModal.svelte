@@ -1,51 +1,80 @@
 <script lang="ts">
+	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 	import { InlineLoading, Modal, TextArea } from 'carbon-components-svelte';
-	import type { CreateBaseTranslationRequestBody } from '../../../routes/api/internal/create-base-translation';
-	import { projectStore } from '$lib/stores/projectStore';
 	import type { definitions } from '@inlang/database';
-	import { createEventDispatcher } from 'svelte';
+	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
 
-	export let open;
-	export let key;
+	export let open: boolean;
+	export let keyName: definitions['key']['name'];
 
-	let translation;
-	const dispatch = createEventDispatcher();
-	let isLoading = 0;
+	let baseTranslationText: definitions['translation']['text'] = '';
 
+	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
+
+	async function handleSubmission() {
+		status = 'isLoading';
+		if ($projectStore.data === null) {
+			throw 'Project Store is null.';
+		}
+		const body: CreateBaseTranslationRequestBody = {
+			projectId: $projectStore.data.project.id,
+			baseTranslation: {
+				key_name: keyName,
+				iso_code: $projectStore.data.project.default_iso_code,
+				text: baseTranslationText
+			}
+		};
+		const response = await fetch('/api/internal/create-base-translation', {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/json'
+			}),
+			body: JSON.stringify(body)
+		});
+		if (response.ok !== true) {
+			status = 'hasError';
+		} else {
+			status = 'isFinished';
+			projectStore.getData({ projectId: $page.params.projectId });
+			// automatically closing the modal but leave time to
+			// let the user read the result status of the action
+			setTimeout(() => {
+				open = false;
+				status = 'idle';
+			}, 1500);
+		}
+	}
 </script>
 
 <Modal
 	bind:open
-	modalHeading={key}
+	modalHeading="Create base translation for {keyName}"
 	size="sm"
-	primaryButtonText="Approve"
+	primaryButtonText="Create"
 	secondaryButtonText="Cancel"
 	on:click:button--secondary={() => {
 		open = false;
 	}}
-	on:submit={() => {
-		handleTranslation(translation);
-	}}
+	on:submit={handleSubmission}
 	preventCloseOnClickOutside
 	shouldSubmitOnEnter={false}
 >
-	<div class="flex items-center">
-		<TextArea labelText="Base translation:" bind:value={translation} />
-	</div>
-	<p>Text is automatically translated to all project languages.</p>
-	{#if isLoading === 1}
+	<p class="text-gray-500">
+		The base translation is the default text that is shown and must match your projects default
+		language ({$projectStore.data?.project.default_iso_code}).
+	</p>
+	<br />
+	<TextArea
+		labelText="Base translation:"
+		bind:value={baseTranslationText}
+		placeholder="Enter the base translation..."
+	/>
+	{#if status === 'isLoading'}
 		<InlineLoading status="active" description="Auto-translating..." />
-	{:else if isLoading === -1}
-		<InlineLoading status="error" description="Auto-translating failed" />
-	{:else if isLoading === 2}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="active" description="Submitting..." />
-	{:else if isLoading === -2}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="error" description="Submitting failed" />
-	{:else if isLoading === 3}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="finished" description="Submitting..." />
+	{:else if status === 'isFinished'}
+		<InlineLoading status="finished" description="Translations have been created." />
+	{:else if status === 'hasError'}
+		<InlineLoading status="error" description="Something went wrong please report the issue." />
 	{/if}
 </Modal>

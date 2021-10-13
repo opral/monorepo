@@ -1,11 +1,6 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
 import { DeeplLanguages } from 'deepl';
-// import { supabaseServerSide } from './_services/supabase';
-
-dotenv.config();
-
-const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
 
 export type TranslateRequestBody = {
 	text: string;
@@ -18,11 +13,14 @@ export type TranslateResponseBody = {
 	targetLang: DeeplLanguages;
 };
 
-type deeplResponse = {
+type DeeplResponse = {
 	translations: { detected_source_lang: string; text: string }[];
 };
 
 export async function post(request: Request): Promise<EndpointOutput<TranslateResponseBody>> {
+	dotenv.config();
+	const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
+
 	if (request.headers['content-type'] !== 'application/json') {
 		return {
 			status: 405
@@ -41,36 +39,38 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'auth_key=' +
 		deeplKey +
 		'&text=' +
-		wrapVariablesInTags(translateRequest.text) +
+		escapeVariablesInTags(translateRequest.text) +
 		'&target_lang=' +
 		translateRequest.targetLang +
 		'&source_lang=' +
-		translateRequest.sourceLang;
+		translateRequest.sourceLang +
+		// tag handling ensures that <variable> {some variable} </varibale> is excaped.
+		'&tag_handling=xml';
 
-	return new Promise((resolve) => {
-		fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
-			method: 'post',
-			headers: new Headers({
-				'content-type': 'application/x-www-form-urlencoded'
-			}),
-			body: body
-		})
-			.then((response: Response) => {
-				return response.json();
-			})
-			.then((response: deeplResponse) =>
-				resolve({
-					body: {
-						text: response.translations[0].text,
-						targetLang: translateRequest.targetLang
-					},
-					status: 200
-				})
-			)
-			.catch((error) => {
-				console.log(error);
-			});
+	const response = await fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
+		method: 'post',
+		headers: new Headers({
+			'content-type': 'application/x-www-form-urlencoded'
+		}),
+		body: body
 	});
+	if (response.ok !== true) {
+		return {
+			status: 500
+		};
+	}
+	const machineTranslation: DeeplResponse = await response.json();
+	if (machineTranslation.translations.length < 1) {
+		return {
+			status: 500
+		};
+	}
+	return {
+		body: <TranslateResponseBody>{
+			text: removeVariableTags(machineTranslation.translations[0].text),
+			targetLang: translateRequest.targetLang
+		}
+	};
 }
 
 /**
@@ -78,7 +78,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
  * @param text "Hello {user}."
  * @returns "Hello <variable>{user}</variable>."
  */
-function wrapVariablesInTags(text: string): string {
+function escapeVariablesInTags(text: string): string {
 	return text.replace(/{.*?}/g, '<variable>$&</variable>');
 }
 
@@ -87,6 +87,6 @@ function wrapVariablesInTags(text: string): string {
  * @param text Hello <variable>{user}</variable>.
  * @returns Hello {user}.
  */
-// function removeVariableTags(text: string): string {
-// 	return text.replace(/<variable>/g, '').replace(/<\/variable>/g, '');
-// }
+function removeVariableTags(text: string): string {
+	return text.replace(/<variable>/g, '').replace(/<\/variable>/g, '');
+}

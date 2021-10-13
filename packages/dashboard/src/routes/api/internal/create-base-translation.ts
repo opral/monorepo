@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { DeeplLanguages } from 'deepl';
 import { definitions } from '@inlang/database';
 import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
+import { TranslateRequestBody, TranslateResponseBody } from './translate';
 
 /**
  * This endpoint uses the base translation to create machine translations
@@ -21,7 +22,12 @@ import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
 // this type is only exportable to be consumed in the front-end.
 //* DO NOT import this type outside of the dashboard.
 export type CreateBaseTranslationRequestBody = {
-	baseTranslation: definitions['translation'];
+	projectId: definitions['project']['id'];
+	baseTranslation: {
+		key_name: definitions['translation']['key_name'];
+		iso_code: definitions['translation']['iso_code'];
+		text: definitions['translation']['text'];
+	};
 };
 
 export async function post(request: Request): Promise<EndpointOutput> {
@@ -32,99 +38,90 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			status: 405
 		};
 	}
+
 	try {
-        const requestBody = (request.body as unknown) as CreateBaseTranslationRequestBody;
-        const supabase = createServerSideSupabaseClient()
-        const projectLanguages = await supabase.from<definitions['language']>('language').select().match({project_id: requestBody.baseTranslation.project_id})
-        if (projectLanguages.data === null || projectLanguages.error){
-            throw projectLanguages.error
-        }
-        // iterating over all language iso codes of the project
-        for (const language of [requestBody.baseTranslation.iso_code, projectLanguages.data.map(lang => lang.iso_code)]){
-            
-        }        
-		let urls = [];
-		for (const l of $projectStore.data.languages) {
-			if (l.iso_code !== $projectStore.data.project.default_iso_code) {
-				if (deeplLanguages.indexOf(l.iso_code.toUpperCase()) !== -1) {
-					let request: TranslateRequestBody = {
-						sourceLang: 'EN',
-						targetLang: l.iso_code.toUpperCase(),
-						text: text
-					};
-					urls.push({
-						url: '/api/translate',
-						params: {
-							method: 'post',
-							headers: new Headers({ 'content-type': 'application/json' }),
-							body: JSON.stringify(request)
-						}
-					});
-				} else {
-					await database.from<definitions['translation']>('translation').insert({
-						key_name: key,
-						project_id: $projectStore.data.project.id,
-						iso_code: l.iso_code,
-						is_reviewed: false,
-						text: ''
-					});
-				}
-			} else {
-				await database.from<definitions['translation']>('translation').insert({
-					key_name: key,
-					project_id: $projectStore.data.project.id,
-					iso_code: $projectStore.data.project.default_iso_code,
-					is_reviewed: false,
-					text: text
-				});
-			}
+		const requestBody = (request.body as unknown) as CreateBaseTranslationRequestBody;
+		const supabase = createServerSideSupabaseClient();
+		const projectLanguages = await supabase
+			.from<definitions['language']>('language')
+			.select()
+			.match({ project_id: requestBody.projectId });
+		if (projectLanguages.data === null || projectLanguages.error) {
+			throw projectLanguages.error;
 		}
-		const requests = urls.map((u) => fetch(u.url, u.params));
-
-		Promise.all(requests).then((responses) => {
-			isLoading = 2;
-			const errors = responses.filter((response) => !response.ok);
-
-			if (errors.length > 0) {
-				throw errors.map((response) => Error(response.statusText));
-			}
-
-			const json = responses.map((response) => response.json());
-
-			for (const r of json) {
-				r.then(async (v) => {
-					await database.from<definitions['translation']>('translation').insert({
-						key_name: key,
-						project_id: $projectStore.data.project.id,
-						iso_code: v.targetLang.toLowerCase(),
-						is_reviewed: false,
-						text: v.text
-					});
-				});
-			}
-        
+		// wrapping all translations below in promises and execute in `Promise.all` speeds up
+		// the function fundamentaly through parallelism
+		const promises: Promise<void>[] = [];
+		// iterating over all language iso codes of the project
+		// assumes that https://linear.app/inlang/issue/INL-95/database-project-should-have-a-default-language-model is implemented
+		for (const language of projectLanguages.data) {
+			promises.push(
+				(async () => {
+					let text: definitions['translation']['text'] | null = null;
+					if (language.iso_code === requestBody.baseTranslation.iso_code) {
+						text = requestBody.baseTranslation.text;
+					} else if (
+						language.iso_code !== requestBody.baseTranslation.iso_code &&
+						deeplIsoCodes.includes(language.iso_code.toUpperCase())
+					) {
+						const machineTranslationRequest: TranslateRequestBody = {
+							sourceLang: 'EN',
+							targetLang: language.iso_code.toUpperCase() as DeeplLanguages,
+							text: requestBody.baseTranslation.text
+						};
+						// since this is server side, realtive url paths don't work.
+						const machineTranslationResponse = await fetch(
+							process.env['VITE_PUBLIC_AUTH_REDIRECT_URL'] + '/api/internal/translate',
+							{
+								method: 'post',
+								headers: new Headers({ 'content-type': 'application/json' }),
+								body: JSON.stringify(machineTranslationRequest)
+							}
+						);
+						if (machineTranslationResponse.ok) {
+							const json = ((await machineTranslationResponse.json()) as unknown) as TranslateResponseBody;
+							text = json.text;
+						} else {
+							// we pass on the error for now
+							console.warn('Error from /api/internal/translation endpoint');
+						}
+					}
+					if (text === null || text === undefined) {
+						console.warn(
+							'Text of a to be created translation was null or undefined. Thus, has not been created.'
+						);
+					} else {
+						// insert translation into database
+						const insertion = await supabase
+							.from<definitions['translation']>('translation')
+							.insert({
+								key_name: requestBody.baseTranslation.key_name,
+								project_id: requestBody.projectId,
+								iso_code: language.iso_code,
+								text: text
+							});
+						if (insertion.error) {
+							console.warn(
+								`Insertion of ${requestBody.baseTranslation.key_name}-${language.iso_code} went wrong:`
+							);
+							console.warn(insertion.error);
+						}
+					}
+					// additional parantheses to execute the function, otherwise the array is not an array of promises
+				})()
+			);
+		}
+		await Promise.all(promises);
+		return {
+			status: 200
+		};
 	} catch (e) {
 		console.error(e);
+		return {
+			status: 500
+		};
 	}
 }
-
-/**
- *
- * @param text "Hello {user}."
- * @returns "Hello <variable>{user}</variable>."
- */
-function wrapVariablesInTags(text: string): string {
-	return text.replace(/{.*?}/g, '<variable>$&</variable>');
-}
-
-/**
- *
- * @param text Hello <variable>{user}</variable>.
- * @returns Hello {user}.
- */
-// function removeVariableTags(text: string): string {
-// 	return text.replace(/<variable>/g, '').replace(/<\/variable>/g, '');
-// }
 
 const deeplIsoCodes = [
 	'BG',
