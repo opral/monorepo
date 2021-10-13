@@ -1,8 +1,7 @@
 ## Run the app (dashboard) locally
 
 0. get the env file from @samuelstroschein
-1. open the `/database` directory in another terminal.
-   0. ensure that you have the supabase cli installed and docker has over 2gb of ram assigned.
+1. open the `/database` directory in another terminal. 0. ensure that you have the supabase cli installed and docker has over 2gb of ram assigned.
    and run all:
    1. `supabase start`
    2. `npx prisma db push`

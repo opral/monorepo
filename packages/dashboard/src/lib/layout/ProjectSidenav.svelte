@@ -2,9 +2,6 @@
 	import Home24 from 'carbon-icons-svelte/lib/Home24';
 	import Key24 from 'carbon-icons-svelte/lib/Password24';
 	import Language24 from 'carbon-icons-svelte/lib/Language24';
-	import Import24 from 'carbon-icons-svelte/lib/DocumentImport24';
-	import Export24 from 'carbon-icons-svelte/lib/DocumentExport24';
-	import Members24 from 'carbon-icons-svelte/lib/Events24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
 	import { page } from '$app/stores';

@@ -1,20 +1,10 @@
 <script lang="ts">
-	import Edit24 from 'carbon-icons-svelte/lib/Edit24';
 	import { projectStore } from '$lib/stores/projectStore';
 
-	import {
-		ProgressBar,
-		Breadcrumb,
-		BreadcrumbItem,
-		CodeSnippet,
-		Pagination,
-		Button,
-		PaginationNav
-	} from 'carbon-components-svelte';
+	import { ProgressBar, PaginationNav } from 'carbon-components-svelte';
 
-	let currentPageNumber: number = 0;
+	let currentPageNumber = 0;
 	export let pageSize = 10;
-	let organization: string;
 	export let noCharacters = 80;
 	export let noWords = 5;
 	/* 	export let activityLog = 'testactivity';
