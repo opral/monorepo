@@ -39,5 +39,15 @@ export async function member_set_policies() {
             public.is_member_of(organization_id) 
         );
     `);
+    await prisma.$queryRawUnsafe(`
+        DROP POLICY IF EXISTS "admin CRUD member" ON public.member
+    `)
+    await prisma.$queryRawUnsafe(`
+        CREATE POLICY "admin CRUD member" ON public.member
+        FOR ALL
+        USING (
+            public.is_admin_of(organization_id)
+        );
+    `)
     console.log("✅ applied policies for: member table");
 }
