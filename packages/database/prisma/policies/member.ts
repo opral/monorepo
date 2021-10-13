@@ -11,15 +11,24 @@ export async function member_set_policies() {
     `);
     //is_member_of always returns true even when select exists evaluates to false
     await prisma.$queryRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.is_member_of(user_id uuid, organization_id uuid) RETURNS bool AS $$
-    SELECT EXISTS (
-        SELECT 1
+        CREATE OR REPLACE FUNCTION public.is_member_of(organization_id uuid) RETURNS bool AS $$
+        SELECT organization_id IN (
+            SELECT om.organization_id
+            FROM member om
+            WHERE om.user_id = auth.uid()
+        );
+        $$ LANGUAGE sql SECURITY DEFINER;
+    `);
+    await prisma.$queryRawUnsafe(`
+    CREATE OR REPLACE FUNCTION public.is_admin_of(organization_id uuid) RETURNS bool AS $$
+    SELECT organization_id IN (
+        SELECT om.organization_id
         FROM member om
-        WHERE om.organization_id = organization_id
-        AND om.user_id = user_id
+        WHERE om.user_id = auth.uid()
+        AND om.role = 'ADMIN'
     );
     $$ LANGUAGE sql SECURITY DEFINER;
-    `);
+    `)
     await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS "user select coworkers" on public.member;
     `);
@@ -27,7 +36,7 @@ export async function member_set_policies() {
         CREATE POLICY "user select coworkers" ON public.member 
         FOR SELECT
         USING ( 
-            public.is_member_of(auth.uid(), organization_id) 
+            public.is_member_of(organization_id) 
         );
     `);
     console.log("✅ applied policies for: member table");
