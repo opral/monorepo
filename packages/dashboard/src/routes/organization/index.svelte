@@ -10,7 +10,6 @@
 		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
-
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
 
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
@@ -21,16 +20,13 @@
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
 
-	let showAddEntityModal = false;
 	let showAddOrganizationModal = false;
-	let showMoreModal = false;
-	let goToProject = false;
+	// let showMoreModal = false;
 
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
-	let selectedOrgId: string;
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 
@@ -110,7 +106,7 @@
 					iconDescription="More"
 					on:click={() => {
 						// selectedShowMoreModal = row.id;
-						showMoreModal = true;
+						// showMoreModal = true;
 					}}
 				/>
 			{:else}
