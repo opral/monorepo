@@ -16,7 +16,7 @@
 	import { onMount } from 'svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
-	import CreateBaseTranslationModal from '$lib/components/modals/createBaseTranslationModal.svelte';
+	import CreateBaseTranslationModal from '$lib/components/modals/CreateBaseTranslationModal.svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
@@ -28,10 +28,10 @@
 	];
 
 	type row = {
-		id: number,
-		key: string,
-		description: string,
-		translations: translation[]
+		id: number;
+		key: string;
+		description: string;
+		translations: translation[];
 	};
 
 	let selectedRowIds: number[];
@@ -43,8 +43,12 @@
 
 	$: rows = fullRows.filter((row: row) => row.key.indexOf(search) !== -1);
 
-	let createTranslationModal: {open: boolean, translations: List<translation[]>, key: string} = { open: false, translations: [], key: '' };
-	let createKeyModal: {open: boolean} = { open: false};
+	let createTranslationModal: { open: boolean; translations: List<translation[]>; key: string } = {
+		open: false,
+		translations: [],
+		key: ''
+	};
+	let createKeyModal: { open: boolean } = { open: false };
 
 	function openTranslationModal(translations: translation[], key: string) {
 		const translationsImmutable = List(translations);
@@ -57,41 +61,42 @@
 
 	function updateRows() {
 		fullRows = [];
-		for (let i = 0; i < $projectStore.data!.keys.length; i++) {
+		for (let i = 0; i < ($projectStore.data?.keys.length ?? 0); i++) {
 			let translations: translation[] = [];
-			for (let j = 0; j < $projectStore.data!.languages.length; j++) {
+			for (let j = 0; j < ($projectStore.data?.languages.length ?? 0); j++) {
 				if (
-					$projectStore.data!.translations.some(
+					$projectStore.data?.translations.some(
 						(t: translation) =>
-							t.key_name === $projectStore.data!.keys[i].name &&
-							t.project_id === $projectStore.data!.project.id &&
-							t.iso_code === $projectStore.data!.languages[j].iso_code
+							t.key_name === $projectStore.data?.keys[i].name &&
+							t.project_id === $projectStore.data?.project.id &&
+							t.iso_code === $projectStore.data?.languages[j].iso_code
 					)
 				) {
 					translations.push({
-						key_name: $projectStore.data!.keys[i].name,
-						project_id: $projectStore.data!.project.id,
-						iso_code: $projectStore.data!.languages[j].iso_code,
+						key_name: $projectStore.data?.keys[i].name,
+						project_id: $projectStore.data?.project.id,
+						iso_code: $projectStore.data?.languages[j].iso_code,
 						created_at: '',
-						is_reviewed: $projectStore.data!.translations.filter(
+						is_reviewed: $projectStore.data?.translations.filter(
 							(t: translation) =>
-								t.key_name === $projectStore.data!.keys[i].name &&
-								t.project_id === $projectStore.data!.project.id &&
-								t.iso_code === $projectStore.data!.languages[j].iso_code
+								t.key_name === $projectStore.data?.keys[i].name &&
+								t.project_id === $projectStore.data?.project.id &&
+								t.iso_code === $projectStore.data?.languages[j].iso_code
 						)[0].is_reviewed,
-						text: $projectStore.data!.translations.find(
-							(t: translation) =>
-								t.key_name === $projectStore.data!.keys[i].name &&
-								t.project_id === $projectStore.data!.project.id &&
-								t.iso_code === $projectStore.data!.languages[j].iso_code
-						)!.text
+						text:
+							$projectStore.data?.translations.find(
+								(t: translation) =>
+									t.key_name === $projectStore.data?.keys[i].name &&
+									t.project_id === $projectStore.data?.project.id &&
+									t.iso_code === $projectStore.data?.languages[j].iso_code
+							)?.text ?? ''
 					});
 				} else {
 					translations.push({
-						key_name: $projectStore.data!.keys[i].name,
-						project_id: $projectStore.data!.project.id,
+						key_name: $projectStore.data?.keys[i].name ?? '',
+						project_id: $projectStore.data?.project.id ?? '',
 						created_at: '',
-						iso_code: $projectStore.data!.languages[j].iso_code,
+						iso_code: $projectStore.data?.languages[j].iso_code ?? 'en',
 						is_reviewed: false,
 						text: ''
 					});
@@ -99,8 +104,8 @@
 			}
 			fullRows.push({
 				id: i,
-				key: $projectStore.data!.keys[i].name,
-				description: $projectStore.data!.keys[i].description ?? '',
+				key: $projectStore.data?.keys[i].name ?? '',
+				description: $projectStore.data?.keys[i].description ?? '',
 				translations: translations
 			});
 		}
@@ -121,7 +126,7 @@
 				.from<definitions['key']>('key')
 				.delete()
 				.eq('name', key)
-				.eq('project_id', $projectStore.data!.project.id);
+				.eq('project_id', $projectStore.data?.project.id);
 			if (deleteReq.error) {
 				alert(deleteReq.error.message);
 			} else {
@@ -132,7 +137,7 @@
 		selectedRowIds = [];
 	}
 
-	async function handleCreateKey(event: {detail: string}) {
+	async function handleCreateKey(event: { detail: string }) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
 		console.log(event.detail);
@@ -144,33 +149,36 @@
 		updateRows();
 	}
 
-	async function handleFinishBase(event: {detail: string}) {
+	async function handleFinishBase(event: { detail: string }) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
 		openTranslationModal(
 			$projectStore.data!.translations.filter(
-				(t: translation) => t.key_name === event.detail && t.project_id === $projectStore.data!.project.id
+				(t: translation) =>
+					t.key_name === event.detail && t.project_id === $projectStore.data?.project.id
 			),
 			event.detail
 		);
 	}
 
-	let createBaseTranslationModal: {open: boolean, key: string} = { open: false, key: '' };
+	let createBaseTranslationModal: { open: boolean; key: string } = { open: false, key: '' };
 
 	function openBaseModal(key: string) {
 		createBaseTranslationModal.key = key;
 		createBaseTranslationModal.open = true;
 	}
 
+	function checkIfBase(row: any) {
+		return (
+			row.translations.find(
+				(t: translation) => t.iso_code === $projectStore.data?.project.default_iso_code
+			)?.text === ''
+		);
+	}
 
-function checkIfBase(row: any) {
-	return row.translations.find((t: translation) => t.iso_code === $projectStore.data!.project.default_iso_code).text === "" ?? false;
-}
-
-
-function openCreateKeyModal() {
-	createKeyModal.open = true;
-}
+	function openCreateKeyModal() {
+		createKeyModal.open = true;
+	}
 </script>
 
 <div class="p-8">
@@ -192,7 +200,7 @@ function openCreateKeyModal() {
 			</Toolbar>
 			<span slot="cell" let:row let:cell>
 				{#if cell.key === 'overflow'}
-					{#if !checkIfBase(row)}
+					{#if checkIfBase(row) === false}
 						<Button
 							on:click={() => openTranslationModal(row.translations, row.key)}
 							iconDescription="Modify translation"
@@ -222,10 +230,7 @@ function openCreateKeyModal() {
 	key={createTranslationModal.key}
 	on:updateRows={handleUpdateRows}
 />
-<CreateKeyModal
-	bind:open={createKeyModal.open}
-	on:createKey={handleCreateKey}
-/>
+<CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
 <CreateBaseTranslationModal
 	bind:open={createBaseTranslationModal.open}
 	key={createBaseTranslationModal.key}

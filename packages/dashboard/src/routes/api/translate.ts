@@ -46,9 +46,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'&target_lang=' +
 		translateRequest.targetLang +
 		'&source_lang=' +
-		translateRequest.sourceLang +
-		'formality=' +
-		formality;
+		translateRequest.sourceLang;
 
 	return new Promise((resolve, reject) => {
 		fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
@@ -61,17 +59,18 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 			.then((response: Response) => {
 				return response.json();
 			})
-			.then((response: deeplResponse) =>
+			.then((response: deeplResponse) => { console.log(response);
 				resolve({
 					body: {
-						text: response.translations[0].text,
+						text: response.translations[0]?.text,
 						targetLang: translateRequest.targetLang
 					},
 					status: 200
-				})
+				})}
 			)
 			.catch((error) => {
 				console.log(error);
+				reject(error);
 			});
 	});
 }
