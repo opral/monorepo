@@ -8,18 +8,11 @@
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
-	import { upsertUser } from '$lib/services/database';
 	import Navbar from '$lib/layout/Navbar.svelte';
 	import { Content } from 'carbon-components-svelte';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
-		// if (user) {
-		// 	const { error } = await upsertUser({ user: user });
-		// 	if (error) {
-		// 		throw error;
-		// 	}
-		// }
 		// includes('auth') ensures that subroutes within /auth do not
 		// lead to constant redirects
 		if (user === null && page.path.includes('auth') === false) {

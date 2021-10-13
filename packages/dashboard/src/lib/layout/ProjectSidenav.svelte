@@ -2,9 +2,6 @@
 	import Home24 from 'carbon-icons-svelte/lib/Home24';
 	import Key24 from 'carbon-icons-svelte/lib/Password24';
 	import Language24 from 'carbon-icons-svelte/lib/Language24';
-	import Import24 from 'carbon-icons-svelte/lib/DocumentImport24';
-	import Export24 from 'carbon-icons-svelte/lib/DocumentExport24';
-	import Members24 from 'carbon-icons-svelte/lib/Events24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import { SideNav, SideNavItems, SideNavLink } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
@@ -26,10 +23,10 @@
 			text="Languages"
 			href="/project/{$page.params.projectId}/languages"
 		/>
-		<SideNavLink icon={Import24} text="Import" href="/project/{$page.params.projectId}/import" />
-		<SideNavLink icon={Export24} text="Export" href="/project/{$page.params.projectId}/export" />
+		<!-- <SideNavLink icon={Import24} text="Import" href="/project/{$page.params.projectId}/import" /> -->
+		<!-- <SideNavLink icon={Export24} text="Export" href="/project/{$page.params.projectId}/export" /> -->
 		<!-- 	<SideNavLink icon={Activity24} text="Activity" href="/" /> -->
-		<SideNavLink icon={Members24} text="Members" href="/project/{$page.params.projectId}/members" />
+		<!-- <SideNavLink icon={Members24} text="Members" href="/project/{$page.params.projectId}/members" /> -->
 		<!-- 		<SideNavLink icon={Integration24} text="Integrations" href="/" />
  -->
 		<SideNavLink

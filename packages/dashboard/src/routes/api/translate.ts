@@ -5,6 +5,7 @@ import { DeeplLanguages } from 'deepl';
 
 dotenv.config();
 
+const formality = "less"; // Hard coded formality option
 const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
 
 export type TranslateRequestBody = {
@@ -47,7 +48,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'&source_lang=' +
 		translateRequest.sourceLang;
 
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
 			method: 'post',
 			headers: new Headers({
@@ -58,17 +59,18 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 			.then((response: Response) => {
 				return response.json();
 			})
-			.then((response: deeplResponse) =>
+			.then((response: deeplResponse) => { console.log(response);
 				resolve({
 					body: {
-						text: response.translations[0].text,
+						text: response.translations[0]?.text,
 						targetLang: translateRequest.targetLang
 					},
 					status: 200
-				})
+				})}
 			)
 			.catch((error) => {
 				console.log(error);
+				reject(error);
 			});
 	});
 }
@@ -87,6 +89,6 @@ function wrapVariablesInTags(text: string): string {
  * @param text Hello <variable>{user}</variable>.
  * @returns Hello {user}.
  */
-function removeVariableTags(text: string): string {
-	return text.replace(/<variable>/g, '').replace(/<\/variable>/g, '');
-}
+// function removeVariableTags(text: string): string {
+// 	return text.replace(/<variable>/g, '').replace(/<\/variable>/g, '');
+// }

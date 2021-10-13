@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { Loading, InlineNotification, Content } from 'carbon-components-svelte';
+	import { Loading, InlineNotification } from 'carbon-components-svelte';
 	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
 
 	// each time the projectId changes, the project store

@@ -42,7 +42,7 @@ describe("policies/key", () => {
   test("Admin can upsert key", async () => {
     const projects = await supabase.from<definitions["project"]>("project")
       .select()
-      .match({ 
+      .match({
         name: "dev-project"
       });
     const upsertCreate = await supabase.from<definitions["key"]>("key")
