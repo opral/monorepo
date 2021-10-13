@@ -52,17 +52,20 @@ async function getData(
 	const languages = await database
 		.from<definitions['language']>('language')
 		.select('*')
-		.match({ project_id: args.projectId });
+		.match({ project_id: args.projectId })
+		.order('iso_code', {ascending: false});
 
 	const keys = await database
 		.from<definitions['key']>('key')
 		.select('*')
-		.match({ project_id: args.projectId });
+		.match({ project_id: args.projectId })
+		.order('name', {ascending: false});
 
 	const translations = await database
 		.from<definitions['translation']>('translation')
 		.select('*')
-		.in('key_name', keys.data?.map((key) => key.name) ?? []);
+		.match({'project_id': args.projectId})
+		.order('key_name', {ascending: false});
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.
 	let error: ProjectStoreInterface['error'] | null = null;
