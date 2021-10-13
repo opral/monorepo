@@ -1,6 +1,6 @@
 <!-- redirecting the user to the projects -->
 <script lang="ts" context="module">
-	import { LoadOutput } from '@sveltejs/kit';
+	import type { LoadOutput } from '@sveltejs/kit';
 
 	export async function load(): Promise<LoadOutput> {
 		return {
