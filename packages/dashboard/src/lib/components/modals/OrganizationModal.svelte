@@ -1,18 +1,15 @@
 <script lang="ts">
-	import { Modal, Form, FormGroup, TextInput, Checkbox } from 'carbon-components-svelte';
+	import { Modal, Form, FormGroup, TextInput } from 'carbon-components-svelte';
 	import { auth } from '$lib/services/auth';
-
-	import { projectStore } from '$lib/stores/projectStore';
 
 	import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
-	import { DatabaseResponse } from '$lib/types/databaseResponse';
-	import { page } from '$app/stores';
+	// import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { createEventDispatcher } from 'svelte';
 
 	export let open = false;
 
-	let organizations: DatabaseResponse<definitions['organization'][]>;
+	// let organizations: DatabaseResponse<definitions['organization'][]>;
 
 	export let heading = 'Add organization';
 

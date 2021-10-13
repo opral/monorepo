@@ -36,22 +36,22 @@
 		'ZH'
 	];
 
-	export let open;
-	export let key;
+	export let open: boolean;
+	export let key: string;
 
-	let translation;
+	let translation: string;
 	const dispatch = createEventDispatcher();
 	let isLoading = 0;
 
 	async function handleTranslation(text: string) {
 		isLoading = 1;
 		let urls = [];
-		for (const l of $projectStore.data.languages) {
-			if (l.iso_code !== $projectStore.data.project.default_iso_code) {
+		for (const l of $projectStore.data?.languages ?? []) {
+			if (l.iso_code !== $projectStore.data?.project.default_iso_code) {
 				if (deeplLanguages.indexOf(l.iso_code.toUpperCase()) !== -1) {
 					let request: TranslateRequestBody = {
-						sourceLang: 'EN',
-						targetLang: l.iso_code.toUpperCase(),
+						sourceLang: ($projectStore.data?.project.default_iso_code),
+						targetLang: (l.iso_code.toUpperCase()),
 						text: text
 					};
 					urls.push({
@@ -65,7 +65,7 @@
 				} else {
 					await database.from<definitions['translation']>('translation').insert({
 						key_name: key,
-						project_id: $projectStore.data.project.id,
+						project_id: $projectStore.data?.project.id,
 						iso_code: l.iso_code,
 						is_reviewed: false,
 						text: ''
@@ -98,7 +98,7 @@
 					r.then(async (v) => {
 						await database.from<definitions['translation']>('translation').insert({
 							key_name: key,
-							project_id: $projectStore.data.project.id,
+							project_id: $projectStore.data?.project.id,
 							iso_code: v.targetLang.toLowerCase(),
 							is_reviewed: false,
 							text: v.text

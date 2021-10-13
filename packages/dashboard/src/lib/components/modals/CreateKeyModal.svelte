@@ -7,7 +7,7 @@
 	import type { definitions } from '@inlang/database';
 
 	export let open = false;
-	let key, description;
+	let key: string, description: string;
 	const dispatch = createEventDispatcher();
 
 	async function save() {
