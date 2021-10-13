@@ -1,13 +1,13 @@
-import React, { Component, Suspense } from 'react';
-import { useTranslation, withTranslation, Trans } from 'react-i18next';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component, Suspense } from "react";
+import { useTranslation, withTranslation, Trans } from "react-i18next";
+import logo from "./logo.svg";
+import "./App.css";
 
 // use hoc for class based components
 class LegacyWelcomeClass extends Component {
   render() {
     const { t } = this.props;
-    return <h2>{t('example.hello')}</h2>;
+    return <h2>{t("example.hello")}</h2>;
   }
 }
 const Welcome = withTranslation()(LegacyWelcomeClass);
@@ -34,17 +34,17 @@ function Page() {
       <div className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <Welcome />
-        <button type="button" onClick={() => changeLanguage('de')}>
+        <button type="button" onClick={() => changeLanguage("de")}>
           de
         </button>
-        <button type="button" onClick={() => changeLanguage('en')}>
+        <button type="button" onClick={() => changeLanguage("en")}>
           en
         </button>
       </div>
       <div className="App-intro">
         <MyComponent />
       </div>
-      <button type="button">{t('button.confirm')}</button>
+      <button type="button">{t("button.confirm")}</button>
     </div>
   );
 }
