@@ -1,40 +1,10 @@
 <script lang="ts">
-	// TODO: Error handling
-
 	import { InlineLoading, Modal, TextArea } from 'carbon-components-svelte';
-	import type { TranslateRequestBody } from '../../../routes/api/translate';
+	import type { CreateBaseTranslationRequestBody } from '../../../routes/api/internal/create-base-translation';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { createEventDispatcher } from 'svelte';
 	import { page } from '$app/stores';
-
-	const deeplLanguages = [
-		'BG',
-		'CS',
-		'DA',
-		'DE',
-		'EL',
-		'EN',
-		'ES',
-		'ET',
-		'FI',
-		'FR',
-		'HU',
-		'IT',
-		'JA',
-		'LT',
-		'LV',
-		'NL',
-		'PL',
-		'PT',
-		'RO',
-		'RU',
-		'SK',
-		'SL',
-		'SV',
-		'ZH'
-	];
 
 	export let open;
 	export let key;
@@ -43,88 +13,6 @@
 	const dispatch = createEventDispatcher();
 	let isLoading = 0;
 
-	async function handleTranslation(text: string) {
-		isLoading = 1;
-		let urls = [];
-		for (const l of $projectStore.data.languages) {
-			if (l.iso_code !== $projectStore.data.project.default_iso_code) {
-				if (deeplLanguages.indexOf(l.iso_code.toUpperCase()) !== -1) {
-					let request: TranslateRequestBody = {
-						sourceLang: 'EN',
-						targetLang: l.iso_code.toUpperCase(),
-						text: text
-					};
-					urls.push({
-						url: '/api/translate',
-						params: {
-							method: 'post',
-							headers: new Headers({ 'content-type': 'application/json' }),
-							body: JSON.stringify(request)
-						}
-					});
-				} else {
-					await database.from<definitions['translation']>('translation').insert({
-						key_name: key,
-						project_id: $projectStore.data.project.id,
-						iso_code: l.iso_code,
-						is_reviewed: false,
-						text: ''
-					});
-				}
-			} else {
-				await database.from<definitions['translation']>('translation').insert({
-					key_name: key,
-					project_id: $projectStore.data.project.id,
-					iso_code: $projectStore.data.project.default_iso_code,
-					is_reviewed: false,
-					text: text
-				});
-			}
-		}
-		const requests = urls.map((u) => fetch(u.url, u.params));
-
-		Promise.all(requests)
-			.then((responses) => {
-				isLoading = 2;
-				const errors = responses.filter((response) => !response.ok);
-
-				if (errors.length > 0) {
-					throw errors.map((response) => Error(response.statusText));
-				}
-
-				const json = responses.map((response) => response.json());
-
-				for (const r of json) {
-					r.then(async (v) => {
-						await database.from<definitions['translation']>('translation').insert({
-							key_name: key,
-							project_id: $projectStore.data.project.id,
-							iso_code: v.targetLang.toLowerCase(),
-							is_reviewed: false,
-							text: v.text
-						});
-					});
-				}
-
-				isLoading = 3;
-				projectStore.getData({ projectId: $page.params.projectId });
-				setTimeout(() => {
-					isLoading = 0;
-					translation = '';
-					dispatch('finishBase', key);
-					open = false;
-				}, 1000);
-			})
-			.catch((errors) => {
-				console.log(errors);
-				isLoading = -1;
-				setTimeout(() => {
-					isLoading = 0;
-					translation = '';
-					open = false;
-				});
-			});
-	}
 </script>
 
 <Modal

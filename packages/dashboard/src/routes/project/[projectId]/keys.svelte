@@ -16,7 +16,7 @@
 	import { onMount } from 'svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
-	import CreateBaseTranslationModal from '$lib/components/modals/createBaseTranslationModal.svelte';
+	import CreateBaseTranslationModal from '$lib/components/modals/CreateBaseTranslationModal.svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
