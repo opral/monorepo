@@ -233,6 +233,6 @@
 <CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
 <CreateBaseTranslationModal
 	bind:open={createBaseTranslationModal.open}
-	key={createBaseTranslationModal.key}
+	keyName={createBaseTranslationModal.key}
 	on:finishBase={handleFinishBase}
 />

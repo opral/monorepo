@@ -1,163 +1,80 @@
 <script lang="ts">
-	// TODO: Error handling
-
+	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 	import { InlineLoading, Modal, TextArea } from 'carbon-components-svelte';
-	import type { TranslateRequestBody } from '../../../routes/api/translate';
-	import { projectStore } from '$lib/stores/projectStore';
-	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
-	import { createEventDispatcher } from 'svelte';
+	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
 
-	const deeplLanguages = [
-		'BG',
-		'CS',
-		'DA',
-		'DE',
-		'EL',
-		'EN',
-		'ES',
-		'ET',
-		'FI',
-		'FR',
-		'HU',
-		'IT',
-		'JA',
-		'LT',
-		'LV',
-		'NL',
-		'PL',
-		'PT',
-		'RO',
-		'RU',
-		'SK',
-		'SL',
-		'SV',
-		'ZH'
-	];
-
 	export let open: boolean;
-	export let key: string;
+	export let keyName: definitions['key']['name'];
 
-	let translation: string;
-	const dispatch = createEventDispatcher();
-	let isLoading = 0;
+	let baseTranslationText: definitions['translation']['text'] = '';
 
-	async function handleTranslation(text: string) {
-		isLoading = 1;
-		let urls = [];
-		for (const l of $projectStore.data?.languages ?? []) {
-			if (l.iso_code !== $projectStore.data?.project.default_iso_code) {
-				if (deeplLanguages.indexOf(l.iso_code.toUpperCase()) !== -1) {
-					let request: TranslateRequestBody = {
-						sourceLang: ($projectStore.data?.project.default_iso_code),
-						targetLang: (l.iso_code.toUpperCase()),
-						text: text
-					};
-					urls.push({
-						url: '/api/translate',
-						params: {
-							method: 'post',
-							headers: new Headers({ 'content-type': 'application/json' }),
-							body: JSON.stringify(request)
-						}
-					});
-				} else {
-					await database.from<definitions['translation']>('translation').insert({
-						key_name: key,
-						project_id: $projectStore.data?.project.id,
-						iso_code: l.iso_code,
-						is_reviewed: false,
-						text: ''
-					});
-				}
-			} else {
-				await database.from<definitions['translation']>('translation').insert({
-					key_name: key,
-					project_id: $projectStore.data.project.id,
-					iso_code: $projectStore.data.project.default_iso_code,
-					is_reviewed: false,
-					text: text
-				});
-			}
+	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
+
+	async function handleSubmission() {
+		status = 'isLoading';
+		if ($projectStore.data === null) {
+			throw 'Project Store is null.';
 		}
-		const requests = urls.map((u) => fetch(u.url, u.params));
-
-		Promise.all(requests)
-			.then((responses) => {
-				isLoading = 2;
-				const errors = responses.filter((response) => !response.ok);
-
-				if (errors.length > 0) {
-					throw errors.map((response) => Error(response.statusText));
-				}
-
-				const json = responses.map((response) => response.json());
-
-				for (const r of json) {
-					r.then(async (v) => {
-						await database.from<definitions['translation']>('translation').insert({
-							key_name: key,
-							project_id: $projectStore.data?.project.id,
-							iso_code: v.targetLang.toLowerCase(),
-							is_reviewed: false,
-							text: v.text
-						});
-					});
-				}
-
-				isLoading = 3;
-				projectStore.getData({ projectId: $page.params.projectId });
-				setTimeout(() => {
-					isLoading = 0;
-					translation = '';
-					dispatch('finishBase', key);
-					open = false;
-				}, 1000);
-			})
-			.catch((errors) => {
-				console.log(errors);
-				isLoading = -1;
-				setTimeout(() => {
-					isLoading = 0;
-					translation = '';
-					open = false;
-				});
-			});
+		const body: CreateBaseTranslationRequestBody = {
+			projectId: $projectStore.data.project.id,
+			baseTranslation: {
+				key_name: keyName,
+				iso_code: $projectStore.data.project.default_iso_code,
+				text: baseTranslationText
+			}
+		};
+		const response = await fetch('/api/internal/create-base-translation', {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/json'
+			}),
+			body: JSON.stringify(body)
+		});
+		if (response.ok !== true) {
+			status = 'hasError';
+		} else {
+			status = 'isFinished';
+			projectStore.getData({ projectId: $page.params.projectId });
+			// automatically closing the modal but leave time to
+			// let the user read the result status of the action
+			setTimeout(() => {
+				open = false;
+				status = 'idle';
+			}, 1500);
+		}
 	}
 </script>
 
 <Modal
 	bind:open
-	modalHeading={key}
+	modalHeading="Create base translation for {keyName}"
 	size="sm"
-	primaryButtonText="Approve"
+	primaryButtonText="Create"
 	secondaryButtonText="Cancel"
 	on:click:button--secondary={() => {
 		open = false;
 	}}
-	on:submit={() => {
-		handleTranslation(translation);
-	}}
+	on:submit={handleSubmission}
 	preventCloseOnClickOutside
 	shouldSubmitOnEnter={false}
 >
-	<div class="flex items-center">
-		<TextArea labelText="Base translation:" bind:value={translation} />
-	</div>
-	<p>Text is automatically translated to all project languages.</p>
-	{#if isLoading === 1}
+	<p class="text-gray-500">
+		The base translation is the default text that is shown and must match your projects default
+		language ({$projectStore.data?.project.default_iso_code}).
+	</p>
+	<br />
+	<TextArea
+		labelText="Base translation:"
+		bind:value={baseTranslationText}
+		placeholder="Enter the base translation..."
+	/>
+	{#if status === 'isLoading'}
 		<InlineLoading status="active" description="Auto-translating..." />
-	{:else if isLoading === -1}
-		<InlineLoading status="error" description="Auto-translating failed" />
-	{:else if isLoading === 2}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="active" description="Submitting..." />
-	{:else if isLoading === -2}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="error" description="Submitting failed" />
-	{:else if isLoading === 3}
-		<InlineLoading status="finished" description="Auto-translating..." />
-		<InlineLoading status="finished" description="Submitting..." />
+	{:else if status === 'isFinished'}
+		<InlineLoading status="finished" description="Translations have been created." />
+	{:else if status === 'hasError'}
+		<InlineLoading status="error" description="Something went wrong please report the issue." />
 	{/if}
 </Modal>
