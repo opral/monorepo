@@ -8,7 +8,10 @@ import * as path from "path";
 import { database } from "../../dashboard/src/lib/services/database"; // is this really the best way?
 
 // anon local key, thus okay if it's hardcoded
-
+const supabase = createClient(
+  "http://localhost:8000",
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew"
+);
 
 async function entry() {
   const args = process.argv;
@@ -30,13 +33,11 @@ async function entry() {
   }
   //add all locales to list
   let localefiles: any = {};
-  console.log("this is filepath:", filepath)
 
   if (filepath.includes(".json")) {
     let locale = filepath.split("/")[0];
     localefiles[locale] = filepath;
   } else if (filepath === ".") {
-    console.log("test");
     const locales = fs.readdirSync("./");
     for (let locale of locales) {
       localefiles[locale] = locale.concat("/translation.json");
@@ -50,9 +51,9 @@ async function entry() {
     //load in locale
     const dataObject = JSON.parse(fs.readFileSync(localefiles[locale]).toString()); // is it best practice that const has type any
     console.log(dataObject);
-    /*
+    
     for (let y in dataObject) {
-      database.from<definitions["key"]>("key").upsert({
+      supabase.from<definitions["key"]>("key").upsert({
         project_id: pid,
         name: y,
         description: "",
@@ -60,7 +61,7 @@ async function entry() {
       });
     }
     for (let z in dataObject) {
-      database.from<definitions["translation"]>("translation").upsert({
+      supabase.from<definitions["translation"]>("translation").upsert({
         key_name: z,
         project_id: pid,
         iso_code: <definitions['language']['iso_code']>locale,
@@ -69,7 +70,7 @@ async function entry() {
         created_at: new Date().toLocaleString(),
       });
     }
-    */
+    
   }
 }
 
