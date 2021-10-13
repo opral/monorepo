@@ -7,7 +7,7 @@ import "./App.css";
 class LegacyWelcomeClass extends Component {
   render() {
     const { t } = this.props;
-    return <h2>{t("example.hello")}</h2>;
+    return <h2>{t("welcome")}</h2>;
   }
 }
 const Welcome = withTranslation()(LegacyWelcomeClass);
@@ -15,7 +15,7 @@ const Welcome = withTranslation()(LegacyWelcomeClass);
 // Component using the Trans component
 function MyComponent() {
   return (
-    <Trans i18nKey="welcome.first">
+    <Trans i18nKey="info">
       To get started, edit <code>src/App.js</code> and save to reload.
     </Trans>
   );
@@ -44,7 +44,7 @@ function Page() {
       <div className="App-intro">
         <MyComponent />
       </div>
-      <button type="button">{t("button.confirm")}</button>
+      <button type="button">{t("confirm.button")}</button>
     </div>
   );
 }

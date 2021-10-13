@@ -51,12 +51,9 @@ export function exportI18nNext(args: {
   };
 }
 
-/*
-  export async function importI18next( args: {obj: Object;}) {
+/*  export async function importI18next( args: {obj: Object;}) {
 
-    console.log("obj");
-    console.log(args);
+   
     await database.from('messages').upsert({});
 
-  }
-*/
+  }*/
