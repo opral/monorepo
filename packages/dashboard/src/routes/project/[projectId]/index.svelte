@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { projectStore } from '$lib/stores/projectStore';
-
-	import { ProgressBar, PaginationNav } from 'carbon-components-svelte';
+	import {
+		ProgressBar,
+		PaginationNav
+	} from 'carbon-components-svelte';
 
 	let currentPageNumber = 0;
 	export let pageSize = 10;
