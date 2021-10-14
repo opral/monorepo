@@ -25,7 +25,6 @@ export type CreateBaseTranslationRequestBody = {
 	projectId: definitions['project']['id'];
 	baseTranslation: {
 		key_name: definitions['translation']['key_name'];
-		iso_code: definitions['translation']['iso_code'];
 		text: definitions['translation']['text'];
 	};
 };
@@ -42,6 +41,18 @@ export async function post(request: Request): Promise<EndpointOutput> {
 	try {
 		const requestBody = (request.body as unknown) as CreateBaseTranslationRequestBody;
 		const supabase = createServerSideSupabaseClient();
+		const project = await supabase
+			.from<definitions['project']>('project')
+			.select()
+			.match({ id: requestBody.projectId })
+			.single();
+
+		if (project.data === null || project.error) {
+			return {
+				status: 500
+			};
+		}
+
 		const projectLanguages = await supabase
 			.from<definitions['language']>('language')
 			.select()
@@ -58,10 +69,10 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			promises.push(
 				(async () => {
 					let text: definitions['translation']['text'] | null = null;
-					if (language.iso_code === requestBody.baseTranslation.iso_code) {
+					if (language.iso_code === project.data.default_iso_code) {
 						text = requestBody.baseTranslation.text;
 					} else if (
-						language.iso_code !== requestBody.baseTranslation.iso_code &&
+						language.iso_code !== project.data.default_iso_code &&
 						deeplIsoCodes.includes(language.iso_code.toUpperCase())
 					) {
 						const machineTranslationRequest: TranslateRequestBody = {
