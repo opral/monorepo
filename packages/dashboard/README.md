@@ -13,7 +13,7 @@
 
 ## Get eslint warnings
 See [this](https://github.com/sveltejs/eslint-plugin-svelte3/blob/master/INTEGRATIONS.md) as of October 2021:
-1. Open the `settings.json` file form VSCode
+1. Open the `settings.json` file from VSCode (eslint)
 2. Add 
 ```JSON
 "eslint.validate": [
