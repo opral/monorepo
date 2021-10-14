@@ -93,7 +93,13 @@
 			</ToolbarContent>
 		</Toolbar>
 		<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
-		<span slot="cell" let:row let:cell on:click={() => goto(`/project/?organization=${row.id}`)}>
+		<span
+			slot="cell"
+			let:row
+			let:cell
+			on:click={() => goto(`/project/?organization=${row.id}`)}
+			class="cursor-pointer"
+		>
 			{#if cell.key === 'name'}
 				<div class="flex items-center space-x-2">
 					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
