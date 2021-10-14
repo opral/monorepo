@@ -16,7 +16,10 @@ export async function user_set_policies() {
         CREATE POLICY "user select user" ON public.user
         FOR SELECT
         USING (
-            auth.uid() = id
+            id IN (
+                SELECT user_id
+                FROM member
+            )
         );
     `);
     await prisma.$queryRawUnsafe(`

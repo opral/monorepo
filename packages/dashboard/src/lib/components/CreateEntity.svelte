@@ -1,9 +1,6 @@
 <script>
-	import { Button, Row } from 'carbon-components-svelte';
+	import { Button } from 'carbon-components-svelte';
 	import { Search } from 'carbon-components-svelte';
-	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRight16';
-	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
-	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import { Pagination } from 'carbon-components-svelte';
 
 	import { Tag } from 'carbon-components-svelte';
@@ -24,12 +21,12 @@
 	function showMore() {
 		// show more information about the selected organisation or project
 	}
-	function prev() {
-		// go to prev slide of organisations
-	}
-	function next() {
-		// go to next slide of organisations
-	}
+	// function prev() {
+	// go to prev slide of organisations
+	// }
+	// function next() {
+	// go to next slide of organisations
+	// }
 </script>
 
 <div class="pl-8 pr-8 pt-8">

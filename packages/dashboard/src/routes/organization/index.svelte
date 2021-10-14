@@ -1,44 +1,32 @@
 <script lang="ts">
 	import {
 		Button,
-		Search,
 		DataTable,
-		PaginationNav,
 		Tag,
-		ProgressBar,
-		Tooltip,
 		Toolbar,
-		ToolbarMenu,
 		ToolbarContent,
 		ToolbarBatchActions,
 		ToolbarSearch,
-		ToolbarMenuItem,
 		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
-
-	import { projectStore } from '$lib/stores/projectStore';
-	import { mockOrganization, mockProject } from '$lib/mockData';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
+
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
 	import type { definitions } from '@inlang/database/types/definitions';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	let showAddEntityModal = false;
 	let showAddOrganizationModal = false;
-	let showMoreModal = false;
-	let goToProject = false;
+	// let showMoreModal = false;
 
 	// as entered in the search bar
 	$: searchQuery = '';
 
 	let isLoading = true;
-	let selectedOrgId: string;
 
 	let organizations: DatabaseResponse<definitions['organization'][]>;
 
@@ -124,7 +112,7 @@
 					iconDescription="More"
 					on:click={() => {
 						// selectedShowMoreModal = row.id;
-						showMoreModal = true;
+						// showMoreModal = true;
 					}}
 				/>
 			{:else}

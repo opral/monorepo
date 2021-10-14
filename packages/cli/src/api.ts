@@ -1,19 +1,26 @@
 import { createClient, PostgrestResponse, SupabaseClient } from '@supabase/supabase-js'
 import type { definitions } from '@inlang/database'
-import { supabase } from './services/supabase';
-import { pgResp2val } from './helpers'
+import { ensureDirectoryExistence, pgResp2val } from './helpers'
 import * as conv from './conversion'
+import { readEnvir as readSupaEnvir } from './services/supabase';
+import { exportI18nNext } from './adapters/reacti18n';
+import * as fs from "fs";
 
-let tok = process.env['inlang_KEY'] as string;
+// let tok = process.env['inlang_KEY'] as string;
 
 export async function download2prj(pid: string) {
-    let sb = supabase
-    let u = await loginWithToken(sb, tok)
-    console.log(u)
-    const dbR = await dbReadTrans(sb, pid)
+    let sb = readSupaEnvir()
+
+    const dbR = await dbReadTrans(sb!, pid)
 
     // conv.json2file(jsonlist)
     console.log(dbR)
+
+    const exportFs = exportI18nNext({ translations: dbR });
+    exportFs.files.forEach(file => {
+        ensureDirectoryExistence(file.path);
+        fs.writeFileSync(file.path, JSON.stringify(file.content, null, 4));
+    })
 }
 
 // https://supabase.io/docs/reference/javascript/select
@@ -50,7 +57,7 @@ async function dbReadTrans(sb: SupabaseClient, projId: string) {
         .select('*')
         .match({ id: projId })
 
-    return pgResp2val(translations)
+    return pgResp2val(translations, 'dbReadTrans')
 }
 
 type dbGetArgs = {
