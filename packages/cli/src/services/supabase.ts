@@ -1,29 +1,25 @@
-
-
+import { createClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
-
-
+import * as os from 'os';
 
 // read envir like supabase from user provided file under lang
+
 export function readEnvir() {
+  let dir = os.homedir() + '/inlang.json'
+  console.log("reading config from : " + dir)
   try {
-    let s = fs.readFileSync('inlang.json', 'utf8');
-    console.log("find config file at")
+    let s = fs.readFileSync(dir, 'utf8');
+    console.log("find config file at " + dir)
     let jo = JSON.parse(s)
-    jo.url
-    jo.key
+
+    const supabase = createClient(
+      jo.url,
+      jo.key
+    );
+    return supabase
   }
   catch (e) {
     console.log("please put config file at")
-    console.log(e);
+    // console.log(e);
   }
 }
-
-// todo : use file
-/*
-// import dotenv from "dotenv";
-dotenv.config();
-export const supabase = createClient(
-  process.env.VITE_PUBLIC_SUPABASE_URL as string,
-  process.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string
-); */
