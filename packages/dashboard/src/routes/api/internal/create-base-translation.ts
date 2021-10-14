@@ -53,6 +53,18 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			};
 		}
 
+		// just in case upserting the key, in case it does not exist yet.
+		const key = await supabase
+			.from<definitions['key']>('key')
+			.upsert({ name: requestBody.baseTranslation.key_name, project_id: requestBody.projectId });
+
+		if (key.error) {
+			console.error(key.error);
+			return {
+				status: 500
+			};
+		}
+
 		const projectLanguages = await supabase
 			.from<definitions['language']>('language')
 			.select()
@@ -115,7 +127,6 @@ export async function post(request: Request): Promise<EndpointOutput> {
 							console.warn(
 								`Insertion of ${requestBody.baseTranslation.key_name}-${language.iso_code} went wrong:`
 							);
-							console.warn(insertion.error);
 						}
 					}
 					// additional parantheses to execute the function, otherwise the array is not an array of promises
