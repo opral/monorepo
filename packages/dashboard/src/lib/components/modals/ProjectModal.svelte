@@ -96,9 +96,9 @@
 		</FormGroup>
 
 		<FormGroup>
-			<!-- <Select
+			<Select
 				labelText="In which organization do you want to put the project? "
-				bind:value={organizationId}
+				bind:selected={organizationId}
 			>
 				<SelectItem disabled hidden value="organization name" text="Choose an option" />
 				{#if organizations}
@@ -106,8 +106,8 @@
 						<SelectItem value={organization.id} text={organization.name} />
 					{/each}
 				{/if}
-			</Select> -->
-			<select bind:value={organizationId}>
+			</Select>
+			<!-- <select bind:value={organizationId}>
 				{#if organizations}
 					{#each organizations.data || [] as organization}
 						<option value={organization.id}>
@@ -115,7 +115,7 @@
 						</option>
 					{/each}
 				{/if}
-			</select>
+			</select> -->
 		</FormGroup>
 		<TextInput
 			labelText="language code (ISO 639-1)"

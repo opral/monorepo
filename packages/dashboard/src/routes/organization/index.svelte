@@ -20,12 +20,6 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import { mockOrganization, mockProject } from '$lib/mockData';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
-	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
-	import Project from '../project/index.svelte';
-
-	import ArrowRight16 from 'carbon-icons-svelte/lib/ArrowRIght16';
-	import ArrowLeft16 from 'carbon-icons-svelte/lib/ArrowLeft16';
-	import Number_1 from 'carbon-icons-svelte/lib/Number_132';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
@@ -111,7 +105,13 @@
 			</ToolbarContent>
 		</Toolbar>
 		<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
-		<span slot="cell" let:row let:cell on:click={() => goto(`/project/?organization=${row.id}`)}>
+		<span
+			slot="cell"
+			let:row
+			let:cell
+			on:click={() => goto(`/project/?organization=${row.id}`)}
+			class="cursor-pointer"
+		>
 			{#if cell.key === 'name'}
 				<div class="flex items-center space-x-2">
 					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>

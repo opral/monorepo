@@ -6,7 +6,8 @@
 		Toolbar,
 		ToolbarBatchActions,
 		ToolbarContent,
-		ToolbarSearch
+		ToolbarSearch,
+		ExpandableTile
 	} from 'carbon-components-svelte';
 	import Edit32 from 'carbon-icons-svelte/lib/Edit32';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
@@ -20,12 +21,14 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
+	import Translations from '$lib/components/Translations.svelte';
 
 	const headers = [
 		{ key: 'key', value: 'Key' },
 		{ key: 'description', value: 'Description' },
 		{ key: 'overflow', empty: true }
 	];
+
 	let selectedRowIds;
 
 	let search = '';
@@ -158,7 +161,7 @@
 
 <div style="padding-left: 2rem;padding-right:2rem">
 	{#if databaseReady}
-		<DataTable batchSelection bind:selectedRowIds {headers} {rows}>
+		<DataTable expandable bind:selectedRowIds {headers} {rows}>
 			<Toolbar>
 				<ToolbarBatchActions>
 					<Button icon={Delete16} on:click={() => deleteKeys(selectedRowIds)}>Delete keys</Button>
@@ -168,9 +171,10 @@
 					<Button on:click={() => (createKeyModal.open = true)}>Create key</Button>
 				</ToolbarContent>
 			</Toolbar>
+
 			<span slot="cell" let:row let:cell>
 				{#if cell.key === 'overflow'}
-					{#if row.translations.filter((t) => t.iso_code === $projectStore.data.project.default_iso_code)[0].text !== ''}
+					<!-- {#if row.translations.filter((t) => t.iso_code === $projectStore.data.project.default_iso_code)[0].text !== ''}
 						<Button
 							on:click={() => openTranslationModal(row.translations, row.key)}
 							iconDescription="Modify translation"
@@ -184,9 +188,12 @@
 							icon={Add32}
 							kind="ghost"
 						/>
-					{/if}
+					{/if} -->
 				{:else}{cell.value}{/if}
 			</span>
+			<div slot="expanded-row" let:row>
+				<Translations keyName={row.key} />
+			</div>
 		</DataTable>
 	{/if}
 </div>
