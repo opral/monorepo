@@ -203,7 +203,7 @@
 
 			<span slot="cell" let:row let:cell>
 				{#if cell.key === 'overflow'}
-					{#if checkIfBase(row) === false}
+					<!-- {#if checkIfBase(row) === false}
 						<Button
 							on:click={() => openTranslationModal(row.translations, row.key)}
 							iconDescription="Modify translation"
