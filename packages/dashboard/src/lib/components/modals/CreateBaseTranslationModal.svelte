@@ -21,7 +21,6 @@
 			projectId: $projectStore.data.project.id,
 			baseTranslation: {
 				key_name: keyName,
-				iso_code: $projectStore.data.project.default_iso_code,
 				text: baseTranslationText
 			}
 		};
