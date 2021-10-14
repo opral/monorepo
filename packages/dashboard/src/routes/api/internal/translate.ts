@@ -1,11 +1,6 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
-import translate, { DeeplLanguages } from 'deepl';
-// import { supabaseServerSide } from './_services/supabase';
-
-dotenv.config();
-
-const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
+import { DeeplLanguages } from 'deepl';
 
 export type TranslateRequestBody = {
 	text: string;
@@ -18,9 +13,14 @@ export type TranslateResponseBody = {
 	targetLang: DeeplLanguages;
 };
 
-export type TranslateSupportedLanguages = DeeplLanguages;
+type DeeplResponse = {
+	translations: { detected_source_lang: string; text: string }[];
+};
 
 export async function post(request: Request): Promise<EndpointOutput<TranslateResponseBody>> {
+	dotenv.config();
+	const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
+
 	if (request.headers['content-type'] !== 'application/json') {
 		return {
 			status: 405
@@ -35,28 +35,39 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 	// 	};
 	// }
 	const translateRequest = (request.body as unknown) as TranslateRequestBody;
-	const result = await translate({
-		text: wrapVariablesInTags(translateRequest.text),
-		// source_lang: translateRequest.sourceLang,
-		target_lang: translateRequest.targetLang,
-		free_api: true,
-		auth_key: deeplKey,
-		formality: 'less',
-		tag_handling: ['xml'],
-		ignore_tags: ['variable']
+	const body =
+		'auth_key=' +
+		deeplKey +
+		'&text=' +
+		escapeVariablesInTags(translateRequest.text) +
+		'&target_lang=' +
+		translateRequest.targetLang +
+		'&source_lang=' +
+		translateRequest.sourceLang +
+		// tag handling ensures that <variable> {some variable} </varibale> is excaped.
+		'&tag_handling=xml';
+
+	const response = await fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
+		method: 'post',
+		headers: new Headers({
+			'content-type': 'application/x-www-form-urlencoded'
+		}),
+		body: body
 	});
-	if (result.status !== 200) {
+	if (response.ok !== true) {
 		return {
-			status: result.status
+			status: 500
 		};
-	} else if (result.data.translations.length !== 1) {
+	}
+	const machineTranslation: DeeplResponse = await response.json();
+	if (machineTranslation.translations.length < 1) {
 		return {
 			status: 500
 		};
 	}
 	return {
-		body: {
-			text: removeVariableTags(result.data.translations[0].text),
+		body: <TranslateResponseBody>{
+			text: removeVariableTags(machineTranslation.translations[0].text),
 			targetLang: translateRequest.targetLang
 		}
 	};
@@ -67,7 +78,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
  * @param text "Hello {user}."
  * @returns "Hello <variable>{user}</variable>."
  */
-function wrapVariablesInTags(text: string): string {
+function escapeVariablesInTags(text: string): string {
 	return text.replace(/{.*?}/g, '<variable>$&</variable>');
 }
 

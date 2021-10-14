@@ -1,18 +1,8 @@
 <script lang="ts">
-	import {
-		Modal,
-		Form,
-		FormGroup,
-		TextInput,
-		Checkbox,
-		Select,
-		SelectItem
-	} from 'carbon-components-svelte';
+	import { Modal, Form, FormGroup, TextInput } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
-	import { projectStore } from '$lib/stores/projectStore';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import ISO6391 from 'iso-639-1';
 	import { createEventDispatcher } from 'svelte';

@@ -65,9 +65,6 @@ describe("policies/translation", () => {
             project_id: project.data![0].id,
             iso_code: "en"
         });
-        console.log("!!! RESPONSE !!!");
-        console.log(translation.error);
-        console.log(translation.statusText);
         expect(translation.data?.length).toEqual(1);
     })
 });

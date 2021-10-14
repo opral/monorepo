@@ -7,7 +7,10 @@
 	let token = '';
 
 	onMount(async () => {
-		token = auth.session()!.access_token;
+		const session = auth.session();
+		if (session) {
+			token = session.access_token;
+		}
 	});
 </script>
 

@@ -21,6 +21,5 @@
 		},
 		"types": ["jest"]
 	},
-	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte", "api/*.ts"],
-	// "exclude": ["src/lib/types/databaseDefinitions.ts"] // auto generated
+	"include": ["src/**/*.ts", "src/**/*.svelte"]
 }

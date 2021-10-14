@@ -1,7 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { database } from './database';
 
-const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string;
-export const supabase_inl = createClient(supabaseUrl, supabaseAnonKey);
-
-export const auth = supabase_inl.auth;
+// solely exists because the project started out with seperation of database and auth
+// but is just a wrapper
+export const auth = database.auth;

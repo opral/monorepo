@@ -7,8 +7,8 @@
 		"preview": "svelte-kit preview",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --ignore-path .gitignore  --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
-		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
+		"lint": "npx prettier --ignore-path .gitignore  --check --plugin-search-dir=. . && npx eslint --ignore-path .gitignore .",
+		"format": "npx prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
 		"test": "jest"
 	},
 	"jest": {
@@ -29,7 +29,9 @@
 		]
 	},
 	"devDependencies": {
+		"@inlang/database": "file:../database",
 		"@sveltejs/adapter-vercel": "next",
+		"@sveltejs/eslint-config": "github:sveltejs/eslint-config",
 		"@sveltejs/kit": "next",
 		"@testing-library/jest-dom": "^5.14.1",
 		"@testing-library/svelte": "^3.0.3",
@@ -41,7 +43,7 @@
 		"carbon-components-svelte": "^0.42.2",
 		"carbon-icons-svelte": "^10.36.0",
 		"cssnano": "^5.0.6",
-		"eslint": "^7.22.0",
+		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.1.0",
 		"eslint-plugin-svelte3": "^3.2.0",
 		"jest": "^27.0.6",
@@ -58,8 +60,7 @@
 		"ts-jest": "^27.0.4",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.0.0",
-		"typescript": "^4.4.3",
-		"@inlang/database": "file:../database"
+		"typescript": "^4.4.3"
 	},
 	"type": "module",
 	"dependencies": {
@@ -69,6 +70,7 @@
 		"deepl": "^1.0.12",
 		"dotenv": "^10.0.0",
 		"fast-deep-equal": "^3.1.3",
+		"immutable": "^4.0.0",
 		"is-valid-domain": "^0.1.2",
 		"iso-639-1": "^2.1.9",
 		"svelte-fluttered": "^0.3.0"
