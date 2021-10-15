@@ -2,7 +2,9 @@
 	import UserAvatar32 from 'carbon-icons-svelte/lib/UserAvatar32';
 	import User24 from 'carbon-icons-svelte/lib/User24';
 	import Password32 from 'carbon-icons-svelte/lib/Password32';
+	import { auth } from '$lib/services/auth';
 	import Logout32 from 'carbon-icons-svelte/lib/Logout32';
+	import { PostgrestError } from '@supabase/postgrest-js';
 	import {
 		Header,
 		HeaderNav,
@@ -16,6 +18,19 @@
 	// export let avatar:
 	export let username: string;
 	let isSideNavOpen = false;
+
+	const handleLogout = async () => {
+		try {
+			const { error } = await auth.signOut();
+			if (error) {
+				throw error;
+			}
+			alert('Logged out!');
+		} catch (error) {
+			const err = error as PostgrestError;
+			alert(err.message);
+		}
+	};
 </script>
 
 <Header company="inlang" bind:isSideNavOpen href="/">
@@ -45,7 +60,7 @@
 							<Password32 class="mr-4 -mt-0.5" />Access tokens
 						</div></HeaderPanelLink
 					>
-					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+					<HeaderPanelLink on:click={handleLogout} class="bx--switcher__item" style="height: 40px"
 						><div class="inline-flex"><Logout32 class="mr-4 -mt-1" /> Log out</div></HeaderPanelLink
 					>
 				</HeaderPanelLinks>
