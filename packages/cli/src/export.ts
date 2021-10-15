@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
 import program from "commander";
 import { createClient } from "@supabase/supabase-js";
 import { definitions } from "@inlang/database";
-import { exportI18nNext } from "../src/adapters/reacti18n";
+import { exportI18nNext } from "./adapters/reacti18n";
 import * as fs from "fs";
 import * as path from "path";
 
