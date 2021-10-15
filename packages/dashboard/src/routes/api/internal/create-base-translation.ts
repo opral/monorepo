@@ -46,8 +46,8 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			.select()
 			.match({ id: requestBody.projectId })
 			.single();
-
 		if (project.data === null || project.error) {
+			console.error('project likely does not exist');
 			return {
 				status: 500
 			};
@@ -56,7 +56,10 @@ export async function post(request: Request): Promise<EndpointOutput> {
 		// just in case upserting the key, in case it does not exist yet.
 		const key = await supabase
 			.from<definitions['key']>('key')
-			.upsert({ name: requestBody.baseTranslation.key_name, project_id: requestBody.projectId });
+			.upsert(
+				{ name: requestBody.baseTranslation.key_name, project_id: requestBody.projectId },
+				{ onConflict: 'name, project_id' }
+			);
 
 		if (key.error) {
 			console.error(key.error);
@@ -124,9 +127,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 								text: text
 							});
 						if (insertion.error) {
-							console.warn(
-								`Insertion of ${requestBody.baseTranslation.key_name}-${language.iso_code} went wrong:`
-							);
+							throw `Insertion of ${requestBody.baseTranslation.key_name}-${language.iso_code} went wrong:`;
 						}
 					}
 					// additional parantheses to execute the function, otherwise the array is not an array of promises
