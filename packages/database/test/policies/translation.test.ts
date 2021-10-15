@@ -28,7 +28,7 @@ describe("policies/translation", () => {
             .match({
                 name: "dev-project"
         });
-        const translation_delete = await supabase.from<definitions["translation"]>("translation")
+        await supabase.from<definitions["translation"]>("translation")
             .delete()
             .match({
                 key_name: "button.confirm",
@@ -50,7 +50,7 @@ describe("policies/translation", () => {
             .match({
                 name: "dev-project"
         });
-        const translation_upsert = await supabase.from<definitions["translation"]>("translation")
+        await supabase.from<definitions["translation"]>("translation")
             .upsert({
                 key_name: "button.confirm",
                 project_id: project.data![0].id,
@@ -66,5 +66,30 @@ describe("policies/translation", () => {
             iso_code: "en"
         });
         expect(translation.data?.length).toEqual(1);
+    });
+    test("Member can not update translation with empty text field", async () => {
+        const project = await supabase.from<definitions["project"]>("project")
+            .select()
+            .match({
+                name: "dev-project"
+        });
+        await supabase.from<definitions["translation"]>("translation")
+            .upsert({
+                key_name: "button.confirm",
+                project_id: project.data![0].id,
+                iso_code: "en",
+                is_reviewed: true,
+                text: ""
+        });
+        const translation = await supabase.from<definitions["translation"]>("translation")
+        .select()
+        .match({
+            key_name: "button.confirm",
+            project_id: project.data![0].id,
+            iso_code: "en",
+            text: ""
+        });
+        expect(translation.data?.length).toEqual(0);
     })
+
 });

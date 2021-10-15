@@ -29,6 +29,12 @@ export async function translation_set_policies() {
             (project_id) IN (
                 SELECT project_id FROM project
             )
+        ) WITH CHECK (
+            (project_id) IN (
+                SELECT project_id FROM project
+            )
+            AND
+            LENGTH(text) > 0
         );
     `);
     console.log("✅ applied policies for: translation table");
