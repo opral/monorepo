@@ -15,14 +15,13 @@
 		SkipToContent,
 		HeaderUtilities
 	} from 'carbon-components-svelte';
+	import { userStore } from '$lib/stores/userStore';
 	// export let avatar:
-	export let username: string;
 	let isSideNavOpen = false;
 
 	const handleLogout = async () => {
 		try {
 			const { error } = await auth.signOut();
-			username = 'undefined';
 			if (error) {
 				throw error;
 			}
@@ -38,7 +37,7 @@
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>
-	{#if username !== 'undefined'}
+	{#if $userStore.data}
 		<HeaderNav>
 			<HeaderNavItem href="/project" text="Projects" />
 			<HeaderNavItem href="/organization" text="Organizations" />
@@ -46,7 +45,7 @@
 
 		<HeaderUtilities>
 			<HeaderAction
-				text={username}
+				text={$userStore.data.email}
 				icon={User24}
 				class="bx--header__global place-items-center flex-row-reverse"
 			>
