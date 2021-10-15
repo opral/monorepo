@@ -16,7 +16,6 @@ function entry() {
     .option('-p, --project', 'project id from dashboard')
     .parse(args)
 
-
   let argParsed = program.parse(args).opts()
   let pid = args[3]
   // if no 
@@ -24,8 +23,7 @@ function entry() {
   if (pid === null) console.log("please provide project id from dashboard")
 
   console.log(pid)
-  // download2prj(pid)
-  readEnvir()
+  download2prj(pid)
   // token expire,please provide a new one from dashboard
 }
 

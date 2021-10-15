@@ -23,12 +23,16 @@
 			text="Languages"
 			href="/project/{$page.params.projectId}/languages"
 		/>
+		<SideNavLink
+			icon={Language24}
+			text="Translations"
+			href="/project/{$page.params.projectId}/translations"
+		/>
 		<!-- <SideNavLink icon={Import24} text="Import" href="/project/{$page.params.projectId}/import" /> -->
 		<!-- <SideNavLink icon={Export24} text="Export" href="/project/{$page.params.projectId}/export" /> -->
 		<!-- 	<SideNavLink icon={Activity24} text="Activity" href="/" /> -->
 		<!-- <SideNavLink icon={Members24} text="Members" href="/project/{$page.params.projectId}/members" /> -->
-		<!-- 		<SideNavLink icon={Integration24} text="Integrations" href="/" />
- -->
+		<!-- 		<SideNavLink icon={Integration24} text="Integrations" href="/" />-->
 		<SideNavLink
 			icon={Settings24}
 			text="Settings"

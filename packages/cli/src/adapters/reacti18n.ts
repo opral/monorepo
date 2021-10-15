@@ -1,6 +1,4 @@
 import type { definitions } from "@inlang/database";
-import { database } from "@inlang/dashboard/src/lib/services/database";
-
 
 type File = {
   path: string;
@@ -14,16 +12,16 @@ type AdapterExport = {
 /**
  * a locale can be undefined e.g.
  * "fr" does not exist in the project locales ["de", "en"]
- * 
- * a key can be undefined for a specific locale because 
+ *
+ * a key can be undefined for a specific locale because
  * "example.hello" may not exist for "de", but for "en"
  */
 type AllTranslations = {
   [locale: string]:
-  | undefined
-  | {
-    [key: string]: string | undefined;
-  };
+    | undefined
+    | {
+        [key: string]: string | undefined;
+      };
 };
 export function exportI18nNext(args: {
   translations: definitions["translation"][];
@@ -53,12 +51,9 @@ export function exportI18nNext(args: {
   };
 }
 
-/*
-  export async function importI18next( args: {obj: Object;}) {
+/*  export async function importI18next( args: {obj: Object;}) {
 
-    console.log("obj");
-    console.log(args);
+   
     await database.from('messages').upsert({});
 
-  }
-*/
+  }*/
