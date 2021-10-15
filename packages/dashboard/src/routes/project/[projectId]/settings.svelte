@@ -5,5 +5,5 @@
 
 <row class="space-x-4 items-center">
 	<p>Project ID:</p>
-	<CodeSnippet>{$projectStore.data?.project.id}</CodeSnippet>
+	<CodeSnippet code={$projectStore.data?.project.id} />
 </row>
