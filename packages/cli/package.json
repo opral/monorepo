@@ -22,21 +22,33 @@
     "bundle": "npm run build && pkg . --out-dir ./exec/"
   },
   "devDependencies": {
-    "ava": "^2.2.0",
-    "pkg": "^4.4.0",
-    "rimraf": "^2.6.3",
-    "ts-node": "^8.3.0",
-    "typescript": "^4.4.3",
+    "@inlang/database": "file:../database",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.10.1",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "ava": "^2.2.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.0.6",
     "jest-esm-transformer": "^1.0.0",
+    "pkg": "^4.4.0",
+    "rimraf": "^2.6.3",
     "ts-jest": "^27.0.4",
-    "@inlang/database": "file:../database"
+    "ts-node": "^8.10.2",
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "@supabase/supabase-js": "^1.23.0",
     "commander": "^2.20.0",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "prettier": "^2.4.1",
+    "typescript-eslint": "0.0.1-alpha.0"
   }
 }

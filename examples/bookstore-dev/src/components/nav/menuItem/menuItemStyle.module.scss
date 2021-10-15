@@ -1,0 +1,27 @@
+@use '../../../styles/utils.scss' as *;
+
+.item {
+  font-family: $second-font;
+  list-style: none;
+
+  .btn {
+    border: none;
+    background-color: transparent;
+    font-size: 1rem;
+    color: grey;
+    scale: 1;
+    transition: all ease-in 0.1s;
+    letter-spacing: 1.9px;
+    margin-top: 1rem;
+
+    &:hover {
+      scale: 1.2;
+      color: black;
+    }
+
+    &:active {
+      scale: 0.9;
+      color: coral;
+    }
+  }
+}
