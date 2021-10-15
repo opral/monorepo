@@ -22,6 +22,7 @@
 	const handleLogout = async () => {
 		try {
 			const { error } = await auth.signOut();
+			username = 'undefined';
 			if (error) {
 				throw error;
 			}
@@ -37,36 +38,40 @@
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>
-	<HeaderNav>
-		<HeaderNavItem href="/project" text="Projects" />
-		<HeaderNavItem href="/organization" text="Organizations" />
-	</HeaderNav>
+	{#if username !== 'undefined'}
+		<HeaderNav>
+			<HeaderNavItem href="/project" text="Projects" />
+			<HeaderNavItem href="/organization" text="Organizations" />
+		</HeaderNav>
 
-	<HeaderUtilities>
-		<HeaderAction
-			text={username}
-			icon={User24}
-			class="bx--header__global place-items-center flex-row-reverse"
-		>
-			<div class="bx--header-panel--expanded bx-switcher__item:nth-child(1)">
-				<HeaderPanelLinks>
-					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
-						><div class="inline-flex">
-							<UserAvatar32 class="mr-4 -mt-1" />Account
-						</div></HeaderPanelLink
-					>
-					<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
-						><div class="inline-flex mb-4">
-							<Password32 class="mr-4 -mt-0.5" />Access tokens
-						</div></HeaderPanelLink
-					>
-					<HeaderPanelLink on:click={handleLogout} class="bx--switcher__item" style="height: 40px"
-						><div class="inline-flex"><Logout32 class="mr-4 -mt-1" /> Log out</div></HeaderPanelLink
-					>
-				</HeaderPanelLinks>
-			</div>
-		</HeaderAction>
-	</HeaderUtilities>
+		<HeaderUtilities>
+			<HeaderAction
+				text={username}
+				icon={User24}
+				class="bx--header__global place-items-center flex-row-reverse"
+			>
+				<div class="bx--header-panel--expanded bx-switcher__item:nth-child(1)">
+					<HeaderPanelLinks>
+						<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+							><div class="inline-flex">
+								<UserAvatar32 class="mr-4 -mt-1" />Account
+							</div></HeaderPanelLink
+						>
+						<HeaderPanelLink href="/" class="bx--switcher__item" style="height: 40px"
+							><div class="inline-flex mb-4">
+								<Password32 class="mr-4 -mt-0.5" />Access tokens
+							</div></HeaderPanelLink
+						>
+						<HeaderPanelLink on:click={handleLogout} class="bx--switcher__item" style="height: 40px"
+							><div class="inline-flex">
+								<Logout32 class="mr-4 -mt-1" /> Log out
+							</div></HeaderPanelLink
+						>
+					</HeaderPanelLinks>
+				</div>
+			</HeaderAction>
+		</HeaderUtilities>
+	{/if}
 </Header>
 
 <style>

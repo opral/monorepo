@@ -10,9 +10,9 @@
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/layout/Navbar.svelte';
 	import { Content } from 'carbon-components-svelte';
+	const user = auth.user();
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
-		const user = auth.user();
 		// includes('auth') ensures that subroutes within /auth do not
 		// lead to constant redirects
 		if (user === null && page.path.includes('auth') === false) {
@@ -39,7 +39,7 @@
 	}
 </script>
 
-<Navbar username="test" />
+<Navbar username={user?.email || ''} />
 <Content>
 	<slot />
 </Content>
