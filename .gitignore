@@ -91,3 +91,13 @@ node_modules
 .vercel
 .vercel_build_output
 package-lock.json
+
+
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+
+
