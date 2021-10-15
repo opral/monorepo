@@ -16,7 +16,7 @@ model organization {
   name               String
   projects           project[]
   // the user id is benefitial to insert an admin membership to the user
-  // who created the organization. 
+  // who created the organization.
   // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
   created_by_user_id String    @db.Uuid
   members            member[]
@@ -60,9 +60,10 @@ model project {
 }
 
 model language {
-  iso_code   iso_639_1
-  project_id String    @db.Uuid
-  project    project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  iso_code     iso_639_1
+  project_id   String        @db.Uuid
+  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  translations translation[] @relation
 
   @@id([project_id, iso_code])
 }
@@ -85,9 +86,10 @@ model translation {
   project_id  String    @db.Uuid
   project     project   @relation(fields: [project_id], references: [id])
   iso_code    iso_639_1
+  language    language  @relation(fields: [project_id, iso_code], references: [project_id, iso_code], onDelete: Cascade)
   is_reviewed Boolean   @default(false)
   /// Contains the translation -> "Hallo Welt"
-  text        String
+  text        String?
   created_at  DateTime  @default(now())
 
   @@id([project_id, key_name, iso_code])
