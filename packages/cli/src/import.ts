@@ -32,7 +32,7 @@ async function entry() {
 	}
 
 	//add all locales to list
-	const localefiles: any = {};
+	const localefiles: Record<string, string> = {};
 
 	if (filepath.includes('.json')) {
 		// single file
