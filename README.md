@@ -1,23 +1,36 @@
-## Localization (L10n) and Internationalization (i18n) of apps is too hard.
+# inlang
+
+[Inlang](https://www.inlang.dev) is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. With inlang you get type safety, machine translations, automatic sync and a collaboration dashboard in one tight package.
+
+**Status**
+
+- [x] Alpha: We are testing the solution and need your feedback.
+- [ ] Beta: Stable enough for small(er) apps and projects.
+- [ ] Release: Production ready.
+
+**Supported Languages**
+- [x] TypeScript using [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n)
+- [ ] Dart / Flutter
+- [ ] Swift / iOS
+- [ ] Kotlin / Android
 
 
-This project strives to lower the barrier(s) of localizing your apps. What started out as a simple [tech demo](https://www.youtube.com/watch?v=6xzbc6QYzDs) turned into a bigger project of 6 students from the Technical University of Denmark.
+## Demo - TODO
 
-### We need your help
-We have to identify what we should build. Help us by participating in [discussions](https://github.com/samuelstroschein/inlang/discussions), open issues, propose ideas, and most importantly, share the pain(s) you experienced with current i18n solutions, or why you did not i18n your app yet.
+*The GIFs should show a simple web page on the left showcasing the automatic key generation and dashboard sync*
 
-## Current state: proof of concept
+1. GIF: VSCode inlang extension context menu -> showing key is automatically translated with machine translations
+2. GIF: Dashboard -> showing sync when changing a translation
 
-> :warning:	Do not use this on production apps. Expect breaking changes. 
 
-### Video Demo
-[![Demo Video](https://img.youtube.com/vi/mivXTx-cpcM/0.jpg)](https://www.youtube.com/watch?v=mivXTx-cpcM)
+## Getting started
 
- 
-Try the proof of concept by using [this repo](https://github.com/samuelstroschein/inlang-test-repository) as a template. 
+TODO - link to documentation
 
-And most importantly, [give feedback](https://github.com/samuelstroschein/inlang/discussions).
 
-## Contribute
+## Community & Support
 
-This repo follows semantic git commits https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716 with the addition of `imp:` for improvments.
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
+- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
+
