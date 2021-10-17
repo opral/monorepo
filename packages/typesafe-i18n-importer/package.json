@@ -1,10 +1,21 @@
 {
-  "name": "typesafe-i18n-inlang-importer",
+  "name": "@inlang/inlang-typesafe-i18n-adapter",
   "version": "0.0.1",
   "description": "Provides a way to automatically import all keys and translations into typesafe-i18n.",
   "main": "index.js",
   "scripts": {},
-  "keywords": [],
+  "keywords": [
+    "i18n",
+    "inlang",
+    "internationalization",
+    "l10n",
+    "localization",
+    "typesafe",
+    "import",
+    "adapter",
+    "management platform",
+    "typesafe-i18n"
+  ],
   "author": "Inlang",
   "license": "ISC",
   "dependencies": {
