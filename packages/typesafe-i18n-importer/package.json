@@ -1,0 +1,20 @@
+{
+  "name": "typesafe-i18n-inlang-importer",
+  "version": "0.0.1",
+  "description": "Provides a way to automatically import all keys and translations into typesafe-i18n.",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "Inlang",
+  "license": "ISC",
+  "dependencies": {
+    "typesafe-i18n": "^2.44.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.4.4"
+  }
+}
