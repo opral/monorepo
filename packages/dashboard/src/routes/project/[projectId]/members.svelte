@@ -1,18 +1,33 @@
 <script lang="ts">
-    import { TextInput, Button } from "carbon-components-svelte";
+    import { TextInput, Button, DataTable } from "carbon-components-svelte";
     import SendAlt24 from "carbon-icons-svelte/lib/SendAlt32";
     import type { definitions } from '@inlang/database';
-    import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
     import { projectStore } from "$lib/stores/projectStore";
 
     let inputEmail = "";
 
-    async function inviteUser(email: string) {
+    
+
+
+    async function inviteUser(email: string) { 
+        console.log("input email: " + inputEmail);
         let organization_id = $projectStore.data?.project.organization_id;
-        let user_id = await database.rpc("get_user_id_from_email", {email: inputEmail})
-        if(user_id.data!.length > 0) {
-            console.log("invite user: " + user_id.data![0].RETURN);
+        let members = await database.from<definitions["member"]>("member").select().match({ organization_id: organization_id});
+        console.log("members: ");
+        members.data!.map((m) => {
+            console.log(m.user_id);
+        })
+        let user_id = (await database.rpc("get_user_id_from_email", {email: inputEmail})).data![0].get_user_id_from_email;
+        if(user_id !== null && user_id.length > 0) {
+            let member_upsert = await database.from<definitions["member"]>("member")
+                .upsert({
+                    organization_id: organization_id,
+                    user_id: user_id,
+                    role: "ADMIN"
+                });
+            console.log("invite response: " + member_upsert.statusText + ", " + member_upsert.status);
+            console.log("invite user: " + user_id);
         }
     }
 
