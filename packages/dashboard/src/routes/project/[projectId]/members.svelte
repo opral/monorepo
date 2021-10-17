@@ -11,6 +11,9 @@
     import { projectStore } from "$lib/stores/projectStore";
     import { onMount } from "svelte";
 
+    //TODO: reload table on invite and clear text input
+    //TODO: fix join, right now user role is hardcoded to admin
+
     let inputEmail = "";
     let isLoading = true;
     let members: DatabaseResponse<definitions["member"][]>;
@@ -109,11 +112,11 @@
 
         // return membersJoined;
 
-		return members.data
-			.map((member) => ({
-                id: member.user_id,
-				email: member.user_id,
-				role: member.role
+		return users.data
+			.map((user) => ({
+                id: user.id,
+				email: user.email,
+				role: 'ADMIN'
 			}));
 	};
 
