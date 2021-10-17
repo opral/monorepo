@@ -7,12 +7,19 @@ const prisma = new PrismaClient();
  */
 export async function initUserFunctions() {
     await prisma.$queryRawUnsafe(`
-        CREATE OR REPLACE FUNCTION public.get_user_id_from_email(email VARCHAR(100))
-        RETURNS uuid AS $$
-        SELECT id
-        FROM public.user U
-        WHERE U.email = email;
-        $$ LANGUAGE sql SECURITY DEFINER;
+    create or replace function public.get_user_id_from_email(arg_email TEXT)
+    returns uuid
+    language plpgsql
+    as $$
+    declare
+       uid uuid;
+    begin
+      select u.id
+      into uid
+      from public.user as u
+      where u.email = arg_email;
+      return uid;
+    end;$$ SECURITY DEFINER;
     `);
         console.log("✅ applied functions for: user table");
 }

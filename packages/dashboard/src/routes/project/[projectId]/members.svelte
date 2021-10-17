@@ -4,32 +4,30 @@
     import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
     import { projectStore } from "$lib/stores/projectStore";
-    import { getUserId } from '../../api/internal/user-queries'
 
     let inputEmail = "";
-
-    
-
 
     async function inviteUser(email: string) { 
         console.log("input email: " + inputEmail);
         let organization_id = $projectStore.data?.project.organization_id;
-        let members = await database.from<definitions["member"]>("member").select().match({ organization_id: organization_id});
-        console.log("members: ");
-        members.data!.map((m) => {
-            console.log(m.user_id);
-        })
-        let user_id = await getUserId(email);
-        if(user_id !== null && user_id.length > 0) {
+
+        let uid_rpc = await database.rpc("get_user_id_from_email", {arg_email: inputEmail});
+        
+        if (uid_rpc.error) {
+            console.error(uid_rpc.error.message);
+        }
+
+        if(uid_rpc.data !== null) {
+            let uid = uid_rpc.data[0].get_user_id_from_email;
             let member_upsert = await database.from<definitions["member"]>("member")
                 .upsert({
                     organization_id: organization_id,
-                    user_id: user_id,
+                    user_id: (uid),
                     role: "ADMIN"
                 });
             console.log("invite response: " + member_upsert.statusText + ", " + member_upsert.status);
-            console.log("invite user: " + user_id);
         }
+
     }
 
 </script>
@@ -43,4 +41,6 @@
     <TextInput size="xl" placeholder="Enter email of user to invite" bind:value={inputEmail}></TextInput>
     <Button  icon={SendAlt24} on:click={() => inviteUser(inputEmail)}>Invite</Button>
     </row>
+
+
 </div>
