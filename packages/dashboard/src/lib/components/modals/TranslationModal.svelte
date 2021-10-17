@@ -7,16 +7,17 @@
 
 	export let open = false;
 	export let key = '';
-	export let translations: definitions['translations'][] = [];
+	export let translations: definitions['translation'][];
 
 	$: isBaseTranslationMissing = !translations.some(
-		(t) => t.text !== '' && t.iso_code === $projectStore.data.project.default_iso_code
+		(t) => t.text !== '' && t.iso_code === $projectStore.data?.project.default_iso_code
 	);
 
-	$: missingTranslations = $projectStore.data.languages.filter((language) =>
-		$projectStore.data.translations
-			.map((translation) => translation.iso_code)
-			.includes(language.iso_code === false)
+	$: missingTranslations = $projectStore.data?.languages.filter(
+		(language) =>
+			$projectStore.data?.translations
+				.map((translation) => translation.iso_code)
+				.includes(language.iso_code) === false
 	);
 
 	const dispatch = createEventDispatcher();
@@ -26,11 +27,11 @@
 		for (const t of translations) {
 			if (t.text !== '') {
 				if (
-					$projectStore.data.translations.some(
+					$projectStore.data?.translations.some(
 						(translation) =>
 							translation.iso_code === t.iso_code &&
 							translation.key_name === key &&
-							translation.project_id === $projectStore.data.project.id
+							translation.project_id === $projectStore.data?.project.id
 					)
 				) {
 					query = await database
@@ -41,7 +42,7 @@
 						.eq('iso_code', t.iso_code);
 				} else {
 					query = await database.from<definitions['translation']>('translation').insert({
-						project_id: $projectStore.data.project.id,
+						project_id: $projectStore.data?.project.id,
 						key_name: key,
 						iso_code: t.iso_code,
 						is_reviewed: false,

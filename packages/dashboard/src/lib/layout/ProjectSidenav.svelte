@@ -17,18 +17,18 @@
 -->
 <SideNav isOpen={true} fixed class="w-64 static p-4 -ml-12 -mt-8">
 	<SideNavItems>
-		<SideNavLink icon={Home24} text="Home" href="/project/{$page.params.projectId}" />
+		<!-- <SideNavLink icon={Home24} text="Home" href="/project/{$page.params.projectId}" /> -->
 		<SideNavLink icon={Key24} text="Keys" href="/project/{$page.params.projectId}/keys" />
 		<SideNavLink
 			icon={Language24}
 			text="Languages"
 			href="/project/{$page.params.projectId}/languages"
 		/>
-		<SideNavLink
+		<!-- <SideNavLink
 			icon={Language24}
 			text="Translations"
 			href="/project/{$page.params.projectId}/translations"
-		/>
+		/> -->
 		<!-- <SideNavLink icon={Import24} text="Import" href="/project/{$page.params.projectId}/import" /> -->
 		<!-- <SideNavLink icon={Export24} text="Export" href="/project/{$page.params.projectId}/export" /> -->
 		<!-- 	<SideNavLink icon={Activity24} text="Activity" href="/" /> -->

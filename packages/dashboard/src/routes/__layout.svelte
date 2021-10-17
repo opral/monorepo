@@ -39,7 +39,7 @@
 	}
 </script>
 
-<Navbar username="test" />
+<Navbar />
 <Content>
 	<slot />
 </Content>

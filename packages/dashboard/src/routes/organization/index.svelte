@@ -121,10 +121,6 @@
 		</span>
 	</DataTable>
 </div>
-<!-- TODO: make pagination interactible -->
-<div class="pl-8 pr-8">
-	<Pagination totalItems={102} page={4} />
-</div>
 
 {#if showAddOrganizationModal}
 	<OrganizationModal
