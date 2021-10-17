@@ -14,6 +14,8 @@
 - [ ] Swift / iOS
 - [ ] Kotlin / Android
 
+[Want to receive a notification when inlang is available for other languages?](TODO)
+
 
 ## Demo - TODO
 
