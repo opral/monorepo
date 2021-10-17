@@ -77,31 +77,44 @@
 
     }
 
+    function getEmail(uid: string) {
+        if (users.data !== null && users.data.length > 0) {
+            // users.data!.find((user) => {
+            //     user.id === uid
+            // })!.email;
+            users.data.map((user) => {
+                console.log(user.id + ", " + user.email);
+            })
+            console.log("email: " + "email")
+            return "";
+        } else {
+            return "undefined";
+        }
+    }
+
     $: rows_members = () => {
 		if (isLoading || members.error || members.data === null || users.error || users.data === null) {
 			return [];
 		}
-        membersJoined = [];
-        members.data.map((member) => {
-            let email = users.data!.find((user) => {
-                user.id === member.user_id;
-            })!.email;
-            membersJoined.push({
-                id: member.user_id,
-                email: email,
-                organization_id: member.organization_id,
-                role: member.role
-            });
-        })
+        // membersJoined = [];
+        // console.log("members length: "  + members.data.length)
+        // members.data.map((member) => {
+        //     membersJoined.push({
+        //         id: member.user_id,
+        //         email: getEmail(member.user_id),
+        //         organization_id: member.organization_id,
+        //         role: member.role
+        //     });
+        // })
 
-        return membersJoined;
+        // return membersJoined;
 
-		/*return members.data
+		return members.data
 			.map((member) => ({
                 id: member.user_id,
 				email: member.user_id,
 				role: member.role
-			}));*/
+			}));
 	};
 
 </script>
