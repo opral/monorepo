@@ -4,6 +4,7 @@
     import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
     import { projectStore } from "$lib/stores/projectStore";
+    import { getUserId } from '../../api/internal/user-queries'
 
     let inputEmail = "";
 
@@ -18,7 +19,7 @@
         members.data!.map((m) => {
             console.log(m.user_id);
         })
-        let user_id = (await database.rpc("get_user_id_from_email", {email: inputEmail})).data![0].get_user_id_from_email;
+        let user_id = await getUserId(email);
         if(user_id !== null && user_id.length > 0) {
             let member_upsert = await database.from<definitions["member"]>("member")
                 .upsert({
