@@ -227,54 +227,50 @@
 	}
 </script>
 
-<div class="p-8">
-	<h1>Keys</h1>
-	<p>All your translation keys will appear here. You can create, delete and edit them.</p>
-</div>
+<h1>Keys</h1>
+<p>All your translation keys will appear here. You can create, delete and edit them.</p>
+<br />
+{#if databaseReady}
+	<DataTable expandable bind:selectedRowIds {headers} {rows}>
+		<Toolbar>
+			<ToolbarBatchActions>
+				<Button icon={Delete16} on:click={() => deleteKeys(selectedRowIds)}>Delete keys</Button>
+			</ToolbarBatchActions>
+			<ToolbarContent>
+				<ToolbarSearch placeholder="Search your translations" bind:value={search} />
+				<Button on:click={() => openCreateKeyModal()}>Create key</Button>
+			</ToolbarContent>
+		</Toolbar>
 
-<div style="padding-left: 2rem;padding-right:2rem">
-	{#if databaseReady}
-		<DataTable expandable bind:selectedRowIds {headers} {rows}>
-			<Toolbar>
-				<ToolbarBatchActions>
-					<Button icon={Delete16} on:click={() => deleteKeys(selectedRowIds)}>Delete keys</Button>
-				</ToolbarBatchActions>
-				<ToolbarContent>
-					<ToolbarSearch placeholder="Search your translations" bind:value={search} />
-					<Button on:click={() => openCreateKeyModal()}>Create key</Button>
-				</ToolbarContent>
-			</Toolbar>
-
-			<span slot="cell" let:row let:cell>
-				{#if cell.key === 'actions'}
-					<row class="justify-end items-center">
-						<!-- Status  -->
-						<div>
-							{#if isKeyMissingTranslation(row) === true}
-								<Tag type="red">Missing translation</Tag>
-							{:else if isKeyFullyReviewed(row) === false}
-								<Tag type="purple">Needs approval</Tag>
-							{:else}
-								<Tag type="green">Complete</Tag>
-							{/if}
-						</div>
-						<!-- Delete Action -->
-						<Button
-							on:click={() => ((openDeleteModal = true), (selectedRow = row.value))}
-							iconDescription="Delete translation"
-							icon={TrashCan32}
-							kind="danger-ghost"
-						/>
-					</row>
-				{:else}{cell.value}{/if}
-			</span>
-			<div slot="expanded-row" let:row>
-				<Translations keyName={row.key} />
-			</div>
-		</DataTable>
-	{/if}
-</div>
-<div class="mt-2 flex flex-row justify-center">
+		<span slot="cell" let:row let:cell>
+			{#if cell.key === 'actions'}
+				<row class="justify-end items-center">
+					<!-- Status  -->
+					<div>
+						{#if isKeyMissingTranslation(row) === true}
+							<Tag type="red">Missing translation</Tag>
+						{:else if isKeyFullyReviewed(row) === false}
+							<Tag type="purple">Needs approval</Tag>
+						{:else}
+							<Tag type="green">Complete</Tag>
+						{/if}
+					</div>
+					<!-- Delete Action -->
+					<Button
+						on:click={() => ((openDeleteModal = true), (selectedRow = row.value))}
+						iconDescription="Delete translation"
+						icon={TrashCan32}
+						kind="danger-ghost"
+					/>
+				</row>
+			{:else}{cell.value}{/if}
+		</span>
+		<div slot="expanded-row" let:row>
+			<Translations keyName={row.key} />
+		</div>
+	</DataTable>
+{/if}
+<div class="pt-2 flex flex-row justify-center">
 	<PaginationNav total={1} class="bottom" />
 </div>
 
