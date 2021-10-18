@@ -8,7 +8,7 @@ Automatically retrieve all translations from the [Inlang translation management 
 
 ```
 {
-    ProjectId: "your-id-here"
+    projectId: "your-id-here"
 }
 ```
 
