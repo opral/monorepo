@@ -1,47 +1,70 @@
 <script lang="ts">
-	import { Modal, TextArea, TextInput } from 'carbon-components-svelte';
+	import { InlineLoading, Modal, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { database } from '$lib/services/database';
 	import { page } from '$app/stores';
-	import { createEventDispatcher } from 'svelte';
 	import type { definitions } from '@inlang/database';
+	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 
 	export let open = false;
 
 	let keyName: definitions['key']['name'];
+
 	let description: definitions['key']['description'];
 
-	const dispatch = createEventDispatcher();
+	let baseTranslationText: definitions['translation']['text'] = '';
 
-	$: isValidInput = () => {
+	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
+
+	$: keyNameIsValid = () => {
 		if (keyName === '') {
-			inputInvalidMessage = 'The key field is required.';
+			invalidKeyNameMessage = 'The key field is required.';
 			return false;
 		} else if ($projectStore.data?.keys.map((key) => key.name).includes(keyName)) {
-			inputInvalidMessage = 'The key already exists in the project.';
+			invalidKeyNameMessage = 'The key already exists in the project.';
 			return false;
 		}
 		return true;
 	};
 
-	let inputInvalidMessage: string;
+	$: isValidInput = keyNameIsValid() && baseTranslationText !== '';
 
-	async function save() {
-		const insert = await database
-			.from<definitions['key']>('key')
-			.insert({ project_id: $page.path.split('/')[2], name: keyName, description: description });
-		if (insert.error) {
-			alert(insert.error.message);
+	let invalidKeyNameMessage: string;
+
+	async function handleSubmission() {
+		status = 'isLoading';
+		if ($projectStore.data === null) {
+			throw 'Project Store is null.';
+		}
+		const body: CreateBaseTranslationRequestBody = {
+			projectId: $projectStore.data.project.id,
+			baseTranslation: {
+				key_name: keyName,
+				text: baseTranslationText
+			}
+		};
+		const response = await fetch('/api/internal/create-base-translation', {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/json'
+			}),
+			body: JSON.stringify(body)
+		});
+		if (response.ok !== true) {
+			status = 'hasError';
 		} else {
+			status = 'isFinished';
 			projectStore.getData({ projectId: $page.params.projectId });
-			/*let newRow = {
-				id: largestTableId + 1,
-				database_id: insert.data[0].id,
-				key: key,
-				description: description,
-				translations: []
-			};*/
-			dispatch('createKey', keyName);
+			// automatically closing the modal but leave time to
+			// let the user read the result status of the action
+			setTimeout(() => {
+				open = false;
+				// animation is ongoing after closing the modal.
+				// thus another setTimeout to reset the status
+				// ----- yes, very ugly ------
+				setTimeout(() => {
+					status = 'idle';
+				}, 500);
+			}, 1500);
 		}
 	}
 </script>
@@ -55,26 +78,45 @@
 	on:click:button--secondary={() => {
 		open = false;
 	}}
-	on:submit={() => {
-		open = false;
-		save();
-	}}
+	on:submit={handleSubmission}
 	preventCloseOnClickOutside
 	hasScrollingContent
-	primaryButtonDisabled={isValidInput() === false}
+	primaryButtonDisabled={isValidInput === false}
 	shouldSubmitOnEnter={false}
 >
 	<!-- 
-		bug: isValidInput is not showing once the user enters a duplicativ key, but works for the primary button (wtf?) 
+		bug: keyNameIsValid is not showing once the user enters a duplicativ key, but works for the primary button (wtf?) 
 	   	not of importance to fix for now.
 	-->
 	<TextInput
-		invalid={isValidInput() === false}
-		invalidText={inputInvalidMessage}
+		invalid={keyNameIsValid() === false && status !== 'isFinished'}
+		invalidText={invalidKeyNameMessage}
 		labelText="Key"
 		bind:value={keyName}
 		placeholder="example.hello"
 	/>
 	<br />
-	<TextArea labelText="Description" bind:value={description} placeholder="What is this key for?" />
+	<TextArea
+		rows={2}
+		invalid={baseTranslationText === ''}
+		invalidText="The base translation is required."
+		labelText="Base translation:"
+		bind:value={baseTranslationText}
+		placeholder={`The base translation is the projects default language (${$projectStore.data?.project.default_iso_code}) text.`}
+	/>
+	<br />
+	<TextArea
+		rows={3}
+		labelText="Description"
+		bind:value={description}
+		placeholder="What is this key for?"
+	/>
+	<br />
+	{#if status === 'isLoading'}
+		<InlineLoading status="active" description="Auto-translating..." />
+	{:else if status === 'isFinished'}
+		<InlineLoading status="finished" description="Translations have been created." />
+	{:else if status === 'hasError'}
+		<InlineLoading status="error" description="Something went wrong please report the issue." />
+	{/if}
 </Modal>

@@ -6,7 +6,6 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarBatchActions,
-		ToolbarSearch,
 		Loading
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
@@ -93,7 +92,7 @@
 			<Button icon={Delete16} kind="danger">Delete</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
-			<ToolbarSearch placeholder="Search project" />
+			<!-- <ToolbarSearch placeholder="Search project" /> -->
 			<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
 		</ToolbarContent>
 	</Toolbar>
@@ -101,7 +100,7 @@
 		slot="cell"
 		let:row
 		let:cell
-		on:click={() => goto(`/project/${row.id}`)}
+		on:click={() => goto(`/project/${row.id}/keys`)}
 		class="cursor-pointer"
 	>
 		{#if cell.key === 'name'}

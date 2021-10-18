@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Modal, Form, FormGroup, TextInput, Select, SelectItem } from 'carbon-components-svelte';
+	import {
+		Modal,
+		Form,
+		FormGroup,
+		TextInput,
+		Select,
+		SelectItem,
+		MultiSelect,
+		Loading
+	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
@@ -21,10 +30,13 @@
 	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
-	let languageIso: definitions['language']['iso_code'] = 'en';
+	let selectedDefaultLanguageIso: definitions['language']['iso_code'] = 'en';
+	let selectedLanguageIsoCodes: definitions['language']['iso_code'][] = [];
+	let confirmIsLoading = false;
 
-	// input must be iso 639-1 and not be contained in project langauges already
-	$: languageIsValidInput = ISO6391.validate(languageIso);
+	$: isValidInput =
+		projectNameIsValidInput && organizationIdIsValidInput && selectedLanguageIsoCodes.length > 0;
+
 	$: projectNameIsValidInput = projectName !== '';
 
 	$: organizationIdIsValidInput = organizationId !== null || organizationId !== '';
@@ -38,35 +50,42 @@
 	});
 
 	async function handleConfirm() {
+		confirmIsLoading = true;
 		if (organizationId === null || organizationIdIsValidInput === false) {
 			alert('The chosen organization is not valid.');
 			return;
 		}
-		const create = await database
+		const insertProject = await database
 			.from<definitions['project']>('project')
 			.insert({
 				name: projectName,
 				organization_id: organizationId,
-				default_iso_code: languageIso
+				default_iso_code: selectedDefaultLanguageIso
 			})
 			.single();
-		if (create.error) {
-			console.error(create.error);
-			alert(create.error.message);
+		if (insertProject.error) {
+			console.error(insertProject.error);
+			alert(insertProject.error.message);
 		} else {
 			const insertDefaultLanguage = await database
 				.from<definitions['language']>('language')
-				.insert({ iso_code: languageIso, project_id: create.data.id });
+				.insert({ iso_code: selectedDefaultLanguageIso, project_id: insertProject.data.id });
 			if (insertDefaultLanguage.error) {
 				alert(insertDefaultLanguage.error.message);
 			}
+			const insertOtherLanguages = await database.from<definitions['language']>('language').insert(
+				selectedLanguageIsoCodes.map((iso) => ({
+					iso_code: iso,
+					project_id: insertProject.data.id
+				}))
+			);
+			if (insertOtherLanguages.error) {
+				alert(insertOtherLanguages.error.message);
+			}
 		}
-		// automatically closing the modal but leave time to
-		// let the user read the result status of the action
-		setTimeout(() => {
-			open = false;
-			dispatch('updateProjects');
-		}, 1000);
+		dispatch('updateProjects');
+		confirmIsLoading = false;
+		open = false;
 	}
 </script>
 
@@ -75,9 +94,7 @@
 	bind:open
 	modalHeading={heading}
 	primaryButtonText="Create"
-	primaryButtonDisabled={(languageIsValidInput &&
-		projectNameIsValidInput &&
-		organizationIdIsValidInput) === false}
+	primaryButtonDisabled={isValidInput === false}
 	hasForm={true}
 	secondaryButtonText="Cancel"
 	on:click:button--primary={handleConfirm}
@@ -86,6 +103,9 @@
 	on:close
 	on:submit
 >
+	{#if confirmIsLoading}
+		<Loading />
+	{/if}
 	<Form>
 		<FormGroup>
 			<TextInput
@@ -109,11 +129,34 @@
 				{/if}
 			</Select>
 		</FormGroup>
-		<TextInput
-			labelText="In which language are you developing your app?"
-			bind:value={languageIso}
-			invalid={languageIsValidInput === false}
-			invalidText={'The code must be an ISO 639-1 code.'}
-		/>
+		<FormGroup>
+			<Select
+				labelText="In which language are you developing your app?"
+				bind:selected={selectedDefaultLanguageIso}
+			>
+				{#each ISO6391.getLanguages(ISO6391.getAllCodes()) as possibleLanguage}
+					<SelectItem
+						value={possibleLanguage.code}
+						text={`${possibleLanguage.code} - ${possibleLanguage.name}`}
+					/>
+				{/each}
+			</Select>
+		</FormGroup>
+		<FormGroup>
+			<MultiSelect
+				bind:selectedIds={selectedLanguageIsoCodes}
+				direction="top"
+				titleText="In which languages to you want to translate your app?"
+				filterable
+				invalid={selectedLanguageIsoCodes.length === 0}
+				invalidText="Select at least one language..."
+				items={ISO6391.getLanguages(ISO6391.getAllCodes())
+					.filter((language) => language.code !== selectedDefaultLanguageIso)
+					.map((language) => ({
+						id: language.code,
+						text: `${language.code} - ${language.name}`
+					}))}
+			/>
+		</FormGroup>
 	</Form>
 </Modal>

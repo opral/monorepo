@@ -15,13 +15,11 @@
 	import { onMount } from 'svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
-	import CreateBaseTranslationModal from '$lib/components/modals/CreateBaseTranslationModal.svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
 	import Translations from '$lib/components/Translations.svelte';
 	import DeletekeyModal from '$lib/components/modals/DeletekeyModal.svelte';
-	import { cloneDeep } from 'lodash';
 	//import { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable';
 
 	const headers = [
@@ -50,25 +48,9 @@
 
 	// check if for this key there is a translation for each of the languages in the project
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function isKeyMissingTranslation(row: any): boolean {
-		// console.log(row.key);
-		// console.log($projectStore.data?.languages.length);
-		// console.log(
-		// 	$projectStore.data?.translations.map(
-		// 		(t) => t.key_name === row.key && t.project_id === $page.params.projectId
-		// 	)
-		// );
-		// console.log(
-		// 	$projectStore.data?.translations.map(
-		// 		(t) => t.key_name === row.key && t.project_id === $page.params.projectId
-		// 	).length
-		// );
-		const x = $projectStore.data?.languages.length;
-		const y = $projectStore.data?.translations.map((t) => t.key_name === row.key).length;
-		//console.log(x);
-		//console.log($projectStore.data?.languages.length, row.translations.length);
-		//console.log();
+	function keyIsMissingTranslation(row: any): boolean {
 		let lhs = $projectStore.data?.languages.length;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let rhs = row.translations.filter((translation: any) => {
 			return translation.text !== '';
 		}).length;
@@ -78,7 +60,7 @@
 
 	//check if this key has a translation that is still not reviewed
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function isKeyFullyReviewed(currentKey: any): boolean {
+	function keyIsFullyReviewed(currentKey: any): boolean {
 		// get all the translations of the key
 		const allTranslationsOfKey =
 			$projectStore.data?.translations.filter(
@@ -101,14 +83,7 @@
 	};
 	let createKeyModal: { open: boolean } = { open: false };
 
-	function openTranslationModal(translations: definitions['translation'][], key: string) {
-		const translationsCopy = cloneDeep(translations);
-		createTranslationModal.translations = translationsCopy;
-		createTranslationModal.key = key;
-		createTranslationModal.open = true;
-	}
-
-	let databaseReady = false;
+	let mounted = false;
 
 	function updateRows() {
 		fullRows = [];
@@ -166,7 +141,7 @@
 	onMount(async () => {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
-		databaseReady = true;
+		mounted = true;
 	});
 
 	async function deleteKeys(rowIds: number[]) {
@@ -200,21 +175,6 @@
 		updateRows();
 	}
 
-	async function handleFinishBase(event: { detail: string }) {
-		await projectStore.getData({ projectId: $page.params.projectId });
-		updateRows();
-		if ($projectStore.data === null) {
-			alert('translations are null');
-			return;
-		}
-		openTranslationModal(
-			$projectStore.data.translations.filter(
-				(t) => t.key_name === event.detail && t.project_id === $projectStore.data?.project.id
-			),
-			event.detail
-		);
-	}
-
 	let createBaseTranslationModal: { open: boolean; key: string } = { open: false, key: '' };
 
 	function openBaseModal(key: string) {
@@ -230,7 +190,7 @@
 <h1>Keys</h1>
 <p>All your translation keys will appear here. You can create, delete and edit them.</p>
 <br />
-{#if databaseReady}
+{#if mounted}
 	<DataTable expandable bind:selectedRowIds {headers} {rows}>
 		<Toolbar>
 			<ToolbarBatchActions>
@@ -247,18 +207,18 @@
 				<row class="justify-end items-center">
 					<!-- Status  -->
 					<div>
-						{#if isKeyMissingTranslation(row) === true}
+						{#if keyIsMissingTranslation(row) === true}
 							<Tag type="red">Missing translation</Tag>
-						{:else if isKeyFullyReviewed(row) === false}
+						{:else if keyIsFullyReviewed(row) === false}
 							<Tag type="purple">Needs approval</Tag>
 						{:else}
-							<Tag type="green">Complete</Tag>
+							<Tag type="cool-gray">Complete</Tag>
 						{/if}
 					</div>
 					<!-- Delete Action -->
 					<Button
 						on:click={() => ((openDeleteModal = true), (selectedRow = row.value))}
-						iconDescription="Delete translation"
+						iconDescription="Delete key"
 						icon={TrashCan32}
 						kind="danger-ghost"
 					/>
@@ -280,13 +240,7 @@
 	key={createTranslationModal.key}
 	on:updateRows={handleUpdateRows}
 />
-<CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
-<CreateBaseTranslationModal
-	bind:open={createBaseTranslationModal.open}
-	keyName={createBaseTranslationModal.key}
-	on:finishBase={handleFinishBase}
-/>
 
-{#if openDeleteModal === true}
-	<DeletekeyModal bind:open={openDeleteModal} {selectedRow} on:updateKeys={handleUpdateRows} />
-{/if}
+<CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
+
+<DeletekeyModal bind:open={openDeleteModal} {selectedRow} on:updateKeys={handleUpdateRows} />

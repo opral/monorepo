@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Modal } from 'carbon-components-svelte';
+	import { Modal } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { projectStore } from '$lib/stores/projectStore';

@@ -84,7 +84,7 @@
 			<Button icon={Delete16} kind="danger">Delete</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
-			<ToolbarSearch placeholder="Search organization" />
+			<!-- <ToolbarSearch placeholder="Search organization" /> -->
 			<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
 		</ToolbarContent>
 	</Toolbar>
