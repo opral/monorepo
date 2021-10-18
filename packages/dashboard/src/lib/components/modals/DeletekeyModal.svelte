@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Modal } from 'carbon-components-svelte';
+	import { Modal } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { projectStore } from '$lib/stores/projectStore';
@@ -7,24 +7,27 @@
 
 	let dispatch = createEventDispatcher();
 
-	type row = {
+	type Row = {
 		id: number;
 		key: string;
 		description: string;
 		translations: definitions['translation'][];
 	};
 
-	export let selectedRow: row;
+	export let selectedRows: Row[];
+
 	export let open = false;
 
-	async function deleteKey() {
-		const deleteReq = await database
-			.from<definitions['key']>('key')
-			.delete()
-			.eq('name', selectedRow.key)
-			.eq('project_id', $projectStore.data?.project.id);
-		if (deleteReq.error) {
-			alert(deleteReq.error.message);
+	async function deleteKeys() {
+		for (let row of selectedRows) {
+			const deleteReq = await database
+				.from<definitions['key']>('key')
+				.delete()
+				.eq('name', row.key)
+				.eq('project_id', $projectStore.data?.project.id);
+			if (deleteReq.error) {
+				alert(deleteReq.error.message);
+			}
 		}
 
 		// automatically closing the modal but leave time to
@@ -42,7 +45,7 @@
 	modalHeading="Are you sure you want to delete the key?"
 	primaryButtonText="Delete"
 	secondaryButtonText="Cancel"
-	on:click:button--primary={deleteKey}
+	on:click:button--primary={deleteKeys}
 	on:click:button--secondary={() => (open = false)}
 	on:open
 	on:close
