@@ -1,16 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
+import { createClient } from "@supabase/supabase-js";
 
-dotenv.config();
-
-const supabaseUrl = process.env.VITE_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
-let supabase;
-if (supabaseUrl !== undefined && supabaseAnonKey !== undefined) {
-	supabase = createClient(supabaseUrl, supabaseAnonKey);
-} else {
-	throw new Error('Supabase information not supplied in .env');
-}
+const supabaseUrl = "http://localhost:8000";
+const supabaseAnonKey =
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const database = supabase;
 
