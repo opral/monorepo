@@ -2,7 +2,6 @@
 	import {
 		Button,
 		DataTable,
-		PaginationNav,
 		Toolbar,
 		ToolbarContent,
 		ToolbarSearch,
@@ -10,58 +9,67 @@
 	} from 'carbon-components-svelte';
 	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
-	import { onMount } from 'svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
+	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
 	import type { definitions } from '@inlang/database';
-	import { page } from '$app/stores';
 	import Translations from '$lib/components/Translations.svelte';
-	import DeletekeyModal from '$lib/components/modals/DeletekeyModal.svelte';
-	//import { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable';
 
 	const headers = [
 		{ key: 'key', value: 'Key' },
-		// { key: 'description', value: 'Description' },
 		{ key: 'actions', empty: true }
-		// { key: 'status', value: 'Status' }
 	];
 
 	type Row = {
-		id: number;
-		key: string;
-		description: string;
+		id: definitions['key']['name'];
+		key: definitions['key'];
 		translations: definitions['translation'][];
 	};
 
-	let selectedRowIds: number[];
-	let openDeleteModal = false;
+	let searchQuery = '';
 
-	let search = '';
-	let fullRows: Row[] = [];
+	let deleteKeyModal: DeleteKeyModal;
 
-	let selectedRows: Row[] = [];
+	// define the type of rows to be a function that returns an array of row
+	let rows: () => Row[];
+	// the actual function
+	$: rows = () => {
+		let result = $projectStore.data?.keys.map((key) => {
+			const translationsOfKey = $projectStore.data?.translations.filter(
+				(translation) => translation.key_name === key.name
+			);
+			return <Row>{
+				id: key.name,
+				key: key,
+				translations: translationsOfKey ?? []
+			};
+		});
+		if (searchQuery !== '') {
+			result = result?.filter((row) => row.key.name.startsWith(searchQuery));
+		}
+		// return an empty array as fallback
+		return result ?? [];
+	};
 
-	$: rows = fullRows.filter((row) => row.key.indexOf(search) !== -1);
+	// $: rows = fullRows.filter((row) => row.key.indexOf(searchQuery) !== -1);
 
 	// check if for this key there is a translation for each of the languages in the project
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function keyIsMissingTranslation(row: any): boolean {
-		let lhs = $projectStore.data?.languages.length;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let rhs = row.translations.filter((translation: any) => {
-			return translation.text !== '';
-		}).length;
-		console.log(lhs, rhs);
-		return lhs !== rhs;
+	function keyIsMissingTranslations(row: unknown): boolean {
+		// type casting row as Row
+		// (parameter must be any due to sveltes limited ts support in markup)
+		const x = row as Row;
+		const numberOfLanguages = $projectStore.data?.languages.length;
+		const numberOfTranslations = x.translations.filter((t) => t.text !== '').length;
+		return numberOfLanguages !== numberOfTranslations;
 	}
 
-	//check if this key has a translation that is still not reviewed
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function keyIsFullyReviewed(currentKey: any): boolean {
-		// get all the translations of the key
+	function keyIsFullyReviewed(row: unknown): boolean {
+		// type casting row as Row
+		// (parameter must be any due to sveltes limited ts support in markup)
+		const x = row as Row;
 		const allTranslationsOfKey =
 			$projectStore.data?.translations.filter(
-				(translation) => translation.key_name === currentKey.key
+				(translation) => translation.key_name === x.key.name
 			) ?? [];
 		const missingReviews = allTranslationsOfKey.filter(
 			(translation) => translation.is_reviewed === false
@@ -79,154 +87,66 @@
 		key: ''
 	};
 	let createKeyModal: { open: boolean } = { open: false };
-
-	let mounted = false;
-
-	function updateRows() {
-		fullRows = [];
-		for (let i = 0; i < ($projectStore.data?.keys.length ?? 0); i++) {
-			let translations: definitions['translation'][] = [];
-			for (let j = 0; j < ($projectStore.data?.languages.length ?? 0); j++) {
-				if (
-					$projectStore.data?.translations.some(
-						(t) =>
-							t.key_name === $projectStore.data?.keys[i].name &&
-							t.project_id === $projectStore.data?.project.id &&
-							t.iso_code === $projectStore.data?.languages[j].iso_code
-					)
-				) {
-					translations.push({
-						key_name: $projectStore.data?.keys[i].name,
-						project_id: $projectStore.data?.project.id,
-						iso_code: $projectStore.data?.languages[j].iso_code,
-						created_at: '',
-						is_reviewed: $projectStore.data?.translations.filter(
-							(t) =>
-								t.key_name === $projectStore.data?.keys[i].name &&
-								t.project_id === $projectStore.data?.project.id &&
-								t.iso_code === $projectStore.data?.languages[j].iso_code
-						)[0].is_reviewed,
-						text:
-							$projectStore.data?.translations.find(
-								(t) =>
-									t.key_name === $projectStore.data?.keys[i].name &&
-									t.project_id === $projectStore.data?.project.id &&
-									t.iso_code === $projectStore.data?.languages[j].iso_code
-							)?.text ?? ''
-					});
-				} else {
-					translations.push({
-						key_name: $projectStore.data?.keys[i].name ?? '',
-						project_id: $projectStore.data?.project.id ?? '',
-						created_at: '',
-						iso_code: $projectStore.data?.languages[j].iso_code ?? 'en',
-						is_reviewed: false,
-						text: ''
-					});
-				}
-			}
-			fullRows.push({
-				id: i,
-				key: $projectStore.data?.keys[i].name ?? '',
-				description: $projectStore.data?.keys[i].description ?? '',
-				translations: translations
-			});
-		}
-		fullRows = fullRows; // Force update for reactive
-	}
-
-	onMount(async () => {
-		await projectStore.getData({ projectId: $page.params.projectId });
-		updateRows();
-		mounted = true;
-	});
-
-	async function handleCreateKey(event: { detail: string }) {
-		await projectStore.getData({ projectId: $page.params.projectId });
-		updateRows();
-		console.log(event.detail);
-		openBaseModal(event.detail);
-	}
-
-	async function handleUpdateRows() {
-		await projectStore.getData({ projectId: $page.params.projectId });
-		updateRows();
-	}
-
-	let createBaseTranslationModal: { open: boolean; key: string } = { open: false, key: '' };
-
-	function openBaseModal(key: string) {
-		createBaseTranslationModal.key = key;
-		createBaseTranslationModal.open = true;
-	}
-
-	function openCreateKeyModal() {
-		createKeyModal.open = true;
-	}
 </script>
 
 <h1>Keys</h1>
 <p>All your translation keys will appear here. You can create, delete and edit them.</p>
 <br />
-{#if mounted}
-	<DataTable expandable bind:selectedRowIds {headers} {rows}>
-		<Toolbar>
-			<ToolbarContent>
-				<ToolbarSearch placeholder="Search your translations" bind:value={search} />
-				<Button on:click={() => openCreateKeyModal()}>Create key</Button>
-			</ToolbarContent>
-		</Toolbar>
+<DataTable expandable {headers} rows={rows()}>
+	<Toolbar>
+		<ToolbarContent>
+			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
+			<Button
+				on:click={() => {
+					createKeyModal.open = true;
+				}}>Create key</Button
+			>
+		</ToolbarContent>
+	</Toolbar>
+	<span slot="cell" let:row let:cell>
+		{#if cell.key === 'actions'}
+			<row class="justify-end items-center">
+				<!-- Status  -->
+				<div>
+					{#if keyIsMissingTranslations(row) === true}
+						<Tag type="red">Missing translation</Tag>
+					{:else if keyIsFullyReviewed(row) === false}
+						<Tag type="purple">Needs approval</Tag>
+					{:else}
+						<Tag type="cool-gray">Complete</Tag>
+					{/if}
+				</div>
+				<!-- Delete Action -->
+				<Button
+					on:click={() => {
+						deleteKeyModal.show({ key: row.key });
+					}}
+					iconDescription="Delete translation"
+					icon={TrashCan32}
+					kind="danger-ghost"
+				/>
+			</row>
+		{:else}
+			{cell.value.name}
+		{/if}
+	</span>
+	<div slot="expanded-row" let:row>
+		<Translations keyName={row.key.name} />
+	</div>
+</DataTable>
 
-		<span slot="cell" let:row let:cell>
-			{#if cell.key === 'actions'}
-				<row class="justify-end items-center">
-					<!-- Status  -->
-					<div>
-						{#if keyIsMissingTranslation(row) === true}
-							<Tag type="red">Missing translation</Tag>
-						{:else if keyIsFullyReviewed(row) === false}
-							<Tag type="purple">Needs approval</Tag>
-						{:else}
-							<Tag type="cool-gray">Complete</Tag>
-						{/if}
-					</div>
-					<!-- Delete Action -->
-					<Button
-						on:click={() => (
-							console.log('row val: ', row),
-							selectedRows.push({
-								id: row.id,
-								key: row.key,
-								description: row.description,
-								translations: row.translations
-							}),
-							(openDeleteModal = true),
-							console.log('selectedRows:', selectedRows)
-						)}
-						iconDescription="Delete translation"
-						icon={TrashCan32}
-						kind="danger-ghost"
-					/>
-				</row>
-			{:else}{cell.value}{/if}
-		</span>
-		<div slot="expanded-row" let:row>
-			<Translations keyName={row.key} />
-		</div>
-	</DataTable>
-{/if}
-
-<div class="pt-2 flex flex-row justify-center">
+<br />
+<p>pagination is coming soon...</p>
+<!-- <div class="flex flex-row justify-center">
 	<PaginationNav total={1} class="bottom" />
-</div>
+</div> -->
 
 <TranslationModal
 	bind:open={createTranslationModal.open}
 	translations={createTranslationModal.translations}
 	key={createTranslationModal.key}
-	on:updateRows={handleUpdateRows}
 />
 
-<CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
+<CreateKeyModal bind:open={createKeyModal.open} />
 
-<DeletekeyModal bind:open={openDeleteModal} {selectedRows} on:updateKeys={handleUpdateRows} />
+<DeleteKeyModal bind:this={deleteKeyModal} />
