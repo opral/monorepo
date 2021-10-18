@@ -14,7 +14,7 @@
 		open = false;
 	}
 
-	let key: definitions['key'] = '';
+	let key: definitions['key'];
 	let open = false;
 
 	async function deleteKey() {
@@ -34,7 +34,7 @@
 <Modal
 	bind:open
 	danger
-	modalHeading={`Delete ${key.name}`}
+	modalHeading={`Delete ${key?.name}`}
 	primaryButtonText="Delete"
 	secondaryButtonText="Cancel"
 	on:click:button--primary={deleteKey}
