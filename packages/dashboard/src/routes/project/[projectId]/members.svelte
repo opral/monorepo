@@ -3,7 +3,8 @@
             Button, 
             DataTable, 
             Loading,
-            Tag } from "carbon-components-svelte";
+            Tag,
+            ToastNotification } from "carbon-components-svelte";
     import SendAlt24 from "carbon-icons-svelte/lib/SendAlt32";
     import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
@@ -33,6 +34,11 @@
 	];
 
     onMount(async () => {
+        await loadUsers();
+        isLoading = false;
+    })
+
+    async function loadUsers() {
         members = await database.from<definitions["member"]>("member")
             .select()
             .match({
@@ -53,18 +59,14 @@
                 alert(users.error.message);
             };
         }
-
-        isLoading = false;
-    })
+    }
 
     async function inviteUser(email: string) { 
-        console.log("input email: " + inputEmail);
         let organization_id = $projectStore.data?.project.organization_id;
-
         let uid_rpc = await database.rpc("get_user_id_from_email", {arg_email: inputEmail});
         
         if (uid_rpc.error) {
-            console.error(uid_rpc.error.message);
+            //alert(uid_rpc.error.message);
         }
 
         if(uid_rpc.data !== null) {
@@ -75,24 +77,20 @@
                     user_id: (uid),
                     role: "ADMIN"
                 });
-            console.log("invite response: " + member_upsert.statusText + ", " + member_upsert.status);
+            if (member_upsert.status === 409) {
+                alert(inputEmail + " is already a member")
+            } else if (member_upsert.status == 400) {
+                alert("Invalid email")
+            } else if (member_upsert.status === 201) {
+                //success
+                await loadUsers();
+            } else {
+                alert("An unknown error occurred")
+            }
+            inputEmail = "";
+            
         }
 
-    }
-
-    function getEmail(uid: string) {
-        if (users.data !== null && users.data.length > 0) {
-            // users.data!.find((user) => {
-            //     user.id === uid
-            // })!.email;
-            users.data.map((user) => {
-                console.log(user.id + ", " + user.email);
-            })
-            console.log("email: " + "email")
-            return "";
-        } else {
-            return "undefined";
-        }
     }
 
     $: rows_members = () => {
@@ -100,7 +98,6 @@
 			return [];
 		}
         // membersJoined = [];
-        // console.log("members length: "  + members.data.length)
         // members.data.map((member) => {
         //     membersJoined.push({
         //         id: member.user_id,
