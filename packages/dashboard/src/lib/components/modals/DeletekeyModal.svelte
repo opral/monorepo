@@ -14,7 +14,7 @@
 		open = false;
 	}
 
-	let key: definitions['key'];
+	let key: definitions['key'] = '';
 	let open = false;
 
 	async function deleteKey() {
@@ -34,11 +34,11 @@
 <Modal
 	bind:open
 	danger
-	modalHeading="Are you sure you want to delete the key?"
+	modalHeading={`Delete ${key.name}`}
 	primaryButtonText="Delete"
 	secondaryButtonText="Cancel"
 	on:click:button--primary={deleteKey}
 	on:click:button--secondary={() => (open = false)}
 >
-	<p>This is a permanent action and cannot be undone.</p>
+	<p>Are you sure? This is a permanent action and cannot be undone.</p>
 </Modal>
