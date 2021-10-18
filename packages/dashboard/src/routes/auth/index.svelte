@@ -16,22 +16,20 @@
 
 <script lang="ts">
 	import Center from '$lib/components/Center.svelte';
-	import { Button, InlineLoading, Link, TextInput, Tile } from 'carbon-components-svelte';
+	import { Button, TextInput, Tile } from 'carbon-components-svelte';
 	import { PostgrestError } from '@supabase/postgrest-js';
 
-	let loading = false;
 	let email = '';
 
 	$: isValidEmail = () => {
 		if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
 			return true;
 		}
-		return true;
+		return false;
 	};
 
-	const handleLogin = async () => {
+	async function handleLogin() {
 		try {
-			loading = true;
 			const { error } = await auth.signIn(
 				{ email },
 				{
@@ -45,29 +43,37 @@
 		} catch (error) {
 			const err = error as PostgrestError;
 			alert(err.message);
-		} finally {
-			loading = false;
 		}
-	};
+	}
+
+	async function handleGithubLogin() {
+		const { error } = await auth.signIn(
+			{
+				provider: 'github'
+			},
+			{ redirectTo: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string }
+		);
+		if (error) {
+			alert(error);
+		}
+	}
 </script>
 
-<Link href="/auth/dev-login">go to developer login</Link>
-
-<div class="w-full h-screen">
-	<Center>
-		<Tile>
-			<div class="col-6 form-widget">
-				<h1 class="header mb-4">Login</h1>
-				<p class="description mb-2">Sign in via magic link with your email below:</p>
-				<TextInput type="email" bind:value={email} placeholder="your e-mail" />
-				<Button disabled={!isValidEmail()} class="mt-4" on:click={handleLogin}>
-					{#if loading}
-						<InlineLoading />
-					{:else}
-						Send Magic Link
-					{/if}
-				</Button>
-			</div>
-		</Tile>
-	</Center>
-</div>
+<Center>
+	<Tile>
+		<column class="space-y-2 w-72">
+			<h1>Login</h1>
+			<!-- MAGIC LINK -->
+			<p class="description mb-2">Sign in via magic link by entering your email below:</p>
+			<TextInput type="email" bind:value={email} placeholder="your e-mail" />
+			<Button disabled={isValidEmail() === false} kind="primary" on:click={handleLogin}
+				>Send Magic Link</Button
+			>
+			<!-- GITHUB SIGN IN -->
+			<Button kind="primary" class="w-full justify-start" on:click={handleGithubLogin}>
+				<img src="/github-icon.svg" alt="Github" class="h-6 pr-2 text-white fill-current" />
+				Sign in with GitHub
+			</Button>
+		</column>
+	</Tile>
+</Center>
