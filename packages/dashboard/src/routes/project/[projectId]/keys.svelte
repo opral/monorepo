@@ -4,18 +4,15 @@
 		DataTable,
 		PaginationNav,
 		Toolbar,
-		ToolbarBatchActions,
 		ToolbarContent,
 		ToolbarSearch,
 		Tag
 	} from 'carbon-components-svelte';
-	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
 	import { onMount } from 'svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
-	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
 	import Translations from '$lib/components/Translations.svelte';
@@ -42,7 +39,7 @@
 	let search = '';
 	let fullRows: Row[] = [];
 
-	let selectedRow: Row;
+	let selectedRows: Row[] = [];
 
 	$: rows = fullRows.filter((row) => row.key.indexOf(search) !== -1);
 
@@ -144,25 +141,6 @@
 		mounted = true;
 	});
 
-	async function deleteKeys(rowIds: number[]) {
-		let key;
-		for (const rowId of rowIds) {
-			key = fullRows.filter((element) => element.id === rowId)[0].key;
-			const deleteReq = await database
-				.from<definitions['key']>('key')
-				.delete()
-				.eq('name', key)
-				.eq('project_id', $projectStore.data?.project.id);
-			if (deleteReq.error) {
-				alert(deleteReq.error.message);
-			} else {
-				delete fullRows[rowId];
-			}
-		}
-		fullRows = fullRows;
-		selectedRowIds = [];
-	}
-
 	async function handleCreateKey(event: { detail: string }) {
 		await projectStore.getData({ projectId: $page.params.projectId });
 		updateRows();
@@ -193,9 +171,6 @@
 {#if mounted}
 	<DataTable expandable bind:selectedRowIds {headers} {rows}>
 		<Toolbar>
-			<ToolbarBatchActions>
-				<Button icon={Delete16} on:click={() => deleteKeys(selectedRowIds)}>Delete keys</Button>
-			</ToolbarBatchActions>
 			<ToolbarContent>
 				<ToolbarSearch placeholder="Search your translations" bind:value={search} />
 				<Button on:click={() => openCreateKeyModal()}>Create key</Button>
@@ -217,8 +192,18 @@
 					</div>
 					<!-- Delete Action -->
 					<Button
-						on:click={() => ((openDeleteModal = true), (selectedRow = row.value))}
-						iconDescription="Delete key"
+						on:click={() => (
+							console.log('row val: ', row),
+							selectedRows.push({
+								id: row.id,
+								key: row.key,
+								description: row.description,
+								translations: row.translations
+							}),
+							(openDeleteModal = true),
+							console.log('selectedRows:', selectedRows)
+						)}
+						iconDescription="Delete translation"
 						icon={TrashCan32}
 						kind="danger-ghost"
 					/>
@@ -230,6 +215,7 @@
 		</div>
 	</DataTable>
 {/if}
+
 <div class="pt-2 flex flex-row justify-center">
 	<PaginationNav total={1} class="bottom" />
 </div>
@@ -243,4 +229,4 @@
 
 <CreateKeyModal bind:open={createKeyModal.open} on:createKey={handleCreateKey} />
 
-<DeletekeyModal bind:open={openDeleteModal} {selectedRow} on:updateKeys={handleUpdateRows} />
+<DeletekeyModal bind:open={openDeleteModal} {selectedRows} on:updateKeys={handleUpdateRows} />
