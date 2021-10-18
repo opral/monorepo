@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Modal, Form, FormGroup, TextInput } from 'carbon-components-svelte';
+	import {
+		Modal,
+		Form,
+		FormGroup,
+		TextInput,
+		Select,
+		SelectItem,
+		MultiSelect,
+		Loading
+	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
@@ -8,62 +17,75 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let open = false;
-	//export let primaryButtonDisabled = false;
-	let isLoading = false;
 
-	export let heading = 'Add project';
+	export let heading: string;
 
-	export let projectName: string | '' = '';
-	export let organizationId: string | '' = '';
-	//export let iso_code: string | '' = '';
+	let projectName = '';
+
+	let organizationId: definitions['organization']['id'] | undefined = undefined;
+
+	// each time the organiations update, select the first organizations id
+	$: organizationId = organizations.data?.[0].id;
 
 	let dispatch = createEventDispatcher();
 
-	let organizations: DatabaseResponse<definitions['organization'][]>;
-	let languageIso: definitions['language']['iso_code'];
+	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
+	let selectedDefaultLanguageIso: definitions['language']['iso_code'] = 'en';
+	let selectedLanguageIsoCodes: definitions['language']['iso_code'][] = [];
+	let confirmIsLoading = false;
 
-	function makeApiKey(length: number) {
-		var result = '';
-		var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-';
-		var charactersLength = characters.length;
-		for (var i = 0; i < length; i++) {
-			result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		}
-		return result;
-	}
+	$: isValidInput =
+		projectNameIsValidInput && organizationIdIsValidInput && selectedLanguageIsoCodes.length > 0;
 
-	// input must be iso 639-1 and not be contained in project langauges already
-	$: isValidInput = ISO6391.validate(languageIso);
+	$: projectNameIsValidInput = projectName !== '';
+
+	$: organizationIdIsValidInput = organizationId !== null || organizationId !== '';
 
 	// load the projects of the selected organization
 	onMount(async () => {
 		organizations = await database.from<definitions['organization']>('organization').select();
-
 		if (organizations.error) {
-			alert(organizations.error);
+			alert(organizations.error.message);
 		}
-		isLoading = false;
 	});
 
 	async function handleConfirm() {
-		console.log(organizationId);
-		console.log(projectName);
-		const create = await database.from<definitions['project']>('project').insert({
-			api_key: makeApiKey(40), //randomstring.generate(40),
-			name: projectName,
-			organization_id: organizationId,
-			default_iso_code: languageIso
-		});
-		if (create.error) {
-			alert(create.error);
-			console.log(create.error);
+		confirmIsLoading = true;
+		if (organizationId === null || organizationIdIsValidInput === false) {
+			alert('The chosen organization is not valid.');
+			return;
 		}
-		// automatically closing the modal but leave time to
-		// let the user read the result status of the action
-		setTimeout(() => {
-			open = false;
-			dispatch('updateProjects');
-		}, 1000);
+		const insertProject = await database
+			.from<definitions['project']>('project')
+			.insert({
+				name: projectName,
+				organization_id: organizationId,
+				default_iso_code: selectedDefaultLanguageIso
+			})
+			.single();
+		if (insertProject.error) {
+			console.error(insertProject.error);
+			alert(insertProject.error.message);
+		} else {
+			const insertDefaultLanguage = await database
+				.from<definitions['language']>('language')
+				.insert({ iso_code: selectedDefaultLanguageIso, project_id: insertProject.data.id });
+			if (insertDefaultLanguage.error) {
+				alert(insertDefaultLanguage.error.message);
+			}
+			const insertOtherLanguages = await database.from<definitions['language']>('language').insert(
+				selectedLanguageIsoCodes.map((iso) => ({
+					iso_code: iso,
+					project_id: insertProject.data.id
+				}))
+			);
+			if (insertOtherLanguages.error) {
+				alert(insertOtherLanguages.error.message);
+			}
+		}
+		dispatch('updateProjects');
+		confirmIsLoading = false;
+		open = false;
 	}
 </script>
 
@@ -72,6 +94,7 @@
 	bind:open
 	modalHeading={heading}
 	primaryButtonText="Create"
+	primaryButtonDisabled={isValidInput === false}
 	hasForm={true}
 	secondaryButtonText="Cancel"
 	on:click:button--primary={handleConfirm}
@@ -80,14 +103,22 @@
 	on:close
 	on:submit
 >
+	{#if confirmIsLoading}
+		<Loading />
+	{/if}
 	<Form>
 		<FormGroup>
-			<TextInput labelText="Project name" bind:value={projectName} />
+			<TextInput
+				labelText="Project name"
+				bind:value={projectName}
+				invalid={projectNameIsValidInput === false}
+				invalidText="This field is required."
+			/>
 		</FormGroup>
 
 		<FormGroup>
 			<Select
-				labelText="In which organization do you want to put the project? "
+				labelText="In which organization do you want to create the project? "
 				bind:selected={organizationId}
 			>
 				<SelectItem disabled hidden value="organization name" text="Choose an option" />
@@ -97,26 +128,35 @@
 					{/each}
 				{/if}
 			</Select>
-			<!-- <select bind:value={organizationId}>
-				{#if organizations}
-					{#each organizations.data || [] as organization}
-						<option value={organization.id}>
-							{organization.name}
-						</option>
-					{/each}
-				{/if}
-			</select> -->
 		</FormGroup>
-		<TextInput
-			labelText="language code (ISO 639-1)"
-			bind:value={languageIso}
-			invalid={isValidInput === false}
-			invalidText={'The code must be an ISO 639-1 code.'}
-		/>
-
-		<!-- <FormGroup disabled>
-			<TextInput labelText="some other information" />
+		<FormGroup>
+			<Select
+				labelText="In which language are you developing your app?"
+				bind:selected={selectedDefaultLanguageIso}
+			>
+				{#each ISO6391.getLanguages(ISO6391.getAllCodes()) as possibleLanguage}
+					<SelectItem
+						value={possibleLanguage.code}
+						text={`${possibleLanguage.code} - ${possibleLanguage.name}`}
+					/>
+				{/each}
+			</Select>
 		</FormGroup>
-		<Checkbox labelText="checkbox" /> -->
+		<FormGroup>
+			<MultiSelect
+				bind:selectedIds={selectedLanguageIsoCodes}
+				direction="top"
+				titleText="In which languages to you want to translate your app?"
+				filterable
+				invalid={selectedLanguageIsoCodes.length === 0}
+				invalidText="Select at least one language..."
+				items={ISO6391.getLanguages(ISO6391.getAllCodes())
+					.filter((language) => language.code !== selectedDefaultLanguageIso)
+					.map((language) => ({
+						id: language.code,
+						text: `${language.code} - ${language.name}`
+					}))}
+			/>
+		</FormGroup>
 	</Form>
 </Modal>

@@ -6,7 +6,6 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarBatchActions,
-		ToolbarSearch,
 		Loading
 	} from 'carbon-components-svelte';
 	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
@@ -24,9 +23,6 @@
 	//export let name = '';
 
 	let showAddProjectModal = false;
-	// let showMoreModal = false;
-	// as entered in the search bar
-	$: searchQuery = '';
 
 	let isLoading = true;
 	let selectedOrgId: string | null = $page.query.get('organization');
@@ -82,64 +78,58 @@
 					.name
 			}));
 	};
-
-	console.log($page.query.get('organization'));
 </script>
 
 {#if isLoading}
 	<Loading />
 {/if}
 
-<div class="p-2">
-	<div class="pt-8 pb-8">
-		<h1>Projects</h1>
-	</div>
-	<DataTable {headers} rows={rows_projects()}>
-		<Toolbar>
-			<ToolbarBatchActions class="bg-danger">
-				<Button icon={Delete16} kind="danger">Delete</Button>
-			</ToolbarBatchActions>
-			<ToolbarContent>
-				<ToolbarSearch placeholder="Search project" />
-				<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
-			</ToolbarContent>
-		</Toolbar>
-		<span
-			slot="cell"
-			let:row
-			let:cell
-			on:click={() => goto(`/project/${row.id}`)}
-			class="cursor-pointer"
-		>
-			{#if cell.key === 'name'}
-				<div class="flex items-center space-x-2">
-					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
-					<p class="text-sm">{cell.value}</p>
-				</div>
-			{:else if cell.key === 'more'}
-				<Button
-					kind="ghost"
-					icon={OverflowMenuHorizontal32}
-					iconDescription="More"
-					on:click={() => {
-						// addMemberModal = row.id;
-						// showMoreModal = true;
-					}}
-				/>
-			{:else if cell.key === 'organization'}
-				{cell.value}
-			{:else}
-				{cell.value}
-			{/if}
-		</span>
-	</DataTable>
-</div>
+<h1>Projects</h1>
+<br />
+<DataTable {headers} rows={rows_projects()}>
+	<Toolbar>
+		<ToolbarBatchActions class="bg-danger">
+			<Button icon={Delete16} kind="danger">Delete</Button>
+		</ToolbarBatchActions>
+		<ToolbarContent>
+			<!-- <ToolbarSearch placeholder="Search project" /> -->
+			<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
+		</ToolbarContent>
+	</Toolbar>
+	<span
+		slot="cell"
+		let:row
+		let:cell
+		on:click={() => goto(`/project/${row.id}/keys`)}
+		class="cursor-pointer"
+	>
+		{#if cell.key === 'name'}
+			<div class="flex items-center space-x-2">
+				<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+				<p class="text-sm">{cell.value}</p>
+			</div>
+		{:else if cell.key === 'more'}
+			<Button
+				kind="ghost"
+				icon={OverflowMenuHorizontal32}
+				iconDescription="More"
+				on:click={() => {
+					// addMemberModal = row.id;
+					// showMoreModal = true;
+				}}
+			/>
+		{:else if cell.key === 'organization'}
+			{cell.value}
+		{:else}
+			{cell.value}
+		{/if}
+	</span>
+</DataTable>
 
 {#if showAddProjectModal}
 	<ProjectModal
 		bind:open={showAddProjectModal}
 		heading="Add project"
-		projectName=""
 		on:updateProjects={handleProjectUpdate}
 	/>
 {/if}

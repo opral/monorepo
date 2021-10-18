@@ -16,85 +16,92 @@ beforeEach(async () => {
 
 describe("policies/project", () => {
   test("Member can select projects", async () => {
-    const projects = await supabase.from<definitions["project"]>("project").select();
+    const projects = await supabase
+      .from<definitions["project"]>("project")
+      .select();
     expect(projects.data?.length).toBeGreaterThanOrEqual(2);
   });
   test("User can not select projects which they are not memeber of", async () => {
-    const projects = await supabase.from<definitions["project"]>("project")
+    const projects = await supabase
+      .from<definitions["project"]>("project")
       .select()
       .match({
-        name: "bass-project"
+        name: "bass-project",
       });
-    expect(projects.data?.length).toEqual(0)
+    expect(projects.data?.length).toEqual(0);
   });
   test("User can create a project for an organization which they are admin of", async () => {
     let organization_id;
-    const organization = await supabase.from<definitions["organization"]>("organization")
+    const organization = await supabase
+      .from<definitions["organization"]>("organization")
       .select("id")
       .match({
-        name: "Acne Inc"
+        name: "Acne Inc",
       });
-    const organization_insert = await supabase.from<definitions["project"]>("project")
-      .upsert({
-        name: "new-project",
-        organization_id: organization.data![0].id,
-        api_key: "2f066a3e-038b-4a02-8449-63976cf4b12a",
-        default_iso_code: "en",
-        
-      });
-    const projects = await supabase.from<definitions["project"]>("project")
+    const project_insert = await supabase
+      .from<definitions["project"]>("project")
+      .upsert(
+        {
+          name: "new-project",
+          organization_id: organization.data![0].id,
+          default_iso_code: "en",
+        },
+        { onConflict: "id" }
+      );
+    expect(project_insert.error).toEqual(null);
+    const projects = await supabase
+      .from<definitions["project"]>("project")
       .select()
       .match({
-        name: "new-project"
+        name: "new-project",
       });
-      expect(projects.data!.length).toEqual(1);
+    expect(projects.data?.some((p) => p.name === "new-project")).toEqual(true);
   });
   test("User can delete a project from an organization which thay are admin of", async () => {
-    await supabase.from<definitions["project"]>("project")
-      .delete()
-      .match({
-        name: "new-project"
-      });
-    const projects = await supabase.from<definitions["project"]>("project")
+    await supabase.from<definitions["project"]>("project").delete().match({
+      name: "new-project",
+    });
+    const projects = await supabase
+      .from<definitions["project"]>("project")
       .select()
       .match({
-        name: "new-project"
+        name: "new-project",
       });
     expect(projects.data!.length).toEqual(0);
   });
   test("User cannot upsert a project for an organizatoin which they are not admin of", async () => {
     let organization_id;
-    const organization = await supabase.from<definitions["organization"]>("organization")
+    const organization = await supabase
+      .from<definitions["organization"]>("organization")
       .select("id")
       .match({
-        name: "Color AS"
+        name: "Color AS",
       });
-    const organization_insert = await supabase.from<definitions["project"]>("project")
+    const organization_insert = await supabase
+      .from<definitions["project"]>("project")
       .upsert({
         name: "invalid-project",
         organization_id: organization.data![0].id,
-        api_key: "cea34fb5-5b49-44a2-92b5-5d5d6f2ba348",
         default_iso_code: "en",
-        
       });
-    const projects = await supabase.from<definitions["project"]>("project")
+    const projects = await supabase
+      .from<definitions["project"]>("project")
       .select()
       .match({
-        name: "invalid-project"
+        name: "invalid-project",
       });
-      expect(projects.data!.length).toEqual(0);
+    expect(projects.data!.length).toEqual(0);
   });
   test("User cannot delete a project for an organization which they are not admin of", async () => {
-    await supabase.from<definitions["project"]>("project")
-      .delete()
-      .match({
-        name: "color-project"
-      });
-    const projects = await supabase.from<definitions["project"]>("project")
+    await supabase.from<definitions["project"]>("project").delete().match({
+      name: "color-project",
+    });
+    const projects = await supabase
+      .from<definitions["project"]>("project")
       .select()
       .match({
-        name: "color-project"
+        name: "color-project",
       });
-      expect(projects.data!.length).toEqual(1);
+    expect(projects.data!.length).toEqual(1);
   });
-})
+});
