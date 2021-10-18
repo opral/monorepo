@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, Form, FormGroup, TextInput } from 'carbon-components-svelte';
+	import { Modal, Form, FormGroup, TextInput, Select, SelectItem } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
@@ -8,55 +8,58 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let open = false;
-	//export let primaryButtonDisabled = false;
-	let isLoading = false;
 
-	export let heading = 'Add project';
+	export let heading: string;
 
-	export let projectName: string | '' = '';
-	export let organizationId: string | '' = '';
-	//export let iso_code: string | '' = '';
+	let projectName = '';
+
+	let organizationId: definitions['organization']['id'] | undefined = undefined;
+
+	// each time the organiations update, select the first organizations id
+	$: organizationId = organizations.data?.[0].id;
 
 	let dispatch = createEventDispatcher();
 
-	let organizations: DatabaseResponse<definitions['organization'][]>;
-	let languageIso: definitions['language']['iso_code'];
-
-	function makeApiKey(length: number) {
-		var result = '';
-		var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-';
-		var charactersLength = characters.length;
-		for (var i = 0; i < length; i++) {
-			result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		}
-		return result;
-	}
+	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
+	let languageIso: definitions['language']['iso_code'] = 'en';
 
 	// input must be iso 639-1 and not be contained in project langauges already
-	$: isValidInput = ISO6391.validate(languageIso);
+	$: languageIsValidInput = ISO6391.validate(languageIso);
+	$: projectNameIsValidInput = projectName !== '';
+
+	$: organizationIdIsValidInput = organizationId !== null || organizationId !== '';
 
 	// load the projects of the selected organization
 	onMount(async () => {
 		organizations = await database.from<definitions['organization']>('organization').select();
-
 		if (organizations.error) {
-			alert(organizations.error);
+			alert(organizations.error.message);
 		}
-		isLoading = false;
 	});
 
 	async function handleConfirm() {
-		console.log(organizationId);
-		console.log(projectName);
-		const create = await database.from<definitions['project']>('project').insert({
-			api_key: makeApiKey(40), //randomstring.generate(40),
-			name: projectName,
-			organization_id: organizationId,
-			default_iso_code: languageIso
-		});
+		if (organizationId === null || organizationIdIsValidInput === false) {
+			alert('The chosen organization is not valid.');
+			return;
+		}
+		const create = await database
+			.from<definitions['project']>('project')
+			.insert({
+				name: projectName,
+				organization_id: organizationId,
+				default_iso_code: languageIso
+			})
+			.single();
 		if (create.error) {
-			alert(create.error);
-			console.log(create.error);
+			console.error(create.error);
+			alert(create.error.message);
+		} else {
+			const insertDefaultLanguage = await database
+				.from<definitions['language']>('language')
+				.insert({ iso_code: languageIso, project_id: create.data.id });
+			if (insertDefaultLanguage.error) {
+				alert(insertDefaultLanguage.error.message);
+			}
 		}
 		// automatically closing the modal but leave time to
 		// let the user read the result status of the action
@@ -72,6 +75,9 @@
 	bind:open
 	modalHeading={heading}
 	primaryButtonText="Create"
+	primaryButtonDisabled={(languageIsValidInput &&
+		projectNameIsValidInput &&
+		organizationIdIsValidInput) === false}
 	hasForm={true}
 	secondaryButtonText="Cancel"
 	on:click:button--primary={handleConfirm}
@@ -82,12 +88,17 @@
 >
 	<Form>
 		<FormGroup>
-			<TextInput labelText="Project name" bind:value={projectName} />
+			<TextInput
+				labelText="Project name"
+				bind:value={projectName}
+				invalid={projectNameIsValidInput === false}
+				invalidText="This field is required."
+			/>
 		</FormGroup>
 
 		<FormGroup>
 			<Select
-				labelText="In which organization do you want to put the project? "
+				labelText="In which organization do you want to create the project? "
 				bind:selected={organizationId}
 			>
 				<SelectItem disabled hidden value="organization name" text="Choose an option" />
@@ -97,26 +108,12 @@
 					{/each}
 				{/if}
 			</Select>
-			<!-- <select bind:value={organizationId}>
-				{#if organizations}
-					{#each organizations.data || [] as organization}
-						<option value={organization.id}>
-							{organization.name}
-						</option>
-					{/each}
-				{/if}
-			</select> -->
 		</FormGroup>
 		<TextInput
-			labelText="language code (ISO 639-1)"
+			labelText="In which language are you developing your app?"
 			bind:value={languageIso}
-			invalid={isValidInput === false}
+			invalid={languageIsValidInput === false}
 			invalidText={'The code must be an ISO 639-1 code.'}
 		/>
-
-		<!-- <FormGroup disabled>
-			<TextInput labelText="some other information" />
-		</FormGroup>
-		<Checkbox labelText="checkbox" /> -->
 	</Form>
 </Modal>

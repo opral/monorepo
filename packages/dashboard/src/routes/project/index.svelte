@@ -24,9 +24,6 @@
 	//export let name = '';
 
 	let showAddProjectModal = false;
-	// let showMoreModal = false;
-	// as entered in the search bar
-	$: searchQuery = '';
 
 	let isLoading = true;
 	let selectedOrgId: string | null = $page.query.get('organization');
@@ -82,8 +79,6 @@
 					.name
 			}));
 	};
-
-	console.log($page.query.get('organization'));
 </script>
 
 {#if isLoading}
@@ -139,7 +134,6 @@
 	<ProjectModal
 		bind:open={showAddProjectModal}
 		heading="Add project"
-		projectName=""
 		on:updateProjects={handleProjectUpdate}
 	/>
 {/if}
