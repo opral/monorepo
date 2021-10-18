@@ -51,8 +51,6 @@
 	};
 </script>
 
-<Link href="/auth/dev-login">go to developer login</Link>
-
 <div class="w-full h-screen">
 	<Center>
 		<Tile>
