@@ -19,7 +19,7 @@ async function signUpMockUser(user: MockUser): Promise<void> {
 
     throw signIn.error ?? "user is null";
   }
-};
+}
 
 async function signOutUser() {
   const signOut = await supabase.auth.signOut();
@@ -27,7 +27,7 @@ async function signOutUser() {
     console.log(signOut.error.message);
     throw signOut.error;
   }
-};
+}
 
 async function main() {
   console.log("applying seeds...");
@@ -40,7 +40,6 @@ async function main() {
       projects: {
         create: {
           name: "dev-project",
-          api_key: "32j2f0onanf39-0001-9rj31nfwqm0-d0m02das",
           default_iso_code: "en",
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
@@ -108,7 +107,6 @@ async function main() {
       projects: {
         create: {
           name: "bass-project",
-          api_key: "1221c0fb-de4e-403d-9a49-4ec81e4bb2e0",
           default_iso_code: "en",
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "fr" }] },
@@ -164,7 +162,6 @@ async function main() {
       projects: {
         create: {
           name: "color-project",
-          api_key: "529a5259-4bcd-4b33-a17e-261b13d468a7",
           default_iso_code: "en",
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
@@ -210,20 +207,20 @@ async function main() {
   });
   const organization = await prisma.organization.findFirst({
     where: {
-      name: "Color AS" 
-    }
+      name: "Color AS",
+    },
   });
   const user = await prisma.user.findFirst({
     where: {
-      email: mockUser.email
-    }
+      email: mockUser.email,
+    },
   });
   await prisma.member.create({
     data: {
       user_id: user!.id,
       organization_id: organization!.id,
-      role: member_role.TRANSLATOR
-    }
+      role: member_role.TRANSLATOR,
+    },
   });
   console.log("✅ applied seeds");
   console.log(`➡️ Mock user 1 email: ${mockUser.email}`);

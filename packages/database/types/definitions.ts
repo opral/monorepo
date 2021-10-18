@@ -12,6 +12,114 @@ export interface paths {
       };
     };
   };
+  "/_prisma_migrations": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["_prisma_migrations"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** _prisma_migrations */
+          _prisma_migrations?: definitions["_prisma_migrations"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
+        };
+        body: {
+          /** _prisma_migrations */
+          _prisma_migrations?: definitions["_prisma_migrations"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/key": {
     get: {
       parameters: {
@@ -392,7 +500,6 @@ export interface paths {
       parameters: {
         query: {
           id?: parameters["rowFilter.project.id"];
-          api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
           default_iso_code?: parameters["rowFilter.project.default_iso_code"];
@@ -448,7 +555,6 @@ export interface paths {
       parameters: {
         query: {
           id?: parameters["rowFilter.project.id"];
-          api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
           default_iso_code?: parameters["rowFilter.project.default_iso_code"];
@@ -468,7 +574,6 @@ export interface paths {
       parameters: {
         query: {
           id?: parameters["rowFilter.project.id"];
-          api_key?: parameters["rowFilter.project.api_key"];
           name?: parameters["rowFilter.project.name"];
           organization_id?: parameters["rowFilter.project.organization_id"];
           default_iso_code?: parameters["rowFilter.project.default_iso_code"];
@@ -684,9 +789,95 @@ export interface paths {
       };
     };
   };
+  "/rpc/handle_insert_organization": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/is_admin_of": {
+    post: {
+      parameters: {
+        body: {
+          args: {
+            organization_id: string;
+          };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/handle_insert_user": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/is_member_of": {
+    post: {
+      parameters: {
+        body: {
+          args: {
+            organization_id: string;
+          };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
 }
 
 export interface definitions {
+  _prisma_migrations: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    checksum: string;
+    finished_at?: string;
+    migration_name: string;
+    logs?: string;
+    rolled_back_at?: string;
+    started_at: string;
+    applied_steps_count: number;
+  };
   key: {
     /**
      * Note:
@@ -930,7 +1121,6 @@ export interface definitions {
      * This is a Primary Key.<pk/>
      */
     id: string;
-    api_key: string;
     name: string;
     /**
      * Note:
@@ -1128,13 +1318,12 @@ export interface definitions {
     /**
      * Note:
      * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `key.name`.<fk table='key' column='name'/>
      */
     key_name: string;
     /**
      * Note:
      * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `key.project_id`.<fk table='key' column='project_id'/>
+     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
      */
     project_id: string;
     /**
@@ -1327,7 +1516,7 @@ export interface definitions {
       | "za"
       | "zu";
     is_reviewed: boolean;
-    text: string;
+    text?: string;
     created_at: string;
   };
   user: {
@@ -1362,6 +1551,16 @@ export interface parameters {
   offset: string;
   /** Limiting and Pagination */
   limit: string;
+  /** _prisma_migrations */
+  "body._prisma_migrations": definitions["_prisma_migrations"];
+  "rowFilter._prisma_migrations.id": string;
+  "rowFilter._prisma_migrations.checksum": string;
+  "rowFilter._prisma_migrations.finished_at": string;
+  "rowFilter._prisma_migrations.migration_name": string;
+  "rowFilter._prisma_migrations.logs": string;
+  "rowFilter._prisma_migrations.rolled_back_at": string;
+  "rowFilter._prisma_migrations.started_at": string;
+  "rowFilter._prisma_migrations.applied_steps_count": string;
   /** key */
   "body.key": definitions["key"];
   "rowFilter.key.project_id": string;
@@ -1386,7 +1585,6 @@ export interface parameters {
   /** project */
   "body.project": definitions["project"];
   "rowFilter.project.id": string;
-  "rowFilter.project.api_key": string;
   "rowFilter.project.name": string;
   "rowFilter.project.organization_id": string;
   "rowFilter.project.default_iso_code": string;
