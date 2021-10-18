@@ -72,55 +72,50 @@
 	};
 </script>
 
-<div class="pl-8 pr-8 pt-8">
-	<h1>Your Organizations</h1>
-	<p>Organizations help you to easily share and manage projects within your company.</p>
-</div>
-
+<h1>Your Organizations</h1>
+<p>Organizations help you to easily share and manage projects within your company.</p>
+<br />
 {#if isLoading}
 	<Loading />
 {/if}
-
-<div class="p-8">
-	<DataTable {headers} rows={rows()}>
-		<Toolbar>
-			<ToolbarBatchActions class="bg-danger">
-				<Button icon={Delete16} kind="danger">Delete</Button>
-			</ToolbarBatchActions>
-			<ToolbarContent>
-				<ToolbarSearch placeholder="Search organization" />
-				<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
-			</ToolbarContent>
-		</Toolbar>
-		<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
-		<span
-			slot="cell"
-			let:row
-			let:cell
-			on:click={() => goto(`/project/?organization=${row.id}`)}
-			class="cursor-pointer"
-		>
-			{#if cell.key === 'name'}
-				<div class="flex items-center space-x-2">
-					<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
-					<p class="text-sm">{cell.value}</p>
-				</div>
-			{:else if cell.key === 'more'}
-				<Button
-					kind="ghost"
-					icon={OverflowMenuHorizontal32}
-					iconDescription="More"
-					on:click={() => {
-						// selectedShowMoreModal = row.id;
-						// showMoreModal = true;
-					}}
-				/>
-			{:else}
-				{cell.value}
-			{/if}
-		</span>
-	</DataTable>
-</div>
+<DataTable {headers} rows={rows()}>
+	<Toolbar>
+		<ToolbarBatchActions class="bg-danger">
+			<Button icon={Delete16} kind="danger">Delete</Button>
+		</ToolbarBatchActions>
+		<ToolbarContent>
+			<ToolbarSearch placeholder="Search organization" />
+			<Button on:click={() => (showAddOrganizationModal = true)}>Add organization</Button>
+		</ToolbarContent>
+	</Toolbar>
+	<!-- TODO: go to projects of a specific organizationn when clicking on a row -->
+	<span
+		slot="cell"
+		let:row
+		let:cell
+		on:click={() => goto(`/project/?organization=${row.id}`)}
+		class="cursor-pointer"
+	>
+		{#if cell.key === 'name'}
+			<div class="flex items-center space-x-2">
+				<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+				<p class="text-sm">{cell.value}</p>
+			</div>
+		{:else if cell.key === 'more'}
+			<Button
+				kind="ghost"
+				icon={OverflowMenuHorizontal32}
+				iconDescription="More"
+				on:click={() => {
+					// selectedShowMoreModal = row.id;
+					// showMoreModal = true;
+				}}
+			/>
+		{:else}
+			{cell.value}
+		{/if}
+	</span>
+</DataTable>
 
 {#if showAddOrganizationModal}
 	<OrganizationModal
