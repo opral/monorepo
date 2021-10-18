@@ -4,21 +4,14 @@ Automatically retrieve all translations from the [Inlang translation management 
 
 ## Getting started
 
-1. Fill in the database details in the .env at the root of your project
-
-```
-VITE_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-VITE_PUBLIC_SUPABASE_URL="your-supabase-url"
-```
-
-2. Write the project id to inlang.json
+1. Write the project id to inlang.json
 
 ```
 {
-    ProjectId: "your-id-here"
+    projectId: "your-id-here"
 }
 ```
 
-3. Run `npx ts-node @inlang/inlang-typesafe-i18n-adapter`
+2. Run `npx ts-node @inlang/inlang-typesafe-i18n-adapter`
 
-4. Add your translations to the dashboard and see them appear in your project!
+3. Add your translations to the dashboard and see them appear in your project!

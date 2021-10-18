@@ -1,6 +1,6 @@
 {
-  "name": "@inlang/inlang-typesafe-i18n-adapter",
-  "version": "0.0.3",
+  "name": "@inlang/typesafe-i18n-adapter",
+  "version": "0.0.2",
   "description": "Provides a way to automatically import all keys and translations into typesafe-i18n.",
   "main": "index.js",
   "scripts": {},
@@ -22,6 +22,7 @@
     "typesafe-i18n": "^2.44.2"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^1.24.0",
     "@types/lodash": "^4.14.175",
     "dotenv": "^10.0.0",
     "lodash": "^4.17.21",
