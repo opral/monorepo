@@ -5,7 +5,8 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarSearch,
-		Tag
+		Tag,
+Pagination
 	} from 'carbon-components-svelte';
 	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
@@ -27,6 +28,8 @@
 	};
 
 	let searchQuery = '';
+	let pageSize = 10;
+	let pageNumber = 1;
 
 	let deleteKeyModal: DeleteKeyModal;
 
@@ -134,12 +137,12 @@
 		<Translations keyName={row.key.name} />
 	</div>
 </DataTable>
-
-<br />
-<p>pagination is coming soon...</p>
-<!-- <div class="flex flex-row justify-center">
-	<PaginationNav total={1} class="bottom" />
-</div> -->
+<Pagination
+		totalItems={rows().length}
+		pageSizes={[10, 25, 50]}
+		bind:pageSize
+		bind:page={pageNumber}
+	/>
 
 <TranslationModal
 	bind:open={createTranslationModal.open}
