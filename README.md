@@ -19,10 +19,12 @@
 
 ## Demo
 
-### Step 1 - Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code
+### Step 1 - Create keys directly in VSCode
+The keys are automatically sent to the dashboard and injected into the code.
 ![Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code](./assets/step1.gif)
 
-### Step 2 - Edit translations in the dashboard which are automatically synced with the source code during development
+### Step 2 - Manage translations in the dashboard
+Translations are automatically synced with the source code during development with typesafety (no more missing translations).
 ![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)
 ## Getting started
 
