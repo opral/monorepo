@@ -2,7 +2,7 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import TranslationRow from './modals/TranslationRow.svelte';
 	import ISO6391 from 'iso-639-1';
-	import { difference } from 'lodash';
+	import { difference } from 'lodash-es';
 	import type { definitions } from '@inlang/database';
 
 	// is a string but the consuming component passes it down as any
