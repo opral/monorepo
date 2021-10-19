@@ -17,14 +17,13 @@
 [Want to receive a notification when inlang is available for other languages?](TODO)
 
 
-## Demo - TODO
+## Demo
 
-*The GIFs should show a simple web page on the left showcasing the automatic key generation and dashboard sync*
+### Step 1 - Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code
+![Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code](./assets/step1.gif)
 
-1. GIF: VSCode inlang extension context menu -> showing key is automatically translated with machine translations
-2. GIF: Dashboard -> showing sync when changing a translation
-
-
+### Step 2 - Edit translations in the dashboard which are automatically synced with the source code during development
+![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)
 ## Getting started
 
 TODO - link to documentation
