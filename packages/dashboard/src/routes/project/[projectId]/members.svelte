@@ -98,6 +98,10 @@
 		}
 	}
 
+    function isOwner(userId: definitions["user"]["id"]): boolean {
+        return organization.created_by_user_id === userId;
+    }
+
 	let rows: () => Row[];
 
 	$: rows = () => {
@@ -138,6 +142,7 @@
 			{:else if cell.key === 'remove'}
 				<row class="justify-end items-center">
 					<Button
+                        disabled={isOwner(row.id)}
 						kind="danger-ghost"
 						icon={Delete24}
 						iconDescription="Remove member"
