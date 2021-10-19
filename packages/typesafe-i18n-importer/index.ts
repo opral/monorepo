@@ -1,5 +1,4 @@
 import { database } from "./database";
-import type { definitions } from "@inlang/database";
 import { storeTranslationsToDisk } from "typesafe-i18n/importer";
 import type { Locale, BaseTranslation } from "typesafe-i18n/types/core";
 import { isEqual } from "lodash";
@@ -7,7 +6,7 @@ import { isEqual } from "lodash";
 type LocaleMapping = { locale: Locale; translations: BaseTranslation };
 
 let projectId = "";
-import("../inlang.json")
+import("../../../inlang.json")
   .then((config) => {
     if (config !== undefined) {
       projectId = config.projectId;
@@ -21,10 +20,7 @@ import("../inlang.json")
 let lastLocaleMappingList: LocaleMapping[] = [];
 
 const getDataFromDatabase = async () => {
-  return database
-    .from<definitions["translation"]>("translation")
-    .select("*")
-    .eq("project_id", projectId);
+  return database.from("translation").select("*").eq("project_id", projectId);
 };
 
 // Recursive function as it is assumed that namespace is not deep enough to cause stack overflow.
@@ -63,7 +59,7 @@ const updateTranslations = async () => {
     localeMapping.translations = createNestedObject(
       localeMapping.translations,
       nest,
-      t.text
+      t.text ?? ""
     );
   }
   if (isEqual(localeMappingList, lastLocaleMappingList) === false) {
