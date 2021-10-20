@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { applyWrappingPattern, inlangConfig, readConfig } from "./helpers";
 import { postTranslateRequest } from "./translate";
 
-const inlangCmd = "inlangext.helloWorld";
+const inlangCmd = "inlangext.send";
 const inlangCmdName = "Send to inlang";
 /* *select text-> ask for namespace 
 	-> get default translation lang
