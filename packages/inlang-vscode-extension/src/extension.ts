@@ -16,19 +16,29 @@ function onCreate() {
     command: inlangCmd,
     title: inlangCmdName,
   };
-
-  let currDir = vscode.workspace.workspaceFolders?.[0].uri.path;
-  let cfg: inlangConfig = readConfig(currDir + "/inlang.json");
-  let msg =
-    currDir != null
-      ? "loaded config from:" + JSON.stringify(currDir)
-      : "please open a directory";
-
-  vscode.window.showInformationMessage(msg);
-  return cfg;
 }
+
 /**will be executed every time your command is executed*/
 async function onCommand(cfg: inlangConfig) {
+  if (cfg === undefined) {
+    let currDir = vscode.workspace.workspaceFolders?.[0].uri.path;
+    let cfg: inlangConfig = readConfig(currDir + "/inlang.json");
+    if (cfg.projectId === "") {
+      vscode.window.showErrorMessage("inlang.json missing projectId");
+      throw new Error("inlang.json missing projectId");
+    } else if (cfg.vsCodeExtension.wrappingPattern === "") {
+      vscode.window.showErrorMessage("inlang.json missing wrapping pattern");
+      throw new Error("inlang.json missing wrapping pattern");
+    } else {
+      let msg =
+        currDir != null
+          ? "loaded config from:" + JSON.stringify(currDir)
+          : "please open a directory";
+
+      vscode.window.showInformationMessage(msg);
+    }
+  }
+
   const activeTextEditor = vscode.window.activeTextEditor;
   let range = activeTextEditor.selection;
   let selectionText = "";
@@ -39,26 +49,24 @@ async function onCommand(cfg: inlangConfig) {
       prompt: "your inlang key name",
     });
 
-    if (keyName === null) {
+    if (keyName === undefined || keyName === "") {
       vscode.window.showInformationMessage("Key name not set.");
-      exit();
-    }
-
-    const response = await postTranslateRequest({
-      projectId: cfg.projectId,
-      baseTranslation: {
-        key_name: keyName,
-        text: selectionText,
-      },
-    });
-
-    if (response.ok) {
-      vscode.window.showInformationMessage(keyName + " added to dashboard.");
-      activeTextEditor.edit((builder) =>
-        builder.replace(range, applyWrappingPattern(cfg, keyName))
-      );
     } else {
-      vscode.window.showErrorMessage(keyName + " could not be added");
+      const response = await postTranslateRequest({
+        projectId: cfg.projectId,
+        baseTranslation: {
+          key_name: keyName,
+          text: selectionText,
+        },
+      });
+      if (response.ok) {
+        vscode.window.showInformationMessage(keyName + " added to dashboard.");
+        activeTextEditor.edit((builder) =>
+          builder.replace(range, applyWrappingPattern(cfg, keyName))
+        );
+      } else {
+        vscode.window.showErrorMessage(keyName + " could not be added");
+      }
     }
   }
 }
@@ -73,11 +81,12 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  let cfg = onCreate();
+  onCreate();
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
 
+  let cfg: inlangConfig;
   let disposable = vscode.commands.registerCommand(inlangCmd, () => {
     onCommand(cfg);
   });

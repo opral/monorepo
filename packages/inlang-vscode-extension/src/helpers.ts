@@ -16,7 +16,12 @@ export type inlangConfig = {
 };
 
 export function readConfig(path: string) {
-  let obj = fs.readFileSync(path, "utf8");
+  let obj = "";
+  try {
+    obj = fs.readFileSync(path, "utf8");
+  } catch (error) {
+    return { projectId: "", vsCodeExtension: { wrappingPattern: "" } };
+  }
   let jo: inlangConfig = JSON.parse(obj);
   return jo;
 }
