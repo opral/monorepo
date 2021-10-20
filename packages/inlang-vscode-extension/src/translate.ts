@@ -1,4 +1,3 @@
-import translate, { DeeplLanguages } from "deepl";
 import fetch from "node-fetch";
 
 export type CreateBaseTranslationRequestBody = {

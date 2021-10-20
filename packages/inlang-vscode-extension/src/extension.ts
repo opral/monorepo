@@ -1,5 +1,5 @@
+import { exit } from "process";
 import * as vscode from "vscode";
-import { Range } from "vscode";
 import { applyWrappingPattern, inlangConfig, readConfig } from "./helpers";
 import { postTranslateRequest } from "./translate";
 
@@ -21,7 +21,7 @@ function onCreate() {
   let cfg: inlangConfig = readConfig(currDir + "/inlang.json");
   let msg =
     currDir != null
-      ? "loaded config from curr dir:" + JSON.stringify(cfg)
+      ? "loaded config from:" + JSON.stringify(currDir)
       : "please open a directory";
 
   vscode.window.showInformationMessage(msg);
@@ -29,45 +29,37 @@ function onCreate() {
 }
 /**will be executed every time your command is executed*/
 async function onCommand(cfg: inlangConfig) {
-  const edt = vscode.window.activeTextEditor;
-  let r = edt?.selection;
+  const activeTextEditor = vscode.window.activeTextEditor;
+  let range = activeTextEditor.selection;
   let selectionText = "";
 
-  if (r != null) {
-    const range1 = new Range(r.start, r?.end);
-
-    selectionText = edt?.document.getText(r) ?? "";
-    let keyP = vscode.window.showInputBox({ prompt: "your inlang key name" });
-    keyP.then(async (keyStr) => {
-      if (keyStr != null) keyStr;
-      let resp = postTranslateRequest({
-        projectId: cfg.projectId,
-        baseTranslation: {
-          key_name: keyStr!,
-          text: selectionText,
-        },
-      });
-      resp
-        .catch((x) =>
-          vscode.window.showInformationMessage(
-            "Problem with saving translations: ",
-            x
-          )
-        )
-        .then((x) =>
-          vscode.window.showInformationMessage(
-            "created key for: " +
-              keyStr +
-              " and saved to inlang server! " +
-              x.json()
-          )
-        );
-
-      edt?.edit((eb) => {
-        if (keyStr != null)
-          eb.replace(range1, applyWrappingPattern(cfg, keyStr));
-      });
+  if (range != null) {
+    selectionText = activeTextEditor?.document.getText(range) ?? "";
+    const keyName = await vscode.window.showInputBox({
+      prompt: "your inlang key name",
     });
+
+    if (keyName === null) {
+      vscode.window.showInformationMessage("Key name not set.");
+      exit();
+    }
+
+    const response = await postTranslateRequest({
+      projectId: cfg.projectId,
+      baseTranslation: {
+        key_name: keyName,
+        text: selectionText,
+      },
+    });
+
+    if (response.ok) {
+      vscode.window.showInformationMessage(keyName + " added to dashboard.");
+      activeTextEditor.edit((builder) =>
+        builder.replace(range, applyWrappingPattern(cfg, keyName))
+      );
+    } else {
+      vscode.window.showErrorMessage(keyName + " could not be added");
+    }
   }
 }
 

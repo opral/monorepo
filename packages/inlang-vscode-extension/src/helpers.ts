@@ -1,28 +1,24 @@
 import * as fs from "fs";
 import * as path from "path";
 
-// import { createClient, PostgrestResponse } from "@supabase/supabase-js";
-import translate, { DeeplLanguages } from 'deepl';
-import { type } from "os";
-
 /* export type inlangConfig = {
     ProjectId: string
 } */
 
 export function applyWrappingPattern(pattern: inlangConfig, content: string) {
-    return pattern.vsCodeExtension.wrappingPattern.replace('keyname', content)
+  return pattern.vsCodeExtension.wrappingPattern.replace("keyname", content);
 }
 export type inlangConfig = {
-    projectId: string,
-    vsCodeExtension: {
-        wrappingPattern: string
-    }
-}
+  projectId: string;
+  vsCodeExtension: {
+    wrappingPattern: string;
+  };
+};
 
 export function readConfig(path: string) {
-    let obj = fs.readFileSync(path, 'utf8')
-    let jo: inlangConfig = JSON.parse(obj)
-    return jo
+  let obj = fs.readFileSync(path, "utf8");
+  let jo: inlangConfig = JSON.parse(obj);
+  return jo;
 }
 
 /* export async function pgResp2val<t>(x: PostgrestResponse<t>, errname: string = ''): Promise<t[]> {
@@ -34,7 +30,6 @@ export function readConfig(path: string) {
         return x.data;
     }
 } */
-
 
 /* const supabase = createClient(
     "http://localhost:8000",
@@ -59,12 +54,12 @@ export function readConfig(path: string) {
 } */
 
 export function ensureDirectoryExistence(filePath: string) {
-    var dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) {
-        return true;
-    }
-    ensureDirectoryExistence(dirname);
-    fs.mkdirSync(dirname);
+  var dirname = path.dirname(filePath);
+  if (fs.existsSync(dirname)) {
+    return true;
+  }
+  ensureDirectoryExistence(dirname);
+  fs.mkdirSync(dirname);
 }
 
 /*
@@ -74,25 +69,24 @@ export type inlangConfig = {
     supabase_secret: string
 }} */
 
-
 type translationT = {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `key.name`.<fk table='key' column='name'/>
-     */
-    key_name: string;
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `key.project_id`.<fk table='key' column='project_id'/>
-     */
-    project_id: string;
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    iso_code:
+  /**
+   * Note:
+   * This is a Primary Key.<pk/>
+   * This is a Foreign Key to `key.name`.<fk table='key' column='name'/>
+   */
+  key_name: string;
+  /**
+   * Note:
+   * This is a Primary Key.<pk/>
+   * This is a Foreign Key to `key.project_id`.<fk table='key' column='project_id'/>
+   */
+  project_id: string;
+  /**
+   * Note:
+   * This is a Primary Key.<pk/>
+   */
+  iso_code:
     | "ab"
     | "aa"
     | "af"
@@ -277,7 +271,7 @@ type translationT = {
     | "yo"
     | "za"
     | "zu";
-    is_reviewed: boolean;
-    text: string;
-    created_at: string;
-}
+  is_reviewed: boolean;
+  text: string;
+  created_at: string;
+};
