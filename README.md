@@ -19,7 +19,7 @@ But that's just the beginning. We want to help you localize your apps with one c
 
 **Features**
 - [x] Typesafety (no more missing translations/keys)
-- [x] Collaboration via the dashboard (don't use excel spreadsheets to manage your translations!) 
+- [x] Collaboration via the dashboard 
 - [x] Sync between dashboard and source code
 - [ ] OTA (Over the air updates without releasing a new version)
 
