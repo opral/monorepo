@@ -1,23 +1,49 @@
-## Localization (L10n) and Internationalization (i18n) of apps is too hard.
+# inlang
+
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
+
+But that's just the beginning. We want to help you localize your apps with one click. Want to stay up-to-date? [Subscribe to our newsletter](TODO) (no spam!)
 
 
-This project strives to lower the barrier(s) of localizing your apps. What started out as a simple [tech demo](https://www.youtube.com/watch?v=6xzbc6QYzDs) turned into a bigger project of 6 students from the Technical University of Denmark.
+**Status**
 
-### We need your help
-We have to identify what we should build. Help us by participating in [discussions](https://github.com/samuelstroschein/inlang/discussions), open issues, propose ideas, and most importantly, share the pain(s) you experienced with current i18n solutions, or why you did not i18n your app yet.
+- [x] Alpha: We are testing the solution and need your feedback.
+- [ ] Beta: Stable enough for small(er) apps and projects.
+- [ ] Release: Production ready.
 
-## Current state: proof of concept
+**Supported Languages**
+- [x] TypeScript using [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n)
+- [ ] Dart / Flutter
+- [ ] Swift / iOS
+- [ ] Kotlin / Android  
 
-> :warning:	Do not use this on production apps. Expect breaking changes. 
+**Features**
+- [x] Typesafety (no more missing translations/keys)
+- [x] Collaboration via the dashboard 
+- [x] Sync between dashboard and source code
+- [ ] OTA (Over the air updates without releasing a new version)
 
-### Video Demo
-[![Demo Video](https://img.youtube.com/vi/mivXTx-cpcM/0.jpg)](https://www.youtube.com/watch?v=mivXTx-cpcM)
+Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
 
- 
-Try the proof of concept by using [this repo](https://github.com/samuelstroschein/inlang-test-repository) as a template. 
+## Getting started
 
-And most importantly, [give feedback](https://github.com/samuelstroschein/inlang/discussions).
+TODO - link to documentation
 
-## Contribute
 
-This repo follows semantic git commits https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716 with the addition of `imp:` for improvments.
+## Demo
+
+### Step 1 - Create keys directly in VSCode
+Keys are automatically sent to the dashboard, machine translated into all languages and synced with your source code. Bonus on top: typesafety (no more missing translations/none existent keys). 
+![Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code](./assets/step1.gif)
+
+### Step 2 - Manage translations in the dashboard
+Collaborators, or you yourself, can seamlessly edit translations in the dashboard. During development the translations are automatically synced with the source code.
+![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)
+
+
+## Community & Support
+
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
+- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
+
