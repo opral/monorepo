@@ -1,17 +1,21 @@
-# inlangext
+# inlang-vscode-extension
 
+Adds "Send to Inlang" to the context menu, which automatically sends the text selected as a base translation to the Inlang dashboard together with the key. The selected text is then replaced with the keyname and wrapping pattern desired.
 
-## try out
+## Getting started
 
-select the text you want to translate,then right click and send to inlang.Input a key name,Then : 
+1. Get your project id from settings on the dashboard.
+2. Add `inlang.json` to your root directory with the following structure:
 
-  1.your text will be automatically replaced 
-  2.a new translation is created for you at inlang's server and the json files of the translation is downloaded to your code base
+```
+  {
+    "projectId": "your-project-id",
+    "vsCodeExtension":{
+      "wrappingPattern": "$LL.keyname()"
+    }
+  }
+```
 
-what's next?
-  depending on the frameworks your
-
-## Features
-
-
-## Extension Settings
+3. Write the desired base translation in your source code.
+4. Right click to open the context menu and choose "Send to Inlang".
+5. Done!
