@@ -6,12 +6,12 @@ import { isEqual } from "lodash";
 type LocaleMapping = { locale: Locale; translations: BaseTranslation };
 
 let projectId = "";
-import("../../../inlang.json")
+import("../../../inlang.config.json")
   .then((config) => {
     if (config !== undefined) {
       projectId = config.projectId;
     } else {
-      throw new Error("projectId not supplied in inlang.json.");
+      throw new Error("projectId not supplied in inlang.config.json.");
     }
   })
   .catch((error) => {

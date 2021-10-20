@@ -9,7 +9,7 @@ The VSCode extension adds a "Send to inlang" command to the context menu. The co
 ## Getting started
 
 1. Get your project id from settings on the dashboard.
-2. Add `inlang.json` to your root directory with the following structure:
+2. Add `inlang.config.json` to your root directory with the following structure:
 
 ```
   {

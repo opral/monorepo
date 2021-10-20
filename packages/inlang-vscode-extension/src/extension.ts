@@ -22,13 +22,15 @@ function onCreate() {
 async function onCommand(cfg: inlangConfig) {
   if (cfg === undefined) {
     let currDir = vscode.workspace.workspaceFolders?.[0].uri.path;
-    let cfg: inlangConfig = readConfig(currDir + "/inlang.json");
+    let cfg: inlangConfig = readConfig(currDir + "/inlang.config.json");
     if (cfg.projectId === "") {
-      vscode.window.showErrorMessage("inlang.json missing projectId");
-      throw new Error("inlang.json missing projectId");
+      vscode.window.showErrorMessage("inlang.config.json missing projectId");
+      throw new Error("inlang.config.json missing projectId");
     } else if (cfg.vsCodeExtension.wrappingPattern === "") {
-      vscode.window.showErrorMessage("inlang.json missing wrapping pattern");
-      throw new Error("inlang.json missing wrapping pattern");
+      vscode.window.showErrorMessage(
+        "inlang.config.json missing wrapping pattern"
+      );
+      throw new Error("inlang.config.json missing wrapping pattern");
     } else {
       let msg =
         currDir != null

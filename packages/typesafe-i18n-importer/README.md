@@ -4,7 +4,7 @@ Automatically retrieve all translations from the [Inlang translation management 
 
 ## Getting started
 
-1. Write the project id to inlang.json
+1. Write the project id to inlang.config.json
 
 ```
 {
