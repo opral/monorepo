@@ -1,6 +1,10 @@
 # inlang-vscode-extension
 
-Adds "Send to Inlang" to the context menu, which automatically sends the text selected as a base translation to the Inlang dashboard together with the key. The selected text is then replaced with the keyname and wrapping pattern desired.
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
+
+The VSCode extension adds a "Send to inlang" command to the context menu. The command automatically sends the selected text/string as base translation to the inlang dashboard together with the key.
+
+![Github](https://github.com/inlang/inlang/blob/398c091946621083fd3d4da56957ccee71cbfcda/assets/step1.gif?raw=true)
 
 ## Getting started
 
