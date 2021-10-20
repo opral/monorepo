@@ -12,7 +12,7 @@ export async function postTranslateRequest(
   data: CreateBaseTranslationRequestBody
 ) {
   const response = await fetch(
-    "https://www.inlang.dev/api/internal/create-base-translation",
+    "https://app.inlang.dev/api/internal/create-base-translation",
     {
       method: "POST",
       body: JSON.stringify(data),

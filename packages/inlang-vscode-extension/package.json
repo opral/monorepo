@@ -1,9 +1,9 @@
 {
-  "name": "inlangext",
-  "displayName": "inlangExt",
+  "name": "vscode-extension",
+  "displayName": "Inlang",
   "description": "",
-  "publisher": "inlang",
-  "repository": "https://github.com/inlang/inlangExt",
+  "publisher": "Inlang",
+  "repository": "https://github.com/inlang/inlang",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.61.0"
@@ -12,20 +12,20 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:inlangext.send"
+    "onCommand:vscode-extension.send"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "inlangext.send",
-        "title": "Send to inlang"
+        "command": "vscode-extension.send",
+        "title": "Inlang: Create key"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "inlangext.send"
+          "command": "vscode-extension.send"
         }
       ]
     }
@@ -43,7 +43,7 @@
     "@types/vscode": "^1.61.0",
     "@vscode/test-electron": "^1.6.2",
     "typescript": "^4.4.3",
-	"vsce": "^1.100.1"
+    "vsce": "^1.100.1"
   },
   "dependencies": {
     "node-fetch": "^2.6.5"
