@@ -1,6 +1,9 @@
 # inlang
 
-[Inlang](https://www.inlang.dev) is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. With inlang you get type safety, machine translations, automatic sync and a collaboration dashboard in one tight package.
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
+
+But that's just the beginning. We want to help you localize your apps with one click. Want to stay up-to-date? [Subscribe to our newsletter](TODO) (no spam!)
+
 
 **Status**
 
@@ -12,9 +15,15 @@
 - [x] TypeScript using [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n)
 - [ ] Dart / Flutter
 - [ ] Swift / iOS
-- [ ] Kotlin / Android
+- [ ] Kotlin / Android  
 
-[Want to receive a notification when inlang is available for other languages?](TODO)
+**Features**
+- [x] Typesafety (no more missing translations/keys)
+- [x] Collaboration via the dashboard (don't use excel spreadsheets to manage your translations!) 
+- [x] Sync between dashboard and source code
+- [ ] OTA (Over the air updates without releasing a new version)
+
+Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
 
 ## Getting started
 
