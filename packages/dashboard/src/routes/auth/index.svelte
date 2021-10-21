@@ -7,7 +7,7 @@
 		if (auth.session()) {
 			return {
 				status: 302,
-				redirect: '/'
+				redirect: '/project'
 			};
 		}
 		return {};
