@@ -10,7 +10,7 @@ const config = {
   tagline: "Localization solution for apps.",
   url: "https://docs.inlang.dev",
   baseUrl: "/",
-  onBrokenLinks: "throw",
+  onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "inlang", // Usually your GitHub org/user name.
