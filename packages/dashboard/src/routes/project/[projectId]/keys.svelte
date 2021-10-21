@@ -54,6 +54,11 @@ Pagination
 		return result ?? [];
 	};
 
+	let displayedRows: () => Row[];
+
+	$: displayedRows = () => { return rows()?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize)
+	}
+
 	// $: rows = fullRows.filter((row) => row.key.indexOf(searchQuery) !== -1);
 
 	// check if for this key there is a translation for each of the languages in the project
@@ -95,7 +100,7 @@ Pagination
 <h1>Keys</h1>
 <p>All your translation keys will appear here. You can create, delete and edit them.</p>
 <br />
-<DataTable expandable {headers} rows={rows()}>
+<DataTable expandable {headers} rows={displayedRows()}>
 	<Toolbar>
 		<ToolbarContent>
 			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
