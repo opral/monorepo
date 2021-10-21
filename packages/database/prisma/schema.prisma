@@ -83,7 +83,7 @@ model translation {
   key_name    String
   key         key       @relation(fields: [key_name, project_id], references: [name, project_id], onDelete: Cascade)
   project_id  String    @db.Uuid
-  project     project   @relation(fields: [project_id], references: [id])
+  project     project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
   iso_code    iso_639_1
   language    language  @relation(fields: [project_id, iso_code], references: [project_id, iso_code], onDelete: Cascade)
   is_reviewed Boolean   @default(false)
