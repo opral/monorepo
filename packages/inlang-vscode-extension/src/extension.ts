@@ -4,7 +4,7 @@ import { postTranslateRequest } from './translate'
 import { InlangConfig } from './types/inlangConfig'
 
 const inlangCmd = 'vscode-extension.send'
-const inlangCmdName = 'Send to inlang'
+const inlangCmdName = 'Inlang: Create key'
 /* *select text-> ask for namespace 
 	-> get default translation lang
 	-> write to db (create new translation with default lang)
@@ -22,13 +22,15 @@ function onCreate() {
 async function onCommand(config: InlangConfig) {
     if (config === undefined) {
         const currDir = vscode.workspace.workspaceFolders?.[0].uri.path
-        const config = readAndValidateConfig(currDir + '/inlang.config.json')
-        if (config.error) {
-            vscode.window.showErrorMessage(config.error)
-            throw config.error
-        } else if (config.data === null) {
+        const configValidated = readAndValidateConfig(
+            currDir + '/inlang.config.json'
+        )
+        if (configValidated.error) {
+            vscode.window.showErrorMessage(configValidated.error)
+            throw configValidated.error
+        } else if (configValidated.data === null) {
             vscode.window.showErrorMessage('The config data was null.')
-            throw config.error
+            throw configValidated.error
         }
         let message =
             currDir != null
@@ -36,6 +38,7 @@ async function onCommand(config: InlangConfig) {
                 : 'please open a directory'
 
         vscode.window.showInformationMessage(message)
+        config = configValidated.data
     }
 
     const activeTextEditor = vscode.window.activeTextEditor

@@ -64,6 +64,11 @@ function validateConfig(args: {
             isValid: false,
             reason: 'field "vsCodeExtension" is missing in config',
         }
+    } else if (casted.vsCodeExtension.wrappingPattern === undefined) {
+        return {
+            isValid: false,
+            reason: 'field "wrappingPattern" is missing in config',
+        }
     }
     return { isValid: true, reason: null }
 }
