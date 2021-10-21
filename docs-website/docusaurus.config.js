@@ -25,6 +25,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           editUrl: "https://github.com/inlang/inlang/edit/main/doc-website/",
           routeBasePath: "/",
+          sidebarCollapsed: false,
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -41,13 +42,19 @@ const config = {
         items: [
           {
             type: "doc",
-            docId: "intro",
+            docId: "introduction",
             position: "left",
             label: "Documentation",
           },
           {
+            href: "https://app.inlang.dev",
+            label: "Open Dashboard",
+            position: "right",
+          },
+          {
             href: "https://github.com/inlang/inlang",
-            label: "GitHub",
+            // label: "GitHub",
+            className: "header-github-link",
             position: "right",
           },
         ],
