@@ -17,18 +17,22 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
-
 	import { page } from '$app/stores';
-import { userStore } from '$lib/stores/userStore';
+	import { userStore } from '$lib/stores/userStore';
 
 	//export let name = '';
 
 	let showAddProjectModal = false;
 
 	let showProjectModalIfOrganizationExists = async () => {
-		console.log(organizations.data)
+		console.log(organizations.data);
 		if (organizations.data?.length === 0 ?? true) {
-			const response = await database.from<definitions['organization']>('organization').insert([{ 'name': $userStore.data?.email?.split("@")[0] + "'s organization", 'created_by_user_id': $userStore.data?.id }]);
+			const response = await database.from<definitions['organization']>('organization').insert([
+				{
+					name: $userStore.data?.email?.split('@')[0] + "'s organization",
+					created_by_user_id: $userStore.data?.id
+				}
+			]);
 			if (response.error) {
 				alert(response.error);
 			}
@@ -105,7 +109,7 @@ import { userStore } from '$lib/stores/userStore';
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
-			<Button on:click={() => (showProjectModalIfOrganizationExists())}>Add project</Button>
+			<Button on:click={() => showProjectModalIfOrganizationExists()}>Add project</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span
