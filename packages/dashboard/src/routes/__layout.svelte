@@ -10,6 +10,7 @@
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/layout/Navbar.svelte';
 	import { Content } from 'carbon-components-svelte';
+import { page } from '$app/stores';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
@@ -26,8 +27,10 @@
 </script>
 
 <script lang="ts">
+	import  { capitalize, last } from 'lodash'
 	// if running in browser (not server side)
 	// listen for auth changes
+
 	if (browser) {
 		auth.onAuthStateChange((event) => {
 			if (event === 'SIGNED_IN') {
@@ -38,6 +41,10 @@
 		});
 	}
 </script>
+
+<svelte:head>
+	<title>Inlang | {capitalize(last($page.path.split('/')))}</title>
+</svelte:head>
 
 <Navbar />
 <Content>
