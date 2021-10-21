@@ -10,7 +10,7 @@
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/layout/Navbar.svelte';
 	import { Content } from 'carbon-components-svelte';
-import { page } from '$app/stores';
+	import { page } from '$app/stores';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
@@ -27,7 +27,7 @@ import { page } from '$app/stores';
 </script>
 
 <script lang="ts">
-	import  { capitalize, last } from 'lodash'
+	import { capitalize, last } from 'lodash-es';
 	// if running in browser (not server side)
 	// listen for auth changes
 
