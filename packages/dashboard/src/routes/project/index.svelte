@@ -19,10 +19,22 @@
 	import { goto } from '$app/navigation';
 
 	import { page } from '$app/stores';
+import { userStore } from '$lib/stores/userStore';
 
 	//export let name = '';
 
 	let showAddProjectModal = false;
+
+	let showProjectModalIfOrganizationExists = async () => {
+		console.log(organizations.data)
+		if (organizations.data?.length === 0 ?? true) {
+			const response = await database.from<definitions['organization']>('organization').insert([{ 'name': $userStore.data?.email?.split("@")[0] + "'s organization", 'created_by_user_id': $userStore.data?.id }]);
+			if (response.error) {
+				alert(response.error);
+			}
+		}
+		showAddProjectModal = true;
+	};
 
 	let isLoading = true;
 	let selectedOrgId: string | null = $page.query.get('organization');
@@ -93,7 +105,7 @@
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
-			<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
+			<Button on:click={() => (showProjectModalIfOrganizationExists())}>Add project</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span
