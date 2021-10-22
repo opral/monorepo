@@ -18,15 +18,11 @@
 	import Center from '$lib/components/Center.svelte';
 	import { Button, TextInput, Tile } from 'carbon-components-svelte';
 	import { PostgrestError } from '@supabase/postgrest-js';
+	import { isValidEmail } from '$lib/utils/isValidEmail';
 
 	let email = '';
 
-	$: isValidEmail = () => {
-		if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-			return true;
-		}
-		return false;
-	};
+	$: inputIsValidEmail = isValidEmail(email);
 
 	async function handleLogin() {
 		try {
@@ -66,7 +62,7 @@
 			<!-- MAGIC LINK -->
 			<p class="description mb-2">Sign in via magic link by entering your email below:</p>
 			<TextInput type="email" bind:value={email} placeholder="your e-mail" />
-			<Button disabled={isValidEmail() === false} kind="primary" on:click={handleLogin}
+			<Button disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin}
 				>Send Magic Link</Button
 			>
 			<!-- GITHUB SIGN IN -->
