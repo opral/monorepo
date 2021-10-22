@@ -6,13 +6,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	export function show(args: { project: definitions['project'] | undefined }): string {
-		if (args.project === undefined) {
-			return 'Project was not found';
-		}
+	export function show(args: { project: definitions['project'] }): void {
 		project = args.project;
 		open = true;
-		return '';
 	}
 
 	export function hide(): void {

@@ -1,15 +1,13 @@
 <!-- 
-	This layout acts solely as authentification layer. 
+	This layout acts as authentification layer. 
 -->
 <script lang="ts" context="module">
 	import '../app.postcss';
-	// import { auth } from '$lib/services/auth';
 	import { auth } from '$lib/services/auth';
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
-	import Navbar from '$lib/layout/Navbar.svelte';
-	import { Content } from 'carbon-components-svelte';
+	import UiShell from '$lib/layout/UiShell.svelte';
 	import { page } from '$app/stores';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
@@ -46,7 +44,6 @@
 	<title>Inlang | {capitalize(last($page.path.split('/')))}</title>
 </svelte:head>
 
-<Navbar />
-<Content>
+<UiShell>
 	<slot />
-</Content>
+</UiShell>

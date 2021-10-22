@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { Loading, InlineNotification } from 'carbon-components-svelte';
-	import ProjectSidenav from '$lib/layout/ProjectSidenav.svelte';
 
 	// each time the projectId changes, the project store
 	// is updated automatically to either get the data for the project
@@ -19,7 +18,6 @@
 	<Loading />
 {:else}
 	<row>
-		<ProjectSidenav />
 		<div class="flex-grow">
 			<slot />
 		</div>
