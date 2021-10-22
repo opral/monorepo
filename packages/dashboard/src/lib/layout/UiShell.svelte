@@ -11,7 +11,8 @@
 		SkipToContent,
 		HeaderUtilities,
 		Content,
-		HeaderPanelDivider
+		HeaderPanelDivider,
+		HeaderNavItem
 	} from 'carbon-components-svelte';
 	import { userStore } from '$lib/stores/userStore';
 	import { page } from '$app/stores';
@@ -47,7 +48,12 @@
 		<SkipToContent />
 	</div>
 	{#if $userStore.data}
-		<HeaderNav />
+		<HeaderNav>
+			<HeaderNavItem
+				href={`https://submission.bromb.co/?email=${auth.user()?.email}`}
+				text="Feedback on this site?"
+			/>
+		</HeaderNav>
 		<HeaderUtilities>
 			<HeaderAction>
 				<HeaderPanelLinks>
