@@ -13,9 +13,8 @@ const config = {
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "inlang", // Usually your GitHub org/user name.
-  projectName: "inlang", // Usually your repo name.
-
+  organizationName: "inlang",
+  projectName: "inlang",
   presets: [
     [
       "@docusaurus/preset-classic",
@@ -33,7 +32,6 @@ const config = {
       }),
     ],
   ],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -45,6 +43,11 @@ const config = {
             docId: "introduction",
             position: "left",
             label: "Documentation",
+          },
+          {
+            href: "https://submission.bromb.co/documentation",
+            label: "Do you have a problem or suggestion?",
+            position: "right",
           },
           {
             href: "https://app.inlang.dev",
