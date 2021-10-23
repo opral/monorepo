@@ -24,9 +24,6 @@
 
 	let organizationId: definitions['organization']['id'] | undefined = undefined;
 
-	// each time the organiations update, select the first organizations id
-	$: organizationId = organizations.data?.[0].id;
-
 	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
