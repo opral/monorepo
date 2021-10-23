@@ -47,5 +47,8 @@
     ],
     "prepare": "npm run build",
     "prepublishOnly": "npm test",
-    "preversion": "npm run lint"
+    "preversion": "npm run lint",
+    "bin": {
+        "typesafe-i18n-importer": "dist/main.js"
+    }
 }
