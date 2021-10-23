@@ -79,4 +79,4 @@ async function main() {
     setInterval(() => updateTranslations({ projectId: config.projectId }), 2000)
 }
 
-export default main
+main()
