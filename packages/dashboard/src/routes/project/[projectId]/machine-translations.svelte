@@ -1,6 +1,5 @@
 <script>
 	import { Link, Tab, TabContent, Tabs, Toggle } from 'carbon-components-svelte';
-	import { mockOrganization, mockProject } from '$lib/mockData';
 
 	let toggled = true; // TODO: Save the machine translations toggle locally
 </script>
@@ -26,12 +25,12 @@
 			<div>
 				<h2>Project Usage:</h2>
 				<p>Characters used for machine translations in current project.</p>
-				<p>Project machine translations: {mockProject.machineTranslations}</p>
+				<!-- <p>Project machine translations: {mockProject.machineTranslations}</p> -->
 			</div>
 			<div>
 				<h2>Organization Usage:</h2>
 				<p>Characters used for machine translations by all projects in the organization.</p>
-				<p>Organization machine translations: {mockOrganization.machineTranslations}</p>
+				<!-- <p>Organization machine translations: {mockOrganization.machineTranslations}</p> -->
 			</div>
 		</TabContent>
 		<TabContent>
