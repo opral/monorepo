@@ -21,12 +21,13 @@
 
 	let isSideNavOpen = false;
 
-	let projectName: () => string | undefined;
+	let projectName: () => string;
 	$: projectName = () => {
 		if ($page.params.projectId && $projectStore.data?.project) {
 			return $projectStore.data.project.name;
 		}
-		return undefined;
+		// return empty string. returning undefined does not work
+		return '';
 	};
 
 	async function handleLogout() {
