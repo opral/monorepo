@@ -1,8 +1,9 @@
-import { database } from './services/database'
+import { database } from './services/database.js'
 import { storeTranslationsToDisk } from 'typesafe-i18n/importer'
 import type { BaseTranslation } from 'typesafe-i18n/types/core'
 import type { LocaleMapping } from './types/LocaleMapping'
-import { isEqual } from 'lodash'
+import { isEqual } from 'lodash-es';
+import { readFile } from 'fs/promises';
 
 // Recursive function as it is assumed that namespace is not deep enough to cause stack overflow.
 function createNestedObject(
@@ -64,7 +65,12 @@ async function updateTranslations(args: { projectId: string }) {
 
 async function main() {
     //@ts-ignore
-    const config = await import('../../../inlang.config.json')
+    const config = JSON.parse(
+        await readFile(
+          //@ts-ignore
+          new URL('../../../../inlang.config.json', import.meta.url)
+        )
+      );
     if (config === undefined) {
         const message =
             '@inlang/typesafe-i18n-importer: Config file "inlang.config.json" has not been found.'
