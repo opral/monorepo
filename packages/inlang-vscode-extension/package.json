@@ -4,7 +4,7 @@
     "description": "",
     "publisher": "Inlang",
     "repository": "https://github.com/inlang/inlang",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.61.0"
     },
