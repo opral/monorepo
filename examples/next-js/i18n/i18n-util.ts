@@ -10,6 +10,7 @@ import { initFormatters } from './formatters'
 export const baseLocale: Locales = 'en'
 
 export const locales: Locales[] = [
+	'da',
 	'de',
 	'en',
 	'fr',
@@ -17,6 +18,7 @@ export const locales: Locales[] = [
 ]
 
 const localeTranslationLoaders = {
+	da: () => import('./da'),
 	de: () => import('./de'),
 	en: () => import('./en'),
 	fr: () => import('./fr'),

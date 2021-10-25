@@ -2,20 +2,21 @@
 import type { Translation } from '../i18n-types'
 
 const de: Translation = {
+	'selectLanguage': 'Wählen Sie eine Sprache',
+	'starOnGithub': '⭐ Star inlang auf GitHub',
+	'welcome': 'Willkommen beim inlang Beispiel',
 	'index': {
-		'documentation': 'Dokumentation',
-		'favoriteColor': '"Mein Name ist {Name} und meine Lieblingsfarbe ist {Farbe}."',
+		'firstCard': '1. Diese Karte ist bereits von uns lokalisiert',
 	},
-	'hello': {
-		'world': 'Beginnen Sie mit der Bearbeitung',
+	'askName': 'Wie ist Ihr Name?',
+	'enterName': 'Ihren Namen eingeben',
+	'askFavoriteColor': 'Was ist Ihre Lieblingsfarbe?',
+	'nameAndFavoriteColor': 'Mein Name ist {name} und meine Lieblingsfarbe ist {color}.',
+	'footer': {
+		'inlangAlpha': 'Inlang ist in der frühen Alpha-Phase',
+		'feedback': 'Jedes Feedback, das wir bekommen, hilft uns enorm.',
+		'bromb': 'Haben Sie ein Feedback zu diesem Beispiel?',
 	},
-	'samuel': {
-		'test': '"2. markieren Sie den Text, den Sie lokalisieren möchten".',
-	},
-	'myname': {
-		'key': '"2. markieren Sie den Text, den Sie lokalisieren möchten".',
-	},
-	'nameAndFingers': '"Mein Name ist {Name} und ich habe {numFingers} Finger."',
 }
 
 export default de

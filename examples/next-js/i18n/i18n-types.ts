@@ -7,83 +7,114 @@ export type BaseTranslation = BaseTranslationType
 export type BaseLocale = 'en'
 
 export type Locales =
+	| 'da'
 	| 'de'
 	| 'en'
 	| 'fr'
 	| 'nl'
 
 export type Translation = {
+	/**
+	 * Select a language
+	 */
+	'selectLanguage': string
+	/**
+	 * ⭐ Star inlang on GitHub
+	 */
+	'starOnGithub': string
+	/**
+	 * Welcome to the inlang example
+	 */
+	'welcome': string
 	'index': {	
 		/**
-		 * Documentation
+		 * 1. This card is already localized by us
 		 */
-		'documentation': string
-		/**
-		 * "My name is {name} and my favorite color is {color}."
-		 * @param {unknown} color
-		 * @param {unknown} name
-		 */
-		'favoriteColor': RequiredParams2<'color', 'name'>
-	}
-	'hello': {	
-		/**
-		 * Get started by editing
-		 */
-		'world': string
-	}
-	'samuel': {	
-		/**
-		 * "2. Highlight the text you want to localize."
-		 */
-		'test': string
-	}
-	'myname': {	
-		/**
-		 * "2. Highlight the text you want to localize."
-		 */
-		'key': string
+		'firstCard': string
 	}
 	/**
-	 * "My name is {name} and I have {numFingers} fingers."
-	 * @param {unknown} name
-	 * @param {unknown} numFingers
+	 * What is your name?
 	 */
-	'nameAndFingers': RequiredParams2<'name', 'numFingers'>
+	'askName': string
+	/**
+	 * What is your favorite color?
+	 */
+	'askFavoriteColor': string
+	/**
+	 * enter your name
+	 */
+	'enterName': string
+	/**
+	 * My name is {name} and my favorite color is {color}.
+	 * @param {unknown} color
+	 * @param {unknown} name
+	 */
+	'nameAndFavoriteColor': RequiredParams2<'color', 'name'>
+	'footer': {	
+		/**
+		 * Inlang is in early alpha
+		 */
+		'inlangAlpha': string
+		/**
+		 * Every feedback we get helps us tremendously.
+		 */
+		'feedback': string
+		/**
+		 * Do you have feedback on this example?
+		 */
+		'bromb': string
+	}
 }
 
 export type TranslationFunctions = {
+	/**
+	 * Select a language
+	 */
+	'selectLanguage': () => LocalizedString
+	/**
+	 * ⭐ Star inlang on GitHub
+	 */
+	'starOnGithub': () => LocalizedString
+	/**
+	 * Welcome to the inlang example
+	 */
+	'welcome': () => LocalizedString
 	'index': {	
 		/**
-		 * Documentation
+		 * 1. This card is already localized by us
 		 */
-		'documentation': () => LocalizedString
-		/**
-		 * "My name is {name} and my favorite color is {color}."
-		 */
-		'favoriteColor': (arg: { color: unknown, name: unknown }) => LocalizedString
-	}
-	'hello': {	
-		/**
-		 * Get started by editing
-		 */
-		'world': () => LocalizedString
-	}
-	'samuel': {	
-		/**
-		 * "2. Highlight the text you want to localize."
-		 */
-		'test': () => LocalizedString
-	}
-	'myname': {	
-		/**
-		 * "2. Highlight the text you want to localize."
-		 */
-		'key': () => LocalizedString
+		'firstCard': () => LocalizedString
 	}
 	/**
-	 * "My name is {name} and I have {numFingers} fingers."
+	 * What is your name?
 	 */
-	'nameAndFingers': (arg: { name: unknown, numFingers: unknown }) => LocalizedString
+	'askName': () => LocalizedString
+	/**
+	 * What is your favorite color?
+	 */
+	'askFavoriteColor': () => LocalizedString
+	/**
+	 * enter your name
+	 */
+	'enterName': () => LocalizedString
+	/**
+	 * My name is {name} and my favorite color is {color}.
+	 */
+	'nameAndFavoriteColor': (arg: { color: unknown, name: unknown }) => LocalizedString
+	'footer': {	
+		/**
+		 * Inlang is in early alpha
+		 */
+		'inlangAlpha': () => LocalizedString
+		/**
+		 * Every feedback we get helps us tremendously.
+		 */
+		'feedback': () => LocalizedString
+		/**
+		 * Do you have feedback on this example?
+		 */
+		'bromb': () => LocalizedString
+	}
 }
 
 export type Formatters = {}
