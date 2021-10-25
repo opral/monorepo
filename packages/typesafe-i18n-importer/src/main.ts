@@ -87,7 +87,14 @@ function main() {
         throw message
     }
     console.log('Starting @inlang/typesafe-i18n-importer...')
-    setInterval(() => updateTranslations({ projectId: config.projectId }), 2000)
+    setInterval(
+        () =>
+            updateTranslations({ projectId: config.projectId }).catch((err) => {
+                console.error(err)
+                process.exit()
+            }),
+        2000
+    )
 }
 
 try {
