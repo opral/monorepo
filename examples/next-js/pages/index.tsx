@@ -4,7 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import LanguageSelector from "../components/LanguageSelector";
-import { ChangeEvent, useContext } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import { I18nContext } from "../i18n/i18n-react";
 import { useRouter } from "next/dist/client/router";
 import { Locales } from "../i18n/i18n-types";
@@ -14,6 +14,10 @@ const Home: NextPage = () => {
   const { LL, setLocale, locale } = useContext(I18nContext);
   // state of i18n routing read more here https://docs.inlang.dev/definitions/i18n-routing
   const router = useRouter();
+
+  const [name, setName] = useState("");
+
+  const [color, setColor] = useState("blue");
 
   async function handleLanguageSelection(
     event: ChangeEvent<HTMLSelectElement>
@@ -38,6 +42,7 @@ const Home: NextPage = () => {
             <label className="label">{"Select a language: "}</label>
             <select
               className="select select-bordered w-full max-w-xs"
+              value={router.locale}
               onChange={handleLanguageSelection}
             >
               <option value="en">🇬🇧 English</option>
@@ -73,29 +78,52 @@ const Home: NextPage = () => {
                 </label>
                 <input
                   type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="enter your name"
                   className="input input-bordered"
                 />
               </div>
               <br />
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">
-                    {"How many fingers do you have?"}
-                  </span>
-                </label>
-                <div className="flex space-x-3 items-center">
-                  <input
-                    type="range"
-                    max="10"
-                    value="0"
-                    className="range range-primary"
-                  />
-                  <span className="font-mono text-lg">5</span>
-                </div>
+              <p className="text-sm pb-1">{"What is your favorite color?"}</p>
+              <div className="flex space-x-2 justify-between">
+                <button
+                  onClick={() => setColor("blue")}
+                  className={`btn btn-square btn-outline btn-info ${
+                    color === "blue" ? "btn-active" : ""
+                  } `}
+                >
+                  {" "}
+                </button>
+                <button
+                  onClick={() => setColor("green")}
+                  className={`btn btn-square btn-outline btn-success ${
+                    color === "green" ? "btn-active" : ""
+                  }`}
+                >
+                  {" "}
+                </button>
+                <button
+                  onClick={() => setColor("orange")}
+                  className={`btn btn-square btn-outline btn-warning ${
+                    color === "orange" ? "btn-active" : ""
+                  } `}
+                >
+                  {" "}
+                </button>
+                <button
+                  onClick={() => setColor("red")}
+                  className={`btn btn-square btn-outline btn-error ${
+                    color === "red" ? "btn-active" : ""
+                  } `}
+                >
+                  {" "}
+                </button>
               </div>
               <div className="divider" />
-              <p className="font-bold">{"My name is and I have fingers."}</p>
+              <p className="font-bold">
+                {"My name is {name} and my favorite color is {color}."}
+              </p>
             </div>
           </div>
           <div className="card shadow">
@@ -124,7 +152,13 @@ const Home: NextPage = () => {
               </p>
               <p>
                 {
-                  "4. Enter a key name, pre-fixed a random id (to avoid namespace collisions), and wait up to 2 seconds"
+                  "4. Enter a key name, pre-fixed a random id (to avoid namespace collisions), and wait up to 2 seconds."
+                }
+              </p>
+              <br />
+              <p>
+                {
+                  "Bonus: {name}, localize this text as you did before. What happens?"
                 }
               </p>
               <br />

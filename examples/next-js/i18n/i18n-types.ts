@@ -18,6 +18,12 @@ export type Translation = {
 		 * Documentation
 		 */
 		'documentation': string
+		/**
+		 * "My name is {name} and my favorite color is {color}."
+		 * @param {unknown} color
+		 * @param {unknown} name
+		 */
+		'favoriteColor': RequiredParams2<'color', 'name'>
 	}
 	'hello': {	
 		/**
@@ -37,6 +43,12 @@ export type Translation = {
 		 */
 		'key': string
 	}
+	/**
+	 * "My name is {name} and I have {numFingers} fingers."
+	 * @param {unknown} name
+	 * @param {unknown} numFingers
+	 */
+	'nameAndFingers': RequiredParams2<'name', 'numFingers'>
 }
 
 export type TranslationFunctions = {
@@ -45,6 +57,10 @@ export type TranslationFunctions = {
 		 * Documentation
 		 */
 		'documentation': () => LocalizedString
+		/**
+		 * "My name is {name} and my favorite color is {color}."
+		 */
+		'favoriteColor': (arg: { color: unknown, name: unknown }) => LocalizedString
 	}
 	'hello': {	
 		/**
@@ -64,6 +80,19 @@ export type TranslationFunctions = {
 		 */
 		'key': () => LocalizedString
 	}
+	/**
+	 * "My name is {name} and I have {numFingers} fingers."
+	 */
+	'nameAndFingers': (arg: { name: unknown, numFingers: unknown }) => LocalizedString
 }
 
 export type Formatters = {}
+
+type Param<P extends string> = `{${P}}`
+
+type Params2<P1 extends string, P2 extends string> =
+	`${string}${Param<P1>}${string}${Param<P2>}${string}`
+
+type RequiredParams2<P1 extends string, P2 extends string> =
+	| Params2<P1, P2>
+	| Params2<P2, P1>
