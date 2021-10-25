@@ -45,10 +45,12 @@ selecting a language with Next.js i18n routing click [here](https://nextjs.org/d
 
 > Read more about the SDK [here](/overview/sdk)
 
-### 1. Install the SDK
+### 1. Install the SDK, importer and concurrently
+
+> Concurrently allows us to run the dev script, SDK and importer in parallel.
 
 ```bash
-npm i typesafe-i18n
+npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrently --save-dev
 ```
 
 ### 2. Create the .typesafe-i18n.json config file
@@ -56,7 +58,7 @@ npm i typesafe-i18n
 - `adapter` specifies that the generates i18n files should be react compatible.
 - `outputPath` specifies that the files should be generated in the `i18n` folder.
 
-```js title="/.typesafe-i18n.json"
+```js title="typesafe-i18n.json"
 {
   "$schema": "https://unpkg.com/typesafe-i18n@2.40.1/schema/typesafe-i18n.json",
   "adapter": "react",
@@ -64,15 +66,34 @@ npm i typesafe-i18n
 }
 ```
 
-### 3. Adjust the build script
+### 3. Create the `inlang.config.json` file.
 
-The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard. Since they should run simultaneously to the regular development process (`npm run dev`), we install 
-helper package [npm-run-all](https://www.npmjs.com/package/npm-run-all). And adjust the dev script in the `package.json` to 
-run the regular dev script, the SDK and the importer in parallel.
+- `wrappingPattern`: defines how a key (keyname) should be wrapped when creating a key with the [inlang
+  VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension). For React it's
+  "LL.keyname()".
 
-1. `npm install npm-run-all --save-dev`
-2. Adjust the `dev` script in `package.json` to
+```js title="inlang.project.json"
+{
+  "projectId": "YOUR PROJECT ID",
+  "vsCodeExtension": {
+    "wrappingPattern": "LL.keyname()"
+  }
+}
+```
 
+### 4. Adjust the build script
 
-and generate corresponding types.
+The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
 
+Adjust the `dev` script in `package.json` to:
+
+```json
+ "scripts": {
+   "dev": "npx concurrently --kill-others 'next dev' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
+
+   ... other scripts
+ },
+```
+
+> The `--kill-others` flag ensures that if one script is failing all scripts fail. Otherwise, one
+> script might fail silently.

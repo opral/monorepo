@@ -1,0 +1,6 @@
+{
+  "projectId": "YOUR PROJECT ID",
+  "vsCodeExtension": {
+    "wrappingPattern": "LL.keyname()"
+  }
+}
