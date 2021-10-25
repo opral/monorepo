@@ -6,7 +6,19 @@ import CodeBlock from '@theme/CodeBlock';
 > @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/next-js)  
 > @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/next-js)
 
-This example is a the default Next.js example created with the `create-next-app` [command](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). The example can be started with the following commands:
+# Quickstart
+
+1. Clone the [inlang repository](https://github.com/inlang/inlang) by running
+
+```bash
+git clone https://github.com/inlang/inlang.git
+```
+
+2. Open `inlang/examples/next-js` in VSCode
+
+3. Install the [inlang VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension)
+
+4. Run
 
 ```bash
 1. npm install
@@ -14,6 +26,10 @@ This example is a the default Next.js example created with the `create-next-app`
 ```
 
 The site should now be running on [http://localhost:3000](http://localhost:3000).
+
+# Add inlang to an existing project
+
+The following is a step by step guide to add inlang to an existing project.
 
 ## 1. Setup i18n routing
 
@@ -28,32 +44,19 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 {NextJSConfig}
 </CodeBlock>
 
-## 2. Add a language selector
-
-The language selectors purpose is to route do a different language path in the url e.g. if the user selects
-"de", the app should route to "http://localhost:3000/de/example".
-
-This example uses a very simple language selector. For more information about
-selecting a language with Next.js i18n routing click [here](https://nextjs.org/docs/advanced-features/i18n-routing).
-
-<details>
-  <summary>Examplary language selector</summary>
-  <CodeBlock className="language-jsx" title="/components/LanguageSelector.tsx">{LanguageSelector}</CodeBlock>
-</details>
-
-## 3. Configure the SDK
+## 2. Configure Typesafe-i18n
 
 > Read more about the SDK [here](/overview/sdk)
 
-### 1. Install the SDK, importer and concurrently
+### 2.1. Install typesafe-i18n, the importer and concurrently
 
-> Concurrently allows us to run the dev script, SDK and importer in parallel.
+> Concurrently allows us to run the dev script, typesafe-i18n and importer in parallel.
 
 ```bash
 npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrently --save-dev
 ```
 
-### 2. Create the .typesafe-i18n.json config file
+### 2.2. Create the .typesafe-i18n.json config file
 
 - `adapter` specifies that the generates i18n files should be react compatible.
 - `outputPath` specifies that the files should be generated in the `i18n` folder.
@@ -66,8 +69,9 @@ npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrentl
 }
 ```
 
-### 3. Create the `inlang.config.json` file.
+### 2.3. Create the `inlang.config.json` file.
 
+- `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id
 - `wrappingPattern`: defines how a key (keyname) should be wrapped when creating a key with the [inlang
   VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension). For React it's
   "LL.keyname()".
@@ -81,7 +85,7 @@ npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrentl
 }
 ```
 
-### 4. Adjust the build script
+### 2.4. Adjust the build script
 
 The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
 
@@ -97,3 +101,38 @@ Adjust the `dev` script in `package.json` to:
 
 > The `--kill-others` flag ensures that if one script is failing all scripts fail. Otherwise, one
 > script might fail silently.
+
+## 3. Let the magic begin
+
+### 3.1. Start the development process
+
+`npm run dev`
+
+Typesafe-i18n should have created the `i18n` folder in the directory and will continously listen for changes from the dashboard.
+
+### 3.2. Wrap the app with the `TypesafeI18n` component
+
+```jsx title="pages/_app.tsx"
+import TypesafeI18n from "../i18n/i18n-react";
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <TypesafeI18n>
+      <Component {...pageProps} />
+    </TypesafeI18n>
+  );
+}
+```
+
+## BONUS: Add a language selector
+
+The language selectors purpose is to route do a different language path in the url e.g. if the user selects
+"de", the app should route to "http://localhost:3000/de/example".
+
+This example uses a very simple language selector. For more information about
+selecting a language with Next.js i18n routing click [here](https://nextjs.org/docs/advanced-features/i18n-routing).
+
+<details>
+  <summary>Examplary language selector</summary>
+  <CodeBlock className="language-jsx" title="/components/LanguageSelector.tsx">{LanguageSelector}</CodeBlock>
+</details>

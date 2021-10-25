@@ -33,6 +33,4 @@ yarn-error.log*
 # vercel
 .vercel
 
-i18n
 package-lock.json
-inlang.config.json

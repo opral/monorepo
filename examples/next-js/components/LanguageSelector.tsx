@@ -6,7 +6,7 @@ const LanguageSelector = () => {
   const router = useRouter();
 
   return (
-    <div style={{ position: "absolute", left: "10rem", top: "1rem" }}>
+    <>
       <label>language: </label>
       <select
         value={router.locale}
@@ -26,7 +26,7 @@ const LanguageSelector = () => {
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 };
 
