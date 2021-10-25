@@ -15,6 +15,12 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "inlang",
   projectName: "inlang",
+  scripts: [
+    {
+      src: "https://app.bromb.co/widget.js",
+      defer: true,
+    },
+  ],
   presets: [
     [
       "@docusaurus/preset-classic",
@@ -45,8 +51,8 @@ const config = {
             label: "Documentation",
           },
           {
-            href: "https://submission.bromb.co/documentation",
-            label: "Do you have a problem or suggestion?",
+            href: "https://submission.bromb.co/inlang/docs",
+            label: "How can we improve our documentation?",
             position: "right",
           },
           {
