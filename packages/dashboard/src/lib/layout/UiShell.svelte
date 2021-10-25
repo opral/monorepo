@@ -51,7 +51,7 @@
 	{#if $userStore.data}
 		<HeaderNav>
 			<HeaderNavItem
-				href={`https://submission.bromb.co/?email=${auth.user()?.email}`}
+				href={`https://submission.bromb.co/inlang/dashboard/?email=${auth.user()?.email}`}
 				text="Feedback on this site?"
 			/>
 		</HeaderNav>
