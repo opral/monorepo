@@ -35,11 +35,11 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div className="w-screen h-screen p-4 flex flex-col space-y-4 items-center justify-center bg-base-100">
+    <div className="mx-auto p-4 flex flex-col space-y-4 items-center justify-center bg-base-100">
       <div className="max-w-4xl">
         <div className="flex justify-between items-center">
           <form>
-            <label className="label">{"Select a language: "}</label>
+            <label className="label">{LL.selectLanguage()}</label>
             <select
               className="select select-bordered w-full max-w-xs"
               value={router.locale}
