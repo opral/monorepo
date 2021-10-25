@@ -45,7 +45,10 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'&source_lang=' +
 		translateRequest.sourceLang +
 		// tag handling ensures that <variable> {some variable} </varibale> is excaped.
-		'&tag_handling=xml';
+		'&tag_handling=xml' +
+		'&ignore_tags=variable';
+
+	console.log(body);
 
 	const response = await fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
 		method: 'post',
