@@ -7,7 +7,7 @@ But that's just the beginning. We want to help you localize your apps with one c
 
 **Status**
 
-- [x] Alpha: We are testing the solution and need your feedback.
+- [x] Early Alpha: We are testing the solution and need your feedback.
 - [ ] Beta: Stable enough for small(er) apps and projects.
 - [ ] Release: Production ready.
 
@@ -21,7 +21,9 @@ But that's just the beginning. We want to help you localize your apps with one c
 - [x] Typesafety (no more missing translations/keys)
 - [x] Collaboration via the dashboard 
 - [x] Sync between dashboard and source code
+- [x] Variables / Interpolation
 - [ ] OTA (Over the air updates without releasing a new version)
+- [ ] Pluralization
 
 Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
 
