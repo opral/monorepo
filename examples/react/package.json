@@ -20,7 +20,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "npx concurrently --kill-others 'react-scripts start' 'typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
+    "dev": "npm-run-all start typesafe-i18n @inlang/typesafe-i18n-importer",
     "typesafe-i18n": "typesafe-i18n",
     "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
   },

@@ -72,7 +72,9 @@ The SDK runs as background process during development to constantly fetch update
 
 ```bash
 {
-"dev": "npx concurrently --kill-others 'next dev' 'typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'"
+  "dev": "npm-run-all start typesafe-i18n @inlang/typesafe-i18n-importer",
+  "typesafe-i18n": "typesafe-i18n",
+  "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
 }
 ```
 
