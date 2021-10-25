@@ -1,6 +1,8 @@
 import { useRouter } from "next/dist/client/router";
 
 const LanguageSelector = () => {
+  // router contains locale informations since Next.js uses i18n routing.
+  // read more here https://nextjs.org/docs/advanced-features/i18n-routing
   const router = useRouter();
 
   return (

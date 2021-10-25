@@ -28,15 +28,42 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 {NextJSConfig}
 </CodeBlock>
 
-## 2. Add a language picker
+## 2. Add a language selector
+
+The language selectors purpose is to route do a different language path in the url e.g. if the user selects
+"de", the app should route to "http://localhost:3000/de/example".
 
 This example uses a very simple language selector. For more information about
 selecting a language with Next.js i18n routing click [here](https://nextjs.org/docs/advanced-features/i18n-routing).
 
-The language selectors purpose is to route do a different language path in the url e.g. if the user selects
-"de", the app should route to "http://localhost:3000/de/example". 
-
 <details>
-  <summary>Language selector</summary>
+  <summary>Examplary language selector</summary>
   <CodeBlock className="language-jsx" title="/components/LanguageSelector.tsx">{LanguageSelector}</CodeBlock>
 </details>
+
+## 3. Configure the SDK
+
+> Read more about the SDK [here](/overview/sdk)
+
+### 1. Install the SDK
+
+```bash
+npm i typesafe-i18n
+```
+
+### 2. Create the .typesafe-i18n.json config file
+
+- `adapter` specifies that the generates i18n files should be react compatible.
+- `outputPath` specifies that the files should be generated in the `i18n` folder.
+
+```js title="/.typesafe-i18n.json"
+{
+  "$schema": "https://unpkg.com/typesafe-i18n@2.40.1/schema/typesafe-i18n.json",
+  "adapter": "react",
+  "outputPath": "./i18n/"
+}
+```
+
+### 3. Adjust the build script
+
+The SDK runs as background process during development to constantly fetch updated translations from the dashboard.
