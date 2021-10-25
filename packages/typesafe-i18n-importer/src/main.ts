@@ -76,8 +76,6 @@ async function main() {
                 new URL(configPath, import.meta.url)
             )
         )
-    } else {
-        console.error('inlang.config.json not found.')
     }
     if (config === undefined) {
         const message =
