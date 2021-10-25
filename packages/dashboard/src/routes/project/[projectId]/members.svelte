@@ -74,31 +74,30 @@
 
 	async function handleInviteUser() {
 		let organization_id = $projectStore.data?.project.organization_id;
-		let uid_rpc = await database.rpc('get_user_id_from_email', { arg_email: inputEmail });
-
-		if (uid_rpc.error) {
-			//alert(uid_rpc.error.message);
+		let userId = await database.rpc('get_user_id_from_email', { arg_email: inputEmail }).single();
+		if (userId.error || userId.data === null) {
+			alert(userId.error?.message);
+			return;
 		}
-
-		if (uid_rpc.data !== null) {
-			let uid = uid_rpc.data[0].get_user_id_from_email;
-			let member_upsert = await database.from<definitions['member']>('member').upsert({
-				organization_id: organization_id,
-				user_id: uid,
-				role: 'ADMIN'
-			});
-			if (member_upsert.status === 409) {
-				alert(inputEmail + ' is already a member');
-			} else if (member_upsert.status == 400) {
-				alert('Invalid email');
-			} else if (member_upsert.status === 201) {
-				//success
-				await loadUsers();
-			} else {
-				alert('An unknown error occurred');
-			}
-			inputEmail = '';
+		const uid = userId.data.get_user_id_from_email;
+		const memberUpsert = await database.from<definitions['member']>('member').insert({
+			organization_id: organization_id,
+			user_id: uid,
+			role: 'ADMIN'
+		});
+		if (memberUpsert.error) {
+			console.error(memberUpsert.error);
+			alert(memberUpsert.error.message);
 		}
+		if (memberUpsert.status === 409) {
+			alert(inputEmail + ' is already a member');
+		} else if (memberUpsert.status === 201) {
+			//success
+			await loadUsers();
+		} else {
+			alert('An unknown error occurred');
+		}
+		inputEmail = '';
 	}
 
 	function isOwner(userId: definitions['user']['id']): boolean {

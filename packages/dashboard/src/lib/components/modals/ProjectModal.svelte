@@ -43,12 +43,18 @@
 		organizations = await database.from<definitions['organization']>('organization').select();
 		if (organizations.error) {
 			alert(organizations.error.message);
+		} else {
+			// ---- ugly workaorund which requires a proper solution long term ----
+			// naively choosing the first org id on mount since the select
+			// does not bind the organization id the first time (bug?).
+			// But in 99% of the cases, the first organization is shown in the select.
+			organizationId = organizations.data?.[0].id;
 		}
 	});
 
 	async function handleConfirm() {
 		confirmIsLoading = true;
-		if (organizationId === null || organizationIdIsValidInput === false) {
+		if (organizationId === undefined || organizationIdIsValidInput === false) {
 			alert('The chosen organization is not valid.');
 			return;
 		}
