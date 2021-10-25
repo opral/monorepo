@@ -1,70 +1,112 @@
-# Getting Started with Create React App
+import CodeBlock from '@theme/CodeBlock';
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/react)  
+> @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/react)
 
-## Available Scripts
+To run the example, paste the following into the terminal:
 
-In the project directory, you can run:
+```bash
+git clone https://github.com/inlang/inlang.git
+cd inlang/examples/react
+npm install
+npm run dev
+```
 
-### `npm start`
+This example is a the default React example created with the [create-react-app](https://github.com/facebook/create-react-app). The example can be started with the following commands:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+The site should now be running on [http://localhost:3000](http://localhost:3000).
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+# Integrating the Inlang flow into your existing React project
 
-### `npm test`
+## 1. Configure the SDK
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+> Read more about the SDK [here](/overview/sdk)
 
-### `npm run build`
+### Install the SDK
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm i typesafe-i18n
+npm i @inlang/typesafe-i18n-importer
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+For full documentation see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n) and [@inlang/typesafe-i18n-importer docs](https://github.com/inlang/inlang/tree/main/packages/typesafe-i18n-importer).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### (Optional) Install the Visual Studio Code extension
 
-### `npm run eject`
+If using Visual Studio Code, it is highly recommended to install the extension to allow for key generation while never leaving the file.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```bash
+ext install inlang.vscode-extension
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+For full documentation see the [inlang vscode-extension docs](https://github.com/inlang/inlang/tree/main/packages/inlang-vscode-extension)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Create the .typesafe-i18n.json config file
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- `adapter` specifies that the generates i18n files should be react compatible.
 
-## Learn More
+```js title="/.typesafe-i18n.json"
+{
+  "$schema": "https://unpkg.com/typesafe-i18n@2.40.1/schema/typesafe-i18n.json",
+  "adapter": "react"
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Create the inlang.config.json file
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `projectId` specifies the projectId which is supplied by the dashboard.
+- `wrappingPattern` specifies what the optional vscode extension will wrap your key in. Only required for vscode.
 
-### Code Splitting
+```js title="/inlang.config.json"
+{
+  "projectId": "your-project-id",
+  "vsCodeExtension": {
+    "wrappingPattern": "LL.keyname()"
+  }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Adjust the build script
 
-### Analyzing the Bundle Size
+The SDK runs as background process during development to constantly fetch updated translations from the dashboard.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+{
+"dev": "npx concurrently --kill-others 'next dev' 'typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'"
+}
+```
 
-### Making a Progressive Web App
+## 2. Add Typesafe initialization
+Initialization of the internationalization should be done close to the root with the following tags.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```js
+<TypesafeI18n initialLocale='en'>
+    <!-- ... -->
+</TypesafeI18n>
+```
 
-### Advanced Configuration
+## 3. Wrap all text in the translation functions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+For React the default option is to use i18nObjects in the following way:
 
-### Deployment
+```js
+function HelloWorld(props) {
+    const { LL } = useContext(I18nContext)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    return LL.helloWorld()
+}
+```
 
-### `npm run build` fails to minify
+If you have the vscode extension, just write the string, right click and send to inlang. The extension will handle the rest!
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 4. Set locale when user desires
+
+```js
+<button onClick={() => setLocale('de')}>Deutsch</button>
+```
+
+To see additional tools see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n)
+
+## 5. Start translating in the app!
+
+Add your team members, or start translating yourself at [app.inlang.dev](https://app.inlang.dev/)
