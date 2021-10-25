@@ -35,3 +35,4 @@ yarn-error.log*
 
 i18n
 package-lock.json
+inlang.config.json
