@@ -34,3 +34,4 @@ yarn-error.log*
 .vercel
 
 i18n
+package-lock.json
