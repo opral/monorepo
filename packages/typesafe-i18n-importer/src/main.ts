@@ -42,6 +42,12 @@ async function updateTranslations(args: { projectId: string }) {
         .select('*')
         .eq('project_id', args.projectId)
 
+    if (translations.error) {
+        throw (
+            'Error getting translations, are you sure projectId is correct?: ' +
+            args.projectId
+        )
+    }
     const localeMappingList: LocaleMapping[] = []
 
     for (const t of translations.data ?? []) {
