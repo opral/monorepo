@@ -66,4 +66,13 @@ npm i typesafe-i18n
 
 ### 3. Adjust the build script
 
-The SDK runs as background process during development to constantly fetch updated translations from the dashboard.
+The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard. Since they should run simultaneously to the regular development process (`npm run dev`), we install 
+helper package [npm-run-all](https://www.npmjs.com/package/npm-run-all). And adjust the dev script in the `package.json` to 
+run the regular dev script, the SDK and the importer in parallel.
+
+1. `npm install npm-run-all --save-dev`
+2. Adjust the `dev` script in `package.json` to
+
+
+and generate corresponding types.
+
