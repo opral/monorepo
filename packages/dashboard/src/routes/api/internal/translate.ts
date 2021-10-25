@@ -48,8 +48,6 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		'&tag_handling=xml' +
 		'&ignore_tags=variable';
 
-	console.log(body);
-
 	const response = await fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
 		method: 'post',
 		headers: new Headers({
