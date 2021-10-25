@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@inlang/typesafe-i18n-importer": "^0.1.2",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -19,7 +20,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "npx concurrently --kill-others 'start' 'typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
+    "dev": "npx concurrently --kill-others 'react-scripts start' 'typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
     "typesafe-i18n": "typesafe-i18n",
     "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
   },
