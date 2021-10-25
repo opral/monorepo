@@ -10,7 +10,8 @@
         "outDir": "./dist",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "baseUrl": "src"
+        "baseUrl": "src",
+		"allowSyntheticDefaultImports": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules, test"]

@@ -2,8 +2,10 @@ import { database } from './services/database.js'
 import { storeTranslationsToDisk } from 'typesafe-i18n/importer'
 import type { BaseTranslation } from 'typesafe-i18n/types/core'
 import type { LocaleMapping } from './types/LocaleMapping'
-import { isEqual } from 'lodash-es';
-import { readFile } from 'fs/promises';
+import { isEqual } from 'lodash-es'
+import fs from 'fs'
+import path from 'path'
+import * as url from 'url'
 
 // Recursive function as it is assumed that namespace is not deep enough to cause stack overflow.
 function createNestedObject(
@@ -65,12 +67,18 @@ async function updateTranslations(args: { projectId: string }) {
 
 async function main() {
     //@ts-ignore
-    const config = JSON.parse(
-        await readFile(
-          //@ts-ignore
-          new URL('../../../../inlang.config.json', import.meta.url)
+    const configPath = path.join(process.cwd(), 'inlang.config.json')
+    let config: any
+    if (fs.existsSync(configPath)) {
+        config = JSON.parse(
+            await fs.readFileSync(
+                //@ts-ignore
+                new URL(configPath, import.meta.url)
+            )
         )
-      );
+    } else {
+        console.error('inlang.config.json not found.')
+    }
     if (config === undefined) {
         const message =
             '@inlang/typesafe-i18n-importer: Config file "inlang.config.json" has not been found.'
@@ -85,4 +93,8 @@ async function main() {
     setInterval(() => updateTranslations({ projectId: config.projectId }), 2000)
 }
 
-main()
+try {
+    main()
+} catch (err) {
+    console.error(err)
+}
