@@ -80,14 +80,13 @@ function main() {
     if (config === undefined) {
         const message =
             '@inlang/typesafe-i18n-importer: Config file "inlang.config.json" has not been found.'
-        console.error(message)
         throw message
     } else if (config.projectId === undefined) {
         const message =
             '@inlang/typesafe-i18n-importer: Config file found but "projectId" is not defined.'
-        console.error(message)
         throw message
     }
+    console.log('Starting @inlang/typesafe-i18n-importer...')
     setInterval(() => updateTranslations({ projectId: config.projectId }), 2000)
 }
 
