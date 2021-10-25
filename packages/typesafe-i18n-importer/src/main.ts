@@ -65,13 +65,13 @@ async function updateTranslations(args: { projectId: string }) {
     }
 }
 
-async function main() {
+function main() {
     //@ts-ignore
     const configPath = path.join(process.cwd(), 'inlang.config.json')
     let config: any
     if (fs.existsSync(configPath)) {
         config = JSON.parse(
-            await fs.readFileSync(
+            fs.readFileSync(
                 //@ts-ignore
                 new URL(configPath, import.meta.url)
             )
