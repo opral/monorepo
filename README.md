@@ -9,7 +9,7 @@
 
 # inlang
 
-Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't write translations manyally in JSON files or (ab)use excel spreadsheets to manage translations. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
 
 But that's just the beginning. We want to help you localize your apps with one click. Want to stay up-to-date? [Subscribe to our newsletter](TODO) (no spam!)
 
