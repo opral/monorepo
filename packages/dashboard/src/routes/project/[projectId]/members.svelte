@@ -73,16 +73,15 @@
 	}
 
 	async function handleInviteUser() {
-		let organization_id = $projectStore.data?.project.organization_id;
-		let userId = await database.rpc('get_user_id_from_email', { arg_email: inputEmail }).single();
+		const organization_id = $projectStore.data?.project.organization_id;
+		const userId = await database.rpc<string>('get_user_id_from_email', { arg_email: inputEmail }).single();
 		if (userId.error || userId.data === null) {
 			alert(userId.error?.message);
 			return;
 		}
-		const uid = userId.data.get_user_id_from_email;
 		const memberUpsert = await database.from<definitions['member']>('member').insert({
 			organization_id: organization_id,
-			user_id: uid,
+			user_id: userId.data,
 			role: 'ADMIN'
 		});
 		if (memberUpsert.error) {
