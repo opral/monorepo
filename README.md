@@ -1,3 +1,12 @@
+<p align="center">
+    <img width="400rem" src="./assets/step1.gif">
+    <img height="240rem" src="./assets/step2-half.gif">
+</p>
+<p align="center">
+  Create translations directly in VSCode and invite collaborators via the dashboard.
+</p>
+
+
 # inlang
 
 Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
