@@ -17,7 +17,7 @@
     "typesafe-i18n": "^2.46.4"
   },
   "devDependencies": {
-    "@inlang/typesafe-i18n-adapter": "0.0.5",
+    "@inlang/typesafe-i18n-importer": "^0.1.2",
     "@types/react": "17.0.31",
     "autoprefixer": "^10.3.7",
     "concurrently": "^6.3.0",
