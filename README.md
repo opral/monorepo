@@ -29,7 +29,8 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 
 ## Getting started
 
-TODO - link to documentation
+Link to documentation
+https://docs.inlang.dev
 
 
 ## Demo
