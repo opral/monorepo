@@ -41,6 +41,13 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 Link to documentation
 https://docs.inlang.dev
 
+## Community & Support
+
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
+- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
+
+
 
 ## Demo
 
@@ -51,11 +58,4 @@ Keys are automatically sent to the dashboard, machine translated into all langua
 ### Step 2 - Manage translations in the dashboard
 Collaborators, or you yourself, can seamlessly edit translations in the dashboard. During development the translations are automatically synced with the source code.
 ![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)
-
-
-## Community & Support
-
-- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
-- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
-- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
 
