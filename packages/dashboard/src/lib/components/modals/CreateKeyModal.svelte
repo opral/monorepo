@@ -5,7 +5,13 @@
 	import type { definitions } from '@inlang/database';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 
-	export let open = false;
+	let open = false;
+
+	export function show(): void {
+		keyName = '';
+		baseTranslationText = '';
+		open = true;
+	}
 
 	let keyName: definitions['key']['name'];
 

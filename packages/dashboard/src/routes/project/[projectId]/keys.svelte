@@ -32,6 +32,7 @@
 	let pageNumber = 1;
 
 	let deleteKeyModal: DeleteKeyModal;
+	let createKeyModal: CreateKeyModal;
 
 	// define the type of rows to be a function that returns an array of row
 	let rows: () => Row[];
@@ -95,7 +96,6 @@
 		translations: [],
 		key: ''
 	};
-	let createKeyModal: { open: boolean } = { open: false };
 </script>
 
 <h1>Keys</h1>
@@ -107,7 +107,7 @@
 			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
 			<Button
 				on:click={() => {
-					createKeyModal.open = true;
+					createKeyModal.show();
 				}}>Create key</Button
 			>
 		</ToolbarContent>
@@ -156,6 +156,6 @@
 	key={createTranslationModal.key}
 />
 
-<CreateKeyModal bind:open={createKeyModal.open} />
+<CreateKeyModal bind:this={createKeyModal} />
 
 <DeleteKeyModal bind:this={deleteKeyModal} />
