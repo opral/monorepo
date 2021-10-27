@@ -2,8 +2,11 @@
 import type { BaseTranslation } from '../i18n-types'
 
 const en: BaseTranslation = {
+	'random_prefix_color_blue': 'blue',
+	'random_prefix_color_red': 'red',
+	'random_prefix_color_green': 'green',
+	'random_prefix_color_orange': 'orange',
 	'random_prefix_star_inlang': '⭐ inlang on GitHub',
-	'random_prefix_welcome': 'Welcome to the inlang example',
 	'random_prefix_as_name': 'What is your name?',
 	'random_prefix_ask_favorite_color': 'What is your favorite color?',
 	'random_prefix_create_project': '1. Go to inlang.dev and create a project.',
@@ -14,6 +17,7 @@ const en: BaseTranslation = {
 	'random_prefix_linting_errors': 'You will get linting errors now that the keys dont exist. You have to add them manually for now.',
 	'random_prefix_npm_run_dev': '3. Re-run the project with npm run dev',
 	'random_prefix_replace_project_id': '2. Replace the projectId in the inlang.config.json file with yours.',
+	'random_prefix_welcome': 'Welcome to the inlang example',
 	'random_prefix_select_language': 'Select a language',
 	'random_prefix_ask_feedback_on_this_example': 'Do you have feedback on this example?',
 	'random_prefix_early_alpha': 'Inlang is in early alpha',

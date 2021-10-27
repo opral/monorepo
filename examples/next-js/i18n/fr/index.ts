@@ -2,9 +2,11 @@
 import type { Translation } from '../i18n-types'
 
 const fr: Translation = {
+	'random_prefix_color_blue': 'bleu',
+	'random_prefix_color_red': 'rouge',
+	'random_prefix_color_green': 'vert',
+	'random_prefix_color_orange': 'orange',
 	'random_prefix_select_language': 'Sélectionnez une langue',
-	'random_prefix_star_inlang': '⭐ inlang sur GitHub',
-	'random_prefix_welcome': 'Bienvenue dans l\'exemple inlang',
 	'random_prefix_as_name': 'Quel est votre nom ?',
 	'random_prefix_ask_favorite_color': 'Quelle est votre couleur préférée ?',
 	'random_prefix_create_project': '1. Allez sur inlang.dev et créez un projet.',
@@ -14,6 +16,8 @@ const fr: Translation = {
 	'random_prefix_invite_collaborators': '3. Invitez et collaborez à vos traductions dans le tableau de bord.',
 	'random_prefix_npm_run_dev': '3. Relancer le projet avec npm run dev',
 	'random_prefix_replace_project_id': '2. Remplacez le projectId dans le fichier inlang.config.json par le vôtre.',
+	'random_prefix_star_inlang': '⭐ inlang sur GitHub',
+	'random_prefix_welcome': 'Bienvenue dans l\'exemple inlang',
 	'random_prefix_feedback_helps_us': 'Tous les commentaires que nous recevons nous aident énormément.',
 	'random_prefix_ask_feedback_on_this_example': 'Avez-vous des commentaires sur cet exemple ?',
 	'random_prefix_early_alpha': 'Inlang est en alpha précoce',

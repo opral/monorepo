@@ -13,6 +13,18 @@ const Home: NextPage = () => {
 
   const [color, setColor] = useState("blue");
 
+  function translatedColor() {
+    if (color === "blue") {
+      return LL.random_prefix_color_blue();
+    } else if (color === "green") {
+      return LL.random_prefix_color_green();
+    } else if (color === "orange") {
+      return LL.random_prefix_color_orange();
+    } else {
+      return LL.random_prefix_color_red();
+    }
+  }
+
   async function handleLanguageSelection(
     event: ChangeEvent<HTMLSelectElement>
   ) {
@@ -121,7 +133,7 @@ const Home: NextPage = () => {
               <div className="divider" />
               <p className="font-bold">
                 {LL.random_prefix_interpolated_string({
-                  color: color,
+                  color: translatedColor(),
                   name: name,
                 })}
               </p>

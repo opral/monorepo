@@ -2,8 +2,11 @@
 import type { Translation } from '../i18n-types'
 
 const da: Translation = {
+	'random_prefix_color_blue': 'blå',
+	'random_prefix_color_red': 'rød',
+	'random_prefix_color_green': 'grøn',
+	'random_prefix_color_orange': 'orange',
 	'random_prefix_select_language': 'Vælg et sprog',
-	'random_prefix_welcome': 'Velkommen til inlang-eksemplet',
 	'random_prefix_as_name': 'Hvad er dit navn?',
 	'random_prefix_ask_favorite_color': 'Hvad er din yndlingsfarve?',
 	'random_prefix_create_project': '1. Gå til inlang.dev og opret et projekt.',
@@ -14,6 +17,7 @@ const da: Translation = {
 	'random_prefix_npm_run_dev': '3. Genkør projektet med npm run dev',
 	'random_prefix_replace_project_id': '2. Udskift projectId i filen inlang.config.json med dit eget.',
 	'random_prefix_star_inlang': '⭐ inlang på GitHub',
+	'random_prefix_welcome': 'Velkommen til inlang-eksemplet',
 	'random_prefix_feedback_helps_us': 'Hver eneste tilbagemelding, vi får, hjælper os enormt meget.',
 	'random_prefix_linting_errors': 'Du vil få linting-fejl nu, da nøglerne ikke findes. Du er nødt til at tilføje dem manuelt indtil videre.',
 	'random_prefix_ask_feedback_on_this_example': 'Har du feedback på dette eksempel?',

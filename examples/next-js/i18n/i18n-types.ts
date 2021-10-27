@@ -15,13 +15,25 @@ export type Locales =
 
 export type Translation = {
 	/**
+	 * blue
+	 */
+	'random_prefix_color_blue': string
+	/**
+	 * red
+	 */
+	'random_prefix_color_red': string
+	/**
+	 * green
+	 */
+	'random_prefix_color_green': string
+	/**
+	 * orange
+	 */
+	'random_prefix_color_orange': string
+	/**
 	 * ⭐ inlang on GitHub
 	 */
 	'random_prefix_star_inlang': string
-	/**
-	 * Welcome to the inlang example
-	 */
-	'random_prefix_welcome': string
 	/**
 	 * What is your name?
 	 */
@@ -65,6 +77,10 @@ export type Translation = {
 	 */
 	'random_prefix_replace_project_id': string
 	/**
+	 * Welcome to the inlang example
+	 */
+	'random_prefix_welcome': string
+	/**
 	 * Select a language
 	 */
 	'random_prefix_select_language': string
@@ -92,13 +108,25 @@ export type Translation = {
 
 export type TranslationFunctions = {
 	/**
+	 * blue
+	 */
+	'random_prefix_color_blue': () => LocalizedString
+	/**
+	 * red
+	 */
+	'random_prefix_color_red': () => LocalizedString
+	/**
+	 * green
+	 */
+	'random_prefix_color_green': () => LocalizedString
+	/**
+	 * orange
+	 */
+	'random_prefix_color_orange': () => LocalizedString
+	/**
 	 * ⭐ inlang on GitHub
 	 */
 	'random_prefix_star_inlang': () => LocalizedString
-	/**
-	 * Welcome to the inlang example
-	 */
-	'random_prefix_welcome': () => LocalizedString
 	/**
 	 * What is your name?
 	 */
@@ -139,6 +167,10 @@ export type TranslationFunctions = {
 	 * 2. Replace the projectId in the inlang.config.json file with yours.
 	 */
 	'random_prefix_replace_project_id': () => LocalizedString
+	/**
+	 * Welcome to the inlang example
+	 */
+	'random_prefix_welcome': () => LocalizedString
 	/**
 	 * Select a language
 	 */

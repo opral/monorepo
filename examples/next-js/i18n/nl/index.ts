@@ -2,8 +2,11 @@
 import type { Translation } from '../i18n-types'
 
 const nl: Translation = {
+	'random_prefix_color_blue': 'blauw',
+	'random_prefix_color_red': 'rood',
+	'random_prefix_color_green': 'groen',
+	'random_prefix_color_orange': 'oranje',
 	'random_prefix_select_language': 'Kies een taal',
-	'random_prefix_welcome': 'Welkom bij het inlang voorbeeld',
 	'random_prefix_as_name': 'Wat is uw naam?',
 	'random_prefix_ask_favorite_color': 'Wat is je favoriete kleur?',
 	'random_prefix_create_project': '1. Ga naar inlang.dev en maak een project aan.',
@@ -14,6 +17,7 @@ const nl: Translation = {
 	'random_prefix_npm_run_dev': '3. Voer het project opnieuw uit met npm run dev',
 	'random_prefix_replace_project_id': '2. Vervang de projectId in het inlang.config.json bestand door de uwe.',
 	'random_prefix_star_inlang': '⭐ inlang op GitHub',
+	'random_prefix_welcome': 'Welkom bij het inlang voorbeeld',
 	'random_prefix_feedback_helps_us': 'Elke feedback die we krijgen helpt ons enorm.',
 	'random_prefix_ask_feedback_on_this_example': 'Heeft u feedback op dit voorbeeld?',
 	'random_prefix_early_alpha': 'Inlang is in vroege alpha',
