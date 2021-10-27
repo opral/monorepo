@@ -3,9 +3,9 @@ import type { Translation } from '../i18n-types'
 
 const da: Translation = {
 	'random_prefix_color_blue': 'blå',
-	'random_prefix_color_red': 'rød',
 	'random_prefix_color_green': 'grøn',
 	'random_prefix_color_orange': 'orange',
+	'random_prefix_color_red': 'rød',
 	'random_prefix_select_language': 'Vælg et sprog',
 	'random_prefix_as_name': 'Hvad er dit navn?',
 	'random_prefix_ask_favorite_color': 'Hvad er din yndlingsfarve?',

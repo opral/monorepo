@@ -3,9 +3,9 @@ import type { Translation } from '../i18n-types'
 
 const nl: Translation = {
 	'random_prefix_color_blue': 'blauw',
-	'random_prefix_color_red': 'rood',
 	'random_prefix_color_green': 'groen',
 	'random_prefix_color_orange': 'oranje',
+	'random_prefix_color_red': 'rood',
 	'random_prefix_select_language': 'Kies een taal',
 	'random_prefix_as_name': 'Wat is uw naam?',
 	'random_prefix_ask_favorite_color': 'Wat is je favoriete kleur?',
