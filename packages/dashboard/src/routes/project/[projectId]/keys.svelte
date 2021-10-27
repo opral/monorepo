@@ -6,7 +6,7 @@
 		ToolbarContent,
 		ToolbarSearch,
 		Tag,
-Pagination
+		Pagination
 	} from 'carbon-components-svelte';
 	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
@@ -51,13 +51,14 @@ Pagination
 			result = result?.filter((row) => row.key.name.startsWith(searchQuery));
 		}
 		// return an empty array as fallback
-		return result ?? [];
+		return result?.reverse() ?? [];
 	};
 
 	let displayedRows: () => Row[];
 
-	$: displayedRows = () => { return rows()?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize)
-	}
+	$: displayedRows = () => {
+		return rows()?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+	};
 
 	// $: rows = fullRows.filter((row) => row.key.indexOf(searchQuery) !== -1);
 
@@ -143,11 +144,11 @@ Pagination
 	</div>
 </DataTable>
 <Pagination
-		totalItems={rows().length}
-		pageSizes={[10, 25, 50]}
-		bind:pageSize
-		bind:page={pageNumber}
-	/>
+	totalItems={rows().length}
+	pageSizes={[10, 25, 50]}
+	bind:pageSize
+	bind:page={pageNumber}
+/>
 
 <TranslationModal
 	bind:open={createTranslationModal.open}
