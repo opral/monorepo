@@ -2,7 +2,7 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import TranslationRow from './modals/TranslationRow.svelte';
 	import ISO6391 from 'iso-639-1';
-	import { difference } from 'lodash-es';
+	import { difference, concat } from 'lodash-es';
 	import type { definitions } from '@inlang/database';
 
 	// is a string but the consuming component passes it down as any
@@ -35,16 +35,13 @@
 	$: rows = () => {
 		// TODO: sort the organizations alphabetically!
 		return (
-			translationsForKey.sort((a, b) =>
+			concat(translationsForKey, missingIsoCodeRows()).sort((a, b) =>
 				ISO6391.getName(a.iso_code).localeCompare(ISO6391.getName(b.iso_code))
 			) ?? []
 		);
 	};
 </script>
 
-{#each missingIsoCodeRows() as row}
-	<TranslationRow translation={row} />
-{/each}
 {#each rows() as row}
 	<TranslationRow translation={row} />
 {/each}
