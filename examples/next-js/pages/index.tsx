@@ -148,13 +148,59 @@ const Home: NextPage = () => {
                 Bonus: {name}, localize this text as you did before. What
                 happens?
               </p>
-              <br />
             </div>
           </div>
         </div>
         <br />
-        <div className="card shadow"></div>
-        <div className="grid grid-cols-2 gap-20">
+        <div className="card shadow">
+          <div className="card-body">
+            <h2 className="card-title">
+              3. Invite and collaborate on your translations on the dashboard
+            </h2>
+            <div className="grid grid-cols-2 gap-4 justify-items-center">
+              <div>
+                <a
+                  href="https://inlang.dev"
+                  target="_blank"
+                  className="link-primary text-lg"
+                >
+                  1. Go to inlang.dev and create a project.
+                </a>
+                <br />
+                <br />
+                <p className="text-lg">
+                  2. Replace the <code>projectId</code> in the
+                  <code>inlang.config.json</code> file with yours.
+                </p>
+                <p className="text-sm text-gray-500">
+                  You can find the projectId in the settings of your project.
+                </p>
+                <br />
+                <p className="text-lg">
+                  3. Re-run the project with <code>npm run dev</code>
+                </p>
+                <p className="text-sm text-gray-500">
+                  You will get linting errors now that the keys don't exist. You
+                  have to add them manually for now.{" "}
+                  <a
+                    className="link-secondary"
+                    href="https://cdn.forms-content.sg-form.com/e22e6493-370b-11ec-9784-62d300bd6ea3"
+                    target="_blank"
+                  >
+                    Want to be informed when inlang can import existing keys and
+                    projects?
+                  </a>
+                </p>
+              </div>
+              <img
+                className="h-80 w-80"
+                src="https://raw.githubusercontent.com/inlang/inlang/main/assets/step2-half.gif"
+              ></img>
+            </div>
+          </div>
+        </div>
+        <br />
+        <div className="grid grid-cols-2 gap-20 justify-items-center">
           <div>
             <h2 className="card-title">{LL.footer.inlangAlpha()}</h2>
             <p>{LL.footer.feedback()}</p>
@@ -191,6 +237,10 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
+        <iframe
+          className="w-full h-96"
+          src="https://cdn.forms-content.sg-form.com/e22e6493-370b-11ec-9784-62d300bd6ea3"
+        />
       </div>
     </div>
   );
