@@ -42,6 +42,9 @@
 	function languageProgress(iso: definitions['language']['iso_code']) {
 		const allTranslations =
 			$projectStore.data?.translations.filter((translation) => translation.iso_code === iso) ?? [];
+		if (allTranslations.length === 0) {
+			return 0;
+		}
 		const missingReview = allTranslations.filter(
 			(translation) => translation.is_reviewed === false
 		);
