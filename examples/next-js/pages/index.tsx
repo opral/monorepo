@@ -149,52 +149,45 @@ const Home: NextPage = () => {
                 happens?
               </p>
               <br />
-              <a
-                href="https://docs.inlang.dev/getting-started/dashboard"
-                className="link-primary"
-              >
-                Want to see the dashboard?
-              </a>
             </div>
           </div>
         </div>
         <br />
-        <div className="card shadow">
-          <div className="card-body grid grid-cols-2 gap-20">
-            <div>
-              <h2 className="card-title">{LL.footer.inlangAlpha()}</h2>
-              <p>{LL.footer.feedback()}</p>
-              <a
-                href="https://submission.bromb.co/inlang/examples"
-                className="link-primary"
-              >
-                {LL.footer.bromb()}
+        <div className="card shadow"></div>
+        <div className="grid grid-cols-2 gap-20">
+          <div>
+            <h2 className="card-title">{LL.footer.inlangAlpha()}</h2>
+            <p>{LL.footer.feedback()}</p>
+            <a
+              href="https://submission.bromb.co/inlang/examples"
+              className="link-primary"
+            >
+              {LL.footer.bromb()}
+            </a>
+          </div>
+          <div>
+            <h2 className="card-title">Community</h2>
+            <div className="flex space-x-10 items-center">
+              <a href="https://github.com/inlang/inlang" target="_blank">
+                <img
+                  alt="GitHub"
+                  className="mx-auto"
+                  height="32"
+                  width="32"
+                  src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg"
+                />
+                GitHub
               </a>
-            </div>
-            <div>
-              <h2 className="card-title">Community</h2>
-              <div className="flex space-x-10 items-center">
-                <a href="https://github.com/inlang/inlang">
-                  <img
-                    alt="GitHub"
-                    className="mx-auto"
-                    height="32"
-                    width="32"
-                    src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg"
-                  />
-                  GitHub
-                </a>
-                <a href="https://discord.gg/CUkj4fgz5K">
-                  <img
-                    alt="Discord"
-                    height="32"
-                    className="mx-auto"
-                    width="32"
-                    src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/discord.svg"
-                  />
-                  Discord
-                </a>
-              </div>
+              <a href="https://discord.gg/CUkj4fgz5K" target="_blank">
+                <img
+                  alt="Discord"
+                  height="32"
+                  className="mx-auto"
+                  width="32"
+                  src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/discord.svg"
+                />
+                Discord
+              </a>
             </div>
           </div>
         </div>
