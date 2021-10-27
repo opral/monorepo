@@ -35,6 +35,10 @@ export type Translation = {
 	 */
 	'random_prefix_star_inlang': string
 	/**
+	 * Welcome to the inlang example
+	 */
+	'random_prefix_welcome': string
+	/**
 	 * What is your name?
 	 */
 	'random_prefix_as_name': string
@@ -76,10 +80,6 @@ export type Translation = {
 	 * 2. Replace the projectId in the inlang.config.json file with yours.
 	 */
 	'random_prefix_replace_project_id': string
-	/**
-	 * Welcome to the inlang example
-	 */
-	'random_prefix_welcome': string
 	/**
 	 * Select a language
 	 */
@@ -128,6 +128,10 @@ export type TranslationFunctions = {
 	 */
 	'random_prefix_star_inlang': () => LocalizedString
 	/**
+	 * Welcome to the inlang example
+	 */
+	'random_prefix_welcome': () => LocalizedString
+	/**
 	 * What is your name?
 	 */
 	'random_prefix_as_name': () => LocalizedString
@@ -167,10 +171,6 @@ export type TranslationFunctions = {
 	 * 2. Replace the projectId in the inlang.config.json file with yours.
 	 */
 	'random_prefix_replace_project_id': () => LocalizedString
-	/**
-	 * Welcome to the inlang example
-	 */
-	'random_prefix_welcome': () => LocalizedString
 	/**
 	 * Select a language
 	 */

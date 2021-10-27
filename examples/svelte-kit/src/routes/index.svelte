@@ -10,10 +10,6 @@
 		setLocale(event.target.value);
 	}
 
-	function setName(event: any) {
-		name = event.target.value;
-	}
-
 	$: translatedColor = () => {
 		if (color === 'blue') {
 			return $LL.random_prefix_color_blue();
@@ -76,8 +72,7 @@
 						</label>
 						<input
 							type="text"
-							value={name}
-							onChange={setName}
+							bind:value={name}
 							placeholder={$LL.random_prefix_enter_name()}
 							class="input input-bordered"
 						/>
