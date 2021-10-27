@@ -1,18 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import type { NextPage } from "next";
-import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
-import LanguageSelector from "../components/LanguageSelector";
 import { ChangeEvent, useContext, useState } from "react";
 import { I18nContext } from "../i18n/i18n-react";
 import { useRouter } from "next/dist/client/router";
-import { Locales } from "../i18n/i18n-types";
 
 const Home: NextPage = () => {
-  // internal state of typesafe-i18n
-  const { LL, setLocale, locale } = useContext(I18nContext);
-  // state of i18n routing read more here https://docs.inlang.dev/definitions/i18n-routing
+  const { LL } = useContext(I18nContext);
+
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -22,16 +16,14 @@ const Home: NextPage = () => {
   async function handleLanguageSelection(
     event: ChangeEvent<HTMLSelectElement>
   ) {
-    // setting the i18n route read more here https://docs.inlang.dev/definitions/i18n-routing
-    const success = await router.push(
+    // setting the i18n route. Basically, it replaces the language slug in the route with a new one.
+    // Replacing the language slug will automatically set the language in the _app.tsx component.
+    // read more here https://docs.inlang.dev/definitions/i18n-routing
+    await router.push(
       { pathname: router.pathname, query: router.query },
       router.asPath,
       { locale: event.target.value }
     );
-    // if i18n routing was successfull -> set the state of typesafe-i18n
-    if (success) {
-      setLocale(event.target.value as Locales);
-    }
   }
 
   return (
