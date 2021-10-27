@@ -25,7 +25,7 @@
 		id: definitions['user']['id'];
 		user: definitions['user'];
 		email: definitions['user']['email'];
-		role: string;
+		//role: string;
 	};
 
 	$: inputIsValidEmail = isValidEmail(inputEmail);
@@ -35,7 +35,7 @@
 
 	const headers = [
 		{ key: 'email', value: 'Name' },
-		{ key: 'role', value: 'Role' },
+		//{ key: 'role', value: 'Role' },
 		{ key: 'remove', empty: true }
 	];
 
@@ -74,7 +74,9 @@
 
 	async function handleInviteUser() {
 		const organization_id = $projectStore.data?.project.organization_id;
-		const userId = await database.rpc<string>('get_user_id_from_email', { arg_email: inputEmail }).single();
+		const userId = await database
+			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
+			.single();
 		if (userId.error || userId.data === null) {
 			alert(userId.error?.message);
 			return;
@@ -142,10 +144,10 @@
 			<row class="items-center space-x-2">
 				<p class="text-sm">{cell.value}</p>
 			</row>
-		{:else if cell.key === 'role'}
+			<!-- {:else if cell.key === 'role'}
 			<row class="items-center space-x-2">
 				<p class="text-sm">{cell.value}</p>
-			</row>
+			</row> -->
 		{:else if cell.key === 'remove'}
 			<row class="justify-end items-center">
 				<Button
