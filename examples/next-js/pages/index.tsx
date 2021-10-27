@@ -130,7 +130,7 @@ const Home: NextPage = () => {
           <div className="card shadow">
             <figure>
               <img
-                src="/highlight-text.gif"
+                src="https://raw.githubusercontent.com/inlang/inlang/main/assets/highlight-text.gif"
                 alt="Highlight text and send to inlang."
               />{" "}
             </figure>
