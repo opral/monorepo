@@ -134,7 +134,7 @@
 		</FormGroup>
 		<FormGroup>
 			<Select
-				labelText="In which language are you developing your app?"
+				labelText="Human language used in source code:"
 				bind:selected={selectedDefaultLanguageIso}
 			>
 				{#each ISO6391.getLanguages(ISO6391.getAllCodes()) as possibleLanguage}
@@ -149,7 +149,7 @@
 			<MultiSelect
 				bind:selectedIds={selectedLanguageIsoCodes}
 				direction="top"
-				titleText="In which languages to you want to translate your app?"
+				titleText="In which languages do you want to translate your app?"
 				filterable
 				invalid={selectedLanguageIsoCodes.length === 0}
 				invalidText="Select at least one language..."
@@ -160,6 +160,12 @@
 						text: `${language.code} - ${language.name}`
 					}))}
 			/>
+			<p>
+				Languages selected:
+				{#each selectedLanguageIsoCodes as isoCode}
+					{ISO6391.getName(isoCode) + ' '}
+				{/each}
+			</p>
 		</FormGroup>
 	</Form>
 </Modal>
