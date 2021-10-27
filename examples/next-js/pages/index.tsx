@@ -31,7 +31,9 @@ const Home: NextPage = () => {
       <div className="max-w-4xl">
         <div className="flex justify-between items-center">
           <form>
-            <label className="label">{LL.selectLanguage()}</label>
+            <label className="label">
+              {LL.random_prefix_select_language()}
+            </label>
             <select
               className="select select-bordered w-full max-w-xs"
               value={router.locale}
@@ -50,32 +52,38 @@ const Home: NextPage = () => {
             rel="noreferrer"
             className="btn btn-ghost"
           >
-            {LL.starOnGithub()}
+            {LL.random_prefix_star_inlang()}
           </a>
         </div>
         <br />
         <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r py-1 from-purple-400 via-pink-500 to-red-500">
-          {LL.welcome()}
+          {LL.random_prefix_welcome()}
         </h1>
         <br />
         <div className="grid grid-cols-2 gap-6">
           <div className="card shadow">
             <div className="card-body">
-              <h2 className="card-title">{LL.index.firstCard()}</h2>
+              <h2 className="card-title">
+                {LL.random_prefix_localized_by_us()}
+              </h2>
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">{LL.askName()}</span>
+                  <span className="label-text">
+                    {LL.random_prefix_as_name()}
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={LL.enterName()}
+                  placeholder={LL.random_prefix_enter_name()}
                   className="input input-bordered"
                 />
               </div>
               <br />
-              <p className="text-sm pb-1">{LL.askFavoriteColor()}</p>
+              <p className="text-sm pb-1">
+                {LL.random_prefix_ask_favorite_color()}
+              </p>
               <div className="flex space-x-2 justify-between">
                 <button
                   onClick={() => setColor("blue")}
@@ -112,8 +120,10 @@ const Home: NextPage = () => {
               </div>
               <div className="divider" />
               <p className="font-bold">
-                {" "}
-                {LL.nameAndFavoriteColor({ color: color, name: name })}
+                {LL.random_prefix_interpolated_string({
+                  color: color,
+                  name: name,
+                })}
               </p>
             </div>
           </div>
@@ -125,7 +135,7 @@ const Home: NextPage = () => {
               />{" "}
             </figure>
             <div className="card-body">
-              <h2 className="card-title">{"2. Localize this card yourself"}</h2>
+              <h2 className="card-title">2. Localize this card yourself</h2>
 
               <a
                 className="link"
@@ -155,40 +165,36 @@ const Home: NextPage = () => {
         <div className="card shadow">
           <div className="card-body">
             <h2 className="card-title">
-              3. Invite and collaborate on your translations on the dashboard
+              {LL.random_prefix_invite_collaborators()}
             </h2>
             <div className="grid grid-cols-2 gap-4 justify-items-center">
-              <div>
+              <div className="flex flex-col justify-center">
                 <a
                   href="https://inlang.dev"
                   target="_blank"
+                  rel="noreferrer"
                   className="link-primary text-lg"
                 >
-                  1. Go to inlang.dev and create a project.
+                  {LL.random_prefix_create_project()}
                 </a>
                 <br />
-                <br />
                 <p className="text-lg">
-                  2. Replace the <code>projectId</code> in the
-                  <code>inlang.config.json</code> file with yours.
+                  {LL.random_prefix_replace_project_id()}
                 </p>
                 <p className="text-sm text-gray-500">
-                  You can find the projectId in the settings of your project.
+                  {LL.random_prefix_find_project_id()}
                 </p>
                 <br />
-                <p className="text-lg">
-                  3. Re-run the project with <code>npm run dev</code>
-                </p>
+                <p className="text-lg">{LL.random_prefix_npm_run_dev()}</p>
                 <p className="text-sm text-gray-500">
-                  You will get linting errors now that the keys don't exist. You
-                  have to add them manually for now.{" "}
+                  {LL.random_prefix_linting_errors()}
                   <a
                     className="link-secondary"
                     href="https://cdn.forms-content.sg-form.com/e22e6493-370b-11ec-9784-62d300bd6ea3"
                     target="_blank"
+                    rel="noreferrer"
                   >
-                    Want to be informed when inlang can import existing keys and
-                    projects?
+                    {LL.random_prefix_newsletter()}
                   </a>
                 </p>
               </div>
@@ -202,19 +208,23 @@ const Home: NextPage = () => {
         <br />
         <div className="grid grid-cols-2 gap-20 justify-items-center">
           <div>
-            <h2 className="card-title">{LL.footer.inlangAlpha()}</h2>
-            <p>{LL.footer.feedback()}</p>
+            <h2 className="card-title">{LL.random_prefix_early_alpha()}</h2>
+            <p>{LL.random_prefix_feedback_helps_us()}</p>
             <a
               href="https://submission.bromb.co/inlang/examples"
               className="link-primary"
             >
-              {LL.footer.bromb()}
+              {LL.random_prefix_ask_feedback_on_this_example()}
             </a>
           </div>
           <div>
             <h2 className="card-title">Community</h2>
             <div className="flex space-x-10 items-center">
-              <a href="https://github.com/inlang/inlang" target="_blank">
+              <a
+                href="https://github.com/inlang/inlang"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <img
                   alt="GitHub"
                   className="mx-auto"
@@ -224,7 +234,11 @@ const Home: NextPage = () => {
                 />
                 GitHub
               </a>
-              <a href="https://discord.gg/CUkj4fgz5K" target="_blank">
+              <a
+                href="https://discord.gg/CUkj4fgz5K"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <img
                   alt="Discord"
                   height="32"

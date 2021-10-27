@@ -1,6 +1,6 @@
 {
-  "projectId": "cb4e1eba-77c2-43ca-a2de-4e0eddbdea28",
+  "projectId": "debe4090-093c-47a2-8da0-fd61be4a76cc",
   "vsCodeExtension": {
-    "wrappingPattern": "LL.keyname()"
+    "wrappingPattern": "{LL.keyname()}"
   }
 }
