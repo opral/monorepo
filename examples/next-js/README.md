@@ -1,5 +1,5 @@
 import I18nRoutingDefinition from "../../docs-website/docs/definitions/i18n-routing.md";
-import LanguageSelector from '!raw-loader!./components/LanguageSelector.tsx';
+import App from '!raw-loader!./pages/\_app.tsx';
 import NextJSConfig from '!raw-loader!./next.config.js';
 import CodeBlock from '@theme/CodeBlock';
 
@@ -124,15 +124,12 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 ```
 
-## BONUS: Add a language selector
+## BONUS: Add language detection
 
-The language selectors purpose is to route do a different language path in the url e.g. if the user selects
-"de", the app should route to "http://localhost:3000/de/example".
-
-This example uses a very simple language selector. For more information about
+This example uses a very simple language selector mechanism. For more information about
 selecting a language with Next.js i18n routing click [here](https://nextjs.org/docs/advanced-features/i18n-routing).
 
 <details>
-  <summary>Examplary language selector</summary>
-  <CodeBlock className="language-jsx" title="/components/LanguageSelector.tsx">{LanguageSelector}</CodeBlock>
+  <summary>Examplary language detection machanism</summary>
+  <CodeBlock className="language-jsx" title="/pages/_app.tsx">{App}</CodeBlock>
 </details>
