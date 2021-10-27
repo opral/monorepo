@@ -121,7 +121,7 @@
 	>
 		{#if cell.key === 'name'}
 			<div class="flex items-center space-x-2">
-				<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+				<!-- <Tag type="blue">{cell.value.substring(0, 2)}</Tag> -->
 				<p class="text-sm">{cell.value}</p>
 			</div>
 		{:else if cell.key === 'more'}
