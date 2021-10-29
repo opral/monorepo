@@ -9,7 +9,7 @@ To run the example, paste the following into the terminal:
 git clone https://github.com/inlang/inlang.git
 cd inlang/examples/react
 npm install
-npm run dev
+npm start
 ```
 
 This example is a the default React example created with the [create-react-app](https://github.com/facebook/create-react-app). The example can be started with the following commands:
