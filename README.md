@@ -1,9 +1,5 @@
 <p align="center">
-    <img width="400rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/step1.gif" />
-    <img height="240rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/step2-half.gif" />
-</p>
-<p align="center">
-  Create translations directly in VSCode and invite collaborators via the dashboard.
+    <img width="500rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-example.gif" />
 </p>
 
 # inlang
