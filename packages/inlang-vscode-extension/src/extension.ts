@@ -23,8 +23,10 @@ function onCreate() {
 /**will be executed every time your command is executed*/
 async function onCommand(config: InlangConfig) {
     if (config === undefined) {
-        const openedDirectoryPath =
-            vscode.workspace.workspaceFolders?.[0].uri.path
+        const openedDirectoryPath = vscode.workspace.workspaceFolders?.[0].uri.path.substring(
+            vscode.workspace.workspaceFolders?.[0].uri.path.indexOf('/') + 1
+        )
+
         if (openedDirectoryPath === undefined) {
             vscode.window.showInformationMessage(
                 'You must open a directory in VSCode.'
