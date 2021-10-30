@@ -77,7 +77,7 @@ We use it to generate keys, for existing text or text to be added later. The key
 
 Using our IDE extensions you can make the whole process of converting text to i18n keys eaiser. You can find the documentation for our extensions [here] (/overview/ide-integration)
 
-## Visual Studio Code extension
+# Visual Studio Code extension
 
 If using Visual Studio Code, it is highly recommended to install the extension to allow for key generation while never leaving the file.
 
