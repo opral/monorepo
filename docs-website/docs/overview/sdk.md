@@ -89,3 +89,5 @@ ext install inlang.vscode-extension
 ```
 
 For full documentation see the [inlang vscode-extension docs](https://github.com/inlang/inlang/tree/main/packages/inlang-vscode-extension)
+
+> [Is something missing in our docs?](https://submission.bromb.co/inlang/docs/feedback)
