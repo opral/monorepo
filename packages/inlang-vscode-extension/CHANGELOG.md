@@ -1,3 +1,6 @@
+### 0.0.5
+-   Change workspace path to work correctly with all OS
+
 ### 0.0.4
 
 -   Fixed invalid workspace path for Windows machines

@@ -4,7 +4,7 @@
     "description": "Create keys directly in VSCode and send them to inlang.",
     "publisher": "Inlang",
     "repository": "https://github.com/inlang/inlang",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "engines": {
         "vscode": "^1.61.0"
     },
