@@ -1,17 +1,25 @@
-# inlangext
+# inlang-vscode-extension
 
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
 
-## try out
+The VSCode extension adds a "Send to inlang" command to the context menu. The command automatically sends the selected text/string as base translation to the inlang dashboard together with the key.
 
-select the text you want to translate,then right click and send to inlang.Input a key name,Then : 
+![Github](https://github.com/inlang/inlang/blob/398c091946621083fd3d4da56957ccee71cbfcda/assets/step1.gif?raw=true)
 
-  1.your text will be automatically replaced 
-  2.a new translation is created for you at inlang's server and the json files of the translation is downloaded to your code base
+## Getting started
 
-what's next?
-  depending on the frameworks your
+1. Get your project id from settings on the dashboard.
+2. Add `inlang.config.json` to your root directory with the following structure:
 
-## Features
+```
+  {
+    "projectId": "your-project-id",
+    "vsCodeExtension":{
+      "wrappingPattern": "$LL.keyname()"
+    }
+  }
+```
 
-
-## Extension Settings
+3. Write the desired base translation in your source code.
+4. Right click to open the context menu and choose "Send to Inlang".
+5. Done!

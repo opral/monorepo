@@ -24,9 +24,6 @@
 
 	let organizationId: definitions['organization']['id'] | undefined = undefined;
 
-	// each time the organiations update, select the first organizations id
-	$: organizationId = organizations.data?.[0].id;
-
 	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
@@ -46,12 +43,18 @@
 		organizations = await database.from<definitions['organization']>('organization').select();
 		if (organizations.error) {
 			alert(organizations.error.message);
+		} else {
+			// ---- ugly workaorund which requires a proper solution long term ----
+			// naively choosing the first org id on mount since the select
+			// does not bind the organization id the first time (bug?).
+			// But in 99% of the cases, the first organization is shown in the select.
+			organizationId = organizations.data?.[0].id;
 		}
 	});
 
 	async function handleConfirm() {
 		confirmIsLoading = true;
-		if (organizationId === null || organizationIdIsValidInput === false) {
+		if (organizationId === undefined || organizationIdIsValidInput === false) {
 			alert('The chosen organization is not valid.');
 			return;
 		}
@@ -131,7 +134,7 @@
 		</FormGroup>
 		<FormGroup>
 			<Select
-				labelText="In which language are you developing your app?"
+				labelText="Human language used in source code:"
 				bind:selected={selectedDefaultLanguageIso}
 			>
 				{#each ISO6391.getLanguages(ISO6391.getAllCodes()) as possibleLanguage}
@@ -146,7 +149,7 @@
 			<MultiSelect
 				bind:selectedIds={selectedLanguageIsoCodes}
 				direction="top"
-				titleText="In which languages to you want to translate your app?"
+				titleText="In which languages do you want to translate your app?"
 				filterable
 				invalid={selectedLanguageIsoCodes.length === 0}
 				invalidText="Select at least one language..."
@@ -157,6 +160,12 @@
 						text: `${language.code} - ${language.name}`
 					}))}
 			/>
+			<p>
+				Languages selected:
+				{#each selectedLanguageIsoCodes as isoCode}
+					{ISO6391.getName(isoCode) + ' '}
+				{/each}
+			</p>
 		</FormGroup>
 	</Form>
 </Modal>

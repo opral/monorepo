@@ -5,11 +5,17 @@
 	import type { definitions } from '@inlang/database';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 
-	export let open = false;
+	let open = false;
+
+	export function show(): void {
+		keyName = '';
+		baseTranslationText = '';
+		open = true;
+	}
 
 	let keyName: definitions['key']['name'];
 
-	let description: definitions['key']['description'];
+	//let description: definitions['key']['description'];
 
 	let baseTranslationText: definitions['translation']['text'] = '';
 
@@ -104,14 +110,14 @@
 		bind:value={baseTranslationText}
 		placeholder={`The base translation is the projects default language (${$projectStore.data?.project.default_iso_code}) text.`}
 	/>
-	<br />
+	<!-- <br />
 	<TextArea
 		rows={3}
 		labelText="Description"
 		bind:value={description}
 		placeholder="What is this key for?"
 	/>
-	<br />
+	<br /> -->
 	{#if status === 'isLoading'}
 		<InlineLoading status="active" description="Auto-translating..." />
 	{:else if status === 'isFinished'}

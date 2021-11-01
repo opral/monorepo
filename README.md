@@ -1,23 +1,56 @@
-## Localization (L10n) and Internationalization (i18n) of apps is too hard.
+<p align="center">
+    <img width="500rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-example.gif" />
+</p>
 
+# inlang
 
-This project strives to lower the barrier(s) of localizing your apps. What started out as a simple [tech demo](https://www.youtube.com/watch?v=6xzbc6QYzDs) turned into a bigger project of 6 students from the Technical University of Denmark.
+Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't create translations manually in JSON files or (ab)use excel spreadsheets to manage translations. With inlang you get collaboration with automatic sync, type safety and machine translations in one tight package.
 
-### We need your help
-We have to identify what we should build. Help us by participating in [discussions](https://github.com/samuelstroschein/inlang/discussions), open issues, propose ideas, and most importantly, share the pain(s) you experienced with current i18n solutions, or why you did not i18n your app yet.
+But that's just the beginning. We want to help you localize your apps with one click. Want to stay up-to-date? [Subscribe to our newsletter](https://cdn.forms-content.sg-form.com/e22e6493-370b-11ec-9784-62d300bd6ea3) (no spam!)
 
-## Current state: proof of concept
+**Status**
 
-> :warning:	Do not use this on production apps. Expect breaking changes. 
+- [x] Early Alpha: We are testing the solution and need your feedback.
+- [ ] Beta: Stable enough for small(er) apps and projects.
+- [ ] Release: Production ready.
 
-### Video Demo
-[![Demo Video](https://img.youtube.com/vi/mivXTx-cpcM/0.jpg)](https://www.youtube.com/watch?v=mivXTx-cpcM)
+**Supported Languages**
 
- 
-Try the proof of concept by using [this repo](https://github.com/samuelstroschein/inlang-test-repository) as a template. 
+- [x] TypeScript using [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n)
+- [ ] Dart / Flutter
+- [ ] Swift / iOS
+- [ ] Kotlin / Android
 
-And most importantly, [give feedback](https://github.com/samuelstroschein/inlang/discussions).
+**Features**
 
-## Contribute
+- [x] Typesafety (no more missing translations/keys)
+- [x] Collaboration via the dashboard
+- [x] Sync between dashboard and source code
+- [x] Variables / Interpolation
+- [ ] OTA (Over the air updates without releasing a new version)
+- [ ] Pluralization 
 
-This repo follows semantic git commits https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716 with the addition of `imp:` for improvments.
+Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
+
+## Getting started
+
+Link to documentation
+https://docs.inlang.dev
+
+## Community & Support
+
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
+- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
+
+## Demo
+
+### Step 1 - Create keys directly in VSCode
+
+Keys are automatically sent to the dashboard, machine translated into all languages and synced with your source code. Bonus on top: typesafety (no more missing translations/none existent keys).
+![Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code](./assets/step1.gif)
+
+### Step 2 - Manage translations in the dashboard
+
+Collaborators, or you yourself, can seamlessly edit translations in the dashboard. During development the translations are automatically synced with the source code.
+![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)

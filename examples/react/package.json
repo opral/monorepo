@@ -1,0 +1,54 @@
+{
+  "name": "inlang-react-example",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@craco/craco": "^6.4.0",
+    "@inlang/typesafe-i18n-importer": "^0.1.2",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "concurrently": "^6.3.0",
+    "daisyui": "^1.16.0",
+    "npm-run-all": "^4.1.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "typesafe-i18n": "^2.46.6",
+    "web-vitals": "^1.1.2"
+  },
+  "scripts": {
+    "start": "npx concurrently --kill-others 'craco start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "typesafe-i18n": "typesafe-i18n",
+    "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.32",
+    "@types/react-dom": "^17.0.10",
+    "autoprefixer": "^9.8.8",
+    "postcss": "^7.0.39",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17",
+    "typescript": "^4.4.4"
+  }
+}

@@ -17,12 +17,29 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
 	import { goto } from '$app/navigation';
-
 	import { page } from '$app/stores';
+	import { userStore } from '$lib/stores/userStore';
 
 	//export let name = '';
 
 	let showAddProjectModal = false;
+
+	let showProjectModalIfOrganizationExists = async () => {
+		console.log(organizations.data);
+		if (organizations.data?.length === 0 ?? true) {
+			const response = await database.from<definitions['organization']>('organization').insert([
+				{
+					name: $userStore.data?.email?.split('@')[0] + "'s organization",
+					created_by_user_id: $userStore.data?.id
+				}
+			]);
+			if (response.error) {
+				alert(response.error);
+			}
+		}
+		organizations = await database.from<definitions['organization']>('organization').select();
+		showAddProjectModal = true;
+	};
 
 	let isLoading = true;
 	let selectedOrgId: string | null = $page.query.get('organization');
@@ -93,7 +110,7 @@
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
-			<Button on:click={() => (showAddProjectModal = true)}>Add project</Button>
+			<Button on:click={() => showProjectModalIfOrganizationExists()}>Add project</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span
@@ -105,7 +122,7 @@
 	>
 		{#if cell.key === 'name'}
 			<div class="flex items-center space-x-2">
-				<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
+				<!-- <Tag type="blue">{cell.value.substring(0, 2)}</Tag> -->
 				<p class="text-sm">{cell.value}</p>
 			</div>
 		{:else if cell.key === 'more'}

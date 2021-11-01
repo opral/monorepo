@@ -4,11 +4,12 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
-	import { cloneDeep, isEqual } from 'lodash';
+	import { cloneDeep, isEqual } from 'lodash-es';
 
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
 
 	export let translation: Readonly<definitions['translation']>;
+	export let isBaseTranslation: Readonly<boolean>;
 
 	let translationCopy = cloneDeep(translation);
 
@@ -30,7 +31,11 @@
 </script>
 
 <row class="items-center space-x-2 justify-between">
-	<Tag type="blue">{translation.iso_code}</Tag>
+	{#if isBaseTranslation}
+		<Tag type="green">{translation.iso_code}</Tag>
+	{:else}
+		<Tag type="blue">{translation.iso_code}</Tag>
+	{/if}
 	<TextInput
 		class="flex-grow"
 		bind:value={translationCopy.text}

@@ -90,7 +90,6 @@ node_modules
 .env*
 .vercel
 .vercel_build_output
-package-lock.json
 
 
 out

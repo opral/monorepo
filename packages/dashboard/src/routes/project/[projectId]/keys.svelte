@@ -6,7 +6,7 @@
 		ToolbarContent,
 		ToolbarSearch,
 		Tag,
-Pagination
+		Pagination
 	} from 'carbon-components-svelte';
 	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
@@ -32,6 +32,7 @@ Pagination
 	let pageNumber = 1;
 
 	let deleteKeyModal: DeleteKeyModal;
+	let createKeyModal: CreateKeyModal;
 
 	// define the type of rows to be a function that returns an array of row
 	let rows: () => Row[];
@@ -51,7 +52,13 @@ Pagination
 			result = result?.filter((row) => row.key.name.startsWith(searchQuery));
 		}
 		// return an empty array as fallback
-		return result ?? [];
+		return result?.reverse() ?? [];
+	};
+
+	let displayedRows: () => Row[];
+
+	$: displayedRows = () => {
+		return rows()?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 	};
 
 	// $: rows = fullRows.filter((row) => row.key.indexOf(searchQuery) !== -1);
@@ -89,19 +96,18 @@ Pagination
 		translations: [],
 		key: ''
 	};
-	let createKeyModal: { open: boolean } = { open: false };
 </script>
 
 <h1>Keys</h1>
 <p>All your translation keys will appear here. You can create, delete and edit them.</p>
 <br />
-<DataTable expandable {headers} rows={rows()}>
+<DataTable expandable {headers} rows={displayedRows()}>
 	<Toolbar>
 		<ToolbarContent>
 			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
 			<Button
 				on:click={() => {
-					createKeyModal.open = true;
+					createKeyModal.show();
 				}}>Create key</Button
 			>
 		</ToolbarContent>
@@ -138,11 +144,11 @@ Pagination
 	</div>
 </DataTable>
 <Pagination
-		totalItems={rows().length}
-		pageSizes={[10, 25, 50]}
-		bind:pageSize
-		bind:page={pageNumber}
-	/>
+	totalItems={rows().length}
+	pageSizes={[10, 25, 50]}
+	bind:pageSize
+	bind:page={pageNumber}
+/>
 
 <TranslationModal
 	bind:open={createTranslationModal.open}
@@ -150,6 +156,6 @@ Pagination
 	key={createTranslationModal.key}
 />
 
-<CreateKeyModal bind:open={createKeyModal.open} />
+<CreateKeyModal bind:this={createKeyModal} />
 
 <DeleteKeyModal bind:this={deleteKeyModal} />

@@ -8,6 +8,7 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
+	import { isValidEmail } from '$lib/utils/isValidEmail';
 
 	//TODO: reload table on invite and clear text input
 	//TODO: fix join, right now user role is hardcoded to admin
@@ -24,15 +25,17 @@
 		id: definitions['user']['id'];
 		user: definitions['user'];
 		email: definitions['user']['email'];
-		role: string;
+		//role: string;
 	};
+
+	$: inputIsValidEmail = isValidEmail(inputEmail);
 
 	let organization_id = $projectStore.data?.project.organization_id;
 	let organization: definitions['organization'];
 
 	const headers = [
 		{ key: 'email', value: 'Name' },
-		{ key: 'role', value: 'Role' },
+		//{ key: 'role', value: 'Role' },
 		{ key: 'remove', empty: true }
 	];
 
@@ -69,41 +72,40 @@
 		}
 	}
 
-	async function inviteUser() {
-		let organization_id = $projectStore.data?.project.organization_id;
-		let uid_rpc = await database.rpc('get_user_id_from_email', { arg_email: inputEmail });
-
-		if (uid_rpc.error) {
-			//alert(uid_rpc.error.message);
+	async function handleInviteUser() {
+		const organization_id = $projectStore.data?.project.organization_id;
+		const userId = await database
+			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
+			.single();
+		if (userId.error || userId.data === null) {
+			alert(userId.error?.message);
+			return;
 		}
-
-		if (uid_rpc.data !== null) {
-			let uid = uid_rpc.data[0].get_user_id_from_email;
-			let member_upsert = await database.from<definitions['member']>('member').upsert({
-				organization_id: organization_id,
-				user_id: uid,
-				role: 'ADMIN'
-			});
-			if (member_upsert.status === 409) {
-				alert(inputEmail + ' is already a member');
-			} else if (member_upsert.status == 400) {
-				alert('Invalid email');
-			} else if (member_upsert.status === 201) {
-				//success
-				await loadUsers();
-			} else {
-				alert('An unknown error occurred');
-			}
-			inputEmail = '';
+		const memberUpsert = await database.from<definitions['member']>('member').insert({
+			organization_id: organization_id,
+			user_id: userId.data,
+			role: 'ADMIN'
+		});
+		if (memberUpsert.error) {
+			console.error(memberUpsert.error);
+			alert(memberUpsert.error.message);
 		}
+		if (memberUpsert.status === 409) {
+			alert(inputEmail + ' is already a member');
+		} else if (memberUpsert.status === 201) {
+			//success
+			await loadUsers();
+		} else {
+			alert('An unknown error occurred');
+		}
+		inputEmail = '';
 	}
 
-    function isOwner(userId: definitions["user"]["id"]): boolean {
-        return organization.created_by_user_id === userId;
-    }
+	function isOwner(userId: definitions['user']['id']): boolean {
+		return organization.created_by_user_id === userId;
+	}
 
 	let rows: () => Row[];
-
 	$: rows = () => {
 		if (isLoading || members.error || members.data === null || users.error || users.data === null) {
 			return [];
@@ -121,45 +123,51 @@
 	<Loading />
 {/if}
 
-<div class="p-8">
-	<h1>Members</h1>
-	<p class="text-gray-600 mt-1 mb-3">Invite members to the organization of current project.</p>
-
-	<row class="space-x-4 items-center" style="margin-bottom: 25px;">
-		<TextInput size="xl" placeholder="Enter email of user to invite" bind:value={inputEmail} />
-		<Button icon={SendAlt24} on:click={() => inviteUser()}>Invite</Button>
-	</row>
-	<DataTable {headers} rows={rows()}>
-		<span slot="cell" let:row let:cell class="cursor-pointer">
-			{#if cell.key === 'email'}
-				<div class="flex items-center space-x-2">
-					<p class="text-sm">{cell.value}</p>
-				</div>
-			{:else if cell.key === 'role'}
-				<div class="flex items-center space-x-2">
-					<p class="text-sm">{cell.value}</p>
-				</div>
-			{:else if cell.key === 'remove'}
-				<row class="justify-end items-center">
-					<Button
-                        disabled={isOwner(row.id)}
-						kind="danger-ghost"
-						icon={Delete24}
-						iconDescription="Remove member"
-						on:click={() => {
-							deleteMemberModal.show({
-								user: row.user,
-								organization: organization,
-								onUserDeleted: loadUsers
-							});
-						}}
-					/>
-				</row>
-			{:else}
-				{cell.value}
-			{/if}
-		</span>
-	</DataTable>
-</div>
+<h1>Members</h1>
+<p class="text-gray-600 mt-1 mb-3">Invite members to the organization of current project.</p>
+<row class="space-x-4">
+	<TextInput
+		size="xl"
+		placeholder="Enter email of user to invite"
+		bind:value={inputEmail}
+		invalid={inputEmail.length > 0 && inputIsValidEmail === false}
+		invalidText="Invalid email."
+	/>
+	<Button disabled={inputIsValidEmail === false} icon={SendAlt24} on:click={handleInviteUser}>
+		Invite
+	</Button>
+</row>
+<br />
+<DataTable {headers} rows={rows()}>
+	<span slot="cell" let:row let:cell class="cursor-pointer">
+		{#if cell.key === 'email'}
+			<row class="items-center space-x-2">
+				<p class="text-sm">{cell.value}</p>
+			</row>
+			<!-- {:else if cell.key === 'role'}
+			<row class="items-center space-x-2">
+				<p class="text-sm">{cell.value}</p>
+			</row> -->
+		{:else if cell.key === 'remove'}
+			<row class="justify-end items-center">
+				<Button
+					disabled={isOwner(row.id)}
+					kind="danger-ghost"
+					icon={Delete24}
+					iconDescription="Remove member"
+					on:click={() => {
+						deleteMemberModal.show({
+							user: row.user,
+							organization: organization,
+							onUserDeleted: loadUsers
+						});
+					}}
+				/>
+			</row>
+		{:else}
+			{cell.value}
+		{/if}
+	</span>
+</DataTable>
 
 <DeleteMemberModal bind:this={deleteMemberModal} />

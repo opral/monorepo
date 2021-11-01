@@ -1,32 +1,55 @@
 {
-  "name": "@inlang/typesafe-i18n-adapter",
-  "version": "0.0.3",
-  "description": "Provides a way to automatically import all keys and translations into typesafe-i18n.",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [
-    "i18n",
-    "inlang",
-    "internationalization",
-    "l10n",
-    "localization",
-    "typesafe",
-    "import",
-    "adapter",
-    "management platform",
-    "typesafe-i18n"
-  ],
-  "author": "Inlang",
-  "license": "ISC",
-  "dependencies": {
-    "typesafe-i18n": "^2.44.2",
-    "lodash": "^4.17.21",
-    "@types/lodash": "^4.14.175"
-  },
-  "devDependencies": {
-    "@supabase/supabase-js": "^1.24.0",
-    "dotenv": "^10.0.0",
-    "ts-node": "^10.3.0",
-    "typescript": "^4.4.4"
-  }
+    "name": "@inlang/typesafe-i18n-importer",
+    "version": "0.1.2",
+    "main": "dist/main.js",
+    "types": "dist/main.d.ts",
+    "type": "module",
+    "description": "Provides a way to automatically import all keys and translations into typesafe-i18n.",
+    "keywords": [
+        "i18n",
+        "inlang",
+        "internationalization",
+        "l10n",
+        "localization",
+        "typesafe",
+        "import",
+        "adapter",
+        "management platform",
+        "typesafe-i18n"
+    ],
+    "author": "Inlang",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/inlang/inlang/packages/typesafe-i18n-importer.git"
+    },
+    "bugs": {
+        "url": "https://github.com/inlang/inlang/issues"
+    },
+    "scripts": {
+        "build": "rm -fr lib/* && tsc -p tsconfig.json && echo '#!/usr/bin/env node' | cat - dist/main.js > temp && mv temp dist/main.js",
+        "test": "jest"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^1.25.0",
+        "lodash-es": "^4.17.21",
+        "typesafe-i18n": "^2.46.6"
+    },
+    "devDependencies": {
+        "@types/jest": "^27.0.1",
+        "@types/lodash": "^4.14.175",
+        "@types/lodash-es": "^4.17.5",
+        "jest": "^27.0.6",
+        "jest-esm-transformer": "^1.0.0",
+        "ts-jest": "^27.0.4",
+        "typescript": "^4.3.5"
+    },
+    "files": [
+        "dist/**/*"
+    ],
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test",
+    "preversion": "npm run lint",
+    "bin": {
+        "typesafe-i18n-importer": "dist/main.js"
+    }
 }

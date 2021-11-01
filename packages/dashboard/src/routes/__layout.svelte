@@ -1,15 +1,14 @@
 <!-- 
-	This layout acts solely as authentification layer. 
+	This layout acts as authentification layer. 
 -->
 <script lang="ts" context="module">
 	import '../app.postcss';
-	// import { auth } from '$lib/services/auth';
 	import { auth } from '$lib/services/auth';
 	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
-	import Navbar from '$lib/layout/Navbar.svelte';
-	import { Content } from 'carbon-components-svelte';
+	import UiShell from '$lib/layout/UiShell.svelte';
+	import { page } from '$app/stores';
 
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
@@ -26,8 +25,10 @@
 </script>
 
 <script lang="ts">
+	import { capitalize, last } from 'lodash-es';
 	// if running in browser (not server side)
 	// listen for auth changes
+
 	if (browser) {
 		auth.onAuthStateChange((event) => {
 			if (event === 'SIGNED_IN') {
@@ -39,7 +40,10 @@
 	}
 </script>
 
-<Navbar />
-<Content>
+<svelte:head>
+	<title>Inlang | {capitalize(last($page.path.split('/')))}</title>
+</svelte:head>
+
+<UiShell>
 	<slot />
-</Content>
+</UiShell>
