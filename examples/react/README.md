@@ -70,13 +70,10 @@ For full documentation see the [typesafe-i18n docs](https://github.com/ivanhofer
 
 The SDK (typesafe-i18n & the inlang typesafe importer) runs as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
 
-```bash
+```json title="Adjust the start script in ./package.json to:"
 
-Adjust the `start` script in `package.json` to:
+"start": "npx concurrently --kill-others 'react-scripts start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'"
 
-{
-  "start": "npx concurrently --kill-others 'react-scripts start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
-}
 ```
 
 ## 2. Add Typesafe initialization
