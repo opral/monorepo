@@ -23,12 +23,13 @@ function onCreate() {
 /**will be executed every time your command is executed*/
 async function onCommand(config: InlangConfig) {
     if (config === undefined) {
-        const openedDirectoryPath =
-            vscode.workspace.workspaceFolders?.[0].uri.path
+        const openedDirectoryPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
+
         if (openedDirectoryPath === undefined) {
-            vscode.window.showInformationMessage(
+            vscode.window.showErrorMessage(
                 'You must open a directory in VSCode.'
             )
+            throw 'You must open a directory in VSCode.';
         }
         const configValidated = readAndValidateConfig(
             openedDirectoryPath + '/inlang.config.json'

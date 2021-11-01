@@ -22,7 +22,7 @@ export function readAndValidateConfig(
     } catch (error) {
         return {
             data: null,
-            error: 'The config file "inlang.config.json" has not been found.',
+            error: 'The config file at ' + path +' has not been found.',
         }
     }
     const configValidation = validateConfig({ config: JSON.parse(file) })

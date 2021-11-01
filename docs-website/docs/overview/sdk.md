@@ -27,17 +27,20 @@ The SDK (typesafe-i18n & the inlang typesafe importer) run as background process
 }
 ```
 
+| Framework  | Adapter |
+|------------|--------------------------------------|
+| React / Next.js | `"react"`  |
+| Svelte / Svelte Kit | `"svelte"`  |
+| Node | `"node"` |
+| Angular | `"angular"` |
+
 ## 1.3. Create the `inlang.config.json` file.
 
 - `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id
 - `wrappingPattern`: defines how a key (keyname) should be wrapped when creating a key with the [inlang
   VSCode extension](#visual-studio-code-extension). 
   
-| Framework  | wrappingPattern                      |
-|------------|--------------------------------------|
-| Next.js    | `"wrappingPattern": "LL.keyname()"`  |
-| React      | `"wrappingPattern": "LL.keyname()"`  |
-| Svelte Kit | `"wrappingPattern": "$LL.keyname()"` |
+
 
 
 ```js title="inlang.project.json for Next.js"
@@ -48,6 +51,14 @@ The SDK (typesafe-i18n & the inlang typesafe importer) run as background process
   }
 }
 ```
+
+> Example wrawpping patterns for different frameworks
+
+| Framework  | wrappingPattern                      |
+|------------|--------------------------------------|
+| Next.js    | `"wrappingPattern": "LL.keyname()"`  |
+| React      | `"wrappingPattern": "LL.keyname()"`  |
+| Svelte Kit | `"wrappingPattern": "$LL.keyname()"` |
 
 ## 1.4. Adjust the build script
 
@@ -75,7 +86,7 @@ For a detailed documentation of the typesafe-i18n please visit [typesafe-i18n do
 The LL object is a typed object exported by the typesafe-i18n [generator](https://github.com/ivanhofer/typesafe-i18n#typesafety).
 
 ```js
-{$LL.random_prefix_welcome()}
+{LL.random_prefix_welcome()}
 ```
 
 We use the `LL` wrapper to get the translated value of the given keys. In the example above it would return the translated text value of the key `random_prefix_welcome`
@@ -84,8 +95,9 @@ We use the `LL` wrapper to get the translated value of the given keys. In the ex
 
 If using Visual Studio Code, install our extension to generate keys for your project while never leaving the IDE.
 
-The VSCode extension adds a "Send to inlang" command to the context menu. The command automatically sends the selected text/string as base translation to the inlang dashboard together with the key name.
+The VSCode extension adds a "Create key" command to the context menu. The command automatically sends the selected text/string as base translation to the inlang dashboard together with the key name.
 
 Find our extension on the marketplace as [inlang](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension)
+
 
 For full documentation of the extension see the [inlang vscode-extension docs](https://github.com/inlang/inlang/tree/main/packages/inlang-vscode-extension)
