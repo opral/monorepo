@@ -72,7 +72,7 @@ The SDK (typesafe-i18n & the inlang typesafe importer) runs as background proces
 
 ```json title="Adjust the start script in ./package.json to:"
 
-"start": "npx concurrently --kill-others 'react-scripts start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'"
+"start": "npx concurrently --kill-others 'react-scripts start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
 
 ```
 
