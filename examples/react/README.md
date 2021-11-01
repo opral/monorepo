@@ -4,7 +4,6 @@ import NpmInstall from '../../docs-website/src/npm-install.md'
 > @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/react)  
 > @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/react)
 
-
 # Quickstart
 
 1. Clone the [inlang repository](https://github.com/inlang/inlang) by running
@@ -76,13 +75,12 @@ The SDK (typesafe-i18n & the inlang typesafe importer) runs as background proces
 Adjust the `start` script in `package.json` to:
 
 {
-  "start": "npm-run-all start typesafe-i18n @inlang/typesafe-i18n-importer",
-  "typesafe-i18n": "typesafe-i18n",
-  "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
+  "start": "npx concurrently --kill-others 'react-scripts start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
 }
 ```
 
 ## 2. Add Typesafe initialization
+
 Initialization of the internationalization should be done close to the root with the following tags.
 
 ```js
@@ -97,9 +95,9 @@ For React the default option is to use i18nObjects in the following way:
 
 ```js
 function HelloWorld(props) {
-    const { LL } = useContext(I18nContext)
+  const { LL } = useContext(I18nContext);
 
-    return LL.helloWorld()
+  return LL.helloWorld();
 }
 ```
 
@@ -108,7 +106,7 @@ If you have the vscode extension, just write the string, right click and send to
 ## 4. Set locale when user desires
 
 ```js
-<button onClick={() => setLocale('de')}>Deutsch</button>
+<button onClick={() => setLocale("de")}>Deutsch</button>
 ```
 
 To see additional tools see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n)

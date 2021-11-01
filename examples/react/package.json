@@ -21,9 +21,7 @@
     "start": "npx concurrently --kill-others 'craco start' 'npx typesafe-i18n' 'npx @inlang/typesafe-i18n-importer'",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject",
-    "typesafe-i18n": "typesafe-i18n",
-    "@inlang/typesafe-i18n-importer": "npx @inlang/typesafe-i18n-importer"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
