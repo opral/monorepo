@@ -12,7 +12,7 @@ import NpmInstall from '../../docs-website/src/npm-install.md'
 git clone https://github.com/inlang/inlang.git
 ```
 
-2. Open `inlang/examples/svelte-kit-example` in VSCode
+2. Open `inlang/examples/svelte-kit` in VSCode
 
 3. Install the [inlang VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension)
 
