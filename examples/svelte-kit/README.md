@@ -1,4 +1,5 @@
 import CodeBlock from '@theme/CodeBlock';
+import NpmInstall from '../../docs-website/src/npm-install.md'
 
 > @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/svelte-kit)  
 > @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/svelte-kit)
@@ -36,9 +37,7 @@ The following is a step by step guide to add inlang to an existing project.
 
 > Concurrently allows us to run the dev script, typesafe-i18n and importer in parallel.
 
-```bash
-npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrently --save-dev
-```
+<NpmInstall />
 
 ### 1.2. Create the .typesafe-i18n.json config file
 

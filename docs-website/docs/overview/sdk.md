@@ -88,4 +88,4 @@ The VSCode extension adds a "Send to inlang" command to the context menu. The co
 
 Find our extension on the marketplace as [inlang](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension)
 
-For full documentation of the extensio see [inlang vscode-extension docs](https://github.com/inlang/inlang/tree/main/packages/inlang-vscode-extension)
+For full documentation of the extension see the [inlang vscode-extension docs](https://github.com/inlang/inlang/tree/main/packages/inlang-vscode-extension)

@@ -1,4 +1,5 @@
 import CodeBlock from '@theme/CodeBlock';
+import NpmInstall from '../../docs-website/src/npm-install.md'
 
 > @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/react)  
 > @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/react)
@@ -24,10 +25,7 @@ The site should now be running on [http://localhost:3000](http://localhost:3000)
 
 ### Install the SDK
 
-```bash
-npm i typesafe-i18n
-npm i @inlang/typesafe-i18n-importer
-```
+<NpmInstall />
 
 For full documentation see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n) and [@inlang/typesafe-i18n-importer docs](https://github.com/inlang/inlang/tree/main/packages/typesafe-i18n-importer).
 

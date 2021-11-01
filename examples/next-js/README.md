@@ -2,6 +2,7 @@ import I18nRoutingDefinition from "../../docs-website/docs/definitions/i18n-rout
 import App from '!raw-loader!./pages/\_app.tsx';
 import NextJSConfig from '!raw-loader!./next.config.js';
 import CodeBlock from '@theme/CodeBlock';
+import NpmInstall from '../../docs-website/src/npm-install.md'
 
 > @GitHub reader: rendered version version is [here](https://docs.inlang.dev/getting-started/next-js)  
 > @inlang reader: source code can be found [here](https://github.com/inlang/inlang/tree/main/examples/next-js)
@@ -52,9 +53,7 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 
 > Concurrently allows us to run the dev script, typesafe-i18n and importer in parallel.
 
-```bash
-npm i typesafe-i18n && npm i @inlang/typesafe-i18n-importer && npm i concurrently --save-dev
-```
+<NpmInstall />
 
 ### 2.2. Create the .typesafe-i18n.json config file
 
