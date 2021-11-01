@@ -37,6 +37,7 @@
 				alert(response.error);
 			}
 		}
+		organizations = await database.from<definitions['organization']>('organization').select();
 		showAddProjectModal = true;
 	};
 
