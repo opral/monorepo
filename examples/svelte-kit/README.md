@@ -25,7 +25,7 @@ git clone https://github.com/inlang/inlang.git
 
 The site should now be running on [http://localhost:3000](http://localhost:3000).
 
-# Add inlang to an existing project
+# Add inlang to an existing SvelteKit project
 
 The following is a step by step guide to add inlang to an existing project.
 
@@ -115,10 +115,10 @@ Add the following to the `__layout` file to initialize to a certain language. Th
 Convert all text to be translated into keys, for Svelte Kit that mostly means using `$LL`
 
 ```js
-    <script lang="ts">
-        import LL from '../i18n/i18n-svelte'
-    </script>
-    {$LL.key({name: "John Doe"})}
+<script lang="ts">import LL from '../i18n/i18n-svelte'</script>;
+{
+	$LL.key({ name: 'John Doe' });
+}
 ```
 
 ### 2.4. Change the language
@@ -126,10 +126,8 @@ Convert all text to be translated into keys, for Svelte Kit that mostly means us
 Use `setLocale(locale)` anywhere you want to provide a different language.
 
 ```js
-    <script>
-        import { setLocale } from '../i18n/i18n-svelte'
-    </script>
-    
-    const locale = 'en'
-    setLocale(locale);
+<script>import {setLocale} from '../i18n/i18n-svelte'</script>;
+
+const locale = 'en';
+setLocale(locale);
 ```

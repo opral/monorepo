@@ -28,7 +28,7 @@ git clone https://github.com/inlang/inlang.git
 
 The site should now be running on [http://localhost:3000](http://localhost:3000).
 
-# Add inlang to an existing project
+# Add inlang to an existing Next.js project
 
 The following is a step by step guide to add inlang to an existing project.
 

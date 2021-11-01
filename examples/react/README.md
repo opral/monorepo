@@ -26,7 +26,7 @@ git clone https://github.com/inlang/inlang.git
 
 The site should now be running on [http://localhost:3000](http://localhost:3000).
 
-# Integrating the Inlang flow into your existing React project
+# Add inlang to an existing React project
 
 ## 1. Configure the SDK
 
