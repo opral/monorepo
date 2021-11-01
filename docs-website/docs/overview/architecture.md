@@ -5,7 +5,7 @@ title: Architecture
 
 # Architecture
 
- Inlang is an open source host of solutions that can be split into four distinct blocks. The dashboard hosting the translations, an importer to get translations into the SDK, an SDK which enables translations in your source code and lastly IDE integration to export directly to the dashboard.
+ Inlang is an open source localization solution for apps which is made up of four distinct components. The dashboard hosting the translations, an importer to get translations into the SDK, an SDK which enables translations in your source code and lastly IDE integration to export directly to the dashboard.
 
  ![inlang architecture](../../static/img/architecture.svg)
 
