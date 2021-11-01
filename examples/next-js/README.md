@@ -45,17 +45,19 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 {NextJSConfig}
 </CodeBlock>
 
-## 2. Configure Typesafe-i18n
+## 2. Configure the SDK
 
 > Read more about the SDK [here](/overview/sdk)
 
-### 2.1. Install typesafe-i18n, the importer and concurrently
+### 2.1. Install the SDK
 
 > Concurrently allows us to run the dev script, typesafe-i18n and importer in parallel.
 
 <NpmInstall />
 
-### 2.2. Create the .typesafe-i18n.json config file
+For full documentation see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n) and [@inlang/typesafe-i18n-importer docs](https://github.com/inlang/inlang/tree/main/packages/typesafe-i18n-importer).
+
+### 2.2. Create the `.typesafe-i18n.json` config file
 
 - `adapter` specifies that the generates i18n files should be react compatible.
 - `outputPath` specifies that the files should be generated in the `i18n` folder.
@@ -70,7 +72,7 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 
 ### 2.3. Create the `inlang.config.json` file.
 
-- `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id
+- `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id.
 - `wrappingPattern`: defines how a key (keyname) should be wrapped when creating a key with the [inlang
   VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension). For React it's
   "LL.keyname()".
@@ -86,7 +88,7 @@ NextJS supports i18n routing out of the box. Add the following to the `next.conf
 
 ### 2.4. Adjust the build script
 
-The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
+The SDK (typesafe-i18n & the inlang typesafe importer) runs as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
 
 Adjust the `dev` script in `package.json` to:
 

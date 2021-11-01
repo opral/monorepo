@@ -29,17 +29,19 @@ The site should now be running on [http://localhost:3000](http://localhost:3000)
 
 The following is a step by step guide to add inlang to an existing project.
 
-## 1. Configure Typesafe-i18n
+## 1. Configure the SDK
 
 > Read more about the SDK [here](/overview/sdk)
 
-### 1.1. Install typesafe-i18n, the importer and concurrently
+### 1.1. Install the SDK
 
 > Concurrently allows us to run the dev script, typesafe-i18n and importer in parallel.
 
 <NpmInstall />
 
-### 1.2. Create the .typesafe-i18n.json config file
+For full documentation see the [typesafe-i18n docs](https://github.com/ivanhofer/typesafe-i18n) and [@inlang/typesafe-i18n-importer docs](https://github.com/inlang/inlang/tree/main/packages/typesafe-i18n-importer).
+
+### 1.2. Create the `.typesafe-i18n.json` config file
 
 - `adapter` specifies that the generates i18n files should be react compatible.
 
@@ -52,7 +54,7 @@ The following is a step by step guide to add inlang to an existing project.
 
 ### 1.3. Create the `inlang.config.json` file.
 
-- `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id
+- `projectId`: create a project at [inlang](https://app.inlang.dev) and copy the project id.
 - `wrappingPattern`: defines how a key (keyname) should be wrapped when creating a key with the [inlang
   VSCode extension](https://marketplace.visualstudio.com/items?itemName=inlang.vscode-extension). For Svelte Kit it's
   "$LL.keyname()".
@@ -68,7 +70,7 @@ The following is a step by step guide to add inlang to an existing project.
 
 ### 1.4. Adjust the build script
 
-The SDK (typesafe-i18n & the inlang typesafe importer) run as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
+The SDK (typesafe-i18n & the inlang typesafe importer) runs as background processes during development to constantly fetch updated translations from the dashboard and generate corresponding types. Since the processes should run simultaneously next to the regular development process (`npm run dev`), we adjust the dev script in the `package.json` to run the regular dev script, the SDK and the importer in parallel with the help of [concurrently](https://www.npmjs.com/package/concurrently).
 
 Adjust the `dev` script in `package.json` to:
 
