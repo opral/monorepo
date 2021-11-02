@@ -11,8 +11,11 @@ export type CreateBaseTranslationRequestBody = {
 export async function postTranslateRequest(
     data: CreateBaseTranslationRequestBody
 ) {
+    let url1 = 'https://us-central1-inlang-92d67.cloudfunctions.net/helloWorld'
+    const url2 = 'https://app.inlang.dev/api/internal/create-base-translation'
+
     const response = await fetch(
-        'https://app.inlang.dev/api/internal/create-base-translation',
+        url1,
         {
             method: 'POST',
             body: JSON.stringify(data),
