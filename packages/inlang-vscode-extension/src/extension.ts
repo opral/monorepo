@@ -1,7 +1,9 @@
-import * as vscode from 'vscode'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import vscode from 'vscode'
 import { applyWrappingPattern, readAndValidateConfig } from './helpers'
 import { postTranslateRequest } from './translate'
 import { InlangConfig } from './types/inlangConfig'
+import { snakeCase } from 'lodash'
 
 const inlangCmd = 'vscode-extension.send'
 const inlangCmdName = 'Inlang: Create key'
@@ -21,9 +23,16 @@ function onCreate() {
 /**will be executed every time your command is executed*/
 async function onCommand(config: InlangConfig) {
     if (config === undefined) {
-        const currDir = vscode.workspace.workspaceFolders?.[0].uri.path
+        const openedDirectoryPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
+
+        if (openedDirectoryPath === undefined) {
+            vscode.window.showErrorMessage(
+                'You must open a directory in VSCode.'
+            )
+            throw 'You must open a directory in VSCode.';
+        }
         const configValidated = readAndValidateConfig(
-            currDir + '/inlang.config.json'
+            openedDirectoryPath + '/inlang.config.json'
         )
         if (configValidated.error) {
             vscode.window.showErrorMessage(configValidated.error)
@@ -32,33 +41,39 @@ async function onCommand(config: InlangConfig) {
             vscode.window.showErrorMessage('The config data was null.')
             throw configValidated.error
         }
-        let message =
-            currDir != null
-                ? 'loaded config from:' + JSON.stringify(currDir)
-                : 'please open a directory'
-
-        vscode.window.showInformationMessage(message)
         config = configValidated.data
     }
-
     const activeTextEditor = vscode.window.activeTextEditor
     const range = activeTextEditor?.selection
-    let selectionText = ''
-
-    if (range != null) {
-        selectionText = activeTextEditor?.document.getText(range) ?? ''
+    if (range !== null) {
+        const selectionText = activeTextEditor?.document.getText(range)
         const keyName = await vscode.window.showInputBox({
             prompt: 'your inlang key name',
         })
-
         if (keyName === undefined || keyName === '') {
             vscode.window.showInformationMessage('Key name not set.')
+        } else if (selectionText === undefined) {
+            vscode.window.showErrorMessage(
+                keyName + ' no text has been selected.'
+            )
+        } else if (keyName !== snakeCase(keyName)) {
+            vscode.window.showErrorMessage(
+                'key names must be snake case e.g. my_cool_key'
+            )
         } else {
+            // trimmed corrects formatting which can be corrupted due to template literal string
+            let trimmed = selectionText.replace(/(?:\n(?:\s*))+/g, ' ').trim()
+            if (trimmed.startsWith(`"`) || trimmed.endsWith(`'`)) {
+                trimmed = trimmed.slice(1, trimmed.length)
+            }
+            if (trimmed.endsWith(`"`) || trimmed.endsWith(`'`)) {
+                trimmed = trimmed.slice(0, trimmed.length - 1)
+            }
             const response = await postTranslateRequest({
                 projectId: config.projectId,
                 baseTranslation: {
                     key_name: keyName,
-                    text: selectionText,
+                    text: trimmed,
                 },
             })
             if (response.ok && range) {
@@ -98,7 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
     // The commandId parameter must match the command field in package.json
 
     let config: InlangConfig
-    let disposable = vscode.commands.registerCommand(inlangCmd, () => {
+    const disposable = vscode.commands.registerCommand(inlangCmd, () => {
         onCommand(config)
     })
 
@@ -106,7 +121,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+// export function deactivate() {}
 
 export class InlangCA implements vscode.CodeActionProvider {
     public static readonly providedCodeActionKinds = [
@@ -119,7 +134,7 @@ export class InlangCA implements vscode.CodeActionProvider {
         context: vscode.CodeActionContext,
         token: vscode.CancellationToken
     ): vscode.ProviderResult<(vscode.CodeAction | vscode.Command)[]> {
-        let ca1 = (new vscode.CodeAction(inlangCmdName).command = {
+        const ca1 = (new vscode.CodeAction(inlangCmdName).command = {
             command: inlangCmd,
             title: inlangCmdName,
         })
@@ -132,4 +147,3 @@ export class InlangCA implements vscode.CodeActionProvider {
         throw new Error('Method not implemented.')
     }
 }
-// "@supabase/supabase-js": "^1.23.0",

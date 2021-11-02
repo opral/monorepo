@@ -1,0 +1,6 @@
+{
+	"projectId": "debe4090-093c-47a2-8da0-fd61be4a76cc",
+	"vsCodeExtension": {
+		"wrappingPattern": "{$LL.keyname()}"
+	}
+}

@@ -2,7 +2,7 @@ datasource db {
   provider          = "postgresql"
   // localhost database.
   url               = "postgres://postgres:postgres@localhost:5432/postgres"
-  shadowDatabaseUrl = "postgres://postgres:shadow@localhost:9432/postgres"
+  shadowDatabaseUrl = "postgres://postgres:postgres@localhost:9432/postgres"
   //! production database
   // url      = env("PRODUCTION_DATABASE_URL")
 }

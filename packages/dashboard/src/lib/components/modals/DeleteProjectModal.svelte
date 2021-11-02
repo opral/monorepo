@@ -2,8 +2,6 @@
 	import { Modal } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
-	import { projectStore } from '$lib/stores/projectStore';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
 	export function show(args: { project: definitions['project'] }): void {
@@ -26,7 +24,6 @@
 		if (deleteRequest.error) {
 			alert(deleteRequest.error.message);
 		}
-		projectStore.getData({ projectId: $page.params.projectId });
 		open = false;
 		goto('/');
 	}

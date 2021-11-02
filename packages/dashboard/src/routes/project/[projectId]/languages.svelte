@@ -11,7 +11,8 @@
 		ToolbarContent,
 		ToolbarSearch
 	} from 'carbon-components-svelte';
-	import Save16 from 'carbon-icons-svelte/lib/Save16';
+	import CheckmarkFilled16 from 'carbon-icons-svelte/lib/CheckmarkFilled16';
+	import CheckmarkOutline16 from 'carbon-icons-svelte/lib/CheckmarkFilled16';
 
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import CreateLanguageModal from '$lib/components/modals/CreateLanguageModal.svelte';
@@ -41,6 +42,9 @@
 	function languageProgress(iso: definitions['language']['iso_code']) {
 		const allTranslations =
 			$projectStore.data?.translations.filter((translation) => translation.iso_code === iso) ?? [];
+		if (allTranslations.length === 0) {
+			return 0;
+		}
 		const missingReview = allTranslations.filter(
 			(translation) => translation.is_reviewed === false
 		);
@@ -126,17 +130,20 @@
 				{#if row.isDefaultLanguage === false}
 					<Button
 						kind="ghost"
-						icon={Save16}
+						icon={CheckmarkFilled16}
 						iconDescription="Set as default language"
-						color="green"
 						on:click={() => {
 							setDefaultLanguageModal.language = row.languageObject;
 							setDefaultLanguageModal.show = true;
 						}}
 					/>
 				{:else}
-					<!-- ugly trick to align the delete button if the language is the default -->
-					<div class="w-12" />
+					<Button
+						kind="ghost"
+						icon={CheckmarkOutline16}
+						iconDescription="Set as default language"
+						disabled
+					/>
 				{/if}
 				<Button
 					kind="danger-ghost"
