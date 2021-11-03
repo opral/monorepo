@@ -88,7 +88,7 @@
 		});
 		if (memberUpsert.error) {
 			console.error(memberUpsert.error);
-			alert(memberUpsert.error.message);
+			alert("Error code: " + memberUpsert.error.code + "\n" + inputEmail + " is not signed up with Inlang");
 		}
 		if (memberUpsert.status === 409) {
 			alert(inputEmail + ' is already a member');
