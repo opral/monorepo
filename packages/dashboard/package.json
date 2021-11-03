@@ -66,6 +66,7 @@
 	"type": "module",
 	"dependencies": {
 		"@now/build-utils": "^2.7.0",
+		"@openreplay/tracker": "^3.4.5",
 		"@supabase/supabase-js": "^1.23.0",
 		"deepl": "^1.0.12",
 		"dotenv": "^10.0.0",
