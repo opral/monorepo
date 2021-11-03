@@ -10,7 +10,6 @@
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
 
-	//TODO: reload table on invite and clear text input
 	//TODO: fix join, right now user role is hardcoded to admin
 
 	let inputEmail = '';
@@ -77,29 +76,35 @@
 		const userId = await database
 			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
 			.single();
-		if (userId.error || userId.data === null) {
-			console.log(userId.error.message);
-			alert(inputEmail + " is not signed up with Inlang");
-			return;
-		}
-		const memberUpsert = await database.from<definitions['member']>('member').insert({
-			organization_id: organization_id,
-			user_id: userId.data,
-			role: 'ADMIN'
-		});
-		if (memberUpsert.error) {
-			alert(memberUpsert.error.message);
-		}
-		if (memberUpsert.status === 409) {
-			alert(inputEmail + ' is already a member');
-		} else if (memberUpsert.status === 201) {
-			//success
-			await loadUsers();
+		if (userId.error) {
+			alert(userId.error.message);
+		} else if (userId.data === null) {
+			alert(inputEmail + " is not a user of inlang yet")
 		} else {
-			alert('An unknown error occurred');
+			const memberUpsert = await database.from<definitions['member']>('member').insert({
+				organization_id: organization_id,
+				user_id: userId.data,
+				role: 'ADMIN'
+			});
+			if (memberUpsert.error) {
+				console.error(memberUpsert.error);
+				alert(memberUpsert.error.message);
+			}
+			if (memberUpsert.status === 409) {
+				alert(inputEmail + ' is already a member');
+			} else if (memberUpsert.status === 201) {
+				//success
+				inputEmail = '';
+				await loadUsers();
+			} else {
+				if (memberUpsert.error) {
+					alert(memberUpsert.error.message)
+				} else {
+					alert('An unknown error occurred');
+				}
+			}
 		}
-		}
-		inputEmail = '';
+	}
 
 	function isOwner(userId: definitions['user']['id']): boolean {
 		return organization.created_by_user_id === userId;
