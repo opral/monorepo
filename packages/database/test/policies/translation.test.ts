@@ -20,7 +20,7 @@ describe("policies/translation", () => {
         await supabase.auth.signOut();
         const translations = await supabase.from<definitions["translation"]>("translation")
             .select();
-        expect(translations.data?.length).toBeGreaterThan(0);
+        expect(translations.data!.length).toBeGreaterThan(0);
     });
     test("Member can delete translation", async () => {
         const project = await supabase.from<definitions["project"]>("project")
