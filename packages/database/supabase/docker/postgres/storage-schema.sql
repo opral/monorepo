@@ -1,10 +1,11 @@
-CREATE SCHEMA IF NOT EXISTS storage AUTHORIZATION supabase_admin;
+CREATE SCHEMA IF NOT EXISTS storage AUTHORIZATION postgres;
 
 grant usage on schema storage to postgres, anon, authenticated, service_role;
 alter default privileges in schema storage grant all on tables to postgres, anon, authenticated, service_role;
 alter default privileges in schema storage grant all on functions to postgres, anon, authenticated, service_role;
 alter default privileges in schema storage grant all on sequences to postgres, anon, authenticated, service_role;
 
+DROP TABLE IF EXISTS "storage"."buckets";
 CREATE TABLE "storage"."buckets" (
     "id" text not NULL,
     "name" text NOT NULL,
@@ -16,6 +17,7 @@ CREATE TABLE "storage"."buckets" (
 );
 CREATE UNIQUE INDEX "bname" ON "storage"."buckets" USING BTREE ("name");
 
+DROP TABLE IF EXISTS "storage"."objects";
 CREATE TABLE "storage"."objects" (
     "id" uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
     "bucket_id" text,
@@ -34,7 +36,7 @@ CREATE INDEX name_prefix_search ON storage.objects(name text_pattern_ops);
 
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
-CREATE FUNCTION storage.foldername(name text)
+CREATE OR REPLACE FUNCTION storage.foldername(name text)
  RETURNS text[]
  LANGUAGE plpgsql
 AS $function$
@@ -46,7 +48,7 @@ BEGIN
 END
 $function$;
 
-CREATE FUNCTION storage.filename(name text)
+CREATE OR REPLACE FUNCTION storage.filename(name text)
  RETURNS text
  LANGUAGE plpgsql
 AS $function$
@@ -58,7 +60,7 @@ BEGIN
 END
 $function$;
 
-CREATE FUNCTION storage.extension(name text)
+CREATE OR REPLACE FUNCTION storage.extension(name text)
  RETURNS text
  LANGUAGE plpgsql
 AS $function$
@@ -68,12 +70,11 @@ _filename text;
 BEGIN
 	select string_to_array(name, '/') into _parts;
 	select _parts[array_length(_parts,1)] into _filename;
-	-- @todo return the last part instead of 2
 	return split_part(_filename, '.', 2);
 END
 $function$;
 
-CREATE FUNCTION storage.search(prefix text, bucketname text, limits int DEFAULT 100, levels int DEFAULT 1, offsets int DEFAULT 0)
+CREATE OR REPLACE FUNCTION storage.search(prefix text, bucketname text, limits int DEFAULT 100, levels int DEFAULT 1, offsets int DEFAULT 0)
  RETURNS TABLE (
     name text,
     id uuid,
@@ -87,30 +88,24 @@ AS $function$
 DECLARE
 _bucketId text;
 BEGIN
-    -- will be replaced by migrations when server starts
-    -- saving space for cloud-init
+    select buckets."id" from buckets where buckets.name=bucketname limit 1 into _bucketId;
+	return query 
+		with files_folders as (
+			select ((string_to_array(objects.name, '/'))[levels]) as folder
+			from objects
+			where objects.name ilike prefix || '%'
+			and bucket_id = _bucketId
+			GROUP by folder
+			limit limits
+			offset offsets
+		) 
+		select files_folders.folder as name, objects.id, objects.updated_at, objects.created_at, objects.last_accessed_at, objects.metadata from files_folders 
+		left join objects
+		on prefix || files_folders.folder = objects.name
+        where objects.id is null or objects.bucket_id=_bucketId;
 END
 $function$;
 
--- create migrations table
--- https://github.com/ThomWright/postgres-migrations/blob/master/src/migrations/0_create-migrations-table.sql
--- we add this table here and not let it be auto-created so that the permissions are properly applied to it
-CREATE TABLE IF NOT EXISTS storage.migrations (
-  id integer PRIMARY KEY,
-  name varchar(100) UNIQUE NOT NULL,
-  hash varchar(40) NOT NULL, -- sha1 hex encoded hash of the file name and contents, to ensure it hasn't been altered since applying the migration
-  executed_at timestamp DEFAULT current_timestamp
-);
-
-CREATE USER supabase_storage_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
-GRANT ALL PRIVILEGES ON SCHEMA storage TO supabase_storage_admin;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA storage TO supabase_storage_admin;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA storage TO supabase_storage_admin;
-ALTER USER supabase_storage_admin SET search_path = "storage";
-ALTER table "storage".objects owner to supabase_storage_admin;
-ALTER table "storage".buckets owner to supabase_storage_admin;
-ALTER table "storage".migrations OWNER TO supabase_storage_admin;
-ALTER function "storage".foldername(text) owner to supabase_storage_admin;
-ALTER function "storage".filename(text) owner to supabase_storage_admin;
-ALTER function "storage".extension(text) owner to supabase_storage_admin;
-ALTER function "storage".search(text,text,int,int,int) owner to supabase_storage_admin;
+GRANT ALL PRIVILEGES ON SCHEMA storage TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA storage TO postgres;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA storage TO postgres; 
