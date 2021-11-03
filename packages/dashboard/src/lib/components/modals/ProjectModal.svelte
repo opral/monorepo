@@ -77,10 +77,12 @@
 				alert(insertDefaultLanguage.error.message);
 			}
 			const insertOtherLanguages = await database.from<definitions['language']>('language').insert(
-				selectedLanguageIsoCodes.map((iso) => ({
-					iso_code: iso,
-					project_id: insertProject.data.id
-				}))
+				selectedLanguageIsoCodes
+					.filter((language) => language !== selectedDefaultLanguageIso)
+					.map((iso) => ({
+						iso_code: iso,
+						project_id: insertProject.data.id
+					}))
 			);
 			if (insertOtherLanguages.error) {
 				alert(insertOtherLanguages.error.message);
@@ -153,12 +155,10 @@
 				filterable
 				invalid={selectedLanguageIsoCodes.length === 0}
 				invalidText="Select at least one language..."
-				items={ISO6391.getLanguages(ISO6391.getAllCodes())
-					.filter((language) => language.code !== selectedDefaultLanguageIso)
-					.map((language) => ({
-						id: language.code,
-						text: `${language.code} - ${language.name}`
-					}))}
+				items={ISO6391.getLanguages(ISO6391.getAllCodes()).map((language) => ({
+					id: language.code,
+					text: `${language.code} - ${language.name}`
+				}))}
 			/>
 			<p>
 				Languages selected:
