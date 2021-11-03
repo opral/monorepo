@@ -78,7 +78,8 @@
 			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
 			.single();
 		if (userId.error || userId.data === null) {
-			alert(userId.error?.message);
+			console.log(userId.error.message);
+			alert(inputEmail + " is not signed up with Inlang");
 			return;
 		}
 		const memberUpsert = await database.from<definitions['member']>('member').insert({
@@ -87,8 +88,7 @@
 			role: 'ADMIN'
 		});
 		if (memberUpsert.error) {
-			console.error(memberUpsert.error);
-			alert("Error code: " + memberUpsert.error.code + "\n" + inputEmail + " is not signed up with Inlang");
+			alert(memberUpsert.error.message);
 		}
 		if (memberUpsert.status === 409) {
 			alert(inputEmail + ' is already a member');
@@ -98,8 +98,8 @@
 		} else {
 			alert('An unknown error occurred');
 		}
+		}
 		inputEmail = '';
-	}
 
 	function isOwner(userId: definitions['user']['id']): boolean {
 		return organization.created_by_user_id === userId;
