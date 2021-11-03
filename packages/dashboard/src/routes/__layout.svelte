@@ -43,9 +43,9 @@
 	if (browser) {
 		auth.onAuthStateChange((event) => {
 			if (event === 'SIGNED_IN') {
+				tracker.setUserID(auth.user()?.email ?? 'Unknown');
 				goto('/');
 			} else if (event === 'SIGNED_OUT') {
-				tracker.stop();
 				goto('/auth');
 			}
 		});
