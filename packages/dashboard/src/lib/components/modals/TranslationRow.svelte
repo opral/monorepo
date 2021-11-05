@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Tag, Toggle, TextInput, Button } from 'carbon-components-svelte';
+	import { Tag, Toggle, TextInput, Button, TextArea, ButtonSet } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
 	import { cloneDeep, isEqual } from 'lodash-es';
-
+	import ISO6391 from 'iso-639-1';
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
 
 	export let translation: Readonly<definitions['translation']>;
@@ -31,27 +31,22 @@
 </script>
 
 <row class="items-center space-x-2 justify-between">
-	{#if isBaseTranslation}
-		<Tag type="green">{translation.iso_code}</Tag>
-	{:else}
-		<Tag type="blue">{translation.iso_code}</Tag>
-	{/if}
-	<TextInput
-		class="flex-grow"
-		bind:value={translationCopy.text}
-		size="sm"
-		invalid={translationCopy.text === ''}
-		invalidText="Missing translation"
-	/>
-	<Button
-		iconDescription="Save the translation"
-		icon={Save32}
-		disabled={isEqual(translation, translationCopy)}
-		kind="ghost"
-		on:click={handleUpdate}
-	/>
-
-	<row class="items-center space-x-2">
+	<row class="items-center">
+		{#if isBaseTranslation}
+			<Tag type="green">{translation.iso_code}</Tag>
+		{:else}
+			<Tag type="blue">{translation.iso_code}</Tag>
+		{/if}
+		{ISO6391.getName(translation.iso_code)}
+	</row>
+	<row class="items-center">
+		<Button
+			iconDescription="Save the translation"
+			icon={Save32}
+			disabled={isEqual(translation, translationCopy)}
+			kind="ghost"
+			on:click={handleUpdate}>Save</Button
+		>
 		<Toggle
 			class="flex-shrink -mt-4 mr-24"
 			labelA="Not approved"
@@ -62,4 +57,13 @@
 			on:toggle={handleUpdate}
 		/>
 	</row>
+</row>
+<row>
+	<TextArea
+		class="flex-grow"
+		bind:value={translationCopy.text}
+		invalid={translationCopy.text === ''}
+		invalidText="Missing translation"
+		rows={2}
+	/>
 </row>
