@@ -5,7 +5,8 @@ import type { LocaleMapping } from './types/LocaleMapping'
 import { isEqual } from 'lodash-es'
 import fs from 'fs'
 import path from 'path'
-import * as url from 'url'
+
+let errorCount = 0
 
 // Recursive function as it is assumed that namespace is not deep enough to cause stack overflow.
 function createNestedObject(
@@ -48,6 +49,7 @@ async function updateTranslations(args: { projectId: string }) {
             args.projectId
         )
     }
+    errorCount = 0
     const localeMappingList: LocaleMapping[] = []
 
     for (const t of translations.data ?? []) {
@@ -96,8 +98,11 @@ function main() {
     setInterval(
         () =>
             updateTranslations({ projectId: config.projectId }).catch((err) => {
-                console.error(err)
-                process.exit()
+                errorCount++
+                if (errorCount > 2) {
+                    console.error(err)
+                    process.exit()
+                }
             }),
         2000
     )
