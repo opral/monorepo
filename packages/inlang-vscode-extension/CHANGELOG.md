@@ -1,3 +1,5 @@
+### 0.0.6
+-   Solve let's encrypt certificate issue.
 ### 0.0.5
 -   Change workspace path to work correctly with all OS
 
