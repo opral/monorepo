@@ -17,7 +17,8 @@ const config = {
   projectName: "inlang",
   scripts: [
     {
-      src: "https://app.bromb.co/widget.js",
+      src: "https://cdn.jsdelivr.net/gh/samuelstroschein/bromb/packages/web/dist/widget.js",
+      "data-theme": "dark",
       defer: true,
     },
   ],

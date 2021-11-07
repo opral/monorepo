@@ -1,7 +1,7 @@
 <a href="https://youtu.be/mQkD1Wckp3U" target="_blank">
     <p align="center">
         <img width="500rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-example.gif" />
-        <img width="400rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-in-81-seconds-banner.jpeg">
+        <img width="400rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-in-81-seconds-banner.jpeg" />
     </p>
 </a>
 
