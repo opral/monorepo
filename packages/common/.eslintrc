@@ -5,6 +5,9 @@
     "node": true
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
+  "plugins": ["@typescript-eslint", "functional"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier", "plugin:functional/lite"],
+  "rules": {
+    "functional/no-expression-statement": 1
+  }
 }
