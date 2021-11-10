@@ -47,51 +47,22 @@ enum member_role {
 }
 
 model project {
-  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
-  organization_id  String        @db.Uuid
-  organization     organization  @relation(fields: [organization_id], references: [id])
+  organization_id  String       @db.Uuid
+  organization     organization @relation(fields: [organization_id], references: [id])
   default_iso_code iso_639_1
-  created_at       DateTime      @default(now())
-  keys             key[]
+  created_at       DateTime     @default(now())
   languages        language[]
-  translation      translation[]
 }
 
 model language {
-  iso_code     iso_639_1
-  project_id   String        @db.Uuid
-  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  translations translation[] @relation
+  iso_code   iso_639_1
+  project_id String    @db.Uuid
+  project    project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  file       String    @default("")
 
   @@id([project_id, iso_code])
-}
-
-model key {
-  project_id   String        @db.Uuid
-  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  /// The name of the key e.g. "example.hello"
-  name         String
-  description  String?
-  translations translation[]
-  created_at   DateTime      @default(now())
-
-  @@id([project_id, name])
-}
-
-model translation {
-  key_name    String
-  key         key       @relation(fields: [key_name, project_id], references: [name, project_id], onDelete: Cascade)
-  project_id  String    @db.Uuid
-  project     project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  iso_code    iso_639_1
-  language    language  @relation(fields: [project_id, iso_code], references: [project_id, iso_code], onDelete: Cascade)
-  is_reviewed Boolean   @default(false)
-  /// Contains the translation -> "Hallo Welt"
-  text        String?
-  created_at  DateTime  @default(now())
-
-  @@id([project_id, key_name, iso_code])
 }
 
 enum iso_639_1 {
