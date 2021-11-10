@@ -2,3 +2,4 @@
 # build artefacts
 dist/*
 jest.config.js
+tests/*
