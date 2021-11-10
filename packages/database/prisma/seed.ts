@@ -44,56 +44,6 @@ async function main() {
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
           },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                    {
-                      iso_code: "de",
-                      text: "Hallo Welt",
-                      is_reviewed: false,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                    {
-                      iso_code: "de",
-                      text: "Willkommen zu unserer Platform",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                    {
-                      iso_code: "de",
-                      text: "Bestätigen",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-            ],
-          },
         },
       },
     },
@@ -111,46 +61,6 @@ async function main() {
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "fr" }] },
           },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                    {
-                      iso_code: "fr",
-                      text: "",
-                      is_reviewed: false,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                  ],
-                },
-              },
-            ],
-          },
         },
       },
     },
@@ -165,41 +75,6 @@ async function main() {
           default_iso_code: "en",
           languages: {
             createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
-          },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                  ],
-                },
-              },
-            ],
           },
         },
       },

@@ -18,14 +18,6 @@ describe("row level security is activated", () => {
     const languages = await supabase.from<definitions["language"]>("language").select();
     expect(languages.data?.length).toEqual(0);
   });
-  test("on key table", async () => {
-    const keys = await supabase.from<definitions["key"]>("key").select();
-    expect(keys.data?.length).toEqual(0);
-  });
-  /*test("on translation table", async () => {
-    const translations = await supabase.from<definitions["translation"]>("translation").select();
-    expect(translations.data?.length).toEqual(0);
-  });*/
   test("on member table", async () => {
     const members = await supabase.from<definitions["member"]>("member").select();
     expect(members.data?.length).toEqual(0);
