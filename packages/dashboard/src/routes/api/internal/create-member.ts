@@ -37,6 +37,19 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			};
 
 		}
+        const organizaiton = await supabase
+            .from<definitions['member']>('member')
+            .select()
+            .match({ user_id: requestBody.adminId,
+                    organization_id: requestBody.organizationId,
+                    role: "ADMIN"})
+            .single()
+        if (organizaiton.data === null || organizaiton.error) {
+            //not a admin of organization
+            return {
+                status: 400
+            }
+        }
         //upsert member
         const memberUpsert = await supabase.from<definitions['member']>('member').insert({
             organization_id: requestBody.organizationId,
