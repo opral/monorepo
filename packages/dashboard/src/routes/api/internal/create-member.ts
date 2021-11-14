@@ -56,19 +56,14 @@ export async function post(request: Request): Promise<EndpointOutput> {
             user_id: newMember.data.id,
             role: requestBody.role
         });
-        if (memberUpsert.error) {
-            console.error(memberUpsert.error);
-            alert(memberUpsert.error.message);
-        }
         if (memberUpsert.status === 409) {
             //is already member
             return {
                 status: 409
             }
-        } else if (memberUpsert.status === 201) {
-            //success
+        } else if (memberUpsert.error) {
             return {
-                status: 201
+                status: memberUpsert.status
             }
         }
         return {

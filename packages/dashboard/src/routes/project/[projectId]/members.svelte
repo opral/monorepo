@@ -9,6 +9,7 @@
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
+	import type { CreateMemberRequestBody } from '../../api/internal/create-member';
 
 	//TODO: fix join, right now user role is hardcoded to admin
 
@@ -68,6 +69,40 @@
 			if (users.error) {
 				alert(users.error.message);
 			}
+		}
+	}
+
+	async function inviteUserSS() {
+		const organization_id = $projectStore.data?.project.organization_id;
+		const userId = database.auth.user()?.id
+		if (organization_id === undefined || userId === undefined) {
+			return {
+				status: 500
+			}
+		}
+
+		const body: CreateMemberRequestBody = {
+			organizationId: organization_id,
+			adminId: userId,
+			memberEmail: inputEmail,
+			role: "ADMIN"
+		};
+		const response = await fetch('/api/internal/create-member', {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/json'
+			}),
+			body: JSON.stringify(body)
+		});
+		if (response.ok) {
+			inputEmail = '';
+			await loadUsers();
+		} else if (response.status === 500) {
+			alert(inputEmail + " is not a user of inlang yet");
+		} else  if (response.status === 400) {
+			alert("You do not have priviliges to invite new users this organizaiton");
+		} else {
+			alert("An unknown error occurred");
 		}
 	}
 
