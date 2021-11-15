@@ -22,14 +22,6 @@ export class TranslationAPI {
         throw new Error(errorMessage);
     }
 
-    #isMessageOrTerm(entry: Entry): entry is Entry {
-        return 'value' in entry;
-    }
-
-    #getMessageOrTerm(resource: TranslationData<Resource>): (Message | Term)[] | undefined {
-        return resource.data.body.filter(this.#isMessageOrTerm) as (Message | Term)[];
-    }
-
     getTranslation(key: string, language: string): string | null {
         const translation = this.resources
             .find((resource) => resource.languageCode === language)
@@ -58,5 +50,26 @@ export class TranslationAPI {
                 (resource) => resource.type !== ('Message' || 'Term') || resource.id.name === key
             )
         );
+    }
+
+    updateKey(key: string, translation: string, language: LanguageCode): Error[] | null {
+        const translations = this.resources.find((resource) => resource.languageCode === language)?.data.body;
+        if (translations === undefined) {
+            return [new Error('Language not found')];
+        }
+
+        const indexOfTranslation = translations?.findIndex(
+            (entry: Entry) => entry.type === ('Message' || 'Term') && entry.id.name === key
+        );
+
+        if (indexOfTranslation === undefined) {
+            return [new Error('Key not found')];
+        }
+        const parsedTranslation = this.adapter.parse(`${key} = ${translation}`).data?.body[0];
+        if (parsedTranslation === undefined) {
+            return [new Error('Incorrect translation')];
+        }
+        translations[indexOfTranslation] = parsedTranslation;
+        return null;
     }
 }
