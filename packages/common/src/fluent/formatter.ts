@@ -2,6 +2,7 @@ import { Message, Resource, Term, Entry, Identifier, Pattern, Attribute } from '
 import { AdapterInterface } from '../types/adapterInterface';
 import { LanguageCode } from '../types/languageCode';
 import { TranslationData } from '../types/translationData';
+import { remove } from 'lodash';
 
 export class TranslationAPI {
     adapter: AdapterInterface;
@@ -30,16 +31,14 @@ export class TranslationAPI {
     }
 
     getTranslation(key: string, language: string): string | null {
-        return this.adapter.serialize(
-            new Resource(
-                this.#getMessageOrTerm(
-                    this.resources.find((resource) => resource.languageCode === language) ??
-                        this.#throwExpression('Language not found')
-                )?.filter((messageOrTerm) => messageOrTerm.id.name === key) ??
-                    this.#throwExpression('Getting translation failed')
-            ),
-            {}
-        ).data;
+        const translation = this.resources
+            .find((resource) => resource.languageCode === language)
+            ?.data.body.find((entry) => entry.type === ('Message' || 'Term') && entry.id.name === key);
+        if (translation === undefined) {
+            return null;
+        }
+
+        return this.adapter.serialize(new Resource([translation]), {}).data;
     }
 
     createKey(key: string, base: string): boolean {
@@ -49,6 +48,15 @@ export class TranslationAPI {
                 ?.data?.body?.push(
                     this.adapter.parse(`${key} = ${base}`).data?.body[0] ?? this.#throwExpression('Parsing failed')
                 ) ?? this.#throwExpression('Finding base locale failed')) > 0
+        );
+    }
+
+    deleteKey(key: string): boolean {
+        return this.resources.some((resource) =>
+            remove(
+                resource.data.body,
+                (resource) => resource.type !== ('Message' || 'Term') || resource.id.name === key
+            )
         );
     }
 }

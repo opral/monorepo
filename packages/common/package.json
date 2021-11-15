@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
+    "@types/lodash": "^4.14.176",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@fluent/bundle": "^0.17.0",
-    "@fluent/syntax": "^0.18.0"
+    "@fluent/syntax": "^0.18.0",
+    "lodash": "^4.17.21"
   }
 }
