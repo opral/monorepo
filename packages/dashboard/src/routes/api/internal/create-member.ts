@@ -70,7 +70,6 @@ export async function post(request: Request): Promise<EndpointOutput> {
             status: 200
         }
 	} catch (e) {
-		console.error(e);
 		return {
 			status: 500
 		};

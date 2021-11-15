@@ -101,7 +101,10 @@
 			alert(inputEmail + " is not a user of inlang yet");
 		} else  if (response.status === 400) {
 			alert("You do not have priviliges to invite new users this organizaiton");
-		} else {
+		} else if (response.status === 409) {
+			alert(inputEmail + ' is already a member');
+		}
+		else {
 			alert("An unknown error occurred");
 		}
 	}
@@ -173,7 +176,7 @@
 		invalid={inputEmail.length > 0 && inputIsValidEmail === false}
 		invalidText="Invalid email."
 	/>
-	<Button disabled={inputIsValidEmail === false} icon={SendAlt24} on:click={handleInviteUser}>
+	<Button disabled={inputIsValidEmail === false} icon={SendAlt24} on:click={inviteUserSS}>
 		Invite
 	</Button>
 </row>
