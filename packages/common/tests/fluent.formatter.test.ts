@@ -10,4 +10,9 @@ describe('constructor', () => {
     it('should print out the test key', () => {
         expect(translationAPI.getTranslation('test', 'en')).toMatch('test = this is my test');
     });
+
+    it('should create a key', () => {
+        translationAPI.createKey('new_test', 'here is another translation');
+        expect(translationAPI.getTranslation('new_test', 'en')).toMatch('here is another translation');
+    });
 });
