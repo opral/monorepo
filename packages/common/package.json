@@ -22,10 +22,13 @@
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-functional": "^4.0.2",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "ts-jest": "^26.5.2",
     "typescript": "^4.2.2"
+  },
+  "dependencies": {
+    "@fluent/bundle": "^0.17.0",
+    "@fluent/syntax": "^0.18.0"
   }
 }
