@@ -10,7 +10,7 @@ describe('constructor', () => {
             { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig' },
             { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich' },
         ],
-        baseLocale: 'en',
+        baseLanguage: 'en',
     });
     it('should print out the test key', () => {
         expect(translationAPI.getTranslation('test', 'en')).toMatch('test = this is my test');

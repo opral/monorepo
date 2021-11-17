@@ -7,15 +7,15 @@ import { remove } from 'lodash';
 export class TranslationAPI {
     adapter: AdapterInterface;
     resources: { data: Resource; languageCode: LanguageCode }[];
-    baseLocale: LanguageCode;
+    baseLanguage: LanguageCode;
 
-    constructor(args: { adapter: AdapterInterface; files: TranslationFile[]; baseLocale: LanguageCode }) {
+    constructor(args: { adapter: AdapterInterface; files: TranslationFile[]; baseLanguage: LanguageCode }) {
         this.adapter = args.adapter;
         this.resources = args.files.map((file) => ({
             languageCode: file.languageCode,
             data: this.adapter.parse(file.data).data ?? this.#throwExpression('Parsing failed'),
         }));
-        this.baseLocale = args.baseLocale;
+        this.baseLanguage = args.baseLanguage;
     }
 
     #throwExpression(errorMessage: string): never {
@@ -36,7 +36,7 @@ export class TranslationAPI {
     createKey(key: string, base: string): boolean {
         return (
             (this.resources
-                .find((resource) => resource.languageCode === this.baseLocale)
+                .find((resource) => resource.languageCode === this.baseLanguage)
                 ?.data?.body?.push(
                     this.adapter.parse(`${key} = ${base}`).data?.body[0] ?? this.#throwExpression('Parsing failed')
                 ) ?? this.#throwExpression('Finding base locale failed')) > 0
@@ -77,7 +77,7 @@ export class TranslationAPI {
     checkMissingTranslations(): { key: string; languageCodes: LanguageCode[] }[] | null {
         return (
             this.resources
-                .find((baseResource) => baseResource.languageCode === this.baseLocale)
+                .find((baseResource) => baseResource.languageCode === this.baseLanguage)
                 ?.data.body.filter((entry) => entry.type === 'Message' || entry.type === 'Term')
                 .map((baseEntry) => ({
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
