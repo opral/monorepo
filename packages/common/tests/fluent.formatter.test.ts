@@ -6,8 +6,9 @@ describe('constructor', () => {
     const translationAPI = new TranslationAPI({
         adapter: new FluentAdapter(),
         locales: [
-            { languageCode: 'en', data: 'test = this is my test' },
-            { languageCode: 'da', data: 'test = dette er min test' },
+            { languageCode: 'en', data: 'test = this is my test\nhello = hello there' },
+            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig' },
+            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich' },
         ],
         baseLocale: 'en',
     });
@@ -28,5 +29,9 @@ describe('constructor', () => {
     it('should update a key', () => {
         translationAPI.updateKey('new_test', 'why not this instead', 'en');
         expect(translationAPI.getTranslation('new_test', 'en')).toMatch('new_test = why not this instead');
+    });
+
+    it('should check for missing translations', () => {
+        expect(translationAPI.checkMissingTranslations()).toEqual([{ key: 'new_test', languageCodes: ['da', 'de'] }]);
     });
 });

@@ -72,4 +72,29 @@ export class TranslationAPI {
         translations[indexOfTranslation] = parsedTranslation;
         return null;
     }
+
+    // This probably runs really poorly... Too bad!
+    checkMissingTranslations(): { key: string; languageCodes: LanguageCode[] }[] | null {
+        return (
+            this.resources
+                .find((baseResource) => baseResource.languageCode === this.baseLocale)
+                ?.data.body.filter((entry) => entry.type === 'Message' || entry.type === 'Term')
+                .map((baseEntry) => ({
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    key: baseEntry.id.name as string,
+                    languageCodes: this.resources
+                        .map((resource) => {
+                            return resource.data.body.some(
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                (entry) => entry.id.name === baseEntry.id.name
+                            ) === false
+                                ? resource.languageCode
+                                : null;
+                        })
+                        .filter((n) => n),
+                })) as { key: string; languageCodes: LanguageCode[] }[]
+        )?.filter((n) => n.languageCodes.length > 0);
+    }
 }
