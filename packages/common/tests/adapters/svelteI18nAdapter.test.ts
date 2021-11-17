@@ -33,6 +33,5 @@ describe('SvelteI18nAdapter', () => {
         const serialization = adapter.serialize(parsing.data);
         expect(serialization.data).not.toBeNull();
         expect(serialization.error).toBeNull();
-        console.log(serialization);
     });
 });
