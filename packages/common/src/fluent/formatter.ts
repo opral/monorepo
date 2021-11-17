@@ -1,19 +1,19 @@
-import { Message, Resource, Term, Entry, Identifier, Pattern, Attribute } from '@fluent/syntax';
+import { Resource, Entry } from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { LanguageCode } from '../types/languageCode';
-import { TranslationData } from '../types/translationData';
+import { TranslationFile } from '../types/translationFile';
 import { remove } from 'lodash';
 
 export class TranslationAPI {
     adapter: AdapterInterface;
-    resources: TranslationData<Resource>[];
+    resources: { data: Resource; languageCode: LanguageCode }[];
     baseLocale: LanguageCode;
 
-    constructor(args: { adapter: AdapterInterface; locales: TranslationData<string>[]; baseLocale: LanguageCode }) {
+    constructor(args: { adapter: AdapterInterface; files: TranslationFile[]; baseLocale: LanguageCode }) {
         this.adapter = args.adapter;
-        this.resources = args.locales.map((locale) => ({
-            languageCode: locale.languageCode,
-            data: this.adapter.parse(locale.data).data ?? this.#throwExpression('Parsing failed'),
+        this.resources = args.files.map((file) => ({
+            languageCode: file.languageCode,
+            data: this.adapter.parse(file.data).data ?? this.#throwExpression('Parsing failed'),
         }));
         this.baseLocale = args.baseLocale;
     }

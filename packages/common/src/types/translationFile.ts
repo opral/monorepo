@@ -1,6 +1,6 @@
 import { LanguageCode } from './languageCode';
 
-export type TranslationData<T> = {
+export type TranslationFile = {
+    data: string;
     languageCode: LanguageCode;
-    data: T;
 };

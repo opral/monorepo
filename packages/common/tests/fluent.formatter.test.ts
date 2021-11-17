@@ -5,7 +5,7 @@ import { TranslationAPI } from '../src/fluent/formatter';
 describe('constructor', () => {
     const translationAPI = new TranslationAPI({
         adapter: new FluentAdapter(),
-        locales: [
+        files: [
             { languageCode: 'en', data: 'test = this is my test\nhello = hello there' },
             { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig' },
             { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich' },
