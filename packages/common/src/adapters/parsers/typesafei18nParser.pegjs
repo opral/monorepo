@@ -26,7 +26,7 @@ object
       head:member
       tail:(value_separator @member)*
       { 
-        result = {};
+        let result = {};
 
         [head].concat(tail).forEach(function(element) {
           result[element.name.replace(/'|"/g, "")] = element.value;

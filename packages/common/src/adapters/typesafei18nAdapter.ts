@@ -1,14 +1,13 @@
 import * as fluent from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { Result } from '../types/result';
-import * as peggy from 'peggy';
+import * as peggyParse from '../adapters/parsers/typesafei18nParser.js';
 
 export class Typesafei18nAdapter implements AdapterInterface {
     parse(data: string): Result<fluent.Resource, unknown> {
-        const peggyParser = peggy.generate(peggyGrammar);
         try {
             return {
-                data: fluent.parse(peggyParser.parse(data), {}),
+                data: fluent.parse(peggyParse.parse(data), {}),
                 error: null,
             };
         } catch (e) {
