@@ -1,3 +1,4 @@
+import * as fluent from '@fluent/syntax';
 import { Resource, Entry } from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { LanguageCode } from '../types/languageCode';
@@ -38,7 +39,7 @@ export class TranslationAPI {
             (this.resources
                 .find((resource) => resource.languageCode === this.baseLanguage)
                 ?.data?.body?.push(
-                    this.adapter.parse(`${key} = ${base}`).data?.body[0] ?? this.#throwExpression('Parsing failed')
+                    fluent.parse(`${key} = ${base}`, {}).body[0] ?? this.#throwExpression('Parsing failed')
                 ) ?? this.#throwExpression('Finding base locale failed')) > 0
         );
     }
@@ -65,7 +66,8 @@ export class TranslationAPI {
         if (indexOfTranslation === undefined) {
             return [new Error('Key not found')];
         }
-        const parsedTranslation = this.adapter.parse(`${key} = ${translation}`).data?.body[0];
+        const parsedTranslation =
+            fluent.parse(`${key} = ${translation}`, {}).body[0] ?? this.#throwExpression('Parsing failed');
         if (parsedTranslation === undefined) {
             return [new Error('Incorrect translation')];
         }

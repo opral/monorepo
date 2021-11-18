@@ -5,6 +5,7 @@ import type { LocaleMapping } from './types/LocaleMapping'
 import { isEqual } from 'lodash-es'
 import fs from 'fs'
 import path from 'path'
+import * as url from 'url'
 
 let errorCount = 0
 
@@ -74,14 +75,14 @@ async function updateTranslations(args: { projectId: string }) {
 }
 
 function main() {
-    //@ts-ignore
     const configPath = path.join(process.cwd(), 'inlang.config.json')
     let config: any
     if (fs.existsSync(configPath)) {
         config = JSON.parse(
             fs.readFileSync(
                 //@ts-ignore
-                new URL(configPath, import.meta.url)
+                configPath,
+                { encoding: 'utf-8' }
             )
         )
     }

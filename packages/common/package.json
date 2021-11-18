@@ -31,6 +31,8 @@
   "dependencies": {
     "@fluent/bundle": "^0.17.0",
     "@fluent/syntax": "^0.18.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "peggy": "^1.2.0",
+    "typesafe-i18n": "^2.51.1"
   }
 }
