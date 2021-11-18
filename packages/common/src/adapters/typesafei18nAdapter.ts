@@ -19,6 +19,31 @@ export class Typesafei18nAdapter implements AdapterInterface {
     }
 
     serialize(resource: fluent.Resource): Result<string, unknown> {
+        let result = `
+        /* eslint-disable */
+        import type { Translation } from '../i18n-types';
+
+        const de: Translation = {
+        `;
+        const entries = resource.body.map((entry) => {
+            if (entry.type === 'Message' || entry.type === 'Term') {
+                entry.value?.elements.reduce((prev, element) => {
+                    if (element.type === 'TextElement') {
+                        return prev + element.value;
+                    } else {
+                        if (element.expression.type === 'VariableReference') {
+                            return prev + element.expression.id.name;
+                        }
+                    }
+                    return '';
+                }, '');
+            }
+            return '';
+        });
+        entries.forEach((entry) => (result += entry));
+
+        console.log(result);
+
         try {
             return {
                 data: fluent.serialize(resource, { withJunk: false }),
