@@ -1,17 +1,15 @@
 import { FluentAdapter } from '../../src/adapters/fluentAdapter';
-import * as fs from 'fs';
 
 describe('FluentAdapter', () => {
-    const mockFiles = fs.readFileSync('./tests/mockFiles/en.fluent').toString();
     const adapter = new FluentAdapter();
     it('should parse a mock file without an error', () => {
-        const result = adapter.parse(mockFiles);
+        const result = adapter.parse(testFile);
         expect(result.data).not.toBeNull();
         expect(result.error).toBeNull();
     });
 
     it('should serialize without an error', () => {
-        const parsing = adapter.parse(mockFiles);
+        const parsing = adapter.parse(testFile);
         if (parsing.data === null) {
             throw parsing.error;
         }
@@ -20,3 +18,20 @@ describe('FluentAdapter', () => {
         expect(serialization.error).toBeNull();
     });
 });
+
+const testFile = `
+# Try editing the translations below.
+# Set $variables' values in the Config tab.
+
+hello = Yes, Hello World!
+shared-photos =
+    { $userName } { $photoCount ->
+        [one] added a new photo
+       *[other] added { $photoCount } new photos
+    } to { $userGender ->
+        [male] his stream
+        [female] her stream
+       *[other] their stream
+    }.
+
+`
