@@ -9,6 +9,7 @@
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
+	import type { GetUserIdRequestBody, GetUserIdResponseBody} from '../../api/internal/get-user-id'
 
 	//TODO: fix join, right now user role is hardcoded to admin
 
@@ -73,23 +74,31 @@
 
 	async function handleInviteUser() {
 		const organization_id = $projectStore.data?.project.organization_id;
-		const userId = await database
-			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
-			.single();
-		if (userId.error) {
-			alert(userId.error.message);
-		} else if (userId.data === null) {
-			alert(inputEmail + " is not a user of inlang yet")
-		} else {
+		if (organization_id === undefined) {
+			return {
+				status: 500
+			}
+		}
+		const body: GetUserIdRequestBody = {
+			organizationId: organization_id,
+			memberEmail: inputEmail,
+			role: "ADMIN"
+		};
+		const response = await fetch('/api/internal/get-user-id', {
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/json'
+			}),
+			body: JSON.stringify(body)
+		});
+		if (response.ok) {
+			const responseJSON = await response.json() as GetUserIdResponseBody;
+			const userId = responseJSON.userId;
 			const memberUpsert = await database.from<definitions['member']>('member').insert({
 				organization_id: organization_id,
-				user_id: userId.data,
+				user_id: userId,
 				role: 'ADMIN'
 			});
-			if (memberUpsert.error) {
-				console.error(memberUpsert.error);
-				alert(memberUpsert.error.message);
-			}
 			if (memberUpsert.status === 409) {
 				alert(inputEmail + ' is already a member');
 			} else if (memberUpsert.status === 201) {
@@ -103,6 +112,12 @@
 					alert('An unknown error occurred');
 				}
 			}
+			await loadUsers();
+		} else if (response.status === 500) {
+			alert(inputEmail + " is not a user of inlang yet");
+		}
+		else {
+			alert("An unknown error occurred");
 		}
 	}
 
