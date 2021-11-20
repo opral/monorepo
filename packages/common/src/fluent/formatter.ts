@@ -30,7 +30,6 @@ export class TranslationAPI {
         if (translation === undefined) {
             return null;
         }
-
         return this.adapter.serialize(new Resource([translation]), {}).data;
     }
 
