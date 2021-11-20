@@ -2,6 +2,12 @@ import * as fluent from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { Result } from '../types/result';
 import * as peggy from 'peggy';
+import { LanguageCode } from '../types/languageCode';
+
+export type Typesafei18nAdapterOptions = {
+    languageCode: LanguageCode;
+    isBaseLanguage: boolean;
+};
 
 export class Typesafei18nAdapter implements AdapterInterface {
     parse(data: string): Result<fluent.Resource, Error> {
@@ -17,28 +23,29 @@ export class Typesafei18nAdapter implements AdapterInterface {
         }
     }
 
-    serialize(resource: fluent.Resource): Result<string, Error> {
+    serialize(resource: fluent.Resource, options: Typesafei18nAdapterOptions): Result<string, Error> {
+        const translationType = options.isBaseLanguage ? 'BaseTranslation' : 'Translation';
         let result = `/* eslint-disable */
-import type { Translation } from '../i18n-types';
+import type { ${translationType} } from '../i18n-types';
 
-const de: Translation = {
+const ${options.languageCode}: ${translationType} = {
 `;
-        const entries = resource.body.map((entry) => {
-            if (entry.type === 'Message' || entry.type === 'Term') {
-                return entry.value?.elements.reduce((prev, element) => {
+        for (const entry of resource.body) {
+            if (entry.type === 'Message' && entry.value?.elements) {
+                result += `"${entry.id.name}": "`;
+                for (const element of entry.value.elements) {
                     if (element.type === 'TextElement') {
-                        return prev + element.value;
+                        result += element.value;
+                    } else if (element.expression.type === 'VariableReference') {
+                        result += `{${element.expression.id.name}}`;
                     } else {
-                        if (element.expression.type === 'VariableReference') {
-                            return prev + '{' + element.expression.id.name + '}';
-                        }
+                        throw Error('None exhaustive if statement.');
                     }
-                    return prev;
-                }, '');
+                }
+                result += `",\n`;
+            } else {
+                throw Error(`None exhaustive if statement: ${entry.type} is not handled.`);
             }
-        });
-        for (const entry of entries) {
-            result += entry + '\n';
         }
         result += `};
 
@@ -98,7 +105,7 @@ key "key"
   = chars:keyName* { return chars.join(""); }
 
 string 'string'
-	= "'" chars:char* "'" { return chars.join("") }
+	= [\'\"] chars:char* [\'\"] { return chars.join("") }
 
 keyName
   = [a-z_'"]
