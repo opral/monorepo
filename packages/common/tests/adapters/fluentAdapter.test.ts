@@ -17,6 +17,16 @@ describe('FluentAdapter', () => {
         expect(serialization.data).not.toBeNull();
         expect(serialization.error).toBeNull();
     });
+
+    it('should have the same abstract syntax trees after multiple parsings and serializations', () => {
+        const parse1 = adapter.parse(testFile);
+        if (parse1.data === null) throw parse1.error;
+        const serialize1 = adapter.serialize(parse1.data);
+        if (serialize1.data === null) throw serialize1.error;
+        const parse2 = adapter.parse(serialize1.data);
+        if (parse2.data === null) throw parse2.error;
+        expect(parse1.data).toEqual(parse2.data);
+    });
 });
 
 const testFile = `
@@ -34,4 +44,7 @@ shared-photos =
        *[other] their stream
     }.
 
-`
+# This is a comment
+-my-name = Samuel
+
+`;
