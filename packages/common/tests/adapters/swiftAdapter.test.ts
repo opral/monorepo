@@ -39,6 +39,9 @@ const testFile = `
 "CamelCaseKey" = "Something went wrong";
 "snake_case_key" = "An error occured while logging in. Please try again";
 
+// interpolation
+"some-key" = "Hello %s";
+
 
 //Another comment
 

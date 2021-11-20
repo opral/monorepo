@@ -1,3 +1,7 @@
+/**
+ * Interpolation only works with %s (strings)
+ */
+
 import * as fluent from '@fluent/syntax';
 import * as peggy from 'peggy';
 import { AdapterInterface } from '../types/adapterInterface';
@@ -6,12 +10,12 @@ import { Result } from '../types/result';
 export class SwiftAdapter implements AdapterInterface {
     parse(data: string): Result<fluent.Resource, Error> {
         try {
-            const recourse = fluent.parse(peggy.generate(grammar).parse(data), {});
+            const recourse = fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false });
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
                 return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
             }
-            return Result.ok(fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false }));
+            return Result.ok(recourse);
         } catch (e) {
             return Result.err(e as Error);
         }
@@ -24,11 +28,12 @@ export class SwiftAdapter implements AdapterInterface {
                 if (entry.type === 'Comment') {
                     result += `//${entry.content}\n`;
                 } else if (entry.type === 'GroupComment') {
-                    result += `/* ${entry.content} */\n`;
+                    result += `/*${entry.content}*/\n`;
                 } else if (entry.type === 'Message' && entry.value?.elements) {
                     if (entry.comment?.content) {
-                        result += `//${entry.comment.content}`;
+                        result += `//${entry.comment.content}\n`;
                     }
+                    result += `"${entry.id.name}" = "`;
                     for (const element of entry.value.elements) {
                         if (element.type === 'TextElement') {
                             result += element.value;
@@ -38,6 +43,7 @@ export class SwiftAdapter implements AdapterInterface {
                             throw Error('None exhaustive if statement.');
                         }
                     }
+                    result += `";\n`;
                 } else {
                     throw Error(`None exhaustive if statement: ${entry.type} is not handled.`);
                 }
