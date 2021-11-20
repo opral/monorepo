@@ -1,47 +1,27 @@
-/**
- * TODO
- * is not working and only commited for initial workprogress!
- */
-
 import * as fluent from '@fluent/syntax';
 import * as peggy from 'peggy';
 import { AdapterInterface } from '../types/adapterInterface';
 import { Result } from '../types/result';
 
 export class SwiftAdapter implements AdapterInterface {
-    parse(data: string): Result<fluent.Resource, unknown> {
+    parse(data: string): Result<fluent.Resource, Error> {
         try {
             const recourse = fluent.parse(peggy.generate(grammar).parse(data), {});
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
-                return {
-                    data: null,
-                    error: "Couldn't parse the following entries:\n" + junk.map((junk) => junk.content),
-                };
+                return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
             }
-            return {
-                data: fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false }),
-                error: null,
-            };
+            return Result.ok(fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false }));
         } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
+            return Result.err(e as Error);
         }
     }
 
-    serialize(resource: fluent.Resource): Result<string, unknown> {
+    serialize(resource: fluent.Resource): Result<string, Error> {
         try {
-            return {
-                data: fluent.serialize(resource, { withJunk: false }),
-                error: null,
-            };
+            return Result.ok(fluent.serialize(resource, { withJunk: false }));
         } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
+            return Result.err(e as Error);
         }
     }
 }

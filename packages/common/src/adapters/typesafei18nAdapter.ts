@@ -4,57 +4,46 @@ import { Result } from '../types/result';
 import * as peggy from 'peggy';
 
 export class Typesafei18nAdapter implements AdapterInterface {
-    parse(data: string): Result<fluent.Resource, unknown> {
+    parse(data: string): Result<fluent.Resource, Error> {
         try {
-            return {
-                data: fluent.parse(peggy.generate(grammar).parse(data), {}),
-                error: null,
-            };
+            const recourse = fluent.parse(peggy.generate(grammar).parse(data), {});
+            const junk = recourse.body.filter((entry) => entry.type === 'Junk');
+            if (junk.length > 0) {
+                return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
+            }
+            return Result.ok(fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false }));
         } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
+            return Result.err(e as Error);
         }
     }
 
-    serialize(resource: fluent.Resource): Result<string, unknown> {
+    serialize(resource: fluent.Resource): Result<string, Error> {
         let result = `/* eslint-disable */
 import type { Translation } from '../i18n-types';
 
 const de: Translation = {
 `;
-        resource.body
-            .map((entry) => {
-                if (entry.type === 'Message' || entry.type === 'Term') {
-                    return entry.value?.elements.reduce((prev, element) => {
-                        if (element.type === 'TextElement') {
-                            return prev + element.value;
-                        } else {
-                            if (element.expression.type === 'VariableReference') {
-                                return prev + '{' + element.expression.id.name + '}';
-                            }
+        const entries = resource.body.map((entry) => {
+            if (entry.type === 'Message' || entry.type === 'Term') {
+                return entry.value?.elements.reduce((prev, element) => {
+                    if (element.type === 'TextElement') {
+                        return prev + element.value;
+                    } else {
+                        if (element.expression.type === 'VariableReference') {
+                            return prev + '{' + element.expression.id.name + '}';
                         }
-                        return prev;
-                    }, '');
-                }
-            })
-            .forEach((entry) => (result += entry + '\n'));
+                    }
+                    return prev;
+                }, '');
+            }
+        });
+        for (const entry of entries) {
+            result += entry + '\n';
+        }
         result += `};
 
 export default de;`;
-
-        try {
-            return {
-                data: result,
-                error: null,
-            };
-        } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
-        }
+        return Result.ok(result);
     }
 }
 

@@ -2,23 +2,26 @@ import { SwiftAdapter } from '../../src/adapters/swiftAdapter';
 
 describe('SwiftAdapter', () => {
     const adapter = new SwiftAdapter();
-    it('should parse a mock file without an error', () => {
+    it('should parse ok', () => {
         const result = adapter.parse(testFile);
-        if (result.error) {
-            console.error(result.error);
-        }
-        expect(result.data).not.toBeNull();
-        expect(result.error).toBeNull();
+        expect(result.isOk);
     });
 
-    it('should serialize without an error', () => {
-        const parsing = adapter.parse(testFile);
-        if (parsing.data === null) {
-            throw parsing.error;
-        }
-        const serialization = adapter.serialize(parsing.data);
-        expect(serialization.data).not.toBeNull();
-        expect(serialization.error).toBeNull();
+    it('should serialize ok', () => {
+        const parse = adapter.parse(testFile);
+        if (parse.isErr) throw parse.error;
+        const serialize = adapter.serialize(parse.value);
+        expect(serialize.isOk);
+    });
+
+    it('should have the same abstract syntax trees after multiple parsings and serializations', () => {
+        const parse1 = adapter.parse(testFile);
+        if (parse1.isErr) throw parse1.error;
+        const serialize1 = adapter.serialize(parse1.value);
+        if (serialize1.isErr) throw serialize1.error;
+        const parse2 = adapter.parse(serialize1.value);
+        if (parse2.isErr) throw parse2.error;
+        expect(parse1.value).toEqual(parse2.value);
     });
 });
 
