@@ -19,7 +19,30 @@ export class SwiftAdapter implements AdapterInterface {
 
     serialize(resource: fluent.Resource): Result<string, Error> {
         try {
-            return Result.ok(fluent.serialize(resource, { withJunk: false }));
+            let result = '';
+            for (const entry of resource.body) {
+                if (entry.type === 'Comment') {
+                    result += `//${entry.content}\n`;
+                } else if (entry.type === 'GroupComment') {
+                    result += `/* ${entry.content} */\n`;
+                } else if (entry.type === 'Message' && entry.value?.elements) {
+                    if (entry.comment?.content) {
+                        result += `//${entry.comment.content}`;
+                    }
+                    for (const element of entry.value.elements) {
+                        if (element.type === 'TextElement') {
+                            result += element.value;
+                        } else if (element.type === 'Placeable') {
+                            result += `%s`;
+                        } else {
+                            throw Error('None exhaustive if statement.');
+                        }
+                    }
+                } else {
+                    throw Error(`None exhaustive if statement: ${entry.type} is not handled.`);
+                }
+            }
+            return Result.ok(result);
         } catch (e) {
             return Result.err(e as Error);
         }
@@ -52,9 +75,9 @@ Message
   = key:String WS "=" WS value:String ";" {
     // count is -1 to start with 0
   	let count = -1
-    value = value.replace(/%d/g, () => {
+    value = value.replace(/%s/g, () => {
       count += 1
-      return "{ NUMBER($var" + count + ") }"
+      return "{ $var" + count + " }"
     })
     return key + " = " + value + "\n"
   }
@@ -65,16 +88,16 @@ String
   }
 
 Comment
-  = //SingleHashComment (is not matched for Swift files)
-    DoubleHashComment
-  / TripleHashComment
+  = SingleHashComment
+  / DoubleHashComment
+  // TripleHashComment (is not matched for Swift files)
 
-DoubleHashComment
+SingleHashComment
   = "//" chars:[^\n]* {
-    return "\n## " + chars.join("") + "\n\n"
+    return "\n# " + chars.join("") + "\n"
   }
 
-TripleHashComment
+DoubleHashComment
   // match any char if previous chars are not "*/" (comment has ended)
   // and match has to end with "*/" (comment is ending)
   = "/*" chars: [^*/]* "*/" {
@@ -85,7 +108,7 @@ TripleHashComment
 	const lines = chars.join("").split("\n")
     for (const line of lines){
       if (line.length > 1){
-        result += "### " + line + "\n"
+        result += "## " + line + "\n"
       }
     }
     return result + "\n"
