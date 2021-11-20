@@ -3,31 +3,19 @@ import { AdapterInterface } from '../types/adapterInterface';
 import { Result } from '../types/result';
 
 export class FluentAdapter implements AdapterInterface {
-    parse(data: string): Result<fluent.Resource, unknown> {
+    parse(data: string): Result<fluent.Resource, Error> {
         try {
-            return {
-                data: fluent.parse(data, { withSpans: false }),
-                error: null,
-            };
+            return Result.ok(fluent.parse(data, { withSpans: false }));
         } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
+            return Result.err(e as Error);
         }
     }
 
-    serialize(resource: fluent.Resource): Result<string, unknown> {
+    serialize(resource: fluent.Resource): Result<string, Error> {
         try {
-            return {
-                data: fluent.serialize(resource, { withJunk: false }),
-                error: null,
-            };
+            return Result.ok(fluent.serialize(resource, { withJunk: false }));
         } catch (e) {
-            return {
-                data: null,
-                error: e,
-            };
+            return Result.err(e as Error);
         }
     }
 }

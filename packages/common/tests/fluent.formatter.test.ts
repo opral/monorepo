@@ -3,7 +3,7 @@ import { FluentAdapter } from '../src/adapters/fluentAdapter';
 import { TranslationAPI } from '../src/fluent/formatter';
 
 describe('constructor', () => {
-    const translationAPI = new TranslationAPI({
+    const translationAPI = TranslationAPI.initialize({
         adapter: new FluentAdapter(),
         files: [
             { languageCode: 'en', data: 'test = this is my test\nhello = hello there' },
@@ -12,26 +12,57 @@ describe('constructor', () => {
         ],
         baseLanguage: 'en',
     });
+    if (translationAPI.isErr) {
+        fail();
+    }
+
+    let testVariable;
     it('should print out the test key', () => {
-        expect(translationAPI.getTranslation('test', 'en')).toMatch('test = this is my test');
+        testVariable = translationAPI.value.getTranslation('test', 'en');
+        if (testVariable.isErr) {
+            fail();
+        }
+        expect(testVariable.value).toMatch('test = this is my test');
     });
 
     it('should create a key', () => {
-        translationAPI.createKey('new_test', 'here is another translation');
-        expect(translationAPI.getTranslation('new_test', 'en')).toMatch('new_test = here is another translation');
+        testVariable = translationAPI.value.createKey('new_test', 'here is another translation');
+        if (testVariable.isErr) {
+            fail();
+        }
+        testVariable = translationAPI.value.getTranslation('new_test', 'en');
+        if (testVariable.isErr) {
+            fail();
+        }
+        expect(testVariable.value).toMatch('new_test = here is another translation');
     });
 
     it('should delete a key', () => {
-        translationAPI.deleteKey('test');
-        expect(translationAPI.getTranslation('test', 'en')).toBe(null);
+        testVariable = translationAPI.value.deleteKey('test');
+        if (testVariable.isErr) {
+            fail();
+        }
+        testVariable = translationAPI.value.getTranslation('test', 'en');
+        expect(testVariable.isErr).toBeTruthy();
     });
 
     it('should update a key', () => {
-        translationAPI.updateKey('new_test', 'why not this instead', 'en');
-        expect(translationAPI.getTranslation('new_test', 'en')).toMatch('new_test = why not this instead');
+        testVariable = translationAPI.value.updateKey('new_test', 'why not this instead', 'en');
+        if (testVariable.isErr) {
+            fail();
+        }
+        testVariable = translationAPI.value.getTranslation('new_test', 'en');
+        if (testVariable.isErr) {
+            fail();
+        }
+        expect(testVariable.value).toMatch('new_test = why not this instead');
     });
 
     it('should check for missing translations', () => {
-        expect(translationAPI.checkMissingTranslations()).toEqual([{ key: 'new_test', languageCodes: ['da', 'de'] }]);
+        testVariable = translationAPI.value.checkMissingTranslations();
+        if (testVariable.isErr) {
+            fail();
+        }
+        expect(testVariable.value).toEqual([{ key: 'new_test', languageCodes: ['da', 'de'] }]);
     });
 });
