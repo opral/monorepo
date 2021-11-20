@@ -9,7 +9,7 @@
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
-	import type { CreateMemberRequestBody } from '../../api/internal/create-member';
+	import type { GetUserIdRequestBody, GetUserIdResponseBody} from '../../api/internal/get-user-id'
 
 	//TODO: fix join, right now user role is hardcoded to admin
 
@@ -72,22 +72,19 @@
 		}
 	}
 
-	async function inviteUserSS() {
+	async function handleInviteUser() {
 		const organization_id = $projectStore.data?.project.organization_id;
-		const userId = database.auth.user()?.id
-		if (organization_id === undefined || userId === undefined) {
+		if (organization_id === undefined) {
 			return {
 				status: 500
 			}
 		}
-
-		const body: CreateMemberRequestBody = {
+		const body: GetUserIdRequestBody = {
 			organizationId: organization_id,
-			adminId: userId,
 			memberEmail: inputEmail,
 			role: "ADMIN"
 		};
-		const response = await fetch('/api/internal/create-member', {
+		const response = await fetch('/api/internal/get-user-id', {
 			method: 'post',
 			headers: new Headers({
 				'content-type': 'application/json'
@@ -95,39 +92,13 @@
 			body: JSON.stringify(body)
 		});
 		if (response.ok) {
-			inputEmail = '';
-			await loadUsers();
-		} else if (response.status === 500) {
-			alert(inputEmail + " is not a user of inlang yet");
-		} else  if (response.status === 400) {
-			alert("You do not have priviliges to invite new users this organizaiton");
-		} else if (response.status === 409) {
-			alert(inputEmail + ' is already a member');
-		}
-		else {
-			alert("An unknown error occurred");
-		}
-	}
-
-	async function handleInviteUser() {
-		const organization_id = $projectStore.data?.project.organization_id;
-		const userId = await database
-			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
-			.single();
-		if (userId.error) {
-			alert(userId.error.message);
-		} else if (userId.data === null) {
-			alert(inputEmail + " is not a user of inlang yet")
-		} else {
+			const responseJSON = await response.json() as GetUserIdResponseBody;
+			const userId = responseJSON.userId;
 			const memberUpsert = await database.from<definitions['member']>('member').insert({
 				organization_id: organization_id,
-				user_id: userId.data,
+				user_id: userId,
 				role: 'ADMIN'
 			});
-			if (memberUpsert.error) {
-				console.error(memberUpsert.error);
-				alert(memberUpsert.error.message);
-			}
 			if (memberUpsert.status === 409) {
 				alert(inputEmail + ' is already a member');
 			} else if (memberUpsert.status === 201) {
@@ -141,6 +112,12 @@
 					alert('An unknown error occurred');
 				}
 			}
+			await loadUsers();
+		} else if (response.status === 500) {
+			alert(inputEmail + " is not a user of inlang yet");
+		}
+		else {
+			alert("An unknown error occurred");
 		}
 	}
 
@@ -176,7 +153,7 @@
 		invalid={inputEmail.length > 0 && inputIsValidEmail === false}
 		invalidText="Invalid email."
 	/>
-	<Button disabled={inputIsValidEmail === false} icon={SendAlt24} on:click={inviteUserSS}>
+	<Button disabled={inputIsValidEmail === false} icon={SendAlt24} on:click={handleInviteUser}>
 		Invite
 	</Button>
 </row>
