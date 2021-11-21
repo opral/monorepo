@@ -19,7 +19,10 @@
 	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
 	import RadioButton16 from 'carbon-icons-svelte/lib/RadioButton16';
 	import RadioButtonChecked16 from 'carbon-icons-svelte/lib/RadioButtonChecked16';
+<<<<<<< HEAD
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
+=======
+>>>>>>> 34ef389815516e2c2e9798d3bf0a667f480cd5eb
 
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
