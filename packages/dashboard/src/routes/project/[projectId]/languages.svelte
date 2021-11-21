@@ -131,10 +131,7 @@
 		{#if cell.key === 'isoCode'}
 			<div class="flex items-center space-x-2">
 				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
-				<Tag>{cell.value}</Tag>
-				{#if cell.value === $projectStore.data?.project.default_iso_code}
-					<Tag type="green">default</Tag>
-				{/if}
+				<Tag type="blue">{cell.value}</Tag>
 			</div>
 		{:else if cell.key === 'isDefaultLanguage'}
 			{#if row.isDefaultLanguage === false}
