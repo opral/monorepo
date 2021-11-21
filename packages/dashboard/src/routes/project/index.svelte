@@ -72,8 +72,7 @@
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
-		{ key: 'organization', value: 'Organization' },
-		{ key: 'more', empty: true }
+		{ key: 'organization', value: 'Organization' }
 	];
 
 	$: rows_projects = () => {
@@ -125,16 +124,6 @@
 				<!-- <Tag type="blue">{cell.value.substring(0, 2)}</Tag> -->
 				<p class="text-sm">{cell.value}</p>
 			</div>
-		{:else if cell.key === 'more'}
-			<Button
-				kind="ghost"
-				icon={OverflowMenuHorizontal32}
-				iconDescription="More"
-				on:click={() => {
-					// addMemberModal = row.id;
-					// showMoreModal = true;
-				}}
-			/>
 		{:else if cell.key === 'organization'}
 			{cell.value}
 		{:else}
