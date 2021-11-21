@@ -10,8 +10,6 @@
 		ToolbarContent,
 		ToolbarSearch
 	} from 'carbon-components-svelte';
-	import CheckmarkFilled16 from 'carbon-icons-svelte/lib/CheckmarkFilled16';
-	import CheckmarkOutline16 from 'carbon-icons-svelte/lib/CheckmarkFilled16';
 
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import CreateLanguageModal from '$lib/components/modals/CreateLanguageModal.svelte';
@@ -21,6 +19,7 @@
 	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
 	import RadioButton16 from 'carbon-icons-svelte/lib/RadioButton16';
 	import RadioButtonChecked16 from 'carbon-icons-svelte/lib/RadioButtonChecked16';
+	import Add16 from 'carbon-icons-svelte/lib/Add16';
 
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
@@ -113,7 +112,7 @@
 		<!-- Yes, the cancel button should be red too but haven't found a way to do so. -->
 		<ToolbarContent>
 			<ToolbarSearch bind:value={searchQuery} />
-			<Button on:click={() => (createLanguageModal.show = true)}>Add language</Button>
+			<Button icon={Add16} on:click={() => (createLanguageModal.show = true)}>Add language</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span slot="cell-header" let:header>

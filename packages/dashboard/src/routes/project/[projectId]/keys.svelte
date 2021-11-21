@@ -16,6 +16,7 @@
 	import type { definitions } from '@inlang/database';
 	import Translations from '$lib/components/Translations.svelte';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import Add16 from 'carbon-icons-svelte/lib/Add16';
 
 	const ff = $projectStore.data?.translations.getFluentFiles();
 	if (ff?.isOk) console.log(ff.value);
@@ -114,6 +115,7 @@
 		<ToolbarContent>
 			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
 			<Button
+				icon={Add16}
 				on:click={() => {
 					createKeyModal.show();
 				}}>Create key</Button
