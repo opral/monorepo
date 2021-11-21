@@ -5,7 +5,6 @@
 		DataTable,
 		PaginationNav,
 		Tag,
-		ProgressBar,
 		Tooltip,
 		Toolbar,
 		ToolbarContent,
@@ -49,34 +48,34 @@
 		return ((allTranslations.length - missingReview.length) / allTranslations.length) * 100;
 	}*/
 
-	function numWords(iso: definitions['language']['iso_code']): number {
-		let result = 0;
-		if ($projectStore.data?.translations === undefined) {
-			throw 'TranslationAPI undefined';
-		}
-		const allKeys = $projectStore.data?.translations.getAllKeys();
-		if (allKeys?.isErr) {
-			throw allKeys.error;
-		}
-		for (const key of allKeys?.value) {
-			if ($projectStore.data?.translations === undefined) {
-				throw 'TranslationAPI undefined';
-			}
-			const allTranslations = $projectStore.data?.translations.getAllTranslations(key);
-			if (allTranslations?.isErr) {
-				throw allTranslations.error;
-			}
-			for (const translation of allTranslations?.value) {
-				result += (translation.translation?.split(' ') ?? []).length;
-			}
-		}
-		return result;
-	}
+	// function numWords(iso: definitions['language']['iso_code']): number {
+	// 	let result = 0;
+	// 	if ($projectStore.data?.translations === undefined) {
+	// 		throw 'TranslationAPI undefined';
+	// 	}
+	// 	const allKeys = $projectStore.data?.translations.getAllKeys();
+	// 	if (allKeys?.isErr) {
+	// 		throw allKeys.error;
+	// 	}
+	// 	for (const key of allKeys?.value) {
+	// 		if ($projectStore.data?.translations === undefined) {
+	// 			throw 'TranslationAPI undefined';
+	// 		}
+	// 		const allTranslations = $projectStore.data?.translations.getAllTranslations(key);
+	// 		if (allTranslations?.isErr) {
+	// 			throw allTranslations.error;
+	// 		}
+	// 		for (const translation of allTranslations?.value) {
+	// 			result += (translation.translation?.split(' ') ?? []).length;
+	// 		}
+	// 	}
+	// 	return result;
+	// }
 
 	const headers = [
 		{ key: 'isoCode', value: 'Language' },
-		{ key: 'progress', value: 'Progress' },
-		{ key: 'words', value: 'Words' },
+		// { key: 'progress', value: 'Progress' },
+		// { key: 'words', value: 'Words' },
 		{ key: 'actions', empty: true }
 	];
 
@@ -94,8 +93,8 @@
 			.map((language) => ({
 				id: language.iso_code,
 				isoCode: language.iso_code,
-				words: numWords(language.iso_code),
-				progress: 0,
+				// words: numWords(language.iso_code),
+				// progress: 0,
 				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_iso_code,
 				languageObject: language
 			}))
@@ -135,10 +134,8 @@
 					<Tag type="green">default</Tag>
 				{/if}
 			</div>
-		{:else if cell.key === 'progress'}
-			<ProgressBar value={cell.value} max={100} helperText={cell.value.toFixed() + '%'} />
 		{:else if cell.key === 'actions'}
-			<row class="flex-shrink">
+			<row class="justify-end">
 				{#if row.isDefaultLanguage === false}
 					<Button
 						kind="ghost"
