@@ -6,8 +6,6 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarBatchActions,
-		ToolbarSearch,
-		Pagination,
 		Loading
 	} from 'carbon-components-svelte';
 	import OrganizationModal from '$lib/components/modals/OrganizationModal.svelte';
@@ -22,9 +20,6 @@
 
 	let showAddOrganizationModal = false;
 	// let showMoreModal = false;
-
-	// as entered in the search bar
-	$: searchQuery = '';
 
 	let isLoading = true;
 
@@ -48,9 +43,7 @@
 	}
 
 	const headers = [
-		{ key: 'name', value: 'Name' },
-		{ key: 'more', empty: true }
-		//{ key: 'admin', value: 'Admin email' },
+		{ key: 'name', value: 'Name' } //{ key: 'admin', value: 'Admin email' },
 		//{ key: 'num_projects', value: 'Number of projects' },
 		//{ key: 'members', value: 'Members in ' }
 	];
@@ -101,16 +94,6 @@
 				<Tag type="blue">{cell.value.substring(0, 2)}</Tag>
 				<p class="text-sm">{cell.value}</p>
 			</div>
-		{:else if cell.key === 'more'}
-			<Button
-				kind="ghost"
-				icon={OverflowMenuHorizontal32}
-				iconDescription="More"
-				on:click={() => {
-					// selectedShowMoreModal = row.id;
-					// showMoreModal = true;
-				}}
-			/>
 		{:else}
 			{cell.value}
 		{/if}
