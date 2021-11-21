@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { auth } from '$lib/services/auth';
-	import Logout32 from 'carbon-icons-svelte/lib/Logout32';
+	import Logout20 from 'carbon-icons-svelte/lib/Logout20';
 	import { PostgrestError } from '@supabase/postgrest-js';
+	import UserAvatar20 from 'carbon-icons-svelte/lib/UserAvatar20';
+
 	import {
 		Header,
 		HeaderNav,
@@ -11,7 +13,6 @@
 		SkipToContent,
 		HeaderUtilities,
 		Content,
-		HeaderPanelDivider,
 		HeaderNavItem
 	} from 'carbon-components-svelte';
 	import { userStore } from '$lib/stores/userStore';
@@ -34,9 +35,8 @@
 		try {
 			const { error } = await auth.signOut();
 			if (error) {
-				throw error;
+				alert(error);
 			}
-			alert('Logged out!');
 		} catch (error) {
 			const err = error as PostgrestError;
 			alert(err.message);
@@ -56,15 +56,13 @@
 			/>
 		</HeaderNav>
 		<HeaderUtilities>
-			<HeaderAction>
+			<HeaderAction icon={UserAvatar20}>
 				<HeaderPanelLinks>
-					<HeaderPanelLink href="/organization">Organizations</HeaderPanelLink>
-					<HeaderPanelLink href="/project">Projects</HeaderPanelLink>
-					<HeaderPanelDivider>Account</HeaderPanelDivider>
+					<h3 class="px-4 pb-4">{auth.user()?.email}</h3>
 					<HeaderPanelLink>
 						<row class="justify-between items-center" on:click={handleLogout}>
 							Sign Out
-							<Logout32 class="h-4" />
+							<Logout20 class="h-4" />
 						</row>
 					</HeaderPanelLink>
 				</HeaderPanelLinks>
