@@ -19,6 +19,8 @@
 	import ISO6391 from 'iso-639-1';
 	import SetDefaultLanguageModal from '$lib/components/modals/SetDefaultLanguageModal.svelte';
 	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
+	import RadioButton16 from 'carbon-icons-svelte/lib/RadioButton16';
+	import RadioButtonChecked16 from 'carbon-icons-svelte/lib/RadioButtonChecked16';
 
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
@@ -76,6 +78,7 @@
 		{ key: 'isoCode', value: 'Language' },
 		// { key: 'progress', value: 'Progress' },
 		// { key: 'words', value: 'Words' },
+		{ key: 'isDefaultLanguage', value: 'Default Language' },
 		{ key: 'actions', empty: true }
 	];
 
@@ -134,31 +137,39 @@
 					<Tag type="green">default</Tag>
 				{/if}
 			</div>
+		{:else if cell.key === 'isDefaultLanguage'}
+			{#if row.isDefaultLanguage === false}
+				<Button
+					kind="ghost"
+					icon={RadioButton16}
+					iconDescription="Set as default language"
+					tooltipAlignment="start"
+					tooltipPosition="left"
+					class="px-0"
+					on:click={() => {
+						setDefaultLanguageModal.language = row.languageObject;
+						setDefaultLanguageModal.show = true;
+					}}
+				/>
+			{:else}
+				<Button
+					kind="ghost"
+					icon={RadioButtonChecked16}
+					iconDescription="Is already default language"
+					tooltipAlignment="start"
+					tooltipPosition="left"
+					class="px-0"
+				/>
+			{/if}
 		{:else if cell.key === 'actions'}
 			<row class="justify-end">
-				{#if row.isDefaultLanguage === false}
-					<Button
-						kind="ghost"
-						icon={CheckmarkFilled16}
-						iconDescription="Set as default language"
-						on:click={() => {
-							setDefaultLanguageModal.language = row.languageObject;
-							setDefaultLanguageModal.show = true;
-						}}
-					/>
-				{:else}
-					<Button
-						kind="ghost"
-						icon={CheckmarkOutline16}
-						iconDescription="Set as default language"
-						disabled
-					/>
-				{/if}
 				<Button
 					kind="danger-ghost"
 					disabled={row.isDefaultLanguage}
 					icon={Delete16}
 					iconDescription="Delete language"
+					tooltipAlignment="start"
+					tooltipPosition="left"
 					on:click={() => {
 						deleteLanguageModal.language = row.languageObject;
 						deleteLanguageModal.show = true;
