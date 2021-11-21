@@ -2,7 +2,6 @@
 	import { InlineLoading, Modal, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
-	import type { definitions } from '@inlang/database';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 
 	let open = false;
@@ -26,10 +25,7 @@
 		if (allKeys?.isErr) {
 			throw allKeys.error;
 		}
-		if (keyName === '') {
-			invalidKeyNameMessage = 'The key field is required.';
-			return false;
-		} else if (allKeys?.value.some((key) => key === keyName)) {
+		if (allKeys?.value.some((key) => key === keyName)) {
 			invalidKeyNameMessage = 'The key already exists in the project.';
 			return false;
 		}
@@ -108,8 +104,6 @@
 	<br />
 	<TextArea
 		rows={2}
-		invalid={baseTranslationText === ''}
-		invalidText="The base translation is required."
 		labelText="Base translation:"
 		bind:value={baseTranslationText}
 		placeholder={`The base translation is the projects default language (${$projectStore.data?.project.default_iso_code}) text.`}
