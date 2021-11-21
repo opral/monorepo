@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { TextInput, Button, DataTable, Loading } from 'carbon-components-svelte';
 	import SendAlt24 from 'carbon-icons-svelte/lib/SendAlt32';
-	import Delete24 from 'carbon-icons-svelte/lib/Delete24';
+	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
@@ -79,7 +79,7 @@
 		if (userId.error) {
 			alert(userId.error.message);
 		} else if (userId.data === null) {
-			alert(inputEmail + " is not a user of inlang yet")
+			alert(inputEmail + ' is not a user of inlang yet');
 		} else {
 			const memberUpsert = await database.from<definitions['member']>('member').insert({
 				organization_id: organization_id,
@@ -98,7 +98,7 @@
 				await loadUsers();
 			} else {
 				if (memberUpsert.error) {
-					alert(memberUpsert.error.message)
+					alert(memberUpsert.error.message);
 				} else {
 					alert('An unknown error occurred');
 				}
@@ -144,11 +144,12 @@
 </row>
 <br />
 <DataTable {headers} rows={rows()}>
-	<span slot="cell" let:row let:cell class="cursor-pointer">
+	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'email'}
 			<row class="items-center space-x-2">
 				<p class="text-sm">{cell.value}</p>
 			</row>
+
 			<!-- {:else if cell.key === 'role'}
 			<row class="items-center space-x-2">
 				<p class="text-sm">{cell.value}</p>
@@ -157,8 +158,10 @@
 			<row class="justify-end items-center">
 				<Button
 					disabled={isOwner(row.id)}
-					kind="danger-ghost"
-					icon={Delete24}
+					kind="ghost"
+					icon={Delete16}
+					tooltipAlignment="start"
+					tooltipPosition="left"
 					iconDescription="Remove member"
 					on:click={() => {
 						deleteMemberModal.show({

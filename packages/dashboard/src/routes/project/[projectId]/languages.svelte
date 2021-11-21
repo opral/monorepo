@@ -160,7 +160,7 @@
 		{:else if cell.key === 'actions'}
 			<row class="justify-end">
 				<Button
-					kind="danger-ghost"
+					kind="ghost"
 					disabled={row.isDefaultLanguage}
 					icon={Delete16}
 					iconDescription="Delete language"

@@ -8,7 +8,7 @@
 		Tag,
 		Pagination
 	} from 'carbon-components-svelte';
-	import TrashCan32 from 'carbon-icons-svelte/lib/TrashCan32';
+	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
@@ -141,8 +141,10 @@
 						deleteKeyModal.show({ key: row.key });
 					}}
 					iconDescription="Delete translation"
-					icon={TrashCan32}
-					kind="danger-ghost"
+					kind="ghost"
+					icon={Delete16}
+					tooltipAlignment="start"
+					tooltipPosition="left"
 				/>
 			</row>
 		{:else}
