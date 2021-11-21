@@ -4,6 +4,8 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import { CodeSnippet, TextInput, Button, Tile } from 'carbon-components-svelte';
 	import DeleteProjectModal from '$lib/components/modals/DeleteProjectModal.svelte';
+	import Save16 from 'carbon-icons-svelte/lib/Save16';
+	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 
 	let projectName = $projectStore.data?.project.name;
 
@@ -41,6 +43,7 @@
 	<row class="items-center">
 		<TextInput placeholder="Project Name" bind:value={projectName} />
 		<Button
+			icon={Save16}
 			disabled={projectName === $projectStore.data?.project.name}
 			size="field"
 			on:click={() => renameProject()}>Save</Button
@@ -51,7 +54,9 @@
 	<Tile>
 		<h2>Danger Zone</h2>
 		<br />
-		<Button kind="danger-tertiary" on:click={handleDeleteProjectClick}>Delete this project</Button>
+		<Button icon={Delete16} kind="danger-tertiary" on:click={handleDeleteProjectClick}
+			>Delete this project</Button
+		>
 	</Tile>
 
 	<DeleteProjectModal bind:this={deleteProjectModal} />
