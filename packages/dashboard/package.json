@@ -72,6 +72,7 @@
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",
-		"svelte-fluttered": "^0.3.0"
+		"svelte-fluttered": "^0.3.0",
+		"@inlang/common": "file:../common"
 	}
 }

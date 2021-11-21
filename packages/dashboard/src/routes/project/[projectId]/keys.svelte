@@ -15,6 +15,10 @@
 	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
 	import type { definitions } from '@inlang/database';
 	import Translations from '$lib/components/Translations.svelte';
+	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+
+	const ff = $projectStore.data?.translations.getFluentFiles();
+	if (ff?.isOk) console.log(ff.value);
 
 	const headers = [
 		{ key: 'key', value: 'Key' },
@@ -22,9 +26,8 @@
 	];
 
 	type Row = {
-		id: definitions['key']['name'];
-		key: definitions['key'];
-		translations: definitions['translation'][];
+		key: string;
+		translations: { languageCode: LanguageCode; translation: string | null }[];
 	};
 
 	let searchQuery = '';
@@ -38,18 +41,24 @@
 	let rows: () => Row[];
 	// the actual function
 	$: rows = () => {
-		let result = $projectStore.data?.keys.map((key) => {
-			const translationsOfKey = $projectStore.data?.translations.filter(
-				(translation) => translation.key_name === key.name
-			);
-			return <Row>{
-				id: key.name,
+		let result: Row[] = [];
+		let allKeys;
+		if ((allKeys = $projectStore.data?.translations.getAllKeys())?.isErr) {
+			throw allKeys.error;
+		}
+		for (const key of allKeys?.value ?? []) {
+			let allTranslations;
+			if ((allTranslations = $projectStore.data?.translations.getAllTranslations(key))?.isErr) {
+				throw allTranslations.error;
+			}
+			result.push({
 				key: key,
-				translations: translationsOfKey ?? []
-			};
-		});
+				translations: allTranslations?.value ?? []
+			});
+		}
+
 		if (searchQuery !== '') {
-			result = result?.filter((row) => row.key.name.startsWith(searchQuery));
+			result = result?.filter((row) => row.key.startsWith(searchQuery));
 		}
 		// return an empty array as fallback
 		return result?.reverse() ?? [];
@@ -69,27 +78,26 @@
 		// (parameter must be any due to sveltes limited ts support in markup)
 		const x = row as Row;
 		const numberOfLanguages = $projectStore.data?.languages.length;
-		const numberOfTranslations = x.translations.filter((t) => t.text !== '').length;
+		const numberOfTranslations = x.translations.filter(
+			(t) => t.translation !== '' || t.translation !== null
+		).length;
 		return numberOfLanguages !== numberOfTranslations;
 	}
 
-	function keyIsFullyReviewed(row: unknown): boolean {
+	/*function keyIsFullyReviewed(row: unknown): boolean {
 		// type casting row as Row
 		// (parameter must be any due to sveltes limited ts support in markup)
 		const x = row as Row;
-		const allTranslationsOfKey =
-			$projectStore.data?.translations.filter(
-				(translation) => translation.key_name === x.key.name
-			) ?? [];
+		const allTranslationsOfKey = $projectStore.data?.translations.getAllTranslations();
 		const missingReviews = allTranslationsOfKey.filter(
 			(translation) => translation.is_reviewed === false
 		);
 		return missingReviews.length === 0;
-	}
+	}*/
 
 	let createTranslationModal: {
 		open: boolean;
-		translations: definitions['translation'][];
+		translations: { languageCode: LanguageCode; translation: string }[];
 		key: string;
 	} = {
 		open: false,
@@ -119,8 +127,8 @@
 				<div>
 					{#if keyIsMissingTranslations(row) === true}
 						<Tag type="red">Missing translation</Tag>
-					{:else if keyIsFullyReviewed(row) === false}
-						<Tag type="purple">Needs approval</Tag>
+						<!--{:else if keyIsFullyReviewed(row) === false}
+						<Tag type="purple">Needs approval</Tag>-->
 					{:else}
 						<Tag type="cool-gray">Complete</Tag>
 					{/if}
@@ -136,7 +144,7 @@
 				/>
 			</row>
 		{:else}
-			{cell.value.name}
+			{cell.value.key}
 		{/if}
 	</span>
 	<div slot="expanded-row" let:row>

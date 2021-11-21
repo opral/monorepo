@@ -7,23 +7,52 @@
 	import { cloneDeep, isEqual } from 'lodash-es';
 	import ISO6391 from 'iso-639-1';
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
+	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
-	export let translation: Readonly<definitions['translation']>;
+	export let translation: Readonly<{
+		key: string;
+		translation: string;
+		languageCode: LanguageCode;
+	}>;
 	export let isBaseTranslation: Readonly<boolean>;
 
 	let translationCopy = cloneDeep(translation);
 
 	async function handleUpdate() {
-		const update = await database
-			.from<definitions['translation']>('translation')
-			.upsert({ ...translationCopy }, { onConflict: 'iso_code, project_id, key_name' })
-			.match({
-				project_id: translation.project_id,
-				key_name: translation.key_name,
-				iso_code: translation.iso_code
-			});
-		if (update.error) {
-			alert(update.error);
+		let query;
+		if ($projectStore.data === null) throw Error('Projectstore not initialized');
+		if (
+			$projectStore.data.translations.doesTranslationExist(
+				translationCopy.key,
+				translationCopy.languageCode
+			)
+		) {
+			$projectStore.data.translations.updateKey(
+				translationCopy.key,
+				translationCopy.translation,
+				translationCopy.languageCode
+			);
+		} else {
+			$projectStore.data.translations.createTranslation(
+				translationCopy.key,
+				translationCopy.translation,
+				translationCopy.languageCode
+			);
+		}
+		const fluentFiles = $projectStore.data.translations.getFluentFiles();
+		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
+		for (const fluentFile of fluentFiles.value) {
+			query = await database
+				.from<definitions['language']>('language')
+				.update({ file: fluentFile.data })
+				.eq('project_id', $projectStore.data?.project.id ?? '')
+				.eq('iso_code', translationCopy.languageCode);
+		}
+
+		if (query === undefined) {
+			alert('Fluent file not found');
+		} else if (query.error) {
+			alert(query.error);
 		} else {
 			projectStore.getData({ projectId: $page.params.projectId });
 		}
@@ -33,11 +62,11 @@
 <row class="items-center space-x-2 justify-between">
 	<row class="items-center">
 		{#if isBaseTranslation}
-			<Tag type="green">{translation.iso_code}</Tag>
+			<Tag type="green">{translation}</Tag>
 		{:else}
-			<Tag type="blue">{translation.iso_code}</Tag>
+			<Tag type="blue">{translation.languageCode}</Tag>
 		{/if}
-		{ISO6391.getName(translation.iso_code)}
+		{ISO6391.getName(translation.languageCode)}
 	</row>
 	<row class="items-center">
 		<Button
@@ -47,22 +76,22 @@
 			kind="ghost"
 			on:click={handleUpdate}>Save</Button
 		>
-		<Toggle
+		<!--<Toggle
 			class="flex-shrink -mt-4 mr-24"
 			labelA="Not approved"
 			labelB="Approved"
-			disabled={translationCopy.text === '' ||
+			disabled={translationCopy.translation === '' ||
 				$projectStore.data?.translations.includes(translation) === false}
 			bind:toggled={translationCopy.is_reviewed}
 			on:toggle={handleUpdate}
-		/>
+		/>-->
 	</row>
 </row>
 <row>
 	<TextArea
 		class="flex-grow"
-		bind:value={translationCopy.text}
-		invalid={translationCopy.text === ''}
+		bind:value={translationCopy.translation}
+		invalid={translationCopy.translation === ''}
 		invalidText="Missing translation"
 		rows={2}
 	/>

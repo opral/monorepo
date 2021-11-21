@@ -37,13 +37,9 @@ export class TranslationAPI {
         return Result.ok(new TranslationAPI({ adapter: args.adapter, resources, baseLanguage: args.baseLanguage }));
     }
 
-    #throwExpression(errorMessage: string): never {
-        throw new Error(errorMessage);
-    }
-
     doesKeyExist(key: string): boolean {
         for (const resource of this.resources) {
-            if (this.getTranslation(key, resource.languageCode) === null) {
+            if (this.getTranslation(key, resource.languageCode).isOk) {
                 return true;
             }
         }
@@ -111,9 +107,11 @@ export class TranslationAPI {
     getAllKeys(): Result<string[], Error> {
         const keys = [];
         for (const resource of this.resources) {
-            for (const entry of resource.data.body) {
-                if (entry.type === 'Message' || entry.type === 'Term') {
-                    keys.push(entry.id.name);
+            if (resource.languageCode === this.baseLanguage) {
+                for (const entry of resource.data.body) {
+                    if (entry.type === 'Message' || entry.type === 'Term') {
+                        keys.push(entry.id.name);
+                    }
                 }
             }
         }
@@ -133,8 +131,7 @@ export class TranslationAPI {
         if (indexOfTranslation === undefined) {
             return Result.err(Error('Key not found'));
         }
-        const parsedTranslation =
-            fluent.parse(`${key} = ${translation}`, {}).body[0] ?? this.#throwExpression('Parsing failed');
+        const parsedTranslation = fluent.parse(`${key} = ${translation}`, {}).body[0];
         if (parsedTranslation === undefined) {
             return Result.err(Error('Incorrect translation'));
         }
@@ -205,5 +202,32 @@ export class TranslationAPI {
             files.push({ data: serial.value, languageCode: resource.languageCode });
         }
         return Result.ok(files);
+    }
+
+    doesTranslationExist(key: string, languageCode: LanguageCode): boolean {
+        for (const resource of this.resources) {
+            if (resource.languageCode === languageCode) {
+                for (const entry of resource.data.body) {
+                    if (entry.type !== 'Message' && entry.type !== 'Term') continue;
+                    if (entry.id.name === key) return true;
+                }
+                break;
+            }
+        }
+        return false;
+    }
+
+    createTranslation(key: string, translation: string, languageCode: LanguageCode): Result<void, Error> {
+        if (this.doesTranslationExist(key, languageCode)) {
+            return Result.err(Error('Translation already exists'));
+        }
+        for (const resource of this.resources) {
+            if (resource.languageCode === languageCode) {
+                const parse = fluent.parse(`${key} = ${translation}`, {}).body[0];
+                resource.data.body.push(parse);
+                return Result.ok(undefined);
+            }
+        }
+        return Result.err(Error('Language not found'));
     }
 }

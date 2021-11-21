@@ -39,25 +39,37 @@
 	 *
 	 * @returns percentage in xx.xx%
 	 */
-	function languageProgress(iso: definitions['language']['iso_code']) {
-		const allTranslations =
-			$projectStore.data?.translations.filter((translation) => translation.iso_code === iso) ?? [];
-		if (allTranslations.length === 0) {
+	/*function languageProgress(iso: definitions['language']['iso_code']) {
+		if ($projectStore.data?.translations.getAllKeys().length === 0) {
 			return 0;
 		}
 		const missingReview = allTranslations.filter(
 			(translation) => translation.is_reviewed === false
 		);
 		return ((allTranslations.length - missingReview.length) / allTranslations.length) * 100;
-	}
+	}*/
 
 	function numWords(iso: definitions['language']['iso_code']): number {
 		let result = 0;
-		$projectStore.data?.translations
-			.filter((translation) => translation.iso_code === iso)
-			.forEach((translation) => {
-				result += (translation.text.split(' ') ?? []).length;
-			});
+		if ($projectStore.data?.translations === undefined) {
+			throw 'TranslationAPI undefined';
+		}
+		const allKeys = $projectStore.data?.translations.getAllKeys();
+		if (allKeys?.isErr) {
+			throw allKeys.error;
+		}
+		for (const key of allKeys?.value) {
+			if ($projectStore.data?.translations === undefined) {
+				throw 'TranslationAPI undefined';
+			}
+			const allTranslations = $projectStore.data?.translations.getAllTranslations(key);
+			if (allTranslations?.isErr) {
+				throw allTranslations.error;
+			}
+			for (const translation of allTranslations?.value) {
+				result += (translation.translation?.split(' ') ?? []).length;
+			}
+		}
 		return result;
 	}
 
@@ -83,7 +95,7 @@
 				id: language.iso_code,
 				isoCode: language.iso_code,
 				words: numWords(language.iso_code),
-				progress: languageProgress(language.iso_code),
+				progress: 0,
 				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_iso_code,
 				languageObject: language
 			}))

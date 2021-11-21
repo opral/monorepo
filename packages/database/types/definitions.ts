@@ -877,6 +877,7 @@ export interface definitions {
      * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
      */
     project_id: string;
+    file: string;
   };
   member: {
     /**

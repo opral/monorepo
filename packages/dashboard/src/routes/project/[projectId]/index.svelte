@@ -1,4 +1,5 @@
 <script lang="ts">
+	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { ProgressBar, PaginationNav } from 'carbon-components-svelte';
 
@@ -13,8 +14,11 @@
 			currentPageNumber * pageSize,
 			(currentPageNumber + 1) * pageSize
 		) ?? [];
-	//$: organization =
-	$projectStore.data?.project.organization_id;
+
+	const allKeys = $projectStore.data?.translations.getAllKeys();
+	if (allKeys?.isErr) {
+		throw allKeys.error;
+	}
 </script>
 
 <section>
@@ -33,11 +37,7 @@
 					</div>
 				{/each}
 			</column>
-			<PaginationNav
-				total={$projectStore.data?.translations.length ?? 0}
-				shown={pageSize}
-				bind:page={currentPageNumber}
-			/>
+			<PaginationNav total={allKeys?.value.length} shown={pageSize} bind:page={currentPageNumber} />
 		</column>
 		<column class="space-y-1">
 			<h3>Statistics</h3>

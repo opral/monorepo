@@ -13,19 +13,23 @@
 		open = true;
 	}
 
-	let keyName: definitions['key']['name'];
+	let keyName: string;
 
 	//let description: definitions['key']['description'];
 
-	let baseTranslationText: definitions['translation']['text'] = '';
+	let baseTranslationText = '';
 
 	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
 
 	$: keyNameIsValid = () => {
+		const allKeys = $projectStore.data?.translations.getAllKeys();
+		if (allKeys?.isErr) {
+			throw allKeys.error;
+		}
 		if (keyName === '') {
 			invalidKeyNameMessage = 'The key field is required.';
 			return false;
-		} else if ($projectStore.data?.keys.map((key) => key.name).includes(keyName)) {
+		} else if (allKeys?.value.some((key) => key === keyName)) {
 			invalidKeyNameMessage = 'The key already exists in the project.';
 			return false;
 		}

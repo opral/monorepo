@@ -4,6 +4,9 @@ import { DeeplLanguages } from 'deepl';
 import { definitions } from '@inlang/database';
 import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
 import { TranslateRequestBody, TranslateResponseBody } from './translate';
+import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+import { Result } from '@inlang/common/src/types/result';
 
 /**
  * This endpoint uses the base translation to create machine translations
@@ -24,8 +27,8 @@ import { TranslateRequestBody, TranslateResponseBody } from './translate';
 export type CreateBaseTranslationRequestBody = {
 	projectId: definitions['project']['id'];
 	baseTranslation: {
-		key_name: definitions['translation']['key_name'];
-		text: definitions['translation']['text'];
+		key_name: string;
+		text: string;
 	};
 };
 
@@ -53,37 +56,44 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			};
 		}
 
-		// just in case upserting the key, in case it does not exist yet.
-		const key = await supabase
-			.from<definitions['key']>('key')
-			.upsert(
-				{ name: requestBody.baseTranslation.key_name, project_id: requestBody.projectId },
-				{ onConflict: 'name, project_id' }
-			);
-
-		if (key.error) {
-			console.error(key.error);
-			return {
-				status: 500
-			};
-		}
-
-		const projectLanguages = await supabase
+		const languages = await supabase
 			.from<definitions['language']>('language')
 			.select()
 			.match({ project_id: requestBody.projectId });
-		if (projectLanguages.data === null || projectLanguages.error) {
-			throw projectLanguages.error;
+
+		const translations: Result<TranslationAPI, Error> = TranslationAPI.initialize({
+			adapter: new FluentAdapter(),
+			files:
+				languages.data?.map((language) => ({
+					data: language.file,
+					languageCode: language.iso_code
+				})) ?? [],
+			baseLanguage: project.data?.default_iso_code ?? 'en' // Always defined according to schema
+		});
+
+		// just in case upserting the key, in case it does not exist yet.
+		if (translations.isErr) {
+			console.error(translations.error);
+			return { status: 500 };
+		}
+		const translationAPI = translations.value;
+		if (translationAPI.doesKeyExist(requestBody.baseTranslation.key_name) === false) {
+			translationAPI.createKey(
+				requestBody.baseTranslation.key_name,
+				requestBody.baseTranslation.text
+			);
 		}
 		// wrapping all translations below in promises and execute in `Promise.all` speeds up
 		// the function fundamentaly through parallelism
 		const promises: Promise<void>[] = [];
 		// iterating over all language iso codes of the project
 		// assumes that https://linear.app/inlang/issue/INL-95/database-project-should-have-a-default-language-model is implemented
-		for (const language of projectLanguages.data) {
+		for (const language of languages.data?.filter(
+			(language) => language.iso_code !== project.data.default_iso_code
+		) ?? []) {
 			promises.push(
 				(async () => {
-					let text: definitions['translation']['text'] | null = null;
+					let text: string | null = null;
 					if (language.iso_code === project.data.default_iso_code) {
 						text = requestBody.baseTranslation.text;
 					} else if (
@@ -117,24 +127,29 @@ export async function post(request: Request): Promise<EndpointOutput> {
 							'Text of a to be created translation was null or undefined. Thus, has not been created.'
 						);
 					} else {
+						console.log(language.iso_code);
 						// insert translation into database
-						const insertion = await supabase
-							.from<definitions['translation']>('translation')
-							.insert({
-								key_name: requestBody.baseTranslation.key_name,
-								project_id: requestBody.projectId,
-								iso_code: language.iso_code,
-								text: text
-							});
-						if (insertion.error) {
-							throw `Insertion of ${requestBody.baseTranslation.key_name}-${language.iso_code} went wrong:`;
-						}
+						translationAPI.createTranslation(
+							requestBody.baseTranslation.key_name,
+							text,
+							language.iso_code
+						);
 					}
 					// additional parantheses to execute the function, otherwise the array is not an array of promises
 				})()
 			);
 		}
 		await Promise.all(promises);
+		const fluentFiles = translationAPI.getFluentFiles();
+		if (fluentFiles.isErr) throw fluentFiles.error;
+		for (const fluentFile of fluentFiles.value) {
+			const query = await supabase
+				.from<definitions['language']>('language')
+				.update({ file: fluentFile.data })
+				.match({ iso_code: fluentFile.languageCode, project_id: project.data.id });
+			if (query.error) throw query.error;
+		}
+
 		return {
 			status: 200
 		};

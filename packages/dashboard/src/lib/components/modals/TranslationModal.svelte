@@ -4,52 +4,59 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { createEventDispatcher } from 'svelte';
+	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
 	export let open = false;
 	export let key = '';
-	export let translations: definitions['translation'][];
+	export let translations: { languageCode: LanguageCode; translation: string }[];
 
-	$: isBaseTranslationMissing = !translations.some(
-		(t) => t.text !== '' && t.iso_code === $projectStore.data?.project.default_iso_code
-	);
-
-	$: missingTranslations = $projectStore.data?.languages.filter(
-		(language) =>
-			$projectStore.data?.translations
-				.map((translation) => translation.iso_code)
-				.includes(language.iso_code) === false
-	);
+	$: missingTranslations = () => {
+		if ($projectStore.data?.translations === undefined) throw Error('Projectstore not initialized');
+		const missing = $projectStore.data.translations.checkMissingTranslations();
+		if (missing.isErr) throw Error('Missing translations not found');
+		for (const missingTranslation of missing?.value) {
+			if (missingTranslation.key === key) return missingTranslation.languageCodes;
+		}
+		return [];
+	};
 
 	const dispatch = createEventDispatcher();
 
 	async function save() {
 		let query;
 		for (const t of translations) {
-			if (t.text !== '') {
-				if (
-					$projectStore.data?.translations.some(
-						(translation) =>
-							translation.iso_code === t.iso_code &&
-							translation.key_name === key &&
-							translation.project_id === $projectStore.data?.project.id
-					)
-				) {
-					query = await database
-						.from<definitions['translation']>('translation')
-						.update({ text: t.text })
-						.eq('key_name', t.key_name)
-						.eq('project_id', $projectStore.data.project.id)
-						.eq('iso_code', t.iso_code);
+			if (t.translation !== '' && t.translation !== null) {
+				if ($projectStore.data?.translations.getTranslation(key, t.languageCode).isOk) {
+					$projectStore.data.translations.updateKey(key, t.translation, t.languageCode);
+					const fluentFiles = $projectStore.data.translations.getFluentFiles();
+					if (fluentFiles.isErr) throw 'Cannot get Fluent file';
+					for (const fluentFile of fluentFiles.value) {
+						if (fluentFile.languageCode === t.languageCode) {
+							query = await database
+								.from<definitions['language']>('language')
+								.update({ file: fluentFile.data })
+								.eq('project_id', $projectStore.data?.project.id ?? '')
+								.eq('iso_code', t.languageCode);
+						}
+					}
 				} else {
-					query = await database.from<definitions['translation']>('translation').insert({
-						project_id: $projectStore.data?.project.id,
-						key_name: key,
-						iso_code: t.iso_code,
-						is_reviewed: false,
-						text: t.text
-					});
+					if ($projectStore.data === null) throw 'Projectstore not initialized.';
+					$projectStore.data?.translations.createTranslation(key, t.translation, t.languageCode);
+					const fluentFiles = $projectStore.data.translations.getFluentFiles();
+					if (fluentFiles.isErr) throw 'Cannot get Fluent file';
+					for (const fluentFile of fluentFiles.value) {
+						if (fluentFile.languageCode === t.languageCode) {
+							query = await database
+								.from<definitions['language']>('language')
+								.update({ file: fluentFile.data })
+								.eq('project_id', $projectStore.data?.project.id ?? '')
+								.eq('iso_code', t.languageCode);
+						}
+					}
 				}
-				if (query.error) {
+				if (query === undefined) {
+					alert('Problem in fluent files');
+				} else if (query.error) {
 					alert(query.error.message);
 				} else {
 					dispatch('updateRows');
@@ -79,12 +86,12 @@
 	<div>
 		{#each translations as translation}
 			<div class="flex items-center">
-				<TextArea labelText="{translation.iso_code}:" bind:value={translation.text} />
+				<TextArea labelText="{translation.languageCode}:" bind:value={translation.translation} />
 			</div>
 		{/each}
-		{#each missingTranslations as miss}
+		{#each missingTranslations() as miss}
 			<div class="flex items-center">
-				<TextArea labelText="{missingTranslations.iso_code}:" />
+				<TextArea labelText="{miss}:" />
 			</div>
 		{/each}
 	</div>
