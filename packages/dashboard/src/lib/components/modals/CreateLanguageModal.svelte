@@ -37,8 +37,8 @@
 
 <Modal
 	bind:open
-	modalHeading="Add new language"
-	primaryButtonText="Create"
+	modalHeading="New language"
+	primaryButtonText="Add"
 	hasForm={true}
 	primaryButtonDisabled={isValidInput === false}
 	secondaryButtonText="Cancel"

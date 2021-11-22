@@ -83,7 +83,7 @@
 
 <Modal
 	bind:open
-	modalHeading="Create key"
+	modalHeading="New key"
 	size="sm"
 	primaryButtonText="Create"
 	secondaryButtonText="Cancel"
