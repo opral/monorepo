@@ -87,6 +87,7 @@
 		<!-- GOOGLE SIGN IN -->
 		<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoGoogle32}>
 			Sign in with Google
-		</Button>	
+		</Button>
+		<p class="text-gray-600 text-sm">Need help? <a class="text-blue-600 underline" href="https://discord.com/invite/CUkj4fgz5K" target="_blank">join our discord</a></p>
 	</column>
 </div>
