@@ -41,7 +41,7 @@ export class TranslationAPI {
         for (const resource of this.resources) {
             if (resource.languageCode === this.baseLanguage) {
                 for (const entry of resource.data.body) {
-                    if (entry.type === 'Message' || entry.type === 'Term') {
+                    if (entry.type === 'Message') {
                         if (entry.id.name === key) return true;
                     }
                 }
@@ -51,13 +51,21 @@ export class TranslationAPI {
     }
 
     getTranslation(key: string, language: string): Result<string, Error> {
-        const translation = this.resources
-            .find((resource) => resource.languageCode === language)
-            ?.data.body.find((entry) => entry.type === ('Message' || 'Term') && entry.id.name === key);
-        if (translation === undefined || translation.type !== 'Message') {
+        let translation;
+        for (const resource of this.resources) {
+            if (resource.languageCode === language) {
+                for (const entry of resource.data.body) {
+                    if (entry.type === 'Message' && entry.id.name === key) {
+                        translation = entry;
+                    }
+                }
+            }
+        }
+
+        if (translation === undefined) {
             return Result.err(Error('Key not found'));
         }
-        if (translation.value === null) return Result.err(Error('Translation not found'));
+        if (translation.value === null) return Result.ok('');
         let out = '';
         for (const element of translation.value.elements) {
             if (element.type === 'Placeable') {
@@ -100,20 +108,18 @@ export class TranslationAPI {
                 return Result.ok(undefined);
             }
         }
-        return Result.err(Error('Language not found'));
+        return Result.err(Error('Base language not found'));
     }
 
     deleteKey(key: string): Result<void, Error> {
-        const removedElements = [];
+        let removedElements = 0;
         for (const resource of this.resources) {
-            removedElements.push(
-                remove(
-                    resource.data.body,
-                    (resource) => (resource.type === 'Message' || resource.type === 'Term') && resource.id.name === key
-                )
-            );
+            removedElements += remove(
+                resource.data.body,
+                (resource) => (resource.type === 'Message' || resource.type === 'Term') && resource.id.name === key
+            ).length;
         }
-        if (removedElements.length === 0) {
+        if (removedElements === 0) {
             return Result.err(Error('Key not found'));
         } else {
             return Result.ok(undefined);
@@ -125,7 +131,7 @@ export class TranslationAPI {
         for (const resource of this.resources) {
             if (resource.languageCode === this.baseLanguage) {
                 for (const entry of resource.data.body) {
-                    if (entry.type === 'Message' || entry.type === 'Term') {
+                    if (entry.type === 'Message') {
                         keys.push(entry.id.name);
                     }
                 }
@@ -144,13 +150,10 @@ export class TranslationAPI {
             (entry: Entry) => entry.type === ('Message' || 'Term') && entry.id.name === key
         );
 
-        if (indexOfTranslation === undefined) {
+        if (indexOfTranslation === -1) {
             return Result.err(Error('Key not found'));
         }
-        const parsedTranslation = fluent.parse(`${key} = ${translation ?? ''}`, {}).body[0];
-        if (parsedTranslation === undefined) {
-            return Result.err(Error('Incorrect translation'));
-        }
+        const parsedTranslation = fluent.parse(`${key} = ${translation ?? '""'}`, {}).body[0];
         translations[indexOfTranslation] = parsedTranslation;
         return Result.ok(undefined);
     }
@@ -161,12 +164,12 @@ export class TranslationAPI {
         for (const baseResource of this.resources) {
             if (baseResource.languageCode === this.baseLanguage) {
                 for (const baseEntry of baseResource.data.body) {
-                    if (baseEntry.type === 'Message' || baseEntry.type === 'Term') {
+                    if (baseEntry.type === 'Message') {
                         const missingLanguages: LanguageCode[] = [];
                         for (const resource of this.resources) {
                             let isTranslatedInLanguage = false;
                             for (const entry of resource.data.body) {
-                                if (entry.type === 'Message' || entry.type === 'Term') {
+                                if (entry.type === 'Message') {
                                     if (entry.id.name === baseEntry.id.name) {
                                         isTranslatedInLanguage = true;
                                         break;
@@ -210,12 +213,12 @@ export class TranslationAPI {
             }
             for (const resource of this.resources) {
                 if (resource.languageCode === file.languageCode) {
-                    if (resource.data.body.length > parse.value.body.length || options.override === true) {
-                        resource.data = parse.value;
-                    } else {
+                    if (resource.data.body.length > parse.value.body.length && options.override === false) {
                         return Result.err(
                             Error('Less keys than original, please set options.override: true to override')
                         );
+                    } else {
+                        resource.data = parse.value;
                     }
                 }
             }
@@ -226,7 +229,7 @@ export class TranslationAPI {
     getFluentFiles(): Result<{ data: string; languageCode: LanguageCode }[], Error> {
         const files = [];
         for (const resource of this.resources) {
-            const serial = this.adapter.serialize(resource.data, {});
+            const serial = this.adapter.serialize(resource.data);
             if (serial.isErr) {
                 return Result.err(serial.error);
             }
@@ -239,8 +242,9 @@ export class TranslationAPI {
         for (const resource of this.resources) {
             if (resource.languageCode === languageCode) {
                 for (const entry of resource.data.body) {
-                    if (entry.type !== 'Message' && entry.type !== 'Term') continue;
-                    if (entry.id.name === key) return true;
+                    if (entry.type === 'Message') {
+                        if (entry.id.name === key) return true;
+                    }
                 }
                 break;
             }
@@ -254,7 +258,7 @@ export class TranslationAPI {
         }
         for (const resource of this.resources) {
             if (resource.languageCode === languageCode) {
-                const parse = fluent.parse(`${key} = ${translation ?? ''}`, {}).body[0];
+                const parse = fluent.parse(`${key} = ${translation ?? '""'}`, {}).body[0];
                 resource.data.body.push(parse);
                 return Result.ok(undefined);
             }
