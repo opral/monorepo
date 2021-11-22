@@ -15,7 +15,7 @@ module.exports = {
 	rules: {
 		'unicorn/no-array-for-each': 'error',
 		'unicorn/prevent-abbreviations': 'error',
-		'unicorn/prefer-spread': 'warning',
+		'unicorn/prefer-spread': 'warn',
 		'unicorn/prefer-array-find': 'error',
 		'unicorn/prefer-array-flat': 'error',
 		'unicorn/prefer-array-flat-map': 'error',
