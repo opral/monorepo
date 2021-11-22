@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ISO6391 from 'iso-639-1';
 	import { InlineLoading, Modal, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
@@ -10,6 +11,10 @@
 		keyName = '';
 		baseTranslationText = '';
 		open = true;
+		// only god knows why focus has to be wrapped in a setTimeout to work
+		setTimeout(() => {
+			keyNameInputElement.focus();
+		});
 	}
 
 	let keyName: string;
@@ -34,6 +39,8 @@
 	$: isValidInput = keyNameIsValid() && baseTranslationText !== '';
 
 	let invalidKeyNameMessage: string;
+
+	let keyNameInputElement: HTMLInputElement;
 
 	async function handleSubmission() {
 		status = 'isLoading';
@@ -85,7 +92,6 @@
 	}}
 	on:submit={handleSubmission}
 	preventCloseOnClickOutside
-	hasScrollingContent
 	primaryButtonDisabled={isValidInput === false}
 	shouldSubmitOnEnter={false}
 >
@@ -97,15 +103,18 @@
 		invalid={keyNameIsValid() === false && status !== 'isFinished'}
 		invalidText={invalidKeyNameMessage}
 		labelText="Key"
+		helperText="A key acts as identifier for a translation."
 		bind:value={keyName}
-		placeholder="example.hello"
+		bind:ref={keyNameInputElement}
 	/>
 	<br />
 	<TextArea
 		rows={2}
-		labelText="Base translation:"
+		labelText={`Base translation (${ISO6391.getName(
+			$projectStore.data?.project.default_iso_code ?? ''
+		)})`}
 		bind:value={baseTranslationText}
-		placeholder={`The base translation is the projects default language (${$projectStore.data?.project.default_iso_code}) text.`}
+		helperText={`The base translation is the text of the projects default (human) language.`}
 	/>
 	<!-- <br />
 	<TextArea
