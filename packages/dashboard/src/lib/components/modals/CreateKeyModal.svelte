@@ -121,6 +121,7 @@
 		placeholder="What is this key for?"
 	/>
 	<br /> -->
+	<br />
 	{#if status === 'isLoading'}
 		<InlineLoading status="active" description="Auto-translating..." />
 	{:else if status === 'isFinished'}
