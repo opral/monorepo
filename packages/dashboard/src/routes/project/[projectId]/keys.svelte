@@ -21,7 +21,7 @@
 	if (ff?.isOk) console.log(ff.value);
 
 	const headers = [
-		{ key: 'key', value: 'Key' },
+		{ key: 'id', value: 'Key' },
 		{ key: 'actions', empty: true }
 	];
 
@@ -149,11 +149,11 @@
 				/>
 			</row>
 		{:else}
-			{cell.value.key}
+			{cell.value}
 		{/if}
 	</span>
 	<div slot="expanded-row" let:row>
-		<Translations keyName={row.key.name} />
+		<Translations keyName={row.id} />
 	</div>
 </DataTable>
 <Pagination

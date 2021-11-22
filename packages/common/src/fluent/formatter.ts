@@ -1,5 +1,5 @@
 import * as fluent from '@fluent/syntax';
-import { Resource, Entry, Message, Identifier } from '@fluent/syntax';
+import { Resource, Entry, Message, Identifier, Pattern, serializeExpression } from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { LanguageCode } from '../types/languageCode';
 import { TranslationFile } from '../types/translationFile';
@@ -39,8 +39,12 @@ export class TranslationAPI {
 
     doesKeyExist(key: string): boolean {
         for (const resource of this.resources) {
-            if (this.getTranslation(key, resource.languageCode).isOk) {
-                return true;
+            if (resource.languageCode === this.baseLanguage) {
+                for (const entry of resource.data.body) {
+                    if (entry.type === 'Message' || entry.type === 'Term') {
+                        if (entry.id.name === key) return true;
+                    }
+                }
             }
         }
         return false;
@@ -50,13 +54,24 @@ export class TranslationAPI {
         const translation = this.resources
             .find((resource) => resource.languageCode === language)
             ?.data.body.find((entry) => entry.type === ('Message' || 'Term') && entry.id.name === key);
-        if (translation === undefined) {
+        if (translation === undefined || translation.type !== 'Message') {
             return Result.err(Error('Key not found'));
         }
-        return this.adapter.serialize(new Resource([translation]), {});
+        if (translation.value === null) return Result.err(Error('Translation not found'));
+        let out = '';
+        for (const element of translation.value.elements) {
+            if (element.type === 'Placeable') {
+                out += serializeExpression(element.expression);
+            } else {
+                out += element.value;
+            }
+        }
+        return Result.ok(out);
     }
 
-    getAllTranslations(key: string): Result<{ languageCode: LanguageCode; translation: string | null }[], Error> {
+    getAllTranslations(
+        key: string
+    ): Result<{ key: string; languageCode: LanguageCode; translation: string | undefined }[], Error> {
         const output = [];
         if (this.doesKeyExist(key) === false) {
             return Result.err(Error('Key does not exist'));
@@ -65,6 +80,7 @@ export class TranslationAPI {
             const translation = this.getTranslation(key, resource.languageCode);
             if (translation.isOk) {
                 output.push({
+                    key: key,
                     languageCode: resource.languageCode,
                     translation: translation.value,
                 });
@@ -118,7 +134,7 @@ export class TranslationAPI {
         return Result.ok(keys);
     }
 
-    updateKey(key: string, translation: string, language: LanguageCode): Result<void, Error> {
+    updateKey(key: string, translation: string | undefined, language: LanguageCode): Result<void, Error> {
         const translations = this.resources.find((resource) => resource.languageCode === language)?.data.body;
         if (translations === undefined) {
             return Result.err(Error('Language not found'));
@@ -131,7 +147,7 @@ export class TranslationAPI {
         if (indexOfTranslation === undefined) {
             return Result.err(Error('Key not found'));
         }
-        const parsedTranslation = fluent.parse(`${key} = ${translation}`, {}).body[0];
+        const parsedTranslation = fluent.parse(`${key} = ${translation ?? ''}`, {}).body[0];
         if (parsedTranslation === undefined) {
             return Result.err(Error('Incorrect translation'));
         }
@@ -169,6 +185,21 @@ export class TranslationAPI {
             }
         }
         return Result.ok(result);
+    }
+
+    checkMissingTranslationsForKey(key: string): Result<{ key: string; languageCode: LanguageCode }[], Error> {
+        const out = [];
+        const missingTranslations = this.checkMissingTranslations();
+        if (missingTranslations.isErr) return Result.err(missingTranslations.error);
+        for (const missingKey of missingTranslations.value) {
+            if (missingKey.key === key) {
+                for (const language of missingKey.languageCodes) {
+                    out.push({ key: key, languageCode: language });
+                }
+                return Result.ok(out);
+            }
+        }
+        return Result.ok([]);
     }
 
     updateFile(files: TranslationFile[], options = { override: false }): Result<void, Error> {
@@ -217,13 +248,13 @@ export class TranslationAPI {
         return false;
     }
 
-    createTranslation(key: string, translation: string, languageCode: LanguageCode): Result<void, Error> {
+    createTranslation(key: string, translation: string | undefined, languageCode: LanguageCode): Result<void, Error> {
         if (this.doesTranslationExist(key, languageCode)) {
             return Result.err(Error('Translation already exists'));
         }
         for (const resource of this.resources) {
             if (resource.languageCode === languageCode) {
-                const parse = fluent.parse(`${key} = ${translation}`, {}).body[0];
+                const parse = fluent.parse(`${key} = ${translation ?? ''}`, {}).body[0];
                 resource.data.body.push(parse);
                 return Result.ok(undefined);
             }
