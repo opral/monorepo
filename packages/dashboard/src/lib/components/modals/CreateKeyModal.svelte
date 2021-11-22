@@ -23,11 +23,7 @@
 	$: keyNameIsValid = () => {
 		const allKeys = $projectStore.data?.translations.getAllKeys();
 		if (allKeys?.isErr) {
-			throw allKeys.error;
-		}
-		if (keyName === '') {
-			invalidKeyNameMessage = 'The key field is required.';
-			return false;
+			alert(allKeys.error.message);
 		} else if (allKeys?.value.some((key) => key === keyName)) {
 			invalidKeyNameMessage = 'The key already exists in the project.';
 			return false;
@@ -107,8 +103,6 @@
 	<br />
 	<TextArea
 		rows={2}
-		invalid={baseTranslationText === ''}
-		invalidText="The base translation is required."
 		labelText="Base translation:"
 		bind:value={baseTranslationText}
 		placeholder={`The base translation is the projects default language (${$projectStore.data?.project.default_iso_code}) text.`}
