@@ -1,27 +1,43 @@
 <script lang="ts">
+	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import ISO6391 from 'iso-639-1';
 	import { projectStore } from '$lib/stores/projectStore';
 
 	import type { definitions } from '@inlang/database';
-	import { Modal, Form, FormGroup, TextInput } from 'carbon-components-svelte';
+	import {
+		Modal,
+		Form,
+		FormGroup,
+		OutboundLink,
+		Select,
+		InlineNotification,
+		NotificationActionButton,
+		SelectItem
+	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { page } from '$app/stores';
 
 	export let open = false;
 
-	let languageIso: definitions['language']['iso_code'];
+	let selectedLanguageIso: definitions['language']['iso_code'];
 
-	$: languageExistsInProject = $projectStore.data?.languages
-		.map((language) => language.iso_code)
-		.includes(languageIso);
+	let projectLanguages = $projectStore.data?.languages.map((language) => language.iso_code);
 
 	// input must be iso 639-1 and not be contained in project langauges already
-	$: isValidInput = ISO6391.validate(languageIso);
+
+	$: isValidInput = ISO6391.validate(selectedLanguageIso);
+
+	let availableLanguages = ISO6391.getAllCodes()
+		.map((code) => ({
+			code: code,
+			name: ISO6391.getName(code)
+		}))
+		.filter((language) => projectLanguages?.includes(language.code as LanguageCode) === false);
 
 	async function handleConfirm() {
 		const create = await database
 			.from<definitions['language']>('language')
-			.insert({ iso_code: languageIso, project_id: $projectStore.data?.project.id });
+			.insert({ iso_code: selectedLanguageIso, project_id: $projectStore.data?.project.id });
 		if (create.error) {
 			alert(create.error);
 		} else {
@@ -49,17 +65,35 @@
 >
 	<Form>
 		<FormGroup>
-			<TextInput
-				labelText="language code (ISO 639-1)"
-				bind:value={languageIso}
-				invalid={isValidInput === false || languageExistsInProject}
-				invalidText={languageExistsInProject
-					? 'Language already exists in this project.'
-					: 'The code must be an ISO 639-1 code.'}
-			/>
+			<Select labelText="Language" bind:selected={selectedLanguageIso}>
+				<SelectItem value="none" text="Select a language" disabled hidden />
+				{#each availableLanguages as language}
+					<SelectItem value={language.code} text={`${language.name} - ${language.code}`} />
+				{/each}
+			</Select>
 		</FormGroup>
-		<FormGroup disabled>
-			<TextInput labelText="country code (ISO 3166-1 alpha-2)" placeholder="coming soon..." />
-		</FormGroup>
+		<InlineNotification hideCloseButton kind="info" subtitle="Looking for country codes?">
+			<div slot="actions">
+				<NotificationActionButton>
+					<OutboundLink href="https://github.com/inlang/inlang/discussions/80">
+						Upvote feature
+					</OutboundLink>
+				</NotificationActionButton>
+			</div>
+		</InlineNotification>
+
+		<InlineNotification
+			hideCloseButton
+			kind="warning"
+			subtitle="Keys are not machine translated for newly added languages."
+		>
+			<div slot="actions">
+				<NotificationActionButton>
+					<OutboundLink href="https://github.com/inlang/inlang/discussions/77">
+						Upvote feature
+					</OutboundLink>
+				</NotificationActionButton>
+			</div>
+		</InlineNotification>
 	</Form>
 </Modal>
