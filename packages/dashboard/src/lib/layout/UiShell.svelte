@@ -36,7 +36,6 @@
 			if (error) {
 				throw error;
 			}
-			alert('Logged out!');
 		} catch (error) {
 			const err = error as PostgrestError;
 			alert(err.message);
