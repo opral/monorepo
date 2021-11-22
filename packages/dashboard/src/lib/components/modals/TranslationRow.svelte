@@ -65,7 +65,7 @@
 <row class="items-center space-x-2 justify-between">
 	<row class="items-center">
 		{#if isBaseTranslation}
-			<Tag type="green">{translation}</Tag>
+			<Tag type="green">{translation.languageCode}</Tag>
 		{:else}
 			<Tag type="blue">{translation.languageCode}</Tag>
 		{/if}
