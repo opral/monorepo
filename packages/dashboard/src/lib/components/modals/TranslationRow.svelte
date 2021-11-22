@@ -11,7 +11,7 @@
 
 	export let translation: Readonly<{
 		key: string;
-		translation: string;
+		translation: string | undefined;
 		languageCode: LanguageCode;
 	}>;
 	export let isBaseTranslation: Readonly<boolean>;
@@ -42,11 +42,14 @@
 		const fluentFiles = $projectStore.data.translations.getFluentFiles();
 		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
 		for (const fluentFile of fluentFiles.value) {
-			query = await database
-				.from<definitions['language']>('language')
-				.update({ file: fluentFile.data })
-				.eq('project_id', $projectStore.data?.project.id ?? '')
-				.eq('iso_code', translationCopy.languageCode);
+			if (fluentFile.languageCode === translationCopy.languageCode) {
+				query = await database
+					.from<definitions['language']>('language')
+					.update({ file: fluentFile.data })
+					.eq('project_id', $projectStore.data?.project.id ?? '')
+					.eq('iso_code', translationCopy.languageCode);
+				break;
+			}
 		}
 
 		if (query === undefined) {
@@ -62,7 +65,7 @@
 <row class="items-center space-x-2 justify-between">
 	<row class="items-center">
 		{#if isBaseTranslation}
-			<Tag type="green">{translation}</Tag>
+			<Tag type="green">{translation.languageCode}</Tag>
 		{:else}
 			<Tag type="blue">{translation.languageCode}</Tag>
 		{/if}

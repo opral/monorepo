@@ -7,30 +7,28 @@
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
 	// is a string but the consuming component passes it down as any
-	export let keyName: unknown;
+	export let keyName: string;
 
 	$: translationsForKey = () => {
-		const allTranslations = $projectStore.data?.translations.getAllTranslations(keyName as string);
+		const allTranslations = $projectStore.data?.translations.getAllTranslations(keyName);
 		if (allTranslations?.isOk) {
 			return allTranslations.value;
 		} else {
-			throw allTranslations?.error;
+			return [];
 		}
 	};
 
 	$: missingIsoCodeRows = () => {
-		return difference(
-			$projectStore.data?.languages.map((l) => l.iso_code) ?? [],
-			translationsForKey().map((t) => t.languageCode)
-		)
-			.map((iso) => {
-				const output: { languageCode: LanguageCode; translation: string | null } = {
-					languageCode: iso,
-					translation: ''
-				};
-				return output;
-			})
-			.concat(translationsForKey());
+		const missingTranslations = $projectStore.data?.translations.checkMissingTranslationsForKey(
+			keyName
+		);
+		if (missingTranslations === undefined) throw 'Fluent file error';
+		if (missingTranslations?.isErr) throw missingTranslations.error;
+		const out: { key: string; languageCode: LanguageCode; translation: string | undefined }[] = [];
+		for (const key of missingTranslations.value) {
+			out.push({ key: key.key, languageCode: key.languageCode, translation: undefined });
+		}
+		return out.concat(translationsForKey());
 	};
 
 	$: rows = () => {
