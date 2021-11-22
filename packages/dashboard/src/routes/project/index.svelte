@@ -2,16 +2,14 @@
 	import {
 		Button,
 		DataTable,
-		Tag,
 		Toolbar,
 		ToolbarContent,
 		ToolbarBatchActions,
 		Loading
 	} from 'carbon-components-svelte';
-	import ProjectModal from '$lib/components/modals/ProjectModal.svelte';
+	import CreateProjectModal from '$lib/components/modals/CreateProjectModal.svelte';
 	//import AddMemberModal from '$lib/components/modals/AddMemberModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import OverflowMenuHorizontal32 from 'carbon-icons-svelte/lib/OverflowMenuHorizontal32';
 	import { onMount } from 'svelte';
 	import type { definitions } from '@inlang/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
@@ -20,12 +18,9 @@
 	import { page } from '$app/stores';
 	import { userStore } from '$lib/stores/userStore';
 
-	//export let name = '';
+	let showCreateProjectModal = false;
 
-	let showAddProjectModal = false;
-
-	let showProjectModalIfOrganizationExists = async () => {
-		console.log(organizations.data);
+	let showCreateProjectModalIfOrganizationExists = async () => {
 		if (organizations.data?.length === 0 ?? true) {
 			const response = await database.from<definitions['organization']>('organization').insert([
 				{
@@ -38,7 +33,7 @@
 			}
 		}
 		organizations = await database.from<definitions['organization']>('organization').select();
-		showAddProjectModal = true;
+		showCreateProjectModal = true;
 	};
 
 	let isLoading = true;
@@ -109,7 +104,7 @@
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
-			<Button on:click={() => showProjectModalIfOrganizationExists()}>Add project</Button>
+			<Button on:click={() => showCreateProjectModalIfOrganizationExists()}>Add project</Button>
 		</ToolbarContent>
 	</Toolbar>
 	<span
@@ -132,12 +127,8 @@
 	</span>
 </DataTable>
 
-{#if showAddProjectModal}
-	<ProjectModal
-		bind:open={showAddProjectModal}
-		heading="Add project"
-		on:updateProjects={handleProjectUpdate}
-	/>
+{#if showCreateProjectModal}
+	<CreateProjectModal on:updateProjects={handleProjectUpdate} bind:open={showCreateProjectModal} />
 {/if}
 
 <!-- Do we need a more button? -->

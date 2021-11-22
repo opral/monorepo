@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import {
 		Modal,
 		Form,
 		FormGroup,
 		TextInput,
-		Select,
-		SelectItem,
 		MultiSelect,
-		Loading
+		Loading,
+		ComboBox
 	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
@@ -18,18 +18,31 @@
 
 	export let open = false;
 
-	export let heading: string;
-
 	let projectName = '';
-
-	let organizationId: definitions['organization']['id'] | undefined = undefined;
 
 	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
-	let selectedDefaultLanguageIso: definitions['language']['iso_code'] = 'en';
 	let selectedLanguageIsoCodes: definitions['language']['iso_code'][] = [];
 	let confirmIsLoading = false;
+	// the selected index of the ComboBox
+	let selectedOrganizationIndex = -1;
+	// the actual value (type definitions)
+	let organizationId: definitions['organization']['id'] | undefined = undefined;
+	// which is reactively deducted
+	$: organizationId =
+		selectedOrganizationIndex === -1
+			? undefined
+			: organizations.data?.[selectedOrganizationIndex].id;
+	// the selected index of the ComboBox
+	let selectedDefaultLanguageIsoIndex = -1;
+	// the actual value (type definitions)
+	let selectedDefaultLanguageIso: definitions['language']['iso_code'] | undefined;
+	// which is reactively deducted
+	$: selectedDefaultLanguageIso =
+		selectedDefaultLanguageIsoIndex === -1
+			? undefined
+			: (allLanguagesWithCode()[selectedDefaultLanguageIsoIndex].id as LanguageCode);
 
 	$: isValidInput =
 		projectNameIsValidInput && organizationIdIsValidInput && selectedLanguageIsoCodes.length > 0;
@@ -38,17 +51,19 @@
 
 	$: organizationIdIsValidInput = organizationId !== null || organizationId !== '';
 
+	// helper function
+	function allLanguagesWithCode() {
+		return ISO6391.getLanguages(ISO6391.getAllCodes()).map((language) => ({
+			id: language.code,
+			text: `${language.name} - ${language.code}`
+		}));
+	}
+
 	// load the projects of the selected organization
 	onMount(async () => {
 		organizations = await database.from<definitions['organization']>('organization').select();
 		if (organizations.error) {
 			alert(organizations.error.message);
-		} else {
-			// ---- ugly workaorund which requires a proper solution long term ----
-			// naively choosing the first org id on mount since the select
-			// does not bind the organization id the first time (bug?).
-			// But in 99% of the cases, the first organization is shown in the select.
-			organizationId = organizations.data?.[0].id;
 		}
 	});
 
@@ -94,10 +109,9 @@
 	}
 </script>
 
-<!-- {console.log(rows_organizations())} -->
 <Modal
 	bind:open
-	modalHeading={heading}
+	modalHeading="New project"
 	primaryButtonText="Create"
 	primaryButtonDisabled={isValidInput === false}
 	hasForm={true}
@@ -115,57 +129,62 @@
 		<FormGroup>
 			<TextInput
 				labelText="Project name"
+				placeholder="What's the name of the project?"
 				bind:value={projectName}
-				invalid={projectNameIsValidInput === false}
-				invalidText="This field is required."
 			/>
 		</FormGroup>
 
 		<FormGroup>
-			<Select
-				labelText="In which organization do you want to create the project? "
-				bind:selected={organizationId}
-			>
-				<SelectItem disabled hidden value="organization name" text="Choose an option" />
-				{#if organizations}
-					{#each organizations.data || [] as organization}
-						<SelectItem value={organization.id} text={organization.name} />
-					{/each}
-				{/if}
-			</Select>
+			<ComboBox
+				titleText="Organization"
+				placeholder="To which organization does the project belong to?"
+				bind:selectedIndex={selectedOrganizationIndex}
+				items={organizations.data?.map((organization) => ({
+					id: organization.id,
+					text: organization.name
+				}))}
+				shouldFilterItem={(item, value) => {
+					if (!value) return true;
+					return item.text.toLowerCase().includes(value.toLowerCase());
+				}}
+			/>
 		</FormGroup>
 		<FormGroup>
-			<Select
-				labelText="Human language used in source code:"
-				bind:selected={selectedDefaultLanguageIso}
-			>
-				{#each ISO6391.getLanguages(ISO6391.getAllCodes()) as possibleLanguage}
-					<SelectItem
-						value={possibleLanguage.code}
-						text={`${possibleLanguage.code} - ${possibleLanguage.name}`}
-					/>
-				{/each}
-			</Select>
+			<ComboBox
+				titleText="Default human language"
+				placeholder="Which human language (English, German ...) is used during development?"
+				direction="top"
+				bind:selectedIndex={selectedDefaultLanguageIsoIndex}
+				items={allLanguagesWithCode()}
+				shouldFilterItem={(item, value) => {
+					if (!value) return true;
+					return item.text.toLowerCase().includes(value.toLowerCase());
+				}}
+			/>
 		</FormGroup>
 		<FormGroup>
 			<MultiSelect
 				bind:selectedIds={selectedLanguageIsoCodes}
 				direction="top"
-				titleText="In which languages do you want to translate your app?"
+				titleText="Translated human languages"
+				placeholder="Which additional human languages should your app support?"
 				filterable
-				invalid={selectedLanguageIsoCodes.length === 0}
-				invalidText="Select at least one language..."
-				items={ISO6391.getLanguages(ISO6391.getAllCodes()).map((language) => ({
-					id: language.code,
-					text: `${language.code} - ${language.name}`
-				}))}
+				items={allLanguagesWithCode().filter(
+					(language) => language.id !== selectedDefaultLanguageIso
+				)}
 			/>
-			<p>
-				Languages selected:
-				{#each selectedLanguageIsoCodes as isoCode}
-					{ISO6391.getName(isoCode) + ' '}
-				{/each}
-			</p>
+			{#if selectedLanguageIsoCodes.length > 0}
+				<p class="pt-1">
+					Translated languages:
+					{#each selectedLanguageIsoCodes as isoCode, i}
+						{#if i + 1 !== selectedLanguageIsoCodes.length}
+							{ISO6391.getName(isoCode) + ', '}
+						{:else}
+							{ISO6391.getName(isoCode)}
+						{/if}
+					{/each}
+				</p>
+			{/if}
 		</FormGroup>
 	</Form>
 </Modal>
