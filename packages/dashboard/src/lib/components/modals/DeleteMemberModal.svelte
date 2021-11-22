@@ -46,8 +46,8 @@
 <Modal
 	bind:open
 	danger
-	modalHeading={`Delete ${user?.email} from ${organization?.name}`}
-	primaryButtonText="Delete"
+	modalHeading={`Remove ${user?.email} from ${organization?.name}`}
+	primaryButtonText="Remove"
 	secondaryButtonText="Cancel"
 	on:click:button--primary={deleteMember}
 	on:click:button--secondary={() => (open = false)}
