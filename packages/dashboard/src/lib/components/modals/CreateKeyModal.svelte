@@ -2,7 +2,6 @@
 	import { InlineLoading, Modal, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
-	import type { definitions } from '@inlang/database';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 
 	let open = false;
