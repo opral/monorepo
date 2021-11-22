@@ -19,7 +19,7 @@
 
 	export let open = false;
 
-	let selectedLanguageIso: definitions['language']['iso_code'];
+	let selectedLanguageIso: definitions['language']['iso_code'] | 'none' = 'none';
 
 	let projectLanguages = $projectStore.data?.languages.map((language) => language.iso_code);
 
@@ -37,7 +37,10 @@
 	async function handleConfirm() {
 		const create = await database
 			.from<definitions['language']>('language')
-			.insert({ iso_code: selectedLanguageIso, project_id: $projectStore.data?.project.id });
+			.insert({
+				iso_code: selectedLanguageIso as LanguageCode,
+				project_id: $projectStore.data?.project.id
+			});
 		if (create.error) {
 			alert(create.error);
 		} else {
