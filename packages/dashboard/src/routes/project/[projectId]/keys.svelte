@@ -13,7 +13,6 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
 	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
-	import type { definitions } from '@inlang/database';
 	import Translations from '$lib/components/Translations.svelte';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
@@ -27,6 +26,7 @@
 	];
 
 	type Row = {
+		id: string;
 		key: string;
 		translations: { languageCode: LanguageCode; translation: string | null }[];
 	};
@@ -53,6 +53,7 @@
 				throw allTranslations.error;
 			}
 			result.push({
+				id: key,
 				key: key,
 				translations: allTranslations?.value ?? []
 			});
