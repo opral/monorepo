@@ -28,10 +28,6 @@
 	// 1 = default human language
 	let currentStep: 0 | 1 = 0;
 
-	$: if (currentStep === 0 || currentStep === 1) {
-		console.log({ currentStep });
-	}
-
 	let projectName = '';
 
 	let projectNameElement: HTMLInputElement;
