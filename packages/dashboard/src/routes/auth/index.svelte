@@ -64,8 +64,8 @@
 
 <div class="flex items-center h-full">
 <column class="space-y-2 w-80 m-5">
-	<h1>Login</h1>
-	<p class="text-gray-600 text-sm">By logging on with an external provider, your inlang account is automatically created</p>
+	<h1>Log in</h1>
+	<p class="text-gray-600 text-xs">By logging on with an external provider, your inlang account is automatically created</p>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
@@ -81,12 +81,12 @@
 	<!-- MAGIC LINK SIGN IN -->
 	<TextInput type="email" bind:value={email} placeholder="your e-mail"/>
 	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={ArrowRight32}>
-		Send Magic Link
+		Log in with Magic Link
 	</Button>
 	
 	<!-- GOOGLE SIGN IN -->
 	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoGoogle32}>
-		log in with Google
+		Log in with Google
 	</Button>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:0.5em;">
