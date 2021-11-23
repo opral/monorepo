@@ -20,9 +20,13 @@
 	import { isValidEmail } from '$lib/utils/isValidEmail';
 	import LogoGithub32 from "carbon-icons-svelte/lib/LogoGithub32";
 	import LogoGoogle32 from "carbon-icons-svelte/lib/LogoGoogle32";
-	import ArrowRight32 from "carbon-icons-svelte/lib/ArrowRight32";
+	import LogoFacebook32 from "carbon-icons-svelte/lib/LogoFacebook32";
+	import LogoDiscord32 from "carbon-icons-svelte/lib/LogoDiscord32";
+	import MagicWand32 from "carbon-icons-svelte/lib/MagicWandFilled32";
+	import Send32 from "carbon-icons-svelte/lib/SendFilled32";
 
 	let email = '';
+	let showMagicLogin = false;
 
 	$: inputIsValidEmail = isValidEmail(email);
 
@@ -59,17 +63,21 @@
 	async function handleGoogleLogin() {
 		// todo
 	}
+
+	function handleShowMagicLogin() {
+		showMagicLogin = !showMagicLogin
+	}
 	
 </script>
 
-<div class="flex items-center h-full">
+<div class="flex items-center h-screen absolute top-0">
 <column class="space-y-2 w-80 m-5">
 	<h1>Log in</h1>
 	<p class="text-gray-600 text-xs">By logging on with an external provider, your inlang account is automatically created</p>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
-	<!-- GITHUB SIGN IN -->
+	<!-- GITHUB LOG IN -->
 	<Button kind="primary" class="w-full justify-start" on:click={handleGithubLogin} icon={LogoGithub32}>
 		Log in with GitHub
 	</Button>
@@ -78,15 +86,28 @@
 
 	<p class="text-gray-600 text-xs">Alternative logins</p>
 
-	<!-- MAGIC LINK SIGN IN -->
+	<!-- MAGIC LINK LOG IN -->
+	<Button kind="tertiary" class="w-full justify-start" on:click={handleShowMagicLogin} icon={MagicWand32}>Log in with Magic Link</Button>
+	{#if showMagicLogin}
 	<TextInput type="email" bind:value={email} placeholder="your e-mail"/>
-	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={ArrowRight32}>
-		Log in with Magic Link
+	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={Send32}>
+		Send Magic Link
 	</Button>
-	
-	<!-- GOOGLE SIGN IN -->
-	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoGoogle32}>
+	{/if}
+
+	<div class="h-2"></div>
+	<p class="text-gray-600 text-xs">Coming soon</p>
+	<!-- GGOOGLE LOG IN -->
+	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoGoogle32} >
 		Log in with Google
+	</Button>
+	<!-- FACEBOOK LOG IN -->
+	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoFacebook32} >
+		Log in with Facebook
+	</Button>
+	<!-- DISCORD LOG IN -->
+	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoDiscord32} >
+		Log in with Discord
 	</Button>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:0.5em;">
