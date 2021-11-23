@@ -73,7 +73,7 @@
 <div class="flex items-center h-screen absolute top-0">
 <column class="space-y-2 w-80 m-5">
 	<h1>Log in</h1>
-	<p class="text-gray-600 text-xs">An account is automatically created when you login. No need to register.</p>
+	<p class="text-gray-600 text-xs">An account is automatically created when you log in. No need to register.</p>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
