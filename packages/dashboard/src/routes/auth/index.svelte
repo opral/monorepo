@@ -73,28 +73,15 @@
 <div class="flex items-center h-screen absolute top-0">
 <column class="space-y-2 w-80 m-5">
 	<h1>Log in</h1>
-	<p class="text-gray-600 text-xs">By logging on with an external provider, your inlang account is automatically created</p>
+	<p class="text-gray-600 text-xs">An account is automatically created when you login. No need to register.</p>
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
 	<!-- GITHUB LOG IN -->
+	<p class="text-gray-600 text-xs">Social Auth Logins</p>
 	<Button kind="primary" class="w-full justify-start" on:click={handleGithubLogin} icon={LogoGithub32}>
 		Log in with GitHub
 	</Button>
-
-	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
-
-	<p class="text-gray-600 text-xs">Alternative logins</p>
-
-	<!-- MAGIC LINK LOG IN -->
-	<Button kind="tertiary" class="w-full justify-start" on:click={handleShowMagicLogin} icon={MagicWand32}>Log in with Magic Link</Button>
-	{#if showMagicLogin}
-	<TextInput type="email" bind:value={email} placeholder="your e-mail"/>
-	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={Send32}>
-		Send Magic Link
-	</Button>
-	{/if}
-
 	<div class="h-2"></div>
 	<p class="text-gray-600 text-xs">Coming soon</p>
 	<!-- GGOOGLE LOG IN -->
@@ -109,6 +96,19 @@
 	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoDiscord32} >
 		Log in with Discord
 	</Button>
+
+	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
+
+	<p class="text-gray-600 text-xs">Alternative logins</p>
+
+	<!-- MAGIC LINK LOG IN -->
+	<Button kind="tertiary" class="w-full justify-start" on:click={handleShowMagicLogin} icon={MagicWand32}>Log in with Magic Link</Button>
+	{#if showMagicLogin}
+	<TextInput type="email" bind:value={email} placeholder="your e-mail"/>
+	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={Send32}>
+		Send Magic Link
+	</Button>
+	{/if}
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:0.5em;">
 
