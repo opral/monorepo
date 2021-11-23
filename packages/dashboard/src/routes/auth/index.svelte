@@ -26,7 +26,6 @@
 	import Send32 from "carbon-icons-svelte/lib/SendFilled32";
 
 	let email = '';
-	let showMagicLogin = false;
 
 	$: inputIsValidEmail = isValidEmail(email);
 
@@ -59,14 +58,6 @@
 			alert(error);
 		}
 	}
-
-	async function handleGoogleLogin() {
-		// todo
-	}
-
-	function handleShowMagicLogin() {
-		showMagicLogin = !showMagicLogin
-	}
 	
 </script>
 
@@ -78,37 +69,32 @@
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
 	<!-- GITHUB LOG IN -->
-	<p class="text-gray-600 text-xs">Social Auth Logins</p>
+	<p class="text-gray-600 text-xs">Social Auth Login</p>
 	<Button kind="primary" class="w-full justify-start" on:click={handleGithubLogin} icon={LogoGithub32}>
 		Log in with GitHub
 	</Button>
-	<div class="h-2"></div>
+	
+	<!-- <div class="h-2"></div>
 	<p class="text-gray-600 text-xs">Coming soon</p>
-	<!-- GGOOGLE LOG IN -->
 	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoGoogle32} >
 		Log in with Google
 	</Button>
-	<!-- FACEBOOK LOG IN -->
 	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoFacebook32} >
 		Log in with Facebook
 	</Button>
-	<!-- DISCORD LOG IN -->
 	<Button disabled kind="tertiary" class="w-full justify-start" on:click={handleGoogleLogin} icon={LogoDiscord32} >
 		Log in with Discord
-	</Button>
+	</Button> -->
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:1em;">
 
-	<p class="text-gray-600 text-xs">Alternative logins</p>
+	<p class="text-gray-600 text-xs">Log in with email</p>
 
 	<!-- MAGIC LINK LOG IN -->
-	<Button kind="tertiary" class="w-full justify-start" on:click={handleShowMagicLogin} icon={MagicWand32}>Log in with Magic Link</Button>
-	{#if showMagicLogin}
 	<TextInput type="email" bind:value={email} placeholder="your e-mail"/>
 	<Button class="w-full" disabled={inputIsValidEmail === false} kind="primary" on:click={handleLogin} icon={Send32}>
-		Send Magic Link
+		Send login link
 	</Button>
-	{/if}
 
 	<hr style="height:2px;border-width:0;color:gray;background-color:lightgray;margin-top:3em;margin-bottom:0.5em;">
 
