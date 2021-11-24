@@ -2,10 +2,10 @@
 	import { Modal } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
-	import { goto } from '$app/navigation';
 
-	export function show(args: { project: definitions['project'] }): void {
+	export function show(args: { project: definitions['project']; onDeletion: () => unknown }): void {
 		project = args.project;
+		onDeletion = args.onDeletion;
 		open = true;
 	}
 
@@ -14,6 +14,7 @@
 	}
 
 	let project: definitions['project'];
+	let onDeletion: () => unknown;
 	let open = false;
 
 	async function deleteProject() {
@@ -23,9 +24,10 @@
 			.eq('id', project.id);
 		if (deleteRequest.error) {
 			alert(deleteRequest.error.message);
+		} else {
+			onDeletion();
 		}
 		open = false;
-		goto('/');
 	}
 </script>
 

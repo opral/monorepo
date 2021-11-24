@@ -6,6 +6,7 @@
 	import DeleteProjectModal from '$lib/components/modals/DeleteProjectModal.svelte';
 	import Save16 from 'carbon-icons-svelte/lib/Save16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
+	import { goto } from '$app/navigation';
 
 	let projectName = $projectStore.data?.project.name;
 
@@ -29,7 +30,7 @@
 			alert('Error 39jf-9jsa');
 			return;
 		}
-		deleteProjectModal.show({ project });
+		deleteProjectModal.show({ project, onDeletion: () => goto('/') });
 	}
 </script>
 

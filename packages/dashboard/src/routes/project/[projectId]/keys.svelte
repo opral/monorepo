@@ -28,7 +28,7 @@
 	type Row = {
 		id: string;
 		key: string;
-		translations: { languageCode: LanguageCode; translation: string | null }[];
+		translations: { languageCode: LanguageCode; translation?: string }[];
 	};
 
 	let searchQuery = '';
@@ -80,9 +80,8 @@
 		// (parameter must be any due to sveltes limited ts support in markup)
 		const x = row as Row;
 		const numberOfLanguages = $projectStore.data?.languages.length;
-		const numberOfTranslations = x.translations.filter(
-			(t) => t.translation !== '' || t.translation !== null
-		).length;
+		const numberOfTranslations = x.translations.filter((t) => t.translation && t.translation !== '')
+			.length;
 		return numberOfLanguages !== numberOfTranslations;
 	}
 

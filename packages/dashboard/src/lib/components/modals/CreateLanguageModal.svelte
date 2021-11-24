@@ -35,12 +35,10 @@
 		.filter((language) => projectLanguages?.includes(language.code as LanguageCode) === false);
 
 	async function handleConfirm() {
-		const create = await database
-			.from<definitions['language']>('language')
-			.insert({
-				iso_code: selectedLanguageIso as LanguageCode,
-				project_id: $projectStore.data?.project.id
-			});
+		const create = await database.from<definitions['language']>('language').insert({
+			iso_code: selectedLanguageIso as LanguageCode,
+			project_id: $projectStore.data?.project.id
+		});
 		if (create.error) {
 			alert(create.error);
 		} else {

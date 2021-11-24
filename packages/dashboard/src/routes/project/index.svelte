@@ -18,7 +18,7 @@
 	import { page } from '$app/stores';
 	import { userStore } from '$lib/stores/userStore';
 
-	let showCreateProjectModal = false;
+	let createProjectModal: CreateProjectModal;
 
 	let showCreateProjectModalIfOrganizationExists = async () => {
 		if (organizations.data?.length === 0 ?? true) {
@@ -33,7 +33,7 @@
 			}
 		}
 		organizations = await database.from<definitions['organization']>('organization').select();
-		showCreateProjectModal = true;
+		createProjectModal.show({ onProjectCreated: loadProjects });
 	};
 
 	let isLoading = true;
@@ -44,25 +44,22 @@
 
 	// load the projects of the selected organization
 	onMount(async () => {
-		organizations = await database.from<definitions['organization']>('organization').select();
-		projects = await database.from<definitions['project']>('project').select();
-
-		if (projects.error) {
-			alert(projects.error);
-		}
+		organizations = await database
+			.from<definitions['organization']>('organization')
+			.select()
+			.order('name');
+		await loadProjects();
 		if (organizations.error) {
 			alert(organizations.error);
 		}
 		isLoading = false;
 	});
 
-	async function handleProjectUpdate() {
-		projects = await database.from<definitions['project']>('project').select();
-
+	async function loadProjects() {
+		projects = await database.from<definitions['project']>('project').select().order('name');
 		if (projects.error) {
 			alert(projects.error);
 		}
-		isLoading = false;
 	}
 
 	const headers = [
@@ -127,9 +124,7 @@
 	</span>
 </DataTable>
 
-{#if showCreateProjectModal}
-	<CreateProjectModal on:updateProjects={handleProjectUpdate} bind:open={showCreateProjectModal} />
-{/if}
+<CreateProjectModal bind:this={createProjectModal} />
 
 <!-- Do we need a more button? -->
 <!-- {#if showMoreModal && name == 'organization'}{:else if showMoreModal && name == 'project'}{/if} -->
