@@ -16,7 +16,6 @@
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
-	import { append } from 'svelte/internal';
 
 	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 	const languages: definitions['language'][] | undefined = $projectStore.data?.languages;
@@ -42,6 +41,7 @@
 			return selectedLanguage.file.length > 0;
 		}
 	};
+    $: parserResponse = tryParse(importText);
 
 	function handleButtonClick() {
 		isImport ? handleImport() : handleExport();
@@ -51,6 +51,27 @@
 		isAdapting = true;
 		isAdapting = false;
 	}
+
+    function tryParse(text: string) {
+        console.log("Try Parse")
+        if (text.length === 0) return "";
+        let adapter;
+        let parsed;
+        if (selectedAdapterIndex === 0) {
+            adapter = new SwiftAdapter();
+        } else if (selectedAdapterIndex === 1) {
+            adapter = new FluentAdapter();
+        } else if (selectedAdapterIndex === 2) {
+            adapter = new Typesafei18nAdapter();
+        } else {
+            return "";
+        }
+        parsed = adapter.parse(text);
+            if (parsed.isErr) {
+                return parsed.error.message;
+            }
+        return "";
+    }
 
 	function handleImport() {
 		isAdapting = true;
@@ -134,7 +155,7 @@
 			>{title}</Button
 		>
 	</column>
-	<column class="flex-auto">
+	<column class="flex-auto space-y-0">
 		{#if isImport}
 			<TextArea
 				style="height:40rem"
@@ -142,6 +163,20 @@
 				placeholder="Paste translation file here"
 				bind:value={importText}
 			/>
+            {#if parserResponse.length > 0}
+            <InlineNotification
+                hideCloseButton
+                kind="error"
+                title="Invalid syntax"
+                subtitle={parserResponse}
+            />
+            {:else}
+                <InlineNotification
+                    hideCloseButton
+                    kind="success"
+                    title="Valid syntax"
+                />
+            {/if}
 		{:else}
 			<CodeSnippet type="multi" code={exportedCode} />
 		{/if}
