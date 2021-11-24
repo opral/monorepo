@@ -3,6 +3,8 @@
 	import Language24 from 'carbon-icons-svelte/lib/Language24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import UserMultiple24 from 'carbon-icons-svelte/lib/UserMultiple24';
+	import DocumentExport24 from "carbon-icons-svelte/lib/DocumentExport24";
+    import DocumentImport24 from "carbon-icons-svelte/lib/DocumentImport24";
 	import { SideNavItems, SideNavLink, SideNav } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 
@@ -21,6 +23,16 @@
 			icon={UserMultiple24}
 			text="Members"
 			href="/project/{$page.params.projectId}/members"
+		/>
+		<SideNavLink
+			icon={DocumentImport24}
+			text="Import"
+			href="/project/{$page.params.projectId}/import"
+		/>
+		<SideNavLink
+			icon={DocumentExport24}
+			text="Export"
+			href="/project/{$page.params.projectId}/export"
 		/>
 		<SideNavLink
 			icon={Settings24}
