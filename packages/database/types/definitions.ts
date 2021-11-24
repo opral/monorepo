@@ -910,6 +910,7 @@ export interface definitions {
      * This is a Primary Key.<pk/>
      */
     id: string;
+    api_key: string;
     name: string;
     /**
      * Note:
