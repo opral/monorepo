@@ -32,6 +32,11 @@ export class TranslationAPI {
             if (parse.isErr) {
                 return Result.err(parse.error);
             }
+            for (const entry of parse.value.body) {
+                if (entry.type === 'Junk') {
+                    return Result.err(Error('Parsing error: Junk'));
+                }
+            }
             resources.push({ languageCode: file.languageCode, data: parse.value });
         }
         return Result.ok(new TranslationAPI({ adapter: args.adapter, resources, baseLanguage: args.baseLanguage }));
@@ -69,7 +74,7 @@ export class TranslationAPI {
         let out = '';
         for (const element of translation.value.elements) {
             if (element.type === 'Placeable') {
-                out += serializeExpression(element.expression);
+                out += '{' + serializeExpression(element.expression) + '}';
             } else {
                 out += element.value;
             }
@@ -104,6 +109,7 @@ export class TranslationAPI {
         for (const resource of this.resources) {
             if (resource.languageCode === this.baseLanguage) {
                 const parse = fluent.parse(`${key} = ${base}`, {}).body[0];
+                if (parse.type === 'Junk') return Result.err(Error('Parsing error: Junk'));
                 resource.data.body.push(parse);
                 return Result.ok(undefined);
             }
@@ -147,13 +153,14 @@ export class TranslationAPI {
         }
 
         const indexOfTranslation = translations?.findIndex(
-            (entry: Entry) => entry.type === ('Message' || 'Term') && entry.id.name === key
+            (entry) => entry.type === 'Message' && entry.id.name === key
         );
 
         if (indexOfTranslation === -1) {
             return Result.err(Error('Key not found'));
         }
         const parsedTranslation = fluent.parse(`${key} = ${translation ?? '""'}`, {}).body[0];
+        if (parsedTranslation.type === 'Junk') return Result.err(Error('Parsing error: Junk'));
         translations[indexOfTranslation] = parsedTranslation;
         return Result.ok(undefined);
     }
@@ -211,6 +218,11 @@ export class TranslationAPI {
             if (parse.isErr) {
                 return Result.err(Error('Parsing error'));
             }
+            for (const entry of parse.value.body) {
+                if (entry.type === 'Junk') {
+                    return Result.err(Error('Parsing error: Junk'));
+                }
+            }
             for (const resource of this.resources) {
                 if (resource.languageCode === file.languageCode) {
                     if (resource.data.body.length > parse.value.body.length && options.override === false) {
@@ -259,10 +271,146 @@ export class TranslationAPI {
         for (const resource of this.resources) {
             if (resource.languageCode === languageCode) {
                 const parse = fluent.parse(`${key} = ${translation ?? '""'}`, {}).body[0];
+                if (parse.type === 'Junk') return Result.err(Error('Parsing error: Junk'));
                 resource.data.body.push(parse);
                 return Result.ok(undefined);
             }
         }
         return Result.err(Error('Language not found'));
+    }
+
+    // This could probably be optimized a lot
+    checkMissingVariables(): Result<
+        { key: string; missingFromBaseTranslation: boolean; variable: string; languageCode: LanguageCode }[],
+        Error
+    > {
+        const result = [];
+        for (const baseResource of this.resources) {
+            if (baseResource.languageCode === this.baseLanguage) {
+                for (const baseEntry of baseResource.data.body) {
+                    if (baseEntry.type === 'Message') {
+                        const basePlaceables = [];
+                        if (baseEntry.value === null) return Result.err(Error('Base entry value null'));
+                        for (const baseElement of baseEntry.value?.elements) {
+                            if (baseElement.type === 'Placeable') {
+                                basePlaceables.push(serializeExpression(baseElement.expression));
+                            }
+                        }
+                        for (const resource of this.resources) {
+                            if (baseResource.languageCode === resource.languageCode) continue;
+                            for (const entry of resource.data.body) {
+                                if (entry.type === 'Message') {
+                                    if (entry.id.name === baseEntry.id.name) {
+                                        const placeables = [];
+                                        if (entry.value === null) return Result.err(Error('Entry value null'));
+                                        for (const element of entry.value?.elements) {
+                                            if (element.type === 'Placeable') {
+                                                placeables.push(serializeExpression(element.expression));
+                                            }
+                                        }
+                                        for (const basePlaceable of basePlaceables) {
+                                            let match = false;
+                                            for (const placeable of placeables) {
+                                                if (placeable === basePlaceable) {
+                                                    match = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (match === false) {
+                                                result.push({
+                                                    key: entry.id.name,
+                                                    missingFromBaseTranslation: false,
+                                                    variable: basePlaceable,
+                                                    languageCode: resource.languageCode,
+                                                });
+                                            }
+                                        }
+                                        for (const placeable of placeables) {
+                                            let match = false;
+                                            for (const basePlaceable of basePlaceables) {
+                                                if (placeable === basePlaceable) {
+                                                    match = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (match === false) {
+                                                result.push({
+                                                    key: entry.id.name,
+                                                    missingFromBaseTranslation: true,
+                                                    variable: placeable,
+                                                    languageCode: resource.languageCode,
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Result.ok(result);
+    }
+
+    compareVariables(
+        translations: { key: string; languageCode: LanguageCode; translation?: string }[],
+        baseTranslation?: { key: string; languageCode: LanguageCode; translation?: string }
+    ): Result<{ [language: string]: { error: string; variable: string } }, Error> {
+        const errors: { [language: string]: { error: string; variable: string } } = {};
+        const baseParse = fluent.parse(`key = ${baseTranslation?.translation}`, {}).body[0];
+        if (baseParse.type !== 'Message') {
+            return Result.ok({
+                [baseTranslation?.languageCode as string]: { error: 'Base translation is incorrect', variable: '' },
+            });
+        }
+
+        const expressionArray: fluent.Expression[] = [];
+        for (const element of baseParse.value?.elements ?? []) {
+            if (element.type === 'Placeable') {
+                expressionArray.push(element.expression);
+            }
+        }
+
+        for (const translation of translations) {
+            const parse = fluent.parse(`key = ${translation.translation ?? ''}`, {}).body[0];
+            if (parse.type !== 'Message') {
+                errors[translation.languageCode] = {
+                    error: 'Translation is incorrect',
+                    variable: '',
+                };
+                return Result.ok(errors);
+            }
+
+            const translationExpressionArray: fluent.Expression[] = [];
+            for (const element of parse.value?.elements ?? []) {
+                if (element.type === 'Placeable') {
+                    translationExpressionArray.push(element.expression);
+                    if (
+                        expressionArray.some(
+                            (expression) => serializeExpression(expression) === serializeExpression(element.expression)
+                        ) === false
+                    ) {
+                        errors[translation.languageCode] = {
+                            error: ' is missing from base translation',
+                            variable: serializeExpression(element.expression),
+                        };
+                    }
+                }
+            }
+            for (const expression of expressionArray) {
+                if (
+                    translationExpressionArray.some(
+                        (exp) => serializeExpression(exp) === serializeExpression(expression)
+                    ) === false
+                ) {
+                    errors[translation.languageCode] = {
+                        error: ' is missing',
+                        variable: serializeExpression(expression),
+                    };
+                }
+            }
+        }
+        return Result.ok(errors);
     }
 }

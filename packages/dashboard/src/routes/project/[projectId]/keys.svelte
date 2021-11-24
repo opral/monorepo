@@ -96,6 +96,19 @@
 		return missingReviews.length === 0;
 	}*/
 
+	function keyIsMissingVariable(row: unknown): boolean {
+		const x = row as Row;
+		const missingVariables = $projectStore.data?.translations.checkMissingVariables();
+		if (missingVariables === undefined) throw 'Missing variables undefined';
+		if (missingVariables?.isErr) throw missingVariables.error;
+		for (const key of missingVariables.value) {
+			if (key.key === x.key) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	let createTranslationModal: {
 		open: boolean;
 		translations: { languageCode: LanguageCode; translation: string }[];
@@ -128,9 +141,11 @@
 				<!-- Status  -->
 				<div>
 					{#if keyIsMissingTranslations(row) === true}
-						<Tag type="red">Missing translation</Tag>
+						<Tag type="red">Action Required</Tag>
 						<!--{:else if keyIsFullyReviewed(row) === false}
 						<Tag type="purple">Needs approval</Tag>-->
+					{:else if keyIsMissingVariable(row)}
+						<Tag type="red">Action Required</Tag>
 					{:else}
 						<Tag type="cool-gray">Complete</Tag>
 					{/if}
@@ -151,7 +166,7 @@
 			{cell.value}
 		{/if}
 	</span>
-	<div slot="expanded-row" let:row>
+	<div class="pb-4" slot="expanded-row" let:row>
 		<Translations keyName={row.id} />
 	</div>
 </DataTable>

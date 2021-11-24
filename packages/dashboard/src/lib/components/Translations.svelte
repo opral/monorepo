@@ -2,12 +2,15 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import TranslationRow from './modals/TranslationRow.svelte';
 	import ISO6391 from 'iso-639-1';
-	import { difference, concat } from 'lodash-es';
-	import type { definitions } from '@inlang/database';
+	import { cloneDeep } from 'lodash-es';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import TranslationModal from './modals/TranslationModal.svelte';
+	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 	// is a string but the consuming component passes it down as any
 	export let keyName: string;
+	const translationAPI = cloneDeep($projectStore.data?.translations);
 
 	$: translationsForKey = () => {
 		const allTranslations = $projectStore.data?.translations.getAllTranslations(keyName);
@@ -43,11 +46,33 @@
 			}
 		});
 	};
+
+	$: missingVariables = (
+		rows: { key: string; languageCode: LanguageCode; translation?: string }[]
+	) => {
+		if (rows[0] === undefined) {
+			return {};
+		}
+		const missingVariables = $projectStore.data?.translations.compareVariables(
+			rows,
+			rows.find((row) => row.languageCode === $projectStore.data?.project.default_iso_code)
+		);
+		if (missingVariables?.isErr) throw missingVariables.error;
+		return missingVariables?.value ?? {};
+	};
+
+	let translationCopy: {
+		key: string;
+		languageCode: LanguageCode;
+		translation: string | undefined;
+	}[] = new Array(3);
 </script>
 
-{#each rows() as row}
+{#each rows() as row, i}
 	<TranslationRow
 		translation={row}
 		isBaseTranslation={row.languageCode === $projectStore.data?.project.default_iso_code}
+		missingVariables={missingVariables(translationCopy)}
+		bind:translationCopy={translationCopy[i]}
 	/>
 {/each}
