@@ -17,10 +17,11 @@
 </script>
 
 <script lang="ts">
-	import { InlineLoading, Link, Modal, TextInput } from 'carbon-components-svelte';
-	import type { InlineLoadingProps } from 'carbon-components-svelte/types/InlineLoading/InlineLoading';
+	import { Modal, TextInput } from 'carbon-components-svelte';
 	import { Result } from '@inlang/common/src/types/result';
-	import { brombTriggerLink } from '$lib/services/bromb';
+	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
+	import { withUxTimeout } from '$lib/utils/withUxTimeout';
+	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 
 	/**
 	 * @param heading Header of the modal
@@ -35,7 +36,7 @@
 		requireTypingOf?: string;
 		onConfirm: () => Promise<Result<void, Error>>;
 	}): void {
-		status = 'inactive';
+		inlineLoadingStatus = 'inactive';
 		heading = args.heading;
 		message = args.message;
 		danger = args.danger;
@@ -54,7 +55,7 @@
 	let onConfirm: () => Promise<Result<void, Error>>;
 
 	$: primaryButtonDisabled =
-		status === 'active' || status === 'finished'
+		inlineLoadingStatus === 'active' || inlineLoadingStatus === 'finished'
 			? true
 			: requireTypingOf
 			? nameOfEntityInput !== requireTypingOf
@@ -70,27 +71,21 @@
 
 	let message: string;
 
-	let status: InlineLoadingProps['status'] = 'inactive';
+	let inlineLoadingStatus: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
 	async function handleConfirm() {
-		status = 'active';
-		const result = (
-			await Promise.all([
-				onConfirm(),
-				// for nicer ux, wait at least x milliseconds
-				new Promise((resolve) => setTimeout(resolve, 500))
-			])
-		)[0]; // take the first element of the promise chain -> `onConfirm`
+		inlineLoadingStatus = 'active';
+		const result = await withUxTimeout(onConfirm);
 		if (result.isErr) {
-			status = 'error';
+			inlineLoadingStatus = 'error';
 			return;
 		}
-		status = 'finished';
+		inlineLoadingStatus = 'finished';
 		// automatically closing the modal but leave time to
 		// let the user read the result status of the action
 		setTimeout(() => {
 			open = false;
-		}, 1000);
+		}, autoCloseModalOnSuccessTimeout);
 	}
 </script>
 
@@ -99,7 +94,7 @@
 	bind:danger
 	bind:open
 	modalHeading={heading}
-	primaryButtonText={status !== 'error' ? 'Confirm' : 'Try again'}
+	primaryButtonText={inlineLoadingStatus !== 'error' ? 'Confirm' : 'Try again'}
 	{primaryButtonDisabled}
 	secondaryButtonText="Cancel"
 	on:click:button--primary={handleConfirm}
@@ -114,14 +109,11 @@
 		<TextInput bind:value={nameOfEntityInput} />
 		<br />
 	{/if}
-	{#if status === 'active'}
-		<InlineLoading status="active" description="Working on it..." />
-	{:else if status === 'error'}
-		<row class="items-center space-x-1">
-			<InlineLoading status="error" description="An error occurred." class="w-auto" />
-			<Link href={brombTriggerLink({ category: 'bug' })} class="text-xs">Report as bug</Link>
-		</row>
-	{:else if status === 'finished'}
-		<InlineLoading status="finished" description="Success" />
+	{#if inlineLoadingStatus !== 'inactive'}
+		<InlineLoadingWrapper
+			status={inlineLoadingStatus}
+			activeDescription="Working on it..."
+			finishedDescription="Success"
+		/>
 	{/if}
 </Modal>

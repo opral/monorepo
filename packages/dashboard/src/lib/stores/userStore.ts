@@ -1,5 +1,4 @@
 import { browser } from '$app/env';
-import { goto } from '$app/navigation';
 import { User } from '@supabase/gotrue-js';
 import { writable } from 'svelte/store';
 import { auth } from '../services/auth';
@@ -7,12 +6,12 @@ import { auth } from '../services/auth';
 export const userStore = createUserStore();
 
 interface UserStoreInterface {
-	data: Readonly<null | User>;
+	data: Readonly<User | undefined>;
 }
 
 function createUserStore() {
 	const { subscribe, set } = writable<UserStoreInterface>({
-		data: auth.user()
+		data: auth.user() ?? undefined
 	});
 
 	// if in client side environment, listen for auth changes
@@ -20,7 +19,7 @@ function createUserStore() {
 		// supabase (auth) will call onAuthStateChange
 		auth.onAuthStateChange(() => {
 			// on each change (doesn't matter what changes)
-			set({ data: auth.user() });
+			set({ data: auth.user() ?? undefined });
 		});
 	}
 

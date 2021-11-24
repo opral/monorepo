@@ -1,39 +1,40 @@
-<!-- redirecting the user to the projects -->
-<script lang="ts" context="module">
-	import { Result } from '@inlang/common/src/types/result';
-	import type { LoadOutput } from '@sveltejs/kit';
-	import type { definitions } from '@inlang/database';
-	import type { DatabaseResponse } from '$lib/types/databaseResponse';
-	import { database } from '$lib/services/database';
-
-	let organizations: DatabaseResponse<definitions['organization'][]>;
-
-	export async function load(): Promise<LoadOutput> {
-		organizations = await database
-			.from<definitions['organization']>('organization')
-			.select()
-			.order('name');
-		return {};
-	}
-</script>
-
 <script lang="ts">
 	import MembersOfOrganization from '$lib/components/MembersOfOrganization.svelte';
 	import ProjectsOfOrganization from '$lib/components/ProjectsOfOrganization.svelte';
 	import Divider from '$lib/layout/Divider.svelte';
-	import { Tab, Tabs, TabContent, Button, Tile } from 'carbon-components-svelte';
+	import { Tab, Tabs, TabContent, Button, Tile, Loading } from 'carbon-components-svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-
+	import { Result } from '@inlang/common/src/types/result';
+	import type { definitions } from '@inlang/database';
+	import type { DatabaseResponse } from '$lib/types/databaseResponse';
+	import { database } from '$lib/services/database';
 	import { userStore } from '$lib/stores/userStore';
 	import { onMount } from 'svelte';
 	import ConfirmModal, {
 		defaultConfirmModalText
 	} from '$lib/components/modals/ConfirmModal.svelte';
+	import CreateOrganizationModal from '$lib/components/modals/CreateOrganizationModal.svelte';
 
-	onMount(() => {
-		createOrganizationIfNotExists();
+	let createOrganizationModal: CreateOrganizationModal;
+
+	// eslint-disable-next-line unicorn/no-null
+	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
+
+	let loading = true;
+
+	onMount(async () => {
+		await loadOrganizations();
+		await createOrganizationIfNotExists();
+		loading = false;
 	});
+
+	async function loadOrganizations() {
+		organizations = await database
+			.from<definitions['organization']>('organization')
+			.select()
+			.order('name');
+	}
 
 	let confirmModal: ConfirmModal;
 
@@ -79,9 +80,19 @@
 		<h1>Overview</h1>
 		<p>Your organizations including their projects, members and settings appear here.</p>
 	</div>
-	<Button kind="secondary" icon={Add16} size="field">New organization</Button>
+	<Button
+		kind="secondary"
+		icon={Add16}
+		size="field"
+		on:click={() => createOrganizationModal.show({ onOrganizationCreated: loadOrganizations })}
+	>
+		New organization
+	</Button>
 </row>
 <br />
+{#if loading}
+	<Loading />
+{/if}
 {#if organizations.data}
 	{#each organizations.data as organization, i}
 		<h2 class="pb-1 pl-4">{organization.name}</h2>
@@ -124,3 +135,4 @@
 {/if}
 
 <ConfirmModal bind:this={confirmModal} />
+<CreateOrganizationModal bind:this={createOrganizationModal} />

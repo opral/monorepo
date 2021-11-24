@@ -6,6 +6,7 @@
 	import type { definitions } from '@inlang/database';
 	import { InlineLoading, Modal } from 'carbon-components-svelte';
 	import type { InlineLoadingProps } from 'carbon-components-svelte/types/InlineLoading/InlineLoading';
+	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 
 	export let open: boolean;
 	export let language: definitions['language'];
@@ -30,13 +31,13 @@
 		// let the user read the result status of the action
 		setTimeout(() => {
 			open = false;
-		}, 1000);
+		}, autoCloseModalOnSuccessTimeout);
 		// reset status to inactive
 		// happens after previous timeout because
 		// of an ongoing animation
 		setTimeout(() => {
 			status = 'inactive';
-		}, 1500);
+		}, autoCloseModalOnSuccessTimeout + 500);
 	}
 </script>
 
