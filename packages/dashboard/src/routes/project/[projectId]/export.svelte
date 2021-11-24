@@ -4,6 +4,6 @@
 
 <Adapter 
     title="Export" 
-    details = "Select adapter and spoken language to export"
+    details = "Select adapter and human language to export"
     >
 </Adapter>
