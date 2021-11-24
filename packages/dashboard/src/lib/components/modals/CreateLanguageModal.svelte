@@ -16,6 +16,7 @@
 	} from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
 	import { page } from '$app/stores';
+	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 
 	export let open = false;
 
@@ -48,7 +49,7 @@
 		// let the user read the result status of the action
 		setTimeout(() => {
 			open = false;
-		}, 1000);
+		}, autoCloseModalOnSuccessTimeout);
 	}
 </script>
 

@@ -4,12 +4,14 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
+	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 
 	let open = false;
 
 	export function show(): void {
 		keyName = '';
 		baseTranslationText = '';
+		status = 'idle';
 		open = true;
 		// only god knows why focus has to be wrapped in a setTimeout to work
 		setTimeout(() => {
@@ -70,13 +72,7 @@
 			// let the user read the result status of the action
 			setTimeout(() => {
 				open = false;
-				// animation is ongoing after closing the modal.
-				// thus another setTimeout to reset the status
-				// ----- yes, very ugly ------
-				setTimeout(() => {
-					status = 'idle';
-				}, 500);
-			}, 1500);
+			}, autoCloseModalOnSuccessTimeout);
 		}
 	}
 </script>
