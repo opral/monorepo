@@ -2,11 +2,12 @@
 	import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { CodeSnippet, TextInput, Button, Tile } from 'carbon-components-svelte';
+	import { TextInput, Button, Tile } from 'carbon-components-svelte';
 	import DeleteProjectModal from '$lib/components/modals/DeleteProjectModal.svelte';
 	import Save16 from 'carbon-icons-svelte/lib/Save16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import { goto } from '$app/navigation';
+	import ApiKey from '$lib/components/ApiKey.svelte';
 
 	let projectName = $projectStore.data?.project.name;
 
@@ -20,7 +21,7 @@
 		if (response.error) {
 			alert(response.error);
 		} else {
-			alert('Project name has been changed to ' + projectName);
+			projectStore.getData({ projectId: $projectStore.data?.project.id ?? '' });
 		}
 	}
 
@@ -37,21 +38,24 @@
 <div class="max-w-lg">
 	<h1>Settings</h1>
 	<br />
-	<p>Project ID:</p>
-	<CodeSnippet code={$projectStore.data?.project.id} />
+	<ApiKey apiKey={$projectStore.data?.project.api_key ?? ''} />
 	<br />
-	<p>Rename Project:</p>
-	<row class="items-center">
-		<TextInput placeholder="Project Name" bind:value={projectName} />
+	<p>Rename project</p>
+	<row class="items-start">
+		<TextInput
+			placeholder="Project Name"
+			bind:value={projectName}
+			invalid={projectName?.includes(' ')}
+			invalidText="The project name can not contain whitespace."
+		/>
 		<Button
 			icon={Save16}
-			disabled={projectName === $projectStore.data?.project.name}
+			disabled={projectName === $projectStore.data?.project.name || projectName?.includes(' ')}
 			size="field"
 			on:click={() => renameProject()}>Save</Button
 		>
 	</row>
 	<br />
-
 	<Tile>
 		<h2>Danger Zone</h2>
 		<br />
