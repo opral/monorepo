@@ -19,7 +19,8 @@ module.exports = {
 		'unicorn/prefer-array-flat': 'error',
 		'unicorn/prefer-array-flat-map': 'error',
 		'unicorn/prefer-array-index-of': 'error',
-		'unicorn/prefer-array-some': 'error'
+		'unicorn/prefer-array-some': 'error',
+		'unicorn/no-null': 'error'
 	},
 	env: {
 		browser: true,
