@@ -53,19 +53,23 @@
 </script>
 
 <svelte:head>
-	<title>Inlang | {capitalize(last($page.path.split('/')))}</title>
+	{#if $page.params.projectId}
+		<title>inlang | {capitalize(last($page.path.split('/')))}</title>
+	{:else}
+		<title>inlang</title>
+	{/if}
 </svelte:head>
 
 <svelte:window bind:outerWidth />
 
 <UiShell>
 	<slot />
+	{#if outerWidth < 550}
+		<InlineNotification
+			kind="warning"
+			title="Notice:"
+			subtitle="Website is not optimized for mobile."
+			hideCloseButton={false}
+		/>
+	{/if}
 </UiShell>
-{#if outerWidth < 550}
-	<InlineNotification
-		kind="warning"
-		title="Notice:"
-		subtitle="Website is not optimized for mobile."
-		hideCloseButton={true}
-	/>
-{/if}

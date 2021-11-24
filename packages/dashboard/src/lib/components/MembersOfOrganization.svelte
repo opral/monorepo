@@ -1,23 +1,29 @@
 <script lang="ts">
-	import { Button, DataTable, Loading } from 'carbon-components-svelte';
+	import {
+		Button,
+		DataTable,
+		Loading,
+		Toolbar,
+		ToolbarContent,
+		ToolbarBatchActions
+	} from 'carbon-components-svelte';
+	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import type { definitions } from '@inlang/database';
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
-	import { projectStore } from '$lib/stores/projectStore';
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
-	import { isValidEmail } from '$lib/utils/isValidEmail';
+	import AddMemberModal from './modals/AddMemberModal.svelte';
 
-	//TODO: fix join, right now user role is hardcoded to admin
+	export let organization: definitions['organization'];
 
-	let inputEmail = '';
 	let isLoading = true;
 	let members: DatabaseResponse<definitions['member'][]>;
 	let users: DatabaseResponse<definitions['user'][]>;
-	let organizationQuery: DatabaseResponse<definitions['organization'][]>;
 
 	let deleteMemberModal: DeleteMemberModal;
+	let addMemberModal: AddMemberModal;
 
 	type Row = {
 		id: definitions['user']['id'];
@@ -26,81 +32,29 @@
 		//role: string;
 	};
 
-	$: inputIsValidEmail = isValidEmail(inputEmail);
-
-	let organization_id = $projectStore.data?.project.organization_id;
-	let organization: definitions['organization'];
-
 	const headers = [
-		{ key: 'email', value: 'Name' },
+		{ key: 'email', value: 'Member email' },
 		//{ key: 'role', value: 'Role' },
-		{ key: 'remove', empty: true }
+		{ key: 'actions', empty: true }
 	];
 
 	onMount(async () => {
 		await loadUsers();
-		organizationQuery = await database
-			.from<definitions['organization']>('organization')
-			.select()
-			.match({
-				id: organization_id
-			});
-		if (organizationQuery.data === null || organizationQuery.error) {
-			alert(organizationQuery.error?.message);
-		} else {
-			organization = organizationQuery.data[0];
-		}
 		isLoading = false;
 	});
 
 	async function loadUsers() {
 		members = await database.from<definitions['member']>('member').select().match({
-			organization_id: organization_id
+			organization_id: organization.id
 		});
 		if (members.error) {
 			alert(members.error.message);
 		}
 		if (members.data !== null) {
-			let user_ids: string[] = members.data.map((member) => member.user_id);
-
-			users = await database.from<definitions['user']>('user').select().in('id', user_ids);
+			let userIds: string[] = members.data.map((member) => member.user_id);
+			users = await database.from<definitions['user']>('user').select().in('id', userIds);
 			if (users.error) {
 				alert(users.error.message);
-			}
-		}
-	}
-
-	async function handleInviteUser() {
-		const organization_id = $projectStore.data?.project.organization_id;
-		const userId = await database
-			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
-			.single();
-		if (userId.error) {
-			alert(userId.error.message);
-		} else if (userId.data === null) {
-			alert(inputEmail + ' is not a user of inlang yet');
-		} else {
-			const memberUpsert = await database.from<definitions['member']>('member').insert({
-				organization_id: organization_id,
-				user_id: userId.data,
-				role: 'ADMIN'
-			});
-			if (memberUpsert.error) {
-				console.error(memberUpsert.error);
-				alert(memberUpsert.error.message);
-			}
-			if (memberUpsert.status === 409) {
-				alert(inputEmail + ' is already a member');
-			} else if (memberUpsert.status === 201) {
-				//success
-				inputEmail = '';
-				await loadUsers();
-			} else {
-				if (memberUpsert.error) {
-					alert(memberUpsert.error.message);
-				} else {
-					alert('An unknown error occurred');
-				}
 			}
 		}
 	}
@@ -140,7 +94,21 @@
 	</Button>
 </row>
 <br /> -->
-<DataTable {headers} rows={rows()}>
+<!-- padding 0 top is neccessary  -->
+<DataTable {headers} rows={rows()} class="pt-0">
+	<Toolbar>
+		<ToolbarBatchActions class="bg-danger">
+			<Button icon={Delete16} kind="danger">Delete</Button>
+		</ToolbarBatchActions>
+		<ToolbarContent>
+			<!-- <ToolbarSearch placeholder="Search project" /> -->
+			<Button
+				icon={Add16}
+				on:click={() => addMemberModal.show({ organization, onMemberAdded: loadUsers })}
+				>Add member</Button
+			>
+		</ToolbarContent>
+	</Toolbar>
 	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'email'}
 			<row class="items-center space-x-2">
@@ -151,7 +119,7 @@
 			<row class="items-center space-x-2">
 				<p class="text-sm">{cell.value}</p>
 			</row> -->
-		{:else if cell.key === 'remove'}
+		{:else if cell.key === 'actions'}
 			<row class="justify-end items-center">
 				<Button
 					disabled={isOwner(row.id)}
@@ -176,3 +144,4 @@
 </DataTable>
 
 <DeleteMemberModal bind:this={deleteMemberModal} />
+<AddMemberModal bind:this={addMemberModal} />
