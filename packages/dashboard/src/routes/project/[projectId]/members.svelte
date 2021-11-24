@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte';
 	import DeleteMemberModal from '$lib/components/modals/DeleteMemberModal.svelte';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
+	import type { GetUserIdRequestBody, GetUserIdResponseBody} from '../../api/internal/get-user-id'
 
 	//TODO: fix join, right now user role is hardcoded to admin
 
@@ -82,13 +83,9 @@
 		} else {
 			const memberUpsert = await database.from<definitions['member']>('member').insert({
 				organization_id: organization_id,
-				user_id: userId.data,
+				user_id: userId,
 				role: 'ADMIN'
 			});
-			if (memberUpsert.error) {
-				console.error(memberUpsert.error);
-				alert(memberUpsert.error.message);
-			}
 			if (memberUpsert.status === 409) {
 				alert(inputEmail + ' is already a member');
 			} else if (memberUpsert.status === 201) {
@@ -102,6 +99,12 @@
 					alert('An unknown error occurred');
 				}
 			}
+			await loadUsers();
+		} else if (response.status === 500) {
+			alert(inputEmail + " is not a user of inlang yet");
+		}
+		else {
+			alert("An unknown error occurred");
 		}
 	}
 
