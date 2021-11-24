@@ -105,7 +105,8 @@
 </script>
 
 <h1>Languages</h1>
-<p class="text-gray-600 mt-1 mb-3">Your project's languages.</p>
+<p>Your project's languages.</p>
+<br />
 
 <DataTable {headers} rows={rows()}>
 	<Toolbar>

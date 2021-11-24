@@ -1,4 +1,5 @@
 import * as fluent from '@fluent/syntax';
+import { serializeExpression } from '@fluent/syntax';
 import { AdapterInterface } from '../types/adapterInterface';
 import { Result } from '../types/result';
 
@@ -12,10 +13,22 @@ export class FluentAdapter implements AdapterInterface {
     }
 
     serialize(resource: fluent.Resource): Result<string, Error> {
-        try {
-            return Result.ok(fluent.serialize(resource, { withJunk: false }));
-        } catch (e) {
-            return Result.err(e as Error);
+        let out = '';
+        for (const entry of resource.body) {
+            if (entry.type === 'Message') {
+                if (entry.value !== null) {
+                    out += entry.id.name + ' = ';
+                    for (const element of entry.value?.elements) {
+                        if (element.type === 'Placeable') {
+                            out += '{' + serializeExpression(element.expression) + '}';
+                        } else {
+                            out += element.value;
+                        }
+                    }
+                    out += '\n';
+                }
+            }
         }
+        return Result.ok(out);
     }
 }

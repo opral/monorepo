@@ -8,6 +8,7 @@
 	import ISO6391 from 'iso-639-1';
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 
 	export let translation: Readonly<{
 		key: string;
@@ -15,11 +16,23 @@
 		languageCode: LanguageCode;
 	}>;
 	export let isBaseTranslation: Readonly<boolean>;
+	export let missingVariables: {
+		[language: string]: { error: string; variable: string };
+	};
+	export let translationCopy = cloneDeep(translation);
 
-	let translationCopy = cloneDeep(translation);
+	$: getError = () => {
+		if (translationCopy.translation === '') return 'Missing translation';
+		if (Object.keys(missingVariables).find((language) => language === translationCopy.languageCode))
+			return (
+				missingVariables[translationCopy.languageCode].variable +
+				missingVariables[translationCopy.languageCode].error
+			);
+		return '';
+	};
 
 	async function handleUpdate() {
-		let query;
+		let query, error;
 		if ($projectStore.data === null) throw Error('Projectstore not initialized');
 		if (
 			$projectStore.data.translations.doesTranslationExist(
@@ -27,18 +40,19 @@
 				translationCopy.languageCode
 			)
 		) {
-			$projectStore.data.translations.updateKey(
+			error = $projectStore.data.translations.updateKey(
 				translationCopy.key,
 				translationCopy.translation,
 				translationCopy.languageCode
 			);
 		} else {
-			$projectStore.data.translations.createTranslation(
+			error = $projectStore.data.translations.createTranslation(
 				translationCopy.key,
 				translationCopy.translation,
 				translationCopy.languageCode
 			);
 		}
+		if (error.isErr) alert(error.error);
 		const fluentFiles = $projectStore.data.translations.getFluentFiles();
 		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
 		for (const fluentFile of fluentFiles.value) {
@@ -66,16 +80,17 @@
 	<row class="items-center">
 		{#if isBaseTranslation}
 			<Tag type="green">{translation.languageCode}</Tag>
+			{ISO6391.getName(translation.languageCode)} - Base Translation
 		{:else}
 			<Tag type="blue">{translation.languageCode}</Tag>
+			{ISO6391.getName(translation.languageCode)}
 		{/if}
-		{ISO6391.getName(translation.languageCode)}
 	</row>
 	<row class="items-center">
 		<Button
 			iconDescription="Save the translation"
 			icon={Save32}
-			disabled={isEqual(translation, translationCopy)}
+			disabled={isEqual(translation, translationCopy) || getError() !== ''}
 			kind="ghost"
 			on:click={handleUpdate}>Save</Button
 		>
@@ -94,8 +109,8 @@
 	<TextArea
 		class="flex-grow"
 		bind:value={translationCopy.translation}
-		invalid={translationCopy.translation === ''}
-		invalidText="Missing translation"
+		invalid={getError() !== ''}
+		invalidText={getError()}
 		rows={2}
 	/>
 </row>
