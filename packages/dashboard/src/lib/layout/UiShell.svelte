@@ -19,6 +19,7 @@
 	import { page } from '$app/stores';
 	import ProjectSideNav from './ProjectSideNav.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
+	import { brombTriggerLink } from '$lib/services/bromb';
 
 	let isSideNavOpen = false;
 
@@ -50,10 +51,7 @@
 	</div>
 	{#if $userStore.data}
 		<HeaderNav>
-			<HeaderNavItem
-				href={`https://submission.bromb.co/inlang/dashboard/?email=${auth.user()?.email}`}
-				text="Feedback on this site?"
-			/>
+			<HeaderNavItem href={brombTriggerLink({})} text="Feedback on this site?" />
 		</HeaderNav>
 		<HeaderUtilities>
 			<HeaderAction icon={UserAvatar20}>

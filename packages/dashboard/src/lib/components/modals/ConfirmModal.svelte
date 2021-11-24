@@ -17,9 +17,10 @@
 </script>
 
 <script lang="ts">
-	import { InlineLoading, Modal, TextInput } from 'carbon-components-svelte';
+	import { InlineLoading, Link, Modal, TextInput } from 'carbon-components-svelte';
 	import type { InlineLoadingProps } from 'carbon-components-svelte/types/InlineLoading/InlineLoading';
 	import { Result } from '@inlang/common/src/types/result';
+	import { brombTriggerLink } from '$lib/services/bromb';
 
 	/**
 	 * @param heading Header of the modal
@@ -77,7 +78,7 @@
 			await Promise.all([
 				onConfirm(),
 				// for nicer ux, wait at least x milliseconds
-				new Promise((resolve) => setTimeout(resolve, 300))
+				new Promise((resolve) => setTimeout(resolve, 500))
 			])
 		)[0]; // take the first element of the promise chain -> `onConfirm`
 		if (result.isErr) {
@@ -116,7 +117,10 @@
 	{#if status === 'active'}
 		<InlineLoading status="active" description="Working on it..." />
 	{:else if status === 'error'}
-		<InlineLoading status="error" description="An error occurred" />
+		<row class="items-center space-x-1">
+			<InlineLoading status="error" description="An error occurred." class="w-auto" />
+			<Link href={brombTriggerLink({ category: 'bug' })} class="text-xs">Report as bug</Link>
+		</row>
 	{:else if status === 'finished'}
 		<InlineLoading status="finished" description="Success" />
 	{/if}
