@@ -53,7 +53,11 @@
 </script>
 
 <svelte:head>
-	<title>Inlang | {capitalize(last($page.path.split('/')))}</title>
+	{#if $page.params.projectId}
+		<title>inlang | {capitalize(last($page.path.split('/')))}</title>
+	{:else}
+		<title>inlang</title>
+	{/if}
 </svelte:head>
 
 <svelte:window bind:outerWidth />
