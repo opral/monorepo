@@ -10,6 +10,7 @@
             InlineNotification,
 		    NotificationActionButton,
             Button,
+            CodeSnippet,
             TextArea } from "carbon-components-svelte";
     import DocumentExport32 from "carbon-icons-svelte/lib/DocumentExport32";
     import DocumentImport32 from "carbon-icons-svelte/lib/DocumentImport32";
@@ -29,6 +30,7 @@
 
     export let title = "Import"
     export let details = "Select adapter and spoken language then import your current translations"
+    $: isImport = title === "Import";
 
     function handleExport() {
         isAdapting = true;
@@ -77,14 +79,22 @@
                 >
             </Dropdown>
         </div>
-        <Button icon={(title === "Import") ? DocumentExport32 : DocumentImport32}>{title}</Button>
+        <Button icon={(isImport) ? DocumentImport32 : DocumentExport32}>{title}</Button>
     </column>
     <column class="flex-auto">
+        {#if isImport}
         <TextArea
-            class="h-fill"
+            style="height:40rem"
             hideLabel
             placeholder="Paste translation file here">
         </TextArea>
+        {:else}
+        <CodeSnippet 
+            type="multi"
+            skeleton
+        >
+        </CodeSnippet>
+        {/if}
     </column>
 </div>
 
