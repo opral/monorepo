@@ -14,7 +14,6 @@
 	export let finishedDescription: string;
 	// usually if statement determines if element is shown
 	export let inactiveDescription: string | undefined = undefined;
-	// default error message
 	export let errorDescription = 'An error occurred.';
 
 	// if the inline loading just became active (spinning),

@@ -3,4 +3,4 @@
  */
 export const uxPromiseTimeout = 500;
 
-export const autoCloseModalOnSuccessTimeout = 1500;
+export const autoCloseModalOnSuccessTimeout = 1000;
