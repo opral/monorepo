@@ -60,12 +60,12 @@
 
 <UiShell>
 	<slot />
+	{#if outerWidth < 550}
+		<InlineNotification
+			kind="warning"
+			title="Notice:"
+			subtitle="Website is not optimized for mobile."
+			hideCloseButton={false}
+		/>
+	{/if}
 </UiShell>
-{#if outerWidth < 550}
-	<InlineNotification
-		kind="warning"
-		title="Notice:"
-		subtitle="Website is not optimized for mobile."
-		hideCloseButton={true}
-	/>
-{/if}

@@ -17,26 +17,55 @@
 	import { database } from '$lib/services/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
-	import { onMount } from 'svelte';
 	import ISO6391 from 'iso-639-1';
-	import { createEventDispatcher } from 'svelte';
 	import { isEqual } from 'lodash';
 
-	export let open = false;
+	export function show(args: {
+		organizationId?: definitions['organization']['id'];
+		onProjectCreated: () => unknown;
+	}): void {
+		// automatically overwriting old data when show is called
+		onProjectCreated = args.onProjectCreated;
+		loadOrganizationsAndProjects();
+		if (args.organizationId) {
+			organizationIdHasBeenDefined = true;
+			// because organizationid is reactive...
+			setTimeout(() => {
+				selectedOrganizationIndex =
+					organizations.data?.findIndex(
+						(organization) => organization.id === args.organizationId
+					) ?? -1;
+			}, 50);
+		}
+		projectName = '';
+		selectedOrganizationIndex = -1;
+		currentStep = 0;
+		selectedLanguageIsoCodes = [];
+		selectedDefaultLanguageIso = undefined;
+		open = true;
+		// nobody knows why it has to be in setTimeout
+		setTimeout(() => {
+			projectNameElement.focus();
+		}, 50);
+	}
+
+	export function hide(): void {
+		open = false;
+	}
+
+	let open = false;
+
+	let organizationIdHasBeenDefined = false;
+
+	let onProjectCreated: () => unknown;
 
 	// 0 = basics
 	// 1 = default human language
 	let currentStep: 0 | 1 = 0;
 
-	$: if (currentStep === 0 || currentStep === 1) {
-		console.log({ currentStep });
-	}
-
 	let projectName = '';
 
 	let projectNameElement: HTMLInputElement;
-
-	let dispatch = createEventDispatcher();
 
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
 
@@ -47,7 +76,7 @@
 	// the selected index of the ComboBox
 	let selectedOrganizationIndex = -1;
 	// the actual value (type definitions)
-	let organizationId: definitions['organization']['id'] | undefined = undefined;
+	export let organizationId: definitions['organization']['id'] | undefined = undefined;
 	// which is reactively deducted
 	$: organizationId =
 		selectedOrganizationIndex === -1
@@ -109,8 +138,7 @@
 		return false;
 	};
 
-	// load the projects of the selected organization
-	onMount(async () => {
+	async function loadOrganizationsAndProjects() {
 		organizations = await database.from<definitions['organization']>('organization').select();
 		projects = await database.from<definitions['project']>('project').select();
 		if (organizations.error) {
@@ -121,7 +149,7 @@
 			alert(projects.error.message);
 			console.error(projects.error);
 		}
-	});
+	}
 
 	async function handleCreateProject() {
 		confirmIsLoading = true;
@@ -159,14 +187,10 @@
 				alert(insertOtherLanguages.error.message);
 			}
 		}
-		dispatch('updateProjects');
+		onProjectCreated();
 		confirmIsLoading = false;
 		open = false;
 	}
-
-	onMount(() => {
-		projectNameElement.focus();
-	});
 </script>
 
 <Modal
