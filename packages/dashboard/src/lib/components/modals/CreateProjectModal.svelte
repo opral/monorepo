@@ -67,8 +67,11 @@
 
 	let projectNameElement: HTMLInputElement;
 
+	
+	// eslint-disable-next-line unicorn/no-null
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
 
+	// eslint-disable-next-line unicorn/no-null
 	let projects: DatabaseResponse<definitions['project'][]> = { data: null, error: null };
 
 	let selectedLanguageIsoCodes: definitions['language']['iso_code'][] = [];
