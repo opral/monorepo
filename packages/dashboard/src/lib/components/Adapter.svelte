@@ -3,34 +3,47 @@
     import { database } from '$lib/services/database';
     import CreateLanguageModal from './modals/CreateLanguageModal.svelte';
     import type { definitions } from '@inlang/database';
-    import { onMount } from 'svelte';
     import { Dropdown,
-            Loading, 
-            InlineLoading,
-            InlineNotification,
-		    NotificationActionButton,
             Button,
             CodeSnippet,
-            TextArea } from "carbon-components-svelte";
+            TextArea,
+            InlineNotification } from "carbon-components-svelte";
     import DocumentExport32 from "carbon-icons-svelte/lib/DocumentExport32";
     import DocumentImport32 from "carbon-icons-svelte/lib/DocumentImport32";
+    import { SwiftAdapter } from "@inlang/common/src/adapters/swiftAdapter";
+    import { FluentAdapter } from "@inlang/common/src/adapters/fluentAdapter";
+    import { Typesafei18nAdapter } from "@inlang/common/src/adapters/typesafei18nAdapter";
+    import { TranslationAPI } from "@inlang/common/src/fluent/formatter"
+import { append } from 'svelte/internal';
 
-    const adapters: string[] = ["Swift", "Test"];
-    const languages = $projectStore.data?.languages.map((language) => ({
-        iso_code: language.iso_code
-    }))
+    const adapters: string[] = ["Swift", "Fluent", "typesafe-i18n"];
+    const languages: definitions["language"][] | undefined = $projectStore.data?.languages;
+    const baseLanguage: definitions["project"]["default_iso_code"] | undefined = $projectStore.data?.project.default_iso_code;
 
     
     let createLanguageModal: { show: boolean } = { show: false };
     let selectedAdapterIndex = 0;
     let selectedLanguageIndex = 0;
-    let isInitialLoading = false;
     let isAdapting = false;
-    let selectedLanguageIso: definitions['language']['iso_code'] | 'none' = 'none';
+    let exportedCode = "";
+    let importText = "";
 
     export let title = "Import"
     export let details = "Select adapter and spoken language then import your current translations"
+
+    $: selectedLanguage = (languages === undefined) ? undefined : languages[selectedLanguageIndex];
     $: isImport = title === "Import";
+    $: isFileForSelectedLanguage = () => {
+        if (selectedLanguage === undefined) {
+            return false
+        } else {
+            return selectedLanguage.file.length > 0
+        }
+    }
+
+    function handleButtonClick() {
+        (isImport) ? handleImport() : handleExport();
+    }
 
     function handleExport() {
         isAdapting = true;
@@ -39,6 +52,34 @@
 
     function handleImport() {
         isAdapting = true;
+        
+        if (baseLanguage === undefined || selectedLanguage?.iso_code === undefined) {
+            // todo throw error
+            return;
+        }
+        if (selectedAdapterIndex === 0) {
+            // Swift
+            const api = TranslationAPI.initialize({
+                adapter: new SwiftAdapter(),
+                files: [
+                    {
+                        languageCode: selectedLanguage.iso_code,
+                        data: importText
+                    }
+                ],
+                baseLanguage: baseLanguage
+            });
+            if (api.isErr) {
+                alert(api.error.message)
+            } else if (api.isOk) {
+                // todo success
+                alert("Success")
+            }
+        } else if (selectedAdapterIndex === 1) {
+            // Fluent
+        } else if (selectedAdapterIndex === 2) {
+            // Typesafei18n
+        }
         isAdapting = false;
     }
 </script>
@@ -78,20 +119,28 @@
                 }))}
                 >
             </Dropdown>
+            {#if isFileForSelectedLanguage()}
+            <InlineNotification
+                hideCloseButton
+                kind="warning"
+                title="Existing translations for chosen language will be overwritten"
+            />
+            {/if}
         </div>
-        <Button icon={(isImport) ? DocumentImport32 : DocumentExport32}>{title}</Button>
+        <Button icon={(isImport) ? DocumentImport32 : DocumentExport32} on:click={handleButtonClick}>{title}</Button>
     </column>
     <column class="flex-auto">
         {#if isImport}
         <TextArea
             style="height:40rem"
             hideLabel
-            placeholder="Paste translation file here">
+            placeholder="Paste translation file here"
+            bind:value={importText}>
         </TextArea>
         {:else}
         <CodeSnippet 
             type="multi"
-            skeleton
+            code={exportedCode}
         >
         </CodeSnippet>
         {/if}
