@@ -42,6 +42,11 @@
 		}
 	};
     $: parserResponse = tryParse(importText);
+    $: isParseable = parserResponse === "";
+    $: isFormValid = (isParseable && 
+                        selectedLanguageIndex >= 0 && 
+                        selectedLanguageIndex >= 0 &&
+                        importText.length > 0);
 
 	function handleButtonClick() {
 		isImport ? handleImport() : handleExport();
@@ -54,7 +59,7 @@
 
     function tryParse(text: string) {
         console.log("Try Parse")
-        if (text.length === 0) return "";
+        if (text.length === 0) return "Empty";
         let adapter;
         let parsed;
         if (selectedAdapterIndex === 0) {
@@ -151,8 +156,13 @@
 				/>
 			{/if}
 		</div>
-		<Button icon={isImport ? DocumentImport32 : DocumentExport32} on:click={handleButtonClick}
-			>{title}</Button
+		<Button 
+            icon={isImport ? DocumentImport32 : DocumentExport32} 
+            on:click={handleButtonClick}
+            disabled={isImport && !isFormValid}
+        >
+            {title}
+        </Button
 		>
 	</column>
 	<column class="flex-auto space-y-0">
@@ -162,21 +172,9 @@
 				hideLabel
 				placeholder="Paste translation file here"
 				bind:value={importText}
+                invalid={!isParseable}
+                invalidText={parserResponse}
 			/>
-            {#if parserResponse.length > 0}
-            <InlineNotification
-                hideCloseButton
-                kind="error"
-                title="Invalid syntax"
-                subtitle={parserResponse}
-            />
-            {:else}
-                <InlineNotification
-                    hideCloseButton
-                    kind="success"
-                    title="Valid syntax"
-                />
-            {/if}
 		{:else}
 			<CodeSnippet type="multi" code={exportedCode} />
 		{/if}
