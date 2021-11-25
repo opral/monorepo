@@ -1,7 +1,7 @@
 {
   "name": "@inlang/cli",
   "description": "TODO",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "inlang",
   "bin": {
     "inlang": "./bin/run"
@@ -23,6 +23,7 @@
     "@types/node": "^10.17.60",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
+    "@inlang/common": "file:../common",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-unicorn": "^38.0.1",

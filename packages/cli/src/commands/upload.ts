@@ -1,18 +1,14 @@
 import { Command, flags } from '@oclif/command';
 
 export default class Hello extends Command {
-  static description = 'describe the command here';
+  static description = 'Download the translations for a specific project.';
 
-  static examples = [
-    `$ inlang hello
-hello world from ./src/hello.ts!
-`,
-  ];
+  static examples = [];
 
   static flags = {
     help: flags.help({ char: 'h' }),
     // flag with a value (-n, --name=VALUE)
-    name: flags.string({ char: 'n', description: 'name to print' }),
+    name: flags.string({ name: 'name', description: 'name to print' }),
     // flag with no value (-f, --force)
     force: flags.boolean({ char: 'f' }),
   };
