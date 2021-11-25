@@ -1,6 +1,6 @@
 import * as fluent from '@fluent/syntax';
-import { Resource, Entry, Message, Identifier, Pattern, serializeExpression } from '@fluent/syntax';
-import { AdapterInterface } from '../types/adapterInterface';
+import { Resource, serializeExpression } from '@fluent/syntax';
+import { AdapterInterface } from '../adapters/index';
 import { LanguageCode } from '../types/languageCode';
 import { TranslationFile } from '../types/translationFile';
 import { remove } from 'lodash';

@@ -1,5 +1,5 @@
 import * as fluent from '@fluent/syntax';
-import { AdapterInterface } from '../types/adapterInterface';
+import { AdapterInterface } from './index';
 import { Result } from '../types/result';
 import * as peggy from 'peggy';
 import { LanguageCode } from '../types/languageCode';
