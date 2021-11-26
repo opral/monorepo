@@ -6,15 +6,15 @@ import { TranslationFile } from '../src/types/translationFile';
 let translationAPI: TranslationAPI;
 let testVariable;
 beforeEach(() => {
-    const api = TranslationAPI.initialize({
+    const api = TranslationAPI.parse({
         adapter: new FluentAdapter(),
         files: [
             {
                 languageCode: 'en',
-                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {name}\nextra = a key without translations',
+                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {$name}\nextra = a key without translations',
             },
-            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {name}' },
-            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {name}' },
+            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}' },
+            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}' },
         ],
         baseLanguage: 'en',
     });
@@ -45,7 +45,7 @@ describe('getTranslation', () => {
         if (testVariable.isErr) {
             fail();
         }
-        expect(testVariable.value).toMatch('Hello name');
+        expect(testVariable.value).toMatch('Hello {$name}');
     });
 });
 
@@ -175,11 +175,11 @@ describe('checkMissingTranslationsForKey', () => {
     });
 });
 
-describe('updateFile', () => {
+/*describe('updateFile', () => {
     it('should update the files when uploading new ones', () => {
         const newFile: TranslationFile = {
             languageCode: 'de',
-            data: 'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {name}',
+            data: 'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {$name}',
         };
         testVariable = translationAPI.updateFile([newFile]);
         if (testVariable.isErr) fail(testVariable.error);
@@ -188,7 +188,7 @@ describe('updateFile', () => {
         for (const fluentFile of fluentFiles.value) {
             if (fluentFile.languageCode === 'de') {
                 expect(fluentFile.data).toMatch(
-                    'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo { name }'
+                    'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {$name}'
                 );
             }
         }
@@ -220,19 +220,19 @@ describe('updateFile', () => {
         testVariable = translationAPI.updateFile([newFile], { override: true });
         expect(testVariable.isErr).toBeTruthy();
     });
-});
+});*/
 
 describe('getFluentFiles', () => {
     it('should get fluent files correctly', () => {
-        testVariable = translationAPI.getFluentFiles();
+        testVariable = translationAPI.serialize(new FluentAdapter());
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toEqual([
             {
                 languageCode: 'en',
-                data: 'test = this is my test\nhello = hello there\ncomplex = Hello { name }\nextra = a key without translations\n',
+                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {$name}\nextra = a key without translations\n',
             },
-            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej { name }\n' },
-            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo { name }\n' },
+            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}\n' },
+            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}\n' },
         ]);
     });
 });
@@ -272,5 +272,45 @@ describe('createTranslation', () => {
     it('should return an error when language is not found', () => {
         testVariable = translationAPI.createTranslation('extra', 'this should fail', 'aa');
         expect(testVariable.isErr).toBeTruthy;
+    });
+});
+
+describe('checkMissingVariables', () => {
+    it('should show missing variables', () => {
+        testVariable = translationAPI.checkMissingTranslations();
+        if (testVariable.isErr) fail();
+        expect(testVariable.value).toEqual([{ key: 'extra', languageCodes: ['da', 'de'] }]);
+    });
+});
+
+describe('compareVariables', () => {
+    it('should compare variables correctly', () => {
+        testVariable = translationAPI.compareVariables(
+            [{ key: 'test', languageCode: 'de', translation: 'dis ist ein {$name}' }],
+            { key: 'test', languageCode: 'en', translation: 'this is a name' }
+        );
+        if (testVariable.isErr) fail();
+        expect(testVariable.value).toEqual({ de: { error: ' is missing from base translation', variable: '$name' } });
+    });
+});
+
+describe('serialize', () => {
+    it('should serialize a file correctly', () => {
+        testVariable = translationAPI.serialize(new FluentAdapter());
+        if (testVariable.isErr) fail();
+        expect(testVariable.value).toEqual([
+            {
+                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {$name}\nextra = a key without translations\n',
+                languageCode: 'en',
+            },
+            {
+                data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}\n',
+                languageCode: 'da',
+            },
+            {
+                data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}\n',
+                languageCode: 'de',
+            },
+        ]);
     });
 });
