@@ -9,7 +9,8 @@
 		TextArea,
 		InlineNotification,
 		TileGroup, 
-		RadioTile
+		RadioTile,
+		InlineLoading
 	} from 'carbon-components-svelte';
 	import DocumentExport32 from 'carbon-icons-svelte/lib/DocumentExport32';
 	import DocumentImport32 from 'carbon-icons-svelte/lib/DocumentImport32';
@@ -19,20 +20,21 @@
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 	import ISO6391 from 'iso-639-1';
 
-	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
-
-	let createLanguageModal: { show: boolean } = { show: false };
-	let selectedAdapterIndex = 0;
-	let selectedLanguageIndex = 0;
-	let isAdapting = false;
-	let exportedCode = '';
-	let importText = '';
-	let selectedLanguageIso: definitions['language']['iso_code'] | undefined = undefined;
-
 	export let project: definitions['project'];
 	export let languages: definitions['language'][];
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
+	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
+
+	let createLanguageModal: { show: boolean } = { show: false };
+	let selectedAdapterIndex = 0;
+	let isAdapting = false;
+	let exportedCode = '';
+	let importText = '';
+	let selectedLanguageIso: definitions['language']['iso_code'] = project.default_iso_code;
+	let success = false;
+
+	
 	
 	
 	const baseLanguage: definitions['project']['default_iso_code'] = project.default_iso_code;
@@ -53,12 +55,25 @@
     $: parserResponse = tryParse(importText);
     $: isParseable = parserResponse === "";
     $: isFormValid = (isParseable && 
-                        selectedLanguageIndex >= 0 && 
-                        selectedLanguageIndex >= 0 &&
+                        selectedLanguageIso !== undefined && 
+                        selectedAdapterIndex>= 0 &&
                         importText.length > 0);
 
 	function handleButtonClick() {
 		isImport ? handleImport() : handleExport();
+	}
+
+	async function getLanguages() {
+		const selectLanguages = await database
+			.from<definitions['language']>('language')
+			.select()
+			.match({ project_id: project.id })
+			.order('iso_code', { ascending: true });
+		if (selectLanguages.error) {
+			alert(selectLanguages.error.message)
+		} else {
+			languages = selectLanguages.data;
+		}
 	}
 
 	function handleExport() {
@@ -88,6 +103,7 @@
     }
 
 	async function handleImport() {
+		success = false;
 		isAdapting = true;
 
 		if (baseLanguage === undefined || selectedLanguageIso === undefined) {
@@ -124,13 +140,20 @@
 							file: language.data
 						}
 					})
-					let bulkUpsert = await database
-						.from<definitions['language']>('language')
-						.upsert(languagesToUpsert);
-					if (bulkUpsert.error) {
-						alert(bulkUpsert.error.message)
-					} else {
-						alert("Success");
+					let hasUpsertError;
+					for(let i = 0; i < languagesToUpsert.length; i++) {
+						let upsert = await database
+							.from<definitions['language']>('language')
+							.update({file: languagesToUpsert[i].file})
+							.match({ project_id: project.id, iso_code: languagesToUpsert[i].iso_code});
+						if(upsert.error) {
+							hasUpsertError = true;
+							alert(upsert.error.message);
+						}
+					};
+					if (!hasUpsertError) {
+						isAdapting = false;
+						success = true;
 					}
 				}
 
@@ -140,6 +163,7 @@
 		} else if (selectedAdapterIndex === 2) {
 			// Typesafei18n
 		}
+		getLanguages();
 		isAdapting = false;
 	}
 </script>
@@ -170,7 +194,7 @@
 					create new language
 				</button>
 			</p>
-			<div style="max-height:30em; overflow: auto">
+			<div style="height:30em; overflow: auto">
 				<TileGroup
 						bind:selected={selectedLanguageIso}
 					>
@@ -182,34 +206,59 @@
 							{/each}
 						{/if}
 				</TileGroup>
-			</div>
-			{#if isFileForSelectedLanguage()}
+				{#if isFileForSelectedLanguage()}
 				<InlineNotification
 					hideCloseButton
 					kind="warning"
 					title="Existing translations for chosen language will be overwritten"
 				/>
 			{/if}
+			</div>
+			
 		</div>
-		<Button 
+		<div>
+			<Button 
             icon={isImport ? DocumentImport32 : DocumentExport32} 
             on:click={handleButtonClick}
             disabled={isImport && !isFormValid}
+			class="w-full"
         >
             {title}
         </Button
 		>
+		{#if isAdapting}
+		<InlineLoading />
+		{/if}
+		</div>
+		
 	</column>
 	<column class="flex-auto space-y-0">
 		{#if isImport}
 			<TextArea
-				style="height:40rem"
+				style="height:40rem;overflow:auto;"
 				hideLabel
 				placeholder="Paste translation file here"
 				bind:value={importText}
                 invalid={!isParseable}
                 invalidText={parserResponse}
 			/>
+			<InlineNotification
+				lowContrast={true}
+				kind="success"
+				title="Success"
+				subtitle="Translations sucessfully imported to inlang"
+				class="mt-0"
+				/>
+			{#if success}
+				<InlineNotification
+				lowContrast={true}
+				kind="success"
+				title="Success"
+				subtitle="Translations sucessfully imported to inlang"
+				timeout={3000}
+				class="mt-0"
+				/>
+			{/if}
 		{:else}
 			<CodeSnippet type="multi" code={exportedCode} />
 		{/if}
