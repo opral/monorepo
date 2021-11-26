@@ -16,3 +16,5 @@ export const adapters = {
     fluent: FluentAdapter,
     'typesafe-i18n': Typesafei18nAdapter,
 };
+
+export type AvailableAdapters = keyof typeof adapters;
