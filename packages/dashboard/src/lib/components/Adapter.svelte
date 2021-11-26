@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { projectStore } from '$lib/stores/projectStore';
 	import { database } from '$lib/services/database';
 	import CreateLanguageModal from './modals/CreateLanguageModal.svelte';
 	import type { definitions } from '@inlang/database';
@@ -21,9 +20,6 @@
 	import ISO6391 from 'iso-639-1';
 
 	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
-	const languages: definitions['language'][] | undefined = $projectStore.data?.languages;
-	const baseLanguage: definitions['project']['default_iso_code'] | undefined =
-		$projectStore.data?.project.default_iso_code;
 
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
@@ -33,8 +29,13 @@
 	let importText = '';
 	let selectedLanguageIso: definitions['language']['iso_code'] | undefined = undefined;
 
+	export let project: definitions['project'];
+	export let languages: definitions['language'][];
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
+	
+	
+	const baseLanguage: definitions['project']['default_iso_code'] = project.default_iso_code;
 
 	$: isImport = title === 'Import';
 	$: isFileForSelectedLanguage = () => {
@@ -86,7 +87,7 @@
         return "";
     }
 
-	function handleImport() {
+	async function handleImport() {
 		isAdapting = true;
 
 		if (baseLanguage === undefined || selectedLanguageIso === undefined) {
@@ -95,7 +96,7 @@
 		}
 		if (selectedAdapterIndex === 0) {
 			// Swift
-			const api = TranslationAPI.initialize({
+			const api = TranslationAPI.parse({
 				adapter: new SwiftAdapter(),
 				files: [
 					{
@@ -105,12 +106,34 @@
 				],
 				baseLanguage: baseLanguage
 			});
+
+			
 			
 			if (api.isErr) {
 				alert(api.error.message);
 			} else {
-				alert("Success");
-				//api.value.adapter.serialize()
+				let fluentLanguages = api.value.serialize(new FluentAdapter());
+				if (fluentLanguages.isErr) {
+					alert(fluentLanguages.error.message);
+				} else {
+					let languagesToUpsert: definitions["language"][];
+					languagesToUpsert = fluentLanguages.value.map((language) => {
+						return {
+							project_id: project.id,
+							iso_code: language.languageCode,
+							file: language.data
+						}
+					})
+					let bulkUpsert = await database
+						.from<definitions['language']>('language')
+						.upsert(languagesToUpsert);
+					if (bulkUpsert.error) {
+						alert(bulkUpsert.error.message)
+					} else {
+						alert("Success");
+					}
+				}
+
 			}
 		} else if (selectedAdapterIndex === 1) {
 			// Fluent
