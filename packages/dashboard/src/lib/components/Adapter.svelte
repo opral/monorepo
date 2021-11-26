@@ -8,7 +8,9 @@
 		Button,
 		CodeSnippet,
 		TextArea,
-		InlineNotification
+		InlineNotification,
+		TileGroup, 
+		RadioTile
 	} from 'carbon-components-svelte';
 	import DocumentExport32 from 'carbon-icons-svelte/lib/DocumentExport32';
 	import DocumentImport32 from 'carbon-icons-svelte/lib/DocumentImport32';
@@ -16,6 +18,7 @@
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+	import ISO6391 from 'iso-639-1';
 
 	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 	const languages: definitions['language'][] | undefined = $projectStore.data?.languages;
@@ -28,17 +31,22 @@
 	let isAdapting = false;
 	let exportedCode = '';
 	let importText = '';
+	let selectedLanguageIso: definitions['language']['iso_code'] | undefined = undefined;
 
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
 
-	$: selectedLanguage = languages === undefined ? undefined : languages[selectedLanguageIndex];
 	$: isImport = title === 'Import';
 	$: isFileForSelectedLanguage = () => {
-		if (selectedLanguage === undefined) {
+		if (selectedLanguageIso === undefined || languages === undefined) {
 			return false;
 		} else {
-			return selectedLanguage.file.length > 0;
+			for (let i = 0; i < languages.length; i++) {
+				if(languages[i].iso_code === selectedLanguageIso && languages[i].file.length > 0) {
+					return true
+				}
+			}
+			return false
 		}
 	};
     $: parserResponse = tryParse(importText);
@@ -59,7 +67,7 @@
 
     function tryParse(text: string) {
         console.log("Try Parse")
-        if (text.length === 0) return "Empty";
+        if (text.length === 0) return "";
         let adapter;
         let parsed;
         if (selectedAdapterIndex === 0) {
@@ -81,7 +89,7 @@
 	function handleImport() {
 		isAdapting = true;
 
-		if (baseLanguage === undefined || selectedLanguage?.iso_code === undefined) {
+		if (baseLanguage === undefined || selectedLanguageIso === undefined) {
 			// todo throw error
 			return;
 		}
@@ -91,17 +99,18 @@
 				adapter: new SwiftAdapter(),
 				files: [
 					{
-						languageCode: selectedLanguage.iso_code,
+						languageCode: selectedLanguageIso,
 						data: importText
 					}
 				],
 				baseLanguage: baseLanguage
 			});
+			
 			if (api.isErr) {
 				alert(api.error.message);
-			} else if (api.isOk) {
-				// todo success
-				alert('Success');
+			} else {
+				alert("Success");
+				//api.value.adapter.serialize()
 			}
 		} else if (selectedAdapterIndex === 1) {
 			// Fluent
@@ -138,16 +147,19 @@
 					create new language
 				</button>
 			</p>
-			<Dropdown
-				hideLabel
-				class="w-fill"
-				titleText="Select human language"
-				bind:selectedIndex={selectedLanguageIndex}
-				items={languages?.map((language) => ({
-					id: language.iso_code,
-					text: language.iso_code
-				}))}
-			/>
+			<div style="max-height:30em; overflow: auto">
+				<TileGroup
+						bind:selected={selectedLanguageIso}
+					>
+						{#if languages !== undefined} 
+							{#each languages as language}
+								<RadioTile value={language.iso_code}>
+									{ISO6391.getName(language.iso_code)} - {language.iso_code}
+								</RadioTile>
+							{/each}
+						{/if}
+				</TileGroup>
+			</div>
 			{#if isFileForSelectedLanguage()}
 				<InlineNotification
 					hideCloseButton
