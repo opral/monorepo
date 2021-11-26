@@ -55,7 +55,7 @@ async function getData(
 		.from<definitions['language']>('language')
 		.select('*')
 		.match({ project_id: args.projectId })
-		.order('iso_code', { ascending: false });
+		.order('iso_code', { ascending: true });
 
 	const translations: Result<TranslationAPI, Error> = TranslationAPI.parse({
 		adapter: new FluentAdapter(),
