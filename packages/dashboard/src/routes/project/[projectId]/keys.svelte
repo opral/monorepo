@@ -17,9 +17,6 @@
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 
-	const ff = $projectStore.data?.translations.getFluentFiles();
-	if (ff?.isOk) console.log(ff.value);
-
 	const headers = [
 		{ key: 'id', value: 'Key' },
 		{ key: 'actions', empty: true }
