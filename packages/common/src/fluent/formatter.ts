@@ -7,21 +7,18 @@ import { remove } from 'lodash';
 import { Result } from '../types/result';
 
 export class TranslationAPI {
-    adapter: AdapterInterface;
     resources: { data: Resource; languageCode: LanguageCode }[];
     baseLanguage: LanguageCode;
 
     private constructor(args: {
-        adapter: AdapterInterface;
         baseLanguage: LanguageCode;
         resources: { data: Resource; languageCode: LanguageCode }[];
     }) {
-        this.adapter = args.adapter;
         this.resources = args.resources;
         this.baseLanguage = args.baseLanguage;
     }
 
-    static initialize(args: {
+    static parse(args: {
         adapter: AdapterInterface;
         files: TranslationFile[];
         baseLanguage: LanguageCode;
@@ -39,7 +36,7 @@ export class TranslationAPI {
             }
             resources.push({ languageCode: file.languageCode, data: parse.value });
         }
-        return Result.ok(new TranslationAPI({ adapter: args.adapter, resources, baseLanguage: args.baseLanguage }));
+        return Result.ok(new TranslationAPI({ resources, baseLanguage: args.baseLanguage }));
     }
 
     doesKeyExist(key: string): boolean {
@@ -212,7 +209,7 @@ export class TranslationAPI {
         return Result.ok([]);
     }
 
-    updateFile(files: TranslationFile[], options = { override: false }): Result<void, Error> {
+    /*updateFile(files: TranslationFile[], options = { override: false }): Result<void, Error> {
         for (const file of files) {
             const parse = this.adapter.parse(file.data);
             if (parse.isErr) {
@@ -236,19 +233,7 @@ export class TranslationAPI {
             }
         }
         return Result.ok(undefined);
-    }
-
-    getFluentFiles(): Result<{ data: string; languageCode: LanguageCode }[], Error> {
-        const files = [];
-        for (const resource of this.resources) {
-            const serial = this.adapter.serialize(resource.data);
-            if (serial.isErr) {
-                return Result.err(serial.error);
-            }
-            files.push({ data: serial.value, languageCode: resource.languageCode });
-        }
-        return Result.ok(files);
-    }
+    }*/
 
     doesTranslationExist(key: string, languageCode: LanguageCode): boolean {
         for (const resource of this.resources) {
@@ -412,5 +397,22 @@ export class TranslationAPI {
             }
         }
         return Result.ok(errors);
+    }
+
+    verifyKeyName(key: string): boolean {
+        const parse = fluent.parse(`${key} = Hopefully not junk`, {});
+        return parse.body[0].type === 'Message';
+    }
+
+    serialize(adapter: AdapterInterface): Result<{ data: string; languageCode: LanguageCode }[], Error> {
+        const files = [];
+        for (const resource of this.resources) {
+            const serial = adapter.serialize(resource.data);
+            if (serial.isErr) {
+                return Result.err(serial.error);
+            }
+            files.push({ data: serial.value, languageCode: resource.languageCode });
+        }
+        return Result.ok(files);
     }
 }
