@@ -57,7 +57,7 @@ async function getData(
 		.match({ project_id: args.projectId })
 		.order('iso_code', { ascending: false });
 
-	const translations: Result<TranslationAPI, Error> = TranslationAPI.initialize({
+	const translations: Result<TranslationAPI, Error> = TranslationAPI.parse({
 		adapter: new FluentAdapter(),
 		files:
 			languages.data?.map((language) => ({
