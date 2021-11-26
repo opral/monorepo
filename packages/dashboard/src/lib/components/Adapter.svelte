@@ -24,7 +24,6 @@
 	export let languages: definitions['language'][];
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
-	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
@@ -34,10 +33,8 @@
 	let selectedLanguageIso: definitions['language']['iso_code'] = project.default_iso_code;
 	let success = false;
 
-	
-	
-	
 	const baseLanguage: definitions['project']['default_iso_code'] = project.default_iso_code;
+	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 
 	$: isImport = title === 'Import';
 	$: isFileForSelectedLanguage = () => {
@@ -242,13 +239,6 @@
                 invalid={!isParseable}
                 invalidText={parserResponse}
 			/>
-			<InlineNotification
-				lowContrast={true}
-				kind="success"
-				title="Success"
-				subtitle="Translations sucessfully imported to inlang"
-				class="mt-0"
-				/>
 			{#if success}
 				<InlineNotification
 				lowContrast={true}
