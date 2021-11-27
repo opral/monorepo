@@ -235,13 +235,6 @@
 							{/each}
 						{/if}
 				</TileGroup>
-				{#if isFileForSelectedLanguage}
-				<InlineNotification
-					hideCloseButton
-					kind="warning"
-					title="Existing translations for chosen language will be overwritten"
-				/>
-			{/if}
 			</div>
 			
 		</div>
@@ -258,14 +251,27 @@
 		{#if isLoading}
 		<InlineLoading />
 		{/if}
+		{#if isImport && isFileForSelectedLanguage}
+					<InlineNotification
+						hideCloseButton
+						kind="warning"
+						title="Existing translations for chosen language will be overwritten"
+					/>
+				{:else if !isImport && !isFileForSelectedLanguage}
+					<InlineNotification
+							hideCloseButton
+							kind="warning"
+							title="No translations exists for chosen language"
+					/>
+				{/if}
 		</div>
 		
 	</column>
 	<column class="flex-auto space-y-0">
 		{#if isImport}
 			<TextArea
-				style="height:40rem;overflow:auto;"
-				hideLabel
+				labelText="Translations"
+				style="height:38.5rem;overflow:auto;"
 				placeholder="Paste translation file here"
 				bind:value={importText}
                 invalid={!isParseable}
