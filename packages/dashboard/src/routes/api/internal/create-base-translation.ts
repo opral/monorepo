@@ -61,7 +61,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			.select()
 			.match({ project_id: requestBody.projectId });
 
-		const translations: Result<TranslationAPI, Error> = TranslationAPI.initialize({
+		const translations: Result<TranslationAPI, Error> = TranslationAPI.parse({
 			adapter: new FluentAdapter(),
 			files:
 				languages.data?.map((language) => ({
@@ -140,7 +140,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			);
 		}
 		await Promise.all(promises);
-		const fluentFiles = translationAPI.getFluentFiles();
+		const fluentFiles = translationAPI.serialize(new FluentAdapter());
 		if (fluentFiles.isErr) throw fluentFiles.error;
 		for (const fluentFile of fluentFiles.value) {
 			const query = await supabase
