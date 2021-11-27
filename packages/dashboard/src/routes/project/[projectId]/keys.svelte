@@ -6,7 +6,9 @@
 		ToolbarContent,
 		ToolbarSearch,
 		Tag,
-		Pagination
+		Pagination,
+		ToolbarMenuItem,
+		ToolbarMenu
 	} from 'carbon-components-svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
@@ -16,6 +18,8 @@
 	import Translations from '$lib/components/Translations.svelte';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
+	import Language16 from 'carbon-icons-svelte/lib/Language16';
+	import TranslationRow from '$lib/components/modals/TranslationRow.svelte';
 
 	const headers = [
 		{ key: 'id', value: 'Key' },
@@ -57,7 +61,11 @@
 		}
 
 		if (searchQuery !== '') {
-			result = result?.filter((row) => row.key.startsWith(searchQuery));
+			result = result?.filter(
+				(row) =>
+					row.key.includes(searchQuery) ||
+					row.translations.some((translation) => translation.translation?.includes(searchQuery))
+			);
 		}
 		// return an empty array as fallback
 		return result?.reverse() ?? [];
@@ -124,6 +132,10 @@
 	<Toolbar>
 		<ToolbarContent>
 			<ToolbarSearch placeholder="Search for a specific key" bind:value={searchQuery} />
+			<ToolbarMenu>
+				<ToolbarMenuItem>Show missing translation</ToolbarMenuItem>
+				<ToolbarMenuItem>Show missing variables</ToolbarMenuItem>
+			</ToolbarMenu>
 			<Button
 				icon={Add16}
 				on:click={() => {
@@ -135,6 +147,16 @@
 	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'actions'}
 			<row class="justify-end items-center">
+				<!-- Human translator -->
+				{#if keyIsMissingTranslations(row)}
+					<Button
+						icon={Language16}
+						iconDescription="Send to translator"
+						kind="ghost"
+						tooltipAlignment="start"
+						tooltipPosition="left"
+					/>
+				{/if}
 				<!-- Status  -->
 				<div>
 					{#if keyIsMissingTranslations(row) === true}
