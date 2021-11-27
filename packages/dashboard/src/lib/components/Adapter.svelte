@@ -288,7 +288,15 @@
 				/>
 			{/if}
 		{:else}
-			<CodeSnippet type="multi" code={exportedCode} />
+			<div style="height:40rem;overflow:auto">
+				<p class="text-xs text-gray-600 mb-2">
+					Exported translations
+				</p>
+				<CodeSnippet 
+					type="multi" 
+					code={exportedCode} 
+				/>
+			</div>
 		{/if}
 	</column>
 </div>
