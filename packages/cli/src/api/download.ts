@@ -6,5 +6,5 @@ export function download(args: {
   pathPattern: string;
   apiKey: string;
 }): Result<void, Error> {
-    
+  return Result.ok(undefined);
 }
