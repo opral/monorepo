@@ -38,18 +38,7 @@
 	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 
 	$: isImport = title === 'Import';
-	$: isFileForSelectedLanguage = () => {
-		if (selectedLanguageIso === undefined || languages === undefined) {
-			return false;
-		} else {
-			for (let i = 0; i < languages.length; i++) {
-				if(languages[i].iso_code === selectedLanguageIso && languages[i].file.length > 0) {
-					return true
-				}
-			}
-			return false
-		}
-	};
+	$: isFileForSelectedLanguage = (getFileForLanguageIso(selectedLanguageIso).length > 0)
     $: parserResponse = tryParse(importText, selectedAdapterIndex);
     $: isParseable = parserResponse === "";
     $: isFormValid = (isParseable && 
@@ -59,6 +48,15 @@
 
 	function handleButtonClick() {
 		isImport ? handleImport() : handleExport();
+	}
+
+	function getFileForLanguageIso(iso: string) {
+		for (let i = 0; i < languages.length; i++) {
+				if(languages[i].iso_code === iso && languages[i].file.length > 0) {
+					return languages[i].file
+				}
+			}
+			return "";
 	}
 
 	async function getLanguages() {
@@ -72,11 +70,6 @@
 		} else {
 			languages = selectLanguages.data;
 		}
-	}
-
-	function handleExport() {
-		isLoading = true;
-		isLoading = false;
 	}
 
     function tryParse(text: string, adapterIndex: number) {
@@ -104,10 +97,6 @@
 		isLoading = true;
 		let adapter: AdapterInterface;
 
-		if (baseLanguage === undefined || selectedLanguageIso === undefined) {
-			// todo throw error
-			return;
-		}
 		if (selectedAdapterIndex === 0) {
 			// Swift
 			adapter = new SwiftAdapter();
@@ -168,6 +157,44 @@
 		getLanguages();
 		isLoading = false;
 	}
+
+	function handleExport() {
+		isLoading = true;
+		let adapter: AdapterInterface;
+		if (selectedAdapterIndex === 0) {
+			// Swift
+			adapter = new SwiftAdapter();
+		} else if (selectedAdapterIndex === 1) {
+			// Fluent
+			adapter = new FluentAdapter();
+		} else {
+			// Typesafei18n
+			adapter = new Typesafei18nAdapter();
+		}
+		const api = TranslationAPI.parse({
+				adapter: new FluentAdapter(),
+				files: [
+					{
+						languageCode: selectedLanguageIso,
+						data: getFileForLanguageIso(selectedLanguageIso)
+					}
+				],
+				baseLanguage: baseLanguage
+			});
+		if (api.isOk) {
+			let response = api.value.serialize(adapter);
+			if (response.isOk) {
+				exportedCode = response.value[0].data
+			} else {
+				alert(response.error.message);
+			}
+
+		} else {
+			alert(api.error.message);
+		}
+		isLoading = false;
+	}
+
 </script>
 
 <h1>{title}</h1>
@@ -208,7 +235,7 @@
 							{/each}
 						{/if}
 				</TileGroup>
-				{#if isFileForSelectedLanguage()}
+				{#if isFileForSelectedLanguage}
 				<InlineNotification
 					hideCloseButton
 					kind="warning"
@@ -222,7 +249,7 @@
 			<Button 
             icon={isImport ? DocumentImport32 : DocumentExport32} 
             on:click={handleButtonClick}
-            disabled={isImport && !isFormValid}
+            disabled={isImport && !isFormValid || !isImport && !isFileForSelectedLanguage}
 			class="w-full"
         >
             {title}
