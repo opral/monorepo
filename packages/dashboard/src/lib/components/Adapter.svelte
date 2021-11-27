@@ -17,6 +17,7 @@
 	import { SwiftAdapter } from '@inlang/common/src/adapters/swiftAdapter';
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
+	import { AdapterInterface } from '@inlang/common/src/types/adapterInterface';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 	import ISO6391 from 'iso-639-1';
 
@@ -24,10 +25,10 @@
 	export let languages: definitions['language'][];
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
-
+	
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
-	let isAdapting = false;
+	let isLoading = false;
 	let exportedCode = '';
 	let importText = '';
 	let selectedLanguageIso: definitions['language']['iso_code'] = project.default_iso_code;
@@ -49,7 +50,7 @@
 			return false
 		}
 	};
-    $: parserResponse = tryParse(importText);
+    $: parserResponse = tryParse(importText, selectedAdapterIndex);
     $: isParseable = parserResponse === "";
     $: isFormValid = (isParseable && 
                         selectedLanguageIso !== undefined && 
@@ -74,20 +75,19 @@
 	}
 
 	function handleExport() {
-		isAdapting = true;
-		isAdapting = false;
+		isLoading = true;
+		isLoading = false;
 	}
 
-    function tryParse(text: string) {
-        console.log("Try Parse")
+    function tryParse(text: string, adapterIndex: number) {
         if (text.length === 0) return "";
-        let adapter;
         let parsed;
-        if (selectedAdapterIndex === 0) {
+		let adapter: AdapterInterface;
+        if (adapterIndex === 0) {
             adapter = new SwiftAdapter();
-        } else if (selectedAdapterIndex === 1) {
+        } else if (adapterIndex === 1) {
             adapter = new FluentAdapter();
-        } else if (selectedAdapterIndex === 2) {
+        } else if (adapterIndex === 2) {
             adapter = new Typesafei18nAdapter();
         } else {
             return "";
@@ -101,7 +101,8 @@
 
 	async function handleImport() {
 		success = false;
-		isAdapting = true;
+		isLoading = true;
+		let adapter: AdapterInterface;
 
 		if (baseLanguage === undefined || selectedLanguageIso === undefined) {
 			// todo throw error
@@ -109,8 +110,17 @@
 		}
 		if (selectedAdapterIndex === 0) {
 			// Swift
-			const api = TranslationAPI.parse({
-				adapter: new SwiftAdapter(),
+			adapter = new SwiftAdapter();
+		} else if (selectedAdapterIndex === 1) {
+			// Fluent
+			adapter = new FluentAdapter();
+		} else {
+			// Typesafei18n
+			adapter = new Typesafei18nAdapter();
+		}
+		//create and parse
+		const api = TranslationAPI.parse({
+				adapter: adapter,
 				files: [
 					{
 						languageCode: selectedLanguageIso,
@@ -149,19 +159,14 @@
 						}
 					};
 					if (!hasUpsertError) {
-						isAdapting = false;
+						isLoading = false;
 						success = true;
 					}
 				}
 
 			}
-		} else if (selectedAdapterIndex === 1) {
-			// Fluent
-		} else if (selectedAdapterIndex === 2) {
-			// Typesafei18n
-		}
 		getLanguages();
-		isAdapting = false;
+		isLoading = false;
 	}
 </script>
 
@@ -223,7 +228,7 @@
             {title}
         </Button
 		>
-		{#if isAdapting}
+		{#if isLoading}
 		<InlineLoading />
 		{/if}
 		</div>
