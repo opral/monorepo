@@ -9,6 +9,7 @@
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
 	import { LanguageCode } from '@inlang/common/src/types/languageCode';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 	export let translation: Readonly<{
 		key: string;
@@ -53,7 +54,7 @@
 			);
 		}
 		if (error.isErr) alert(error.error);
-		const fluentFiles = $projectStore.data.translations.getFluentFiles();
+		const fluentFiles = $projectStore.data.translations.serialize(new FluentAdapter());
 		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
 		for (const fluentFile of fluentFiles.value) {
 			if (fluentFile.languageCode === translationCopy.languageCode) {
