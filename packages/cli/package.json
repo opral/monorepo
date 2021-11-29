@@ -12,7 +12,9 @@
     "@oclif/config": "^1.17.1",
     "@oclif/plugin-help": "^3.2.7",
     "@oclif/plugin-not-found": "^1.2.4",
+    "@types/node-fetch": "^2.5.12",
     "lodash": "^4.17.21",
+    "node-fetch": "^2.6.6",
     "prompts": "^2.4.2",
     "tslib": "^1.14.1"
   },
