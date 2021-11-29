@@ -1,7 +1,4 @@
 import { Command, flags } from '@oclif/command';
-import { download } from '../api/download';
-import { getAdapter } from '../lib/adapter';
-import * as fs from 'fs';
 
 export default class Hello extends Command {
   static description = 'Download the translations for a specific project.';
@@ -22,22 +19,20 @@ export default class Hello extends Command {
         `./{languageCode}/Localizable.strings`,
       required: true,
     }),
-    apikey: flags.string({ description: 'The apikey of the project found at https://app.inlang.dev/', required: true }),
     force: flags.boolean({ description: `Overwrite local translation files regardless of merge conflicts.` }),
   };
 
-  async run(): Promise<void> {
-    const { flags } = this.parse(Hello);
-    const adapter = getAdapter(flags.adapter);
-    if (adapter.isErr) throw adapter.error;
+  static args = [{ name: 'file' }];
 
-    const result = await download({ adapter: adapter.value, pathPattern: flags['path-pattern'], apiKey: flags.apikey });
-    if (result.isErr) throw result.error;
-    for (const file of result.value) {
-      fs.writeFileSync(
-        flags['path-pattern'].replace('{languageCode}', file.languageCode),
-        adapter.value.serialize(file.data)
-      );
+  async run(): Promise<void> {
+    const { args, flags } = this.parse(Hello);
+
+    const name = flags.languageCode ?? 'world';
+
+    this.log(`hello ${name} from ./src/commands/hello.ts`);
+
+    if (args.file && flags.force) {
+      this.log(`you input --force and --file: ${args.file}`);
     }
   }
 }
