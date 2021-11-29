@@ -1,46 +1,70 @@
-# command line interface for inlang
+@inlang/cli
+===========
 
-- [TypeScript](https://www.typescriptlang.org/), for writing good code
-- [Ava](https://www.npmjs.com/package/ava), for writing good tests
-- [Commander](https://www.npmjs.com/package/commander), for building CLI applications
-- [Pkg](https://www.npmjs.com/package/pkg), for building cross-platform native executables
+TODO
 
-Your application will be installable from `npm` or by sharing your native executables.
+[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+[![Version](https://img.shields.io/npm/v/@inlang/cli.svg)](https://npmjs.org/package/@inlang/cli)
+[![Downloads/week](https://img.shields.io/npm/dw/@inlang/cli.svg)](https://npmjs.org/package/@inlang/cli)
+[![License](https://img.shields.io/npm/l/@inlang/cli.svg)](https://github.com/inlang/inlang/blob/master/package.json)
 
-## Usage
+<!-- toc -->
+* [Usage](#usage)
+* [Commands](#commands)
+<!-- tocstop -->
+# Usage
+<!-- usage -->
+```sh-session
+$ npm install -g @inlang/cli
+$ inlang COMMAND
+running command...
+$ inlang (-v|--version|version)
+@inlang/cli/0.0.0 darwin-arm64 node-v14.17.4
+$ inlang --help [COMMAND]
+USAGE
+  $ inlang COMMAND
+...
+```
+<!-- usagestop -->
+# Commands
+<!-- commands -->
+* [`inlang hello [FILE]`](#inlang-hello-file)
+* [`inlang help [COMMAND]`](#inlang-help-command)
 
-### **dev**
+## `inlang hello [FILE]`
 
-`npm run dev`
+describe the command here
 
-Runs the CLI application.
+```
+USAGE
+  $ inlang hello [FILE]
 
-You can pass arguments to your application by running `npm run dev -- --your-argument`. The extra `--` is so that your arguments are passed to your CLI application, and not `npm`.
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
 
-### **clean**
+EXAMPLE
+  $ inlang hello
+  hello world from ./src/hello.ts!
+```
 
-`npm run clean`
+_See code: [src/commands/hello.ts](https://github.com/inlang/inlang/blob/v0.0.0/src/commands/hello.ts)_
 
-Removes any built code and any built executables.
+## `inlang help [COMMAND]`
 
-### **build**
+display help for inlang
 
-`npm run build`
+```
+USAGE
+  $ inlang help [COMMAND]
 
-Cleans, then builds the TypeScript code.
+ARGUMENTS
+  COMMAND  command to show help for
 
-Your built code will be in the `./dist/` directory.
+OPTIONS
+  --all  see all commands in CLI
+```
 
-### **test**
-
-`npm run test`
-
-Cleans, then builds, and tests the built code.
-
-### **bundle**
-
-`npm run bundle`
-
-Cleans, then builds, then bundles into native executables for Windows, Mac, and Linux.
-
-Your shareable executables will be in the `./exec/` directory.
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.7/src/commands/help.ts)_
+<!-- commandsstop -->
