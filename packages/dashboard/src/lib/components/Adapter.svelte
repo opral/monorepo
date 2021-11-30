@@ -17,7 +17,7 @@
 	import { SwiftAdapter } from '@inlang/common/src/adapters/swiftAdapter';
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
-	import { AdapterInterface } from '@inlang/common/src/types/adapterInterface';
+	import { AdapterInterface } from '@inlang/common/src/adapters/index';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 	import ISO6391 from 'iso-639-1';
 
