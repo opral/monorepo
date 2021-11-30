@@ -288,12 +288,13 @@
 				/>
 			{/if}
 		{:else}
-			<div style="height:40rem;overflow:auto">
+			<div style="height:40rem;overflow:auto;">
 				<p class="text-xs text-gray-600 mb-2">
 					Exported translations
 				</p>
 				<CodeSnippet 
-					type="multi" 
+					type="multi"
+					expanded={true}
 					code={exportedCode} 
 				/>
 			</div>
