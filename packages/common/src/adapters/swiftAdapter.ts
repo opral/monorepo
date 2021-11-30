@@ -4,7 +4,7 @@
 
 import * as fluent from '@fluent/syntax';
 import * as peggy from 'peggy';
-import { AdapterInterface } from '../types/adapterInterface';
+import { AdapterInterface } from './index';
 import { Result } from '../types/result';
 
 export class SwiftAdapter implements AdapterInterface {

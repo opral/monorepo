@@ -1,54 +1,73 @@
 {
-  "name": "inlang-cli",
-  "version": "1.0.0",
-  "description": "cli for inlang.",
-  "author": "doofin <8177dph@gmail.com>",
-  "keywords": [
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "./dist/bin.js",
-  "bin": "./dist/bin.js",
-  "files": [
-    "dist/**/*",
-    "!dist/**/*.test.js"
-  ],
-  "scripts": {
-    "dev": "ts-node ./src/bin.ts",
-    "bin": "ts-node ./src/bin.ts",
-    "clean": "rimraf ./dist/ ./exec/",
-    "build": "npm run clean && tsc",
-    "test": "jest",
-    "bundle": "npm run build && pkg . --out-dir ./exec/"
+  "name": "@inlang/cli",
+  "description": "TODO",
+  "version": "0.1.0",
+  "author": "inlang",
+  "bin": {
+    "inlang": "./bin/run"
+  },
+  "bugs": "https://github.com/inlang/inlang/issues",
+  "dependencies": {
+    "@oclif/command": "^1.8.4",
+    "@oclif/config": "^1.17.1",
+    "@oclif/plugin-help": "^3.2.7",
+    "@oclif/plugin-not-found": "^1.2.4",
+    "lodash": "^4.17.21",
+    "prompts": "^2.4.2",
+    "tslib": "^1.14.1"
   },
   "devDependencies": {
-    "@inlang/database": "file:../database",
-    "@types/jest": "^27.0.1",
-    "@types/node": "^16.10.1",
-    "@typescript-eslint/eslint-plugin": "^4.19.0",
-    "@typescript-eslint/parser": "^4.19.0",
-    "ava": "^2.2.0",
-    "eslint": "^7.32.0",
+    "@oclif/dev-cli": "^1.26.3",
+    "@types/jest": "^26.0.20",
+    "@types/lodash": "^4.14.176",
+    "@types/node": "^10.17.60",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "@inlang/common": "file:../common",
+    "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.1.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^5.1.0",
-    "jest": "^27.0.6",
-    "jest-esm-transformer": "^1.0.0",
-    "pkg": "^4.4.0",
-    "rimraf": "^2.6.3",
-    "ts-jest": "^27.0.4",
+    "eslint-plugin-unicorn": "^38.0.1",
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.5.2",
     "ts-node": "^8.10.2",
-    "typescript": "^4.4.4"
+    "typescript": "^3.9.10"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^1.23.0",
-    "commander": "^2.20.0",
-    "dotenv": "^10.0.0",
-    "eslint-config-standard-with-typescript": "^21.0.1",
-    "prettier": "^2.4.1",
-    "typescript-eslint": "0.0.1-alpha.0"
-  }
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/inlang/inlang",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "inlang",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-not-found"
+    ]
+  },
+  "repository": "inlang/inlang",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "version": "oclif-dev readme && git add README.md",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "jest",
+    "test:watch": "npm test -- --watch"
+  },
+  "types": "lib/index.d.ts"
 }

@@ -1,6 +1,6 @@
 import * as fluent from '@fluent/syntax';
 import { serializeExpression } from '@fluent/syntax';
-import { AdapterInterface } from '../types/adapterInterface';
+import { AdapterInterface } from './index';
 import { Result } from '../types/result';
 
 export class FluentAdapter implements AdapterInterface {
