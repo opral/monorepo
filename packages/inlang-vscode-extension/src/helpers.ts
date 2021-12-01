@@ -1,19 +1,22 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { InlangConfig } from './types/inlangConfig'
+import { InlangVsCodeExtensionConfig } from './types/inlangVsCodeExtensionConfig'
 
 /* export type inlangConfig = {
     ProjectId: string
 } */
 
-export function applyWrappingPattern(pattern: InlangConfig, content: string) {
-    return pattern.vsCodeExtension.wrappingPattern.replace('keyname', content)
+export function applyWrappingPattern(
+    pattern: InlangVsCodeExtensionConfig,
+    content: string
+) {
+    return pattern.wrappingPattern.replace('keyname', content)
 }
 
 export function readAndValidateConfig(
     path: string
 ): {
-    data: InlangConfig | null
+    data: InlangVsCodeExtensionConfig | null
     error: string | null
 } {
     let file = ''
@@ -22,7 +25,7 @@ export function readAndValidateConfig(
     } catch (error) {
         return {
             data: null,
-            error: 'The config file at ' + path +' has not been found.',
+            error: 'The config file at ' + path + ' has not been found.',
         }
     }
     const configValidation = validateConfig({ config: JSON.parse(file) })
@@ -51,7 +54,7 @@ function validateConfig(args: {
     isValid: boolean
     reason: string | null
 } {
-    const casted = args.config as InlangConfig
+    const casted = args.config as InlangVsCodeExtensionConfig
     if (args.config === undefined) {
         return { isValid: false, reason: 'no config ' }
     } else if (casted.projectId === undefined) {
@@ -74,7 +77,7 @@ function validateConfig(args: {
 }
 
 export function ensureDirectoryExistence(filePath: string): void {
-    var dirname = path.dirname(filePath)
+    const dirname = path.dirname(filePath)
     if (fs.existsSync(dirname)) {
         return
     }

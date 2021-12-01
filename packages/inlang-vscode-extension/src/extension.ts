@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import vscode from 'vscode'
 import { applyWrappingPattern, readAndValidateConfig } from './helpers'
-import { postTranslateRequest } from './translate'
-import { InlangConfig } from './types/inlangConfig'
+import { InlangVsCodeExtensionConfig } from './types/inlangVsCodeExtensionConfig'
 import { snakeCase } from 'lodash'
 
 const inlangCmd = 'vscode-extension.send'
@@ -21,15 +20,16 @@ function onCreate() {
 }
 
 /**will be executed every time your command is executed*/
-async function onCommand(config: InlangConfig) {
+async function onCommand(config: InlangVsCodeExtensionConfig) {
     if (config === undefined) {
-        const openedDirectoryPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
+        const openedDirectoryPath =
+            vscode.workspace.workspaceFolders?.[0].uri.fsPath
 
         if (openedDirectoryPath === undefined) {
             vscode.window.showErrorMessage(
                 'You must open a directory in VSCode.'
             )
-            throw 'You must open a directory in VSCode.';
+            throw 'You must open a directory in VSCode.'
         }
         const configValidated = readAndValidateConfig(
             openedDirectoryPath + '/inlang.config.json'
@@ -69,26 +69,6 @@ async function onCommand(config: InlangConfig) {
             if (trimmed.endsWith(`"`) || trimmed.endsWith(`'`)) {
                 trimmed = trimmed.slice(0, trimmed.length - 1)
             }
-            const response = await postTranslateRequest({
-                projectId: config.projectId,
-                baseTranslation: {
-                    key_name: keyName,
-                    text: trimmed,
-                },
-            })
-            if (response.ok && range) {
-                vscode.window.showInformationMessage(
-                    keyName + ' added to dashboard.'
-                )
-                activeTextEditor?.edit((builder) =>
-                    builder.replace(
-                        range,
-                        applyWrappingPattern(config, keyName)
-                    )
-                )
-            } else {
-                vscode.window.showErrorMessage(keyName + ' could not be added')
-            }
         }
     }
 }
@@ -112,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
 
-    let config: InlangConfig
+    let config: InlangVsCodeExtensionConfig
     const disposable = vscode.commands.registerCommand(inlangCmd, () => {
         onCommand(config)
     })
