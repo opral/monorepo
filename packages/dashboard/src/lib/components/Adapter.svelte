@@ -8,7 +8,7 @@
 		CodeSnippet,
 		TextArea,
 		InlineNotification,
-		TileGroup, 
+		TileGroup,
 		RadioTile,
 		InlineLoading
 	} from 'carbon-components-svelte';
@@ -17,7 +17,7 @@
 	import { SwiftAdapter } from '@inlang/common/src/adapters/swiftAdapter';
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
-	import { AdapterInterface } from '@inlang/common/src/adapters/index';
+	import { AdapterInterface } from '@inlang/common/src/adapters';
 	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 	import ISO6391 from 'iso-639-1';
 
@@ -25,7 +25,7 @@
 	export let languages: definitions['language'][];
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
-	
+
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
 	let isLoading = false;
@@ -38,13 +38,14 @@
 	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 
 	$: isImport = title === 'Import';
-	$: isFileForSelectedLanguage = (getFileForLanguageIso(selectedLanguageIso).length > 0)
-    $: parserResponse = tryParse(importText, selectedAdapterIndex);
-    $: isParseable = parserResponse === "";
-    $: isFormValid = (isParseable && 
-                        selectedLanguageIso !== undefined && 
-                        selectedAdapterIndex>= 0 &&
-                        importText.length > 0);
+	$: isFileForSelectedLanguage = getFileForLanguageIso(selectedLanguageIso).length > 0;
+	$: parserResponse = tryParse(importText, selectedAdapterIndex);
+	$: isParseable = parserResponse === '';
+	$: isFormValid =
+		isParseable &&
+		selectedLanguageIso !== undefined &&
+		selectedAdapterIndex >= 0 &&
+		importText.length > 0;
 
 	function handleButtonClick() {
 		isImport ? handleImport() : handleExport();
@@ -52,11 +53,11 @@
 
 	function getFileForLanguageIso(iso: string) {
 		for (let i = 0; i < languages.length; i++) {
-				if(languages[i].iso_code === iso && languages[i].file.length > 0) {
-					return languages[i].file
-				}
+			if (languages[i].iso_code === iso && languages[i].file.length > 0) {
+				return languages[i].file;
 			}
-			return "";
+		}
+		return '';
 	}
 
 	async function getLanguages() {
@@ -66,31 +67,31 @@
 			.match({ project_id: project.id })
 			.order('iso_code', { ascending: true });
 		if (selectLanguages.error) {
-			alert(selectLanguages.error.message)
+			alert(selectLanguages.error.message);
 		} else {
 			languages = selectLanguages.data;
 		}
 	}
 
-    function tryParse(text: string, adapterIndex: number) {
-        if (text.length === 0) return "";
-        let parsed;
+	function tryParse(text: string, adapterIndex: number) {
+		if (text.length === 0) return '';
+		let parsed;
 		let adapter: AdapterInterface;
-        if (adapterIndex === 0) {
-            adapter = new SwiftAdapter();
-        } else if (adapterIndex === 1) {
-            adapter = new FluentAdapter();
-        } else if (adapterIndex === 2) {
-            adapter = new Typesafei18nAdapter();
-        } else {
-            return "";
-        }
-        parsed = adapter.parse(text);
-            if (parsed.isErr) {
-                return parsed.error.message;
-            }
-        return "";
-    }
+		if (adapterIndex === 0) {
+			adapter = new SwiftAdapter();
+		} else if (adapterIndex === 1) {
+			adapter = new FluentAdapter();
+		} else if (adapterIndex === 2) {
+			adapter = new Typesafei18nAdapter();
+		} else {
+			return '';
+		}
+		parsed = adapter.parse(text);
+		if (parsed.isErr) {
+			return parsed.error.message;
+		}
+		return '';
+	}
 
 	async function handleImport() {
 		success = false;
@@ -109,51 +110,48 @@
 		}
 		//create and parse
 		const api = TranslationAPI.parse({
-				adapter: adapter,
-				files: [
-					{
-						languageCode: selectedLanguageIso,
-						data: importText
-					}
-				],
-				baseLanguage: baseLanguage
-			});
+			adapter: adapter,
+			files: [
+				{
+					languageCode: selectedLanguageIso,
+					data: importText
+				}
+			],
+			baseLanguage: baseLanguage
+		});
 
-			
-			
-			if (api.isErr) {
-				alert(api.error.message);
+		if (api.isErr) {
+			alert(api.error.message);
+		} else {
+			let fluentLanguages = api.value.serialize(new FluentAdapter());
+			if (fluentLanguages.isErr) {
+				alert(fluentLanguages.error.message);
 			} else {
-				let fluentLanguages = api.value.serialize(new FluentAdapter());
-				if (fluentLanguages.isErr) {
-					alert(fluentLanguages.error.message);
-				} else {
-					let languagesToUpsert: definitions["language"][];
-					languagesToUpsert = fluentLanguages.value.map((language) => {
-						return {
-							project_id: project.id,
-							iso_code: language.languageCode,
-							file: language.data
-						}
-					})
-					let hasUpsertError;
-					for(let i = 0; i < languagesToUpsert.length; i++) {
-						let upsert = await database
-							.from<definitions['language']>('language')
-							.update({file: languagesToUpsert[i].file})
-							.match({ project_id: project.id, iso_code: languagesToUpsert[i].iso_code});
-						if(upsert.error) {
-							hasUpsertError = true;
-							alert(upsert.error.message);
-						}
+				let languagesToUpsert: definitions['language'][];
+				languagesToUpsert = fluentLanguages.value.map((language) => {
+					return {
+						project_id: project.id,
+						iso_code: language.languageCode,
+						file: language.data
 					};
-					if (!hasUpsertError) {
-						isLoading = false;
-						success = true;
+				});
+				let hasUpsertError;
+				for (let i = 0; i < languagesToUpsert.length; i++) {
+					let upsert = await database
+						.from<definitions['language']>('language')
+						.update({ file: languagesToUpsert[i].file })
+						.match({ project_id: project.id, iso_code: languagesToUpsert[i].iso_code });
+					if (upsert.error) {
+						hasUpsertError = true;
+						alert(upsert.error.message);
 					}
 				}
-
+				if (!hasUpsertError) {
+					isLoading = false;
+					success = true;
+				}
 			}
+		}
 		getLanguages();
 		isLoading = false;
 	}
@@ -172,29 +170,27 @@
 			adapter = new Typesafei18nAdapter();
 		}
 		const api = TranslationAPI.parse({
-				adapter: new FluentAdapter(),
-				files: [
-					{
-						languageCode: selectedLanguageIso,
-						data: getFileForLanguageIso(selectedLanguageIso)
-					}
-				],
-				baseLanguage: baseLanguage
-			});
+			adapter: new FluentAdapter(),
+			files: [
+				{
+					languageCode: selectedLanguageIso,
+					data: getFileForLanguageIso(selectedLanguageIso)
+				}
+			],
+			baseLanguage: baseLanguage
+		});
 		if (api.isOk) {
 			let response = api.value.serialize(adapter);
 			if (response.isOk) {
-				exportedCode = response.value[0].data
+				exportedCode = response.value[0].data;
 			} else {
 				alert(response.error.message);
 			}
-
 		} else {
 			alert(api.error.message);
 		}
 		isLoading = false;
 	}
-
 </script>
 
 <h1>{title}</h1>
@@ -224,48 +220,43 @@
 				</button>
 			</p>
 			<div style="height:30em; overflow: auto">
-				<TileGroup
-						bind:selected={selectedLanguageIso}
-					>
-						{#if languages !== undefined} 
-							{#each languages as language}
-								<RadioTile value={language.iso_code}>
-									{ISO6391.getName(language.iso_code)} - {language.iso_code}
-								</RadioTile>
-							{/each}
-						{/if}
+				<TileGroup bind:selected={selectedLanguageIso}>
+					{#if languages !== undefined}
+						{#each languages as language}
+							<RadioTile value={language.iso_code}>
+								{ISO6391.getName(language.iso_code)} - {language.iso_code}
+							</RadioTile>
+						{/each}
+					{/if}
 				</TileGroup>
 			</div>
-			
 		</div>
 		<div>
-			<Button 
-            icon={isImport ? DocumentImport32 : DocumentExport32} 
-            on:click={handleButtonClick}
-            disabled={isImport && !isFormValid || !isImport && !isFileForSelectedLanguage}
-			class="w-full"
-        >
-            {title}
-        </Button
-		>
-		{#if isLoading}
-		<InlineLoading />
-		{/if}
-		{#if isImport && isFileForSelectedLanguage}
-					<InlineNotification
-						hideCloseButton
-						kind="warning"
-						title="Existing translations for chosen language will be overwritten"
-					/>
-				{:else if !isImport && !isFileForSelectedLanguage}
-					<InlineNotification
-							hideCloseButton
-							kind="warning"
-							title="No translations exists for chosen language"
-					/>
-				{/if}
+			<Button
+				icon={isImport ? DocumentImport32 : DocumentExport32}
+				on:click={handleButtonClick}
+				disabled={(isImport && !isFormValid) || (!isImport && !isFileForSelectedLanguage)}
+				class="w-full"
+			>
+				{title}
+			</Button>
+			{#if isLoading}
+				<InlineLoading />
+			{/if}
+			{#if isImport && isFileForSelectedLanguage}
+				<InlineNotification
+					hideCloseButton
+					kind="warning"
+					title="Existing translations for chosen language will be overwritten"
+				/>
+			{:else if !isImport && !isFileForSelectedLanguage}
+				<InlineNotification
+					hideCloseButton
+					kind="warning"
+					title="No translations exists for chosen language"
+				/>
+			{/if}
 		</div>
-		
 	</column>
 	<column class="flex-auto space-y-0">
 		{#if isImport}
@@ -274,20 +265,21 @@
 				style="height:38.5rem;overflow:auto;"
 				placeholder="Paste translation file here"
 				bind:value={importText}
-                invalid={!isParseable}
-                invalidText={parserResponse}
+				invalid={!isParseable}
+				invalidText={parserResponse}
 			/>
 			{#if success}
 				<InlineNotification
-				lowContrast={true}
-				kind="success"
-				title="Success"
-				subtitle="Translations sucessfully imported to inlang"
-				timeout={3000}
-				class="mt-0"
+					lowContrast={true}
+					kind="success"
+					title="Success"
+					subtitle="Translations sucessfully imported to inlang"
+					timeout={3000}
+					class="mt-0"
 				/>
 			{/if}
 		{:else}
+<<<<<<< HEAD
 			<div style="height:40rem;overflow:auto;">
 				<p class="text-xs text-gray-600 mb-2">
 					Exported translations
@@ -297,6 +289,11 @@
 					expanded={true}
 					code={exportedCode} 
 				/>
+=======
+			<div style="height:40rem;overflow:auto">
+				<p class="text-xs text-gray-600 mb-2">Exported translations</p>
+				<CodeSnippet type="multi" code={exportedCode} />
+>>>>>>> e883d1ac6e986548736eb5f53da39f68268b256f
 			</div>
 		{/if}
 	</column>

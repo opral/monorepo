@@ -1,12 +1,10 @@
-import { Command, flags } from '@oclif/command';
-import { getAdapter } from '../lib/adapter';
-import * as fs from 'fs';
-import { upload } from '../api/upload';
-import { LanguageCode } from '@inlang/common/src/types/languageCode';
 import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
-import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+import { Command, flags } from '@oclif/command';
+import * as fs from 'fs';
+import { getAdapter } from '../lib/adapter';
+import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
-export default class Upload extends Command {
+export default class keyCreate extends Command {
   static description = 'Download the translations for a specific project.';
 
   static examples = [];
@@ -25,12 +23,16 @@ export default class Upload extends Command {
         `./{languageCode}/Localizable.strings`,
       required: true,
     }),
-    apikey: flags.string({ description: 'The apikey of the project found at https://app.inlang.dev/', required: true }),
-    force: flags.boolean({ description: `Overwrite local translation files regardless of merge conflicts.` }),
+    key: flags.string({ description: 'The name of the key for the translation key-pairs', required: true }),
+    baseTranslation: flags.string({
+      description: 'The base translation for the translation key-pairs',
+      required: true,
+    }),
+    baseLanguage: flags.string({ description: 'The base language of the project', required: true }),
   };
 
   async run(): Promise<void> {
-    const { flags } = this.parse(Upload);
+    const { flags } = this.parse(keyCreate);
     const adapter = getAdapter(flags.adapter);
     if (adapter.isErr) throw adapter.error;
 
@@ -47,18 +49,20 @@ export default class Upload extends Command {
 
     const translationAPI = TranslationAPI.parse({
       adapter: adapter.value,
-      baseLanguage: 'en',
+      baseLanguage: flags.baseLanguage as LanguageCode,
       files: translationFiles,
     });
-    if (translationAPI.isErr) throw translationAPI.error;
-    const serializedFiles = translationAPI.value.serialize(new FluentAdapter());
-    if (serializedFiles.isErr) throw serializedFiles.error;
 
-    await upload({
-      adapter: adapter.value,
-      apiKey: flags.apikey,
-      files: serializedFiles.value,
-    });
+    if (translationAPI.isErr) throw translationAPI.error;
+    const result = translationAPI.value.createKey(flags.key, flags.baseTranslation);
+    if (result.isErr) throw result.error;
+
+    const files = translationAPI.value.serialize(adapter.value);
+    if (files.isErr) throw files.error;
+
+    for (const file of files.value) {
+      fs.writeFileSync(flags['path-pattern'].replace('{languageCode}', file.languageCode), file.data);
+    }
   }
 }
 
