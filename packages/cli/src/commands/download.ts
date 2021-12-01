@@ -45,6 +45,8 @@ export default class Download extends Command {
     if (files.isErr) throw files.error;
 
     for (const file of files.value) {
+      fs.mkdirSync(flags['path-pattern'].split('/').slice(0, -1).join('/'), { recursive: true });
+
       fs.writeFileSync(flags['path-pattern'].replace('{languageCode}', file.languageCode), file.data);
     }
   }
