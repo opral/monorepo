@@ -2,6 +2,9 @@ import { Command, flags } from '@oclif/command';
 import { download } from '../api/download';
 import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';
+import * as fluent from '@fluent/syntax';
+import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 export default class Hello extends Command {
   static description = 'Download the translations for a specific project.';
@@ -31,13 +34,19 @@ export default class Hello extends Command {
     const adapter = getAdapter(flags.adapter);
     if (adapter.isErr) throw adapter.error;
 
-    const result = await download({ adapter: adapter.value, pathPattern: flags['path-pattern'], apiKey: flags.apikey });
+    const result = await download({ adapter: adapter.value, apiKey: flags.apikey });
     if (result.isErr) throw result.error;
-    for (const file of result.value) {
-      fs.writeFileSync(
-        flags['path-pattern'].replace('{languageCode}', file.languageCode),
-        adapter.value.serialize(file.data)
-      );
+    const translationAPI = TranslationAPI.parse({
+      adapter: new FluentAdapter(),
+      files: result.value,
+      baseLanguage: 'en',
+    });
+    if (translationAPI.isErr) throw translationAPI.error;
+    const files = translationAPI.value.serialize(adapter.value);
+    if (files.isErr) throw files.error;
+
+    for (const file of files.value) {
+      fs.writeFileSync(flags['path-pattern'].replace('{languageCode}', file.languageCode), file.data);
     }
   }
 }

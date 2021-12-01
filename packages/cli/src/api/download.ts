@@ -5,7 +5,6 @@ import fetch from 'node-fetch';
 
 export async function download(args: {
   adapter: AdapterInterface;
-  pathPattern: string;
   apiKey: string;
 }): Promise<Result<TranslationFile[], Error>> {
   return fetch(process.env.VITE_PUBLIC_AUTH_REDIRECT_URL + '/api/download' ?? 'http://localhost:3000/api/download', {

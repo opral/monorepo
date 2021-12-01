@@ -10,7 +10,6 @@
 
 	// is a string but the consuming component passes it down as any
 	export let keyName: string;
-	const translationAPI = cloneDeep($projectStore.data?.translations);
 
 	$: translationsForKey = () => {
 		const allTranslations = $projectStore.data?.translations.getAllTranslations(keyName);
@@ -61,11 +60,13 @@
 		return missingVariables?.value ?? {};
 	};
 
+	let translations = $projectStore.data?.translations.getAllTranslations(keyName);
+	if (translations?.isErr) throw translations.error;
 	let translationCopy: {
 		key: string;
 		languageCode: LanguageCode;
 		translation: string | undefined;
-	}[] = new Array(3);
+	}[] = new Array(translations?.value.length);
 </script>
 
 {#each rows() as row, i}

@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import type { TranslationFile } from '@inlang/common/src/types/translationFile';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
+import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
 export type TranslateRequestBody = {
 	// yeah yeah don't put the api key in the body
@@ -12,6 +13,7 @@ export type TranslateRequestBody = {
 
 export type TranslateResponseBody = {
 	files: TranslationFile[];
+	baseLanguage: LanguageCode;
 };
 
 export async function post(request: Request): Promise<EndpointOutput<TranslateResponseBody>> {
@@ -53,7 +55,8 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 			files: languages.data.map((language) => ({
 				data: language.file,
 				languageCode: language.iso_code
-			}))
+			})),
+			baseLanguage: project.body.default_iso_code
 		}
 	};
 }
