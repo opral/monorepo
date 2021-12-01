@@ -3,11 +3,10 @@ import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';
 import { upload } from '../api/upload';
 import { LanguageCode } from '@inlang/common/src/types/languageCode';
-import * as fluent from '@fluent/syntax';
 import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
-export default class Hello extends Command {
+export default class Upload extends Command {
   static description = 'Download the translations for a specific project.';
 
   static examples = [];
@@ -31,7 +30,7 @@ export default class Hello extends Command {
   };
 
   async run(): Promise<void> {
-    const { flags } = this.parse(Hello);
+    const { flags } = this.parse(Upload);
     const adapter = getAdapter(flags.adapter);
     if (adapter.isErr) throw adapter.error;
 
