@@ -1,5 +1,0 @@
-digraph graphname {
-    npm_install_inlang -> add_service_file;
-    b -> d;
-    b->cc;
-}
