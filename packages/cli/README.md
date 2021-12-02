@@ -19,7 +19,7 @@ $ npm install -g @inlang/cli
 $ inlang COMMAND
 running command...
 $ inlang (-v|--version|version)
-@inlang/cli/0.0.0 darwin-arm64 node-v14.17.4
+@inlang/cli/0.1.3 linux-x64 node-v14.18.1
 $ inlang --help [COMMAND]
 USAGE
   $ inlang COMMAND
@@ -28,28 +28,33 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`inlang hello [FILE]`](#inlang-hello-file)
+* [`inlang download`](#inlang-download)
 * [`inlang help [COMMAND]`](#inlang-help-command)
+* [`inlang keyCreate`](#inlang-keycreate)
+* [`inlang lint`](#inlang-lint)
+* [`inlang upload`](#inlang-upload)
 
-## `inlang hello [FILE]`
+## `inlang download`
 
-describe the command here
+Download the translations for a specific project.
 
 ```
 USAGE
-  $ inlang hello [FILE]
+  $ inlang download
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  --adapter=swift|typesafe-i18n|fluent  (required) The adapter used to parse from and to inlang's schema.
+  --apikey=apikey                       (required) The apikey of the project found at https://app.inlang.dev/
+  --force                               Overwrite local translation files regardless of merge conflicts.
 
-EXAMPLE
-  $ inlang hello
-  hello world from ./src/hello.ts!
+  --path-pattern=path-pattern           (required) Where and how the translation files should be saved. You can use
+                                        "{languageCode}" as dynamic value.
+                                        [examples]
+                                        ./translations/{languageCode}.json
+                                        ./{languageCode}/Localizable.strings
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/inlang/inlang/blob/v0.0.0/src/commands/hello.ts)_
+_See code: [src/commands/download.ts](https://github.com/inlang/inlang/blob/v0.1.3/src/commands/download.ts)_
 
 ## `inlang help [COMMAND]`
 
@@ -67,4 +72,69 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.7/src/commands/help.ts)_
+
+## `inlang keyCreate`
+
+Download the translations for a specific project.
+
+```
+USAGE
+  $ inlang keyCreate
+
+OPTIONS
+  --adapter=swift|typesafe-i18n|fluent  (required) The adapter used to parse from and to inlang's schema.
+  --baseLanguage=baseLanguage           (required) The base language of the project
+  --baseTranslation=baseTranslation     (required) The base translation for the translation key-pairs
+  --key=key                             (required) The name of the key for the translation key-pairs
+
+  --path-pattern=path-pattern           (required) Where and how the translation files should be saved. You can use
+                                        "{languageCode}" as dynamic value.
+                                        [examples]
+                                        ./translations/{languageCode}.json
+                                        ./{languageCode}/Localizable.strings
+```
+
+_See code: [src/commands/keyCreate.ts](https://github.com/inlang/inlang/blob/v0.1.3/src/commands/keyCreate.ts)_
+
+## `inlang lint`
+
+Download the translations for a specific project.
+
+```
+USAGE
+  $ inlang lint
+
+OPTIONS
+  --adapter=swift|typesafe-i18n|fluent  (required) The adapter used to parse from and to inlang's schema.
+
+  --path-pattern=path-pattern           (required) Where and how the translation files should be saved. You can use
+                                        "{languageCode}" as dynamic value.
+                                        [examples]
+                                        ./translations/{languageCode}.json
+                                        ./{languageCode}/Localizable.strings
+```
+
+_See code: [src/commands/lint.ts](https://github.com/inlang/inlang/blob/v0.1.3/src/commands/lint.ts)_
+
+## `inlang upload`
+
+Download the translations for a specific project.
+
+```
+USAGE
+  $ inlang upload
+
+OPTIONS
+  --adapter=swift|typesafe-i18n|fluent  (required) The adapter used to parse from and to inlang's schema.
+  --apikey=apikey                       (required) The apikey of the project found at https://app.inlang.dev/
+  --force                               Overwrite local translation files regardless of merge conflicts.
+
+  --path-pattern=path-pattern           (required) Where and how the translation files should be saved. You can use
+                                        "{languageCode}" as dynamic value.
+                                        [examples]
+                                        ./translations/{languageCode}.json
+                                        ./{languageCode}/Localizable.strings
+```
+
+_See code: [src/commands/upload.ts](https://github.com/inlang/inlang/blob/v0.1.3/src/commands/upload.ts)_
 <!-- commandsstop -->
