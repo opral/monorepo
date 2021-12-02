@@ -1,35 +1,17 @@
 {
-    "name": "vscode-extension",
+    "name": "inlang-",
     "displayName": "Inlang",
     "description": "Create keys directly in VSCode and send them to inlang.",
     "publisher": "Inlang",
     "repository": "https://github.com/inlang/inlang",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "engines": {
         "vscode": "^1.61.0"
     },
     "categories": [
         "Other"
     ],
-    "activationEvents": [
-        "onCommand:vscode-extension.send"
-    ],
     "main": "./out/extension.js",
-    "contributes": {
-        "commands": [
-            {
-                "command": "vscode-extension.send",
-                "title": "Inlang: Create key"
-            }
-        ],
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "vscode-extension.send"
-                }
-            ]
-        }
-    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
@@ -53,5 +35,12 @@
     },
     "dependencies": {
         "lodash": "^4.17.21"
-    }
+    },
+    "activationEvents": [
+        "onLanguage:javascript",
+        "onLanguage:javascriptreact",
+        "onLanguage:typescript",
+        "onLanguage:typescriptreact",
+        "onLanguage:svelte"
+    ]
 }
