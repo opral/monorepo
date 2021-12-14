@@ -30,16 +30,6 @@ export default class Download extends Command {
   static args = [{ name: 'file' }];
 
   async run(): Promise<void> {
-<<<<<<< HEAD
-    const { args, flags } = this.parse(Hello);
-
-    const name = flags.languageCode ?? 'world';
-
-    this.log(`hello ${name} from ./src/commands/hello.ts`);
-
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`);
-=======
     const { flags } = this.parse(Download);
     const adapter = getAdapter(flags.adapter);
     if (adapter.isErr) throw adapter.error;
@@ -59,7 +49,6 @@ export default class Download extends Command {
       fs.mkdirSync(flags['path-pattern'].split('/').slice(0, -1).join('/'), { recursive: true });
 
       fs.writeFileSync(flags['path-pattern'].replace('{languageCode}', file.languageCode), file.data);
->>>>>>> e883d1ac6e986548736eb5f53da39f68268b256f
     }
   }
 }

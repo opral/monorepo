@@ -23,7 +23,7 @@
     "tslib": "^1.14.1"
   },
   "devDependencies": {
-    "@inlang/common": "file:../common",
+    "@inlang/common": "*",
     "@oclif/dev-cli": "^1.26.3",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.176",
