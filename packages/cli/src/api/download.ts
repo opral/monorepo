@@ -1,5 +1,4 @@
-import { AdapterInterface } from '@inlang/common/src/adapters/index';
-import { Result } from '@inlang/common/src/types/result';
+import { Result, TranslationFile, AdapterInterface } from '@inlang/common';
 
 export function download(args: {
   adapter: AdapterInterface;
