@@ -1,6 +1,6 @@
 import { PrismaClient, member_role } from "@prisma/client";
 import { supabase, mockUser, mockUser2, MockUser } from "../local.config";
-import { definitions } from "../types/definitions";
+import { definitions } from "../src/types/definitions";
 /**
  * Creates a mock user if the user does not exist yet.
  */

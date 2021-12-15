@@ -28,7 +28,7 @@
 		]
 	},
 	"devDependencies": {
-		"@inlang/database": "file:../database",
+		"@inlang/database": "*",
 		"@sveltejs/adapter-vercel": "next",
 		"@sveltejs/eslint-config": "github:sveltejs/eslint-config",
 		"@sveltejs/kit": "1.0.0-next.172",
@@ -73,6 +73,6 @@
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",
 		"svelte-fluttered": "^0.3.0",
-		"@inlang/common": "file:../common"
+		"@inlang/common": "*"
 	}
 }

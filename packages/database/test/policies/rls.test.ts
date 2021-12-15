@@ -1,5 +1,5 @@
 import { supabase } from "../../local.config";
-import { definitions } from "../../types/definitions";
+import { definitions } from "../../src/types/definitions";
 
 describe("row level security is activated", () => {
   test("on user table", async () => {

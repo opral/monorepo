@@ -1,5 +1,5 @@
 import { mockUser, supabase } from "../../local.config";
-import { definitions } from "../../types/definitions";
+import { definitions } from "../../src/types/definitions";
 
 beforeEach(async () => {
   // The user needs to be authorized for the requests.
