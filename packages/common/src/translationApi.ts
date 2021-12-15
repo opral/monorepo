@@ -1,12 +1,12 @@
 import * as fluent from '@fluent/syntax';
 import { Resource, serializeExpression } from '@fluent/syntax';
-import { AdapterInterface } from '../adapters/index';
-import { LanguageCode } from '../types/languageCode';
-import { TranslationFile } from '../types/translationFile';
+import { AdapterInterface } from './adapters/index';
+import { LanguageCode } from './types/languageCode';
+import { TranslationFile } from './types/translationFile';
 import { remove } from 'lodash';
-import { Result } from '../types/result';
+import { Result } from './types/result';
 
-export class TranslationAPI {
+export class TranslationApi {
     resources: { data: Resource; languageCode: LanguageCode }[];
     baseLanguage: LanguageCode;
 
@@ -22,7 +22,7 @@ export class TranslationAPI {
         adapter: AdapterInterface;
         files: TranslationFile[];
         baseLanguage: LanguageCode;
-    }): Result<TranslationAPI, Error> {
+    }): Result<TranslationApi, Error> {
         const resources: { data: Resource; languageCode: LanguageCode }[] = [];
         for (const file of args.files) {
             const parse = args.adapter.parse(file.data);
@@ -36,7 +36,7 @@ export class TranslationAPI {
             }
             resources.push({ languageCode: file.languageCode, data: parse.value });
         }
-        return Result.ok(new TranslationAPI({ resources, baseLanguage: args.baseLanguage }));
+        return Result.ok(new TranslationApi({ resources, baseLanguage: args.baseLanguage }));
     }
 
     doesKeyExist(key: string): boolean {

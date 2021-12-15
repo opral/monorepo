@@ -8,7 +8,7 @@
     "outDir": "dist",
     "removeComments": true,
     "declaration": true,
-    "allowJs": true
+    "allowJs": false
   },
   "include": ["src/**/**.ts", "tests/**/**.ts"]
 }

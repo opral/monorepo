@@ -1,12 +1,10 @@
-import { lastIndexOf } from 'lodash';
 import { FluentAdapter } from '../src/adapters/fluentAdapter';
-import { TranslationAPI } from '../src/fluent/formatter';
-import { TranslationFile } from '../src/types/translationFile';
+import { TranslationApi } from '../src/translationApi';
 
-let translationAPI: TranslationAPI;
+let translationApi: TranslationApi;
 let testVariable;
 beforeEach(() => {
-    const api = TranslationAPI.parse({
+    const api = TranslationApi.parse({
         adapter: new FluentAdapter(),
         files: [
             {
@@ -21,19 +19,19 @@ beforeEach(() => {
     if (api.isErr) {
         fail();
     } else {
-        translationAPI = api.value;
+        translationApi = api.value;
     }
 });
 
 describe('doesKeyExist', () => {
     test('Check if key exists, and it does', () => {
-        expect(translationAPI.doesKeyExist('test')).toBeTruthy();
+        expect(translationApi.doesKeyExist('test')).toBeTruthy();
     });
 });
 
 describe('getTranslation', () => {
     it('should print out the test key', () => {
-        testVariable = translationAPI.getTranslation('test', 'en');
+        testVariable = translationApi.getTranslation('test', 'en');
         if (testVariable.isErr) {
             fail();
         }
@@ -41,7 +39,7 @@ describe('getTranslation', () => {
     });
 
     it('should print out an advanced key', () => {
-        testVariable = translationAPI.getTranslation('complex', 'en');
+        testVariable = translationApi.getTranslation('complex', 'en');
         if (testVariable.isErr) {
             fail();
         }
@@ -51,7 +49,7 @@ describe('getTranslation', () => {
 
 describe('getAllTranslations', () => {
     it('should print out all translations', () => {
-        testVariable = translationAPI.getAllTranslations('test');
+        testVariable = translationApi.getAllTranslations('test');
         if (testVariable.isErr) {
             fail();
         }
@@ -64,18 +62,18 @@ describe('getAllTranslations', () => {
     });
 
     it('should return an error when key does not exist', () => {
-        testVariable = translationAPI.getAllTranslations('unknown-key');
+        testVariable = translationApi.getAllTranslations('unknown-key');
         expect(testVariable.isErr).toBeTruthy();
     });
 });
 
 describe('createKey', () => {
     it('should create a key', () => {
-        testVariable = translationAPI.createKey('new_test', 'here is another translation');
+        testVariable = translationApi.createKey('new_test', 'here is another translation');
         if (testVariable.isErr) {
             fail();
         }
-        testVariable = translationAPI.getTranslation('new_test', 'en');
+        testVariable = translationApi.getTranslation('new_test', 'en');
         if (testVariable.isErr) {
             fail();
         }
@@ -83,30 +81,30 @@ describe('createKey', () => {
     });
 
     it('should fail when key already exists', () => {
-        testVariable = translationAPI.createKey('test', 'this should fail');
+        testVariable = translationApi.createKey('test', 'this should fail');
         expect(testVariable.isErr).toBeTruthy();
     });
 });
 
 describe('deleteKey', () => {
     it('should delete a key', () => {
-        testVariable = translationAPI.deleteKey('test');
+        testVariable = translationApi.deleteKey('test');
         if (testVariable.isErr) {
             fail();
         }
-        testVariable = translationAPI.getTranslation('test', 'en');
+        testVariable = translationApi.getTranslation('test', 'en');
         expect(testVariable.isErr).toBeTruthy();
     });
 
     it('should fail when key is not found', () => {
-        testVariable = translationAPI.deleteKey('asdf');
+        testVariable = translationApi.deleteKey('asdf');
         expect(testVariable.isErr).toBeTruthy();
     });
 });
 
 describe('getAllKeys', () => {
     it('should get all keys', () => {
-        testVariable = translationAPI.getAllKeys();
+        testVariable = translationApi.getAllKeys();
         if (testVariable.isErr) fail();
         expect(testVariable.value).toEqual(['test', 'hello', 'complex', 'extra']);
     });
@@ -114,11 +112,11 @@ describe('getAllKeys', () => {
 
 describe('updateKey', () => {
     it('should update a key', () => {
-        testVariable = translationAPI.updateKey('test', 'why not this instead', 'en');
+        testVariable = translationApi.updateKey('test', 'why not this instead', 'en');
         if (testVariable.isErr) {
             fail();
         }
-        testVariable = translationAPI.getTranslation('test', 'en');
+        testVariable = translationApi.getTranslation('test', 'en');
         if (testVariable.isErr) {
             fail();
         }
@@ -126,21 +124,21 @@ describe('updateKey', () => {
     });
 
     it('should fail when language does not exist', () => {
-        testVariable = translationAPI.updateKey('test', 'this should fail', 'aa');
+        testVariable = translationApi.updateKey('test', 'this should fail', 'aa');
         expect(testVariable.isErr).toBeTruthy();
     });
 
     it('should fail when key is not found', () => {
-        testVariable = translationAPI.updateKey('unknown-key', 'this should fail', 'en');
+        testVariable = translationApi.updateKey('unknown-key', 'this should fail', 'en');
         expect(testVariable.isErr).toBeTruthy();
     });
 
     it('should make an empty translation when undefined', () => {
-        testVariable = translationAPI.updateKey('test', undefined, 'en');
+        testVariable = translationApi.updateKey('test', undefined, 'en');
         if (testVariable.isErr) {
             fail();
         }
-        testVariable = translationAPI.getTranslation('test', 'en');
+        testVariable = translationApi.getTranslation('test', 'en');
         if (testVariable.isErr) {
             fail(testVariable.error);
         }
@@ -150,7 +148,7 @@ describe('updateKey', () => {
 
 describe('checkMissingTranslations', () => {
     it('should check for missing translations', () => {
-        testVariable = translationAPI.checkMissingTranslations();
+        testVariable = translationApi.checkMissingTranslations();
         if (testVariable.isErr) {
             fail();
         }
@@ -160,7 +158,7 @@ describe('checkMissingTranslations', () => {
 
 describe('checkMissingTranslationsForKey', () => {
     it('should check for missing translations when giving a key', () => {
-        testVariable = translationAPI.checkMissingTranslationsForKey('extra');
+        testVariable = translationApi.checkMissingTranslationsForKey('extra');
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toEqual([
             { key: 'extra', languageCode: 'da' },
@@ -169,7 +167,7 @@ describe('checkMissingTranslationsForKey', () => {
     });
 
     it('should return an empty list when there are no missing translations for a key', () => {
-        testVariable = translationAPI.checkMissingTranslationsForKey('test');
+        testVariable = translationApi.checkMissingTranslationsForKey('test');
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toEqual([]);
     });
@@ -181,9 +179,9 @@ describe('checkMissingTranslationsForKey', () => {
             languageCode: 'de',
             data: 'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {$name}',
         };
-        testVariable = translationAPI.updateFile([newFile]);
+        testVariable = translationApi.updateFile([newFile]);
         if (testVariable.isErr) fail(testVariable.error);
-        const fluentFiles = translationAPI.getFluentFiles();
+        const fluentFiles = translationApi.getFluentFiles();
         if (fluentFiles.isErr) fail(fluentFiles.error);
         for (const fluentFile of fluentFiles.value) {
             if (fluentFile.languageCode === 'de') {
@@ -199,7 +197,7 @@ describe('checkMissingTranslationsForKey', () => {
             languageCode: 'de',
             data: '',
         };
-        testVariable = translationAPI.updateFile([newFile]);
+        testVariable = translationApi.updateFile([newFile]);
         expect(testVariable.isErr).toBeTruthy();
     });
 
@@ -208,7 +206,7 @@ describe('checkMissingTranslationsForKey', () => {
             languageCode: 'de',
             data: '',
         };
-        testVariable = translationAPI.updateFile([newFile], { override: true });
+        testVariable = translationApi.updateFile([newFile], { override: true });
         expect(testVariable.isErr).toBeFalsy();
     });
 
@@ -217,14 +215,14 @@ describe('checkMissingTranslationsForKey', () => {
             languageCode: 'de',
             data: 'asd = ',
         };
-        testVariable = translationAPI.updateFile([newFile], { override: true });
+        testVariable = translationApi.updateFile([newFile], { override: true });
         expect(testVariable.isErr).toBeTruthy();
     });
 });*/
 
 describe('getFluentFiles', () => {
     it('should get fluent files correctly', () => {
-        testVariable = translationAPI.serialize(new FluentAdapter());
+        testVariable = translationApi.serialize(new FluentAdapter());
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toEqual([
             {
@@ -239,45 +237,45 @@ describe('getFluentFiles', () => {
 
 describe('doesTranslationExist', () => {
     it('should be able to detect a translations existence', () => {
-        expect(translationAPI.doesTranslationExist('test', 'en')).toBeTruthy;
+        expect(translationApi.doesTranslationExist('test', 'en')).toBeTruthy;
     });
 
     it('should return false when a translation does not exist', () => {
-        expect(translationAPI.doesTranslationExist('extra', 'de')).toBeFalsy;
+        expect(translationApi.doesTranslationExist('extra', 'de')).toBeFalsy;
     });
 });
 
 describe('createTranslation', () => {
     it('should be possible to create a translation', () => {
-        testVariable = translationAPI.createTranslation('extra', 'en nøgle uden oversættelse', 'da');
+        testVariable = translationApi.createTranslation('extra', 'en nøgle uden oversættelse', 'da');
         if (testVariable.isErr) fail(testVariable.error);
-        testVariable = translationAPI.getTranslation('extra', 'da');
+        testVariable = translationApi.getTranslation('extra', 'da');
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toMatch('en nøgle uden oversættelse');
     });
 
     it('should be able to parse an empty translation', () => {
-        testVariable = translationAPI.createTranslation('extra', undefined, 'da');
+        testVariable = translationApi.createTranslation('extra', undefined, 'da');
         if (testVariable.isErr) fail(testVariable.error);
-        testVariable = translationAPI.getTranslation('extra', 'da');
+        testVariable = translationApi.getTranslation('extra', 'da');
         if (testVariable.isErr) fail(testVariable.error);
         expect(testVariable.value).toMatch('');
     });
 
     it('should return an error when translation alreaedy exists', () => {
-        testVariable = translationAPI.createTranslation('extra', 'this should fail', 'en');
+        testVariable = translationApi.createTranslation('extra', 'this should fail', 'en');
         expect(testVariable.isErr).toBeTruthy;
     });
 
     it('should return an error when language is not found', () => {
-        testVariable = translationAPI.createTranslation('extra', 'this should fail', 'aa');
+        testVariable = translationApi.createTranslation('extra', 'this should fail', 'aa');
         expect(testVariable.isErr).toBeTruthy;
     });
 });
 
 describe('checkMissingVariables', () => {
     it('should show missing variables', () => {
-        testVariable = translationAPI.checkMissingTranslations();
+        testVariable = translationApi.checkMissingTranslations();
         if (testVariable.isErr) fail();
         expect(testVariable.value).toEqual([{ key: 'extra', languageCodes: ['da', 'de'] }]);
     });
@@ -285,7 +283,7 @@ describe('checkMissingVariables', () => {
 
 describe('compareVariables', () => {
     it('should compare variables correctly', () => {
-        testVariable = translationAPI.compareVariables(
+        testVariable = translationApi.compareVariables(
             [{ key: 'test', languageCode: 'de', translation: 'dis ist ein {$name}' }],
             { key: 'test', languageCode: 'en', translation: 'this is a name' }
         );
@@ -296,7 +294,7 @@ describe('compareVariables', () => {
 
 describe('serialize', () => {
     it('should serialize a file correctly', () => {
-        testVariable = translationAPI.serialize(new FluentAdapter());
+        testVariable = translationApi.serialize(new FluentAdapter());
         if (testVariable.isErr) fail();
         expect(testVariable.value).toEqual([
             {
