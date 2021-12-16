@@ -23,6 +23,7 @@ interface ProjectStoreInterface {
 	error: PostgrestError | Error | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createProjectStore() {
 	const { subscribe, update, set } = writable<ProjectStoreInterface>({
 		data: null,
@@ -32,7 +33,7 @@ function createProjectStore() {
 	return {
 		subscribe,
 		set,
-		getData: (args: GetDataArgs) => getData(args, update)
+		getData: (args: GetDataArgs): Promise<void> => getData(args, update)
 	};
 }
 

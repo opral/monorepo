@@ -9,6 +9,7 @@ interface UserStoreInterface {
 	data: Readonly<User | undefined>;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createUserStore() {
 	const { subscribe, set } = writable<UserStoreInterface>({
 		data: auth.user() ?? undefined

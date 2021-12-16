@@ -1,8 +1,8 @@
 module.exports = {
 	root: true,
 	parser: '@typescript-eslint/parser',
-	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-	plugins: ['svelte3', '@typescript-eslint', 'unicorn'],
+	extends: ['@inlang/eslint-config'],
+	plugins: ['svelte3'],
 	ignorePatterns: ['*.cjs', '.svelte-kit/**', '.vercel/**', '.vercel_build_output/**'],
 	overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
 	settings: {
@@ -11,16 +11,6 @@ module.exports = {
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2019
-	},
-	rules: {
-		'unicorn/no-array-for-each': 'error',
-		'unicorn/prefer-spread': 'warn',
-		'unicorn/prefer-array-find': 'error',
-		'unicorn/prefer-array-flat': 'error',
-		'unicorn/prefer-array-flat-map': 'error',
-		'unicorn/prefer-array-index-of': 'error',
-		'unicorn/prefer-array-some': 'error',
-		'unicorn/no-null': 'error'
 	},
 	env: {
 		browser: true,

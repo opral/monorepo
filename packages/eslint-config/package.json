@@ -1,23 +1,16 @@
 {
-  "name": "@inlang/config",
-  "version": "0.0.0",
+  "name": "@inlang/eslint-config",
   "main": "index.js",
   "private": true,
-  "files": [
-    "eslint",
-    "tsconfig"
-  ],
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf node_modules"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.22",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-unicorn": "^38.0.1",
-    "jest": "^26.6.3",
     "prettier": "^2.2.1"
   },
   "dependencies": {}

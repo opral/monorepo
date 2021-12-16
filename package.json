@@ -9,6 +9,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "clean": "turbo run clean",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
@@ -29,11 +30,14 @@
           ".next/**"
         ]
       },
-      "lint": {
-        "outputs": []
-      },
       "dev": {
         "cache": false
+      },
+      "clean": {
+        "cache": false
+      },
+      "lint": {
+        "outputs": []
       },
       "test": {
         "outputs": []

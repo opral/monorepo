@@ -5,5 +5,5 @@
     "node": true
   },
   "parser": "@typescript-eslint/parser",
-  "extends": ["@inlang/config/eslint"]
+  "extends": ["@inlang/eslint-config"]
 }
