@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import { LanguageCode } from '@inlang/common';
 	import ISO6391 from 'iso-639-1';
 	import { projectStore } from '$lib/stores/projectStore';
 

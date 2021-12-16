@@ -1,8 +1,7 @@
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { TranslationApi, LanguageCode } from '@inlang/common';
 import { Command, flags } from '@oclif/command';
 import * as fs from 'fs';
 import { getAdapter } from '../lib/adapter';
-import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
 export default class keyCreate extends Command {
   static description = 'Download the translations for a specific project.';

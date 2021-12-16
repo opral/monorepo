@@ -5,7 +5,7 @@
 	import { Tab, Tabs, TabContent, Button, Tile, Loading } from 'carbon-components-svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import { Result } from '@inlang/common/src/types/result';
+	import { Result } from '@inlang/common';
 	import type { definitions } from '@inlang/database';
 	import type { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';

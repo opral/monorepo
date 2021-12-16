@@ -2,8 +2,7 @@ import { Command, flags } from '@oclif/command';
 import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';
 import { upload } from '../api/upload';
-import { LanguageCode } from '@inlang/common/src/types/languageCode';
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { LanguageCode, TranslationApi } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 export default class Upload extends Command {
@@ -45,7 +44,7 @@ export default class Upload extends Command {
       }
     }
 
-    const translationAPI = TranslationAPI.parse({
+    const translationAPI = TranslationApi.parse({
       adapter: adapter.value,
       baseLanguage: 'en',
       files: translationFiles,

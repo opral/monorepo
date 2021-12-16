@@ -1,9 +1,8 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
-import type { TranslationFile } from '@inlang/common/src/types/translationFile';
+import type { TranslationFile, LanguageCode } from '@inlang/common';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
-import { LanguageCode } from '@inlang/common/src/types/languageCode';
 
 export type TranslateRequestBody = {
 	// yeah yeah don't put the api key in the body

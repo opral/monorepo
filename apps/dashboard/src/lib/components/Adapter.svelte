@@ -18,7 +18,7 @@
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
 	import { AdapterInterface } from '@inlang/common/src/adapters';
-	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+	import { TranslationApi } from '@inlang/common';
 	import ISO6391 from 'iso-639-1';
 
 	export let project: definitions['project'];
@@ -109,7 +109,7 @@
 			adapter = new Typesafei18nAdapter();
 		}
 		//create and parse
-		const api = TranslationAPI.parse({
+		const api = TranslationApi.parse({
 			adapter: adapter,
 			files: [
 				{
@@ -169,7 +169,7 @@
 			// Typesafei18n
 			adapter = new Typesafei18nAdapter();
 		}
-		const api = TranslationAPI.parse({
+		const api = TranslationApi.parse({
 			adapter: new FluentAdapter(),
 			files: [
 				{
@@ -279,21 +279,9 @@
 				/>
 			{/if}
 		{:else}
-<<<<<<< HEAD
 			<div style="height:40rem;overflow:auto;">
-				<p class="text-xs text-gray-600 mb-2">
-					Exported translations
-				</p>
-				<CodeSnippet 
-					type="multi"
-					expanded={true}
-					code={exportedCode} 
-				/>
-=======
-			<div style="height:40rem;overflow:auto">
 				<p class="text-xs text-gray-600 mb-2">Exported translations</p>
-				<CodeSnippet type="multi" code={exportedCode} />
->>>>>>> e883d1ac6e986548736eb5f53da39f68268b256f
+				<CodeSnippet type="multi" expanded={true} code={exportedCode} />
 			</div>
 		{/if}
 	</column>

@@ -16,10 +16,9 @@
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
 	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
 	import Translations from '$lib/components/Translations.svelte';
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import { LanguageCode } from '@inlang/common';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Language16 from 'carbon-icons-svelte/lib/Language16';
-	import TranslationRow from '$lib/components/modals/TranslationRow.svelte';
 
 	const headers = [
 		{ key: 'id', value: 'Key' },

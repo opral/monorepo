@@ -1,5 +1,4 @@
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
-import { LanguageCode } from '@inlang/common/src/types/languageCode';
+import { TranslationApi, LanguageCode } from '@inlang/common';
 import { flags, Command } from '@oclif/command';
 import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';

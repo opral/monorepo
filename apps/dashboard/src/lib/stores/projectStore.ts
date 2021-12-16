@@ -1,10 +1,10 @@
-import type { definitions } from '../../../../database';
+import type { definitions } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { TranslationApi } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
-import { Result } from '@inlang/common/src/types/result';
+import { Result } from '@inlang/common';
 
 /**
  * Bundles project related information regarding one project tightly together in
@@ -18,7 +18,7 @@ interface ProjectStoreInterface {
 	data: null | {
 		project: definitions['project'];
 		languages: definitions['language'][];
-		translations: TranslationAPI;
+		translations: TranslationApi;
 	};
 	error: PostgrestError | Error | null;
 }
@@ -57,7 +57,7 @@ async function getData(
 		.match({ project_id: args.projectId })
 		.order('iso_code', { ascending: true });
 
-	const translations: Result<TranslationAPI, Error> = TranslationAPI.parse({
+	const translations: Result<TranslationApi, Error> = TranslationApi.parse({
 		adapter: new FluentAdapter(),
 		files:
 			languages.data?.map((language) => ({

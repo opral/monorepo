@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tag, Toggle, TextInput, Button, TextArea, ButtonSet } from 'carbon-components-svelte';
+	import { Tag, Button, TextArea } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
@@ -7,8 +7,7 @@
 	import { cloneDeep, isEqual } from 'lodash-es';
 	import ISO6391 from 'iso-639-1';
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
-	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+	import { LanguageCode } from '@inlang/common';
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 	export let translation: Readonly<{
@@ -24,7 +23,7 @@
 
 	$: getError = () => {
 		if (translationCopy.translation === '') return 'Missing translation';
-		if (Object.keys(missingVariables).find((language) => language === translationCopy.languageCode))
+		if (Object.keys(missingVariables).some((language) => language === translationCopy.languageCode))
 			return (
 				missingVariables[translationCopy.languageCode].variable +
 				missingVariables[translationCopy.languageCode].error

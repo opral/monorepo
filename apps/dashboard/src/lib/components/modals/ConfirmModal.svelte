@@ -18,7 +18,7 @@
 
 <script lang="ts">
 	import { Modal, TextInput } from 'carbon-components-svelte';
-	import { Result } from '@inlang/common/src/types/result';
+	import { Result } from '@inlang/common';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 	import { withUxTimeout } from '$lib/utils/withUxTimeout';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';

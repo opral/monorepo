@@ -4,7 +4,7 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { createEventDispatcher } from 'svelte';
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import { LanguageCode } from '@inlang/common';
 
 	export let open = false;
 	export let key = '';

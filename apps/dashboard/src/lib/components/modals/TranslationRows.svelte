@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Tag, Toggle, TextInput, Button } from 'carbon-components-svelte';
+	import { Tag, TextInput, Button } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { page } from '$app/stores';
 
 	import Checkmark32 from 'carbon-icons-svelte/lib/Checkmark32';
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
+	import { LanguageCode } from '@inlang/common';
 	// is a string but the consuming component passes it down as any
 	// eslint-disable-next-line
 

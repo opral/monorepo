@@ -2,7 +2,7 @@ import { Command, flags } from '@oclif/command';
 import { download } from '../api/download';
 import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { TranslationApi } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 export default class Download extends Command {
@@ -36,7 +36,7 @@ export default class Download extends Command {
 
     const result = await download({ adapter: adapter.value, apiKey: flags.apikey });
     if (result.isErr) throw result.error;
-    const translationAPI = TranslationAPI.parse({
+    const translationAPI = TranslationApi.parse({
       adapter: new FluentAdapter(),
       files: result.value,
       baseLanguage: 'en',

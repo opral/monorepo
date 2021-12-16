@@ -4,9 +4,8 @@ import { DeeplLanguages } from 'deepl';
 import { definitions } from '@inlang/database';
 import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
 import { TranslateRequestBody, TranslateResponseBody } from './translate';
-import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
+import { TranslationApi, Result } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
-import { Result } from '@inlang/common/src/types/result';
 
 /**
  * This endpoint uses the base translation to create machine translations
@@ -61,7 +60,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			.select()
 			.match({ project_id: requestBody.projectId });
 
-		const translations: Result<TranslationAPI, Error> = TranslationAPI.parse({
+		const translations: Result<TranslationApi, Error> = TranslationApi.parse({
 			adapter: new FluentAdapter(),
 			files:
 				languages.data?.map((language) => ({

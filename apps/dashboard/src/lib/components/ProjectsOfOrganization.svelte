@@ -17,7 +17,7 @@
 	import { database } from '$lib/services/database';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import ConfirmModal, { defaultConfirmModalText } from './modals/ConfirmModal.svelte';
-	import { Result } from '@inlang/common/src/types/result';
+	import { Result } from '@inlang/common';
 
 	export let organization: definitions['organization'];
 

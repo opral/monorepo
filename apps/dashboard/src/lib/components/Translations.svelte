@@ -2,11 +2,7 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import TranslationRow from './modals/TranslationRow.svelte';
 	import ISO6391 from 'iso-639-1';
-	import { cloneDeep } from 'lodash-es';
-	import { LanguageCode } from '@inlang/common/src/types/languageCode';
-	import TranslationModal from './modals/TranslationModal.svelte';
-	import { TranslationAPI } from '@inlang/common/src/fluent/formatter';
-	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+	import { LanguageCode } from '@inlang/common';
 
 	// is a string but the consuming component passes it down as any
 	export let keyName: string;

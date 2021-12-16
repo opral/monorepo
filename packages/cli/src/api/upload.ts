@@ -1,6 +1,4 @@
-import { AdapterInterface } from '@inlang/common/src/adapters/index';
-import type { TranslationFile } from '@inlang/common/src/types/translationFile';
-import { Result } from '@inlang/common/src/types/result';
+import { TranslationFile, Result, AdapterInterface } from '@inlang/common';
 import fetch from 'node-fetch';
 
 export async function upload(args: {
