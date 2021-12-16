@@ -41,7 +41,7 @@ export default class Lint extends Command {
       }
     }
 
-    const translationAPI = TranslationAPI.parse({
+    const translationAPI = TranslationApi.parse({
       adapter: adapter.value,
       baseLanguage: 'en',
       files: translationFiles,

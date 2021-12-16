@@ -29,6 +29,11 @@ export default class Upload extends Command {
   };
 
   async run(): Promise<void> {
+    const x = ['hello'];
+
+    x.forEach((x) => {
+      console.log(x);
+    });
     const { flags } = this.parse(Upload);
     const adapter = getAdapter(flags.adapter);
     if (adapter.isErr) throw adapter.error;

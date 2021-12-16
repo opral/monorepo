@@ -46,7 +46,7 @@ export default class keyCreate extends Command {
       }
     }
 
-    const translationAPI = TranslationAPI.parse({
+    const translationAPI = TranslationApi.parse({
       adapter: adapter.value,
       baseLanguage: flags.baseLanguage as LanguageCode,
       files: translationFiles,

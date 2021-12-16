@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@inlang/common": "*",
+    "@inlang/config": "*",
     "@oclif/dev-cli": "^1.26.3",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.176",
