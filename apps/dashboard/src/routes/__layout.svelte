@@ -9,17 +9,9 @@
 	import { goto } from '$app/navigation';
 	import UiShell from '$lib/layout/UiShell.svelte';
 	import { page } from '$app/stores';
-	import Tracker from '@openreplay/tracker';
-	import { openreplayKey } from '$lib/services/replay';
 	import { InlineNotification } from 'carbon-components-svelte';
 
-	const tracker = new Tracker({ projectKey: openreplayKey });
-
 	export async function load({ page }: LoadInput): Promise<LoadOutput> {
-		if (tracker.isActive() === false) {
-			tracker.start();
-			tracker.setUserID(auth.user()?.email ?? 'Not logged in');
-		}
 		const user = auth.user();
 		// includes('auth') ensures that subroutes within /auth do not
 		// lead to constant redirects
@@ -43,7 +35,6 @@
 	if (browser) {
 		auth.onAuthStateChange((event) => {
 			if (event === 'SIGNED_IN') {
-				tracker.setUserID(auth.user()?.email ?? 'Unknown');
 				goto('/');
 			} else if (event === 'SIGNED_OUT') {
 				goto('/auth');
