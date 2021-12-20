@@ -60,14 +60,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@inlang/common": "*",
 		"@now/build-utils": "^2.7.0",
-		"@openreplay/tracker": "^3.4.5",
 		"@supabase/supabase-js": "^1.23.0",
 		"deepl": "^1.0.12",
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",
-		"svelte-fluttered": "^0.3.0",
-		"@inlang/common": "*"
+		"svelte-fluttered": "^0.3.0"
 	}
 }
