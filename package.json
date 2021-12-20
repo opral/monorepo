@@ -8,8 +8,9 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
-    "clean": "turbo run clean",
+    "predev": "npm run start -w @inlang/database",
+    "dev": "trap 'exit 0' SIGINT; turbo run dev --parallel",
+    "postdev": "npm run stop -w @inlang/database",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
@@ -31,9 +32,6 @@
         ]
       },
       "dev": {
-        "cache": false
-      },
-      "clean": {
         "cache": false
       },
       "lint": {
