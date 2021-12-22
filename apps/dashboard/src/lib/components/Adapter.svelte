@@ -26,6 +26,8 @@
 	export let title = 'Import';
 	export let details = 'Select adapter and human language then import your current translations';
 
+	// TODO this whole file should be refactored. Bad coding style.
+
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
 	let isLoading = false;
@@ -47,20 +49,20 @@
 		selectedAdapterIndex >= 0 &&
 		importText.length > 0;
 
-	function handleButtonClick() {
+	function handleButtonClick(): void {
 		isImport ? handleImport() : handleExport();
 	}
 
-	function getFileForLanguageIso(iso: string) {
-		for (let i = 0; i < languages.length; i++) {
-			if (languages[i].iso_code === iso && languages[i].file.length > 0) {
-				return languages[i].file;
+	function getFileForLanguageIso(iso: string): string {
+		for (const language of languages) {
+			if (language.iso_code === iso && language.file.length > 0) {
+				return language.file;
 			}
 		}
 		return '';
 	}
 
-	async function getLanguages() {
+	async function getLanguages(): Promise<void> {
 		const selectLanguages = await database
 			.from<definitions['language']>('language')
 			.select()
@@ -73,10 +75,11 @@
 		}
 	}
 
-	function tryParse(text: string, adapterIndex: number) {
+	function tryParse(text: string, adapterIndex: number): string {
 		if (text.length === 0) return '';
 		let parsed;
 		let adapter: AdapterInterface;
+		// eslint-disable-next-line unicorn/prefer-switch
 		if (adapterIndex === 0) {
 			adapter = new SwiftAdapter();
 		} else if (adapterIndex === 1) {
@@ -93,7 +96,7 @@
 		return '';
 	}
 
-	async function handleImport() {
+	async function handleImport(): Promise<void> {
 		success = false;
 		isLoading = true;
 		let adapter: AdapterInterface;
@@ -136,11 +139,11 @@
 					};
 				});
 				let hasUpsertError;
-				for (let i = 0; i < languagesToUpsert.length; i++) {
+				for (const element of languagesToUpsert) {
 					let upsert = await database
 						.from<definitions['language']>('language')
-						.update({ file: languagesToUpsert[i].file })
-						.match({ project_id: project.id, iso_code: languagesToUpsert[i].iso_code });
+						.update({ file: element.file })
+						.match({ project_id: project.id, iso_code: element.iso_code });
 					if (upsert.error) {
 						hasUpsertError = true;
 						alert(upsert.error.message);
@@ -156,7 +159,7 @@
 		isLoading = false;
 	}
 
-	function handleExport() {
+	function handleExport(): void {
 		isLoading = true;
 		let adapter: AdapterInterface;
 		if (selectedAdapterIndex === 0) {
@@ -200,7 +203,7 @@
 	<column class="space-y-10 w-80">
 		<Dropdown
 			class="w-fill"
-			titleText="Select adapter"
+			titleText="Select an adapter"
 			bind:selectedIndex={selectedAdapterIndex}
 			items={adapters.map((adapter, index) => ({
 				id: '' + index,
@@ -208,17 +211,7 @@
 			}))}
 		/>
 		<div>
-			<p class="text-xs text-gray-600 mb-2">
-				Select human language or
-				<button
-					class="text-blue-600 underline"
-					on:click={() => {
-						createLanguageModal.show = true;
-					}}
-				>
-					create new language
-				</button>
-			</p>
+			<p class="text-xs text-gray-600 mb-2">Select a human language</p>
 			<div style="height:30em; overflow: auto">
 				<TileGroup bind:selected={selectedLanguageIso}>
 					{#if languages !== undefined}
