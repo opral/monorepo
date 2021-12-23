@@ -3,10 +3,14 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 
-	export function show(args: { user: definitions['user'], organization: definitions["organization"], onUserDeleted: () => void }): void {
+	export function show(args: {
+		user: definitions['user'];
+		organization: definitions['organization'];
+		onUserDeleted: () => void;
+	}): void {
 		user = args.user;
-		organization = args.organization
-		onUserDeleted = args.onUserDeleted
+		organization = args.organization;
+		onUserDeleted = args.onUserDeleted;
 		open = true;
 	}
 
@@ -14,18 +18,18 @@
 		open = false;
 	}
 
-	let onUserDeleted: () => void
+	let onUserDeleted: () => void;
 	let user: definitions['user'] | undefined;
-    let organization: definitions['organization'] | undefined;
+	let organization: definitions['organization'] | undefined;
 	let open = false;
 
-	async function deleteMember() {
+	async function deleteMember(): Promise<void> {
 		if (organization === undefined || user === undefined) {
 			if (organization === undefined) {
-				console.log("organization is undefined");
+				console.log('organization is undefined');
 			}
 			if (user === undefined) {
-				console.log("user is undefined")
+				console.log('user is undefined');
 			}
 			return;
 		}
@@ -37,7 +41,7 @@
 		if (deleteRequest.error) {
 			alert(deleteRequest.error.message);
 		} else {
-			onUserDeleted()
+			onUserDeleted();
 		}
 		open = false;
 	}
