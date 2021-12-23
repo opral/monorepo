@@ -1,6 +1,15 @@
-# inlang-vscode-extension
+# ABANDONED FOR NOW
 
-Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. Don't (ab)use excel spreadsheets to manage translations, or modify JSON files manually. With inlang you get collaboration, type safety, machine translations and automatic sync in one tight package.
+The VSCode extension will come back but for now we will focus on the core product: the dashboard.
+
+Open questions:
+
+-   it needs to be configured. We opted for a json file in the source code similar to eslint etc. but is that ideal?
+-   the wrapping pattern needs to adopt to different environments within one project e.g. the wrapping pattern for markup differs from scripts. Which architecture works across different envs?
+
+As long as the questions above are not eloborated, the extension is on hold.
+
+---
 
 The VSCode extension adds a "Send to inlang" command to the context menu. The command automatically sends the selected text/string as base translation to the inlang dashboard together with the key.
 
