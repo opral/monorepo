@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-interface */
-/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable unicorn/no-abusive-eslint-disable */
+/* eslint-disable */
 
 // Code from https://github.com/badrap/result
 
