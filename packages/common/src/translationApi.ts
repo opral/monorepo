@@ -43,8 +43,8 @@ export class TranslationApi {
         for (const resource of this.resources) {
             if (resource.languageCode === this.baseLanguage) {
                 for (const entry of resource.data.body) {
-                    if (entry.type === 'Message') {
-                        if (entry.id.name === key) return true;
+                    if (entry.type === 'Message' && entry.id.name === key) {
+                        return true;
                     }
                 }
             }
@@ -70,6 +70,7 @@ export class TranslationApi {
         if (translation.value === null) return Result.ok('');
         let out = '';
         for (const element of translation.value.elements) {
+            // eslint-disable-next-line unicorn/prefer-ternary
             if (element.type === 'Placeable') {
                 out += '{' + serializeExpression(element.expression) + '}';
             } else {
@@ -124,9 +125,8 @@ export class TranslationApi {
         }
         if (removedElements === 0) {
             return Result.err(Error('Key not found'));
-        } else {
-            return Result.ok(undefined);
         }
+        return Result.ok(undefined);
     }
 
     getAllKeys(): Result<string[], Error> {
@@ -173,11 +173,9 @@ export class TranslationApi {
                         for (const resource of this.resources) {
                             let isTranslatedInLanguage = false;
                             for (const entry of resource.data.body) {
-                                if (entry.type === 'Message') {
-                                    if (entry.id.name === baseEntry.id.name) {
-                                        isTranslatedInLanguage = true;
-                                        break;
-                                    }
+                                if (entry.type === 'Message' && entry.id.name === baseEntry.id.name) {
+                                    isTranslatedInLanguage = true;
+                                    break;
                                 }
                             }
                             if (isTranslatedInLanguage === false) {
@@ -239,8 +237,8 @@ export class TranslationApi {
         for (const resource of this.resources) {
             if (resource.languageCode === languageCode) {
                 for (const entry of resource.data.body) {
-                    if (entry.type === 'Message') {
-                        if (entry.id.name === key) return true;
+                    if (entry.type === 'Message' && entry.id.name === key) {
+                        return true;
                     }
                 }
                 break;
@@ -276,7 +274,7 @@ export class TranslationApi {
                     if (baseEntry.type === 'Message') {
                         const basePlaceables = [];
                         if (baseEntry.value === null) return Result.err(Error('Base entry value null'));
-                        for (const baseElement of baseEntry.value?.elements) {
+                        for (const baseElement of baseEntry.value.elements) {
                             if (baseElement.type === 'Placeable') {
                                 basePlaceables.push(serializeExpression(baseElement.expression));
                             }
@@ -284,48 +282,46 @@ export class TranslationApi {
                         for (const resource of this.resources) {
                             if (baseResource.languageCode === resource.languageCode) continue;
                             for (const entry of resource.data.body) {
-                                if (entry.type === 'Message') {
-                                    if (entry.id.name === baseEntry.id.name) {
-                                        const placeables = [];
-                                        if (entry.value === null) return Result.err(Error('Entry value null'));
-                                        for (const element of entry.value?.elements) {
-                                            if (element.type === 'Placeable') {
-                                                placeables.push(serializeExpression(element.expression));
-                                            }
+                                if (entry.type === 'Message' && entry.id.name === baseEntry.id.name) {
+                                    const placeables = [];
+                                    if (entry.value === null) return Result.err(Error('Entry value null'));
+                                    for (const element of entry.value.elements) {
+                                        if (element.type === 'Placeable') {
+                                            placeables.push(serializeExpression(element.expression));
                                         }
-                                        for (const basePlaceable of basePlaceables) {
-                                            let match = false;
-                                            for (const placeable of placeables) {
-                                                if (placeable === basePlaceable) {
-                                                    match = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (match === false) {
-                                                result.push({
-                                                    key: entry.id.name,
-                                                    missingFromBaseTranslation: false,
-                                                    variable: basePlaceable,
-                                                    languageCode: resource.languageCode,
-                                                });
-                                            }
-                                        }
+                                    }
+                                    for (const basePlaceable of basePlaceables) {
+                                        let match = false;
                                         for (const placeable of placeables) {
-                                            let match = false;
-                                            for (const basePlaceable of basePlaceables) {
-                                                if (placeable === basePlaceable) {
-                                                    match = true;
-                                                    break;
-                                                }
+                                            if (placeable === basePlaceable) {
+                                                match = true;
+                                                break;
                                             }
-                                            if (match === false) {
-                                                result.push({
-                                                    key: entry.id.name,
-                                                    missingFromBaseTranslation: true,
-                                                    variable: placeable,
-                                                    languageCode: resource.languageCode,
-                                                });
+                                        }
+                                        if (match === false) {
+                                            result.push({
+                                                key: entry.id.name,
+                                                missingFromBaseTranslation: false,
+                                                variable: basePlaceable,
+                                                languageCode: resource.languageCode,
+                                            });
+                                        }
+                                    }
+                                    for (const placeable of placeables) {
+                                        let match = false;
+                                        for (const basePlaceable of basePlaceables) {
+                                            if (placeable === basePlaceable) {
+                                                match = true;
+                                                break;
                                             }
+                                        }
+                                        if (match === false) {
+                                            result.push({
+                                                key: entry.id.name,
+                                                missingFromBaseTranslation: true,
+                                                variable: placeable,
+                                                languageCode: resource.languageCode,
+                                            });
                                         }
                                     }
                                 }
