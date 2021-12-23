@@ -29,7 +29,7 @@
 		loading = false;
 	});
 
-	async function loadOrganizations() {
+	async function loadOrganizations(): Promise<void> {
 		organizations = await database
 			.from<definitions['organization']>('organization')
 			.select()
@@ -40,7 +40,7 @@
 
 	// on first registration, the user has no organizations. We create one automatically
 	// for better UX.
-	async function createOrganizationIfNotExists() {
+	async function createOrganizationIfNotExists(): Promise<void> {
 		if (organizations.data?.length === 0 ?? true) {
 			const response = await database.from<definitions['organization']>('organization').insert([
 				{
@@ -59,7 +59,9 @@
 		}
 	}
 
-	async function deleteOrganization(id: definitions['organization']['id']) {
+	async function deleteOrganization(
+		id: definitions['organization']['id']
+	): Promise<Result<void, Error>> {
 		const result = await database
 			.from<definitions['organization']>('organization')
 			.delete()
@@ -116,9 +118,7 @@
 									message: defaultConfirmModalText.delete.organization.message,
 									danger: true,
 									requireTypingOf: organization.name,
-									onConfirm: async () => {
-										return await deleteOrganization(organization.id);
-									}
+									onConfirm: () => deleteOrganization(organization.id)
 								});
 							}}
 						>

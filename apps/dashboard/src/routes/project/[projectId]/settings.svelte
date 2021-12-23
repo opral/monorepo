@@ -13,7 +13,7 @@
 
 	let deleteProjectModal: DeleteProjectModal;
 
-	async function renameProject() {
+	async function renameProject(): Promise<void> {
 		const response = await database
 			.from<definitions['project']>('project')
 			.update({ name: projectName })
@@ -25,7 +25,7 @@
 		}
 	}
 
-	function handleDeleteProjectClick() {
+	function handleDeleteProjectClick(): void {
 		const project = $projectStore.data?.project;
 		if (project === undefined) {
 			alert('Error 39jf-9jsa');
@@ -63,6 +63,5 @@
 			>Delete this project</Button
 		>
 	</Tile>
-
 	<DeleteProjectModal bind:this={deleteProjectModal} />
 </div>
