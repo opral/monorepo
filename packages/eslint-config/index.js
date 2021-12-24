@@ -12,6 +12,8 @@ module.exports = {
     "unicorn/new-for-builtins": "off",
     "unicorn/no-useless-undefined": "off",
     "unicorn/filename-case": "off",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/throw-new-error": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {

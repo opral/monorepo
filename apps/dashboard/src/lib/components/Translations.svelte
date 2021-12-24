@@ -26,7 +26,7 @@
 		for (const key of missingTranslations.value) {
 			out.push({ key: key.key, languageCode: key.languageCode, translation: undefined });
 		}
-		return out.concat(translationsForKey());
+		return [...out, ...translationsForKey()];
 	};
 
 	$: rows = () => {
@@ -62,7 +62,7 @@
 		key: string;
 		languageCode: LanguageCode;
 		translation: string | undefined;
-	}[] = new Array(translations?.value.length);
+	}[] = [];
 </script>
 
 {#each rows() as row, i}

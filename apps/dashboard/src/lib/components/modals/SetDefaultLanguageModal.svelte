@@ -14,7 +14,7 @@
 
 	let status: InlineLoadingProps['status'] = 'inactive';
 
-	async function handleConfirm() {
+	async function handleConfirm(): Promise<void> {
 		status = 'active';
 		const update = await database
 			.from<definitions['project']>('project')

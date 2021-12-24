@@ -61,7 +61,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		};
 	}
 	const machineTranslation: DeeplResponse = await response.json();
-	if (machineTranslation.translations.length < 1) {
+	if (machineTranslation.translations.length === 0) {
 		return {
 			status: 500
 		};

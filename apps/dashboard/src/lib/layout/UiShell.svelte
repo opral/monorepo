@@ -32,7 +32,7 @@
 		return '';
 	};
 
-	async function handleLogout() {
+	async function handleLogout(): Promise<void> {
 		try {
 			const { error } = await auth.signOut();
 			if (error) {

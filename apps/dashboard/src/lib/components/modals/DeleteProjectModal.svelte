@@ -17,7 +17,7 @@
 	let onDeletion: () => unknown;
 	let open = false;
 
-	async function deleteProject() {
+	async function deleteProject(): Promise<void> {
 		const deleteRequest = await database
 			.from<definitions['project']>('project')
 			.delete()

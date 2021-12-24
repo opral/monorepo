@@ -27,7 +27,7 @@
 
 	$: inputIsValidEmail = isValidEmail(inputEmail);
 
-	async function handleInviteUser() {
+	async function handleInviteUser(): Promise<void> {
 		const userId = await database
 			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
 			.single();

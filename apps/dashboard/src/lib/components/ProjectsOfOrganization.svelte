@@ -34,7 +34,7 @@
 		await loadProjects();
 	});
 
-	async function loadProjects() {
+	async function loadProjects(): Promise<void> {
 		isLoading = true;
 		projects = await database.from<definitions['project']>('project').select().order('name');
 		if (projects.error) {

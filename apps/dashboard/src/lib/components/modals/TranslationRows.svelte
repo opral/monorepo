@@ -7,8 +7,8 @@
 
 	import Checkmark32 from 'carbon-icons-svelte/lib/Checkmark32';
 	import { LanguageCode } from '@inlang/common';
+	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	// is a string but the consuming component passes it down as any
-	// eslint-disable-next-line
 
 	export let translation: { key: string; translation: string; languageCode: LanguageCode };
 
@@ -29,17 +29,18 @@
 		}
 	}*/
 
-	async function handleChangeTranslationClick(
-		translation: { key: string; translation: string; languageCode: LanguageCode },
-		newTranslation: string
-	) {
+	async function handleChangeTranslationClick(translation: {
+		key: string;
+		translation: string;
+		languageCode: LanguageCode;
+	}): Promise<void> {
 		$projectStore.data?.translations.updateKey(
 			translation.key,
 			translation.translation,
 			translation.languageCode
 		);
 		if ($projectStore.data === null) throw 'Projectstore not initialized';
-		const fluentFiles = $projectStore.data.translations.getFluentFiles();
+		const fluentFiles = $projectStore.data.translations.serialize(new FluentAdapter());
 		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
 		let query;
 		for (const fluentFile of fluentFiles.value) {
@@ -82,7 +83,7 @@
 		iconDescription="Change the translation"
 		icon={Checkmark32}
 		kind="ghost"
-		on:click={() => handleChangeTranslationClick(translation, translation.translation)}
+		on:click={() => handleChangeTranslationClick(translation)}
 	/>
 	<!-- </row> -->
 

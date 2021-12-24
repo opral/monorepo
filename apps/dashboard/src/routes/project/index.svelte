@@ -20,7 +20,7 @@
 
 	let createProjectModal: CreateProjectModal;
 
-	let showCreateProjectModalIfOrganizationExists = async () => {
+	async function showCreateProjectModalIfOrganizationExists(): Promise<void> {
 		if (organizations.data?.length === 0 ?? true) {
 			const response = await database.from<definitions['organization']>('organization').insert([
 				{
@@ -34,7 +34,7 @@
 		}
 		organizations = await database.from<definitions['organization']>('organization').select();
 		createProjectModal.show({ onProjectCreated: loadProjects });
-	};
+	}
 
 	let isLoading = true;
 	let selectedOrgId: string | null = $page.query.get('organization');
@@ -55,7 +55,7 @@
 		isLoading = false;
 	});
 
-	async function loadProjects() {
+	async function loadProjects(): Promise<void> {
 		projects = await database.from<definitions['project']>('project').select().order('name');
 		if (projects.error) {
 			alert(projects.error);

@@ -67,7 +67,6 @@
 
 	let projectNameElement: HTMLInputElement;
 
-	
 	// eslint-disable-next-line unicorn/no-null
 	let organizations: DatabaseResponse<definitions['organization'][]> = { data: null, error: null };
 
@@ -120,7 +119,7 @@
 	};
 
 	// helper function
-	function allLanguagesWithCode() {
+	function allLanguagesWithCode(): { id: string; text: string }[] {
 		return ISO6391.getLanguages(ISO6391.getAllCodes()).map((language) => ({
 			id: language.code,
 			text: `${language.name} - ${language.code}`
@@ -141,7 +140,7 @@
 		return false;
 	};
 
-	async function loadOrganizationsAndProjects() {
+	async function loadOrganizationsAndProjects(): Promise<void> {
 		organizations = await database.from<definitions['organization']>('organization').select();
 		projects = await database.from<definitions['project']>('project').select();
 		if (organizations.error) {
@@ -154,7 +153,7 @@
 		}
 	}
 
-	async function handleCreateProject() {
+	async function handleCreateProject(): Promise<void> {
 		confirmIsLoading = true;
 		if (organizationId === undefined || organizationIdIsValidInput === false) {
 			alert('The chosen organization is not valid.');

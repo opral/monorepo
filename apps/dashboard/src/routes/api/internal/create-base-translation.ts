@@ -92,12 +92,12 @@ export async function post(request: Request): Promise<EndpointOutput> {
 		) ?? []) {
 			promises.push(
 				(async () => {
-					let text: string | null = null;
+					let text: string | undefined;
 					if (language.iso_code === project.data.default_iso_code) {
 						text = requestBody.baseTranslation.text;
 					} else if (
 						language.iso_code !== project.data.default_iso_code &&
-						deeplIsoCodes.includes(language.iso_code.toUpperCase())
+						deeplIsoCodes.has(language.iso_code.toUpperCase())
 					) {
 						const machineTranslationRequest: TranslateRequestBody = {
 							sourceLang: 'EN',
@@ -152,15 +152,15 @@ export async function post(request: Request): Promise<EndpointOutput> {
 		return {
 			status: 200
 		};
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		console.error(error);
 		return {
 			status: 500
 		};
 	}
 }
 
-const deeplIsoCodes = [
+const deeplIsoCodes = new Set([
 	'BG',
 	'CS',
 	'DA',
@@ -185,4 +185,4 @@ const deeplIsoCodes = [
 	'SL',
 	'SV',
 	'ZH'
-];
+]);

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { ProgressBar, PaginationNav } from 'carbon-components-svelte';
 

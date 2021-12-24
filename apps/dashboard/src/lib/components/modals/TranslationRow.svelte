@@ -23,7 +23,7 @@
 
 	$: getError = () => {
 		if (translationCopy.translation === '') return 'Missing translation';
-		if (Object.keys(missingVariables).some((language) => language === translationCopy.languageCode))
+		if (Object.keys(missingVariables).includes(translationCopy.languageCode))
 			return (
 				missingVariables[translationCopy.languageCode].variable +
 				missingVariables[translationCopy.languageCode].error
@@ -31,7 +31,7 @@
 		return '';
 	};
 
-	async function handleUpdate() {
+	async function handleUpdate(): Promise<void> {
 		let query, error;
 		if ($projectStore.data === null) throw Error('Projectstore not initialized');
 		if (

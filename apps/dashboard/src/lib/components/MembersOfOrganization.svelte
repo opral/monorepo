@@ -43,7 +43,7 @@
 		isLoading = false;
 	});
 
-	async function loadUsers() {
+	async function loadUsers(): Promise<void> {
 		members = await database.from<definitions['member']>('member').select().match({
 			organization_id: organization.id
 		});

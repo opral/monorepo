@@ -5,6 +5,7 @@
 	import type { definitions } from '@inlang/database';
 	import { createEventDispatcher } from 'svelte';
 	import { LanguageCode } from '@inlang/common';
+	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 	export let open = false;
 	export let key = '';
@@ -14,7 +15,7 @@
 		if ($projectStore.data?.translations === undefined) throw Error('Projectstore not initialized');
 		const missing = $projectStore.data.translations.checkMissingTranslations();
 		if (missing.isErr) throw Error('Missing translations not found');
-		for (const missingTranslation of missing?.value) {
+		for (const missingTranslation of missing.value) {
 			if (missingTranslation.key === key) return missingTranslation.languageCodes;
 		}
 		return [];
@@ -22,13 +23,13 @@
 
 	const dispatch = createEventDispatcher();
 
-	async function save() {
+	async function save(): Promise<void> {
 		let query;
 		for (const t of translations) {
 			if (t.translation !== '' && t.translation !== null) {
 				if ($projectStore.data?.translations.getTranslation(key, t.languageCode).isOk) {
 					$projectStore.data.translations.updateKey(key, t.translation, t.languageCode);
-					const fluentFiles = $projectStore.data.translations.getFluentFiles();
+					const fluentFiles = $projectStore.data.translations.serialize(new FluentAdapter());
 					if (fluentFiles.isErr) throw 'Cannot get Fluent file';
 					for (const fluentFile of fluentFiles.value) {
 						if (fluentFile.languageCode === t.languageCode) {
@@ -42,7 +43,7 @@
 				} else {
 					if ($projectStore.data === null) throw 'Projectstore not initialized.';
 					$projectStore.data?.translations.createTranslation(key, t.translation, t.languageCode);
-					const fluentFiles = $projectStore.data.translations.getFluentFiles();
+					const fluentFiles = $projectStore.data.translations.serialize(new FluentAdapter());
 					if (fluentFiles.isErr) throw 'Cannot get Fluent file';
 					for (const fluentFile of fluentFiles.value) {
 						if (fluentFile.languageCode === t.languageCode) {

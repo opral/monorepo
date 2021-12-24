@@ -3,7 +3,7 @@ module.exports = {
 	parser: '@typescript-eslint/parser',
 	extends: ['@inlang/eslint-config'],
 	plugins: ['svelte3'],
-	ignorePatterns: ['*.cjs', '.svelte-kit/**', '.vercel/**', '.vercel_build_output/**'],
+	ignorePatterns: ['*.cjs', '.svelte-kit/**', '.vercel/**', '.vercel_build_output/**', 'static/**'],
 	overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
 	settings: {
 		'svelte3/typescript': () => require('typescript')

@@ -31,7 +31,7 @@
 		const allKeys = $projectStore.data?.translations.getAllKeys();
 		if (allKeys?.isErr) {
 			alert(allKeys.error.message);
-		} else if (allKeys?.value.some((key) => key === keyName)) {
+		} else if (allKeys?.value.includes(keyName)) {
 			invalidKeyNameMessage = 'The key already exists in the project.';
 			return false;
 		}
@@ -44,7 +44,7 @@
 
 	let keyNameInputElement: HTMLInputElement;
 
-	async function handleSubmission() {
+	async function handleSubmission(): Promise<void> {
 		status = 'isLoading';
 		if ($projectStore.data === null) {
 			throw 'Project Store is null.';

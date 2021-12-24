@@ -31,7 +31,7 @@
 
 	let nameInputElement: HTMLInputElement;
 
-	async function handleSubmission() {
+	async function handleSubmission(): Promise<void> {
 		inlineLoadingStatus = 'active';
 		const insert = await withUxTimeout(async () =>
 			database

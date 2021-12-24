@@ -12,11 +12,11 @@
 
 	import { Button } from 'carbon-components-svelte';
 
-	async function handleDevLogin() {
+	async function handleDevLogin(): Promise<void> {
 		const signIn = await auth.signIn({ email: 'dev@account.com', password: 'dev@account.com' });
 		if (signIn.error) {
 			alert(signIn.error.message);
-		} else if (signIn.data) {
+		} else if (signIn.user) {
 			goto('/');
 		}
 	}
