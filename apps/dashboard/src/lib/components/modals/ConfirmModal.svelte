@@ -73,7 +73,7 @@
 
 	let inlineLoadingStatus: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
-	async function handleConfirm() {
+	async function handleConfirm(): Promise<void> {
 		inlineLoadingStatus = 'active';
 		const result = await withUxTimeout(onConfirm);
 		if (result.isErr) {
