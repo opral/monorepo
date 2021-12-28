@@ -9,8 +9,6 @@
 		ComboBox,
 		ProgressIndicator,
 		ProgressStep,
-		RadioTile,
-		TileGroup,
 		InlineNotification,
 		NotificationActionButton
 	} from 'carbon-components-svelte';
@@ -19,6 +17,7 @@
 	import type { definitions } from '@inlang/database';
 	import ISO6391 from 'iso-639-1';
 	import { isEqual } from 'lodash';
+	import SelectDefaultHumanLanguageTile from '../tiles/SelectDefaultHumanLanguageTile.svelte';
 
 	export function show(args: {
 		organizationId?: definitions['organization']['id'];
@@ -285,37 +284,27 @@
 					</p>
 				{/if}
 			</FormGroup>
-		{:else if currentStep === 1}
-			<FormGroup>
-				<TileGroup
-					bind:selected={selectedDefaultLanguageIso}
-					legend="Select default human language"
-				>
-					{#if selectedLanguageIsoCodes.length === 0}
-						<InlineNotification
-							kind="warning"
-							title="You need to select at least one human language for the project."
-							hideCloseButton
-						>
-							<div slot="actions">
-								<NotificationActionButton on:click={() => (currentStep -= 1)}>
-									Go back
-								</NotificationActionButton>
-							</div>
-						</InlineNotification>
-					{:else}
-						{#each selectedLanguageIsoCodes as languageCode}
-							<RadioTile light value={languageCode}>
-								{ISO6391.getName(languageCode)} - {languageCode}
-							</RadioTile>
-						{/each}
-					{/if}
-				</TileGroup>
-				<p class="pt-4">
-					The default human language is the language used during development. In most cases it's
-					English.
-				</p>
-			</FormGroup>
+		{:else if currentStep === 1 && selectedLanguageIsoCodes.length === 0}
+			<InlineNotification
+				kind="warning"
+				title="You need to select at least one human language for the project."
+				hideCloseButton
+			>
+				<div slot="actions">
+					<NotificationActionButton on:click={() => (currentStep -= 1)}>
+						Go back
+					</NotificationActionButton>
+				</div>
+			</InlineNotification>
+		{:else}
+			<SelectDefaultHumanLanguageTile
+				bind:selected={selectedDefaultLanguageIso}
+				possibleLanguageCodes={selectedLanguageIsoCodes}
+			/>
+			<p class="pt-4">
+				The default human language is the language used during development. In most cases it's
+				English.
+			</p>
 		{/if}
 	</Form>
 </Modal>

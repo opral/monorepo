@@ -15,19 +15,13 @@
 	import CreateLanguageModal from '$lib/components/modals/CreateLanguageModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import ISO6391 from 'iso-639-1';
-	import SetDefaultLanguageModal from '$lib/components/modals/SetDefaultLanguageModal.svelte';
 	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
-	import RadioButton16 from 'carbon-icons-svelte/lib/RadioButton16';
-	import RadioButtonChecked16 from 'carbon-icons-svelte/lib/RadioButtonChecked16';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
 	let createLanguageModal: { show: boolean } = { show: false };
 	let deleteLanguageModal: { show: boolean; language?: definitions['language'] } = {
-		show: false
-	};
-	let setDefaultLanguageModal: { show: boolean; language?: definitions['language'] } = {
 		show: false
 	};
 
@@ -77,7 +71,6 @@
 		{ key: 'isoCode', value: 'Language' },
 		// { key: 'progress', value: 'Progress' },
 		// { key: 'words', value: 'Words' },
-		{ key: 'isDefaultLanguage', value: 'Default Language' },
 		{ key: 'actions', empty: true }
 	];
 
@@ -133,31 +126,10 @@
 			<div class="flex items-center space-x-2">
 				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
 				<Tag type="blue">{cell.value}</Tag>
+				{#if row.isDefaultLanguage}
+					<Tag type="green">Default human language</Tag>
+				{/if}
 			</div>
-		{:else if cell.key === 'isDefaultLanguage'}
-			{#if row.isDefaultLanguage === false}
-				<Button
-					kind="ghost"
-					icon={RadioButton16}
-					iconDescription="Set as default language"
-					tooltipAlignment="start"
-					tooltipPosition="left"
-					class="px-0"
-					on:click={() => {
-						setDefaultLanguageModal.language = row.languageObject;
-						setDefaultLanguageModal.show = true;
-					}}
-				/>
-			{:else}
-				<Button
-					kind="ghost"
-					icon={RadioButtonChecked16}
-					iconDescription="Is already default language"
-					tooltipAlignment="start"
-					tooltipPosition="left"
-					class="px-0"
-				/>
-			{/if}
 		{:else if cell.key === 'actions'}
 			<row class="justify-end">
 				<Button
@@ -188,20 +160,6 @@
 		createLanguageModal.show = false;
 	}}
 />
-
-{#if setDefaultLanguageModal.language}
-	<SetDefaultLanguageModal
-		bind:open={setDefaultLanguageModal.show}
-		language={setDefaultLanguageModal.language}
-		on:close={() => {
-			setDefaultLanguageModal.show = false;
-			// not setting language to undefined to animate
-			// the model disappering which would be prevented
-			// by a sudden removal of the modal html element
-			// through the if statement
-		}}
-	/>
-{/if}
 
 {#if deleteLanguageModal.language}
 	<DeleteLanguageModal
