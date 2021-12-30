@@ -14,6 +14,7 @@ module.exports = {
     "unicorn/filename-case": "off",
     "unicorn/prefer-ternary": "off",
     "unicorn/throw-new-error": "off",
+    "unicorn/prefer-spread": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
