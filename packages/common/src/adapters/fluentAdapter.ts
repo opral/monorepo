@@ -15,18 +15,16 @@ export class FluentAdapter implements AdapterInterface {
     serialize(resource: fluent.Resource): Result<string, Error> {
         let out = '';
         for (const entry of resource.body) {
-            if (entry.type === 'Message') {
-                if (entry.value !== null) {
-                    out += entry.id.name + ' = ';
-                    for (const element of entry.value?.elements) {
-                        if (element.type === 'Placeable') {
-                            out += '{' + serializeExpression(element.expression) + '}';
-                        } else {
-                            out += element.value;
-                        }
+            if (entry.type === 'Message' && entry.value !== null) {
+                out += entry.id.name + ' = ';
+                for (const element of entry.value?.elements ?? []) {
+                    if (element.type === 'Placeable') {
+                        out += '{' + serializeExpression(element.expression) + '}';
+                    } else {
+                        out += element.value;
                     }
-                    out += '\n';
                 }
+                out += '\n';
             }
         }
         return Result.ok(out);
