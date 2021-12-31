@@ -27,9 +27,9 @@ describe('SwiftAdapter', () => {
 
 const testFile = `
 /*
-  A mutli-line
+  A mutli-line
   commment lalalalala.
-  
+
 */
 
 "WrongPassword" = "Wrong Password";
