@@ -70,29 +70,6 @@ describe('getMessageForAllResources()', () => {
     });
 });
 
-describe('addMessage()', () => {
-    it('should create a key', () => {
-        const result = resources.addMessage({
-            id: 'new_test',
-            value: 'here is another translation',
-            languageCode: 'en',
-        });
-        if (result.isErr) {
-            fail();
-        }
-        const message = resources.getMessage({ id: 'new_test', languageCode: 'en' });
-        if (result.isErr) {
-            fail();
-        }
-        expect(message).toMatch('here is another translation');
-    });
-
-    it('should fail when key already exists', () => {
-        const result = resources.addMessage({ id: 'test', value: 'this should fail', languageCode: 'en' });
-        expect(result.isErr).toBeTruthy();
-    });
-});
-
 describe('deleteMessage()', () => {
     it('retrieving a message should result in undefined after deletion', () => {
         const deletion = resources.deleteMessage({ id: 'test', languageCode: 'en' });
@@ -224,9 +201,9 @@ describe('doesMessageExist()', () => {
     });
 });
 
-describe('addMessage()', () => {
+describe('createMessage()', () => {
     it('should be possible to add a message', () => {
-        const add = resources.addMessage({ id: 'extra', value: 'en nøgle uden oversættelse', languageCode: 'da' });
+        const add = resources.createMessage({ id: 'extra', value: 'en nøgle uden oversættelse', languageCode: 'da' });
         if (add.isErr) {
             fail(add.error);
         }
@@ -238,17 +215,17 @@ describe('addMessage()', () => {
     });
 
     it('should not be possible to add an empty message', () => {
-        const add = resources.addMessage({ id: 'extra', value: ' ', languageCode: 'da' });
+        const add = resources.createMessage({ id: 'extra', value: ' ', languageCode: 'da' });
         expect(add.isErr).toBeTruthy();
     });
 
     it('should return an error when a message alreaedy exists', () => {
-        const result = resources.addMessage({ id: 'extra', value: 'this should fail', languageCode: 'en' });
+        const result = resources.createMessage({ id: 'extra', value: 'this should fail', languageCode: 'en' });
         expect(result.isErr).toBeTruthy;
     });
 
     it('should return an error when language code does not exist', () => {
-        const result = resources.addMessage({ id: 'extra', value: 'this should fail', languageCode: 'aa' });
+        const result = resources.createMessage({ id: 'extra', value: 'this should fail', languageCode: 'aa' });
         expect(result.isErr).toBeTruthy;
     });
 });

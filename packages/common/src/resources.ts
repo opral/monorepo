@@ -116,7 +116,7 @@ export class Resources {
         return result;
     }
 
-    addMessage(args: { id: string; value: string; languageCode: LanguageCode }): Result<void, Error> {
+    createMessage(args: { id: string; value: string; languageCode: LanguageCode }): Result<void, Error> {
         if (this.doesMessageExist({ id: args.id, languageCode: args.languageCode })) {
             return Result.err(
                 Error(`Message id ${args.id} already exists for the language code ${args.languageCode}.`)
