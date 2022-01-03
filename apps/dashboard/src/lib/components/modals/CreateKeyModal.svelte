@@ -5,13 +5,13 @@
 	import { page } from '$app/stores';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
-	import { isValidMessageId } from '@inlang/common/src/utils/fluentValidators';
+	import { isValidMessageId } from '@inlang/fluent-syntax';
 
 	let open = false;
 
 	export function show(): void {
 		messageId = '';
-		baseTranslationText = '';
+		messageValue = '';
 		status = 'idle';
 		open = true;
 		// only god knows why focus has to be wrapped in a setTimeout to work
@@ -20,7 +20,7 @@
 		});
 	}
 
-	let messageId: string;
+	let messageId: string | undefined;
 
 	//let description: definitions['key']['description'];
 
@@ -28,7 +28,7 @@
 
 	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
 
-	$: isValidInput = isValidMessageId(messageId) && messageValue !== '';
+	$: isValidInput = messageId !== undefined && isValidMessageId(messageId) && messageValue !== '';
 
 	let invalidKeyNameMessage: string;
 
@@ -42,7 +42,7 @@
 		const body: CreateBaseTranslationRequestBody = {
 			projectId: $projectStore.data.project.id,
 			baseTranslation: {
-				key_name: keyName,
+				key_name: messageId,
 				text: messageValue
 			}
 		};
@@ -86,11 +86,13 @@
 	   	not of importance to fix for now.
 	-->
 	<TextInput
-		invalid={keyNameIsValid() === false && status !== 'isFinished'}
+		invalid={messageId !== undefined &&
+			isValidMessageId(messageId) === false &&
+			status !== 'isFinished'}
 		invalidText={invalidKeyNameMessage}
 		labelText="Key"
 		helperText="A key acts as identifier for a translation."
-		bind:value={keyName}
+		bind:value={messageValue}
 		bind:ref={keyNameInputElement}
 	/>
 	<br />
@@ -99,7 +101,7 @@
 		labelText={`Base translation (${ISO6391.getName(
 			$projectStore.data?.project.default_iso_code ?? ''
 		)})`}
-		bind:value={baseTranslationText}
+		bind:value={messageValue}
 		helperText={`The base translation is the text of the projects default (human) language.`}
 	/>
 	<!-- <br />

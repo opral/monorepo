@@ -87,7 +87,7 @@
 		<InlineNotification
 			hideCloseButton
 			kind="warning"
-			subtitle="Keys are not machine translated for newly added languages."
+			subtitle="Messages are not machine translated for newly added languages."
 		>
 			<div slot="actions">
 				<NotificationActionButton>

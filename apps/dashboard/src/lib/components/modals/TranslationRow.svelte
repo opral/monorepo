@@ -8,7 +8,7 @@
 	import ISO6391 from 'iso-639-1';
 	import Save32 from 'carbon-icons-svelte/lib/Save32';
 	import { LanguageCode } from '@inlang/common';
-	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+	import { adapters } from '@inlang/adapters';
 
 	export let translation: Readonly<{
 		key: string;
@@ -35,25 +35,25 @@
 		let query, error;
 		if ($projectStore.data === null) throw Error('Projectstore not initialized');
 		if (
-			$projectStore.data.translations.doesTranslationExist(
-				translationCopy.key,
-				translationCopy.languageCode
-			)
+			$projectStore.data.resources.doesMessageExist({
+				id: translationCopy.key,
+				languageCode: translationCopy.languageCode
+			})
 		) {
-			error = $projectStore.data.translations.updateKey(
-				translationCopy.key,
-				translationCopy.translation,
-				translationCopy.languageCode
-			);
+			error = $projectStore.data.resources.updateMessage({
+				id: translationCopy.key,
+				value: translationCopy.translation ?? '',
+				languageCode: translationCopy.languageCode
+			});
 		} else {
-			error = $projectStore.data.translations.createTranslation(
-				translationCopy.key,
-				translationCopy.translation,
-				translationCopy.languageCode
-			);
+			error = $projectStore.data.resources.createMessage({
+				id: translationCopy.key,
+				value: translationCopy.translation ?? '',
+				languageCode: translationCopy.languageCode
+			});
 		}
 		if (error.isErr) alert(error.error);
-		const fluentFiles = $projectStore.data.translations.serialize(new FluentAdapter());
+		const fluentFiles = $projectStore.data.resources.serialize({ adapter: adapters.fluent });
 		if (fluentFiles.isErr) throw Error('Cannot get fluent files');
 		for (const fluentFile of fluentFiles.value) {
 			if (fluentFile.languageCode === translationCopy.languageCode) {

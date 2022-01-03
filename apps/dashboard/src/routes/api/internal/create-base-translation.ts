@@ -4,8 +4,9 @@ import { DeeplLanguages } from 'deepl';
 import { definitions } from '@inlang/database';
 import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
 import { TranslateRequestBody, TranslateResponseBody } from './translate';
-import { Resources, Result } from '@inlang/common';
-import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+import { Result } from '@inlang/common';
+import { Resources } from '@inlang/fluent-syntax';
+import { adapters } from '@inlang/adapters';
 
 /**
  * This endpoint uses the base translation to create machine translations
@@ -60,7 +61,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			.match({ project_id: requestBody.projectId });
 
 		const maybeResources: Result<Resources, Error> = Resources.parse({
-			adapter: new FluentAdapter(),
+			adapter: adapters.fluent,
 			files:
 				languages.data?.map((language) => ({
 					data: language.file,
@@ -146,7 +147,7 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			);
 		}
 		await Promise.all(promises);
-		const fluentFiles = resources.serialize({ adapter: new FluentAdapter() });
+		const fluentFiles = resources.serialize({ adapter: adapters.fluent });
 		if (fluentFiles.isErr) throw fluentFiles.error;
 		for (const fluentFile of fluentFiles.value) {
 			const query = await supabase

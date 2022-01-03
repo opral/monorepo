@@ -95,7 +95,7 @@
 	</Toolbar>
 	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'name'}
-			<Link href={`/project/${row.id}/keys`}>
+			<Link href={`/project/${row.id}/messages`}>
 				<div class="flex items-center space-x-2">
 					<!-- <Tag type="blue">{cell.value.substring(0, 2)}</Tag> -->
 					<p class="text-sm">{cell.value}</p>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Key24 from 'carbon-icons-svelte/lib/Password24';
+	import Chat24 from 'carbon-icons-svelte/lib/Chat24';
 	import Language24 from 'carbon-icons-svelte/lib/Language24';
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import DocumentExport24 from 'carbon-icons-svelte/lib/DocumentExport24';
@@ -12,7 +12,7 @@
 
 <SideNav bind:isOpen expansionBreakpoint={320}>
 	<SideNavItems>
-		<SideNavLink icon={Key24} text="Keys" href="/project/{$page.params.projectId}/keys" />
+		<SideNavLink icon={Chat24} text="Messages" href="/project/{$page.params.projectId}/messages" />
 		<SideNavLink
 			icon={Language24}
 			text="Languages"

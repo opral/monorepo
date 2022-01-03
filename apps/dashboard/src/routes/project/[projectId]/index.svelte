@@ -14,10 +14,7 @@
 			(currentPageNumber + 1) * pageSize
 		) ?? [];
 
-	const allKeys = $projectStore.data?.translations.getAllKeys();
-	if (allKeys?.isErr) {
-		throw allKeys.error;
-	}
+	const allMessageIds = $projectStore.data?.resources.getMessageIdsForAllResources();
 </script>
 
 <section>
@@ -36,7 +33,7 @@
 					</div>
 				{/each}
 			</column>
-			<PaginationNav total={allKeys?.value.length} shown={pageSize} bind:page={currentPageNumber} />
+			<PaginationNav total={allMessageIds?.size} shown={pageSize} bind:page={currentPageNumber} />
 		</column>
 		<column class="space-y-1">
 			<h3>Statistics</h3>

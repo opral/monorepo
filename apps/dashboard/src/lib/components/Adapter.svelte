@@ -14,12 +14,9 @@
 	} from 'carbon-components-svelte';
 	import DocumentExport32 from 'carbon-icons-svelte/lib/DocumentExport32';
 	import DocumentImport32 from 'carbon-icons-svelte/lib/DocumentImport32';
-	import { SwiftAdapter } from '@inlang/common/src/adapters/swiftAdapter';
-	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
-	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
-	import { AdapterInterface } from '@inlang/common/src/adapters';
-	import { Resources } from '@inlang/common';
 	import ISO6391 from 'iso-639-1';
+	import { AdapterInterface, adapters } from '@inlang/adapters';
+	import { Resources } from '@inlang/fluent-syntax';
 
 	export let project: definitions['project'];
 	export let languages: definitions['language'][];
@@ -30,6 +27,8 @@
 
 	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
+	let selectedAdapter: AdapterInterface;
+	$: selectedAdapter = Object.values(adapters)[selectedAdapterIndex];
 	let isLoading = false;
 	let exportedCode = '';
 	let importText = '';
@@ -37,17 +36,12 @@
 	let success = false;
 
 	const baseLanguage: definitions['project']['default_iso_code'] = project.default_iso_code;
-	const adapters: string[] = ['Swift', 'Fluent', 'typesafe-i18n'];
 
 	$: isImport = title === 'Import';
 	$: isFileForSelectedLanguage = getFileForLanguageIso(selectedLanguageIso).length > 0;
-	$: parserResponse = tryParse(importText, selectedAdapterIndex);
+	$: parserResponse = tryParse(importText);
 	$: isParseable = parserResponse === '';
-	$: isFormValid =
-		isParseable &&
-		selectedLanguageIso !== undefined &&
-		selectedAdapterIndex >= 0 &&
-		importText.length > 0;
+	$: isFormValid = isParseable && selectedLanguageIso !== undefined && importText.length > 0;
 
 	function handleButtonClick(): void {
 		isImport ? handleImport() : handleExport();
@@ -75,21 +69,9 @@
 		}
 	}
 
-	function tryParse(text: string, adapterIndex: number): string {
+	function tryParse(text: string): string {
 		if (text.length === 0) return '';
-		let parsed;
-		let adapter: AdapterInterface;
-		// eslint-disable-next-line unicorn/prefer-switch
-		if (adapterIndex === 0) {
-			adapter = new SwiftAdapter();
-		} else if (adapterIndex === 1) {
-			adapter = new FluentAdapter();
-		} else if (adapterIndex === 2) {
-			adapter = new Typesafei18nAdapter();
-		} else {
-			return '';
-		}
-		parsed = adapter.parse(text);
+		const parsed = selectedAdapter.parse(text);
 		if (parsed.isErr) {
 			return parsed.error.message;
 		}
@@ -99,21 +81,9 @@
 	async function handleImport(): Promise<void> {
 		success = false;
 		isLoading = true;
-		let adapter: AdapterInterface;
-
-		if (selectedAdapterIndex === 0) {
-			// Swift
-			adapter = new SwiftAdapter();
-		} else if (selectedAdapterIndex === 1) {
-			// Fluent
-			adapter = new FluentAdapter();
-		} else {
-			// Typesafei18n
-			adapter = new Typesafei18nAdapter();
-		}
 		//create and parse
 		const api = Resources.parse({
-			adapter: adapter,
+			adapter: selectedAdapter,
 			files: [
 				{
 					languageCode: selectedLanguageIso,
@@ -126,7 +96,7 @@
 		if (api.isErr) {
 			alert(api.error.message);
 		} else {
-			let fluentLanguages = api.value.serialize({ adapter: new FluentAdapter() });
+			let fluentLanguages = api.value.serialize({ adapter: adapters.fluent });
 			if (fluentLanguages.isErr) {
 				alert(fluentLanguages.error.message);
 			} else {
@@ -161,19 +131,8 @@
 
 	function handleExport(): void {
 		isLoading = true;
-		let adapter: AdapterInterface;
-		if (selectedAdapterIndex === 0) {
-			// Swift
-			adapter = new SwiftAdapter();
-		} else if (selectedAdapterIndex === 1) {
-			// Fluent
-			adapter = new FluentAdapter();
-		} else {
-			// Typesafei18n
-			adapter = new Typesafei18nAdapter();
-		}
 		const api = Resources.parse({
-			adapter: new FluentAdapter(),
+			adapter: adapters.fluent,
 			files: [
 				{
 					languageCode: selectedLanguageIso,
@@ -183,7 +142,7 @@
 			baseLanguageCode: baseLanguage
 		});
 		if (api.isOk) {
-			let response = api.value.serialize({ adapter });
+			let response = api.value.serialize({ adapter: selectedAdapter });
 			if (response.isOk) {
 				exportedCode = response.value[0].data;
 			} else {
@@ -205,9 +164,9 @@
 			class="w-fill"
 			titleText="Select an adapter"
 			bind:selectedIndex={selectedAdapterIndex}
-			items={adapters.map((adapter, index) => ({
+			items={Object.entries(adapters).map(([adapterName], index) => ({
 				id: '' + index,
-				text: adapter
+				text: adapterName
 			}))}
 		/>
 		<div>

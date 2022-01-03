@@ -108,7 +108,7 @@
 		slot="cell"
 		let:row
 		let:cell
-		on:click={() => goto(`/project/${row.id}/keys`)}
+		on:click={() => goto(`/project/${row.id}/messages`)}
 		class="cursor-pointer"
 	>
 		{#if cell.key === 'name'}

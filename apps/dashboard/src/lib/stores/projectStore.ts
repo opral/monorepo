@@ -2,10 +2,9 @@ import type { definitions } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
-import { Resources } from '@inlang/common';
-import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 import { Result } from '@inlang/common';
-
+import { Resources } from '@inlang/fluent-syntax';
+import { adapters } from '@inlang/adapters';
 /**
  * Bundles project related information regarding one project tightly together in
  * one object. Corresponds to `/project/[projectId]` route.
@@ -59,7 +58,7 @@ async function getData(
 		.order('iso_code', { ascending: true });
 
 	const resources: Result<Resources, Error> = Resources.parse({
-		adapter: new FluentAdapter(),
+		adapter: adapters.fluent,
 		files:
 			languages.data?.map((language) => ({
 				data: language.file,

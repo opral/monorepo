@@ -18,6 +18,7 @@
 	import { LanguageCode } from '@inlang/common';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Language16 from 'carbon-icons-svelte/lib/Language16';
+	import { Message } from '@inlang/fluent-syntax';
 
 	const headers = [
 		{ key: 'id', value: 'Key' },
@@ -26,7 +27,7 @@
 
 	type Row = {
 		id: string;
-		values: Record<LanguageCode, string | undefined>;
+		values: Record<string, Message | undefined>;
 	};
 
 	let searchQuery = '';
@@ -103,7 +104,7 @@
 	};
 </script>
 
-<h1>Keys</h1>
+<h1>Messages</h1>
 <p>All your translation keys will appear here. You can create, delete and edit them.</p>
 <br />
 <DataTable expandable {headers} rows={displayedRows()}>

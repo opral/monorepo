@@ -4,7 +4,7 @@
 	import type { definitions } from '@inlang/database';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
-	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+	import { adapters } from '@inlang/adapters';
 
 	export function show(args: { key: string }): void {
 		key = args.key;
@@ -19,12 +19,12 @@
 	let open = false;
 
 	async function deleteKey(): Promise<void> {
-		const deleteRequest = $projectStore.data?.translations.deleteKey(key);
+		const deleteRequest = $projectStore.data?.resources.deleteMessageForAllResources({ id: key });
 		if (deleteRequest?.isErr) {
 			alert(deleteRequest.error.message);
 			return;
 		}
-		const fluentFiles = $projectStore.data?.translations.serialize(new FluentAdapter());
+		const fluentFiles = $projectStore.data?.resources.serialize({ adapter: adapters.fluent });
 		if (fluentFiles === undefined || fluentFiles?.isErr) {
 			alert(fluentFiles?.error.message);
 			return;
