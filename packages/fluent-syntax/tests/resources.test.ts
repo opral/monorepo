@@ -1,5 +1,6 @@
 import { adapter } from '@inlang/adapters';
 import { Resources } from '../src/resources';
+import { serializeEntry } from '../src/utils/serializeEntry';
 
 let resources: Resources;
 
@@ -22,20 +23,22 @@ beforeEach(() => {
         resources = api.value;
     }
 });
-
 describe('doesMessageExist()', () => {
-    it('should be truthy', () => {
+    it('should be truthy when a message exists', () => {
         expect(resources.doesMessageExist({ id: 'test', languageCode: 'en' })).toBeTruthy();
     });
-});
 
+    it('should be falsy when a message not exists', () => {
+        expect(resources.doesMessageExist({ id: 'extra', languageCode: 'de' })).toBeFalsy();
+    });
+});
 describe('getMessage()', () => {
     it('simple: should not be undefined and match the expected result', () => {
         const result = resources.getMessage({ id: 'test', languageCode: 'en' });
         if (result === undefined) {
             fail();
         }
-        expect(result).toMatch('this is my test');
+        expect(serializeEntry(result)).toMatch('this is my test');
     });
 
     it('complex(er): should not be undefined and match the expected result', () => {
@@ -43,7 +46,7 @@ describe('getMessage()', () => {
         if (result === undefined) {
             fail();
         }
-        expect(result).toMatch('Hello {$name}');
+        expect(serializeEntry(result)).toMatch('complex = Hello { $name }');
     });
 
     it('should return undefined if a message does not exist', () => {
@@ -54,12 +57,21 @@ describe('getMessage()', () => {
 
 describe('getMessageForAllResources()', () => {
     it('should return all messages', () => {
-        const result = resources.getMessageForAllResources({ id: 'test' });
+        const messages = resources.getMessageForAllResources({ id: 'test' });
+
+        const result: Record<string, string> = {};
+
+        for (const languageCode in messages) {
+            const message = messages[languageCode];
+            if (message) {
+                result[languageCode] = serializeEntry(message);
+            }
+        }
 
         const match = {
-            en: 'this is my test',
-            da: 'dette er min test',
-            de: 'dis ist ein test',
+            en: 'test = this is my test',
+            da: 'test = dette er min test',
+            de: 'test = dis ist ein test',
         };
         expect(result).toEqual(match);
     });
@@ -103,7 +115,7 @@ describe('updateMessage()', () => {
         if (result === undefined) {
             fail();
         }
-        expect(result).toMatch('why not this instead');
+        expect(serializeEntry(result)).toMatch('test = why not this instead');
     });
 
     it('should fail when languageCode does not exist', () => {
@@ -191,16 +203,6 @@ describe('updateMessage()', () => {
     });
 });*/
 
-describe('doesMessageExist()', () => {
-    it('should be truthy when a message exists', () => {
-        expect(resources.doesMessageExist({ id: 'test', languageCode: 'en' })).toBeTruthy();
-    });
-
-    it('should be falsy when a message not exists', () => {
-        expect(resources.doesMessageExist({ id: 'extra', languageCode: 'de' })).toBeFalsy();
-    });
-});
-
 describe('createMessage()', () => {
     it('should be possible to add a message', () => {
         const add = resources.createMessage({ id: 'extra', value: 'en nøgle uden oversættelse', languageCode: 'da' });
@@ -211,7 +213,7 @@ describe('createMessage()', () => {
         if (message === undefined) {
             fail();
         }
-        expect(message).toMatch('en nøgle uden oversættelse');
+        expect(serializeEntry(message)).toMatch('en nøgle uden oversættelse');
     });
 
     it('should not be possible to add an empty message', () => {

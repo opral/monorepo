@@ -1,10 +1,10 @@
-import * as fluent from '@fluent/syntax';
 import { AdapterInterface } from '@inlang/adapters';
 import { LanguageCode } from '@inlang/common';
 import { SerializedResource } from './types/serializedResource';
 import { remove, trim } from 'lodash';
 import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
+import { Message, parse, Resource } from '@fluent/syntax';
 
 /**
  * Holds all resources as object accesible via a `languageCode`.
@@ -13,19 +13,19 @@ import { isValidMessageId } from './utils/isValidMessageId';
  * Example:
  *
  *      const x: RecordOfResources = {
- *          en: fluent.Resource,
- *          de: fluent.Resource
+ *          en: Resource,
+ *          de: Resource
  *      }
  *
  */
-type RecordOfResources = Record<string, fluent.Resource | undefined>;
+type RecordOfResources = Record<string, Resource | undefined>;
 
 /**
  * Allows to parse files (as resources), act on those resources and serialize back to files.
  *
  * All messages, terms etc. are saved as files (resources) either in the local source code,
  * or the inlang database. In order to act on those files, they need to be parsed.
- * The parsed format is `fluent.Resource`. This class acts as wrapper around multiple `fluent.Resource`s
+ * The parsed format is `Resource`. This class acts as wrapper around multiple `Resource`s
  * to act on all those resources at once.
  */
 export class Resources {
@@ -68,7 +68,7 @@ export class Resources {
         return Object.entries(this.resources).map(([languageCode]) => languageCode as LanguageCode);
     }
 
-    doesMessageExist(args: { id: string; languageCode: LanguageCode }): boolean {
+    doesMessageExist(args: { id: Message['id']['name']; languageCode: LanguageCode }): boolean {
         for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.id) {
                 return true;
@@ -77,26 +77,12 @@ export class Resources {
         return false;
     }
 
-    getMessage(args: { id: string; languageCode: LanguageCode }): string | undefined {
-        let translation;
+    getMessage(args: { id: Message['id']['name']; languageCode: LanguageCode }): Message | undefined {
         for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.id) {
-                translation = entry;
+                return entry;
             }
         }
-        if (translation === undefined || translation.value === null) {
-            return;
-        }
-        let out = '';
-        for (const element of translation.value.elements) {
-            // eslint-disable-next-line unicorn/prefer-ternary
-            if (element.type === 'Placeable') {
-                out += '{' + fluent.serializeExpression(element.expression) + '}';
-            } else {
-                out += element.value;
-            }
-        }
-        return out;
     }
 
     /**
@@ -110,8 +96,8 @@ export class Resources {
      *          "de": "Hallo Welt"
      *      }
      */
-    getMessageForAllResources(args: { id: string }): Record<string, string | undefined> {
-        const result: Record<string, string | undefined> = {};
+    getMessageForAllResources(args: { id: Message['id']['name'] }): Record<string, Message | undefined> {
+        const result: ReturnType<typeof this.getMessageForAllResources> = {};
         for (const [languageCode] of Object.entries(this.resources)) {
             const message = this.getMessage({ id: args.id, languageCode: languageCode as LanguageCode });
             result[languageCode] = message;
@@ -119,7 +105,7 @@ export class Resources {
         return result;
     }
 
-    createMessage(args: { id: string; value: string; languageCode: LanguageCode }): Result<void, Error> {
+    createMessage(args: { id: Message['id']['name']; value: string; languageCode: LanguageCode }): Result<void, Error> {
         if (this.doesMessageExist({ id: args.id, languageCode: args.languageCode })) {
             return Result.err(
                 Error(`Message id ${args.id} already exists for the language code ${args.languageCode}.`)
@@ -131,7 +117,7 @@ export class Resources {
         } else if (trim(args.value) === '') {
             return Result.err(Error(`The value is an empty string.`));
         }
-        const parsed = fluent.parse(`${args.id} = ${args.value}`, {}).body[0];
+        const parsed = parse(`${args.id} = ${args.value}`, {}).body[0];
         if (parsed.type === 'Junk') {
             return Result.err(Error('Parsing error: Junk'));
         }
@@ -139,7 +125,7 @@ export class Resources {
         return Result.ok(undefined);
     }
 
-    deleteMessage(args: { id: string; languageCode: LanguageCode }): Result<void, Error> {
+    deleteMessage(args: { id: Message['id']['name']; languageCode: LanguageCode }): Result<void, Error> {
         const removed = remove(
             this.resources[args.languageCode]?.body ?? [],
             (resource) => (resource.type === 'Message' || resource.type === 'Term') && resource.id.name === args.id
@@ -150,14 +136,14 @@ export class Resources {
         return Result.ok(undefined);
     }
 
-    deleteMessageForAllResources(args: { id: string }): Result<void, Error> {
+    deleteMessageForAllResources(args: { id: Message['id']['name'] }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.resources)) {
             this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
         }
         return Result.ok(undefined);
     }
 
-    getMessageIds(args: { languageCode: LanguageCode }): Set<string> {
+    getMessageIds(args: { languageCode: LanguageCode }): Set<Message['id']['name']> {
         const result: Set<string> = new Set();
         for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message') {
@@ -167,7 +153,7 @@ export class Resources {
         return result;
     }
 
-    getMessageIdsForAllResources(): Set<string> {
+    getMessageIdsForAllResources(): Set<Message['id']['name']> {
         let result: Set<string> = new Set();
         for (const languageCode of this.containedLanguageCodes()) {
             // concating both sets
@@ -176,7 +162,7 @@ export class Resources {
         return result;
     }
 
-    updateMessage(args: { id: string; value: string; languageCode: LanguageCode }): Result<void, Error> {
+    updateMessage(args: { id: Message['id']['name']; value: string; languageCode: LanguageCode }): Result<void, Error> {
         const resource = this.resources[args.languageCode];
         if (resource === undefined) {
             return Result.err(Error(`Resource for language code ${args.languageCode} does not exist.`));
@@ -189,7 +175,7 @@ export class Resources {
                 Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}`)
             );
         }
-        const parsedUpdatedMessage = fluent.parse(`${args.id} = ${args.value}`, {}).body[0];
+        const parsedUpdatedMessage = parse(`${args.id} = ${args.value}`, {}).body[0];
         if (parsedUpdatedMessage.type === 'Junk') {
             return Result.err(Error(`Unable to parse the value of the updated message: ${args.value}`));
         }
@@ -289,7 +275,7 @@ export class Resources {
     //                     if (baseEntry.value === null) return Result.err(Error('Base entry value null'));
     //                     for (const baseElement of baseEntry.value.elements) {
     //                         if (baseElement.type === 'Placeable') {
-    //                             basePlaceables.push(fluent.serializeExpression(baseElement.expression));
+    //                             basePlaceables.push(serializeExpression(baseElement.expression));
     //                         }
     //                     }
     //                     for (const resource of this.resources) {
@@ -300,7 +286,7 @@ export class Resources {
     //                                 if (entry.value === null) return Result.err(Error('Entry value null'));
     //                                 for (const element of entry.value.elements) {
     //                                     if (element.type === 'Placeable') {
-    //                                         placeables.push(fluent.serializeExpression(element.expression));
+    //                                         placeables.push(serializeExpression(element.expression));
     //                                     }
     //                                 }
     //                                 for (const basePlaceable of basePlaceables) {
@@ -352,14 +338,14 @@ export class Resources {
     //     baseTranslation?: { key: string; languageCode: LanguageCode; translation?: string }
     // ): Result<{ [language: string]: { error: string; variable: string } }, Error> {
     //     const errors: { [language: string]: { error: string; variable: string } } = {};
-    //     const baseParse = fluent.parse(`key = ${baseTranslation?.translation}`, {}).body[0];
+    //     const baseParse = parse(`key = ${baseTranslation?.translation}`, {}).body[0];
     //     if (baseParse.type !== 'Message') {
     //         return Result.ok({
     //             [baseTranslation?.languageCode as string]: { error: 'Base translation is incorrect', variable: '' },
     //         });
     //     }
 
-    //     const expressionArray: fluent.Expression[] = [];
+    //     const expressionArray: Expression[] = [];
     //     for (const element of baseParse.value?.elements ?? []) {
     //         if (element.type === 'Placeable') {
     //             expressionArray.push(element.expression);
@@ -367,7 +353,7 @@ export class Resources {
     //     }
 
     //     for (const translation of translations) {
-    //         const parse = fluent.parse(`key = ${translation.translation ?? ''}`, {}).body[0];
+    //         const parse = parse(`key = ${translation.translation ?? ''}`, {}).body[0];
     //         if (parse.type !== 'Message') {
     //             errors[translation.languageCode] = {
     //                 error: 'Translation is incorrect',
@@ -376,20 +362,20 @@ export class Resources {
     //             return Result.ok(errors);
     //         }
 
-    //         const translationExpressionArray: fluent.Expression[] = [];
+    //         const translationExpressionArray: Expression[] = [];
     //         for (const element of parse.value?.elements ?? []) {
     //             if (element.type === 'Placeable') {
     //                 translationExpressionArray.push(element.expression);
     //                 if (
     //                     expressionArray.some(
     //                         (expression) =>
-    //                             fluent.serializeExpression(expression) ===
-    //                             fluent.serializeExpression(element.expression)
+    //                             serializeExpression(expression) ===
+    //                             serializeExpression(element.expression)
     //                     ) === false
     //                 ) {
     //                     errors[translation.languageCode] = {
     //                         error: ' is missing from base translation',
-    //                         variable: fluent.serializeExpression(element.expression),
+    //                         variable: serializeExpression(element.expression),
     //                     };
     //                 }
     //             }
@@ -397,12 +383,12 @@ export class Resources {
     //         for (const expression of expressionArray) {
     //             if (
     //                 translationExpressionArray.some(
-    //                     (exp) => fluent.serializeExpression(exp) === fluent.serializeExpression(expression)
+    //                     (exp) => serializeExpression(exp) === serializeExpression(expression)
     //                 ) === false
     //             ) {
     //                 errors[translation.languageCode] = {
     //                     error: ' is missing',
-    //                     variable: fluent.serializeExpression(expression),
+    //                     variable: serializeExpression(expression),
     //                 };
     //             }
     //         }
@@ -413,7 +399,7 @@ export class Resources {
     serialize(args: { adapter: AdapterInterface }): Result<SerializedResource[], Error> {
         const files: SerializedResource[] = [];
         for (const [languageCode, resource] of Object.entries(this.resources)) {
-            const serialized = args.adapter.serialize(resource as fluent.Resource);
+            const serialized = args.adapter.serialize(resource as Resource);
             if (serialized.isErr) {
                 return Result.err(serialized.error);
             }
