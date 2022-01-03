@@ -2,7 +2,7 @@ import { FluentAdapter } from './fluentAdapter';
 import { SwiftAdapter } from './swiftAdapter';
 import { Typesafei18nAdapter, Typesafei18nAdapterOptions } from './typesafei18nAdapter';
 import { Result } from '@inlang/common';
-import { Resource } from '@inlang/fluent-syntax';
+import { SingleResource } from '@inlang/fluent-syntax';
 
 /**
  * Each adapter must implement the interface.
@@ -12,9 +12,9 @@ import { Resource } from '@inlang/fluent-syntax';
  * "simply" parse and serialize with regular JavaScript/Typescript.
  */
 export interface AdapterInterface {
-    parse(data: string): Result<Resource, Error>;
+    parse(data: string): Result<SingleResource, Error>;
 
-    serialize(data: Resource, options?: Typesafei18nAdapterOptions): Result<string, Error>;
+    serialize(data: SingleResource, options?: Typesafei18nAdapterOptions): Result<string, Error>;
 }
 
 /**
