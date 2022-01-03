@@ -1,7 +1,6 @@
-import { serializeExpression } from '@fluent/syntax';
 import { AdapterInterface } from './index';
 import { Result } from '@inlang/common';
-import { parse, SingleResource } from '@inlang/fluent-syntax';
+import { parse, serializeExpression, SingleResource } from '@inlang/fluent-syntax';
 
 export class FluentAdapter implements AdapterInterface {
     parse(data: string): Result<SingleResource, Error> {

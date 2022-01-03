@@ -2,15 +2,15 @@
  * Interpolation only works with %s (strings)
  */
 
-import * as fluent from '@fluent/syntax';
 import * as peggy from 'peggy';
 import { AdapterInterface } from './index';
 import { Result } from '@inlang/common';
+import { parse, SingleResource } from '@inlang/fluent-syntax';
 
 export class SwiftAdapter implements AdapterInterface {
-    parse(data: string): Result<fluent.Resource, Error> {
+    parse(data: string): Result<SingleResource, Error> {
         try {
-            const recourse = fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false });
+            const recourse = parse(peggy.generate(grammar).parse(data), { withSpans: false });
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
                 return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
@@ -21,7 +21,7 @@ export class SwiftAdapter implements AdapterInterface {
         }
     }
 
-    serialize(resource: fluent.Resource): Result<string, Error> {
+    serialize(resource: SingleResource): Result<string, Error> {
         try {
             let result = '';
             for (const entry of resource.body) {
