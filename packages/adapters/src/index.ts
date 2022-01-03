@@ -27,7 +27,7 @@ export interface AdapterInterface {
 // performance implications:
 // + no garbage collection. Each adapter is initialized only once.
 // - no code splitting. A piece of software might only need one specific adapter.
-export const adapter = {
+export const adapters = {
     swift: new SwiftAdapter(),
     fluent: new FluentAdapter(),
     'typesafe-i18n': new Typesafei18nAdapter(),
@@ -38,4 +38,4 @@ export const adapter = {
  *
  * Uses the keys of the `adapter` object.
  */
-export type SupportedAdapter = keyof typeof adapter;
+export type SupportedAdapter = keyof typeof adapters;

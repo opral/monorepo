@@ -1,4 +1,4 @@
-import { adapter } from '@inlang/adapters';
+import { adapters } from '@inlang/adapters';
 import { Resources } from '../src/resources';
 import { serializeEntry } from '../src/utils/serializeEntry';
 
@@ -6,7 +6,7 @@ let resources: Resources;
 
 beforeEach(() => {
     const api = Resources.parse({
-        adapter: adapter.fluent,
+        adapter: adapters.fluent,
         files: [
             {
                 languageCode: 'en',
@@ -253,7 +253,7 @@ describe('createMessage()', () => {
 
 describe('serialize', () => {
     it('should serialize a file correctly', () => {
-        const result = resources.serialize({ adapter: adapter.fluent });
+        const result = resources.serialize({ adapter: adapters.fluent });
         if (result.isErr) fail();
         expect(result.value).toEqual([
             {
