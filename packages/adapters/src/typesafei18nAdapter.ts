@@ -1,8 +1,7 @@
 import * as fluent from '@fluent/syntax';
 import { AdapterInterface } from './index';
-import { Result } from '../types/result';
+import { Result, LanguageCode } from '@inlang/common';
 import * as peggy from 'peggy';
-import { LanguageCode } from '../types/languageCode';
 
 export type Typesafei18nAdapterOptions = {
     languageCode: LanguageCode;
@@ -18,8 +17,8 @@ export class Typesafei18nAdapter implements AdapterInterface {
                 return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
             }
             return Result.ok(fluent.parse(peggy.generate(grammar).parse(data), { withSpans: false }));
-        } catch (e) {
-            return Result.err(e as Error);
+        } catch (error) {
+            return Result.err(error as Error);
         }
     }
 
@@ -54,6 +53,7 @@ export default de;`;
     }
 }
 
+// eslint-disable-next-line unicorn/no-hex-escape
 const grammar = String.raw`
 JSON_text
 	= [^=]* "=" output:value [^\0]* {

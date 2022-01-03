@@ -5,7 +5,7 @@
 import * as fluent from '@fluent/syntax';
 import * as peggy from 'peggy';
 import { AdapterInterface } from './index';
-import { Result } from '../types/result';
+import { Result } from '@inlang/common';
 
 export class SwiftAdapter implements AdapterInterface {
     parse(data: string): Result<fluent.Resource, Error> {
@@ -16,8 +16,8 @@ export class SwiftAdapter implements AdapterInterface {
                 return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
             }
             return Result.ok(recourse);
-        } catch (e) {
-            return Result.err(e as Error);
+        } catch (error) {
+            return Result.err(error as Error);
         }
     }
 
@@ -49,12 +49,13 @@ export class SwiftAdapter implements AdapterInterface {
                 }
             }
             return Result.ok(result);
-        } catch (e) {
-            return Result.err(e as Error);
+        } catch (error) {
+            return Result.err(error as Error);
         }
     }
 }
 
+// eslint-disable-next-line unicorn/no-hex-escape
 const grammar = String.raw`
 
 Result = WS @File WS

@@ -1,7 +1,7 @@
-import { FluentAdapter } from '../../src/adapters/fluentAdapter';
+import { SwiftAdapter } from "../src/swiftAdapter";
 
-describe('FluentAdapter', () => {
-    const adapter = new FluentAdapter();
+describe('SwiftAdapter', () => {
+    const adapter = new SwiftAdapter();
     it('should parse ok', () => {
         const result = adapter.parse(testFile);
         expect(result.isOk);
@@ -26,21 +26,31 @@ describe('FluentAdapter', () => {
 });
 
 const testFile = `
-# Try editing the translations below.
-# Set $variables' values in the Config tab.
+/*
+  A mutli-line
+  commment lalalalala.
 
-hello = Yes, Hello World!
-shared-photos =
-    { $userName } { $photoCount ->
-        [one] added a new photo
-       *[other] added { $photoCount } new photos
-    } to { $userGender ->
-        [male] his stream
-        [female] her stream
-       *[other] their stream
-    }.
+*/
 
-# This is a comment
--my-name = Samuel
+"WrongPassword" = "Wrong Password";
+
+
+// MARK: - Comment
+"CamelCaseKey" = "Something went wrong";
+"snake_case_key" = "An error occured while logging in. Please try again";
+
+// interpolation
+"some-key" = "Hello %s";
+
+
+//Another comment
+
+// MARK: - Introduction Guide
+"letsGetStarted" = "Let's go!";
+"redeemCode" = "Redeem code";
+
+"keyWithNumber" = "1 month";
+
+"kebap-case" = "The default Fluent style.";
 
 `;

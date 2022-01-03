@@ -4,7 +4,7 @@ import { DeeplLanguages } from 'deepl';
 import { definitions } from '@inlang/database';
 import { createServerSideSupabaseClient } from '../_utils/serverSideServices';
 import { TranslateRequestBody, TranslateResponseBody } from './translate';
-import { TranslationApi, Result } from '@inlang/common';
+import { Resources, Result } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 
 /**
@@ -22,7 +22,6 @@ import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
  */
 
 // this type is only exportable to be consumed in the front-end.
-//* DO NOT import this type outside of the dashboard.
 export type CreateBaseTranslationRequestBody = {
 	projectId: definitions['project']['id'];
 	baseTranslation: {
@@ -60,27 +59,35 @@ export async function post(request: Request): Promise<EndpointOutput> {
 			.select()
 			.match({ project_id: requestBody.projectId });
 
-		const translations: Result<TranslationApi, Error> = TranslationApi.parse({
+		const maybeResources: Result<Resources, Error> = Resources.parse({
 			adapter: new FluentAdapter(),
 			files:
 				languages.data?.map((language) => ({
 					data: language.file,
 					languageCode: language.iso_code
 				})) ?? [],
-			baseLanguage: project.data?.default_iso_code ?? 'en' // Always defined according to schema
+			baseLanguageCode: project.data?.default_iso_code ?? 'en' // Always defined according to schema
 		});
 
 		// just in case upserting the key, in case it does not exist yet.
-		if (translations.isErr) {
-			console.error(translations.error);
+		if (maybeResources.isErr) {
+			console.error(maybeResources.error);
 			return { status: 500 };
 		}
-		const translationAPI = translations.value;
-		if (translationAPI.doesKeyExist(requestBody.baseTranslation.key_name) === false) {
-			translationAPI.createKey(
-				requestBody.baseTranslation.key_name,
-				requestBody.baseTranslation.text
-			);
+		const resources = maybeResources.value;
+		// TODO languageCode
+		if (
+			resources.doesMessageExist({
+				id: requestBody.baseTranslation.key_name,
+				languageCode: 'en'
+			}) === false
+		) {
+			resources.createMessage({
+				id: requestBody.baseTranslation.key_name,
+				value: requestBody.baseTranslation.text,
+				// TODO
+				languageCode: 'en'
+			});
 		}
 		// wrapping all translations below in promises and execute in `Promise.all` speeds up
 		// the function fundamentaly through parallelism
@@ -128,18 +135,18 @@ export async function post(request: Request): Promise<EndpointOutput> {
 					} else {
 						console.log(language.iso_code);
 						// insert translation into database
-						translationAPI.createTranslation(
-							requestBody.baseTranslation.key_name,
-							text,
-							language.iso_code
-						);
+						resources.createMessage({
+							id: requestBody.baseTranslation.key_name,
+							value: text,
+							languageCode: language.iso_code
+						});
 					}
 					// additional parantheses to execute the function, otherwise the array is not an array of promises
 				})()
 			);
 		}
 		await Promise.all(promises);
-		const fluentFiles = translationAPI.serialize(new FluentAdapter());
+		const fluentFiles = resources.serialize({ adapter: new FluentAdapter() });
 		if (fluentFiles.isErr) throw fluentFiles.error;
 		for (const fluentFile of fluentFiles.value) {
 			const query = await supabase

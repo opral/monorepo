@@ -10,5 +10,5 @@
     "declaration": true,
     "allowJs": false
   },
-  "include": ["src/**/**.ts", "tests/**/**.ts"]
+  "include": ["src/**/**.ts", "tests/**/**.ts", "../fluent-syntax/src/validators/isValidMessageId.ts", "../fluent-syntax/tests/validators/isValidMessageId.test.ts", "../adapters/tests/fluentAdapter.test.ts", "../adapters/tests/typesafei18nAdapter.test.ts", "../adapters/tests/swiftAdapter.test.ts"]
 }

@@ -5,11 +5,12 @@
 	import { page } from '$app/stores';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
+	import { isValidMessageId } from '@inlang/common/src/utils/fluentValidators';
 
 	let open = false;
 
 	export function show(): void {
-		keyName = '';
+		messageId = '';
 		baseTranslationText = '';
 		status = 'idle';
 		open = true;
@@ -19,26 +20,15 @@
 		});
 	}
 
-	let keyName: string;
+	let messageId: string;
 
 	//let description: definitions['key']['description'];
 
-	let baseTranslationText = '';
+	let messageValue = '';
 
 	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
 
-	$: keyNameIsValid = () => {
-		const allKeys = $projectStore.data?.translations.getAllKeys();
-		if (allKeys?.isErr) {
-			alert(allKeys.error.message);
-		} else if (allKeys?.value.includes(keyName)) {
-			invalidKeyNameMessage = 'The key already exists in the project.';
-			return false;
-		}
-		return true;
-	};
-
-	$: isValidInput = keyNameIsValid() && baseTranslationText !== '';
+	$: isValidInput = isValidMessageId(messageId) && messageValue !== '';
 
 	let invalidKeyNameMessage: string;
 
@@ -53,7 +43,7 @@
 			projectId: $projectStore.data.project.id,
 			baseTranslation: {
 				key_name: keyName,
-				text: baseTranslationText
+				text: messageValue
 			}
 		};
 		const response = await fetch('/api/internal/create-base-translation', {

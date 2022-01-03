@@ -11,7 +11,6 @@
 		ToolbarMenu
 	} from 'carbon-components-svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import TranslationModal from '$lib/components/modals/TranslationModal.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
 	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
@@ -27,8 +26,7 @@
 
 	type Row = {
 		id: string;
-		key: string;
-		translations: { languageCode: LanguageCode; translation?: string }[];
+		values: Record<LanguageCode, string | undefined>;
 	};
 
 	let searchQuery = '';
@@ -42,32 +40,13 @@
 	let rows: () => Row[];
 	// the actual function
 	$: rows = () => {
-		let result: Row[] = [];
-		let allKeys;
-		if ((allKeys = $projectStore.data?.translations.getAllKeys())?.isErr) {
-			throw allKeys.error;
+		const result: Row[] = [];
+		const allIds = $projectStore.data?.resources.getMessageIdsForAllResources();
+		for (const id of allIds ?? []) {
+			const values = $projectStore.data?.resources.getMessageForAllResources({ id }) ?? {};
+			result.push({ id, values });
 		}
-		for (const key of allKeys?.value ?? []) {
-			let allTranslations;
-			if ((allTranslations = $projectStore.data?.translations.getAllTranslations(key))?.isErr) {
-				throw allTranslations.error;
-			}
-			result.push({
-				id: key,
-				key: key,
-				translations: allTranslations?.value ?? []
-			});
-		}
-
-		if (searchQuery !== '') {
-			result = result?.filter(
-				(row) =>
-					row.key.includes(searchQuery) ||
-					row.translations.some((translation) => translation.translation?.includes(searchQuery))
-			);
-		}
-		// return an empty array as fallback
-		return result?.reverse() ?? [];
+		return result;
 	};
 
 	let displayedRows: () => Row[];
@@ -79,15 +58,15 @@
 	// $: rows = fullRows.filter((row) => row.key.indexOf(searchQuery) !== -1);
 
 	// check if for this key there is a translation for each of the languages in the project
-	function keyIsMissingTranslations(row: unknown): boolean {
-		// type casting row as Row
-		// (parameter must be any due to sveltes limited ts support in markup)
-		const x = row as Row;
-		const numberOfLanguages = $projectStore.data?.languages.length;
-		const numberOfTranslations = x.translations.filter((t) => t.translation && t.translation !== '')
-			.length;
-		return numberOfLanguages !== numberOfTranslations;
-	}
+	// function keyIsMissingTranslations(row: unknown): boolean {
+	// 	// type casting row as Row
+	// 	// (parameter must be any due to sveltes limited ts support in markup)
+	// 	const x = row as Row;
+	// 	const numberOfLanguages = $projectStore.data?.languages.length;
+	// 	const numberOfTranslations = x.values.filter((t) => t.translation && t.translation !== '')
+	// 		.length;
+	// 	return numberOfLanguages !== numberOfTranslations;
+	// }
 
 	/*function keyIsFullyReviewed(row: unknown): boolean {
 		// type casting row as Row
@@ -100,18 +79,18 @@
 		return missingReviews.length === 0;
 	}*/
 
-	function keyIsMissingVariable(row: unknown): boolean {
-		const x = row as Row;
-		const missingVariables = $projectStore.data?.translations.checkMissingVariables();
-		if (missingVariables === undefined) throw 'Missing variables undefined';
-		if (missingVariables?.isErr) throw missingVariables.error;
-		for (const key of missingVariables.value) {
-			if (key.key === x.key) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// function keyIsMissingVariable(row: unknown): boolean {
+	// 	const x = row as Row;
+	// 	const missingVariables = $projectStore.data?.translations.checkMissingVariables();
+	// 	if (missingVariables === undefined) throw 'Missing variables undefined';
+	// 	if (missingVariables?.isErr) throw missingVariables.error;
+	// 	for (const key of missingVariables.value) {
+	// 		if (key.key === x.key) {
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 
 	let createTranslationModal: {
 		open: boolean;
@@ -147,27 +126,27 @@
 		{#if cell.key === 'actions'}
 			<row class="justify-end items-center">
 				<!-- Human translator -->
-				{#if keyIsMissingTranslations(row)}
-					<Button
-						icon={Language16}
-						iconDescription="Send to translator"
-						kind="ghost"
-						tooltipAlignment="start"
-						tooltipPosition="left"
-					/>
-				{/if}
+				<!-- {#if keyIsMissingTranslations(row)} -->
+				<Button
+					icon={Language16}
+					iconDescription="Send to translator"
+					kind="ghost"
+					tooltipAlignment="start"
+					tooltipPosition="left"
+				/>
+				<!-- {/if} -->
 				<!-- Status  -->
-				<div>
+				<!-- <div>
 					{#if keyIsMissingTranslations(row) === true}
 						<Tag type="red">Action Required</Tag>
-						<!--{:else if keyIsFullyReviewed(row) === false}
-						<Tag type="purple">Needs approval</Tag>-->
+						{:else if keyIsFullyReviewed(row) === false}
+						<Tag type="purple">Needs approval</Tag>
 					{:else if keyIsMissingVariable(row)}
 						<Tag type="red">Action Required</Tag>
 					{:else}
 						<Tag type="cool-gray">Complete</Tag>
 					{/if}
-				</div>
+				</div> -->
 				<!-- Delete Action -->
 				<Button
 					on:click={() => {
@@ -195,11 +174,11 @@
 	bind:page={pageNumber}
 />
 
-<TranslationModal
+<!-- <TranslationModal
 	bind:open={createTranslationModal.open}
 	translations={createTranslationModal.translations}
 	key={createTranslationModal.key}
-/>
+/> -->
 
 <CreateKeyModal bind:this={createKeyModal} />
 

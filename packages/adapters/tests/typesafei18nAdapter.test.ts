@@ -1,5 +1,5 @@
-import { Typesafei18nAdapter } from '../../src/adapters/typesafei18nAdapter';
-import { LanguageCode } from '../../src/types/languageCode';
+import { LanguageCode } from '@inlang/common';
+import { Typesafei18nAdapter } from '../src/typesafei18nAdapter';
 
 describe('Typesafei18nAdapter', () => {
     const adapter = new Typesafei18nAdapter();

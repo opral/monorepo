@@ -1,6 +1,6 @@
 {
-  "name": "@inlang/common",
-  "version": "0.0.1",
+  "name": "@inlang/adapters",
+  "version": "0.0.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -17,6 +17,13 @@
     "test:watch": "npm test -- --watch"
   },
   "devDependencies": {
-    "@inlang/eslint-config": "*"
+    "@inlang/eslint-config": "*",
+    "@inlang/common": "*"
+  },
+  "dependencies": {
+    "@inlang/fluent-syntax": "*",
+    "lodash": "^4.17.21",
+    "peggy": "^1.2.0",
+    "typesafe-i18n": "^2.51.1"
   }
 }

@@ -1,7 +1,7 @@
 import * as fluent from '@fluent/syntax';
 import { serializeExpression } from '@fluent/syntax';
 import { AdapterInterface } from './index';
-import { Result } from '../types/result';
+import { Result } from '@inlang/common';
 
 export class FluentAdapter implements AdapterInterface {
     parse(data: string): Result<fluent.Resource, Error> {

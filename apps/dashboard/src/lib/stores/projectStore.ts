@@ -2,7 +2,7 @@ import type { definitions } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
-import { TranslationApi } from '@inlang/common';
+import { Resources } from '@inlang/common';
 import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 import { Result } from '@inlang/common';
 
@@ -18,7 +18,7 @@ interface ProjectStoreInterface {
 	data: null | {
 		project: definitions['project'];
 		languages: definitions['language'][];
-		translations: TranslationApi;
+		resources: Resources;
 	};
 	error: PostgrestError | Error | null;
 }
@@ -58,14 +58,14 @@ async function getData(
 		.match({ project_id: args.projectId })
 		.order('iso_code', { ascending: true });
 
-	const translations: Result<TranslationApi, Error> = TranslationApi.parse({
+	const resources: Result<Resources, Error> = Resources.parse({
 		adapter: new FluentAdapter(),
 		files:
 			languages.data?.map((language) => ({
 				data: language.file,
 				languageCode: language.iso_code
 			})) ?? [],
-		baseLanguage: project.data?.default_iso_code ?? 'en' // Always defined according to schema
+		baseLanguageCode: project.data?.default_iso_code ?? 'en' // Always defined according to schema
 	});
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.
@@ -74,15 +74,15 @@ async function getData(
 		error = project.error;
 	} else if (languages.error) {
 		error = languages.error;
-	} else if (translations.isErr) {
-		error = translations.error;
+	} else if (resources.isErr) {
+		error = resources.error;
 	}
-	if (translations.isErr || error) {
+	if (resources.isErr || error) {
 		updateStore(() => ({ data: null, error: error }));
 	} else {
 		updateStore(() => {
 			// null checking
-			if (project.data === null || languages.data === null || translations.value === null) {
+			if (project.data === null || languages.data === null || resources.value === null) {
 				return {
 					data: null,
 					// using postgresterror here to not have type `error:
@@ -98,7 +98,7 @@ async function getData(
 				data: {
 					project: project.data,
 					languages: languages.data,
-					translations: translations.value
+					resources: resources.value
 				},
 				error: null
 			};

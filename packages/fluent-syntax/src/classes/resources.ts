@@ -1,10 +1,10 @@
 import * as fluent from '@fluent/syntax';
-import { AdapterInterface } from './adapters/index';
-import { LanguageCode } from './types/languageCode';
-import { SerializedResource } from './types/serializedResource';
+import { AdapterInterface } from '@inlang/adapters';
+import { LanguageCode } from '@inlang/common';
+import { SerializedResource } from '../types/serializedResource';
 import { remove, trim } from 'lodash';
-import { Result } from './types/result';
-import { isValidMessageId } from './utils/fluentValidators';
+import { Result } from '@inlang/common';
+import { isValidMessageId } from '../validators/isValidMessageId';
 
 // TODO refactor translation api to named parameters and adhere to fluent names e.g. "message" instead of "translation" etc.
 
@@ -76,7 +76,6 @@ export class Resources {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -106,6 +105,12 @@ export class Resources {
      * Retrieves all messages with the given id of all resources.
      *
      * @returns A record holding the messages accessible via the languageCode.
+     *
+     * @example
+     *      {
+     *          "en": "Hello World",
+     *          "de": "Hallo Welt"
+     *      }
      */
     getMessageForAllResources(args: { id: string }): Record<string, string | undefined> {
         const result: Record<string, string | undefined> = {};

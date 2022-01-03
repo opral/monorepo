@@ -1,4 +1,4 @@
-import { LanguageCode } from './languageCode';
+import { LanguageCode } from '@inlang/common';
 
 /**
  * A serialized resource (a file saved in the source code/database).

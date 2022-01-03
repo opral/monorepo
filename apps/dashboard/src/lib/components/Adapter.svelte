@@ -18,7 +18,7 @@
 	import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
 	import { Typesafei18nAdapter } from '@inlang/common/src/adapters/typesafei18nAdapter';
 	import { AdapterInterface } from '@inlang/common/src/adapters';
-	import { TranslationApi } from '@inlang/common';
+	import { Resources } from '@inlang/common';
 	import ISO6391 from 'iso-639-1';
 
 	export let project: definitions['project'];
@@ -112,7 +112,7 @@
 			adapter = new Typesafei18nAdapter();
 		}
 		//create and parse
-		const api = TranslationApi.parse({
+		const api = Resources.parse({
 			adapter: adapter,
 			files: [
 				{
@@ -120,13 +120,13 @@
 					data: importText
 				}
 			],
-			baseLanguage: baseLanguage
+			baseLanguageCode: baseLanguage
 		});
 
 		if (api.isErr) {
 			alert(api.error.message);
 		} else {
-			let fluentLanguages = api.value.serialize(new FluentAdapter());
+			let fluentLanguages = api.value.serialize({ adapter: new FluentAdapter() });
 			if (fluentLanguages.isErr) {
 				alert(fluentLanguages.error.message);
 			} else {
@@ -172,7 +172,7 @@
 			// Typesafei18n
 			adapter = new Typesafei18nAdapter();
 		}
-		const api = TranslationApi.parse({
+		const api = Resources.parse({
 			adapter: new FluentAdapter(),
 			files: [
 				{
@@ -180,10 +180,10 @@
 					data: getFileForLanguageIso(selectedLanguageIso)
 				}
 			],
-			baseLanguage: baseLanguage
+			baseLanguageCode: baseLanguage
 		});
 		if (api.isOk) {
-			let response = api.value.serialize(adapter);
+			let response = api.value.serialize({ adapter });
 			if (response.isOk) {
 				exportedCode = response.value[0].data;
 			} else {
