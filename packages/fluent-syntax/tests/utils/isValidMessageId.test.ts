@@ -1,4 +1,4 @@
-import { isValidMessageId } from '../../src/validators/isValidMessageId';
+import { isValidMessageId } from '../../src/utils/isValidMessageId';
 
 describe('isValidMessageId()', () => {
     it('should accept snake_case', () => {

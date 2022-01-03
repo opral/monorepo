@@ -17,12 +17,13 @@
     "test:watch": "npm test -- --watch"
   },
   "devDependencies": {
-    "@inlang/eslint-config": "*",
-    "@inlang/common": "*"
+    "@fluent/dedent": "^0.4.0",
+    "@inlang/common": "*",
+    "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@inlang/adapters": "*",
     "@fluent/syntax": "^0.18.0",
+    "@inlang/adapters": "*",
     "lodash": "^4.17.21"
   }
 }

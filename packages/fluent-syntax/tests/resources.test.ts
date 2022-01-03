@@ -1,5 +1,5 @@
 import { adapter } from '@inlang/adapters';
-import { Resources } from '../../src/classes/resources';
+import { Resources } from '../src/resources';
 
 let resources: Resources;
 

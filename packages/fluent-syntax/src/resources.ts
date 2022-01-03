@@ -1,12 +1,10 @@
 import * as fluent from '@fluent/syntax';
 import { AdapterInterface } from '@inlang/adapters';
 import { LanguageCode } from '@inlang/common';
-import { SerializedResource } from '../types/serializedResource';
+import { SerializedResource } from './types/serializedResource';
 import { remove, trim } from 'lodash';
 import { Result } from '@inlang/common';
-import { isValidMessageId } from '../validators/isValidMessageId';
-
-// TODO refactor translation api to named parameters and adhere to fluent names e.g. "message" instead of "translation" etc.
+import { isValidMessageId } from './utils/isValidMessageId';
 
 /**
  * Holds all resources as object accesible via a `languageCode`.

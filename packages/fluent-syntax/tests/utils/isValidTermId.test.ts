@@ -1,4 +1,4 @@
-import { isValidTermId } from '../../src/validators/isValidTermId';
+import { isValidTermId } from '../../src/utils/isValidTermId';
 
 describe('isValidTermId()', () => {
     it('should accept snake_case', () => {
