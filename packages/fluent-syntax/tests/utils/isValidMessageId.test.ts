@@ -11,6 +11,10 @@ describe('isValidMessageId()', () => {
     it('should accept camelCase', () => {
         expect(isValidMessageId('helloWorld')).toBeTruthy();
     });
+
+    it('should accept PascalCase', () => {
+        expect(isValidMessageId('HelloWorld')).toBeTruthy();
+    });
     it('should reject `-` prefixed ids', () => {
         // that would be a term id
         expect(isValidMessageId('-hello')).toBeFalsy();
