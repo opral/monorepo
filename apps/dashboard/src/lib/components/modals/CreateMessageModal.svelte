@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ISO6391 from 'iso-639-1';
-	import { InlineLoading, Modal, TextArea, TextInput } from 'carbon-components-svelte';
+	import { InlineLoading, Modal, Tag, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
 	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
@@ -20,9 +20,7 @@
 		});
 	}
 
-	let messageId: string | undefined;
-
-	//let description: definitions['key']['description'];
+	let messageId = '';
 
 	let messageValue = '';
 
@@ -30,7 +28,12 @@
 
 	$: isValidInput = messageId !== undefined && isValidMessageId(messageId) && messageValue !== '';
 
-	let invalidKeyNameMessage: string;
+	$: invalidMessageIdErrorMessage = $projectStore.data?.resources.doesMessageExist({
+		id: messageId,
+		languageCode: $projectStore.data.project.default_iso_code
+	})
+		? 'Id already exists.'
+		: 'Invalid character.';
 
 	let keyNameInputElement: HTMLInputElement;
 
@@ -69,7 +72,7 @@
 
 <Modal
 	bind:open
-	modalHeading="New key"
+	modalHeading="New message"
 	size="sm"
 	primaryButtonText="Create"
 	secondaryButtonText="Cancel"
@@ -81,6 +84,13 @@
 	primaryButtonDisabled={isValidInput === false}
 	shouldSubmitOnEnter={false}
 >
+	<p>
+		A new message is always created for the human base language first. The human base language for
+		this project is <strong>
+			{ISO6391.getName($projectStore.data?.project.default_iso_code ?? '')}
+		</strong>.
+	</p>
+	<br />
 	<!-- 
 		bug: keyNameIsValid is not showing once the user enters a duplicativ key, but works for the primary button (wtf?) 
 	   	not of importance to fix for now.
@@ -89,20 +99,19 @@
 		invalid={messageId !== undefined &&
 			isValidMessageId(messageId) === false &&
 			status !== 'isFinished'}
-		invalidText={invalidKeyNameMessage}
-		labelText="Key"
-		helperText="A key acts as identifier for a translation."
-		bind:value={messageValue}
+		invalidText={invalidMessageIdErrorMessage}
+		labelText="Id (identifier)"
+		bind:value={messageId}
 		bind:ref={keyNameInputElement}
 	/>
 	<br />
 	<TextArea
 		rows={2}
-		labelText={`Base translation (${ISO6391.getName(
-			$projectStore.data?.project.default_iso_code ?? ''
-		)})`}
+		labelText={`Message`}
 		bind:value={messageValue}
-		helperText={`The base translation is the text of the projects default (human) language.`}
+		helperText={`Remember, the message must be written in ${ISO6391.getName(
+			$projectStore.data?.project.default_iso_code ?? ''
+		)}.`}
 	/>
 	<!-- <br />
 	<TextArea

@@ -5,17 +5,15 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarSearch,
-		Tag,
 		Pagination,
 		ToolbarMenuItem,
 		ToolbarMenu
 	} from 'carbon-components-svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import { projectStore } from '$lib/stores/projectStore';
-	import CreateKeyModal from '$lib/components/modals/CreateKeyModal.svelte';
+	import CreateMessageModal from '$lib/components/modals/CreateMessageModal.svelte';
 	import DeleteKeyModal from '$lib/components/modals/DeleteKeyModal.svelte';
 	import Translations from '$lib/components/Translations.svelte';
-	import { LanguageCode } from '@inlang/common';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import Language16 from 'carbon-icons-svelte/lib/Language16';
 	import { Message } from '@inlang/fluent-syntax';
@@ -35,7 +33,7 @@
 	let pageNumber = 1;
 
 	let deleteKeyModal: DeleteKeyModal;
-	let createKeyModal: CreateKeyModal;
+	let createMessageModal: CreateMessageModal;
 
 	// define the type of rows to be a function that returns an array of row
 	let rows: () => Row[];
@@ -92,20 +90,10 @@
 	// 	}
 	// 	return false;
 	// }
-
-	let createTranslationModal: {
-		open: boolean;
-		translations: { languageCode: LanguageCode; translation: string }[];
-		key: string;
-	} = {
-		open: false,
-		translations: [],
-		key: ''
-	};
 </script>
 
 <h1>Messages</h1>
-<p>All your translation keys will appear here. You can create, delete and edit them.</p>
+<p>All your messages will appear here. You can create, delete and edit them.</p>
 <br />
 <DataTable expandable {headers} rows={displayedRows()}>
 	<Toolbar>
@@ -118,7 +106,7 @@
 			<Button
 				icon={Add16}
 				on:click={() => {
-					createKeyModal.show();
+					createMessageModal.show();
 				}}>Create key</Button
 			>
 		</ToolbarContent>
@@ -181,6 +169,6 @@
 	key={createTranslationModal.key}
 /> -->
 
-<CreateKeyModal bind:this={createKeyModal} />
+<CreateMessageModal bind:this={createMessageModal} />
 
 <DeleteKeyModal bind:this={deleteKeyModal} />
