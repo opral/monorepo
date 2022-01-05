@@ -162,7 +162,10 @@ export class Resources {
         return result;
     }
 
-    updateMessage(args: { id: Message['id']['name']; value: string; languageCode: LanguageCode }): Result<void, Error> {
+    updateMessage(args: { id: Message['id']['name']; languageCode: LanguageCode; with: Message }): Result<void, Error> {
+        if (args.id !== args.with.id.name) {
+            return Result.err(Error('The given id does not match the with.id'));
+        }
         const resource = this.resources[args.languageCode];
         if (resource === undefined) {
             return Result.err(Error(`Resource for language code ${args.languageCode} does not exist.`));
@@ -175,11 +178,7 @@ export class Resources {
                 Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}`)
             );
         }
-        const parsedUpdatedMessage = parse(`${args.id} = ${args.value}`, {}).body[0];
-        if (parsedUpdatedMessage.type === 'Junk') {
-            return Result.err(Error(`Unable to parse the value of the updated message: ${args.value}`));
-        }
-        resource.body[indexOfMessage] = parsedUpdatedMessage;
+        resource.body[indexOfMessage] = args.with;
         return Result.ok(undefined);
     }
 

@@ -1,3 +1,4 @@
+import { Identifier, Message, Pattern, TextElement } from '@fluent/syntax';
 import { adapters } from '@inlang/adapters';
 import { Resources } from '../src/resources';
 import { serializeEntry } from '../src/utils/serializeEntry';
@@ -107,7 +108,9 @@ describe('getMessageIdsForAllResources()', () => {
 
 describe('updateMessage()', () => {
     it('should update a message', () => {
-        const update = resources.updateMessage({ id: 'test', value: 'why not this instead', languageCode: 'en' });
+        const mockMessage = new Message(new Identifier('test'), new Pattern([new TextElement('why not this instead')]));
+
+        const update = resources.updateMessage({ id: 'test', languageCode: 'en', with: mockMessage });
         if (update.isErr) {
             fail();
         }
@@ -118,13 +121,24 @@ describe('updateMessage()', () => {
         expect(serializeEntry(result)).toMatch('test = why not this instead');
     });
 
-    it('should fail when languageCode does not exist', () => {
-        const result = resources.updateMessage({ id: 'test', value: 'this should fail', languageCode: 'aa' });
+    it('should fail when the language code does not exist', () => {
+        const mockMessage = new Message(new Identifier('test'), new Pattern([new TextElement('why not this instead')]));
+        const result = resources.updateMessage({ id: 'test', languageCode: 'aa', with: mockMessage });
         expect(result.isErr).toBeTruthy();
     });
 
-    it('should fail when message is not found', () => {
-        const result = resources.updateMessage({ id: 'unknown-key', value: 'this should fail', languageCode: 'en' });
+    it('should fail when the message id is not found', () => {
+        const mockMessage = new Message(
+            new Identifier('unknown-id'),
+            new Pattern([new TextElement('why not this instead')])
+        );
+        const result = resources.updateMessage({ id: 'unknown-id', languageCode: 'en', with: mockMessage });
+        expect(result.isErr).toBeTruthy();
+    });
+
+    it('should fail when the given id does not equal the with.id', () => {
+        const mockMessage = new Message(new Identifier('test'), new Pattern([new TextElement('why not this instead')]));
+        const result = resources.updateMessage({ id: 'differnet-id', languageCode: 'en', with: mockMessage });
         expect(result.isErr).toBeTruthy();
     });
 });
