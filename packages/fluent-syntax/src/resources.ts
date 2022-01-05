@@ -86,21 +86,15 @@ export class Resources {
     }
 
     /**
-     * Retrieves all messages with the given id of all resources.
-     *
-     * @returns A record holding the messages accessible via the languageCode.
-     *
-     * @example
-     *      {
-     *          "en": "Hello World",
-     *          "de": "Hallo Welt"
-     *      }
+     * Retrieves all messages with the given id of all resources
      */
-    getMessageForAllResources(args: { id: Message['id']['name'] }): Record<string, Message | undefined> {
-        const result: ReturnType<typeof this.getMessageForAllResources> = {};
+    getMessageForAllResources(args: { id: Message['id']['name'] }): { languageCode: LanguageCode; message: Message }[] {
+        const result: ReturnType<typeof this.getMessageForAllResources> = [];
         for (const [languageCode] of Object.entries(this.resources)) {
             const message = this.getMessage({ id: args.id, languageCode: languageCode as LanguageCode });
-            result[languageCode] = message;
+            if (message) {
+                result.push({ languageCode: languageCode as LanguageCode, message });
+            }
         }
         return result;
     }
