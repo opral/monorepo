@@ -1,18 +1,19 @@
 <script lang="ts">
 	import ISO6391 from 'iso-639-1';
-	import { InlineLoading, Modal, Tag, TextArea, TextInput } from 'carbon-components-svelte';
+	import { Modal, TextArea, TextInput } from 'carbon-components-svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
-	import type { CreateBaseTranslationRequestBody } from './../../../routes/api/internal/create-base-translation';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 	import { isValidMessageId } from '@inlang/fluent-syntax';
+	import { updateResourcesInDatabase } from '$lib/services/database';
+	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 
 	let open = false;
 
 	export function show(): void {
 		messageId = '';
 		messageValue = '';
-		status = 'idle';
+		status = 'inactive';
 		open = true;
 		// only god knows why focus has to be wrapped in a setTimeout to work
 		setTimeout(() => {
@@ -24,7 +25,7 @@
 
 	let messageValue = '';
 
-	let status: 'idle' | 'isLoading' | 'isFinished' | 'hasError' = 'idle';
+	let status: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
 	$: isValidInput = messageId !== undefined && isValidMessageId(messageId) && messageValue !== '';
 
@@ -38,28 +39,23 @@
 	let keyNameInputElement: HTMLInputElement;
 
 	async function handleSubmission(): Promise<void> {
-		status = 'isLoading';
+		status = 'active';
 		if ($projectStore.data === null) {
 			throw 'Project Store is null.';
 		}
-		const body: CreateBaseTranslationRequestBody = {
-			projectId: $projectStore.data.project.id,
-			baseTranslation: {
-				key_name: messageId,
-				text: messageValue
-			}
-		};
-		const response = await fetch('/api/internal/create-base-translation', {
-			method: 'post',
-			headers: new Headers({
-				'content-type': 'application/json'
-			}),
-			body: JSON.stringify(body)
+		const create = $projectStore.data.resources.createMessage({
+			id: messageId,
+			value: messageValue,
+			languageCode: $projectStore.data.project.default_iso_code
 		});
-		if (response.ok !== true) {
-			status = 'hasError';
+		const updateDatabase = await updateResourcesInDatabase({
+			projectId: $projectStore.data.project.id ?? '',
+			resources: $projectStore.data.resources
+		});
+		if (create.isErr || updateDatabase.isErr) {
+			status = 'error';
 		} else {
-			status = 'isFinished';
+			status = 'finished';
 			projectStore.getData({ projectId: $page.params.projectId });
 			// automatically closing the modal but leave time to
 			// let the user read the result status of the action
@@ -98,7 +94,7 @@
 	<TextInput
 		invalid={messageId !== undefined &&
 			isValidMessageId(messageId) === false &&
-			status !== 'isFinished'}
+			status !== 'finished'}
 		invalidText={invalidMessageIdErrorMessage}
 		labelText="Id (identifier)"
 		bind:value={messageId}
@@ -122,11 +118,11 @@
 	/>
 	<br /> -->
 	<br />
-	{#if status === 'isLoading'}
-		<InlineLoading status="active" description="Auto-translating..." />
-	{:else if status === 'isFinished'}
-		<InlineLoading status="finished" description="Translations have been created." />
-	{:else if status === 'hasError'}
-		<InlineLoading status="error" description="Something went wrong please report the issue." />
+	{#if status !== 'inactive'}
+		<InlineLoadingWrapper
+			{status}
+			activeDescription="Creating the message..."
+			finishedDescription="Message has been created."
+		/>
 	{/if}
 </Modal>
