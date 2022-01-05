@@ -57,21 +57,28 @@ describe('getMessage()', () => {
 
 describe('getMessageForAllResources()', () => {
     it('should return all messages', () => {
-        const messages = resources
-            .getMessageForAllResources({ id: 'test' })
-            .map((obj) => ({ [obj.languageCode]: serializeEntry(obj.message) }));
+        const messages = resources.getMessageForAllResources({ id: 'test' });
 
-        const match = [
-            { en: 'test = this is my test' },
-            { da: 'test = dette er min test' },
-            { de: 'test = dis ist ein test' },
-        ];
-        expect(messages).toEqual(match);
+        const result: Record<string, string> = {};
+
+        for (const languageCode in messages) {
+            const message = messages[languageCode];
+            if (message) {
+                result[languageCode] = serializeEntry(message);
+            }
+        }
+
+        const match = {
+            en: 'test = this is my test',
+            da: 'test = dette er min test',
+            de: 'test = dis ist ein test',
+        };
+        expect(result).toEqual(match);
     });
 
-    it('should return an empty array if no messages exist', () => {
+    it('should return an empty object if no messages exist', () => {
         const result = resources.getMessageForAllResources({ id: 'undefined-key' });
-        expect(result).toEqual([]);
+        expect(result).toEqual({});
     });
 });
 
