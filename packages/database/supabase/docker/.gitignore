@@ -1,3 +1,5 @@
 volumes/db/data
+volumes/db/init/data.sql
 volumes/storage
-!.env
+.env
+test.http
