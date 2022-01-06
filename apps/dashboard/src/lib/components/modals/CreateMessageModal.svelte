@@ -41,7 +41,8 @@
 	async function handleSubmission(): Promise<void> {
 		status = 'active';
 		if ($projectStore.data === null) {
-			throw 'Project Store is null.';
+			status = 'error';
+			return;
 		}
 		const create = $projectStore.data.resources.createMessage({
 			id: messageId,
