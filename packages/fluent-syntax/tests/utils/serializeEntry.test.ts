@@ -83,3 +83,15 @@ it('should serialize a comment', () => {
     const result = serializeEntry(message);
     expect(result).toEqual('# this is a comment');
 });
+
+it('should return a message without id', () => {
+    const resource = parse(
+        ftl`
+    welcome = Welcome, {$name}, to {-brand-name}!
+    `,
+        {}
+    );
+    const message = resource.body[0];
+    const result = serializeEntry(message, { withoutId: true });
+    expect(result).toEqual('Welcome, { $name }, to { -brand-name }!');
+});

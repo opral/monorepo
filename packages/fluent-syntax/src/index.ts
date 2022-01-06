@@ -6,3 +6,4 @@ export * from './types/serializedResource';
 export * from './types/singleResource';
 export * from './utils/isValidMessageId';
 export * from './utils/isValidTermId';
+export * from './utils/serializeEntry';
