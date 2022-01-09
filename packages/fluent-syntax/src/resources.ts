@@ -162,7 +162,10 @@ export class Resources {
         return result;
     }
 
-    updateMessage(args: { id: Message['id']['name']; languageCode: LanguageCode; with: Message }): Result<void, Error> {
+    updateMessage(
+        args: { id: Message['id']['name']; languageCode: LanguageCode; with: Message },
+        options?: { upsert?: true }
+    ): Result<void, Error> {
         if (args.id !== args.with.id.name) {
             return Result.err(Error('The given id does not match the with.id'));
         }
@@ -174,11 +177,19 @@ export class Resources {
             (entry) => entry.type === 'Message' && entry.id.name === args.id
         );
         if (indexOfMessage === -1) {
-            return Result.err(
-                Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}`)
-            );
+            if (options?.upsert !== true) {
+                return Result.err(
+                    Error(
+                        `Message with id '${args.id}' does not exist for the language code ${args.languageCode}. Did you mean to upsert?`
+                    )
+                );
+            } else {
+                // appending at the end
+                resource.body[resource.body.length] = args.with;
+            }
+        } else {
+            resource.body[indexOfMessage] = args.with;
         }
-        resource.body[indexOfMessage] = args.with;
         return Result.ok(undefined);
     }
 
