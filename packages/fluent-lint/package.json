@@ -13,7 +13,7 @@
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "npm test -- --watch"
   },
   "devDependencies": {
