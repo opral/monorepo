@@ -13,8 +13,7 @@ import { lintEntry } from '../src/lintEntry';
 // select expression can be different for languages. Think about
 // pluralization rules.
 //
-// See the following discussion https://github.com/inlang/inlang/discussions/87
-
+// See the following discussion #87 https://github.com/inlang/inlang/discussions/87
 it('should return Result.ok for a simple message', () => {
     // some-id = Hello { $userName } you have { $numApples ->
     //       [one] one apple
@@ -113,7 +112,10 @@ it('should return Result.ok even though the select expressions variants differs'
         ])
     );
     const result = lintEntry({ source, target });
-    expect(result.isOk).toBeTruthy();
+    if (result.isErr) {
+        console.log(result.error);
+        fail();
+    }
 });
 
 it('should return Result.err if the select expression variable reference differs', () => {
