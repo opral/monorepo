@@ -99,6 +99,18 @@ describe('deleteMessage()', () => {
     });
 });
 
+describe('deleteMessageForAllResources()', () => {
+    it('should delete the message for all resources', () => {
+        const result = resources.deleteMessageForAllResources({ id: 'test' });
+        if (result.isErr) {
+            fail();
+        }
+        for (const languageCode of resources.containedLanguageCodes()) {
+            expect(resources.getMessage({ id: 'test', languageCode })).toBeUndefined();
+        }
+    });
+});
+
 describe('getMessageIdsForAllResources()', () => {
     it('should get all ids', () => {
         const result = resources.getMessageIdsForAllResources();
@@ -156,80 +168,6 @@ describe('updateMessage()', () => {
         expect(getMessage).toEqual(mockMessage);
     });
 });
-
-// describe('checkMissingTranslations', () => {
-//     it('should check for missing translations', () => {
-//         const result = resources.();
-//         if (result.isErr) {
-//             fail();
-//         }
-//         expect(result.value).toEqual([{ key: 'extra', languageCodes: ['da', 'de'] }]);
-//     });
-// });
-
-// describe('checkMissingTranslationsForKey', () => {
-//     it('should check for missing translations when giving a key', () => {
-//         const result = resources.checkMissingTranslationsForKey('extra');
-//         if (result.isErr) fail(result.error);
-//         expect(result.value).toEqual([
-//             { key: 'extra', languageCode: 'da' },
-//             { key: 'extra', languageCode: 'de' },
-//         ]);
-//     });
-
-//     it('should return an empty list when there are no missing translations for a key', () => {
-//         const result = resources.checkMissingTranslationsForKey('test');
-//         if (result.isErr) fail(result.error);
-//         expect(result.value).toEqual([]);
-//     });
-// });
-
-/*describe('updateFile', () => {
-    it('should update the files when uploading new ones', () => {
-        const newFile: TranslationFile = {
-            languageCode: 'de',
-            data: 'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {$name}',
-        };
-        result = resources.updateFile([newFile]);
-        if (result.isErr) fail(result.error);
-        const fluentFiles = resources.getFluentFiles();
-        if (fluentFiles.isErr) fail(fluentFiles.error);
-        for (const fluentFile of fluentFiles.value) {
-            if (fluentFile.languageCode === 'de') {
-                expect(fluentFile.data).toMatch(
-                    'test = dis ist mein test\nhello = hallo mit dich\ncomplex = Hallo {$name}'
-                );
-            }
-        }
-    });
-
-    it('should return an error when trying to delete keys', () => {
-        const newFile: TranslationFile = {
-            languageCode: 'de',
-            data: '',
-        };
-        result = resources.updateFile([newFile]);
-        expect(result.isErr).toBeTruthy();
-    });
-
-    it('should be possible to override this error', () => {
-        const newFile: TranslationFile = {
-            languageCode: 'de',
-            data: '',
-        };
-        result = resources.updateFile([newFile], { override: true });
-        expect(result.isErr).toBeFalsy();
-    });
-
-    it('should return an error when parsing junk', () => {
-        const newFile: TranslationFile = {
-            languageCode: 'de',
-            data: 'asd = ',
-        };
-        result = resources.updateFile([newFile], { override: true });
-        expect(result.isErr).toBeTruthy();
-    });
-});*/
 
 describe('createMessage()', () => {
     it('should be possible to add a message', () => {
