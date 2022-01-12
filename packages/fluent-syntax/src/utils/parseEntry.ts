@@ -8,7 +8,6 @@ export function parseEntry(value: string, options: { expectType: 'ResourceCommen
 export function parseEntry(value: string, options: { expectType: 'Message' }): Result<Message, Error>;
 export function parseEntry(value: string, options: { expectType: 'Term' }): Result<Term, Error>;
 export function parseEntry(value: string, options: { expectType: 'Junk' }): Result<Junk, Error>;
-export function parseEntry(value: string, options: { expectType: Entry['type'] }): Result<Entry, Error>;
 
 /**
  * Parses an a fluent string to an Entry (without Junk).
@@ -21,13 +20,17 @@ export function parseEntry(value: string, options: { expectType: Entry['type'] }
  *      >> Result.err(Error)
  */
 export function parseEntry(value: string, options: { expectType: Entry['type'] }): Result<Entry, Error> {
-    const resource = parse(value, {});
+    // ignore the spans when parsing -> `serialize` will format entry correctly
+    const resource = parse(value, { withSpans: false });
     if (resource.body.length !== 1) {
         return Result.err(Error('Multiple entries have been parsed instead of only one.'));
     }
     const entry = resource.body[0];
-    if (entry.type !== options.expectType) {
-        return Result.err(Error(`The parsed type is "${entry.type}" and not the expected "${options.expectType}"`));
+    if (options.expectType && entry.type !== options.expectType) {
+        if (entry.type === 'Junk') {
+            return Result.err(Error('The syntax contains an error.'));
+        }
+        return Result.err(Error(`The parsed type is "${entry.type}" and not the expected "${options.expectType}".`));
     }
     return Result.ok(resource.body[0]);
 }
