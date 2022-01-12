@@ -32,13 +32,67 @@ function createProjectStore() {
 	return {
 		subscribe,
 		set,
-		getData: (args: GetDataArgs): Promise<void> => getData(args, update)
+		getData: (args: GetDataArgs): Promise<void> => getData(args, update),
+		updateResourcesInDatabase: () => updateResourcesInDatabase({ updater: update })
 	};
 }
 
 type GetDataArgs = {
 	projectId: definitions['project']['id'];
 };
+
+/**
+ * Updates all languages in the database of a project and their corresponding files.
+ *
+ * Make sure that a subscription for the corresponding project is active and depent on the
+ * subscription to update the UI (instead of the return type of this function).
+ */
+// This ugly function is required since the simple database schema of "just save fluent source files"
+// entails having no proper api to update the database. The supabase API (builder) can't be used since the
+// data is not relational (yet?).
+async function updateResourcesInDatabase(args: {
+	updater: (updater: Updater<ProjectStoreInterface>) => void;
+}): Promise<Result<void, Error>> {
+	let project: ProjectStoreInterface | undefined;
+	// little hack to get the current value of the project store
+	projectStore.subscribe((p) => {
+		project = p;
+	});
+	while (project === undefined) {
+		// wait 10 milliseconds
+		await new Promise((resolve) => setTimeout(resolve, 10));
+	}
+	if (project.data === null) {
+		return Result.err(Error('project.data was null'));
+	}
+	const serializedResources = project.data.resources.serialize({ adapter: adapters.fluent });
+	if (serializedResources.isErr) {
+		return Result.err(serializedResources.error);
+	}
+	const promises = [];
+	for (const serializedResource of serializedResources.value) {
+		promises.push(
+			database
+				.from<definitions['language']>('language')
+				.update({ file: serializedResource.data })
+				.eq('project_id', project.data.project.id)
+				.eq('iso_code', serializedResource.languageCode)
+		);
+	}
+	const responses = await Promise.all(promises);
+	const errors = responses.filter((response) => response.error !== null);
+	if (errors.length > 0) {
+		const message =
+			errors.length > 1
+				? `Multiple errors occured: \n${errors
+						.map((error) => error.error?.message)
+						.reduce((a, b) => a + '\n' + b)}`
+				: errors[0].error?.message;
+		return Result.err(Error(message));
+	}
+	getData({ projectId: project.data.project.id }, args.updater);
+	return Result.ok(undefined);
+}
 
 // a true ugly monster function
 async function getData(

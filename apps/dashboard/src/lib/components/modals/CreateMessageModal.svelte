@@ -5,7 +5,6 @@
 	import { page } from '$app/stores';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 	import { isValidMessageId } from '@inlang/fluent-syntax';
-	import { updateResourcesInDatabase } from '$lib/services/database';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 
 	let open = false;
@@ -41,6 +40,7 @@
 	async function handleSubmission(): Promise<void> {
 		status = 'active';
 		if ($projectStore.data === null) {
+			console.log('Projectstore.data was null');
 			status = 'error';
 			return;
 		}
@@ -49,11 +49,11 @@
 			value: messageValue,
 			languageCode: $projectStore.data.project.default_iso_code
 		});
-		const updateDatabase = await updateResourcesInDatabase({
-			projectId: $projectStore.data.project.id ?? '',
-			resources: $projectStore.data.resources
-		});
+		const updateDatabase = await projectStore.updateResourcesInDatabase();
 		if (create.isErr || updateDatabase.isErr) {
+			console.log(
+				create.isErr ? create.error : updateDatabase.isErr ? updateDatabase.error : 'Unknown error'
+			);
 			status = 'error';
 		} else {
 			status = 'finished';
@@ -82,8 +82,8 @@
 	shouldSubmitOnEnter={false}
 >
 	<p>
-		A new message is always created for the human base language first. The human base language for
-		this project is <strong>
+		A new message is always created for base language first. The human base language for this
+		project is <strong>
 			{ISO6391.getName($projectStore.data?.project.default_iso_code ?? '')}
 		</strong>.
 	</p>
