@@ -104,9 +104,9 @@
 	<br />
 	<TextArea
 		rows={2}
-		labelText={`Message`}
+		labelText={`Pattern`}
 		bind:value={messageValue}
-		helperText={`Remember, the message must be written in ${ISO6391.getName(
+		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
 			$projectStore.data?.project.default_iso_code ?? ''
 		)}.`}
 	/>
