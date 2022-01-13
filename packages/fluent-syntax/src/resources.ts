@@ -105,7 +105,11 @@ export class Resources {
         return result;
     }
 
-    createMessage(args: { id: Message['id']['name']; value: string; languageCode: LanguageCode }): Result<void, Error> {
+    createMessage(args: {
+        id: Message['id']['name'];
+        pattern?: string;
+        languageCode: LanguageCode;
+    }): Result<void, Error> {
         if (this.doesMessageExist({ id: args.id, languageCode: args.languageCode })) {
             return Result.err(
                 Error(`Message id ${args.id} already exists for the language code ${args.languageCode}.`)
@@ -114,10 +118,8 @@ export class Resources {
             return Result.err(Error(`Message id ${args.id} is not a valid id.`));
         } else if (this.resources[args.languageCode] === undefined) {
             return Result.err(Error(`No resource for the language code ${args.languageCode} exits.`));
-        } else if (trim(args.value) === '') {
-            return Result.err(Error(`The value is an empty string.`));
         }
-        const parsed = parse(`${args.id} = ${args.value}`, {}).body[0];
+        const parsed = parse(`${args.id} = ${args.pattern}`, {}).body[0];
         if (parsed.type === 'Junk') {
             return Result.err(Error('Parsing error: Junk'));
         }

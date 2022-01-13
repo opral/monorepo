@@ -171,7 +171,7 @@ describe('updateMessage()', () => {
 
 describe('createMessage()', () => {
     it('should be possible to add a message', () => {
-        const add = resources.createMessage({ id: 'extra', value: 'en nøgle uden oversættelse', languageCode: 'da' });
+        const add = resources.createMessage({ id: 'extra', pattern: 'en nøgle uden oversættelse', languageCode: 'da' });
         if (add.isErr) {
             fail(add.error);
         }
@@ -183,17 +183,17 @@ describe('createMessage()', () => {
     });
 
     it('should not be possible to add an empty message', () => {
-        const add = resources.createMessage({ id: 'extra', value: ' ', languageCode: 'da' });
+        const add = resources.createMessage({ id: 'extra', pattern: ' ', languageCode: 'da' });
         expect(add.isErr).toBeTruthy();
     });
 
     it('should return an error when a message alreaedy exists', () => {
-        const result = resources.createMessage({ id: 'extra', value: 'this should fail', languageCode: 'en' });
+        const result = resources.createMessage({ id: 'extra', pattern: 'this should fail', languageCode: 'en' });
         expect(result.isErr).toBeTruthy;
     });
 
     it('should return an error when language code does not exist', () => {
-        const result = resources.createMessage({ id: 'extra', value: 'this should fail', languageCode: 'aa' });
+        const result = resources.createMessage({ id: 'extra', pattern: 'this should fail', languageCode: 'aa' });
         expect(result.isErr).toBeTruthy;
     });
 });
