@@ -13,7 +13,7 @@ import { referencesInPattern } from './utils/referencesInPattern';
  * The function checks whether all references in the source and target are matching
  * based on their Id and Type.
  */
-export function lintPattern(args: LintArguments<Pattern, Pattern>): LintResult {
+export function lintPattern(args: LintArguments<Pattern>): LintResult {
     // source -> target
     // do all references in source also exist in target?
     const sourceReferences = referencesInPattern(args.source);
