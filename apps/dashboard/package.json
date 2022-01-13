@@ -60,6 +60,7 @@
 		"@inlang/common": "*",
 		"@inlang/adapters": "*",
 		"@inlang/fluent-syntax": "*",
+		"@inlang/fluent-lint": "*",
 		"@now/build-utils": "^2.7.0",
 		"@supabase/supabase-js": "^1.23.0",
 		"deepl": "^1.0.12",

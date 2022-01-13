@@ -8,6 +8,8 @@
 	import { LanguageCode } from '@inlang/common';
 	// called MessageComponent to not conflict with `Message` type.
 	import MessageComponent from '$lib/components/Message.svelte';
+	import { lowerCase } from 'lodash-es';
+	import { lintPattern } from '@inlang/fluent-lint';
 
 	let searchQuery = '';
 
@@ -16,6 +18,7 @@
 	type Row = {
 		id: string;
 		messages: Record<LanguageCode, Message | undefined>;
+		actionRequired: boolean;
 	};
 	let rows: () => Row[];
 	$: rows = () => {
@@ -23,13 +26,42 @@
 		const ids = $projectStore.data?.resources.getMessageIds({
 			languageCode: $projectStore.data.project.default_iso_code
 		});
-		const filtered = [...(ids ?? [])].filter((id) => id.startsWith(searchQuery));
+		const filtered = [...(ids ?? [])].filter((id) =>
+			lowerCase(id).startsWith(lowerCase(searchQuery))
+		);
 		for (const id of filtered) {
 			const messages = $projectStore.data?.resources.getMessageForAllResources({ id }) ?? {};
-			result.push({ id, messages });
+			result.push({ id, messages, actionRequired: isActionRequired({ messages }) });
 		}
 		return result;
 	};
+
+	/**
+	 * Determines whether or not the message or attribute requires action.
+	 */
+	function isActionRequired(args: {
+		messages: Record<LanguageCode, Message | undefined>;
+	}): boolean {
+		const sourceLanguageCode = $projectStore.data?.resources.baseLanguageCode ?? 'en';
+		const sourceMessage = args.messages[sourceLanguageCode];
+		if (sourceMessage === undefined || sourceMessage?.value === null) {
+			return true;
+		}
+		for (const [languageCode, message] of Object.entries(args.messages)) {
+			if (languageCode === sourceLanguageCode) {
+				continue;
+			}
+			if (message?.value) {
+				const lint = lintPattern({ source: sourceMessage.value, target: message.value });
+				if (lint.isErr) {
+					return true;
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
 </script>
 
 <!-- description -->
@@ -63,6 +95,7 @@
 {#each rows() as row, i}
 	<MessageComponent
 		messages={row.messages}
+		displayActionRequired={row.actionRequired}
 		requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.iso_code) ?? []}
 		sourceLanguageCode={$projectStore.data?.project.default_iso_code ?? 'en'}
 	/>

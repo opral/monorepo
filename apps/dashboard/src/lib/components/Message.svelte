@@ -43,56 +43,9 @@
 	 */
 	export let sourceLanguageCode: LanguageCode;
 
+	export let displayActionRequired: boolean;
+
 	$: sourceMessage = messages[sourceLanguageCode] as Message;
-
-	/**
-	 * All messages in serialized form without id.
-	 *
-	 */
-	function deriveSerializedMessagesWithoutId(
-		messages: Record<LanguageCode, Message | undefined>
-	): Record<LanguageCode, string> {
-		return Object.fromEntries(
-			Object.entries(messages).map(([languageCode, message]) => [
-				languageCode,
-				message ? serializeEntry(message, { withoutId: true }) : ''
-			])
-		) as Record<LanguageCode, string>;
-	}
-
-	async function saveChanges(): Promise<void> {
-		for (const [languageCode, message] of Object.entries(serializedMessagesWithoutId)) {
-			const parsed = parseEntry(`${sourceMessage.id.name} = ${message}`, {
-				expectType: 'Message'
-			});
-			if (parsed.isErr) {
-				alert(parsed.error);
-				return;
-			}
-			const update = $projectStore.data?.resources.updateMessage(
-				{
-					id: sourceMessage.id.name,
-					languageCode: languageCode as LanguageCode,
-					with: parsed.value
-				},
-				{ upsert: true }
-			);
-			if (update?.isErr) {
-				alert(update.error);
-				return;
-			}
-			console.log(
-				$projectStore.data?.resources.getMessage({
-					id: sourceMessage.id.name,
-					languageCode: languageCode as LanguageCode
-				})
-			);
-		}
-		const databaseRequest = await projectStore.updateResourcesInDatabase();
-		if (databaseRequest.isErr) {
-			alert(databaseRequest.error);
-		}
-	}
 
 	/**
 	 * Internal (component scoped) representation of messages in serialized form.
@@ -118,6 +71,50 @@
 	// (in other words: has been updated)
 	$: if (isEqual(deriveSerializedMessagesWithoutId(messages), serializedMessagesWithoutId)) {
 		serializedMessagesWithoutId = deriveSerializedMessagesWithoutId(messages);
+	}
+
+	$: allPatternsAreValid = Object.values(serializedMessagesWithoutId).every(
+		(pattern) => parseEntry(`dummy-id = ${pattern}`).isOk
+	);
+	/**
+	 * All messages in serialized form without id.
+	 *
+	 */
+	function deriveSerializedMessagesWithoutId(
+		messages: Record<LanguageCode, Message | undefined>
+	): Record<LanguageCode, string> {
+		return Object.fromEntries(
+			Object.entries(messages).map(([languageCode, message]) => [
+				languageCode,
+				message ? serializeEntry(message, { withoutId: true }) : ''
+			])
+		) as Record<LanguageCode, string>;
+	}
+
+	async function saveChanges(): Promise<void> {
+		for (const [languageCode, message] of Object.entries(serializedMessagesWithoutId)) {
+			const parsed = parseEntry(`${sourceMessage.id.name} = ${message}`);
+			if (parsed.isErr) {
+				alert(parsed.error);
+				return;
+			}
+			const update = $projectStore.data?.resources.updateMessage(
+				{
+					id: sourceMessage.id.name,
+					languageCode: languageCode as LanguageCode,
+					with: parsed.value as Message
+				},
+				{ upsert: true }
+			);
+			if (update?.isErr) {
+				alert(update.error);
+				return;
+			}
+		}
+		const databaseRequest = await projectStore.updateResourcesInDatabase();
+		if (databaseRequest.isErr) {
+			alert(databaseRequest.error);
+		}
 	}
 </script>
 
@@ -149,7 +146,9 @@
 					{/if}
 					<p>{sourceMessage.id.name}</p>
 				</row>
-				<Tag type="red">Action required</Tag>
+				{#if displayActionRequired}
+					<Tag type="red">Action required</Tag>
+				{/if}
 			</row>
 		</ClickableTile>
 		{#if expanded}
@@ -177,7 +176,7 @@
 						<Button
 							kind="primary"
 							size="field"
-							disabled={hasChanges === false}
+							disabled={hasChanges === false || allPatternsAreValid === false}
 							icon={Save20}
 							on:click={saveChanges}
 						>
