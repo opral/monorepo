@@ -8,5 +8,6 @@ export * from './types/reference';
 export * from './utils/isValidMessageId';
 export * from './utils/isValidTermId';
 export * from './utils/serializeEntry';
+export * from './utils/serializePattern';
 export * from './utils/parseEntry';
 export * from './utils/parsePattern';
