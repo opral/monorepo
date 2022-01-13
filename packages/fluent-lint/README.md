@@ -1,7 +1,4 @@
 # @inlang/fluent-lint
 
-Enables linting of fluent AST types such as `Resource`, `Message` etc.
+Enables linting of fluent AST types such as `Pattern`. The AST implementation can be found in [@inlang/fluent-syntax](../fluent-syntax).
 
-## Structure
-
-Linting functions are mostly grouped by [the fluent AST types](https://projectfluent.org/fluent.js/syntax/modules.html#comments).

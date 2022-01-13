@@ -1,13 +1,4 @@
-import {
-    Expression,
-    FunctionReference,
-    Identifier,
-    MessageReference,
-    Pattern,
-    Placeable,
-    TermReference,
-    VariableReference,
-} from '@inlang/fluent-syntax';
+import { Identifier, Pattern, Placeable, Reference } from '@inlang/fluent-syntax';
 
 /**
  * Searches for a a reference in a pattern.
@@ -16,11 +7,7 @@ import {
  * source languages pattern contains three references. Do these
  * three references also exist in another (languages) pattern?
  */
-export function doesReferenceExist(args: {
-    id: Identifier;
-    type: VariableReference['type'] | FunctionReference['type'] | TermReference['type'] | MessageReference['type'];
-    pattern: Pattern;
-}): boolean {
+export function doesReferenceExist(args: { reference: Reference; pattern: Pattern }): boolean {
     const searchTypes = new Set(['FunctionReference', 'MessageReference', 'TermReference', 'VariableReference']);
     for (const element of args.pattern.elements) {
         if (element.type === 'TextElement') {
@@ -41,7 +28,7 @@ export function doesReferenceExist(args: {
         } else if (searchTypes.has(element.expression.type) === false) {
             continue;
         } else {
-            if ((element.expression.id as Identifier | undefined)?.name === args.id.name) {
+            if ((element.expression.id as Identifier | undefined)?.name === args.reference.id.name) {
                 return true;
             }
         }

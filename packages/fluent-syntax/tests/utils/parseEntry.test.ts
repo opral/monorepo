@@ -5,8 +5,7 @@ it('should parse a message with variables and term references', () => {
     const message = parseEntry(
         ftl`
     welcome = Welcome to this test.
-    `,
-        { expectType: 'Message' }
+    `
     );
     if (message.isErr) {
         fail(message.error);
@@ -18,23 +17,11 @@ it('should parse a message with variables and term references', () => {
     }
 });
 
-it('should return an error if multiple entries are being parse', () => {
-    const result = parseEntry(
+it('should return Result.err when junk has been parsed', () => {
+    const message = parseEntry(
         ftl`
-    welcome = Welcome to this test.
-    hello = Hello to this test.
-    `,
-        { expectType: 'Message' }
+    welcome = Welcome  {invalid{} to this test.
+    `
     );
-    expect(result.isErr).toBeTruthy();
-});
-
-it('should return an error if the expected type does not equal the actual type', () => {
-    const result = parseEntry(
-        ftl`
-    welcome = Welcome to this test.
-    `,
-        { expectType: 'Term' }
-    );
-    expect(result.isErr).toBeTruthy();
+    expect(message.isErr).toBeTruthy();
 });

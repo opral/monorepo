@@ -1,5 +1,5 @@
 import { Result } from '@inlang/common';
-import { LintError } from '../errors/LintError';
+import { LintError } from '../errors/lintError';
 
 /**
  * Utility type to strengthen consistency.

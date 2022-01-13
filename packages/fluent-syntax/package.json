@@ -22,8 +22,9 @@
     "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@fluent/syntax": "^0.18.0",
     "@inlang/adapters": "*",
+    "@inlang/fluent-lint": "*",
+    "@fluent/syntax": "^0.18.0",
     "lodash": "^4.17.21"
   }
 }
