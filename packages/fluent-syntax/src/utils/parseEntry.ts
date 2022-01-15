@@ -11,9 +11,9 @@ import { Result } from '@inlang/common';
  *      parseEntry("login-hello = Welcome, { }, to { -brand-name }!")
  *      >> Result.err(ParseError)
  */
-export function parseEntry(source: string): Result<Message | Term | Comments, ParseError> {
+export function parseEntry(serializedEntry: string): Result<Message | Term | Comments, ParseError> {
     const parser = new FluentParser({ withSpans: false });
-    const entry = parser.parseEntry(source);
+    const entry = parser.parseEntry(serializedEntry);
     if (entry.type === 'Junk') {
         return Result.err(new ParseError(entry.annotations[0].code));
     }
