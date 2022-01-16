@@ -30,6 +30,11 @@ const testFile = `
 # Set $variables' values in the Config tab.
 
 hello = Yes, Hello World!
+
+
+a-message =
+    .with-an-attribute = This is the attributes pattern.
+
 shared-photos =
     { $userName } { $photoCount ->
         [one] added a new photo
