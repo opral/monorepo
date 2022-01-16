@@ -247,6 +247,33 @@ export class Resources {
     }
 
     /**
+     * Retrieves all attributes with the given ids for all resources.
+     *
+     * @returns A record holding the messages accessible via the languageCode.
+     *
+     * @example
+     *      {
+     *          "en": Attribute
+     *          "de": Attribute
+     *      }
+     */
+    getAttributeForAllResources(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+    }): Record<string, Attribute | undefined> {
+        const result: ReturnType<typeof this.getAttributeForAllResources> = {};
+        for (const [languageCode] of Object.entries(this.#resources)) {
+            const attribute = this.getAttribute({
+                messageId: args.messageId,
+                id: args.id,
+                languageCode: languageCode as LanguageCode,
+            });
+            result[languageCode] = attribute;
+        }
+        return result;
+    }
+
+    /**
      * Updates an attribute of a message.
      */
     updateAttribute(args: {

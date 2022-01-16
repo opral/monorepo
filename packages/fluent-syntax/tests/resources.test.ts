@@ -323,6 +323,26 @@ describe('getAttribute()', () => {
     });
 });
 
+describe('getAttributeForAllResources()', () => {
+    // hmmm bad. Since resources is not an immutable class and all actions are mutable
+    // sub deletions might succeed and are not reversed.
+    it('should retrieve the attribute for all resources', () => {
+        for (const languageCode of resources.containedLanguageCodes()) {
+            const create = resources.createAttribute({
+                messageId: 'test',
+                id: 'login',
+                pattern: 'Welcome to this test, please login.',
+                languageCode: languageCode,
+            });
+            if (create.isErr) {
+                fail(create.error);
+            }
+        }
+        const attributes = resources.getAttributeForAllResources({ messageId: 'test', id: 'login' });
+        expect(Object.keys(attributes).length).toBe(resources.containedLanguageCodes().length);
+    });
+});
+
 describe('deleteAttribute()', () => {
     it('should delete an attribute', () => {
         const create = resources.createAttribute({
@@ -395,15 +415,15 @@ describe('serialize', () => {
         if (result.isErr) fail();
         expect(result.value).toEqual([
             {
-                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {$name}\nextra = a key without translations\n',
+                data: 'test = this is my test\nhello = hello there\ncomplex = Hello { $name }\nextra = a key without translations\n',
                 languageCode: 'en',
             },
             {
-                data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}\n',
+                data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej { $name }\n',
                 languageCode: 'da',
             },
             {
-                data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}\n',
+                data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo { $name }\n',
                 languageCode: 'de',
             },
         ]);
