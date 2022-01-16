@@ -1,5 +1,6 @@
-import { Identifier, Message, Pattern, TextElement } from '@fluent/syntax';
+import { Attribute, Identifier, Message, Pattern, TextElement } from '@fluent/syntax';
 import { adapters } from '@inlang/adapters';
+import { serializePattern } from '../src';
 import { Resources } from '../src/resources';
 import { serializeEntry } from '../src/utils/serializeEntry';
 
@@ -109,6 +110,12 @@ describe('deleteMessageForAllResources()', () => {
             expect(resources.getMessage({ id: 'test', languageCode })).toBeUndefined();
         }
     });
+    // hmmm bad. Since resources is not an immutable class and all actions are mutable
+    // sub deletions might succeed and are not reversed.
+    it('should return Result.err if the message does not exist for one or more languages', () => {
+        const result = resources.deleteMessageForAllResources({ id: 'dasdsa' });
+        expect(result.isErr).toBeTruthy();
+    });
 });
 
 describe('getMessageIdsForAllResources()', () => {
@@ -189,33 +196,225 @@ describe('createMessage()', () => {
 
     it('should return an error when a message alreaedy exists', () => {
         const result = resources.createMessage({ id: 'extra', pattern: 'this should fail', languageCode: 'en' });
-        expect(result.isErr).toBeTruthy;
+        expect(result.isErr).toBeTruthy();
     });
 
     it('should return an error when language code does not exist', () => {
         const result = resources.createMessage({ id: 'extra', pattern: 'this should fail', languageCode: 'aa' });
-        expect(result.isErr).toBeTruthy;
+        expect(result.isErr).toBeTruthy();
+    });
+
+    it('should return an error when the message id is invalid', () => {
+        const result = resources.createMessage({
+            id: 'extra.something',
+            pattern: 'this should fail',
+            languageCode: 'aa',
+        });
+        expect(result.isErr).toBeTruthy();
     });
 });
 
-// describe('checkMissingVariables', () => {
-//     it('should show missing variables', () => {
-//         const result = resources.checkMissingTranslations();
-//         if (result.isErr) fail();
-//         expect(result.value).toEqual([{ key: 'extra', languageCodes: ['da', 'de'] }]);
-//     });
-// });
+describe('createAttribute()', () => {
+    it('should create an attribute', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+        const message = resources.getMessage({ id: 'test', languageCode: 'en' });
+        expect(message?.attributes[0].id.name).toEqual('login');
+        expect(serializePattern(message?.attributes[0].value ?? new Pattern([]))).toEqual(
+            'Welcome to this test, please login.'
+        );
+    });
 
-// describe('compareVariables', () => {
-//     it('should compare variables correctly', () => {
-//         const result = resources.compareVariables(
-//             [{ key: 'test', languageCode: 'de', translation: 'dis ist ein {$name}' }],
-//             { key: 'test', languageCode: 'en', translation: 'this is a name' }
-//         );
-//         if (result.isErr) fail();
-//         expect(result.value).toEqual({ de: { error: ' is missing from base translation', variable: '$name' } });
-//     });
-// });
+    it('should return Result.err if the attribute exists already', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        expect(create.isOk).toBeTruthy();
+        const create2 = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        expect(create2.isOk).toBeFalsy();
+    });
+
+    it('should return Result.err if the message id does not exist', () => {
+        const create = resources.createAttribute({
+            messageId: 'balbla-nonexistent',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        expect(create.isOk).toBeFalsy();
+    });
+
+    it('should return Result.err if the pattern is invalid', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this {{{}$ test, please login.',
+            languageCode: 'en',
+        });
+        expect(create.isOk).toBeFalsy();
+    });
+});
+
+describe('updateAttribute()', () => {
+    it('should update an attribute', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+        const update = resources.updateAttribute({
+            messageId: 'test',
+            id: 'login',
+            languageCode: 'en',
+            with: new Attribute(
+                new Identifier('login'),
+                new Pattern([new TextElement('Welcome to this test. Please logout.')])
+            ),
+        });
+        if (update.isErr) {
+            fail(update.error);
+        }
+        const message = resources.getMessage({ id: 'test', languageCode: 'en' });
+        expect(message?.attributes[0].id.name).toEqual('login');
+        expect(serializePattern(message?.attributes[0].value ?? new Pattern([]))).toEqual(
+            'Welcome to this test. Please logout.'
+        );
+    });
+
+    it('should return Result.err if the messageId does not exist', () => {
+        const update = resources.updateAttribute({
+            messageId: 'afpihsihg',
+            id: 'das',
+            with: new Attribute(new Identifier('hi'), new Pattern([])),
+            languageCode: 'en',
+        });
+        expect(update.isErr).toBeTruthy();
+    });
+    it('should return Result.err if the attribute does not exist and options.upsert is undefined', () => {
+        const update = resources.updateAttribute({
+            messageId: 'test',
+            id: 'login',
+            with: new Attribute(new Identifier('hi'), new Pattern([])),
+            languageCode: 'en',
+        });
+        expect(update.isErr).toBeTruthy();
+    });
+
+    it('should return Result.ok if the attribute does not exist and options.upsert is true', () => {
+        const update = resources.updateAttribute(
+            {
+                messageId: 'test',
+                id: 'login',
+                with: new Attribute(new Identifier('hi'), new Pattern([])),
+                languageCode: 'en',
+            },
+            { upsert: true }
+        );
+        expect(update.isOk).toBeTruthy();
+    });
+});
+
+describe('getAttribute()', () => {
+    it('should update an attribute', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+
+        const attribute = resources.getAttribute({ messageId: 'test', id: 'login', languageCode: 'en' });
+        expect(serializePattern(attribute?.value ?? new Pattern([]))).toEqual('Welcome to this test, please login.');
+    });
+});
+
+describe('deleteAttribute()', () => {
+    it('should delete an attribute', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+        const attribute = resources.getAttribute({ messageId: 'test', id: 'login', languageCode: 'en' });
+        expect(serializePattern(attribute?.value ?? new Pattern([]))).toEqual('Welcome to this test, please login.');
+        const deletion = resources.deleteAttribute({ messageId: 'test', id: 'login', languageCode: 'en' });
+        expect(deletion.isOk).toBeTruthy();
+        const attributeAfterDeletion = resources.getAttribute({ messageId: 'test', id: 'login', languageCode: 'en' });
+        expect(attributeAfterDeletion).toBeUndefined();
+    });
+
+    it('should return Result.err if the message does not exist', () => {
+        const deletion = resources.deleteAttribute({ messageId: 'tadsdasdasdadsest', id: 'login', languageCode: 'en' });
+        expect(deletion.isErr).toBeTruthy();
+    });
+
+    it('should return Result.err if the message exists but the attribute does not', () => {
+        const deletion = resources.deleteAttribute({ messageId: 'test', id: 'logigassagagsagsa', languageCode: 'en' });
+        expect(deletion.isErr).toBeTruthy();
+    });
+});
+
+describe('deleteAttributeForAllResources()', () => {
+    it('should return Result.ok when deleting existing attributes', () => {
+        for (const languageCode of resources.containedLanguageCodes()) {
+            const create = resources.createAttribute({
+                messageId: 'test',
+                id: 'login',
+                pattern: 'Welcome to this test, please login.',
+                languageCode: languageCode,
+            });
+            if (create.isErr) {
+                fail(create.error);
+            }
+        }
+
+        const deletion = resources.deleteAttributeForAllResources({ messageId: 'test', id: 'login' });
+        expect(deletion.isOk).toBeTruthy();
+    });
+    // hmmm bad. Since resources is not an immutable class and all actions are mutable
+    // sub deletions might succeed and are not reversed.
+    it('should return Result.err when deleting an attribute that does not exist for one language', () => {
+        for (const languageCode of resources.containedLanguageCodes().slice(1)) {
+            const create = resources.createAttribute({
+                messageId: 'test',
+                id: 'login',
+                pattern: 'Welcome to this test, please login.',
+                languageCode: languageCode,
+            });
+            if (create.isErr) {
+                fail(create.error);
+            }
+        }
+        const deletion = resources.deleteAttributeForAllResources({ messageId: 'test', id: 'login' });
+        expect(deletion.isErr).toBeTruthy();
+    });
+});
 
 describe('serialize', () => {
     it('should serialize a file correctly', () => {

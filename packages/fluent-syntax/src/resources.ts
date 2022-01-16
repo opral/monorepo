@@ -1,10 +1,11 @@
 import { AdapterInterface } from '@inlang/adapters';
 import { LanguageCode } from '@inlang/common';
 import { SerializedResource } from './types/serializedResource';
-import { remove, trim } from 'lodash';
+import { remove } from 'lodash';
 import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
-import { Message, parse, Resource } from '@fluent/syntax';
+import { Attribute, Identifier, Message, parse, Resource } from '@fluent/syntax';
+import { parsePattern } from '.';
 
 /**
  * Holds all resources as object accesible via a `languageCode`.
@@ -154,7 +155,10 @@ export class Resources {
 
     deleteMessageForAllResources(args: { id: Message['id']['name'] }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.#resources)) {
-            this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
+            const deletion = this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
+            if (deletion.isErr) {
+                return Result.err(deletion.error);
+            }
         }
         return Result.ok(undefined);
     }
@@ -198,7 +202,7 @@ export class Resources {
                     Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}.`)
                 );
             } else {
-                // appending at the end
+                // appending at the end, since attribute does not exist but upsert is true
                 resource.body[resource.body.length] = args.with;
             }
         } else {
@@ -209,45 +213,126 @@ export class Resources {
 
     // ----------- attributes -------------
 
-    // /**
-    //  * Creates an attribute of a message.
-    //  *
-    //  * IMPORTANT:
-    //  *  The id must be an attribute id e.g. `login-screen.hello`.
-    //  */
-    // createAttribute(args: { id: string; pattern: string; languageCode: LanguageCode }): Result<void, Error> {}
+    /**
+     * Creates an attribute of a message.
+     */
+    createAttribute(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+        pattern: string;
+        languageCode: LanguageCode;
+    }): Result<void, Error> {
+        const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
+        if (message === undefined) {
+            return Result.err(
+                Error(`The message "${args.messageId}" does not exist for the language ${args.languageCode}`)
+            );
+        }
+        if (message.attributes.some((attribute) => attribute.id.name === args.id)) {
+            return Result.err(Error(`Attribute with id ${args.id} exists already for language "${args.languageCode}"`));
+        }
+        const parsedPattern = parsePattern(args.pattern);
+        if (parsedPattern.isErr) {
+            return Result.err(parsedPattern.error);
+        }
+        const attribute = new Attribute(new Identifier(args.id), parsedPattern.value);
+        message.attributes.push(attribute);
+        return this.updateMessage({ id: args.messageId, languageCode: args.languageCode, with: message });
+    }
 
-    // /**
-    //  * Creates an attribute of a message.
-    //  *
-    //  * IMPORTANT:
-    //  *  The id must be an attribute id e.g. `login-screen.hello`.
-    //  */
-    // getAttribute(args: { id: string; languageCode: LanguageCode }): Result<void, Error> {}
+    /**
+     * Get an attribute of a message.
+     *
+     * Returns undefined if the message, or the attribute itself does not exist.
+     */
+    getAttribute(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+        languageCode: LanguageCode;
+    }): Attribute | undefined {
+        const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
+        const attribute = message?.attributes.find((attribute) => attribute.id.name === args.id);
+        return attribute;
+    }
 
-    // /**
-    //  * Updates an attribute of a message.
-    //  *
-    //  * IMPORTANT:
-    //  *  The id must be an attribute id e.g. `login-screen.hello`.
-    //  */
-    // updateAttribute(args: { id: string; pattern: string; languageCode: LanguageCode }): Result<void, Error> {}
+    /**
+     * Updates an attribute of a message.
+     */
+    updateAttribute(
+        args: {
+            messageId: Message['id']['name'];
+            id: Attribute['id']['name'];
+            languageCode: LanguageCode;
+            with: Attribute;
+        },
+        options?: { upsert?: true }
+    ): Result<void, Error> {
+        const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
+        if (message === undefined) {
+            return Result.err(
+                Error(`The message "${args.messageId}" does not exist for the language ${args.languageCode}`)
+            );
+        }
+        const indexOfAttribute = message.attributes.findIndex((attribute) => attribute.id.name === args.id);
+        if (indexOfAttribute === -1) {
+            if (options?.upsert !== true) {
+                return Result.err(
+                    Error(
+                        `Attribute with id '${args.id}' does not exist for the message ${args.messageId} with language ${args.languageCode}.`
+                    )
+                );
+            } else {
+                // appending at the end, since attribute does not exist but upsert is true
+                message.attributes[message.attributes.length] = args.with;
+            }
+        } else {
+            // replace existent attribute at that index
+            message.attributes[indexOfAttribute] = args.with;
+        }
+        return this.updateMessage({ id: args.messageId, languageCode: args.languageCode, with: message });
+    }
 
-    // /**
-    //  * Deletes an attribute of a message.
-    //  *
-    //  * IMPORTANT:
-    //  *  The id must be an attribute id e.g. `login-screen.hello`.
-    //  */
-    // deleteAttribute(args: { id: string; languageCode: LanguageCode }): Result<void, Error> {}
+    /**
+     * Deletes an attribute of a message.
+     */
+    deleteAttribute(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+        languageCode: LanguageCode;
+    }): Result<void, Error> {
+        const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
+        if (message === undefined) {
+            return Result.err(
+                Error(`The message "${args.messageId}" does not exist for the language ${args.languageCode}`)
+            );
+        }
+        const removed = remove(message.attributes, (attribute) => attribute.id.name === args.id);
+        if (removed.length === 0) {
+            return Result.err(
+                Error(
+                    `Attribute with id '${args.id}' does not exist for the message ${args.messageId} with language ${args.languageCode}.`
+                )
+            );
+        }
+        return Result.ok(undefined);
+    }
 
-    // /**
-    //  * Deletes the attribute with the given id for all resources.
-    //  *
-    //  * IMPORTANT:
-    //  *  The id must be an attribute id e.g. `login-screen.hello`.
-    //  */
-    // deleteAttributeForAllResources(args: { id: string }): Result<void, Error> {}
+    /**
+     * Deletes the attribute with the given id for all resources.
+     */
+    deleteAttributeForAllResources(args: { messageId: Message['id']['name']; id: string }): Result<void, Error> {
+        for (const [languageCode] of Object.entries(this.#resources)) {
+            const deletion = this.deleteAttribute({
+                messageId: args.messageId,
+                id: args.id,
+                languageCode: languageCode as LanguageCode,
+            });
+            if (deletion.isErr) {
+                return Result.err(deletion.error);
+            }
+        }
+        return Result.ok(undefined);
+    }
 
     /**
      * Serializes the resources.

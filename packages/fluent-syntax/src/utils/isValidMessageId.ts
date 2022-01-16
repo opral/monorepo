@@ -1,5 +1,5 @@
 /**
- * A message id is valid if the id is kebap-case, snake_case, or camelCase.
+ * Returns whether a message id is valid.
  *
  * Read more about messages here https://projectfluent.org/fluent/guide/hello.html
  */
