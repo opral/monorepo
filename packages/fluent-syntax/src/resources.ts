@@ -182,10 +182,7 @@ export class Resources {
         return result;
     }
 
-    updateMessage(
-        args: { id: Message['id']['name']; languageCode: LanguageCode; with: Message },
-        options?: { upsert?: true }
-    ): Result<void, Error> {
+    updateMessage(args: { id: Message['id']['name']; languageCode: LanguageCode; with: Message }): Result<void, Error> {
         if (args.id !== args.with.id.name) {
             return Result.err(Error('The given id does not match the with.id'));
         }
@@ -197,17 +194,11 @@ export class Resources {
             (entry) => entry.type === 'Message' && entry.id.name === args.id
         );
         if (indexOfMessage === -1) {
-            if (options?.upsert !== true) {
-                return Result.err(
-                    Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}.`)
-                );
-            } else {
-                // appending at the end, since attribute does not exist but upsert is true
-                resource.body[resource.body.length] = args.with;
-            }
-        } else {
-            resource.body[indexOfMessage] = args.with;
+            return Result.err(
+                Error(`Message with id '${args.id}' does not exist for the language code ${args.languageCode}.`)
+            );
         }
+        resource.body[indexOfMessage] = args.with;
         return Result.ok(undefined);
     }
 
@@ -258,15 +249,12 @@ export class Resources {
     /**
      * Updates an attribute of a message.
      */
-    updateAttribute(
-        args: {
-            messageId: Message['id']['name'];
-            id: Attribute['id']['name'];
-            languageCode: LanguageCode;
-            with: Attribute;
-        },
-        options?: { upsert?: true }
-    ): Result<void, Error> {
+    updateAttribute(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+        languageCode: LanguageCode;
+        with: Attribute;
+    }): Result<void, Error> {
         const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
         if (message === undefined) {
             return Result.err(
@@ -275,20 +263,15 @@ export class Resources {
         }
         const indexOfAttribute = message.attributes.findIndex((attribute) => attribute.id.name === args.id);
         if (indexOfAttribute === -1) {
-            if (options?.upsert !== true) {
-                return Result.err(
-                    Error(
-                        `Attribute with id '${args.id}' does not exist for the message ${args.messageId} with language ${args.languageCode}.`
-                    )
-                );
-            } else {
-                // appending at the end, since attribute does not exist but upsert is true
-                message.attributes[message.attributes.length] = args.with;
-            }
-        } else {
-            // replace existent attribute at that index
-            message.attributes[indexOfAttribute] = args.with;
+            return Result.err(
+                Error(
+                    `Attribute with id '${args.id}' does not exist for the message ${args.messageId} with language ${args.languageCode}.`
+                )
+            );
         }
+        // replace existent attribute at that index
+        message.attributes[indexOfAttribute] = args.with;
+
         return this.updateMessage({ id: args.messageId, languageCode: args.languageCode, with: message });
     }
 

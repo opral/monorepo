@@ -160,20 +160,6 @@ describe('updateMessage()', () => {
         const result = resources.updateMessage({ id: 'differnet-id', languageCode: 'en', with: mockMessage });
         expect(result.isErr).toBeTruthy();
     });
-
-    it('should be able to upsert', () => {
-        const mockMessage = new Message(
-            new Identifier('unknown-id'),
-            new Pattern([new TextElement('why not this instead')])
-        );
-        const result = resources.updateMessage(
-            { id: 'unknown-id', languageCode: 'en', with: mockMessage },
-            { upsert: true }
-        );
-        expect(result.isOk).toBeTruthy();
-        const getMessage = resources.getMessage({ id: 'unknown-id', languageCode: 'en' });
-        expect(getMessage).toEqual(mockMessage);
-    });
 });
 
 describe('createMessage()', () => {
@@ -317,19 +303,6 @@ describe('updateAttribute()', () => {
             languageCode: 'en',
         });
         expect(update.isErr).toBeTruthy();
-    });
-
-    it('should return Result.ok if the attribute does not exist and options.upsert is true', () => {
-        const update = resources.updateAttribute(
-            {
-                messageId: 'test',
-                id: 'login',
-                with: new Attribute(new Identifier('hi'), new Pattern([])),
-                languageCode: 'en',
-            },
-            { upsert: true }
-        );
-        expect(update.isOk).toBeTruthy();
     });
 });
 
