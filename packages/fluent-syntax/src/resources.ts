@@ -83,10 +83,30 @@ export class Resources {
         return Object.entries(this.#resources).map(([languageCode]) => languageCode as LanguageCode);
     }
 
-    doesMessageExist(args: { id: Message['id']['name']; languageCode: LanguageCode }): boolean {
+    messageExist(args: { id: Message['id']['name']; languageCode: LanguageCode }): boolean {
         for (const entry of this.#resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.id) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether or not an attribute exists.
+     */
+    attributeExists(args: {
+        messageId: Message['id']['name'];
+        id: Attribute['id']['name'];
+        languageCode: LanguageCode;
+    }): boolean {
+        for (const entry of this.#resources[args.languageCode]?.body ?? []) {
+            if (entry.type === 'Message' && entry.id.name === args.messageId) {
+                for (const attribute of entry.attributes) {
+                    if (attribute.id.name === args.id) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -125,7 +145,7 @@ export class Resources {
         pattern?: string;
         languageCode: LanguageCode;
     }): Result<void, Error> {
-        if (this.doesMessageExist({ id: args.id, languageCode: args.languageCode })) {
+        if (this.messageExist({ id: args.id, languageCode: args.languageCode })) {
             return Result.err(
                 Error(`Message id ${args.id} already exists for the language code ${args.languageCode}.`)
             );
@@ -155,7 +175,7 @@ export class Resources {
 
     deleteMessageForAllResources(args: { id: Message['id']['name'] }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.#resources)) {
-            if (this.doesMessageExist({ id: args.id, languageCode: languageCode as LanguageCode })) {
+            if (this.messageExist({ id: args.id, languageCode: languageCode as LanguageCode })) {
                 const deletion = this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
                 if (deletion.isErr) {
                     return Result.err(deletion.error);
@@ -334,7 +354,7 @@ export class Resources {
      */
     deleteAttributeForAllResources(args: { messageId: Message['id']['name']; id: string }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.#resources)) {
-            if (this.doesMessageExist({ id: args.messageId, languageCode: languageCode as LanguageCode })) {
+            if (this.messageExist({ id: args.messageId, languageCode: languageCode as LanguageCode })) {
                 const deletion = this.deleteAttribute({
                     messageId: args.messageId,
                     id: args.id,

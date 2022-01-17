@@ -25,15 +25,16 @@ beforeEach(() => {
         resources = api.value;
     }
 });
-describe('doesMessageExist()', () => {
+describe('messageExist()', () => {
     it('should be truthy when a message exists', () => {
-        expect(resources.doesMessageExist({ id: 'test', languageCode: 'en' })).toBeTruthy();
+        expect(resources.messageExist({ id: 'test', languageCode: 'en' })).toBeTruthy();
     });
 
     it('should be falsy when a message not exists', () => {
-        expect(resources.doesMessageExist({ id: 'extra', languageCode: 'de' })).toBeFalsy();
+        expect(resources.messageExist({ id: 'extra', languageCode: 'de' })).toBeFalsy();
     });
 });
+
 describe('getMessage()', () => {
     it('simple: should not be undefined and match the expected result', () => {
         const result = resources.getMessage({ id: 'test', languageCode: 'en' });
@@ -112,9 +113,9 @@ describe('deleteMessageForAllResources()', () => {
     });
     // hmmm bad. Since resources is not an immutable class and all actions are mutable
     // sub deletions might succeed and are not reversed.
-    it('should return Result.err if the message does not exist for one or more languages', () => {
+    it('should return Result.ok if the message does not exist for one or more languages', () => {
         const result = resources.deleteMessageForAllResources({ id: 'dasdsa' });
-        expect(result.isErr).toBeTruthy();
+        expect(result.isOk).toBeTruthy();
     });
 });
 
@@ -197,6 +198,34 @@ describe('createMessage()', () => {
             languageCode: 'aa',
         });
         expect(result.isErr).toBeTruthy();
+    });
+});
+
+describe('attributeExists()', () => {
+    it('should be truthy when an attribute exists', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+        expect(resources.attributeExists({ messageId: 'test', id: 'login', languageCode: 'en' })).toBeTruthy();
+    });
+
+    it('should be falsy when a message not exists', () => {
+        const create = resources.createAttribute({
+            messageId: 'test',
+            id: 'login',
+            pattern: 'Welcome to this test, please login.',
+            languageCode: 'en',
+        });
+        if (create.isErr) {
+            fail(create.error);
+        }
+        expect(resources.attributeExists({ messageId: 'test', id: 'sfafsafwee', languageCode: 'en' })).toBeFalsy();
     });
 });
 
