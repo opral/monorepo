@@ -11,7 +11,7 @@
 
 	export function show(): void {
 		messageId = '';
-		messageValue = '';
+		messagePattern = '';
 		status = 'inactive';
 		open = true;
 		// only god knows why focus has to be wrapped in a setTimeout to work
@@ -22,13 +22,13 @@
 
 	let messageId = '';
 
-	let messageValue = '';
+	let messagePattern = '';
 
 	let status: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
-	$: isValidInput = messageId !== undefined && isValidMessageId(messageId) && messageValue !== '';
+	$: isValidInput = messageId !== '' && isValidMessageId(messageId);
 
-	$: invalidMessageIdErrorMessage = $projectStore.data?.resources.doesMessageExist({
+	$: invalidMessageIdErrorMessage = $projectStore.data?.resources.messageExist({
 		id: messageId,
 		languageCode: $projectStore.data.project.default_iso_code
 	})
@@ -46,7 +46,7 @@
 		}
 		const create = $projectStore.data.resources.createMessage({
 			id: messageId,
-			value: messageValue,
+			pattern: messagePattern,
 			languageCode: $projectStore.data.project.default_iso_code
 		});
 		const updateDatabase = await projectStore.updateResourcesInDatabase();
@@ -97,7 +97,7 @@
 			isValidMessageId(messageId) === false &&
 			status !== 'finished'}
 		invalidText={invalidMessageIdErrorMessage}
-		labelText="Id (identifier)"
+		labelText="Id"
 		bind:value={messageId}
 		bind:ref={keyNameInputElement}
 	/>
@@ -105,7 +105,7 @@
 	<TextArea
 		rows={2}
 		labelText={`Pattern`}
-		bind:value={messageValue}
+		bind:value={messagePattern}
 		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
 			$projectStore.data?.project.default_iso_code ?? ''
 		)}.`}

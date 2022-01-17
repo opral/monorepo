@@ -79,7 +79,7 @@
 
 <row class="justify-between items-end">
 	<div>
-		<h1>Overview</h1>
+		<h1 class="">Overview</h1>
 		<p>Your organizations including their projects, members and settings appear here.</p>
 	</div>
 	<Button

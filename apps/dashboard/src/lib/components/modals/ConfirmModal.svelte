@@ -78,6 +78,7 @@
 		const result = await withUxTimeout(onConfirm);
 		if (result.isErr) {
 			inlineLoadingStatus = 'error';
+			alert(result.error);
 			return;
 		}
 		inlineLoadingStatus = 'finished';
@@ -105,7 +106,7 @@
 	<p>{message}</p>
 	<br />
 	{#if requireTypingOf}
-		<p class="pb-1">Please type <b>{requireTypingOf}</b> to confirm.</p>
+		<p class="pb-1 text-xs">Please type "<strong>{requireTypingOf}</strong>" to confirm.</p>
 		<TextInput bind:value={nameOfEntityInput} />
 		<br />
 	{/if}
