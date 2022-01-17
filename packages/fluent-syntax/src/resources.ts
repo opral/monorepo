@@ -6,6 +6,7 @@ import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
 import { Attribute, Identifier, Message, parse, Resource } from '@fluent/syntax';
 import { parsePattern } from '.';
+import ftl from '@fluent/dedent';
 
 /**
  * Holds all resources as object accesible via a `languageCode`.
@@ -142,7 +143,7 @@ export class Resources {
 
     createMessage(args: {
         id: Message['id']['name'];
-        pattern?: string;
+        pattern: string;
         languageCode: LanguageCode;
     }): Result<void, Error> {
         if (this.messageExist({ id: args.id, languageCode: args.languageCode })) {
@@ -237,9 +238,20 @@ export class Resources {
     }): Result<void, Error> {
         const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
         if (message === undefined) {
-            return Result.err(
-                Error(`The message "${args.messageId}" does not exist for the language ${args.languageCode}`)
-            );
+            // parsing the attribute as new message
+            const createMessage = this.createMessage({
+                id: args.messageId,
+                languageCode: args.languageCode,
+                // the new line is important to parse the pattern as attribute and not as message pattern
+                pattern: ftl`
+
+                .${args.id} = ${args.pattern}
+            `,
+            });
+            if (createMessage.isErr) {
+                return Result.err(createMessage.error);
+            }
+            return Result.ok(undefined);
         }
         if (message.attributes.some((attribute) => attribute.id.name === args.id)) {
             return Result.err(Error(`Attribute with id ${args.id} exists already for language "${args.languageCode}"`));
