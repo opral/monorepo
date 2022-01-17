@@ -264,22 +264,14 @@ describe('createAttribute()', () => {
         expect(create2.isOk).toBeFalsy();
     });
 
-    it('should create the message if the message id does not exist', () => {
+    it('should return Result.err if the message id does not exist', () => {
         const create = resources.createAttribute({
             messageId: 'balbla-nonexistent',
             id: 'login',
             pattern: 'Welcome to this test, please login.',
             languageCode: 'en',
         });
-        if (create.isErr) {
-            fail(create.error);
-        }
-        const message = resources.getMessage({ id: 'balbla-nonexistent', languageCode: 'en' });
-        if (message === undefined) {
-            fail();
-        }
-        expect(message.value === null).toBeTruthy();
-        expect(message.attributes[0].id.name).toBe('login');
+        expect(create.isOk).toBeFalsy();
     });
 
     it('should return Result.err if the pattern is invalid', () => {
