@@ -155,9 +155,11 @@ export class Resources {
 
     deleteMessageForAllResources(args: { id: Message['id']['name'] }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.#resources)) {
-            const deletion = this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
-            if (deletion.isErr) {
-                return Result.err(deletion.error);
+            if (this.doesMessageExist({ id: args.id, languageCode: languageCode as LanguageCode })) {
+                const deletion = this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
+                if (deletion.isErr) {
+                    return Result.err(deletion.error);
+                }
             }
         }
         return Result.ok(undefined);
@@ -332,13 +334,15 @@ export class Resources {
      */
     deleteAttributeForAllResources(args: { messageId: Message['id']['name']; id: string }): Result<void, Error> {
         for (const [languageCode] of Object.entries(this.#resources)) {
-            const deletion = this.deleteAttribute({
-                messageId: args.messageId,
-                id: args.id,
-                languageCode: languageCode as LanguageCode,
-            });
-            if (deletion.isErr) {
-                return Result.err(deletion.error);
+            if (this.doesMessageExist({ id: args.messageId, languageCode: languageCode as LanguageCode })) {
+                const deletion = this.deleteAttribute({
+                    messageId: args.messageId,
+                    id: args.id,
+                    languageCode: languageCode as LanguageCode,
+                });
+                if (deletion.isErr) {
+                    return Result.err(deletion.error);
+                }
             }
         }
         return Result.ok(undefined);
