@@ -181,12 +181,27 @@ describe('createMessage()', () => {
         expect(add.isErr).toBeTruthy();
     });
 
-    it('should be possible to add a message with an undefined pattern', () => {
-        const create = resources.createMessage({ id: 'extra', pattern: undefined, languageCode: 'da' });
+    it('should be return Result.ok when adding a message with an undefined pattern', () => {
+        const create = resources.createMessage({
+            id: 'extra',
+            pattern: undefined,
+            languageCode: 'da',
+            attributes: [new Attribute(new Identifier('hi'), new Pattern([]))],
+        });
         expect(create.isOk).toBeTruthy();
         const message = resources.getMessage({ id: 'extra', languageCode: 'da' });
         // eslint-disable-next-line unicorn/no-null
         expect(message?.value).toBe(null);
+    });
+
+    it('should be return Result.err when adding a message with an undefined pattern without attributes', () => {
+        const create = resources.createMessage({
+            id: 'extra',
+            pattern: undefined,
+            languageCode: 'da',
+            attributes: [],
+        });
+        expect(create.isErr).toBeTruthy();
     });
 
     it('should return an error when a message alreaedy exists', () => {
@@ -272,14 +287,24 @@ describe('createAttribute()', () => {
         expect(create2.isOk).toBeFalsy();
     });
 
-    it('should return Result.err if the message id does not exist', () => {
+    it('should create the message if the if the message id does not exist', () => {
         const create = resources.createAttribute({
             messageId: 'balbla-nonexistent',
             id: 'login',
             pattern: 'Welcome to this test, please login.',
             languageCode: 'en',
         });
-        expect(create.isOk).toBeFalsy();
+        if (create.isErr) {
+            console.error(create.error);
+            fail();
+        }
+        const message = resources.getMessage({ id: 'balbla-nonexistent', languageCode: 'en' });
+        if (message === undefined) {
+            fail();
+        }
+        expect(message.attributes.length > 0).toBeTruthy();
+        // eslint-disable-next-line unicorn/no-null
+        expect(message.value).toBe(null);
     });
 
     it('should return Result.err if the pattern is invalid', () => {

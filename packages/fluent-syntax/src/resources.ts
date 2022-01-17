@@ -135,18 +135,36 @@ export class Resources {
         return result;
     }
 
+    // overloading: empty pattern requires attributes
+    createMessage(args: {
+        id: Message['id']['name'];
+        pattern?: string;
+        languageCode: LanguageCode;
+        attributes: Attribute[];
+    }): Result<void, Error>;
+
+    // overloading: defined pattern does not require attributes
+    createMessage(args: {
+        id: Message['id']['name'];
+        pattern: string;
+        languageCode: LanguageCode;
+        attributes?: Attribute[];
+    }): Result<void, Error>;
+
     /**
      * Creates a message.
      *
-     * Note that attributes can not be passed in the `pattern`.
-     *
-     *
+     * Note: Attributes can not be passed in the `pattern`.
      */
     createMessage(args: {
         id: Message['id']['name'];
         pattern?: string;
         languageCode: LanguageCode;
+        attributes?: Attribute[];
     }): Result<void, Error> {
+        if (args.pattern === undefined && (args.attributes === undefined || args.attributes.length === 0)) {
+            return Result.err(Error('The message has no pattern. Thus, at least one attribute is required.'));
+        }
         if (this.messageExist({ id: args.id, languageCode: args.languageCode })) {
             return Result.err(
                 Error(`Message id ${args.id} already exists for the language code ${args.languageCode}.`)
@@ -163,6 +181,9 @@ export class Resources {
                 return Result.err(parsed.error);
             }
             message.value = parsed.value;
+        }
+        if (args.attributes) {
+            message.attributes = args.attributes;
         }
         this.#resources[args.languageCode]?.body.push(message);
         return Result.ok(undefined);
@@ -234,6 +255,8 @@ export class Resources {
 
     /**
      * Creates an attribute of a message.
+     *
+     * If the message does not exist, the message is created too.
      */
     createAttribute(args: {
         messageId: Message['id']['name'];
@@ -242,21 +265,22 @@ export class Resources {
         languageCode: LanguageCode;
     }): Result<void, Error> {
         const message = this.getMessage({ id: args.messageId, languageCode: args.languageCode });
-        if (message === undefined) {
+        if (message?.attributes.some((attribute) => attribute.id.name === args.id)) {
             return Result.err(
-                Error(`The message "${args.messageId}" does not exist for the language ${args.languageCode}`)
+                Error(`Attribute with id ${args.id} exists already for language "${args.languageCode}".`)
             );
-        }
-        if (message.attributes.some((attribute) => attribute.id.name === args.id)) {
-            return Result.err(Error(`Attribute with id ${args.id} exists already for language "${args.languageCode}"`));
         }
         const parsedPattern = parsePattern(args.pattern);
         if (parsedPattern.isErr) {
             return Result.err(parsedPattern.error);
         }
         const attribute = new Attribute(new Identifier(args.id), parsedPattern.value);
-        message.attributes.push(attribute);
-        return this.updateMessage({ id: args.messageId, languageCode: args.languageCode, with: message });
+        if (message) {
+            message.attributes.push(attribute);
+            return this.updateMessage({ id: args.messageId, languageCode: args.languageCode, with: message });
+        } else {
+            return this.createMessage({ id: args.messageId, languageCode: args.languageCode, attributes: [attribute] });
+        }
     }
 
     /**
