@@ -1,5 +1,5 @@
+import ftl from '@fluent/dedent';
 import { Identifier, parse, Pattern, Placeable, TextElement, VariableReference } from '@fluent/syntax';
-import { parseEntry } from '../../src';
 import { parsePattern } from '../../src/utils/parsePattern';
 
 it('should parse a correct pattern', () => {
@@ -17,5 +17,13 @@ it('should parse a correct pattern', () => {
 
 it('should return Result.err if an incorrect pattern is being parsed', () => {
     const result = parsePattern('{Junk.com}}');
+    expect(result.isErr).toBeTruthy();
+});
+
+it('should return Result.err if an attribute is parsed', () => {
+    const result = parsePattern(ftl`
+
+    .attribute = Hello
+    `);
     expect(result.isErr).toBeTruthy();
 });

@@ -4,7 +4,7 @@ import { SerializedResource } from './types/serializedResource';
 import { remove } from 'lodash';
 import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
-import { Attribute, Identifier, Message, parse, Resource } from '@fluent/syntax';
+import { Attribute, Identifier, Message, Resource } from '@fluent/syntax';
 import { parsePattern } from '.';
 
 /**
@@ -62,11 +62,6 @@ export class Resources {
             const parsed = args.adapter.parse(file.data);
             if (parsed.isErr) {
                 return Result.err(parsed.error);
-            }
-            for (const entry of parsed.value.body) {
-                if (entry.type === 'Junk') {
-                    return Result.err(Error('Parsing error: Junk'));
-                }
             }
             resources[file.languageCode] = parsed.value;
         }
@@ -140,6 +135,13 @@ export class Resources {
         return result;
     }
 
+    /**
+     * Creates a message.
+     *
+     * Note that attributes can not be passed in the `pattern`.
+     *
+     *
+     */
     createMessage(args: {
         id: Message['id']['name'];
         pattern?: string;
@@ -154,11 +156,15 @@ export class Resources {
         } else if (this.#resources[args.languageCode] === undefined) {
             return Result.err(Error(`No resource for the language code ${args.languageCode} exits.`));
         }
-        const parsed = parse(`${args.id} = ${args.pattern}`, {}).body[0];
-        if (parsed.type === 'Junk') {
-            return Result.err(Error('Parsing error: Junk'));
+        const message = new Message(new Identifier(args.id));
+        if (args.pattern) {
+            const parsed = parsePattern(args.pattern);
+            if (parsed.isErr) {
+                return Result.err(parsed.error);
+            }
+            message.value = parsed.value;
         }
-        this.#resources[args.languageCode]?.body.push(parsed);
+        this.#resources[args.languageCode]?.body.push(message);
         return Result.ok(undefined);
     }
 

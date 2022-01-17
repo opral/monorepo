@@ -181,6 +181,14 @@ describe('createMessage()', () => {
         expect(add.isErr).toBeTruthy();
     });
 
+    it('should be possible to add a message with an undefined pattern', () => {
+        const create = resources.createMessage({ id: 'extra', pattern: undefined, languageCode: 'da' });
+        expect(create.isOk).toBeTruthy();
+        const message = resources.getMessage({ id: 'extra', languageCode: 'da' });
+        // eslint-disable-next-line unicorn/no-null
+        expect(message?.value).toBe(null);
+    });
+
     it('should return an error when a message alreaedy exists', () => {
         const result = resources.createMessage({ id: 'extra', pattern: 'this should fail', languageCode: 'en' });
         expect(result.isErr).toBeTruthy();
