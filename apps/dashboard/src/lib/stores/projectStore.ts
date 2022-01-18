@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import type { definitions } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
