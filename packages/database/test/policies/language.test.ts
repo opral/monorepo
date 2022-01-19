@@ -31,7 +31,7 @@ describe("policies/language", () => {
     const langauge_upsert = await supabase
       .from<definitions["language"]>("language")
       .upsert({
-        iso_code: "fr",
+        code: "fr",
         project_id: project.data![0].id,
       });
     const languages = await supabase

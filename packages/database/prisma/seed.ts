@@ -37,9 +37,9 @@ async function main() {
     data: {
       name: "dev-project",
       created_by_user_id: supabase.auth.user()!.id,
-      default_iso_code: "en",
+      source_language_code: "en",
       languages: {
-        createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
+        createMany: { data: [{ code: "en" }, { code: "de" }] },
       },
     },
   });
@@ -49,9 +49,9 @@ async function main() {
     data: {
       name: "bass-project",
       created_by_user_id: supabase.auth.user()!.id,
-      default_iso_code: "en",
+      source_language_code: "en",
       languages: {
-        createMany: { data: [{ iso_code: "en" }, { iso_code: "fr" }] },
+        createMany: { data: [{ code: "en" }, { code: "fr" }] },
       },
     },
   });
@@ -59,9 +59,9 @@ async function main() {
     data: {
       created_by_user_id: supabase.auth.user()!.id,
       name: "color-project",
-      default_iso_code: "en",
+      source_language_code: "en",
       languages: {
-        createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
+        createMany: { data: [{ code: "en" }, { code: "de" }] },
       },
     },
   });

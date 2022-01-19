@@ -412,14 +412,517 @@ export interface paths {
       };
     };
   };
+  "/rpc/is_member_of_project": {
+    post: {
+      parameters: {
+        body: {
+          args: {
+            project_id: string;
+          };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/get_user_id_from_email": {
+    post: {
+      parameters: {
+        body: {
+          args: {
+            arg_email: string;
+          };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/handle_insert_user": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
+  "/rpc/handle_insert_project": {
+    post: {
+      parameters: {
+        body: {
+          args: { [key: string]: unknown };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
 }
 
 export interface definitions {
-  _prisma_migrations: { [key: string]: unknown };
-  language: { [key: string]: unknown };
-  project: { [key: string]: unknown };
-  project_member: { [key: string]: unknown };
-  user: { [key: string]: unknown };
+  _prisma_migrations: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    checksum: string;
+    finished_at?: string;
+    migration_name: string;
+    logs?: string;
+    rolled_back_at?: string;
+    started_at: string;
+    applied_steps_count: number;
+  };
+  language: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    code:
+      | "ab"
+      | "aa"
+      | "af"
+      | "ak"
+      | "sq"
+      | "am"
+      | "ar"
+      | "an"
+      | "hy"
+      | "as"
+      | "av"
+      | "ae"
+      | "ay"
+      | "az"
+      | "bm"
+      | "ba"
+      | "eu"
+      | "be"
+      | "bn"
+      | "bh"
+      | "bi"
+      | "bs"
+      | "br"
+      | "bg"
+      | "my"
+      | "ca"
+      | "km"
+      | "ch"
+      | "ce"
+      | "ny"
+      | "zh"
+      | "cu"
+      | "cv"
+      | "kw"
+      | "co"
+      | "cr"
+      | "hr"
+      | "cs"
+      | "da"
+      | "dv"
+      | "nl"
+      | "dz"
+      | "en"
+      | "eo"
+      | "et"
+      | "ee"
+      | "fo"
+      | "fj"
+      | "fi"
+      | "fr"
+      | "ff"
+      | "gd"
+      | "gl"
+      | "lg"
+      | "ka"
+      | "de"
+      | "ki"
+      | "el"
+      | "kl"
+      | "gn"
+      | "gu"
+      | "ht"
+      | "ha"
+      | "he"
+      | "hz"
+      | "hi"
+      | "ho"
+      | "hu"
+      | "is"
+      | "io"
+      | "ig"
+      | "id"
+      | "ia"
+      | "ie"
+      | "iu"
+      | "ik"
+      | "ga"
+      | "it"
+      | "ja"
+      | "jv"
+      | "kn"
+      | "kr"
+      | "ks"
+      | "kk"
+      | "rw"
+      | "kv"
+      | "kg"
+      | "ko"
+      | "kj"
+      | "ku"
+      | "ky"
+      | "lo"
+      | "la"
+      | "lv"
+      | "lb"
+      | "li"
+      | "ln"
+      | "lt"
+      | "lu"
+      | "mk"
+      | "mg"
+      | "ms"
+      | "ml"
+      | "mt"
+      | "gv"
+      | "mi"
+      | "mr"
+      | "mh"
+      | "ro"
+      | "mn"
+      | "na"
+      | "nv"
+      | "nd"
+      | "ng"
+      | "ne"
+      | "se"
+      | "no"
+      | "nb"
+      | "nn"
+      | "ii"
+      | "oc"
+      | "oj"
+      | "or"
+      | "om"
+      | "os"
+      | "pi"
+      | "pa"
+      | "ps"
+      | "fa"
+      | "pl"
+      | "pt"
+      | "qu"
+      | "rm"
+      | "rn"
+      | "ru"
+      | "sm"
+      | "sg"
+      | "sa"
+      | "sc"
+      | "sr"
+      | "sn"
+      | "sd"
+      | "si"
+      | "sk"
+      | "sl"
+      | "so"
+      | "st"
+      | "nr"
+      | "es"
+      | "su"
+      | "sw"
+      | "ss"
+      | "sv"
+      | "tl"
+      | "ty"
+      | "tg"
+      | "ta"
+      | "tt"
+      | "te"
+      | "th"
+      | "bo"
+      | "ti"
+      | "to"
+      | "ts"
+      | "tn"
+      | "tr"
+      | "tk"
+      | "tw"
+      | "ug"
+      | "uk"
+      | "ur"
+      | "uz"
+      | "ve"
+      | "vi"
+      | "vo"
+      | "wa"
+      | "cy"
+      | "fy"
+      | "wo"
+      | "xh"
+      | "yi"
+      | "yo"
+      | "za"
+      | "zu";
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
+     */
+    project_id: string;
+    file: string;
+  };
+  project_member: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
+     */
+    project_id: string;
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `user.id`.<fk table='user' column='id'/>
+     */
+    user_id: string;
+  };
+  project: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    api_key: string;
+    name: string;
+    /**
+     * Note:
+     * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
+     */
+    created_by_user_id: string;
+    source_language_code:
+      | "ab"
+      | "aa"
+      | "af"
+      | "ak"
+      | "sq"
+      | "am"
+      | "ar"
+      | "an"
+      | "hy"
+      | "as"
+      | "av"
+      | "ae"
+      | "ay"
+      | "az"
+      | "bm"
+      | "ba"
+      | "eu"
+      | "be"
+      | "bn"
+      | "bh"
+      | "bi"
+      | "bs"
+      | "br"
+      | "bg"
+      | "my"
+      | "ca"
+      | "km"
+      | "ch"
+      | "ce"
+      | "ny"
+      | "zh"
+      | "cu"
+      | "cv"
+      | "kw"
+      | "co"
+      | "cr"
+      | "hr"
+      | "cs"
+      | "da"
+      | "dv"
+      | "nl"
+      | "dz"
+      | "en"
+      | "eo"
+      | "et"
+      | "ee"
+      | "fo"
+      | "fj"
+      | "fi"
+      | "fr"
+      | "ff"
+      | "gd"
+      | "gl"
+      | "lg"
+      | "ka"
+      | "de"
+      | "ki"
+      | "el"
+      | "kl"
+      | "gn"
+      | "gu"
+      | "ht"
+      | "ha"
+      | "he"
+      | "hz"
+      | "hi"
+      | "ho"
+      | "hu"
+      | "is"
+      | "io"
+      | "ig"
+      | "id"
+      | "ia"
+      | "ie"
+      | "iu"
+      | "ik"
+      | "ga"
+      | "it"
+      | "ja"
+      | "jv"
+      | "kn"
+      | "kr"
+      | "ks"
+      | "kk"
+      | "rw"
+      | "kv"
+      | "kg"
+      | "ko"
+      | "kj"
+      | "ku"
+      | "ky"
+      | "lo"
+      | "la"
+      | "lv"
+      | "lb"
+      | "li"
+      | "ln"
+      | "lt"
+      | "lu"
+      | "mk"
+      | "mg"
+      | "ms"
+      | "ml"
+      | "mt"
+      | "gv"
+      | "mi"
+      | "mr"
+      | "mh"
+      | "ro"
+      | "mn"
+      | "na"
+      | "nv"
+      | "nd"
+      | "ng"
+      | "ne"
+      | "se"
+      | "no"
+      | "nb"
+      | "nn"
+      | "ii"
+      | "oc"
+      | "oj"
+      | "or"
+      | "om"
+      | "os"
+      | "pi"
+      | "pa"
+      | "ps"
+      | "fa"
+      | "pl"
+      | "pt"
+      | "qu"
+      | "rm"
+      | "rn"
+      | "ru"
+      | "sm"
+      | "sg"
+      | "sa"
+      | "sc"
+      | "sr"
+      | "sn"
+      | "sd"
+      | "si"
+      | "sk"
+      | "sl"
+      | "so"
+      | "st"
+      | "nr"
+      | "es"
+      | "su"
+      | "sw"
+      | "ss"
+      | "sv"
+      | "tl"
+      | "ty"
+      | "tg"
+      | "ta"
+      | "tt"
+      | "te"
+      | "th"
+      | "bo"
+      | "ti"
+      | "to"
+      | "ts"
+      | "tn"
+      | "tr"
+      | "tk"
+      | "tw"
+      | "ug"
+      | "uk"
+      | "ur"
+      | "uz"
+      | "ve"
+      | "vi"
+      | "vo"
+      | "wa"
+      | "cy"
+      | "fy"
+      | "wo"
+      | "xh"
+      | "yi"
+      | "yo"
+      | "za"
+      | "zu";
+    created_at: string;
+    file: string;
+  };
+  user: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    email: string;
+    created_at: string;
+  };
 }
 
 export interface parameters {

@@ -38,7 +38,7 @@ describe("policies/project", () => {
         {
           name: "new-project",
           created_by_user_id: uid,
-          default_iso_code: "en",
+          source_language_code: "en",
         },
         { returning: "minimal" }
       );

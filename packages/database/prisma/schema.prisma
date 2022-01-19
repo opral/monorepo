@@ -28,25 +28,25 @@ model project_member {
 }
 
 model project {
-  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  api_key            String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  api_key              String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
   // the user id is required to to insert a membership to the project via a trigger
   // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
-  created_by_user_id String           @db.Uuid
-  members            project_member[]
-  default_iso_code   iso_639_1
-  created_at         DateTime         @default(now())
-  languages          language[]
+  created_by_user_id   String           @db.Uuid
+  members              project_member[]
+  source_language_code iso_639_1
+  created_at           DateTime         @default(now())
+  languages            language[]
 }
 
 model language {
-  iso_code   iso_639_1
+  code       iso_639_1
   project_id String    @db.Uuid
   project    project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
   file       String    @default("")
 
-  @@id([project_id, iso_code])
+  @@id([project_id, code])
 }
 
 enum iso_639_1 {
