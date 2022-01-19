@@ -15,7 +15,7 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
 	import ISO6391 from 'iso-639-1';
-	import SelectHumanSourceLanguageTile from '../tiles/SelectHumanSourceLanguageTile.svelte';
+	import SelectHumanSourceLanguageTile from '../tiles/SelectHumanBaseLanguageTile.svelte';
 	import { auth } from '$lib/services/auth';
 
 	export function show(args: { onProjectCreated: () => unknown }): void {
@@ -42,7 +42,7 @@
 	let onProjectCreated: () => unknown;
 
 	// 0 = basics
-	// 1 = human source language
+	// 1 = human base language
 	let currentStep: 0 | 1 = 0;
 
 	let projectName = '';
@@ -52,11 +52,11 @@
 	// eslint-disable-next-line unicorn/no-null
 	let projects: DatabaseResponse<definitions['project'][]> = { data: null, error: null };
 
-	let selectedLanguageCodes: definitions['language']['iso_code'][] = [];
+	let selectedLanguageCodes: definitions['language']['code'][] = [];
 	let confirmIsLoading = false;
 
 	// the actual value (type definitions)
-	let selectedSourceLanguageCode: definitions['language']['iso_code'] | undefined;
+	let selectedSourceLanguageCode: definitions['language']['code'] | undefined;
 
 	$: isValidInput =
 		projectNameIsValidInput &&
@@ -106,7 +106,7 @@
 			.insert({
 				name: projectName,
 				created_by_user_id: auth.user()?.id ?? '',
-				default_iso_code: selectedSourceLanguageCode
+				base_language_code: selectedSourceLanguageCode
 			})
 			.single();
 		if (insertProject.error) {
@@ -115,7 +115,7 @@
 		} else {
 			const insertDefaultLanguage = await database
 				.from<definitions['language']>('language')
-				.insert({ iso_code: selectedSourceLanguageCode, project_id: insertProject.data.id });
+				.insert({ code: selectedSourceLanguageCode, project_id: insertProject.data.id });
 			if (insertDefaultLanguage.error) {
 				alert(insertDefaultLanguage.error.message);
 			}
@@ -168,7 +168,7 @@
 				/>
 				<ProgressStep
 					current={currentStep === 1}
-					label="Human Source Language"
+					label="Human Base Language"
 					description="The progress indicator will listen for clicks on the steps"
 					on:click={() => (currentStep = 1)}
 				/>
@@ -227,7 +227,7 @@
 				possibleLanguageCodes={selectedLanguageCodes}
 			/>
 			<p class="pt-4">
-				The (human) source language is the language used during development. In most cases it's
+				The (human) base language is the language used during development. In most cases it's
 				English.
 			</p>
 		{/if}

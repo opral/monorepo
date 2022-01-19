@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation';
 	import ApiKey from '$lib/components/ApiKey.svelte';
 	import Divider from '$lib/layout/Divider.svelte';
-	import SelectDefaultHumanLanguageTile from '$lib/components/tiles/SelectHumanSourceLanguageTile.svelte';
+	import SelectDefaultHumanLanguageTile from '$lib/components/tiles/SelectHumanBaseLanguageTile.svelte';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
 	import { LanguageCode, Result } from '@inlang/common';
 
@@ -19,15 +19,13 @@
 
 	let deleteProjectModal: DeleteProjectModal;
 
-	async function changeDefaultHumanLanguage(args: {
-		to: LanguageCode;
-	}): Promise<Result<void, Error>> {
+	async function changeHumanBaseLanguage(args: { to: LanguageCode }): Promise<Result<void, Error>> {
 		if (args.to === undefined) {
 			return Result.err(Error('selectedDefaultLanguage is undefined'));
 		}
 		const response = await database
 			.from<definitions['project']>('project')
-			.update({ default_iso_code: args.to })
+			.update({ base_language_code: args.to })
 			.eq('id', $projectStore.data?.project.id ?? '');
 		if (response.data && response.error === null) {
 			projectStore.getData({ projectId: $projectStore.data?.project.id ?? '' });
@@ -80,24 +78,24 @@
 		>
 	</row>
 	<Divider />
-	<p class="pt-1">Change the human source language</p>
+	<p class="pt-1">Change the human base language</p>
 	<p class="pt-1 pb-2 text-gray-600 text-sm">
-		The human source language is the language used during development and acts as source of truth of
-		source for the other languages in this project.
+		The human base language is the language used during development and acts as source of truth of
+		source for the other languages (translations) in this project.
 	</p>
 	<br />
 	<SelectDefaultHumanLanguageTile
 		showLegend={false}
-		selected={$projectStore.data?.project.default_iso_code}
+		selected={$projectStore.data?.project.base_language_code}
 		onSelect={(selectedLanguageCode) =>
 			confirmModal.show({
 				heading: 'Are you sure?',
 				message:
-					'You can always change the default human language again but usually there is no reason to do so.',
+					'You can always change the human base language again but usually there is no reason to do so.',
 				danger: false,
-				onConfirm: () => changeDefaultHumanLanguage({ to: selectedLanguageCode })
+				onConfirm: () => changeHumanBaseLanguage({ to: selectedLanguageCode })
 			})}
-		possibleLanguageCodes={$projectStore.data?.languages.map((language) => language.iso_code) ?? []}
+		possibleLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
 	/>
 	<Divider />
 	<Tile>

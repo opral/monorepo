@@ -43,7 +43,7 @@
 	$: rows = () => {
 		const result: Row[] = [];
 		const ids = $projectStore.data?.resources.getMessageIds({
-			languageCode: $projectStore.data.project.default_iso_code
+			languageCode: $projectStore.data.project.base_language_code
 		});
 		const filtered = [...(ids ?? [])].filter((id) =>
 			id.toLowerCase().startsWith(searchQuery.toLowerCase())
@@ -59,7 +59,7 @@
 					message?.value ?? undefined
 				])
 			);
-			const sourceLanguageCode = $projectStore.data?.project.default_iso_code ?? 'en';
+			const sourceLanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
 			const sourceMessage = messages[sourceLanguageCode];
 			if (sourceMessage === undefined) {
 				alert(`Error 219dx: The source message is undefined for id "${messageId}"`);
@@ -234,7 +234,7 @@
 		};
 		const message = $projectStore.data?.resources.getMessage({
 			id: args.messageId,
-			languageCode: $projectStore.data.project.default_iso_code
+			languageCode: $projectStore.data.project.base_language_code
 		});
 		if ((message?.attributes.length ?? []) > 0) {
 			confirmModal.show({
@@ -314,7 +314,7 @@
 				patterns={{ en: new Pattern([]) }}
 				displayActionRequired={false}
 				requiredLanguageCodes={[]}
-				sourceLanguageCode={$projectStore.data?.project.default_iso_code ?? 'en'}
+				sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 				onDelete={() => deleteMessage({ messageId: row.messageId })}
 				onSaveChanges={(serializedPatterns) =>
 					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
@@ -325,7 +325,7 @@
 					kind="info"
 					title="This message has no patterns but attributes:"
 					subtitle={`If you want to add patterns to this message, fill out the ${ISO6391.getName(
-						$projectStore.data?.project.default_iso_code ?? ''
+						$projectStore.data?.project.base_language_code ?? ''
 					)} pattern and press 'Save changes'.`}
 				/>
 			</Patterns>
@@ -334,9 +334,8 @@
 				id={row.messageId}
 				patterns={row.patterns}
 				displayActionRequired={row.actionRequired}
-				requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.iso_code) ??
-					[]}
-				sourceLanguageCode={$projectStore.data?.project.default_iso_code ?? 'en'}
+				requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
+				sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 				onDelete={() => deleteMessage({ messageId: row.messageId })}
 				onSaveChanges={(serializedPatterns) =>
 					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
@@ -348,9 +347,8 @@
 			id={row.messageId + ' . ' + row.attributeId}
 			patterns={row.patterns}
 			displayActionRequired={row.actionRequired}
-			requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.iso_code) ??
-				[]}
-			sourceLanguageCode={$projectStore.data?.project.default_iso_code ?? 'en'}
+			requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
+			sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 			onDelete={() => deleteAttribute({ messageId: row.messageId, attributeId: row.attributeId })}
 			onSaveChanges={(serializedPatterns) =>
 				saveAttributeChanges({

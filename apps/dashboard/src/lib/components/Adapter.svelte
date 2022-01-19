@@ -32,10 +32,10 @@
 	let isLoading = false;
 	let exportedCode = '';
 	let importText = '';
-	let selectedLanguageIso: definitions['language']['iso_code'] = project.default_iso_code;
+	let selectedLanguageIso: definitions['language']['code'] = project.base_language_code;
 	let success = false;
 
-	const baseLanguage: definitions['project']['default_iso_code'] = project.default_iso_code;
+	const baseLanguage: definitions['project']['base_language_code'] = project.base_language_code;
 
 	$: isImport = title === 'Import';
 	$: isFileForSelectedLanguage = getFileForLanguageIso(selectedLanguageIso).length > 0;
@@ -49,7 +49,7 @@
 
 	function getFileForLanguageIso(iso: string): string {
 		for (const language of languages) {
-			if (language.iso_code === iso && language.file.length > 0) {
+			if (language.code === iso && language.file.length > 0) {
 				return language.file;
 			}
 		}
@@ -61,7 +61,7 @@
 			.from<definitions['language']>('language')
 			.select()
 			.match({ project_id: project.id })
-			.order('iso_code', { ascending: true });
+			.order('code', { ascending: true });
 		if (selectLanguages.error) {
 			alert(selectLanguages.error.message);
 		} else {
@@ -104,7 +104,7 @@
 				languagesToUpsert = fluentLanguages.value.map((language) => {
 					return {
 						project_id: project.id,
-						iso_code: language.languageCode,
+						code: language.languageCode,
 						file: language.data
 					};
 				});
@@ -113,7 +113,7 @@
 					let upsert = await database
 						.from<definitions['language']>('language')
 						.update({ file: element.file })
-						.match({ project_id: project.id, iso_code: element.iso_code });
+						.match({ project_id: project.id, iso_code: element.code });
 					if (upsert.error) {
 						hasUpsertError = true;
 						alert(upsert.error.message);
@@ -175,8 +175,8 @@
 				<TileGroup bind:selected={selectedLanguageIso}>
 					{#if languages !== undefined}
 						{#each languages as language}
-							<RadioTile value={language.iso_code}>
-								{ISO6391.getName(language.iso_code)} - {language.iso_code}
+							<RadioTile value={language.code}>
+								{ISO6391.getName(language.code)} - {language.code}
 							</RadioTile>
 						{/each}
 					{/if}

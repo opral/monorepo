@@ -4,7 +4,7 @@ import { Identifier, Pattern, Placeable, Reference } from '@inlang/fluent-syntax
  * Searches for a a reference in a pattern.
  *
  * Useful to search for a reference in another pattern e.g. the
- * source languages pattern contains three references. Do these
+ * base languages pattern contains three references. Do these
  * three references also exist in another (languages) pattern?
  */
 export function doesReferenceExist(args: { reference: Reference; pattern: Pattern }): boolean {

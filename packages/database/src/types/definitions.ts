@@ -726,7 +726,7 @@ export interface definitions {
      * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
      */
     created_by_user_id: string;
-    source_language_code:
+    base_language_code:
       | "ab"
       | "aa"
       | "af"

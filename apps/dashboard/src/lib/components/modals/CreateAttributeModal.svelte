@@ -55,7 +55,7 @@
 			$projectStore.data?.resources.attributeExists({
 				messageId,
 				id,
-				languageCode: $projectStore.data.project.default_iso_code
+				languageCode: $projectStore.data.project.base_language_code
 			})
 		) {
 			return {
@@ -82,7 +82,7 @@
 			messageId: messageId,
 			id: attributeId,
 			pattern: serializedPattern,
-			languageCode: $projectStore.data.project.default_iso_code
+			languageCode: $projectStore.data.project.base_language_code
 		});
 		if (create.isErr) {
 			status = 'error';
@@ -141,7 +141,7 @@
 		labelText={`Pattern`}
 		bind:value={serializedPattern}
 		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
-			$projectStore.data?.project.default_iso_code ?? ''
+			$projectStore.data?.project.base_language_code ?? ''
 		)}.`}
 	/>
 	<br />

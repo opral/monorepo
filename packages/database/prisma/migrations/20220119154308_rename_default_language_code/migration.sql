@@ -16,4 +16,4 @@ ADD CONSTRAINT "language_pkey" PRIMARY KEY ("project_id", "code");
 
 -- AlterTable
 ALTER TABLE "project" DROP COLUMN "default_iso_code",
-ADD COLUMN     "source_language_code" "iso_639_1" NOT NULL;
+ADD COLUMN     "base_language_code" "iso_639_1" NOT NULL;

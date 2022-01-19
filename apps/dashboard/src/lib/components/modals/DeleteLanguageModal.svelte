@@ -62,6 +62,6 @@
 	{:else if status === 'finished'}
 		<InlineLoading status="finished" description="Success" />
 	{:else}
-		<p>Do you really want to delete {ISO6391.getName(language.iso_code)} from the project?</p>
+		<p>Do you really want to delete {ISO6391.getName(language.code)} from the project?</p>
 	{/if}
 </Modal>

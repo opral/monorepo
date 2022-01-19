@@ -80,17 +80,17 @@
 		let languages = $projectStore.data?.languages ?? [];
 		if (searchQuery !== '') {
 			languages = languages.filter((language) =>
-				ISO6391.getName(language.iso_code).toLowerCase().startsWith(searchQuery.toLowerCase())
+				ISO6391.getName(language.code).toLowerCase().startsWith(searchQuery.toLowerCase())
 			);
 		}
 		// sorted alphabetically
 		return languages
 			.map((language) => ({
-				id: language.iso_code,
-				isoCode: language.iso_code,
+				id: language.code,
+				isoCode: language.code,
 				// words: numWords(language.iso_code),
 				// progress: 0,
-				isDefaultLanguage: language.iso_code === $projectStore.data?.project.default_iso_code,
+				isDefaultLanguage: language.code === $projectStore.data?.project.base_language_code,
 				languageObject: language
 			}))
 			.sort((a, b) => ISO6391.getName(a.isoCode).localeCompare(ISO6391.getName(b.isoCode)));

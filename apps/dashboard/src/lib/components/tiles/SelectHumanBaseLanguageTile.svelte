@@ -12,7 +12,7 @@
 <TileGroup
 	on:select={(event) => onSelect?.(event.detail)}
 	bind:selected
-	legend={showLegend ? 'Select (human) source language' : undefined}
+	legend={showLegend ? 'Select (human) base language' : undefined}
 >
 	{#each possibleLanguageCodes as languageCode}
 		<RadioTile light value={languageCode}>

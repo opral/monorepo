@@ -77,7 +77,7 @@ async function updateResourcesInDatabase(args: {
 				.from<definitions['language']>('language')
 				.update({ file: serializedResource.data })
 				.eq('project_id', project.data.project.id)
-				.eq('iso_code', serializedResource.languageCode)
+				.eq('code', serializedResource.languageCode)
 		);
 	}
 	const responses = await Promise.all(promises);
@@ -110,16 +110,16 @@ async function getData(
 		.from<definitions['language']>('language')
 		.select('*')
 		.match({ project_id: args.projectId })
-		.order('iso_code', { ascending: true });
+		.order('code', { ascending: true });
 
 	const resources: Result<Resources, Error> = Resources.parse({
 		adapter: adapters.fluent,
 		files:
 			languages.data?.map((language) => ({
 				data: language.file,
-				languageCode: language.iso_code
+				languageCode: language.code
 			})) ?? [],
-		baseLanguageCode: project.data?.default_iso_code ?? 'en' // Always defined according to schema
+		baseLanguageCode: project.data?.base_language_code ?? 'en' // Always defined according to schema
 	});
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.

@@ -18,7 +18,7 @@
 		status = 'active';
 		const update = await database
 			.from<definitions['project']>('project')
-			.update({ default_iso_code: language.iso_code })
+			.update({ base_language_code: language.code })
 			.match({ id: language.project_id });
 		if (update.error) {
 			console.log(update.error);
@@ -46,7 +46,7 @@
 <Modal
 	size="sm"
 	bind:open
-	modalHeading="Set as default language"
+	modalHeading="Set as base language"
 	primaryButtonText="Confirm"
 	secondaryButtonText="Cancel"
 	on:click:button--primary={handleConfirm}
@@ -56,12 +56,12 @@
 	on:close
 >
 	{#if status === 'active'}
-		<InlineLoading status="active" description="Changing default language..." />
+		<InlineLoading status="active" description="Changing base language..." />
 	{:else if status === 'error'}
 		<InlineLoading status="error" description="An error occurred" />
 	{:else if status === 'finished'}
 		<InlineLoading status="finished" description="Success" />
 	{:else}
-		<p>Do you really want to set {ISO6391.getName(language.iso_code)} as default language?</p>
+		<p>Do you really want to set {ISO6391.getName(language.code)} as base language?</p>
 	{/if}
 </Modal>

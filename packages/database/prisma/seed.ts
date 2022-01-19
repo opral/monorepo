@@ -37,7 +37,7 @@ async function main() {
     data: {
       name: "dev-project",
       created_by_user_id: supabase.auth.user()!.id,
-      source_language_code: "en",
+      base_language_code: "en",
       languages: {
         createMany: { data: [{ code: "en" }, { code: "de" }] },
       },
@@ -49,7 +49,7 @@ async function main() {
     data: {
       name: "bass-project",
       created_by_user_id: supabase.auth.user()!.id,
-      source_language_code: "en",
+      base_language_code: "en",
       languages: {
         createMany: { data: [{ code: "en" }, { code: "fr" }] },
       },
@@ -59,7 +59,7 @@ async function main() {
     data: {
       created_by_user_id: supabase.auth.user()!.id,
       name: "color-project",
-      source_language_code: "en",
+      base_language_code: "en",
       languages: {
         createMany: { data: [{ code: "en" }, { code: "de" }] },
       },

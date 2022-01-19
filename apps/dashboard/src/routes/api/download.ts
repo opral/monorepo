@@ -53,9 +53,9 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		body: {
 			files: languages.data.map((language) => ({
 				data: language.file,
-				languageCode: language.iso_code
+				languageCode: language.code
 			})),
-			baseLanguage: project.body.default_iso_code
+			baseLanguage: project.body.base_language_code
 		}
 	};
 }
