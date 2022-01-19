@@ -11,12 +11,12 @@ export interface MockUser {
   password: string;
 }
 
-export const mockUser : MockUser = {
+export const mockUser: MockUser = {
   email: "dev@account.com",
   password: "dev@account.com",
 };
 
-export const mockUser2 : MockUser = {
+export const mockUser2: MockUser = {
   email: "user@account.com",
   password: "user@account.com",
 };
