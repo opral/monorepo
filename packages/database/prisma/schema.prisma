@@ -11,50 +11,33 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model organization {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String
-  projects           project[]
-  // the user id is benefitial to insert an admin membership to the user
-  // who created the organization.
-  // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
-  created_by_user_id String    @db.Uuid
-  members            member[]
-  created_at         DateTime  @default(now())
-}
-
 model user {
-  id          String   @id @db.Uuid
-  email       String   @unique
-  memberships member[]
-  created_at  DateTime @default(now())
+  id                  String           @id @db.Uuid
+  email               String           @unique
+  project_memberships project_member[]
+  created_at          DateTime         @default(now())
 }
 
-model member {
-  organization_id String       @db.Uuid
-  organization    organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  user_id         String       @db.Uuid
-  user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  role            member_role
+model project_member {
+  project_id String  @db.Uuid
+  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user_id    String  @db.Uuid
+  user       user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@id([organization_id, user_id])
-}
-
-/// only admin for now
-enum member_role {
-  ADMIN
-  TRANSLATOR
+  @@id([project_id, user_id])
 }
 
 model project {
-  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  api_key          String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  organization_id  String       @db.Uuid
-  organization     organization @relation(fields: [organization_id], references: [id])
-  default_iso_code iso_639_1
-  created_at       DateTime     @default(now())
-  languages        language[]
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  api_key            String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String
+  // the user id is required to to insert a membership to the project via a trigger
+  // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
+  created_by_user_id String           @db.Uuid
+  members            project_member[]
+  default_iso_code   iso_639_1
+  created_at         DateTime         @default(now())
+  languages          language[]
 }
 
 model language {
