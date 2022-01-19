@@ -63,7 +63,6 @@
 		"@inlang/fluent-lint": "*",
 		"@now/build-utils": "^2.7.0",
 		"@supabase/supabase-js": "^1.23.0",
-		"deepl": "^1.0.12",
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",

@@ -10,6 +10,13 @@
 	import Bot20 from 'carbon-icons-svelte/lib/Bot20';
 	import Save20 from 'carbon-icons-svelte/lib/Save20';
 	import { isEqual } from 'lodash-es';
+	import {
+		MachineTranslateRequestBody,
+		MachineTranslateResponseBody,
+		SupportedLanguageCode,
+		supportedLanguageCodes
+	} from '../../routes/api/internal/machine-translate';
+	import InlineLoadingWrapper from './InlineLoadingWrapper.svelte';
 
 	/**
 	 * The id to which the pattern belongs.
@@ -38,7 +45,7 @@
 	 *
 	 * Is used to derive the "source of truth".
 	 */
-	export let sourceLanguageCode: LanguageCode;
+	export let baseLanguageCode: LanguageCode;
 
 	export let displayActionRequired: boolean;
 
@@ -58,10 +65,16 @@
 
 	let expanded = false;
 
+	let machineTranslationStatus: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
+	let machineTranslationErrorMessage = '';
+
 	/**
 	 * whether the user made changes to any message
 	 */
 	$: hasChanges = isEqual(serializedPatterns, serializePatterns({ patterns })) === false;
+
+	$: hasMissingPatterns =
+		requiredLanguageCodes.every((code) => serializedPatterns[code] !== '') === false;
 
 	// update the internal represenation of patterns if the external representation differs.
 	// (in other words: has been updated)
@@ -72,6 +85,47 @@
 	$: allPatternsAreValid = Object.values(serializedPatterns).every(
 		(pattern) => parseEntry(`dummy-id = ${pattern}`).isOk
 	);
+
+	async function machineTranslate(): Promise<void> {
+		machineTranslationStatus = 'active';
+		for (const languageCode of requiredLanguageCodes) {
+			if (languageCode === baseLanguageCode) {
+				continue;
+			} else if (
+				supportedLanguageCodes.includes(baseLanguageCode as SupportedLanguageCode) === false
+			) {
+				machineTranslationStatus = 'error';
+				machineTranslationErrorMessage = `The base language ${baseLanguageCode} is not supported.`;
+				break;
+			} else if (supportedLanguageCodes.includes(languageCode as SupportedLanguageCode) === false) {
+				alert(`The language ${languageCode} is not supported.`);
+			} else {
+				const requestBody: MachineTranslateRequestBody = {
+					serializedSourcePattern: serializedPatterns[baseLanguageCode],
+					sourceLanguageCode: baseLanguageCode as SupportedLanguageCode,
+					targetLanguageCode: languageCode as SupportedLanguageCode
+				};
+				const response = await fetch('/api/internal/machine-translate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+						// 'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: JSON.stringify(requestBody)
+				});
+				if (response.ok === false) {
+					machineTranslationStatus = 'error';
+					machineTranslationErrorMessage =
+						'Something went wrong. The response code was ' + response.status;
+					break;
+				} else {
+					const responseBody = (await response.json()) as MachineTranslateResponseBody;
+					serializedPatterns[languageCode] = responseBody.serializedPattern;
+				}
+			}
+		}
+		machineTranslationStatus = 'finished';
+	}
 
 	/**
 	 * All patterns in serialized form.
@@ -111,16 +165,16 @@
 			<grid class="grid-cols-4 gap-2">
 				{#each Array.from(new Set(Object.keys(patterns).concat(requiredLanguageCodes))) as languageCode}
 					<row class="col-span-1 space-x-2 items-center">
-						<Tag type={languageCode === sourceLanguageCode ? 'green' : 'blue'}>
+						<Tag type={languageCode === baseLanguageCode ? 'green' : 'blue'}>
 							{languageCode}
 						</Tag>
 						<p class="text-sm">{ISO6391.getName(languageCode)}</p>
 					</row>
 					<PatternEditor
-						emptyPatternIsOk={languageCode === sourceLanguageCode}
+						emptyPatternIsOk={languageCode === baseLanguageCode}
 						class="col-span-3"
 						bind:serializedPattern={serializedPatterns[languageCode]}
-						serializedSourcePattern={serializedPatterns[sourceLanguageCode]}
+						serializedSourcePattern={serializedPatterns[baseLanguageCode]}
 					/>
 				{/each}
 			</grid>
@@ -138,7 +192,24 @@
 					>
 						Save changes
 					</Button>
-					<Button kind="secondary" size="field" disabled icon={Bot20}>Auto translate</Button>
+					{#if machineTranslationStatus === 'inactive'}
+						<Button
+							kind="secondary"
+							size="field"
+							disabled={hasMissingPatterns === false}
+							on:click={machineTranslate}
+							icon={Bot20}
+						>
+							Auto translate
+						</Button>
+					{:else}
+						<InlineLoadingWrapper
+							class="px-2 flex flex-row items-center"
+							bind:status={machineTranslationStatus}
+							activeDescription="Machine translating..."
+							finishedDescription="Finished"
+						/>
+					{/if}
 				</ButtonSet>
 				<Button
 					kind="danger-tertiary"

@@ -314,7 +314,7 @@
 				patterns={{ en: new Pattern([]) }}
 				displayActionRequired={false}
 				requiredLanguageCodes={[]}
-				sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
+				baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 				onDelete={() => deleteMessage({ messageId: row.messageId })}
 				onSaveChanges={(serializedPatterns) =>
 					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
@@ -335,7 +335,7 @@
 				patterns={row.patterns}
 				displayActionRequired={row.actionRequired}
 				requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
-				sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
+				baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 				onDelete={() => deleteMessage({ messageId: row.messageId })}
 				onSaveChanges={(serializedPatterns) =>
 					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
@@ -348,7 +348,7 @@
 			patterns={row.patterns}
 			displayActionRequired={row.actionRequired}
 			requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
-			sourceLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
+			baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
 			onDelete={() => deleteAttribute({ messageId: row.messageId, attributeId: row.attributeId })}
 			onSaveChanges={(serializedPatterns) =>
 				saveAttributeChanges({
