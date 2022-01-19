@@ -28,12 +28,20 @@
 
 	$: isValidInput = messageId !== '' && isValidMessageId(messageId);
 
-	$: invalidMessageIdErrorMessage = $projectStore.data?.resources.messageExist({
-		id: messageId,
-		languageCode: $projectStore.data.project.default_iso_code
-	})
-		? 'Id already exists.'
-		: 'Invalid character.';
+	let invalidMessageIdErrorMessage: () => string;
+	$: invalidMessageIdErrorMessage = () => {
+		if (
+			$projectStore.data?.resources.messageExist({
+				id: messageId,
+				languageCode: $projectStore.data.project.base_language_code
+			})
+		) {
+			return 'Id already exists.';
+		} else if (messageId.includes('.')) {
+			return 'A message id can not contain a dot. Seems like you want to create an attribute?';
+		}
+		return 'Invalid character.';
+	};
 
 	let keyNameInputElement: HTMLInputElement;
 
@@ -47,7 +55,7 @@
 		const create = $projectStore.data.resources.createMessage({
 			id: messageId,
 			pattern: messagePattern,
-			languageCode: $projectStore.data.project.default_iso_code
+			languageCode: $projectStore.data.project.base_language_code
 		});
 		const updateDatabase = await projectStore.updateResourcesInDatabase();
 		if (create.isErr || updateDatabase.isErr) {
@@ -84,7 +92,7 @@
 	<p>
 		A new message is always created for base language first. The human base language for this
 		project is <strong>
-			{ISO6391.getName($projectStore.data?.project.default_iso_code ?? '')}
+			{ISO6391.getName($projectStore.data?.project.base_language_code ?? '')}
 		</strong>.
 	</p>
 	<br />
@@ -96,7 +104,7 @@
 		invalid={messageId !== undefined &&
 			isValidMessageId(messageId) === false &&
 			status !== 'finished'}
-		invalidText={invalidMessageIdErrorMessage}
+		invalidText={invalidMessageIdErrorMessage()}
 		labelText="Id"
 		bind:value={messageId}
 		bind:ref={keyNameInputElement}
@@ -107,7 +115,7 @@
 		labelText={`Pattern`}
 		bind:value={messagePattern}
 		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
-			$projectStore.data?.project.default_iso_code ?? ''
+			$projectStore.data?.project.base_language_code ?? ''
 		)}.`}
 	/>
 	<!-- <br />
