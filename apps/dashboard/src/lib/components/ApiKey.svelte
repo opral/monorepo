@@ -12,10 +12,11 @@
 </script>
 
 <p class="pt-1">API key</p>
-<p class="pt-1 pb-2 text-gray-600 text-sm">
+<p class="pt-1 text-gray-600 text-sm">
 	If you are not a developer, you won't need the API key. The API key can be used to make requests
 	with the CLI. Don't share the key with anyone who should not have access to this project.
 </p>
+<br />
 <row>
 	<CodeSnippet code={text} />
 	{#if isRevealed}

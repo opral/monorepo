@@ -4,6 +4,8 @@
 	import Settings24 from 'carbon-icons-svelte/lib/Settings24';
 	import DocumentExport24 from 'carbon-icons-svelte/lib/DocumentExport24';
 	import DocumentImport24 from 'carbon-icons-svelte/lib/DocumentImport24';
+	import Group24 from 'carbon-icons-svelte/lib/Group24';
+
 	import { SideNavItems, SideNavLink, SideNav } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 
@@ -28,6 +30,7 @@
 			text="Export"
 			href="/project/{$page.params.projectId}/export"
 		/>
+		<SideNavLink icon={Group24} text="Members" href="/project/{$page.params.projectId}/members" />
 		<SideNavLink
 			icon={Settings24}
 			text="Settings"

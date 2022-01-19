@@ -9,6 +9,7 @@
 	$: if ($page.params.projectId) {
 		projectStore.getData({ projectId: $page.params.projectId });
 	} else {
+		// eslint-disable-next-line unicorn/no-null
 		$projectStore = { data: null, error: null };
 	}
 </script>

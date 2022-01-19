@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation';
 	import ApiKey from '$lib/components/ApiKey.svelte';
 	import Divider from '$lib/layout/Divider.svelte';
-	import SelectDefaultHumanLanguageTile from '$lib/components/tiles/SelectDefaultHumanLanguageTile.svelte';
+	import SelectDefaultHumanLanguageTile from '$lib/components/tiles/SelectHumanSourceLanguageTile.svelte';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
 	import { LanguageCode, Result } from '@inlang/common';
 
@@ -59,7 +59,7 @@
 </script>
 
 <div class="max-w-lg">
-	<h1>Settings</h1>
+	<h1 class="mb-1">Settings</h1>
 	<br />
 	<ApiKey apiKey={$projectStore.data?.project.api_key ?? ''} />
 	<Divider />
@@ -80,10 +80,12 @@
 		>
 	</row>
 	<Divider />
-	<p class="pt-1">Change the default human language</p>
+	<p class="pt-1">Change the human source language</p>
 	<p class="pt-1 pb-2 text-gray-600 text-sm">
-		The default human language is the language used during development.
+		The human source language is the language used during development and acts as source of truth of
+		source for the other languages in this project.
 	</p>
+	<br />
 	<SelectDefaultHumanLanguageTile
 		showLegend={false}
 		selected={$projectStore.data?.project.default_iso_code}

@@ -97,7 +97,7 @@
 	};
 </script>
 
-<h1>Languages</h1>
+<h1 class="mb-1">Languages</h1>
 <p>Your project's languages.</p>
 <br />
 

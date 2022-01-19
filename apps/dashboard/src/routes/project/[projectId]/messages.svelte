@@ -277,7 +277,7 @@
 </script>
 
 <!-- description -->
-<h1>Messages</h1>
+<h1 class="mb-1">Messages</h1>
 <p>All your messages will appear here. You can create, delete and edit them.</p>
 <br />
 <!-- "action bar" -->

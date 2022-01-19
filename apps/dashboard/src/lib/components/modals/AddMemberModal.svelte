@@ -5,11 +5,11 @@
 	import { isValidEmail } from '$lib/utils/isValidEmail';
 
 	export function show(args: {
-		organization: definitions['organization'];
+		projectId: definitions['project']['id'];
 		onMemberAdded: () => unknown;
 	}): void {
 		// automatically overwriting old data when show is called
-		organization = args.organization;
+		projectId = args.projectId;
 		onAddedMember = args.onMemberAdded;
 		open = true;
 	}
@@ -19,7 +19,7 @@
 	}
 
 	let open = false;
-	let organization: definitions['organization'];
+	let projectId: definitions['project']['id'];
 
 	let onAddedMember: () => unknown;
 
@@ -29,18 +29,19 @@
 
 	async function handleInviteUser(): Promise<void> {
 		const userId = await database
-			.rpc<string>('get_user_id_from_email', { arg_email: inputEmail })
+			.rpc<string>('get_user_id_from_email', { email: inputEmail })
 			.single();
 		if (userId.error) {
 			alert(userId.error.message);
 		} else if (userId.data === null) {
 			alert(inputEmail + ' is not a user of inlang yet');
 		} else {
-			const memberUpsert = await database.from<definitions['member']>('member').insert({
-				organization_id: organization.id,
-				user_id: userId.data,
-				role: 'ADMIN'
-			});
+			const memberUpsert = await database
+				.from<definitions['project_member']>('project_member')
+				.insert({
+					project_id: projectId,
+					user_id: userId.data
+				});
 			if (memberUpsert.error) {
 				console.error(memberUpsert.error);
 				alert(memberUpsert.error.message);
