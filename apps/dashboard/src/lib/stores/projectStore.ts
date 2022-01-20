@@ -102,8 +102,7 @@ async function getData(
 			languages.data?.map((language) => ({
 				data: language.file,
 				languageCode: language.code
-			})) ?? [],
-		baseLanguageCode: project.data?.base_language_code ?? 'en' // Always defined according to schema
+			})) ?? []
 	});
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.

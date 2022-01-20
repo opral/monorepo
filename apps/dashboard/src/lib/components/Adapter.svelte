@@ -88,7 +88,6 @@
 					data: importText
 				}
 			],
-			baseLanguageCode: baseLanguage
 		});
 
 		if (api.isErr) {
@@ -137,7 +136,6 @@
 					data: getFileForLanguageIso(selectedLanguageIso)
 				}
 			],
-			baseLanguageCode: baseLanguage
 		});
 		if (api.isOk) {
 			let response = api.value.serialize({ adapter: selectedAdapter });
