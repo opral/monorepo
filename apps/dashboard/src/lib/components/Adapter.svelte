@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { database } from '$lib/services/database';
-	import CreateLanguageModal from './modals/CreateLanguageModal.svelte';
 	import type { definitions } from '@inlang/database';
 	import {
 		Dropdown,
@@ -25,7 +24,6 @@
 
 	// TODO this whole file should be refactored. Bad coding style.
 
-	let createLanguageModal: { show: boolean } = { show: false };
 	let selectedAdapterIndex = 0;
 	let selectedAdapter: AdapterInterface;
 	$: selectedAdapter = Object.values(adapters)[selectedAdapterIndex];
@@ -162,7 +160,7 @@
 	<column class="space-y-10 w-80">
 		<Dropdown
 			class="w-fill"
-			titleText="Select an adapter"
+			titleText="Select the adapter"
 			bind:selectedIndex={selectedAdapterIndex}
 			items={Object.entries(adapters).map(([adapterName], index) => ({
 				id: '' + index,
@@ -170,7 +168,7 @@
 			}))}
 		/>
 		<div>
-			<p class="text-xs text-gray-600 mb-2">Select a human language</p>
+			<p class="text-xs text-gray-600 mb-2">Select the human language</p>
 			<div style="height:30em; overflow: auto">
 				<TileGroup bind:selected={selectedLanguageIso}>
 					{#if languages !== undefined}
@@ -184,14 +182,6 @@
 			</div>
 		</div>
 		<div>
-			<Button
-				icon={isImport ? DocumentImport32 : DocumentExport32}
-				on:click={handleButtonClick}
-				disabled={(isImport && !isFormValid) || (!isImport && !isFileForSelectedLanguage)}
-				class="w-full"
-			>
-				{title}
-			</Button>
 			{#if isLoading}
 				<InlineLoading />
 			{/if}
@@ -207,6 +197,15 @@
 					kind="warning"
 					title="No translations exists for chosen language"
 				/>
+			{:else}
+				<Button
+					icon={isImport ? DocumentImport32 : DocumentExport32}
+					on:click={handleButtonClick}
+					disabled={(isImport && !isFormValid) || (!isImport && !isFileForSelectedLanguage)}
+					class="w-full"
+				>
+					{title}
+				</Button>
 			{/if}
 		</div>
 	</column>
@@ -238,10 +237,3 @@
 		{/if}
 	</column>
 </div>
-
-<CreateLanguageModal
-	bind:open={createLanguageModal.show}
-	on:close={() => {
-		createLanguageModal.show = false;
-	}}
-/>
