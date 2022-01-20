@@ -35,16 +35,8 @@ export class Resources {
      */
     #resources: RecordOfResources;
 
-    /**
-     * The base language code determines which entities
-     * (the ones whom's language code matches the base languages code)
-     * act as "Source of Truth".
-     */
-    baseLanguageCode: LanguageCode;
-
-    private constructor(args: { baseLanguageCode: LanguageCode; resources: RecordOfResources }) {
+    private constructor(args: { resources: RecordOfResources }) {
         this.#resources = args.resources;
-        this.baseLanguageCode = args.baseLanguageCode;
     }
 
     /**
@@ -52,11 +44,7 @@ export class Resources {
      *
      * The provided adapter determines from which file format.
      */
-    static parse(args: {
-        adapter: AdapterInterface;
-        files: SerializedResource[];
-        baseLanguageCode: LanguageCode;
-    }): Result<Resources, Error> {
+    static parse(args: { adapter: AdapterInterface; files: SerializedResource[] }): Result<Resources, Error> {
         const resources: RecordOfResources = {};
         for (const file of args.files) {
             const parsed = args.adapter.parse(file.data);
@@ -65,7 +53,7 @@ export class Resources {
             }
             resources[file.languageCode] = parsed.value;
         }
-        return Result.ok(new Resources({ resources, baseLanguageCode: args.baseLanguageCode }));
+        return Result.ok(new Resources({ resources }));
     }
 
     /**

@@ -17,7 +17,6 @@ beforeEach(() => {
             { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}' },
             { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}' },
         ],
-        baseLanguageCode: 'en',
     });
     if (api.isErr) {
         fail();

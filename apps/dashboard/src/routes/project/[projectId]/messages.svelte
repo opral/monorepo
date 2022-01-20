@@ -106,7 +106,7 @@
 	function isActionRequired(args: {
 		messagesOrAttributes: Record<LanguageCode, Message | Attribute | undefined>;
 	}): boolean {
-		const sourceLanguageCode = $projectStore.data?.resources.baseLanguageCode ?? 'en';
+		const sourceLanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
 		const sourceEntity = args.messagesOrAttributes[sourceLanguageCode];
 		if (sourceEntity === undefined || sourceEntity?.value === null) {
 			return true;
