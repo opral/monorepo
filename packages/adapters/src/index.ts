@@ -23,6 +23,14 @@ export interface AdapterInterface {
  * Using this object instead of directly importing adapters ensures one
  * crucial thing: the naming (key) of adapters is consistent throughout
  * inlang e.g. "typesafe-i18n" is not "typesafeAdapter", or "TypesafeI18n".
+ *
+ * @example
+ *      adapters.fluent
+ *      >> FluentAdapter
+ *
+ * @example
+ *      Object.keys(adapters)
+ *      >> list all available adapters
  */
 // performance implications:
 // + no garbage collection. Each adapter is initialized only once.
