@@ -1,6 +1,7 @@
 {
   "name": "@inlang/eslint-config",
   "main": "index.js",
+  "type": "commonjs",
   "private": true,
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf node_modules"
