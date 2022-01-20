@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-null */
 import type { definitions } from '@inlang/database';
+import { updateResources } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
@@ -66,30 +67,13 @@ async function updateResourcesInDatabase(args: {
 	if (project.data === null) {
 		return Result.err(Error('project.data was null'));
 	}
-	const serializedResources = project.data.resources.serialize({ adapter: adapters.fluent });
-	if (serializedResources.isErr) {
-		return Result.err(serializedResources.error);
-	}
-	const promises = [];
-	for (const serializedResource of serializedResources.value) {
-		promises.push(
-			database
-				.from<definitions['language']>('language')
-				.update({ file: serializedResource.data })
-				.eq('project_id', project.data.project.id)
-				.eq('code', serializedResource.languageCode)
-		);
-	}
-	const responses = await Promise.all(promises);
-	const errors = responses.filter((response) => response.error !== null);
-	if (errors.length > 0) {
-		const message =
-			errors.length > 1
-				? `Multiple errors occured: \n${errors
-						.map((error) => error.error?.message)
-						.reduce((a, b) => a + '\n' + b)}`
-				: errors[0].error?.message;
-		return Result.err(Error(message));
+	const update = await updateResources({
+		client: database,
+		project: project.data.project,
+		resources: project.data.resources
+	});
+	if (update.isErr) {
+		return Result.err(update.error);
 	}
 	getData({ projectId: project.data.project.id }, args.updater);
 	return Result.ok(undefined);

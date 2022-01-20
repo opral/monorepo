@@ -28,7 +28,6 @@
 		]
 	},
 	"devDependencies": {
-		"@inlang/database": "*",
 		"@inlang/eslint-config": "*",
 		"@sveltejs/adapter-vercel": "next",
 		"@sveltejs/eslint-config": "github:sveltejs/eslint-config",
@@ -58,11 +57,11 @@
 	"type": "module",
 	"dependencies": {
 		"@inlang/common": "*",
+		"@inlang/database": "*",
 		"@inlang/adapters": "*",
 		"@inlang/fluent-syntax": "*",
 		"@inlang/fluent-lint": "*",
 		"@now/build-utils": "^2.7.0",
-		"@supabase/supabase-js": "^1.23.0",
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",
