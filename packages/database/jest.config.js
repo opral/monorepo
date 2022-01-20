@@ -1,4 +1,4 @@
-const config = {
+export default {
   verbose: true,
   transform: {
     "^.+\\.ts$": "ts-jest",
@@ -7,5 +7,3 @@ const config = {
   testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 };
-
-module.exports = config;
