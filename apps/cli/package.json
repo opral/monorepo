@@ -1,76 +1,73 @@
 {
   "name": "@inlang/cli",
+  "version": "0.0.0",
   "description": "TODO",
-  "version": "0.1.0",
   "author": "inlang",
   "bin": {
     "inlang": "./bin/run"
   },
-  "bugs": "https://github.com/inlang/inlang/issues",
-  "dependencies": {
-    "@oclif/command": "^1.8.4",
-    "@oclif/config": "^1.17.1",
-    "@oclif/plugin-help": "^3.2.7",
-    "@oclif/plugin-not-found": "^1.2.4",
-    "@types/cli-color": "^2.0.1",
-    "@types/node-fetch": "^2.5.12",
-    "cli-color": "^2.0.1",
-    "glob": "^7.2.0",
-    "iso-639-2": "^3.0.1",
-    "lodash": "^4.17.21",
-    "prompts": "^2.4.2",
-    "tslib": "^1.14.1"
-  },
-  "devDependencies": {
-    "@inlang/common": "*",
-    "@inlang/eslint-config": "*",
-    "@inlang/fluent-syntax": "*",
-    "@inlang/database": "*",
-    "@inlang/adapters": "*",
-    "@oclif/dev-cli": "^1.26.3",
-    "@types/lodash": "^4.14.176",
-    "@types/node": "^10.17.60",
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "ts-node": "^8.10.2",
-    "webpack": "^5.64.4",
-    "webpack-cli": "^4.9.1"
-  },
-  "engines": {
-    "node": ">=8.0.0"
-  },
+  "homepage": "https://github.com/inlang/inlang",
+  "license": "Apache 2.0",
+  "main": "dist/index.js",
+  "repository": "inlang/inlang",
   "files": [
     "/bin",
-    "/lib",
+    "/dist",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/inlang/inlang",
+  "dependencies": {
+    "@oclif/core": "^1",
+    "@oclif/plugin-help": "^5",
+    "@oclif/plugin-plugins": "^2.0.1"
+  },
+  "devDependencies": {
+    "@oclif/test": "^2",
+    "@types/chai": "^4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.9.4",
+    "chai": "^4",
+    "eslint": "^7.32.0",
+    "eslint-config-oclif": "^4",
+    "eslint-config-oclif-typescript": "^1.0.2",
+    "globby": "^11",
+    "mocha": "^9",
+    "oclif": "^2",
+    "shx": "^0.3.3",
+    "ts-node": "^10.2.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.3"
+  },
+  "oclif": {
+    "bin": "inlang",
+    "dirname": "oex",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint . --ext .ts --config .eslintrc",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "yarn lint",
+    "prepack": "yarn build && oclif manifest && oclif readme",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme && git add README.md"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "bugs": "https://github.com/inlang/inlang/issues",
   "keywords": [
     "oclif"
   ],
-  "license": "MIT",
-  "main": "lib/index.js",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "inlang",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-not-found"
-    ]
-  },
-  "repository": "inlang/inlang",
-  "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "version": "oclif-dev readme && git add README.md",
-    "format": "prettier .",
-    "format:fix": "npm run format -- --write",
-    "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix",
-    "test": "jest",
-    "test:watch": "npm test -- --watch"
-  },
-  "types": "lib/index.d.ts"
+  "types": "dist/index.d.ts"
 }

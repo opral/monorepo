@@ -1,14 +1,20 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
-import type { TranslationFile } from '@inlang/common/src/types/translationFile';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
+import { SerializedResource } from '@inlang/fluent-syntax';
 
-export type TranslateRequestBody = {
+/**
+ * This is a middleware api endpoint for the CLI.
+ *
+ * API Endpoint exists because supabase has no way to authorize api keys yet.
+ */
+
+type RequestBody = {
 	// yeah yeah don't put the api key in the body
 	// pssst you never saw that
 	apiKey: string;
-	files: TranslationFile[];
+	files: SerializedResource[];
 };
 
 export async function post(request: Request): Promise<EndpointOutput<string>> {
@@ -19,7 +25,7 @@ export async function post(request: Request): Promise<EndpointOutput<string>> {
 		};
 	}
 	const supabase = createServerSideSupabaseClient();
-	const requestBody = (request.body as unknown) as TranslateRequestBody;
+	const requestBody = (request.body as unknown) as RequestBody;
 	const project = await supabase
 		.from<definitions['project']>('project')
 		.select()

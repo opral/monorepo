@@ -1,21 +1,26 @@
 import type { EndpointOutput, Request } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
-import type { TranslationFile, LanguageCode } from '@inlang/common';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
+import { SerializedResource } from '@inlang/fluent-syntax';
 
-export type TranslateRequestBody = {
+/**
+ * This is a middleware api endpoint for the CLI.
+ *
+ * API Endpoint exists because supabase has no way to authorize api keys yet.
+ */
+
+type RequestBody = {
 	// yeah yeah don't put the api key in the body
 	// pssst you never saw that
 	apiKey: string;
 };
 
-export type TranslateResponseBody = {
-	files: TranslationFile[];
-	baseLanguage: LanguageCode;
+type ResponseBody = {
+	files: SerializedResource[];
 };
 
-export async function post(request: Request): Promise<EndpointOutput<TranslateResponseBody>> {
+export async function post(request: Request): Promise<EndpointOutput<ResponseBody>> {
 	dotenv.config();
 	if (request.headers['content-type'] !== 'application/json') {
 		return {
@@ -23,7 +28,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 		};
 	}
 	const supabase = createServerSideSupabaseClient();
-	const requestBody = (request.body as unknown) as TranslateRequestBody;
+	const requestBody = (request.body as unknown) as RequestBody;
 	const project = await supabase
 		.from<definitions['project']>('project')
 		.select()
@@ -54,8 +59,7 @@ export async function post(request: Request): Promise<EndpointOutput<TranslateRe
 			files: languages.data.map((language) => ({
 				data: language.file,
 				languageCode: language.code
-			})),
-			baseLanguage: project.body.base_language_code
+			}))
 		}
 	};
 }

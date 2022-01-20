@@ -1,9 +1,9 @@
 import { Command, flags } from '@oclif/command';
-import { getAdapter } from '../lib/adapter';
 import * as fs from 'fs';
 import { upload } from '../api/upload';
-import { LanguageCode, TranslationApi } from '@inlang/common';
-import { FluentAdapter } from '@inlang/common/src/adapters/fluentAdapter';
+import { LanguageCode } from '@inlang/common';
+import { adapters, SupportedAdapter } from '@inlang/adapters';
+import { Resources } from '@inlang/fluent-syntax';
 
 export default class Upload extends Command {
   static description = 'Download the translations for a specific project.';
@@ -30,38 +30,37 @@ export default class Upload extends Command {
 
   async run(): Promise<void> {
     const { flags } = this.parse(Upload);
-    const adapter = getAdapter(flags.adapter);
-    if (adapter.isErr) throw adapter.error;
-
-    const translationFiles = [];
-    for (const language of languages) {
-      const file = flags['path-pattern'].replace('{languageCode}', language);
+    const adapter = adapters[flags.adapter as SupportedAdapter];
+    const localFiles = [];
+    for (const languageCode of languageCodes) {
+      const file = flags['path-pattern'].replace('{languageCode}', languageCode);
       if (fs.existsSync(file)) {
-        translationFiles.push({
+        localFiles.push({
           data: fs.readFileSync(file).toString(),
-          languageCode: language,
+          languageCode: languageCode,
         });
       }
     }
-
-    const translationAPI = TranslationApi.parse({
-      adapter: adapter.value,
-      baseLanguage: 'en',
-      files: translationFiles,
+    const resources = Resources.parse({
+      adapter: adapter,
+      files: localFiles,
     });
-    if (translationAPI.isErr) throw translationAPI.error;
-    const serializedFiles = translationAPI.value.serialize(new FluentAdapter());
-    if (serializedFiles.isErr) throw serializedFiles.error;
-
+    if (resources.isErr) {
+      throw resources.error;
+    }
+    const fluentFiles = resources.value.serialize({ adapter: adapters.fluent });
+    if (fluentFiles.isErr) {
+      throw fluentFiles.error;
+    }
     await upload({
-      adapter: adapter.value,
       apiKey: flags.apikey,
-      files: serializedFiles.value,
+      files: fluentFiles.value,
     });
   }
 }
 
-const languages: LanguageCode[] = [
+// maybe put in common?
+const languageCodes: LanguageCode[] = [
   'ab',
   'aa',
   'af',
