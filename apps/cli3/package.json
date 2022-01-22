@@ -1,0 +1,28 @@
+{
+  "name": "@inlang/cli3",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/main.js",
+  "types": "dist/main.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "jest --passWithNoTests",
+    "test:watch": "npm test -- --watch"
+  },
+  "devDependencies": {
+    "@inlang/eslint-config": "*"
+  },
+  "dependencies": {
+    "@inlang/adapters": "*",
+    "@inlang/common": "*",
+    "cleye": "^1.0.1"
+  }
+}
