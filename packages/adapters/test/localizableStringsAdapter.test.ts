@@ -1,7 +1,7 @@
-import { SwiftAdapter } from '../src/swiftAdapter';
+import { LocalizableStringsAdapter } from '../src/localizableStringsAdapter';
 
-describe('SwiftAdapter', () => {
-    const adapter = new SwiftAdapter();
+describe('LocalizableStringsAdapter', () => {
+    const adapter = new LocalizableStringsAdapter();
     it('should parse ok', () => {
         const result = adapter.parse(testFile);
         expect(result.isOk);

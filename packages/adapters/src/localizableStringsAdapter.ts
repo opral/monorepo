@@ -7,7 +7,7 @@ import { AdapterInterface } from './index';
 import { Result } from '@inlang/common';
 import { parse, SingleResource } from '@inlang/fluent-syntax';
 
-export class SwiftAdapter implements AdapterInterface {
+export class LocalizableStringsAdapter implements AdapterInterface {
     parse(data: string): Result<SingleResource, Error> {
         try {
             const recourse = parse(peggy.generate(grammar).parse(data), { withSpans: false });

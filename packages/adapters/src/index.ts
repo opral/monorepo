@@ -1,5 +1,5 @@
 import { FluentAdapter } from './fluentAdapter';
-import { SwiftAdapter } from './swiftAdapter';
+import { LocalizableStringsAdapter } from './localizableStringsAdapter';
 import { Typesafei18nAdapter, Typesafei18nAdapterOptions } from './typesafei18nAdapter';
 import { Result } from '@inlang/common';
 import { SingleResource } from '@inlang/fluent-syntax';
@@ -36,10 +36,10 @@ export interface AdapterInterface {
 // + no garbage collection. Each adapter is initialized only once.
 // - no code splitting. A piece of software might only need one specific adapter.
 export const adapters = {
-    swift: new SwiftAdapter(),
+    'localizable-strings': new LocalizableStringsAdapter(),
     fluent: new FluentAdapter(),
     'typesafe-i18n': new Typesafei18nAdapter(),
-};
+} as const;
 
 /**
  * Supported adapters.
