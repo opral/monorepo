@@ -1,7 +1,7 @@
-import { AdapterInterface } from '@inlang/adapters';
+// import { AdapterInterface } from '@inlang/adapters';
 import { LanguageCode } from '@inlang/common';
 import { SerializedResource } from './types/serializedResource';
-import { remove } from 'lodash';
+import { remove } from 'lodash-es';
 import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
 import { Attribute, Identifier, Message, Resource } from '@fluent/syntax';
@@ -44,7 +44,7 @@ export class Resources {
      *
      * The provided adapter determines from which file format.
      */
-    static parse(args: { adapter: AdapterInterface; files: SerializedResource[] }): Result<Resources, Error> {
+    static parse(args: { adapter: any; files: SerializedResource[] }): Result<Resources, Error> {
         const resources: RecordOfResources = {};
         for (const file of args.files) {
             const parsed = args.adapter.parse(file.data);
@@ -391,7 +391,7 @@ export class Resources {
      *
      * The provided adapter determines to which file format.
      */
-    serialize(args: { adapter: AdapterInterface }): Result<SerializedResource[], Error> {
+    serialize(args: { adapter: any }): Result<SerializedResource[], Error> {
         const files: SerializedResource[] = [];
         for (const [languageCode, resource] of Object.entries(this.#resources)) {
             const serialized = args.adapter.serialize(resource as Resource);

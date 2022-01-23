@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
     "strict": true,
     "target": "ES2020",
+    "esModuleInterop": true,
     "noImplicitAny": true,
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "outDir": "dist",
-    "removeComments": true,
+    "removeComments": false,
     "declaration": true,
-    "allowJs": false
+    "allowJs": true
   },
-  "include": ["src/**/**.ts", "tests/**/**.ts"]
+  "include": ["src/**/**.ts"]
 }

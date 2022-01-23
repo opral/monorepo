@@ -24,7 +24,6 @@ describe('Typesafei18nAdapter', () => {
         if (parse1.isErr) throw parse1.error;
         const serialize1 = adapter.serialize(parse1.value, serializationOptions);
         if (serialize1.isErr) throw serialize1.error;
-        console.log(serialize1.value);
         const parse2 = adapter.parse(serialize1.value);
         if (parse2.isErr) throw parse2.error;
         expect(parse1.value).toEqual(parse2.value);

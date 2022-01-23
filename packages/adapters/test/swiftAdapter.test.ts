@@ -1,4 +1,4 @@
-import { SwiftAdapter } from "../src/swiftAdapter";
+import { SwiftAdapter } from '../src/swiftAdapter';
 
 describe('SwiftAdapter', () => {
     const adapter = new SwiftAdapter();

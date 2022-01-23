@@ -1,9 +1,11 @@
 export default {
-  verbose: true,
-  transform: {
-    "^.+\\.ts$": "ts-jest",
-    "\\.m?jsx?$": "jest-esm-transformer",
+  preset: 'ts-jest/presets/default-esm',
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
   },
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  testPathIgnorePatterns: ['<rootDir>/dist/'],
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.ts'],
 };

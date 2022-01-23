@@ -1,5 +1,5 @@
 import { Entry, Resource, serialize } from '@fluent/syntax';
-import { trim } from 'lodash';
+import { trim } from 'lodash-es';
 
 /**
  * Serializes an `Entry` to a fluent string.

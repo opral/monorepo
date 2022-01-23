@@ -1,20 +1,22 @@
 {
   "name": "@inlang/common",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
-  "types": "src/index.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "clean": "rm -r ./dist",
     "format": "prettier .",
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "test": "jest --passWithNoTests",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
     "test:watch": "npm test -- --watch"
   },
   "devDependencies": {

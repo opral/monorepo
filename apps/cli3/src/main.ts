@@ -1,4 +1,5 @@
 import { cli } from 'cleye';
+import { Result } from '@inlang/common';
 
 // Parse argv
 const argv = cli({
@@ -24,8 +25,8 @@ const argv = cli({
 const name = [argv._.firstName, argv._.lastName].filter(Boolean).join(' ');
 
 // const adapter = adapters[flags.adapter as SupportedAdapter];
-// const x = Result.err();
-// console.log(x);
+const x = Result.err();
+console.log(x);
 
 if (argv.flags.time === 'morning') {
     console.log(`Good morning ${name}!`);
