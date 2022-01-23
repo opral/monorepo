@@ -1,6 +1,6 @@
 import { AdapterInterface } from './index';
 import { Result, LanguageCode } from '@inlang/common';
-import * as peggy from 'peggy';
+import peggy from 'peggy';
 import { parse, SingleResource } from '@inlang/fluent-syntax';
 
 export type Typesafei18nAdapterOptions = {

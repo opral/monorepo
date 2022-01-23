@@ -2,7 +2,7 @@
  * Interpolation only works with %s (strings)
  */
 
-import * as peggy from 'peggy';
+import peggy from 'peggy';
 import { AdapterInterface } from './index';
 import { Result } from '@inlang/common';
 import { parse, SingleResource } from '@inlang/fluent-syntax';
