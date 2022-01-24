@@ -1,6 +1,4 @@
-// import { AdapterInterface } from '@inlang/adapters';
 import { LanguageCode } from '@inlang/common';
-import { SerializedResource } from './types/serializedResource';
 import { remove } from 'lodash-es';
 import { Result } from '@inlang/common';
 import { isValidMessageId } from './utils/isValidMessageId';
@@ -8,16 +6,29 @@ import { Attribute, Identifier, Message, Resource } from '@fluent/syntax';
 import { parsePattern } from '.';
 
 /**
- * Holds all resources as object accesible via a `languageCode`.
+ * The API of this class could be improved.
  *
+ * Most methods require a `languageCode` and act only on one resource.
+ * Intead of defining functions like `getMessage` on all resources,
+ * single resources could be extended to include those functions.
+ * Getting a message from a resource could then be `resources.en.deleteMessage()`.
+ * Functions that act on all resources would be called like `resources.deleteMessage()`.
  *
- * Example:
- *
- *      const x: RecordOfResources = {
- *          en: Resource,
- *          de: Resource
+ * However:
+ *  a) could lead to confusion e.g. single deletion, delete for all resources (see example above)?
+ *  b) works only if resources always use languageCodes as ids. Maybe as on object it's possible:
+ *      ```
+ *      type Resources = {
+ *          [resourceId: string] : SingleResource | undefined
+ *          messageIds (of all resources)
+ *          deleteMessage (for all resources)
+ *          ...
  *      }
- *
+ *      ```
+ */
+
+/**
+ * Utility type for consistency throughout the resources class.
  */
 type RecordOfResources = Record<string, Resource | undefined>;
 
@@ -31,29 +42,24 @@ type RecordOfResources = Record<string, Resource | undefined>;
  */
 export class Resources {
     /**
-     * Private variable that holds all resources.
-     */
-    #resources: RecordOfResources;
-
-    private constructor(args: { resources: RecordOfResources }) {
-        this.#resources = args.resources;
-    }
-
-    /**
-     * Parses serialized resources.
+     * Holds all resources as object accesible via a `languageCode`.
      *
-     * The provided adapter determines from which file format.
+     *
+     * @example:
+     *
+     *      const x: RecordOfResources = {
+     *          en: Resource,
+     *          de: Resource
+     *      }
+     *      console.log(x.en)
+     *      >> Resource
+     *
+     *
      */
-    static parse(args: { adapter: any; files: SerializedResource[] }): Result<Resources, Error> {
-        const resources: RecordOfResources = {};
-        for (const file of args.files) {
-            const parsed = args.adapter.parse(file.data);
-            if (parsed.isErr) {
-                return Result.err(parsed.error);
-            }
-            resources[file.languageCode] = parsed.value;
-        }
-        return Result.ok(new Resources({ resources }));
+    resources: RecordOfResources;
+
+    constructor(args: { resources: RecordOfResources }) {
+        this.resources = args.resources;
     }
 
     /**
@@ -63,11 +69,11 @@ export class Resources {
      * The resources contain "en", "de" and "fr".
      */
     containedLanguageCodes(): LanguageCode[] {
-        return Object.entries(this.#resources).map(([languageCode]) => languageCode as LanguageCode);
+        return Object.entries(this.resources).map(([languageCode]) => languageCode as LanguageCode);
     }
 
     messageExist(args: { id: Message['id']['name']; languageCode: LanguageCode }): boolean {
-        for (const entry of this.#resources[args.languageCode]?.body ?? []) {
+        for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.id) {
                 return true;
             }
@@ -83,7 +89,7 @@ export class Resources {
         id: Attribute['id']['name'];
         languageCode: LanguageCode;
     }): boolean {
-        for (const entry of this.#resources[args.languageCode]?.body ?? []) {
+        for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.messageId) {
                 for (const attribute of entry.attributes) {
                     if (attribute.id.name === args.id) {
@@ -96,7 +102,7 @@ export class Resources {
     }
 
     getMessage(args: { id: Message['id']['name']; languageCode: LanguageCode }): Message | undefined {
-        for (const entry of this.#resources[args.languageCode]?.body ?? []) {
+        for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === args.id) {
                 return entry;
             }
@@ -116,7 +122,7 @@ export class Resources {
      */
     getMessageForAllResources(args: { id: Message['id']['name'] }): Record<string, Message | undefined> {
         const result: ReturnType<typeof this.getMessageForAllResources> = {};
-        for (const [languageCode] of Object.entries(this.#resources)) {
+        for (const [languageCode] of Object.entries(this.resources)) {
             const message = this.getMessage({ id: args.id, languageCode: languageCode as LanguageCode });
             result[languageCode] = message;
         }
@@ -159,7 +165,7 @@ export class Resources {
             );
         } else if (isValidMessageId(args.id) === false) {
             return Result.err(Error(`Message id ${args.id} is not a valid id.`));
-        } else if (this.#resources[args.languageCode] === undefined) {
+        } else if (this.resources[args.languageCode] === undefined) {
             return Result.err(Error(`No resource for the language code ${args.languageCode} exits.`));
         }
         const message = new Message(new Identifier(args.id));
@@ -173,13 +179,13 @@ export class Resources {
         if (args.attributes) {
             message.attributes = args.attributes;
         }
-        this.#resources[args.languageCode]?.body.push(message);
+        this.resources[args.languageCode]?.body.push(message);
         return Result.ok(undefined);
     }
 
     deleteMessage(args: { id: Message['id']['name']; languageCode: LanguageCode }): Result<void, Error> {
         const removed = remove(
-            this.#resources[args.languageCode]?.body ?? [],
+            this.resources[args.languageCode]?.body ?? [],
             (resource) => (resource.type === 'Message' || resource.type === 'Term') && resource.id.name === args.id
         );
         if (removed.length === 0) {
@@ -189,12 +195,14 @@ export class Resources {
     }
 
     deleteMessageForAllResources(args: { id: Message['id']['name'] }): Result<void, Error> {
-        for (const [languageCode] of Object.entries(this.#resources)) {
+        for (const [languageCode] of Object.entries(this.resources)) {
             if (this.messageExist({ id: args.id, languageCode: languageCode as LanguageCode })) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const deletion = this.deleteMessage({ id: args.id, languageCode: languageCode as LanguageCode });
-                if (deletion.isErr) {
-                    return Result.err(deletion.error);
-                }
+                // dont return an error (if a message does not exist for this language code)
+                // if (deletion.isErr) {
+                //     return Result.err(deletion.error);
+                // }
             }
         }
         return Result.ok(undefined);
@@ -202,7 +210,7 @@ export class Resources {
 
     getMessageIds(args: { languageCode: LanguageCode }): Set<Message['id']['name']> {
         const result: Set<string> = new Set();
-        for (const entry of this.#resources[args.languageCode]?.body ?? []) {
+        for (const entry of this.resources[args.languageCode]?.body ?? []) {
             if (entry.type === 'Message') {
                 result.add(entry.id.name);
             }
@@ -223,7 +231,7 @@ export class Resources {
         if (args.id !== args.with.id.name) {
             return Result.err(Error('The given id does not match the with.id'));
         }
-        const resource = this.#resources[args.languageCode];
+        const resource = this.resources[args.languageCode];
         if (resource === undefined) {
             return Result.err(Error(`Resource for language code ${args.languageCode} does not exist.`));
         }
@@ -302,7 +310,7 @@ export class Resources {
         id: Attribute['id']['name'];
     }): Record<string, Attribute | undefined> {
         const result: ReturnType<typeof this.getAttributeForAllResources> = {};
-        for (const [languageCode] of Object.entries(this.#resources)) {
+        for (const [languageCode] of Object.entries(this.resources)) {
             const attribute = this.getAttribute({
                 messageId: args.messageId,
                 id: args.id,
@@ -371,7 +379,7 @@ export class Resources {
      * Deletes the attribute with the given id for all resources.
      */
     deleteAttributeForAllResources(args: { messageId: Message['id']['name']; id: string }): Result<void, Error> {
-        for (const [languageCode] of Object.entries(this.#resources)) {
+        for (const [languageCode] of Object.entries(this.resources)) {
             if (this.messageExist({ id: args.messageId, languageCode: languageCode as LanguageCode })) {
                 const deletion = this.deleteAttribute({
                     messageId: args.messageId,
@@ -384,22 +392,5 @@ export class Resources {
             }
         }
         return Result.ok(undefined);
-    }
-
-    /**
-     * Serializes the resources.
-     *
-     * The provided adapter determines to which file format.
-     */
-    serialize(args: { adapter: any }): Result<SerializedResource[], Error> {
-        const files: SerializedResource[] = [];
-        for (const [languageCode, resource] of Object.entries(this.#resources)) {
-            const serialized = args.adapter.serialize(resource as Resource);
-            if (serialized.isErr) {
-                return Result.err(serialized.error);
-            }
-            files.push({ data: serialized.value, languageCode: languageCode as LanguageCode });
-        }
-        return Result.ok(files);
     }
 }

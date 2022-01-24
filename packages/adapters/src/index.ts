@@ -1,21 +1,11 @@
 import { FluentAdapter } from './fluentAdapter';
 import { LocalizableStringsAdapter } from './localizableStringsAdapter';
-import { Typesafei18nAdapter, Typesafei18nAdapterOptions } from './typesafei18nAdapter';
-import { Result } from '@inlang/common';
-import { SingleResource } from '@inlang/fluent-syntax';
+import { Typesafei18nAdapter } from './typesafei18nAdapter';
 
-/**
- * Each adapter must implement the interface.
- *
- * The underlying implementation can vastly differ per adapter.
- * For example, some adapters make us of PEG parsing, while others
- * "simply" parse and serialize with regular JavaScript/Typescript.
- */
-export interface AdapterInterface {
-    parse(data: string): Result<SingleResource, Error>;
-
-    serialize(data: SingleResource, options?: Typesafei18nAdapterOptions): Result<string, Error>;
-}
+export * from './types/adapterInterface';
+export * from './types/serializedResource';
+export * from './utils/parseResources';
+export * from './utils/serializeResources';
 
 /**
  * Object holding all available adapters.

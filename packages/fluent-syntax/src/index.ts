@@ -2,7 +2,6 @@
 export * from '@fluent/syntax';
 // "extensions" are exported below
 export * from './resources';
-export * from './types/serializedResource';
 export * from './types/singleResource';
 export * from './types/reference';
 export * from './utils/isValidMessageId';

@@ -1,5 +1,13 @@
-import { Attribute, Identifier, Message, Pattern, TextElement } from '@fluent/syntax';
-import { adapters } from '@inlang/adapters';
+import {
+    Attribute,
+    Identifier,
+    Message,
+    Pattern,
+    Placeable,
+    Resource,
+    TextElement,
+    VariableReference,
+} from '@fluent/syntax';
 import { serializePattern } from '../src';
 import { Resources } from '../src/resources';
 import { serializeEntry } from '../src/utils/serializeEntry';
@@ -7,22 +15,42 @@ import { serializeEntry } from '../src/utils/serializeEntry';
 let resources: Resources;
 
 beforeEach(() => {
-    const api = Resources.parse({
-        adapter: adapters.fluent,
-        files: [
-            {
-                languageCode: 'en',
-                data: 'test = this is my test\nhello = hello there\ncomplex = Hello {$name}\nextra = a key without translations',
-            },
-            { languageCode: 'da', data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej {$name}' },
-            { languageCode: 'de', data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo {$name}' },
-        ],
+    resources = new Resources({
+        resources: {
+            en: new Resource([
+                new Message(new Identifier('test'), new Pattern([new TextElement('this is my test')])),
+                new Message(new Identifier('hello'), new Pattern([new TextElement('hello there')])),
+                new Message(
+                    new Identifier('complex'),
+                    new Pattern([
+                        new TextElement('Hello '),
+                        new Placeable(new VariableReference(new Identifier('name'))),
+                    ])
+                ),
+                new Message(new Identifier('extra'), new Pattern([new TextElement('a key without translations ')])),
+            ]),
+            da: new Resource([
+                new Message(new Identifier('test'), new Pattern([new TextElement('dette er min test')])),
+                new Message(new Identifier('hello'), new Pattern([new TextElement('hej med dig')])),
+
+                new Message(
+                    new Identifier('complex'),
+                    new Pattern([new TextElement('Hej '), new Placeable(new VariableReference(new Identifier('name')))])
+                ),
+            ]),
+            de: new Resource([
+                new Message(new Identifier('test'), new Pattern([new TextElement('dis ist ein test')])),
+                new Message(new Identifier('hello'), new Pattern([new TextElement('hallo mit dich')])),
+                new Message(
+                    new Identifier('complex'),
+                    new Pattern([
+                        new TextElement('Hallo '),
+                        new Placeable(new VariableReference(new Identifier('name'))),
+                    ])
+                ),
+            ]),
+        },
     });
-    if (api.isErr) {
-        fail();
-    } else {
-        resources = api.value;
-    }
 });
 describe('messageExist()', () => {
     it('should be truthy when a message exists', () => {
@@ -467,26 +495,5 @@ describe('deleteAttributeForAllResources()', () => {
         }
         const deletion = resources.deleteAttributeForAllResources({ messageId: 'test', id: 'login' });
         expect(deletion.isErr).toBeTruthy();
-    });
-});
-
-describe('serialize', () => {
-    it('should serialize a file correctly', () => {
-        const result = resources.serialize({ adapter: adapters.fluent });
-        if (result.isErr) fail();
-        expect(result.value).toEqual([
-            {
-                data: 'test = this is my test\nhello = hello there\ncomplex = Hello { $name }\nextra = a key without translations\n',
-                languageCode: 'en',
-            },
-            {
-                data: 'test = dette er min test\nhello = hej med dig\ncomplex = Hej { $name }\n',
-                languageCode: 'da',
-            },
-            {
-                data: 'test = dis ist ein test\nhello = hallo mit dich\ncomplex = Hallo { $name }\n',
-                languageCode: 'de',
-            },
-        ]);
     });
 });

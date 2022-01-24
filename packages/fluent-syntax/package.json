@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "@inlang/common": "*",
-    "@inlang/adapters": "*",
     "@inlang/eslint-config": "*",
     "@fluent/dedent": "^0.4.0"
   },
