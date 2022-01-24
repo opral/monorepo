@@ -14,8 +14,7 @@
 	import DocumentExport32 from 'carbon-icons-svelte/lib/DocumentExport32';
 	import DocumentImport32 from 'carbon-icons-svelte/lib/DocumentImport32';
 	import ISO6391 from 'iso-639-1';
-	import { AdapterInterface, adapters } from '@inlang/adapters';
-	import { Resources } from '@inlang/fluent-syntax';
+	import { AdapterInterface, adapters, serializeResources, parseResources } from '@inlang/adapters';
 
 	export let project: definitions['project'];
 	export let languages: definitions['language'][];
@@ -80,20 +79,23 @@
 		success = false;
 		isLoading = true;
 		//create and parse
-		const api = Resources.parse({
+		const parsedResources = parseResources({
 			adapter: selectedAdapter,
 			files: [
 				{
 					languageCode: selectedLanguageIso,
 					data: importText
 				}
-			],
+			]
 		});
 
-		if (api.isErr) {
-			alert(api.error.message);
+		if (parsedResources.isErr) {
+			alert(parsedResources.error.message);
 		} else {
-			let fluentLanguages = api.value.serialize({ adapter: adapters.fluent });
+			let fluentLanguages = serializeResources({
+				adapter: adapters.fluent,
+				resources: parsedResources.value
+			});
 			if (fluentLanguages.isErr) {
 				alert(fluentLanguages.error.message);
 			} else {
@@ -128,24 +130,27 @@
 
 	function handleExport(): void {
 		isLoading = true;
-		const api = Resources.parse({
+		const parsedResources = parseResources({
 			adapter: adapters.fluent,
 			files: [
 				{
 					languageCode: selectedLanguageIso,
 					data: getFileForLanguageIso(selectedLanguageIso)
 				}
-			],
+			]
 		});
-		if (api.isOk) {
-			let response = api.value.serialize({ adapter: selectedAdapter });
+		if (parsedResources.isOk) {
+			let response = serializeResources({
+				adapter: selectedAdapter,
+				resources: parsedResources.value
+			});
 			if (response.isOk) {
 				exportedCode = response.value[0].data;
 			} else {
 				alert(response.error.message);
 			}
 		} else {
-			alert(api.error.message);
+			alert(parsedResources.error.message);
 		}
 		isLoading = false;
 	}
