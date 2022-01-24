@@ -1,6 +1,5 @@
-import { adapters, SupportedAdapter } from '@inlang/adapters';
+import { adapters, SupportedAdapter, SerializedResource, parseResources, serializeResources } from '@inlang/adapters';
 import { LanguageCode, Result } from '@inlang/common';
-import { Resources, SerializedResource } from '@inlang/fluent-syntax';
 import { command } from 'cleye';
 import consola from 'consola';
 import * as fs from 'fs';
@@ -9,6 +8,11 @@ import fetch from 'node-fetch';
 export const uploadCommand = command(
     {
         name: 'upload',
+        help: {
+            description: 'Uploads the local files and OVERWRITES the remote files.',
+            examples:
+                'inlang upload --adapter fluent --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>',
+        },
         flags: {
             adapter: {
                 description:
@@ -61,16 +65,18 @@ export const uploadCommand = command(
             consola.error("Couldn't find any files that match the --path-pattern.");
             return;
         }
-        const resources = Resources.parse({
+        const parsedResources = parseResources({
             adapter: adapter,
             files: localFiles,
         });
-        if (resources.isErr) {
-            throw resources.error;
+        if (parsedResources.isErr) {
+            consola.error(parsedResources.error);
+            return;
         }
-        const fluentFiles = resources.value.serialize({ adapter: adapters.fluent });
+        const fluentFiles = serializeResources({ adapter: adapters.fluent, resources: parsedResources.value });
         if (fluentFiles.isErr) {
-            throw fluentFiles.error;
+            consola.error(fluentFiles.error);
+            return;
         }
         consola.info('Uploading files...');
         const result = await upload({
@@ -86,7 +92,7 @@ export const uploadCommand = command(
 );
 
 async function upload(args: { apiKey: string; files: SerializedResource[] }): Promise<Result<void, Error>> {
-    const response = await fetch('http://localhost:3000/api/upload', {
+    const response = await fetch(process.env.API_ENDPOINT + 'upload', {
         method: 'post',
         body: JSON.stringify({ apiKey: args.apiKey, files: args.files }),
         headers: { 'content-type': 'application/json' },

@@ -1,6 +1,5 @@
-import { adapters, SupportedAdapter } from '@inlang/adapters';
+import { adapters, SupportedAdapter, serializeResources, parseResources, SerializedResource } from '@inlang/adapters';
 import { Result } from '@inlang/common';
-import { Resources, SerializedResource } from '@inlang/fluent-syntax';
 import { command } from 'cleye';
 import consola from 'consola';
 import * as fs from 'fs';
@@ -9,6 +8,11 @@ import fetch from 'node-fetch';
 export const downloadCommand = command(
     {
         name: 'download',
+        help: {
+            description: 'Downloads the translations and OVER-WRITES the local files.',
+            examples:
+                'inlang download --adapter fluent --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>',
+        },
         flags: {
             adapter: {
                 description:
@@ -53,7 +57,7 @@ export const downloadCommand = command(
             consola.error(fluentFiles.error);
             return;
         }
-        const resources = Resources.parse({
+        const resources = parseResources({
             adapter: adapters.fluent,
             files: fluentFiles.value,
         });
@@ -61,7 +65,7 @@ export const downloadCommand = command(
             consola.error(resources.error);
             return;
         }
-        const toBeSavedFiles = resources.value.serialize({ adapter });
+        const toBeSavedFiles = serializeResources({ adapter, resources: resources.value });
         if (toBeSavedFiles.isErr) {
             consola.error(toBeSavedFiles.error);
             return;
@@ -87,7 +91,7 @@ export const downloadCommand = command(
 
 async function download(args: { apiKey: string }): Promise<Result<SerializedResource[], Error>> {
     try {
-        const response = await fetch('http://localhost:3000/api/download', {
+        const response = await fetch(process.env.API_ENDPOINT + 'download', {
             method: 'post',
             body: JSON.stringify({ apiKey: args.apiKey }),
             headers: { 'content-type': 'application/json' },

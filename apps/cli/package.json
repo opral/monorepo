@@ -9,6 +9,7 @@
     "inlang": "./bin/run.js"
   },
   "scripts": {
+    "prebuild": "npm run clean",
     "build": "rollup --config",
     "dev": "rollup --config --watch",
     "clean": "rm -r dist",
