@@ -1,10 +1,16 @@
-*-debug.log
-*-error.log
-/.nyc_output
-/dist
-/lib
-/package-lock.json
-/tmp
-/yarn.lock
-node_modules
-oclif.manifest.json
+# Dependency directory
+node_modules/
+
+# Ignore built ts files
+dist/**/*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+
+# NPM Lock file
+package-lock.json
