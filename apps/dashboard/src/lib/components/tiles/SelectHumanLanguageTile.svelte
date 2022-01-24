@@ -6,14 +6,10 @@
 	export let possibleLanguageCodes: LanguageCode[];
 	export let selected: LanguageCode | undefined;
 	export let onSelect: ((languageCode: LanguageCode) => unknown) | undefined = undefined;
-	export let showLegend = true;
+	export let legend: string | undefined = undefined
 </script>
 
-<TileGroup
-	on:select={(event) => onSelect?.(event.detail)}
-	bind:selected
-	legend={showLegend ? 'Select (human) base language' : undefined}
->
+<TileGroup on:select={(event) => onSelect?.(event.detail)} bind:selected {legend}>
 	{#each possibleLanguageCodes as languageCode}
 		<RadioTile light value={languageCode}>
 			{ISO6391.getName(languageCode)} - {languageCode}

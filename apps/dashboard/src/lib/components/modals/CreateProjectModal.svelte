@@ -15,7 +15,7 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import type { definitions } from '@inlang/database';
 	import ISO6391 from 'iso-639-1';
-	import SelectHumanSourceLanguageTile from '../tiles/SelectHumanBaseLanguageTile.svelte';
+	import SelectHumanLanguageTile from '../tiles/SelectHumanLanguageTile.svelte';
 	import { auth } from '$lib/services/auth';
 
 	export function show(args: { onProjectCreated: () => unknown }): void {
@@ -222,9 +222,10 @@
 				</div>
 			</InlineNotification>
 		{:else}
-			<SelectHumanSourceLanguageTile
+			<SelectHumanLanguageTile
 				bind:selected={selectedSourceLanguageCode}
 				possibleLanguageCodes={selectedLanguageCodes}
+				legend="Select human base language"
 			/>
 			<p class="pt-4">
 				The (human) base language is the language used during development. In most cases it's

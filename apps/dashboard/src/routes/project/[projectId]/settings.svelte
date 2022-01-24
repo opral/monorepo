@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation';
 	import ApiKey from '$lib/components/ApiKey.svelte';
 	import Divider from '$lib/layout/Divider.svelte';
-	import SelectDefaultHumanLanguageTile from '$lib/components/tiles/SelectHumanBaseLanguageTile.svelte';
+	import SelectHumanLanguageTile from '$lib/components/tiles/SelectHumanLanguageTile.svelte';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
 	import { LanguageCode, Result } from '@inlang/common';
 
@@ -84,8 +84,7 @@
 		source for the other languages (translations) in this project.
 	</p>
 	<br />
-	<SelectDefaultHumanLanguageTile
-		showLegend={false}
+	<SelectHumanLanguageTile
 		selected={$projectStore.data?.project.base_language_code}
 		onSelect={(selectedLanguageCode) =>
 			confirmModal.show({
