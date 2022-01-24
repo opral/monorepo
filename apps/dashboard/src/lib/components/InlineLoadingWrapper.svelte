@@ -10,6 +10,12 @@
 
 	import { InlineLoading, Link } from 'carbon-components-svelte';
 
+	/**
+	 * Consuming component must bind the status.
+	 *
+	 * Internally the status is automoatically reset to inactive
+	 * X seconds after being finished.
+	 */
 	export let status: 'active' | 'finished' | 'error' | 'inactive';
 	export let activeDescription: string;
 	export let finishedDescription: string;

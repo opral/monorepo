@@ -1,20 +1,42 @@
 <script lang="ts">
-	import Adapter from '$lib/components/Adapter.svelte';
+	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
-	import type { definitions } from '@inlang/database';
-	import { InlineNotification } from 'carbon-components-svelte';
+	import { AdapterInterface, adapters, serializeResources } from '@inlang/adapters';
+	import { LanguageCode } from '@inlang/common';
+	import { Resources } from '@inlang/fluent-syntax';
+	import { CodeSnippet, InlineNotification } from 'carbon-components-svelte';
 
-	const project: definitions['project'] | undefined = $projectStore.data?.project;
-	const languages: definitions['language'][] = $projectStore.data?.languages ?? [];
+	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
+	let selectedAdapter: AdapterInterface = adapters.fluent;
+
+	const resources = $projectStore.data?.resources ?? new Resources({ resources: {} });
+
+	let serializedResource: () => string;
+	$: serializedResource = () => {
+		const result = serializeResources({ adapter: selectedAdapter, resources });
+		if (result.isErr) {
+			return 'The file could not be serialized.\n' + result.error.message;
+		}
+		const resource = result.value.find(
+			(resource) => resource.languageCode === selectedLanguageCode
+		);
+		if (resource === undefined || resource.data === '') {
+			return `No file for the language "${selectedLanguageCode}" exists.`;
+		}
+		return resource.data;
+	};
 </script>
 
-{#if languages.length === 0 || project === undefined}
+{#if $projectStore.data === undefined || $projectStore.data?.languages.length === 0}
 	<InlineNotification title="Error fetching data" />
 {:else}
-	<Adapter
-		title="Export"
-		details="Select adapter and human language to export"
-		{project}
-		{languages}
-	/>
+	<h1 class="mb-1">Export</h1>
+	<p>Copy and paste your local from inlang to your source code.</p>
+	<br />
+	<SerializedResource bind:selectedLanguageCode bind:selectedAdapter {resources}>
+		<div slot="code-field" style="height: 60vh; overflow:auto;">
+			<p class="text-xs text-gray-600 mb-2">File</p>
+			<CodeSnippet code={serializedResource()} type="multi" />
+		</div>
+	</SerializedResource>
 {/if}
