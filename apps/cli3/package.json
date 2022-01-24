@@ -2,8 +2,8 @@
   "name": "@inlang/cli3",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/main.js",
-  "types": "dist/main.js",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
   "type": "module",
   "bin": {
     "inlang": "./bin/run.js"
@@ -30,6 +30,7 @@
     "@inlang/adapters": "*",
     "@inlang/common": "*",
     "cleye": "^1.0.1",
+    "consola": "^2.15.3",
     "node-fetch": "^3.2.0"
   }
 }

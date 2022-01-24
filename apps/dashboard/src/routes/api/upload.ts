@@ -33,22 +33,29 @@ export async function post(request: Request): Promise<EndpointOutput<string>> {
 		.single();
 	if (project.error) {
 		return {
-			status: 500
+			status: 500,
+			body: 'Error retrieving the project.'
 		};
-	}
-	if (project.data === null) {
+	} else if (project.data === null) {
 		return {
-			status: 404
+			status: 404,
+			body: "Couldn't find the project. Are you sure that the api key is correct?"
+		};
+	} else if (requestBody.files.length === 0) {
+		return {
+			status: 400,
+			body: 'No files to update have been provided.'
 		};
 	}
 	for (const file of requestBody.files) {
 		const languages = await supabase
 			.from<definitions['language']>('language')
 			.update({ file: file.data })
-			.match({ project_id: project.data.id, iso_code: file.languageCode });
+			.match({ project_id: project.data.id, code: file.languageCode });
 		if (languages.error) {
 			return {
-				status: 500
+				status: 500,
+				body: languages.error.message
 			};
 		}
 	}

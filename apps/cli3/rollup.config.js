@@ -19,6 +19,6 @@ export default {
   },
   // nodeResolve = bundle the dependencies
   // typescript = compile typescript
-  // commonjs = because of commonjs peer dependencies
+  // commonjs = because of commonjs peer dependencies (peggy.js)
   plugins: [nodeResolve(), typescript(), commonjs()],
 };
