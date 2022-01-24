@@ -2,8 +2,8 @@
   "name": "@inlang/adapters",
   "version": "0.0.0",
   "private": true,
-  "exports": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "files": [
     "dist"
