@@ -16,8 +16,6 @@
 
 #### [Get Started](https://inlang.dev/docs/getting-started) · [Documentation](https://inlang.dev/docs) · [Blog](https://inlang.dev/blog)
 
-<br/>
-
 Inlang is an open source software localization solution build on top of [Mozilla's Fluent](https://projectfluent.org/) that strives to make localization (translation) of software easier.
 
 [x] Collaboration on translations with non-technical team members or translators.  
