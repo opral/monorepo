@@ -5,9 +5,9 @@
     <h2 align="center">
         Open Source Software Localization Solution
     </h2>
-    <div align="center">
-        <a href="https://inlang.dev/docs/getting-started">Get Started</a> 
-        <p>&nbsp;·&nbsp;</p> 
+    <div style="display: flex; flex-direction: row; justify-content: center">
+        <a href="https://inlang.dev/docs/getting-started">Get Started</a>
+        <p>&nbsp;·&nbsp;</p>
         <a href="https://inlang.dev/docs">Documentation</a>
         <p>&nbsp;·&nbsp;</p> 
         <a href="https://inlang.dev/blog">Blog</a>
