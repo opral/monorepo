@@ -1,0 +1,16 @@
+# Dependency directory
+node_modules/
+
+# Ignore built ts files
+dist/**/*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+
+# NPM Lock file
+package-lock.json

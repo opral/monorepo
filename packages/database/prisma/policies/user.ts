@@ -6,31 +6,31 @@ const prisma = new PrismaClient();
  *
  */
 export async function user_set_policies() {
-    await prisma.$queryRawUnsafe(`
+  await prisma.$queryRawUnsafe(`
         ALTER TABLE public.user ENABLE ROW LEVEL SECURITY;
     `);
-    await prisma.$queryRawUnsafe(`
+  await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS "user select user" ON public.user;
     `);
-    await prisma.$queryRawUnsafe(`
+  await prisma.$queryRawUnsafe(`
         CREATE POLICY "user select user" ON public.user
         FOR SELECT
         USING (
             id IN (
                 SELECT user_id
-                FROM member
+                FROM project_member
             )
         );
     `);
-    await prisma.$queryRawUnsafe(`
+  await prisma.$queryRawUnsafe(`
         DROP POLICY IF EXISTS "user update user" ON public.user;
     `);
-    await prisma.$queryRawUnsafe(`
+  await prisma.$queryRawUnsafe(`
         CREATE POLICY "user update user" ON public.user
         FOR UPDATE
         USING (
             auth.uid() = id
         );
     `);
-    console.log("✅ applied policies for: user table");
+  console.log("✅ applied policies for: user table");
 }

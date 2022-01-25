@@ -80,7 +80,6 @@ examples/svelte/package-lock.json
 examples/sveltekit/package-lock.json
 
 **/.DS_Store
-.vscode
 
 .DS_Store
 node_modules
@@ -100,3 +99,8 @@ node_modules
 
 
 
+
+# Supabase
+**/supabase/.branches
+**/supabase/.temp
+**/supabase/.env

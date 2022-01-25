@@ -1,11 +1,9 @@
-import { handle_insert_organization } from "./triggers/handle_insert_organization";
-import { handle_insert_user } from "./triggers/handle_insert_user";
-import { initUserFunctions } from "./functions/user";
+import { on_insert_auth_user } from "./triggers/on_insert_auth_user";
+import { on_insert_project } from "./triggers/on_insert_project";
 
 async function main() {
-  await handle_insert_user();
-  await handle_insert_organization();
-  await initUserFunctions();
+  await on_insert_auth_user();
+  await on_insert_project();
 }
 
 main().catch((e) => console.error(e));

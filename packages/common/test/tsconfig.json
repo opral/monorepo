@@ -1,0 +1,12 @@
+// Workaround to have types working in test code.
+//
+// See https://github.com/jaredpalmer/tsdx/issues/871#issuecomment-695822562
+//
+// **TLDR**
+// VSCode takes the nearest tsconfig, the regular tsconfig does not include
+// test code, thus tons of linting errors. Workaround -> have a seperate
+// tscnfig that includes test code but is not used for compilation.
+{
+  "extends": "../tsconfig.json",
+  "include": ["./**/**.ts"]
+}

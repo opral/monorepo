@@ -1,27 +1,24 @@
 {
   "name": "@inlang/database",
-  "version": "1.0.0",
-  "description": "",
-  "type": "commonjs",
-  "types": "./types/definitions.ts",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
-    "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npx prisma migrate dev && npm run apply-triggers && npm run apply-policies && npm run seed",
+    "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npx prisma migrate dev && npm run apply-functions && npm run apply-triggers && npm run seed && npm run apply-policies",
     "stop": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
     "dashboard": "npx prisma studio",
     "test": "jest",
-    "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output types/definitions.ts",
+    "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output src/types/definitions.ts",
     "seed": "ts-node prisma/seed.ts",
-    "create-migration": "npx prisma migrate dev && npm run apply-triggers && npm run apply-policies && npm run seed",
-    "deploy-to-production": "npx prisma generate && npx prisma migrate deploy && npm run apply-triggers && npm run apply-policies",
+    "create-migration": "npx prisma migrate dev && npm run apply-functions && npm run apply-triggers && npm run apply-policies && npm run seed",
+    "deploy-to-production": "npx prisma generate && npx prisma migrate deploy && npm run apply-functions && npm run apply-triggers && npm run apply-policies",
     "apply-triggers": "ts-node prisma/apply_triggers.ts",
-    "apply-policies": "ts-node prisma/apply_policies.ts"
+    "apply-policies": "ts-node prisma/apply_policies.ts",
+    "apply-functions": "ts-node prisma/apply_functions.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@prisma/client": "^3.2.1",
-    "@supabase/supabase-js": "^1.23.0",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.10.1",
     "jest": "^27.0.6",
@@ -31,5 +28,11 @@
     "ts-jest": "^27.0.4",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@inlang/common": "*",
+    "@inlang/fluent-syntax": "*",
+    "@inlang/adapters": "*",
+    "@supabase/supabase-js": "^1.29.2"
   }
 }

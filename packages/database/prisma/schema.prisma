@@ -11,87 +11,42 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model organization {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String
-  projects           project[]
-  // the user id is benefitial to insert an admin membership to the user
-  // who created the organization.
-  // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
-  created_by_user_id String    @db.Uuid
-  members            member[]
-  created_at         DateTime  @default(now())
-}
-
 model user {
-  id          String   @id @db.Uuid
-  email       String   @unique
-  memberships member[]
-  created_at  DateTime @default(now())
+  id                  String           @id @db.Uuid
+  email               String           @unique
+  project_memberships project_member[]
+  created_at          DateTime         @default(now())
 }
 
-model member {
-  organization_id String       @db.Uuid
-  organization    organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  user_id         String       @db.Uuid
-  user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  role            member_role
+model project_member {
+  project_id String  @db.Uuid
+  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user_id    String  @db.Uuid
+  user       user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@id([organization_id, user_id])
-}
-
-/// only admin for now
-enum member_role {
-  ADMIN
-  TRANSLATOR
+  @@id([project_id, user_id])
 }
 
 model project {
-  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  organization_id  String        @db.Uuid
-  organization     organization  @relation(fields: [organization_id], references: [id])
-  default_iso_code iso_639_1
-  created_at       DateTime      @default(now())
-  keys             key[]
-  languages        language[]
-  translation      translation[]
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  api_key            String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String
+  // the user id is required to to insert a membership to the project via a trigger
+  // is not @default(dbgenerated("auth.uid()")) because that leads to problems with migrations.
+  created_by_user_id String           @db.Uuid
+  members            project_member[]
+  base_language_code iso_639_1
+  created_at         DateTime         @default(now())
+  languages          language[]
 }
 
 model language {
-  iso_code     iso_639_1
-  project_id   String        @db.Uuid
-  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  translations translation[] @relation
+  code       iso_639_1
+  project_id String    @db.Uuid
+  project    project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  file       String    @default("")
 
-  @@id([project_id, iso_code])
-}
-
-model key {
-  project_id   String        @db.Uuid
-  project      project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  /// The name of the key e.g. "example.hello"
-  name         String
-  description  String?
-  translations translation[]
-  created_at   DateTime      @default(now())
-
-  @@id([project_id, name])
-}
-
-model translation {
-  key_name    String
-  key         key       @relation(fields: [key_name, project_id], references: [name, project_id], onDelete: Cascade)
-  project_id  String    @db.Uuid
-  project     project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  iso_code    iso_639_1
-  language    language  @relation(fields: [project_id, iso_code], references: [project_id, iso_code], onDelete: Cascade)
-  is_reviewed Boolean   @default(false)
-  /// Contains the translation -> "Hallo Welt"
-  text        String?
-  created_at  DateTime  @default(now())
-
-  @@id([project_id, key_name, iso_code])
+  @@id([project_id, code])
 }
 
 enum iso_639_1 {

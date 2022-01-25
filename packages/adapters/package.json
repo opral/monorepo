@@ -1,0 +1,32 @@
+{
+  "name": "@inlang/adapters",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "clean": "rm -r ./dist",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "npm test -- --watch"
+  },
+  "devDependencies": {
+    "@inlang/eslint-config": "*"
+  },
+  "dependencies": {
+    "@inlang/common": "*",
+    "@inlang/fluent-syntax": "*",
+    "lodash": "^4.17.21",
+    "peggy": "^1.2.0",
+    "typesafe-i18n": "^2.51.1"
+  }
+}

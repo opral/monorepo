@@ -1,59 +1,40 @@
-<a href="https://youtu.be/mQkD1Wckp3U" target="_blank">
-    <p align="center">
-        <img width="500rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-example.gif" />
-        <img width="400rem" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/inlang-in-81-seconds-banner.jpeg" />
-    </p>
-</a>
+<div>
+    <h1 align="center">
+        Inlang
+    </h1>
+    <h2 align="center">
+        Open Source Software Localization Solution
+    </h2>
+    <!-- <div style="display: flex; flex-direction: row; justify-content: center">
+        <a href="https://inlang.dev/docs/getting-started">Get Started</a>
+        <p>&nbsp;·&nbsp;</p>
+        <a href="https://inlang.dev/docs">Documentation</a>
+        <p>&nbsp;·&nbsp;</p> 
+        <a href="https://inlang.dev/blog">Blog</a>
+    </div> -->
+</div>
 
-# inlang
+#### [Get Started](https://inlang.dev/docs/getting-started) · [Documentation](https://inlang.dev/docs) · [Blog](https://inlang.dev/blog)
 
-Inlang is an open source localization (translation) solution for mobile and web apps with developer experience (DX) in mind. With inlang you get collaboration with automatic sync, type safety and machine translations in one tight package.
+Inlang is an open source software localization solution build on top of [Mozilla's Fluent](https://projectfluent.org/) that strives to make localization (translation) of software easier.
 
-But that's just the beginning. We want to help you localize your apps with one click. Want to stay up-to-date? [Subscribe to our newsletter](https://cdn.forms-content.sg-form.com/e22e6493-370b-11ec-9784-62d300bd6ea3) (no spam!)
-
-**Status**
-
-- [x] Early Alpha: We are testing the solution and need your feedback.
-- [ ] Beta: Stable enough for small(er) apps and projects.
-- [ ] Release: Production ready.
-
-**Supported Languages**
-
-- [x] TypeScript using [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n)
-- [ ] Dart / Flutter
-- [ ] Swift / iOS
-- [ ] Kotlin / Android
-
-**Features**
-
-- [x] Typesafety (no more missing translations/keys)
-- [x] Collaboration via the dashboard
-- [x] Sync between dashboard and source code
-- [x] Variables / Interpolation
-- [ ] OTA (Over the air updates without releasing a new version)
-- [ ] Pluralization 
+[x] Collaboration on translations with non-technical team members or translators.  
+[x] Machine translations.  
+[-] Linting of translations (in the dashboard).  
+[-] Synchronize translations (via the CLI or Copy & Paste).  
+[] Over the air updates without releasing a new version of your app.  
+[] Self-hostable, see [this discussion](https://github.com/inlang/inlang/discussions/65).
 
 Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
 
-## Getting started
+## Status
 
-Link to documentation
-https://docs.inlang.dev
+[x] Alpha: Stable enough to translate simple apps.  
+[ ] Beta: Translate medium sized software projects which require ongoing translations.  
+[ ] Release: Production ready.
 
 ## Community & Support
 
-- [GitHub Discussions](https://github.com/inlang/inlang/discussions): public feedback and questions.
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): feedback and questions.
 - [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
-- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hanging out with the community.
-
-## Demo
-
-### Step 1 - Create keys directly in VSCode
-
-Keys are automatically sent to the dashboard, machine translated into all languages and synced with your source code. Bonus on top: typesafety (no more missing translations/none existent keys).
-![Create keys directly in VSCode which are automatically sent to the dashboard and injected into the code](./assets/step1.gif)
-
-### Step 2 - Manage translations in the dashboard
-
-Collaborators, or you yourself, can seamlessly edit translations in the dashboard. During development the translations are automatically synced with the source code.
-![Editing and syncing translations from the dashboard to source code](./assets/step2.gif)
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hang out with the community.

@@ -1,0 +1,52 @@
+{
+  "name": "inlang",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "predev": "npm run start -w @inlang/database",
+    "dev": "trap 'exit 0' SIGINT; turbo run dev --parallel",
+    "postdev": "npm run stop -w @inlang/database",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "jest": "^27.0.3",
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.0.3",
+    "turbo": "latest",
+    "typescript": "^4.5.4"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/**",
+          ".next/**"
+        ]
+      },
+      "dev": {
+        "cache": false
+      },
+      "lint": {
+        "outputs": []
+      },
+      "test": {
+        "outputs": []
+      }
+    }
+  },
+  "engines": {
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0"
+  }
+}

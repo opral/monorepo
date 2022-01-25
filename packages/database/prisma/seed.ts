@@ -1,6 +1,6 @@
-import { PrismaClient, member_role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { supabase, mockUser, mockUser2, MockUser } from "../local.config";
-import { definitions } from "../types/definitions";
+
 /**
  * Creates a mock user if the user does not exist yet.
  */
@@ -33,181 +33,41 @@ async function main() {
   console.log("applying seeds...");
   await signUpMockUser(mockUser);
   const prisma = new PrismaClient();
-  await prisma.organization.create({
+  await prisma.project.create({
     data: {
-      name: "Acne Inc",
+      name: "dev-project",
       created_by_user_id: supabase.auth.user()!.id,
-      projects: {
-        create: {
-          name: "dev-project",
-          default_iso_code: "en",
-          languages: {
-            createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
-          },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                    {
-                      iso_code: "de",
-                      text: "Hallo Welt",
-                      is_reviewed: false,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                    {
-                      iso_code: "de",
-                      text: "Willkommen zu unserer Platform",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                    {
-                      iso_code: "de",
-                      text: "Bestätigen",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
+      base_language_code: "en",
+      languages: {
+        createMany: { data: [{ code: "en" }, { code: "de" }] },
       },
     },
   });
   await signOutUser();
   await signUpMockUser(mockUser2);
-  await prisma.organization.create({
+  await prisma.project.create({
     data: {
-      name: "Bass Co.",
+      name: "bass-project",
       created_by_user_id: supabase.auth.user()!.id,
-      projects: {
-        create: {
-          name: "bass-project",
-          default_iso_code: "en",
-          languages: {
-            createMany: { data: [{ iso_code: "en" }, { iso_code: "fr" }] },
-          },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                    {
-                      iso_code: "fr",
-                      text: "",
-                      is_reviewed: false,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                  ],
-                },
-              },
-            ],
-          },
-        },
+      base_language_code: "en",
+      languages: {
+        createMany: { data: [{ code: "en" }, { code: "fr" }] },
       },
     },
   });
-  await prisma.organization.create({
+  await prisma.project.create({
     data: {
-      name: "Color AS",
       created_by_user_id: supabase.auth.user()!.id,
-      projects: {
-        create: {
-          name: "color-project",
-          default_iso_code: "en",
-          languages: {
-            createMany: { data: [{ iso_code: "en" }, { iso_code: "de" }] },
-          },
-          keys: {
-            create: [
-              {
-                name: "example.hello",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "Hello World",
-                    },
-                  ],
-                },
-              },
-              {
-                name: "welcome.first",
-                translations: {
-                  create: [
-                    {
-                      iso_code: "en",
-                      text: "We welcome you to our platform.",
-                      is_reviewed: true,
-                    },
-                  ],
-                },
-              },
-              {
-                name: "button.confirm",
-                translations: {
-                  create: [
-                    { iso_code: "en", text: "Confirm", is_reviewed: true },
-                  ],
-                },
-              },
-            ],
-          },
-        },
+      name: "color-project",
+      base_language_code: "en",
+      languages: {
+        createMany: { data: [{ code: "en" }, { code: "de" }] },
       },
     },
   });
-  const organization = await prisma.organization.findFirst({
+  const project = await prisma.project.findFirst({
     where: {
-      name: "Color AS",
+      name: "color-project",
     },
   });
   const user = await prisma.user.findFirst({
@@ -215,11 +75,10 @@ async function main() {
       email: mockUser.email,
     },
   });
-  await prisma.member.create({
+  await prisma.project_member.create({
     data: {
       user_id: user!.id,
-      organization_id: organization!.id,
-      role: member_role.TRANSLATOR,
+      project_id: project!.id,
     },
   });
   console.log("✅ applied seeds");

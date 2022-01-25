@@ -1,7 +1,8 @@
-# Inlang Database
+# @inlang/database
 
-This directory contains the schema for inlang, a local runnable version of the database for
-development purposes and auto generated types for type safety.
+The database uses supabase. Currently, supabase is mature (enough) for everything DB related except for
+running stuff locally and doing migrations. Therefore, this is a slightly modified local instance of supabase
+in combination with prisma for migrations.
 
 ## Scripts
 
