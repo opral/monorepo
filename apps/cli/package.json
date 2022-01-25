@@ -12,7 +12,7 @@
     "prebuild": "npm run clean",
     "build": "rollup --config",
     "dev": "rollup --config --watch",
-    "clean": "rm -r dist",
+    "clean": "rm -r -f dist",
     "format": "prettier .",
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
@@ -25,6 +25,7 @@
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.0",
+    "rollup-plugin-inject-process-env": "^1.3.1",
     "rollup": "^2.66.0"
   },
   "dependencies": {
