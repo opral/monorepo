@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --watch",
-    "clean": "rm -r ./dist",
+    "clean": "rm -r -f ./dist",
     "format": "prettier .",
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
