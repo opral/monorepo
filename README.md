@@ -1,18 +1,8 @@
-<div>
-    <h1 align="center">
-        Inlang
-    </h1>
-    <h2 align="center">
-        Open Source Software Localization Solution
-    </h2>
-    <div style="display: flex; flex-direction: row; justify-content: center">
-        <a href="https://inlang.dev/docs/getting-started">Get Started</a>
-        <p>&nbsp;·&nbsp;</p>
-        <a href="https://inlang.dev/docs">Documentation</a>
-        <p>&nbsp;·&nbsp;</p> 
-        <a href="https://inlang.dev/blog">Blog</a>
-    </div>
-</div>
+# Inlang
+
+## Open Source Software Localization Solution
+
+### [Get Started](https://inlang.dev/docs/getting-started) · [Documentation](https://inlang.dev/docs) · [Blog](https://inlang.dev/blog)
 
 <br/>
 
