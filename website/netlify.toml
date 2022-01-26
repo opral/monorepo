@@ -7,5 +7,5 @@
   NODE_VERSION = "14"
   NPM_FLAGS = "--prefix=/dev/null"
 [build]
-  publish = ".next"
   command = "npx pnpm i --store=node_modules/.pnpm-store && npx pnpm run build"
+  publish = "website/.next"
