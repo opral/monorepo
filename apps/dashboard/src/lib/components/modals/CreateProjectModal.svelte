@@ -123,7 +123,7 @@
 				selectedLanguageCodes
 					.filter((language) => language !== selectedSourceLanguageCode)
 					.map((iso) => ({
-						iso_code: iso,
+						code: iso,
 						project_id: insertProject.data.id
 					}))
 			);
