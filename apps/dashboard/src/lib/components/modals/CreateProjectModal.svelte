@@ -17,6 +17,7 @@
 	import ISO6391 from 'iso-639-1';
 	import SelectHumanLanguageTile from '../tiles/SelectHumanLanguageTile.svelte';
 	import { auth } from '$lib/services/auth';
+	import { isValidMessageId } from '@inlang/fluent-syntax';
 
 	export function show(args: { onProjectCreated: () => unknown }): void {
 		// automatically overwriting old data when show is called
@@ -68,7 +69,9 @@
 		? ISO6391.getAllCodes().includes(selectedSourceLanguageCode)
 		: false;
 
-	$: projectNameIsValidInput = projectName !== '' && projectAlreadyExists === false;
+	// using fluent message id to lint project names to be somewhat future proof
+	// and dis-allow crazy project names
+	$: projectNameIsValidInput = projectName !== '' && isValidMessageId(projectName);
 
 	$: currentStepIsValid = () => {
 		if (currentStep === 0) {
@@ -180,7 +183,9 @@
 					labelText="Project name"
 					bind:value={projectName}
 					invalid={projectAlreadyExists}
-					invalidText={`${projectName} already exists.`}
+					invalidText={isValidMessageId(projectName)
+						? 'Invalid character'
+						: `${projectName} already exists.`}
 					placeholder="What is the name of the project?"
 					bind:ref={projectNameElement}
 				/>
@@ -191,7 +196,7 @@
 					direction="top"
 					titleText="Human languages"
 					placeholder={selectedLanguageCodes.length === 0
-						? 'In which languages (English, German ...) do you want to offer your software?'
+						? 'In which human languages (English, German ...) do you want to offer your software?'
 						: ''}
 					filterable
 					items={allLanguagesWithCode()}
