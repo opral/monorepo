@@ -31,7 +31,9 @@
       "dev": {
         "cache": false
       },
-      "clean": {},
+      "clean": {
+        "cache": false
+      },
       "test": {
         "dependsOn": [
           "build"
