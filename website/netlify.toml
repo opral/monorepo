@@ -8,4 +8,4 @@
   NPM_FLAGS = "--prefix=/dev/null"
 [build]
   command = "npx pnpm i --store=node_modules/.pnpm-store && npx pnpm run build"
-  publish = "website/.next"
+  publish = ".next/"
