@@ -6,6 +6,7 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "removeComments": false,
     "declaration": true,

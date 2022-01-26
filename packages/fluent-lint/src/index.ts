@@ -1,4 +1,3 @@
 export * from './lintPattern';
 export * from './types/lintResult';
-
-export * from './errors/LintError';
+export * from './errors/lintError';
