@@ -182,8 +182,8 @@
 				<TextInput
 					labelText="Project name"
 					bind:value={projectName}
-					invalid={projectAlreadyExists}
-					invalidText={isValidMessageId(projectName)
+					invalid={projectName !== '' && projectNameIsValidInput === false}
+					invalidText={isValidMessageId(projectName) === false
 						? 'Invalid character'
 						: `${projectName} already exists.`}
 					placeholder="What is the name of the project?"
