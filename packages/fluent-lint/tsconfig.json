@@ -6,6 +6,8 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
+    // forcing consistens casing in files is a life saver.
+    // if you see this comment, check your tsconfig. Saves you from deployment headdaches.
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "removeComments": false,
