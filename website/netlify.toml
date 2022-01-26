@@ -1,11 +1,11 @@
-# NPM is not supported by Nextra yet. Thus, use "a hacky pnpm" workaround.
-#
-# https://equk.co.uk/2021/05/26/deploying-on-netlify-using-pnpm
-
-
-[build.environment]
-  NODE_VERSION = "14"
-  NPM_FLAGS = "--prefix=/dev/null"
 [build]
-  command = "npx pnpm i --store=node_modules/.pnpm-store && npx pnpm run build"
-  publish = ".next/non-existent-folder/"
+
+# This is the directory to change to before starting a build.
+# NOTE: This is where we will look for package.json/.nvmrc/etc, not root.
+  base    = "website/"
+
+# This is the directory that you are publishing from (relative to root of your repo)
+  publish = "website/build/"
+
+# This will be your default build command
+  command = "npm run build"
