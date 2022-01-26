@@ -16,6 +16,14 @@ export interface paths {
     get: {
       parameters: {
         query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -65,6 +73,16 @@ export interface paths {
     };
     delete: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
+        };
         header: {
           /** Preference */
           Prefer?: parameters["preferReturn"];
@@ -77,6 +95,16 @@ export interface paths {
     };
     patch: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter._prisma_migrations.id"];
+          checksum?: parameters["rowFilter._prisma_migrations.checksum"];
+          finished_at?: parameters["rowFilter._prisma_migrations.finished_at"];
+          migration_name?: parameters["rowFilter._prisma_migrations.migration_name"];
+          logs?: parameters["rowFilter._prisma_migrations.logs"];
+          rolled_back_at?: parameters["rowFilter._prisma_migrations.rolled_back_at"];
+          started_at?: parameters["rowFilter._prisma_migrations.started_at"];
+          applied_steps_count?: parameters["rowFilter._prisma_migrations.applied_steps_count"];
+        };
         body: {
           /** _prisma_migrations */
           _prisma_migrations?: definitions["_prisma_migrations"];
@@ -96,6 +124,9 @@ export interface paths {
     get: {
       parameters: {
         query: {
+          project_id?: parameters["rowFilter.language.project_id"];
+          file?: parameters["rowFilter.language.file"];
+          code?: parameters["rowFilter.language.code"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -145,6 +176,11 @@ export interface paths {
     };
     delete: {
       parameters: {
+        query: {
+          project_id?: parameters["rowFilter.language.project_id"];
+          file?: parameters["rowFilter.language.file"];
+          code?: parameters["rowFilter.language.code"];
+        };
         header: {
           /** Preference */
           Prefer?: parameters["preferReturn"];
@@ -157,6 +193,11 @@ export interface paths {
     };
     patch: {
       parameters: {
+        query: {
+          project_id?: parameters["rowFilter.language.project_id"];
+          file?: parameters["rowFilter.language.file"];
+          code?: parameters["rowFilter.language.code"];
+        };
         body: {
           /** language */
           language?: definitions["language"];
@@ -176,6 +217,12 @@ export interface paths {
     get: {
       parameters: {
         query: {
+          id?: parameters["rowFilter.project.id"];
+          name?: parameters["rowFilter.project.name"];
+          created_at?: parameters["rowFilter.project.created_at"];
+          api_key?: parameters["rowFilter.project.api_key"];
+          created_by_user_id?: parameters["rowFilter.project.created_by_user_id"];
+          base_language_code?: parameters["rowFilter.project.base_language_code"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -225,6 +272,14 @@ export interface paths {
     };
     delete: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter.project.id"];
+          name?: parameters["rowFilter.project.name"];
+          created_at?: parameters["rowFilter.project.created_at"];
+          api_key?: parameters["rowFilter.project.api_key"];
+          created_by_user_id?: parameters["rowFilter.project.created_by_user_id"];
+          base_language_code?: parameters["rowFilter.project.base_language_code"];
+        };
         header: {
           /** Preference */
           Prefer?: parameters["preferReturn"];
@@ -237,6 +292,14 @@ export interface paths {
     };
     patch: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter.project.id"];
+          name?: parameters["rowFilter.project.name"];
+          created_at?: parameters["rowFilter.project.created_at"];
+          api_key?: parameters["rowFilter.project.api_key"];
+          created_by_user_id?: parameters["rowFilter.project.created_by_user_id"];
+          base_language_code?: parameters["rowFilter.project.base_language_code"];
+        };
         body: {
           /** project */
           project?: definitions["project"];
@@ -256,6 +319,8 @@ export interface paths {
     get: {
       parameters: {
         query: {
+          project_id?: parameters["rowFilter.project_member.project_id"];
+          user_id?: parameters["rowFilter.project_member.user_id"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -305,6 +370,10 @@ export interface paths {
     };
     delete: {
       parameters: {
+        query: {
+          project_id?: parameters["rowFilter.project_member.project_id"];
+          user_id?: parameters["rowFilter.project_member.user_id"];
+        };
         header: {
           /** Preference */
           Prefer?: parameters["preferReturn"];
@@ -317,6 +386,10 @@ export interface paths {
     };
     patch: {
       parameters: {
+        query: {
+          project_id?: parameters["rowFilter.project_member.project_id"];
+          user_id?: parameters["rowFilter.project_member.user_id"];
+        };
         body: {
           /** project_member */
           project_member?: definitions["project_member"];
@@ -336,6 +409,9 @@ export interface paths {
     get: {
       parameters: {
         query: {
+          id?: parameters["rowFilter.user.id"];
+          email?: parameters["rowFilter.user.email"];
+          created_at?: parameters["rowFilter.user.created_at"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -385,6 +461,11 @@ export interface paths {
     };
     delete: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter.user.id"];
+          email?: parameters["rowFilter.user.email"];
+          created_at?: parameters["rowFilter.user.created_at"];
+        };
         header: {
           /** Preference */
           Prefer?: parameters["preferReturn"];
@@ -397,6 +478,11 @@ export interface paths {
     };
     patch: {
       parameters: {
+        query: {
+          id?: parameters["rowFilter.user.id"];
+          email?: parameters["rowFilter.user.email"];
+          created_at?: parameters["rowFilter.user.created_at"];
+        };
         body: {
           /** user */
           user?: definitions["user"];
@@ -412,31 +498,13 @@ export interface paths {
       };
     };
   };
-  "/rpc/is_member_of_project": {
-    post: {
-      parameters: {
-        body: {
-          args: {
-            project_id: string;
-          };
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferParams"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: unknown;
-      };
-    };
-  };
   "/rpc/get_user_id_from_email": {
     post: {
       parameters: {
         body: {
           args: {
-            arg_email: string;
+            /** Format: text */
+            email: string;
           };
         };
         header: {
@@ -484,26 +552,67 @@ export interface paths {
       };
     };
   };
+  "/rpc/is_member_of_project": {
+    post: {
+      parameters: {
+        body: {
+          args: {
+            /** Format: uuid */
+            project_id: string;
+          };
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferParams"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: unknown;
+      };
+    };
+  };
 }
 
 export interface definitions {
   _prisma_migrations: {
     /**
-     * Note:
+     * Format: character varying
+     * @description Note:
      * This is a Primary Key.<pk/>
      */
     id: string;
+    /** Format: character varying */
     checksum: string;
+    /** Format: timestamp with time zone */
     finished_at?: string;
+    /** Format: character varying */
     migration_name: string;
+    /** Format: text */
     logs?: string;
+    /** Format: timestamp with time zone */
     rolled_back_at?: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
     started_at: string;
+    /** Format: integer */
     applied_steps_count: number;
   };
   language: {
     /**
-     * Note:
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
+     */
+    project_id: string;
+    /** Format: text */
+    file: string;
+    /**
+     * Format: public.iso_639_1
+     * @description Note:
      * This is a Primary Key.<pk/>
      */
     code:
@@ -691,41 +800,30 @@ export interface definitions {
       | "yo"
       | "za"
       | "zu";
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
-     */
-    project_id: string;
-    file: string;
-  };
-  project_member: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
-     */
-    project_id: string;
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     * This is a Foreign Key to `user.id`.<fk table='user' column='id'/>
-     */
-    user_id: string;
   };
   project: {
     /**
-     * Note:
+     * Format: uuid
+     * @description Note:
      * This is a Primary Key.<pk/>
+     * @default gen_random_uuid()
      */
     id: string;
-    api_key: string;
+    /** Format: text */
     name: string;
     /**
-     * Note:
-     * This is a Foreign Key to `organization.id`.<fk table='organization' column='id'/>
+     * Format: timestamp without time zone
+     * @default CURRENT_TIMESTAMP
      */
+    created_at: string;
+    /**
+     * Format: uuid
+     * @default gen_random_uuid()
+     */
+    api_key: string;
+    /** Format: uuid */
     created_by_user_id: string;
+    /** Format: public.iso_639_1 */
     base_language_code:
       | "ab"
       | "aa"
@@ -911,51 +1009,118 @@ export interface definitions {
       | "yo"
       | "za"
       | "zu";
-    created_at: string;
-    file: string;
+  };
+  project_member: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `project.id`.<fk table='project' column='id'/>
+     */
+    project_id: string;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     * This is a Foreign Key to `user.id`.<fk table='user' column='id'/>
+     */
+    user_id: string;
   };
   user: {
     /**
-     * Note:
+     * Format: uuid
+     * @description Note:
      * This is a Primary Key.<pk/>
      */
     id: string;
+    /** Format: text */
     email: string;
+    /**
+     * Format: timestamp without time zone
+     * @default CURRENT_TIMESTAMP
+     */
     created_at: string;
   };
 }
 
 export interface parameters {
-  /** Preference */
+  /** @description Preference */
   preferParams: "params=single-object";
-  /** Preference */
+  /** @description Preference */
   preferReturn: "return=representation" | "return=minimal" | "return=none";
-  /** Preference */
+  /** @description Preference */
   preferCount: "count=none";
-  /** Filtering Columns */
+  /** @description Filtering Columns */
   select: string;
-  /** On Conflict */
+  /** @description On Conflict */
   on_conflict: string;
-  /** Ordering */
+  /** @description Ordering */
   order: string;
-  /** Limiting and Pagination */
+  /** @description Limiting and Pagination */
   range: string;
-  /** Limiting and Pagination */
+  /**
+   * @description Limiting and Pagination
+   * @default items
+   */
   rangeUnit: string;
-  /** Limiting and Pagination */
+  /** @description Limiting and Pagination */
   offset: string;
-  /** Limiting and Pagination */
+  /** @description Limiting and Pagination */
   limit: string;
-  /** _prisma_migrations */
+  /** @description _prisma_migrations */
   "body._prisma_migrations": definitions["_prisma_migrations"];
-  /** language */
+  /** Format: character varying */
+  "rowFilter._prisma_migrations.id": string;
+  /** Format: character varying */
+  "rowFilter._prisma_migrations.checksum": string;
+  /** Format: timestamp with time zone */
+  "rowFilter._prisma_migrations.finished_at": string;
+  /** Format: character varying */
+  "rowFilter._prisma_migrations.migration_name": string;
+  /** Format: text */
+  "rowFilter._prisma_migrations.logs": string;
+  /** Format: timestamp with time zone */
+  "rowFilter._prisma_migrations.rolled_back_at": string;
+  /** Format: timestamp with time zone */
+  "rowFilter._prisma_migrations.started_at": string;
+  /** Format: integer */
+  "rowFilter._prisma_migrations.applied_steps_count": string;
+  /** @description language */
   "body.language": definitions["language"];
-  /** project */
+  /** Format: uuid */
+  "rowFilter.language.project_id": string;
+  /** Format: text */
+  "rowFilter.language.file": string;
+  /** Format: public.iso_639_1 */
+  "rowFilter.language.code": string;
+  /** @description project */
   "body.project": definitions["project"];
-  /** project_member */
+  /** Format: uuid */
+  "rowFilter.project.id": string;
+  /** Format: text */
+  "rowFilter.project.name": string;
+  /** Format: timestamp without time zone */
+  "rowFilter.project.created_at": string;
+  /** Format: uuid */
+  "rowFilter.project.api_key": string;
+  /** Format: uuid */
+  "rowFilter.project.created_by_user_id": string;
+  /** Format: public.iso_639_1 */
+  "rowFilter.project.base_language_code": string;
+  /** @description project_member */
   "body.project_member": definitions["project_member"];
-  /** user */
+  /** Format: uuid */
+  "rowFilter.project_member.project_id": string;
+  /** Format: uuid */
+  "rowFilter.project_member.user_id": string;
+  /** @description user */
   "body.user": definitions["user"];
+  /** Format: uuid */
+  "rowFilter.user.id": string;
+  /** Format: text */
+  "rowFilter.user.email": string;
+  /** Format: timestamp without time zone */
+  "rowFilter.user.created_at": string;
 }
 
 export interface operations {}
