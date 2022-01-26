@@ -15,15 +15,8 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "devDependencies": {
-    "@types/jest": "^27.0.3",
-    "jest": "^27.0.3",
-    "prettier": "^2.5.1",
-    "ts-jest": "^27.0.3",
-    "turbo": "latest",
-    "typescript": "^4.5.4"
-  },
   "turbo": {
+    "baseBranch": "origin/main",
     "pipeline": {
       "build": {
         "dependsOn": [
@@ -31,19 +24,26 @@
         ],
         "outputs": [
           "dist/**",
-          ".next/**"
+          ".svelte-kit/**"
         ]
       },
       "dev": {
         "cache": false
       },
-      "lint": {
-        "outputs": []
-      },
       "test": {
-        "outputs": []
+        "dependsOn": [
+          "build"
+        ]
       }
     }
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "jest": "^27.0.3",
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.0.3",
+    "turbo": "latest",
+    "typescript": "^4.5.4"
   },
   "engines": {
     "npm": ">=7.0.0",

@@ -1,4 +1,4 @@
-import type { EndpointOutput, Request } from '@sveltejs/kit';
+import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
 
 export type MachineTranslateRequestBody = {
@@ -48,13 +48,10 @@ type DeeplResponse = {
 	translations: { text: string }[];
 };
 
-export async function post(
-	request: Request
-): Promise<EndpointOutput<MachineTranslateResponseBody>> {
+export async function post(event: RequestEvent): Promise<EndpointOutput> {
 	dotenv.config();
 	const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
-
-	if (request.headers['content-type'] !== 'application/json') {
+	if (event.request.headers.get('content-type') !== 'application/json') {
 		return {
 			status: 405
 		};
@@ -67,7 +64,7 @@ export async function post(
 	// 		status: 401
 	// 	};
 	// }
-	const translateRequest = (request.body as unknown) as MachineTranslateRequestBody;
+	const translateRequest = (await event.request.json()) as MachineTranslateRequestBody;
 
 	const deeplRequestBody =
 		'auth_key=' +

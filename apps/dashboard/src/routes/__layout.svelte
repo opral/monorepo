@@ -11,11 +11,11 @@
 	import { page } from '$app/stores';
 	import { InlineNotification } from 'carbon-components-svelte';
 
-	export async function load({ page }: LoadInput): Promise<LoadOutput> {
+	export async function load({ url }: LoadInput): Promise<LoadOutput> {
 		const user = auth.user();
 		// includes('auth') ensures that subroutes within /auth do not
 		// lead to constant redirects
-		if (user === null && page.path.includes('auth') === false) {
+		if (user === null && url.href.includes('auth') === false) {
 			return {
 				status: 302,
 				redirect: '/auth'
@@ -45,7 +45,7 @@
 
 <svelte:head>
 	{#if $page.params.projectId}
-		<title>inlang | {capitalize(last($page.path.split('/')))}</title>
+		<title>inlang | {capitalize(last($page.url.href.split('/')))}</title>
 	{:else}
 		<title>inlang</title>
 	{/if}

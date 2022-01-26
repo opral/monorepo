@@ -1,8 +1,7 @@
-import type { EndpointOutput, Request } from '@sveltejs/kit';
+import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
-import { SerializedResource } from '@inlang/fluent-syntax';
 
 /**
  * This is a middleware api endpoint for the CLI.
@@ -16,19 +15,19 @@ type RequestBody = {
 	apiKey: string;
 };
 
-type ResponseBody = {
-	files: SerializedResource[];
-};
+// type ResponseBody = {
+// 	files: SerializedResource[];
+// };
 
-export async function post(request: Request): Promise<EndpointOutput<ResponseBody>> {
+export async function post(event: RequestEvent): Promise<EndpointOutput> {
 	dotenv.config();
-	if (request.headers['content-type'] !== 'application/json') {
+	if (event.request.headers.get('content-type') !== 'application/json') {
 		return {
 			status: 405
 		};
 	}
 	const supabase = createServerSideSupabaseClient();
-	const requestBody = (request.body as unknown) as RequestBody;
+	const requestBody = (await event.request.json()) as RequestBody;
 	const project = await supabase
 		.from<definitions['project']>('project')
 		.select()
