@@ -15,7 +15,6 @@ AS $BODY$
     
 $BODY$;
 
-DROP TRIGGER IF EXISTS on_insert_user_schema_auth on auth.users;
 CREATE TRIGGER on_insert_user_schema_auth
     AFTER INSERT
     ON auth.users
