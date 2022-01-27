@@ -30,8 +30,8 @@
 	},
 	"devDependencies": {
 		"@inlang/eslint-config": "*",
+		"@sveltejs/adapter-netlify": "1.0.0-next.37",
 		"@sveltejs/eslint-config": "github:sveltejs/eslint-config",
-		"@sveltejs/adapter-netlify": "^1.0.0-next.44",
 		"@sveltejs/kit": "1.0.0-next.241",
 		"@testing-library/jest-dom": "^5.14.1",
 		"@testing-library/svelte": "^3.0.3",

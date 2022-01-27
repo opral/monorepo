@@ -1,4 +1,11 @@
 [build]
   command = "npm run build"
-  publish = "build/"
-  functions = "functions/"
+  publish = "build"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+
+[build.environment]
+  NODE_VERSION = "14"
+  ## https://github.com/sveltejs/kit/issues/2687
