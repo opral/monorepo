@@ -4,3 +4,5 @@
 
 [functions]
   node_bundler = "esbuild"
+  directory = "functions/"
+

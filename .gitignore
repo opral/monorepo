@@ -104,3 +104,6 @@ node_modules
 **/supabase/.branches
 **/supabase/.temp
 **/supabase/.env
+
+# Local Netlify folder
+.netlify
