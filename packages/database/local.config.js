@@ -16,17 +16,17 @@ export const serviceSupabaseClient = createClient(
   serviceKey
 );
 
-export interface MockUser {
-  email: string;
-  password: string;
-}
+// export interface MockUser {
+//   email: string;
+//   password: string;
+// }
 
-export const mockUser: MockUser = {
+export const mockUser = {
   email: "dev@account.com",
   password: "dev@account.com",
 };
 
-export const mockUser2: MockUser = {
+export const mockUser2 = {
   email: "user@account.com",
   password: "user@account.com",
 };

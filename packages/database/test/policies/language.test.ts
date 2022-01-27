@@ -28,7 +28,11 @@ describe("policies/language", () => {
       .match({
         name: "color-project",
       });
-    const langauge_upsert = await anonSupabaseClient
+    if (project.error || project.data === null) {
+      console.error(project.error);
+      fail();
+    }
+    const languageUpsert = await anonSupabaseClient
       .from<definitions["language"]>("language")
       .upsert({
         code: "fr",
@@ -38,7 +42,7 @@ describe("policies/language", () => {
       .from<definitions["language"]>("language")
       .select()
       .match({
-        iso_code: "fr",
+        code: "fr",
         project_id: project.data![0].id,
       });
     expect(languages.data!.length).toEqual(1);
@@ -54,14 +58,14 @@ describe("policies/language", () => {
       .from<definitions["language"]>("language")
       .delete()
       .match({
-        iso_code: "de",
+        code: "de",
         project_id: project.data![0].id,
       });
     const languages = await anonSupabaseClient
       .from<definitions["language"]>("language")
       .select()
       .match({
-        iso_code: "de",
+        code: "de",
         project_id: project.data![0].id,
       });
     expect(languages.data!.length).toEqual(0);

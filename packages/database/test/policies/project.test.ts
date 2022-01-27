@@ -51,20 +51,20 @@ describe("policies/project", () => {
       });
     expect(projects.data?.some((p) => p.name === "new-project")).toEqual(true);
   });
-  // test("User can delete a project which they are a member of", async () => {
-  //   const deletion = await anonSupabaseClient
-  //     .from<definitions["project"]>("project")
-  //     .delete()
-  //     .match({
-  //       name: "new-project",
-  //     });
-  //   expect(deletion.error).toBe(null);
-  //   const projects = await anonSupabaseClient
-  //     .from<definitions["project"]>("project")
-  //     .select()
-  //     .match({
-  //       name: "new-project",
-  //     });
-  //   expect(projects.data!.length).toEqual(0);
-  // });
+  test("User can delete a project which they are a member of", async () => {
+    const deletion = await anonSupabaseClient
+      .from<definitions["project"]>("project")
+      .delete()
+      .match({
+        name: "new-project",
+      });
+    expect(deletion.error).toBe(null);
+    const projects = await anonSupabaseClient
+      .from<definitions["project"]>("project")
+      .select()
+      .match({
+        name: "new-project",
+      });
+    expect(projects.data!.length).toEqual(0);
+  });
 });
