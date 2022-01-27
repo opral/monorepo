@@ -7,15 +7,9 @@
   "scripts": {
     "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npx prisma migrate dev && npm run apply-functions && npm run apply-triggers && npm run seed && npm run apply-policies",
     "stop": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
-    "dashboard": "npx prisma studio",
     "test": "jest",
-    "generate-types": "npx openapi-typescript http://localhost:8000/rest/v1/?apikey=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew --output src/types/definitions.ts",
-    "seed": "ts-node prisma/seed.ts",
-    "create-migration": "npx prisma migrate dev && npm run apply-functions && npm run apply-triggers && npm run apply-policies && npm run seed",
-    "deploy-to-production": "npx prisma generate && npx prisma migrate deploy && npm run apply-functions && npm run apply-triggers && npm run apply-policies",
-    "apply-triggers": "ts-node prisma/apply_triggers.ts",
-    "apply-policies": "ts-node prisma/apply_policies.ts",
-    "apply-functions": "ts-node prisma/apply_functions.ts"
+    "generate-types": "npx openapi-typescript http://localhost:54321/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI --output src/types/definitions.ts",
+    "seed": "ts-node prisma/seed.ts"
   },
   "devDependencies": {
     "@prisma/client": "^3.2.1",

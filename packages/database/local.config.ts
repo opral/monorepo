@@ -1,10 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-// taken from .supabase/docker/docker-compose.yaml
 const anonKey =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTYwMzk2ODgzNCwiZXhwIjoyNTUwNjUzNjM0LCJyb2xlIjoiYW5vbiJ9.36fUebxgx1mcBo4s19v0SzqmzunP--hm_hep0uLX0ew";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI";
 
-export const supabase = createClient("http://localhost:8000", anonKey);
+const serviceKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.M2d2z4SFn5C7HlJlaSLfrzuYim9nbY_XI40uWFN3hEE";
+
+export const anonSupabaseClient = createClient(
+  "http://localhost:54321",
+  anonKey
+);
+
+export const serviceSupabaseClient = createClient(
+  "http://localhost:54321",
+  serviceKey
+);
 
 export interface MockUser {
   email: string;
