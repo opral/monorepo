@@ -3,7 +3,7 @@
   publish = "build"
 
 [functions]
-  directory = "functions"
+  directory = ".netlify"
   node_bundler = "esbuild"
 
   # https://github.com/sveltejs/kit/issues/2687
