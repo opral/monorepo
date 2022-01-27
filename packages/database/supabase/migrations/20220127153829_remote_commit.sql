@@ -3,6 +3,67 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
+CREATE TYPE public.iso_639_1 AS ENUM
+    ('ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'av', 'ae', 'ay', 'az', 'bm', 'ba', 'eu', 'be', 'bn', 'bh', 'bi', 'bs', 'br', 'bg', 'my', 'ca', 'km', 'ch', 'ce', 'ny', 'zh', 'cu', 'cv', 'kw', 'co', 'cr', 'hr', 'cs', 'da', 'dv', 'nl', 'dz', 'en', 'eo', 'et', 'ee', 'fo', 'fj', 'fi', 'fr', 'ff', 'gd', 'gl', 'lg', 'ka', 'de', 'ki', 'el', 'kl', 'gn', 'gu', 'ht', 'ha', 'he', 'hz', 'hi', 'ho', 'hu', 'is', 'io', 'ig', 'id', 'ia', 'ie', 'iu', 'ik', 'ga', 'it', 'ja', 'jv', 'kn', 'kr', 'ks', 'kk', 'rw', 'kv', 'kg', 'ko', 'kj', 'ku', 'ky', 'lo', 'la', 'lv', 'lb', 'li', 'ln', 'lt', 'lu', 'mk', 'mg', 'ms', 'ml', 'mt', 'gv', 'mi', 'mr', 'mh', 'ro', 'mn', 'na', 'nv', 'nd', 'ng', 'ne', 'se', 'no', 'nb', 'nn', 'ii', 'oc', 'oj', 'or', 'om', 'os', 'pi', 'pa', 'ps', 'fa', 'pl', 'pt', 'qu', 'rm', 'rn', 'ru', 'sm', 'sg', 'sa', 'sc', 'sr', 'sn', 'sd', 'si', 'sk', 'sl', 'so', 'st', 'nr', 'es', 'su', 'sw', 'ss', 'sv', 'tl', 'ty', 'tg', 'ta', 'tt', 'te', 'th', 'bo', 'ti', 'to', 'ts', 'tn', 'tr', 'tk', 'tw', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'cy', 'fy', 'wo', 'xh', 'yi', 'yo', 'za', 'zu');
+
+ALTER TYPE public.iso_639_1
+    OWNER TO postgres;
+
+
+CREATE TABLE IF NOT EXISTS public."user"
+(
+    id uuid NOT NULL,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp(3) without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT user_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+CREATE TABLE IF NOT EXISTS public.project
+(
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp(3) without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    api_key uuid NOT NULL DEFAULT gen_random_uuid(),
+    created_by_user_id uuid NOT NULL,
+    base_language_code iso_639_1 NOT NULL,
+    CONSTRAINT project_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+CREATE TABLE IF NOT EXISTS public.language
+(
+    project_id uuid NOT NULL,
+    file text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
+    code iso_639_1 NOT NULL,
+    CONSTRAINT language_pkey PRIMARY KEY (project_id, code),
+    CONSTRAINT language_project_id_fkey FOREIGN KEY (project_id)
+        REFERENCES public.project (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+CREATE TABLE IF NOT EXISTS public.project_member
+(
+    project_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    CONSTRAINT project_member_pkey PRIMARY KEY (project_id, user_id),
+    CONSTRAINT project_member_project_id_fkey FOREIGN KEY (project_id)
+        REFERENCES public.project (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT project_member_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public."user" (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
 CREATE OR REPLACE FUNCTION public.is_member_of_project(
 	project_id uuid)
     RETURNS boolean
@@ -116,23 +177,6 @@ GRANT EXECUTE ON FUNCTION public.handle_insert_project() TO anon;
 
 GRANT EXECUTE ON FUNCTION public.handle_insert_project() TO service_role;
 
-CREATE TABLE IF NOT EXISTS public.project_member
-(
-    project_id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    CONSTRAINT project_member_pkey PRIMARY KEY (project_id, user_id),
-    CONSTRAINT project_member_project_id_fkey FOREIGN KEY (project_id)
-        REFERENCES public.project (id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT project_member_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public."user" (id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-
-TABLESPACE pg_default;
-
 ALTER TABLE IF EXISTS public.project_member
     OWNER to postgres;
 
@@ -153,15 +197,6 @@ CREATE POLICY "user can act on records if member"
     TO public
     USING (is_member_of_project(project_id));
 
-CREATE TABLE IF NOT EXISTS public."user"
-(
-    id uuid NOT NULL,
-    email text COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp(3) without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT user_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public."user"
     OWNER to postgres;
@@ -194,18 +229,6 @@ CREATE POLICY "user update user"
     TO public
     USING ((auth.uid() = id));
 
-CREATE TABLE IF NOT EXISTS public.project
-(
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp(3) without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    api_key uuid NOT NULL DEFAULT gen_random_uuid(),
-    created_by_user_id uuid NOT NULL,
-    base_language_code iso_639_1 NOT NULL,
-    CONSTRAINT project_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.project
     OWNER to postgres;
@@ -277,19 +300,6 @@ GRANT ALL ON TABLE public._prisma_migrations TO postgres;
 
 GRANT ALL ON TABLE public._prisma_migrations TO service_role;
 
-CREATE TABLE IF NOT EXISTS public.language
-(
-    project_id uuid NOT NULL,
-    file text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
-    code iso_639_1 NOT NULL,
-    CONSTRAINT language_pkey PRIMARY KEY (project_id, code),
-    CONSTRAINT language_project_id_fkey FOREIGN KEY (project_id)
-        REFERENCES public.project (id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-
-TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.language
     OWNER to postgres;
@@ -316,9 +326,3 @@ CREATE POLICY "user can act on language if project member"
 -- Type: iso_639_1
 
 -- DROP TYPE IF EXISTS public.iso_639_1;
-
-CREATE TYPE public.iso_639_1 AS ENUM
-    ('ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'av', 'ae', 'ay', 'az', 'bm', 'ba', 'eu', 'be', 'bn', 'bh', 'bi', 'bs', 'br', 'bg', 'my', 'ca', 'km', 'ch', 'ce', 'ny', 'zh', 'cu', 'cv', 'kw', 'co', 'cr', 'hr', 'cs', 'da', 'dv', 'nl', 'dz', 'en', 'eo', 'et', 'ee', 'fo', 'fj', 'fi', 'fr', 'ff', 'gd', 'gl', 'lg', 'ka', 'de', 'ki', 'el', 'kl', 'gn', 'gu', 'ht', 'ha', 'he', 'hz', 'hi', 'ho', 'hu', 'is', 'io', 'ig', 'id', 'ia', 'ie', 'iu', 'ik', 'ga', 'it', 'ja', 'jv', 'kn', 'kr', 'ks', 'kk', 'rw', 'kv', 'kg', 'ko', 'kj', 'ku', 'ky', 'lo', 'la', 'lv', 'lb', 'li', 'ln', 'lt', 'lu', 'mk', 'mg', 'ms', 'ml', 'mt', 'gv', 'mi', 'mr', 'mh', 'ro', 'mn', 'na', 'nv', 'nd', 'ng', 'ne', 'se', 'no', 'nb', 'nn', 'ii', 'oc', 'oj', 'or', 'om', 'os', 'pi', 'pa', 'ps', 'fa', 'pl', 'pt', 'qu', 'rm', 'rn', 'ru', 'sm', 'sg', 'sa', 'sc', 'sr', 'sn', 'sd', 'si', 'sk', 'sl', 'so', 'st', 'nr', 'es', 'su', 'sw', 'ss', 'sv', 'tl', 'ty', 'tg', 'ta', 'tt', 'te', 'th', 'bo', 'ti', 'to', 'ts', 'tn', 'tr', 'tk', 'tw', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'cy', 'fy', 'wo', 'xh', 'yi', 'yo', 'za', 'zu');
-
-ALTER TYPE public.iso_639_1
-    OWNER TO postgres;
