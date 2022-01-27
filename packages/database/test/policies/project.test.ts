@@ -1,10 +1,10 @@
-import { mockUser, supabase } from "../../local.config";
+import { mockUser, anonSupabaseClient } from "../../local.config";
 import { definitions } from "../../src/types/definitions";
 
 beforeEach(async () => {
   // The user needs to be authorized for the requests.
   // If this login fails, does the user exists in the seeding file?
-  const login = await supabase.auth.signIn({
+  const login = await anonSupabaseClient.auth.signIn({
     email: mockUser.email,
     password: mockUser.password,
   });
@@ -16,13 +16,13 @@ beforeEach(async () => {
 
 describe("policies/project", () => {
   test("Member can select projects", async () => {
-    const projects = await supabase
+    const projects = await anonSupabaseClient
       .from<definitions["project"]>("project")
       .select();
     expect(projects.data?.length).toBeGreaterThanOrEqual(2);
   });
   test("User can not select projects which they are not memeber of", async () => {
-    const projects = await supabase
+    const projects = await anonSupabaseClient
       .from<definitions["project"]>("project")
       .select()
       .match({
@@ -31,8 +31,8 @@ describe("policies/project", () => {
     expect(projects.data?.length).toEqual(0);
   });
   test("User can create a project ", async () => {
-    const uid = supabase.auth.user()!.id;
-    const project_insert = await supabase
+    const uid = anonSupabaseClient.auth.user()!.id;
+    const project_insert = await anonSupabaseClient
       .from<definitions["project"]>("project")
       .insert(
         {
@@ -43,7 +43,7 @@ describe("policies/project", () => {
         { returning: "minimal" }
       );
     expect(project_insert.error).toEqual(null);
-    const projects = await supabase
+    const projects = await anonSupabaseClient
       .from<definitions["project"]>("project")
       .select()
       .match({
@@ -52,14 +52,14 @@ describe("policies/project", () => {
     expect(projects.data?.some((p) => p.name === "new-project")).toEqual(true);
   });
   // test("User can delete a project which they are a member of", async () => {
-  //   const deletion = await supabase
+  //   const deletion = await anonSupabaseClient
   //     .from<definitions["project"]>("project")
   //     .delete()
   //     .match({
   //       name: "new-project",
   //     });
   //   expect(deletion.error).toBe(null);
-  //   const projects = await supabase
+  //   const projects = await anonSupabaseClient
   //     .from<definitions["project"]>("project")
   //     .select()
   //     .match({

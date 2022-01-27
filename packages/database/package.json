@@ -1,13 +1,14 @@
 {
   "name": "@inlang/database",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
     "start": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml up -d && echo \"waiting for database to initialize the schema...\" && sleep 30 && npx prisma migrate dev && npm run apply-functions && npm run apply-triggers && npm run seed && npm run apply-policies",
     "stop": "docker compose -p inlang-database --file ./supabase/docker/docker-compose.yml down",
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "generate-types": "npx openapi-typescript http://localhost:54321/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI --output src/types/definitions.ts",
     "seed": "ts-node prisma/seed.ts"
   },
