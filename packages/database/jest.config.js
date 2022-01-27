@@ -1,11 +1,11 @@
 export default {
-  preset: 'ts-jest/presets/default-esm',
+  preset: "ts-jest/presets/default-esm",
   globals: {
-    'ts-jest': {
+    "ts-jest": {
       useESM: true,
     },
   },
-  testPathIgnorePatterns: ['<rootDir>/dist/'],
+  testPathIgnorePatterns: ["<rootDir>/dist/"],
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts'],
+  collectCoverageFrom: ["src/**/*.ts"],
 };

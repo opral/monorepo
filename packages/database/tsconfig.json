@@ -1,7 +1,18 @@
 {
   "compilerOptions": {
     "strict": true,
-    "esModuleInterop": true
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    // forcing consistens casing in files is a life saver.
+    // if you see this comment, check your tsconfig. Saves you from deployment headdaches.
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "removeComments": false,
+    "declaration": true,
+    "allowJs": true
   },
-  "exclude": ["node_modules, test"]
+  "include": ["src/**/**.ts"]
 }

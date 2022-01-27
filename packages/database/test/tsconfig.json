@@ -8,5 +8,5 @@
 // tscnfig that includes test code but is not used for compilation.
 {
   "extends": "../tsconfig.json",
-  "include": ["."]
+  "include": ["./**/**.ts"]
 }
