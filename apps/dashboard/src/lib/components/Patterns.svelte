@@ -10,12 +10,6 @@
 	import Bot20 from 'carbon-icons-svelte/lib/Bot20';
 	import Save20 from 'carbon-icons-svelte/lib/Save20';
 	import { isEqual } from 'lodash-es';
-	import {
-		MachineTranslateRequestBody,
-		MachineTranslateResponseBody,
-		SupportedLanguageCode,
-		supportedLanguageCodes
-	} from '../../routes/api/internal/machine-translate';
 	import InlineLoadingWrapper from './InlineLoadingWrapper.svelte';
 
 	/**
@@ -88,42 +82,42 @@
 
 	async function machineTranslate(): Promise<void> {
 		machineTranslationStatus = 'active';
-		for (const languageCode of requiredLanguageCodes) {
-			if (languageCode === baseLanguageCode) {
-				continue;
-			} else if (
-				supportedLanguageCodes.includes(baseLanguageCode as SupportedLanguageCode) === false
-			) {
-				machineTranslationStatus = 'error';
-				machineTranslationErrorMessage = `The base language ${baseLanguageCode} is not supported.`;
-				break;
-			} else if (supportedLanguageCodes.includes(languageCode as SupportedLanguageCode) === false) {
-				alert(`The language ${languageCode} is not supported.`);
-			} else {
-				const requestBody: MachineTranslateRequestBody = {
-					serializedSourcePattern: serializedPatterns[baseLanguageCode],
-					sourceLanguageCode: baseLanguageCode as SupportedLanguageCode,
-					targetLanguageCode: languageCode as SupportedLanguageCode
-				};
-				const response = await fetch('/api/internal/machine-translate', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-						// 'Content-Type': 'application/x-www-form-urlencoded',
-					},
-					body: JSON.stringify(requestBody)
-				});
-				if (response.ok === false) {
-					machineTranslationStatus = 'error';
-					machineTranslationErrorMessage =
-						'Something went wrong. The response code was ' + response.status;
-					break;
-				} else {
-					const responseBody = (await response.json()) as MachineTranslateResponseBody;
-					serializedPatterns[languageCode] = responseBody.serializedPattern;
-				}
-			}
-		}
+		// for (const languageCode of requiredLanguageCodes) {
+		// 	if (languageCode === baseLanguageCode) {
+		// 		continue;
+		// 	} else if (
+		// 		supportedLanguageCodes.includes(baseLanguageCode as SupportedLanguageCode) === false
+		// 	) {
+		// 		machineTranslationStatus = 'error';
+		// 		machineTranslationErrorMessage = `The base language ${baseLanguageCode} is not supported.`;
+		// 		break;
+		// 	} else if (supportedLanguageCodes.includes(languageCode as SupportedLanguageCode) === false) {
+		// 		alert(`The language ${languageCode} is not supported.`);
+		// 	} else {
+		// 		const requestBody: MachineTranslateRequestBody = {
+		// 			serializedSourcePattern: serializedPatterns[baseLanguageCode],
+		// 			sourceLanguageCode: baseLanguageCode as SupportedLanguageCode,
+		// 			targetLanguageCode: languageCode as SupportedLanguageCode
+		// 		};
+		// 		const response = await fetch('/api/internal/machine-translate', {
+		// 			method: 'POST',
+		// 			headers: {
+		// 				'Content-Type': 'application/json'
+		// 				// 'Content-Type': 'application/x-www-form-urlencoded',
+		// 			},
+		// 			body: JSON.stringify(requestBody)
+		// 		});
+		// 		if (response.ok === false) {
+		// 			machineTranslationStatus = 'error';
+		// 			machineTranslationErrorMessage =
+		// 				'Something went wrong. The response code was ' + response.status;
+		// 			break;
+		// 		} else {
+		// 			const responseBody = (await response.json()) as MachineTranslateResponseBody;
+		// 			serializedPatterns[languageCode] = responseBody.serializedPattern;
+		// 		}
+		// 	}
+		// }
 		machineTranslationStatus = 'finished';
 	}
 
