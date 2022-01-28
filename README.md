@@ -3,14 +3,18 @@
         <img width="300" src="assets/logo-white-background.svg"/>
     </p>
     <h2 align="center">
-        Open source localization solution for software build on top of <a href="https://projectfluent.org" target="_blank">Mozilla's Fluent project</a>.
-    </h2>
-    <h3 align="center" style="padding-top: 0.6rem;">
+        Open Source Localization Solution for Software
+    <h3 align="center">
         <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> · <a href="https://inlang.dev/docs" target="_blank">Documentation</a> · <a href="https://inlang.dev/blog" target="_blank">Blog</a>
     </h3>
+    </h2>
 </div>
 
----
+<br/>
+
+# Inlang
+
+Inlang is an open source localization solution for software build on top [Mozilla's Fluent project](https://projectfluent.org/).
 
 ## Goals
 
