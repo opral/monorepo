@@ -11,10 +11,10 @@ the specific i18n libray to and from Fluent syntax.
 ⭕ = partially supported
 ❌ = not supported
 
-| Adapter       | Interpolation | Pluralization | Formatters |
-| ------------- | ------------- | ------------- | ---------- |
-| typesafe-i18n | ✅            | ❌            | ❌         |
-| swift         | ⭕            | ❌            | ❌         |
+| Adapter             | Interpolation | Pluralization | Formatters |
+| ------------------- | ------------- | ------------- | ---------- |
+| typesafe-i18n       | ✅            | ❌            | ❌         |
+| localizable-strings | ⭕            | ❌            | ❌         |
 
 Missing an adapter? Open a feature request [here](https://github.com/inlang/inlang/discussions/categories/feature-requests).
 
