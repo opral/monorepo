@@ -1,12 +1,11 @@
 {
   "name": "@inlang/fluent-adapters",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
   "license": "MIT",
   "publicConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,8 +28,8 @@
     "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@inlang/common": "^0.1.2",
-    "@inlang/fluent-syntax": "^0.1.2",
+    "@inlang/common": "^0.1.3",
+    "@inlang/fluent-syntax": "^0.1.3",
     "lodash": "^4.17.21",
     "peggy": "^1.2.0",
     "typesafe-i18n": "^2.51.1"
