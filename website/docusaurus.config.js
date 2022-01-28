@@ -50,6 +50,13 @@ const config = {
       colorMode: {
         disableSwitch: true,
       },
+      metadata: [
+        {
+          name: "keywords",
+          content:
+            "i18n, localization, internationalization, translations, software, javascript, svelte, fluent, mozilla",
+        },
+      ],
       navbar: {
         title: "Inlang",
         logo: {
