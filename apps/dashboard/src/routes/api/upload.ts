@@ -2,7 +2,7 @@ import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
 import * as dotenv from 'dotenv';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
-import { SerializedResource } from '@inlang/adapters';
+import { SerializedResource } from '@inlang/fluent-adapters';
 
 /**
  * This is a middleware api endpoint for the CLI.

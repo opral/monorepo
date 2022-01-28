@@ -25,7 +25,7 @@
   "dependencies": {
     "@inlang/common": "*",
     "@inlang/fluent-syntax": "*",
-    "@inlang/adapters": "*",
+    "@inlang/fluent-adapters": "*",
     "@supabase/supabase-js": "^1.29.2"
   }
 }

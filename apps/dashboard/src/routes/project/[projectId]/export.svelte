@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { AdapterInterface, adapters, serializeResources } from '@inlang/adapters';
+	import { AdapterInterface, adapters, serializeResources } from '@inlang/fluent-adapters';
 	import { LanguageCode } from '@inlang/common';
 	import { Resources } from '@inlang/fluent-syntax';
 	import { CodeSnippet, InlineNotification } from 'carbon-components-svelte';

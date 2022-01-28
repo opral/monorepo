@@ -56,7 +56,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@inlang/adapters": "*",
+		"@inlang/fluent-adapters": "*",
 		"@inlang/common": "*",
 		"@inlang/database": "*",
 		"@inlang/fluent-lint": "*",
