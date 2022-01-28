@@ -1,7 +1,6 @@
 {
   "name": "@inlang/cli",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
   "type": "module",
