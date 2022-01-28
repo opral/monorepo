@@ -1,20 +1,25 @@
 <div>
-    <h1 align="center">
-        Inlang
-    </h1>
+    <p align="center">
+        <img width="300" src="assets/logo-white-background.svg"/>
+    </p>
     <h2 align="center">
-        Open Source Software Localization Solution
+        Open source localization solution for software build on top of <a href="https://projectfluent.org" target="_blank">Mozilla's Fluent project</a>.
     </h2>
+    <h3 align="center" style="padding-top: 0.6rem;">
+        <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> · <a href="https://inlang.dev/docs" target="_blank">Documentation</a> · <a href="https://inlang.dev/blog" target="_blank">Blog</a>
+    </h3>
 </div>
 
-#### [Get Started](https://inlang.dev/docs/getting-started) · [Documentation](https://inlang.dev/docs) · [Blog](https://inlang.dev/blog)
+---
 
-Inlang is an open source software localization solution build on top of [Mozilla's Fluent](https://projectfluent.org/) that strives to make localization (translation) of software easier.
+## Goals
+
+## Status
 
 [x] Collaboration on translations with non-technical team members or translators.  
 [x] Machine translations.  
-[-] Linting of translations (in the dashboard).  
-[-] Synchronize translations (via the CLI or Copy & Paste).  
+[x] Linting of translations (in the dashboard).  
+[x] Synchronize translations (via the CLI or Copy & Paste).  
 [] Over the air updates without releasing a new version of your app.  
 [] Self-hostable, see [this discussion](https://github.com/inlang/inlang/discussions/65).
 
