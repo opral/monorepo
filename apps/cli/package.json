@@ -8,6 +8,10 @@
   "bin": {
     "inlang": "./bin/run.js"
   },
+  "files": [
+    "/bin",
+    "/dist"
+  ],
   "scripts": {
     "prebuild": "npm run clean",
     "build": "rollup --config",
