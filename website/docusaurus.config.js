@@ -7,7 +7,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "inlang",
-  tagline: "Open source software localization solution",
+  tagline: "Open Source Localization Solution for Software",
   url: "https://inlang.dev",
   baseUrl: "/",
   onBrokenLinks: "throw",
