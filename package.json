@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "lerna run build",
     "predev": "npm run start -w @inlang/database",
     "dev": "trap 'exit 0' SIGINT; turbo run dev --parallel",
     "clean": "turbo run clean",
