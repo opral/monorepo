@@ -6,9 +6,7 @@ sidebar_position: 1
 
 ## Current State
 
-Inlang reduces the effort to localize software by enabling non-technical team members, or translators, to manage translations without touching source-code.
-
-Developers are reliefed from managing translations and can focus on writing code. Changes are synchronized with inlang which enables translators to do their work without contact between developers and translators.
+Inlang reduces the effort to localize software by enabling non-technical team members, or translators, to manage translations without touching source-code. Developers are reliefed from managing translations and can focus on writing code. Changes are synchronized with inlang which enables translators to do their work without contact between developers and translators.
 
 ![image](/img/dashboard-example.webp)
 

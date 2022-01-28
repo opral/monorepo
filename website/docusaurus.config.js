@@ -82,6 +82,11 @@ const config = {
             position: "left",
           },
           {
+            href: "https://projectfluent.org/fluent/guide/hello.html",
+            label: "Fluent Syntax Guide",
+            position: "left",
+          },
+          {
             href: "https://submission.bromb.co/inlang/docs",
             label: "Ideas on how to improve this site?",
             position: "right",
