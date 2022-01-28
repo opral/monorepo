@@ -10,15 +10,21 @@
     </h2>
 </div>
 
-<br/>
-
 # Inlang
 
 Inlang is an open source localization solution for software build on top [Mozilla's Fluent project](https://projectfluent.org/).
 
-## Goals
+## Goal
+
+Develop the standard solution to localize software. 
 
 ## Status
+
+[x] Alpha: Stable enough to translate simple apps.  
+[ ] Beta: Translate medium sized software projects which require ongoing translations.  
+[ ] Release: Production ready.
+
+## Features
 
 [x] Collaboration on translations with non-technical team members or translators.  
 [x] Machine translations.  
@@ -28,12 +34,6 @@ Inlang is an open source localization solution for software build on top [Mozill
 [] Self-hostable, see [this discussion](https://github.com/inlang/inlang/discussions/65).
 
 Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
-
-## Status
-
-[x] Alpha: Stable enough to translate simple apps.  
-[ ] Beta: Translate medium sized software projects which require ongoing translations.  
-[ ] Release: Production ready.
 
 ## Community & Support
 
