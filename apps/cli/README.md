@@ -55,8 +55,6 @@ _Examples_
 
 --path-pattern ./{languageCode}/Localizable.strings
 
----
-
 `--api-key: string`
 
 The api key for the project.
