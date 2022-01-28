@@ -1,6 +1,6 @@
 <div>
     <p align="center">
-        <img width="300" src="assets/logo-white-background.svg"/>
+        <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/logo-white-background.svg"/>
     </p>
     <h2 align="center">
         Open Source Localization Solution for Software
@@ -16,7 +16,7 @@ Inlang is an open source localization solution for software build on top [Mozill
 
 ## Goal
 
-Develop the standard solution to localize software. 
+Develop the standard solution to localize software.
 
 ## Status
 
