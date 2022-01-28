@@ -2,6 +2,7 @@
   "name": "@inlang/fluent-syntax",
   "version": "0.1.0",
   "main": "dist/index.js",
+  "private": false,
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [

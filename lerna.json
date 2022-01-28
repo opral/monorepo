@@ -1,0 +1,9 @@
+{
+  "packages": ["packages/*", "apps/cli"],
+  "version": "independent",
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    }
+  }
+}
