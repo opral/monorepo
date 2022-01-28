@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-syntax",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
@@ -21,9 +21,9 @@
     "test:watch": "npm test -- --watch"
   },
   "devDependencies": {
-    "@inlang/common": "*",
-    "@inlang/eslint-config": "*",
-    "@fluent/dedent": "^0.4.0"
+    "@fluent/dedent": "^0.4.0",
+    "@inlang/common": "^0.1.1",
+    "@inlang/eslint-config": "*"
   },
   "dependencies": {
     "@fluent/syntax": "^0.18.0",

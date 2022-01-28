@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-adapters",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "license": "MIT",
   "main": "dist/index.js",
@@ -24,8 +24,8 @@
     "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@inlang/common": "*",
-    "@inlang/fluent-syntax": "*",
+    "@inlang/common": "^0.1.1",
+    "@inlang/fluent-syntax": "^0.1.1",
     "lodash": "^4.17.21",
     "peggy": "^1.2.0",
     "typesafe-i18n": "^2.51.1"

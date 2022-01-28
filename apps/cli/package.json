@@ -1,6 +1,6 @@
 {
   "name": "@inlang/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "license": "MIT",
   "main": "./dist/main.js",
@@ -30,12 +30,12 @@
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.0",
-    "rollup-plugin-inject-process-env": "^1.3.1",
-    "rollup": "^2.66.0"
+    "rollup": "^2.66.0",
+    "rollup-plugin-inject-process-env": "^1.3.1"
   },
   "dependencies": {
-    "@inlang/fluent-adapters": "*",
-    "@inlang/common": "*",
+    "@inlang/common": "^0.1.1",
+    "@inlang/fluent-adapters": "^0.1.1",
     "cleye": "^1.0.1",
     "consola": "^2.15.3",
     "node-fetch": "^3.2.0"
