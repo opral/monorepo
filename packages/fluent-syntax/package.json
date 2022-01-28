@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-syntax",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "dist/index.js",
   "license": "MIT",
   "publicConfig": {
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@fluent/dedent": "^0.4.0",
-    "@inlang/common": "^0.1.1",
+    "@inlang/common": "^0.1.2",
     "@inlang/eslint-config": "*"
   },
   "dependencies": {

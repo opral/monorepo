@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-lint",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "license": "MIT",
   "publicConfig": {
@@ -25,11 +25,11 @@
   },
   "devDependencies": {
     "@fluent/dedent": "^0.4.0",
-    "@inlang/common": "^0.1.1",
+    "@inlang/common": "^0.1.2",
     "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@inlang/fluent-syntax": "^0.1.1",
+    "@inlang/fluent-syntax": "^0.1.2",
     "lodash-es": "^4.17.21"
   },
   "gitHead": "bfcd40767c80c067618c786d5ad5dba25788abb4"

@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-adapters",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "license": "MIT",
   "publicConfig": {
@@ -27,8 +27,8 @@
     "@inlang/eslint-config": "*"
   },
   "dependencies": {
-    "@inlang/common": "^0.1.1",
-    "@inlang/fluent-syntax": "^0.1.1",
+    "@inlang/common": "^0.1.2",
+    "@inlang/fluent-syntax": "^0.1.2",
     "lodash": "^4.17.21",
     "peggy": "^1.2.0",
     "typesafe-i18n": "^2.51.1"
