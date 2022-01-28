@@ -1,0 +1,25 @@
+{
+  "baseBranch": "origin/main",
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".svelte-kit/**"
+      ]
+    },
+    "dev": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ]
+    }
+  }
+}

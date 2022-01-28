@@ -16,31 +16,6 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "turbo": {
-    "baseBranch": "origin/main",
-    "pipeline": {
-      "build": {
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": [
-          "dist/**",
-          ".svelte-kit/**"
-        ]
-      },
-      "dev": {
-        "cache": false
-      },
-      "clean": {
-        "cache": false
-      },
-      "test": {
-        "dependsOn": [
-          "build"
-        ]
-      }
-    }
-  },
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "jest": "^27.0.3",
