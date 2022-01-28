@@ -2,6 +2,9 @@
   "name": "@inlang/cli",
   "version": "0.1.2",
   "private": false,
+  "publicConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
@@ -39,5 +42,6 @@
     "cleye": "^1.0.1",
     "consola": "^2.15.3",
     "node-fetch": "^3.2.0"
-  }
+  },
+  "gitHead": "bfcd40767c80c067618c786d5ad5dba25788abb4"
 }

@@ -3,6 +3,9 @@
   "version": "0.1.1",
   "main": "dist/index.js",
   "license": "MIT",
+  "publicConfig": {
+    "access": "public"
+  },
   "private": false,
   "types": "dist/index.d.ts",
   "type": "module",
@@ -28,5 +31,6 @@
   "dependencies": {
     "@fluent/syntax": "^0.18.0",
     "lodash-es": "^4.17.21"
-  }
+  },
+  "gitHead": "bfcd40767c80c067618c786d5ad5dba25788abb4"
 }
