@@ -4,7 +4,8 @@
   "private": false,
   "license": "MIT",
   "publicConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,5 +33,5 @@
     "@inlang/fluent-syntax": "^0.1.2",
     "lodash-es": "^4.17.21"
   },
-  "gitHead": "bfcd40767c80c067618c786d5ad5dba25788abb4"
+  "gitHead": "0748855a82fd1676274eb7e1cd7ce7b6acd9ecce"
 }
