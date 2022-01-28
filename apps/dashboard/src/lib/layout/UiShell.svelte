@@ -51,6 +51,16 @@
 	</div>
 	{#if $userStore.data}
 		<HeaderNav>
+			<HeaderNavItem
+				href={'https://inlang.dev/docs/getting-started'}
+				target="_blank"
+				text="Documentation"
+			/>
+			<HeaderNavItem
+				href={'https://projectfluent.org/fluent/guide/text.html'}
+				target="_blank"
+				text="Syntax Guide"
+			/>
 			<HeaderNavItem href={brombTriggerLink({})} text="Feedback on this site?" />
 		</HeaderNav>
 		<HeaderUtilities>
