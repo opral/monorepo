@@ -6,7 +6,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Inlang",
+  title: "inlang",
   tagline: "Open source software localization solution",
   url: "https://inlang.dev",
   baseUrl: "/",
@@ -15,7 +15,13 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "inlang", // Usually your GitHub org/user name.
   projectName: "inlang", // Usually your repo name.
-
+  scripts: [
+    {
+      defer: true,
+      "data-theme": "light",
+      src: "https://cdn.jsdelivr.net/gh/samuelstroschein/bromb/packages/web/dist/widget.js",
+    },
+  ],
   presets: [
     [
       "classic",
@@ -59,13 +65,23 @@ const config = {
           },
           { to: "/blog", label: "Blog", position: "left" },
           {
+            href: "https://github.com/inlang/inlang/discussions",
+            label: "Forum",
+            position: "left",
+          },
+          {
             href: "https://github.com/inlang/inlang",
             label: "GitHub",
             position: "left",
           },
           {
+            href: "https://submission.bromb.co/inlang/docs",
+            label: "Ideas on how to improve this site?",
+            position: "right",
+          },
+          {
             href: "https://app.inlang.dev",
-            label: "Login",
+            label: "Open Dashboard",
             position: "right",
           },
         ],
@@ -85,6 +101,10 @@ const config = {
           {
             title: "Community",
             items: [
+              {
+                label: "Forum",
+                href: "https://github.com/inlang/inlang/discussions",
+              },
               {
                 label: "Discord",
                 href: "https://discord.gg/gdMPPWy57R",
