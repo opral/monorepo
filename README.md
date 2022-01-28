@@ -4,10 +4,10 @@
     </p>
     <h2 align="center">
         Open Source Localization Solution for Software
+    </h2>
     <h3 align="center">
         <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> · <a href="https://inlang.dev/docs/intro" target="_blank">Documentation</a> · <a href="https://inlang.dev/blog" target="_blank">Blog</a>
     </h3>
-    </h2>
 </div>
 
 # Inlang
