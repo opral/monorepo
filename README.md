@@ -20,7 +20,7 @@ Develop the standard solution to localize software.
 
 ## Status
 
-[x] Alpha: Sufficient to manage translations for apps. Exploration phase to determine additional features. 
+[x] Alpha: Sufficient to manage translations for apps. Exploration phase to determine additional features.  
 [ ] Beta: Sufficient for medium sized software projects with multiple components.  
 [ ] Release: Production ready.
 
