@@ -9,7 +9,7 @@
   "scripts": {
     "build": "lerna run build",
     "predev": "npm run start -w @inlang/database",
-    "dev": "lerna run dev --parallel",
+    "dev": "trap 'exit 0' SIGINT; lerna run dev --parallel",
     "postdev": "npm run stop -w @inlang/database",
     "clean": "lerna run clean",
     "lint": "lerna run lint",
