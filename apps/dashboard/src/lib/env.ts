@@ -3,6 +3,7 @@
 //  2. Default env variables to run this app locally without an env file
 
 type ClientSideEnvironmentVariables = {
+	VITE_IS_DEVELOPMENT: boolean;
 	VITE_PUBLIC_AUTH_REDIRECT_URL: string;
 	VITE_PUBLIC_SUPABASE_ANON_KEY: string;
 	VITE_PUBLIC_SUPABASE_URL: string;
@@ -15,6 +16,7 @@ type ClientSideEnvironmentVariables = {
  * with the provided variables exists.
  */
 export const env: ClientSideEnvironmentVariables = {
+	VITE_IS_DEVELOPMENT: import.meta.env.DEV,
 	VITE_PUBLIC_AUTH_REDIRECT_URL: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL
 		? (import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string)
 		: 'http://localhost:3000',
