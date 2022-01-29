@@ -1,5 +1,5 @@
 import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
-import * as dotenv from 'dotenv';
+import { getServerSideEnv } from '../_utils/serverSideEnv';
 
 export type MachineTranslateRequestBody = {
 	serializedSourcePattern: string;
@@ -49,8 +49,13 @@ type DeeplResponse = {
 };
 
 export async function post(event: RequestEvent): Promise<EndpointOutput> {
-	dotenv.config();
-	const deeplKey = process.env['DEEPL_SECRET_KEY'] as string;
+	const env = getServerSideEnv();
+	if (env.DEEPL_SECRET_KEY === undefined) {
+		return {
+			status: 400,
+			body: 'The DEEPL_SECRET_KEY key is not set in the env file.'
+		};
+	}
 	if (event.request.headers.get('content-type') !== 'application/json') {
 		return {
 			status: 405
@@ -68,7 +73,7 @@ export async function post(event: RequestEvent): Promise<EndpointOutput> {
 
 	const deeplRequestBody =
 		'auth_key=' +
-		deeplKey +
+		env.DEEPL_SECRET_KEY +
 		'&text=' +
 		wrapPlaceablesInTags(translateRequest.serializedSourcePattern) +
 		'&target_lang=' +
@@ -79,13 +84,16 @@ export async function post(event: RequestEvent): Promise<EndpointOutput> {
 		'&tag_handling=xml' +
 		'&ignore_tags=placeable';
 
-	const response = await fetch('https://api-free.deepl.com/v2/translate?auth_key=' + deeplKey, {
-		method: 'post',
-		headers: new Headers({
-			'content-type': 'application/x-www-form-urlencoded'
-		}),
-		body: deeplRequestBody
-	});
+	const response = await fetch(
+		'https://api-free.deepl.com/v2/translate?auth_key=' + env.DEEPL_SECRET_KEY,
+		{
+			method: 'post',
+			headers: new Headers({
+				'content-type': 'application/x-www-form-urlencoded'
+			}),
+			body: deeplRequestBody
+		}
+	);
 	if (response.ok !== true) {
 		return {
 			status: 500

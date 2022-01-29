@@ -1,5 +1,4 @@
 import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
-import * as dotenv from 'dotenv';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
 
@@ -20,7 +19,6 @@ type RequestBody = {
 // };
 
 export async function post(event: RequestEvent): Promise<EndpointOutput> {
-	dotenv.config();
 	if (event.request.headers.get('content-type') !== 'application/json') {
 		return {
 			status: 405

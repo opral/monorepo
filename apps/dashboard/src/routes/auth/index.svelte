@@ -16,12 +16,12 @@
 
 <script lang="ts">
 	import { Button, OutboundLink, TextInput } from 'carbon-components-svelte';
+	import { env } from '$lib/env';
 	import { PostgrestError } from '@supabase/postgrest-js';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
 	import LogoGithub32 from 'carbon-icons-svelte/lib/LogoGithub32';
 	import Send32 from 'carbon-icons-svelte/lib/SendFilled32';
 	import Divider from '$lib/layout/Divider.svelte';
-
 	let email = '';
 
 	$: inputIsValidEmail = isValidEmail(email);
@@ -31,7 +31,7 @@
 			const { error } = await auth.signIn(
 				{ email },
 				{
-					redirectTo: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string
+					redirectTo: env.VITE_PUBLIC_AUTH_REDIRECT_URL
 				}
 			);
 			if (error) {
@@ -49,7 +49,7 @@
 			{
 				provider: 'github'
 			},
-			{ redirectTo: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string }
+			{ redirectTo: env.VITE_PUBLIC_AUTH_REDIRECT_URL }
 		);
 		if (error) {
 			alert(error);
