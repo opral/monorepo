@@ -16,12 +16,12 @@
 
 <script lang="ts">
 	import { Button, OutboundLink, TextInput } from 'carbon-components-svelte';
+	import { env } from '$lib/env';
 	import { PostgrestError } from '@supabase/postgrest-js';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
 	import LogoGithub32 from 'carbon-icons-svelte/lib/LogoGithub32';
 	import Send32 from 'carbon-icons-svelte/lib/SendFilled32';
 	import Divider from '$lib/layout/Divider.svelte';
-
 	let email = '';
 
 	$: inputIsValidEmail = isValidEmail(email);
@@ -31,7 +31,7 @@
 			const { error } = await auth.signIn(
 				{ email },
 				{
-					redirectTo: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string
+					redirectTo: env.VITE_PUBLIC_AUTH_REDIRECT_URL
 				}
 			);
 			if (error) {
@@ -44,12 +44,22 @@
 		}
 	}
 
+	/**
+	 * Login for development purposes.
+	 */
+	async function handleDevLogin(): Promise<void> {
+		const signIn = await auth.signIn({ email: 'dev@account.com', password: 'dev@account.com' });
+		if (signIn.error) {
+			alert(signIn.error.message);
+		}
+	}
+
 	async function handleGithubLogin(): Promise<void> {
 		const { error } = await auth.signIn(
 			{
 				provider: 'github'
 			},
-			{ redirectTo: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string }
+			{ redirectTo: env.VITE_PUBLIC_AUTH_REDIRECT_URL }
 		);
 		if (error) {
 			alert(error);
@@ -64,10 +74,20 @@
 			An account is automatically created when you log in. There is no need to explicitly register.
 		</p>
 		<Divider />
+		{#if env.VITE_IS_DEVELOPMENT}
+			<p class="text-gray-600 text-xs">DEVELOPMENT LOGIN</p>
+			<Button class="w-full justify-start" on:click={handleDevLogin} kind="primary">
+				Login with mock account
+			</Button>
+			<p class="text-danger">
+				The social auth methods below most likely do not work in the dev environment!
+			</p>
+			<Divider />
+		{/if}
 		<!-- GITHUB LOG IN -->
 		<p class="text-gray-600 text-xs">Social Auth Login</p>
 		<Button
-			kind="primary"
+			kind="tertiary"
 			class="w-full justify-start"
 			on:click={handleGithubLogin}
 			icon={LogoGithub32}

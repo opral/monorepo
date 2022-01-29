@@ -1,7 +1,8 @@
 import { createClient } from '@inlang/database';
+import { env } from '$lib/env';
 
-const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string;
+const supabaseUrl = env.VITE_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = env.VITE_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const database = supabase;

@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/*", "apps/cli"],
+  "packages": ["packages/*", "apps/*"],
   "version": "independent",
   "command": {
     "publish": {

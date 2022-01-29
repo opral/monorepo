@@ -115,16 +115,17 @@
 				});
 				if (response.ok === false) {
 					machineTranslationStatus = 'error';
-					machineTranslationErrorMessage =
-						'Something went wrong. The response code was ' + response.status;
+					machineTranslationErrorMessage = `Something went wrong. (Code: ${
+						response.status
+					}) ${await response.text()}`;
 					break;
 				} else {
 					const responseBody = (await response.json()) as MachineTranslateResponseBody;
 					serializedPatterns[languageCode] = responseBody.serializedPattern;
+					machineTranslationStatus = 'finished';
 				}
 			}
 		}
-		machineTranslationStatus = 'finished';
 	}
 
 	/**
@@ -207,6 +208,7 @@
 							class="px-2 flex flex-row items-center"
 							bind:status={machineTranslationStatus}
 							activeDescription="Machine translating..."
+							errorDescription={machineTranslationErrorMessage}
 							finishedDescription="Finished"
 						/>
 					{/if}
