@@ -76,7 +76,7 @@
 		<Divider />
 		{#if env.VITE_IS_DEVELOPMENT}
 			<p class="text-gray-600 text-xs">DEVELOPMENT LOGIN</p>
-			<Button class="w-full justify-start" on:click={handleDevLogin} kind="tertiary">
+			<Button class="w-full justify-start" on:click={handleDevLogin} kind="primary">
 				Login with mock account
 			</Button>
 			<p class="text-danger">
