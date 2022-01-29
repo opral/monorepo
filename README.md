@@ -35,6 +35,22 @@ Develop the standard solution to localize software.
 
 Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
 
+## Run Locally & Contribute
+
+All scripts are shown in the `package.json` file(s).
+
+### Inlang as a whole
+
+1. Install the [supabase cli](https://github.com/supabase/cli)
+2. `npm install`
+3. `npm run dev`
+4. (for the dashboard) open [localhost:3000](http://localhost:3000/)
+
+### A dedicated package
+
+1. `npm install`
+2. `npm run dev -w @inlang/<package_name>`
+
 ## Community & Support
 
 - [GitHub Discussions](https://github.com/inlang/inlang/discussions): feedback and questions.
