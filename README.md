@@ -37,9 +37,8 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 
 ## Run Locally & Contribute
 
-Fork this project
-
-All scripts are shown in the `package.json` file(s).
+![fork](https://raw.githubusercontent.com/inlang/inlang/main/assets/fork-project.webp)
+Fork this project.
 
 ### Run the whole inlang project
 
