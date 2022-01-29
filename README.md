@@ -16,7 +16,7 @@ Inlang is an open source localization solution for software build on top [Mozill
 
 ## Goal
 
-Develop the standard solution to localize software.
+Build an ecosystem around Fluent and standardize localization of software.
 
 ## Status
 
@@ -37,16 +37,18 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 
 ## Run Locally & Contribute
 
+Fork this project
+
 All scripts are shown in the `package.json` file(s).
 
-### Inlang as a whole
+### Run the whole inlang project
 
 1. Install the [supabase cli](https://github.com/supabase/cli)
 2. `npm install`
 3. `npm run dev`
 4. (for the dashboard) open [localhost:3000](http://localhost:3000/)
 
-### A dedicated package
+### Only a dedicated package
 
 1. `npm install`
 2. `npm run dev -w @inlang/<package_name>`
