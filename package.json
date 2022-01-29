@@ -9,11 +9,11 @@
   "scripts": {
     "build": "lerna run build",
     "predev": "npm run start -w @inlang/database",
-    "dev": "trap 'exit 0' SIGINT; turbo run dev --parallel",
-    "clean": "turbo run clean",
+    "dev": "lerna run dev --parallel",
     "postdev": "npm run stop -w @inlang/database",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
+    "clean": "lerna run clean",
+    "lint": "lerna run lint",
+    "test": "lerna run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
@@ -22,7 +22,6 @@
     "lerna": "^4.0.0",
     "prettier": "^2.5.1",
     "ts-jest": "^27.0.3",
-    "turbo": "latest",
     "typescript": "^4.5.4"
   },
   "engines": {
