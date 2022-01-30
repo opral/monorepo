@@ -1,36 +1,25 @@
 <!-- 
 	This layout acts as authentification layer. 
 -->
-<script lang="ts" context="module">
+<script lang="ts">
+	import { capitalize, last } from 'lodash-es';
 	import '../app.postcss';
 	import { auth } from '$lib/services/auth';
-	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
 	import UiShell from '$lib/layout/UiShell.svelte';
 	import { page } from '$app/stores';
 	import { InlineNotification } from 'carbon-components-svelte';
 
-	export async function load({ url }: LoadInput): Promise<LoadOutput> {
-		const user = auth.user();
-		// includes('auth') ensures that subroutes within /auth do not
-		// lead to constant redirects
-		if (user === null && url.href.includes('auth') === false) {
-			return {
-				status: 302,
-				redirect: '/auth'
-			};
-		}
-		return {};
-	}
-</script>
-
-<script lang="ts">
-	import { capitalize, last } from 'lodash-es';
-	// if running in browser (not server side)
-	// listen for auth changes
-
 	$: outerWidth = 0;
+
+	// check whether a user exists / is logged in
+	const user = auth.user();
+	// includes('auth') ensures that subroutes within /auth do not
+	// lead to constant redirects
+	if (user === null && $page.url.href.includes('auth') === false) {
+		goto('auth');
+	}
 
 	if (browser) {
 		auth.onAuthStateChange((event) => {
