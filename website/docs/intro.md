@@ -12,6 +12,6 @@ Inlang reduces the effort to localize software by enabling non-technical team me
 
 ## The Future
 
-Inlang strives to develop the standard solution to localize software. The current features are a small subset of features and tools required to achieve the formulated goal. Localizing software consists of multiple minor inconveniences like non-existend typesafety, collaboration via email, fragmented tooling that merge into a giant pile of problems. The consequence is to not localize software, despite major benefits like substantial increase in traffic (SEO) and conversions.
+Inlang strives build an ecosystem around Fluent and standardize localization of software. The current features are a small subset of features and tools required to achieve the formulated goal. Localizing software consists of multiple minor inconveniences like non-existend typesafety, collaboration via email, fragmented tooling that merge into a giant pile of problems. The consequence is to not localize software, despite major benefits like substantial increase in traffic (SEO) and conversions.
 
-Localizing (translating) software should be straightforward, unfortunately it is not.
+Localizing (translating) software should be straightforward.
