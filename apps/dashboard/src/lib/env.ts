@@ -7,6 +7,10 @@ type ClientSideEnvironmentVariables = {
 	VITE_PUBLIC_AUTH_REDIRECT_URL: string;
 	VITE_PUBLIC_SUPABASE_ANON_KEY: string;
 	VITE_PUBLIC_SUPABASE_URL: string;
+	// if undefined -> no analytics
+	VITE_PUBLIC_POSTHOG_TOKEN: string | undefined;
+	// if undefined -> no analytics
+	VITE_PUBLIC_POSTHOG_API_HOST: string | undefined;
 };
 
 /**
@@ -18,12 +22,23 @@ type ClientSideEnvironmentVariables = {
 export const env: ClientSideEnvironmentVariables = {
 	VITE_IS_DEVELOPMENT: import.meta.env.DEV,
 	VITE_PUBLIC_AUTH_REDIRECT_URL: import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL
-		? (import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL as string)
+		? import.meta.env.VITE_PUBLIC_AUTH_REDIRECT_URL.toString()
 		: 'http://localhost:3000',
 	VITE_PUBLIC_SUPABASE_ANON_KEY: import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY
-		? (import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY as string)
+		? import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY.toString()
 		: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI',
 	VITE_PUBLIC_SUPABASE_URL: import.meta.env.VITE_PUBLIC_SUPABASE_URL
-		? (import.meta.env.VITE_PUBLIC_SUPABASE_URL as string)
-		: 'http://localhost:54321'
+		? import.meta.env.VITE_PUBLIC_SUPABASE_URL.toString()
+		: 'http://localhost:54321',
+	VITE_PUBLIC_POSTHOG_TOKEN: import.meta.env.VITE_PUBLIC_POSTHOG_TOKEN?.toString(),
+	VITE_PUBLIC_POSTHOG_API_HOST: import.meta.env.VITE_PUBLIC_POSTHOG_API_HOST?.toString()
 };
+
+// ----- validation ------
+// if either is undefined, throw an error (both must be defined)
+if (
+	(env.VITE_PUBLIC_POSTHOG_TOKEN !== undefined && env.VITE_PUBLIC_POSTHOG_API_HOST === undefined) ||
+	(env.VITE_PUBLIC_POSTHOG_TOKEN === undefined && env.VITE_PUBLIC_POSTHOG_API_HOST !== undefined)
+) {
+	throw Error('VITE_PUBLIC_POSTHOG_TOKEN and VITE_PUBLIC_POSTHOG_API_HOST must both be defined');
+}

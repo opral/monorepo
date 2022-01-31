@@ -56,9 +56,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@inlang/fluent-adapters": "*",
 		"@inlang/common": "*",
 		"@inlang/database": "*",
+		"@inlang/fluent-adapters": "*",
 		"@inlang/fluent-lint": "*",
 		"@inlang/fluent-syntax": "*",
 		"@netlify/functions": "^0.11.0",
@@ -66,6 +66,7 @@
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
 		"lodash-es": "^4.17.21",
+		"posthog-js": "^1.17.6",
 		"svelte-fluttered": "^0.3.0"
 	}
 }
