@@ -1,6 +1,8 @@
 import preprocess from 'svelte-preprocess';
 // import netlify from '@sveltejs/adapter-netlify';
 import node from '@sveltejs/adapter-node';
+// importing validateEnv script which leads to auto execution of the script
+import './validateEnv.js';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
