@@ -43,6 +43,13 @@
 				message:
 					"The id can only contain one dot '.' because a message can only have one nested layer of attributes."
 			};
+		}
+		// attribute id is not written out yet
+		else if (isValidMessageId(id.split('.')[0]) === true && id.split('.')[1] === '') {
+			return {
+				value: true,
+				message: ''
+			};
 		} else if (
 			isValidMessageId(id.split('.')[0]) === false ||
 			isValidAttributeId(id.split('.')[1]) === false
