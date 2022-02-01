@@ -101,9 +101,7 @@
 	   	not of importance to fix for now.
 	-->
 	<TextInput
-		invalid={messageId !== undefined &&
-			isValidMessageId(messageId) === false &&
-			status !== 'finished'}
+		invalid={messageId !== '' && isValidMessageId(messageId) === false && status !== 'finished'}
 		invalidText={invalidMessageIdErrorMessage()}
 		labelText="Id"
 		bind:value={messageId}
