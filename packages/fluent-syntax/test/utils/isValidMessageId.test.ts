@@ -1,6 +1,7 @@
 import { isValidMessageId } from '../../src/utils/isValidMessageId';
 
 describe('isValidMessageId()', () => {
+    it('should reject an empty string', () => expect(isValidMessageId('')).toBeFalsy());
     it('should accept snake_case', () => {
         expect(isValidMessageId('hello_world')).toBeTruthy();
     });
