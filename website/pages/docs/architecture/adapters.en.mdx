@@ -1,0 +1,16 @@
+import Callout from "../../../components/callout";
+
+# Adapters
+
+**Inlang supports other syntaxes through adapters.** Adapters convert i18n syntaxes other than Fluent to and from
+Fluent. The latter entails that not every functionality that Fluent/inlang supports is supported
+by every adapter (due to syntax features) and vice-versa.
+
+<Callout type="warning">
+  Only functions that fluent supports can be supported by adapters. For example,
+  Fluent only supports one nested layer of attributes i.e. an `id` with two
+  layers named `login.button.close` won't work. See the [Fluent syntax
+  specification](https://projectfluent.org/fluent/guide/).
+</Callout>
+
+#### For a list of available adapters, and how to contribute, go to [@inlang/adapters](https://github.com/inlang/inlang/tree/main/packages/fluent-adapters).

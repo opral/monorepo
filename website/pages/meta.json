@@ -1,0 +1,15 @@
+{
+  "index": {
+    "title": "Inlang",
+    "type": "nav",
+    "hidden": true
+  },
+  "docs": {
+    "title": "Docs",
+    "type": "nav"
+  },
+  "blog": {
+    "title": "Blog",
+    "type": "nav"
+  }
+}

@@ -1,0 +1,71 @@
+---
+date: 2022/01/25
+description: Inlang v0.2 is released.
+tag: web development
+authors: [Samuel Stroschein]
+type: post
+---
+
+# Inlang v0.2
+
+<br />
+
+import ReactPlayer from "react-player";
+
+<ReactPlayer url="https://youtu.be/87_pRYTC1YA" />
+
+---
+
+## Transcript
+
+Hello there,
+
+inlang version 0.2 is out. The stated goal of Inlang is to build an ecosystem around Fluent and standardize localization of software.
+Why? Because localizing software is not straightforward. It involves a lot of technical questions like, what SDK should I choose?
+What localization syntax? How do I build a translation pipeline?
+And non-technical questions like, well, the biggest one being who's actually going to do
+the translations, but also, how do you maintain translations?
+Inlang strives to build the standard solution to tackle all of
+those problems, and we're doing that by building on top of Mozilla's
+recently released Fluent.
+
+### 1. Inlang is now built on top of Mozilla's Fluent system
+
+Let me give you a brief introduction to Fluent and why we adopted it.
+First and foremost, human languages are complex.
+Mozilla observed multiple problems with existing localization syntaxes.
+To solve those problems, Mozilla designed a dedicated syntax, file format,
+a whole system whose sole purpose is to express human languages,
+nothing more, nothing less. We think Fluent is the best bet to build
+the standard solution for localizing software. If we are building the
+standard solution, it should come with the best localization syntax.
+Right now, that's Fluent built by tremendously experienced people
+with over 20 years of experience in localizing software, namely Firefox.
+
+```
+# Simple things are simple.
+hello-user = Hello, {$userName}!
+
+# Complex things are possible.
+shared-photos =
+    {$userName} {$photoCount ->
+        [one] added a new photo
+       *[other] added {$photoCount} new photos
+    } to {$userGender ->
+        [male] his stream
+        [female] her stream
+       *[other] their stream
+    }.
+```
+
+### 2. Solve non-technical problems first
+
+With version 0.2 comes a slight shift in focus. Inlang started out with trying
+to solve technical problems first. However, technical problems are inherently more difficult
+to solve than non-technical problems. Especially, if the sheer variatey of software stacks
+needs to be considered. We are now focusing on the non technical questions first, specifically
+how to maintain translations for a project.
+
+### 3. Demo of inlang v0.2
+
+<ReactPlayer url="https://youtu.be/87_pRYTC1YA?t=162" />
