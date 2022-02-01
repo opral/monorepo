@@ -37,17 +37,17 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 
 ## Run Locally & Contribute
 
+### 1. Fork this project
 ![fork](https://raw.githubusercontent.com/inlang/inlang/main/assets/fork-project.webp)
-Fork this project.
 
-### Run the whole inlang project
+### 2. Run the whole inlang project
 
 1. Install the [supabase cli](https://github.com/supabase/cli)
 2. `npm install`
 3. `npm run dev`
 4. (for the dashboard) open [localhost:3000](http://localhost:3000/)
 
-### Only a dedicated package
+### (3. Or only a dedicated package)
 
 1. `npm install`
 2. `npm run dev -w @inlang/<package_name>`
