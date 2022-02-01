@@ -156,7 +156,10 @@ export class Resources {
         languageCode: LanguageCode;
         attributes?: Attribute[];
     }): Result<void, Error> {
-        if (args.pattern === undefined && (args.attributes === undefined || args.attributes.length === 0)) {
+        if (
+            (args.pattern === undefined || args.pattern.trim() === '') &&
+            (args.attributes === undefined || args.attributes.length === 0)
+        ) {
             return Result.err(Error('The message has no pattern. Thus, at least one attribute is required.'));
         }
         if (this.messageExist({ id: args.id, languageCode: args.languageCode })) {

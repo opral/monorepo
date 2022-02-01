@@ -204,7 +204,7 @@ describe('createMessage()', () => {
     });
 
     it('should not be possible to add an empty message', () => {
-        const add = resources.createMessage({ id: 'extra', pattern: ' ', languageCode: 'da' });
+        const add = resources.createMessage({ id: 'extra', pattern: '', languageCode: 'da' });
         expect(add.isErr).toBeTruthy();
     });
 
