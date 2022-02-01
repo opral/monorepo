@@ -12,11 +12,11 @@
 
 # Inlang
 
-Inlang is an open source localization solution for software build on top [Mozilla's Fluent project](https://projectfluent.org/).
+Inlang is an open source localization solution for software build on top [Mozilla's Fluent system](https://projectfluent.org/).
 
 ## Goal
 
-Build an ecosystem around Fluent and standardize localization of software.
+Build an ecosystem around Mozilla's Fluent system and thereby standardize the localization process of software.
 
 ## Status
 
@@ -38,6 +38,7 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 ## Run Locally & Contribute
 
 ### 1. Fork this project
+
 ![fork](https://raw.githubusercontent.com/inlang/inlang/main/assets/fork-project.webp)
 
 ### 2. Run the whole inlang project
