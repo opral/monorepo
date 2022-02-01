@@ -24,6 +24,7 @@ module.exports = withTranspilation(
       locales: ["en"],
       defaultLocale: "en",
     },
+    swcMinify: false,
     async redirects() {
       return [
         {
