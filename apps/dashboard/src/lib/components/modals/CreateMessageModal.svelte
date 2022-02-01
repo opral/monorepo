@@ -26,7 +26,7 @@
 
 	let status: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
-	$: isValidInput = messageId !== '' && isValidMessageId(messageId);
+	$: isValidInput = messageId !== '' && isValidMessageId(messageId) && messagePattern != '';
 
 	let invalidMessageIdErrorMessage: () => string;
 	$: invalidMessageIdErrorMessage = () => {
@@ -59,7 +59,7 @@
 		});
 		const updateDatabase = await projectStore.updateResourcesInDatabase();
 		if (create.isErr || updateDatabase.isErr) {
-			console.log(
+			alert(
 				create.isErr ? create.error : updateDatabase.isErr ? updateDatabase.error : 'Unknown error'
 			);
 			status = 'error';
