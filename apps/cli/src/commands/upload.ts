@@ -1,4 +1,10 @@
-import { adapters, SupportedAdapter, SerializedResource, parseResources, serializeResources } from '@inlang/fluent-adapters';
+import {
+    adapters,
+    SupportedAdapter,
+    SerializedResource,
+    parseResources,
+    serializeResources,
+} from '@inlang/fluent-adapters';
 import { LanguageCode, Result } from '@inlang/common';
 import { command } from 'cleye';
 import consola from 'consola';
