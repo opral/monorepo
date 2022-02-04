@@ -121,32 +121,6 @@ GRANT EXECUTE ON FUNCTION public.get_user_id_from_email(text) TO postgres;
 
 GRANT EXECUTE ON FUNCTION public.get_user_id_from_email(text) TO service_role;
 
-CREATE OR REPLACE FUNCTION public.handle_insert_user()
-    RETURNS trigger
-    LANGUAGE 'plpgsql'
-    COST 100
-    VOLATILE NOT LEAKPROOF SECURITY DEFINER
-AS $BODY$
-    begin
-        insert into public.user (id, email)
-        values (new.id, new.email);
-        return new;
-    end;
-    
-$BODY$;
-
-ALTER FUNCTION public.handle_insert_user()
-    OWNER TO postgres;
-
-GRANT EXECUTE ON FUNCTION public.handle_insert_user() TO authenticated;
-
-GRANT EXECUTE ON FUNCTION public.handle_insert_user() TO postgres;
-
-GRANT EXECUTE ON FUNCTION public.handle_insert_user() TO PUBLIC;
-
-GRANT EXECUTE ON FUNCTION public.handle_insert_user() TO anon;
-
-GRANT EXECUTE ON FUNCTION public.handle_insert_user() TO service_role;
 
 CREATE OR REPLACE FUNCTION public.handle_insert_project()
     RETURNS trigger
