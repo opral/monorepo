@@ -21,7 +21,7 @@ import injectEnvVariables from 'rollup-plugin-inject-process-env';
 const env = process.env.ROLLUP_WATCH
   ? // development
     {
-      API_ENDPOINT: 'http://localhost:3000/api/',
+      API_ENDPOINT: 'http://127.0.0.1:3000/api/',
     }
   : // production
     {
