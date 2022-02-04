@@ -33,12 +33,13 @@ export async function post(event: RequestEvent): Promise<EndpointOutput> {
 		.single();
 	if (project.error) {
 		return {
-			status: 500
+			status: 500,
+			body: 'Error retrieving the project.'
 		};
-	}
-	if (project.data === null) {
+	} else if (project.data === null) {
 		return {
-			status: 404
+			status: 404,
+			body: "Couldn't find the project. Are you sure that the api key is correct?"
 		};
 	}
 	const languages = await supabase
