@@ -58,11 +58,15 @@ export class LocalizableStringsAdapter implements AdapterInterface {
 // eslint-disable-next-line unicorn/no-hex-escape
 const grammar = String.raw`
 
+// @ means match whitespace left and right but disregard it
+// i.e. only return the file.
 Result = WS @File WS
+
 
 File
   = entries:(
       head:Entry
+      // same as above, disregard ws and only return the entry
       tail:(WS @Entry)*
       {
         // head is a single element
