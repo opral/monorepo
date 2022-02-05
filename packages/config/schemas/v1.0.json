@@ -1,7 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Inlang Config 1.0",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
     "fileFormat": {
       "enum": ["fluent", "typesafe-i18n", "localizable-strings"],
       "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters"
@@ -15,5 +20,5 @@
       "format": "uri"
     }
   },
-  "required": ["fileFormat", "pathPattern", "fetchUsageGrammarFrom"]
+  "required": ["$schema", "fileFormat", "pathPattern", "fetchUsageGrammarFrom"]
 }
