@@ -1,0 +1,29 @@
+{
+  "name": "@inlang/config",
+  "version": "1.0.0",
+  "private": false,
+  "license": "MIT",
+  "publicConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "clean": "rm -r -f ./dist",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "devDependencies": {
+    "@inlang/eslint-config": "*"
+  },
+  "dependencies": {}
+}
