@@ -1,8 +1,8 @@
 # @inlang/fluent-adapters
 
-Parse and serialize i18n syntax to and from [Fluent syntax](https://projectfluent.org/).
+Parse and serialize file formats to and from [Fluent](https://projectfluent.org/).
 
-Inlang uses [Fluent](https://projectfluent.org/) from Mozilla under the hood. In order to support i18n libraries / codebases that do not use Fluent, adapters are required. The purpose of an adapter is to parse and serialize the file format used by
+Inlang uses [Fluent](https://projectfluent.org/) from Mozilla under the hood. In order to support i18n libraries / codebases / file formats that do not use Fluent, adapters are required. The purpose of an adapter is to parse and serialize the file format used by
 the specific i18n libray to and from Fluent syntax.
 
 ## Supported Adapters
