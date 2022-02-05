@@ -1,6 +1,6 @@
-import typescript from '@rollup/plugin-typescript'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+import typescript from '@rollup/plugin-typescript';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 /**
  * What is rollup used for?
@@ -10,17 +10,18 @@ import commonjs from '@rollup/plugin-commonjs'
  */
 
 export default {
-    input: 'src/main.ts',
-    output: {
-        dir: 'dist',
-        format: 'cjs',
-    },
-    plugins: [
-        // nodeResolve = bundle the dependencies
-        nodeResolve(),
-        // typescript = compile typescript
-        typescript(),
-        // commonjs = because of commonjs peer dependencies (peggy.js)
-        commonjs(),
-    ],
-}
+  input: 'src/main.ts',
+  output: {
+    sourcemap: true,
+    dir: 'dist',
+    format: 'cjs',
+  },
+  plugins: [
+    // nodeResolve = bundle the dependencies
+    nodeResolve(),
+    // typescript = compile typescript
+    typescript(),
+    // commonjs = because of commonjs peer dependencies (peggy.js)
+    commonjs(),
+  ],
+};
