@@ -4,16 +4,16 @@
   "properties": {
     "fileFormat": {
       "enum": ["fluent", "typesafe-i18n", "localizable-strings"],
-      "description": "The file format of the local translation files.\n\n Any other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters"
+      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters"
     },
     "pathPattern": {
       "type": "string",
-      "description": "Where and how the local translation files are saved.\n\n Use '{languageCode}' as dynamic value. \n@examples\n./translations/{languageCode}.json\n./{languageCode}/Localizable.strings"
+      "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n`./translations/{languageCode}.json`\n.`/{languageCode}/Localizable.strings`"
     },
-    "usageGrammar": {
+    "fetchUsageGrammarFrom": {
       "type": "string",
       "format": "uri"
     }
   },
-  "required": ["fileFormat", "pathPattern", "usageGrammar"]
+  "required": ["fileFormat", "pathPattern", "fetchUsageGrammarFrom"]
 }
