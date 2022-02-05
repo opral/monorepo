@@ -1,17 +1,18 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2020",
-    "outDir": "out",
-    "lib": ["ES2020"],
-    "sourceMap": true,
-    "rootDir": "src",
-    "strict": true,
-    "esModuleInterop": true
-    /* Additional Checks */
-    // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-    // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-    // "noUnusedParameters": true,  /* Report errors on unused parameters. */
-  },
-  "exclude": ["node_modules", ".vscode-test"]
+    "compilerOptions": {
+        "strict": true,
+        "target": "ES2020",
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        // forcing consistens casing in files is a life saver.
+        // if you see this comment, check your tsconfig. Saves you from deployment headdaches.
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "dist",
+        "removeComments": false,
+        "declaration": true,
+        "allowJs": true
+    },
+    "include": ["src/**/**.ts"]
 }
