@@ -1,13 +1,13 @@
-import { InlangConfig10 } from './types/v1.0';
-import schema1_0 from '../schemas/v1.0.json';
+import { InlangConfig01 } from './types/v0.1';
+import schema1_0 from '../schemas/v0.1.json';
 import Ajv from 'ajv';
 import { Result } from '@inlang/common';
 
-export function validate(args: { config: Record<string, unknown> }): Result<InlangConfig10, Error> {
+export function validate(args: { config: Record<string, unknown> }): Result<InlangConfig01, Error> {
     const ajv = new Ajv({}).compile(schema1_0);
     const valid = ajv(args.config);
     if (valid) {
-        return Result.ok(args.config as InlangConfig10);
+        return Result.ok(args.config as InlangConfig01);
     } else if (ajv.errors) {
         return Result.err(Error('Validating config error: ' + ajv.errors[0].message));
     }
