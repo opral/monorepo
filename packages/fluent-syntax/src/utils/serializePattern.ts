@@ -1,5 +1,6 @@
 import { trim } from 'lodash-es';
-import { Identifier, Message, Pattern, serializeEntry } from '..';
+import { Identifier, Message, Pattern } from '@fluent/syntax';
+import { serializeEntry } from './serializeEntry';
 
 /**
  * Serializes a `Pattern` to a fluent string.

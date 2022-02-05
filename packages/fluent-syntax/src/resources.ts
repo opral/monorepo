@@ -1,9 +1,8 @@
-import { LanguageCode } from '@inlang/common';
+import { LanguageCode, Result } from '@inlang/common';
 import { remove } from 'lodash-es';
-import { Result } from '@inlang/common';
-import { isValidMessageId } from './utils/isValidMessageId';
 import { Attribute, Identifier, Message, Resource } from '@fluent/syntax';
-import { parsePattern } from '.';
+import { isValidMessageId } from './utils/isValidMessageId';
+import { parsePattern } from './utils/parsePattern';
 
 /**
  * The API of this class could be improved.

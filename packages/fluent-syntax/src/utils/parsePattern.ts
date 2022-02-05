@@ -1,5 +1,6 @@
 import { Result } from '@inlang/common';
-import { Message, parseEntry, ParseError, Pattern } from '..';
+import { Message, ParseError, Pattern } from '@fluent/syntax';
+import { parseEntry } from './parseEntry';
 
 /**
  * Takes a serialized pattern and returns a parsed pattern.

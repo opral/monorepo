@@ -1,4 +1,4 @@
-import { isValidMessageId } from '..';
+import { isValidMessageId } from './isValidMessageId';
 
 /**
  * Returns whether or not the provided id is valid as attribute id.
