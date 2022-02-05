@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Emojizer } from './actions/extractPattern';
+import { ExtractPattern } from './actions/extractPattern';
 
 export function activate(context: vscode.ExtensionContext): void {
   const supportedLanguages = [
@@ -12,8 +12,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   for (const language of supportedLanguages) {
     context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(language, new Emojizer(), {
-        providedCodeActionKinds: Emojizer.providedCodeActionKinds,
+      vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
+        providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
       })
     );
   }
