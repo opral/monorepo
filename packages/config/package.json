@@ -11,7 +11,8 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "schemas"
   ],
   "scripts": {
     "build": "tsc --build",
@@ -20,10 +21,16 @@
     "format": "prettier .",
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "npm test -- --watch",
+    "generate-types": "json2ts -i schemas/ -o src/types/"
+  },
+  "dependencies": {
+    "@inlang/common": "*"
   },
   "devDependencies": {
-    "@inlang/eslint-config": "*"
-  },
-  "dependencies": {}
+    "@inlang/eslint-config": "*",
+    "json-schema-to-typescript": "^10.1.5"
+  }
 }

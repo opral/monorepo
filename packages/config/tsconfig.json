@@ -12,7 +12,8 @@
     "outDir": "dist",
     "removeComments": false,
     "declaration": true,
-    "allowJs": true
+    "allowJs": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/**.ts"]
 }
