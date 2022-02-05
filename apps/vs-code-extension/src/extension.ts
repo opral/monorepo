@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { Emojizer } from './actions/createKeyFromHighlightedText'
+import { Emojizer } from './actions/extractPattern'
 
 export function activate(context: vscode.ExtensionContext) {
     const supportedLanguages = [

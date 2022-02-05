@@ -1,5 +1,5 @@
 {
-    "name": "inlang-",
+    "name": "@inlang/vs-code-extension",
     "private": true,
     "displayName": "Inlang",
     "description": "Create keys directly in VSCode and send them to inlang.",
