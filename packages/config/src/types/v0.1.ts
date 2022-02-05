@@ -22,6 +22,6 @@ export interface InlangConfig01 {
      * .`/{languageCode}/Localizable.strings`
      */
     pathPattern: string;
-    fetchUsageGrammarFrom: string;
+    fetchUsageGrammarFrom?: string;
     [k: string]: unknown;
 }

@@ -20,5 +20,5 @@
       "format": "uri"
     }
   },
-  "required": ["$schema", "fileFormat", "pathPattern", "fetchUsageGrammarFrom"]
+  "required": ["$schema", "fileFormat", "pathPattern"]
 }
