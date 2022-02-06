@@ -1,21 +1,41 @@
 import * as vscode from 'vscode';
 import { ExtractPattern } from './actions/extractPattern';
+import { initState } from './state';
+import { extractPatternCommand } from './commands/extractPattern';
 
-export function activate(context: vscode.ExtensionContext): void {
-  const supportedLanguages = [
-    'javascript',
-    'typescript',
-    'javascriptreact',
-    'typescriptreact',
-    'svelte',
-  ];
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  try {
+    const supportedLanguages = [
+      'javascript',
+      'typescript',
+      'javascriptreact',
+      'typescriptreact',
+      'svelte',
+    ];
 
-  for (const language of supportedLanguages) {
+    const activeTextEditor = vscode.window.activeTextEditor;
+    if (activeTextEditor === undefined) {
+      return;
+    }
+
+    const initStateResult = await initState({ activeTextEditor });
+    if (initStateResult.isErr) {
+      vscode.window.showErrorMessage(initStateResult.error.message);
+    }
+
+    for (const language of supportedLanguages) {
+      context.subscriptions.push(
+        vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
+          providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
+        })
+      );
+    }
     context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
-        providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
-      })
+      vscode.commands.registerCommand(extractPatternCommand.id, extractPatternCommand.callback)
     );
+  } catch (error) {
+    vscode.window.showErrorMessage((error as Error).message);
+    console.error(error);
   }
 }
 
