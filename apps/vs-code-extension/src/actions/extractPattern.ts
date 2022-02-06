@@ -8,28 +8,26 @@ import { extractPatternCommand, ExtractPatternCommandArgs } from '../commands/ex
 export class ExtractPattern implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
 
-  public async provideCodeActions(
-    document: vscode.TextDocument
-  ): Promise<vscode.CodeAction[] | undefined> {
+  public async provideCodeActions(document: vscode.TextDocument): Promise<vscode.CodeAction[]> {
     const activeTextEditor = vscode.window.activeTextEditor;
     // user has not highlighted text
     if (activeTextEditor === undefined || activeTextEditor.selection.isEmpty) {
-      return;
+      return [];
     } else if (state.config.extractPatternReplacementOptions === undefined) {
-      return;
+      return [];
     }
-    const fix = new vscode.CodeAction(`Inlang: Extract pattern`);
+    const extractPatternAction = new vscode.CodeAction(`Inlang: Extract pattern`);
     // workaround to get typesafety when passing down the arguments
     const args: ExtractPatternCommandArgs = {
       pattern: document.getText(activeTextEditor.selection),
       activeTextEditor,
     };
-    fix.command = {
+    extractPatternAction.command = {
       title: extractPatternCommand.title,
       command: extractPatternCommand.id,
       arguments: [args],
     };
-    return [fix];
+    return [extractPatternAction];
   }
 
   public resolveCodeAction(
