@@ -60,7 +60,7 @@ export function invalidIdReason(
     else if (split.length === 2 && id.includes('.')) {
         return 'Expected attribute id.';
     } else if (split.length > 2) {
-        return 'The id is valid.';
+        return 'Fluent only supports one layer of attributes.';
     } else {
         return 'Invalid character.';
     }
