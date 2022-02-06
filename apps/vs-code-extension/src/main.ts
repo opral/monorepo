@@ -36,12 +36,18 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   if (activeTextEditor === undefined) {
     return;
   }
-  // activeTextEditor is defined -> try to get the config
-  const config = await getConfig({ activeTextEditor });
-  if (config.isErr) {
+  // checking whether a config file exists -> if not dont start the extension
+  const configFileUris = await vscode.workspace.findFiles('**/inlang.config.json');
+  if (configFileUris.length === 0) {
     return;
   }
-  // config exists -> intialize state
+  // activeTextEditor is defined -> try to get the config
+  const config = await getConfig({ activeTextEditor, configFileUris });
+  if (config.isErr) {
+    vscode.window.showErrorMessage(config.error.message);
+    return;
+  }
+  // config loaded sucessfully -> intialize state
   initState({ config: config.value });
 
   const supportedLanguages = [

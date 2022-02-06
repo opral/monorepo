@@ -11,13 +11,10 @@ import fs from 'fs';
  */
 export async function getConfig(args: {
   activeTextEditor: vscode.TextEditor;
+  configFileUris: vscode.Uri[];
 }): Promise<Result<InlangConfig01, Error>> {
-  const configFileUris = await vscode.workspace.findFiles('**/inlang.config.json');
-  if (configFileUris.length === 0) {
-    return Result.err(Error('No `inlang.config.json` file has been found in the workspace.'));
-  }
   const closestConfigPath = determineClosestPath({
-    options: configFileUris.map((uri) => uri.path),
+    options: args.configFileUris.map((uri) => uri.path),
     to: args.activeTextEditor.document.uri.path,
   });
   const config = JSON.parse(fs.readFileSync(closestConfigPath, 'utf8'));
