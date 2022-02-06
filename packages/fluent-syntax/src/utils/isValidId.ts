@@ -34,3 +34,31 @@ export function isValidId(id: string): boolean {
             return false;
     }
 }
+
+/**
+ * Utility function to have consistent error messages and reduce boilerplate.
+ */
+// defining the reasons as return type union leads to nice DX because
+// conditional logic can be used e.g. invalidIdReason(x) === "The id is valid." etc.
+/* istanbul ignore next */
+export function invalidIdReason(
+    id: string
+):
+    | 'The id is valid.'
+    | 'Expected attribute id.'
+    | 'Fluent only supports one layer of attributes.'
+    | 'Invalid character.' {
+    const split = id.split('.');
+    if (isValidId(id)) {
+        return 'The id is valid.';
+    }
+    // attribute id has not been entered yet (which is no error but leads to an invalid id)
+    // length === 2 because `hello.`.split('.') = ['hello', '']
+    else if (split.length === 2 && id.includes('.')) {
+        return 'Expected attribute id.';
+    } else if (split.length > 2) {
+        return 'The id is valid.';
+    } else {
+        return 'Invalid character.';
+    }
+}
