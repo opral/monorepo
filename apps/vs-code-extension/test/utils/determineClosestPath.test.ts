@@ -1,4 +1,4 @@
-import { determineClosestPath } from '../../src/utils/determineClosestFile';
+import { determineClosestPath } from '../../src/utils/determineClosestPath';
 
 it('should find the closest path', () => {
   const result = determineClosestPath({
