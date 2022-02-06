@@ -13,16 +13,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       'svelte',
     ];
 
+    // if no active text editor -> no window is open -> hence dont activate the extension
     const activeTextEditor = vscode.window.activeTextEditor;
     if (activeTextEditor === undefined) {
       return;
     }
-
+    // activeTextEditor is defined -> try to intialize the state
     const initStateResult = await initState({ activeTextEditor });
     if (initStateResult.isErr) {
       vscode.window.showErrorMessage(initStateResult.error.message);
     }
-
+    // register the commands and code actions
     for (const language of supportedLanguages) {
       context.subscriptions.push(
         vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
