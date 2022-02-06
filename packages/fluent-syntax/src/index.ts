@@ -11,3 +11,4 @@ export * from './utils/serializeEntry';
 export * from './utils/serializePattern';
 export * from './utils/parseEntry';
 export * from './utils/parsePattern';
+export * from './utils/isValidId';
