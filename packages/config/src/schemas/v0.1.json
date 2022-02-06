@@ -18,6 +18,12 @@
     "fetchUsageGrammarFrom": {
       "type": "string",
       "format": "uri"
+    },
+    "extractPatternReplacementOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": ["$schema", "fileFormat", "pathPattern"]

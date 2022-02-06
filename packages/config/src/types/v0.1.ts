@@ -23,5 +23,6 @@ export interface InlangConfig01 {
      */
     pathPattern: string;
     fetchUsageGrammarFrom?: string;
+    extractPatternReplacementOptions?: string[];
     [k: string]: unknown;
 }
