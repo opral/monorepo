@@ -45,12 +45,15 @@ export function invalidIdReason(
     id: string
 ):
     | 'The id is valid.'
+    | 'The id can not be empty.'
     | 'Expected attribute id.'
     | 'Fluent only supports one layer of attributes.'
     | 'Invalid character.' {
     const split = id.split('.');
     if (isValidId(id)) {
         return 'The id is valid.';
+    } else if (id.length === 0) {
+        return 'The id can not be empty.';
     }
     // attribute id has not been entered yet (which is no error but leads to an invalid id)
     // length === 2 because `hello.`.split('.') = ['hello', '']
