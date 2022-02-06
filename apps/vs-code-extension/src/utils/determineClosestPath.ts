@@ -2,6 +2,8 @@ import nodePath from 'path';
 
 /**
  * Determines the closest path from the `options` compared to the `to` path.
+ * 
+ * The patch is only searched for "upwards".
  *
  * @example
  *     const result = determineClosestPath({
