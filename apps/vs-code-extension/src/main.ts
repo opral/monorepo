@@ -2,42 +2,66 @@ import * as vscode from 'vscode';
 import { ExtractPattern } from './actions/extractPattern';
 import { initState } from './state';
 import { extractPatternCommand } from './commands/extractPattern';
+import { getConfig } from './utils/getConfig';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const supportedLanguages = [
-      'javascript',
-      'typescript',
-      'javascriptreact',
-      'typescriptreact',
-      'svelte',
-    ];
-
-    // if no active text editor -> no window is open -> hence dont activate the extension
-    const activeTextEditor = vscode.window.activeTextEditor;
-    if (activeTextEditor === undefined) {
-      return;
-    }
-    // activeTextEditor is defined -> try to intialize the state
-    const initStateResult = await initState({ activeTextEditor });
-    if (initStateResult.isErr) {
-      vscode.window.showErrorMessage(initStateResult.error.message);
-    }
-    // register the commands and code actions
-    for (const language of supportedLanguages) {
-      context.subscriptions.push(
-        vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
-          providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
-        })
-      );
-    }
-    context.subscriptions.push(
-      vscode.commands.registerCommand(extractPatternCommand.id, extractPatternCommand.callback)
-    );
+    // start the extension
+    main({ context });
+    // in case the active window changes -> restart the extension
+    // could be improved in the future for performance reasons
+    // by detecting whether the closest config differs
+    vscode.window.onDidChangeActiveTextEditor(() => {
+      // in case of running subscriptions -> dispose them (no commands will be shown anymore in the IDE)
+      for (const subscription of context.subscriptions) {
+        subscription.dispose();
+      }
+      // restart extension
+      main({ context });
+    });
   } catch (error) {
     vscode.window.showErrorMessage((error as Error).message);
     console.error(error);
   }
+}
+
+/**
+ * The main entry of the extension.
+ *
+ * This function registers all commands, actions, loads the config etc.
+ */
+async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
+  // if no active text editor -> no window is open -> hence dont activate the extension
+  const activeTextEditor = vscode.window.activeTextEditor;
+  if (activeTextEditor === undefined) {
+    return;
+  }
+  // activeTextEditor is defined -> try to get the config
+  const config = await getConfig({ activeTextEditor });
+  if (config.isErr) {
+    return;
+  }
+  // config exists -> intialize state
+  initState({ config: config.value });
+
+  const supportedLanguages = [
+    'javascript',
+    'typescript',
+    'javascriptreact',
+    'typescriptreact',
+    'svelte',
+  ];
+  // register the commands and code actions
+  for (const language of supportedLanguages) {
+    args.context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(language, new ExtractPattern(), {
+        providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
+      })
+    );
+  }
+  args.context.subscriptions.push(
+    vscode.commands.registerCommand(extractPatternCommand.id, extractPatternCommand.callback)
+  );
 }
 
 // this method is called when your extension is deactivated
