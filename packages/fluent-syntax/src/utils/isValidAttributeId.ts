@@ -3,13 +3,19 @@ import { isValidMessageId } from './isValidMessageId';
 /**
  * Returns whether or not the provided id is valid as attribute id.
  *
- * Note that have to check yourself whether the combination of message
- * id and attribute id is correct.
+ * Note if you want to check the combination of a message id with an
+ * attribut id i.e. dot notation -> `hello.world`, use the `isValidId()`
+ * function instead.
  *
  * @example
- *      const x = "hello.world"
- *      isValidMessageId(x.split('.')[0]) && isValidAttributeId(x.split('.')[1])
+ *      isValidAttributeId("world")
  *      >> true
+ *
+ *      isValidAttributeId(".world")
+ *      >> false
+ *
+ *      isValidAttributeId("hello.world")
+ *      >> false
  */
 export function isValidAttributeId(id: string): boolean {
     return isValidMessageId(id);
