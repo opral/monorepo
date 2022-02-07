@@ -17,7 +17,9 @@
     },
     "fetchUsageGrammarFrom": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "pattern": "(.pegjs)",
+      "description": "The pegjs grammar to detect usage of translations in the source code."
     },
     "extractPatternReplacementOptions": {
       "type": "array",
