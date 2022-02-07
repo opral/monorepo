@@ -3,6 +3,7 @@ import { ExtractPattern } from './actions/extractPattern';
 import { initState } from './state';
 import { extractPatternCommand } from './commands/extractPattern';
 import { getConfig } from './utils/getConfig';
+import { readTranslationFiles } from './utils/readTranslationFiles';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
@@ -47,8 +48,17 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     vscode.window.showErrorMessage(config.error.message);
     return;
   }
+  const resources = readTranslationFiles({ cwd: config.value.path, ...config.value.config });
+  if (resources.isErr) {
+    vscode.window.showErrorMessage(resources.error.message);
+    return;
+  }
   // config loaded sucessfully -> intialize state
-  initState({ config: config.value });
+  initState({
+    config: config.value.config,
+    configPath: config.value.path,
+    resources: resources.value,
+  });
 
   const supportedLanguages = [
     'javascript',

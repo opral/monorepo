@@ -12,7 +12,7 @@ import fs from 'fs';
 export async function getConfig(args: {
   activeTextEditor: vscode.TextEditor;
   configFileUris: vscode.Uri[];
-}): Promise<Result<InlangConfig01, Error>> {
+}): Promise<Result<{ config: InlangConfig01; path: string }, Error>> {
   const closestConfigPath = determineClosestPath({
     options: args.configFileUris.map((uri) => uri.path),
     to: args.activeTextEditor.document.uri.path,
@@ -26,5 +26,5 @@ export async function getConfig(args: {
       )
     );
   }
-  return Result.ok(config);
+  return Result.ok({ config: config, path: closestConfigPath });
 }

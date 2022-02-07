@@ -43,8 +43,10 @@
     "vsce": "^1.100.1"
   },
   "dependencies": {
-    "@inlang/fluent-syntax": "*",
     "@inlang/config": "*",
+    "@inlang/common": "*",
+    "@inlang/fluent-adapters": "*",
+    "@inlang/fluent-syntax": "*",
     "lodash": "^4.17.21",
     "peggy": "^1.2.0"
   },

@@ -1,10 +1,16 @@
 import { InlangConfig01 } from '@inlang/config';
+import { Resources } from '@inlang/fluent-syntax';
 
 /**
  * The state of the vscode extension.
  */
 type State = {
   config: InlangConfig01;
+  /**
+   * The config path is useful to resolve relative paths in the config.
+   */
+  configPath: string;
+  resources: Resources;
 };
 
 /**
@@ -16,6 +22,8 @@ type State = {
 export function initState(args: State): void {
   state = {
     config: args.config,
+    configPath: args.configPath,
+    resources: args.resources,
   };
 }
 
