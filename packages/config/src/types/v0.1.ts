@@ -24,5 +24,9 @@ export interface InlangConfig01 {
     pathPattern: string;
     fetchUsageGrammarFrom?: string;
     extractPatternReplacementOptions?: string[];
+    /**
+     * An ISO 639-1 human language code that determines the base language. TODO link to glossary
+     */
+    baseLanguageCode?: string;
     [k: string]: unknown;
 }

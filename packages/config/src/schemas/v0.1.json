@@ -24,6 +24,10 @@
       "items": {
         "type": "string"
       }
+    },
+    "baseLanguageCode": {
+      "type": "string",
+      "description": "An ISO 639-1 human language code that determines the base language. TODO link to glossary"
     }
   },
   "required": ["$schema", "fileFormat", "pathPattern"]
