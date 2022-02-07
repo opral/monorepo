@@ -10,7 +10,7 @@ export function validate(args: { config: Record<string, unknown> }): Result<Inla
     if (valid) {
         return Result.ok(args.config as InlangConfig01);
     } else if (ajv.errors) {
-        return Result.err(Error(ajv.errors[0].message));
+        return Result.err(Error(`'${ajv.errors[0].instancePath}': ${ajv.errors[0].message}`));
     }
     return Result.err(Error('unknown error.'));
 }
