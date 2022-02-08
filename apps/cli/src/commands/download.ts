@@ -1,10 +1,10 @@
 import {
-    adapters,
-    SupportedAdapter,
+    converters,
+    SupportedConverter,
     serializeResources,
     parseResources,
     SerializedResource,
-} from '@inlang/fluent-adapters';
+} from '@inlang/fluent-syntax-converters';
 import { Result } from '@inlang/common';
 import { command } from 'cleye';
 import consola from 'consola';
@@ -42,9 +42,9 @@ export const downloadCommand = command(
     },
     async (parsed) => {
         // start of validation
-        if (Object.keys(adapters).includes(parsed.flags.adapter) === false) {
+        if (Object.keys(converters).includes(parsed.flags.adapter) === false) {
             parsed.showHelp();
-            consola.info(`--adapter must be ${Object.keys(adapters)}`);
+            consola.info(`--adapter must be ${Object.keys(converters)}`);
             return;
         } else if (parsed.flags.apiKey === undefined) {
             parsed.showHelp();
@@ -56,7 +56,7 @@ export const downloadCommand = command(
             return;
         }
         // end of validation
-        const adapter = adapters[parsed.flags.adapter as SupportedAdapter];
+        const converter = converters[parsed.flags.adapter as SupportedConverter];
         consola.info('Downloading files...');
         const fluentFiles = await download({ apiKey: parsed.flags.apiKey });
         if (fluentFiles.isErr) {
@@ -64,14 +64,14 @@ export const downloadCommand = command(
             return;
         }
         const resources = parseResources({
-            adapter: adapters.fluent,
+            converter: converters.fluent,
             files: fluentFiles.value,
         });
         if (resources.isErr) {
             consola.error(resources.error);
             return;
         }
-        const toBeSavedFiles = serializeResources({ adapter, resources: resources.value });
+        const toBeSavedFiles = serializeResources({ converter, resources: resources.value });
         if (toBeSavedFiles.isErr) {
             consola.error(toBeSavedFiles.error);
             return;

@@ -1,5 +1,9 @@
 import { Result } from '@inlang/common';
-import { adapters, serializeResources, SupportedAdapter } from '@inlang/fluent-adapters';
+import {
+  converters,
+  serializeResources,
+  SupportedConverter,
+} from '@inlang/fluent-syntax-converters';
 import { Resources } from '@inlang/fluent-syntax';
 import fs from 'fs';
 import path from 'path';
@@ -16,11 +20,11 @@ export function writeTranslationFiles(args: {
   cwd: string;
   resources: Resources;
   pathPattern: string;
-  fileFormat: SupportedAdapter;
+  fileFormat: SupportedConverter;
 }): Result<void, Error> {
   const serializedResources = serializeResources({
     resources: args.resources,
-    adapter: adapters[args.fileFormat],
+    format: args.fileFormat,
   });
   if (serializedResources.isErr) {
     return Result.err(serializedResources.error);
@@ -34,7 +38,10 @@ export function writeTranslationFiles(args: {
         }
       );
       fs.writeFileSync(
-        path.resolve(path.dirname(args.cwd), args.pathPattern.replace('{languageCode}', file.languageCode)),
+        path.resolve(
+          path.dirname(args.cwd),
+          args.pathPattern.replace('{languageCode}', file.languageCode)
+        ),
         file.data
       );
     } catch (error) {

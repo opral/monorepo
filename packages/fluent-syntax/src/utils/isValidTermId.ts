@@ -1,4 +1,4 @@
-import { isValidMessageId } from "./isValidMessageId";
+import { isValidMessageId } from './isValidMessageId';
 
 /**
  * A term id is valid if the term is prefixed with a `-` and is a valid

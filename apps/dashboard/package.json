@@ -58,7 +58,7 @@
 	"dependencies": {
 		"@inlang/common": "*",
 		"@inlang/database": "*",
-		"@inlang/fluent-adapters": "*",
+		"@inlang/fluent-syntax-converters": "*",
 		"@inlang/fluent-lint": "*",
 		"@inlang/fluent-syntax": "*",
 		"@netlify/functions": "^0.11.0",

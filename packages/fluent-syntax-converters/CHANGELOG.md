@@ -7,25 +7,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @inlang/fluent-adapters
 
-
-
-
-
 ## [0.1.3](https://github.com/inlang/inlang/compare/@inlang/fluent-adapters@0.1.2...@inlang/fluent-adapters@0.1.3) (2022-01-28)
 
 **Note:** Version bump only for package @inlang/fluent-adapters
 
-
-
-
-
 ## [0.1.2](https://github.com/inlang/inlang/compare/@inlang/fluent-adapters@0.1.1...@inlang/fluent-adapters@0.1.2) (2022-01-28)
 
 **Note:** Version bump only for package @inlang/fluent-adapters
-
-
-
-
 
 ## 0.1.1 (2022-01-28)
 

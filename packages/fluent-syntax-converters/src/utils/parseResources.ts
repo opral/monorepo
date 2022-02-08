@@ -1,20 +1,20 @@
 import { Result } from '@inlang/common';
 import { Resource, Resources } from '@inlang/fluent-syntax';
-import { AdapterInterface } from '../types/adapterInterface';
+import { Converter } from '../types/converter';
 import { SerializedResource } from '../types/serializedResource';
 
 /**
  * Parses serialized resources.
  *
- * The provided adapter determines from which file format.
+ * The provided converter determines from which file format.
  */
 export function parseResources(args: {
-    adapter: AdapterInterface;
+    converter: Converter;
     files: SerializedResource[];
 }): Result<Resources, Error> {
     const resources: Record<string, Resource | undefined> = {};
     for (const file of args.files) {
-        const parsed = args.adapter.parse(file.data);
+        const parsed = args.converter.parse({ data: file.data });
         if (parsed.isErr) {
             return Result.err(parsed.error);
         }

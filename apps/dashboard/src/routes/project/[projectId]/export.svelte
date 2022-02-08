@@ -1,19 +1,19 @@
 <script lang="ts">
 	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { AdapterInterface, adapters, serializeResources } from '@inlang/fluent-adapters';
+	import { Converter, converters, serializeResources } from '@inlang/fluent-syntax-converters';
 	import { LanguageCode } from '@inlang/common';
 	import { Resources } from '@inlang/fluent-syntax';
 	import { CodeSnippet, InlineNotification } from 'carbon-components-svelte';
 
 	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
-	let selectedAdapter: AdapterInterface = adapters.fluent;
+	let selectedConverter: Converter = converters.fluent;
 
 	const resources = $projectStore.data?.resources ?? new Resources({ resources: {} });
 
 	let serializedResource: () => string;
 	$: serializedResource = () => {
-		const result = serializeResources({ adapter: selectedAdapter, resources });
+		const result = serializeResources({ converter: selectedConverter, resources });
 		if (result.isErr) {
 			return 'The file could not be serialized.\n' + result.error.message;
 		}
@@ -33,7 +33,7 @@
 	<h1 class="mb-1">Export</h1>
 	<p>Copy and paste your local from inlang to your source code.</p>
 	<br />
-	<SerializedResource bind:selectedLanguageCode bind:selectedAdapter {resources}>
+	<SerializedResource bind:selectedLanguageCode bind:selectedConverter {resources}>
 		<div slot="code-field" style="height: 60vh; overflow:auto;">
 			<p class="text-xs text-gray-600 mb-2">File</p>
 			<CodeSnippet code={serializedResource()} type="multi" />

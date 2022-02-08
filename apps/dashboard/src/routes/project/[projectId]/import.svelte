@@ -3,7 +3,12 @@
 	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { database } from '$lib/services/database';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { AdapterInterface, adapters, parseResources, serializeResources } from '@inlang/fluent-adapters';
+	import {
+		Converter,
+		converters,
+		parseResources,
+		serializeResources
+	} from '@inlang/fluent-syntax-converters';
 	import { LanguageCode, Result } from '@inlang/common';
 	import { definitions } from '@inlang/database';
 	import { Resources } from '@inlang/fluent-syntax';
@@ -17,20 +22,20 @@
 
 	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
 	let importTextField = '';
-	let selectedAdapter: AdapterInterface = adapters.fluent;
+	let selectedConverter: Converter = converters.fluent;
 
 	const resources = $projectStore.data?.resources ?? new Resources({ resources: {} });
 
 	$: serializedAsFluent = (() => {
 		const parsed = parseResources({
-			adapter: selectedAdapter,
+			converter: selectedConverter,
 			files: [{ languageCode: selectedLanguageCode, data: importTextField }]
 		});
 		if (parsed.isErr) {
 			return Result.err(parsed.error);
 		}
 		const serializedAsFluent = serializeResources({
-			adapter: adapters.fluent,
+			converter: converters.fluent,
 			resources: parsed.value
 		});
 		if (serializedAsFluent.isErr) {
@@ -88,7 +93,7 @@
 		</NotificationActionButton>
 	</InlineNotification>
 	<br />
-	<SerializedResource bind:selectedLanguageCode bind:selectedAdapter {resources}>
+	<SerializedResource bind:selectedLanguageCode bind:selectedConverter {resources}>
 		<TextArea
 			slot="code-field"
 			placeholder="Paste your file here"

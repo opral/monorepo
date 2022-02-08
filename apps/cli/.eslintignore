@@ -5,3 +5,4 @@ jest.config.js
 tests/*
 jest.config.js
 bin/*
+coverage/

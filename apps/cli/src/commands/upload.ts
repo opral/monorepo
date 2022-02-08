@@ -1,10 +1,10 @@
 import {
-    adapters,
-    SupportedAdapter,
+    converters,
+    SupportedConverter,
     SerializedResource,
     parseResources,
     serializeResources,
-} from '@inlang/fluent-adapters';
+} from '@inlang/fluent-syntax-converters';
 import { languageCodes, Result } from '@inlang/common';
 import { command } from 'cleye';
 import consola from 'consola';
@@ -42,9 +42,9 @@ export const uploadCommand = command(
     },
     async (parsed) => {
         // start of validation
-        if (Object.keys(adapters).includes(parsed.flags.adapter) === false) {
+        if (Object.keys(converters).includes(parsed.flags.adapter) === false) {
             parsed.showHelp();
-            consola.info(`--adapter must be ${Object.keys(adapters)}`);
+            consola.info(`--adapter must be ${Object.keys(converters)}`);
             return;
         } else if (parsed.flags.apiKey === undefined) {
             parsed.showHelp();
@@ -56,7 +56,7 @@ export const uploadCommand = command(
             return;
         }
         // end of validation
-        const adapter = adapters[parsed.flags.adapter as SupportedAdapter];
+        const converter = converters[parsed.flags.adapter as SupportedConverter];
         const localFiles = [];
         for (const languageCode of languageCodes) {
             const file = (parsed.flags.pathPattern as string).replace('{languageCode}', languageCode);
@@ -72,14 +72,14 @@ export const uploadCommand = command(
             return;
         }
         const parsedResources = parseResources({
-            adapter: adapter,
+            converter: converter,
             files: localFiles,
         });
         if (parsedResources.isErr) {
             consola.error(parsedResources.error);
             return;
         }
-        const fluentFiles = serializeResources({ adapter: adapters.fluent, resources: parsedResources.value });
+        const fluentFiles = serializeResources({ converter: converters.fluent, resources: parsedResources.value });
         if (fluentFiles.isErr) {
             consola.error(fluentFiles.error);
             return;

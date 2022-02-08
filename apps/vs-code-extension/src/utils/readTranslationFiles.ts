@@ -1,5 +1,5 @@
 import { languageCodes, Result } from '@inlang/common';
-import { SupportedAdapter, adapters, parseResources } from '@inlang/fluent-adapters';
+import { converters, parseResources, SupportedConverter } from '@inlang/fluent-syntax-converters';
 import { Resources } from '@inlang/fluent-syntax';
 import fs from 'fs';
 import path from 'path';
@@ -15,9 +15,9 @@ import path from 'path';
 export function readTranslationFiles(args: {
   cwd: string;
   pathPattern: string;
-  fileFormat: SupportedAdapter;
+  fileFormat: SupportedConverter;
 }): Result<Resources, Error> {
-  const adapter = adapters[args.fileFormat];
+  const converter = converters[args.fileFormat];
   const localFiles = [];
   for (const languageCode of languageCodes) {
     // named with underscore to avoid name clashing with the imported path module
@@ -30,7 +30,7 @@ export function readTranslationFiles(args: {
     }
   }
   return parseResources({
-    adapter: adapter,
+    converter: converter,
     files: localFiles,
   });
 }
