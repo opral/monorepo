@@ -4,9 +4,9 @@ Parse and serialize file formats to and from [Fluent](https://projectfluent.org/
 
 ## Supported Converters (Formats)
 
-Goto [/src/converters](/src/converters)
+**Goto [./src/converters](./src/converters)**
 
-Missing a converter (format)? Open a feature request [here](https://github.com/inlang/inlang/discussions/categories/feature-requests).
+Missing a converter (format)? Make a pull request, or open a feature request [here](https://github.com/inlang/inlang/discussions/categories/feature-requests).
 
 ## Writing Converters
 
