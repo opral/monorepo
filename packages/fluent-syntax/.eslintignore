@@ -4,3 +4,4 @@ dist/*
 jest.config.js
 tests/*
 jest.config.js
+coverage/
