@@ -13,18 +13,20 @@ export async function getConfig(args: {
   activeTextEditor: vscode.TextEditor;
   configFileUris: vscode.Uri[];
 }): Promise<Result<{ config: InlangConfig01; path: string }, Error>> {
-  const closestConfigPath = determineClosestPath({
-    options: args.configFileUris.map((uri) => uri.path),
-    to: args.activeTextEditor.document.uri.path,
-  });
-  const config = JSON.parse(fs.readFileSync(closestConfigPath, 'utf8'));
-  const isValidConfig = validate({ config });
-  if (isValidConfig.isErr) {
-    return Result.err(
-      Error(
+  try {
+    const closestConfigPath = determineClosestPath({
+      options: args.configFileUris.map((uri) => uri.path),
+      to: args.activeTextEditor.document.uri.path,
+    });
+    const config = JSON.parse(fs.readFileSync(closestConfigPath, 'utf8'));
+    const isValidConfig = validate({ config });
+    if (isValidConfig.isErr) {
+      throw Error(
         `The inlang.config.json is not valid: ${isValidConfig.error.message}\n\n${closestConfigPath}`
-      )
-    );
+      );
+    }
+    return Result.ok({ config: config, path: closestConfigPath });
+  } catch (error) {
+    return Result.err(error as Error);
   }
-  return Result.ok({ config: config, path: closestConfigPath });
 }
