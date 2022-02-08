@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Inlang Config 0.1",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "fileFormat": {
+      "enum": ["fluent", "typesafe-i18n", "localizable-strings"],
+      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters"
+    },
+    "pathPattern": {
+      "type": "string",
+      "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n`./translations/{languageCode}.json`\n.`/{languageCode}/Localizable.strings`",
+      "pattern": "(\\{languageCode\\})"
+    },
+    "fetchUsageGrammarFrom": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "(.pegjs)",
+      "description": "The pegjs grammar to detect usage of translations in the source code."
+    },
+    "extractPatternReplacementOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "baseLanguageCode": {
+      "type": "string",
+      "description": "An ISO 639-1 human language code that determines the base language. TODO link to glossary"
+    }
+  },
+  "required": ["$schema", "fileFormat", "pathPattern"]
+}

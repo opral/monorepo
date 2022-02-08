@@ -5,11 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "apps/dashboard",
       "type": "pwa-chrome",
       "request": "launch",
-      "name": "apps/dashboard",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/apps/dashboard"
+    },
+    {
+      "name": "apps/vs-code-extension",
+      "type": "extensionHost",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/apps/vs-code-extension"
+      ],
+      "outFiles": ["${workspaceFolder}/apps/vs-code-extension/dist/**/*.js"],
+      "request": "launch"
     }
   ]
 }

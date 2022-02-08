@@ -1,0 +1,41 @@
+{
+  "name": "@inlang/config",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "publicConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup --config",
+    "dev": "rollup --config --watch",
+    "clean": "rm -r -f ./dist",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "npm test -- --watch",
+    "generate-types": "json2ts -i src/schemas/ -o src/types/"
+  },
+  "dependencies": {
+    "@inlang/common": "*"
+  },
+  "devDependencies": {
+    "@inlang/eslint-config": "*",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "ajv": "^8.10.0",
+    "ajv-formats": "^2.1.1",
+    "json-schema-to-typescript": "^10.1.5",
+    "rollup": "^2.67.0"
+  }
+}
