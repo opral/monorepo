@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AdapterInterface, adapters } from '@inlang/fluent-adapters';
+	import { AdapterInterface, adapters } from '@inlang/fluent-syntax-converters';
 	import { LanguageCode } from '@inlang/common';
 	import { Resources } from '@inlang/fluent-syntax';
 	import { Dropdown } from 'carbon-components-svelte';

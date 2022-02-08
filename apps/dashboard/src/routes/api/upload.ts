@@ -1,7 +1,7 @@
 import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
 import { createServerSideSupabaseClient } from './_utils/serverSideServices';
 import type { definitions } from '@inlang/database';
-import { SerializedResource } from '@inlang/fluent-adapters';
+import { SerializedResource } from '../../packages/fluent-syntax-converters/dist';
 
 /**
  * This is a middleware api endpoint for the CLI.

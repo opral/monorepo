@@ -1,5 +1,5 @@
 {
-  "name": "@inlang/fluent-adapters",
+  "name": "@inlang/fluent-syntax-converters",
   "version": "0.1.4",
   "private": false,
   "license": "MIT",
@@ -33,6 +33,5 @@
     "lodash": "^4.17.21",
     "peggy": "^1.2.0",
     "typesafe-i18n": "^2.51.1"
-  },
-  "gitHead": "0748855a82fd1676274eb7e1cd7ce7b6acd9ecce"
+  }
 }

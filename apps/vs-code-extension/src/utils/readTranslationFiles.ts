@@ -1,5 +1,5 @@
 import { languageCodes, Result } from '@inlang/common';
-import { SupportedAdapter, adapters, parseResources } from '@inlang/fluent-adapters';
+import { SupportedAdapter, adapters, parseResources } from '../../../../packages/fluent-syntax-converters/dist';
 import { Resources } from '@inlang/fluent-syntax';
 import fs from 'fs';
 import path from 'path';

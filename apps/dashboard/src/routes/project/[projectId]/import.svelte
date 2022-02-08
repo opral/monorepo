@@ -3,7 +3,12 @@
 	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { database } from '$lib/services/database';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { AdapterInterface, adapters, parseResources, serializeResources } from '@inlang/fluent-adapters';
+	import {
+		AdapterInterface,
+		adapters,
+		parseResources,
+		serializeResources
+	} from '@inlang/fluent-syntax-converters';
 	import { LanguageCode, Result } from '@inlang/common';
 	import { definitions } from '@inlang/database';
 	import { Resources } from '@inlang/fluent-syntax';

@@ -4,7 +4,7 @@ import {
     SerializedResource,
     parseResources,
     serializeResources,
-} from '@inlang/fluent-adapters';
+} from '../../../../packages/fluent-syntax-converters/dist';
 import { languageCodes, Result } from '@inlang/common';
 import { command } from 'cleye';
 import consola from 'consola';

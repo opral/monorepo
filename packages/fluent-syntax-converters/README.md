@@ -1,4 +1,4 @@
-# @inlang/fluent-adapters
+# @inlang/fluent-syntax-converters
 
 Parse and serialize file formats to and from [Fluent](https://projectfluent.org/).
 

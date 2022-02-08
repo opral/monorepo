@@ -6,7 +6,7 @@ import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
 import { Result } from '@inlang/common';
 import { Resources } from '@inlang/fluent-syntax';
-import { adapters, parseResources } from '@inlang/fluent-adapters';
+import { adapters, parseResources } from '@inlang/fluent-syntax-converters';
 /**
  * Bundles project related information regarding one project tightly together in
  * one object. Corresponds to `/project/[projectId]` route.

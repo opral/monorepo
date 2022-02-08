@@ -7,17 +7,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @inlang/common
 
-
-
-
-
 ## [0.1.2](https://github.com/inlang/inlang/compare/@inlang/common@0.1.1...@inlang/common@0.1.2) (2022-01-28)
 
 **Note:** Version bump only for package @inlang/common
-
-
-
-
 
 ## 0.1.1 (2022-01-28)
 

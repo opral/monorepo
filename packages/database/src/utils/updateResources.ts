@@ -2,7 +2,7 @@ import { definitions } from "../types/definitions";
 import { Resources } from "@inlang/fluent-syntax";
 import { Result } from "@inlang/common";
 import { SupabaseClient } from "..";
-import { adapters, serializeResources } from "@inlang/fluent-adapters";
+import { adapters, serializeResources } from "@inlang/fluent-syntax-converters";
 
 /**
  * Updates all languages in the database of a project and their corresponding files.

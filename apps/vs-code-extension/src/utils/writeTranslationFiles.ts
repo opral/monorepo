@@ -1,5 +1,5 @@
 import { Result } from '@inlang/common';
-import { adapters, serializeResources, SupportedAdapter } from '@inlang/fluent-adapters';
+import { adapters, serializeResources, SupportedAdapter } from '../../../../packages/fluent-syntax-converters/dist';
 import { Resources } from '@inlang/fluent-syntax';
 import fs from 'fs';
 import path from 'path';
@@ -34,7 +34,10 @@ export function writeTranslationFiles(args: {
         }
       );
       fs.writeFileSync(
-        path.resolve(path.dirname(args.cwd), args.pathPattern.replace('{languageCode}', file.languageCode)),
+        path.resolve(
+          path.dirname(args.cwd),
+          args.pathPattern.replace('{languageCode}', file.languageCode)
+        ),
         file.data
       );
     } catch (error) {
