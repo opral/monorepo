@@ -9,7 +9,7 @@
     },
     "fileFormat": {
       "enum": ["fluent", "typesafe-i18n", "localizable-strings"],
-      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters"
+      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters"
     },
     "pathPattern": {
       "type": "string",

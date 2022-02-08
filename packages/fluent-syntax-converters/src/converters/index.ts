@@ -6,19 +6,19 @@ import { LocalizableStringsConverter } from './localizable-strings/converter';
  *
  * Using this object instead of directly importing converters ensures one
  * crucial thing: the naming (key) of converters is consistent throughout
- * inlang e.g. "typesafe-i18n" is not "typesafeAdapter", or "TypesafeI18n".
+ * inlang e.g. "typesafe-i18n" is not "typesafeConverter", or "TypesafeI18n".
  *
  * @example
  *      converters.fluent
- *      >> FluentAdapter
+ *      >> FluentConverter
  *
  * @example
  *      Object.keys(converters)
  *      >> list all available converters
  */
 // performance implications:
-// + no garbage collection. Each adapter is initialized only once.
-// - no code splitting. A piece of software might only need one specific adapter.
+// + no garbage collection. Each converter is initialized only once.
+// - no code splitting. A piece of software might only need one specific converter.
 export const converters = {
     'localizable-strings': new LocalizableStringsConverter(),
     fluent: new FluentConverter(),

@@ -6,7 +6,7 @@ import { SerializedResource } from '../types/serializedResource';
 /**
  * Parses serialized resources.
  *
- * The provided adapter determines from which file format.
+ * The provided converter determines from which file format.
  */
 export function parseResources(args: {
     converter: Converter;

@@ -2,10 +2,10 @@ import { Result } from '@inlang/common';
 import { SingleResource } from '@inlang/fluent-syntax';
 
 /**
- * Each adapter must implement the interface.
+ * Each converter must implement the interface.
  *
- * The underlying implementation can vastly differ per adapter.
- * For example, some adapters make us of PEG parsing, while others
+ * The underlying implementation can vastly differ per converter.
+ * For example, some converters make us of PEG parsing, while others
  * "simply" parse and serialize with regular JavaScript/Typescript.
  */
 export type Converter = {

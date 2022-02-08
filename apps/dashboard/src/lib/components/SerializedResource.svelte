@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AdapterInterface, adapters } from '@inlang/fluent-syntax-converters';
+	import { Converter, converters } from '@inlang/fluent-syntax-converters';
 	import { LanguageCode } from '@inlang/common';
 	import { Resources } from '@inlang/fluent-syntax';
 	import { Dropdown } from 'carbon-components-svelte';
@@ -9,21 +9,21 @@
 	export let resources: Resources;
 
 	/**
-	 * Defaults to the fluent adapter.
+	 * Defaults to the fluent converter (format).
 	 */
-	export let selectedAdapter: AdapterInterface = adapters.fluent;
-	$: selectedAdapter = Object.values(adapters)[selectedAdapterIndex];
+	export let selectedConverter: Converter = converters.fluent;
+	$: selectedConverter = Object.values(converters)[selectedConverterIndex];
 
 	/**
 	 * Defaults to the first language code in the resources.
 	 */
 	export let selectedLanguageCode: LanguageCode = resources.containedLanguageCodes()[0];
 
-	let selectedAdapterIndex = 0;
+	let selectedConverterIndex = 0;
 
 	onMount(() => {
-		// by default set the adapter to fluent
-		selectedAdapterIndex = Object.keys(adapters).indexOf('fluent');
+		// by default set the converter to fluent
+		selectedConverterIndex = Object.keys(converters).indexOf('fluent');
 	});
 </script>
 
@@ -32,11 +32,11 @@
 		<div class="col-span-1">
 			<Dropdown
 				class="w-fill"
-				titleText="Select the adapter (format)"
-				bind:selectedIndex={selectedAdapterIndex}
-				items={Object.entries(adapters).map(([adapterName], index) => ({
+				titleText="Select the format"
+				bind:selectedIndex={selectedConverterIndex}
+				items={Object.entries(converters).map(([format], index) => ({
 					id: '' + index,
-					text: adapterName
+					text: format
 				}))}
 			/>
 			<br />

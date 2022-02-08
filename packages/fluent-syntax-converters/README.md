@@ -15,5 +15,5 @@ Missing a converter (format)? Make a pull request, or open a feature request [he
 **Tips for PEG(GY.js) parsing**
 
 - use the online playground https://peggyjs.org/online
-- copy & paste the grammer from/into the playground and from/into the adapters `grammar` variable
+- copy & paste the grammer from/into the playground and from/into the converters `grammar` variable
 - run the unit tests

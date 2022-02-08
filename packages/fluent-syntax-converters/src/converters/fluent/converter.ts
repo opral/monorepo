@@ -6,11 +6,11 @@ import { parse, serialize, SingleResource } from '@inlang/fluent-syntax';
  * The fluent converter exists for ease of use of the package.
  * In the sense that Fluent is a supported format.
  *
- * Under the hood, the adapter simply calls parse and serialize
+ * Under the hood, the converter simply calls parse and serialize
  * as exposed by the fluent syntax package i.e. no format
  * conversion is taking place. `**BUT**` In contrast to the fluent
  * implementation which is supposed to "skip" un-parsable entries,
- * the adapter returns `Result.err`. Skipping un-parsable entries
+ * the converter returns `Result.err`. Skipping un-parsable entries
  * makes sense in the context of consuming translations (otherwise
  * the app crashes, has no translations at all), but not in the
  * context of creating/editing translations. If the syntax is incorrect

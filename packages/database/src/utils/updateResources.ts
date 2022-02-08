@@ -2,7 +2,10 @@ import { definitions } from "../types/definitions";
 import { Resources } from "@inlang/fluent-syntax";
 import { Result } from "@inlang/common";
 import { SupabaseClient } from "..";
-import { adapters, serializeResources } from "@inlang/fluent-syntax-converters";
+import {
+  converters,
+  serializeResources,
+} from "@inlang/fluent-syntax-converters";
 
 /**
  * Updates all languages in the database of a project and their corresponding files.
@@ -20,7 +23,7 @@ export async function updateResources(args: {
 }): Promise<Result<void, Error>> {
   const serializedResources = serializeResources({
     resources: args.resources,
-    adapter: adapters.fluent,
+    converter: converters.fluent,
   });
   if (serializedResources.isErr) {
     return Result.err(serializedResources.error);
