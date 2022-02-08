@@ -1,35 +1,35 @@
-import { AdapterInterface } from './index';
+import { Converter } from '../../types/converter';
 import { Result, LanguageCode } from '@inlang/common';
 import peggy from 'peggy';
 import { parse, SingleResource } from '@inlang/fluent-syntax';
 
-export type Typesafei18nAdapterOptions = {
+export type Typesafei18nConverterOptions = {
     languageCode: LanguageCode;
     isBaseLanguage: boolean;
 };
 
-export class Typesafei18nAdapter implements AdapterInterface {
-    parse(data: string): Result<SingleResource, Error> {
+export class Typesafei18nConverter implements Converter {
+    parse(args: { data: string }): Result<SingleResource, Error> {
         try {
-            const recourse = parse(peggy.generate(grammar).parse(data), {});
+            const recourse = parse(peggy.generate(grammar).parse(args.data), {});
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
                 return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
             }
-            return Result.ok(parse(peggy.generate(grammar).parse(data), { withSpans: false }));
+            return Result.ok(parse(peggy.generate(grammar).parse(args.data), { withSpans: false }));
         } catch (error) {
             return Result.err(error as Error);
         }
     }
 
-    serialize(resource: SingleResource, options: Typesafei18nAdapterOptions): Result<string, Error> {
+    serialize(args: { resource: SingleResource }, options: Typesafei18nConverterOptions): Result<string, Error> {
         const translationType = options.isBaseLanguage ? 'BaseTranslation' : 'Translation';
         let result = `/* eslint-disable */
 import type { ${translationType} } from '../i18n-types';
 
 const ${options.languageCode}: ${translationType} = {
 `;
-        for (const entry of resource.body) {
+        for (const entry of args.resource.body) {
             if (entry.type === 'Message' && entry.value?.elements) {
                 result += `"${entry.id.name}": "`;
                 for (const element of entry.value.elements) {

@@ -1,6 +1,6 @@
-import { Typesafei18nAdapterOptions } from '../typesafei18nAdapter';
 import { Result } from '@inlang/common';
 import { SingleResource } from '@inlang/fluent-syntax';
+import { Typesafei18nConverterOptions } from '../converters/typesafe-i18n/converter';
 
 /**
  * Each adapter must implement the interface.
@@ -9,8 +9,7 @@ import { SingleResource } from '@inlang/fluent-syntax';
  * For example, some adapters make us of PEG parsing, while others
  * "simply" parse and serialize with regular JavaScript/Typescript.
  */
-export interface AdapterInterface {
-    parse(data: string): Result<SingleResource, Error>;
-
-    serialize(data: SingleResource, options?: Typesafei18nAdapterOptions): Result<string, Error>;
-}
+export type Converter = {
+    parse(args: { data: string }): Result<SingleResource, Error>;
+    serialize(args: { resource: SingleResource }, options?: Typesafei18nConverterOptions): Result<string, Error>;
+};
