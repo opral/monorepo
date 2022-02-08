@@ -14,7 +14,11 @@ export class Typesafei18nConverter implements Converter {
             const recourse = parse(peggy.generate(grammar).parse(args.data), {});
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
-                return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
+                return Result.err(
+                    Error(
+                        "Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)
+                    )
+                );
             }
             return Result.ok(parse(peggy.generate(grammar).parse(args.data), { withSpans: false }));
         } catch (error) {
@@ -22,7 +26,10 @@ export class Typesafei18nConverter implements Converter {
         }
     }
 
-    serialize(args: { resource: SingleResource }, options: Typesafei18nConverterOptions): Result<string, Error> {
+    serialize(
+        args: { resource: SingleResource },
+        options: Typesafei18nConverterOptions
+    ): Result<string, Error> {
         const translationType = options.isBaseLanguage ? 'BaseTranslation' : 'Translation';
         let result = `/* eslint-disable */
 import type { ${translationType} } from '../i18n-types';
@@ -38,12 +45,14 @@ const ${options.languageCode}: ${translationType} = {
                     } else if (element.expression.type === 'VariableReference') {
                         result += `{${element.expression.id.name}}`;
                     } else {
-                        throw Error('None exhaustive if statement.');
+                        return Result.err(Error('None exhaustive if statement.'));
                     }
                 }
                 result += `",\n`;
             } else {
-                throw Error(`None exhaustive if statement: ${entry.type} is not handled.`);
+                return Result.err(
+                    Error(`None exhaustive if statement: ${entry.type} is not handled.`)
+                );
             }
         }
         result += `};
