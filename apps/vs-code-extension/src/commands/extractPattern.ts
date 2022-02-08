@@ -78,6 +78,6 @@ export const extractPatternCommand = {
     await args.activeTextEditor.edit((editor) => {
       editor.replace(args.activeTextEditor.selection, replacementPattern);
     });
-    return vscode.window.showInformationMessage('Translation created');
+    return vscode.window.showInformationMessage('Pattern extracted.');
   },
 } as const;
