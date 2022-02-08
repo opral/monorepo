@@ -2,25 +2,15 @@
 
 Parse and serialize file formats to and from [Fluent](https://projectfluent.org/).
 
-Inlang uses [Fluent](https://projectfluent.org/) from Mozilla under the hood. In order to support i18n libraries / codebases / file formats that do not use Fluent, adapters are required. The purpose of an adapter is to parse and serialize the file format used by
-the specific i18n libray to and from Fluent syntax.
+## Supported Converters (Formats)
 
-## Supported Adapters
+Goto [/src/converters](/src/converters)
 
-✅ = supported
-⭕ = partially supported
-❌ = not supported
+Missing a converter (format)? Open a feature request [here](https://github.com/inlang/inlang/discussions/categories/feature-requests).
 
-| Adapter             | Interpolation | Pluralization | Formatters |
-| ------------------- | ------------- | ------------- | ---------- |
-| typesafe-i18n       | ✅            | ❌            | ❌         |
-| localizable-strings | ⭕            | ❌            | ❌         |
+## Writing Converters
 
-Missing an adapter? Open a feature request [here](https://github.com/inlang/inlang/discussions/categories/feature-requests).
-
-## Writing Adapters
-
-"It's simple". Only two functions are required `parse` and `serialize`. Depending on the complexity of the syntax, those two function can take some hours to implement though. We found PEG parsing with Peggy.js useful. A gentle introduction can be found [here](https://coderwall.com/p/316gba/beginning-parsers-with-peg-js). However, as long as `parse` and `serialize` yield the expected results, the underlying implementation does not matter (you don't have to use PEG parsing).
+"It's simple". Only two functions are required `parse` and `serialize`. How they are implemented does not matter. We found [Peggy.js](https://github.com/peggyjs/peggy) useful to at least create a serialization grammar. A gentle introduction can be found [here](https://coderwall.com/p/316gba/beginning-parsers-with-peg-js).
 
 **Tips for PEG(GY.js) parsing**
 
