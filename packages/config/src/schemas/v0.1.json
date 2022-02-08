@@ -14,7 +14,7 @@
     "pathPattern": {
       "type": "string",
       "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n`./translations/{languageCode}.json`\n.`/{languageCode}/Localizable.strings`",
-      "pattern": "({languageCode})"
+      "pattern": "(\\{languageCode\\})"
     },
     "fetchUsageGrammarFrom": {
       "type": "string",

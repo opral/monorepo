@@ -14,6 +14,15 @@ it('should return Result.ok for a valid config', () => {
     expect(result.isOk).toBeTruthy();
 });
 
+it('should return Result.err if the pathPattern does not include {languageCode}', () => {
+    const config = {
+        fileFormat: 'fluent',
+        pathPattern: './translations',
+    };
+    const result = validate({ config });
+    expect(result.isErr).toBeTruthy();
+});
+
 it('should return Result.err if a required field is undefined ', () => {
     const config = {
         pathPattern: './translations/{languageCode}.ftl',
