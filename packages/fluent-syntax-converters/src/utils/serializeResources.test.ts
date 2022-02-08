@@ -23,7 +23,7 @@ it('should serialize a file correctly', () => {
     if (parsed.isErr) {
         fail();
     }
-    const result = serializeResources({ converter: converters.fluent, resources: parsed.value });
+    const result = serializeResources({ format: 'fluent', resources: parsed.value });
     if (result.isErr) fail();
     expect(result.value).toEqual([
         {

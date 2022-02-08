@@ -1,6 +1,5 @@
 import { Result } from '@inlang/common';
 import { SingleResource } from '@inlang/fluent-syntax';
-import { Typesafei18nConverterOptions } from '../converters/typesafe-i18n/converter';
 
 /**
  * Each adapter must implement the interface.
@@ -11,5 +10,5 @@ import { Typesafei18nConverterOptions } from '../converters/typesafe-i18n/conver
  */
 export type Converter = {
     parse(args: { data: string }): Result<SingleResource, Error>;
-    serialize(args: { resource: SingleResource }, options?: Typesafei18nConverterOptions): Result<string, Error>;
+    serialize(args: { resource: SingleResource }): Result<string, Error>;
 };

@@ -1,6 +1,5 @@
 import { FluentConverter } from './fluent/converter';
 import { LocalizableStringsConverter } from './localizable-strings/converter';
-import { Typesafei18nConverter } from './typesafe-i18n/converter';
 
 /**
  * Object holding all available converters.
@@ -23,5 +22,4 @@ import { Typesafei18nConverter } from './typesafe-i18n/converter';
 export const converters = {
     'localizable-strings': new LocalizableStringsConverter(),
     fluent: new FluentConverter(),
-    'typesafe-i18n': new Typesafei18nConverter(),
 } as const;
