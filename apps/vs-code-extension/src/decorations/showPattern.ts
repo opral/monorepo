@@ -4,7 +4,6 @@ import peggy from 'peggy';
 import { LanguageCode } from '@inlang/common';
 import { serializePattern } from '@inlang/fluent-syntax';
 import axios from 'axios';
-import { throttle } from 'lodash';
 
 export async function showPattern(args: { activeTextEditor: vscode.TextEditor }): Promise<unknown> {
   if (state.config.fetchUsageGrammarFrom === undefined) {
@@ -35,18 +34,13 @@ export async function showPattern(args: { activeTextEditor: vscode.TextEditor })
   const decorationType = vscode.window.createTextEditorDecorationType({});
   updateDecorations({ parser, activeTextEditor: args.activeTextEditor, type: decorationType });
   // update the decoartions each time the file is changed
-  vscode.workspace.onDidChangeTextDocument(() => {
-    // only update the decorations every x milliseconds
-    throttle(
-      () =>
-        updateDecorations({
-          parser,
-          activeTextEditor: args.activeTextEditor,
-          type: decorationType,
-        }),
-      250
-    );
-  });
+  vscode.workspace.onDidChangeTextDocument(() =>
+    updateDecorations({
+      parser,
+      activeTextEditor: args.activeTextEditor,
+      type: decorationType,
+    })
+  );
 }
 
 function updateDecorations(args: {
