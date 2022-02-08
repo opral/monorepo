@@ -1,5 +1,4 @@
 import { languageCodes, Result } from '@inlang/common';
-import { InlangConfig01 } from '@inlang/config';
 import { SupportedAdapter, adapters, parseResources } from '@inlang/fluent-adapters';
 import { Resources } from '@inlang/fluent-syntax';
 import fs from 'fs';
@@ -22,10 +21,7 @@ export function readTranslationFiles(args: {
   const localFiles = [];
   for (const languageCode of languageCodes) {
     // named with underscore to avoid name clashing with the imported path module
-    const _path = path.resolve(
-      path.dirname(args.cwd),
-      args.pathPattern.replace('{languageCode}', languageCode)
-    );
+    const _path = path.resolve(args.cwd, args.pathPattern.replace('{languageCode}', languageCode));
     if (fs.existsSync(_path)) {
       localFiles.push({
         data: fs.readFileSync(_path).toString(),
