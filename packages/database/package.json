@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "start": "echo '💡 you have to have the supabase CLI installed\n' && supabase start && npm run seed",
+    "start": "echo '💡 you have to have the supabase CLI installed\n' && supabase stop && supabase start && npm run seed",
     "stop": "supabase stop",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "generate-types": "npx openapi-typescript http://localhost:54321/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI --output src/types/definitions.ts",
