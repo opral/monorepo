@@ -1,7 +1,6 @@
 import { cli } from 'cleye';
-import { downloadCommand } from './commands/download';
 import consola from 'consola';
-import { uploadCommand } from './commands/upload';
+import { remoteCommand } from './commands/remote/index';
 
 consola.warn(
     'The CLI is in early-alpha, expect breaking changes. Report bugs and open feature requests here https://github.com/inlang/inlang .'
@@ -11,7 +10,7 @@ try {
     cli(
         {
             name: 'inlang',
-            commands: [downloadCommand, uploadCommand],
+            commands: [remoteCommand],
         },
         // by default show help
         // (command `inlang`)

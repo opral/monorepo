@@ -41,6 +41,7 @@ export const uploadCommand = command(
         },
     },
     async (parsed) => {
+        consola.info(parsed);
         // start of validation
         if (Object.keys(converters).includes(parsed.flags.adapter) === false) {
             parsed.showHelp();
