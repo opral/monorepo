@@ -4,11 +4,16 @@ import addFormats from 'ajv-formats';
 import schema01 from './schemas/v0.1.json';
 import { InlangConfig01 } from './types/v0.1';
 
+/**
+ * Validate a whole inlang config.
+ *
+ * Note `validateProperties()` can be used for partial validation.
+ */
 export function validate(args: { config: Record<string, unknown> }): Result<InlangConfig01, Error> {
     // ajv can throw
     try {
-        const ajv = addFormats(new Ajv({})).compile(schema01);
-        const valid = ajv(args.config);
+        const ajv = addFormats(new Ajv({}));
+        const valid = ajv.validate(schema01, args.config);
         if (valid) {
             return Result.ok(args.config as InlangConfig01);
         } else if (ajv.errors) {
