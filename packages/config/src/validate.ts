@@ -7,7 +7,7 @@ import { InlangConfig01 } from './types/v0.1';
 /**
  * Validate a whole inlang config.
  *
- * Note `validateProperties()` can be used for partial validation.
+ * Note `validatePartialProperties()` can be used for partial validation.
  */
 export function validate(args: { config: Record<string, unknown> }): Result<InlangConfig01, Error> {
     // ajv can throw
