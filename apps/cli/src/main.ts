@@ -1,23 +1,14 @@
-import { cli } from 'cleye';
-import consola from 'consola';
-import { remoteCommand } from './commands/remote/index';
+import { Command } from 'commander';
+import { remote } from './commands/remote/index';
 
-consola.warn(
-    'The CLI is in early-alpha, expect breaking changes. Report bugs and open feature requests here https://github.com/inlang/inlang .'
-);
+const cli = new Command().name('inlang').addCommand(remote);
 
-try {
-    cli(
-        {
-            name: 'inlang',
-            commands: [remoteCommand],
-        },
-        // by default show help
-        // (command `inlang`)
-        (parsed) => {
-            parsed.showHelp();
-        }
+if (process.env.PACKAGE_VERSION === undefined) {
+    throw Error(
+        'Env varibales do not contain package version.' + JSON.stringify(process.env)
     );
-} catch (error) {
-    consola.error(error);
 }
+// adding the version
+cli.version(process.env.PACKAGE_VERSION);
+
+cli.parse();

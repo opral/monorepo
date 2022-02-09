@@ -1,64 +1,47 @@
+import { Command, Option } from 'commander';
+import consola from 'consola';
 import {
     converters,
-    SupportedConverter,
-    serializeResources,
     parseResources,
     SerializedResource,
+    serializeResources,
+    SupportedConverter,
 } from '@inlang/fluent-syntax-converters';
+import fs from 'fs';
 import { Result } from '@inlang/common';
-import { command } from 'cleye';
-import consola from 'consola';
-import * as fs from 'fs';
 import fetch from 'node-fetch';
 
-export const downloadCommand = command(
-    {
-        name: 'download',
-        help: {
-            description: 'Downloads the translations and OVER-WRITES the local files.',
-            examples:
-                'inlang download --adapter fluent --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>',
-        },
-        flags: {
-            adapter: {
-                description:
-                    'Inlang uses Mozillas Fluent syntax. If your environment uses a different translation syntax, you can specify an adapter (to adapt to your environment).',
-                type: String,
-                default: 'fluent',
-            },
-            pathPattern: {
-                description:
-                    'Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.\n' +
-                    '[examples]\n' +
-                    `./translations/{languageCode}.json\n` +
-                    `./{languageCode}/Localizable.strings`,
-                type: String,
-            },
-            apiKey: {
-                description: 'The api key for the project.',
-                type: String,
-            },
-        },
-    },
-    async (parsed) => {
+export const download = new Command()
+    .command('download')
+    .description('Downloads the translations and OVERWRITES the local translation files.')
+    .addOption(
+        new Option('--format <format>').choices(
+            Object.keys({ fluent: '', 'localizable-strings': '' })
+        )
+    )
+    .requiredOption(
+        '--path-pattern <path>',
+        'Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.\n' +
+            '------\n' +
+            '[examples]\n' +
+            `./translations/{languageCode}.json\n` +
+            `./{languageCode}/Localizable.strings`
+    )
+    .requiredOption('--api-key <key>', 'The api key for the project.')
+    .action(async (options) => {
         // start of validation
-        if (Object.keys(converters).includes(parsed.flags.adapter) === false) {
-            parsed.showHelp();
-            consola.info(`--adapter must be ${Object.keys(converters)}`);
-            return;
-        } else if (parsed.flags.apiKey === undefined) {
-            parsed.showHelp();
-            consola.info('--api-key is required');
-            return;
-        } else if (parsed.flags.pathPattern === undefined) {
-            parsed.showHelp();
-            consola.info('--path-pattern is required');
-            return;
+        if (
+            options.format === undefined ||
+            Object.keys(converters).includes(options.format) === false
+        ) {
+            return consola.info(`--format must be one of ${Object.keys(converters)}`);
+        } else if ((options.pathPattern as string).match('({languageCode})') === null) {
+            return consola.error(`--path-pattern must include "{languageCode}"`);
         }
         // end of validation
-        const converter = converters[parsed.flags.adapter as SupportedConverter];
+        const converter = converters[options.format as SupportedConverter];
         consola.info('Downloading files...');
-        const fluentFiles = await download({ apiKey: parsed.flags.apiKey });
+        const fluentFiles = await getRemoteFiles({ apiKey: options.apiKey });
         if (fluentFiles.isErr) {
             consola.error(fluentFiles.error);
             return;
@@ -71,7 +54,10 @@ export const downloadCommand = command(
             consola.error(resources.error);
             return;
         }
-        const toBeSavedFiles = serializeResources({ converter, resources: resources.value });
+        const toBeSavedFiles = serializeResources({
+            converter,
+            resources: resources.value,
+        });
         if (toBeSavedFiles.isErr) {
             consola.error(toBeSavedFiles.error);
             return;
@@ -79,11 +65,17 @@ export const downloadCommand = command(
         consola.info('Writing files...');
         for (const file of toBeSavedFiles.value) {
             try {
-                fs.mkdirSync((parsed.flags.pathPattern as string).split('/').slice(0, -1).join('/'), {
-                    recursive: true,
-                });
+                fs.mkdirSync(
+                    (options.pathPattern as string).split('/').slice(0, -1).join('/'),
+                    {
+                        recursive: true,
+                    }
+                );
                 fs.writeFileSync(
-                    (parsed.flags.pathPattern as string).replace('{languageCode}', file.languageCode),
+                    (options.pathPattern as string).replace(
+                        '{languageCode}',
+                        file.languageCode
+                    ),
                     file.data
                 );
             } catch (error) {
@@ -92,10 +84,11 @@ export const downloadCommand = command(
             }
         }
         consola.success('Complete');
-    }
-);
+    });
 
-async function download(args: { apiKey: string }): Promise<Result<SerializedResource[], Error>> {
+async function getRemoteFiles(args: {
+    apiKey: string;
+}): Promise<Result<SerializedResource[], Error>> {
     try {
         const response = await fetch(process.env.API_ENDPOINT + 'download', {
             method: 'post',
@@ -103,7 +96,9 @@ async function download(args: { apiKey: string }): Promise<Result<SerializedReso
             headers: { 'content-type': 'application/json' },
         });
         if (response.ok === false) {
-            return Result.err(Error(response.statusText + ': ' + (await response.text())));
+            return Result.err(
+                Error(response.statusText + ': ' + (await response.text()))
+            );
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = await response.json();
