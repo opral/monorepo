@@ -180,7 +180,7 @@ async function setupVsCodeExtension(args: {
         });
         config.extractPatternReplacementOptions = [response.patternOptions];
     }
-    if (config.fetchUsageGrammarFrom === undefined) {
+    if (config.fetchI18nDetectionGrammarFrom === undefined) {
         const response = await prompts({
             type: 'text',
             name: 'fetchI18nDetectionGrammarFrom',
