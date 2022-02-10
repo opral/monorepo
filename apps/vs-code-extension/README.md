@@ -1,6 +1,6 @@
 <div>
     <p align="center">
-        <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/87ec9e71ab76ad390c17fb4bd5c3cd22da9d88fc/assets/logo-white-background.svg"/>
+        <img width="300" src="./assets/readme-logo.png"/>
     </p>
     <h2 align="center">
         Open Source Localization Solution for Software
