@@ -10,6 +10,7 @@ import {
 } from '@inlang/fluent-syntax-converters';
 import fs from 'fs';
 import fetch from 'node-fetch';
+import dedent from 'dedent';
 
 export const upload = new Command()
     .command('upload')
@@ -21,11 +22,12 @@ export const upload = new Command()
     )
     .requiredOption(
         '--path-pattern <path>',
-        'Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.\n' +
-            '------\n' +
-            '[examples]\n' +
-            `./translations/{languageCode}.json\n` +
-            `./{languageCode}/Localizable.strings`
+        dedent`
+          Where and how the translation files should be saved.
+            @examples
+            './translations/{languageCode}.json'
+            './{languageCode}/Localizable.strings'
+        `
     )
     .requiredOption('--api-key <key>', 'The api key for the project.')
     .action(async (options) => {
