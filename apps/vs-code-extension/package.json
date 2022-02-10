@@ -4,7 +4,11 @@
   "displayName": "Inlang",
   "description": "i18n extension that makes you more productive.",
   "publisher": "Inlang",
-  "repository": "https://github.com/inlang/inlang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inlang/inlang.git"
+  },
+  "icon": "./icon.png",
   "version": "0.1.1",
   "engines": {
     "vscode": "^1.61.0"
