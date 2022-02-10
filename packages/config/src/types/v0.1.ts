@@ -10,22 +10,32 @@ export interface InlangConfig01 {
     /**
      * The file format of the local translation files.
      *
-     * Any other file format than Fluent makes use of an adapter. Read more about adapters and their limitations here https://inlang.dev/docs/architecture/adapters
+     * Any other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters.
      */
-    fileFormat: 'fluent' | 'typesafe-i18n' | 'localizable-strings';
+    fileFormat: 'fluent' | 'localizable-strings';
     /**
      * Where and how the local translation files are saved.
      *
      * Use '{languageCode}' as dynamic value.
      * @examples
-     * `./translations/{languageCode}.json`
-     * .`/{languageCode}/Localizable.strings`
+     * 		`./translations/{languageCode}.json`
+     * 		.`/{languageCode}/Localizable.strings`
      */
     pathPattern: string;
-    fetchUsageGrammarFrom?: string;
+    /**
+     * The pegjs grammar to detect the usage of i18n (translations) in the source code.
+     */
+    fetchI18nDetectionGrammarFrom?: string;
+    /**
+     * The replacement options when extracting pattern.
+     *
+     * Must include `{id}` in all options.
+     * @example
+     * 		['t("{id}")', 'i18n.{id}']
+     */
     extractPatternReplacementOptions?: string[];
     /**
-     * An ISO 639-1 human language code that determines the base language. TODO link to glossary
+     * An ISO 639-1 human language code that determines the base language.
      */
     baseLanguageCode?: string;
     [k: string]: unknown;
