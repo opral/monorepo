@@ -92,7 +92,6 @@ export const init = new Command()
             return consola.error(configValidation.error.message);
         }
         try {
-            console.info(`creating config file at ${process.cwd()}/inlang.config.json`);
             fs.writeFileSync(
                 process.cwd() + '/inlang.config.json',
                 JSON.stringify(config, undefined, 2) // spacing level = 2)
