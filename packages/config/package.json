@@ -1,6 +1,6 @@
 {
   "name": "@inlang/config",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "license": "MIT",
   "publicConfig": {
@@ -26,7 +26,7 @@
     "generate-types": "json2ts -i src/schemas/ -o src/types/"
   },
   "dependencies": {
-    "@inlang/common": "*"
+    "@inlang/common": "^0.1.4"
   },
   "devDependencies": {
     "@inlang/eslint-config": "*",

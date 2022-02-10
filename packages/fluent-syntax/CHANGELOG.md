@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.5](https://github.com/inlang/inlang/compare/@inlang/fluent-syntax@0.1.4...@inlang/fluent-syntax@0.1.5) (2022-02-10)
+
+
+### Bug Fixes
+
+* circular dependencies ([70d6647](https://github.com/inlang/inlang/commit/70d6647ef160aef72eb579b21176da6375cf9f7a))
+* invalidIdReason ([bc4b311](https://github.com/inlang/inlang/commit/bc4b311cfe948bea2e8c12e563e44286aab5788b))
+
+
+
+
+
 ## [0.1.4](https://github.com/inlang/inlang/compare/@inlang/fluent-syntax@0.1.3...@inlang/fluent-syntax@0.1.4) (2022-02-01)
 
 ### Bug Fixes
