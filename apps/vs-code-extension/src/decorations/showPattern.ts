@@ -6,7 +6,7 @@ import { serializePattern } from '@inlang/fluent-syntax';
 import axios from 'axios';
 
 export async function showPattern(args: { activeTextEditor: vscode.TextEditor }): Promise<unknown> {
-  if (state.config.fetchUsageGrammarFrom === undefined) {
+  if (state.config.fetchI18nDetectionGrammarFrom === undefined) {
     // not showing an error message because showing the pattern is optional
     return;
   }
@@ -15,10 +15,10 @@ export async function showPattern(args: { activeTextEditor: vscode.TextEditor })
       'The `baseLanguageCode` musst be defined in the inlang.config.json to show patterns inline.'
     );
   }
-  const requestGrammar = await axios(state.config.fetchUsageGrammarFrom);
+  const requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
   if (requestGrammar.status !== 200) {
     return vscode.window.showWarningMessage(
-      'Couldnt fetch the grammar from the provided `fetchUsageGrammarFrom` uri.'
+      'Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri.'
     );
   }
   const grammar = await requestGrammar.data;

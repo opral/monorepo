@@ -4,7 +4,7 @@ it('should return Result.ok for a valid config', () => {
     const config = {
         $schema: 'https://uri.com',
         pathPattern: './translations/{languageCode}.ftl',
-        fetchUsageGrammarFrom: 'https://github.com/grammar.pegjs',
+        fetchI18nDetectionGrammarFrom: 'https://github.com/grammar.pegjs',
         fileFormat: 'fluent',
     };
     const result = validate({ config });
@@ -26,7 +26,7 @@ it('should return Result.err if the pathPattern does not include {languageCode}'
 it('should return Result.err if a required field is undefined ', () => {
     const config = {
         pathPattern: './translations/{languageCode}.ftl',
-        fetchUsageGrammarFrom: 'https://github.com/grammar.pegjs',
+        fetchI18nDetectionGrammarFrom: 'https://github.com/grammar.pegjs',
         fileFormat: 'fluent',
     };
     const result = validate({ config });
@@ -38,7 +38,7 @@ it('should return Result.err if optional field is defined but incorrect', () => 
         $schema: 'https://uri.com',
         pathPattern: './translations/{languageCode}.ftl',
         // no pegjs ending -> can't be grammar
-        fetchUsageGrammarFrom: 'https://github.com/',
+        fetchI18nDetectionGrammarFrom: 'https://github.com/',
         fileFormat: 'fluent',
     };
     const result = validate({ config });

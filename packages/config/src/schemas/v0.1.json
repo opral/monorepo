@@ -8,29 +8,31 @@
       "format": "uri"
     },
     "fileFormat": {
-      "enum": ["fluent", "typesafe-i18n", "localizable-strings"],
-      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters"
+      "enum": ["fluent", "localizable-strings"],
+      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters."
     },
     "pathPattern": {
       "type": "string",
-      "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n`./translations/{languageCode}.json`\n.`/{languageCode}/Localizable.strings`",
+      "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n\t\t`./translations/{languageCode}.json`\n\t\t.`/{languageCode}/Localizable.strings`",
       "pattern": "(\\{languageCode\\})"
     },
-    "fetchUsageGrammarFrom": {
+    "fetchI18nDetectionGrammarFrom": {
       "type": "string",
       "format": "uri",
       "pattern": "(.pegjs)",
-      "description": "The pegjs grammar to detect usage of translations in the source code."
+      "description": "The pegjs grammar to detect the usage of i18n (translations) in the source code."
     },
     "extractPatternReplacementOptions": {
       "type": "array",
       "items": {
-        "type": "string"
-      }
+        "type": "string",
+        "pattern": "(\\{id\\})"
+      },
+      "description": "The replacement options when extracting pattern.\n\nMust include `{id}` in all options.\n@example\n\t\t['t(\"{id}\")', 'i18n.{id}']"
     },
     "baseLanguageCode": {
       "type": "string",
-      "description": "An ISO 639-1 human language code that determines the base language. TODO link to glossary"
+      "description": "An ISO 639-1 human language code that determines the base language."
     }
   },
   "required": ["$schema", "fileFormat", "pathPattern"]

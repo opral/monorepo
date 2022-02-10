@@ -1,22 +1,24 @@
 # @inlang/cli
 
-Synchronize your local files with the remote files.
-
 ## Commands
 
-### `download`
+### `init`
+
+Interactive configuration and creation of the `inlang.config.json`.
+
+### `remote download`
 
 Downloads the translations and _OVER-WRITES_ the local files.
 
 **Example**
 
-`inlang download --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>`
+`inlang remote download --path-pattern ./translations/{languageCode}.ftl --api-key <your api key> --format fluent`
 
 **Flags**
 
-`--adapter: string`
+`--format: string`
 
-Inlang uses Mozillas Fluent syntax. If your environment uses a different translation syntax, you can specify an adapter (to adapt to your environment).
+If your environment uses a different translation format than Fluent, a converter is used to transform the format to and from Fluent.
 
 `--path-pattern: string`
 
@@ -31,19 +33,19 @@ _Examples_
 `--api-key: string`
 The api key for the project.
 
-### `upload`
+### `remote upload`
 
 Uploads the local files and _OVERWRITES_ the remote files.
 
 **Example**
 
-`inlang upload --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>`
+`inlang remote upload --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>`
 
 **Flags**
 
-`--adapter: string`
+`--format: string`
 
-Inlang uses Mozillas Fluent syntax. If your environment uses a different translation syntax, you can specify an adapter (to adapt to your environment).
+If your environment uses a different translation format than Fluent, a converter is used to transform the format to and from Fluent.
 
 `--path-pattern: string`
 

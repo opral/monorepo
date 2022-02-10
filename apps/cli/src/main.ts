@@ -1,24 +1,19 @@
-import { cli } from 'cleye';
-import { downloadCommand } from './commands/download';
-import consola from 'consola';
-import { uploadCommand } from './commands/upload';
+import { Command } from 'commander';
+// commands
+import { init } from './commands/init';
+import { remote } from './commands/remote/index';
 
-consola.warn(
-    'The CLI is in early-alpha, expect breaking changes. Report bugs and open feature requests here https://github.com/inlang/inlang .'
-);
-
-try {
-    cli(
-        {
-            name: 'inlang',
-            commands: [downloadCommand, uploadCommand],
-        },
-        // by default show help
-        // (command `inlang`)
-        (parsed) => {
-            parsed.showHelp();
-        }
+if (process.env.PACKAGE_VERSION === undefined) {
+    throw Error(
+        'Env varibales do not contain package version.' + JSON.stringify(process.env)
     );
-} catch (error) {
-    consola.error(error);
 }
+
+export const cli = new Command()
+    .name('inlang')
+    .version(process.env.PACKAGE_VERSION)
+    .description(
+        'The CLI is in early alpha. Expect changes and new commands down the line.'
+    )
+    .addCommand(init)
+    .addCommand(remote);

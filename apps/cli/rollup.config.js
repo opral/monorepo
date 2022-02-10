@@ -3,6 +3,12 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import injectEnvVariables from 'rollup-plugin-inject-process-env';
 
+// Retrieving the package version attribute for env variable injection.
+// https://www.stefanjudis.com/snippets/how-to-import-json-files-in-es-modules-node-js/
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const packageVersion = require('./package.json').version;
+
 /**
  * What is rollup used for?
  *
@@ -21,6 +27,7 @@ import injectEnvVariables from 'rollup-plugin-inject-process-env';
 const env = process.env.ROLLUP_WATCH
   ? // development
     {
+      // the local dev api endpoint
       API_ENDPOINT: 'http://127.0.0.1:3000/api/',
     }
   : // production
@@ -42,6 +49,6 @@ export default {
     // commonjs = because of commonjs peer dependencies (peggy.js)
     commonjs(),
     // inject = pass env variables into the compiled code to not
-    injectEnvVariables(env),
+    injectEnvVariables({ PACKAGE_VERSION: packageVersion, ...env }),
   ],
 };
