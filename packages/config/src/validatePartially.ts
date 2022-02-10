@@ -9,9 +9,7 @@ import { InlangConfig01 } from './types/v0.1';
  *
  * Note `validate()` can be used to validate the whole config schema.
  */
-export function validatePartialProperties(
-    properties: Partial<InlangConfig01>
-): Result<'isOk', Error> {
+export function validatePartially(properties: Partial<InlangConfig01>): Result<'isOk', Error> {
     // ajv can throw
     try {
         const schema = schema01 as unknown as Record<string, Record<string, string>>;
