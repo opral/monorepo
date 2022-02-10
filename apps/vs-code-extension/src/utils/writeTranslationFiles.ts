@@ -24,7 +24,7 @@ export function writeTranslationFiles(args: {
 }): Result<void, Error> {
   const serializedResources = serializeResources({
     resources: args.resources,
-    format: args.fileFormat,
+    converter: converters[args.fileFormat],
   });
   if (serializedResources.isErr) {
     return Result.err(serializedResources.error);
