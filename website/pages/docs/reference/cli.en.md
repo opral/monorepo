@@ -16,7 +16,7 @@ Downloads the translations and _OVER-WRITES_ the local files.
 
 **Example**
 
-`inlang remote download --path-pattern ./translations/{languageCode}.ftl --api-key <your api key> --format fluent`
+`inlang remote download --path-pattern ./translations/\{languageCode\}.ftl --api-key <your api key> --format fluent`
 
 **Flags**
 
@@ -26,13 +26,13 @@ If your environment uses a different translation format than Fluent, a converter
 
 `--path-pattern: string`
 
-Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.
+Where and how the translation files should be saved. Use "\{languageCode\}" as dynamic value.
 
 _Examples_
 
---path-pattern ./translations/{languageCode}.ftl
+--path-pattern ./translations/\{languageCode\}.ftl
 
---path-pattern ./{languageCode}/Localizable.strings
+--path-pattern ./\{languageCode\}/Localizable.strings
 
 `--api-key: string`
 The api key for the project.
@@ -43,7 +43,7 @@ Uploads the local files and _OVERWRITES_ the remote files.
 
 **Example**
 
-`inlang remote upload --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>`
+`inlang remote upload --path-pattern ./translations/\{languageCode\}.ftl --api-key <your api key>`
 
 **Flags**
 
@@ -53,13 +53,13 @@ If your environment uses a different translation format than Fluent, a converter
 
 `--path-pattern: string`
 
-Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.
+Where and how the translation files should be saved. Use "\{languageCode\}" as dynamic value.
 
 _Examples_
 
---path-pattern ./translations/{languageCode}.ftl
+--path-pattern ./translations/\{languageCode\}.ftl
 
---path-pattern ./{languageCode}/Localizable.strings
+--path-pattern ./\{languageCode\}/Localizable.strings
 
 `--api-key: string`
 

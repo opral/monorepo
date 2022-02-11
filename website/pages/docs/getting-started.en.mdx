@@ -2,28 +2,27 @@ import Callout from "../../components/callout";
 
 # Getting Started
 
-Inlang takes 10 seconds to adopt and 1 second to get rid of. No lock-in whatsoever.
+<Callout>
+  Inlang is build on top of [Mozilla's Fluent system](https://projectfluent.org/). In case you intend
+  to use inlang with an i18n syntax/file format other than Fluent, please refer to
+  [using a converter](docs/architecture/overview#support-for-file-formats-other-than-fluent).
+
+In case you want to localize your app from scratch, use an [i18n library that supports Fluent](https://github.com/inlang/awesome-fluent).
+
+</Callout>
+
+You can setup inlang in three ways:
+
+1. Increase developer productivity via the VSCode extension.
+2. Let non-technical team members and translators manage translations.
+3. Both of the above :)
+
+## VSCode extension (takes 60 seconds)
+
+1. Install the VSCode extension [download link](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
+2. Run `npx inlang init` (node must be installed) in the terminal.
+
+## Translation Management (takes 2 minutes)
 
 1. Create a project in [the dashboard](https://app.inlang.dev).
-2. Import your translations either via copy & paste or [the CLI](/docs/cli).
-3. Done :)
-
-### Use inlang with existing translations
-
-<Callout>
-  In case your software project does not use [Fluent](https://projectfluent.org)
-  as i18n syntax, check whether a [converter](/docs/converter) exists.
-</Callout>
-
-### You want to start localizing (translate) your software
-
-Some languages like Swift have an in-build localiation solution. For most other languages like JavaScript
-you need a i18n (internationalization) library. The choice of the i18n library is up to you. If you
-are in doubt, [ask in the forum](https://github.com/inlang/inlang/discussions) which i18n library
-suits your project.
-
-<Callout type="warning">
-  Since inlang is build around [Fluent](https://projectfluent.org), whatever
-  i18n library you end up choosing it should use Fluent as syntax. Other
-  syntaxes work as well but require a [converter](/docs/converter).
-</Callout>
+2. Import your translations either via copy & paste or [the CLI](/docs/reference/cli-reference).
