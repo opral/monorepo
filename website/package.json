@@ -2,7 +2,7 @@
   "name": "website",
   "private": true,
   "scripts": {
-    "dev": "npm run compile-tailwind-classes --watch && next dev",
+    "dev": "next dev",
     "build": "npm run compile-tailwind-classes && next build",
     "start": "next start",
     "lint": "next lint",

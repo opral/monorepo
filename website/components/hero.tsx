@@ -5,10 +5,9 @@ const Hero = () => {
   return (
     <div className="px-4 pt-16 pb-8 sm:px-6 sm:pt-24 lg:px-8  ">
       <h1 className="text-center text-6xl font-extrabold tracking-tighter leading-[1.1] sm:text-7xl lg:text-8xl xl:text-8xl">
-        Translate your software product
-        <br className="hidden lg:block" />
+        Translate your software product <br className="hidden lg:block" />
         <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-blue-500 ">
-          with less effort.
+          2x faster.
         </span>{" "}
       </h1>
       <p className="max-w-lg mx-auto mt-6 text-xl font-medium leading-tight text-center text-current  sm:max-w-4xl sm:text-2xl md:text-3xl lg:text-4xl">
