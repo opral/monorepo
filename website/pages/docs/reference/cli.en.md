@@ -4,6 +4,21 @@ The CLI enables seamless synchronization of source code files with remote files 
 In the future, the CLI could become more advanced with linting and other features. Take part in the
 [discussions](https://github.com/inlang/inlang/discussions).
 
+## Installation
+
+The CLI requires [node](https://nodejs.org) to be installed on your machine. Since the CLI is distributed via
+NPM, you can simply `npm i @inlang/cli --save-dev`
+
+**In a Node.js project**
+
+1. install via `npm i @inlang/cli --save-dev`
+2. run `npx inlang <command>`
+
+**Other**
+
+1. install the CLI globally via `npm i @inlang/cli -g`
+2. run `inlang <command>`
+
 ## Commands
 
 ### `init`
