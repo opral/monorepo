@@ -64,7 +64,7 @@ const Personas = () => {
                     />
                   </svg>
                 }
-                title="Works Independent of the Dashboard"
+                title="Never leave your IDE"
               />
             </>
           }
