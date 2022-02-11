@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "inlang.vs-code-extension",
+    "peggyjs.peggy-language",
+    "silvenon.mdx",
+    "macabeus.vscode-fluent",
+    "svelte.svelte-vscode",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode"
+  ]
+}
