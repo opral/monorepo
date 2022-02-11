@@ -5,11 +5,12 @@
   "properties": {
     "$schema": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "description": "A link to the JSON schema.\n\nGo to https://github.com/inlang/inlang/tree/main/packages/config/src/schemas to see a list of all schemas.\n\nUsing a schema enables auto-complete and linting in most IDE's via https://json-schema.org/. Furthermore, defining a version of the config file allows for changes down the line with auto-migration scripts."
     },
     "fileFormat": {
       "enum": ["fluent", "localizable-strings"],
-      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters."
+      "description": "The file format of the local translation files.\n\nAny other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/architecture/overview#support-for-file-formats-other-than-fluent."
     },
     "pathPattern": {
       "type": "string",
@@ -20,7 +21,7 @@
       "type": "string",
       "format": "uri",
       "pattern": "(.pegjs)",
-      "description": "The pegjs grammar to detect the usage of i18n (translations) in the source code."
+      "description": "A link to the pegjs grammar to detect the usage of i18n (translations) in the source code.\n\nGo to https://github.com/inlang/inlang/tree/main/packages/i18n-detection/src/grammars for predefined grammars.\n\nUsing a link offers flexibility to define own grammars for specific environments. Go to  "
     },
     "extractPatternReplacementOptions": {
       "type": "array",

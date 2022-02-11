@@ -6,11 +6,18 @@
  */
 
 export interface InlangConfig01 {
+    /**
+     * A link to the JSON schema.
+     *
+     * Go to https://github.com/inlang/inlang/tree/main/packages/config/src/schemas to see a list of all schemas.
+     *
+     * Using a schema enables auto-complete and linting in most IDE's via https://json-schema.org/. Furthermore, defining a version of the config file allows for changes down the line with auto-migration scripts.
+     */
     $schema: string;
     /**
      * The file format of the local translation files.
      *
-     * Any other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/docs/architecture/converters.
+     * Any other file format than Fluent makes use of a converter. Read more about converters and their limitations here https://inlang.dev/architecture/overview#support-for-file-formats-other-than-fluent.
      */
     fileFormat: 'fluent' | 'localizable-strings';
     /**
@@ -23,7 +30,11 @@ export interface InlangConfig01 {
      */
     pathPattern: string;
     /**
-     * The pegjs grammar to detect the usage of i18n (translations) in the source code.
+     * A link to the pegjs grammar to detect the usage of i18n (translations) in the source code.
+     *
+     * Go to https://github.com/inlang/inlang/tree/main/packages/i18n-detection/src/grammars for predefined grammars.
+     *
+     * Using a link offers flexibility to define own grammars for specific environments. Go to
      */
     fetchI18nDetectionGrammarFrom?: string;
     /**
