@@ -1,6 +1,6 @@
 {
   "name": "@inlang/cli",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": false,
   "publicConfig": {
     "access": "public"
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@inlang/common": "^0.1.4",
-    "@inlang/config": "^0.1.1",
+    "@inlang/config": "^0.1.2",
     "@inlang/fluent-syntax-converters": "^0.1.5",
     "@types/prompts": "^2.0.14",
     "commander": "^9.0.0",
