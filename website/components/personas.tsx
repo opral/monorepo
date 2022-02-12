@@ -64,7 +64,7 @@ const Personas = () => {
                     />
                   </svg>
                 }
-                title="Never leave your IDE"
+                title="Never Leave your IDE"
               />
             </>
           }
