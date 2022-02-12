@@ -3,7 +3,7 @@ import { state } from '../state';
 import peggy from 'peggy';
 import { LanguageCode } from '@inlang/common';
 import { serializePattern } from '@inlang/fluent-syntax';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 export async function showPattern(args: { activeTextEditor: vscode.TextEditor }): Promise<unknown> {
   if (state.config.fetchI18nDetectionGrammarFrom === undefined) {
@@ -15,10 +15,15 @@ export async function showPattern(args: { activeTextEditor: vscode.TextEditor })
       'The `baseLanguageCode` musst be defined in the inlang.config.json to show patterns inline.'
     );
   }
-  const requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
-  if (requestGrammar.status !== 200) {
+  let requestGrammar: AxiosResponse;
+  try {
+    requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
+    if (requestGrammar.status !== 200) {
+      throw '';
+    }
+  } catch {
     return vscode.window.showWarningMessage(
-      'Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri.'
+      'Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri. Is the uri correct?'
     );
   }
   const grammar = await requestGrammar.data;
