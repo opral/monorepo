@@ -14,6 +14,8 @@
     "clean": "lerna run clean",
     "lint": "lerna run lint",
     "test": "lerna run --ignore @inlang/database test",
+    "prepublish": "npm run build && npm run test",
+    "publish": "lerna publish",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
