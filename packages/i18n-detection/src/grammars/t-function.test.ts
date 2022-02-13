@@ -51,8 +51,15 @@ it('should detect t({id}, ...args)', () => {
     expect(matches[0].id === 'some-id');
 });
 
+// it('should match with no pre-fixed whitespace', () => {
+//     const sourceCode = `t('some-id')`;
+//     const matches = parser.parse(sourceCode) as Match[];
+//     expect(matches[0].id === 'some-id');
+// });
+
 it('should only return location of the id', () => {
-    const sourceCode = `t('some-id', ...args)`;
+    // prefixing with space see test above
+    const sourceCode = ` t('some-id', ...args)`;
     const matches = parser.parse(sourceCode) as Match[];
     expect(matches[0].id === 'some-id');
     expect(

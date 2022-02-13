@@ -10,19 +10,21 @@ Result = matches:(Possiblities / .)* {
 }
 
 // a valid (fluent message or attribute) id
-Id = chars:([a-z]/[A-Z]/[0-9]/'_'/'-')* {
+Id = characters:([a-z]/[A-Z]/[0-9]/'_'/'-')* {
 	// the id is the combination of all characters, hence .join()
 	// the location uses the location function from peggy
 	// https://peggyjs.org/documentation.html#locations
-	return { id: chars.join(""), location: location() }
+	return { id: characters.join(""), location: location() }
 }
 
 // all possiblities
 Possiblities = Possibility1
 
 // [^)]* match any character except ')' multiple times until
-// the closing pharantheses ')' is matched.
-Possibility1 = 't(' QuotationMark @Id QuotationMark [^)]* ')'
+//       the closing pharantheses ')' is matched.
+// [^a-z] do not match if preceeding character is a letter
+//        prevents false positives like string.split("id")
+Possibility1 = [^a-z] 't(' QuotationMark @Id QuotationMark [^)]* ')'
 
 // single quote `'` or double quote `"`
 QuotationMark = '"' / "'"
