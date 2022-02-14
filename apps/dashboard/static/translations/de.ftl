@@ -1,0 +1,11 @@
+login =
+    .check-email = Ein einmaliger Loginlink wurde an deine Email gesendet!
+    .log-in = Einloggen
+    .account-auto-created = Ein Konto wird automatisch erstellt, wenn du dich anmeldest. Eine explizite Registrierung ist nicht erforderlich.
+    .social-auth = Social Auth Login
+    .github = Mit GitHub anmelden
+    .email = Mit E-Mail anmelden
+    .enter-mail = deine E-Mail
+    .send-magic-link = Anmeldelink senden
+    .need-help = Hilfe benötigt?
+    .join-discord = Trete unserem Discord bei
