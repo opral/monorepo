@@ -7,6 +7,7 @@
 	import { InlineLoading, Modal } from 'carbon-components-svelte';
 	import type { InlineLoadingProps } from 'carbon-components-svelte/types/InlineLoading/InlineLoading';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
+	import { t } from '$lib/services/i18n';
 
 	export let open: boolean;
 	export let language: definitions['language'];
@@ -46,9 +47,9 @@
 	danger
 	size="sm"
 	bind:open
-	modalHeading="Set as default language"
-	primaryButtonText="Confirm"
-	secondaryButtonText="Cancel"
+	modalHeading={$t('set-base-language')}
+	primaryButtonText={$t('generic.confirm')}
+	secondaryButtonText="$t('generic.cancel')"
 	on:click:button--primary={handleConfirm}
 	on:click:button--secondary={() => {
 		open = false;
@@ -56,12 +57,12 @@
 	on:close
 >
 	{#if status === 'active'}
-		<InlineLoading status="active" description="Deleting language..." />
+		<InlineLoading status="active" description={$t('loading.deleting-language')} />
 	{:else if status === 'error'}
-		<InlineLoading status="error" description="An error occurred" />
+		<InlineLoading status="error" description={$t('loading.generic-error')} />
 	{:else if status === 'finished'}
-		<InlineLoading status="finished" description="Success" />
+		<InlineLoading status="finished" description={$t('generic.success')} />
 	{:else}
-		<p>Do you really want to delete {ISO6391.getName(language.code)} from the project?</p>
+		<p>{($t('confirm.delete-language'), { languageCode: ISO6391.getName(language.code) })}</p>
 	{/if}
 </Modal>

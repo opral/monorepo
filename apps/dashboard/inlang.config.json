@@ -4,5 +4,5 @@
 	"pathPattern": "./static/translations/{languageCode}.ftl",
 	"baseLanguageCode": "en",
 	"extractPatternReplacementOptions": ["$t('{id}')", "{$t('{id}')}", "{@html $t('{id}')}"],
-	"fetchI18nDetectionGrammarFrom": "https://raw.githubusercontent.com/inlang/inlang/main/packages/i18n-detection/src/grammars/t-function.pegjs"
+	"fetchI18nDetectionGrammarFrom": "https://raw.githubusercontent.com/inlang/inlang/add/i18n/packages/i18n-detection/src/grammars/t-function.pegjs"
 }

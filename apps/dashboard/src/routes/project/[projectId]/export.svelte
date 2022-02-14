@@ -5,7 +5,7 @@
 	import { LanguageCode } from '@inlang/common';
 	import { Resources } from '@inlang/fluent-syntax';
 	import { CodeSnippet, InlineNotification } from 'carbon-components-svelte';
-
+	import { t } from '$lib/services/i18n';
 	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
 	let selectedConverter: Converter = converters.fluent;
 
@@ -30,12 +30,12 @@
 {#if $projectStore.data === undefined || $projectStore.data?.languages.length === 0}
 	<InlineNotification title="Error fetching data" />
 {:else}
-	<h1 class="mb-1">Export</h1>
-	<p>Copy and paste your local from inlang to your source code.</p>
+	<h1 class="mb-1">{$t('generic.export')}</h1>
+	<p>{$t('info.export')}</p>
 	<br />
 	<SerializedResource bind:selectedLanguageCode bind:selectedConverter {resources}>
 		<div slot="code-field" style="height: 60vh; overflow:auto;">
-			<p class="text-xs text-gray-600 mb-2">File</p>
+			<p class="text-xs text-gray-600 mb-2">{$t('generic.file')}</p>
 			<CodeSnippet code={serializedResource()} type="multi" />
 		</div>
 	</SerializedResource>

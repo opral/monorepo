@@ -6,6 +6,7 @@
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 	import { isValidMessageId } from '@inlang/fluent-syntax';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
+	import { t } from '$lib/services/i18n';
 
 	let open = false;
 
@@ -36,11 +37,11 @@
 				languageCode: $projectStore.data.project.base_language_code
 			})
 		) {
-			return 'Id already exists.';
+			return $t('error.id-exists');
 		} else if (messageId.includes('.')) {
-			return 'A message id can not contain a dot. Seems like you want to create an attribute?';
+			return $t('error.message-cant-contain-dot');
 		}
-		return 'Invalid character.';
+		return $t('error.id-invalid-character');
 	};
 
 	let keyNameInputElement: HTMLInputElement;
@@ -60,7 +61,11 @@
 		const updateDatabase = await projectStore.updateResourcesInDatabase();
 		if (create.isErr || updateDatabase.isErr) {
 			alert(
-				create.isErr ? create.error : updateDatabase.isErr ? updateDatabase.error : 'Unknown error'
+				create.isErr
+					? create.error
+					: updateDatabase.isErr
+					? updateDatabase.error
+					: $t('error.unknown')
 			);
 			status = 'error';
 		} else {
@@ -77,10 +82,10 @@
 
 <Modal
 	bind:open
-	modalHeading="New message"
+	modalHeading={$t('new.message')}
 	size="sm"
-	primaryButtonText="Create"
-	secondaryButtonText="Cancel"
+	primaryButtonText={$t('generic.create')}
+	secondaryButtonText={$t('generic.cancel')}
 	on:click:button--secondary={() => {
 		open = false;
 	}}
@@ -90,10 +95,10 @@
 	shouldSubmitOnEnter={false}
 >
 	<p>
-		A new message is always created for base language first. The human base language for this
-		project is <strong>
-			{ISO6391.getName($projectStore.data?.project.base_language_code ?? '')}
-		</strong>.
+		{@html $t('info.new-message-base-language', {
+			baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
+		})}
+		}
 	</p>
 	<br />
 	<!-- 
@@ -112,9 +117,9 @@
 		rows={2}
 		labelText={`Pattern`}
 		bind:value={messagePattern}
-		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
-			$projectStore.data?.project.base_language_code ?? ''
-		)}.`}
+		helperText={$t('info.new-pattern-base-language', {
+			baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
+		})}
 	/>
 	<!-- <br />
 	<TextArea
@@ -128,8 +133,8 @@
 	{#if status !== 'inactive'}
 		<InlineLoadingWrapper
 			{status}
-			activeDescription="Creating the message..."
-			finishedDescription="Message has been created."
+			activeDescription={$t('loading.creating-message')}
+			finishedDescription={$t('loading.message-created')}
 		/>
 	{/if}
 </Modal>

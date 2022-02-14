@@ -1,27 +1,10 @@
-<script lang="ts" context="module">
-	// can be imported by other files and helps to stay consistent throughout the app
-	export const defaultConfirmModalText = {
-		delete: {
-			organization: {
-				heading: 'Delete organization',
-				message:
-					'Do you really want to delete this organization? All projects and their translations will be deleted.'
-			},
-			project: {
-				heading: 'Delete project',
-				message:
-					'Do you really want to delete this project? All translation will be deleted from inlang. Your local files (in the code) will not be deleted.'
-			}
-		}
-	} as const;
-</script>
-
 <script lang="ts">
 	import { Modal, TextInput } from 'carbon-components-svelte';
 	import { Result } from '@inlang/common';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 	import { withUxTimeout } from '$lib/utils/withUxTimeout';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
+	import { t } from '$lib/services/i18n';
 
 	/**
 	 * @param heading Header of the modal
@@ -95,9 +78,9 @@
 	bind:danger
 	bind:open
 	modalHeading={heading}
-	primaryButtonText={inlineLoadingStatus !== 'error' ? 'Confirm' : 'Try again'}
+	primaryButtonText={inlineLoadingStatus !== 'error' ? $t('generic.confirm') : $t('try-again')}
 	{primaryButtonDisabled}
-	secondaryButtonText="Cancel"
+	secondaryButtonText="{$t('generic.cancel')}}"
 	on:click:button--primary={handleConfirm}
 	on:click:button--secondary={() => {
 		open = false;
@@ -106,15 +89,15 @@
 	<p>{message}</p>
 	<br />
 	{#if requireTypingOf}
-		<p class="pb-1 text-xs">Please type "<strong>{requireTypingOf}</strong>" to confirm.</p>
+		<p class="pb-1 text-xs">{($t('confirm-with-typing'), { requireTypingOf })}</p>
 		<TextInput bind:value={nameOfEntityInput} />
 		<br />
 	{/if}
 	{#if inlineLoadingStatus !== 'inactive'}
 		<InlineLoadingWrapper
 			status={inlineLoadingStatus}
-			activeDescription="Working on it..."
-			finishedDescription="Success"
+			activeDescription={$t('working-on-it')}
+			finishedDescription={$t('generic.success')}
 		/>
 	{/if}
 </Modal>

@@ -7,7 +7,7 @@
  -->
 <script lang="ts">
 	import { brombTriggerLink } from '$lib/services/bromb';
-
+	import { t } from '$lib/services/i18n';
 	import { InlineLoading, Link } from 'carbon-components-svelte';
 
 	/**
@@ -57,7 +57,8 @@
 	{:else if status === 'error'}
 		<row class="items-center space-x-1">
 			<InlineLoading status="error" description={errorDescription} class="w-auto" />
-			<Link href={brombTriggerLink({ category: 'bug' })} class="text-xs">Report as bug</Link>
+			<Link href={brombTriggerLink({ category: 'bug' })} class="text-xs">{$t('report-as-bug')}</Link
+			>
 		</row>
 	{/if}
 </div>

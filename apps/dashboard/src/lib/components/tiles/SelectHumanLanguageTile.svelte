@@ -6,7 +6,7 @@
 	export let possibleLanguageCodes: LanguageCode[];
 	export let selected: LanguageCode | undefined;
 	export let onSelect: ((languageCode: LanguageCode) => unknown) | undefined = undefined;
-	export let legend: string | undefined = undefined
+	export let legend: string | undefined = undefined;
 </script>
 
 <TileGroup on:select={(event) => onSelect?.(event.detail)} bind:selected {legend}>

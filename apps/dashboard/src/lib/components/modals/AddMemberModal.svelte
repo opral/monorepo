@@ -3,6 +3,7 @@
 	import { database } from '$lib/services/database';
 	import type { definitions } from '@inlang/database';
 	import { isValidEmail } from '$lib/utils/isValidEmail';
+	import { t } from '$lib/services/i18n';
 
 	export function show(args: {
 		projectId: definitions['project']['id'];
@@ -34,7 +35,7 @@
 		if (userId.error) {
 			alert(userId.error.message);
 		} else if (userId.data === null) {
-			alert(inputEmail + ' is not a user of inlang yet');
+			alert($t('not-a-user-yet', { email: inputEmail }));
 		} else {
 			const memberUpsert = await database
 				.from<definitions['project_member']>('project_member')
@@ -47,7 +48,7 @@
 				alert(memberUpsert.error.message);
 			}
 			if (memberUpsert.status === 409) {
-				alert(inputEmail + ' is already a member');
+				alert($t('already-team-member', { email: inputEmail }));
 			} else if (memberUpsert.status === 201) {
 				//success
 				onAddedMember();
@@ -56,7 +57,7 @@
 				if (memberUpsert.error) {
 					alert(memberUpsert.error.message);
 				} else {
-					alert('An unknown error occurred');
+					alert($t('generic.unknown-error'));
 				}
 			}
 		}
@@ -65,23 +66,23 @@
 
 <Modal
 	bind:open
-	modalHeading={`Add member`}
-	primaryButtonText="Invite"
-	secondaryButtonText="Cancel"
+	modalHeading={$t('add-member')}
+	primaryButtonText={$t('generic.invite')}
+	secondaryButtonText={$t('generic.cancel')}
 	primaryButtonDisabled={inputIsValidEmail === false}
 	on:click:button--primary={handleInviteUser}
 	on:click:button--secondary={() => (open = false)}
 >
 	<InlineNotification
 		kind="info"
-		subtitle="The member you are inviting must have an account on inlang already."
+		subtitle={$t('invite.member-must-have-account')}
 		hideCloseButton
 	/>
 	<TextInput
 		size="xl"
-		placeholder="Enter the email of the new member"
+		placeholder={$t('invite.enter-email')}
 		bind:value={inputEmail}
 		warn={inputEmail.length > 0 && inputIsValidEmail === false}
-		warnText="Invalid email."
+		warnText={$t('error.invalid-mail')}
 	/>
 </Modal>

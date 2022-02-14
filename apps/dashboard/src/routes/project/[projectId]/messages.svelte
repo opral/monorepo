@@ -10,6 +10,7 @@
 	import Patterns from '$lib/components/Patterns.svelte';
 	import { lintPattern } from '@inlang/fluent-lint';
 	import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';
+	import { t } from '$lib/services/i18n';
 
 	let searchQuery = '';
 
@@ -238,17 +239,17 @@
 		});
 		if ((message?.attributes.length ?? []) > 0) {
 			confirmModal.show({
-				heading: `Delete message "${args.messageId}"?`,
+				heading: $t('delete.message', { id: args.messageId }),
 				danger: true,
-				message: `This message has attributes. All attributes will be deleted as well.`,
-				requireTypingOf: 'delete attributes',
+				message: $t('warning.message-has-attributes'),
+				requireTypingOf: $t('require-typing-attributes'),
 				onConfirm
 			});
 		} else {
 			confirmModal.show({
-				heading: `Delete message "${args.messageId}"?`,
+				heading: $t('delete.message', { id: args.messageId }),
 				danger: true,
-				message: `This action is irreversible.`,
+				message: $t('warning.irreversible-action'),
 				onConfirm
 			});
 		}
@@ -259,8 +260,8 @@
 		attributeId: Attribute['id']['name'];
 	}): Promise<void> {
 		confirmModal.show({
-			heading: `Delete attribute "${args.messageId} . ${args.attributeId}"?`,
-			message: `This action is irreversible.`,
+			heading: $t('delete.attribute', { messageId: args.messageId, attributeId: args.attributeId }),
+			message: $t('warning.irreversible-action'),
 			danger: true,
 			onConfirm: async () => {
 				const deletion = $projectStore.data?.resources.deleteAttributeForAllResources({
@@ -277,8 +278,8 @@
 </script>
 
 <!-- description -->
-<h1 class="mb-1">Messages</h1>
-<p>All your messages will appear here. You can create, delete and edit them.</p>
+<h1 class="mb-1">{$t('generic.messages')}</h1>
+<p>{$t('info.messages')}</p>
 <br />
 <!-- "action bar" -->
 <row class="min-w-0">
@@ -290,13 +291,13 @@
 			createAttributeModal.show();
 		}}
 	>
-		New attribute
+		{$t('new.attribute')}
 	</Button>
 	<Button
 		icon={Add16}
 		on:click={() => {
 			createMessageModal.show();
-		}}>New message</Button
+		}}>{$t('new.message')}</Button
 	>
 </row>
 <!-- divider -->
@@ -323,10 +324,10 @@
 					slot="above-expanded"
 					hideCloseButton={true}
 					kind="info"
-					title="This message has no patterns but attributes:"
-					subtitle={`If you want to add patterns to this message, fill out the ${ISO6391.getName(
-						$projectStore.data?.project.base_language_code ?? ''
-					)} pattern and press 'Save changes'.`}
+					title={$t('info.message-no-pattern')}
+					subtitle={$t('info.message-no-pattern-fill-out', {
+						baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
+					})}
 				/>
 			</Patterns>
 		{:else}

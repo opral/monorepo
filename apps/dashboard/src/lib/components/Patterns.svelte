@@ -17,6 +17,7 @@
 		supportedLanguageCodes
 	} from '../../routes/api/internal/machine-translate';
 	import InlineLoadingWrapper from './InlineLoadingWrapper.svelte';
+	import { t } from '$lib/services/i18n';
 
 	/**
 	 * The id to which the pattern belongs.
@@ -95,10 +96,12 @@
 				supportedLanguageCodes.includes(baseLanguageCode as SupportedLanguageCode) === false
 			) {
 				machineTranslationStatus = 'error';
-				machineTranslationErrorMessage = `The base language ${baseLanguageCode} is not supported.`;
+				machineTranslationErrorMessage = $t('error.unsupported-base-language', {
+					baseLanguageCode
+				});
 				break;
 			} else if (supportedLanguageCodes.includes(languageCode as SupportedLanguageCode) === false) {
-				alert(`The language ${languageCode} is not supported.`);
+				alert($t('error.unsupported-language-code', { languageCode }));
 			} else {
 				const requestBody: MachineTranslateRequestBody = {
 					serializedSourcePattern: serializedPatterns[baseLanguageCode],
@@ -156,7 +159,7 @@
 				<p>{id}</p>
 			</row>
 			{#if displayActionRequired}
-				<Tag type="red">Action required</Tag>
+				<Tag type="red">{$t('action-required')}</Tag>
 			{/if}
 		</row>
 	</ClickableTile>
@@ -191,7 +194,7 @@
 						icon={Save20}
 						on:click={() => onSaveChanges(serializedPatterns)}
 					>
-						Save changes
+						{$t('save-changes')}
 					</Button>
 					{#if machineTranslationStatus === 'inactive'}
 						<Button
@@ -201,15 +204,15 @@
 							on:click={machineTranslate}
 							icon={Bot20}
 						>
-							Auto translate
+							{$t('machine-translate')}
 						</Button>
 					{:else}
 						<InlineLoadingWrapper
 							class="px-2 flex flex-row items-center"
 							bind:status={machineTranslationStatus}
-							activeDescription="Machine translating..."
+							activeDescription={$t('loading.machine-translating')}
 							errorDescription={machineTranslationErrorMessage}
-							finishedDescription="Finished"
+							finishedDescription={$t('generic.finished')}
 						/>
 					{/if}
 				</ButtonSet>
@@ -217,7 +220,7 @@
 					kind="danger-tertiary"
 					size="field"
 					icon={TrashCan20}
-					iconDescription="Delete"
+					iconDescription={$t('generic.delete')}
 					on:click={onDelete}
 				/>
 			</row>

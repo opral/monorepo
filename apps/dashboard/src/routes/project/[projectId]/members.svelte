@@ -18,6 +18,7 @@
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
 	import { Result } from '@inlang/common';
 	import { auth } from '$lib/services/auth';
+	import { t } from '$lib/services/i18n';
 
 	let isLoading = true;
 	let members: DatabaseResponse<definitions['project_member'][]>;
@@ -28,7 +29,7 @@
 	let addMemberModal: AddMemberModal;
 
 	const headers = [
-		{ key: 'email', value: 'Member email' },
+		{ key: 'email', value: $t('member-email') },
 		//{ key: 'role', value: 'Role' },
 		{ key: 'actions', empty: true }
 	];
@@ -91,14 +92,14 @@
 	<Loading />
 {/if}
 
-<h1 class="mb-1">Members</h1>
-<p>The members of this project.</p>
+<h1 class="mb-1">{$t('generic.members')}</h1>
+<p>{$t('info.members')}</p>
 <br />
 <!-- padding 0 top is neccessary  -->
 <DataTable {headers} rows={rows()} class="pt-0">
 	<Toolbar>
 		<ToolbarBatchActions class="bg-danger">
-			<Button icon={Delete16} kind="danger">Delete</Button>
+			<Button icon={Delete16} kind="danger">{$t('generic.delete')}</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
@@ -106,7 +107,7 @@
 				icon={Add16}
 				on:click={() =>
 					addMemberModal.show({ projectId: $page.params.projectId, onMemberAdded: loadUsers })}
-				>Add member</Button
+				>{$t('add.member')}</Button
 			>
 		</ToolbarContent>
 	</Toolbar>
@@ -128,11 +129,11 @@
 					icon={Delete16}
 					tooltipAlignment="start"
 					tooltipPosition="left"
-					iconDescription="Remove member"
+					iconDescription={$t('member.remove')}
 					on:click={() => {
 						confirmModal.show({
-							heading: 'Delete member',
-							message: 'Are you sure you want to delete the member?',
+							heading: $t('member.remove'),
+							message: $t('member.remove-confirm'),
 							requireTypingOf: row.user.email,
 							danger: true,
 							onConfirm: () => deleteMember({ userId: row.user.id })

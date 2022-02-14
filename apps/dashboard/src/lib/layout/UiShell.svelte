@@ -20,6 +20,8 @@
 	import ProjectSideNav from './ProjectSideNav.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { brombTriggerLink } from '$lib/services/bromb';
+	import { locale, t } from '$lib/services/i18n';
+	import Language20 from 'carbon-icons-svelte/lib/Language20';
 
 	let isSideNavOpen = false;
 
@@ -54,22 +56,37 @@
 			<HeaderNavItem
 				href={'https://inlang.dev/docs/getting-started'}
 				target="_blank"
-				text="Documentation"
+				text={$t('generic.documentation')}
 			/>
 			<HeaderNavItem
 				href={'https://projectfluent.org/fluent/guide/text.html'}
 				target="_blank"
-				text="Syntax Guide"
+				text={$t('syntax-guide')}
 			/>
-			<HeaderNavItem href={brombTriggerLink({})} text="Feedback on this site?" />
+			<HeaderNavItem href={brombTriggerLink({})} text={$t('feedback')} />
 		</HeaderNav>
 		<HeaderUtilities>
+			<HeaderAction icon={Language20}>
+				<HeaderPanelLinks>
+					<h3 class="px-4 pb-4">{$t('generic.language', { count: '1' })}</h3>
+					<HeaderPanelLink>
+						<row class="justify-between items-center" on:click={() => ($locale = 'en')}>
+							{$t('generic.english')}
+						</row>
+					</HeaderPanelLink>
+					<HeaderPanelLink>
+						<row class="justify-between items-center" on:click={() => ($locale = 'de')}>
+							{$t('generic.german')}
+						</row>
+					</HeaderPanelLink>
+				</HeaderPanelLinks>
+			</HeaderAction>
 			<HeaderAction icon={UserAvatar20}>
 				<HeaderPanelLinks>
 					<h3 class="px-4 pb-4">{auth.user()?.email}</h3>
 					<HeaderPanelLink>
 						<row class="justify-between items-center" on:click={handleLogout}>
-							Sign Out
+							{$t('login.sing-out')}
 							<Logout20 class="h-4" />
 						</row>
 					</HeaderPanelLink>

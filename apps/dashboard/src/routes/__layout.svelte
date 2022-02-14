@@ -24,6 +24,7 @@
 	import { InlineNotification } from 'carbon-components-svelte';
 	import { analytics } from '$lib/services/analytics';
 	import { env } from '$lib/env';
+	import { t } from '$lib/services/i18n';
 
 	$: outerWidth = 0;
 
@@ -71,7 +72,7 @@
 		<InlineNotification
 			kind="warning"
 			title="Notice:"
-			subtitle="Website is not optimized for mobile."
+			subtitle={$t('warning.no-optimized-for-mobile')}
 			hideCloseButton={false}
 		/>
 	{/if}

@@ -15,6 +15,7 @@
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
 	import { database } from '$lib/services/database';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
+	import { t } from '$lib/services/i18n';
 
 	let createProjectModal: CreateProjectModal;
 
@@ -35,7 +36,7 @@
 		isLoading = false;
 	}
 
-	const headers = [{ key: 'name', value: 'Project name' }];
+	const headers = [{ key: 'name', value: $t('project-name') }];
 
 	let rows: () => { id: string; name: string; object: definitions['project'] }[];
 	$: rows = () => {
@@ -58,7 +59,7 @@
 <DataTable {headers} rows={rows()} class="pt-0">
 	<Toolbar>
 		<ToolbarBatchActions class="bg-danger">
-			<Button icon={Delete16} kind="danger">Delete</Button>
+			<Button icon={Delete16} kind="danger">{$t('generic.delete')}</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
@@ -67,7 +68,7 @@
 				on:click={() =>
 					createProjectModal.show({
 						onProjectCreated: loadProjects
-					})}>New project</Button
+					})}>{$t('new-project')}</Button
 			>
 		</ToolbarContent>
 	</Toolbar>

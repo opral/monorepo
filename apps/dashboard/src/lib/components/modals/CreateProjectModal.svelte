@@ -18,6 +18,7 @@
 	import SelectHumanLanguageTile from '../tiles/SelectHumanLanguageTile.svelte';
 	import { auth } from '$lib/services/auth';
 	import { isValidMessageId } from '@inlang/fluent-syntax';
+	import { t } from '$lib/services/i18n';
 
 	export function show(args: { onProjectCreated: () => unknown }): void {
 		// automatically overwriting old data when show is called
@@ -142,12 +143,12 @@
 
 <Modal
 	bind:open
-	modalHeading="New project"
-	primaryButtonText={currentStep === 0 ? 'Next' : 'Create'}
+	modalHeading={$t('new.project')}
+	primaryButtonText={currentStep === 0 ? $t('generic.next') : $t('generic.cancel')}
 	primaryButtonDisabled={currentStepIsValid() === false && isValidInput === false}
 	hasForm={true}
 	hasScrollingContent={selectedLanguageCodes.length > 5}
-	secondaryButtonText={currentStep === 0 ? 'Cancel' : 'Back'}
+	secondaryButtonText={currentStep === 0 ? $t('generic.cancel') : $t('generic.back')}
 	on:click:button--primary={currentStep === 0 ? () => (currentStep += 1) : handleCreateProject}
 	on:click:button--secondary={currentStep === 0 ? () => (open = false) : () => (currentStep -= 1)}
 	on:open
@@ -165,14 +166,12 @@
 					complete={projectNameIsValidInput}
 					invalid={currentStep > 0 &&
 						(projectNameIsValidInput && selectedLanguageCodes.length > 0) === false}
-					label="Basics"
-					description="The progress indicator will listen for clicks on the steps"
+					label={$t('generic.basics')}
 					on:click={() => (currentStep = 0)}
 				/>
 				<ProgressStep
 					current={currentStep === 1}
 					label="Human Base Language"
-					description="The progress indicator will listen for clicks on the steps"
 					on:click={() => (currentStep = 1)}
 				/>
 			</ProgressIndicator>
@@ -180,13 +179,13 @@
 		{#if currentStep === 0}
 			<FormGroup>
 				<TextInput
-					labelText="Project name"
+					labelText={$t('project-name')}
 					bind:value={projectName}
 					invalid={projectName !== '' && projectNameIsValidInput === false}
 					invalidText={isValidMessageId(projectName) === false
-						? 'Invalid character'
-						: `${projectName} already exists.`}
-					placeholder="What is the name of the project?"
+						? $t('error.invalid-character')
+						: $t('error.entity-already-exists', { entity: projectName })}
+					placeholder={$t('name-of-project')}
 					bind:ref={projectNameElement}
 				/>
 			</FormGroup>
@@ -194,16 +193,15 @@
 				<MultiSelect
 					bind:selectedIds={selectedLanguageCodes}
 					direction="top"
-					titleText="Human languages"
-					placeholder={selectedLanguageCodes.length === 0
-						? 'In which human languages (English, German ...) do you want to offer your software?'
-						: ''}
+					titleText={$t('human-languages')}
+					placeholder={selectedLanguageCodes.length === 0 ? $t('human-languages-question') : ''}
 					filterable
 					items={allLanguagesWithCode()}
 				/>
 				{#if selectedLanguageCodes.length > 0}
 					<p class="pt-1">
-						Languages:
+						<!-- count:2 = to get plural -->
+						{$t('generic.language', { count: '2' })}:
 						{#each selectedLanguageCodes as isoCode, i}
 							{#if i + 1 !== selectedLanguageCodes.length}
 								{ISO6391.getName(isoCode) + ', '}
@@ -217,12 +215,12 @@
 		{:else if currentStep === 1 && selectedLanguageCodes.length === 0}
 			<InlineNotification
 				kind="warning"
-				title="You need to select at least one human language for the project."
+				title={$t('warning.one-language-is-required')}
 				hideCloseButton
 			>
 				<div slot="actions">
 					<NotificationActionButton on:click={() => (currentStep -= 1)}>
-						Go back
+						{$t('go-back')}
 					</NotificationActionButton>
 				</div>
 			</InlineNotification>
@@ -230,11 +228,10 @@
 			<SelectHumanLanguageTile
 				bind:selected={selectedSourceLanguageCode}
 				possibleLanguageCodes={selectedLanguageCodes}
-				legend="Select human base language"
+				legend={$t('select.human-base-language')}
 			/>
 			<p class="pt-4">
-				The (human) base language is the language used during development. In most cases it's
-				English.
+				{$t('definition.base-language')}
 			</p>
 		{/if}
 	</Form>

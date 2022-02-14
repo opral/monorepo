@@ -12,6 +12,7 @@
 	import SelectHumanLanguageTile from '$lib/components/tiles/SelectHumanLanguageTile.svelte';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
 	import { LanguageCode, Result } from '@inlang/common';
+	import { t } from '$lib/services/i18n';
 
 	let projectName = $projectStore.data?.project.name;
 
@@ -57,40 +58,38 @@
 </script>
 
 <div class="max-w-lg">
-	<h1 class="mb-1">Settings</h1>
+	<h1 class="mb-1">{$t('generic.settings')}</h1>
 	<br />
 	<ApiKey apiKey={$projectStore.data?.project.api_key ?? ''} />
 	<Divider />
-	<p>Rename project</p>
+	<p>{$t('rename-project')}</p>
 	<br />
 	<row class="items-start">
 		<TextInput
 			placeholder="Project Name"
 			bind:value={projectName}
 			invalid={projectName?.includes(' ')}
-			invalidText="The project name can not contain whitespace."
+			invalidText={$t('error.project-whitespace')}
 		/>
 		<Button
 			icon={Save16}
 			disabled={projectName === $projectStore.data?.project.name || projectName?.includes(' ')}
 			size="field"
-			on:click={() => renameProject()}>Save</Button
+			on:click={() => renameProject()}>{$t('generic.save')}</Button
 		>
 	</row>
 	<Divider />
-	<p class="pt-1">Change the human base language</p>
+	<p class="pt-1">{$t('change-base-language')}</p>
 	<p class="pt-1 pb-2 text-gray-600 text-sm">
-		The human base language is the language used during development and acts as source of truth of
-		source for the other languages (translations) in this project.
+		{$t('definition.base-language')}
 	</p>
 	<br />
 	<SelectHumanLanguageTile
 		selected={$projectStore.data?.project.base_language_code}
 		onSelect={(selectedLanguageCode) =>
 			confirmModal.show({
-				heading: 'Are you sure?',
-				message:
-					'You can always change the human base language again but usually there is no reason to do so.',
+				heading: $t('confirm.are-you-sure'),
+				message: $t('info.change-base-language'),
 				danger: false,
 				onConfirm: () => changeHumanBaseLanguage({ to: selectedLanguageCode })
 			})}
@@ -98,10 +97,10 @@
 	/>
 	<Divider />
 	<Tile>
-		<h2>Danger Zone</h2>
+		<h2>{$t('danger-zone')}</h2>
 		<br />
 		<Button icon={Delete16} kind="danger-tertiary" on:click={handleDeleteProjectClick}
-			>Delete this project</Button
+			>{$t('delete.project')}</Button
 		>
 	</Tile>
 	<DeleteProjectModal bind:this={deleteProjectModal} />
