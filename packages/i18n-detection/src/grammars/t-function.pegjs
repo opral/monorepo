@@ -9,8 +9,12 @@ Result = matches:(Possiblities / .)* {
 	return matches.filter((match) => typeof match === "object")
 }
 
-// a valid (fluent message or attribute) id
-Id = characters:([a-z]/[A-Z]/[0-9]/'_'/'-')* {
+// A valid id
+//
+// Note: The matching pattern is taken from the Fluent spec
+//       with one change: Combined message.attrbibute ids
+//       such as `login.hello` are matched.
+Id = characters:([a-z]/[A-Z]/[0-9]/'_'/'-'/'.')* {
 	// the id is the combination of all characters, hence .join()
 	// the location uses the location function from peggy
 	// https://peggyjs.org/documentation.html#locations
