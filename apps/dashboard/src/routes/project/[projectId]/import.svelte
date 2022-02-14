@@ -90,7 +90,9 @@
 		subtitle={$t('warning.no-merge-yet')}
 	>
 		<NotificationActionButton slot="actions">
-			<a href="https://github.com/inlang/inlang/discussions" target="_blank">{$t('learn-more')}</a>
+			<a href="https://github.com/inlang/inlang/discussions/101" target="_blank"
+				>{$t('learn-more')}</a
+			>
 		</NotificationActionButton>
 	</InlineNotification>
 	<br />
