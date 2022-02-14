@@ -17,6 +17,7 @@
 	import { database } from '$lib/services/database';
 	import { page } from '$app/stores';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
+	import { t } from '$lib/services/i18n';
 
 	export let open = false;
 
@@ -55,11 +56,11 @@
 
 <Modal
 	bind:open
-	modalHeading="New language"
-	primaryButtonText="Add"
+	modalHeading={$t('new.language')}
+	primaryButtonText={$t('generic.add')}
 	hasForm={true}
 	primaryButtonDisabled={isValidInput === false}
-	secondaryButtonText="Cancel"
+	secondaryButtonText={$t('generic.cancel')}
 	on:click:button--primary={handleConfirm}
 	on:click:button--secondary={() => (open = false)}
 	on:close
@@ -67,18 +68,21 @@
 >
 	<Form>
 		<FormGroup>
-			<Select labelText="Language" bind:selected={selectedLanguageIso}>
-				<SelectItem value="none" text="Select a language" disabled hidden />
+			<Select
+				labelText={$t('generic.language', { count: '1' })}
+				bind:selected={selectedLanguageIso}
+			>
+				<SelectItem value="none" text={$t('select.language')} disabled hidden />
 				{#each availableLanguages as language}
 					<SelectItem value={language.code} text={`${language.name} - ${language.code}`} />
 				{/each}
 			</Select>
 		</FormGroup>
-		<InlineNotification hideCloseButton kind="info" subtitle="Looking for country codes?">
+		<InlineNotification hideCloseButton kind="info" subtitle={$t('looking-for-country-codes')}>
 			<div slot="actions">
 				<NotificationActionButton>
 					<OutboundLink href="https://github.com/inlang/inlang/discussions/80">
-						Upvote feature
+						{$t('upvote-feature')}
 					</OutboundLink>
 				</NotificationActionButton>
 			</div>
@@ -87,12 +91,12 @@
 		<InlineNotification
 			hideCloseButton
 			kind="warning"
-			subtitle="Messages are not machine translated for newly added languages."
+			subtitle={$t('warning.new-messages-not-machine-translated')}
 		>
 			<div slot="actions">
 				<NotificationActionButton>
 					<OutboundLink href="https://github.com/inlang/inlang/discussions/77">
-						Upvote feature
+						{$t('upvote-feature')}
 					</OutboundLink>
 				</NotificationActionButton>
 			</div>

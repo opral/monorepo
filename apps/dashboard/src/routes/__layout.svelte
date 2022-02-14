@@ -1,3 +1,15 @@
+<script context="module" lang="ts">
+	import { loadResources } from '$lib/services/i18n';
+	import type { LoadInput, LoadOutput } from '@sveltejs/kit';
+	export async function load({ fetch }: LoadInput): Promise<LoadOutput> {
+		// fetching the translations with sveltekits load function https://kit.svelte.dev/docs/migrating#pages-and-layouts-preload
+		await loadResources({ fetch });
+		return {
+			status: 200
+		};
+	}
+</script>
+
 <!-- 
 	This layout acts as authentification layer. 
 -->
@@ -12,6 +24,7 @@
 	import { InlineNotification } from 'carbon-components-svelte';
 	import { analytics } from '$lib/services/analytics';
 	import { env } from '$lib/env';
+	import { t } from '$lib/services/i18n';
 
 	$: outerWidth = 0;
 
@@ -59,7 +72,7 @@
 		<InlineNotification
 			kind="warning"
 			title="Notice:"
-			subtitle="Website is not optimized for mobile."
+			subtitle={$t('warning.no-optimized-for-mobile')}
 			hideCloseButton={false}
 		/>
 	{/if}

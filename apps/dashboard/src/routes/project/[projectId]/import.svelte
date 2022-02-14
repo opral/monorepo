@@ -19,6 +19,7 @@
 		TextArea
 	} from 'carbon-components-svelte';
 	import DocumentImport32 from 'carbon-icons-svelte/lib/DocumentImport32';
+	import { t } from '$lib/services/i18n';
 
 	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
 	let importTextField = '';
@@ -80,25 +81,25 @@
 {#if $projectStore.data === undefined || $projectStore.data?.languages.length === 0}
 	<InlineNotification title="Error fetching data" />
 {:else}
-	<h1 class="mb-1">Import</h1>
-	<p>Copy and paste your local files into inlang.</p>
+	<h1 class="mb-1">{$t('generic.import')}</h1>
+	<p>{$t('info.import')}</p>
 	<InlineNotification
 		hideCloseButton
 		kind="warning"
-		title="Importing translations overwrites existent translations."
-		subtitle="Inlang has no merge functionality yet."
+		title={$t('warning.import-overwrite')}
+		subtitle={$t('warning.no-merge-yet')}
 	>
 		<NotificationActionButton slot="actions">
-			<a href="https://github.com/inlang/inlang/discussions" target="_blank">Learn more</a>
+			<a href="https://github.com/inlang/inlang/discussions" target="_blank">{$t('learn-more')}</a>
 		</NotificationActionButton>
 	</InlineNotification>
 	<br />
 	<SerializedResource bind:selectedLanguageCode bind:selectedConverter {resources}>
 		<TextArea
 			slot="code-field"
-			placeholder="Paste your file here"
+			placeholder={$t('paste-file-here')}
 			style="height: 60vh;"
-			labelText="File"
+			labelText={$t('generic.file')}
 			invalidText={errorMessage}
 			invalid={hasError}
 			bind:value={importTextField}
@@ -111,12 +112,12 @@
 					icon={DocumentImport32}
 					on:click={handleImport}
 				>
-					Import
+					{$t('generic.file')}
 				</Button>
 			{:else}
 				<InlineLoadingWrapper
-					activeDescription="Importing translations..."
-					finishedDescription="Translations imported"
+					activeDescription={$t('loading.importing-translations')}
+					finishedDescription={$t('loading.importing-translations-finished')}
 					bind:status={loadingStatus}
 				/>
 			{/if}

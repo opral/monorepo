@@ -22,6 +22,7 @@
 	import LogoGithub32 from 'carbon-icons-svelte/lib/LogoGithub32';
 	import Send32 from 'carbon-icons-svelte/lib/SendFilled32';
 	import Divider from '$lib/layout/Divider.svelte';
+	import { t } from '$lib/services/i18n';
 	let email = '';
 
 	$: inputIsValidEmail = isValidEmail(email);
@@ -37,7 +38,7 @@
 			if (error) {
 				throw error;
 			}
-			alert('Check your email for the login link!');
+			alert($t('login.check-email'));
 		} catch (error) {
 			const err = error as PostgrestError;
 			alert(err.message);
@@ -69,9 +70,9 @@
 
 <div class="flex items-center h-screen absolute top-0">
 	<column class="space-y-2 w-80 m-5">
-		<h1>Log in</h1>
+		<h1>{$t('login.log-in')}</h1>
 		<p class="text-gray-600 text-xs">
-			An account is automatically created when you log in. There is no need to explicitly register.
+			{$t('login.account-auto-created')}
 		</p>
 		<Divider />
 		{#if env.VITE_IS_DEVELOPMENT}
@@ -85,14 +86,14 @@
 			<Divider />
 		{/if}
 		<!-- GITHUB LOG IN -->
-		<p class="text-gray-600 text-xs">Social Auth Login</p>
+		<p class="text-gray-600 text-xs">{$t('login.social-auth')}</p>
 		<Button
 			kind="tertiary"
 			class="w-full justify-start"
 			on:click={handleGithubLogin}
 			icon={LogoGithub32}
 		>
-			Log in with GitHub
+			{$t('login.github')}
 		</Button>
 		<!-- <div class="h-2"></div>
 	<p class="text-gray-600 text-xs">Coming soon</p>
@@ -106,9 +107,9 @@
 		Log in with Discord
 	</Button> -->
 		<Divider />
-		<p class="text-gray-600 text-xs">Log in with email</p>
+		<p class="text-gray-600 text-xs">{$t('login.email')}</p>
 		<!-- MAGIC LINK LOG IN -->
-		<TextInput type="email" bind:value={email} placeholder="your e-mail" />
+		<TextInput type="email" bind:value={email} placeholder={$t('login.enter-mail')} />
 		<Button
 			class="w-full"
 			disabled={inputIsValidEmail === false}
@@ -116,12 +117,14 @@
 			on:click={handleLogin}
 			icon={Send32}
 		>
-			Send login link
+			{$t('login.send-magic-link')}
 		</Button>
 		<Divider />
 		<p class="text-gray-600 text-sm">
-			Need help?
-			<OutboundLink href="https://discord.com/invite/CUkj4fgz5K">Join our Discord</OutboundLink>
+			{$t('login.need-help')}
+			<OutboundLink href="https://discord.com/invite/CUkj4fgz5K"
+				>{$t('login.join-discord')}
+			</OutboundLink>
 		</p>
 	</column>
 </div>

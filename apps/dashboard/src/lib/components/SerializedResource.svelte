@@ -5,6 +5,7 @@
 	import { Dropdown } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import SelectHumanLanguageTile from './tiles/SelectHumanLanguageTile.svelte';
+	import { t } from '$lib/services/i18n';
 
 	export let resources: Resources;
 
@@ -32,7 +33,7 @@
 		<div class="col-span-1">
 			<Dropdown
 				class="w-fill"
-				titleText="Select the format"
+				titleText={$t('select.format')}
 				bind:selectedIndex={selectedConverterIndex}
 				items={Object.entries(converters).map(([format], index) => ({
 					id: '' + index,
@@ -41,7 +42,7 @@
 			/>
 			<br />
 			<SelectHumanLanguageTile
-				legend="Select the human language"
+				legend={$t('select.human-language')}
 				bind:selected={selectedLanguageCode}
 				possibleLanguageCodes={resources.containedLanguageCodes()}
 			/>

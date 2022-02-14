@@ -5,7 +5,7 @@
 	import DocumentExport24 from 'carbon-icons-svelte/lib/DocumentExport24';
 	import DocumentImport24 from 'carbon-icons-svelte/lib/DocumentImport24';
 	import Group24 from 'carbon-icons-svelte/lib/Group24';
-
+	import { t } from '$lib/services/i18n';
 	import { SideNavItems, SideNavLink, SideNav } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 
@@ -17,23 +17,27 @@
 		<SideNavLink icon={Chat24} text="Messages" href="/project/{$page.params.projectId}/messages" />
 		<SideNavLink
 			icon={Language24}
-			text="Languages"
+			text={$t('generic.language', { count: '2' })}
 			href="/project/{$page.params.projectId}/languages"
 		/>
 		<SideNavLink
 			icon={DocumentImport24}
-			text="Import"
+			text={$t('generic.import')}
 			href="/project/{$page.params.projectId}/import"
 		/>
 		<SideNavLink
 			icon={DocumentExport24}
-			text="Export"
+			text={$t('generic.export')}
 			href="/project/{$page.params.projectId}/export"
 		/>
-		<SideNavLink icon={Group24} text="Members" href="/project/{$page.params.projectId}/members" />
+		<SideNavLink
+			icon={Group24}
+			text={$t('generic.members')}
+			href="/project/{$page.params.projectId}/members"
+		/>
 		<SideNavLink
 			icon={Settings24}
-			text="Settings"
+			text={$t('generic.settings')}
 			href="/project/{$page.params.projectId}/settings"
 		/>
 	</SideNavItems>

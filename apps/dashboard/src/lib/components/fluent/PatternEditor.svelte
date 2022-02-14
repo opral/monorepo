@@ -2,6 +2,7 @@
 	import { parsePattern } from '@inlang/fluent-syntax';
 	import { lintPattern } from '@inlang/fluent-lint';
 	import { TextArea } from 'carbon-components-svelte';
+	import { t } from '$lib/services/i18n';
 
 	/**
 	 * Is used to lint the pattern.
@@ -32,7 +33,7 @@
 			if (emptyPatternIsOk) {
 				return { value: true };
 			} else {
-				return { value: false, message: 'Missing the pattern for this language.' };
+				return { value: false, message: $t('error.missing-pattern') };
 			}
 		}
 		// need to parse the patterns in order to lint.
@@ -47,7 +48,7 @@
 			if (parsedSource.isErr) {
 				return {
 					value: false,
-					message: 'Could not parse the source message. This is a bug. Please report it.'
+					message: $t('error.unparsable')
 				};
 			}
 			const lint = lintPattern({ source: parsedSource.value, target: parsed.value });

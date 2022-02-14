@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from 'carbon-components-svelte';
 	import { database } from '$lib/services/database';
+	import { t } from '$lib/services/i18n';
 	import type { definitions } from '@inlang/database';
 
 	export function show(args: { project: definitions['project']; onDeletion: () => unknown }): void {
@@ -13,7 +14,7 @@
 		open = false;
 	}
 
-	let project: definitions['project'];
+	let project: definitions['project'] | undefined;
 	let onDeletion: () => unknown;
 	let open = false;
 
@@ -21,7 +22,7 @@
 		const deleteRequest = await database
 			.from<definitions['project']>('project')
 			.delete()
-			.eq('id', project.id);
+			.eq('id', project?.id ?? '');
 		if (deleteRequest.error) {
 			alert(deleteRequest.error.message);
 		} else {
@@ -34,11 +35,11 @@
 <Modal
 	bind:open
 	danger
-	modalHeading={`Delete ${project?.name}`}
-	primaryButtonText="Delete"
-	secondaryButtonText="Cancel"
+	modalHeading={$t('delete-project', { projectName: project?.name ?? '' })}
+	primaryButtonText={$t('generic.delete')}
+	secondaryButtonText={$t('generic.cancel')}
 	on:click:button--primary={deleteProject}
 	on:click:button--secondary={() => (open = false)}
 >
-	<p>Are you sure? This is a permanent action and cannot be undone.</p>
+	<p>{$t('confirm.generic')}</p>
 </Modal>

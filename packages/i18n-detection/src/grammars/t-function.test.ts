@@ -66,3 +66,9 @@ it('should only return location of the id', () => {
         sourceCode.slice(matches[0].location.start.offset, matches[0].location.end.offset)
     ).toBe('some-id');
 });
+
+it('should detect combined message.attribute ids', () => {
+    const sourceCode = ` t('some-message.with-attribute')`;
+    const matches = parser.parse(sourceCode) as Match[];
+    expect(matches[0].id === 'some-message.with-attribute');
+});

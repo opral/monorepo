@@ -6,6 +6,7 @@
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
 	import { isValidMessageId, isValidAttributeId } from '@inlang/fluent-syntax';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
+	import { t } from '$lib/services/i18n';
 
 	let open = false;
 
@@ -36,12 +37,11 @@
 	let isValidId: () => { value: boolean; message: string };
 	$: isValidId = () => {
 		if (id.includes('.') === false) {
-			return { value: false, message: "The id must contain a dot '.' if you create an attribute." };
+			return { value: false, message: $t('error.attribute-must-contain-dot') };
 		} else if (id.split('.').length > 2) {
 			return {
 				value: false,
-				message:
-					"The id can only contain one dot '.' because a message can only have one nested layer of attributes."
+				message: $t('error.only-one-nested-attribute-allowed')
 			};
 		}
 		// attribute id is not written out yet
@@ -56,7 +56,7 @@
 		) {
 			return {
 				value: false,
-				message: 'The id contains an invalid character.'
+				message: $t('error.id-invalid-character')
 			};
 		} else if (
 			$projectStore.data?.resources.attributeExists({
@@ -67,7 +67,7 @@
 		) {
 			return {
 				value: false,
-				message: 'Attribute exists already.'
+				message: $t('error.attribute-exists')
 			};
 		}
 		return {
@@ -114,10 +114,10 @@
 
 <Modal
 	bind:open
-	modalHeading="New attribute"
+	modalHeading={$t('new.attribute')}
 	size="sm"
-	primaryButtonText="Create"
-	secondaryButtonText="Cancel"
+	primaryButtonText={$t('generic.create')}
+	secondaryButtonText={$t('generic.cancel')}
 	on:click:button--secondary={() => {
 		open = false;
 	}}
@@ -126,7 +126,7 @@
 	primaryButtonDisabled={isValidInput === false}
 	shouldSubmitOnEnter={false}
 >
-	<p>Attributes help bundling multiple separate messages within a single message (id).</p>
+	<p>{$t('definition.attribute')}</p>
 	<br />
 	<img class="h-10" src="/attribute-visualization.svg" alt="Attribute visualization." />
 	<br />
@@ -147,16 +147,16 @@
 		rows={2}
 		labelText={`Pattern`}
 		bind:value={serializedPattern}
-		helperText={`Remember, the pattern must be written in ${ISO6391.getName(
-			$projectStore.data?.project.base_language_code ?? ''
-		)}.`}
+		helperText={$t('info.new-pattern-base-language', {
+			baseLanguageCode: $projectStore.data?.project.base_language_code ?? ''
+		})}
 	/>
 	<br />
 	{#if status !== 'inactive'}
 		<InlineLoadingWrapper
 			{status}
-			activeDescription="Creating the attribute..."
-			finishedDescription="Attribute has been created."
+			activeDescription={$t('loading.creating-attribute')}
+			finishedDescription={$t('loading.attribute-created')}
 		/>
 	{/if}
 </Modal>

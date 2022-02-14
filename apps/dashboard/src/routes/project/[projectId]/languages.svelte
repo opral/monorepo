@@ -17,6 +17,7 @@
 	import ISO6391 from 'iso-639-1';
 	import DeleteLanguageModal from '$lib/components/modals/DeleteLanguageModal.svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
+	import { t } from '$lib/services/i18n';
 
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
@@ -97,8 +98,8 @@
 	};
 </script>
 
-<h1 class="mb-1">Languages</h1>
-<p>Your project's languages.</p>
+<h1 class="mb-1">{$t('generic.language', { count: '2' })}</h1>
+<p>{$t('info.languages')}</p>
 <br />
 
 <DataTable {headers} rows={rows()}>
@@ -106,20 +107,13 @@
 		<!-- Yes, the cancel button should be red too but haven't found a way to do so. -->
 		<ToolbarContent>
 			<ToolbarSearch bind:value={searchQuery} />
-			<Button icon={Add16} on:click={() => (createLanguageModal.show = true)}>Add language</Button>
+			<Button icon={Add16} on:click={() => (createLanguageModal.show = true)}
+				>{$t('add.language')}</Button
+			>
 		</ToolbarContent>
 	</Toolbar>
 	<span slot="cell-header" let:header>
-		{#if header.key === 'progress'}
-			<div class="flex items-center">
-				<p class="text-sm font-semibold">{header.value}</p>
-				<Tooltip class="pt-1.5">
-					<p>The percentage of reviewed translations.</p>
-				</Tooltip>
-			</div>
-		{:else}
-			{header.value}
-		{/if}
+		{header.value}
 	</span>
 	<span slot="cell" let:row let:cell>
 		{#if cell.key === 'isoCode'}
@@ -127,7 +121,7 @@
 				<p class="text-sm">{ISO6391.getName(cell.value)}</p>
 				<Tag type="blue">{cell.value}</Tag>
 				{#if row.isDefaultLanguage}
-					<Tag type="green">Default human language</Tag>
+					<Tag type="green">{$t('human-base-language')}</Tag>
 				{/if}
 			</div>
 		{:else if cell.key === 'actions'}
@@ -136,7 +130,7 @@
 					kind="ghost"
 					disabled={row.isDefaultLanguage}
 					icon={Delete16}
-					iconDescription="Delete language"
+					iconDescription={$t('delete.language')}
 					tooltipAlignment="start"
 					tooltipPosition="left"
 					on:click={() => {

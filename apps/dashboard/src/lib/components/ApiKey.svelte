@@ -3,6 +3,7 @@
 	import { Button, CodeSnippet } from 'carbon-components-svelte';
 	import View16 from 'carbon-icons-svelte/lib/View16';
 	import ViewOff16 from 'carbon-icons-svelte/lib/ViewOff16';
+	import { t } from '$lib/services/i18n';
 
 	export let apiKey: definitions['project']['api_key'];
 
@@ -13,8 +14,7 @@
 
 <p class="pt-1">API key</p>
 <p class="pt-1 text-gray-600 text-sm">
-	If you are not a developer, you won't need the API key. The API key can be used to make requests
-	with the CLI. Don't share the key with anyone who should not have access to this project.
+	{$t('info.api-key')}
 </p>
 <br />
 <row>
