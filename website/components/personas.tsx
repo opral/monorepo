@@ -1,3 +1,5 @@
+import ReactPlayer from "react-player/youtube";
+
 const Personas = () => {
   return (
     // -mx-20 to escape the boundries of the theme
@@ -126,27 +128,73 @@ const Personas = () => {
       <div className="lg:col-span-2">
         <OnePersona
           title="Product Managers"
-          subheader="Ship your product faster."
-        >
-          <div className="flex pt-6 gap-4 items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 5l7 7-7 7M5 5l7 7-7 7"
+          subheader="Ship your product faster. See inlang in action:"
+          features={
+            <>
+              <Feature
+                icon={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"
+                    />
+                  </svg>
+                }
+                title="No more handoff"
               />
-            </svg>
-            <div className="text-4xl font-bold italic">
-              Automate your translation pipeline.
-            </div>
-          </div>
+              <Feature
+                icon={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                }
+                title="No more email"
+              />
+              <Feature
+                icon={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                }
+                title="No more excel"
+              />
+            </>
+          }
+        >
+          <ReactPlayer
+            url="https://youtu.be/cEjEAcAFfsA?t=132"
+            controls={true}
+          />
         </OnePersona>
       </div>
     </div>
