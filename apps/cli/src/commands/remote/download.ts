@@ -11,6 +11,7 @@ import fs from 'fs';
 import { Result } from '@inlang/common';
 import fetch from 'node-fetch';
 import dedent from 'dedent';
+import prompts from 'prompts';
 
 export const download = new Command()
     .command('download')
@@ -41,6 +42,22 @@ export const download = new Command()
             return consola.error(`--path-pattern must include "{languageCode}"`);
         }
         // end of validation
+        // start confirmation
+        const response = await prompts({
+            type: 'confirm',
+            name: 'confirm',
+            initial: false,
+            message: dedent`
+              ⚠️ Local translation files will be overwritten!
+                Inlang does not support merging yet. See https://github.com/inlang/inlang/discussions/101
+
+                Continue?
+            `,
+        });
+        if (response.confirm === false) {
+            return;
+        }
+        // end confirmation
         const converter = converters[options.format as SupportedConverter];
         consola.info('Downloading files...');
         const fluentFiles = await getRemoteFiles({ apiKey: options.apiKey });

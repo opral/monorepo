@@ -11,6 +11,7 @@ import {
 import fs from 'fs';
 import fetch from 'node-fetch';
 import dedent from 'dedent';
+import prompts from 'prompts';
 
 export const upload = new Command()
     .command('upload')
@@ -41,6 +42,22 @@ export const upload = new Command()
             return consola.error(`--path-pattern must include "{languageCode}"`);
         }
         // end of validation
+        // start confirmation
+        const response = await prompts({
+            type: 'confirm',
+            name: 'confirm',
+            initial: false,
+            message: dedent`
+              ⚠️ Remote translation files will be overwritten!
+                Inlang does not support merging yet. See https://github.com/inlang/inlang/discussions/101
+
+                Continue?
+            `,
+        });
+        if (response.confirm === false) {
+            return;
+        }
+        // end confirmation
         const converter = converters[options.format as SupportedConverter];
         const localFiles = [];
         for (const languageCode of languageCodes) {
