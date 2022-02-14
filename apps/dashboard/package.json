@@ -29,12 +29,14 @@
 		]
 	},
 	"devDependencies": {
+		"@inlang/cli": "^0.1.7",
 		"@inlang/eslint-config": "*",
 		"@sveltejs/adapter-node": "^1.0.0-next.67",
 		"@sveltejs/eslint-config": "github:sveltejs/eslint-config",
 		"@sveltejs/kit": "1.0.0-next.241",
 		"@testing-library/jest-dom": "^5.14.1",
 		"@testing-library/svelte": "^3.0.3",
+		"@types/js-cookie": "^3.0.1",
 		"@types/lodash-es": "^4.17.5",
 		"@types/node": "^16.9.6",
 		"autoprefixer": "^10.4.0",
@@ -56,15 +58,17 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@fluent/bundle": "^0.17.1",
 		"@inlang/common": "*",
 		"@inlang/database": "*",
-		"@inlang/fluent-syntax-converters": "*",
 		"@inlang/fluent-lint": "*",
 		"@inlang/fluent-syntax": "*",
+		"@inlang/fluent-syntax-converters": "*",
 		"@netlify/functions": "^0.11.0",
 		"@now/build-utils": "^2.7.0",
 		"dotenv": "^10.0.0",
 		"iso-639-1": "^2.1.9",
+		"js-cookie": "^3.0.1",
 		"lodash-es": "^4.17.21",
 		"posthog-js": "^1.17.6",
 		"svelte-fluttered": "^0.3.0"
