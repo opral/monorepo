@@ -1,9 +1,101 @@
 ---
-date: 2022/01/25
+date: 2022/02/14
 description: Inlang v0.2 is released.
 tag: web development
 authors: [Samuel Stroschein]
 type: post
 ---
 
-# Coming soon
+import ReactPlayer from "react-player/youtube";
+import Callout from "../../components/callout";
+
+# Inlang v0.2 is out. More or less rewritten from scratch.
+
+## What changed?
+
+- **Inlang is now built on top of and around Mozilla's new Fluent system.**  
+  Standardizing the localization process starts with standardizing the file format. Mozilla recently released [Fluent](https://projectfluent.org),
+  a dedicated system solely to express human languages and solve problems with other i18n systems (file formats). While not perfect,
+  it seems to be the best format and system to build an ecosystem around. [Here](https://hacks.mozilla.org/2019/04/fluent-1-0-a-localization-system-for-natural-sounding-translations/)
+  is a deeper article about Fluent.
+- **Everything, including the dashboard, acts directly on parsed translation files instead of a (relational) database.**  
+  The problems inlang tries to solve are difficult and the solutions not obvious. By building the dashboard (the localization problem)
+  to act on top of parsed files, code can be shared with the developer tools (internationalization problem) for the time being.
+
+## The goal of inlang
+
+With v0.2 the goal of inlang takes a concreter shape: **Standardize the
+internationalization/localization process of software.**
+Starting by explaining the difference between those two terms.
+Wikipedia describes the differences as following
+
+> Internationalization is the process of designing a software application
+> so that it can be adapted to various languages and regions without engineering changes.
+> Localization is the process of adapting internationalized software for a specific region
+> or language by translating text and adding locale-specific components. [0]
+
+**Internationalizing software should be plug and play, yet it's not.** Every programming language,
+framework and library comes with its own solutions to something that should be straightforward:
+Text in source code should be displayed in the corresponding language of the user.
+It's less frustrating to set up Stripe than to set up internationalization.
+Inlang is out there to change that status quo by building a series of developer
+tools starting with the [VSCode extension](https://github.com/inlang/inlang/tree/main/apps/vs-code-extension).
+
+**Localizing software (content) involves tons of manual tasks that are doomed to be automated**: hand-offs via email,
+collaboration via excel spreadsheets, no (automated) Q&A pipelines, no version control, the list goes on.
+Inlang is going to address that problem space too.
+Version 0.2 eliminates hand-offs and collaboration via excel spreadsheets.
+
+<Callout>
+  Inlang is early and by no means has found the best answers to address the
+  problems mentioned above. Take [part in the
+  discussions](https://github.com/inlang/inlang/discussions) and help make
+  internationalization and localization easier than setting up Stripe.
+</Callout>
+
+## Demo
+
+<ReactPlayer url="https://youtu.be/cEjEAcAFfsA?t=132" controls={true} />
+
+## History
+
+### September 2021: Proof of Concept II
+
+The previous proof of concept was limited to specific web-frameworks like NextJS and SvelteKit. It became clear
+that for most software stacks, having the translations living in the source code is ensured more compatibility.
+
+The proof of concept II made use of a GitHub integration to commit translation file (changes) to source code
+instead of relying on SSR. The app still "reported" missing translations, the main pain that got me started
+working on inlang.
+
+<br />
+
+<ReactPlayer
+  url="https://www.youtube.com/watch?v=mivXTx-cpcM"
+  controls={true}
+/>
+
+### Early August 2021: "Can't i18n be easier?" Proof of Concept posted on Reddit
+
+By the time of the reddit post, I had an IoT company with a B2C app that had to be offered in German and English. Even though I am fluent
+in German (and somewhat) English, internationalizing the app was a pain. I used the summer break to develop a proof of concept which
+would solve one of my main pains: missing translations.
+
+To solve the problem, I had a relatively simple idea. Why does the app not "report" the translations it needs?
+
+https://www.reddit.com/r/sveltejs/comments/p4h6bg/proof_of_concept_internationalize_a_svelte_app_in/
+
+<br />
+
+<ReactPlayer
+  url="https://www.youtube.com/watch?v=6xzbc6QYzDs"
+  controls={true}
+/>
+
+Btw, I did not plan to develop inlang further after that reddit post. I was about to start my masters
+and knew I would be easily distracted otherwise. However, by coincidance, my proof of concept and myself ended up as part
+of project within my masters which meant the further development of inlang, and touchée, dropping out of my masters.
+
+#### Footnotes
+
+[0] https://en.wikipedia.org/wiki/Internationalization_and_localization#:~:text=Internationalization%20is%20the%20process%20of,and%20adding%20locale%2Dspecific%20components.
