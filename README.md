@@ -16,7 +16,7 @@ Inlang is an open source localization solution for software build on top [Mozill
 
 ## Goal
 
-Make internationalization and localization of software 2x,3x,4x faster through developer tools and automation. 
+Make internationalization and localization of software X times faster through standardization, developer tools and automation. 
 
 ## Status
 
