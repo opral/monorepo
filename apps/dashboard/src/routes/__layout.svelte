@@ -22,23 +22,9 @@
 	import UiShell from '$lib/layout/UiShell.svelte';
 	import { page } from '$app/stores';
 	import { InlineNotification } from 'carbon-components-svelte';
-	import { analytics } from '$lib/services/analytics';
-	import { env } from '$lib/env';
 	import { t } from '$lib/services/i18n';
 
 	$: outerWidth = 0;
-
-	// initialize analytics if token is defined and is production
-	if (
-		env.VITE_PUBLIC_POSTHOG_TOKEN &&
-		env.VITE_PUBLIC_POSTHOG_API_HOST &&
-		env.VITE_IS_DEVELOPMENT !== false
-	) {
-		analytics.init(env.VITE_PUBLIC_POSTHOG_TOKEN, {
-			api_host: env.VITE_PUBLIC_POSTHOG_API_HOST,
-			debug: true
-		});
-	}
 
 	// check whether a user exists / is logged in
 	const user = auth.user();
@@ -46,10 +32,6 @@
 	// lead to constant redirects
 	if (user === null && $page.url.href.includes('auth') === false) {
 		goto('auth');
-	}
-
-	if (user) {
-		analytics.identify(user.id, { email: user.email });
 	}
 
 	if (browser) {

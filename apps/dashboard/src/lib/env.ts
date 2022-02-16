@@ -7,9 +7,6 @@ type ClientSideEnvironmentVariables = {
 	VITE_PUBLIC_AUTH_REDIRECT_URL: string;
 	VITE_PUBLIC_SUPABASE_ANON_KEY: string;
 	VITE_PUBLIC_SUPABASE_URL: string;
-	// if undefined -> no analytics
-	VITE_PUBLIC_POSTHOG_TOKEN: string | undefined;
-	VITE_PUBLIC_POSTHOG_API_HOST: string | undefined;
 };
 
 /**
@@ -28,7 +25,5 @@ export const env: ClientSideEnvironmentVariables = {
 		: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiJ9.ZopqoUt20nEV9cklpv9e3yw3PVyZLmKs5qLD6nGL1SI',
 	VITE_PUBLIC_SUPABASE_URL: import.meta.env.VITE_PUBLIC_SUPABASE_URL
 		? import.meta.env.VITE_PUBLIC_SUPABASE_URL.toString()
-		: 'http://localhost:54321',
-	VITE_PUBLIC_POSTHOG_TOKEN: import.meta.env.VITE_PUBLIC_POSTHOG_TOKEN?.toString(),
-	VITE_PUBLIC_POSTHOG_API_HOST: import.meta.env.VITE_PUBLIC_POSTHOG_API_HOST?.toString()
+		: 'http://localhost:54321'
 };
