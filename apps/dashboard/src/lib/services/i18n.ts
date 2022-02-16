@@ -1,5 +1,5 @@
 /**
- * Taken from https://github.com/inlang/awesome-fluent/tree/main/examples/svelte-kit
+ * Taken from https://github.com/inlang/awesome-fluent-i18n/tree/main/examples/svelte-kit
  */
 
 import { FluentBundle, FluentResource } from '@fluent/bundle';
