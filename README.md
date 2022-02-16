@@ -12,9 +12,7 @@
 
 # Inlang
 
-> Difference between internationalization and localization? -> [Wikipedia definition](https://en.wikipedia.org/wiki/Internationalization_and_localization#:~:text=Internationalization%20is%20the%20process%20of,and%20adding%20locale%2Dspecific%20components.)
-
-Inlang is an ecosystem of developer tools (speeding up internationalization of software) and localization platform. 
+Inlang is building an ecosystem of developer tools and a localization platform. 
  
 
 ## Goal 
