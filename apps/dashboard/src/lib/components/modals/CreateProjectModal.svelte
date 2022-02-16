@@ -144,7 +144,7 @@
 <Modal
 	bind:open
 	modalHeading={$t('new.project')}
-	primaryButtonText={currentStep === 0 ? $t('generic.next') : $t('generic.cancel')}
+	primaryButtonText={currentStep === 0 ? $t('generic.next') : $t('generic.create')}
 	primaryButtonDisabled={currentStepIsValid() === false && isValidInput === false}
 	hasForm={true}
 	hasScrollingContent={selectedLanguageCodes.length > 5}
