@@ -12,28 +12,67 @@
 
 # Inlang
 
-Inlang is an open source localization solution for software build on top [Mozilla's Fluent system](https://projectfluent.org/).
+> Difference between internationalization and localization? -> [Wikipedia definition](https://en.wikipedia.org/wiki/Internationalization_and_localization#:~:text=Internationalization%20is%20the%20process%20of,and%20adding%20locale%2Dspecific%20components.)
 
-## Goal
+Inlang is an ecosystem of developer tools (speeding up internationalization of software) and a localization platform (the dashboard). In addition to providing "ready-made" apps, inlang itself is split into smaller packages that can be leveraged by developers to build additional solutions.
+ 
 
-Make internationalization and localization of software X times faster through standardization, developer tools and automation. 
+## Goal 
 
-## Status
+Internationalization and localization of software should be 2x, 3x, 4x faster. 
+  
 
-[x] Alpha: Sufficient to manage translations for apps. Exploration phase to determine additional features.  
-[ ] Beta: Sufficient for medium sized software projects with multiple components.  
-[ ] Release: Production ready.
+## Apps
 
-## Features
+> :bulb: The apps and features you see below are the features that are available right now. More is planned.
 
-[x] Collaboration on translations with non-technical team members or translators.  
-[x] Machine translations.  
-[x] Linting of translations (in the dashboard).  
-[x] Synchronize translations (via the CLI or Copy & Paste).  
-[] Over the air updates without releasing a new version of your app.  
-[] Self-hostable, see [this discussion](https://github.com/inlang/inlang/discussions/65).
 
-Are you missing a feature? Head over to discussion to [request a new feature](https://github.com/inlang/inlang/discussions).
+### [cli](apps/cli)  
+Synchronize translation files in source code with remote translation files used by non-technical team members and translators. 
+
+Besides synchronization between the dashboard and source code, the CLI is supposed to provide additional tooling like linting the source code, extracting translations etc. If you have more ideas, open a discussion. 
+
+### [dashboard](apps/dashboard)  
+Let non-technical team members and translators manage translations for you.
+
+![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
+
+
+### [vs-code-extension](apps/vs-code-extension)  
+Extract and show patterns directly in your IDE. 
+
+> :bulb: The VS Code extension works independently of the dashboard and CLI.
+
+
+![Screen Recording 2022-02-15 at 15 02 26](https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif)
+
+
+## Packages
+
+> :bulb: Only published packages are listed below. For all packages open the [packages/](packages/) directory.
+
+### [fluent-syntax](packages/fluent-syntax)  
+Fluent (syntax) AST.  
+
+This package is a wrapper around the official [@fluent/syntax](https://projectfluent.org/fluent.js/syntax/) package with additional classes, types and helper functions to increase ease of use of Fluent resources (as file, or AST).
+
+### [fluent-syntax-converters](packages/fluent-syntax-converters)  
+Parse and serialize i18n file formats/syntaxes other than [Fluent](https://projectfluent.org/) to and from Fluent.
+
+### [fluent-lint](packages/fluent-lint)  
+Lint Fluent AST types such as `Pattern` etc. 
+
+### [config](packages/config)  
+The inlang config schema and parser.
+
+### [common](packages/common)  
+Common types, helper function, etc. used throughout the inlang project.
+
+## Community & Support
+
+- [GitHub Discussions](https://github.com/inlang/inlang/discussions): feedback and questions.
+- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
+- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hang out with the community.
 
 ## Run Locally & Contribute
 
@@ -53,8 +92,3 @@ Are you missing a feature? Head over to discussion to [request a new feature](ht
 1. `npm install`
 2. `npm run dev -w @inlang/<package_name>`
 
-## Community & Support
-
-- [GitHub Discussions](https://github.com/inlang/inlang/discussions): feedback and questions.
-- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
-- [Discord](https://discord.gg/CUkj4fgz5K): contact the maintainers and hang out with the community.
