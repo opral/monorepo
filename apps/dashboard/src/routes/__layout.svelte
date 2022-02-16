@@ -29,8 +29,15 @@
 	$: outerWidth = 0;
 
 	// initialize analytics if token is defined and is production
-	if (env.VITE_PUBLIC_POSTHOG_TOKEN && env.VITE_IS_DEVELOPMENT !== false) {
-		analytics.init(env.VITE_PUBLIC_POSTHOG_TOKEN, { api_host: env.VITE_PUBLIC_POSTHOG_API_HOST });
+	if (
+		env.VITE_PUBLIC_POSTHOG_TOKEN &&
+		env.VITE_PUBLIC_POSTHOG_API_HOST &&
+		env.VITE_IS_DEVELOPMENT !== false
+	) {
+		analytics.init(env.VITE_PUBLIC_POSTHOG_TOKEN, {
+			api_host: env.VITE_PUBLIC_POSTHOG_API_HOST,
+			debug: true
+		});
 	}
 
 	// check whether a user exists / is logged in
