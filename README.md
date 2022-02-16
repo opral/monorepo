@@ -14,7 +14,7 @@
 
 > Difference between internationalization and localization? -> [Wikipedia definition](https://en.wikipedia.org/wiki/Internationalization_and_localization#:~:text=Internationalization%20is%20the%20process%20of,and%20adding%20locale%2Dspecific%20components.)
 
-Inlang is an ecosystem of developer tools (speeding up internationalization of software) and a localization platform (the dashboard). In addition to providing "ready-made" apps, inlang itself is split into smaller packages that can be leveraged by developers to build additional solutions.
+Inlang is an ecosystem of developer tools (speeding up internationalization of software) and localization platform. 
  
 
 ## Goal 
@@ -49,7 +49,7 @@ Extract and show patterns directly in your IDE.
 
 ## Packages
 
-> :bulb: Only published packages are listed below. For all packages open the [packages/](packages/) directory.
+Inlang is split into smaller packages that can be leveraged by developers.
 
 ### [fluent-syntax](packages/fluent-syntax)  
 Fluent (syntax) AST.  
