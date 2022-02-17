@@ -80,7 +80,7 @@ export default function Navbar({
               "no-underline whitespace-nowrap mr-4 hidden md:inline-block text-current"
             )}
           >
-            Forum
+            Discussions
           </a>
         </Link>
         {config.projectLink || config.github ? (
