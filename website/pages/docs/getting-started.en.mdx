@@ -3,20 +3,10 @@ import ReactPlayer from "react-player/youtube";
 
 # Getting Started
 
-You can setup inlang in three ways:
-
-1.  0:00 Increase developer productivity via the VSCode extension.
-2.  1:47 Let non-technical team members and translators manage translations.
-3.  Both of the above :)
-
-<br />
-
-<ReactPlayer url="https://youtu.be/cEjEAcAFfsA" controls={true} />
-
 <Callout>
   Inlang is build on top of [Mozilla's Fluent system](https://projectfluent.org/). In case you intend
   to use inlang with an i18n syntax/file format other than Fluent, please refer to
-  [using a converter](docs/architecture/overview#support-for-file-formats-other-than-fluent).
+  [using a converter](/docs/architecture/overview#build-on-top-of-fluent-1).
 
 In case you want to localize your app from scratch, use an [i18n library that supports Fluent](https://github.com/inlang/awesome-fluent-i18n).
 
@@ -25,9 +15,23 @@ In case you want to localize your app from scratch, use an [i18n library that su
 ## VSCode extension (takes 60 seconds)
 
 1. Install the VSCode extension [download link](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
-2. Run `npx inlang init` (node must be installed) in the terminal.
+2. Create an `inlang.config.json` file your project.
+
+   - Either run `npx @inlang/cli init` in the terminal (but node must be installed).
+   - Or manually create the JSON config:  
+     For an example and the config schema go to the [config reference](/docs/reference/config).
 
 ## Translation Management (takes 2 minutes)
 
 1. Create a project in [the dashboard](https://app.inlang.dev).
-2. Import your translations either via copy & paste or [the CLI](/docs/reference/cli-reference).
+2. Import your translations either via copy & paste or [the CLI](/docs/reference/cli).
+
+## Video tutorial
+
+1.  0:00 Introduction
+2.  0:27 Setup und use the VSCode extension.
+3.  1:47 Let non-technical team members and translators manage translations.
+
+<br />
+
+<ReactPlayer url="https://youtu.be/cEjEAcAFfsA" controls={true} />
