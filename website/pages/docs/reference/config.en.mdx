@@ -1,8 +1,38 @@
+import Callout from "$components/callout";
+
 # Config Reference
 
-For a full, and always up to date, reference go to [@inlang/config](https://github.com/inlang/inlang/tree/main/packages/config/src/schemas).
+The inlang config file makes use of [JSON Schema](https://json-schema.org/) for auto-complete and validation. The JSON
+Schema definitions can be found [here](https://github.com/inlang/inlang/tree/main/packages/config/src/schemas).
 
-`inlang.config.json`
+## Example
+
+See how the examplary config below is used by one of the examples in the awesome-fluent-i18n repository
+[here](https://github.com/inlang/awesome-fluent-i18n/blob/main/examples/svelte-kit/inlang.config.json).
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/inlang/inlang/main/packages/config/src/schemas/v0.1.json",
+  "fileFormat": "fluent",
+  "pathPattern": "./static/translations/{languageCode}.ftl",
+  "baseLanguageCode": "en",
+  "extractPatternReplacementOptions": [
+    "$t('{id}')",
+    "{$t('{id}')}",
+    "{@html $t('{id}')}"
+  ],
+  "fetchI18nDetectionGrammarFrom": "https://raw.githubusercontent.com/inlang/inlang/main/packages/i18n-detection/src/grammars/t-function.pegjs"
+}
+```
+
+## Reference
+
+Below is `v0.1` of the config schema as typescript type (for better readability):
+
+<Callout>
+  The type below is not a valid JSON file but resembles the schema. To be a
+  valid JSON, all properties need to be wrapped as strings.
+</Callout>
 
 ```ts
 {
