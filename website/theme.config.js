@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 export default {
   projectLink: "https://github.com/inlang/inlang",
   docsRepositoryBase:
-    "https://github.com/inlang/inlang/tree/main/website/pages/docs",
+    "https://github.com/inlang/inlang/tree/main/website/pages",
   projectChatLink: "https://discord.gg/CUkj4fgz5K",
   titleSuffix: " – inlang",
   logo: (
