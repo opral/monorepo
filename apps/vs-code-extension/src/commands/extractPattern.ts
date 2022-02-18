@@ -42,11 +42,19 @@ export const extractPatternCommand = {
       return vscode.window.showErrorMessage(invalidIdReason(id));
     }
     const replacementPattern = await vscode.window.showQuickPick(
-      state.config.extractPatternReplacementOptions.map((option) => option.replace(/{id}/, id)),
+      state.config.extractPatternReplacementOptions
+        .map((option) => option.replace(/{id}/, id))
+        .concat('How to edit these replacement options?'),
       { title: 'Select a pattern replacement option:' }
     );
     if (replacementPattern === undefined) {
       return;
+    } else if (replacementPattern === 'How to edit these replacement options?') {
+      await vscode.env.openExternal(
+        vscode.Uri.parse(
+          'https://inlang.dev/docs/reference/config#extractpatternreplacementoptions'
+        )
+      );
     }
     let create: Result<void, Error>;
     if (id.includes('.')) {
