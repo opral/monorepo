@@ -27,59 +27,83 @@ See how the examplary config below is used by one of the examples in the awesome
 
 ## Properties
 
-Below is `v0.1` of the config schema as typescript type (for better readability):
-
-<Callout>
-  The type below is not a valid JSON file but resembles the schema. To be a
-  valid JSON, all properties need to be wrapped as strings.
-</Callout>
+### `$schema`
 
 ```ts
-{
-    /**
-     * A link to the JSON schema.
-     *
-     * Go to https://github.com/inlang/inlang/tree/main/packages/config/src/schemas to see a list of all schemas.
-     *
-     * Using a schema enables auto-complete and linting in most IDE's via https://json-schema.org/.
-     * Furthermore, defining a version of the config file allows for changes down the line with auto-migration scripts.
-     */
-    $schema: string;
-    /**
-     * The file format of the local translation files.
-     *
-     * Any other file format than Fluent makes use of a converter.
-     * Read more about converters and their limitations here https://inlang.dev/architecture/overview#support-for-file-formats-other-than-fluent.
-     */
-    fileFormat: string;
-    /**
-     * Where and how the local translation files are saved.
-     *
-     * Use '{languageCode}' as dynamic value.
-     * @examples
-     * 		`./translations/{languageCode}.json`
-     * 		.`/{languageCode}/Localizable.strings`
-     */
-    pathPattern: string;
-    /**
-     * A link to the pegjs grammar to detect the usage of i18n (translations) in the source code.
-     *
-     * Go to https://github.com/inlang/inlang/tree/main/packages/i18n-detection/src/grammars for predefined grammars.
-     *
-     * Using a link offers flexibility to define own grammars for specific environments. Go to
-     */
-    fetchI18nDetectionGrammarFrom?: string;
-    /**
-     * The replacement options when extracting pattern.
-     *
-     * Must include `{id}` in all options.
-     * @example
-     * 		['t("{id}")', 'i18n.{id}']
-     */
-    extractPatternReplacementOptions?: string[];
-    /**
-     * An ISO 639-1 human language code that determines the base language.
-     */
-    baseLanguageCode?: string;
-}
+type string;
+
+/**
+ * A link to the JSON schema.
+ *
+ * Go to https://github.com/inlang/inlang/tree/main/packages/config/src/schemas to see a list of all schemas.
+ *
+ * Using a schema enables auto-complete and linting in most IDE's via https://json-schema.org/.
+ * Furthermore, defining a version of the config file allows for changes down the line with auto-migration scripts.
+ */
+```
+
+### `fileFormat`
+
+```ts
+type string;
+
+/**
+* The file format of the local translation files.
+*
+* Any other file format than Fluent makes use of a converter.
+* Read more about converters and their limitations here https://inlang.dev/architecture/overview#support-for-file-formats-other-than-fluent.
+*/
+```
+
+### `pathPattern`
+
+```ts
+type string;
+
+/**
+* Where and how the local translation files are saved.
+*
+* Use '{languageCode}' as dynamic value.
+* @examples
+* 		`./translations/{languageCode}.json`
+* 		`./{languageCode}/Localizable.strings`
+*/
+```
+
+### `fetchI18nDetectionGrammarFrom?`
+
+```ts
+type string | undefined;
+
+/**
+* A link to the pegjs grammar to detect the usage of i18n (translations) in the source code.
+*
+* Go to https://github.com/inlang/inlang/tree/main/packages/i18n-detection/src/grammars for predefined grammars.
+*
+* Using a link offers flexibility to define own grammars for specific environments. Go to
+*/
+```
+
+### `extractPatternReplacementOptions?`
+
+```ts
+type string | undefined;
+
+/**
+* The replacement options when extracting pattern.
+*
+* Must include `{id}` in all options.
+* @example
+* 		['t("{id}")', 'i18n.{id}']
+*/
+```
+
+### `baseLanguageCode?`
+
+```ts
+type string | undefined;
+
+/**
+* An ISO 639-1 human language code that determines the base language.
+*/
 ```
