@@ -6,10 +6,9 @@ import { useRouter } from "next/router";
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   projectLink: "https://github.com/inlang/inlang",
-  docsRepositoryBase: "https://github.com/inlang/inlang/website/pages/docs",
-  projectChatLink: "https://discord.gg/CUkj4fgz5K",
   docsRepositoryBase:
-    "https://github.com/inlang/inlang/website/tree/main/pages/docs",
+    "https://github.com/inlang/inlang/tree/main/website/pages/docs",
+  projectChatLink: "https://discord.gg/CUkj4fgz5K",
   titleSuffix: " – inlang",
   logo: (
     <>
