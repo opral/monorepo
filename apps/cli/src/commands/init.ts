@@ -10,18 +10,32 @@ import fs from 'fs';
 
 export const init = new Command()
     .command('init')
-    .description('Get up and running by creating the config file.')
+    .description('Get up and running by creating the inlang.config.json file.')
     .action(async () => {
         let config: Partial<InlangConfig01> | InlangConfig01 = {
             $schema:
                 'https://raw.githubusercontent.com/inlang/inlang/main/packages/config/src/schemas/v0.1.json',
         };
-        const response1 = await prompts({
+        consola.info(dedent`
+          The init command creates an inlang.config.json with reasonable defaults.
+        `);
+        // const response1 = await prompts({
+        //     type: 'multiselect',
+        //     name: 'feature',
+        //     message: 'Which apps do you want to setup?',
+        //     choices: [
+        //         {
+        //             title: 'VS Code Extension',
+        //             description: 'Extract and see patterns directly in VS Code.',
+        //         },
+        //     ],
+        // });
+        const response2 = await prompts({
             type: 'autocomplete',
             name: 'format',
             initial: 'fluent',
             message:
-                'What file format is or will be used for translations in this project?',
+                'What file format is, or will be used for translations in this project?',
             choices: Object.keys(converters)
                 .map((name) => ({
                     title: name,
@@ -29,7 +43,7 @@ export const init = new Command()
                 }))
                 .concat({ title: 'other', value: 'other' }),
         });
-        if (response1.format === 'other') {
+        if (response2.format === 'other') {
             return consola.log(
                 dedent`
                   Other formats are not yet supported.
@@ -39,9 +53,9 @@ export const init = new Command()
                 `
             );
         } else {
-            config.fileFormat = response1.format;
+            config.fileFormat = response2.format;
         }
-        const response2 = await prompts([
+        const response3 = await prompts([
             {
                 type: 'text',
                 name: 'pathPattern',
@@ -49,8 +63,8 @@ export const init = new Command()
                   What is the path pattern of the translation files?
 
                     @examples
-                    './translations/{languageCode}.json'
-                    './{languageCode}/Localizable.strings'\n\n
+                    ./translations/{languageCode}.ftl
+                    ./{languageCode}/Localizable.strings\n\n
                 `,
                 validate: (value) => {
                     const result = validatePartially({ pathPattern: value });
@@ -71,22 +85,9 @@ export const init = new Command()
                     return true;
                 },
             },
-            {
-                type: 'confirm',
-                name: 'useVsCodeExtension',
-                initial: true,
-                message: dedent`
-                  Do you want to use the VSCode extension?
-
-                    Read more about the VSCode extension here https://github.com/inlang/inlang/tree/main/apps/vs-code-extension.\n
-                `,
-            },
         ]);
-        config.pathPattern = response2.pathPattern;
-        if (response2.useVsCodeExtension) {
-            consola.info('Setting up the config for the VSCode extension.');
-            config = await setupVsCodeExtension({ config: config as InlangConfig01 });
-        }
+        config.pathPattern = response3.pathPattern;
+        config = await setupVsCodeExtension({ config: config as InlangConfig01 });
         const configValidation = validate({ config });
         if (configValidation.isErr) {
             return consola.error(configValidation.error.message);
@@ -156,46 +157,55 @@ async function setupVsCodeExtension(args: {
         config.baseLanguageCode = response.baseLanguageCode;
     }
     if (config.extractPatternReplacementOptions === undefined) {
-        const response = await prompts({
-            type: 'text',
-            name: 'patternOptions',
-            message: dedent(
-                `
-              What is the replacement pattern when extracting a 'pattern'?"
+        /**
+         * Outcommented to set a reasonable default and speed up the init command.
+         */
+        // const response = await prompts({
+        //     type: 'text',
+        //     name: 'patternOptions',
+        //     message: dedent(
+        //         `
+        //       What is the replacement pattern when extracting a 'pattern'?"
 
-                    @example
-                    You reference ids with a t() function like so 't("example-id")'.
-                    Then one replacement pattern is 't("{id}")'.
-            ` + '\n'
-            ),
-            validate: (value) => {
-                const validation = validatePartially({
-                    extractPatternReplacementOptions: [value],
-                });
-                if (validation.isErr) {
-                    return validation.error.message;
-                }
-                return true;
-            },
-        });
-        config.extractPatternReplacementOptions = [response.patternOptions];
+        //             @example
+        //             You reference ids with a t() function like so 't("example-id")'.
+        //             Then one replacement pattern is 't("{id}")'.
+        //     ` + '\n'
+        //     ),
+        //     validate: (value) => {
+        //         const validation = validatePartially({
+        //             extractPatternReplacementOptions: [value],
+        //         });
+        //         if (validation.isErr) {
+        //             return validation.error.message;
+        //         }
+        //         return true;
+        //     },
+        // });
+        // config.extractPatternReplacementOptions = [response.patternOptions];
+        config.extractPatternReplacementOptions = ["t('{id}')"];
     }
     if (config.fetchI18nDetectionGrammarFrom === undefined) {
-        const response = await prompts({
-            type: 'text',
-            name: 'fetchI18nDetectionGrammarFrom',
-            message: 'What is the url to fetch the i18n detection grammar from?',
-            validate: (value) => {
-                const validation = validatePartially({
-                    fetchI18nDetectionGrammarFrom: value,
-                });
-                if (validation.isErr) {
-                    return validation.error.message;
-                }
-                return true;
-            },
-        });
-        config.fetchI18nDetectionGrammarFrom = response.fetchI18nDetectionGrammarFrom;
+        /**
+         * Outcommented to set a reasonable default and speed up the init command.
+         */
+        // const response = await prompts({
+        //     type: 'text',
+        //     name: 'fetchI18nDetectionGrammarFrom',
+        //     message: 'What is the url to fetch the i18n detection grammar from?',
+        //     validate: (value) => {
+        //         const validation = validatePartially({
+        //             fetchI18nDetectionGrammarFrom: value,
+        //         });
+        //         if (validation.isErr) {
+        //             return validation.error.message;
+        //         }
+        //         return true;
+        //     },
+        // });
+        // config.fetchI18nDetectionGrammarFrom = response.fetchI18nDetectionGrammarFrom;
+        config.fetchI18nDetectionGrammarFrom =
+            'https://raw.githubusercontent.com/inlang/inlang/main/packages/i18n-detection/src/grammars/t-function.pegjs';
     }
     return config;
 }
