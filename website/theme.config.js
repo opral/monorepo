@@ -8,7 +8,8 @@ export default {
   projectLink: "https://github.com/inlang/inlang",
   docsRepositoryBase: "https://github.com/inlang/inlang/website/pages/docs",
   projectChatLink: "https://discord.gg/CUkj4fgz5K",
-  docsRepositoryBase: "https://github.com/inlang/website/tree/main/pages/docs",
+  docsRepositoryBase:
+    "https://github.com/inlang/inlang/website/tree/main/pages/docs",
   titleSuffix: " – inlang",
   logo: (
     <>
