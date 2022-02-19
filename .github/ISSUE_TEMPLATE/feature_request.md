@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-# Please open feature requests in the discussion instead. 
+# Please open feature requests in [the discussion](https://github.com/inlang/inlang/discussions/categories/feature-requests) instead. 
 
 Opening a discussion instead of an issue allows to: 
 
