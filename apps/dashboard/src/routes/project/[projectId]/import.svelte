@@ -114,7 +114,7 @@
 					icon={DocumentImport32}
 					on:click={handleImport}
 				>
-					{$t('generic.file')}
+					{$t('generic.import')}
 				</Button>
 			{:else}
 				<InlineLoadingWrapper
