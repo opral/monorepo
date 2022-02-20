@@ -1,6 +1,6 @@
 {
   "name": "@inlang/fluent-syntax-converters",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": false,
   "license": "MIT",
   "publicConfig": {
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@inlang/common": "^0.1.4",
-    "@inlang/fluent-syntax": "^0.1.5",
+    "@inlang/fluent-syntax": "^0.1.6",
     "lodash": "^4.17.21",
     "peggy": "^1.2.0",
     "typesafe-i18n": "^2.51.1"

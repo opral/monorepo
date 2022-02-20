@@ -9,7 +9,7 @@
     "url": "https://github.com/inlang/inlang.git"
   },
   "icon": "assets/icon.png",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "engines": {
     "vscode": "^1.61.0"
   },
@@ -37,8 +37,8 @@
     "@inlang/common": "^0.1.4",
     "@inlang/config": "^0.1.2",
     "@inlang/eslint-config": "*",
-    "@inlang/fluent-syntax": "^0.1.5",
-    "@inlang/fluent-syntax-converters": "^0.1.5",
+    "@inlang/fluent-syntax": "^0.1.6",
+    "@inlang/fluent-syntax-converters": "^0.1.6",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.0",

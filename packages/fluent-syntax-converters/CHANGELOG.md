@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.6](https://github.com/inlang/inlang/compare/@inlang/fluent-syntax-converters@0.1.5...@inlang/fluent-syntax-converters@0.1.6) (2022-02-20)
+
+**Note:** Version bump only for package @inlang/fluent-syntax-converters
+
+
+
+
+
 ## 0.1.5 (2022-02-10)
 
 **Note:** Version bump only for package @inlang/fluent-syntax-converters
