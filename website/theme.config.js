@@ -25,19 +25,33 @@ export default {
       <meta httpEquiv="Content-Language" content="en" />
       <meta
         name="description"
-        content="Inlang: The open source localization solution for software."
+        content="Inlang: Open source localization solution for software."
       />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@SamuelStros" />
       <meta
         property="og:title"
-        content="Inlang: The open source localization solution for software."
+        content="Inlang: Open source localization solution for software."
       />
       <meta
         property="og:description"
-        content="Inlang: The open source localization solution for software."
+        content="Inlang: Open source localization solution for software."
       />
       <meta name="apple-mobile-web-app-title" content="Inlang" />
+      <meta
+        property="og:title"
+        content="inlang/inlang: Open Source Localization Solution for Software."
+      ></meta>
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://inlang.dev/" />
+      <meta
+        property="og:description"
+        content="Open Source Localization Solution for Software."
+      ></meta>
+      <meta
+        property="og:image"
+        content="https://inlang.dev/images/meta-og-image.jpg"
+      />
     </>
   ),
   search: true,
