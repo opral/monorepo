@@ -12,11 +12,11 @@
 
 # Inlang
 
-Inlang is an open source localization solution for software build on top [Mozilla's Fluent system](https://projectfluent.org/) that makes developers more productive and automates localization pipelines. 
+Inlang is an open source localization solution for software. 
 
-### Goal 
+## Goal
 
-Make internationalization and localization of software 2x, 3x, 4x faster. 
+Make internationalization and localization of software X times faster through standardization, developer tools and automation.
   
 
 ## Apps
