@@ -10,9 +10,17 @@
     </h3>
 </div>
 
-# Inlang
+# Inlang VS Code Extension
 
-Inlang is an open source localization solution for software build on top [Mozilla's Fluent system](https://projectfluent.org/).
+The VS Code extension is part of the open source localization solution [inlang](https://www.inlang.dev/). 
+
+## Getting Started
+
+Create an `inlang.config.json` file in your project.
+
+   - Either run `npx @inlang/cli init` in the terminal (but node must be installed).
+   - Or manually create the JSON config:  
+     For an example and the config schema go to the [config reference](https://inlang.dev/docs/reference/config).
 
 ## Features
 
