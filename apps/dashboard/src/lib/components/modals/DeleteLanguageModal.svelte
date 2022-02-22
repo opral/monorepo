@@ -63,6 +63,6 @@
 	{:else if status === 'finished'}
 		<InlineLoading status="finished" description={$t('generic.success')} />
 	{:else}
-		<p>{($t('confirm.delete-language'), { languageCode: ISO6391.getName(language.code) })}</p>
+		<p>{$t('confirm.delete-language', { languageCode: ISO6391.getName(language.code) })}</p>
 	{/if}
 </Modal>
