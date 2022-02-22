@@ -12,7 +12,7 @@
 
 # Inlang
 
-Inlang is an open source localization solution for software. 
+Inlang is an open source localization solution for software build on top of Mozillas recently released [Fluent localization system](https://projectfluent.org/). 
 
 ## Goal
 
