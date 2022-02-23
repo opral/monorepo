@@ -49,7 +49,7 @@
 	bind:open
 	modalHeading={$t('set-base-language')}
 	primaryButtonText={$t('generic.confirm')}
-	secondaryButtonText="$t('generic.cancel')"
+	secondaryButtonText={$t('generic.cancel')}
 	on:click:button--primary={handleConfirm}
 	on:click:button--secondary={() => {
 		open = false;
