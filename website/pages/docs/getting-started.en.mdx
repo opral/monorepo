@@ -3,21 +3,23 @@ import ReactPlayer from "react-player/youtube";
 
 # Getting Started
 
-  <Callout>
-    **inlang is not an i18n library**
-  
-  Inlang works on top of translation files. How you "feed" those translation files into your software/app
-  is up to you and the job of dedicated i18n libraries.  
-  </Callout>
+<Callout>
+  **inlang is not an [i18n library](/docs/glossary/i18n-library)** <br />
+  Inlang works on top of translation files. How you "feed" those translation files
+  into your software/app is up to you and the job of dedicated i18n libraries.
+</Callout>
 
-  
-  ### I am starting to translate my software from scratch
-  
-  
-  
-  
-  ### I am already localizing my software
+### I am starting to translate my software from scratch
 
+You need an [i18n library](/docs/glossary/i18n-library) to load translations from files into your software. Since
+inlang is build on top of Mozillas Fluent system, choose an i18n library that supports Fluent translation files.
+For a list of libraries and examples, go to the [awesome-fluent-i18n repository](https://github.com/inlang/awesome-fluent-i18n).
+
+### I am already internationalizing/localizing/translating my software
+
+Inlang is build on top of Mozillas Fluent system. If your translation files are in the [Fluent format](https://projectfluent.org/play/)
+(ending with .ftl), inlang works out of the box. In case your translation files are not not in the Fluent
+format (ending with .json, .string, etc.), you need a [converter](/docs/glossary/converter).
 
 ## VSCode extension (takes 60 seconds)
 
