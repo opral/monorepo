@@ -1,7 +1,7 @@
 # @inlang/dashboard 
 
 ## Running locally
-Open the root of this repository ([/](/)) and follow the instructions there.
+Open the root of this repository ([/](https://github.com/inlang/inlang)) and follow the instructions there.
 
 ## Get eslint warnings
 
