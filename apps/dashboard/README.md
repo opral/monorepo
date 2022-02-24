@@ -1,11 +1,7 @@
-## Run the app (dashboard) locally
+# @inlang/dashboard 
 
-0. get the env file from @samuelstroschein
-1. make sure the database is running
-2. in dashboard: `npm install`
-3. in dashboard: `npm run dev`
-4. Open [localhost:3000](http://localhost:3000)
-5. if you have to sign in, goto [http://localhost:3000/auth/dev-login](http://localhost:3000/auth/dev-login)
+## Running locally
+Open the root of this repository ([/](/)) and follow the instructions there.
 
 ## Get eslint warnings
 
