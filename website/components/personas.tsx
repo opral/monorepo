@@ -194,6 +194,7 @@ const Personas = () => {
           <ReactPlayer
             url="https://youtu.be/cEjEAcAFfsA?t=132"
             controls={true}
+            width="100%"
           />
         </OnePersona>
       </div>
