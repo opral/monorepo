@@ -6,7 +6,7 @@ const Personas = () => {
     <div className="grid gap-6 grid-flow-row lg:-mx-20">
       <div>
         <OnePersona
-          title="Developers"
+          title="Developer Tools"
           subheader="Get more productive with inlangs developer tools."
           features={
             <>
@@ -76,7 +76,7 @@ const Personas = () => {
       </div>
       <div>
         <OnePersona
-          title="Translators"
+          title="Localization Platform"
           subheader="Manage translations without touching source code."
           features={
             <>
@@ -126,8 +126,8 @@ const Personas = () => {
         </OnePersona>
       </div>
       <div className="lg:col-span-2">
-        <OnePersona
-          title="Product Managers"
+        {/* <OnePersona
+          title="@Product Managers"
           subheader="Ship your product faster. See inlang in action:"
           features={
             <>
@@ -196,7 +196,7 @@ const Personas = () => {
             controls={true}
             width="100%"
           />
-        </OnePersona>
+        </OnePersona> */}
       </div>
     </div>
   );
