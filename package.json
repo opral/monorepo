@@ -12,8 +12,7 @@
     "clean": "lerna run clean",
     "lint": "lerna run lint",
     "test": "lerna run",
-    "prepublish": "npm run build && npm run test",
-    "publish": "lerna publish",
+    "publish": "npm run build && npm run test && lerna publish",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
