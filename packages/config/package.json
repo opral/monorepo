@@ -25,9 +25,6 @@
     "test:watch": "npm test -- --watch",
     "generate-types": "json2ts -i src/schemas/ -o src/types/"
   },
-  "dependencies": {
-    "@inlang/common": "^0.1.4"
-  },
   "devDependencies": {
     "@inlang/eslint-config": "*",
     "@rollup/plugin-commonjs": "^21.0.1",
