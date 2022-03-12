@@ -21,11 +21,11 @@
     "format:fix": "npm run format -- --write",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
-    "test:watch": "npm test -- --watch"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@inlang/eslint-config": "*",
+    "@inlang/config": "*",
     "@isomorphic-git/lightning-fs": "^4.4.1",
     "@types/isomorphic-git__lightning-fs": "^4.4.2"
   },

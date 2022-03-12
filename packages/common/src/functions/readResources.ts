@@ -1,10 +1,11 @@
-import { languageCodes, Result } from '@inlang/common';
-import { converters, parseResources, type SupportedConverter } from '@inlang/fluent-syntax-converters';
 import type { Resources } from '@inlang/fluent-syntax';
-import path from 'path';
+import type { InlangConfig } from '@inlang/config';
 import type FS from '@isomorphic-git/lightning-fs';
+import { converters, parseResources } from '@inlang/fluent-syntax-converters';
+import path from 'path';
 import { Buffer } from 'buffer';
-
+import { languageCodes } from '../variables/languageCodes';
+import { Result } from '../types/result';
 /**
  * Reads and parses the local translation files to `Resources`.
  *
@@ -16,8 +17,8 @@ import { Buffer } from 'buffer';
 export async function readResources(args: {
     fs: FS.PromisifedFS;
     directory: string;
-    pathPattern: string;
-    fileFormat: SupportedConverter;
+    pathPattern: InlangConfig['latest']['pathPattern'];
+    fileFormat: InlangConfig['latest']['fileFormat'];
 }): Promise<Result<Resources, Error>> {
     const converter = converters[args.fileFormat];
     const localFiles = [];
