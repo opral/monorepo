@@ -21,11 +21,13 @@ const config = {
 		target: '#svelte',
 		adapter: node(),
 		vite: {
+			// required node (fs) polyfills
 			resolve: {
 				alias: {
 					path: 'path-browserify'
 				}
 			},
+			// required node (fs) polyfills
 			optimizeDeps: {
 				esbuildOptions: {
 					// Node.js global to browser globalThis
