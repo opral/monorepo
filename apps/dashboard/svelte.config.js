@@ -19,26 +19,26 @@ const config = {
 	kit: {
 		// hydrate the <div id="svelte"> element in src/app.html
 		target: '#svelte',
-		adapter: node()
-	},
-	vite: {
-		resolve: {
-			alias: {
-				path: 'path-browserify'
-			}
-		},
-		optimizeDeps: {
-			esbuildOptions: {
-				// Node.js global to browser globalThis
-				define: {
-					global: 'globalThis'
-				},
-				// Enable esbuild polyfill plugins
-				plugins: [
-					NodeGlobalsPolyfillPlugin({
-						buffer: true
-					})
-				]
+		adapter: node(),
+		vite: {
+			resolve: {
+				alias: {
+					path: 'path-browserify'
+				}
+			},
+			optimizeDeps: {
+				esbuildOptions: {
+					// Node.js global to browser globalThis
+					define: {
+						global: 'globalThis'
+					},
+					// Enable esbuild polyfill plugins
+					plugins: [
+						NodeGlobalsPolyfillPlugin({
+							buffer: true
+						})
+					]
+				}
 			}
 		}
 	}
