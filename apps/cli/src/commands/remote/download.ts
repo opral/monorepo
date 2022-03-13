@@ -6,9 +6,9 @@ import {
     SerializedResource,
     serializeResources,
     SupportedConverter,
-} from '@inlang/fluent-syntax-converters';
+} from '@inlang/fluent-format-converters';
 import fs from 'fs';
-import { Result } from '@inlang/common';
+import { Result } from '@inlang/utils';
 import fetch from 'node-fetch';
 import dedent from 'dedent';
 import prompts from 'prompts';

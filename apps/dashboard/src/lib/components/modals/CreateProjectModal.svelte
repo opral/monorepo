@@ -17,7 +17,7 @@
 	import ISO6391 from 'iso-639-1';
 	import SelectHumanLanguageTile from '../tiles/SelectHumanLanguageTile.svelte';
 	import { auth } from '$lib/services/auth';
-	import { isValidMessageId } from '@inlang/fluent-syntax';
+	import { isValidMessageId } from '@inlang/fluent-ast';
 	import { t } from '$lib/services/i18n';
 
 	export function show(args: { onProjectCreated: () => unknown }): void {

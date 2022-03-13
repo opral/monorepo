@@ -1,0 +1,34 @@
+{
+  "name": "@inlang/core",
+  "version": "0.1.0",
+  "private": true,
+  "publicConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "clean": "rm -r ./dist",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@inlang/eslint-config": "*",
+    "@types/isomorphic-git__lightning-fs": "^4.4.2"
+  },
+  "dependencies": {
+    "@inlang/config": "*",
+    "@isomorphic-git/lightning-fs": "^4.4.1"
+  }
+}

@@ -16,7 +16,7 @@
 	import AddMemberModal from '$lib/components/modals/AddMemberModal.svelte';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
-	import { Result } from '@inlang/common';
+	import { Result } from '@inlang/utils';
 	import { auth } from '$lib/services/auth';
 	import { t } from '$lib/services/i18n';
 

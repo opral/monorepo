@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Converter, converters } from '@inlang/fluent-syntax-converters';
-	import { LanguageCode } from '@inlang/common';
-	import { Resources } from '@inlang/fluent-syntax';
+	import { Converter, converters } from '@inlang/fluent-format-converters';
+	import { LanguageCode } from '@inlang/utils';
+	import { Resources } from '@inlang/fluent-ast';
 	import { Dropdown } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import SelectHumanLanguageTile from './tiles/SelectHumanLanguageTile.svelte';

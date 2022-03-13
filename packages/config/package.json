@@ -34,5 +34,8 @@
     "ajv-formats": "^2.1.1",
     "json-schema-to-typescript": "^10.1.5",
     "rollup": "^2.67.0"
+  },
+  "dependencies": {
+    "@inlang/utils": "*"
   }
 }

@@ -1,4 +1,4 @@
-import { Result } from './types/result';
+import { Result } from '../../utils/dist';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import schema01 from './schemas/v0.1.json';

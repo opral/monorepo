@@ -5,8 +5,8 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import CreateMessageModal from '$lib/components/modals/CreateMessageModal.svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
-	import { Attribute, Message, parsePattern, Pattern } from '@inlang/fluent-syntax';
-	import { LanguageCode, Result } from '@inlang/common';
+	import { Attribute, Message, parsePattern, Pattern } from '@inlang/fluent-ast';
+	import { LanguageCode, Result } from '@inlang/utils';
 	import Patterns from '$lib/components/Patterns.svelte';
 	import { lintPattern } from '@inlang/fluent-lint';
 	import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';

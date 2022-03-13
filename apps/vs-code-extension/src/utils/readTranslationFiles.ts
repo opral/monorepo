@@ -1,6 +1,6 @@
-import { languageCodes, Result } from '@inlang/common';
-import { converters, parseResources, SupportedConverter } from '@inlang/fluent-syntax-converters';
-import { Resources } from '@inlang/fluent-syntax';
+import { languageCodes, Result } from '@inlang/utils';
+import { converters, parseResources, SupportedConverter } from '@inlang/fluent-format-converters';
+import { Resources } from '@inlang/fluent-ast';
 import fs from 'fs';
 import path from 'path';
 

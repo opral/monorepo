@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { state } from '../state';
 import peggy from 'peggy';
-import { LanguageCode } from '@inlang/common';
-import { serializePattern } from '@inlang/fluent-syntax';
+import { LanguageCode } from '@inlang/utils';
+import { serializePattern } from '@inlang/fluent-ast';
 import axios, { AxiosResponse } from 'axios';
 
 export async function showPattern(args: { activeTextEditor: vscode.TextEditor }): Promise<unknown> {

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import SerializedResource from '$lib/components/SerializedResource.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
-	import { Converter, converters, serializeResources } from '@inlang/fluent-syntax-converters';
-	import { LanguageCode } from '@inlang/common';
-	import { Resources } from '@inlang/fluent-syntax';
+	import { Converter, converters, serializeResources } from '@inlang/fluent-format-converters';
+	import { LanguageCode } from '@inlang/utils';
+	import { Resources } from '@inlang/fluent-ast';
 	import { CodeSnippet, InlineNotification } from 'carbon-components-svelte';
 	import { t } from '$lib/services/i18n';
 	let selectedLanguageCode: LanguageCode = $projectStore.data?.project.base_language_code ?? 'en';

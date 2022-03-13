@@ -11,7 +11,7 @@
 	import Divider from '$lib/layout/Divider.svelte';
 	import SelectHumanLanguageTile from '$lib/components/tiles/SelectHumanLanguageTile.svelte';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
-	import { LanguageCode, Result } from '@inlang/common';
+	import { LanguageCode, Result } from '@inlang/utils';
 	import { t } from '$lib/services/i18n';
 
 	let projectName = $projectStore.data?.project.name;

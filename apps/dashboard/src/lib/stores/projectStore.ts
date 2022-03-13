@@ -4,9 +4,9 @@ import { updateResources } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
 import { database } from '../services/database';
-import { Result } from '@inlang/common';
-import { Resources } from '@inlang/fluent-syntax';
-import { converters, parseResources } from '@inlang/fluent-syntax-converters';
+import { Result } from '@inlang/utils';
+import { Resources } from '@inlang/fluent-ast';
+import { converters, parseResources } from '@inlang/fluent-format-converters';
 /**
  * Bundles project related information regarding one project tightly together in
  * one object. Corresponds to `/project/[projectId]` route.

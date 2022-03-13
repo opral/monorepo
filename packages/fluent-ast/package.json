@@ -1,0 +1,37 @@
+{
+  "name": "@inlang/fluent-ast",
+  "version": "0.1.6",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "publicConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "private": false,
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --watch",
+    "clean": "rm -r -f ./dist",
+    "format": "prettier .",
+    "format:fix": "npm run format -- --write",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "npm test -- --watch"
+  },
+  "devDependencies": {
+    "@fluent/dedent": "^0.4.0",
+    "@inlang/utils": "^0.1.4",
+    "@inlang/eslint-config": "*"
+  },
+  "dependencies": {
+    "@fluent/syntax": "*",
+    "lodash-es": "^4.17.21"
+  },
+  "gitHead": "0748855a82fd1676274eb7e1cd7ce7b6acd9ecce"
+}

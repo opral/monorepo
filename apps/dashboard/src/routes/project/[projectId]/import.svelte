@@ -8,10 +8,10 @@
 		converters,
 		parseResources,
 		serializeResources
-	} from '@inlang/fluent-syntax-converters';
-	import { LanguageCode, Result } from '@inlang/common';
+	} from '@inlang/fluent-format-converters';
+	import { LanguageCode, Result } from '@inlang/utils';
 	import { definitions } from '@inlang/database';
-	import { Resources } from '@inlang/fluent-syntax';
+	import { Resources } from '@inlang/fluent-ast';
 	import {
 		Button,
 		InlineNotification,

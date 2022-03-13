@@ -1,13 +1,13 @@
 import { Command, Option } from 'commander';
 import consola from 'consola';
-import { languageCodes, Result } from '@inlang/common';
+import { languageCodes, Result } from '@inlang/utils';
 import {
     converters,
     parseResources,
     SerializedResource,
     serializeResources,
     SupportedConverter,
-} from '@inlang/fluent-syntax-converters';
+} from '@inlang/fluent-format-converters';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import dedent from 'dedent';

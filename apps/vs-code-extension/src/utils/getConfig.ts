@@ -1,4 +1,4 @@
-import { Result } from '@inlang/common';
+import { Result } from '@inlang/utils';
 import { InlangConfig01, validate } from '@inlang/config';
 import * as vscode from 'vscode';
 import { determineClosestPath } from './determineClosestPath';

@@ -4,7 +4,7 @@
 	import { projectStore } from '$lib/stores/projectStore';
 	import { page } from '$app/stores';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
-	import { isValidMessageId } from '@inlang/fluent-syntax';
+	import { isValidMessageId } from '@inlang/fluent-ast';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 	import { t } from '$lib/services/i18n';
 
