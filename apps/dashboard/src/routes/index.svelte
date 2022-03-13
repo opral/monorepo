@@ -8,20 +8,16 @@
 		Loading,
 		Link
 	} from 'carbon-components-svelte';
-	import CreateProjectModal from '$lib/components/modals/CreateProjectModal.svelte';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import { onMount } from 'svelte';
-	import type { definitions } from '@inlang/database';
 	import { DatabaseResponse } from '$lib/types/databaseResponse';
-	import { database } from '$lib/services/database';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import { t } from '$lib/services/i18n';
 
-	let createProjectModal: CreateProjectModal;
-
 	let isLoading = true;
 
-	let projects: DatabaseResponse<definitions['project'][]>;
+	// let projects: DatabaseResponse<definitions['project'][]>;
+	let projects: any;
 
 	onMount(async () => {
 		await loadProjects();
@@ -29,7 +25,7 @@
 
 	async function loadProjects(): Promise<void> {
 		isLoading = true;
-		projects = await database.from<definitions['project']>('project').select().order('name');
+		// projects = await database.from<definitions['project']>('project').select().order('name');
 		if (projects.error) {
 			alert(projects.error);
 		}
@@ -38,17 +34,17 @@
 
 	const headers = [{ key: 'name', value: $t('project-name') }];
 
-	let rows: () => { id: string; name: string; object: definitions['project'] }[];
-	$: rows = () => {
-		if (isLoading || projects.error || projects.data === null) {
-			return [];
-		}
-		return projects.data.map((project) => ({
-			id: project.id,
-			name: project.name,
-			object: project
-		}));
-	};
+	// let rows: () => { id: string; name: string; object: definitions['project'] }[];
+	// $: rows = () => {
+	// 	if (isLoading || projects.error || projects.data === null) {
+	// 		return [];
+	// 	}
+	// 	return projects.data.map((project) => ({
+	// 		id: project.id,
+	// 		name: project.name,
+	// 		object: project
+	// 	}));
+	// };
 </script>
 
 {#if isLoading}
@@ -56,20 +52,13 @@
 {/if}
 
 <!-- padding 0 top is neccessary  -->
-<DataTable {headers} rows={rows()} class="pt-0">
+<DataTable {headers} rows={[]} class="pt-0">
 	<Toolbar>
 		<ToolbarBatchActions class="bg-danger">
 			<Button icon={Delete16} kind="danger">{$t('generic.delete')}</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
 			<!-- <ToolbarSearch placeholder="Search project" /> -->
-			<Button
-				icon={Add16}
-				on:click={() =>
-					createProjectModal.show({
-						onProjectCreated: loadProjects
-					})}>{$t('new-project')}</Button
-			>
 		</ToolbarContent>
 	</Toolbar>
 	<span slot="cell" let:row let:cell>
@@ -85,5 +74,3 @@
 		{/if}
 	</span>
 </DataTable>
-
-<CreateProjectModal bind:this={createProjectModal} />

@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { definitions } from '@inlang/database';
 	import { Button, CodeSnippet } from 'carbon-components-svelte';
 	import View16 from 'carbon-icons-svelte/lib/View16';
 	import ViewOff16 from 'carbon-icons-svelte/lib/ViewOff16';
 	import { t } from '$lib/services/i18n';
 
-	export let apiKey: definitions['project']['api_key'];
+	export let apiKey: string;
 
 	let isRevealed = false;
 

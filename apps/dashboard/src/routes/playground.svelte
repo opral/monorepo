@@ -4,7 +4,7 @@
 	import http from 'isomorphic-git/http/web';
 	import FS from '@isomorphic-git/lightning-fs';
 	import type { Resources } from '@inlang/fluent-ast';
-	import { readResources } from '@inlang/utils';
+	import { readResources } from '@inlang/core';
 	import type { Result } from '@inlang/utils';
 
 	let resources: Result<Resources>;

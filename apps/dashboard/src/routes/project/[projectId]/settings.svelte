@@ -1,9 +1,6 @@
 <script lang="ts">
-	import type { definitions } from '@inlang/database';
-	import { database } from '$lib/services/database';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { TextInput, Button, Tile } from 'carbon-components-svelte';
-	import DeleteProjectModal from '$lib/components/modals/DeleteProjectModal.svelte';
 	import Save16 from 'carbon-icons-svelte/lib/Save16';
 	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
 	import { goto } from '$app/navigation';
@@ -18,42 +15,19 @@
 
 	let confirmModal: ConfirmModal;
 
-	let deleteProjectModal: DeleteProjectModal;
-
 	async function changeHumanBaseLanguage(args: { to: LanguageCode }): Promise<Result<void, Error>> {
 		if (args.to === undefined) {
 			return Result.err(Error('selectedDefaultLanguage is undefined'));
 		}
-		const response = await database
-			.from<definitions['project']>('project')
-			.update({ base_language_code: args.to })
-			.eq('id', $projectStore.data?.project.id ?? '');
-		if (response.data && response.error === null) {
-			projectStore.getData({ projectId: $projectStore.data?.project.id ?? '' });
-			return Result.ok(undefined);
-		}
+		// const response = await database
+		// 	.from<definitions['project']>('project')
+		// 	.update({ base_language_code: args.to })
+		// 	.eq('id', $projectStore.data?.project.id ?? '');
+		// if (response.data && response.error === null) {
+		// 	projectStore.getData({ projectId: $projectStore.data?.project.id ?? '' });
+		// 	return Result.ok(undefined);
+		// }
 		return Result.err(Error('Database response was not successfull.'));
-	}
-
-	async function renameProject(): Promise<void> {
-		const response = await database
-			.from<definitions['project']>('project')
-			.update({ name: projectName })
-			.eq('id', $projectStore?.data?.project.id ?? '');
-		if (response.error) {
-			alert(response.error);
-		} else {
-			projectStore.getData({ projectId: $projectStore.data?.project.id ?? '' });
-		}
-	}
-
-	function handleDeleteProjectClick(): void {
-		const project = $projectStore.data?.project;
-		if (project === undefined) {
-			alert('Error 39jf-9jsa');
-			return;
-		}
-		deleteProjectModal.show({ project, onDeletion: () => goto('/') });
 	}
 </script>
 
@@ -71,12 +45,6 @@
 			invalid={projectName?.includes(' ')}
 			invalidText={$t('error.project-whitespace')}
 		/>
-		<Button
-			icon={Save16}
-			disabled={projectName === $projectStore.data?.project.name || projectName?.includes(' ')}
-			size="field"
-			on:click={() => renameProject()}>{$t('generic.save')}</Button
-		>
 	</row>
 	<Divider />
 	<p class="pt-1">{$t('change-base-language')}</p>
@@ -99,11 +67,10 @@
 	<Tile>
 		<h2>{$t('danger-zone')}</h2>
 		<br />
-		<Button icon={Delete16} kind="danger-tertiary" on:click={handleDeleteProjectClick}
+		<!-- <Button icon={Delete16} kind="danger-tertiary" on:click={handleDeleteProjectClick}
 			>{$t('delete.project')}</Button
-		>
+		> -->
 	</Tile>
-	<DeleteProjectModal bind:this={deleteProjectModal} />
 </div>
 
 <ConfirmModal bind:this={confirmModal} />

@@ -1,5 +1,3 @@
-import { auth } from '$lib/services/auth';
-
 /**
  * Default bromb trigger link with pre-filled metadata.
  *
@@ -17,13 +15,12 @@ export function brombTriggerLink(args: {
 	} else {
 		result = new URL(`https://submission.bromb.co/inlang/dashboard`);
 	}
-	const user = auth.user();
-	if (user) {
-		result.searchParams.append('userId', user.id);
-	}
-	if (user?.email) {
-		result.searchParams.append('email', user.email);
-	}
+	// if (user) {
+	// 	result.searchParams.append('userId', user.id);
+	// }
+	// if (user?.email) {
+	// 	result.searchParams.append('email', user.email);
+	// }
 	if (args.metadata) {
 		result.searchParams.append('metadata', JSON.stringify(args.metadata));
 	}

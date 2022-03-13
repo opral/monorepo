@@ -1,12 +1,9 @@
 /* eslint-disable unicorn/no-null */
-import type { definitions } from '@inlang/database';
-import { updateResources } from '@inlang/database';
 import { PostgrestError } from '@supabase/postgrest-js';
 import { Updater, writable } from 'svelte/store';
-import { database } from '../services/database';
 import { Result } from '@inlang/utils';
 import { Resources } from '@inlang/fluent-ast';
-import { converters, parseResources } from '@inlang/fluent-format-converters';
+// import { converters, parseResources } from '@inlang/fluent-format-converters';
 /**
  * Bundles project related information regarding one project tightly together in
  * one object. Corresponds to `/project/[projectId]` route.
@@ -17,8 +14,8 @@ export const projectStore = createProjectStore();
 
 interface ProjectStoreInterface {
 	data: null | {
-		project: definitions['project'];
-		languages: definitions['language'][];
+		project: any;
+		languages: any;
 		resources: Resources;
 	};
 	error: PostgrestError | Error | null;
@@ -40,7 +37,7 @@ function createProjectStore() {
 }
 
 type GetDataArgs = {
-	projectId: definitions['project']['id'];
+	projectId: any;
 };
 
 /**
@@ -67,15 +64,15 @@ async function updateResourcesInDatabase(args: {
 	if (project.data === null) {
 		return Result.err(Error('project.data was null'));
 	}
-	const update = await updateResources({
-		client: database,
-		project: project.data.project,
-		resources: project.data.resources
-	});
-	if (update.isErr) {
-		return Result.err(update.error);
-	}
-	getData({ projectId: project.data.project.id }, args.updater);
+	// const update = await updateResources({
+	// 	client: database,
+	// 	project: project.data.project,
+	// 	resources: project.data.resources
+	// });
+	// if (update.isErr) {
+	// 	return Result.err(update.error);
+	// }
+	// getData({ projectId: project.data.project.id }, args.updater);
 	return Result.ok(undefined);
 }
 
@@ -84,61 +81,61 @@ async function getData(
 	args: GetDataArgs,
 	updateStore: (updater: Updater<ProjectStoreInterface>) => void
 ): Promise<void> {
-	const project = await database
-		.from<definitions['project']>('project')
-		.select('*')
-		.match({ id: args.projectId })
-		.single();
-	// in-efficient to query three times but doesn't matter for now
-	const languages = await database
-		.from<definitions['language']>('language')
-		.select('*')
-		.match({ project_id: args.projectId })
-		.order('code', { ascending: true });
+	// const project = await database
+	// 	.from<definitions['project']>('project')
+	// 	.select('*')
+	// 	.match({ id: args.projectId })
+	// 	.single();
+	// // in-efficient to query three times but doesn't matter for now
+	// const languages = await database
+	// 	.from<definitions['language']>('language')
+	// 	.select('*')
+	// 	.match({ project_id: args.projectId })
+	// 	.order('code', { ascending: true });
 
-	const resources: Result<Resources, Error> = parseResources({
-		converter: converters.fluent,
-		files:
-			languages.data?.map((language) => ({
-				data: language.file,
-				languageCode: language.code
-			})) ?? []
-	});
+	// const resources: Result<Resources, Error> = parseResources({
+	// 	converter: converters.fluent,
+	// 	files:
+	// 		languages.data?.map((language) => ({
+	// 			data: language.file,
+	// 			languageCode: language.code
+	// 		})) ?? []
+	// });
 
 	// multiple errors might slip i.e. project.error is true but translation.error is true as well.
-	let error: ProjectStoreInterface['error'] | null = null;
-	if (project.error) {
-		error = project.error;
-	} else if (languages.error) {
-		error = languages.error;
-	} else if (resources.isErr) {
-		error = resources.error;
-	}
-	if (resources.isErr || error) {
-		updateStore(() => ({ data: null, error: error }));
-	} else {
-		updateStore(() => {
-			// null checking
-			if (project.data === null || languages.data === null || resources.value === null) {
-				return {
-					data: null,
-					// using postgresterror here to not have type `error:
-					error: {
-						code: '',
-						details: 'Some value was null although it should not have been',
-						message: 'Some value was null although it should not have been',
-						hint: 'projectStore'
-					}
-				};
-			}
-			return {
-				data: {
-					project: project.data,
-					languages: languages.data,
-					resources: resources.value
-				},
-				error: null
-			};
-		});
-	}
+	// let error: ProjectStoreInterface['error'] | null = null;
+	// if (project.error) {
+	// 	error = project.error;
+	// } else if (languages.error) {
+	// 	error = languages.error;
+	// } else if (resources.isErr) {
+	// 	error = resources.error;
+	// }
+	// if (resources.isErr || error) {
+	// 	updateStore(() => ({ data: null, error: error }));
+	// } else {
+	// 	updateStore(() => {
+	// 		// null checking
+	// 		if (project.data === null || languages.data === null || resources.value === null) {
+	// 			return {
+	// 				data: null,
+	// 				// using postgresterror here to not have type `error:
+	// 				error: {
+	// 					code: '',
+	// 					details: 'Some value was null although it should not have been',
+	// 					message: 'Some value was null although it should not have been',
+	// 					hint: 'projectStore'
+	// 				}
+	// 			};
+	// 		}
+	// 		return {
+	// 			data: {
+	// 				project: project.data,
+	// 				languages: languages.data,
+	// 				resources: resources.value
+	// 			},
+	// 			error: null
+	// 		};
+	// 	});
+	// }
 }

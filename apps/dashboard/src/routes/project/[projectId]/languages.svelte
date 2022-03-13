@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { definitions } from '@inlang/database';
 	import {
 		Button,
 		DataTable,
@@ -22,7 +21,7 @@
 	// all modals are interacted with as object which alllows to pass
 	// values such as a language that should be deleted along.
 	let createLanguageModal: { show: boolean } = { show: false };
-	let deleteLanguageModal: { show: boolean; language?: definitions['language'] } = {
+	let deleteLanguageModal: { show: boolean; language?: any } = {
 		show: false
 	};
 
@@ -78,23 +77,24 @@
 	// rows needs to be reactive. Otherwise, the rows do not update
 	// when projectStore.data changes or the search query
 	$: rows = () => {
-		let languages = $projectStore.data?.languages ?? [];
-		if (searchQuery !== '') {
-			languages = languages.filter((language) =>
-				ISO6391.getName(language.code).toLowerCase().startsWith(searchQuery.toLowerCase())
-			);
-		}
-		// sorted alphabetically
-		return languages
-			.map((language) => ({
-				id: language.code,
-				isoCode: language.code,
-				// words: numWords(language.iso_code),
-				// progress: 0,
-				isDefaultLanguage: language.code === $projectStore.data?.project.base_language_code,
-				languageObject: language
-			}))
-			.sort((a, b) => ISO6391.getName(a.isoCode).localeCompare(ISO6391.getName(b.isoCode)));
+		return [];
+		// let languages = $projectStore.data?.languages ?? [];
+		// if (searchQuery !== '') {
+		// 	languages = languages.filter((language) =>
+		// 		ISO6391.getName(language.code).toLowerCase().startsWith(searchQuery.toLowerCase())
+		// 	);
+		// }
+		// // sorted alphabetically
+		// return languages
+		// 	.map((language) => ({
+		// 		id: language.code,
+		// 		isoCode: language.code,
+		// 		// words: numWords(language.iso_code),
+		// 		// progress: 0,
+		// 		isDefaultLanguage: language.code === $projectStore.data?.project.base_language_code,
+		// 		languageObject: language
+		// 	}))
+		// 	.sort((a, b) => ISO6391.getName(a.isoCode).localeCompare(ISO6391.getName(b.isoCode)));
 	};
 </script>
 
