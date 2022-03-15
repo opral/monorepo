@@ -16,6 +16,7 @@ module.exports = {
     "unicorn/throw-new-error": "off",
     "unicorn/prefer-spread": "off",
     "unicorn/prefer-node-protocol": "off",
+    "unicorn/no-await-expression-member": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
