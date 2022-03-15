@@ -17,10 +17,6 @@
       "description": "Where and how the local translation files are saved.\n\nUse '{languageCode}' as dynamic value. \n@examples\n\t\t`./translations/{languageCode}.json`\n\t\t.`/{languageCode}/Localizable.strings`",
       "pattern": "(\\{languageCode\\})"
     },
-    "baseLanguageCode": {
-      "type": "string",
-      "description": "An ISO 639-1 human language code that determines the base language."
-    },
     "fetchI18nDetectionGrammarFrom": {
       "type": "string",
       "format": "uri",
@@ -34,7 +30,11 @@
         "pattern": "(\\{id\\})"
       },
       "description": "The replacement options when extracting pattern.\n\nMust include `{id}` in all options.\n@example\n\t\t['t(\"{id}\")', 'i18n.{id}']"
+    },
+    "baseLanguageCode": {
+      "type": "string",
+      "description": "An ISO 639-1 human language code that determines the base language."
     }
   },
-  "required": ["$schema", "fileFormat", "pathPattern", "baseLanguageCode"]
+  "required": ["$schema", "fileFormat", "pathPattern"]
 }
