@@ -1,8 +1,8 @@
 {
   "root": true,
   "env": {
-    "browser": true,
-    "node": true
+    "browser": false,
+    "node": false
   },
   "parser": "@typescript-eslint/parser",
   "extends": ["@inlang/eslint-config"]

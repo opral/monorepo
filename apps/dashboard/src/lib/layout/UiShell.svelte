@@ -13,7 +13,7 @@
 		HeaderNavItem
 	} from 'carbon-components-svelte';
 	import { page } from '$app/stores';
-	import ProjectSideNav from './ProjectSideNav.svelte';
+	import UriSideNav from './UriSideNav.svelte';
 	import { projectStore } from '$lib/stores/projectStore';
 	import { brombTriggerLink } from '$lib/services/bromb';
 	import { locale, t } from '$lib/services/i18n';
@@ -78,9 +78,17 @@
 	</HeaderUtilities>
 </Header>
 
-{#if $page.params.projectId}
-	<ProjectSideNav bind:isOpen={isSideNavOpen} />
-{/if}
+<!-- 
+	The following is a workaround. 
+
+	Binding `isOpen` is required. Thus, two options: 
+		1. Render the SideNavs in this component. 
+		2. Introduce a side nav store. 
+	Option 1 has been chosen. 
+-->
+<!-- {#if $page.params.uri}
+	<UriSideNav bind:isOpen={isSideNavOpen} />
+{/if} -->
 
 <Content>
 	<slot />

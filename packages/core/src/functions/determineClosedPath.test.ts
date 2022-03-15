@@ -1,5 +1,4 @@
 import { determineClosestPath } from './determineClosestPath';
-import { it, expect } from 'vitest';
 import path from 'path';
 
 it('should find the closest path', () => {

@@ -1,14 +1,12 @@
 import type { Resources } from '@inlang/fluent-ast';
 import type { InlangConfig } from '@inlang/config';
-import type FS from '@isomorphic-git/lightning-fs';
 import { converters, parseResources } from '@inlang/fluent-format-converters';
 import path from 'path';
 import { Buffer } from 'buffer';
 import { languageCodes } from '@inlang/utils';
 import { Result } from '@inlang/utils';
+import { CommonFsApi } from '../types/commonFsApi';
 
-console.log(Result);
-console.log(languageCodes);
 // /**
 //  * Reads and parses the local translation files to `Resources`.
 //  *
@@ -18,7 +16,7 @@ console.log(languageCodes);
 //  *
 //  */
 export async function readResources(args: {
-    fs: FS.PromisifedFS;
+    fs: CommonFsApi;
     directory: string;
     pathPattern: InlangConfig['latest']['pathPattern'];
     fileFormat: InlangConfig['latest']['fileFormat'];
