@@ -196,7 +196,7 @@ export type LanguageCode =
   | "za"
   | "zu";
 
-export interface InlangConfig10 {
+export interface InlangConfigV1 {
   /**
    * A link to the JSON schema.
    *

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Inlang Config 1.0",
+  "title": "Inlang Config v1",
   "type": "object",
   "properties": {
     "$schema": {

@@ -1,12 +1,12 @@
-import { InlangConfig10 } from './v1.0';
+import { InlangConfigV1 } from './v1';
 
 export type InlangConfig = {
-    latest: InlangConfig10;
+    latest: InlangConfigV1;
     /**
      * Any version of inlang config.
      *
      * (Union of all inlang config versions.)
      */
-    any: InlangConfig10;
-    '1.0': InlangConfig10;
+    any: InlangConfigV1;
+    v1: InlangConfigV1;
 };

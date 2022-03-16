@@ -1,7 +1,7 @@
 import { Result } from '../../utils/dist';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import schema01 from './schemas/v1.0.json';
+import schemaV1 from './schemas/v1.json';
 import { InlangConfig } from './types/inlangConfig';
 
 /**
@@ -15,7 +15,7 @@ export function validate(args: {
     // ajv can throw
     try {
         const ajv = addFormats(new Ajv({}));
-        const valid = ajv.validate(schema01, args.config);
+        const valid = ajv.validate(schemaV1, args.config);
         if (valid) {
             return Result.ok(args.config as InlangConfig['any']);
         } else if (ajv.errors) {
