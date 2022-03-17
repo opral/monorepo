@@ -12,26 +12,14 @@
 		Content,
 		HeaderNavItem
 	} from 'carbon-components-svelte';
-	import { page } from '$app/stores';
-	import UriSideNav from './UriSideNav.svelte';
-	import { projectStore } from '$lib/stores/projectStore';
 	import { brombTriggerLink } from '$lib/services/bromb';
 	import { locale, t } from '$lib/services/i18n';
 	import Language20 from 'carbon-icons-svelte/lib/Language20';
 
 	let isSideNavOpen = false;
-
-	let projectName: () => string;
-	$: projectName = () => {
-		if ($page.params.projectId && $projectStore.data?.project) {
-			return $projectStore.data.project.name;
-		}
-		// return empty string. returning undefined does not work
-		return '';
-	};
 </script>
 
-<Header company="inlang" href="/" bind:isSideNavOpen platformName={projectName()}>
+<Header company="inlang" href="/" bind:isSideNavOpen>
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>

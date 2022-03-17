@@ -8,6 +8,7 @@ it('should read inlang config', async () => {
     const config: InlangConfig['any'] = {
         $schema: 'https://raw.githubusercontent.com/inlang/inlang/main/packages/config/src/schemas/v0.1.json',
         fileFormat: 'fluent',
+        baseLanguageCode: 'en',
         pathPattern: './translations/{languageCode}.ftl',
     };
     fs.writeFileSync(path, JSON.stringify(config));
@@ -21,6 +22,7 @@ it('it should return error on invalid config', async () => {
     const config: InlangConfig['any'] = {
         $schema: 'example.com',
         fileFormat: 'fluent',
+        baseLanguageCode: 'en',
         pathPattern: 'INVALID',
     };
     fs.writeFileSync(path, JSON.stringify(config));

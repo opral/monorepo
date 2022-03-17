@@ -71,6 +71,7 @@
 		"@now/build-utils": "^2.7.0",
 		"buffer": "^6.0.3",
 		"dotenv": "^10.0.0",
+		"filer": "^1.4.1",
 		"iso-639-1": "^2.1.9",
 		"isomorphic-git": "^1.13.1",
 		"js-cookie": "^3.0.1",

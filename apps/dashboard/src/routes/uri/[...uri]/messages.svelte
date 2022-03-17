@@ -1,22 +1,22 @@
 <script lang="ts">
 	import ISO6391 from 'iso-639-1';
 	import ConfirmModal from '$lib/components/modals/ConfirmModal.svelte';
-	import { Button, InlineNotification, Search } from 'carbon-components-svelte';
-	import { projectStore } from '$lib/stores/projectStore';
+	import { Button, InlineNotification, Loading, Search } from 'carbon-components-svelte';
 	import CreateMessageModal from '$lib/components/modals/CreateMessageModal.svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import { Attribute, Message, parsePattern, Pattern } from '@inlang/fluent-ast';
 	import { LanguageCode, Result } from '@inlang/utils';
 	import Patterns from '$lib/components/Patterns.svelte';
 	import { lintPattern } from '@inlang/fluent-lint';
-	import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';
+	// import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';
 	import { t } from '$lib/services/i18n';
+	import { resources, inlangConfig } from '$lib/stores/routes/uriStores';
 
 	let searchQuery = '';
 
 	let createMessageModal: CreateMessageModal;
 
-	let createAttributeModal: CreateAttributeModal;
+	// let createAttributeModal: CreateAttributeModal;
 
 	let confirmModal: ConfirmModal;
 
@@ -42,17 +42,19 @@
 
 	let rows: () => Row[];
 	$: rows = () => {
+		if ($resources === undefined) {
+			return [];
+		}
 		const result: Row[] = [];
-		const ids = $projectStore.data?.resources.getMessageIds({
-			languageCode: $projectStore.data.project.base_language_code
+		const ids = $resources.getMessageIds({
+			languageCode: $inlangConfig.baseLanguageCode
 		});
 		const filtered = [...(ids ?? [])].filter((id) =>
 			id.toLowerCase().startsWith(searchQuery.toLowerCase())
 		);
 		for (const messageId of filtered) {
 			// messages
-			const messages =
-				$projectStore.data?.resources.getMessageForAllResources({ id: messageId }) ?? {};
+			const messages = $resources.getMessageForAllResources({ id: messageId }) ?? {};
 			// transforming record of messages to a record of patterns
 			const patterns: Record<string, Pattern | undefined> = Object.fromEntries(
 				Object.entries(messages).map(([languageCode, message]) => [
@@ -60,7 +62,7 @@
 					message?.value ?? undefined
 				])
 			);
-			const sourceLanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
+			const sourceLanguageCode = $inlangConfig.baseLanguageCode;
 			const sourceMessage = messages[sourceLanguageCode];
 			if (sourceMessage === undefined) {
 				alert(`Error 219dx: The source message is undefined for id "${messageId}"`);
@@ -76,7 +78,7 @@
 			// attributes
 			for (const attribute of sourceMessage.attributes) {
 				const attributes =
-					$projectStore.data?.resources.getAttributeForAllResources({
+					$resources.getAttributeForAllResources({
 						messageId,
 						id: attribute.id.name
 					}) ?? {};
@@ -107,7 +109,7 @@
 	function isActionRequired(args: {
 		messagesOrAttributes: Record<LanguageCode, Message | Attribute | undefined>;
 	}): boolean {
-		const sourceLanguageCode = $projectStore.data?.project.base_language_code ?? 'en';
+		const sourceLanguageCode = $inlangConfig.baseLanguageCode;
 		const sourceEntity = args.messagesOrAttributes[sourceLanguageCode];
 		if (sourceEntity === undefined || sourceEntity?.value === null) {
 			return true;
@@ -134,7 +136,7 @@
 		serializedPatterns: Record<LanguageCode, string>;
 	}): Promise<void> {
 		for (const [languageCode, serializedPattern] of Object.entries(args.serializedPatterns)) {
-			const message = $projectStore.data?.resources.getMessage({
+			const message = $resources.getMessage({
 				id: args.messageId,
 				languageCode: languageCode as LanguageCode
 			});
@@ -149,14 +151,14 @@
 				// update the message pattern
 				message.value = parsedPattern.value;
 				updateOrCreateResult =
-					$projectStore.data?.resources.updateMessage({
+					$resources.updateMessage({
 						id: args.messageId,
 						languageCode: languageCode as LanguageCode,
 						with: message
 					}) ?? Result.err();
 			} else {
 				updateOrCreateResult =
-					$projectStore.data?.resources.createMessage({
+					$resources.createMessage({
 						id: args.messageId,
 						languageCode: languageCode as LanguageCode,
 						pattern: serializedPattern
@@ -168,10 +170,12 @@
 				return;
 			}
 		}
-		const databaseRequest = await projectStore.updateResourcesInDatabase();
-		if (databaseRequest.isErr) {
-			alert(databaseRequest.error);
-		}
+		resources.triggerUpdate();
+		// TODO
+		// const databaseRequest = await projectStore.updateResourcesInDatabase();
+		// if (databaseRequest.isErr) {
+		// 	alert(databaseRequest.error);
+		// }
 	}
 
 	// ugh ugly 2x
@@ -181,7 +185,7 @@
 		serializedPatterns: Record<LanguageCode, string>;
 	}): Promise<void> {
 		for (const [languageCode, serializedPattern] of Object.entries(args.serializedPatterns)) {
-			const attribute = $projectStore.data?.resources.getAttribute({
+			const attribute = $resources.getAttribute({
 				id: args.attributeId,
 				messageId: args.messageId,
 				languageCode: languageCode as LanguageCode
@@ -196,7 +200,7 @@
 				}
 				attribute.value = parsedPattern.value;
 				updateOrCreateResult =
-					$projectStore.data?.resources.updateAttribute({
+					$resources.updateAttribute({
 						id: args.attributeId,
 						messageId: args.messageId,
 						languageCode: languageCode as LanguageCode,
@@ -204,7 +208,7 @@
 					}) ?? Result.err();
 			} else {
 				updateOrCreateResult =
-					$projectStore.data?.resources.createAttribute({
+					$resources.createAttribute({
 						id: args.attributeId,
 						messageId: args.messageId,
 						languageCode: languageCode as LanguageCode,
@@ -216,26 +220,28 @@
 				return;
 			}
 		}
-		const databaseRequest = await projectStore.updateResourcesInDatabase();
-		if (databaseRequest.isErr) {
-			alert(databaseRequest.error);
-		}
+		// TODO
+		// const databaseRequest = await projectStore.updateResourcesInDatabase();
+		// if (databaseRequest.isErr) {
+		// 	alert(databaseRequest.error);
+		// }
 	}
 
 	async function deleteMessage(args: { messageId: Message['id']['name'] }): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 		const onConfirm = async () => {
-			const deletion = $projectStore.data?.resources.deleteMessageForAllResources({
+			const deletion = $resources.deleteMessageForAllResources({
 				id: args.messageId
 			});
 			if (deletion === undefined || deletion.isErr) {
 				return Result.err(deletion?.error);
 			}
-			return projectStore.updateResourcesInDatabase();
+			// todo
+			return Result.ok(resources.triggerUpdate());
 		};
-		const message = $projectStore.data?.resources.getMessage({
+		const message = $resources.getMessage({
 			id: args.messageId,
-			languageCode: $projectStore.data.project.base_language_code
+			languageCode: $inlangConfig.baseLanguageCode
 		});
 		if ((message?.attributes.length ?? []) > 0) {
 			confirmModal.show({
@@ -264,109 +270,112 @@
 			message: $t('warning.irreversible-action'),
 			danger: true,
 			onConfirm: async () => {
-				const deletion = $projectStore.data?.resources.deleteAttributeForAllResources({
+				const deletion = $resources.deleteAttributeForAllResources({
 					messageId: args.messageId,
 					id: args.attributeId
 				});
 				if (deletion === undefined || deletion.isErr) {
 					return Result.err(deletion?.error);
 				}
-				return projectStore.updateResourcesInDatabase();
+				return Result.ok(resources.triggerUpdate());
 			}
 		});
 	}
 </script>
 
-<!-- description -->
-<h1 class="mb-1">{$t('generic.messages')}</h1>
-<p>{$t('info.messages')}</p>
-<br />
-<!-- "action bar" -->
-<row class="min-w-0">
-	<Search bind:value={searchQuery} />
-	<Button
-		kind="secondary"
-		icon={Add16}
-		on:click={() => {
-			createAttributeModal.show();
-		}}
-	>
-		{$t('new.attribute')}
-	</Button>
-	<Button
-		icon={Add16}
-		on:click={() => {
-			createMessageModal.show();
-		}}>{$t('new.message')}</Button
-	>
-</row>
-<!-- divider -->
-<row class="bg-gray-300 w-full h-12 items-center">
-	<strong class="pl-12">Id</strong>
-</row>
-<!-- patterns -->
-{#each rows() as row, i}
-	<!-- of messages -->
-	{#if row.type === 'Message'}
-		<!-- a message with no patterns -->
-		{#if Object.values(row.patterns).every((pattern) => pattern === undefined)}
-			<Patterns
-				id={row.messageId}
-				patterns={{ en: new Pattern([]) }}
-				displayActionRequired={false}
-				requiredLanguageCodes={[]}
-				baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
-				onDelete={() => deleteMessage({ messageId: row.messageId })}
-				onSaveChanges={(serializedPatterns) =>
-					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
-			>
-				<InlineNotification
-					slot="above-expanded"
-					hideCloseButton={true}
-					kind="info"
-					title={$t('info.message-no-pattern')}
-					subtitle={$t('info.message-no-pattern-fill-out', {
-						baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
-					})}
+{#if $resources === undefined || $inlangConfig === undefined}
+	<Loading />
+{:else}
+	<!-- description -->
+	<h1 class="mb-1">{$t('generic.messages')}</h1>
+	<!-- <p>{$t('info.messages')}</p> -->
+	<br />
+	<!-- "action bar" -->
+	<row class="min-w-0">
+		<Search bind:value={searchQuery} />
+		<Button
+			kind="secondary"
+			icon={Add16}
+			on:click={() => {
+				// createAttributeModal.show();
+			}}
+		>
+			{$t('new.attribute')}
+		</Button>
+		<Button
+			icon={Add16}
+			on:click={() => {
+				createMessageModal.show();
+			}}>{$t('new.message')}</Button
+		>
+	</row>
+	<!-- divider -->
+	<row class="bg-gray-300 w-full h-12 items-center">
+		<strong class="pl-12">Id</strong>
+	</row>
+	<!-- patterns -->
+	{#each rows() as row, i}
+		<!-- of messages -->
+		{#if row.type === 'Message'}
+			<!-- a message with no patterns -->
+			{#if Object.values(row.patterns).every((pattern) => pattern === undefined)}
+				<Patterns
+					id={row.messageId}
+					patterns={{ en: new Pattern([]) }}
+					displayActionRequired={false}
+					requiredLanguageCodes={[]}
+					baseLanguageCode={$inlangConfig.baseLanguageCode}
+					onDelete={() => deleteMessage({ messageId: row.messageId })}
+					onSaveChanges={(serializedPatterns) =>
+						saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
+				>
+					<InlineNotification
+						slot="above-expanded"
+						hideCloseButton={true}
+						kind="info"
+						title={$t('info.message-no-pattern')}
+						subtitle={$t('info.message-no-pattern-fill-out', {
+							baseLanguageCode: ISO6391.getName($inlangConfig.baseLanguageCode)
+						})}
+					/>
+				</Patterns>
+			{:else}
+				<Patterns
+					id={row.messageId}
+					patterns={row.patterns}
+					displayActionRequired={row.actionRequired}
+					requiredLanguageCodes={$inlangConfig.languageCodes}
+					baseLanguageCode={$inlangConfig.baseLanguageCode}
+					onDelete={() => deleteMessage({ messageId: row.messageId })}
+					onSaveChanges={(serializedPatterns) =>
+						saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
 				/>
-			</Patterns>
+			{/if}
 		{:else}
+			<!-- of attributes -->
 			<Patterns
-				id={row.messageId}
+				id={row.messageId + ' . ' + row.attributeId}
 				patterns={row.patterns}
 				displayActionRequired={row.actionRequired}
-				requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
-				baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
-				onDelete={() => deleteMessage({ messageId: row.messageId })}
+				requiredLanguageCodes={$inlangConfig.languageCodes}
+				baseLanguageCode={$inlangConfig.baseLanguageCode}
+				onDelete={() => deleteAttribute({ messageId: row.messageId, attributeId: row.attributeId })}
 				onSaveChanges={(serializedPatterns) =>
-					saveMessageChanges({ messageId: row.messageId, serializedPatterns })}
+					saveAttributeChanges({
+						messageId: row.messageId,
+						attributeId: row.attributeId,
+						serializedPatterns
+					})}
 			/>
 		{/if}
-	{:else}
-		<!-- of attributes -->
-		<Patterns
-			id={row.messageId + ' . ' + row.attributeId}
-			patterns={row.patterns}
-			displayActionRequired={row.actionRequired}
-			requiredLanguageCodes={$projectStore.data?.languages.map((language) => language.code) ?? []}
-			baseLanguageCode={$projectStore.data?.project.base_language_code ?? 'en'}
-			onDelete={() => deleteAttribute({ messageId: row.messageId, attributeId: row.attributeId })}
-			onSaveChanges={(serializedPatterns) =>
-				saveAttributeChanges({
-					messageId: row.messageId,
-					attributeId: row.attributeId,
-					serializedPatterns
-				})}
-		/>
-	{/if}
-	{#if i + 1 < rows().length}
-		<div class="h-px w-full bg-gray-300" />
-	{/if}
-{/each}
+		{#if i + 1 < rows().length}
+			<div class="h-px w-full bg-gray-300" />
+		{/if}
+	{/each}
 
-<!-- modals -->
-<CreateMessageModal bind:this={createMessageModal} />
+	<!-- modals -->
+	<CreateMessageModal bind:this={createMessageModal} />
+	<!-- <CreateAttributeModal bind:this={createAttributeModal} /> -->
 
-<CreateAttributeModal bind:this={createAttributeModal} />
-
-<ConfirmModal bind:this={confirmModal} />
+	<ConfirmModal bind:this={confirmModal} />
+{/if}

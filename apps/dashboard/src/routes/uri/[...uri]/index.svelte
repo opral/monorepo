@@ -1,31 +1,79 @@
 <script lang="ts">
-	import { Button, ClickableTile, Loading } from 'carbon-components-svelte';
-	import Delete16 from 'carbon-icons-svelte/lib/Delete16';
-	import Add16 from 'carbon-icons-svelte/lib/Add16';
-	import { fs } from '$lib/stores/filesystem';
+	import {
+		ClickableTile,
+		InlineNotification,
+		Loading,
+		NotificationActionButton
+	} from 'carbon-components-svelte';
+	import { fs, normalize } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
-	import { Breadcrumb, BreadcrumbItem } from 'carbon-components-svelte';
-
-	$: path = $page.url.searchParams.get('path') ?? '';
+	import { searchParams, resources } from '$lib/stores/routes/uriStores';
+	import { onMount } from 'svelte';
+	import AddRepository from '$lib/components/modals/AddRepository.svelte';
 
 	$: directories = async () => {
-		const paths = await $fs.readdir(path === '' ? '/' : path);
-		return paths.filter(async (path) => {
-			const stat = await $fs.stat(path);
-			// console.log({ isDir: stat.isDirectory(), isFile: stat.isFile() });
-			// return stat.isDirectory();
-			return true;
-		});
+		console.log('rebuild');
+		const paths = await $fs.readdir($searchParams.dir);
+		console.log({ dir: $searchParams.dir });
+		console.log({ paths });
+		// not using filter because async
+		let dirs: string[] = [];
+		for (const subpath of paths) {
+			// skipping .dot files and directories
+			if (subpath.at(0) === '.') {
+				continue;
+			}
+			const stat = await $fs.stat(normalize($searchParams.dir + subpath) + '/');
+			if (stat.isDirectory()) {
+				dirs.push(subpath);
+			}
+		}
+		return dirs;
 	};
+
+	// // check whether directory contains the inlang config
+	// $: async () => {
+	// 	const paths = await $fs.readdir(path);
+	// 	if (paths.includes('inlang.config.json')) {
+	// 		inlangConfigFound = true;
+	// 	} else {
+	// 		inlangConfigFound = false;
+	// 	}
+	// };
+
+	onMount(() => {
+		console.log({ tostring: $page.url.searchParams.toString() });
+		console.log({ decode: decodeURIComponent($page.url.searchParams.toString()) });
+	});
 </script>
 
 {#await directories()}
 	<Loading />
 {:then paths}
+	{#if $resources}
+		<InlineNotification lowContrast kind="info" title="Inlang config found.">
+			<svelte:fragment slot="actions">
+				<!-- ugly ugly workaround to set a search parameter -->
+				<a
+					href={$page.url.pathname +
+						'/messages?' +
+						decodeURIComponent($page.url.searchParams.toString())}
+				>
+					<NotificationActionButton>Open editor</NotificationActionButton>
+				</a>
+			</svelte:fragment>
+		</InlineNotification>
+	{/if}
 	<!-- filter = only show directories -->
-	{#each paths as _path}
-		<ClickableTile href={`/uri/${$page.params.uri}?path=${path + '/' + _path}`}>
-			{_path}
+	<h3>Select a directory:</h3>
+	<p class="text-gray-600 text-sm">
+		The directory must contain an <code>inlang.config.json</code> to open and edit messages.
+	</p>
+	<br />
+	{#each paths as subpath}
+		<!-- directory hrefs must have a trailing slash!  -->
+		<ClickableTile href={`/uri/${$page.params.uri}?dir=${$searchParams.dir + subpath}/`}>
+			{subpath}
 		</ClickableTile>
 	{/each}
 {/await}

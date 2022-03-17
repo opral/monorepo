@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const _fs = new FS('fs');
+const _fs = new FS('fs', { wipe: true });
 
 /**
  * Promise based fs (filesystem) store.
@@ -32,4 +32,18 @@ function createFsStore() {
 		 */
 		callbackBased: _fs
 	};
+}
+
+/**
+ * Prefixes a slash to a path if required.
+ *
+ * LightningFS has problems with relative paths.
+ */
+export function normalize(path: string): string {
+	let result = path;
+	// prefix with slash
+	if (path.at(0) !== '/') {
+		result = '/' + path;
+	}
+	return result;
 }

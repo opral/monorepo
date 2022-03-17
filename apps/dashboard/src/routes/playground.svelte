@@ -1,8 +1,11 @@
 <script lang="ts">
-	// import BrowserFS from 'browserfs';
-	// import { onMount } from 'svelte';
+	import { fs } from '$lib/stores/filesystem';
+	import { onMount } from 'svelte';
 
-	// const x = BrowserFS.initialize(BrowserFS.configure())
-
-	// onMount(async () => console.log(fs.promises.readdir('/')));
+	onMount(async () => {
+		await $fs.mkdir('/example');
+		console.log({ stat: await $fs.stat('/example') });
+		fs.refresh();
+		console.log({ stat: await $fs.stat('/example') });
+	});
 </script>
