@@ -1,8 +1,7 @@
 import type { Resources } from '@inlang/fluent-ast';
 import type { InlangConfig } from '@inlang/config';
-import { converters, parseResources, serializeResources } from '@inlang/fluent-format-converters';
+import { converters, serializeResources } from '@inlang/fluent-format-converters';
 import path from 'path';
-import { Buffer } from 'buffer';
 import { Result } from '@inlang/utils';
 import { CommonFsApi } from '../types/commonFsApi';
 
