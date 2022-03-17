@@ -8,8 +8,6 @@
 	import { fs, normalize } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
 	import { searchParams, resources } from '$lib/stores/routes/uriStores';
-	import { onMount } from 'svelte';
-	import AddRepository from '$lib/components/modals/AddRepository.svelte';
 
 	$: directories = async () => {
 		console.log('rebuild');
@@ -40,11 +38,6 @@
 	// 		inlangConfigFound = false;
 	// 	}
 	// };
-
-	onMount(() => {
-		console.log({ tostring: $page.url.searchParams.toString() });
-		console.log({ decode: decodeURIComponent($page.url.searchParams.toString()) });
-	});
 </script>
 
 {#await directories()}
