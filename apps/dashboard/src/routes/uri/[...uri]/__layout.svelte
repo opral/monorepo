@@ -8,7 +8,6 @@
 	import { page } from '$app/stores';
 	import { Breadcrumb, BreadcrumbItem } from 'carbon-components-svelte';
 	import { searchParams } from '$lib/stores/routes/uriStores';
-	import { slice } from 'lodash-es';
 
 	let inlineLoadingStatus: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
