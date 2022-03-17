@@ -10,6 +10,7 @@ it('should read inlang config', async () => {
         fileFormat: 'fluent',
         baseLanguageCode: 'en',
         pathPattern: './translations/{languageCode}.ftl',
+        languageCodes: ['en', 'de'],
     };
     fs.writeFileSync(path, JSON.stringify(config));
     const result = await readInlangConfig({ fs: fs.promises as any, path });
@@ -24,6 +25,7 @@ it('it should return error on invalid config', async () => {
         fileFormat: 'fluent',
         baseLanguageCode: 'en',
         pathPattern: 'INVALID',
+        languageCodes: ['en', 'de'],
     };
     fs.writeFileSync(path, JSON.stringify(config));
     const result = await readInlangConfig({ fs: fs.promises as any, path });
