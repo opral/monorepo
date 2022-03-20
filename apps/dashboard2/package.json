@@ -30,7 +30,11 @@
 	},
 	"dependencies": {
 		"@inlang/core": "*",
-		"@inlang/utils": "*"
+		"@inlang/utils": "*",
+		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+		"@isomorphic-git/lightning-fs": "^4.4.1",
+		"path-browserify": "^1.0.1",
+		"buffer": "^6.0.3"
 	},
 	"type": "module"
 }
