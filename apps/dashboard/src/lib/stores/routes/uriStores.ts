@@ -29,7 +29,10 @@ export const inlangConfig = derived<[typeof searchParams, typeof fs], InlangConf
 		if (ls.includes('inlang.config.json')) {
 			try {
 				const config = (
-					await readInlangConfig({ fs: $fs, path: $searchParams.dir + 'inlang.config.json' })
+					await readInlangConfig({
+						fs: $fs,
+						path: $searchParams.dir + 'inlang.config.json'
+					})
 				).unwrap();
 				set(config);
 			} catch (error) {
@@ -48,25 +51,24 @@ export const resources = createResourcesStore();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createResourcesStore() {
-	let setter: (value: Resources) => void;
-	let resources: Resources;
 	const { subscribe } = derived<[typeof searchParams, typeof fs], Resources>(
 		[searchParams, fs],
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		async ([$searchParams, $fs], set) => {
-			setter = set;
 			const ls = await $fs.readdir($searchParams.dir);
 			if (ls.includes('inlang.config.json')) {
 				try {
 					const config = (
-						await readInlangConfig({ fs: $fs, path: $searchParams.dir + 'inlang.config.json' })
+						await readInlangConfig({
+							fs: $fs,
+							path: $searchParams.dir + 'inlang.config.json'
+						})
 					).unwrap();
 					const _resources = (
 						await readResources({ fs: $fs, directory: $searchParams.dir, ...config })
 					).unwrap();
 					set(_resources);
-					resources = _resources;
 				} catch (error) {
 					alert((error as Error).message);
 				}
@@ -76,14 +78,6 @@ function createResourcesStore() {
 		}
 	);
 	return {
-		subscribe,
-		/** 
-		 * Notify listeners of an update.
-		 * 
-		 * Resources is mutable, thus triggering a rebuild is explicit. 
-		 */
-		triggerUpdate: () => {
-			setter(resources);
-		}
+		subscribe
 	};
 }

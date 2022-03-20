@@ -1,13 +1,14 @@
 <script lang="ts">
 	import InlineLoadingWrapper from '$lib/components/InlineLoadingWrapper.svelte';
 	import { t } from '$lib/services/i18n';
-	import git from 'isomorphic-git';
 	import http from 'isomorphic-git/http/web';
 	import { fs } from '$lib/stores/filesystem';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Breadcrumb, BreadcrumbItem } from 'carbon-components-svelte';
 	import { searchParams } from '$lib/stores/routes/uriStores';
+	import GitStatus from '$lib/components/GitStatus.svelte';
+	import { clone } from '$lib/services/git/index';
 
 	let inlineLoadingStatus: InlineLoadingWrapper['$$prop_def']['status'] = 'inactive';
 
@@ -15,28 +16,20 @@
 
 	async function cloneRepository(): Promise<void> {
 		inlineLoadingStatus = 'active';
-		try {
-			// replacing slashes with | to make the directory
-			const dir = `/`;
-			// try {
-			// 	// see whether the directory exists
-			// 	await fs.readdir(dir);
-			// } catch {
-			// 	await fs.mkdir(dir);
-			// }
-			await git.clone({
-				fs: fs.callbackBased,
-				http,
-				dir,
-				url: $page.params.uri,
-				corsProxy: 'https://cors.isomorphic-git.org'
-			});
-			fs.refresh();
-			inlineLoadingStatus = 'finished';
-		} catch (error) {
+		const result = await clone({
+			fs: fs.callbackBased,
+			dir: '/',
+			http,
+			url: $page.params.uri,
+			corsProxy: 'https://cors.isomorphic-git.org'
+		});
+		if (result.isErr) {
 			inlineLoadingStatus = 'error';
-			alert(error);
+			alert(result.error);
+		} else {
+			inlineLoadingStatus = 'finished';
 		}
+		fs.refresh();
 	}
 
 	onMount(async () => {
@@ -84,5 +77,6 @@
 		finishedDescription={$t('generic.success')}
 	/>
 {:else}
+	<GitStatus />
 	<slot />
 {/if}

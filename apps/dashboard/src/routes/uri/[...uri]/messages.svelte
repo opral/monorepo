@@ -10,7 +10,9 @@
 	import { lintPattern } from '@inlang/fluent-lint';
 	// import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';
 	import { t } from '$lib/services/i18n';
-	import { resources, inlangConfig } from '$lib/stores/routes/uriStores';
+	import { resources, inlangConfig, searchParams } from '$lib/stores/routes/uriStores';
+	import { writeResources } from '@inlang/core';
+	import { fs } from '$lib/stores/filesystem';
 
 	let searchQuery = '';
 
@@ -170,7 +172,17 @@
 				return;
 			}
 		}
-		resources.triggerUpdate();
+		const result = await writeResources({
+			fs: $fs,
+			resources: $resources,
+			directory: $searchParams.dir,
+			...$inlangConfig
+		});
+		if (result.isErr) {
+			alert(result.error);
+		} else {
+			fs.refresh();
+		}
 		// TODO
 		// const databaseRequest = await projectStore.updateResourcesInDatabase();
 		// if (databaseRequest.isErr) {
@@ -236,8 +248,18 @@
 			if (deletion === undefined || deletion.isErr) {
 				return Result.err(deletion?.error);
 			}
-			// todo
-			return Result.ok(resources.triggerUpdate());
+			const write = await writeResources({
+				fs: $fs,
+				resources: $resources,
+				directory: $searchParams.dir,
+				...$inlangConfig
+			});
+			if (write.isErr) {
+				alert(write.error);
+			} else {
+				fs.refresh();
+			}
+			return Result.ok(undefined);
 		};
 		const message = $resources.getMessage({
 			id: args.messageId,
@@ -255,7 +277,7 @@
 			confirmModal.show({
 				heading: $t('delete.message', { id: args.messageId }),
 				danger: true,
-				message: $t('warning.irreversible-action'),
+				message: '',
 				onConfirm
 			});
 		}
@@ -277,7 +299,18 @@
 				if (deletion === undefined || deletion.isErr) {
 					return Result.err(deletion?.error);
 				}
-				return Result.ok(resources.triggerUpdate());
+				const write = await writeResources({
+					fs: $fs,
+					resources: $resources,
+					directory: $searchParams.dir,
+					...$inlangConfig
+				});
+				if (write.isErr) {
+					alert(write.error);
+				} else {
+					fs.refresh();
+				}
+				return Result.ok(undefined);
 			}
 		});
 	}

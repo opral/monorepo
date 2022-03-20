@@ -53,7 +53,6 @@
 			pattern: messagePattern,
 			languageCode: $inlangConfig.baseLanguageCode
 		});
-		resources.triggerUpdate();
 		if (create.isErr) {
 			alert(create.isErr ? create.error : $t('error.unknown'));
 			status = 'error';

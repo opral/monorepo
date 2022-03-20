@@ -43,7 +43,7 @@
 			// 	await fs.mkdir(dir);
 			// }
 			await git.clone({
-				fs: fs.callbackBased,
+				fs: $fs,
 				http,
 				dir,
 				url,
