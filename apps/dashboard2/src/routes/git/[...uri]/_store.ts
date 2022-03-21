@@ -51,8 +51,8 @@ export const resources = createResourcesStore();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createResourcesStore() {
-    // derived from search params -> if directory changes
-    // derived from fs -> if files change 
+	// derived from search params -> if directory changes
+	// derived from fs -> if files change
 	const { subscribe } = derived<[typeof searchParams, typeof fs], Resources>(
 		[searchParams, fs],
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
