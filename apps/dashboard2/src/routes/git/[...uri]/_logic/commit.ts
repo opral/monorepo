@@ -8,7 +8,7 @@ import git from 'isomorphic-git';
  * don't know what a commit, push or remote is. Just show a "submit" button
  * which performs staging, committing and pushing in one go.
  */
-export async function save(
+export async function commit(
 	args: Parameters<typeof git['commit']>[0] & Parameters<typeof filesWithChanges>[0]
 ): Promise<Result<void, Error>> {
 	try {

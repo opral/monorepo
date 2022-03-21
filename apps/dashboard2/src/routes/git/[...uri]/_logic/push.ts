@@ -4,9 +4,7 @@ import git from 'isomorphic-git';
 /**
  * TODO
  */
-export async function submit(
-	args: Parameters<typeof git['push']>[0]
-): Promise<Result<void, Error>> {
+export async function push(args: Parameters<typeof git['push']>[0]): Promise<Result<void, Error>> {
 	try {
 		await git.push(args);
 		return Result.ok(undefined);

@@ -6,7 +6,7 @@ import git from 'isomorphic-git';
  *
  * All commits should happen on the 'inlang' branch. Thus, automatic checkout to that branch.
  */
-export async function open(args: Parameters<typeof git['clone']>[0]): Promise<Result<void, Error>> {
+export async function clone(args: Parameters<typeof git['clone']>[0]): Promise<Result<void, Error>> {
 	try {
 		await git.clone(args);
 		(await checkoutOrCreateInlangBranch({ ref: 'inlang', ...args })).unwrap();
