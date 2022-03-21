@@ -22,6 +22,6 @@
 	</div>
 </nav>
 
-<div class="container my-3">
+<div class="container my-4">
 	<slot />
 </div>
