@@ -12,11 +12,11 @@
 		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
 	},
 	"devDependencies": {
+		"@inlang/eslint-config": "*",
 		"@sveltejs/adapter-auto": "1.0.0-next.33",
 		"@sveltejs/kit": "1.0.0-next.301",
 		"@typescript-eslint/eslint-plugin": "^5.10.1",
 		"@typescript-eslint/parser": "^5.10.1",
-		"@inlang/eslint-config": "*",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-svelte3": "^3.2.1",
@@ -28,12 +28,12 @@
 		"tslib": "^2.3.1"
 	},
 	"dependencies": {
+		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
 		"@inlang/core": "*",
 		"@inlang/utils": "*",
-		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
 		"@isomorphic-git/lightning-fs": "^4.4.1",
-		"path-browserify": "^1.0.1",
-		"buffer": "^6.0.3"
+		"buffer": "^6.0.3",
+		"path-browserify": "^1.0.1"
 	},
 	"type": "module"
 }

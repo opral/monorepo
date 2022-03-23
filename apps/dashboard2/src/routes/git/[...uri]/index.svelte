@@ -36,6 +36,11 @@
 		<span class="visually-hidden">Loading...</span>
 	</div>
 {:then paths}
+	<!-- filter = only show directories -->
+	<h5>Navigate to the inlang config</h5>
+	<p class="text-gray-600 text-sm">
+		The directory must contain an <code>inlang.config.json</code> to open and edit messages.
+	</p>
 	{#if $resources}
 		<div class="alert alert-info" role="alert">
 			<strong>Inlang config found.</strong>
@@ -49,20 +54,15 @@
 			</a>
 		</div>
 	{/if}
-	<!-- filter = only show directories -->
-	<h3>Select a directory:</h3>
-	<p class="text-gray-600 text-sm">
-		The directory must contain an <code>inlang.config.json</code> to open and edit messages.
-	</p>
-	<br />
 	{#each paths as subpath}
-		<ul class="nav column">
-			<li class="nav-item">
-				<!-- hrefs must have a trailing slash!  -->
-				<a href={`/uri/${$page.params.uri}?dir=${$searchParams.dir + subpath}/`} class="nav-link">
-					{subpath}
-				</a>
-			</li>
-		</ul>
+		<div class="list-group">
+			<strong class="list-group-item bg-light">Directories</strong>
+			<a
+				href={`/git/${$page.params.uri}?dir=${$searchParams.dir + subpath}/`}
+				class="list-group-item list-group-item-action"
+			>
+				{subpath}
+			</a>
+		</div>
 	{/each}
 {/await}

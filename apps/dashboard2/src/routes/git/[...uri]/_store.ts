@@ -6,7 +6,7 @@ import { readInlangConfig, readResources } from '@inlang/core';
 import type { InlangConfig } from '@inlang/config';
 
 /**
- * Search params of uri routes.
+ * (Typed) Search params.
  */
 export const searchParams = derived<
 	typeof page,
@@ -16,6 +16,12 @@ export const searchParams = derived<
 	}
 >(page, ($page, set) => {
 	set({
+		/**
+		 * Falls back to root ('/') if the query paramater is not set.
+		 *
+		 * Makes the logic easier. If no subdirectory is specified, the user
+		 * is in the root ('/') directory.
+		 */
 		dir: $page.url.searchParams.get('dir') ?? '/'
 	});
 });
@@ -39,6 +45,9 @@ export const inlangConfig = derived<[typeof searchParams, typeof fs], InlangConf
 				alert((error as Error).message);
 			}
 		} else {
+			// is always defined from the layout. thus, ignore
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			set(undefined);
 		}
 	}
@@ -75,6 +84,9 @@ function createResourcesStore() {
 					alert((error as Error).message);
 				}
 			} else {
+				// is always defined from the layout. thus, ignore
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				set(undefined);
 			}
 		}
