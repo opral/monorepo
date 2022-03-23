@@ -73,8 +73,5 @@ export default {
     return translations[locale] || translations["en"];
   },
   feedbackLabels: "feedback",
-  i18n: [
-    { locale: "en", text: "English" },
-    { locale: "de", text: "Deutsch" },
-  ],
+  i18n: [{ locale: "en", text: "English" }],
 };
