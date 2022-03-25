@@ -1,3 +1,6 @@
+## Inlang is being refactored right now. Check back in a month. See https://github.com/inlang/inlang/issues/119
+
+
 <div>
     <p align="center">
         <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/logo-white-background.svg"/>
@@ -13,6 +16,7 @@
 # Inlang
 
 Inlang is an open source localization solution for software build on top of Mozillas recently released [Fluent localization system](https://projectfluent.org/). 
+
 
 ## Goal
 
