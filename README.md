@@ -1,4 +1,4 @@
-## Inlang is being refactored right now. Check back in a month. See https://github.com/inlang/inlang/issues/119
+## Inlang is being refactored right now. Check back in a month. See https://github.com/inlang/inlang/issues/119#issuecomment-1078813933
 
 
 <div>
