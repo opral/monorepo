@@ -1,29 +1,41 @@
 import * as fluent from '@fluent/syntax';
 import { Resource } from './resource';
 
-const resource = new Resource([
-    new fluent.Message(new fluent.Identifier('test'), new fluent.Pattern([new fluent.TextElement('this is my test')])),
-    new fluent.Message(new fluent.Identifier('hello'), new fluent.Pattern([new fluent.TextElement('hello there')])),
-    new fluent.Message(
-        new fluent.Identifier('complex'),
-        new fluent.Pattern([
-            new fluent.TextElement('Hello '),
-            new fluent.Placeable(new fluent.VariableReference(new fluent.Identifier('name'))),
-        ])
-    ),
-    new fluent.Message(
-        new fluent.Identifier('extra'),
-        new fluent.Pattern([new fluent.TextElement('a key without translations ')])
-    ),
-]);
-
 describe('messageExists()', () => {
+    const resource = new Resource([
+        new fluent.Message(
+            new fluent.Identifier('the-message'),
+            new fluent.Pattern([new fluent.TextElement('this is a test pattern')])
+        ),
+    ]);
     it('should be truthy when a message exists', () => {
-        expect(resource.messageExists({ id: 'test' })).toBeTruthy();
+        expect(resource.messageExists({ id: 'the-message' })).toBeTruthy();
     });
 
     it('should be falsy when a message does not exist', () => {
         expect(resource.messageExists({ id: 'none-existent' })).toBeFalsy();
+    });
+});
+
+describe('attributeExists()', () => {
+    const resource = new Resource([
+        new fluent.Message(
+            new fluent.Identifier('with-attribute'),
+            new fluent.Pattern([new fluent.TextElement('this is my test')]),
+            [
+                new fluent.Attribute(
+                    new fluent.Identifier('the-attribute'),
+                    new fluent.Pattern([new fluent.TextElement('some text pattern')])
+                ),
+            ]
+        ),
+    ]);
+    it('should be truthy when an attribute exists', () => {
+        expect(resource.attributeExists({ messageId: 'with-attribute', id: 'the-attribute' })).toBeTruthy();
+    });
+
+    it('should be falsy the message holding the attribute does not exists', () => {
+        expect(resource.attributeExists({ messageId: 'none-existent', id: 'the-attribute' })).toBeFalsy();
     });
 });
 
@@ -213,34 +225,6 @@ describe('messageExists()', () => {
 //             languageCode: 'aa',
 //         });
 //         expect(result.isErr).toBeTruthy();
-//     });
-// });
-
-// describe('attributeExists()', () => {
-//     it('should be truthy when an attribute exists', () => {
-//         const create = resource.createAttribute({
-//             messageId: 'test',
-//             id: 'login',
-//             pattern: 'Welcome to this test, please login.',
-//             languageCode: 'en',
-//         });
-//         if (create.isErr) {
-//             fail(create.error);
-//         }
-//         expect(resource.attributeExists({ messageId: 'test', id: 'login', languageCode: 'en' })).toBeTruthy();
-//     });
-
-//     it('should be falsy when a message not exists', () => {
-//         const create = resource.createAttribute({
-//             messageId: 'test',
-//             id: 'login',
-//             pattern: 'Welcome to this test, please login.',
-//             languageCode: 'en',
-//         });
-//         if (create.isErr) {
-//             fail(create.error);
-//         }
-//         expect(resource.attributeExists({ messageId: 'test', id: 'sfafsafwee', languageCode: 'en' })).toBeFalsy();
 //     });
 // });
 
