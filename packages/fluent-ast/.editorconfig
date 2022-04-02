@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [*.ts]
 indent_style = space
 indent_size = 4
-max_line_length = 120
+max_line_length = 90
 
 [*.md]
 max_line_length = 80
