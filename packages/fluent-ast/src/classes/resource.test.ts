@@ -34,7 +34,7 @@ describe('attributeExists()', () => {
         expect(resource.attributeExists({ messageId: 'with-attribute', id: 'the-attribute' })).toBeTruthy();
     });
 
-    it('should be falsy the message holding the attribute does not exists', () => {
+    it('should be falsy if the message holding the attribute does not exists', () => {
         expect(resource.attributeExists({ messageId: 'none-existent', id: 'the-attribute' })).toBeFalsy();
     });
 });
