@@ -1,35 +1,32 @@
 import * as fluent from '@fluent/syntax';
 
 export class Resource extends fluent.Resource {
-    constructor(body?: Array<fluent.Entry>) {
-        super(body);
+    exists(args: { type: NodeType }): boolean {
+        throw 'Unimplemented';
     }
 
-    /**
-     * Whether or not a message exists.
-     */
-    messageExists(args: { id: fluent.Message['id']['name'] }): boolean {
-        for (const entry of this.body ?? []) {
-            if (entry.type === 'Message' && entry.id.name === args.id) {
-                return true;
-            }
-        }
-        return false;
+    create(args: { messageId: fluent.Message['id']; attributeId?: fluent.Attribute['id'] }): Resource {
+        throw 'Unimplemented';
     }
 
-    /**
-     * Whether or not an attribute exists.
-     */
-    attributeExists(args: { messageId: fluent.Message['id']['name']; id: fluent.Attribute['id']['name'] }): boolean {
-        for (const entry of this.body ?? []) {
-            if (entry.type === 'Message' && entry.id.name === args.messageId) {
-                for (const attribute of entry.attributes) {
-                    if (attribute.id.name === args.id) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+    get(args: { messageId: fluent.Message['id']; attributeId?: fluent.Attribute['id'] }): fluent.Pattern {
+        throw 'Unimplemented';
+    }
+
+    update(args: {
+        messageId: fluent.Message['id'];
+        attributeId?: fluent.Attribute['id'];
+        pattern: fluent.Pattern;
+    }): Resource {
+        throw 'Unimplemented';
+    }
+
+    delete(args: { messageId: fluent.Message['id']; attributeId?: fluent.Attribute['id'] }): Resource {
+        throw 'Unimplemented';
     }
 }
+
+type NodeType = fluent.Message['type'] | fluent.Attribute['type'];
+
+const x: Resource = new Resource();
+console.log(x);
