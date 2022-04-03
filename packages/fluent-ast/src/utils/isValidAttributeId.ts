@@ -7,6 +7,8 @@ import { isValidMessageId } from './isValidMessageId';
  * attribut id i.e. dot notation -> `hello.world`, use the `isValidId()`
  * function instead.
  *
+ * @deprecated TODO Have one validId function only?
+ *
  * @example
  *      isValidAttributeId("world")
  *      >> true
