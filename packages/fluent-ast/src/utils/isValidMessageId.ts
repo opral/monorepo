@@ -1,6 +1,8 @@
 /**
  * Returns whether a message id is valid.
  *
+ * @deprecated TODO Have one validId function only?
+ *
  * Read more about messages here https://projectfluent.org/fluent/guide/hello.html
  */
 export function isValidMessageId(id: string): boolean {

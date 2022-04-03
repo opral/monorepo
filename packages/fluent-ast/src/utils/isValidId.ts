@@ -1,3 +1,4 @@
+import { Identifier } from '../classes';
 import { isValidAttributeId } from './isValidAttributeId';
 import { isValidMessageId } from './isValidMessageId';
 
@@ -22,11 +23,12 @@ import { isValidMessageId } from './isValidMessageId';
  *      >> false
  *
  */
-export function isValidId(id: string): boolean {
-    const split = id.split('.');
+export function isValidId(id: string | Identifier): boolean {
+    const _id = id instanceof Identifier ? id.name : id;
+    const split = _id.split('.');
     switch (split.length) {
         case 1:
-            return isValidMessageId(id);
+            return isValidMessageId(_id);
         case 2:
             return isValidMessageId(split[0]) && isValidAttributeId(split[1]);
         // more than one dot (one attribute) is not allowed in fluent
