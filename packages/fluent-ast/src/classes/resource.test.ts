@@ -59,3 +59,50 @@ describe('get()', () => {
         expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
     });
 });
+
+describe('create()', () => {
+    const resource = new Resource([
+        new fluent.Message(
+            new fluent.Identifier('first-message'),
+            new fluent.Pattern([new fluent.TextElement('this is my test')])
+        ),
+    ]);
+
+    it('should create a new message with no attributes', () => {
+        const newResource = resource
+            .create({ message: { id: 'new-message', value: 'new pattern', attributes: [] } })
+            .unwrap();
+        expect(newResource.body.length).toBe(2);
+        expect((newResource.body[1] as Message).id.name).toBe('new-message');
+    });
+
+    it('should create a new message with attributes', () => {
+        const newResource = resource
+            .create({
+                message: {
+                    id: 'new-message',
+                    value: 'new pattern',
+                    attributes: [{ id: 'new-attribute', value: 'some pattern' }],
+                },
+            })
+            .unwrap();
+        expect(newResource.body.length).toBe(2);
+        expect((newResource.body[1] as Message).attributes[0].id.name).toBe('new-attribute');
+    });
+
+    it('should be immutable', () => {
+        // if the method would be immutable, the following would throw an "already exists" error
+        resource.create({ message: { id: 'new-message', value: 'new pattern' } }).unwrap();
+        resource.create({ message: { id: 'new-message', value: 'new pattern' } }).unwrap();
+    });
+
+    // it('should return the attribute', () => {
+    //     expect(resource.get({ message: { id: 'the-message' }, attribute: { id: 'the-attribute' } })).toEqual(
+    //         (resource.body[0] as Message).attributes[0]
+    //     );
+    // });
+
+    // it('should return undefined if a message does not exist', () => {
+    //     expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
+    // });
+});
