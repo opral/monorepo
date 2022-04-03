@@ -5,7 +5,7 @@ export default {
       useESM: true,
     },
   },
-  testPathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/test/'],
+  testPathIgnorePatterns: ['<rootDir>/dist/'],
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
 };
