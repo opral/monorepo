@@ -29,6 +29,9 @@ export class Resource extends FluentResource {
         return false;
     }
 
+    /**
+     * Creates the specified node in the resource.
+     */
     create(query: { message: Message }): Result<Resource, Error>;
     create(query: { attribute: Attribute & { messageId: string } }): Result<Resource, Error>;
     create(query: { message?: Message; attribute?: Attribute & { messageId: string } }): Result<Resource, Error> {
