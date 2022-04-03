@@ -31,14 +31,13 @@ export class Resource extends FluentResource {
 
     /**
      * Creates the specified node in the resource.
+     *
+     * If you want to create an attribute, create a message instead.
      */
     create(query: { message: Message }): Result<Resource, Error>;
-    create(query: { attribute: Attribute & { messageId: string } }): Result<Resource, Error>;
-    create(query: { message?: Message; attribute?: Attribute & { messageId: string } }): Result<Resource, Error> {
+    create(query: { message?: Message }): Result<Resource, Error> {
         if (query.message) {
             return this.#createMessage(query.message);
-        } else if (query.attribute) {
-            return this.#createAttribute(query.attribute);
         }
         return Result.err(Error('Unimplmented'));
     }
@@ -49,7 +48,7 @@ export class Resource extends FluentResource {
      * Returns undefined if the node does not exist.
      */
     get(query: { message: { id: string }; attribute?: { id: string; messageId: string } }): Message | undefined;
-    get(query: { message: { id: string }; attribute: { id: string; messageId: string } }): Attribute | undefined;
+    get(query: { message?: { id: string }; attribute: { id: string; messageId: string } }): Attribute | undefined;
     get(query: {
         message?: { id: string };
         attribute?: { id: string; messageId: string };
@@ -103,23 +102,6 @@ export class Resource extends FluentResource {
     }
 
     // ----- Private functions -----
-    #createAttribute(attribute: Attribute & { messageId: string }): Result<Resource, Error> {
-        const cloned = cloneDeep(this);
-        const message = cloned.get({ message: { id: attribute.messageId } });
-        if (message === undefined) {
-            return Result.err(Error(`Message id ${attribute.messageId} does not exist.`));
-        } else {
-            if (message?.attributes.some((attribute) => attribute.id.name === attribute.id.name)) {
-                return Result.err(
-                    Error(
-                        `Attribute with id "${attribute.id.name}" already exists for the message with id "${attribute.messageId}".`
-                    )
-                );
-            }
-            message.attributes.push(attribute);
-            return Result.ok(cloned);
-        }
-    }
 
     #updateAttribute(args: { id: string; messageId: string; with: Partial<Attribute> }): Result<Resource, Error> {
         const cloned = cloneDeep(this);

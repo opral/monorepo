@@ -81,6 +81,31 @@ describe('get()', () => {
             expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
         });
     });
+
+    describe('attribute:', () => {
+        const resource = new Resource([
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+                attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+            }).unwrap(),
+        ]);
+        it('should return the attribute', () => {
+            expect(resource.get({ attribute: { messageId: 'the-message', id: 'the-attribute' } })).toEqual(
+                (resource.body[0] as Message).attributes[0]
+            );
+        });
+
+        it('should return undefined if the parent message does not exist', () => {
+            expect(resource.get({ attribute: { messageId: 'none-existent', id: 'the-attribute' } })).toBeUndefined();
+        });
+
+        it('should return undefined if the parent message exists but the attribute itself does not', () => {
+            expect(
+                resource.get({ attribute: { messageId: 'the-message', id: 'none-existent-attribute' } })
+            ).toBeUndefined();
+        });
+    });
 });
 
 describe('update()', () => {
