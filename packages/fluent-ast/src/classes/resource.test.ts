@@ -1,4 +1,3 @@
-import * as fluent from '@fluent/syntax';
 import { Attribute } from './attribute';
 import { Message } from './message';
 import { Resource } from './resource';
@@ -6,16 +5,11 @@ import { Resource } from './resource';
 describe('includes()', () => {
     describe('message:', () => {
         const resource = new Resource([
-            new fluent.Message(
-                new fluent.Identifier('the-message'),
-                new fluent.Pattern([new fluent.TextElement('this is my test')]),
-                [
-                    new fluent.Attribute(
-                        new fluent.Identifier('the-attribute'),
-                        new fluent.Pattern([new fluent.TextElement('some text pattern')])
-                    ),
-                ]
-            ),
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+                attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+            }).unwrap(),
         ]);
         it('should be truthy when a message exists', () => {
             expect(resource.includes({ message: { id: 'the-message' } })).toBeTruthy();
@@ -39,45 +33,9 @@ describe('includes()', () => {
     });
 });
 
-describe('get()', () => {
-    describe('message:', () => {
-        const resource = new Resource([
-            new fluent.Message(
-                new fluent.Identifier('the-message'),
-                new fluent.Pattern([new fluent.TextElement('this is my test')]),
-                [
-                    new fluent.Attribute(
-                        new fluent.Identifier('the-attribute'),
-                        new fluent.Pattern([new fluent.TextElement('some text pattern')])
-                    ),
-                ]
-            ),
-        ]);
-        it('should return the message', () => {
-            expect(resource.get({ message: { id: 'the-message' } })).toEqual(resource.body[0]);
-        });
-
-        it('should return the attribute', () => {
-            expect(resource.get({ message: { id: 'the-message' }, attribute: { id: 'the-attribute' } })).toEqual(
-                (resource.body[0] as Message).attributes[0]
-            );
-        });
-
-        it('should return undefined if a message does not exist', () => {
-            expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
-        });
-    });
-});
-
 describe('create()', () => {
     describe('message:', () => {
-        const resource = new Resource([
-            new fluent.Message(
-                new fluent.Identifier('first-message'),
-                new fluent.Pattern([new fluent.TextElement('this is my test')])
-            ),
-        ]);
-
+        const resource = new Resource([Message.from({ id: 'first-message', value: 'this is my test' }).unwrap()]);
         it('should create a new message with no attributes', () => {
             const newResource = resource
                 .create({ message: Message.from({ id: 'new-message', value: 'new pattern', attributes: [] }).unwrap() })
@@ -101,19 +59,113 @@ describe('create()', () => {
         });
 
         it('should be immutable', () => {
-            // if the method would be immutable, the following would throw an "already exists" error
+            // if the method is not immutable, the following would throw an "already exists" error
             resource.create({ message: Message.from({ id: 'new-message', value: 'new pattern' }).unwrap() }).unwrap();
             resource.create({ message: Message.from({ id: 'new-message', value: 'new pattern' }).unwrap() }).unwrap();
         });
 
-        // it('should return the attribute', () => {
-        //     expect(resource.get({ message: { id: 'the-message' }, attribute: { id: 'the-attribute' } })).toEqual(
-        //         (resource.body[0] as Message).attributes[0]
-        //     );
-        // });
+        it('should return the attribute', () => {
+            expect(resource.get({ message: { id: 'the-message' }, attribute: { id: 'the-attribute' } })).toEqual(
+                (resource.body[0] as Message).attributes[0]
+            );
+        });
 
-        // it('should return undefined if a message does not exist', () => {
-        //     expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
-        // });
+        it('should return undefined if a message does not exist', () => {
+            expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
+        });
+    });
+});
+
+describe('get()', () => {
+    describe('message:', () => {
+        const resource = new Resource([
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+                attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+            }).unwrap(),
+        ]);
+        it('should return the message', () => {
+            expect(resource.get({ message: { id: 'the-message' } })).toEqual(resource.body[0]);
+        });
+
+        it('should return the attribute', () => {
+            expect(resource.get({ message: { id: 'the-message' }, attribute: { id: 'the-attribute' } })).toEqual(
+                (resource.body[0] as Message).attributes[0]
+            );
+        });
+
+        it('should return undefined if a message does not exist', () => {
+            expect(resource.get({ message: { id: 'none-existent' } })).toBeUndefined();
+        });
+    });
+});
+
+describe('update()', () => {
+    describe('message:', () => {
+        const resource = new Resource([
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+            }).unwrap(),
+        ]);
+        it('should update the value (pattern)', () => {
+            const newResource = resource
+                .update({
+                    message: {
+                        id: 'the-message',
+                        with: Message.from({ id: 'the-message', value: 'updated text' }).unwrap(),
+                    },
+                })
+                .unwrap();
+            expect((newResource.body[0] as Message).value?.elements[0].value).toBe('updated text');
+        });
+
+        it('should update the attributes', () => {
+            const newResource = resource
+                .update({
+                    message: {
+                        id: 'the-message',
+                        with: {
+                            attributes: [Attribute.from({ id: 'the-attribute', value: 'the attribute text' }).unwrap()],
+                        },
+                    },
+                })
+                .unwrap();
+            expect((newResource.body[0] as Message).attributes[0].value.elements[0].value).toBe('the attribute text');
+        });
+
+        it('should be immutable', () => {
+            // if the method is not immutable, the following would throw an error
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _ = resource
+                .update({
+                    message: { id: 'the-message', with: Message.from({ id: 'the-message', value: 'hello' }).unwrap() },
+                })
+                .unwrap();
+            expect((resource.body[0] as Message).value?.elements[0].value).toBe('this is my test');
+        });
+    });
+});
+
+describe('delete()', () => {
+    describe('message:', () => {
+        const resource = new Resource([
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+                attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+            }).unwrap(),
+        ]);
+        it('should delete the message', () => {
+            const newResource = resource.delete({ message: { id: 'the-message' } }).unwrap();
+            expect(newResource.body.length).toBe(0);
+        });
+
+        it('should be immutable', () => {
+            // if the method is not immutable, the following would throw an error
+            resource.delete({ message: { id: 'the-message' } }).unwrap();
+            resource.delete({ message: { id: 'the-message' } }).unwrap();
+        });
     });
 });

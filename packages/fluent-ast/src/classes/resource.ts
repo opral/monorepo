@@ -3,7 +3,7 @@ import { Identifier, Resource as FluentResource } from '@fluent/syntax';
 import { Attribute } from './attribute';
 import { Message } from './message';
 import { isValidId } from '../utils';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, merge, remove } from 'lodash-es';
 
 export class Resource extends FluentResource {
     /**
@@ -11,10 +11,7 @@ export class Resource extends FluentResource {
      *
      * Searching for attributes requires the message id to be specified.
      */
-    includes(query: {
-        message: { id: string | Message['id'] };
-        attribute?: { id: string | Attribute['id'] };
-    }): boolean {
+    includes(query: { message: { id: string }; attribute?: { id: string } }): boolean {
         for (const entry of this.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === query.message.id) {
                 if (query.attribute === undefined) {
@@ -63,27 +60,26 @@ export class Resource extends FluentResource {
         }
     }
 
-    update(query: { message: { id: string; with: Message } }): Resource {
-        throw 'Unimplemented';
+    /**
+     * Updates the given node.
+     *
+     * `with` is merged with the existing node.
+     */
+    update(query: { message: { id: string; with: Partial<Message> } }): Result<Resource, Error> {
+        if (query.message) {
+            return this.#updateMessage(query.message);
+        }
+        return Result.err(Error('Unimplemented'));
     }
 
-    delete(node: Pick<Message | Attribute, 'type' | 'id'>): Resource {
-        throw 'Unimplemented';
+    delete(query: { message: { id: string } }): Result<Resource, Error> {
+        if (query.message) {
+            return this.#deleteMessage(query.message);
+        }
+        return Result.err(Error('Unimplemented'));
     }
 
     // ----- Private functions -----
-    #createMessage(message: Message): Result<Resource, Error> {
-        if (this.includes({ message: { id: message.id } })) {
-            return Result.err(Error(`Message id ${message.id} already exists.`));
-        }
-        if (isValidId(message.id) === false) {
-            return Result.err(Error(`Message id ${message.id} is not a valid id.`));
-        }
-        const cloned = cloneDeep(this);
-        cloned.body.push(message);
-        return Result.ok(cloned);
-    }
-
     #createAttribute(attribute: Attribute & { messageId: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const message = cloned.get({ message: { id: attribute.messageId } });
@@ -100,5 +96,36 @@ export class Resource extends FluentResource {
             message.attributes.push(attribute);
             return Result.ok(cloned);
         }
+    }
+
+    #createMessage(message: Message): Result<Resource, Error> {
+        if (this.includes({ message: { id: message.id.name } })) {
+            return Result.err(Error(`Message id ${message.id} already exists.`));
+        }
+        if (isValidId(message.id) === false) {
+            return Result.err(Error(`Message id ${message.id} is not a valid id.`));
+        }
+        const cloned = cloneDeep(this);
+        cloned.body.push(message);
+        return Result.ok(cloned);
+    }
+
+    #updateMessage(args: { id: string; with: Partial<Message> }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const indexOfMessage = cloned.body.findIndex((entry) => entry.type === 'Message' && entry.id.name === args.id);
+        if (indexOfMessage === -1) {
+            return Result.err(Error(`Message with id '${args.id}' does not exist.`));
+        }
+        merge(cloned.body[indexOfMessage], args.with);
+        return Result.ok(cloned);
+    }
+
+    #deleteMessage(args: { id: string }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const removed = remove(cloned.body ?? [], (entry) => entry.type === 'Message' && entry.id.name === args.id);
+        if (removed.length === 0) {
+            return Result.err(Error(`Message with id ${args.id} does not exist.`));
+        }
+        return Result.ok(cloned);
     }
 }
