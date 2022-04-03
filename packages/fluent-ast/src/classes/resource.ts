@@ -1,5 +1,5 @@
 import { Result } from '@inlang/result';
-import { Identifier, Resource as FluentResource } from '@fluent/syntax';
+import { Resource as FluentResource } from '@fluent/syntax';
 import { Attribute } from './attribute';
 import { Message } from './message';
 import { isValidId } from '../utils';
@@ -11,9 +11,11 @@ export class Resource extends FluentResource {
      *
      * Searching for attributes requires the message id to be specified.
      */
-    includes(query: { message: { id: string }; attribute?: { id: string } }): boolean {
+    includes(query: { message: { id: string } }): boolean;
+    includes(query: { attribute: { messageId: string; id: string } }): boolean;
+    includes(query: { message?: { id: string }; attribute?: { messageId: string; id: string } }): boolean {
         for (const entry of this.body ?? []) {
-            if (entry.type === 'Message' && entry.id.name === query.message.id) {
+            if (entry.type === 'Message' && entry.id.name === (query.message?.id ?? query.attribute?.messageId)) {
                 if (query.attribute === undefined) {
                     return true;
                 }
@@ -43,11 +45,15 @@ export class Resource extends FluentResource {
      *
      * Returns undefined if the node does not exist.
      */
-    get(query: { message: { id: string }; attribute?: { id: string } }): Message | undefined;
-    get(query: { message: { id: string }; attribute: { id: string } }): Attribute | undefined;
-    get(query: { message: { id: string }; attribute?: { id: string } }): Message | Attribute | undefined {
+    get(query: { message: { id: string }; attribute?: { id: string; messageId: string } }): Message | undefined;
+    get(query: { message: { id: string }; attribute: { id: string; messageId: string } }): Attribute | undefined;
+    get(query: {
+        message?: { id: string };
+        attribute?: { id: string; messageId: string };
+    }): Message | Attribute | undefined {
         for (const entry of this.body ?? []) {
-            if (entry.type === 'Message' && entry.id.name === query.message.id) {
+            // one message id is defined.
+            if (entry.type === 'Message' && entry.id.name === (query.message?.id ?? query.attribute?.messageId)) {
                 if (query.attribute === undefined) {
                     return entry;
                 }
@@ -65,16 +71,30 @@ export class Resource extends FluentResource {
      *
      * `with` is merged with the existing node.
      */
-    update(query: { message: { id: string; with: Partial<Message> } }): Result<Resource, Error> {
+    update(query: { message: { id: string; with: Partial<Message> } }): Result<Resource, Error>;
+    update(query: { attribute: { id: string; messageId: string; with: Partial<Attribute> } }): Result<Resource, Error>;
+    update(query: {
+        message?: { id: string; with: Partial<Message> };
+        attribute?: { id: string; messageId: string; with: Partial<Attribute> };
+    }): Result<Resource, Error> {
         if (query.message) {
             return this.#updateMessage(query.message);
+        } else if (query.attribute) {
+            return this.#updateAttribute(query.attribute);
         }
         return Result.err(Error('Unimplemented'));
     }
 
-    delete(query: { message: { id: string } }): Result<Resource, Error> {
+    delete(query: { attribute: { messageId: string; id: string } }): Result<Resource, Error>;
+    delete(query: { message: { id: string } }): Result<Resource, Error>;
+    delete(query: {
+        message?: { id: string };
+        attribute?: { messageId: string; id: string };
+    }): Result<Resource, Error> {
         if (query.message) {
             return this.#deleteMessage(query.message);
+        } else if (query.attribute) {
+            return this.#deleteAttribute(query.attribute);
         }
         return Result.err(Error('Unimplemented'));
     }
@@ -98,12 +118,48 @@ export class Resource extends FluentResource {
         }
     }
 
+    #updateAttribute(args: { id: string; messageId: string; with: Partial<Attribute> }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const indexOfMessage = cloned.body.findIndex(
+            (entry) => entry.type === 'Message' && entry.id.name === args.messageId
+        );
+        if (indexOfMessage === -1) {
+            return Result.err(Error(`Message with id '${args.messageId}' does not exist.`));
+        }
+        const indexOfAttribute = (cloned.body[indexOfMessage] as Message).attributes.findIndex(
+            (attribute) => attribute.id.name === args.id
+        );
+        if (indexOfAttribute === -1) {
+            return Result.err(
+                Error(`Attribute with id '${args.id}' does not exist for the message with id '${args.messageId}'.`)
+            );
+        }
+        merge((cloned.body[indexOfMessage] as Message).attributes[indexOfAttribute], args.with);
+        return Result.ok(cloned);
+    }
+
+    #deleteAttribute(args: { messageId: string; id: string }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        for (const message of cloned.body.filter((entry) => entry.type === 'Message')) {
+            if ((message as Message).id.name === args.messageId) {
+                const removed = remove((message as Message).attributes, (attribute) => attribute.id.name === args.id);
+                if (removed.length === 0) {
+                    return Result.err(
+                        Error(`Attribute with id ${args.id} does not exist for message with id '${args.messageId}'.`)
+                    );
+                }
+                return Result.ok(cloned);
+            }
+        }
+        return Result.err(Error(`The attributes parent message with id '${args.id}' does not exist.`));
+    }
+
     #createMessage(message: Message): Result<Resource, Error> {
         if (this.includes({ message: { id: message.id.name } })) {
-            return Result.err(Error(`Message id ${message.id} already exists.`));
+            return Result.err(Error(`Message with id '${message.id}' already exists.`));
         }
         if (isValidId(message.id) === false) {
-            return Result.err(Error(`Message id ${message.id} is not a valid id.`));
+            return Result.err(Error(`Message id '${message.id}' is not a valid id.`));
         }
         const cloned = cloneDeep(this);
         cloned.body.push(message);
@@ -124,7 +180,7 @@ export class Resource extends FluentResource {
         const cloned = cloneDeep(this);
         const removed = remove(cloned.body ?? [], (entry) => entry.type === 'Message' && entry.id.name === args.id);
         if (removed.length === 0) {
-            return Result.err(Error(`Message with id ${args.id} does not exist.`));
+            return Result.err(Error(`Message with id '${args.id}' does not exist.`));
         }
         return Result.ok(cloned);
     }
