@@ -8,7 +8,7 @@ export * from './identifier';
 export * from './junk';
 export * from './message';
 export * from './messageReference';
-export * from './namesArgument';
+export * from './namedArgument';
 export * from './numberLiteral';
 export * from './pattern';
 export * from './placeable';
