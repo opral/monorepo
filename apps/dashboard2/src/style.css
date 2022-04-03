@@ -1,6 +1,0 @@
-/* mostly bootstrap overwrites */
-
-/* <a> should have no underline */
-a {
-	text-decoration-line: none;
-}

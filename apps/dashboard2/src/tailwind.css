@@ -1,0 +1,5 @@
+/* Style gets minified during development and build.   */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
