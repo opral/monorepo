@@ -1,8 +1,9 @@
-import { languageCodes, Result } from '@inlang/utils';
+import { languageCodes } from '@inlang/utils';
 import { converters, parseResources, SupportedConverter } from '@inlang/fluent-format-converters';
 import { Resources } from '@inlang/fluent-ast';
 import fs from 'fs';
 import path from 'path';
+import { Result } from '@inlang/result';
 
 /**
  * Reads and parses the local translation files to `Resources`.

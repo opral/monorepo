@@ -1,4 +1,4 @@
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import {
   converters,
   serializeResources,

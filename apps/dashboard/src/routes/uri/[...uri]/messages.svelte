@@ -5,7 +5,7 @@
 	import CreateMessageModal from '$lib/components/modals/CreateMessageModal.svelte';
 	import Add16 from 'carbon-icons-svelte/lib/Add16';
 	import { Attribute, Message, parsePattern, Pattern } from '@inlang/fluent-ast';
-	import { LanguageCode, Result } from '@inlang/utils';
+	import { LanguageCode } from '@inlang/utils';
 	import Patterns from '$lib/components/Patterns.svelte';
 	import { lintPattern } from '@inlang/fluent-lint';
 	// import CreateAttributeModal from '$lib/components/modals/CreateAttributeModal.svelte';
@@ -13,6 +13,7 @@
 	import { resources, inlangConfig, searchParams } from '$lib/stores/routes/uriStores';
 	import { writeResources } from '@inlang/core';
 	import { fs } from '$lib/stores/filesystem';
+import { Result } from '@inlang/result';
 
 	let searchQuery = '';
 

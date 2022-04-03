@@ -1,4 +1,4 @@
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import git from 'isomorphic-git';
 
 /**
@@ -29,7 +29,7 @@ async function checkoutOrCreateInlangBranch(
 		if (branches.includes('inlang')) {
 			await git.checkout(args);
 		} else {
-            // create the branch
+			// create the branch
 			await git.branch(args);
 		}
 		return Result.ok(undefined);

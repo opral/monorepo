@@ -4,13 +4,13 @@
 
 import peggy from 'peggy';
 import { Converter } from '../../types/converter';
-import { Result } from '@inlang/utils';
-import { parse, SingleResource } from '@inlang/fluent-ast';
+import { Result } from '@inlang/result';
+import { parseResource, Resource } from '@inlang/fluent-ast';
 
 export class LocalizableStringsConverter implements Converter {
-    parse(args: { data: string }): Result<SingleResource, Error> {
+    parse(args: { data: string }): Result<Resource, Error> {
         try {
-            const recourse = parse(peggy.generate(grammar).parse(args.data), { withSpans: false });
+            const recourse = parseResource(peggy.generate(grammar).parse(args.data)).unwrap();
             const junk = recourse.body.filter((entry) => entry.type === 'Junk');
             if (junk.length > 0) {
                 return Result.err(
@@ -25,7 +25,7 @@ export class LocalizableStringsConverter implements Converter {
         }
     }
 
-    serialize(args: { resource: SingleResource }): Result<string, Error> {
+    serialize(args: { resource: Resource }): Result<string, Error> {
         try {
             let result = '';
             for (const entry of args.resource.body) {

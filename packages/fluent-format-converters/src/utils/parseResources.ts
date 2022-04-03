@@ -1,5 +1,5 @@
-import { Result } from '@inlang/utils';
-import { Resource, Resources } from '@inlang/fluent-ast';
+import { Result } from '@inlang/result';
+import { Resource } from '@inlang/fluent-ast';
 import { Converter } from '../types/converter';
 import { SerializedResource } from '../types/serializedResource';
 
@@ -11,7 +11,7 @@ import { SerializedResource } from '../types/serializedResource';
 export function parseResources(args: {
     converter: Converter;
     files: SerializedResource[];
-}): Result<Resources, Error> {
+}): Result<{ [id: string]: Resource | undefined }, Error> {
     const resources: Record<string, Resource | undefined> = {};
     for (const file of args.files) {
         const parsed = args.converter.parse({ data: file.data });
@@ -20,5 +20,5 @@ export function parseResources(args: {
         }
         resources[file.languageCode] = parsed.value;
     }
-    return Result.ok(new Resources({ resources }));
+    return Result.ok(resources);
 }

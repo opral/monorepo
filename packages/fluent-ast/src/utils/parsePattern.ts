@@ -1,4 +1,4 @@
-import { Result } from '../../../utils/dist';
+import { Result } from '@inlang/result';
 import { Message, ParseError, Pattern } from '@fluent/syntax';
 import { parseEntry } from './parseEntry';
 

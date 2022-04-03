@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { state } from '../state';
 import { invalidIdReason, isValidId } from '@inlang/fluent-ast';
-import { LanguageCode, Result } from '@inlang/utils';
+import { LanguageCode } from '@inlang/utils';
 import { writeTranslationFiles } from '../utils/writeTranslationFiles';
+import { Result } from '@inlang/result';
 
 export type ExtractPatternCommandArgs = {
   pattern: string;

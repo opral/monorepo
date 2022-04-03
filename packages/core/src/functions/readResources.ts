@@ -1,9 +1,9 @@
-import type { Resources } from '@inlang/fluent-ast';
+import type { Resource } from '@inlang/fluent-ast';
 import type { InlangConfig } from '@inlang/config';
 import { converters, parseResources } from '@inlang/fluent-format-converters';
 import path from 'path';
 import { languageCodes } from '@inlang/utils';
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import { CommonFsApi } from '../types/commonFsApi';
 
 /**
@@ -19,7 +19,7 @@ export async function readResources(args: {
     directory: string;
     pathPattern: InlangConfig['latest']['pathPattern'];
     fileFormat: InlangConfig['latest']['fileFormat'];
-}): Promise<Result<Resources, Error>> {
+}): Promise<Result<Record<string, Resource | undefined>, Error>> {
     const converter = converters[args.fileFormat];
     const localFiles = [];
     for (const languageCode of languageCodes) {

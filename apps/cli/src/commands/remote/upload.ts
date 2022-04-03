@@ -1,6 +1,7 @@
 import { Command, Option } from 'commander';
 import consola from 'consola';
-import { languageCodes, Result } from '@inlang/utils';
+import { languageCodes } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import {
     converters,
     parseResources,

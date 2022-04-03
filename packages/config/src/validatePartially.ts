@@ -1,5 +1,5 @@
 import Ajv from 'ajv';
-import { Result } from '../../utils/dist';
+import { Result } from '@inlang/result';
 import addFormats from 'ajv-formats';
 import schemaV1 from './schemas/v1.json';
 import { InlangConfig } from './types/inlangConfig';

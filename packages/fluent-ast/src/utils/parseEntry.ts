@@ -1,5 +1,5 @@
 import { Message, Term, FluentParser, Comments, ParseError } from '@fluent/syntax';
-import { Result } from '../../../utils/dist';
+import { Result } from '@inlang/result';
 
 /**
  * Parses an a fluent string to an Entry (without Junk).

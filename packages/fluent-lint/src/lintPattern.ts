@@ -1,4 +1,4 @@
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import { Pattern, Reference } from '@inlang/fluent-ast';
 import { lowerCase } from 'lodash-es';
 import { LintError } from './errors/lintError';

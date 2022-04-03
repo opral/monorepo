@@ -1,7 +1,8 @@
-import { LanguageCode, Result } from '@inlang/utils';
-import { Resources, SingleResource } from '@inlang/fluent-ast';
+import { LanguageCode } from '@inlang/utils';
+import { Resource } from '@inlang/fluent-ast';
 import { Converter } from '../types/converter';
 import { SerializedResource } from '../types/serializedResource';
+import { Result } from '@inlang/result';
 
 /**
  * Serializes the provided resources.
@@ -10,12 +11,12 @@ import { SerializedResource } from '../types/serializedResource';
  */
 export function serializeResources(args: {
     converter: Converter;
-    resources: Resources;
+    resources: { [id: string]: Resource | undefined };
 }): Result<SerializedResource[], Error> {
     const files: SerializedResource[] = [];
-    for (const [languageCode, resource] of Object.entries(args.resources.resources)) {
+    for (const [languageCode, resource] of Object.entries(args.resources)) {
         const serialized = args.converter.serialize({
-            resource: resource as SingleResource,
+            resource: resource as Resource,
         });
         if (serialized.isErr) {
             return Result.err(serialized.error);

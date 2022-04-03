@@ -8,7 +8,7 @@ import {
     SupportedConverter,
 } from '@inlang/fluent-format-converters';
 import fs from 'fs';
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import fetch from 'node-fetch';
 import dedent from 'dedent';
 import prompts from 'prompts';

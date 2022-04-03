@@ -1,8 +1,8 @@
-import type { Resources } from '@inlang/fluent-ast';
+import type { Resource } from '@inlang/fluent-ast';
 import type { InlangConfig } from '@inlang/config';
 import { converters, serializeResources } from '@inlang/fluent-format-converters';
 import path from 'path';
-import { Result } from '@inlang/utils';
+import { Result } from '@inlang/result';
 import { CommonFsApi } from '../types/commonFsApi';
 
 /**
@@ -16,7 +16,7 @@ import { CommonFsApi } from '../types/commonFsApi';
 export async function writeResources(args: {
     fs: CommonFsApi;
     directory: string;
-    resources: Resources;
+    resources: Record<string, Resource | undefined>;
     pathPattern: InlangConfig['latest']['pathPattern'];
     fileFormat: InlangConfig['latest']['fileFormat'];
     languageCodes: InlangConfig['latest']['languageCodes'];

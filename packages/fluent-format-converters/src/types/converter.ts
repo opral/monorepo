@@ -1,5 +1,5 @@
-import { Result } from '@inlang/utils';
-import { SingleResource } from '@inlang/fluent-ast';
+import { Result } from '@inlang/result';
+import { Resource } from '@inlang/fluent-ast';
 
 /**
  * Each converter must implement the interface.
@@ -18,6 +18,6 @@ export type Converter = {
     //     variables: boolean;
     //     terms: boolean;
     // };
-    parse(args: { data: string }): Result<SingleResource, Error>;
-    serialize(args: { resource: SingleResource }): Result<string, Error>;
+    parse(args: { data: string }): Result<Resource, Error>;
+    serialize(args: { resource: Resource }): Result<string, Error>;
 };
