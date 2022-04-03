@@ -2,8 +2,7 @@ import { Result } from '@inlang/result';
 import { Identifier, Resource as FluentResource } from '@fluent/syntax';
 import { Attribute } from './attribute';
 import { Message } from './message';
-import { Comment } from './comment';
-import { isValidId, parsePattern } from '../utils';
+import { isValidId } from '../utils';
 import { cloneDeep } from 'lodash-es';
 
 export class Resource extends FluentResource {
@@ -12,7 +11,10 @@ export class Resource extends FluentResource {
      *
      * Searching for attributes requires the message id to be specified.
      */
-    includes(query: { message: { id: string }; attribute?: { id: string } }): boolean {
+    includes(query: {
+        message: { id: string | Message['id'] };
+        attribute?: { id: string | Attribute['id'] };
+    }): boolean {
         for (const entry of this.body ?? []) {
             if (entry.type === 'Message' && entry.id.name === query.message.id) {
                 if (query.attribute === undefined) {
@@ -28,11 +30,13 @@ export class Resource extends FluentResource {
         return false;
     }
 
-    create(query: { message: MessageQuery }): Result<Resource, Error>;
-    create(query: { attribute: AttributeQuery }): Result<Resource, Error>;
-    create(query: { message?: MessageQuery; attribute?: AttributeQuery }): Result<Resource, Error> {
+    create(query: { message: Message }): Result<Resource, Error>;
+    create(query: { attribute: Attribute & { messageId: string } }): Result<Resource, Error>;
+    create(query: { message?: Message; attribute?: Attribute & { messageId: string } }): Result<Resource, Error> {
         if (query.message) {
             return this.#createMessage(query.message);
+        } else if (query.attribute) {
+            return this.#createAttribute(query.attribute);
         }
         return Result.err(Error('Unimplmented'));
     }
@@ -59,7 +63,7 @@ export class Resource extends FluentResource {
         }
     }
 
-    update(node: Pick<Message | Attribute, 'type' | 'id'>): Resource {
+    update(query: { message: { id: string; with: Message } }): Resource {
         throw 'Unimplemented';
     }
 
@@ -68,49 +72,33 @@ export class Resource extends FluentResource {
     }
 
     // ----- Private functions -----
-    #createMessage(args: MessageQuery): Result<Resource, Error> {
-        if (args.value === null && (args.attributes === null || args.attributes?.length === 0)) {
-            return Result.err(Error('The message has no value (pattern). Thus, at least one attribute is required.'));
+    #createMessage(message: Message): Result<Resource, Error> {
+        if (this.includes({ message: { id: message.id } })) {
+            return Result.err(Error(`Message id ${message.id} already exists.`));
         }
-        if (this.includes({ message: { id: args.id } })) {
-            return Result.err(Error(`Message id ${args.id} already exists.`));
-        }
-        if (isValidId(args.id) === false) {
-            return Result.err(Error(`Message id ${args.id} is not a valid id.`));
+        if (isValidId(message.id) === false) {
+            return Result.err(Error(`Message id ${message.id} is not a valid id.`));
         }
         const cloned = cloneDeep(this);
-        try {
-            const value = parsePattern(args.value).unwrap();
-            cloned.body.push(
-                new Message(
-                    new Identifier(args.id),
-                    value,
-                    args.attributes?.map(
-                        ({ id, value }) => new Attribute(new Identifier(id), parsePattern(value).unwrap())
+        cloned.body.push(message);
+        return Result.ok(cloned);
+    }
+
+    #createAttribute(attribute: Attribute & { messageId: string }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const message = cloned.get({ message: { id: attribute.messageId } });
+        if (message === undefined) {
+            return Result.err(Error(`Message id ${attribute.messageId} does not exist.`));
+        } else {
+            if (message?.attributes.some((attribute) => attribute.id.name === attribute.id.name)) {
+                return Result.err(
+                    Error(
+                        `Attribute with id "${attribute.id.name}" already exists for the message with id "${attribute.messageId}".`
                     )
-                )
-            );
+                );
+            }
+            message.attributes.push(attribute);
             return Result.ok(cloned);
-        } catch (error) {
-            return Result.err(error as Error);
         }
     }
 }
-
-// ----- Query types -----
-//
-// Enable more convenient syntax for querying the resource; opposed to
-// using the AST types. For example, the id can be defined as a string
-// `hello` instead of `new Identifier('hello').
-
-type MessageQuery = {
-    id: string;
-    comment?: Comment;
-    value: string;
-    attributes?: { id: string; value: string }[];
-};
-
-type AttributeQuery = {
-    id: string;
-    value: string;
-};
