@@ -18,3 +18,8 @@
 .border {
 	@apply border-gray-300;
 }
+
+/* fixing none-existent border */
+sl-divider {
+	@apply h-px bg-gray-300;
+}
