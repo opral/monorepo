@@ -3,6 +3,7 @@
 	import ISO6391 from 'iso-639-1';
 	import { countryCodeEmoji } from 'country-code-emoji';
 	import { onMount } from 'svelte';
+	import type { SlDropdown } from '@shoelace-style/shoelace';
 
 	let filterDropdown: SlDropdown;
 

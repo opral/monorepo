@@ -87,6 +87,7 @@ function createResourcesStore() {
 					).unwrap();
 					set(_resources);
 				} catch (error) {
+					console.error(error);
 					alert((error as Error).message);
 				}
 			} else {
