@@ -46,6 +46,7 @@
 <!-- BREADCRUMBS START -->
 <div class="border px-4 py-2 rounded">
 	<sl-breadcrumb>
+		<!-- repository octicon -->
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 pr-2"
 			><path
 				fill-rule="evenodd"
