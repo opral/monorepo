@@ -38,7 +38,7 @@
 		<sl-button
 			class="mt-2"
 			href={$page.url.pathname +
-				'/messages?' +
+				'/in-editor?' +
 				decodeURIComponent($page.url.searchParams.toString())}
 			size="small"
 			variant="success"
