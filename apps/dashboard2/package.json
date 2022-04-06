@@ -2,7 +2,7 @@
 	"name": "@inlang/dashboard2",
 	"scripts": {
 		"dev": "concurrently \"svelte-kit dev\" \"npm run minify-css -- --watch\"",
-		"build": "npm run minify-tailwind && svelte-kit build",
+		"build": "npm run minify-css && svelte-kit build",
 		"package": "svelte-kit package",
 		"preview": "svelte-kit preview",
 		"prepare": "svelte-kit sync",
