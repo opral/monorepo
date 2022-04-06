@@ -7,6 +7,23 @@ import { cloneDeep, merge, remove } from 'lodash-es';
 
 export class Resource extends FluentResource {
     /**
+     * Included message ids of the resource.
+     *
+     * @example
+     *      resource.includedIds()
+     *      >> ["message-one", "message-two"]
+     */
+    includedMessageIds(): string[] {
+        const ids: string[] = [];
+        for (const entry of this.body ?? []) {
+            if (entry.type === 'Message') {
+                ids.push(entry.id.name);
+            }
+        }
+        return ids;
+    }
+
+    /**
      * Returns whether or not the resource includes the given node.
      *
      * Searching for attributes requires the message id to be specified.

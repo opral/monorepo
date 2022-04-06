@@ -2,6 +2,26 @@ import { Attribute } from './attribute';
 import { Message } from './message';
 import { Resource } from './resource';
 
+describe('includedMessageIds()', () => {
+    const resource = new Resource([
+        Message.from({
+            id: 'the-message',
+            value: 'this is my test',
+            attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+        }).unwrap(),
+        Message.from({ id: 'second-message' }).unwrap(),
+    ]);
+
+    it('should include all message ids', () => {
+        expect(resource.includedMessageIds()[0]).toBe('the-message');
+        expect(resource.includedMessageIds()[1]).toBe('second-message');
+    });
+
+    it('should not include none-existent message ids', () => {
+        expect(resource.includedMessageIds().includes('none-existent')).toBeFalsy();
+    });
+});
+
 describe('includes()', () => {
     const resource = new Resource([
         Message.from({
