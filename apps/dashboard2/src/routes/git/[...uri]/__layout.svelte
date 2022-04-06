@@ -44,27 +44,14 @@
 </script>
 
 <!-- BREADCRUMBS START -->
-<nav
-	class="flex card rounded bg-surface-100 title-md text-on-surface border"
-	aria-label="breadcrumb"
->
-	<ol class="inline-flex items-center space-x-1 md:space-x-3">
+<sl-card class="w-full">
+	<sl-breadcrumb>
 		{#each breadcrumbs() as breadcrumb}
-			<li class="inline-flex items-center">
-				<a
-					href={breadcrumb.href}
-					class="inline-flex items-center"
-					class:text-primary={breadcrumb.isCurrentPage === false}
-					class:hover:text-hover-primary={breadcrumb.isCurrentPage === false}
-					class:cursor-default={breadcrumb.isCurrentPage === true}
-				>
-					{breadcrumb.name}
-				</a>
-			</li>
-			<p>/</p>
+			<sl-breadcrumb-item href={breadcrumb.href}>{breadcrumb.name}</sl-breadcrumb-item>
 		{/each}
-	</ol>
-</nav>
+	</sl-breadcrumb>
+</sl-card>
+
 <!-- BREADCRUMBS END -->
 
 {#await cloning}

@@ -8,7 +8,16 @@ module.exports = {
 	},
 	plugins: [
 		pankowUi.withConfig({
-			colorSystem: { semanticColors: { info: colors.blue, success: colors.green } },
+			// based on shoelace
+			colorSystem: {
+				accentColors: { primary: colors.sky },
+				neutralColors: {},
+				semanticColors: {
+					success: colors.green,
+					warning: colors.amber,
+					danger: colors.red
+				}
+			},
 			borderRadiusBase: 'rounded'
 		})
 	]
