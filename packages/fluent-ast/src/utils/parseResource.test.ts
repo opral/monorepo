@@ -15,6 +15,7 @@ it('should parse a resource', () => {
 it('should parse an empty resource body as Resource', () => {
     const resource = ftl`
     `;
-    const result = parseResource(resource);
-    expect(result.isOk).toEqual(true);
+    const result = parseResource(resource).unwrap();
+    const junk = result.body.filter((entry) => entry.type === 'Junk');
+    expect(junk.length).toEqual(0);
 });

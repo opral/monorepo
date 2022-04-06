@@ -11,7 +11,7 @@ export function parseResource(
 ): Result<Resource, ParseError | Error> {
     const _options = { withJunk: true, ...options };
     // wrapping the pattern as message to parse it
-    const fluentResource = parse('placeholder-id = ' + serializedResource, { withSpans: false });
+    const fluentResource = parse(serializedResource, { withSpans: false });
     const junk = fluentResource.body.filter((entry) => entry.type === 'Junk');
     if (_options.withJunk === false && junk.length > 0) {
         return Result.err(Error("Couldn't parse the following entries:\n" + junk.map((junk) => junk.content)));
