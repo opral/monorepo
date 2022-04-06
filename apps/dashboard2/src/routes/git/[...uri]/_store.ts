@@ -26,7 +26,10 @@ export const searchParams = derived<
 	});
 });
 
-export const inlangConfig = derived<[typeof searchParams, typeof fs], InlangConfig['any']>(
+export const inlangConfig = derived<
+	[typeof searchParams, typeof fs],
+	InlangConfig['any'] | undefined
+>(
 	[searchParams, fs],
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
