@@ -1,10 +1,8 @@
 <script lang="ts">
-	import type { SlDropdown } from '@shoelace-style/shoelace';
-	import { onMount } from 'svelte';
 	import { inlangConfig } from '../_store';
 	import ISO6391 from 'iso-639-1';
-
 	import { countryCodeEmoji } from 'country-code-emoji';
+	import { onMount } from 'svelte';
 
 	let filterDropdown: SlDropdown;
 
@@ -13,7 +11,6 @@
 	});
 </script>
 
-<!-- MENUBAR START -->
 <div role="menubar" class="flex space-x-2">
 	<sl-input placeholder="Search translations" size="medium" class="w-full">
 		<sl-icon name="search" slot="prefix" />
@@ -39,14 +36,7 @@
 		</sl-menu>
 	</sl-dropdown>
 </div>
-<!-- MENUBAR END -->
-<!-- CONTENT START -->
 
-<div class="grid">
-	<slot />
-</div>
-
-<!-- CONTENT END -->
 <style>
 	/** the text color is not white on hover because a checkbox is not supposed to be in a dropdown */
 	.hover-fix::part(base):hover {
