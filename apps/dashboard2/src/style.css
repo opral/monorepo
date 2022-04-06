@@ -13,3 +13,11 @@
 .link {
 	@apply text-primary hover:text-hover-primary;
 }
+
+.form-label {
+	@apply block label-md;
+}
+
+.form-input {
+	@apply body-md rounded block p-2 border;
+}
