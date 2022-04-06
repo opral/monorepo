@@ -1,4 +1,4 @@
-import type { Resources } from '@inlang/fluent-ast';
+import type { Resource } from '@inlang/fluent-ast';
 import { derived } from 'svelte/store';
 import { page } from '$app/stores';
 import { fs } from '$lib/stores/filesystem';
@@ -62,7 +62,10 @@ export const resources = createResourcesStore();
 function createResourcesStore() {
 	// derived from search params -> if directory changes
 	// derived from fs -> if files change
-	const { subscribe } = derived<[typeof searchParams, typeof fs], Resources>(
+	const { subscribe } = derived<
+		[typeof searchParams, typeof fs],
+		Record<string, Resource | undefined>
+	>(
 		[searchParams, fs],
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore

@@ -2,7 +2,7 @@
 	let showHamburgerMenu = false;
 </script>
 
-<nav class="bg-surface-100 text-on-surface px-2 sm:px-4 py-2.5 rounded">
+<nav class="bg-surface-100 text-on-surface text-body-md font-body-md px-2 sm:px-4 py-2.5 border-b">
 	<div class="container flex flex-wrap justify-between items-center mx-auto">
 		<a href="/" class="flex items-center text-headline-sm">Inlang</a>
 		<!-- hamburger menu on mobile -->
@@ -56,6 +56,6 @@
 		</div>
 	</div>
 </nav>
-<div class="container mx-auto mt-4 px-2 sm:px-0 bg-background text-on-background">
+<div class="container mx-auto mt-2 px-2 space-y-2 sm:px-0 bg-background text-on-background">
 	<slot />
 </div>

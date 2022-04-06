@@ -1,4 +1,4 @@
-const pankowUi = require('@pankow/pankow-ui');
+const pankowUi = require('@pankow-ui/pankow-ui');
 const colors = require('tailwindcss/colors');
 
 module.exports = {
@@ -6,5 +6,10 @@ module.exports = {
 	theme: {
 		extend: {}
 	},
-	plugins: [pankowUi.withConfig({ colorSystem: { semanticColors: { info: colors.blue } } })]
+	plugins: [
+		pankowUi.withConfig({
+			colorSystem: { semanticColors: { info: colors.blue, success: colors.green } },
+			borderRadiusBase: 'rounded'
+		})
+	]
 };

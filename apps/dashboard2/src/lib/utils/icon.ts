@@ -1,9 +1,25 @@
 /* eslint-disable unicorn/numeric-separators-style */
-/** Returns the src of the specified icon. */
-// (a simple typesafe utility function)
-export function icon(name: keyof IconJson): string {
-	return `https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/${name}.svg`;
+/**
+ * Returns the icon class in a typesafe and autocomplete way.
+ */
+export function icon(name: keyof IconJson | keyof SemanticColors): string {
+	switch (name) {
+		case 'error':
+			return 'bi-exclamation-diamond';
+		case 'info':
+			return 'bi-info-circle';
+		case 'success':
+			return 'bi-check-circle';
+		default:
+			return `bi-${name}`;
+	}
 }
+
+type SemanticColors = {
+	error: '';
+	info: '';
+	success: '';
+};
 
 // taken from https://github.com/twbs/icons/blob/main/font/bootstrap-icons.json
 type IconJson = {

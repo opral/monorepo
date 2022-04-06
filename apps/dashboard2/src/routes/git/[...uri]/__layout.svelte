@@ -4,10 +4,9 @@
 	import { fs } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
 	import { searchParams } from './_store';
-	import { onMount } from 'svelte';
 
 	// ugly stitching together of paths
-	let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
+	// let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
 	$: breadcrumbs = () => {
 		// consists of last two paths (/) of the uri (skipping https:// etc.)
 		const respositoryName = $page.params.uri.split('/').slice(-2).join(' ');
@@ -40,35 +39,47 @@
 		dir: '/',
 		http,
 		url: $page.params.uri,
-		corsProxy: 'https://cors.isomorphic-git.org'
+		corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/'
 	});
 </script>
 
 <!-- BREADCRUMBS START -->
-<nav aria-label="breadcrumb">
-	<ol class="breadcrumb h4">
+<nav
+	class="flex card rounded bg-surface-100 title-md text-on-surface border"
+	aria-label="breadcrumb"
+>
+	<ol class="inline-flex items-center space-x-1 md:space-x-3">
 		{#each breadcrumbs() as breadcrumb}
-			<li class="breadcrumb-item" aria-current={breadcrumb.isCurrentPage ? 'page' : undefined}>
-				<a href={breadcrumb.href} class="">
+			<li class="inline-flex items-center">
+				<a
+					href={breadcrumb.href}
+					class="inline-flex items-center"
+					class:text-primary={breadcrumb.isCurrentPage === false}
+					class:hover:text-hover-primary={breadcrumb.isCurrentPage === false}
+					class:cursor-default={breadcrumb.isCurrentPage === true}
+				>
 					{breadcrumb.name}
 				</a>
 			</li>
+			<p>/</p>
 		{/each}
 	</ol>
 </nav>
 <!-- BREADCRUMBS END -->
+
 {#await cloning}
-	<div class="my-2">
-		<div class="spinner-border spinner-border-sm text-primary me-1" role="status" />
-		Loading files...
+	<div
+		class="absolute inset-0 w-full h-full flex flex-col items-center justify-center backdrop-blur"
+	>
+		<h1 class="display-md">Cloning repository...</h1>
 	</div>
-	<!-- show content even when loading (to avoid snapping elements) -->
+	<!-- show content while loading (to avoid snapping elements) -->
 	<slot />
 {:then result}
 	{#if result.isErr}
-		<div class="alert alert-danger" role="alert">
-			<strong>Something went wrong: </strong><br />
-			{result.error.message}
+		<div class="alert alert-error">
+			<h1 class="alert-title">Something went wrong.</h1>
+			<p class="alert-body">{result.error.message}</p>
 		</div>
 	{:else}
 		<!-- only show content if no error -->
