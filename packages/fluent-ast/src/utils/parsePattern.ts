@@ -8,7 +8,6 @@ import { parseEntry } from './parseEntry';
  * @param {string} serializedPattern - the pattern to parse
  * @returns parsed pattern.
  */
-
 export function parsePattern(serializedPattern: string): Result<Pattern, ParseError | Error> {
     // wrapping the pattern as message to parse it
     const entry = parseEntry('placeholder-id = ' + serializedPattern);
