@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { base } from '$app/paths';
+
 	import { languageName } from '$lib/utils/languageName';
 
 	import { Attribute, Message, serializePattern, type Resource } from '@inlang/fluent-ast';
@@ -77,20 +79,23 @@
 	<Sidebar class="col-span-1" />
 	<div class="col-span-3 flex flex-col space-y-2">
 		{#each rows() as row}
+			<!-- the node type  -->
 			<sl-card class="space-y-2" class:ml-12={row.baseNode.type === 'Attribute'}>
 				<h3 slot="header" class="title-md">{row.id}</h3>
 				{#each languageCodes as languageCode}
 					{@const node = row.nodes[languageCode]}
 					{@const serializedPattern = node?.value ? serializePattern(node.value) : undefined}
-					{#if serializedPattern === undefined}
-						<h4 class="title-sm">{languageName(languageCode)}</h4>
-						<div class="flex items-center body-md decoration-dotted">
-							<sl-icon name="info-circle" class="mr-1" />
-							<p>This language has no pattern.</p>
+					{#if row.baseNode.value === null}
+						<!-- show create pattern message if the current row is the "base row" -->
+						{#if languageCode === baseLanguageCode}
+							<div class="flex items-center body-md decoration-dotted">
+								<sl-icon name="info-circle" class="mr-1" />
+								<p>This message has no pattern in the base language.</p>
+							</div>
 							<sl-button variant="text" on:click={() => alert('unimplemented')}>
 								Create pattern
 							</sl-button>
-						</div>
+						{/if}
 					{:else}
 						<sl-textarea rows="2" resize="auto" value={serializedPattern ?? ''}>
 							<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
