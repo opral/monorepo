@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { serializePattern, type Resource } from '@inlang/fluent-ast';
+	import { Message, serializePattern, type Resource } from '@inlang/fluent-ast';
 	import { identity } from 'svelte/internal';
 	import { get } from 'svelte/store';
 	import { inlangConfig, resources } from '../_store';
@@ -17,33 +17,48 @@
 			return new Set([...result, ...($resources[languageCode]?.includedMessageIds() ?? [])]);
 		}, new Set<string>())
 	);
+
+	/** Mapping the messages from the AST's with language codes. */
+	const rows = () => {
+		const result: {
+			messageId: string;
+			messages: Record<string, Message | undefined>;
+			attributeIds: string[];
+		}[] = [];
+		for (const messageId of messageIds) {
+			const messages = Object.fromEntries(
+				languageCodes.map((languageCode) => [
+					languageCode,
+					$resources[languageCode]?.get({ message: { id: messageId } })
+				])
+			);
+			const attributeIds = Array.from(
+				languageCodes.reduce((result, languageCode) => {
+					return new Set([
+						...result,
+						...(messages[languageCode]?.attributes.map((attribute) => attribute.id.name) ?? [])
+					]);
+				}, new Set<string>())
+			);
+			result.push({
+				messageId: messageId,
+				messages,
+				attributeIds
+			});
+		}
+		return result;
+	};
 </script>
 
 <Menubar />
 <div class="grid grid-cols-4">
 	<Sidebar class="col-span-1" />
 	<div class="col-span-3 flex flex-col space-y-2">
-		{#each messageIds as messageId}
-			<!-- mapping all languageCodes to Record<LanguageCode, Message | undefined> -->
-			{@const messages = Object.fromEntries(
-				languageCodes.map((languageCode) => [
-					languageCode,
-					$resources[languageCode]?.get({ message: { id: messageId } })
-				])
-			)}
-			<!-- attribute ids of all messages combined by the language code -->
-			{@const attributeIds = Array.from(
-				languageCodes.reduce((result, languageCode) => {
-					return new Set([
-						...result,
-						...(messages[languageCode]?.attributes.map((attribute) => attribute.id.name) ?? [])
-					]);
-				}, new Set())
-			)}
+		{#each rows() as row}
 			<sl-card>
-				<h3 slot="header" class="title-md">{messageId}</h3>
+				<h3 slot="header" class="title-md">{row.messageId}</h3>
 				{#each languageCodes as languageCode}
-					{@const message = messages[languageCode]}
+					{@const message = row.messages[languageCode]}
 					{@const pattern = message?.value ? serializePattern(message.value) : undefined}
 					{#if pattern}
 						<sl-textarea rows="2" resize="auto" value={pattern}>
@@ -61,9 +76,9 @@
 					{/if}
 				{/each}
 			</sl-card>
-			{#each attributeIds as attributeId}
+			{#each row.attributeIds as attributeId}
 				{#each languageCodes as languageCode}
-					{@const attribute = messages[languageCode]?.attributes.find(
+					{@const attribute = row.messages[languageCode]?.attributes.find(
 						(attribute) => attribute.id.name === attributeId
 					)}
 					{@const pattern = attribute?.value ? serializePattern(attribute.value) : undefined}
