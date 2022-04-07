@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { Message, serializePattern, type Resource } from '@inlang/fluent-ast';
-	import { identity } from 'svelte/internal';
-	import { get } from 'svelte/store';
 	import { inlangConfig, resources } from '../_store';
 	import Menubar from './_Menubar.svelte';
+	import Pattern from './_Pattern.svelte';
 	import Sidebar from './_Sidebar.svelte';
 
 	const baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
@@ -48,6 +47,16 @@
 		}
 		return result;
 	};
+
+	function findAttribute(args: {
+		row: ReturnType<typeof rows>[number];
+		languageCode: string;
+		attributeId: string;
+	}) {
+		return args.row.messages[args.languageCode]?.attributes.find(
+			(attribute) => attribute.id.name === args.attributeId
+		);
+	}
 </script>
 
 <Menubar />
@@ -55,46 +64,46 @@
 	<Sidebar class="col-span-1" />
 	<div class="col-span-3 flex flex-col space-y-2">
 		{#each rows() as row}
-			<sl-card>
+			<sl-card class="space-y-2">
 				<h3 slot="header" class="title-md">{row.messageId}</h3>
 				{#each languageCodes as languageCode}
 					{@const message = row.messages[languageCode]}
-					{@const pattern = message?.value ? serializePattern(message.value) : undefined}
-					{#if pattern}
-						<sl-textarea rows="2" resize="auto" value={pattern}>
-							<h4 slot="label" class="title-sm">{languageCode}</h4>
-						</sl-textarea>
+					{@const serializedPattern = message?.value ? serializePattern(message.value) : undefined}
+					{#if languageCode === baseLanguageCode}
+						{#if serializedPattern}
+							<Pattern {serializedPattern} {languageCode} />
+						{:else}
+							<h4 class="title-sm">Pattern</h4>
+							<div class="flex items-center body-sm decoration-dotted">
+								<sl-icon name="info-circle" class="mr-1" />
+								<p class="decoration-dotted">This message has no pattern.</p>
+								<sl-button variant="text" size="small" on:click={() => alert('unimplemented')}>
+									Create pattern
+								</sl-button>
+							</div>
+						{/if}
 					{:else}
-						<h4 class="title-sm">Pattern</h4>
-						<div class="flex items-center body-sm decoration-dotted">
-							<sl-icon name="info-circle" class="mr-1" />
-							<p class="decoration-dotted">This message has no pattern.</p>
-							<sl-button variant="text" size="small" on:click={() => alert('unimplemented')}>
-								Create pattern
-							</sl-button>
-						</div>
+						<Pattern {serializedPattern} {languageCode} />
 					{/if}
 				{/each}
 			</sl-card>
 			{#each row.attributeIds as attributeId}
-				{#each languageCodes as languageCode}
-					{@const attribute = row.messages[languageCode]?.attributes.find(
-						(attribute) => attribute.id.name === attributeId
-					)}
-					{@const pattern = attribute?.value ? serializePattern(attribute.value) : undefined}
-					<div class="flex">
-						<div class="w-12 h-full flex items-center justify-center">
-							<!-- TODO treeview line -->
-							<!-- <div class="h-0.5 w-20 bg-neutral-300 rotate-90" /> -->
-						</div>
-						<sl-details class="w-full">
-							<h3 slot="summary" class="title-md">.{attributeId}</h3>
-							<sl-textarea rows="2" resize="auto" value={pattern}>
-								<h4 slot="label" class="title-sm">Pattern</h4>
-							</sl-textarea>
-						</sl-details>
+				<div class="flex">
+					<div class="w-12 h-full flex items-center justify-center">
+						<!-- TODO treeview line -->
+						<!-- <div class="h-0.5 w-20 bg-neutral-300 rotate-90" /> -->
 					</div>
-				{/each}
+					<sl-details class="w-full space-y-2 p-0">
+						<h3 slot="summary" class="title-md">.{attributeId}</h3>
+						{#each languageCodes as languageCode}
+							{@const attribute = findAttribute({ row, languageCode, attributeId })}
+							{@const serializedPattern = attribute?.value
+								? serializePattern(attribute.value)
+								: undefined}
+							<Pattern {serializedPattern} {languageCode} />
+						{/each}
+					</sl-details>
+				</div>
 			{/each}
 		{/each}
 	</div>
