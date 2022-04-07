@@ -1,5 +1,6 @@
 <script lang="ts">
 	let showHamburgerMenu = false;
+	import '../style.css';
 </script>
 
 <nav class="bg-surface-100 text-on-surface text-body-md font-body-md px-2 sm:px-4 py-2.5 border-b">
