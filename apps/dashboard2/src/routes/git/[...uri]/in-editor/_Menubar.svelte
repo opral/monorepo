@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { inlangConfig } from '../_store';
-	import ISO6391 from 'iso-639-1';
-	import { countryCodeEmoji } from 'country-code-emoji';
-	import { onMount } from 'svelte';
 	import type { SlDropdown } from '@shoelace-style/shoelace';
+	import { inlangConfig } from '../_store';
+	import { onMount } from 'svelte';
+	import { languageName } from '$lib/utils/languageName';
 
 	let filterDropdown: SlDropdown;
 
@@ -28,10 +27,7 @@
 			<sl-divider />
 			{#each $inlangConfig?.languageCodes ?? [] as languageCode}
 				<sl-menu-item>
-					<sl-checkbox class="hover-fix"
-						>{countryCodeEmoji(languageCode === 'en' ? 'gb' : languageCode)}
-						{ISO6391.getName(languageCode)}
-					</sl-checkbox>
+					<sl-checkbox class="hover-fix">{languageName(languageCode)}</sl-checkbox>
 				</sl-menu-item>
 			{/each}
 		</sl-menu>
