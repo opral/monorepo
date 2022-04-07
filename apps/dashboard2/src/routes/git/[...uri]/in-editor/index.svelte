@@ -110,7 +110,7 @@
 						>
 							<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
 							{#if serializedPattern === undefined}
-								<p slot="help-text">Missing the pattern for this language.</p>
+								<p slot="help-text">Missing pattern.</p>
 							{/if}
 						</sl-textarea>
 					{/if}
