@@ -102,8 +102,16 @@
 							</sl-button>
 						{/if}
 					{:else}
-						<sl-textarea rows="2" resize="auto" value={serializedPattern ?? ''}>
+						<sl-textarea
+							rows="2"
+							resize="auto"
+							value={serializedPattern ?? ''}
+							class:textarea-error={serializedPattern === undefined}
+						>
 							<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
+							{#if serializedPattern === undefined}
+								<p slot="help-text">Missing the pattern for this language.</p>
+							{/if}
 						</sl-textarea>
 					{/if}
 				{/each}
@@ -111,3 +119,13 @@
 		{/each}
 	</div>
 </div>
+
+<style lang="postcss">
+	.textarea-error::part(base) {
+		@apply border-error-container;
+	}
+
+	.textarea-error::part(form-control-help-text) {
+		@apply text-error;
+	}
+</style>
