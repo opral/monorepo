@@ -70,7 +70,7 @@
 		<h1 class="display-md">Cloning repository...</h1>
 	</div>
 	<!-- show content while loading (to avoid snapping elements) -->
-	<slot />
+	<!-- <slot /> -->
 {:then result}
 	{#if result.isErr}
 		<div class="alert alert-error">
