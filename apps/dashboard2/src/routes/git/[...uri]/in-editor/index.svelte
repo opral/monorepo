@@ -41,7 +41,7 @@
 				// assumption that the baseNode always exists
 				baseNode: messages[baseLanguageCode] as Message,
 				nodes: messages,
-				actionRequired: false
+				actionRequired: Object.values(messages).some((message) => !message?.value)
 			});
 			const attributeIds = Array.from(
 				languageCodes.reduce((result, languageCode) => {
@@ -66,7 +66,7 @@
 					// assumption that the baseNode always exists
 					baseNode: attributes[baseLanguageCode] as Attribute,
 					nodes: attributes,
-					actionRequired: false
+					actionRequired: Object.values(attributes).some((attribute) => !attribute?.value)
 				});
 			}
 		}
@@ -81,7 +81,12 @@
 		{#each rows() as row}
 			<!-- the node type  -->
 			<sl-card class="space-y-2" class:ml-12={row.baseNode.type === 'Attribute'}>
-				<h3 slot="header" class="title-md">{row.id}</h3>
+				<div slot="header" class="flex justify-between">
+					<h3 class="title-md">{row.id}</h3>
+					{#if row.actionRequired}
+						<sl-tag variant="danger" size="small">Action required</sl-tag>
+					{/if}
+				</div>
 				{#each languageCodes as languageCode}
 					{@const node = row.nodes[languageCode]}
 					{@const serializedPattern = node?.value ? serializePattern(node.value) : undefined}
