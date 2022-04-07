@@ -8,7 +8,7 @@ import { countryCodeEmoji } from 'country-code-emoji';
  * @example
  *      languageName('en') // => 🇬🇧 English
  */
-export function languageName(languageCode: LanguageCode): string {
+export function languageName(languageCode: LanguageCode | string): string {
 	return `${countryCodeEmoji(languageCode === 'en' ? 'gb' : languageCode)} ${ISO6391.getName(
 		languageCode
 	)}`;
