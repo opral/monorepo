@@ -9,7 +9,8 @@ import { countryCodeEmoji } from 'country-code-emoji';
  *      languageName('en') // => 🇬🇧 English
  */
 export function languageName(languageCode: LanguageCode | string): string {
-	return `${countryCodeEmoji(languageCode === 'en' ? 'gb' : languageCode)} ${ISO6391.getName(
-		languageCode
+	const _languageCode = languageCode.toLowerCase();
+	return `${countryCodeEmoji(_languageCode === 'en' ? 'gb' : _languageCode)} ${ISO6391.getName(
+		_languageCode
 	)}`;
 }
