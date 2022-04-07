@@ -1,29 +1,53 @@
 <script lang="ts">
 	import { serializePattern, type Resource } from '@inlang/fluent-ast';
+	import { identity } from 'svelte/internal';
+	import { get } from 'svelte/store';
 	import { inlangConfig, resources } from '../_store';
 	import Menubar from './_Menubar.svelte';
 	import Sidebar from './_Sidebar.svelte';
 
-	const baseResource = $resources[$inlangConfig?.baseLanguageCode ?? 'en'] as Resource;
-	const ids = baseResource.includedMessageIds();
+	const baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
+	const baseResource = $resources[baseLanguageCode] as Resource;
 
-	const messages = ids
-		.map((id) => baseResource.get({ message: { id } }))
-		.filter((value) => value !== undefined);
+	const languageCodes = Object.keys($resources);
+
+	/** all ids of all resources */
+	const messageIds = Array.from(
+		languageCodes.reduce((result, languageCode) => {
+			return new Set([...result, ...($resources[languageCode]?.includedMessageIds() ?? [])]);
+		}, new Set<string>())
+	);
 </script>
 
 <Menubar />
 <div class="grid grid-cols-4">
 	<Sidebar class="col-span-1" />
 	<div class="col-span-3 flex flex-col space-y-2">
-		{#each messages as message}
-			{@const pattern = message?.value ? serializePattern(message.value) : undefined}
-			{#if message !== undefined}
-				<sl-card>
-					<h3 slot="header" class="title-md">{message.id.name}</h3>
+		{#each messageIds as messageId}
+			<!-- mapping all languageCodes to Record<LanguageCode, Message | undefined> -->
+			{@const messages = Object.fromEntries(
+				languageCodes.map((languageCode) => [
+					languageCode,
+					$resources[languageCode]?.get({ message: { id: messageId } })
+				])
+			)}
+			<!-- attribute ids of all messages combined by the language code -->
+			{@const attributeIds = Array.from(
+				languageCodes.reduce((result, languageCode) => {
+					return new Set([
+						...result,
+						...(messages[languageCode]?.attributes.map((attribute) => attribute.id.name) ?? [])
+					]);
+				}, new Set())
+			)}
+			<sl-card>
+				<h3 slot="header" class="title-md">{messageId}</h3>
+				{#each languageCodes as languageCode}
+					{@const message = messages[languageCode]}
+					{@const pattern = message?.value ? serializePattern(message.value) : undefined}
 					{#if pattern}
 						<sl-textarea rows="2" resize="auto" value={pattern}>
-							<h4 slot="label" class="title-sm">Pattern</h4>
+							<h4 slot="label" class="title-sm">{languageCode}</h4>
 						</sl-textarea>
 					{:else}
 						<h4 class="title-sm">Pattern</h4>
@@ -35,24 +59,28 @@
 							</sl-button>
 						</div>
 					{/if}
-				</sl-card>
-				{#each message.attributes as attribute}
-					{@const pattern = serializePattern(attribute.value)}
+				{/each}
+			</sl-card>
+			{#each attributeIds as attributeId}
+				{#each languageCodes as languageCode}
+					{@const attribute = messages[languageCode]?.attributes.find(
+						(attribute) => attribute.id.name === attributeId
+					)}
+					{@const pattern = attribute?.value ? serializePattern(attribute.value) : undefined}
 					<div class="flex">
 						<div class="w-12 h-full flex items-center justify-center">
 							<!-- TODO treeview line -->
 							<!-- <div class="h-0.5 w-20 bg-neutral-300 rotate-90" /> -->
 						</div>
-
 						<sl-details class="w-full">
-							<h3 slot="summary" class="title-md">.{attribute.id.name}</h3>
+							<h3 slot="summary" class="title-md">.{attributeId}</h3>
 							<sl-textarea rows="2" resize="auto" value={pattern}>
 								<h4 slot="label" class="title-sm">Pattern</h4>
 							</sl-textarea>
 						</sl-details>
 					</div>
 				{/each}
-			{/if}
+			{/each}
 		{/each}
 	</div>
 </div>
