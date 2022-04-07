@@ -25,6 +25,15 @@
 						<sl-textarea rows="2" resize="auto" value={pattern}>
 							<h4 slot="label" class="title-sm">Pattern</h4>
 						</sl-textarea>
+					{:else}
+						<h4 class="title-sm">Pattern</h4>
+						<div class="flex items-center body-sm decoration-dotted">
+							<sl-icon name="info-circle" class="mr-1" />
+							<p class="decoration-dotted">This message has no pattern.</p>
+							<sl-button variant="text" size="small" on:click={() => alert('unimplemented')}>
+								Create pattern
+							</sl-button>
+						</div>
 					{/if}
 				</sl-card>
 				{#each message.attributes as attribute}
