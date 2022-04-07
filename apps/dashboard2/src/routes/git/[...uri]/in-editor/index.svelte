@@ -26,16 +26,23 @@
 							<h4 slot="label" class="title-sm">Pattern</h4>
 						</sl-textarea>
 					{/if}
-					<h4 class="title-sm pt-4 pb-0.5">Attributes</h4>
-					<div class="space-y-4">
-						{#each message.attributes as attribute}
-							<sl-details>
-								<h3 slot="summary" class="title-md">.{attribute.id.name}</h3>
-								hello
-							</sl-details>
-						{/each}
-					</div>
 				</sl-card>
+				{#each message.attributes as attribute}
+					{@const pattern = serializePattern(attribute.value)}
+					<div class="flex">
+						<div class="w-12 h-full flex items-center justify-center">
+							<!-- TODO treeview line -->
+							<!-- <div class="h-0.5 w-20 bg-neutral-300 rotate-90" /> -->
+						</div>
+
+						<sl-details class="w-full">
+							<h3 slot="summary" class="title-md">.{attribute.id.name}</h3>
+							<sl-textarea rows="2" resize="auto" value={pattern}>
+								<h4 slot="label" class="title-sm">Pattern</h4>
+							</sl-textarea>
+						</sl-details>
+					</div>
+				{/each}
 			{/if}
 		{/each}
 	</div>

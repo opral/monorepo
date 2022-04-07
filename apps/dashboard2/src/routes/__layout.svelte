@@ -56,6 +56,8 @@
 		</div>
 	</div>
 </nav>
-<div class="container mx-auto mt-2 px-2 space-y-2 sm:px-0 bg-background text-on-background">
+<div class="container mx-auto my-2 px-2 space-y-2 sm:px-0 bg-background text-on-background">
 	<slot />
 </div>
+<!-- empty footer for now but with height acting as "margin" -->
+<footer class="h-10" />

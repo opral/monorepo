@@ -13,7 +13,7 @@
 </script>
 
 <div role="menubar" class="flex space-x-2">
-	<sl-input placeholder="Search translations" size="medium" class="w-full">
+	<sl-input placeholder="Search id's" size="medium" class="w-full">
 		<sl-icon name="search" slot="prefix" />
 	</sl-input>
 	<sl-dropdown bind:this={filterDropdown}>
