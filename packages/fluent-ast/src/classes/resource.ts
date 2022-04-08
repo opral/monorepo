@@ -6,57 +6,40 @@ import { isValidId } from '../utils';
 import { cloneDeep, merge, remove } from 'lodash-es';
 
 export class Resource extends FluentResource {
-    /**
-     * Included message ids of the resource.
-     *
-     * @example
-     *      resource.includedIds()
-     *      >> ["message-one", "message-two"]
-     */
-    includedMessageIds(): string[] {
-        const ids: string[] = [];
-        for (const entry of this.body ?? []) {
-            if (entry.type === 'Message') {
-                ids.push(entry.id.name);
-            }
-        }
-        return ids;
-    }
+    // ----- Attribute -----
 
     /**
      * Returns whether or not the resource includes the given node.
-     *
-     * Searching for attributes requires the message id to be specified.
      */
-    includes(query: { message: { id: string } }): boolean;
-    includes(query: { attribute: { messageId: string; id: string } }): boolean;
-    includes(query: { message?: { id: string }; attribute?: { messageId: string; id: string } }): boolean {
+    includesAttribute(args: { messageId: string; id: string }): boolean {
         for (const entry of this.body ?? []) {
-            if (entry.type === 'Message' && entry.id.name === (query.message?.id ?? query.attribute?.messageId)) {
-                if (query.attribute === undefined) {
-                    return true;
-                }
+            if (entry.type === 'Message' && entry.id.name === args.messageId) {
                 for (const attribute of entry.attributes) {
-                    if (attribute.id.name === query.attribute.id) {
+                    if (attribute.id.name === args.id) {
                         return true;
                     }
                 }
+                return true;
             }
         }
         return false;
     }
 
     /**
-     * Creates the specified node in the resource.
-     *
-     * If you want to create an attribute, create a message instead.
+     * Creates the attribute in an existing message, or creates a new message with the attribute.
      */
-    create(query: { message: Message }): Result<Resource, Error>;
-    create(query: { message?: Message }): Result<Resource, Error> {
-        if (query.message) {
-            return this.createMessage(query.message);
+    createAttribute(args: Attribute & { messageId: string }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const message = cloned.getMessage({ id: args.messageId });
+        if (message === undefined) {
+            return cloned.createMessage(Message.from({ id: args.messageId, attributes: [args] }).unwrap());
+        } else if (cloned.includesAttribute({ id: args.id.name, messageId: args.messageId })) {
+            return Result.err(
+                Error(`Attribute with id '${args.id.name}' already exists for the message with id '${args.messageId}'.`)
+            );
         }
-        return Result.err(Error('Unimplmented'));
+        message.attributes.push(args);
+        return Result.ok(cloned);
     }
 
     /**
@@ -64,20 +47,12 @@ export class Resource extends FluentResource {
      *
      * Returns undefined if the node does not exist.
      */
-    get(query: { message: { id: string }; attribute?: { id: string; messageId: string } }): Message | undefined;
-    get(query: { message?: { id: string }; attribute: { id: string; messageId: string } }): Attribute | undefined;
-    get(query: {
-        message?: { id: string };
-        attribute?: { id: string; messageId: string };
-    }): Message | Attribute | undefined {
+    getAttribute(args: { id: string; messageId: string }): Attribute | undefined {
         for (const entry of this.body ?? []) {
             // one message id is defined.
-            if (entry.type === 'Message' && entry.id.name === (query.message?.id ?? query.attribute?.messageId)) {
-                if (query.attribute === undefined) {
-                    return entry;
-                }
+            if (entry.type === 'Message' && entry.id.name === args.messageId) {
                 for (const attribute of entry.attributes) {
-                    if (attribute.id.name === query.attribute.id) {
+                    if (attribute.id.name === args.id) {
                         return attribute;
                     }
                 }
@@ -85,46 +60,7 @@ export class Resource extends FluentResource {
         }
     }
 
-    /**
-     * Updates the given node.
-     *
-     * `with` is merged with the existing node.
-     */
-    update(query: { message: { id: string; with: Partial<Message> } }): Result<Resource, Error>;
-    update(query: { attribute: { id: string; messageId: string; with: Partial<Attribute> } }): Result<Resource, Error>;
-    update(query: {
-        message?: { id: string; with: Partial<Message> };
-        attribute?: { id: string; messageId: string; with: Partial<Attribute> };
-    }): Result<Resource, Error> {
-        if (query.message) {
-            return this.updateMessage(query.message);
-        } else if (query.attribute) {
-            return this.updateAttribute(query.attribute);
-        }
-        return Result.err(Error('Unimplemented'));
-    }
-
-    delete(query: { attribute: { messageId: string; id: string } }): Result<Resource, Error>;
-    delete(query: { message: { id: string } }): Result<Resource, Error>;
-    delete(query: {
-        message?: { id: string };
-        attribute?: { messageId: string; id: string };
-    }): Result<Resource, Error> {
-        if (query.message) {
-            return this.deleteMessage(query.message);
-        } else if (query.attribute) {
-            return this.deleteAttribute(query.attribute);
-        }
-        return Result.err(Error('Unimplemented'));
-    }
-
-    // ----- Private functions -----
-
-    private updateAttribute(args: {
-        id: string;
-        messageId: string;
-        with: Partial<Attribute>;
-    }): Result<Resource, Error> {
+    updateAttribute(args: { id: string; messageId: string; with: Partial<Attribute> }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const indexOfMessage = cloned.body.findIndex(
             (entry) => entry.type === 'Message' && entry.id.name === args.messageId
@@ -144,7 +80,17 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    private deleteAttribute(args: { messageId: string; id: string }): Result<Resource, Error> {
+    upsertAttribute(args: Attribute & { messageId: string }): Result<Resource, Error> {
+        const cloned = cloneDeep(this);
+        const attribute = cloned.getAttribute({ id: args.id.name, messageId: args.messageId });
+        if (attribute) {
+            return this.updateAttribute({ id: args.id.name, messageId: args.messageId, with: args });
+        } else {
+            return this.createAttribute(args);
+        }
+    }
+
+    deleteAttribute(args: { messageId: string; id: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         for (const message of cloned.body.filter((entry) => entry.type === 'Message')) {
             if ((message as Message).id.name === args.messageId) {
@@ -160,8 +106,39 @@ export class Resource extends FluentResource {
         return Result.err(Error(`The attributes parent message with id '${args.id}' does not exist.`));
     }
 
-    private createMessage(message: Message): Result<Resource, Error> {
-        if (this.includes({ message: { id: message.id.name } })) {
+    // ----- Message -----
+
+    /**
+     * Included message ids of the resource.
+     *
+     * @example
+     *      resource.includedIds()
+     *      >> ["message-one", "message-two"]
+     */
+    includedMessageIds(): string[] {
+        const ids: string[] = [];
+        for (const entry of this.body ?? []) {
+            if (entry.type === 'Message') {
+                ids.push(entry.id.name);
+            }
+        }
+        return ids;
+    }
+
+    /**
+     * Returns whether or not the resource includes the given node.
+     */
+    includesMessage(args: { id: string }): boolean {
+        for (const entry of this.body ?? []) {
+            if (entry.type === 'Message' && entry.id.name === args.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    createMessage(message: Message): Result<Resource, Error> {
+        if (this.includesMessage({ id: message.id.name })) {
             return Result.err(Error(`Message with id '${message.id}' already exists.`));
         }
         if (isValidId(message.id) === false) {
@@ -172,7 +149,20 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    private updateMessage(args: { id: string; with: Partial<Message> }): Result<Resource, Error> {
+    /**
+     * Get's (retrieves) a node from the resource.
+     *
+     * Returns undefined if the node does not exist.
+     */
+    getMessage(args: { id: string }): Message | undefined {
+        for (const entry of this.body ?? []) {
+            if (entry.type === 'Message' && entry.id.name === args.id) {
+                return entry;
+            }
+        }
+    }
+
+    updateMessage(args: { id: string; with: Partial<Message> }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const indexOfMessage = cloned.body.findIndex((entry) => entry.type === 'Message' && entry.id.name === args.id);
         if (indexOfMessage === -1) {
@@ -182,7 +172,7 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    private deleteMessage(args: { id: string }): Result<Resource, Error> {
+    deleteMessage(args: { id: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const removed = remove(cloned.body ?? [], (entry) => entry.type === 'Message' && entry.id.name === args.id);
         if (removed.length === 0) {
