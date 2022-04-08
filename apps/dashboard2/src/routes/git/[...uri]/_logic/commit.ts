@@ -2,11 +2,10 @@ import { Result } from '@inlang/result';
 import git from 'isomorphic-git';
 
 /**
- * Adds (stages) all changed, commits the changes and pushes to remote.
+ * Adds (stages) all changed and commits the changes.
  *
  * Happens all in one ago to accommdate the workflow. Non-technical users
- * don't know what a commit, push or remote is. Just show a "submit" button
- * which performs staging, committing and pushing in one go.
+ * don't know what a commit, push or remote is.
  */
 export async function commit(
 	args: Parameters<typeof git['commit']>[0] & Parameters<typeof filesWithChanges>[0]
