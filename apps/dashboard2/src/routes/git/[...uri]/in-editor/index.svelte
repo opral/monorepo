@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-
-	import { languageName } from '$lib/utils/languageName';
-
-	import { Attribute, Message, serializePattern, type Resource } from '@inlang/fluent-ast';
+	import type { Attribute, Message } from '@inlang/fluent-ast';
 	import { inlangConfig, resources } from '../_store';
 	import Menubar from './_Menubar.svelte';
+	import Node from './_Node.svelte';
 	import Sidebar from './_Sidebar.svelte';
 
 	const baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
-	const baseResource = $resources[baseLanguageCode] as Resource;
 
 	const languageCodes = Object.keys($resources);
 
@@ -79,70 +75,7 @@
 	<Sidebar class="col-span-1" />
 	<div class="col-span-3 flex flex-col space-y-2">
 		{#each rows() as row}
-			<!-- the node type  -->
-			<sl-card class:ml-12={row.baseNode.type === 'Attribute'}>
-				<div slot="header" class="flex justify-between">
-					<h3 class="title-md">{row.id}</h3>
-					{#if row.actionRequired}
-						<sl-tag variant="danger" size="small">Action required</sl-tag>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					{#each languageCodes as languageCode}
-						{@const node = row.nodes[languageCode]}
-						{@const serializedPattern = node?.value ? serializePattern(node.value) : undefined}
-						{#if row.baseNode.value === null}
-							<!-- show create pattern message if the current row is the "base row" -->
-							{#if languageCode === baseLanguageCode}
-								<div class="flex items-center body-md decoration-dotted">
-									<sl-icon name="info-circle" class="mr-1" />
-									<p>This message has no pattern in the base language.</p>
-								</div>
-								<sl-button variant="text" on:click={() => alert('unimplemented')}>
-									Create pattern
-								</sl-button>
-							{/if}
-						{:else}
-							<sl-textarea
-								rows="2"
-								resize="auto"
-								value={serializedPattern ?? ''}
-								class:textarea-error={serializedPattern === undefined}
-							>
-								<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
-								{#if serializedPattern === undefined}
-									<p slot="help-text">Missing pattern.</p>
-								{/if}
-							</sl-textarea>
-						{/if}
-					{/each}
-				</div>
-				<div slot="footer" class="flex justify-between">
-					<div>
-						<sl-button variant="primary">
-							<sl-icon src="/icons/save-floppy-disk.svg" slot="prefix" />
-							Save changes
-						</sl-button>
-						<sl-button>
-							<sl-icon name="robot" slot="prefix" />
-							Machine translate
-						</sl-button>
-					</div>
-					<!-- <sl-button>
-						<sl-icon name="arrow-counterclockwise" slot="prefix" />
-					</sl-button> -->
-				</div>
-			</sl-card>
+			<Node {row} {baseLanguageCode} {languageCodes} />
 		{/each}
 	</div>
 </div>
-
-<style lang="postcss">
-	.textarea-error::part(base) {
-		@apply border-error-container;
-	}
-
-	.textarea-error::part(form-control-help-text) {
-		@apply text-error;
-	}
-</style>
