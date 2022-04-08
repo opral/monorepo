@@ -85,7 +85,7 @@
 				await writeResources({
 					fs: $fs,
 					directory: $searchParams.dir,
-					resources: $resources,
+					resources: cloned,
 					...($inlangConfig as InlangConfig['latest'])
 				})
 			).unwrap();
