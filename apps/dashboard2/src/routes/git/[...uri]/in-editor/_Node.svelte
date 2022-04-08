@@ -3,7 +3,7 @@
  -->
 <script lang="ts">
 	import { languageName } from '$lib/utils/languageName';
-	import { Attribute, Message, serializePattern } from '@inlang/fluent-ast';
+	import { Attribute, Message, parsePattern, serializePattern } from '@inlang/fluent-ast';
 	import { fade } from 'svelte/transition';
 	import { fs } from '$lib/stores/filesystem';
 	import { commit } from '../_logic/commit';
@@ -77,8 +77,22 @@
 				}
 				// the row is a message
 				else {
-					cloned[languageCode];
-					alert('unimplemented message change E94344');
+					const message = resource.getMessage({ id: row.messageId });
+					if (message) {
+						// update message
+						message.value = parsePattern(patterns.modified).unwrap();
+						cloned[languageCode] = resource
+							.updateMessage({
+								with: message,
+								id: row.messageId
+							})
+							.unwrap();
+					} else {
+						// create the message
+						cloned[languageCode] = resource
+							.createMessage(Message.from({ id: row.messageId, value: patterns.modified }).unwrap())
+							.unwrap();
+					}
 				}
 			}
 			(
@@ -162,7 +176,8 @@
 		<div>
 			<sl-button
 				variant="primary"
-				disabled={hasChanges === false}
+				disabled={hasChanges === false ||
+					Object.values(modifiedPatterns).some((pattern) => pattern.modified === '')}
 				on:click={commitChanges}
 				loading={saveButtonIsLoading}
 			>
