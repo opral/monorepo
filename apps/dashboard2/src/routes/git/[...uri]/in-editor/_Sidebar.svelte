@@ -1,7 +1,6 @@
 <script lang="ts">
-    export { classes as class };
+	export { classes as class };
 	let classes = '';
-
 </script>
 
 <div class={classes}>
