@@ -33,19 +33,19 @@
 	 * "Current" refers to the current state on the file system.
 	 * "Modified" refers to the AST representation of a resource.
 	 */
-	const modifiedPatterns: Record<string, { current: string; modified: string }> =
-		Object.fromEntries(
-			// initializing the object with the language codes to avoid
-			// undefined values which can lead to throws
-			languageCodes.map((languageCode) => {
-				const node = row.nodes[languageCode];
-				const serializedPattern = node?.value ? serializePattern(node.value) : undefined;
-				return [
-					languageCode,
-					{ current: serializedPattern ?? '', modified: serializedPattern ?? '' }
-				];
-			})
-		);
+	let modifiedPatterns: Record<string, { current: string; modified: string }>;
+	$: modifiedPatterns = Object.fromEntries(
+		// initializing the object with the language codes to avoid
+		// undefined values which can lead to throws
+		languageCodes.map((languageCode) => {
+			const node = row.nodes[languageCode];
+			const serializedPattern = node?.value ? serializePattern(node.value) : undefined;
+			return [
+				languageCode,
+				{ current: serializedPattern ?? '', modified: serializedPattern ?? '' }
+			];
+		})
+	);
 
 	$: hasChanges = Object.values(modifiedPatterns).some(
 		({ current, modified }) => current !== modified
@@ -148,6 +148,7 @@
 						modifiedPatterns[languageCode].modified}
 				>
 					<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
+					<!-- cant use `hasChanges()` because hasChanges applies to all patterns, not a single one -->
 					{#if modifiedPatterns[languageCode].current !== modifiedPatterns[languageCode].modified}
 						<p slot="help-text">Unsaved changes.</p>
 					{:else if modifiedPatterns[languageCode].current === ''}
