@@ -79,6 +79,8 @@
 					<h4 slot="label" class="title-sm pb-1">{languageName(languageCode)}</h4>
 					{#if modifiedPatterns[languageCode].current === ''}
 						<p slot="help-text">Missing pattern.</p>
+					{:else if modifiedPatterns[languageCode].current !== modifiedPatterns[languageCode].modified}
+						<p slot="help-text">Unsaved changes.</p>
 					{/if}
 				</sl-textarea>
 			{/if}
@@ -112,5 +114,9 @@
 
 	.textarea-unsaved-changes::part(base) {
 		@apply border-warning-container;
+	}
+
+	.textarea-unsaved-changes::part(form-control-help-text) {
+		@apply text-warning;
 	}
 </style>
