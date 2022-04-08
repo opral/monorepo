@@ -5,20 +5,31 @@
 	import { languageName } from '$lib/utils/languageName';
 	import { Attribute, Message, serializePattern } from '@inlang/fluent-ast';
 	import { fade } from 'svelte/transition';
+	import { fs } from '$lib/stores/filesystem';
+	import { commit } from '../_logic/commit';
+	import { writeResources } from '@inlang/core';
+	import { inlangConfig, resources, searchParams } from '../_store';
+	import { cloneDeep } from 'lodash-es';
+	import type { InlangConfig } from '@inlang/config';
 
 	export let baseLanguageCode: string;
 	export let languageCodes: string[];
 	export let row: {
-		id: string;
+		attributeId?: string;
+		messageId: string;
 		baseNode: Attribute | Message;
-		nodes: Record<string, Message | Attribute | undefined>;
+		nodes: Record<string, Attribute | Message | undefined>;
 		actionRequired: boolean;
 	};
+
+	let saveButtonIsLoading = false;
 
 	/**
 	 * The modified patterns.
 	 *
 	 * Contains a current and modified pattern to detect changes.
+	 * "Current" refers to the current state on the file system.
+	 * "Modified" refers to the AST representation of a resource.
 	 */
 	const modifiedPatterns: Record<string, { current: string; modified: string }> =
 		Object.fromEntries(
@@ -37,11 +48,69 @@
 	$: hasChanges = Object.values(modifiedPatterns).some(
 		({ current, modified }) => current !== modified
 	);
+
+	// TODO update resources
+	async function commitChanges() {
+		try {
+			saveButtonIsLoading = true;
+			// writing the translation files to disk
+			let cloned = cloneDeep($resources);
+			// go through all potentially modified patterns
+			for (const [languageCode, patterns] of Object.entries(modifiedPatterns)) {
+				const resource = cloned[languageCode];
+				// continue if no changes were made
+				if (patterns.current === patterns.modified) {
+					continue;
+				} else if (resource === undefined) {
+					alert(`No resource for '${languageCode}' exists.`);
+				}
+				// pattern is an attribute
+				else if (row.attributeId) {
+					cloned[languageCode] = resource
+						.upsertAttribute({
+							attribute: Attribute.from({ id: row.attributeId, value: patterns.modified }).unwrap(),
+							messageId: row.messageId
+						})
+						.unwrap();
+				}
+				// the row is a message
+				else {
+					cloned[languageCode];
+					alert('unimplemented message change E94344');
+				}
+			}
+			(
+				await writeResources({
+					fs: $fs,
+					directory: $searchParams.dir,
+					resources: $resources,
+					...($inlangConfig as InlangConfig['latest'])
+				})
+			).unwrap();
+			(
+				await commit({
+					fs: fs.callbackBased,
+					message: `Update translation '${row.messageId}'`,
+					author: {
+						name: 'inlang.dev',
+						email: 'anonymous-user-submission@inlang.dev'
+					},
+					dir: '/'
+				})
+			).unwrap();
+			fs.refresh();
+		} catch (error) {
+			console.error(error);
+			alert((error as Error).message);
+		} finally {
+			saveButtonIsLoading = false;
+		}
+	}
 </script>
 
 <sl-card class:ml-12={row.baseNode.type === 'Attribute'}>
 	<div slot="header" class="flex justify-between">
-		<h3 class="title-md">{row.id}</h3>
+		<h3 class="title-md">{'.' + row.attributeId}</h3>
 		{#if row.actionRequired}
 			<div class="flex space-x-1">
 				{#if hasChanges}
@@ -71,7 +140,7 @@
 					rows="2"
 					resize="auto"
 					value={serializedPattern ?? ''}
-					on:input={(event) => (modifiedPatterns[languageCode].current = event.srcElement.value)}
+					on:input={(event) => (modifiedPatterns[languageCode].modified = event.srcElement.value)}
 					class:textarea-error={modifiedPatterns[languageCode].current === ''}
 					class:textarea-unsaved-changes={modifiedPatterns[languageCode].current !==
 						modifiedPatterns[languageCode].modified}
@@ -88,7 +157,12 @@
 	</div>
 	<div slot="footer" class="flex justify-between">
 		<div>
-			<sl-button variant="primary" disabled={hasChanges === false}>
+			<sl-button
+				variant="primary"
+				disabled={hasChanges === false}
+				on:click={commitChanges}
+				loading={saveButtonIsLoading}
+			>
 				<sl-icon src="/icons/save-floppy-disk.svg" slot="prefix" />
 				Save changes
 			</sl-button>

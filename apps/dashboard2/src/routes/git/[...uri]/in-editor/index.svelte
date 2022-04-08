@@ -16,24 +16,37 @@
 		}, new Set<string>())
 	);
 
-	/** Mapping the messages from the AST's with language codes. */
+	/**
+	 * Mapping the messages from the AST's with language codes.
+	 *
+	 * Values in the array are either a Message, or an Attribute.
+	 */
 	const rows = () => {
-		const result: {
-			id: string;
-			baseNode: Attribute | Message;
-			nodes: Record<string, Message | Attribute | undefined>;
-			actionRequired: boolean;
-		}[] = [];
+		const result: (
+			| {
+					attributeId: string;
+					messageId: string;
+					baseNode: Attribute;
+					nodes: Record<string, Attribute | undefined>;
+					actionRequired: boolean;
+			  }
+			| {
+					messageId: string;
+					baseNode: Message;
+					nodes: Record<string, Message | undefined>;
+					actionRequired: boolean;
+			  }
+		)[] = [];
 		for (const messageId of messageIds) {
 			const messages = Object.fromEntries(
 				languageCodes.map((languageCode) => [
 					languageCode,
-					$resources[languageCode]?.get({ message: { id: messageId } })
+					$resources[languageCode]?.getMessage({ id: messageId })
 				])
 			);
 			// pushing the message itself
 			result.push({
-				id: messageId,
+				messageId: messageId,
 				// assumption that the baseNode always exists
 				baseNode: messages[baseLanguageCode] as Message,
 				nodes: messages,
@@ -58,7 +71,8 @@
 					])
 				);
 				result.push({
-					id: '.' + attributeId,
+					attributeId: attributeId,
+					messageId: messageId,
 					// assumption that the baseNode always exists
 					baseNode: attributes[baseLanguageCode] as Attribute,
 					nodes: attributes,
