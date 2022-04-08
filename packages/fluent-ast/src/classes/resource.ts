@@ -80,6 +80,11 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
+    /**
+     * Upserts the attribute.
+     *
+     * If the parent message does not exist, the parent message will be created.
+     */
     upsertAttribute(args: Attribute & { messageId: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const attribute = cloned.getAttribute({ id: args.id.name, messageId: args.messageId });
