@@ -28,17 +28,19 @@ export class Resource extends FluentResource {
     /**
      * Creates the attribute in an existing message, or creates a new message with the attribute.
      */
-    createAttribute(args: Attribute & { messageId: string }): Result<Resource, Error> {
+    createAttribute(args: { attribute: Attribute; messageId: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const message = cloned.getMessage({ id: args.messageId });
         if (message === undefined) {
-            return cloned.createMessage(Message.from({ id: args.messageId, attributes: [args] }).unwrap());
-        } else if (cloned.includesAttribute({ id: args.id.name, messageId: args.messageId })) {
+            return cloned.createMessage(Message.from({ id: args.messageId, attributes: [args.attribute] }).unwrap());
+        } else if (cloned.includesAttribute({ id: args.attribute.id.name, messageId: args.messageId })) {
             return Result.err(
-                Error(`Attribute with id '${args.id.name}' already exists for the message with id '${args.messageId}'.`)
+                Error(
+                    `Attribute with id '${args.attribute.id.name}' already exists for the message with id '${args.messageId}'.`
+                )
             );
         }
-        message.attributes.push(args);
+        message.attributes.push(args.attribute);
         return Result.ok(cloned);
     }
 
@@ -85,11 +87,15 @@ export class Resource extends FluentResource {
      *
      * If the parent message does not exist, the parent message will be created.
      */
-    upsertAttribute(args: Attribute & { messageId: string }): Result<Resource, Error> {
+    upsertAttribute(args: { attribute: Attribute; messageId: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
-        const attribute = cloned.getAttribute({ id: args.id.name, messageId: args.messageId });
+        const attribute = cloned.getAttribute({ id: args.attribute.id.name, messageId: args.messageId });
         if (attribute) {
-            return this.updateAttribute({ id: args.id.name, messageId: args.messageId, with: args });
+            return this.updateAttribute({
+                id: args.attribute.id.name,
+                messageId: args.messageId,
+                with: args.attribute,
+            });
         } else {
             return this.createAttribute(args);
         }
