@@ -1,7 +1,6 @@
 import { Attribute } from './attribute';
 import { Message } from './message';
 import { Resource } from './resource';
-import { TextElement } from './textElement';
 
 describe('includedMessageIds()', () => {
     const resource = new Resource([
@@ -48,6 +47,10 @@ describe('includes', () => {
 
         it('should be falsy if the message holding the attribute does not exists', () => {
             expect(resource.includesAttribute({ messageId: 'none-existent', id: 'the-attribute' })).toBeFalsy();
+        });
+
+        it('should be flasy if the message holding the attribute exists but the attribute does not', () => {
+            expect(resource.includesAttribute({ messageId: 'the-message', id: 'none-existent-attribute' })).toBeFalsy();
         });
     });
 });

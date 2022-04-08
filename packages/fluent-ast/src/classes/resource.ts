@@ -19,7 +19,6 @@ export class Resource extends FluentResource {
                         return true;
                     }
                 }
-                return true;
             }
         }
         return false;
