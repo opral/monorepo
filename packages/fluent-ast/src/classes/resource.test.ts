@@ -1,6 +1,7 @@
 import { Attribute } from './attribute';
 import { Message } from './message';
 import { Resource } from './resource';
+import { TextElement } from './textElement';
 
 describe('includedMessageIds()', () => {
     const resource = new Resource([
@@ -239,6 +240,40 @@ describe('delete', () => {
             // if the method is not immutable, the following would throw an error
             resource.deleteAttribute({ messageId: 'the-message', id: 'the-attribute' }).unwrap();
             resource.deleteAttribute({ messageId: 'the-message', id: 'the-attribute' }).unwrap();
+        });
+    });
+});
+
+describe('upsert', () => {
+    describe('Attribute()', () => {
+        const resource = new Resource([
+            Message.from({
+                id: 'the-message',
+                value: 'this is my test',
+                attributes: [Attribute.from({ id: 'the-attribute', value: 'some text pattern' }).unwrap()],
+            }).unwrap(),
+        ]);
+        it('should update an existing attribute', () => {
+            const newResource = resource
+                .upsertAttribute({
+                    attribute: Attribute.from({ id: 'the-attribute', value: 'some new text pattern' }).unwrap(),
+                    messageId: 'the-message',
+                })
+                .unwrap();
+            expect((newResource.body[0] as Message).attributes[0].value.elements[0].value).toEqual(
+                'some new text pattern'
+            );
+        });
+
+        it('should create a new message containing the attribute if the "parent message" does not exist', () => {
+            const newResource = resource
+                .upsertAttribute({
+                    attribute: Attribute.from({ id: 'the-attribute', value: 'a pattern' }).unwrap(),
+                    messageId: 'a-new-message',
+                })
+                .unwrap();
+            expect((newResource.body[1] as Message).id.name).toEqual('a-new-message');
+            expect((newResource.body[1] as Message).attributes[0].value.elements[0].value).toEqual('a pattern');
         });
     });
 });
