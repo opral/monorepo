@@ -54,7 +54,7 @@ export class Resource extends FluentResource {
     create(query: { message: Message }): Result<Resource, Error>;
     create(query: { message?: Message }): Result<Resource, Error> {
         if (query.message) {
-            return this.#createMessage(query.message);
+            return this.createMessage(query.message);
         }
         return Result.err(Error('Unimplmented'));
     }
@@ -97,9 +97,9 @@ export class Resource extends FluentResource {
         attribute?: { id: string; messageId: string; with: Partial<Attribute> };
     }): Result<Resource, Error> {
         if (query.message) {
-            return this.#updateMessage(query.message);
+            return this.updateMessage(query.message);
         } else if (query.attribute) {
-            return this.#updateAttribute(query.attribute);
+            return this.updateAttribute(query.attribute);
         }
         return Result.err(Error('Unimplemented'));
     }
@@ -111,16 +111,20 @@ export class Resource extends FluentResource {
         attribute?: { messageId: string; id: string };
     }): Result<Resource, Error> {
         if (query.message) {
-            return this.#deleteMessage(query.message);
+            return this.deleteMessage(query.message);
         } else if (query.attribute) {
-            return this.#deleteAttribute(query.attribute);
+            return this.deleteAttribute(query.attribute);
         }
         return Result.err(Error('Unimplemented'));
     }
 
     // ----- Private functions -----
 
-    #updateAttribute(args: { id: string; messageId: string; with: Partial<Attribute> }): Result<Resource, Error> {
+    private updateAttribute(args: {
+        id: string;
+        messageId: string;
+        with: Partial<Attribute>;
+    }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const indexOfMessage = cloned.body.findIndex(
             (entry) => entry.type === 'Message' && entry.id.name === args.messageId
@@ -140,7 +144,7 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    #deleteAttribute(args: { messageId: string; id: string }): Result<Resource, Error> {
+    private deleteAttribute(args: { messageId: string; id: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         for (const message of cloned.body.filter((entry) => entry.type === 'Message')) {
             if ((message as Message).id.name === args.messageId) {
@@ -156,7 +160,7 @@ export class Resource extends FluentResource {
         return Result.err(Error(`The attributes parent message with id '${args.id}' does not exist.`));
     }
 
-    #createMessage(message: Message): Result<Resource, Error> {
+    private createMessage(message: Message): Result<Resource, Error> {
         if (this.includes({ message: { id: message.id.name } })) {
             return Result.err(Error(`Message with id '${message.id}' already exists.`));
         }
@@ -168,7 +172,7 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    #updateMessage(args: { id: string; with: Partial<Message> }): Result<Resource, Error> {
+    private updateMessage(args: { id: string; with: Partial<Message> }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const indexOfMessage = cloned.body.findIndex((entry) => entry.type === 'Message' && entry.id.name === args.id);
         if (indexOfMessage === -1) {
@@ -178,7 +182,7 @@ export class Resource extends FluentResource {
         return Result.ok(cloned);
     }
 
-    #deleteMessage(args: { id: string }): Result<Resource, Error> {
+    private deleteMessage(args: { id: string }): Result<Resource, Error> {
         const cloned = cloneDeep(this);
         const removed = remove(cloned.body ?? [], (entry) => entry.type === 'Message' && entry.id.name === args.id);
         if (removed.length === 0) {
