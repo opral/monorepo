@@ -24,6 +24,8 @@
 
 	let saveButtonIsLoading = false;
 
+	let title = row.attributeId ? `.${row.attributeId}` : row.messageId;
+
 	/**
 	 * The modified patterns.
 	 *
@@ -110,7 +112,7 @@
 
 <sl-card class:ml-12={row.baseNode.type === 'Attribute'}>
 	<div slot="header" class="flex justify-between">
-		<h3 class="title-md">{'.' + row.attributeId}</h3>
+		<h3 class="title-md">{title}</h3>
 		{#if row.actionRequired}
 			<div class="flex space-x-1">
 				{#if hasChanges}
