@@ -21,7 +21,7 @@
 	 *
 	 * Values in the array are either a Message, or an Attribute.
 	 */
-	const rows = () => {
+	$: rows = () => {
 		const result: (
 			| {
 					attributeId: string;
