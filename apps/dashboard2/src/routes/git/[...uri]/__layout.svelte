@@ -4,6 +4,7 @@
 	import { fs } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
 	import { searchParams } from './_store';
+	import git from 'isomorphic-git';
 
 	// ugly stitching together of paths
 	// let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
@@ -41,6 +42,31 @@
 		url: $page.params.uri,
 		corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/'
 	});
+
+	$: unpushedChanges = async () => {
+		// making unpushedChanges reactive by referencing $fs.
+		// can't use (the promised based $fs) directly because the `git`
+		// object crashes otherwise.
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _ = $fs;
+		const oneWeekAgo = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
+		const all = await git.log({
+			fs: fs.callbackBased,
+			dir: '/',
+			ref: 'HEAD',
+			since: oneWeekAgo
+		});
+		const pushed = await git.log({
+			fs: fs.callbackBased,
+			dir: '/',
+			ref: 'origin',
+			since: oneWeekAgo
+		});
+		const unpushed = all.filter(
+			(commit) => !pushed.some((pushedCommit) => commit.oid === pushedCommit.oid)
+		);
+		return unpushed;
+	};
 </script>
 
 <!-- BREADCRUMBS START -->
@@ -78,7 +104,19 @@
 			<p class="alert-body">{result.error.message}</p>
 		</div>
 	{:else}
-		<!-- only show content if no error -->
+		{#await unpushedChanges() then unpushedChanges}
+			{#if unpushedChanges.length > 0}
+				<sl-alert open variant="success">
+					<sl-icon slot="icon" name="info-circle" />
+					<div class="flex items-center">
+						<div class="w-full">
+							<h3 class="title-md">{unpushedChanges.length} outstanding changes.</h3>
+						</div>
+						<sl-button size="small" variant="success">Submit for review</sl-button>
+					</div>
+				</sl-alert>
+			{/if}
+		{/await}
 		<slot />
 	{/if}
 {/await}
