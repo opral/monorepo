@@ -60,7 +60,7 @@
 	);
 
 	// TODO update resources
-	async function commitChanges() {
+	async function commitChanges(): Promise<void> {
 		try {
 			saveButtonIsLoading = true;
 			// writing the translation files to disk
