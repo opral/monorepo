@@ -29,7 +29,6 @@
     "memfs": "^3.4.1"
   },
   "dependencies": {
-    "@inlang/config": "*",
-    "@inlang/utils": "*"
+    "@inlang/config": "*"
   }
 }
