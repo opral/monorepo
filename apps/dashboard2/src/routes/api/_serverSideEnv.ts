@@ -5,9 +5,7 @@
 import * as dotenv from 'dotenv';
 
 type ServerSideEnvironmentVariables = {
-	VITE_PUBLIC_SUPABASE_URL: string;
 	DEEPL_SECRET_KEY: string | undefined;
-	SUPABASE_SECRET_KEY: string;
 };
 /**
  * Server side environment variables.
@@ -23,10 +21,6 @@ type ServerSideEnvironmentVariables = {
 export function getServerSideEnv(): ServerSideEnvironmentVariables {
 	dotenv.config();
 	return {
-		VITE_PUBLIC_SUPABASE_URL: process.env['VITE_PUBLIC_SUPABASE_URL'] ?? 'http://localhost:54321',
-		DEEPL_SECRET_KEY: process.env['DEEPL_SECRET_KEY'],
-		SUPABASE_SECRET_KEY:
-			process.env['SUPABASE_SECRET_KEY'] ??
-			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.M2d2z4SFn5C7HlJlaSLfrzuYim9nbY_XI40uWFN3hEE'
+		DEEPL_SECRET_KEY: process.env['DEEPL_SECRET_KEY']
 	};
 }

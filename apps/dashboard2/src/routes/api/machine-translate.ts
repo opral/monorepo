@@ -1,5 +1,4 @@
-import type { EndpointOutput, RequestEvent } from '@sveltejs/kit';
-import { getServerSideEnv } from '../_utils/serverSideEnv';
+import { getServerSideEnv } from './_serverSideEnv';
 
 export type MachineTranslateRequestBody = {
 	serializedSourcePattern: string;
@@ -48,7 +47,7 @@ type DeeplResponse = {
 	translations: { text: string }[];
 };
 
-export async function post(event: RequestEvent): Promise<EndpointOutput> {
+export async function post(event: any): Promise<unknown> {
 	const env = getServerSideEnv();
 	if (env.DEEPL_SECRET_KEY === undefined) {
 		return {
