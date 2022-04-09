@@ -10,7 +10,6 @@ export function parseResource(
     options?: { withJunk?: boolean }
 ): Result<Resource, ParseError | Error> {
     const _options = { withJunk: true, ...options };
-    // wrapping the pattern as message to parse it
     const fluentResource = parse(serializedResource, { withSpans: false });
     const junk = fluentResource.body.filter((entry) => entry.type === 'Junk');
     if (_options.withJunk === false && junk.length > 0) {
