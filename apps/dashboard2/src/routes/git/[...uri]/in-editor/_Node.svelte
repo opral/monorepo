@@ -26,6 +26,14 @@
 
 	let title = row.attributeId ? `.${row.attributeId}` : row.messageId;
 
+	function commitMessage(): string {
+		if (row.attributeId) {
+			return `update translation with id '${row.messageId}.${row.attributeId}'`;
+		} else {
+			return `update translation with id '${row.messageId}'`;
+		}
+	}
+
 	/**
 	 * The modified patterns.
 	 *
@@ -106,7 +114,7 @@
 			(
 				await commit({
 					fs: fs.callbackBased,
-					message: `Update translation '${row.messageId}'`,
+					message: commitMessage(),
 					author: {
 						name: 'inlang.dev',
 						email: 'anonymous-user-submission@inlang.dev'

@@ -110,7 +110,12 @@
 					<sl-icon slot="icon" name="info-circle" />
 					<div class="flex items-center">
 						<div class="w-full">
-							<h3 class="title-md">{unpushedChanges.length} outstanding changes.</h3>
+							<h3 class="title-md mb-1">{unpushedChanges.length} outstanding changes:</h3>
+							<ol>
+								{#each unpushedChanges as change}
+									<li class="body-md">- {change.commit.message}</li>
+								{/each}
+							</ol>
 						</div>
 						<sl-button size="small" variant="success">Submit for review</sl-button>
 					</div>
