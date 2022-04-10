@@ -84,10 +84,23 @@
 	};
 </script>
 
-<Menubar />
+<!-- <Menubar /> -->
 <div class="grid grid-cols-4">
-	<Sidebar class="col-span-1" />
-	<div class="col-span-3 flex flex-col space-y-2">
+	<!-- <Sidebar class="col-span-1" /> -->
+	<div class="col-span-4 flex flex-col space-y-2">
+		{#if rows().some((row) => row.actionRequired)}
+			<sl-alert open variant="neutral" closable>
+				<sl-icon slot="icon" name="info-circle" />
+				<div class="flex items-center">
+					<div class="w-full">
+						<h3 class="title-md mb-1">Project contains missing translations.</h3>
+					</div>
+					<sl-button size="small" on:click={() => alert('unimplemented')}>
+						Machine translate all
+					</sl-button>
+				</div>
+			</sl-alert>
+		{/if}
 		{#each rows() as row}
 			<Node {row} {baseLanguageCode} {languageCodes} />
 		{/each}
