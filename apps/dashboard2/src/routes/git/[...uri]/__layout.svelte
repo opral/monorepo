@@ -150,9 +150,12 @@
 						<div class="w-full">
 							<h3 class="title-md mb-1">{unpushedChanges.length} outstanding changes:</h3>
 							<ol>
-								{#each unpushedChanges as change}
+								{#each unpushedChanges.slice(0, 3) as change}
 									<li class="body-md">- {change.commit.message}</li>
 								{/each}
+								{#if unpushedChanges.length > 3}
+									<li class="body-md">...</li>
+								{/if}
 							</ol>
 						</div>
 						<sl-button
