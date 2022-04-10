@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import type { Attribute, Message } from '@inlang/fluent-ast';
 	import { inlangConfig, resources } from '../_store';
-	import Menubar from './_Menubar.svelte';
 	import Node from './_Node.svelte';
-	import Sidebar from './_Sidebar.svelte';
 
 	const baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
 
@@ -95,7 +95,13 @@
 					<div class="w-full">
 						<h3 class="title-md mb-1">Project contains missing translations.</h3>
 					</div>
-					<sl-button size="small" on:click={() => alert('unimplemented')}>
+					<!-- TODO workaround for demo purposes. Remove after demo. -->
+					<sl-button
+						size="small"
+						on:click={() => {
+							goto(`/git/${$page.params.uri}/in-editor?machineTranslateAll=true`);
+						}}
+					>
 						Machine translate all
 					</sl-button>
 				</div>

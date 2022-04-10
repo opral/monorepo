@@ -17,6 +17,8 @@
 		type SupportedLanguageCode,
 		supportedLanguageCodes
 	} from '../../../api/machine-translate';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	export let baseLanguageCode: string;
 	export let languageCodes: string[];
@@ -184,6 +186,11 @@
 		} finally {
 			saveButtonIsLoading = false;
 		}
+	}
+
+	$: if ($page.url.searchParams.get('machineTranslateAll')) {
+		console.log('machineTranslateAll triggered. REMOVE after demo');
+		handleMachineTranslate();
 	}
 </script>
 

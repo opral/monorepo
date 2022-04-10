@@ -2,7 +2,7 @@ import { Result } from '@inlang/result';
 import git from 'isomorphic-git';
 
 /**
- * Clones a repository and checks out or creates the 'inlang' branch.
+ * Clones, or pulls a repository and checks out or creates the 'inlang' branch.
  *
  * All commits should happen on the 'inlang' branch. Thus, automatic checkout to that branch.
  */
