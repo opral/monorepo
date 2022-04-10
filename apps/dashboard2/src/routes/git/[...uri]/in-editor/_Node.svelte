@@ -11,6 +11,12 @@
 	import { inlangConfig, resources, searchParams } from '../_store';
 	import { cloneDeep } from 'lodash-es';
 	import type { InlangConfig } from '@inlang/config';
+	import {
+		type MachineTranslateRequestBody,
+		type MachineTranslateResponseBody,
+		type SupportedLanguageCode,
+		supportedLanguageCodes
+	} from '../../../api/machine-translate';
 
 	export let baseLanguageCode: string;
 	export let languageCodes: string[];
@@ -23,6 +29,8 @@
 	};
 
 	let saveButtonIsLoading = false;
+
+	let machineTranslateButtonIsLoading = false;
 
 	let title = row.attributeId ? `.${row.attributeId}` : row.messageId;
 
@@ -58,6 +66,53 @@
 	$: hasChanges = Object.values(modifiedPatterns).some(
 		({ current, modified }) => current !== modified
 	);
+
+	$: missingLanguageCodes = languageCodes.filter(
+		(languageCode) => modifiedPatterns[languageCode].modified === ''
+	);
+
+	async function handleMachineTranslate(): Promise<void> {
+		machineTranslateButtonIsLoading = true;
+		for (const languageCode of missingLanguageCodes) {
+			if (languageCode === baseLanguageCode) {
+				continue;
+			} else if (
+				supportedLanguageCodes.includes(baseLanguageCode as SupportedLanguageCode) === false
+			) {
+				alert(
+					`The base language '${baseLanguageCode}' is not supported by the machine translation service.`
+				);
+
+				break;
+			} else if (supportedLanguageCodes.includes(languageCode as SupportedLanguageCode) === false) {
+				alert(
+					`The language '${languageCode}' is not supported by the machine translation service.`
+				);
+			} else {
+				const requestBody: MachineTranslateRequestBody = {
+					serializedSourcePattern: modifiedPatterns[baseLanguageCode].modified,
+					sourceLanguageCode: baseLanguageCode as SupportedLanguageCode,
+					targetLanguageCode: languageCode as SupportedLanguageCode
+				};
+				const response = await fetch('/api/machine-translate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+						// 'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: JSON.stringify(requestBody)
+				});
+				if (response.ok === false) {
+					alert(`Failed to translate: ${await response.text()}`);
+					break;
+				} else {
+					const responseBody = (await response.json()) as MachineTranslateResponseBody;
+					modifiedPatterns[languageCode].modified = responseBody.serializedPattern;
+				}
+			}
+		}
+		machineTranslateButtonIsLoading = false;
+	}
 
 	// TODO update resources
 	async function commitChanges(): Promise<void> {
@@ -146,8 +201,6 @@
 	</div>
 	<div class="space-y-2">
 		{#each languageCodes as languageCode}
-			{@const node = row.nodes[languageCode]}
-			{@const serializedPattern = node?.value ? serializePattern(node.value) : undefined}
 			{#if row.baseNode.value === null}
 				<!-- show create pattern message if the current row is the "base row" -->
 				{#if languageCode === baseLanguageCode}
@@ -163,7 +216,7 @@
 				<sl-textarea
 					rows="2"
 					resize="auto"
-					value={serializedPattern ?? ''}
+					value={modifiedPatterns[languageCode].modified ?? ''}
 					on:input={(event) => (modifiedPatterns[languageCode].modified = event.srcElement.value)}
 					class:textarea-error={modifiedPatterns[languageCode].current === ''}
 					class:textarea-unsaved-changes={modifiedPatterns[languageCode].current !==
@@ -192,7 +245,11 @@
 				<sl-icon src="/icons/save-floppy-disk.svg" slot="prefix" />
 				Save changes
 			</sl-button>
-			<sl-button>
+			<sl-button
+				on:click={handleMachineTranslate}
+				disabled={missingLanguageCodes.length === 0}
+				loading={machineTranslateButtonIsLoading}
+			>
 				<sl-icon name="robot" slot="prefix" />
 				Machine translate
 			</sl-button>
