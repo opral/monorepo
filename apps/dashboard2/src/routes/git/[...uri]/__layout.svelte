@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { clone } from './_logic/clone';
+	import { push } from './_logic/push';
 	import http from 'isomorphic-git/http/web';
 	import { fs } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
 	import { searchParams } from './_store';
 	import git from 'isomorphic-git';
+	import { Result } from '@inlang/result';
 
 	// ugly stitching together of paths
 	// let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
@@ -67,6 +69,42 @@
 		);
 		return unpushed;
 	};
+
+	let submitButtonLoading = false;
+
+	async function handleSubmitForReview(): Promise<void> {
+		submitButtonLoading = true;
+		try {
+			(
+				await push({
+					fs: fs.callbackBased,
+					http,
+					dir: '/',
+					author: {
+						name: 'inlang.dev',
+						email: 'anonymous-user-submission@inlang.dev'
+					},
+					remote: 'origin',
+					url: $page.params.uri,
+					corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/',
+					onAuth: (url) => {
+						const token = import.meta.env.VITE_GITHUB_TOKEN as string;
+						console.log({ token });
+						return {
+							username: token
+						};
+					}
+				})
+			).unwrap();
+			// refresh the states
+			fs.refresh();
+		} catch (error) {
+			console.error(error);
+			alert((error as Error).message);
+		} finally {
+			submitButtonLoading = false;
+		}
+	}
 </script>
 
 <!-- BREADCRUMBS START -->
@@ -117,7 +155,14 @@
 								{/each}
 							</ol>
 						</div>
-						<sl-button size="small" variant="success">Submit for review</sl-button>
+						<sl-button
+							size="small"
+							variant="success"
+							loading={submitButtonLoading}
+							on:click={handleSubmitForReview}
+						>
+							Submit for review
+						</sl-button>
 					</div>
 				</sl-alert>
 			{/if}
