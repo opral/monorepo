@@ -4,7 +4,6 @@ import { page } from '$app/stores';
 import { fs } from '$lib/stores/filesystem';
 import { readInlangConfig, readResources } from '@inlang/core';
 import type { InlangConfig } from '@inlang/config';
-import git from 'isomorphic-git';
 
 /**
  * (Typed) Search params.

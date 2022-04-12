@@ -87,7 +87,7 @@
 					remote: 'origin',
 					url: $page.params.uri,
 					corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/',
-					onAuth: (url) => {
+					onAuth: () => {
 						const token = import.meta.env.VITE_GITHUB_TOKEN as string;
 						console.log({ token });
 						return {
