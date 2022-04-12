@@ -6,7 +6,7 @@
 	import { Attribute, Message, parsePattern, serializePattern } from '@inlang/fluent-ast';
 	import { fade } from 'svelte/transition';
 	import { fs } from '$lib/stores/filesystem';
-	import { commit } from '../_logic/commit';
+	import { commit } from '$lib/services/git/';
 	import { writeResources } from '@inlang/core';
 	import { inlangConfig, resources, searchParams } from '../_store';
 	import { cloneDeep } from 'lodash-es';
@@ -17,7 +17,6 @@
 		type SupportedLanguageCode,
 		supportedLanguageCodes
 	} from '../../../api/machine-translate';
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 
 	export let baseLanguageCode: string;

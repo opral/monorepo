@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { clone } from './_logic/clone';
-	import { push } from './_logic/push';
+	import { clone, push } from '$lib/services/git/';
 	import http from 'isomorphic-git/http/web';
 	import { fs } from '$lib/stores/filesystem';
 	import { page } from '$app/stores';
 	import { searchParams } from './_store';
 	import git from 'isomorphic-git';
-	import { Result } from '@inlang/result';
 
 	// ugly stitching together of paths
 	// let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
