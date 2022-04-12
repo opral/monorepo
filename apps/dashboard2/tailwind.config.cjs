@@ -1,24 +1,21 @@
-const pankowUi = require('@pankow-ui/pankow-ui');
+const colorSystem = require('@pankow-ui/color-system');
+const typography = require('@pankow-ui/typography');
 const colors = require('tailwindcss/colors');
 
 module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts,md}'],
-	theme: {
-		extend: {}
-	},
+	theme: {},
 	plugins: [
-		pankowUi.withConfig({
+		typography,
+		colorSystem.withConfig({
 			// based on shoelace
-			colorSystem: {
-				accentColors: { primary: colors.sky },
-				neutralColors: {},
-				semanticColors: {
-					success: colors.green,
-					warning: colors.amber,
-					danger: colors.red
-				}
-			},
-			borderRadiusBase: 'rounded'
+			accentColors: { primary: colors.sky },
+			neutralColors: {},
+			semanticColors: {
+				success: colors.green,
+				warning: colors.amber,
+				danger: colors.red
+			}
 		})
 	]
 };
