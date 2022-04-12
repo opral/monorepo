@@ -34,18 +34,20 @@
 {#if $resources}
 	<sl-alert open variant="success">
 		<sl-icon slot="icon" name="info-circle" />
-		<h3 class="title-md">Found inlang.config.json file.</h3>
-		<sl-button
-			class="mt-2"
-			href={$page.url.pathname +
-				'/in-editor?' +
-				decodeURIComponent($page.url.searchParams.toString())}
-			size="small"
-			variant="success"
-		>
-			<sl-icon name="box-arrow-up-right" />
-			Open editor
-		</sl-button>
+		<div class="flex items-center justify-between">
+			<h3 class="title-md">Found inlang.config.json file.</h3>
+			<sl-button
+				class="mt-2"
+				href={$page.url.pathname +
+					'/in-editor?' +
+					decodeURIComponent($page.url.searchParams.toString())}
+				size="small"
+				variant="success"
+			>
+				<sl-icon name="box-arrow-up-right" />
+				Open editor
+			</sl-button>
+		</div>
 	</sl-alert>
 {:else}
 	<sl-alert open>
