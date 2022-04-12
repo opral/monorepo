@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { base } from '$app/paths';
+
 	import type { Attribute, Message } from '@inlang/fluent-ast';
 	import { inlangConfig, resources } from '../_store';
 	import Node from './_Node.svelte';
@@ -43,13 +45,18 @@
 					$resources[languageCode]?.getMessage({ id: messageId })
 				])
 			);
+			const baseNode = messages[baseLanguageCode] as Message;
 			// pushing the message itself
 			result.push({
 				messageId: messageId,
 				// assumption that the baseNode always exists
-				baseNode: messages[baseLanguageCode] as Message,
+				baseNode,
 				nodes: messages,
-				actionRequired: Object.values(messages).some((message) => !message?.value)
+				// if the base message has no pattern, patterns are not required for translations
+				// since the message is a message with attributes.
+				actionRequired: baseNode.value
+					? Object.values(messages).some((message) => message?.value === undefined)
+					: false
 			});
 			const attributeIds = Array.from(
 				// eslint-disable-next-line unicorn/no-array-reduce
