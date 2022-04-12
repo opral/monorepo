@@ -93,7 +93,7 @@
 				<sl-icon slot="icon" name="info-circle" />
 				<div class="flex items-center">
 					<div class="w-full">
-						<h3 class="title-md mb-1">Project contains missing translations.</h3>
+						<h3 class="title-md">The project contains missing translations.</h3>
 					</div>
 				</div>
 			</sl-alert>
