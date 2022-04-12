@@ -90,12 +90,8 @@ function createResourcesStore() {
 					console.error(error);
 					alert((error as Error).message);
 				}
-			} else {
-				// is always defined from the layout. thus, ignore
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				set(undefined);
 			}
+			return {};
 		}
 	);
 	return {

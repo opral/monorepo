@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import type { Attribute, Message } from '@inlang/fluent-ast';
 	import { inlangConfig, resources } from '../_store';
 	import Node from './_Node.svelte';
 
-	const baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
+	$: baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
 
-	const languageCodes = Object.keys($resources);
+	$: languageCodes = Object.keys($resources ?? {});
 
 	/** all ids of all resources */
-	const messageIds = Array.from(
+	$: messageIds = Array.from(
+		// eslint-disable-next-line unicorn/no-array-reduce
 		languageCodes.reduce((result, languageCode) => {
 			return new Set([...result, ...($resources[languageCode]?.includedMessageIds() ?? [])]);
 		}, new Set<string>())
@@ -53,6 +52,7 @@
 				actionRequired: Object.values(messages).some((message) => !message?.value)
 			});
 			const attributeIds = Array.from(
+				// eslint-disable-next-line unicorn/no-array-reduce
 				languageCodes.reduce((result, languageCode) => {
 					return new Set([
 						...result,
@@ -89,21 +89,12 @@
 	<!-- <Sidebar class="col-span-1" /> -->
 	<div class="col-span-4 flex flex-col space-y-2">
 		{#if rows().some((row) => row.actionRequired)}
-			<sl-alert open variant="neutral" closable>
+			<sl-alert open variant="danger">
 				<sl-icon slot="icon" name="info-circle" />
 				<div class="flex items-center">
 					<div class="w-full">
 						<h3 class="title-md mb-1">Project contains missing translations.</h3>
 					</div>
-					<!-- TODO workaround for demo purposes. Remove after demo. -->
-					<sl-button
-						size="small"
-						on:click={() => {
-							goto(`/git/${$page.params.uri}/in-editor?machineTranslateAll=true`);
-						}}
-					>
-						Machine translate all
-					</sl-button>
 				</div>
 			</sl-alert>
 		{/if}
