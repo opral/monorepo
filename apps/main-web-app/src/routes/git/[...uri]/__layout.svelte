@@ -32,6 +32,13 @@
 		return result;
 	};
 
+	function onAuth() {
+		const token = import.meta.env.VITE_GITHUB_TOKEN as string;
+		return {
+			username: token
+		};
+	}
+
 	// wrapping clone in a variable to make the function call none-reactive.
 	//
 	// If the $page.params.uri changes (new search params etc.), the repo should not be cloned again.
@@ -39,6 +46,7 @@
 		fs: fs.callbackBased,
 		dir: '/',
 		http,
+		onAuth,
 		url: $page.params.uri,
 		corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/'
 	});
@@ -85,13 +93,7 @@
 					remote: 'origin',
 					url: $page.params.uri,
 					corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/',
-					onAuth: () => {
-						const token = import.meta.env.VITE_GITHUB_TOKEN as string;
-						console.log({ token });
-						return {
-							username: token
-						};
-					}
+					onAuth
 				})
 			).unwrap();
 			// refresh the states
