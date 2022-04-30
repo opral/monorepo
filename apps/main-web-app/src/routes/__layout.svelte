@@ -1,10 +1,13 @@
 <script lang="ts">
-	let showHamburgerMenu = false;
 	import '../style.css';
+
+	let showHamburgerMenu = false;
+	/** Same padding across nav bar and container */
+	const paddingXAxis = 'px-2 md:px-4 ';
 </script>
 
-<nav class="bg-surface-100 text-on-surface text-body-md font-body-md px-2 sm:px-4 py-2.5 border-b">
-	<div class="container flex flex-wrap justify-between items-center mx-auto">
+<nav class="bg-surface-100 text-on-surface text-body-md font-body-md  py-2.5 border-b">
+	<div class="container {paddingXAxis} flex flex-wrap justify-between items-center mx-auto">
 		<a href="/" class="flex items-center text-headline-sm">Inlang</a>
 		<!-- hamburger menu on mobile -->
 		<button
@@ -57,7 +60,7 @@
 		</div>
 	</div>
 </nav>
-<div class="container mx-auto my-2 px-2 space-y-2 sm:px-0 bg-background text-on-background">
+<div class="container mx-auto space-y-2 my-2 {paddingXAxis} bg-background text-on-background">
 	<slot />
 </div>
 <!-- empty footer for now but with height acting as "margin" -->
