@@ -8,7 +8,7 @@
 	import { fs } from '$lib/stores/filesystem';
 	import { commit } from '$lib/services/git/';
 	import { writeResources } from '@inlang/core';
-	import { inlangConfig, resources, searchParams } from '../_store';
+	import { inlangConfig, resources, searchParams } from '../../_store';
 	import { cloneDeep } from 'lodash-es';
 	import type { InlangConfig } from '@inlang/config';
 	import {
@@ -16,7 +16,7 @@
 		type MachineTranslateResponseBody,
 		type SupportedLanguageCode,
 		supportedLanguageCodes
-	} from '../../../api/machine-translate';
+	} from '../../../../api/machine-translate';
 	import { page } from '$app/stores';
 
 	export let baseLanguageCode: string;

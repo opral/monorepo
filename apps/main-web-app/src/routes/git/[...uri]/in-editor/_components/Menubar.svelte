@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SlDropdown } from '@shoelace-style/shoelace';
-	import { inlangConfig } from '../_store';
+	import { inlangConfig } from '../../_store';
 	import { onMount } from 'svelte';
 	import { languageName } from '$lib/utils/languageName';
 

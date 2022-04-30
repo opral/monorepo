@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-
 	import type { Attribute, Message } from '@inlang/fluent-ast';
 	import { inlangConfig, resources } from '../_store';
-	import Node from './_Node.svelte';
+	import Node from './_components/Node.svelte';
+	import Menubar from './_components/Menubar.svelte';
 
 	$: baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
 
@@ -91,7 +90,7 @@
 	};
 </script>
 
-<!-- <Menubar /> -->
+<Menubar />
 <div class="grid grid-cols-4">
 	<!-- <Sidebar class="col-span-1" /> -->
 	<div class="col-span-4 flex flex-col space-y-2">
