@@ -7,12 +7,37 @@
 			description: 'Open Source Localization Solution for Software.',
 			stars: 0,
 			url: ''
+		},
+		{
+			name: 'inlang/inlang',
+			iconSrc: 'https://github.com/inlang.png',
+			description: 'Open Source Localization Solution for Software.',
+			stars: 0,
+			url: ''
+		},
+		{
+			name: 'inlang/inlang',
+			iconSrc: 'https://github.com/inlang.png',
+			description: 'Open Source Localization Solution for Software.',
+			stars: 0,
+			url: ''
 		}
 	];
+
+	let searchValue = '';
 </script>
 
+<sl-input
+	placeholder="Search projects"
+	size="medium"
+	class="w-full"
+	on:input={(event) => (searchValue = event.srcElement.value)}
+>
+	<sl-icon name="search" slot="prefix" />
+</sl-input>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-	{#each forks as fork}
+	{#each forks.filter((fork) => fork.name.includes(searchValue)) as fork}
 		<sl-card class="space-y-1">
 			<div class="flex justify-between items-center gap-2">
 				<h2 class="title-md pt-1">{fork.name}</h2>
