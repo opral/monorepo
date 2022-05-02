@@ -18,6 +18,7 @@
 		supportedLanguageCodes
 	} from '../../../../api/machine-translate';
 	import { page } from '$app/stores';
+	import { user } from '$lib/stores/user';
 
 	export let baseLanguageCode: string;
 	export let languageCodes: string[];
@@ -171,10 +172,7 @@
 				await commit({
 					fs: fs.callbackBased,
 					message: commitMessage(),
-					author: {
-						name: 'inlang.dev',
-						email: 'anonymous-user-submission@inlang.dev'
-					},
+					author: $user,
 					dir: '/'
 				})
 			).unwrap();

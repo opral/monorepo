@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import { searchParams } from './_store';
 	import git from 'isomorphic-git';
+	import { user } from '$lib/stores/user';
 
 	// ugly stitching together of paths
 	// let breadcrumbs: () => { name: string; href: string; isCurrentPage: boolean }[];
@@ -48,7 +49,7 @@
 		http,
 		onAuth,
 		url: $page.params.uri,
-		corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/'
+		corsProxy: 'https://my-app-hbv9a.ondigitalocean.app/'
 	});
 
 	$: unpushedChanges = async () => {
@@ -86,13 +87,10 @@
 					fs: fs.callbackBased,
 					http,
 					dir: '/',
-					author: {
-						name: 'inlang.dev',
-						email: 'anonymous-user-submission@inlang.dev'
-					},
+					author: $user,
 					remote: 'origin',
 					url: $page.params.uri,
-					corsProxy: 'https://cors-proxy-ys64u.ondigitalocean.app/',
+					corsProxy: 'https://my-app-hbv9a.ondigitalocean.app/',
 					onAuth
 				})
 			).unwrap();
