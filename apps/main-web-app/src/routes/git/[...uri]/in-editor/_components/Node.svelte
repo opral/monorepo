@@ -184,11 +184,6 @@
 			saveButtonIsLoading = false;
 		}
 	}
-
-	$: if ($page.url.searchParams.get('machineTranslateAll')) {
-		console.log('machineTranslateAll triggered. REMOVE after demo');
-		handleMachineTranslate();
-	}
 </script>
 
 <sl-card class:ml-12={row.baseNode.type === 'Attribute'}>
