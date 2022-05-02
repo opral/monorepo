@@ -23,3 +23,13 @@
 sl-divider {
 	@apply h-px bg-gray-300;
 }
+
+/* make the dialog full screen on small devices */
+@media screen and (max-width: 460px) {
+	sl-dialog::part(panel) {
+		@apply w-screen h-screen rounded-none;
+
+		max-height: none;
+		max-width: none;
+	}
+}
