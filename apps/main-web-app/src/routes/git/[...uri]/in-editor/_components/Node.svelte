@@ -235,8 +235,7 @@
 		<div>
 			<sl-button
 				variant="primary"
-				disabled={hasChanges === false ||
-					Object.values(modifiedPatterns).some((pattern) => pattern.modified === '')}
+				disabled={hasChanges === false}
 				on:click={commitChanges}
 				loading={saveButtonIsLoading}
 			>
