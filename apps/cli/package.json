@@ -18,7 +18,6 @@
   ],
   "scripts": {
     "prebuild": "npm run clean",
-    "build": "rollup --config",
     "dev": "rollup --config --watch",
     "clean": "rm -r -f dist",
     "format": "prettier .",

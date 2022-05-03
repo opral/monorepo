@@ -22,7 +22,6 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "prebuild": "npm run clean",
-    "build": "rollup --config",
     "package": "npx vsce package",
     "dev": "rollup --config --watch",
     "clean": "rm -r -f dist",
