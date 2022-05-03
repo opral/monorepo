@@ -95,7 +95,7 @@
 	<!-- <Sidebar class="col-span-1" /> -->
 	<div class="col-span-4 flex flex-col space-y-2">
 		{#if rows().some((row) => row.actionRequired)}
-			<sl-alert open variant="danger">
+			<sl-alert open variant="warning">
 				<sl-icon slot="icon" name="info-circle" />
 				<div class="flex items-center">
 					<div class="w-full">
