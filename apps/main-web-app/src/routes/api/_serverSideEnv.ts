@@ -6,6 +6,9 @@ import * as dotenv from 'dotenv';
 
 type ServerSideEnvironmentVariables = {
 	DEEPL_SECRET_KEY: string | undefined;
+	GITHUB_OAUTH_CLIENT_SECRET: string | undefined;
+	VITE_GITHUB_OAUTH_CLIENT_ID: string | undefined;
+	JWT_SECRET_KEY: string | undefined;
 };
 /**
  * Server side environment variables.
@@ -21,6 +24,9 @@ type ServerSideEnvironmentVariables = {
 export function getServerSideEnv(): ServerSideEnvironmentVariables {
 	dotenv.config();
 	return {
-		DEEPL_SECRET_KEY: process.env['DEEPL_SECRET_KEY']
+		DEEPL_SECRET_KEY: process.env['DEEPL_SECRET_KEY'],
+		GITHUB_OAUTH_CLIENT_SECRET: process.env['GITHUB_OAUTH_CLIENT_SECRET'],
+		VITE_GITHUB_OAUTH_CLIENT_ID: process.env['VITE_GITHUB_OAUTH_CLIENT_ID'],
+		JWT_SECRET_KEY: process.env['JWT_SECRET_KEY']
 	};
 }

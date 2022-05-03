@@ -10,10 +10,7 @@
 	import { searchParams, resources } from '$lib/stores/routes/uriStores';
 
 	$: directories = async () => {
-		console.log('rebuild');
 		const paths = await $fs.readdir($searchParams.dir);
-		console.log({ dir: $searchParams.dir });
-		console.log({ paths });
 		// not using filter because async
 		let dirs: string[] = [];
 		for (const subpath of paths) {

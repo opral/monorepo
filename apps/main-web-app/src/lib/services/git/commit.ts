@@ -1,3 +1,4 @@
+import type { User } from '$lib/stores/user';
 import { Result } from '@inlang/result';
 import git from 'isomorphic-git';
 
@@ -8,7 +9,8 @@ import git from 'isomorphic-git';
  * don't know what a commit, push or remote is.
  */
 export async function commit(
-	args: Parameters<typeof git['commit']>[0] & Parameters<typeof filesWithChanges>[0]
+	args: Parameters<typeof git['commit']>[0] &
+		Parameters<typeof filesWithChanges>[0] & { author: User }
 ): Promise<Result<void, Error>> {
 	try {
 		const paths = await filesWithChanges(args);

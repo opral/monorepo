@@ -33,10 +33,15 @@
 		return result;
 	};
 
-	function onAuth() {
-		const token = import.meta.env.VITE_GITHUB_TOKEN as string;
+	/**
+	 * If the git provider returns a 401 code, the onAuth callback is executed.
+	 */
+	function onAuth(): { headers: Record<string, string> } {
 		return {
-			username: token
+			// custom auth header which is resolved in the cors proxy
+			headers: {
+				Authorization: `Bearer ${$user.accessTokenJwt}`
+			}
 		};
 	}
 
@@ -49,7 +54,7 @@
 		http,
 		onAuth,
 		url: $page.params.uri,
-		corsProxy: 'https://my-app-hbv9a.ondigitalocean.app/'
+		corsProxy: import.meta.env.VITE_PROXY_URL as string
 	});
 
 	$: unpushedChanges = async () => {
@@ -90,7 +95,7 @@
 					author: $user,
 					remote: 'origin',
 					url: $page.params.uri,
-					corsProxy: 'https://my-app-hbv9a.ondigitalocean.app/',
+					corsProxy: import.meta.env.VITE_PROXY_URL as string,
 					onAuth
 				})
 			).unwrap();
@@ -162,7 +167,7 @@
 							loading={submitButtonLoading}
 							on:click={handleSubmitForReview}
 						>
-							Submit for review
+							Submit
 						</sl-button>
 					</div>
 				</sl-alert>

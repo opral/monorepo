@@ -3,6 +3,7 @@
 	import { inlangConfig, resources } from '../_store';
 	import Node from './_components/Node.svelte';
 	import Menubar from './_components/Menubar.svelte';
+	import { page } from '$app/stores';
 
 	$: baseLanguageCode = $inlangConfig?.baseLanguageCode ?? 'en';
 
@@ -90,22 +91,41 @@
 	};
 </script>
 
-<Menubar />
-<div class="grid grid-cols-4">
-	<!-- <Sidebar class="col-span-1" /> -->
-	<div class="col-span-4 flex flex-col space-y-2">
-		{#if rows().some((row) => row.actionRequired)}
-			<sl-alert open variant="warning">
-				<sl-icon slot="icon" name="info-circle" />
-				<div class="flex items-center">
-					<div class="w-full">
-						<h3 class="title-md">The project contains missing translations.</h3>
-					</div>
-				</div>
-			</sl-alert>
-		{/if}
-		{#each rows() as row}
-			<Node {row} {baseLanguageCode} {languageCodes} />
-		{/each}
+<div class="flex gap-4">
+	<div class="w-full">
+		<Menubar />
+		<div class="grid grid-cols-4 pt-2">
+			<!-- <Sidebar class="col-span-1" /> -->
+			<div class="col-span-4 flex flex-col space-y-2">
+				{#if rows().some((row) => row.actionRequired)}
+					<sl-alert open variant="warning">
+						<sl-icon slot="icon" name="info-circle" />
+						<div class="flex items-center">
+							<div class="w-full">
+								<h3 class="title-md">The project contains missing translations.</h3>
+							</div>
+						</div>
+					</sl-alert>
+				{/if}
+				{#each rows() as row}
+					<Node {row} {baseLanguageCode} {languageCodes} />
+				{/each}
+			</div>
+		</div>
 	</div>
+	{#if $page.params['uri'].includes('inlang/demo')}
+		<div style="height:40rem;" class="sticky top-20">
+			<h2 class="headline-sm">Preview:</h2>
+			<a class="title-md text-primary" href="https://inlang-demo.netlify.app" target="_blank">
+				inlang-demo.netlify.app</a
+			>
+			<p class="body-md">Refresh this site to reflect changes.</p>
+			<p class="body-md italic text-gray-500">Keep in mind that changes take ≈20 to propagate.</p>
+			<embed
+				src="https://inlang-demo.netlify.app/"
+				type="text/html"
+				class="border rounded h-full mt-2"
+			/>
+		</div>
+	{/if}
 </div>

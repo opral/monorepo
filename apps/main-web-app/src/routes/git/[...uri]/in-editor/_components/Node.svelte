@@ -17,7 +17,6 @@
 		type SupportedLanguageCode,
 		supportedLanguageCodes
 	} from '../../../../api/machine-translate';
-	import { page } from '$app/stores';
 	import { user } from '$lib/stores/user';
 
 	export let baseLanguageCode: string;

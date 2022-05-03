@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { user } from '$lib/stores/user';
 	import type { SlDialog } from '@shoelace-style/shoelace';
+	import { onMount } from 'svelte';
 
 	/** inlang forks of public github projects */
 	const forks = [
@@ -8,17 +10,17 @@
 			iconSrc: 'https://github.com/inlang.png',
 			description: 'Open Source Localization Solution for Software.',
 			stars: 0,
-			url: ''
+			href: ''
 		}
 	];
 
 	/** The demonstration repository */
 	const demoRepository = {
-		name: 'Try it yourself',
+		name: 'inlang/demo',
 		iconSrc: 'https://github.com/inlang.png',
-		description: 'Try out the inlang editor in a demo repository.',
+		description: 'Try out the inlang editor with the demo repository.',
 		stars: 0,
-		url: ''
+		href: '/git/https://github.com/inlang/demo/in-editor'
 	};
 
 	let searchValue = '';
@@ -62,7 +64,9 @@
 				{demoRepository.stars}
 			</h2>
 			<p class="body-md">{demoRepository.description}</p>
-			<sl-button size="small" variant="primary" class="pt-3 w-full">Open</sl-button>
+			<sl-button size="small" variant="primary" class="pt-3 w-full" href={demoRepository.href}>
+				Open
+			</sl-button>
 		</sl-card>
 	{/if}
 	<!-- END DEMO REPOSITORY -->
