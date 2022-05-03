@@ -47,7 +47,8 @@
 		</button>
 		<div class="w-full md:block md:w-auto" class:hidden={showHamburgerMenu === false}>
 			<ul class="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0">
-				{#each [['Home', '/'], ['Todo', '#']] as [name, href]}
+				<!-- outcommented nav links -->
+				<!-- {#each [['Home', '/'], ['Todo', '#']] as [name, href]}
 					<li>
 						<a
 							{href}
@@ -55,7 +56,7 @@
 							aria-current="page">{name}</a
 						>
 					</li>
-				{/each}
+				{/each} -->
 			</ul>
 		</div>
 	</div>
