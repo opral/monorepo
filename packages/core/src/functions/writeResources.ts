@@ -1,6 +1,6 @@
 import type { Resource } from '@inlang/fluent-ast';
 import type { InlangConfig } from '@inlang/config';
-import { converters, serializeResources } from '@inlang/fluent-format-converters';
+import { converters } from '@inlang/fluent-format-converters';
 import path from 'path';
 import { Result } from '@inlang/result';
 import { CommonFsApi } from '../types/commonFsApi';
@@ -23,13 +23,18 @@ export async function writeResources(args: {
 }): Promise<Result<void, Error>> {
     try {
         const converter = converters[args.fileFormat];
-        const toBeSavedFiles = serializeResources({ converter, resources: args.resources }).unwrap();
         const encoder = new TextEncoder();
-        for (const file of toBeSavedFiles) {
+
+        for (const languageCode of args.languageCodes) {
+            const resource = args.resources[languageCode];
+            if (resource === undefined) {
+                return Result.err(new Error(`No resource for language code ${languageCode}`));
+            }
+            const file = converter.serialize({ resource }).unwrap();
             // _path = avoid clash with imported path module
-            const _path = path.resolve(args.directory, args.pathPattern.replace('{languageCode}', file.languageCode));
+            const _path = path.resolve(args.directory, args.pathPattern.replace('{languageCode}', languageCode));
             // encode = string to Uint8Array
-            await args.fs.writeFile(_path, encoder.encode(file.data));
+            await args.fs.writeFile(_path, encoder.encode(file));
         }
         return Result.ok(undefined);
     } catch (error) {
