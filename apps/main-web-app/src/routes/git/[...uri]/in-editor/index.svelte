@@ -91,9 +91,24 @@
 	};
 </script>
 
+<sl-alert open variant="primary">
+	<sl-icon slot="icon" name="info-circle" />
+	<div class="flex items-center">
+		<div class="w-full">
+			<h3 class="title-md">Welcome to the demo!</h3>
+			<p class="body-md">
+				Everything works on top of git with no database whatsoever leading to low adoption friction
+				+ version control + review system -> why we will leapfrog the competiton.
+				<br />
+				Take a look at the underlying repository
+				<a class="link" href="https://github.com/inlang/demo" target="_blank"> here </a>.
+			</p>
+		</div>
+	</div>
+</sl-alert>
 <div class="flex gap-4">
 	<div class="w-full">
-		<Menubar />
+		<!-- <Menubar /> -->
 		<div class="grid grid-cols-4 pt-2">
 			<!-- <Sidebar class="col-span-1" /> -->
 			<div class="col-span-4 flex flex-col space-y-2">
@@ -114,13 +129,15 @@
 		</div>
 	</div>
 	{#if $page.params['uri'].includes('inlang/demo')}
-		<div style="height:40rem;" class="sticky top-20">
+		<div style="height:40rem;" class="sticky top-10">
 			<h2 class="headline-sm">Preview:</h2>
 			<a class="title-md text-primary" href="https://inlang-demo.netlify.app" target="_blank">
 				inlang-demo.netlify.app</a
 			>
 			<p class="body-md">Refresh this site to reflect changes.</p>
-			<p class="body-md italic text-gray-500">Keep in mind that changes take ≈20 to propagate.</p>
+			<p class="body-md italic text-gray-500">
+				Keep in mind that changes can take ≈25s to propagate.
+			</p>
 			<embed
 				src="https://inlang-demo.netlify.app/"
 				type="text/html"
