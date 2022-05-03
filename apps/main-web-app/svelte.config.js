@@ -1,5 +1,5 @@
 import adapter from '@sveltejs/adapter-auto';
-import netlify from '@sveltejs/adapter-netlify';
+import node from '@sveltejs/adapter-node';
 
 import preprocess from 'svelte-preprocess';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
@@ -11,7 +11,7 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		adapter: netlify(),
+		adapter: node(),
 		vite: {
 			// required node (fs) polyfills
 			resolve: {
