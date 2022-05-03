@@ -1,5 +1,8 @@
 <script lang="ts">
 	import '../style.css';
+	// https://github.com/vitejs/vite/discussions/3126#discussioncomment-936044
+	import { Buffer } from 'buffer';
+	window.Buffer = Buffer;
 
 	let showHamburgerMenu = false;
 	/** Same padding across nav bar and container */
