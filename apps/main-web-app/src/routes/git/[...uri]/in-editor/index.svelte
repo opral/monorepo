@@ -98,7 +98,7 @@
 			<h3 class="title-md">Welcome to the demo!</h3>
 			<p class="body-md">
 				Everything works on top of git with no database whatsoever leading to low adoption friction
-				+ version control + review system -> why we will leapfrog the competiton.
+				+ version control + review system and overall working (none-existent) sync.
 				<br />
 				Take a look at the underlying repository
 				<a class="link" href="https://github.com/inlang/demo" target="_blank"> here </a>.
