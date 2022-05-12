@@ -1,4 +1,4 @@
-## Inlang is being refactored right now. Check back in a month. See https://github.com/inlang/inlang/issues/119#issuecomment-1078813933
+## Inlang is being refactored right now. See https://github.com/inlang/inlang/issues/119#issuecomment-1078813933
 
 
 <div>
@@ -9,7 +9,7 @@
         Open Source Localization Solution for Software
     </h2>
     <h3 align="center">
-        <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> · <a href="https://inlang.dev/docs/intro" target="_blank">Documentation</a> · <a href="https://inlang.dev/blog" target="_blank">Blog</a>
+        <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> · <a href="https://inlang.dev/docs/getting-started" target="_blank">Documentation</a> · <a href="https://inlang.dev/blog/inlang-v0-2" target="_blank">Blog</a>
     </h3>
 </div>
 
