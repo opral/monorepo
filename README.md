@@ -25,7 +25,7 @@ Inlang's goal is to make localization (i18n) of software effortless through deve
 > :bulb: The apps and features you see below are the features that are available right now. More is planned.
 
 
-### [dashboard](apps/dashboard)  
+### [editor](apps/dashboard)  
 Let non-technical team members and translators manage translations for you.
 
 ![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
