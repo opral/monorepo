@@ -1,5 +1,5 @@
-import { Result } from '@inlang/common';
-import { Pattern, Reference } from '@inlang/fluent-syntax';
+import { Result } from '@inlang/result';
+import { Pattern, Reference } from '@inlang/fluent-ast';
 import { lowerCase } from 'lodash-es';
 import { LintError } from './errors/lintError';
 import { LintArguments } from './types/lintArguments';

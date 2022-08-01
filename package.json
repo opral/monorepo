@@ -8,23 +8,22 @@
   ],
   "scripts": {
     "build": "lerna run build",
-    "predev": "npm run start -w @inlang/database",
-    "dev": "trap 'exit 0' SIGINT; lerna run dev --parallel",
-    "postdev": "npm run stop -w @inlang/database",
+    "dev": "lerna run dev --parallel",
     "clean": "lerna run clean",
     "lint": "lerna run lint",
     "test": "lerna run --ignore @inlang/database test",
-    "prepublish": "npm run build && npm run test",
-    "publish": "lerna publish",
+    "publish": "npm run build && npm run test && lerna publish",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
-    "jest": "^27.0.3",
+    "c8": "^7.11.0",
+    "jest": "^27.5.1",
     "lerna": "^4.0.0",
     "prettier": "^2.5.1",
     "ts-jest": "^27.0.3",
-    "typescript": "^4.5.4"
+    "typescript": "^4.6.2",
+    "vitest": "^0.6.0"
   },
   "engines": {
     "npm": ">=7.0.0",

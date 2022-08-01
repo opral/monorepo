@@ -1,9 +1,9 @@
-import { converters } from '@inlang/fluent-syntax-converters';
+import { converters } from '@inlang/fluent-format-converters';
 import { Command } from 'commander';
 import prompts from 'prompts';
 import dedent from 'dedent';
 import { InlangConfig01, validate, validatePartially } from '@inlang/config';
-import { LanguageCode, languageCodes } from '@inlang/common';
+import { LanguageCode, languageCodes } from '@inlang/utils';
 import path from 'path';
 import consola from 'consola';
 import fs from 'fs';

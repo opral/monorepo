@@ -10,7 +10,7 @@ import {
     NumberLiteral,
     SelectExpression,
     TextElement,
-} from '@inlang/fluent-syntax';
+} from '@inlang/fluent-ast';
 import { referencesInPattern } from '../../src/utils/referencesInPattern';
 
 it('should find all references', () => {

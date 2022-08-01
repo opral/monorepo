@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ISO6391 from 'iso-639-1';
 	import { RadioTile, TileGroup } from 'carbon-components-svelte';
-	import { LanguageCode } from '@inlang/common';
+	import { LanguageCode } from '@inlang/utils';
 
 	export let possibleLanguageCodes: LanguageCode[];
 	export let selected: LanguageCode | undefined;

@@ -1,4 +1,4 @@
-import { Pattern, Placeable, Reference } from '@inlang/fluent-syntax';
+import { Pattern, Placeable, Reference } from '@inlang/fluent-ast';
 
 /**
  * Finds references in a pattern.

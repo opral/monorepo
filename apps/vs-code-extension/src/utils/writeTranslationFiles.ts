@@ -1,10 +1,10 @@
-import { Result } from '@inlang/common';
+import { Result } from '@inlang/result';
 import {
   converters,
   serializeResources,
   SupportedConverter,
-} from '@inlang/fluent-syntax-converters';
-import { Resources } from '@inlang/fluent-syntax';
+} from '@inlang/fluent-format-converters';
+import { Resources } from '@inlang/fluent-ast';
 import fs from 'fs';
 import path from 'path';
 

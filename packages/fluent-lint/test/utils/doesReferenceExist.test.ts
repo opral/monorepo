@@ -7,7 +7,7 @@ import {
     TextElement,
     VariableReference,
     Variant,
-} from '@inlang/fluent-syntax';
+} from '@inlang/fluent-ast';
 import { doesReferenceExist } from '../../src/utils/doesReferenceExist';
 
 it('should find variable reference', () => {

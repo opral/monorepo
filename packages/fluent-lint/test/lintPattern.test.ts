@@ -11,7 +11,7 @@ import {
     Identifier,
     CallArguments,
     parsePattern,
-} from '@inlang/fluent-syntax';
+} from '@inlang/fluent-ast';
 import ftl from '@fluent/dedent';
 import { lintPattern } from '../src/lintPattern';
 

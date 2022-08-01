@@ -12,5 +12,5 @@ and run call commands with the `--workspace` flag.
 
 **Example**
 Running the `dev` command in a package:  
-`npm run dev --workspace <package-name>`   
--> `npm run dev --workspace @inlang/fluent-syntax`
+`npm run dev --workspace <package-name>`  
+-> `npm run dev --workspace @inlang/fluent-ast`

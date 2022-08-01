@@ -1,5 +1,5 @@
 import { InlangConfig01 } from '@inlang/config';
-import { Resources } from '@inlang/fluent-syntax';
+import { Resources } from '@inlang/fluent-ast';
 
 /**
  * The state of the vscode extension.

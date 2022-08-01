@@ -1,6 +1,6 @@
 {
   "name": "@inlang/config",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "private": false,
   "license": "MIT",
   "publicConfig": {
@@ -25,9 +25,6 @@
     "test:watch": "npm test -- --watch",
     "generate-types": "json2ts -i src/schemas/ -o src/types/"
   },
-  "dependencies": {
-    "@inlang/common": "^0.1.4"
-  },
   "devDependencies": {
     "@inlang/eslint-config": "*",
     "@rollup/plugin-commonjs": "^21.0.1",
@@ -37,5 +34,8 @@
     "ajv-formats": "^2.1.1",
     "json-schema-to-typescript": "^10.1.5",
     "rollup": "^2.67.0"
+  },
+  "dependencies": {
+    "@inlang/utils": "*"
   }
 }

@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "apps/dashboard",
+      "name": "apps/main-web-app",
       "type": "pwa-chrome",
       "request": "launch",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/apps/dashboard"
+      "webRoot": "${workspaceFolder}/apps/main-web-app"
     },
     {
       "name": "apps/vs-code-extension",

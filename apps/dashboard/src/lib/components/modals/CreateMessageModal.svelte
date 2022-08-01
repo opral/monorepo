@@ -1,12 +1,11 @@
 <script lang="ts">
 	import ISO6391 from 'iso-639-1';
 	import { Modal, TextArea, TextInput } from 'carbon-components-svelte';
-	import { projectStore } from '$lib/stores/projectStore';
-	import { page } from '$app/stores';
 	import { autoCloseModalOnSuccessTimeout } from '$lib/utils/timeouts';
-	import { isValidMessageId } from '@inlang/fluent-syntax';
+	import { isValidMessageId } from '@inlang/fluent-ast';
 	import InlineLoadingWrapper from '../InlineLoadingWrapper.svelte';
 	import { t } from '$lib/services/i18n';
+	import { inlangConfig, resources } from '$lib/stores/routes/uriStores';
 
 	let open = false;
 
@@ -32,9 +31,9 @@
 	let invalidMessageIdErrorMessage: () => string;
 	$: invalidMessageIdErrorMessage = () => {
 		if (
-			$projectStore.data?.resources.messageExist({
+			$resources.messageExist({
 				id: messageId,
-				languageCode: $projectStore.data.project.base_language_code
+				languageCode: $inlangConfig.baseLanguageCode
 			})
 		) {
 			return $t('error.id-exists');
@@ -48,29 +47,17 @@
 
 	async function handleSubmission(): Promise<void> {
 		status = 'active';
-		if ($projectStore.data === null) {
-			console.log('Projectstore.data was null');
-			status = 'error';
-			return;
-		}
-		const create = $projectStore.data.resources.createMessage({
+
+		const create = $resources.createMessage({
 			id: messageId,
 			pattern: messagePattern,
-			languageCode: $projectStore.data.project.base_language_code
+			languageCode: $inlangConfig.baseLanguageCode
 		});
-		const updateDatabase = await projectStore.updateResourcesInDatabase();
-		if (create.isErr || updateDatabase.isErr) {
-			alert(
-				create.isErr
-					? create.error
-					: updateDatabase.isErr
-					? updateDatabase.error
-					: $t('error.unknown')
-			);
+		if (create.isErr) {
+			alert(create.isErr ? create.error : $t('error.unknown'));
 			status = 'error';
 		} else {
 			status = 'finished';
-			projectStore.getData({ projectId: $page.params.projectId });
 			// automatically closing the modal but leave time to
 			// let the user read the result status of the action
 			setTimeout(() => {
@@ -96,7 +83,7 @@
 >
 	<p>
 		{@html $t('info.new-message-base-language', {
-			baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
+			baseLanguageCode: ISO6391.getName($inlangConfig.baseLanguageCode)
 		})}
 		}
 	</p>
@@ -118,7 +105,7 @@
 		labelText={`Pattern`}
 		bind:value={messagePattern}
 		helperText={$t('info.new-pattern-base-language', {
-			baseLanguageCode: ISO6391.getName($projectStore.data?.project.base_language_code ?? '')
+			baseLanguageCode: ISO6391.getName($inlangConfig.baseLanguageCode)
 		})}
 	/>
 	<!-- <br />

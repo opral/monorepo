@@ -1,6 +1,7 @@
-# @inlang/dashboard 
+# @inlang/web-app (the "main" web application)
 
 ## Running locally
+
 Open the root of this repository ([/](https://github.com/inlang/inlang)) and follow the instructions there.
 
 ## Get eslint warnings

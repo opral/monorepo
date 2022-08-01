@@ -1,8 +1,8 @@
 <script lang="ts">
 	import PatternEditor from './fluent/PatternEditor.svelte';
 	import ISO6391 from 'iso-639-1';
-	import { LanguageCode } from '@inlang/common';
-	import { parseEntry, Pattern, serializePattern } from '@inlang/fluent-syntax';
+	import { LanguageCode } from '@inlang/utils';
+	import { parseEntry, Pattern, serializePattern } from '@inlang/fluent-ast';
 	import { Button, ButtonSet, ClickableTile, Tag, Tile } from 'carbon-components-svelte';
 	import ChevronDown20 from 'carbon-icons-svelte/lib/ChevronDown20';
 	import ChevronUp20 from 'carbon-icons-svelte/lib/ChevronUp20';

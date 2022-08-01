@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { parsePattern } from '@inlang/fluent-syntax';
+	import { parsePattern } from '@inlang/fluent-ast';
 	import { lintPattern } from '@inlang/fluent-lint';
 	import { TextArea } from 'carbon-components-svelte';
 	import { t } from '$lib/services/i18n';
