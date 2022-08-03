@@ -22,7 +22,7 @@ This RFC proposes a localization system that acknowledges git as translation sto
 
 - Focus on the web platform but keep other platforms (Flutter, iOS, Android) in mind.
 
-### None-goals
+### Noe-goals
 
 - Define detailed architecture of individual components.
 
