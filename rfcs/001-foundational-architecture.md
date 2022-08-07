@@ -473,6 +473,7 @@ flowchart LR
         Workflow[Business logic]
         Other2[And more...]
     end
+    Community[Commnunity packages]-->External
     config-->External
     External-->Applications
     Host-->Applications
@@ -480,9 +481,31 @@ flowchart LR
     git-->Applications
     ast-->config
     ast-->validation
-
-
 ```
+
+#### git-provider-api
+
+Git (hosting) providers add features on top off git like pull or merge requests and handle authoriziation differently. The `git-provider-api` provides one API that deals with the API differences between hosting providers.
+
+#### validation
+
+The `validation` package validates resources and messages based on the AST and can be used to further build on top.
+
+#### git-js
+
+Git will be run in JS environments (browser and node). A package is required to make that work. Luckily, [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version.
+
+#### ast
+
+Defines the AST (abstract syntax tree) that every component, and hence inlang overall, builds upon.
+
+#### config
+
+Defines the config schema(s) and provides types and utility functions to create a config.
+
+#### Community packages
+
+The JS inlang config file is supposed to be able to import external code. By providing import functionality, read, write and business logic functions can be shared.
 
 ---
 
