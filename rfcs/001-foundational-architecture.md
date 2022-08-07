@@ -442,6 +442,48 @@ The design requirement for inlang are as follows:
 
 In response to the Realms shim compromise, Agoric designed the [SES (Secure ECMAScript)](https://github.com/endojs/endo/tree/master/packages/ses) proposal.
 
+### Flowchart
+
+```mermaid
+flowchart LR
+    Applications
+    subgraph Packages
+        subgraph Providers
+                GitHub
+                Azure
+                GitLab
+                Other[etc...]
+        end
+        Providers-.-Host
+        git[git-js]
+        Host[git-provider-api]
+        validation
+        ast
+        config
+    end
+    subgraph Legend
+        direction LR
+        start1[ ] --->|depends on| stop1[ ]
+        style start1 height:0px;
+        style stop1 height:0px;
+    end
+    subgraph External[inlang.config.js]
+        direction LR
+        Parsing[Read & write / AST]
+        Workflow[Business logic]
+        Other2[And more...]
+    end
+    config-->External
+    External-->Applications
+    Host-->Applications
+    validation-->Applications
+    git-->Applications
+    ast-->config
+    ast-->validation
+
+
+```
+
 ---
 
 ## Glossary
