@@ -30,6 +30,8 @@ This RFC proposes a localization system that acknowledges git as translation sto
 
 The following components are exposed to users when localizing software: A syntax to express human languages, dev tools, an SDK, automation (CI/CD), and a translation editor (also called CAT).
 
+> A user can either be a translator or developer.
+
 ```mermaid
 flowchart BT
     Syntax[Human Language Syntax]
