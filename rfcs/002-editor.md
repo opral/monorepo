@@ -67,3 +67,9 @@ Integrating the editor into an IDE or text editor like VSCode could streamline t
 | Embeddable | ?                 | +                  | +                   |
 
 ## Architecture
+
+## Appendix
+
+### Gitpod architectur
+
+Gitpod spins up a cloud based IDE. [This video](https://youtu.be/svV-uE0Cdjk?t=544) explains the architecture behind gitpod. One word: complex. The complexity seems to stem from the fact that high computation resources are required to execute code. Think of compiling a program. The inlang editor does not seem to require such computation power, and hence not such a complex architecture.
