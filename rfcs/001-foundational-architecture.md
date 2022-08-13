@@ -2,7 +2,7 @@
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
 
-**Inlang's goal** is to streamline software localization for every stakeholder involved to the point that localization is so effortless that it's a "no-brainer" to localize.
+**Inlang's goal** is to streamline software localization for every stakeholder involved to the point that localization is one-click simple.
 
 ## Background
 
