@@ -31,9 +31,19 @@ The requirements above resemble a fusion of VSCode and Figma. VSCode due to the 
 
 Git's async collaboration features are deemed to be sufficient. Product usage and feedback will reveal whether real-time collaboration is benefitial and desired.
 
-- Embeddable **TODO**
+- TODO: Embeddable
 
 Integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers. On the other hand, the requirement of the editor to work with local files reduces the benefit of an IDE integration. Offline support could be achieved by leveraging PWA (Progressive Web Application) features. The majority of professional content related applications like Google Docs, VSCode or Figma (all?) are architected as dedicated applications, illustrated by figure _(b)_.
+
+Reasons against embeddability are runtime dependent features like networking or sandboxing JavaScript. However, the inlang config already delegates those requirements out of the editor. A network request would be required for machine translations for example. But, the inlang config could contain a callback `onMachineTranslate`. The host would be responsible for making the network request.
+
+<!-- Considering that the editor requires sandboxing JavaScript, networking and more runtime dependent features, the overhead of encapsulating those features to make the editor embeddable seems unreasonbale. For the same reasons, choosing a monolith architecture that would mix a sophisticated web application with a semi-static website seems unfavourable. Hence, a seperated architecture is chosen. -->
+
+|            | Development speed | Maintenance effort | Potential extension |
+| ---------- | ----------------- | ------------------ | ------------------- |
+| Monolith   | +                 | -                  | -                   |
+| Separated  | o                 | +                  | o                   |
+| Embeddable | o                 | o                  | +                   |
 
 <figure>
     <img src="./assets/002-embedded-separated-legend.png" alt="Legend"/>
@@ -49,7 +59,7 @@ Integrating the editor into an IDE or text editor like VSCode could streamline t
 <figure>
     <img src="./assets/002-separated-architecture.png"/>
     <figcaption>
-        (b) Separated architecture. A website or app links to a separate application: <i>inlang.com</i> -> <i>app.inlang.com</i>.
+        (b) Separated architecture. A website or app links to a separate application: <i>inlang.com</i> -> <i>editor.inlang.com</i>. Similar to clicking on a document in Google Drive. The click forwards from <i>drive.google.com</i> to another app <i>docs.google.com</i>. 
     </figcaption>
 </figure>
 
@@ -60,11 +70,7 @@ Integrating the editor into an IDE or text editor like VSCode could streamline t
     </figcaption>
 </figure>
 
-|            | Development speed | Maintenance effort | Potential extension |
-| ---------- | ----------------- | ------------------ | ------------------- |
-| Monolith   | +                 | o                  | -                   |
-| Separated  | o                 | +                  | o                   |
-| Embeddable | ?                 | +                  | +                   |
+- TODO: SPA, SSR, MPA, (PWA)
 
 ## Architecture
 
