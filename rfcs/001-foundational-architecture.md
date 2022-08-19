@@ -235,9 +235,9 @@ Using an SDK does not relieve developers from two extremely time-consuming and e
 
    Developers have to manually copy & paste hardcoded strings into resources. That process can take weeks.
 
-2. Validating translations.
+2. Validating messages.
 
-   No widely adopted tools exist to validate translations: Does the German translation exist? Is the French translation correct? Does the UI work as expected for Arabic?
+   No widely adopted tools exist to validate messages: Does the German message exist? Is the French message correct? Does the UI work as expected for Arabic?
 
 Furthermore, the DX of localizing software, in general, is improvable. The pseudocode below illustrates some problems:
 
