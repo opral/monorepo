@@ -14,3 +14,10 @@ The design requirement for inlang are as follows:
 - Support the import of external scripts/packages. The flexibility of defining `readResources` and `writeResources` is handy but the ability to import third party code that deals with reading and writing resources reduces the adoption friction.
 
 In response to the Realms shim compromise, Agoric designed the [SES (Secure ECMAScript)](https://github.com/endojs/endo/tree/master/packages/ses) proposal.
+
+| Method             | Secure | ESM consumption | Async | Third party code | Bundle size       |
+| ------------------ | :----: | --------------- | ----- | ---------------- | ----------------- |
+| dynamic import     |   ❌   | ✅              | ✅    | ?                | 0kb               |
+| ses                |   ✅   | ❌              |       | ❌               | ?kb               |
+| shadow realms      |        | ✅              | ❌    |                  | 0kb in the future |
+| Quick JS (runtime) |   ✅   |                 |       |                  | ~600kb            |
