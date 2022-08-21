@@ -1,4 +1,4 @@
-# RFC 001: Foundational Architecture
+# RFC 001: Core Architecture
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
 
@@ -17,7 +17,7 @@ This RFC proposes a localization system that acknowledges git as the source of t
   <img src="./assets/001-git-based-architecture.png" alt="Git-based architecture">
   <figcaption>
     <small>
-      A git-based localization system enables seamless collaboration between developers and translators with endless automation possiblities.    
+      A git-based localization system enables seamless collaboration between developers and translators with endless automation possibilities.    
     </small>
   </figcaption>
 </figure>
@@ -28,9 +28,7 @@ This RFC proposes a localization system that acknowledges git as the source of t
 ### Goals
 
 - Define components of which inlang will eventually consist.
-
-- Define a foundational architecture that can be shared among those components.
-
+- Define a core architecture that can be shared among those components.
 - Focus on the web platform but keep other platforms (Flutter, iOS, Android) in mind.
 
 ### None-goals
@@ -99,13 +97,13 @@ Anne added 3 new photos to her stream.
 
 Many different syntaxes and formats to store messages exist, even within one ecosystem. The web world has [Unicode's ICU MessageFormat](https://unicode-org.github.io/icu/) and [Mozilla's Fluent](https://projectfluent.org/) project, Apple's iOS uses Localizable Strings, Android uses XML and Flutter uses ARB files. A working group within Unicode has been working on an industry standard that recently [reached stage 1](https://github.com/tc39/proposal-intl-messageformat) called [MessageFormat 2.0](https://github.com/unicode-org/message-format-wg).
 
-The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers them. While one standard syntax to express human languages should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
+The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers need to support those syntaxes. While one standard syntax to express human languages should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
 
 Supporting different syntaxes and their features opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design a custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
 
 #### Observations
 
-- The sheer variety of syntaxes to express human languages are confusing.
+- The sheer variety of syntaxes to express human languages is confusing.
 - Standardization via Unicode's MessageFormat 2.0 is in its infancy.
 - Supporting different syntaxes now is beneficial for adoption but standardization is beneficial and should be accounted for.
 - Fluent seems to be the best-designed syntax used in production.
@@ -140,7 +138,7 @@ Use [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most adva
 
 #### Proposal C
 
-Design an custom AST that does not heavily lean into a certain syntax and its supported features.
+Design a custom AST that does not heavily lean into a certain syntax and its supported features.
 
 **Pros**
 
@@ -148,17 +146,17 @@ Design an custom AST that does not heavily lean into a certain syntax and its su
 
 **Cons**
 
-- No existing design that acts as reference.
+- No existing design acts as a reference.
 
-  Leveraging MessageFormat 2.0 or Fluent provides a clear(er) path how an AST should be designed.
+  Leveraging MessageFormat 2.0 or Fluent provides a clear(er) path on how an AST should be designed.
 
 - Engineering complexity to support numerous syntax features.
 
-  Instead of leveraging one syntax and its features as reference, inlang would have X features and developers need to navigate what features syntax Y supports. The latter leads to an inferior user experience.
+  Instead of leveraging one syntax and its features as a reference, inlang would have X features and developers need to navigate what features syntax Y supports. The latter leads to an inferior user experience.
 
 ### SDK
 
-Messages need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developers perspective, the i18n SDK loads resources, detects the language of a user and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
+Messages need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer's perspective, the i18n SDK loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
 
 #### Illustration
 
@@ -224,7 +222,7 @@ Leverage existing SDKs instead of forcing a specific inlang SDK.
 
 - Different SDKs have different design goals and trade-offs.
 
-  One SDK to rule them all is unlikely a feasable idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n SDK obsolete. Supporting native localization features instead of forcing the use of an i18n SDK is arguably better. And so is supporting a suited localization approach, i.e. different i18n SDKs, better than forcing the usage a specific, but less suited, i18n SDK onto developers.
+  One SDK to rule them all is unlikely a feasible idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n SDK obsolete. Supporting native localization features instead of forcing the use of an i18n SDK is arguably better. And so is supporting a suited localization approach, i.e. different i18n SDKs, better than forcing the usage of a specific, but less suited, i18n SDK onto developers.
 
 **Cons**
 
@@ -314,19 +312,19 @@ Develop a CLI and VSCode extension to extract and validate resources and message
 Translators need a dedicated editor to manage translations. Those editors exist and are called CAT (Computer Assisted Translation) editors. There are two types of editors:
 
 1. Local single-user editors such as [MemoQ](https://docs.memoq.com/current/en/Images/m-q/project-home-translations-tpro-documents-structure.png).
-2. Cloud based editors like [Lokalise](https://lokalise.com/), [Smartling](https://www.smartling.com/) or [Transifex](https://www.transifex.com/).
+2. Cloud based editors like [Lokalise, [Smartling](https://www.smartling.com/), or [Transifex](https://www.transifex.com/).
 
-Single-user editor's are displaced by cloud based editors for _simple_ string localization such as software. Collaboration is easier with a cloud-based solution. However, cloud-based editors add complexity by requiring continuous synchronization with the source code (git repository) and _the_ cloud; thereby breaking the single source of truth contract.
+Single-user editors are displaced by cloud-based editors for _simple_ string localization such as software. Collaboration is easier with a cloud-based solution. However, cloud-based editors add complexity by requiring continuous synchronization with the source code (git repository) and _the_ cloud; thereby breaking the single source of truth contract.
 
 #### Observations
 
-- The cloud is overhead. Git repositories are build for collaboration and strore translations.
+- The cloud is overhead. Git repositories are built for collaboration and store translations.
 
-- Git (including GitHub and GitLab) provide version control, collaboration, and an awesome review system. All of which are required for a CAT editor essentially _for free_.
+- Git (including GitHub and GitLab) provides version control, collaboration, and an awesome review system. All of these are required for a CAT editor essentially _for free_.
 
 #### Proposal
 
-A git-based editor that combines collaboration of cloud-based solutions with the simplicity of a local-first solution and the collaboration of git is an order of magnitude better than existing solutions. Think of a combination of Figma and VSCode. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
+A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution and the collaboration of git is an order of magnitude better than existing solutions. Think of a combination of Figma and VSCode. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
 **Pros**
 
@@ -360,12 +358,12 @@ Leverage existing CI/CD infrastructure that is built on top of git like CircleCI
 
 **Cons**
 
-- No GUI (Graphical User Interface) - but also no GUI limitation of experessiveness.
+- No GUI (Graphical User Interface) - but also no GUI limitation of expressiveness.
 - Relying on external CI/CD infrastructure.
 
 ## Architecture
 
-The following describes a foundational architecture that is designed to support the components defined above while sharing code and business logic. Interestingly, only two questions need to be elaborated, and both go hand-in-hand:
+The following describes a core architecture that is designed to support the components defined above while sharing code and business logic. Interestingly, only two questions need to be elaborated, and both go hand-in-hand:
 
 1. How are messages stored?
 2. How are components configured to work hand-in-hand?
@@ -385,7 +383,7 @@ _Dedicated resource files pattern:_
 └── inlang.config.json
 ```
 
-_Examplary inlang config:_
+_Exemplary inlang config:_
 
 ```json
 {
@@ -397,7 +395,7 @@ However, smaller projects store messages directly in code [[1](https://github.co
 
 #### Proposal
 
-Be unopinionated where and in which format resources are stored and thereby ease adoption. Being unopinoated directly leads to the configuration question: "How can inlang be unopinionated while requiring reading and writing to resources?".
+Be unopinionated where and in which format resources are stored and thereby ease adoption. Being unopinionated directly leads to the configuration question: "How can inlang be unopinionated while requiring reading and writing to resources?".
 
 ### 2. How is inlang configured?
 
@@ -477,13 +475,15 @@ export const editor = {
 
 ### Conclusion
 
-The common denominator across all proposed components is a JavaScript [instead of JSON/YAML/TOML] config and an AST. Hence, the foundational architecture is a config and AST package that is consumed by every other component of inlang.
+The common denominator across all proposed components is a JavaScript [instead of JSON/YAML/TOML] config and an AST. Hence, the core architecture is a config and AST package that is consumed by every other component of inlang.
 
 The JS config solves the storage [of resources] and different syntaxes [to express human languages] problems. Developers can define how resources are read, parsed, serialized, and written to the filesystem. Furthermore, developers are empowered to adjust the business logic of inlang components to the needs of the project. Due to the complexity of sandboxing JS, the detailed design of the config will follow in RFC-003.
 
 The config itself requires an AST specification for developers to parse resources to and serialize from which is further consumed by all inlang components. TODO: THE CHOICE HAS NOT BEEN MADE YET.
 
 ### Dependency graph
+
+The `ast` and `config` packages are the core components that power inlang. The `ast` is used to act on resources whether it be CRUD operations or validation. The `config` package defines a schema (functions) that the `inlang.config.js` file implements. Among those functions is defined how resources are read, parsed to an AST, serialized from an AST, and written to the file system. Hence the dependency of `config` to `ast`. Furthermore, `config` provides sandboxing to import and securely execute the implemented code.
 
 ```mermaid
 flowchart LR
@@ -520,7 +520,7 @@ flowchart LR
 
 #### git-provider-api
 
-Git (hosting) providers add features on top off git like pull or merge requests and handle authoriziation differently. The `git-provider-api` provides one API that deals with the API differences between hosting providers.
+Git (hosting) providers add features on top of git like pull or merge requests and handle authorization differently. The `git-provider-api` provides one API that deals with the API differences between hosting providers.
 
 #### validation
 
