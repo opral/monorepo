@@ -2,7 +2,7 @@
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
 
-**Inlang's goal** is to streamline software localization for every stakeholder involved to the point that localization is one-click simple.
+**Inlang's goal** is to streamline software localization for every stakeholder involved to the point that localization is effortless and will become the default.
 
 ## Background
 
@@ -10,7 +10,18 @@ Localization of software requires too much effort. Basic tools for developers ar
 
 What started with a [proof of concept](https://www.reddit.com/r/sveltejs/comments/p4h6bg/proof_of_concept_internationalize_a_svelte_app_in/) to solve @samuelstroschein's frustrations turned into a year-long research project: "What solution(s) are required to make localization simple across all stakeholders?". Hundreds of interviews and multiple proofs of concepts later a pattern emerged: Software and translations are stored in git. Yet, most solutions do not acknowledge and embrace that fact. Developers manage translations in git while translators manage translations with Excel or [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) UIs on top of databases. Workflows of developers and translators are de-coupled and siloed.
 
-This RFC proposes a localization system that acknowledges git as translation storage and embraces git to close collaboration gaps between developers and translators.
+This RFC proposes a localization system that acknowledges git as the source of truth for localization and embraces git to close collaboration gaps between developers and translators.
+
+<br/>
+<figure>
+  <img src="./assets/001-git-based-architecture.png" alt="Git-based architecture">
+  <figcaption>
+    <small>
+      A git-based localization system enables seamless collaboration between developers and translators with endless automation possiblities.    
+    </small>
+  </figcaption>
+</figure>
+<img>
 
 ## Scope of this RFC
 
@@ -88,16 +99,16 @@ Anne added 3 new photos to her stream.
 
 Many different syntaxes and formats to store messages exist, even within one ecosystem. The web world has [Unicode's ICU MessageFormat](https://unicode-org.github.io/icu/) and [Mozilla's Fluent](https://projectfluent.org/) project, Apple's iOS uses Localizable Strings, Android uses XML and Flutter uses ARB files. A working group within Unicode has been working on an industry standard that recently [reached stage 1](https://github.com/tc39/proposal-intl-messageformat) called [MessageFormat 2.0](https://github.com/unicode-org/message-format-wg).
 
-The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers need to support different features. While one syntax and corresponding AST to rule them all should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
+The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers them. While one standard syntax to express human languages should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
 
-Supporting different syntaxes and their features but ultimately leading the way for standardization opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design a custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
+Supporting different syntaxes and their features opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design a custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
 
 #### Observations
 
-1. The sheer variety of syntaxes to express human languages are confusing.
-2. Standardization via Unicode's MessageFormat 2.0 is in its infancy.
-3. Supporting different syntaxes now is beneficial for adoption but standardization should be accounted for.
-4. Fluent seems to be the most advanced syntax in production.
+- The sheer variety of syntaxes to express human languages are confusing.
+- Standardization via Unicode's MessageFormat 2.0 is in its infancy.
+- Supporting different syntaxes now is beneficial for adoption but standardization is beneficial and should be accounted for.
+- Fluent seems to be the best-designed syntax used in production.
 
 #### Proposal A
 
@@ -106,32 +117,30 @@ Design an AST based on MessageFormat 2.0's proposed [spec](https://github.com/un
 **Pros**
 
 - Standardization by leveraging the soon-to-be standard syntax.
-
-- The specification of Message Format 2.0 can be influenced by early feedback from inlang.
+- The specification of Message Format 2.0 can be influenced by feedback from inlang since Message Format 2.0 is in stage 1/2.
 
 **Cons**
 
-- Message Format 2.0 is in its infancy. Breaking changes are to be expected.
+- Message Format 2.0 is in its infancy. Breaking changes are to be expected.  
+  Since the AST is exposed to developers, those breaking changes are propagated and will not stay isolated within inlang.
 
 #### Proposal B
 
-Use the [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most advanced and well-designed syntax. Leveraging Fluent would speed up inlang's path to an MVP.
+Use [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most advanced and well-designed syntax.
 
 **Pros**
 
-- Fluent is used in production and takes away many of the features that MessageFormat 2.0 will have. The moment MessageFormat 2.0 is released, support should be trivial.
+- Fluent is used in production and takes away features that MessageFormat 2.0 will have. The moment MessageFormat 2.0 is released, support should be trivial.
 
 **Cons**
 
 - Fluent might support features that MessageFormat 2.0 will not support. That could lead to painful migrations or require extensions of MessageFormat 2.0.
-
 - Fluent itself is not widely adopted.
-
 - If MessageFormat 2.0 becomes the standard, Fluent is legacy.
 
 #### Proposal C
 
-Design an own AST that does not heavily lean into a certain syntax and its supported features.
+Design an custom AST that does not heavily lean into a certain syntax and its supported features.
 
 **Pros**
 
@@ -139,15 +148,17 @@ Design an own AST that does not heavily lean into a certain syntax and its suppo
 
 **Cons**
 
-- Engineering complexity to support numerous syntaxes.
+- No existing design that acts as reference.
 
-- Inferior user experience "what syntax supports what?".
+  Leveraging MessageFormat 2.0 or Fluent provides a clear(er) path how an AST should be designed.
 
-- There should not be 10+ different syntaxes to express human languages.
+- Engineering complexity to support numerous syntax features.
+
+  Instead of leveraging one syntax and its features as reference, inlang would have X features and developers need to navigate what features syntax Y supports. The latter leads to an inferior user experience.
 
 ### SDK
 
-Messages (strings) need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer perspective, the i18n SDK loads resources, detects the language of a user and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
+Messages need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developers perspective, the i18n SDK loads resources, detects the language of a user and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
 
 #### Illustration
 
@@ -196,7 +207,7 @@ console.log(translate("example", { name: "Samuel" }));
 
 #### Observations
 
-1. A variety of good and adopted open source SDKs exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), ...]. Each serves a different programming language, framework, niche, or feature.
+1. A variety of good and adopted open source SDKs exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), and more]. Each serves a different programming language, framework, niche, or feature.
 
 2. The internals are identical:  
    `Resource` -> `Reference and Format a Message` -> `Output`
@@ -207,8 +218,13 @@ Leverage existing SDKs instead of forcing a specific inlang SDK.
 
 **Pros**
 
-- Existing codebases can adopt inlang.
-- Different SDKs solve different problems.
+- Already localized codebases can easily adopt inlang.
+
+  Localized codebase use i18n SDKs, or custom build solutions. By being SDK agnostic, those codebases are not required to migrate to an SDK provided by inlang. Instead, inlang complements the existing SDK or solution in use.
+
+- Different SDKs have different design goals and trade-offs.
+
+  One SDK to rule them all is unlikely a feasable idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n SDK obsolete. Supporting native localization features instead of forcing the use of an i18n SDK is arguably better. And so is supporting a suited localization approach, i.e. different i18n SDKs, better than forcing the usage a specific, but less suited, i18n SDK onto developers.
 
 **Cons**
 
@@ -262,53 +278,55 @@ import Translated from 'i18n-sdk';
 
 #### Observations
 
-1. Dev tools beyond SDKs are required to make localization effortless.
-
-2. A CLI to extract and validate messages enables CI/CD.
-
-3. Platform-specific tooling like GitHub actions can be built on top of dev tools (the CLI).
-
-4. An [IDE extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) speeds up development.
-
-<br/>
-<figure>
-  <img src="https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif" alt="Localization ">
-  <figcaption>
-    <small>
-      An IDE extension speeds up development by an order of magnitude.   
-    </small>
-  </figcaption>
-</figure>
-<img>
+- Dev tools beyond SDKs are required to make localization effortless.
+- A CLI enables developers to build custom CI/CD pipelines.
+- Platform-specific tooling like GitHub actions can be built on top of dev tools (the CLI).
+- An [IDE extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) speeds up development.
 
 #### Proposal
 
 Develop a CLI and VSCode extension to extract and validate resources and messages.
 
-### Editor
-
-Translators need a dedicated editor to manage translations. Those editors exist and are called CAT (Computer Assisted Translation) editors. However, they add complexity by requiring continuous synchronization between git repositories and remote databases.
-
-#### Observations
-
-1. Databases that store translations are overhead. Git repositories already store translations.
-
-2. Git (including GitHub and GitLab) provides version control, collaboration, and an awesome review system. All of which are required for a CAT editor.
-
 <br/>
 <figure>
-  <img src="https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png" alt="Proof of concept translation editor CAT">
+  <img src="./assets/001-ide-extension.gif" alt="Localization IDE extension">
   <figcaption>
     <small>
-      Early iteration of the CAT editor.   
+      An IDE extension speeds up development by providing message extraction, linting, and more.   
     </small>
   </figcaption>
 </figure>
 <img>
 
+### Editor
+
+<br/>
+<figure>
+  <img src="./assets/001-editor.png" alt="Proof of concept translation editor CAT">
+  <figcaption>
+    <small>
+      Early iteration of the inlang editor from December 2021.   
+    </small>
+  </figcaption>
+</figure>
+<img>
+
+Translators need a dedicated editor to manage translations. Those editors exist and are called CAT (Computer Assisted Translation) editors. There are two types of editors:
+
+1. Local single-user editors such as [MemoQ](https://docs.memoq.com/current/en/Images/m-q/project-home-translations-tpro-documents-structure.png).
+2. Cloud based editors like [Lokalise](https://lokalise.com/), [Smartling](https://www.smartling.com/) or [Transifex](https://www.transifex.com/).
+
+Single-user editor's are displaced by cloud based editors for _simple_ string localization such as software. Collaboration is easier with a cloud-based solution. However, cloud-based editors add complexity by requiring continuous synchronization with the source code (git repository) and _the_ cloud; thereby breaking the single source of truth contract.
+
+#### Observations
+
+- The cloud is overhead. Git repositories are build for collaboration and strore translations.
+
+- Git (including GitHub and GitLab) provide version control, collaboration, and an awesome review system. All of which are required for a CAT editor essentially _for free_.
+
 #### Proposal
 
-Develop a CAT editor that combines VSCode and Figma. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
+A git-based editor that combines collaboration of cloud-based solutions with the simplicity of a local-first solution and the collaboration of git is an order of magnitude better than existing solutions. Think of a combination of Figma and VSCode. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
 **Pros**
 
@@ -320,18 +338,16 @@ Develop a CAT editor that combines VSCode and Figma. VSCode brings out-of-the-bo
 **Cons**
 
 - Engineering effort: Git is not meant to build applications on top off and to be run in the browser.
-
 - Design effort: Git is difficult to understand. Abstractions for translators need to be designed.
 
 ### Automation (CI/CD)
 
-The hand-off between developers and translators requires automation. The current status quo of manual pinging is unbearable.
+The hand-off between developers and translators requires automation. The current status quo is either no automation or limited automation via cloud-based solutions.
 
 #### Observations
 
-1. Every (software) company already has an automation solution in the form of CI/CD.
-
-2. Since localization is tightly coupled with software development, existing CI/CD infrastructure can be used instead of building out (and forcing) another automation layer.
+- Every (software) company already has an automation solution in the form of CI/CD.
+- Since localization is tightly coupled with software development, existing CI/CD infrastructure can be used instead of building out (and forcing) another automation layer.
 
 #### Proposal
 
@@ -344,22 +360,19 @@ Leverage existing CI/CD infrastructure that is built on top of git like CircleCI
 
 **Cons**
 
-- Monetizing automation becomes harder. CI/CD infrastructure providers make the money.
+- No GUI (Graphical User Interface) - but also no GUI limitation of experessiveness.
+- Relying on external CI/CD infrastructure.
 
 ## Architecture
 
-The following describes a foundational architecture that is designed to support the components defined above while sharing as much code and business logic as possible.
+The following describes a foundational architecture that is designed to support the components defined above while sharing code and business logic. Interestingly, only two questions need to be elaborated, and both go hand-in-hand:
 
-Interestingly, only two questions need to be elaborated, and both go hand-in-hand:
+1. How are messages stored?
+2. How are components configured to work hand-in-hand?
 
-1. How are messages (translations) stored?
-2. How are components configured and orchestrated?
+### 1. How are messages stored?
 
-### How are messages stored?
-
-The common pattern across larger projects is to store messages in dedicated resource files.
-
-The pattern is easy to implement: Only the paths of the files need to be known. A string-based config is sufficient to implement read and write operations by parsing and serializing the resource files.
+The common pattern across larger projects is to store messages in dedicated resource files. The pattern is easy to implement: Only the paths of resource files need to be known. A string-based config is sufficient to implement read and write operations by parsing and serializing the resource files.
 
 _Dedicated resource files pattern:_
 
@@ -384,11 +397,11 @@ However, smaller projects store messages directly in code [[1](https://github.co
 
 #### Proposal
 
-Be unopinionated where and in which format messages are stored to allow adoption of inlang among smaller projects. This directly leads to the configuration question: "How can inlang be unopinionated while requiring reading and writing to resources?".
+Be unopinionated where and in which format resources are stored and thereby ease adoption. Being unopinoated directly leads to the configuration question: "How can inlang be unopinionated while requiring reading and writing to resources?".
 
-### How is inlang configured?
+### 2. How is inlang configured?
 
-Using JavaScript as a configuration format would allow unopinionated workflows. Developers are empowered to adjust inlang, across every component, to their needs. The read and write problem of resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file. Furthermore, JavaScript as config solves two common config file annoyances. First, comments are supported, and type annotations via JSDoc/TypeScript enable autocomplete and type safety.
+Using JavaScript as a configuration format would allow unopinionated storing of resources. The read and write problem of resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file. Developers are empowered to adjust those functions, and more, to their needs. Furthermore, JavaScript as config solves two common config file annoyances. First, comments are supported, and type annotations via JSDoc/TypeScript enable autocomplete and type safety.
 
 **Flowchart of JS as config**
 
@@ -430,11 +443,11 @@ export const metadata = {
 
 ```
 
-One (the?) drawback of JS as config is exploit vulnerability. The JS config could contain malicious code that would be executed by inlang components. An example exploit: An attacker could steal user authentification information by writing malicious code in the config that reads authentification information from the editor. JS as config would require sandboxing to a certain degree to eliminate exploit vulnerability.
+One (the?) drawback of JS as config is security. The JS config could contain malicious code that would be executed by inlang components. An example exploit: An attacker could steal user authentification information by writing malicious code in the config that reads authentification information from the editor. JS as config would require sandboxing to a certain degree to eliminate exploit vulnerability.
 
 #### Proposal
 
-Leveraging JavaScript, or any programming language allows for tremendous flexibility and therefore unopinionated workflows. Flexibility is required: codebases differ, approaches to localize software differ, syntaxes differ, and last but not least workflows differ. JavaScript as config could even be used to adjust the business logic of components:
+Leveraging JavaScript, or any programming language allows for tremendous flexibility and therefore unopinionated workflows. Flexibility is required: Codebases differ, approaches to localize software differ, syntaxes differ, and last but not least workflows differ. JavaScript as config could even be used to adjust the business logic of components:
 
 ```js
 // pseudocode that illustrates the possbility to
@@ -464,9 +477,9 @@ export const editor = {
 
 ### Conclusion
 
-The common denominator across all proposed components is a JavaScript [instead of JSON/YAML/TOML] config and an AST.
+The common denominator across all proposed components is a JavaScript [instead of JSON/YAML/TOML] config and an AST. Hence, the foundational architecture is a config and AST package that is consumed by every other component of inlang.
 
-The JS config solves the storage [of messages] and different syntaxes [to express human languages] problems by exposing functions to developers and allowing them to define how resources are read, parsed, serialized, and written to the filesystem. Furthermore, developers are empowered to adjust the business logic of inlang components to the needs of the project. Due to the complexity of sandboxing JS, the detailed design of the config will follow in RFC-003.
+The JS config solves the storage [of resources] and different syntaxes [to express human languages] problems. Developers can define how resources are read, parsed, serialized, and written to the filesystem. Furthermore, developers are empowered to adjust the business logic of inlang components to the needs of the project. Due to the complexity of sandboxing JS, the detailed design of the config will follow in RFC-003.
 
 The config itself requires an AST specification for developers to parse resources to and serialize from which is further consumed by all inlang components. TODO: THE CHOICE HAS NOT BEEN MADE YET.
 
@@ -556,3 +569,7 @@ l10n = translators work.
 ### Message
 
 The basic unit of translation is called a message. Messages are containers for information. Messages are used to identify, store, and recall translation information to be used in the product [[source](https://projectfluent.org/fluent/guide/hello.html)].
+
+### Resource
+
+A collection of messages. Think of a file or object containing multiple messages.
