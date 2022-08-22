@@ -1,3 +1,5 @@
+### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/128).
+
 # RFC 002: Editor (CAT)
 
 Translators, and developers to a certain extend, require an editor to create and manage translations. Such an editor is sometimes referred to as CAT (computer-assisted translation) editor.
