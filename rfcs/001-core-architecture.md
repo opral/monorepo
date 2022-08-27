@@ -4,7 +4,7 @@
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
 
-**Inlang's goal** is to streamline software localization for every stakeholder involved to the point that localization is effortless and will become the default.
+**Inlang's goal** is to make software localization effortless for every stakeholder (developers, translators, product managers). We believe that localization is underutalized, and if the effort to localize is just low enough, the majority of projects and organizations will localize.
 
 ## Background
 
@@ -12,7 +12,9 @@ Localization of software requires too much effort. Basic tools for developers ar
 
 What started with a [proof of concept](https://www.reddit.com/r/sveltejs/comments/p4h6bg/proof_of_concept_internationalize_a_svelte_app_in/) to solve @samuelstroschein's frustrations turned into a year-long research project: "What solution(s) are required to make localization simple across all stakeholders?". Hundreds of interviews and multiple proofs of concepts later a pattern emerged: Software and translations are stored in git. Yet, most solutions do not acknowledge and embrace that fact. Developers manage translations in git while translators manage translations with Excel or [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) UIs on top of databases. Workflows of developers and translators are de-coupled and siloed.
 
-This RFC proposes a localization system that acknowledges git as the source of truth for localization and embraces git to close collaboration gaps between developers and translators.
+This RFC proposes a localization system that acknowledges git as the single source of truth, utilizes git for automation, and extends git to close collaboration gaps between developers and translators.
+
+In short, a git-based localization system for developers and translators.
 
 <br/>
 <figure>
@@ -551,6 +553,10 @@ The JS inlang config file is supposed to be able to import external code. By pro
 ### Inlang
 
 Inlang is the project and product name. Inlang stands for "_**in**_ your _**lang**_(uage)".
+
+### Component
+
+A component in the context of this RFC is either an application or a package. An application is usually broken down into multiple packages.
 
 ### Locale
 
