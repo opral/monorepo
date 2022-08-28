@@ -1,6 +1,8 @@
+/**
+ * Types for shoelace web components.
+ */
+
 import "solid-js";
-import "@shoelace-style/shoelace";
-import "@shoelace-style/shoelace/dist/themes/light.css";
 
 declare module "solid-js" {
   namespace JSX {

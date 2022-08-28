@@ -12,6 +12,13 @@
       "webRoot": "${workspaceFolder}/apps/main-web-app"
     },
     {
+      "name": "apps/editor-solidjs",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/apps/editor-solidjs"
+    },
+    {
       "name": "apps/vs-code-extension",
       "type": "extensionHost",
       "args": [
