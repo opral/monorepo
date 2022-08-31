@@ -1,0 +1,3 @@
+.demoCard::part(base) {
+  @apply bg-primary-container border-primary text-on-primary-container;
+}

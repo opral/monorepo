@@ -4,7 +4,7 @@ const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./renderer/**/*.tsx", "./pages/**/*.tsx"],
+  content: ["./renderer/**/*.tsx", "./pages/**/*.tsx", "./pages/**/*.css"],
   theme: {
     extend: {},
   },
