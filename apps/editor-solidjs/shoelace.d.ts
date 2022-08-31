@@ -3,6 +3,7 @@
  */
 
 import "solid-js";
+import "@shoelace-style/shoelace";
 
 declare module "solid-js" {
   namespace JSX {
