@@ -5,7 +5,7 @@ import ssr from "vite-plugin-ssr/plugin";
 export default defineConfig({
   plugins: [solidPlugin({ ssr: true }), ssr()],
   server: {
-    port: 3000,
+    port: 3002,
   },
   build: {
     target: "esnext",
