@@ -2,13 +2,15 @@
 	import type { SlDialog } from '@shoelace-style/shoelace';
 
 	/** The demonstration repository */
-	const demoRepository = {
-		name: 'inlang/demo',
-		iconSrc: 'https://github.com/inlang.png',
-		description: 'Try out the inlang editor with the demo repository.',
-		stars: 0,
-		href: '/git/https://github.com/inlang/demo/in-editor'
-	};
+	const repositories = [
+		{
+			name: 'inlang/demo',
+			iconSrc: 'https://github.com/inlang.png',
+			description: 'Try out the inlang editor with the demo repository.',
+			stars: 0,
+			href: '/git/https://github.com/inlang/demo/in-editor'
+		}
+	];
 
 	let searchValue = '';
 
@@ -39,24 +41,26 @@
 
 <!-- START REPOSITORY GRID -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-	<!-- START DEMO REPOSITORY -->
-	{#if searchValue === ''}
-		<sl-card class="space-y-1 demo-card">
+	{#each repositories.filter((repository) => repository.name.includes(searchValue)) as repository}
+		{@const isDemo = repository.name.includes('demo')}
+		<sl-card class="space-y-1" class:demo-card={isDemo}>
 			<div class="flex justify-between items-center gap-2">
-				<h2 class="title-md pt-1">{demoRepository.name}</h2>
-				<img class="h-7 w-7" src={demoRepository.iconSrc} alt="{demoRepository.name} icon" />
+				<h2 class="title-md pt-1">{repository.name}</h2>
+				<img class="h-7 w-7" src={repository.iconSrc} alt="{repository.name} icon" />
 			</div>
 			<h2 class="label-md">
 				<sl-icon name="star" />
-				{demoRepository.stars}
+				{repository.stars}
 			</h2>
-			<p class="body-md">{demoRepository.description}</p>
-			<sl-button size="small" variant="primary" class="pt-3 w-full" href={demoRepository.href}>
-				Open
-			</sl-button>
+			<p class="body-md">{repository.description}</p>
+			<sl-button
+				size="small"
+				variant={isDemo ? 'primary' : ''}
+				class="pt-3 w-full"
+				href={repository.href}>Open</sl-button
+			>
 		</sl-card>
-	{/if}
-	<!-- END DEMO REPOSITORY -->
+	{/each}
 </div>
 <!-- END REPOSITORY GRID -->
 
