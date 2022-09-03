@@ -1,4 +1,4 @@
-import { clone } from "../../services/git";
+import { clone as cloneGitRepository } from "../../services/git";
 import { filesystem } from "./filesystem";
 import { Layout } from "./Layout";
 import { Layout as RootLayout } from "../index/Layout";
@@ -6,8 +6,8 @@ import { createResource, Match, Switch } from "solid-js";
 import http from "isomorphic-git/http/web";
 
 export function Page() {
-  const [data] = createResource(() =>
-    clone({
+  const [clone] = createResource(() =>
+    cloneGitRepository({
       fs: filesystem,
       dir: "/",
       http,
@@ -25,12 +25,12 @@ export function Page() {
     <RootLayout>
       <Layout>
         <Switch>
-          <Match when={data.loading}>
+          <Match when={clone.loading}>
             <div class="absolute inset-0 w-full h-full flex flex-col items-center justify-center backdrop-blur z-50">
               <h1 class="display-md">Cloning repository...</h1>
             </div>
           </Match>
-          <Match when={data().isErr}>
+          <Match when={clone().isErr}>
             <div class="alert alert-error">
               <h1 class="alert-title">Something went wrong.</h1>
             </div>
