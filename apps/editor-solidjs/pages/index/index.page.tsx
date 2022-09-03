@@ -2,6 +2,7 @@ import type { SlDialog } from "@shoelace-style/shoelace";
 import { createSignal, For } from "solid-js";
 import { Layout } from "./Layout";
 import style from "./index.module.css";
+import { navigate } from "vite-plugin-ssr/client/router";
 
 export function Page() {
   /** The demonstration repository. */
@@ -49,7 +50,11 @@ export function Page() {
                   repository.name.includes("demo") ? `primary` : "default"
                 }
                 class="pt-3 w-full"
-                prop:href={repository.href}
+                onClick={() => {
+                  console.log("click triggered");
+                  navigate(repository.href);
+                }}
+                // prop:href={repository.href}
               >
                 Open
               </sl-button>
