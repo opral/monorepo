@@ -19,7 +19,11 @@
     "vite-plugin-ssr": "^0.4.27"
   },
   "dependencies": {
-    "@shoelace-style/shoelace": "^2.0.0-beta.80",
+    "@inlang/core": "*",
+    "@inlang/result": "*",
+    "@inlang/utils": "*",
+    "@isomorphic-git/lightning-fs": "^4.6.0",
+    "iso-639-1": "^2.1.13",
     "solid-js": "^1.4.7"
   }
 }
