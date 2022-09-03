@@ -19,6 +19,7 @@
     "vite-plugin-ssr": "^0.4.27"
   },
   "dependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@inlang/core": "*",
     "@inlang/result": "*",
     "@inlang/utils": "*",
