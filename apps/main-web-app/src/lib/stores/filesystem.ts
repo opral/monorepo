@@ -1,4 +1,4 @@
-import FS, { type PromisifedFS } from '@isomorphic-git/lightning-fs';
+import FS, { type PromisifiedFS } from '@isomorphic-git/lightning-fs';
 import { writable } from 'svelte/store';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -15,7 +15,7 @@ export const fs = createFsStore();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createFsStore() {
-	const { subscribe, set } = writable<PromisifedFS>(_fs.promises);
+	const { subscribe, set } = writable<PromisifiedFS>(_fs.promises);
 
 	return {
 		subscribe,
