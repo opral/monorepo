@@ -15,7 +15,7 @@
       "name": "apps/editor-solidjs",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3002",
       "webRoot": "${workspaceFolder}/apps/editor-solidjs"
     },
     {

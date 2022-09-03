@@ -19,11 +19,11 @@ function Breadcrumbs() {
       .split("/")
       .slice(-2)
       .join(" ");
-    if (searchParameters.directory === "/") {
+    if (searchParameters.dir === "/") {
       return [
         {
           name: respositoryName,
-          href: `/git/${window.location.pathname}`,
+          href: `${window.location.pathname}`,
           isCurrentPage: true,
         },
       ];
@@ -31,17 +31,17 @@ function Breadcrumbs() {
     const result = [
       {
         name: respositoryName,
-        href: `/git/${window.location.pathname}`,
+        href: `${window.location.pathname}`,
         isCurrentPage: false,
       },
     ];
-    for (const [i, subpath] of searchParameters.directory
+    for (const [i, subpath] of searchParameters.dir
       .split("/")
       .slice(1, -1)
       .entries()) {
       // the path(s) "above" the subpath
       // .slice(1) to remove prefixed slash as in the each loop above
-      const rootpath = searchParameters.directory
+      const rootpath = searchParameters.dir
         .split("/")
         .slice(1)
         .slice(0, i)
@@ -50,8 +50,8 @@ function Breadcrumbs() {
       const dir = rootpath ? `/${rootpath}/${subpath}/` : `/${subpath}/`;
       // ugly slicing of slashes
       let isCurrentPage =
-        searchParameters.directory.slice(
-          searchParameters.directory.slice(0, -1).lastIndexOf("/") + 1,
+        searchParameters.dir.slice(
+          searchParameters.dir.slice(0, -1).lastIndexOf("/") + 1,
           -1
         ) === subpath;
       result.push({

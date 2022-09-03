@@ -8,5 +8,7 @@ import { Component } from "solid-js";
  * Ommiting "Page" and re-defining it as SolidJS component.
  */
 export type PageContext = Omit<PageContextBuiltIn, "Page"> & {
-  Page: Component;
+  Page: Component<{ clientPageContext: ClientPageContext }>;
 };
+
+export type ClientPageContext = Pick<PageContext, "urlParsed">;

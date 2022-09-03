@@ -25,7 +25,7 @@ export async function render(pageContext: PageContext) {
 
   // render the page and save the dispose function of that page
   disposePreviousPage = solidRender(
-    () => <Page />,
+    () => <Page clientPageContext={pageContext} />,
     document.getElementById("root")
   );
 }

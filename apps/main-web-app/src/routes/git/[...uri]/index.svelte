@@ -81,3 +81,9 @@
 		{/each}
 	{/await}
 </ol>
+
+<button
+	on:click={() => {
+		console.log('hello');
+	}}>dsds</button
+>

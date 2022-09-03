@@ -7,6 +7,10 @@
   @apply p-4 rounded;
 }
 
+.link {
+  @apply text-primary hover:text-hover-primary;
+}
+
 /* Replicating default border color of shoelace */
 .border {
   @apply border-gray-300;

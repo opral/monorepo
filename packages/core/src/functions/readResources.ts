@@ -28,6 +28,8 @@ export async function readResources(args: {
         const decoder = new TextDecoder();
         try {
             // https://stackoverflow.com/a/44640785/16690118
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             const file = decoder.decode(await args.fs.readFile(_path));
             resources[languageCode] = converter.parse({ data: file }).unwrap();
         } catch (error) {

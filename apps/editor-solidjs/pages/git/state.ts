@@ -1,28 +1,26 @@
 import { readInlangConfig } from "@inlang/core";
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { filesystem } from "./filesystem";
 
 export const [searchParameters, setSearchParameters] = createStore({
-  /** The current directory */
-  directory: "/",
-  /**
-   * Currently viewed page.
-   *
-   * Exists because the route is matched with a glob `/git/*`.
-   */
-  page: "/",
+  /** Current directory */
+  dir: "/",
+});
+
+createEffect(() => {
+  console.log({ searchParameters });
 });
 
 export const inlangConfig = async () => {
-  const ls = await filesystem.promises.readdir(searchParameters.directory);
+  const ls = await filesystem.promises.readdir(searchParameters.dir);
   if (ls.includes("inlang.config.json")) {
     try {
       const config = (
         await readInlangConfig({
           // @ts-ignore
           fs: filesystem,
-          path: searchParameters.directory + "inlang.config.json",
+          path: searchParameters.dir + "inlang.config.json",
         })
       ).unwrap();
       return config;

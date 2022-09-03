@@ -1,7 +1,7 @@
 // node fs
 import type fs from 'fs';
 // browser fs
-import type { PromisifedFS } from '@isomorphic-git/lightning-fs';
+import type { PromisifiedFS } from '@isomorphic-git/lightning-fs';
 
 /**
  * Common fs api of node and browser.
@@ -10,7 +10,7 @@ import type { PromisifedFS } from '@isomorphic-git/lightning-fs';
  */
 export type CommonFsApi = {
     /** Reads File Content from Disk */
-    readFile(path: string): Promise<Buffer | Uint8Array>;
+    readFile(path: string): Promise<string | Buffer | Uint8Array>;
     /** Writes File Content to Disk */
     writeFile(filePath: string, data: Uint8Array, opts?: WriteFileOpts): Promise<void>;
     /** Remove File from Disk */

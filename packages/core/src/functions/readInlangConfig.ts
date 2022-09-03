@@ -12,6 +12,8 @@ export async function readInlangConfig(args: {
     try {
         const decoder = new TextDecoder();
         const file = await args.fs.readFile(args.path);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const decodedFile = decoder.decode(file);
         const config = JSON.parse(decodedFile);
         const validation = validate({ config });
