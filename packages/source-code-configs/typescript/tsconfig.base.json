@@ -1,26 +1,26 @@
 // The goal of this config is native ESM compilation.
 // see https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#how-can-i-make-my-typescript-project-output-esm
 {
-  "compilerOptions": {
-    // Set the compiler to ESM (node16)
-    "module": "node16",
-    // Resolve modules with ESM (node16)
-    "moduleResolution": "node16",
-    // Allow following syntax and global variables:
-    "lib": ["ES2022"],
-    // Compile to ... syntax (makes importing easier, if the importing environment does not support new syntax features)
-    "target": "ES2020", // ES2020 = Node.js 14
-    // To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
-    "allowSyntheticDefaultImports": true,
-    // ESM doesn't yet support JSON modules.
-    "resolveJsonModule": false,
-    // Create type declaration files (otherwise no typesafety for the importing module)
-    "declaration": true,
-    // For debugging
-    "sourceMap": true,
-    // Strict type checking
-    "strict": true,
-    // forcing consistens casing in files is a life saver (different environments deal with file casing differently)
-    "forceConsistentCasingInFileNames": true
-  }
+	"compilerOptions": {
+		// Set the compiler to ESM (node16)
+		"module": "node16",
+		// Resolve modules with ESM (node16)
+		"moduleResolution": "node16",
+		// Allow following syntax and global variables:
+		"lib": ["ES2022"],
+		// Compile to ... syntax (makes importing easier, if the importing environment does not support new syntax features)
+		"target": "ES2020", // ES2020 = Node.js 14
+		// To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
+		"allowSyntheticDefaultImports": true,
+		// ESM doesn't yet support JSON modules.
+		"resolveJsonModule": false,
+		// Create type declaration files (otherwise no typesafety for the importing module)
+		"declaration": true,
+		// For debugging
+		"sourceMap": true,
+		// Strict type checking
+		"strict": true,
+		// forcing consistens casing in files is a life saver (different environments deal with file casing differently)
+		"forceConsistentCasingInFileNames": true
+	}
 }
