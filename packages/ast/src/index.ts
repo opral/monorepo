@@ -1,3 +1,3 @@
-export function createAst(x: string): string {
-	return x + " world";
-}
+export * from "./classes";
+export * from "./types";
+export * from "./utils";

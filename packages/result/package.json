@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/ast",
+	"name": "@inlang/result",
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
@@ -13,11 +13,6 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@fluent/syntax": "^0.18.1",
-		"lodash-es": "^4.17.21",
-		"@inlang/result": "*"
-	},
-	"devDependencies": {
-		"@types/lodash-es": "^4.17.6"
+		"@inlang/ast": "*"
 	}
 }
