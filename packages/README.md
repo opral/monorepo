@@ -9,7 +9,7 @@ Those packages can be imported by apps as required.
 All packages have more or less the same structure. If in doubt, please open the `package.json`
 file from the package of interest and look up the `scripts` property.
 
-Generally, running commands from dedicated packages requires the cwd to be the root directory `inlang`
+Generally, running commands from dedicated packages requires the CWD to be the root directory `inlang`
 and run call commands with the `--workspace` flag.
 
 **Example**
