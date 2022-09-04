@@ -1,9 +1,0 @@
-{
-  "root": true,
-  "env": {
-    "browser": false,
-    "node": false
-  },
-  "parser": "@typescript-eslint/parser",
-  "extends": ["@inlang/eslint-config"]
-}
