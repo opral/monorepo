@@ -9,7 +9,8 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@inlang/ast": "*"
