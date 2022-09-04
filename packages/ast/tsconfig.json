@@ -1,0 +1,9 @@
+{
+	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
+	"include": ["src/**/*"],
+	"exclude": ["**/node_modules"],
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"outDir": "out"
+	}
+}

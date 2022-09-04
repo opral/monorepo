@@ -1,6 +1,7 @@
 {
-  "name": "@inlang/source-code-configs",
-  "files": [
-    "typescript/tsconfig.base.json"
-  ]
+	"name": "@inlang/source-code-configs",
+	"files": [
+		"typescript/tsconfig.base.json",
+		"typescript/tsconfig.package.json"
+	]
 }

@@ -6,8 +6,6 @@
 		"module": "node16",
 		// Resolve modules with ESM (node16)
 		"moduleResolution": "node16",
-		// Allow following syntax and global variables:
-		"lib": ["ES2022"],
 		// Compile to ... syntax (makes importing easier, if the importing environment does not support new syntax features)
 		"target": "ES2020", // ES2020 = Node.js 14
 		// To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
@@ -21,6 +19,8 @@
 		// Strict type checking
 		"strict": true,
 		// forcing consistens casing in files is a life saver (different environments deal with file casing differently)
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		// exclude types in node modules, see https://stackoverflow.com/a/69649992
+		"types": []
 	}
 }

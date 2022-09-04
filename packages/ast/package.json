@@ -1,0 +1,14 @@
+{
+	"name": "@inlang/ast",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./out/index.d.ts",
+			"import": "./out/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc"
+	}
+}
