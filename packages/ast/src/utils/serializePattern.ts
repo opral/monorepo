@@ -1,6 +1,6 @@
-import { trim } from 'lodash-es';
-import { Identifier, Message, Pattern } from '@fluent/syntax';
-import { serializeEntry } from './serializeEntry';
+import { trim } from "lodash-es";
+import { Identifier, Message, Pattern } from "@fluent/syntax";
+import { serializeEntry } from "./serializeEntry.js";
 
 /**
  * Serializes a `Pattern` to a fluent string.
@@ -11,6 +11,8 @@ import { serializeEntry } from './serializeEntry';
 
  */
 export function serializePattern(pattern: Pattern): string {
-    const serializedEntry = serializeEntry(new Message(new Identifier('dummy-id'), pattern));
-    return trim(serializedEntry.slice(serializedEntry.indexOf('=') + 1));
+	const serializedEntry = serializeEntry(
+		new Message(new Identifier("dummy-id"), pattern)
+	);
+	return trim(serializedEntry.slice(serializedEntry.indexOf("=") + 1));
 }

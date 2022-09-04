@@ -1,8 +1,8 @@
 import { Result } from "@inlang/result";
 import { Resource as FluentResource } from "@fluent/syntax";
-import { Attribute } from "./attribute";
-import { Message } from "./message";
-import { isValidId } from "../utils";
+import { Attribute } from "./attribute.js";
+import { Message } from "./message.js";
+import { isValidId } from "../utils/index.js";
 import { cloneDeep, merge, remove } from "lodash-es";
 
 export class Resource extends FluentResource {

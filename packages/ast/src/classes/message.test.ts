@@ -1,5 +1,5 @@
-import { Attribute } from "./attribute";
-import { Message } from "./message";
+import { Attribute } from "./attribute.js";
+import { Message } from "./message.js";
 import { describe, it, expect } from "vitest";
 
 describe("from()", () => {

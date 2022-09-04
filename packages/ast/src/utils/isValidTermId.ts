@@ -1,4 +1,4 @@
-import { isValidMessageId } from './isValidMessageId';
+import { isValidMessageId } from "./isValidMessageId.js";
 
 /**
  * A term id is valid if the term is prefixed with a `-` and is a valid
@@ -10,8 +10,8 @@ import { isValidMessageId } from './isValidMessageId';
  * https://projectfluent.org/fluent/guide/terms.html
  */
 export function isValidTermId(id: string): boolean {
-    if (id.startsWith('-') && isValidMessageId(id.slice(1, id.length))) {
-        return true;
-    }
-    return false;
+	if (id.startsWith("-") && isValidMessageId(id.slice(1, id.length))) {
+		return true;
+	}
+	return false;
 }

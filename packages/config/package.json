@@ -10,7 +10,8 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"test": "vitest run"
+		"test": "vitest run",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
 	},
 	"dependencies": {
 		"@inlang/ast": "*"

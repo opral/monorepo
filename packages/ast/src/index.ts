@@ -1,3 +1,3 @@
-export * from "./classes";
-export * from "./types";
-export * from "./utils";
+export * from "./classes/index.js";
+export * from "./types/index.js";
+export * from "./utils/index.js";

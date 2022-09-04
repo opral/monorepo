@@ -1,3 +1,3 @@
-import { Annotation as FluentAnnotation } from '@fluent/syntax';
+import { Annotation as FluentAnnotation } from "@fluent/syntax";
 
 export class Annotation extends FluentAnnotation {}

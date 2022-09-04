@@ -3,5 +3,8 @@
 	"files": [
 		"typescript/tsconfig.base.json",
 		"typescript/tsconfig.package.json"
-	]
+	],
+	"scripts": {
+		"format": ""
+	}
 }

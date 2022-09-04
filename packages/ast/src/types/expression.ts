@@ -1,4 +1,4 @@
-import type { SelectExpression } from '../classes';
-import type { InlineExpression } from './inlineExpression';
+import type { SelectExpression } from "../classes/index.js";
+import type { InlineExpression } from "./inlineExpression.js";
 
 export type Expression = InlineExpression | SelectExpression;

@@ -1,3 +1,3 @@
-import { NumberLiteral as FluentNumberLiteral } from '@fluent/syntax';
+import { NumberLiteral as FluentNumberLiteral } from "@fluent/syntax";
 
 export class NumberLiteral extends FluentNumberLiteral {}

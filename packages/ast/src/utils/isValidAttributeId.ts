@@ -1,4 +1,4 @@
-import { isValidMessageId } from './isValidMessageId';
+import { isValidMessageId } from "./isValidMessageId.js";
 
 /**
  * Returns whether or not the provided id is valid as attribute id.
@@ -20,5 +20,5 @@ import { isValidMessageId } from './isValidMessageId';
  *      >> false
  */
 export function isValidAttributeId(id: string): boolean {
-    return isValidMessageId(id);
+	return isValidMessageId(id);
 }

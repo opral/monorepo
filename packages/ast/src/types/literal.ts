@@ -1,3 +1,3 @@
-import type { NumberLiteral, StringLiteral } from '../classes';
+import type { NumberLiteral, StringLiteral } from "../classes/index.js";
 
 export type Literal = StringLiteral | NumberLiteral;
