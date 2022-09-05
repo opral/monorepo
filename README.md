@@ -49,7 +49,7 @@ Let non-technical team members and translators manage translations for you.
 
 ![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
 
-> In-progress features:
+> 🔧 In-progress features:
 > - In-editor rendering of your site/application so translators keep proper context of translations in mind.
 
 ### [VS-Code-Extension](apps/vs-code-extension)  
