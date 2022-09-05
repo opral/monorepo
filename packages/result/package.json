@@ -1,17 +1,22 @@
 {
 	"name": "@inlang/result",
-	"version": "1.0.0",
 	"type": "module",
+	"private": "true",
 	"exports": {
 		".": {
-			"types": "./out/index.d.ts",
-			"import": "./out/index.js"
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
 		}
 	},
+	"files": [
+		"./dist"
+	],
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc --build",
+		"dev": "tsc --watch",
 		"test": "vitest run",
-		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
+		"clean": "rm -r ./dist"
 	},
 	"dependencies": {
 		"@inlang/ast": "*"

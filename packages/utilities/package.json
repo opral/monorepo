@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/config",
+	"name": "@inlang/utilities",
 	"type": "module",
 	"private": "true",
 	"exports": {
@@ -17,9 +17,5 @@
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
-	},
-	"devDependencies": {},
-	"dependencies": {
-		"@inlang/ast": "*"
 	}
 }

@@ -5,6 +5,7 @@
 		"typescript/tsconfig.package.json"
 	],
 	"scripts": {
-		"format": ""
+		"format": "",
+		"build": ""
 	}
 }
