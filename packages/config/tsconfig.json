@@ -3,6 +3,8 @@
 	"include": ["src/**/*"],
 	"exclude": ["**/node_modules", "**/*.test.ts"],
 	"compilerOptions": {
+		// This package is imported both in Node and browser environments.
+		// Therefore, don't include the DOM as lib.
 		"lib": ["ESNext"],
 		"outDir": "out"
 	}

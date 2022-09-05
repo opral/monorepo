@@ -13,6 +13,7 @@
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
 	},
+	"devDependencies": {},
 	"dependencies": {
 		"@inlang/ast": "*"
 	}
