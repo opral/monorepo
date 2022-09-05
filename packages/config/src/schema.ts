@@ -3,7 +3,7 @@ import { LanguageCode } from "@inlang/utilities";
 /**
  * Inlang config schema.
  */
-type Schema = {
+export type Schema = {
 	/**
 	 * The language that other languages are validated against.
 	 *
