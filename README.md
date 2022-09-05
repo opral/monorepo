@@ -14,17 +14,10 @@
        A git-based software localization system
 </h2> 
 
-#
-
 Inlang is a localization system that acknowledges git repositories as the single source of truth, utilizes CI/CD pipelines of repositories for automation, and extends git to close collaboration gaps between developers and translators. 
 
 <figure width="50%">
   <img src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
-  <figcaption>
-    <small>
-      Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
-    </small>
-  </figcaption>
 </figure>
 
 ## Apps
