@@ -3,6 +3,9 @@
 
 // Code from https://github.com/badrap/result
 
+/**
+ * @deprecated Has been used because of missing error boundries of Svelte.
+ */
 abstract class _Result<T, E extends Error> {
 	protected abstract _chain<X, U extends Error>(
 		ok: (value: T) => Result<X, U>,
