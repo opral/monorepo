@@ -14,11 +14,26 @@
        A git-based software localization system
 </h2> 
 
+#
+
 Inlang is a localization system that acknowledges git repositories as the single source of truth, utilizes CI/CD pipelines of repositories for automation, and extends git to close collaboration gaps between developers and translators. 
 
-<figure width="50%">
-  <img src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
+
+<figure align="center">
+  <img width="60%" src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
+  <figcaption>
+    <small>
+      Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
+    </small>
+  </figcaption>
 </figure>
+
+
+Inlang works "on-top-of" the translation files in your repository so you keep full control of your data with no lock-in effect. Validated translations go right back to your git-repo where the rest of your code-base lives. No unnecessary data pipelines and integrations needed.
+
+This leads to one single source of truth: your repository ✅
+
+Useful features such as warnings for missing translations, or  immutable placeholders for variables are pleasant extras to the fundamental advantage of Inlang's git-based architecture.  
 
 ## Apps
 
@@ -30,19 +45,8 @@ Let non-technical team members and translators manage translations for you.
 
 ![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
 
-- Interface built on top of git
- --> Integrate into existing CI/CD pipelines ✅
-- Translations stored in your repository --> you keep control over your data ✅
-- Get warnings for missing translations ✅
-  
-=> The source of truth: your repository 
-
-
-Validated translations go right back to your git-repo where the rest of your code-base lives. No unnecessary data pipelines and integrations needed.
-
 > In-progress features:
 > - In-editor rendering of your site/application so translators keep proper context of translations in mind.
-> - Immutable variables in the translations to prevent translators from changing them while still getting the necessary context
 
 ### [VS-Code-Extension](apps/vs-code-extension)  
 Improve developers' workflows by (semi)automating repetitive tasks. 
