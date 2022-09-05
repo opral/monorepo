@@ -27,10 +27,6 @@ Inlang is a localization system that acknowledges git repositories as the single
     </small>
 </p>
 
-<small align="center">
-  Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
-</small>
-
 
 
 Inlang works "on-top-of" the translation files in your repository so you keep full control of your data with no lock-in effect. Validated translations go right back to your git-repo where the rest of your code-base lives. No unnecessary data pipelines and integrations needed.
