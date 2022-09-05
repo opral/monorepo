@@ -20,7 +20,8 @@
 		"strict": true,
 		// forcing consistens casing in files is a life saver (different environments deal with file casing differently)
 		"forceConsistentCasingInFileNames": true,
-		// exclude types in node modules, see https://stackoverflow.com/a/69649992
-		"types": []
+		// only include certain types in node modules, see https://stackoverflow.com/a/69649992
+		// commonjs types of imported dependencies error out otherwise
+		"types": ["node"]
 	}
 }
