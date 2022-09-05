@@ -20,6 +20,7 @@
 	},
 	"devDependencies": {},
 	"dependencies": {
-		"@inlang/ast": "*"
+		"@inlang/ast": "*",
+		"@inlang/utilities": "*"
 	}
 }
