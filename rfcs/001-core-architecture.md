@@ -328,7 +328,7 @@ Single-user editors are displaced by cloud-based editors for _simple_ string loc
 
 #### Proposal
 
-A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution and the collaboration of git is an order of magnitude better than existing solutions. Think of a combination of Figma and VSCode. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
+A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution. Think of a combination of Figma and VSCode: VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
 ##### Pros
 
