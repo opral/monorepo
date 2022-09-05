@@ -1,6 +1,6 @@
 import { Result } from "@inlang/result";
 import { Message, ParseError, Pattern } from "@fluent/syntax";
-import { parseEntry } from "./parseEntry";
+import { parseEntry } from "./parseEntry.js";
 
 /**
  * Takes a serialized pattern and returns a parsed pattern.
