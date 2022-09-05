@@ -19,14 +19,18 @@
 Inlang is a localization system that acknowledges git repositories as the single source of truth, utilizes CI/CD pipelines of repositories for automation, and extends git to close collaboration gaps between developers and translators. 
 
 
-<figure align="center">
-  <img width="60%" src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
-  <figcaption>
-    <small>
-      Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
+<p align="center">
+    <img width="60%" src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png"   alt="Git-based     architecture">
+    <br/>
+    <small align="center">
+        Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
     </small>
-  </figcaption>
-</figure>
+</p>
+
+<small align="center">
+  Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
+</small>
+
 
 
 Inlang works "on-top-of" the translation files in your repository so you keep full control of your data with no lock-in effect. Validated translations go right back to your git-repo where the rest of your code-base lives. No unnecessary data pipelines and integrations needed.
