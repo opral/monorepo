@@ -16,6 +16,4 @@ export type Schema = {
 	 * The languages must include the reference language itself.
 	 */
 	languages: LanguageCode[];
-	/** Testing whether function can be executed in sandbox. */
-	testFunction: (name: string) => string;
 };
