@@ -1,5 +1,5 @@
 import * as ast from "@inlang/ast";
-import { LanguageCode } from "@inlang/utilities";
+import { LanguageCode } from "../../i18n-utilities/dist/index.js";
 import { FsPromisesSubset } from "./fsPromisesSubset.js";
 
 /**

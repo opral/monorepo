@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/utilities",
+	"name": "@inlang/i18n-utilities",
 	"type": "module",
 	"private": "true",
 	"exports": {

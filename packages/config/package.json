@@ -21,6 +21,6 @@
 	"devDependencies": {},
 	"dependencies": {
 		"@inlang/ast": "*",
-		"@inlang/utilities": "*"
+		"@inlang/i18n-utilities": "*"
 	}
 }
