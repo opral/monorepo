@@ -1,4 +1,6 @@
+import * as ast from "@inlang/ast";
 import { LanguageCode } from "@inlang/utilities";
+import { FsPromisesSubset } from "./fsPromisesSubset.js";
 
 /**
  * Inlang config schema.
@@ -7,7 +9,7 @@ export type Schema = {
 	/**
 	 * The language that other languages are validated against.
 	 *
-	 * In most cases the reference language is English.
+	 * In most cases, the reference language is `en` (English).
 	 */
 	referenceLanguage: LanguageCode;
 	/**
@@ -16,4 +18,14 @@ export type Schema = {
 	 * The languages must include the reference language itself.
 	 */
 	languages: LanguageCode[];
+	readResource: (args: {
+		fs: FsPromisesSubset;
+		languageCode: LanguageCode;
+		ast: typeof ast;
+	}) => Promise<ast.Resource>;
+	writeResource: (args: {
+		fs: FsPromisesSubset;
+		resource: ast.Resource;
+		languageCode: LanguageCode;
+	}) => Promise<void>;
 };
