@@ -1,0 +1,12 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		/**
+          TypeScript doesn't know about import usages in the template because it only sees the
+          script of a Svelte file. Therefore preserve all value imports. Requires TS 4.5 or higher.
+         */
+		"preserveValueImports": true,
+		// taken from the svelte ts config. Effect unknown.
+		"isolatedModules": true
+	}
+}

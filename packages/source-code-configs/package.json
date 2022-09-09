@@ -2,7 +2,7 @@
 	"name": "@inlang/source-code-configs",
 	"files": [
 		"typescript/tsconfig.base.json",
-		"typescript/tsconfig.package.json"
+		"typescript/tsconfig.svelte.json"
 	],
 	"scripts": {
 		"format": "",
