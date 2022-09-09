@@ -1,10 +1,8 @@
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.svelte.json",
 	"compilerOptions": {
-		"target": "ESNext",
 		"useDefineForClassFields": true,
 		"resolveJsonModule": true
-		// "baseUrl": "."
 	},
 	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }

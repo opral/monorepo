@@ -1,7 +1,11 @@
-<!--Add this line to your web component-->
 <svelte:options tag="my-counter" />
 
 <script lang="ts">
+	import {onMount} from 'svelte'
+
+	onMount(() => {
+		console.log('hi')
+	})
 	let count: number = 0;
 	const increment = () => {
 		count += 1;
