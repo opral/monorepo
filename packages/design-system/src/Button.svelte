@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { createEventDispatcher } from "svelte";
 	/**
 	 * Is this the principal call to action on the page?
@@ -12,7 +12,7 @@
 	/**
 	 * How large should the button be?
 	 */
-	export let size = "medium";
+	export let size: "small" | "medium" | "large" = "medium";
 	/**
 	 * Button contents
 	 */

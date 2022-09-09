@@ -5,16 +5,6 @@ import Button from "./Button.svelte";
 export default {
 	title: "Button",
 	component: Button,
-	argTypes: {
-		backgroundColor: { control: "color" },
-		label: { control: "text" },
-		onClick: { action: "onClick" },
-		primary: { control: "boolean" },
-		size: {
-			control: { type: "select" },
-			options: ["small", "medium", "large"],
-		},
-	},
 };
 
 // More on component templates: https://storybook.js.org/docs/svelte/writing-stories/introduction#using-args
