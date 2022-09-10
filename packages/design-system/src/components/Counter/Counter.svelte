@@ -1,26 +1,21 @@
-<!-- lib/Clock.svelte -->
-<svelte:options tag="my-clock" />
-
 <script lang="ts">
-	import { onMount, onDestroy } from "svelte";
-	let date = new Date().toLocaleTimeString();
-	let interval: NodeJS.Timer;
+	import { onMount } from "svelte";
 
 	onMount(() => {
-		interval = setInterval(() => {
-			date = new Date().toLocaleTimeString();
-		}, 1000);
+		console.log("hi");
 	});
-
-	onDestroy(() => {
-		clearInterval(interval);
-	});
+	let count: number = 0;
+	const increment = () => {
+		count += 1;
+	};
 </script>
 
-<span>{date || ""}</span>
+<button on:click={increment}>
+	Clicks: {count}
+</button>
 
 <style>
-	span {
+	button {
 		font-family: inherit;
 		font-size: inherit;
 		padding: 1em 2em;
@@ -34,7 +29,11 @@
 		cursor: pointer;
 	}
 
-	span:active {
+	button:focus {
+		border: 2px solid #ff3e00;
+	}
+
+	button:active {
 		background-color: rgba(255, 62, 0, 0.2);
 	}
 </style>

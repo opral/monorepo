@@ -2,7 +2,8 @@
 	"private": true,
 	"workspaces": [
 		"apps/*",
-		"packages/*"
+		"packages/*",
+		"website/"
 	],
 	"scripts": {},
 	"engines": {
@@ -13,5 +14,8 @@
 		"prettier": "^2.7.1",
 		"typescript": "^4.8.3",
 		"vitest": "^0.23.0"
+	},
+	"dependencies": {
+		"@inlang/design-system": "*"
 	}
 }

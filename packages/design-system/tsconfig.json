@@ -2,7 +2,8 @@
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.svelte.json",
 	"compilerOptions": {
 		"useDefineForClassFields": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": false
 	},
 	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }

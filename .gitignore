@@ -107,3 +107,7 @@ node_modules
 
 # Local Netlify folder
 .netlify
+
+# SvelteKit output
+
+.svelte-kit
