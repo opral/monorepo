@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Counter } from "@inlang/design-system";
+	import { Counter } from "@inlang/design-system/svelte";
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -7,4 +7,4 @@
 	Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
 </p>
 
-<Counter />
+<Counter count={2} />

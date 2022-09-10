@@ -3,9 +3,9 @@
 {
 	"compilerOptions": {
 		// Set the compiler to ESM (node16)
-		"module": "node16",
+		"module": "ESNext",
 		// Resolve modules with ESM (node16)
-		"moduleResolution": "node16",
+		"moduleResolution": "Node",
 		// Compile to ... syntax (makes importing easier, if the importing environment does not support new syntax features)
 		"target": "ES2020", // ES2020 = Node.js 14
 		// To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
@@ -27,11 +27,6 @@
 		// The imported libraries might have different settings/whatever.
 		"skipLibCheck": true,
 		// Lint JS files
-		"checkJs": true,
-		// Svelte Preprocess cannot figure out whether you have a value or a type, so tell TypeScript
-		// to enforce using `import type` instead of `import` for Types.
-		//
-		// For consistency across the source code, the setting is used in the base ts config.
-		"importsNotUsedAsValues": "error"
+		"checkJs": true
 	}
 }

@@ -4,7 +4,7 @@
 	onMount(() => {
 		console.log("hi");
 	});
-	let count: number = 0;
+	export let count: number;
 	const increment = () => {
 		count += 1;
 	};

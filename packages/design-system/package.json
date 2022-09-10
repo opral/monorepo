@@ -2,7 +2,12 @@
 	"name": "@inlang/design-system",
 	"private": true,
 	"type": "module",
-	"svelte": "./src/components/index.ts",
+	"exports": {
+		"./svelte": {
+			"types": "./src/components/index.ts",
+			"import": "./src/components/index.ts"
+		}
+	},
 	"files": [
 		"src"
 	],

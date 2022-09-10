@@ -1,16 +1,17 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		// svelte has problems with module node16. Hence, set svelte code to esnex.
-		// 	- consistent casing does not work see https://github.com/microsoft/TypeScript/issues/50544
-		//  - vite can't bundle for whatever reason.
-		"module": "esnext",
 		/**
           TypeScript doesn't know about import usages in the template because it only sees the
           script of a Svelte file. Therefore preserve all value imports. Requires TS 4.5 or higher.
          */
 		"preserveValueImports": true,
 		// taken from the svelte ts config. Effect unknown.
-		"isolatedModules": true
+		"isolatedModules": true,
+		// Svelte Preprocess cannot figure out whether you have a value or a type, so tell TypeScript
+		// to enforce using `import type` instead of `import` for Types.
+		//
+		// For consistency across the source code, the setting is used in the base ts config.
+		"importsNotUsedAsValues": "error"
 	}
 }
