@@ -1,0 +1,9 @@
+<script>
+    import Clock from './Clock.svelte'
+</script>
+
+<h1>Find a clock below:</h1>
+
+<Clock count={4}>
+
+

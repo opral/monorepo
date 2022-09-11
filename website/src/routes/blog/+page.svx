@@ -1,6 +1,0 @@
-<script lang="ts">
-	import { Counter } from "@inlang/design-system/svelte";
-</script>
-
-<div>hello world</div>
-<Counter count={3} />
