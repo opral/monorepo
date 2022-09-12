@@ -1,30 +1,28 @@
 {
 	"name": "@inlang/design-system",
-	"private": true,
 	"type": "module",
+	"private": "true",
 	"exports": {
-		"./svelte": {
-			"types": "./src/components/index.ts",
-			"import": "./src/components/index.ts"
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./types/svelte": {
+			"types": "./types/svelte.d.ts"
 		}
 	},
 	"files": [
-		"src"
+		"./dist",
+		"./types"
 	],
 	"scripts": {
-		"dev": "vite",
-		"build": "vite build",
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r ./dist"
+		"clean": "rm -r -f ./dist"
 	},
-	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^1.0.2",
-		"@tsconfig/svelte": "^3.0.0",
-		"svelte": "^3.49.0",
-		"svelte-check": "^2.8.1",
-		"svelte-preprocess": "^4.10.7",
-		"tslib": "^2.4.0",
-		"typescript": "^4.6.4",
-		"vite": "^3.1.0"
+	"dependencies": {
+		"lit": "^2.3.1"
 	}
 }

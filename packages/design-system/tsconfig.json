@@ -1,4 +1,12 @@
 {
-	"extends": "@inlang/source-code-configs/typescript/tsconfig.svelte.json",
-	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
+	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
+	"include": ["src/**/*", "src/types-svelte.ts"],
+	"exclude": ["**/*.test.ts"],
+	"compilerOptions": {
+		// This package is imported both in Node and browser environments.
+		// Therefore, don't include the DOM as lib.
+		"lib": ["ESNext"],
+		"outDir": "dist",
+		"experimentalDecorators": true
+	}
 }
