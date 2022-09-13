@@ -3,9 +3,9 @@
 {
 	"compilerOptions": {
 		// Set the compiler to ESM (node16)
-		"module": "ESNext",
+		"module": "Node16",
 		// Resolve modules with ESM (node16)
-		"moduleResolution": "Node",
+		"moduleResolution": "Node16",
 		// Compile to ... syntax (makes importing easier, if the importing environment does not support new syntax features)
 		"target": "ES2020", // ES2020 = Node.js 14
 		// To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
