@@ -16,7 +16,7 @@
 		"./types"
 	],
 	"scripts": {
-		"build": "tsc --build",
+		"build": "npm run clean && tsc --build",
 		"dev": "tsc --watch",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
