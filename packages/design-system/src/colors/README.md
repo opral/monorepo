@@ -22,7 +22,7 @@ module.exports = {
 
 #### What benefit do color tokens provide?
 
-TailwindCSS only provides utility classes. However, UI elements convey semantic meaning and hierarchy such as a "primary" or "secondary" button. Tailwind has no semantic classes such as "primary color". Color tokens are exactly that, semantic classes for colors.
+TailwindCSS only provides utility classes. However, UI elements convey semantic meaning and hierarchy such as a higher emphasized `Save` button and a lower emphasized `Discard` button. Tailwind has no semantic classes such as "primary color". Color tokens are exactly that, semantic classes for colors.
 
 #### Why has Material 3 been chosen as the reference?
 
