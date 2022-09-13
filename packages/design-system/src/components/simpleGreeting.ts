@@ -9,9 +9,9 @@ export class SimpleGreeting extends LitElementWithTailwindCss {
 
 	render() {
 		return html`
-			<div class="bg-primary h-20 flex items-center justify-center">
-				<div class="h-10 bg-on-primary bg-red-200">some text</div>
-			</div>
+			<div class="w-10 h-10 bg-primary"></div>
+			<div class="w-10 h-10 bg-secondary"></div>
+			<div class="w-10 h-10 bg-tertiary"></div>
 		`;
 	}
 }
