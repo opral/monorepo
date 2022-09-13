@@ -12,10 +12,7 @@ export class SimpleGreeting extends LitElement {
 	@property()
 	name = "Somebody";
 
-	@property()
-	age = 0;
-
 	render() {
-		return html`<p>Hello, ${this.name}!</p>`;
+		return html`<p class="bg-purple-500">Hello, ${this.name}!</p>`;
 	}
 }

@@ -20,9 +20,13 @@
 		"dev": "tsc --watch",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist"
+		"clean": "rm -r -f ./dist",
+		"generate-tailwind-classes": "tailwindcss --minify --output ./dist/style.css "
 	},
 	"dependencies": {
 		"lit": "^2.3.1"
+	},
+	"devDependencies": {
+		"tailwindcss": "^3.1.8"
 	}
 }
