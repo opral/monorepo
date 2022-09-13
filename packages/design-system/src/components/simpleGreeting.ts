@@ -13,6 +13,6 @@ export class SimpleGreeting extends LitElement {
 	name = "Somebody";
 
 	render() {
-		return html`<p class="bg-purple-500">Hello, ${this.name}!</p>`;
+		return html`<p class="bg-purple-600">Hello, ${this.name}!</p>`;
 	}
 }

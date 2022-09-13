@@ -7,7 +7,7 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
-		"./types/svelte": {
+		"./components/types/svelte": {
 			"types": "./types/svelte.d.ts"
 		}
 	},
@@ -21,9 +21,10 @@
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist",
-		"generate-tailwind-classes": "tailwindcss --minify --output ./dist/style.css "
+		"generate-tailwind-css": "tailwindcss --output ./dist/style.css "
 	},
 	"dependencies": {
+		"@ctrl/tinycolor": "^3.4.1",
 		"lit": "^2.3.1"
 	},
 	"devDependencies": {
