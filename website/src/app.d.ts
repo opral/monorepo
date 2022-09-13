@@ -1,4 +1,4 @@
-import "@inlang/design-system/types/svelte";
+import "@inlang/design-system/components/types/svelte";
 
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces

@@ -3,10 +3,11 @@
 	"type": "module",
 	"private": "true",
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+		"./components": {
+			"types": "./dist/components/index.d.ts",
+			"import": "./dist/components/index.js"
 		},
+		"./components/style.css": "./dist/components/style.css",
 		"./components/types/svelte": {
 			"types": "./types/svelte.d.ts"
 		}
@@ -16,12 +17,12 @@
 		"./types"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build",
+		"build": "npm run clean && tsc --build && npm run generate-tailwind-css",
 		"dev": "tsc --watch",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist",
-		"generate-tailwind-css": "tailwindcss --output ./dist/style.css "
+		"generate-tailwind-css": "tailwindcss --output ./dist/components/style.css "
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",

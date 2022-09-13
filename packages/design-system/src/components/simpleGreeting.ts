@@ -1,18 +1,17 @@
-import { html, css, LitElement } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { LitElementWithTailwindCss } from "./utilities/LitElementWithTailwindCss.js";
 
 @customElement("simple-greeting")
-export class SimpleGreeting extends LitElement {
-	static styles = css`
-		p {
-			color: blue;
-		}
-	`;
-
+export class SimpleGreeting extends LitElementWithTailwindCss {
 	@property()
 	name = "Somebody";
 
 	render() {
-		return html`<p class="bg-purple-600">Hello, ${this.name}!</p>`;
+		return html`
+			<div class="bg-primary h-20 flex items-center justify-center">
+				<div class="h-10 bg-on-primary bg-red-200">some text</div>
+			</div>
+		`;
 	}
 }
