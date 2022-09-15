@@ -13,7 +13,8 @@
 		},
 		"./colors/tailwind-plugin": {
 			"types": "./dist/colors/tailwindPlugin.d.cts",
-			"import": "./dist/colors/tailwindPlugin.cjs"
+			"import": "./dist/colors/tailwindPlugin.cjs",
+			"require": "./dist/colors/tailwindPlugin.cjs"
 		},
 		"./typography/tailwind-plugin": {
 			"types": "./dist/typography/tailwindPlugin.d.cts",
