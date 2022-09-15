@@ -14,6 +14,11 @@
 		"./colors/tailwind-plugin": {
 			"types": "./dist/colors/tailwindPlugin.d.cts",
 			"import": "./dist/colors/tailwindPlugin.cjs"
+		},
+		"./typography/tailwind-plugin": {
+			"types": "./dist/typography/tailwindPlugin.d.cts",
+			"import": "./dist/typography/tailwindPlugin.cjs",
+			"require": "./dist/typography/tailwindPlugin.cjs"
 		}
 	},
 	"files": [

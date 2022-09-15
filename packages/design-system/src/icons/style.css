@@ -1,10 +1,3 @@
-@import "@inlang/design-system/components/style.css";
-
-/* Write your global styles here, in PostCSS syntax */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @font-face {
 	font-family: "Material Symbols Outlined";
 	font-style: normal;
