@@ -31,13 +31,24 @@
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist",
-		"generate-tailwind-css": "tailwindcss --output ./dist/components/style.css "
+		"generate-tailwind-css": "tailwindcss --output ./dist/components/style.css ",
+		"storybook": "start-storybook -p 6006",
+		"build-storybook": "build-storybook"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
 		"lit": "^2.3.1"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.19.1",
+		"@storybook/addon-actions": "^6.5.12",
+		"@storybook/addon-essentials": "^6.5.12",
+		"@storybook/addon-links": "^6.5.12",
+		"@storybook/builder-webpack4": "^6.5.12",
+		"@storybook/manager-webpack4": "^6.5.12",
+		"@storybook/web-components": "^6.5.12",
+		"babel-loader": "^8.2.5",
+		"lit-html": "^2.3.1",
 		"tailwindcss": "^3.1.8"
 	}
 }
