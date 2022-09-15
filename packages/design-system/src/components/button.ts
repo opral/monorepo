@@ -7,6 +7,9 @@ export class Button extends LitElementWithTailwindCss {
 	@property()
 	name = "Somebody";
 
+	@property()
+	age = 23;
+
 	render() {
 		return html`
 			<div class="w-10 h-10 bg-primary"></div>

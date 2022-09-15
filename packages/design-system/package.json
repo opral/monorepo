@@ -9,7 +9,7 @@
 		},
 		"./components/style.css": "./dist/components/style.css",
 		"./components/types/svelte": {
-			"types": "./types/svelte.d.ts"
+			"types": "./src/svelte.d.ts"
 		},
 		"./colors/tailwind-plugin": {
 			"types": "./dist/colors/tailwindPlugin.d.cts",
@@ -24,7 +24,7 @@
 	},
 	"files": [
 		"./dist",
-		"./types"
+		"./src/svelte.d.ts"
 	],
 	"scripts": {
 		"build": "npm run clean && tsc --build && npm run generate-tailwind-css",

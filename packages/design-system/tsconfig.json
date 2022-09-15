@@ -1,6 +1,7 @@
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
 	"include": ["src/**/*"],
+	"files": ["src/components/types/svelte.d.ts"],
 	"exclude": ["**/*.test.ts", "**/*.stories.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
