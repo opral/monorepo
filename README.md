@@ -11,11 +11,11 @@
 
 
 <h2 align="center">
-       A Git-Based Localization System
+       Git-Based Localization Infrastructure
 </h2> 
 
 
-Inlang makes localization of software effortless with a git-based architecture, dev tools and automation. Your git repository is the single source of truth for localization.
+Inlang makes localization effortless with git-based localization infrastructure: Dev tools, an editor, and automation. Your git repository is the single source of truth for localization.
 
 - [x] No lock-in.
 - [x] One-click setup.
