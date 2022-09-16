@@ -8,14 +8,14 @@
  */
 declare namespace svelteHTML {
 	interface IntrinsicElements {
-		"in-button": ParametersOf<import("./components/button.js").Button>;
+		"in-button": PropertiesOf<import("./components/button.js").Button>;
 	}
 }
 
 // duplicate of ./comonents/types/parameterOf.ts
 // exists because imports of namespace declarations
 // are tricky.
-type ParametersOf<Component> = Omit<
+type PropertiesOf<Component> = Omit<
 	Component,
 	// omit lit element properties and the render function
 	keyof import("lit").LitElement | "render"
