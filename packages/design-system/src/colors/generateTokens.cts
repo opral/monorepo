@@ -8,18 +8,13 @@ import { TinyColor } from "@ctrl/tinycolor";
 // - support for custom colors
 // - non-hardcoded version
 // - derive dark/light mode colors
-export function generateTokens(config: Config): { colors: Tokens } {
+export function generateTokens(config: Config): Tokens {
 	const { accentColors, neutralColors, semanticColors } = config;
 
 	// ---- HELPER VARIABLES -----
 	// Some tokens are always white.
 	// See https://m3.material.io/styles/color/the-color-system/key-colors-tones
 	const white = "#ffffff";
-	// regular colors refer to accent and semantic colors.
-	// like primary, secondary, error etc.
-	const regular = 700;
-	const container = 200;
-	const onContainer = 900;
 
 	// initlize the color system with neutral colors
 	const tokens: Partial<Tokens> = {
@@ -86,7 +81,5 @@ export function generateTokens(config: Config): { colors: Tokens } {
 		.setAlpha(0.12)
 		.toHex8String();
 
-	return {
-		colors: tokens as Tokens,
-	};
+	return tokens as Tokens;
 }
