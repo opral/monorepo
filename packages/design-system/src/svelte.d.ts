@@ -8,7 +8,7 @@
  */
 declare namespace svelteHTML {
 	interface IntrinsicElements {
-		"in-button": PropertiesOf<import("./components/button.js").Button>;
+		"in-button": PropertiesOf<import("./components/button/button.js").Button>;
 	}
 }
 
