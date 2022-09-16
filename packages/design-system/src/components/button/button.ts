@@ -1,21 +1,27 @@
 import { html } from "lit";
+import { classMap } from "lit-html/directives/class-map.js";
 import { customElement, property } from "lit/decorators.js";
-import { LitElementWithTailwindCss } from "../utilities/LitElementWithTailwindCss.js";
+import { LightDomElement } from "../lightDomElement.js";
 
 @customElement("in-button")
-export class Button extends LitElementWithTailwindCss {
+export class Button extends LightDomElement {
 	@property()
-	name = "Somebody";
+	disabled? = false;
 
 	@property()
-	age = 23;
+	variant = "primary";
 
 	render() {
 		return html`
-			<div class="w-10 h-10 bg-primary"></div>
-			<div class="w-10 h-10 bg-secondary"></div>
-			<div class="w-10 h-10 bg-tertiary"></div>
-			<p>My name is ${this.name}</p>
+			<button class="px-5 py-2.5 bg-primary text-on-primary">
+				${this.children}
+			</button>
 		`;
 	}
 }
+
+// px-5 py-2.5 mr-2 mb-2
+// 				text-on-${this.variant}
+// 				bg-${this.variant}
+// 				body-md
+// 				rounded
