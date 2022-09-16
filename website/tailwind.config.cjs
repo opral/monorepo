@@ -1,4 +1,5 @@
 const typography = require("@inlang/design-system/typography/tailwind-plugin");
+const colors = require("@inlang/design-system/colors/tailwind-plugin");
 
 module.exports = {
 	content: ["./src/**/*.{html,js,svelte,ts}"],
@@ -7,5 +8,5 @@ module.exports = {
 		extend: {},
 	},
 
-	plugins: [typography],
+	plugins: [typography, colors.withConfig()],
 };
