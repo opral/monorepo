@@ -7,7 +7,6 @@
 			"types": "./dist/components/index.d.ts",
 			"import": "./dist/components/index.js"
 		},
-		"./components/style.css": "./dist/components/style.css",
 		"./components/types/svelte": {
 			"types": "./src/svelte.d.ts"
 		},
