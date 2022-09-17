@@ -3,28 +3,18 @@
 	"type": "module",
 	"private": "true",
 	"exports": {
+		".": {
+			"types": "./dist/index.d.cts",
+			"import": "./dist/index.cjs",
+			"require": "./dist/index.cjs"
+		},
 		"./components": {
 			"types": "./dist/components/index.d.ts",
 			"import": "./dist/components/index.js"
 		},
-		"./components/tailwind-plugin": {
-			"types": "./dist/components/tailwindPlugin.d.cts",
-			"import": "./dist/components/tailwindPlugin.cjs",
-			"require": "./dist/components/tailwindPlugin.cjs"
-		},
 		"./components/style.css": "./dist/components/style.css",
 		"./components/types/svelte": {
 			"types": "./src/svelte.d.ts"
-		},
-		"./colors/tailwind-plugin": {
-			"types": "./dist/colors/tailwindPlugin.d.cts",
-			"import": "./dist/colors/tailwindPlugin.cjs",
-			"require": "./dist/colors/tailwindPlugin.cjs"
-		},
-		"./typography/tailwind-plugin": {
-			"types": "./dist/typography/tailwindPlugin.d.cts",
-			"import": "./dist/typography/tailwindPlugin.cjs",
-			"require": "./dist/typography/tailwindPlugin.cjs"
 		}
 	},
 	"files": [
