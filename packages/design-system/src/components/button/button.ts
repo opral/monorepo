@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { html, LitElement, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("in-button")
@@ -7,12 +7,12 @@ export class Button extends LitElement {
 	disabled? = false;
 
 	@property()
-	variant = "primary";
+	class? = "";
 
 	render() {
 		return html`
 			<link rel="stylesheet" href="/tailwind.css"></link>
-			<button class="px-5 py-2.5 bg-primary text-on-primary">
+			<button class="px-5 py-2.5 ${this.class}">
 				<slot></slot>
 			</button>
 		`;
