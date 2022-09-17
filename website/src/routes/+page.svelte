@@ -1,9 +1,11 @@
 <script lang="ts">
 </script>
 
-<in-button variant="primary">
-	<p slot="header">Header</p>
-	Button
+<in-button class="bg-primary text-on-primary">
+	hello
 </in-button>
 
-<p class="mt-10 bg-primary">beneath</p>
+
+<div class="button-primary">
+HALLLLO
+</div>

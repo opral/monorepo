@@ -6,6 +6,6 @@ module.exports = {
 	content: ["./src/components/**/*.ts"],
 	theme: {},
 	plugins: [colors.withConfig(colors.defaultConfig), typography],
-	safelist: colors.safeListTokens(),
+	// safelist: colors.safeListTokens(),
 	// safelisting color classes as they can't be known beforehand.
 };

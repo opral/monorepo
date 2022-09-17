@@ -2,7 +2,7 @@
 	"name": "@inlang/website",
 	"private": true,
 	"scripts": {
-		"dev": "concurrently \"vite dev\" \"npm run generate-tailwind-css:watch\"",
+		"dev": "concurrently \"vite dev\" \"npm run generate-tailwind-css:dev\"",
 		"build": "npm run generate-tailwind-css:build && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

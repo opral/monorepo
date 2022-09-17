@@ -12,11 +12,5 @@ declare namespace svelteHTML {
 	}
 }
 
-// duplicate of ./comonents/types/parameterOf.ts
-// exists because imports of namespace declarations
-// are tricky.
-type PropertiesOf<Component> = Omit<
-	Component,
-	// omit lit element properties and the render function
-	keyof import("lit").LitElement | "render"
->;
+// utility to get rid of ugly double import
+type PropertiesOf = import("./components/types/propertiesOf.js").PropertiesOf;

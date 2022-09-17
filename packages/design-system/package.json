@@ -7,6 +7,11 @@
 			"types": "./dist/components/index.d.ts",
 			"import": "./dist/components/index.js"
 		},
+		"./components/tailwind-plugin": {
+			"types": "./dist/components/tailwindPlugin.d.cts",
+			"import": "./dist/components/tailwindPlugin.cjs",
+			"require": "./dist/components/tailwindPlugin.cjs"
+		},
 		"./components/style.css": "./dist/components/style.css",
 		"./components/types/svelte": {
 			"types": "./src/svelte.d.ts"

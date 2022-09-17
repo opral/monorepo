@@ -6,6 +6,6 @@
  */
 export type PropertiesOf<Component> = Omit<
 	Component,
-	// omit lit element properties and the render function
+	// omit generic lit element properties and the render function
 	keyof import("lit").LitElement | "render"
 >;
