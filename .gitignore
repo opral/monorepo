@@ -111,3 +111,6 @@ node_modules
 # SvelteKit output
 
 .svelte-kit
+
+# tailwind css is auto generated
+website/static/tailwind.css

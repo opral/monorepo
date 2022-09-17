@@ -1,7 +1,0 @@
-<script>
-    let name = "Samuel"
-</script>
-
-<p>{name}</p>
-
-<button on:click={() => {alert('ey dy penner')}}>alert</button>

@@ -1,10 +1,8 @@
-import { html } from "lit";
-import { classMap } from "lit-html/directives/class-map.js";
+import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { LightDomElement } from "../lightDomElement.js";
 
 @customElement("in-button")
-export class Button extends LightDomElement {
+export class Button extends LitElement {
 	@property()
 	disabled? = false;
 
@@ -13,8 +11,9 @@ export class Button extends LightDomElement {
 
 	render() {
 		return html`
+			<link rel="stylesheet" href="/tailwind.css"></link>
 			<button class="px-5 py-2.5 bg-primary text-on-primary">
-				${this.children}
+				<slot></slot>
 			</button>
 		`;
 	}

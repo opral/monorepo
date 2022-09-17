@@ -1,3 +1,9 @@
+/* This file is compiled to tailwind.css and served in the [static directory](../static/tailwind.css)  */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
 	font-family: "Material Symbols Outlined";
 	font-style: normal;
