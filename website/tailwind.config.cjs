@@ -8,8 +8,6 @@ module.exports = {
 	theme: {
 		extend: {},
 	},
-	plugins: [typography, colors.withConfig(), components.configure()],
+	plugins: [typography.configure(), colors.configure(), components.configure()],
 	safelist: [...components.usedUtilityClasses()],
 };
-
-console.log(components);

@@ -5,7 +5,7 @@ const typography = require("./dist/typography/tailwindPlugin.cjs");
 module.exports = {
 	content: ["./src/components/**/*.ts"],
 	theme: {},
-	plugins: [colors.withConfig(colors.defaultConfig), typography],
+	plugins: [colors.configure(colors.defaultConfig), typography.configure()],
 	// safelist: colors.safeListTokens(),
 	// safelisting color classes as they can't be known beforehand.
 };
