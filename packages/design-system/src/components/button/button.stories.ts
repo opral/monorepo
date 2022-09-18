@@ -10,10 +10,14 @@ export default {
 
 //👇 We create a “template” of how args map to rendering
 const Template = (props: PropertiesOf<Button>) => {
-	return html` <in-button disabled=${props.disabled}> dddddd </in-button>`;
+	return html` <in-button disabled=${props.disabled} class=${props.class}>
+		Click Me
+	</in-button>`;
 };
 
-export const Primary: { args: PropertiesOf<Button> } = Template.bind({});
-Primary.args = {
+export const Default: { args: PropertiesOf<Button> } = Template.bind({});
+Default.args = {
 	disabled: false,
+	class: "button-primary",
 };
+

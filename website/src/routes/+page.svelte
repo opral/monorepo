@@ -1,4 +1,4 @@
 <script lang="ts">
 </script>
 
-<in-button>hi</in-button>
+<in-button class="button-primary">Click me</in-button>
