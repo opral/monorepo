@@ -9,7 +9,7 @@ module.exports = {
 		typography.configure(),
 		components.configure(),
 	],
-	// !safelisting the utlities used by the components is not required
-	// the used utility classes are extracted by the tailwind cli.
-	// TLDR tailwind will crash because no tailwind.css exists
+	// we safelist all tailwind classes to enable
+	// dynamic style changing in storybook
+	safelist: [{ pattern: /./ }],
 };

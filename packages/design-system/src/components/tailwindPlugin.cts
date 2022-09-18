@@ -28,7 +28,7 @@ export function usedUtilityClasses() {
 	// will only be executed when compiled and saved in dist, this works).
 	//
 	// using require.resolve to resolve the relative path in the node modules
-	const cssFile = fs.readFileSync(require.resolve("./style.css"), "utf8");
+	const cssFile = fs.readFileSync(require.resolve("./tailwind.css"), "utf8");
 	const cssObject = css.parse(cssFile);
 	const selectors = cssObject.stylesheet?.rules
 		// @ts-ignore

@@ -23,12 +23,12 @@
 	],
 	"scripts": {
 		"build": "npm run clean && tsc --build && npm run generate-tailwind-css",
-		"dev": "concurrently \"tsc --watch\" \"npm run storybook\" \"npm run generate-tailwind-css:watch\"",
+		"dev": "concurrently \"tsc --watch\" \"npm run generate-tailwind-css:dev\" \"npm run storybook\"",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist",
-		"generate-tailwind-css": "tailwindcss --output ./dist/components/style.css",
-		"generate-tailwind-css:watch": "tailwindcss --output ./dist/components/style.css --watch",
+		"generate-tailwind-css": "tailwindcss --config ./tailwind.config.cjs --output ./dist/components/tailwind.css",
+		"generate-tailwind-css:dev": "tailwindcss --config ./tailwind.config.dev.cjs --output ./.storybook/static/tailwind.css --watch",
 		"storybook": "start-storybook -p 6006",
 		"build-storybook": "build-storybook"
 	},
