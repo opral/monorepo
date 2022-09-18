@@ -29,7 +29,11 @@ export function usedUtilityClasses(): string[] {
 	// using require.resolve to resolve the relative path in the node modules
 	const css = fs.readFileSync(require.resolve("./style.css"), "utf8");
 	// match classes in the stylesheet.
-	const result = [...css.matchAll(/\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*\s*\{/g)!].map(
+	const result = [
+		...css.matchAll(
+			/(([a-zA-Z-:]*)[\\\\\\\\]*:)*([\\\\\\\\]*!)?tw-[a-zA-Z-]([a-zA-Z0-9-]*([\\\\\\\\]*(\\%|\\#|\\.|\\[|\\]))*)*/g
+		),
+	].map(
 		// the match returns an array of arrays.
 		// the first element is the class name
 		// and returns a list like `['.mr-2 {', '.mb-2 {', '.rounded {', ...]`

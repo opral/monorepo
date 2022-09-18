@@ -1,6 +1,7 @@
 # @inlang/design-system
 
-A web-component and tailwind CSS-based design system for applications.
+A web-component and tailwind CSS-based design system for applications with semantic
+meaning inspired by [Material3](https://m3.material.io/).
 
 Web-components arrived. Let's stop the framework "works only in React/Vue/Svelte" madness.
 This design system works everywhere (even in Markdown files!). The design system builds on

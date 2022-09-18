@@ -12,7 +12,12 @@ export class Button extends LitElement {
 	render() {
 		return html`
 			<link rel="stylesheet" href="/tailwind.css"></link>
-			<button class="py-2.5 mr-2 mb-2 rounded ${this.class}">
+			<button class="${this.class} 
+				px-5 py-2.5 mr-2 mb-2 rounded
+				focus:outline-none
+				focus:ring-4 
+				hover:bg-hover-primary
+				">
 				<slot></slot>
 			</button>
 		`;
