@@ -3,7 +3,7 @@
 	"type": "module",
 	"private": "true",
 	"exports": {
-		".": {
+		"./tailwind": {
 			"types": "./dist/index.d.cts",
 			"import": "./dist/index.cjs",
 			"require": "./dist/index.cjs"

@@ -1,4 +1,8 @@
-const { colors, typography, components } = require("@inlang/design-system");
+const {
+	colors,
+	typography,
+	components,
+} = require("@inlang/design-system/tailwind");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
