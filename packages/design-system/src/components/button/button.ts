@@ -23,7 +23,6 @@ export class Button extends LitElement {
 				focus:ring-4
 				disabled:cursor-not-allowed
 				">
-				${this.disabled}
 				<slot></slot>
 			</button>
 		`;

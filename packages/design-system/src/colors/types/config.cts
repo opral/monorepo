@@ -1,7 +1,7 @@
 import type { Color } from "./color.cjs";
 
 /**
- * 
+ * The color systems config.
  */
 export type Config = {
 	accentColors: {
