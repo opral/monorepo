@@ -8,15 +8,26 @@ The tokens are taken from Material Design 3. Take a look at the excellent docume
 
 ```js
 // tailwind.config.js
-const colors = require("@inlang/design-system/colors/tailwind-plugin");
+const { colors } = require("@inlang/design-system/tailwind");
 
 module.exports = {
 	content: ["<your content paths>"],
 	theme: {},
-	// optionally configure the colors. see [config](./types/config.cts)
-	plugins: [colors.withConfig({})],
+	plugins: [colors.configure({})],
 };
 ```
+
+## Deviations from Material3
+
+**No :drag colors; increased darkening of :press selector**
+
+Material defines [4 interaction state colors](https://m3.material.io/foundations/interaction-states).
+One of them is a drag state. However, CSS provides no drag selector. Furthermore, the press
+darkening is identical to the hover darkening. The identical darkening leads to an unsatisfying
+press experience where the colors don't change. To combat the drag and unsatisfying press experience,
+the press selector has been darkened to the drag value.
+
+The implemenation can be found in (./generateTokens.cts)[./generateTokens.cts].
 
 ## FAQ
 

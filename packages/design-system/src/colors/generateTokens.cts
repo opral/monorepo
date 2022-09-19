@@ -57,8 +57,12 @@ export function generateTokens(config: Config): Tokens {
 	for (const [name, hex] of Object.entries(tokens)) {
 		tokens[`hover-${name}`] = new TinyColor(hex).darken(8).toHex8String();
 		tokens[`focus-${name}`] = new TinyColor(hex).darken(12).toHex8String();
-		tokens[`press-${name}`] = new TinyColor(hex).darken(12).toHex8String();
-		tokens[`drag-${name}`] = new TinyColor(hex).darken(16).toHex8String();
+		// slight deviation from material by darken the color by 16 instead of 12
+		// due to the lack of drag and incresing the feedback when pressing a button.
+		tokens[`press-${name}`] = new TinyColor(hex).darken(16).toHex8String();
+		// no drag because css has no drag selector
+		// tokens[`drag-${name}`] = new TinyColor(hex).darken(16).toHex8String();
+
 		// no selected or activated colors because:
 		//
 		//   "Unlike hover, focus, pressed, and dragged states
