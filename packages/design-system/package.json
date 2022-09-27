@@ -23,7 +23,7 @@
 	],
 	"scripts": {
 		"build": "npm run clean && tsc --build && npm run generate-tailwind-css",
-		"dev": "concurrently \"tsc --watch\" \"npm run generate-tailwind-css:dev\" \"npm run storybook\"",
+		"dev": "npm run generate-tailwind-css && concurrently \"tsc --watch\" \"npm run generate-tailwind-css:dev\" \"npm run storybook\" --kill-others",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist",
