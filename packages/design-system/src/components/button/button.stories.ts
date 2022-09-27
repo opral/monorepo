@@ -20,4 +20,3 @@ Default.args = {
 	disabled: false,
 	class: "button-primary",
 };
-

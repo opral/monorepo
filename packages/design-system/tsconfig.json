@@ -3,7 +3,7 @@
 	"include": ["src/**/*"],
 	"exclude": ["**/*.test.*", "**/*.stories.ts"],
 	"compilerOptions": {
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"outDir": "dist",
 		// lit makes heavy use of decorators
 		"experimentalDecorators": true
