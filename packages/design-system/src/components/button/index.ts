@@ -31,6 +31,7 @@ export class Button extends LitElement {
 				disabled=${this.disabled === true ? true : nothing}
 				aria-disabled=${this.disabled ? "true" : "false"}
 				@click=${this.handleClick}
+				@mousedown=${this.handleMouseDown}
 				class="
 				${this.class} 
 				px-5 py-2.5 mr-2 mb-2 rounded
