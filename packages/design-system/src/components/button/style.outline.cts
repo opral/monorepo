@@ -12,19 +12,22 @@ export const style = forEachColorToken(
 		".button-outline-${token}": {
 			"&:enabled": {
 				color: "theme(colors.${token})",
-				"border-color": "theme(colors.${token})",
+				"border-color": "theme(colors.outline)",
 				"border-width": "theme(borderWidth.DEFAULT)",
 			},
 			"&:enabled:hover": {
 				color: "theme(colors.on-${token})",
+				"border-color": "theme(colors.hover-${token})",
 				"background-color": "theme(colors.hover-${token})",
 			},
 			"&:enabled:focus": {
 				color: "theme(colors.on-${token})",
+				"border-color": "theme(colors.focus-${token})",
 				"background-color": "theme(colors.focus-${token})",
 			},
 			"&:enabled:press": {
 				color: "theme(colors.on-${token})",
+				"border-color": "theme(colors.press-${token})",
 				"background-color": "theme(colors.press-${token})",
 			},
 			"&:disabled": {
