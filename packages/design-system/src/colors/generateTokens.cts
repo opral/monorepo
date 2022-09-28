@@ -57,11 +57,14 @@ export function generateTokens(config: Config): Tokens {
 			throw `The base color level can not be higher than 600. 
 			Otherwise, the derived interaction state colors break.`;
 		}
+		// the tokens are adapted to the web:
+		// 1. no drag token.
+		// 2. press token = the active token
 		tokens[`hover-${name}`] =
 			color[(config.colorLevels.base + 100) as keyof Color];
 		tokens[`focus-${name}`] =
 			color[(config.colorLevels.base + 200) as keyof Color];
-		tokens[`press-${name}`] =
+		tokens[`active-${name}`] =
 			color[(config.colorLevels.base + 300) as keyof Color];
 		// no drag token because css has no drag selector. the press and drag token
 		// are identical.

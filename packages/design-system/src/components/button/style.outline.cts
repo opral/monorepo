@@ -25,10 +25,10 @@ export const style = forEachColorToken(
 				"border-color": "theme(colors.focus-${token})",
 				"background-color": "theme(colors.focus-${token})",
 			},
-			"&:enabled:press": {
+			"&:enabled:active": {
 				color: "theme(colors.on-${token})",
-				"border-color": "theme(colors.press-${token})",
-				"background-color": "theme(colors.press-${token})",
+				"border-color": "theme(colors.active-${token})",
+				"background-color": "theme(colors.active-${token})",
 			},
 			"&:disabled": {
 				color: "theme(colors.disabled-content)",
