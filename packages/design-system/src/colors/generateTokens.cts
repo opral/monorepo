@@ -21,19 +21,19 @@ export function generateTokens(config: Config): Tokens {
 	const tokens: Partial<Tokens> = {
 		background: white,
 		"on-background": neutralColors.neutral[900],
-		"surface-100": new TinyColor(accentColors.neutral[900])
+		"surface-100": new TinyColor(neutralColors.neutral[900])
 			.setAlpha(0.05)
 			.toHex8String(),
-		"surface-200": new TinyColor(accentColors.neutral[900])
+		"surface-200": new TinyColor(neutralColors.neutral[900])
 			.setAlpha(0.08)
 			.toHex8String(),
-		"surface-300": new TinyColor(accentColors.neutral[900])
+		"surface-300": new TinyColor(neutralColors.neutral[900])
 			.setAlpha(0.11)
 			.toHex8String(),
-		"surface-400": new TinyColor(accentColors.neutral[900])
+		"surface-400": new TinyColor(neutralColors.neutral[900])
 			.setAlpha(0.12)
 			.toHex8String(),
-		"surface-500": new TinyColor(accentColors.neutral[900])
+		"surface-500": new TinyColor(neutralColors.neutral[900])
 			.setAlpha(0.14)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
