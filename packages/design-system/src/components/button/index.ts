@@ -9,14 +9,20 @@ export class Button extends LitElement {
 	@property()
 	disabled? = false;
 
-	handleClick(event: MouseEvent) {
+	private handleClick(event: MouseEvent) {
 		// if the button is disabled, no event should be emitted.
 		if (this.disabled) {
-			event.preventDefault();
 			event.stopPropagation();
 			return;
 		}
 	}
+
+	private handleMouseDown(event: MouseEvent) {
+		// prevents the focus state after the button has been clicked.
+		// see https://stackoverflow.com/a/37580028
+		event.preventDefault();
+	}
+
 	render() {
 		return html`
 			<link rel="stylesheet" href="/tailwind.css"></link>
@@ -36,7 +42,7 @@ export class Button extends LitElement {
 					does not trigger a click event, or does not disable 
 					a click event when this.disabled is true. 
 				-->
-				<slot @click=${this.handleClick}></slot>
+				<slot @click=${this.handleClick} @mousedown=${this.handleMouseDown}></slot>
 			</button>
 		`;
 	}
