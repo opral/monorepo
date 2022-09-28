@@ -1,7 +1,8 @@
 import fs from "node:fs";
-import { style } from "./button/button.style.cjs";
 import plugin from "tailwindcss/plugin";
 import css from "css";
+import * as button from "./button/style.default.cjs";
+import * as buttonOutline from "./button/style.outline.cjs";
 
 /**
  * Entrypoint of the plugin.
@@ -12,7 +13,9 @@ import css from "css";
  */
 export function configure() {
 	return plugin(({ addComponents }) => {
-		addComponents(style);
+		for (const component of [button, buttonOutline]) {
+			addComponents(component.style);
+		}
 	});
 }
 

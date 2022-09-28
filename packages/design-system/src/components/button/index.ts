@@ -1,4 +1,4 @@
-import { html, LitElement, nothing } from "lit";
+import { html, nothing, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("in-button")
@@ -6,23 +6,17 @@ export class Button extends LitElement {
 	@property()
 	class? = "";
 
-	// the button state should be reactive (reflect)
-	// otherwise, the `handleClick()` will not reflect the current state
-	@property({ reflect: true })
+	@property()
 	disabled? = false;
 
-	private handleClick(event: MouseEvent) {
-		console.log({ disabled: this.disabled });
-
+	handleClick(event: MouseEvent) {
 		// if the button is disabled, no event should be emitted.
 		if (this.disabled) {
-			console.log("disabled");
 			event.preventDefault();
 			event.stopPropagation();
 			return;
 		}
 	}
-
 	render() {
 		return html`
 			<link rel="stylesheet" href="/tailwind.css"></link>

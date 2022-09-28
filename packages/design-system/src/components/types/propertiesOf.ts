@@ -7,5 +7,5 @@
 export type PropertiesOf<Component> = Omit<
 	Component,
 	// omit generic lit element properties and the render function
-	keyof import("lit").LitElement | "render"
+	keyof import("lit").LitElement | "render" | "handleClick"
 >;
