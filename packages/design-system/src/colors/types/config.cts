@@ -66,7 +66,12 @@ export type Config = {
 	 * like primary, secondary, error etc.
 	 */
 	colorLevels: {
-		base: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+		/**
+		 * A base level higher than 600 would break the interaction state colors.
+		 *
+		 * The interaction state colors are generate in (generateTokens())[./generateTokens.cts].
+		 */
+		base: 100 | 200 | 300 | 400 | 500 | 600;
 		container: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 		onContainer: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 	};

@@ -1,6 +1,7 @@
 import type { Config } from "./types/config.cjs";
 import type { Tokens } from "./types/tokens.cjs";
 import { TinyColor } from "@ctrl/tinycolor";
+import type { Color } from "./types/color.cjs";
 
 // todos:
 // - support surface levels (100,200,300,400,500)
@@ -50,26 +51,22 @@ export function generateTokens(config: Config): Tokens {
 		tokens[`on-${name}`] = white;
 		tokens[`${name}-container`] = color[config.colorLevels.container];
 		tokens[`on-${name}-container`] = color[config.colorLevels.onContainer];
+		// add interaction state colors
+		// see https://m3.material.io/foundations/interaction-states
+		if (config.colorLevels.base > 600) {
+			throw `The base color level can not be higher than 600. 
+			Otherwise, the derived interaction state colors break.`;
+		}
+		tokens[`hover-${name}`] =
+			color[(config.colorLevels.base + 100) as keyof Color];
+		tokens[`focus-${name}`] =
+			color[(config.colorLevels.base + 200) as keyof Color];
+		tokens[`press-${name}`] =
+			color[(config.colorLevels.base + 300) as keyof Color];
+		// no drag token because css has no drag selector. the press and drag token
+		// are identical.
 	}
 
-	// add interaction state colors
-	// see https://m3.material.io/foundations/interaction-states
-	for (const [name, hex] of Object.entries(tokens)) {
-		tokens[`hover-${name}`] = new TinyColor(hex).darken(8).toHex8String();
-		tokens[`focus-${name}`] = new TinyColor(hex).darken(12).toHex8String();
-		// slight deviation from material by darken the color by 16 instead of 12
-		// due to the lack of drag and incresing the feedback when pressing a button.
-		tokens[`press-${name}`] = new TinyColor(hex).darken(16).toHex8String();
-		// no drag because css has no drag selector
-		// tokens[`drag-${name}`] = new TinyColor(hex).darken(16).toHex8String();
-
-		// no selected or activated colors because:
-		//
-		//   "Unlike hover, focus, pressed, and dragged states
-		//    that use state layers, components using the activated
-		//    or selected states change the container and content
-		//    color directly".
-	}
 	// "single" interaction states.
 	// see https://m3.material.io/foundations/interaction-states
 	//
