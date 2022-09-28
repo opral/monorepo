@@ -37,12 +37,12 @@ export function configure(config: Partial<Config>) {
 export let USED_CONFIG: Config = {
 	accentColors: {
 		primary: colors.blue,
-		secondary: colors.fuchsia,
-		tertiary: colors.cyan,
+		secondary: colors.gray,
+		tertiary: colors.teal,
 	},
 	neutralColors: {
-		neutral: colors.stone,
-		neutralVariant: colors.neutral,
+		neutral: colors.neutral,
+		neutralVariant: colors.stone,
 	},
 	semanticColors: {
 		error: colors.red,

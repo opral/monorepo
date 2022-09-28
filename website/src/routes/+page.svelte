@@ -1,9 +1,7 @@
 <script lang="ts">
-    let disabled = false
+	let disabled = true;
 </script>
 
-<in-button class="button-primary" {disabled} on:click={() => {
-    disabled = !disabled
-}}>Click me</in-button>
+<in-button {disabled} class="button-primary label-lg"> Click me </in-button>
 
-<p>state is {disabled}</p>
+<in-button {disabled} class="button-outline-primary label-lg"> Click me </in-button>
