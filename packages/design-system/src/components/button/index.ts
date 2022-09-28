@@ -1,5 +1,6 @@
 import { html, nothing, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { createRef, Ref, ref } from "lit/directives/ref.js";
 
 @customElement("in-button")
 export class Button extends LitElement {
@@ -23,10 +24,20 @@ export class Button extends LitElement {
 		event.preventDefault();
 	}
 
+	buttonRef: Ref<HTMLButtonElement> = createRef();
+
 	render() {
+		// enable click with enter key.
+		this.buttonRef.value?.addEventListener("keypress", (event) => {
+			if (event.key === "Enter") {
+				this.buttonRef.value?.click();
+			}
+		});
+
 		return html`
 			<link rel="stylesheet" href="/tailwind.css"></link>
 			<button 
+				${ref(this.buttonRef)}
 				type="button"
 				disabled=${this.disabled === true ? true : nothing}
 				aria-disabled=${this.disabled ? "true" : "false"}
