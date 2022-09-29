@@ -4,8 +4,9 @@ import { createRef, Ref, ref } from "lit/directives/ref.js";
 
 @customElement("in-button")
 export class Button extends LitElement {
+	// custom elements are not rendered as inline-block by default.
+	// see https://stackoverflow.com/questions/25193964/how-can-i-have-a-web-components-width-and-height-be-inherited-by-its-children
 	static styles = css`
-		/* see https://stackoverflow.com/questions/25193964/how-can-i-have-a-web-components-width-and-height-be-inherited-by-its-children */
 		:host {
 			display: inline-block;
 		}
@@ -16,22 +17,6 @@ export class Button extends LitElement {
 
 	@property()
 	disabled? = false;
-
-	private handleClick(event: MouseEvent) {
-		// if the button is disabled, no event should be emitted.
-		if (this.disabled) {
-			event.stopPropagation();
-			return;
-		}
-	}
-
-	private handleMouseDown(event: MouseEvent) {
-		// prevents the focus state after the button has been clicked.
-		// see https://stackoverflow.com/a/37580028
-		event.preventDefault();
-	}
-
-	buttonRef: Ref<HTMLButtonElement> = createRef();
 
 	render() {
 		// enable click with enter key.
@@ -51,22 +36,30 @@ export class Button extends LitElement {
 				@click=${this.handleClick}
 				@mousedown=${this.handleMouseDown}
 				class="
-				${this.class} 
-				px-5 py-2.5 mr-2 mb-2 rounded
-				disabled:cursor-not-allowed
-				">
-				<!-- 
-					Need to propagate click on slotted childs too.
-					Otherwise, clicking elements within the slot either
-					does not trigger a click event, or does not disable 
-					a click event when this.disabled is true. 
-				-->
-				<slot 
-					@click=${this.handleClick} 
-					@mousedown=${this.handleMouseDown}
-				>
-				</slot>
+					${this.class} 
+					px-4 py-2.5 mr-2 mb-2 rounded
+					flex items-center gap-1
+					disabled:cursor-not-allowed
+				"
+			>
+				<slot></slot>
 			</button>
 		`;
+	}
+
+	private buttonRef: Ref<HTMLButtonElement> = createRef();
+
+	private handleClick(event: MouseEvent) {
+		// if the button is disabled, no event should be emitted.
+		if (this.disabled) {
+			event.stopPropagation();
+			return;
+		}
+	}
+
+	private handleMouseDown(event: MouseEvent) {
+		// prevents the focus state after the button has been clicked.
+		// see https://stackoverflow.com/a/37580028
+		event.preventDefault();
 	}
 }
