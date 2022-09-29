@@ -54,7 +54,11 @@ export class Button extends LitElement {
 					does not trigger a click event, or does not disable 
 					a click event when this.disabled is true. 
 				-->
-				<slot @click=${this.handleClick} @mousedown=${this.handleMouseDown}></slot>
+				<slot 
+					@click=${this.handleClick} 
+					@mousedown=${this.handleMouseDown}
+				>
+				</slot>
 			</button>
 		`;
 	}
