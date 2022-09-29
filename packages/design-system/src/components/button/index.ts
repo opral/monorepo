@@ -1,9 +1,16 @@
-import { html, nothing, LitElement } from "lit";
+import { html, nothing, LitElement, CSSResultGroup, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
 @customElement("in-button")
 export class Button extends LitElement {
+	static styles = css`
+		/* see https://stackoverflow.com/questions/25193964/how-can-i-have-a-web-components-width-and-height-be-inherited-by-its-children */
+		:host {
+			display: inline-block;
+		}
+	`;
+
 	@property()
 	class? = "";
 
