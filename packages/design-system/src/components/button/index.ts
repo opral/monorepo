@@ -38,7 +38,7 @@ export class Button extends LitElement {
 				class="
 					${this.class} 
 					px-4 py-2.5 mr-2 mb-2 rounded
-					flex items-center gap-1
+					flex items-center gap-1.5
 					disabled:cursor-not-allowed
 				"
 			>
