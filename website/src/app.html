@@ -3,16 +3,17 @@
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<link rel="stylesheet" href="/tailwind.css" />
 		<meta name="viewport" content="width=device-width" />
+		<!-- importing app.css stylesheet which is compiled to tailwind.css -->
+		<link rel="stylesheet" href="/tailwind.css" />
+		<!-- importing the inter font. see https://rsms.me/inter/ -->
+		<link rel="preconnect" href="https://rsms.me/" />
+		<link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+		<!-- importing material symbols. see https://fonts.google.com/icons?icon.style=Rounded  -->
 		<link
 			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
 		/>
-		<script
-			type="module"
-			src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/shoelace.js"
-		></script>
 		%sveltekit.head%
 	</head>
 	<body>
