@@ -4,6 +4,7 @@ import css from "css";
 import * as alert from "./alert/style.default.cjs";
 import * as button from "./button/style.default.cjs";
 import * as buttonOutline from "./button/style.outline.cjs";
+import * as badge from "./badge/style.default.cjs";
 
 /**
  * Entrypoint of the plugin.
@@ -14,7 +15,7 @@ import * as buttonOutline from "./button/style.outline.cjs";
  */
 export function configure() {
 	return plugin(({ addComponents }) => {
-		for (const component of [alert, button, buttonOutline]) {
+		for (const component of [alert, button, badge, buttonOutline]) {
 			addComponents(component.style);
 		}
 	});
