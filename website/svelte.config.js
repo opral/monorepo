@@ -5,12 +5,7 @@ import { mdsvex } from "mdsvex";
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	extensions: [".svelte", ".svx", ".md"],
-	preprocess: [
-		preprocess({
-			postcss: true,
-		}),
-		mdsvex(),
-	],
+	preprocess: [preprocess(), mdsvex()],
 
 	kit: {
 		adapter: adapter(),
