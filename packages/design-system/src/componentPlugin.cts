@@ -1,3 +1,6 @@
+//! This plugin is not contained in ./components directory because
+//! stencil deleted the file when compiling the components.
+
 import plugin from "tailwindcss/plugin";
 
 /**
@@ -9,7 +12,7 @@ import plugin from "tailwindcss/plugin";
 export function configure() {
 	return plugin(({ addComponents }) => {
 		for (const component of []) {
-			addComponents(component.style);
+			// addComponents(component.style);
 		}
 	});
 }

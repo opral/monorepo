@@ -1,6 +1,6 @@
 import { Component, Prop, h } from "@stencil/core";
 
-@Component({ tag: "in-button" })
+@Component({ tag: "in-component" })
 export class Button {
 	/**
 	 * The first name

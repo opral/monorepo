@@ -1,8 +1,7 @@
 const {
-	colors,
-	typography,
+	colorSystem,
 	components,
-} = require("@inlang/design-system/tailwind");
+} = require("@inlang/design-system/tailwind-plugins");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -10,6 +9,5 @@ module.exports = {
 	theme: {
 		extend: {},
 	},
-	plugins: [typography.configure(), colors.configure(), components.configure()],
-	safelist: [...components.usedUtilityClasses()],
+	plugins: [colorSystem.configure(), components.configure()],
 };

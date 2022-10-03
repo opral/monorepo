@@ -3,14 +3,15 @@
 	"type": "module",
 	"private": "true",
 	"exports": {
-		"./tailwindPlugin": {
-			"types": "./dist/tailwindPlugin.d.cts",
-			"import": "./dist/tailwindPlugin.cjs",
-			"require": "./dist/tailwindPlugin.cjs"
+		"./tailwind-plugins": {
+			"types": "./dist/tailwindPlugins.d.cts",
+			"import": "./dist/tailwindPlugins.cjs",
+			"require": "./dist/tailwindPlugins.cjs"
 		},
 		"./components": {
-			"types": "./dist/components/index.d.ts",
-			"import": "./dist/components/index.js"
+			"types": "./dist/components/types/index.d.ts",
+			"import": "./dist/components/index.js",
+			"require": "./dist/components.index.cjs.js"
 		},
 		"./types/svelte": {
 			"types": "./src/svelte.d.ts"
@@ -21,7 +22,7 @@
 		"./src/svelte.d.ts"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build && stencil build",
+		"build": "npm run clean && tsc --build ./tsconfig.tailwind.json && stencil build",
 		"dev": "npm run build && concurrently \"tsc --watch\" --kill-others",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",

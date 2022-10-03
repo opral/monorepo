@@ -1,5 +1,7 @@
 <script lang="ts">
-	import "@inlang/design-system/components";
+	import { Button } from "@inlang/design-system/components";
+
+	customElements.define("in-button", Button);
 </script>
 
 <slot />
