@@ -3,17 +3,16 @@
 	"type": "module",
 	"private": "true",
 	"exports": {
-		"./tailwind": {
-			"types": "./dist/index.d.cts",
-			"import": "./dist/index.cjs",
-			"require": "./dist/index.cjs"
+		"./tailwindPlugin": {
+			"types": "./dist/tailwindPlugin.d.cts",
+			"import": "./dist/tailwindPlugin.cjs",
+			"require": "./dist/tailwindPlugin.cjs"
 		},
 		"./components": {
 			"types": "./dist/components/index.d.ts",
 			"import": "./dist/components/index.js"
 		},
-		"./components/style.css": "./dist/components/style.css",
-		"./components/types/svelte": {
+		"./types/svelte": {
 			"types": "./src/svelte.d.ts"
 		}
 	},
@@ -22,17 +21,16 @@
 		"./src/svelte.d.ts"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build && npm run generate-tailwind-css",
-		"dev": "npm run build && concurrently \"tsc --watch\" \"npm run generate-tailwind-css:dev\" --kill-others",
+		"build": "npm run clean && tsc --build && stencil build",
+		"dev": "npm run build && concurrently \"tsc --watch\" --kill-others",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist",
-		"generate-tailwind-css": "tailwindcss --config ./tailwind.config.cjs --output ./dist/components/tailwind.css",
-		"generate-tailwind-css:dev": "tailwindcss --config ./tailwind.config.dev.cjs --output ./.storybook/static/tailwind.css --watch"
+		"clean": "rm -r -f ./dist"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
 		"@shoelace-style/shoelace": "^2.0.0-beta.83",
+		"@stencil/core": "^2.18.0",
 		"lit": "^2.3.1"
 	},
 	"devDependencies": {

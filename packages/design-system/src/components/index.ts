@@ -1,2 +1,3 @@
-// style is not exported.
-// style is generated and "exported" in ./tailwindPlugin.cts
+// Export of all (unstyled) components.
+
+export * from "./button/index.js";

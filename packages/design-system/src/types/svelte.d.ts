@@ -13,4 +13,4 @@ declare namespace svelteHTML {
 }
 
 // utility to get rid of ugly double import
-type PropertiesOf = import("./components/types/propertiesOf.js").PropertiesOf;
+type PropertiesOf = import("../components/types/propertiesOf.js").PropertiesOf;

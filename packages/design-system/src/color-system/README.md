@@ -4,19 +4,6 @@ A tailwind plugin that leverages [tailwind colors](https://tailwindcss.com/docs/
 
 The tokens are taken from Material Design 3. Take a look at the excellent documentation https://m3.material.io/styles/color/the-color-system/key-colors-tones. Material also provides a color schema generator https://m3.material.io/theme-builder#/custom.
 
-## How to use
-
-```js
-// tailwind.config.js
-const { colors } = require("@inlang/design-system/tailwind");
-
-module.exports = {
-	content: ["<your content paths>"],
-	theme: {},
-	plugins: [colors.configure({})],
-};
-```
-
 ## Deviations from Material3
 
 **No :drag colors; increased darkening of :press selector**

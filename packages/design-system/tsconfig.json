@@ -5,7 +5,14 @@
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"outDir": "dist",
-		// lit makes heavy use of decorators
-		"experimentalDecorators": true
+		"module": "ESNext",
+		"experimentalDecorators": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"jsx": "react",
+		"jsxFactory": "h",
+		"allowSyntheticDefaultImports": true,
+		// stencil decorators...
+		"strict": false
 	}
 }

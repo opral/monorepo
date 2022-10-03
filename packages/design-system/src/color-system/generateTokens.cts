@@ -1,5 +1,5 @@
 import type { Config } from "./types/config.cjs";
-import type { Tokens } from "./types/tokens.cjs";
+import type { ColorTokens } from "./types/colorTokens.cjs";
 import { TinyColor } from "@ctrl/tinycolor";
 import type { Color } from "./types/color.cjs";
 
@@ -9,7 +9,7 @@ import type { Color } from "./types/color.cjs";
 // - support for custom colors
 // - non-hardcoded version
 // - derive dark/light mode colors
-export function generateTokens(config: Config): Tokens {
+export function generateTokens(config: Config): ColorTokens {
 	const { accentColors, neutralColors, semanticColors } = config;
 
 	// ---- HELPER VARIABLES -----
@@ -18,7 +18,7 @@ export function generateTokens(config: Config): Tokens {
 	const white = "#ffffff";
 
 	// initlize the color system with neutral colors
-	const tokens: Partial<Tokens> = {
+	const tokens: Partial<ColorTokens> = {
 		background: white,
 		"on-background": neutralColors.neutral[900],
 		"surface-100": new TinyColor(neutralColors.neutral[900])
@@ -85,5 +85,5 @@ export function generateTokens(config: Config): Tokens {
 		.setAlpha(0.12)
 		.toHex8String();
 
-	return tokens as Tokens;
+	return tokens as ColorTokens;
 }
