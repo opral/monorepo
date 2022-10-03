@@ -4,32 +4,32 @@ import { forEachColorToken } from "../utilities/forEachColorToken.cjs";
 export const style = forEachColorToken(
 	Object.keys({ ...USED_CONFIG.accentColors, ...USED_CONFIG.semanticColors }),
 	{
-		".button-fill-${token}": {
-			"&:enabled": {
-				color: "theme(colors.on-${token})",
-				"background-color": "theme(colors.${token})",
-				// The default button needs a border too
-				// in case default and outline buttons are used at the same time.
-				"border-color": "theme(colors.${token})",
-				"border-width": "theme(borderWidth.DEFAULT)",
-			},
-			"&:enabled:hover": {
+		"sl-button.color-${token}.button--standard::part(base)": {
+			color: "theme(colors.on-${token})",
+			"background-color": "theme(colors.${token})",
+			// Needs a border in case default and outline buttons are used at the same time.
+			"border-color": "theme(colors.${token})",
+			"border-width": "theme(borderWidth.DEFAULT)",
+			"&:hover": {
 				"border-color": "theme(colors.hover-${token})",
 				"background-color": "theme(colors.hover-${token})",
 			},
-			"&:enabled:focus": {
-				"border-color": "theme(colors.focus-${token})",
-				"background-color": "theme(colors.focus-${token})",
-			},
-			"&:enabled:active": {
+			"&:active": {
 				"border-color": "theme(colors.active-${token})",
 				"background-color": "theme(colors.active-${token})",
 			},
-			"&:disabled": {
-				color: "theme(colors.disabled-content)",
-				"border-color": "theme(colors.disabled-container)",
-				"border-width": "theme(borderWidth.DEFAULT)",
-			},
+		},
+		"sl-button.color-${token}.button--standard::part(label)": {
+			color: "theme(colors.on-${token})",
+		},
+		"sl-button.color-${token}.button--standard::part(prefix)": {
+			color: "theme(colors.on-${token})",
+		},
+		"sl-button.color-${token}.button--standard::part(suffix)": {
+			color: "theme(colors.on-${token})",
+		},
+		"sl-button.color-${token}.button--standard::part(caret)": {
+			color: "theme(colors.on-${token})",
 		},
 	}
 );

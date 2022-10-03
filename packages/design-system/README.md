@@ -1,10 +1,10 @@
 # @inlang/design-system
 
-An optionally styled design system for professional applications and documentation sites
-that work everywhere (React, Svelte, Vue, Solid, Angular, etc).
+An optionally styled design system for professional applications and documentation sites that work everywhere (React, Svelte, Vue, Solid, Angular, etc).
 
-Web-components arrived. Let's stop the framework "works only in React/Vue/Svelte" madness.
-This design system works everywhere (even in Markdown files!).
+Web-components arrived. Let's stop the framework "works only in React/Vue/Svelte" madness. Web-components work everywhere (even in Markdown files!). 
+
+!This project is on hold! If you 
 
 ## Design principles
 
