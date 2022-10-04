@@ -9,5 +9,8 @@ module.exports = {
 	theme: {
 		extend: {},
 	},
-	plugins: [colorSystem.configure(), components.configure()],
+	plugins: [
+		colorSystem.configure(),
+		components.configure({ borderRadius: "none" }),
+	],
 };

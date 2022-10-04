@@ -1,20 +1,12 @@
 // Stencil specific config file.
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
-	"include": ["src/components/**/*"],
-	"exclude": ["**/*.test.*", "src/components/tailwindPlugin.cts"],
+	"include": ["src/**/*"],
+	"exclude": ["**/*.test.*"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"outDir": "dist",
-		"module": "ESNext",
-		"experimentalDecorators": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"jsx": "react",
-		"jsxFactory": "h",
 		"sourceMap": false,
-		"allowSyntheticDefaultImports": true,
-		// stencil decorators...
-		"strict": false
+		"experimentalDecorators": true
 	}
 }

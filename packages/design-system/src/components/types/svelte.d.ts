@@ -8,9 +8,9 @@
  */
 declare namespace svelteHTML {
 	interface IntrinsicElements {
-		"in-button": PropertiesOf<import("./components/button/index.js").Button>;
+		"in-button": PropertiesOf<import("./components/button/index.js.js").Button>;
 	}
 }
 
 // utility to get rid of ugly double import
-type PropertiesOf = import("../components/types/propertiesOf.js").PropertiesOf;
+type PropertiesOf = import("./propertiesOf.js").PropertiesOf;

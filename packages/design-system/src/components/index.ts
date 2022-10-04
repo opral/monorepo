@@ -1,3 +1,1 @@
-// Export of all (unstyled) components.
-
-export * from "./button/index.js";
+// Export of all (unstyled) custom elements (web-components).

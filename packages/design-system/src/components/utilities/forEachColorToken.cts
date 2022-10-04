@@ -19,9 +19,15 @@ import type { CSSRuleObject } from "tailwindcss/types/config";
 export function forEachColorToken(
 	tokens: string[],
 	css: CSSRuleObject
-): CSSRuleObject[] {
+): CSSRuleObject {
+	// 1. stringify the css rule
+	// 2. replace the tokens in the stringified css
+	// 3. merge the resulting css rules into one object (Object.assign)
+	const result: CSSRuleObject = {};
 	const cssAsString = JSON.stringify(css);
-	return tokens.map((token) =>
-		JSON.parse(cssAsString.replaceAll("${token}", token))
-	);
+	for (const token of tokens) {
+		const withReplacedTokens = cssAsString.replaceAll("${token}", token);
+		Object.assign(result, JSON.parse(withReplacedTokens));
+	}
+	return result;
 }

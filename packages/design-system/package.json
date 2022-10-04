@@ -22,7 +22,7 @@
 		"./src/svelte.d.ts"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build ./tsconfig.tailwind.json && stencil build",
+		"build": "npm run clean && tsc --build",
 		"dev": "npm run build && concurrently \"tsc --watch\" --kill-others",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
@@ -30,8 +30,6 @@
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
-		"@shoelace-style/shoelace": "^2.0.0-beta.83",
-		"@stencil/core": "^2.18.0",
 		"lit": "^2.3.1"
 	},
 	"devDependencies": {
