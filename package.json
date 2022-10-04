@@ -1,9 +1,7 @@
 {
 	"private": true,
 	"workspaces": [
-		"apps/*",
-		"packages/*",
-		"website/"
+		"source-code/*"
 	],
 	"scripts": {},
 	"engines": {

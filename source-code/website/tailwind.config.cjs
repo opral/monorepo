@@ -11,6 +11,6 @@ module.exports = {
 	},
 	plugins: [
 		colorSystem.configure(),
-		components.configure({ borderRadius: "none" }),
+		components.configure({ borderRadius: "lg" }),
 	],
 };
