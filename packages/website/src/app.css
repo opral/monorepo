@@ -1,0 +1,9 @@
+/* This file is compiled to tailwind.css and served in the [static directory](../static/tailwind.css)  */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	font-family: "Inter", sans-serif;
+}

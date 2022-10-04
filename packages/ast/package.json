@@ -1,0 +1,30 @@
+{
+	"name": "@inlang/ast",
+	"type": "module",
+	"private": "true",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "vitest run",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
+		"clean": "rm -r ./dist"
+	},
+	"dependencies": {
+		"@fluent/syntax": "^0.18.1",
+		"lodash-es": "^4.17.21",
+		"@inlang/result": "*"
+	},
+	"devDependencies": {
+		"@types/lodash-es": "^4.17.6",
+		"@fluent/dedent": "^0.4.0"
+	}
+}
