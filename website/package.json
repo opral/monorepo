@@ -7,8 +7,8 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"generate-tailwind-css:build": "tailwindcss --input ./src/app.css --output ./static/tailwind.css --minify",
-		"generate-tailwind-css:dev": "tailwindcss --input ./src/app.css --output ./static/tailwind.css --watch"
+		"generate-tailwind-css:build": "tailwindcss --input ./src/app.css --output ./static/app.css --minify",
+		"generate-tailwind-css:dev": "tailwindcss --input ./src/app.css --output ./static/app.css --watch"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",
