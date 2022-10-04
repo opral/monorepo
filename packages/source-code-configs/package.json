@@ -1,0 +1,11 @@
+{
+	"name": "@inlang/source-code-configs",
+	"files": [
+		"typescript/tsconfig.base.json",
+		"typescript/tsconfig.svelte.json"
+	],
+	"scripts": {
+		"format": "",
+		"build": ""
+	}
+}
