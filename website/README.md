@@ -1,8 +1,5 @@
-# @inlang/website
+# website
 
-Static website builder with Next.js.
+## TailwindCSS
 
-## Get Started
-
-1. `npm run dev`
-2. `done`
+TODO: describe how tailwind CSS works in this package.

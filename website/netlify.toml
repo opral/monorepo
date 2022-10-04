@@ -1,7 +1,0 @@
-[build]
-  publish = ".next"
-  command = "npm run build"
-
-[[redirects]]
-from = "*"
-to = "https://github.com/inlang/inlang"

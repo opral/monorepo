@@ -1,19 +1,11 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "target": "ES2020",
-    "esModuleInterop": true,
-    "noImplicitAny": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    // forcing consistens casing in files is a life saver.
-    // if you see this comment, check your tsconfig. Saves you from deployment headdaches.
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
-    "removeComments": false,
-    "declaration": true,
-    "allowJs": true,
-    "resolveJsonModule": true
-  },
-  "include": ["src/**/**.ts"]
+	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
+	"include": ["src/**/*"],
+	"exclude": ["**/*.test.ts"],
+	"compilerOptions": {
+		// This package is imported both in Node and browser environments.
+		// Therefore, don't include the DOM as lib.
+		"lib": ["ESNext"],
+		"outDir": "dist"
+	}
 }

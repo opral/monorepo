@@ -1,0 +1,4 @@
+{
+	"useTabs": true,
+	"overrides": [{ "files": ["*.svx"], "options": { "parser": "markdown" } }]
+}

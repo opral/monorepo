@@ -1,0 +1,41 @@
+{
+	"name": "@inlang/design-system",
+	"type": "module",
+	"private": "true",
+	"exports": {
+		"./tailwind-plugins": {
+			"types": "./dist/tailwindPlugins.d.cts",
+			"import": "./dist/tailwindPlugins.cjs",
+			"require": "./dist/tailwindPlugins.cjs"
+		},
+		"./components": {
+			"types": "./dist/components/types/index.d.ts",
+			"import": "./dist/components/index.js",
+			"require": "./dist/components.index.cjs.js"
+		},
+		"./types/svelte": {
+			"types": "./src/svelte.d.ts"
+		}
+	},
+	"files": [
+		"./dist",
+		"./src/svelte.d.ts"
+	],
+	"scripts": {
+		"build": "npm run clean && tsc --build",
+		"dev": "npm run build && concurrently \"tsc --watch\" --kill-others",
+		"test": "vitest run",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
+		"clean": "rm -r -f ./dist"
+	},
+	"dependencies": {
+		"@ctrl/tinycolor": "^3.4.1",
+		"lit": "^2.3.1"
+	},
+	"devDependencies": {
+		"@types/css": "^0.0.33",
+		"css": "^3.0.0",
+		"lit-html": "^2.3.1",
+		"tailwindcss": "^3.1.8"
+	}
+}

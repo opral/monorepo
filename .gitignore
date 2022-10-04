@@ -107,3 +107,11 @@ node_modules
 
 # Local Netlify folder
 .netlify
+
+# SvelteKit output
+
+.svelte-kit
+
+# tailwind css is auto generated
+website/static/tailwind.css
+packages/design-system/.storybook/static/tailwind.css
