@@ -1,6 +1,6 @@
 # @inlang/design-system
 
-Unstyled web components with configurable style on option.
+Unstyled web components with optional, configurable, and themeable styling.
 
 Like https://www.radix-ui.com/ but with class components like https://daisyui.com/components/button/. What's the benefit of combining web components + RadixUI + daisyUI?
 Unstyled components that work everywhere (React, Svelte, Vue, even markdown!) that are accessible, themeable
