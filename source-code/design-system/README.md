@@ -2,8 +2,11 @@
 
 Unstyled web components with optional, configurable, and themeable styling.
 
-Like https://www.radix-ui.com/ but with class components like https://daisyui.com/components/button/. What's the benefit of combining web components + RadixUI + daisyUI?
-Unstyled components that work everywhere (React, Svelte, Vue, even markdown!) that are accessible, themeable
+A combination of [Radix UI](https://www.radix-ui.com/) and [Headless UI](https://headlessui.com/) but with themeable CSS components classes like [Daisy UI](https://daisyui.com) and [Bootstrap](https://getbootstrap.com/).
+
+**What's the benefit of combining web components + RadixUI + daisyUI?**
+
+Unstyled components that work everywhere (React, Svelte, Vue, even markdown!) that are accessible, themeable, and enable complex components that can not be achieved without JS (daisy UI and bootstrap flaw).
 
 ## Design principles
 
