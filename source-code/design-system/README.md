@@ -1,9 +1,9 @@
 # @inlang/design-system
 
-An optionally styled design system for professional applications and documentation sites that work everywhere (React, Svelte, Vue, Solid, Angular, etc).
+Unstyled web components with configurable style on option.
 
-Web-components arrived. Let's stop the framework "works only in React/Vue/Svelte" madness. Web-components work everywhere (even in Markdown files!).
-
+Like https://www.radix-ui.com/ but with class components like https://daisyui.com/components/button/. What's the benefit of combining web components + RadixUI + daisyUI?
+Unstyled components that work everywhere (React, Svelte, Vue, even markdown!) that are accessible, themeable
 
 ## Design principles
 
@@ -27,7 +27,6 @@ Web-components arrived. Let's stop the framework "works only in React/Vue/Svelte
 
   Using TailwindCSS tokens allows additional themeability. For example, the host might define `p-2` as `0.75rem` instead of the default `0.5rem` in their tailwind config. The design system
   inherits the change, leading to easy themability and consistency across the UI.
-
 
 ## FAQ
 
