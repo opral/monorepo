@@ -33,12 +33,12 @@ Unstyled components that work everywhere (React, Svelte, Vue, even markdown!) th
 
 ## FAQ
 
-**Why has this been developed?**
+### Why has this been developed?
 
 No high-quality unstyled/themeable component libraries like [Radix](https://www.radix-ui.com/) or [HeadlessUI](https://headlessui.com/) exist that are framework agnostic, even though web components have been standardized. [Shoelace](https://shoelace.style/) was a contester but the color tokens are hard-coded. Tailwind itself has no components at all and lacks a [semantic color system](https://m3.material.io/styles/color/overview). A semantic color system leads to a consistent UI and seamless dark mode. (The `dark:` modifier in tailwind is unnecessary
 if a semantic color system is used.)
 
-**Why are components beneficial?**
+### Why are components beneficial?
 
 Maintaining TailwindCSS without components leads to inconsistencies and is hard to read.
 Tailwind plugins like [DaisyUI](https://daisyui.com/) create component CSS classes. But,
@@ -48,6 +48,10 @@ as the Tailwind maintainers themselves declare:
 > _https://tailwindcss.com/docs/reusing-styles#compared-to-css-abstractions_
 
 This design system aims at combining the theme ability of DaisyUI with the functionality of a real component.
+
+### Why would I use web components in Markdown?
+
+Because no preprocessors like [MDX](https://mdxjs.com/), [MDsvex](https://mdsvex.pngwn.io/), or [Stripe Markdoc](https://markdoc.dev/) are required. Reducing boilerplate, increasing maintainability, and composability.
 
 **What are those `.cjs` and `.cts` files in the source code?**
 
