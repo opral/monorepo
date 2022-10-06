@@ -18,13 +18,6 @@
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
 	},
-	"dependencies": {
-		"@fluent/syntax": "^0.18.1",
-		"lodash-es": "^4.17.21",
-		"@inlang/result": "*"
-	},
-	"devDependencies": {
-		"@types/lodash-es": "^4.17.6",
-		"@fluent/dedent": "^0.4.0"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }
