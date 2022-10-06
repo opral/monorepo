@@ -13,13 +13,11 @@ The AST allows for CRUD (Create, Retrieve, Update, Delete) operations on a Resou
 
 ## Design goals and choices
 
-### Based on the newly planned industry-standard MessageFormat 2.0
+### Message syntax is based on the newly planned industry-standard MessageFormat 2.0
 
 Inlang strives to consolidate localization approaches and form best practices. Basing the AST on the newly specified and planned industry-standard MessageFormat 2.0 supports the consolidation goal.
 
 The Unicode Consortium is working on a [new industry standard](https://github.com/unicode-org/message-format-wg) for representing localizable messages (strings). Instead of basing the AST
 on the outdated but widely adopted MessageFormat 1.0 format, rolling our own syntax, or adopting a well-designed but niche syntax like [Fluent](https://projectfluent.org/), we decided to build on and support the planned industry-standard MessageFormat 2.0.
 
-### Extending the MessageFormat 2.0 spec
-
-At the beginning of development, the MessageFormat 2.0 spec was unfinished and contained no Metadata and Resource specifications. The AST, therefore, extends the MessageFormat spec where required.
+At the beginning of the development, the MessageFormat 2.0 spec was unfinished and contained no specifications beyond the Message syntax. Thus,
