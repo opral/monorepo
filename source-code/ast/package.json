@@ -4,27 +4,19 @@
 	"private": "true",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
 		"./dist"
 	],
 	"scripts": {
-		"build": "tsc --build",
+		"build": "npm run clean && tsc --build",
 		"dev": "tsc --watch",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r ./dist"
+		"clean": "rm -r -f ./dist"
 	},
-	"dependencies": {
-		"@fluent/syntax": "^0.18.1",
-		"lodash-es": "^4.17.21",
-		"@inlang/result": "*"
-	},
-	"devDependencies": {
-		"@types/lodash-es": "^4.17.6",
-		"@fluent/dedent": "^0.4.0"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }
