@@ -1,16 +1,12 @@
-// query(ast)         // bundle
-//   .from('en')      // resource
+// query(bundle)      // bundle
 //   .select('id')    // message
 
-// query(ast)         // bundle
-//   .from('en')      // resource
+// query([resource])  // single resource
 //   .select('id')    // message
 
 // query(bundle)      // bundle
-//   .resource('en')  // resource
 //   .select('id')    // message
 
 // query(bundle)      // bundle
-//   .resource('*')  // all resources
+//   .resource('*')   // all resources
 //   .select('id')    // message
-
