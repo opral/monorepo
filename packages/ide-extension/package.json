@@ -1,5 +1,5 @@
 {
-	"name": "vs-code-extension",
+	"name": "ide-extension",
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",

@@ -1,5 +1,5 @@
 /**
- * @type {import("../dist/schema.js").Schema}
+ * @type {import("../src/index.js").Config}
  */
 // export const config = {
 // 	referenceLanguage: "en",

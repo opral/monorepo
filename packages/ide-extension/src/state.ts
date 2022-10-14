@@ -1,4 +1,4 @@
-import type { InlangConfig } from "@inlang/config";
+import type { Config as InlangConfig } from "@inlang/config";
 import type { Bundle } from "@inlang/ast";
 
 /**

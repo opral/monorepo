@@ -21,7 +21,8 @@ export class ExtractPattern implements vscode.CodeActionProvider {
 		if (activeTextEditor === undefined || activeTextEditor.selection.isEmpty) {
 			return [];
 		} else if (
-			state.config.extractPattern.replacementOptions("") === undefined
+			false
+			// state.config.extractPattern.replacementOptions("") === undefined
 		) {
 			return [];
 		}

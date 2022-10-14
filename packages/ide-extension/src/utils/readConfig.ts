@@ -1,7 +1,7 @@
 import type * as vscode from "vscode";
 import { determineClosestPath } from "./determineClosestPath.js";
 import fs from "fs";
-import type { InlangConfig } from "@inlang/config";
+import type { Config as InlangConfig } from "@inlang/config";
 
 /**
  * Gets the closest inlang.config.json file relative to the current texteditor window.
