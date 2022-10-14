@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { state } from "../state";
+import { state } from "../state.js";
 import {
 	extractPatternCommand,
 	ExtractPatternCommandArgs,
-} from "../commands/extractPattern";
+} from "../commands/extractPattern.js";
 
 /**
  * Provides code actions for converting :) to a smiley emoji.
@@ -20,7 +20,9 @@ export class ExtractPattern implements vscode.CodeActionProvider {
 		// user has not highlighted text
 		if (activeTextEditor === undefined || activeTextEditor.selection.isEmpty) {
 			return [];
-		} else if (state.config.extractPatternReplacementOptions === undefined) {
+		} else if (
+			state.config.extractPattern.replacementOptions("") === undefined
+		) {
 			return [];
 		}
 		const extractPatternAction = new vscode.CodeAction(

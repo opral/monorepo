@@ -1,35 +1,28 @@
 import * as vscode from "vscode";
-import { state } from "../state";
-import peggy from "peggy";
-import { LanguageCode } from "@inlang/common";
-import { serializePattern } from "@inlang/fluent-syntax";
+import { state } from "../state.js";
 import axios, { AxiosResponse } from "axios";
 
 export async function showPattern(args: {
 	activeTextEditor: vscode.TextEditor;
 }): Promise<unknown> {
-	if (state.config.fetchI18nDetectionGrammarFrom === undefined) {
-		// not showing an error message because showing the pattern is optional
-		return;
-	}
-	if (state.config.baseLanguageCode === undefined) {
+	if (state.config.referenceLanguage === undefined) {
 		return vscode.window.showWarningMessage(
 			"The `baseLanguageCode` musst be defined in the inlang.config.json to show patterns inline."
 		);
 	}
-	let requestGrammar: AxiosResponse;
-	try {
-		requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
-		if (requestGrammar.status !== 200) {
-			throw "";
-		}
-	} catch {
-		return vscode.window.showWarningMessage(
-			"Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri. Is the uri correct?"
-		);
-	}
-	const grammar = await requestGrammar.data;
-	const parser = peggy.generate(grammar);
+	// let requestGrammar: AxiosResponse;
+	// try {
+	// 	requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
+	// 	if (requestGrammar.status !== 200) {
+	// 		throw "";
+	// 	}
+	// } catch {
+	// 	return vscode.window.showWarningMessage(
+	// 		"Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri. Is the uri correct?"
+	// 	);
+	// }
+	// const grammar = await requestGrammar.data;
+	// const parser = peggy.generate(grammar);
 	/**
 	 * Outfactor the code below to a decorations/index.ts file which handles updates
 	 * for all decorations? (If more were to come)
@@ -38,76 +31,75 @@ export async function showPattern(args: {
 	// vscode uses the reference to detect what decorations to redraw.
 	// intializing a new decoration type in each update leads to an
 	// infinite "loop" of the same decorations
-	const decorationType = vscode.window.createTextEditorDecorationType({});
-	updateDecorations({
-		parser,
-		activeTextEditor: args.activeTextEditor,
-		type: decorationType,
-	});
-	// update the decoartions each time the file is changed
-	vscode.workspace.onDidChangeTextDocument(() =>
-		updateDecorations({
-			parser,
-			activeTextEditor: args.activeTextEditor,
-			type: decorationType,
-		})
-	);
+	// const decorationType = vscode.window.createTextEditorDecorationType({});
+	// updateDecorations({
+	// 	parser,
+	// 	activeTextEditor: args.activeTextEditor,
+	// 	type: decorationType,
+	// });
+	// // update the decoartions each time the file is changed
+	// vscode.workspace.onDidChangeTextDocument(() =>
+	// 	updateDecorations({
+	// 		parser,
+	// 		activeTextEditor: args.activeTextEditor,
+	// 		type: decorationType,
+	// 	})
+	// );
 }
 
 function updateDecorations(args: {
 	activeTextEditor: vscode.TextEditor;
-	parser: peggy.Parser;
 	type: vscode.TextEditorDecorationType;
 }): void {
-	const sourceCode = args.activeTextEditor.document.getText();
-	const matches = args.parser.parse(sourceCode) as {
-		id: string;
-		location: {
-			start: { offset: number; line: number; column: number };
-			end: { offset: number; line: number; column: number };
-		};
-	}[];
-	const decorations: vscode.DecorationOptions[] = [];
-	for (const match of matches) {
-		// getting either the message or attribute pattern
-		const messageOrAttribute = match.id.includes(".")
-			? state.resources.getAttribute({
-					messageId: match.id.split(".")[0],
-					id: match.id.split(".")[1],
-					languageCode: state.config.baseLanguageCode as LanguageCode,
-			  })
-			: state.resources.getMessage({
-					id: match.id,
-					languageCode: state.config.baseLanguageCode as LanguageCode,
-			  });
-		// the parser starts a file from line 0, while vscode starts from line 1 -> thus -1
-		const range = new vscode.Range(
-			new vscode.Position(
-				match.location.start.line - 1,
-				match.location.start.column
-			),
-			new vscode.Position(
-				match.location.end.line - 1,
-				match.location.end.column
-			)
-		);
-		const pattern = messageOrAttribute?.value;
-		const color = pattern ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)";
-		const borderColor = pattern ? "rgb(45 212 191/.50)" : "rgb(244 63 94/.50)"; // more opacity
-		const decoration: vscode.DecorationOptions = {
-			range,
-			renderOptions: {
-				after: {
-					border: `0.1rem solid ${borderColor}`,
-					backgroundColor: color,
-					contentText: pattern
-						? serializePattern(pattern)
-						: "ERROR: The id does not exist.",
-					margin: "0.2rem",
-				},
-			},
-		};
-		decorations.push(decoration);
-	}
-	args.activeTextEditor.setDecorations(args.type, decorations);
+	// const sourceCode = args.activeTextEditor.document.getText();
+	// const matches = args.parser.parse(sourceCode) as {
+	// 	id: string;
+	// 	location: {
+	// 		start: { offset: number; line: number; column: number };
+	// 		end: { offset: number; line: number; column: number };
+	// 	};
+	// }[];
+	// const decorations: vscode.DecorationOptions[] = [];
+	// for (const match of matches) {
+	// 	// getting either the message or attribute pattern
+	// 	const messageOrAttribute = match.id.includes(".")
+	// 		? state.resources.getAttribute({
+	// 				messageId: match.id.split(".")[0],
+	// 				id: match.id.split(".")[1],
+	// 				languageCode: state.config.baseLanguageCode as LanguageCode,
+	// 		  })
+	// 		: state.resources.getMessage({
+	// 				id: match.id,
+	// 				languageCode: state.config.baseLanguageCode as LanguageCode,
+	// 		  });
+	// 	// the parser starts a file from line 0, while vscode starts from line 1 -> thus -1
+	// 	const range = new vscode.Range(
+	// 		new vscode.Position(
+	// 			match.location.start.line - 1,
+	// 			match.location.start.column
+	// 		),
+	// 		new vscode.Position(
+	// 			match.location.end.line - 1,
+	// 			match.location.end.column
+	// 		)
+	// 	);
+	// 	const pattern = messageOrAttribute?.value;
+	// 	const color = pattern ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)";
+	// 	const borderColor = pattern ? "rgb(45 212 191/.50)" : "rgb(244 63 94/.50)"; // more opacity
+	// 	const decoration: vscode.DecorationOptions = {
+	// 		range,
+	// 		renderOptions: {
+	// 			after: {
+	// 				border: `0.1rem solid ${borderColor}`,
+	// 				backgroundColor: color,
+	// 				contentText: pattern
+	// 					? serializePattern(pattern)
+	// 					: "ERROR: The id does not exist.",
+	// 				margin: "0.2rem",
+	// 			},
+	// 		},
+	// 	};
+	// 	decorations.push(decoration);
+	// }
+	// args.activeTextEditor.setDecorations(args.type, decorations);
 }
