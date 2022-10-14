@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/config",
 	"type": "module",
-	"private": "true",
+	"private": true,
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -14,7 +14,7 @@
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "vitest run",
+		"test": "vitest run --passWithNoTests",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
 	},
