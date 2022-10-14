@@ -11,19 +11,19 @@ export async function activate(
 		vscode.window.showInformationMessage("HELLO FROM EXTENSION");
 
 		// start the extension
-		// main({ context });
-		// // in case the active window changes -> restart the extension
-		// // (could be improved in the future for performance reasons
-		// // by detecting whether the closest config differs. For now,
-		// // it's easier to restart the application each time.)
-		// vscode.window.onDidChangeActiveTextEditor(() => {
-		// 	// in case of running subscriptions -> dispose them (no commands will be shown anymore in the IDE)
-		// 	for (const subscription of context.subscriptions) {
-		// 		subscription.dispose();
-		// 	}
-		// 	// restart extension
-		// 	main({ context });
-		// });
+		main({ context });
+		// in case the active window changes -> restart the extension
+		// (could be improved in the future for performance reasons
+		// by detecting whether the closest config differs. For now,
+		// it's easier to restart the application each time.)
+		vscode.window.onDidChangeActiveTextEditor(() => {
+			// in case of running subscriptions -> dispose them (no commands will be shown anymore in the IDE)
+			for (const subscription of context.subscriptions) {
+				subscription.dispose();
+			}
+			// restart extension
+			main({ context });
+		});
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message);
 		console.error(error);
@@ -42,10 +42,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return;
 	}
 	// checking whether a config file exists -> if not dont start the extension
-	const configFileUris = await vscode.workspace.findFiles(
-		"**/inlang.config.json"
+	const potentialConfigFilePaths = await vscode.workspace.findFiles(
+		"**/inlang.config.js"
 	);
-	if (configFileUris.length === 0) {
+	if (potentialConfigFilePaths.length === 0) {
 		return;
 	}
 	// activeTextEditor is defined -> try to get the config
