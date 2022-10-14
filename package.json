@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "turbo run build",
 		"dev": "turbo run dev",
+		"clean": "turbo run clean",
 		"test": "turbo run test"
 	},
 	"engines": {
