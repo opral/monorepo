@@ -1,11 +1,11 @@
 import type * as ast from "@inlang/ast";
-import type { LanguageCode } from "../../i18n-utilities/dist/index.js";
+import type { LanguageCode } from "../../../i18n-utilities/dist/index.js";
 import type { FsPromisesSubset } from "./fsPromisesSubset.js";
 
 /**
  * Inlang config schema.
  */
-export type InlangConfig = {
+export type Config = {
 	/**
 	 * The language that other languages are validated against.
 	 *
@@ -18,9 +18,9 @@ export type InlangConfig = {
 	 * The languages must include the reference language itself.
 	 */
 	languages: LanguageCode[];
-	extractPattern: {
-		replacementOptions: (id: string) => string[];
-	};
+	// extractPattern: {
+	// 	replacementOptions: (id: string) => string[];
+	// };
 	readResource: (args: {
 		fs: FsPromisesSubset;
 		languageCode: LanguageCode;
