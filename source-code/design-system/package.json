@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/design-system",
 	"type": "module",
-	"private": "true",
+	"private": true,
 	"exports": {
 		"./tailwind-plugins": {
 			"types": "./dist/tailwindPlugins.d.cts",
@@ -22,18 +22,20 @@
 		"./src/svelte.d.ts"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build",
-		"dev": "npm run build && concurrently \"tsc --watch\" --kill-others",
+		"build": "tsc --build",
+		"dev": "tsc --watch",
 		"test": "vitest run",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
-		"lit": "^2.3.1"
+		"lit": "^2.3.1",
+		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
 		"@types/css": "^0.0.33",
+		"@types/lodash": "^4.14.186",
 		"css": "^3.0.0",
 		"lit-html": "^2.3.1",
 		"tailwindcss": "^3.1.8"

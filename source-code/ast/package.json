@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/ast",
 	"type": "module",
-	"private": "true",
+	"private": true,
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts"
@@ -11,9 +11,9 @@
 		"./dist"
 	],
 	"scripts": {
-		"build": "npm run clean && tsc --build",
+		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "vitest run",
+		"test": "vitest run --passWithNoTests",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist"
 	},

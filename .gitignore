@@ -115,3 +115,5 @@ node_modules
 # tailwind css is auto generated
 website/static/tailwind.css
 packages/design-system/.storybook/static/tailwind.css
+
+.turbo

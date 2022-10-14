@@ -1,6 +1,6 @@
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "example/**/*"],
 	"exclude": ["**/*.test.ts"],
 	"compilerOptions": {
 		// This package is imported both in Node and browser environments.

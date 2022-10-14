@@ -1,4 +1,4 @@
-import { languageCodes } from "../variables/languageCodes.js";
+import type { languageCodes } from "../variables/languageCodes.js";
 
 /**
  * Iso 639-1 language code.
@@ -6,3 +6,6 @@ import { languageCodes } from "../variables/languageCodes.js";
  * https://www.iso.org/standard/22109.html
  */
 export type LanguageCode = typeof languageCodes[number];
+
+
+

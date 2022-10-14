@@ -1,6 +1,6 @@
-import * as ast from "@inlang/ast";
-import { LanguageCode } from "../../i18n-utilities/dist/index.js";
-import { FsPromisesSubset } from "./fsPromisesSubset.js";
+import type * as ast from "@inlang/ast";
+import type { LanguageCode } from "../../i18n-utilities/dist/index.js";
+import type { FsPromisesSubset } from "./fsPromisesSubset.js";
 
 /**
  * Inlang config schema.

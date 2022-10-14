@@ -3,7 +3,11 @@
 	"workspaces": [
 		"source-code/*"
 	],
-	"scripts": {},
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"test": "turbo run test"
+	},
 	"engines": {
 		"npm": ">=8.0.0",
 		"node": ">=18.0.0"
@@ -11,6 +15,7 @@
 	"devDependencies": {
 		"concurrently": "^7.4.0",
 		"prettier": "^2.7.1",
+		"turbo": "^1.5.6",
 		"typescript": "^4.8.3",
 		"vitest": "^0.23.0"
 	}
