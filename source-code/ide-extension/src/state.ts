@@ -1,16 +1,16 @@
-import { InlangConfig01 } from "@inlang/config";
-import { Resources } from "@inlang/fluent-syntax";
+import type { InlangConfig } from "@inlang/config";
+import type { Bundle } from "@inlang/ast";
 
 /**
  * The state of the vscode extension.
  */
 type State = {
-	config: InlangConfig01;
+	config: InlangConfig;
 	/**
 	 * The config path is useful to resolve relative paths in the config.
 	 */
 	configPath: string;
-	resources: Resources;
+	bundles: Bundle[];
 };
 
 /**
@@ -23,7 +23,7 @@ export function initState(args: State): void {
 	state = {
 		config: args.config,
 		configPath: args.configPath,
-		resources: args.resources,
+		bundles: args.bundles,
 	};
 }
 
