@@ -3,12 +3,10 @@ import { ExtractPattern } from "./actions/extractPattern.js";
 import { initState } from "./state.js";
 import { extractPatternCommand } from "./commands/extractPattern.js";
 import { showPattern } from "./decorations/showPattern.js";
-// import path from "path";
 
 export async function activate(
 	context: vscode.ExtensionContext
 ): Promise<void> {
-	console.log("hi");
 	try {
 		vscode.window.showInformationMessage("HELLO FROM EXTENSION");
 

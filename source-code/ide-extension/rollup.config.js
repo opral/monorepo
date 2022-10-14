@@ -1,6 +1,5 @@
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
 
 /**
  * What is rollup used for?
@@ -13,15 +12,18 @@ export default {
 	input: "src/main.ts",
 	output: {
 		sourcemap: true,
-		dir: "dist",
+		// .cjs because the package.json defines "type": "module",
+		// .cjs indicates that the file should not be treated as es module
+		// but commonjs instead
+		file: "dist/main.cjs",
 		format: "cjs",
 	},
+	// the vscode dependency is provided by vscode.
+	external: ["vscode"],
 	plugins: [
 		// nodeResolve = bundle the dependencies
 		nodeResolve(),
 		// typescript = compile typescript
 		typescript(),
-		// commonjs = because of commonjs peer dependencies (peggy.js)
-		commonjs(),
 	],
 };
