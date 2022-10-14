@@ -5,7 +5,7 @@ import type { FsPromisesSubset } from "./fsPromisesSubset.js";
 /**
  * Inlang config schema.
  */
-export type Schema = {
+export type InlangConfig = {
 	/**
 	 * The language that other languages are validated against.
 	 *
@@ -18,6 +18,9 @@ export type Schema = {
 	 * The languages must include the reference language itself.
 	 */
 	languages: LanguageCode[];
+	extractPattern: {
+		replacementOptions: (id: string) => string[];
+	};
 	readResource: (args: {
 		fs: FsPromisesSubset;
 		languageCode: LanguageCode;

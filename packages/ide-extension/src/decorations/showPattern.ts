@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
-import axios, { AxiosResponse } from "axios";
 
 export async function showPattern(args: {
 	activeTextEditor: vscode.TextEditor;

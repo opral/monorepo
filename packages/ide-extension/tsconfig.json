@@ -5,6 +5,13 @@
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"outDir": "dist",
-		"sourceMap": true
+		// Not specifying node16 causes https://github.com/rollup/plugins/issues/1224#issuecomment-1242109375
+		// interestingly, extending a base config taht contains module node16 still requires explicit manual
+		// setting of module node16 here.
+		"module": "Node16",
+		// for debugging
+		"sourceMap": true,
+		// this module is not imported anywhere. hence, no declaration.
+		"declaration": false
 	}
 }

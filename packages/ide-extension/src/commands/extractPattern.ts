@@ -10,16 +10,16 @@ export const extractPatternCommand = {
 	id: "inlang.extractPattern",
 	title: "Extract pattern",
 	callback: async function (args: ExtractPatternCommandArgs) {
-		if (state.config.extractPatternReplacementOptions === undefined) {
-			return vscode.window.showWarningMessage(
-				"The `extractPatternReplacementOptions` are not defined in the inlang.config.json but required to extract a pattern."
-			);
-		}
-		if (state.config.baseLanguageCode === undefined) {
-			return vscode.window.showWarningMessage(
-				"The `baseLanguageCode` is not defined in the inlang.config.json but required to extract a pattern."
-			);
-		}
+		// if (state.config.extractPatternReplacementOptions === undefined) {
+		// 	return vscode.window.showWarningMessage(
+		// 		"The `extractPatternReplacementOptions` are not defined in the inlang.config.json but required to extract a pattern."
+		// 	);
+		// }
+		// if (state.config.baseLanguageCode === undefined) {
+		// 	return vscode.window.showWarningMessage(
+		// 		"The `baseLanguageCode` is not defined in the inlang.config.json but required to extract a pattern."
+		// 	);
+		// }
 		const id = await vscode.window.showInputBox({
 			title: "Enter the ID:",
 			validateInput: (input) => {
