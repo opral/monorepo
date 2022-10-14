@@ -4,7 +4,7 @@ import { state } from "../state.js";
 export async function showPattern(args: {
 	activeTextEditor: vscode.TextEditor;
 }): Promise<unknown> {
-	if (state.config.referenceLanguage === undefined) {
+	if (state().config.referenceLanguage === undefined) {
 		return vscode.window.showWarningMessage(
 			"The `baseLanguageCode` musst be defined in the inlang.config.json to show patterns inline."
 		);

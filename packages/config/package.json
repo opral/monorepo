@@ -18,7 +18,9 @@
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"@types/vscode": "^1.72.0"
+	},
 	"dependencies": {
 		"@inlang/ast": "*",
 		"@inlang/i18n-utilities": "*"

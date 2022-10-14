@@ -10,21 +10,28 @@ type State = {
 	 * The config path is useful to resolve relative paths in the config.
 	 */
 	configPath: string;
-	bundles: Bundle[];
 };
 
+let _state: State;
+
 /**
- * Initialize the state.
+ * Set the state.
  *
  * Export variables can not be assigned outside of this file. Thus,
  * this function is a wrapper to assign the `state` variable.
  */
-export function initState(args: State): void {
-	state = {
-		config: args.config,
-		configPath: args.configPath,
-		bundles: args.bundles,
-	};
+export function setState(state: State) {
+	_state = state;
 }
 
-export let state: State;
+/**
+ * Returns the current state.
+ *
+ * The state is a function because importing a variable
+ * is static i.e. if the variable is mutated after an
+ * import occured, the change (might) not be reflected.
+ * State that is not reflected = endless bugs.
+ */
+export function state(): State {
+	return _state;
+}

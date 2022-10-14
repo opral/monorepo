@@ -10,43 +10,39 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Extract Message",
 	callback: async function (args: ExtractMessageCommandArgs) {
-		// if (state.config.extractPatternReplacementOptions === undefined) {
-		// 	return vscode.window.showWarningMessage(
-		// 		"The `extractPatternReplacementOptions` are not defined in the inlang.config.json but required to extract a pattern."
-		// 	);
-		// }
-		// if (state.config.baseLanguageCode === undefined) {
-		// 	return vscode.window.showWarningMessage(
-		// 		"The `baseLanguageCode` is not defined in the inlang.config.json but required to extract a pattern."
-		// 	);
-		// }
+		if (
+			state().config.ideExtension.extractMessageReplacementOptions === undefined
+		) {
+			return vscode.window.showWarningMessage(
+				"The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message."
+			);
+		} else if (state().config.referenceLanguage === undefined) {
+			return vscode.window.showWarningMessage(
+				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message."
+			);
+		}
 		const id = await vscode.window.showInputBox({
 			title: "Enter the ID:",
-			validateInput: (input) => {
-				throw "Unimplemented";
-			},
 		});
 		if (id === undefined) {
 			return;
 		}
-		throw "Unimplemented";
-		// 	const replacementPattern = await vscode.window.showQuickPick(
-		// 		state.config.extractPatternReplacementOptions
-		// 			.map((option) => option.replace(/{id}/, id))
-		// 			.concat("How to edit these replacement options?"),
-		// 		{ title: "Select a pattern replacement option:" }
-		// 	);
-		// 	if (replacementPattern === undefined) {
-		// 		return;
-		// 	} else if (
-		// 		replacementPattern === "How to edit these replacement options?"
-		// 	) {
-		// 		await vscode.env.openExternal(
-		// 			vscode.Uri.parse(
-		// 				"https://inlang.dev/docs/reference/config#extractpatternreplacementoptions"
-		// 			)
-		// 		);
-		// 	}
+		const chosenReplacementOption = await vscode.window.showQuickPick(
+			state()
+				.config.ideExtension.extractMessageReplacementOptions({ id })
+				.concat("How to edit these replacement options?"),
+			{ title: "Replace highlighted text with:" }
+		);
+		if (chosenReplacementOption === undefined) {
+			return;
+		} else if (
+			chosenReplacementOption === "How to edit these replacement options?"
+		) {
+			// TODO #151
+			await vscode.env.openExternal(
+				vscode.Uri.parse("https://github.com/inlang/inlang")
+			);
+		}
 		// 	let create: Result<void, Error>;
 		// 	if (id.includes(".")) {
 		// 		create = state.resources.createAttribute({

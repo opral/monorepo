@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import { ExtractMessage } from "./actions/extractMessage.js";
-import { initState } from "./state.js";
+import { setState, state } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { showPattern } from "./decorations/showPattern.js";
+import { determineClosestPath } from "./utils/determineClosestPath.js";
 
 export async function activate(
 	context: vscode.ExtensionContext
@@ -41,33 +42,21 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return;
 	}
 	// checking whether a config file exists -> if not dont start the extension
-	const potentialConfigFilePaths = await vscode.workspace.findFiles(
+	const potentialConfigFileUris = await vscode.workspace.findFiles(
 		"**/inlang.config.js"
 	);
-	if (potentialConfigFilePaths.length === 0) {
+	if (potentialConfigFileUris.length === 0) {
 		return;
 	}
-	// activeTextEditor is defined -> try to get the config
-	// const config = await ({ activeTextEditor, configFileUris });
-	// if (config.isErr) {
-	// vscode.window.showErrorMessage(config.error.message);
-	// return;
-	// }
-
-	// config loaded sucessfully -> intialize state
-	// initState({
-	// 	config: config.value.config,
-	// 	configPath: config.value.path,
-	// 	resources: resources.value,
-	// });
-
-	const supportedLanguages = [
-		"javascript",
-		"typescript",
-		"javascriptreact",
-		"typescriptreact",
-		"svelte",
-	];
+	const closestConfigPath = determineClosestPath({
+		options: potentialConfigFileUris.map((uri) => uri.path),
+		to: activeTextEditor.document.uri.path,
+	});
+	const configModule = await import(closestConfigPath);
+	setState({
+		config: configModule.config,
+		configPath: closestConfigPath,
+	});
 	// register the commands
 	args.context.subscriptions.push(
 		vscode.commands.registerCommand(
@@ -76,7 +65,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		)
 	);
 	// register the code actions
-	for (const language of supportedLanguages) {
+	for (const language of state().config.ideExtension.documentSelectors) {
 		args.context.subscriptions.push(
 			vscode.languages.registerCodeActionsProvider(
 				language,
@@ -87,8 +76,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			)
 		);
 	}
-	// register decorations
-	showPattern({ activeTextEditor });
+	// // register decorations
+	// showPattern({ activeTextEditor });
 	// register translation file watcher
 	// const fileWatcher = vscode.workspace
 	//   .createFileSystemWatcher(

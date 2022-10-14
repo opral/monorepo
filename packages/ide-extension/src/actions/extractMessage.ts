@@ -20,11 +20,6 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 		// user has not highlighted text
 		if (activeTextEditor === undefined || activeTextEditor.selection.isEmpty) {
 			return [];
-		} else if (
-			false
-			// state.config.extractMessage.replacementOptions("") === undefined
-		) {
-			return [];
 		}
 		const extractMessageAction = new vscode.CodeAction(
 			`Inlang: Extract Message`
