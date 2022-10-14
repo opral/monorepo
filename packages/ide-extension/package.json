@@ -1,0 +1,66 @@
+{
+	"name": "vs-code-extension",
+	"private": true,
+	"displayName": "inlang",
+	"description": "i18n extension that makes you more productive.",
+	"publisher": "Inlang",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/inlang/inlang.git"
+	},
+	"icon": "assets/icon.png",
+	"version": "0.1.5",
+	"engines": {
+		"vscode": "^1.61.0"
+	},
+	"categories": [
+		"Other",
+		"Linters",
+		"Visualization"
+	],
+	"main": "./dist/main.js",
+	"scripts": {
+		"vscode:prepublish": "npm run build",
+		"prebuild": "npm run clean",
+		"build": "rollup --config",
+		"package": "npx vsce package",
+		"dev": "rollup --config --watch",
+		"clean": "rm -r -f dist",
+		"format": "prettier .",
+		"format:fix": "npm run format -- --write",
+		"lint": "eslint .",
+		"lint:fix": "npm run lint -- --fix",
+		"test": "jest",
+		"test:watch": "npm test -- --watch"
+	},
+	"devDependencies": {
+		"@inlang/common": "^0.1.4",
+		"@inlang/config": "^0.1.2",
+		"@inlang/eslint-config": "*",
+		"@inlang/fluent-syntax": "^0.1.6",
+		"@inlang/fluent-syntax-converters": "^0.1.6",
+		"@rollup/plugin-commonjs": "^21.0.1",
+		"@rollup/plugin-node-resolve": "^13.1.3",
+		"@rollup/plugin-typescript": "^8.3.0",
+		"@types/lodash": "^4.14.176",
+		"@types/node": "14.x",
+		"@types/vscode": "^1.61.0",
+		"@typescript-eslint/eslint-plugin": "^5.2.0",
+		"@typescript-eslint/parser": "^5.2.0",
+		"@vscode/test-electron": "^1.6.2",
+		"axios": "^0.25.0",
+		"lodash": "^4.17.21",
+		"peggy": "^1.2.0",
+		"prettier": "~2.2.1",
+		"rollup": "^2.66.0",
+		"typescript": "^4.4.3",
+		"vsce": "^2.6.7"
+	},
+	"activationEvents": [
+		"onLanguage:javascript",
+		"onLanguage:javascriptreact",
+		"onLanguage:typescript",
+		"onLanguage:typescriptreact",
+		"onLanguage:svelte"
+	]
+}
