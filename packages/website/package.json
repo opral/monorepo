@@ -4,6 +4,7 @@
 	"scripts": {
 		"dev": "concurrently \"vite dev\" \"npm run generate-tailwind-css:dev\"",
 		"build": "npm run generate-tailwind-css:build && vite build",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
