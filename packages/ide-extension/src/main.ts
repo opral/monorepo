@@ -1,15 +1,14 @@
 import * as vscode from "vscode";
-import { ExtractPattern } from "./actions/extractPattern.js";
+import { ExtractMessage } from "./actions/extractMessage.js";
 import { initState } from "./state.js";
-import { extractPatternCommand } from "./commands/extractPattern.js";
+import { extractMessageCommand } from "./commands/extractMessage.js";
 import { showPattern } from "./decorations/showPattern.js";
 
 export async function activate(
 	context: vscode.ExtensionContext
 ): Promise<void> {
 	try {
-		vscode.window.showInformationMessage("HELLO FROM EXTENSION");
-
+		vscode.window.showInformationMessage("Inlang extension activated.");
 		// start the extension
 		main({ context });
 		// in case the active window changes -> restart the extension
@@ -72,8 +71,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// register the commands
 	args.context.subscriptions.push(
 		vscode.commands.registerCommand(
-			extractPatternCommand.id,
-			extractPatternCommand.callback
+			extractMessageCommand.id,
+			extractMessageCommand.callback
 		)
 	);
 	// register the code actions
@@ -81,9 +80,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		args.context.subscriptions.push(
 			vscode.languages.registerCodeActionsProvider(
 				language,
-				new ExtractPattern(),
+				new ExtractMessage(),
 				{
-					providedCodeActionKinds: ExtractPattern.providedCodeActionKinds,
+					providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
 				}
 			)
 		);

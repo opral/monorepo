@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
 import {
-	extractPatternCommand,
-	ExtractPatternCommandArgs,
-} from "../commands/extractPattern.js";
+	extractMessageCommand,
+	ExtractMessageCommandArgs,
+} from "../commands/extractMessage.js";
 
 /**
  * Provides code actions for converting :) to a smiley emoji.
  */
-export class ExtractPattern implements vscode.CodeActionProvider {
+export class ExtractMessage implements vscode.CodeActionProvider {
 	public static readonly providedCodeActionKinds = [
 		vscode.CodeActionKind.QuickFix,
 	];
@@ -22,24 +22,24 @@ export class ExtractPattern implements vscode.CodeActionProvider {
 			return [];
 		} else if (
 			false
-			// state.config.extractPattern.replacementOptions("") === undefined
+			// state.config.extractMessage.replacementOptions("") === undefined
 		) {
 			return [];
 		}
-		const extractPatternAction = new vscode.CodeAction(
-			`Inlang: Extract pattern`
+		const extractMessageAction = new vscode.CodeAction(
+			`Inlang: Extract Message`
 		);
 		// workaround to get typesafety when passing down the arguments
-		const args: ExtractPatternCommandArgs = {
+		const args: ExtractMessageCommandArgs = {
 			pattern: document.getText(activeTextEditor.selection),
 			activeTextEditor,
 		};
-		extractPatternAction.command = {
-			title: extractPatternCommand.title,
-			command: extractPatternCommand.id,
+		extractMessageAction.command = {
+			title: extractMessageCommand.title,
+			command: extractMessageCommand.id,
 			arguments: [args],
 		};
-		return [extractPatternAction];
+		return [extractMessageAction];
 	}
 
 	public resolveCodeAction(

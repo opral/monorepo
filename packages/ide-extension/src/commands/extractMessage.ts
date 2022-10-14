@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
 
-export type ExtractPatternCommandArgs = {
+export type ExtractMessageCommandArgs = {
 	pattern: string;
 	activeTextEditor: vscode.TextEditor;
 };
 
-export const extractPatternCommand = {
-	id: "inlang.extractPattern",
-	title: "Extract pattern",
-	callback: async function (args: ExtractPatternCommandArgs) {
+export const extractMessageCommand = {
+	id: "inlang.extractMessage",
+	title: "Extract Message",
+	callback: async function (args: ExtractMessageCommandArgs) {
 		// if (state.config.extractPatternReplacementOptions === undefined) {
 		// 	return vscode.window.showWarningMessage(
 		// 		"The `extractPatternReplacementOptions` are not defined in the inlang.config.json but required to extract a pattern."
