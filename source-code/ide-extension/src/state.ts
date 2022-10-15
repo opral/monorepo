@@ -10,6 +10,7 @@ type State = {
 	 * The config path is useful to resolve relative paths in the config.
 	 */
 	configPath: string;
+	bundles: Bundle[];
 };
 
 let _state: State;

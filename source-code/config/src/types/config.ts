@@ -7,28 +7,40 @@ import type { DocumentSelector } from "vscode";
  * Inlang config schema.
  */
 export type Config = {
+	// /**
+	//  * The language that other languages are validated against.
+	//  *
+	//  * In most cases, the reference language is `en` (English).
+	//  */
+	// referenceLanguage: LanguageCode;
+	// /**
+	//  * Languages of this project.
+	//  *
+	//  * The languages must include the reference language itself.
+	//  */
+	// languages: LanguageCode[];
 	/**
-	 * The language that other languages are validated against.
+	 * The bundle (id) that other bundles are validated against.
 	 *
-	 * In most cases, the reference language is `en` (English).
+	 * In most cases, the reference bundle is `en` (English).
 	 */
-	referenceLanguage: LanguageCode;
+	referenceBundleId: string;
 	/**
-	 * Languages of this project.
+	 * Bundle (ids) of this project.
 	 *
-	 * The languages must include the reference language itself.
+	 * The bunndles must include the reference bundle (id) itself.
 	 */
-	languages: LanguageCode[];
-	readResource: (args: {
-		fs: FsPromisesSubset;
-		languageCode: LanguageCode;
-		ast: typeof ast;
-	}) => Promise<ast.Resource>;
-	writeResource: (args: {
-		fs: FsPromisesSubset;
-		resource: ast.Resource;
-		languageCode: LanguageCode;
-	}) => Promise<void>;
+	bundleIds: string[];
+	readBundles: (args: { fs: FsPromisesSubset }) => Promise<ast.Bundle[]>;
+	// readResource: (args: {
+	// 	fs: FsPromisesSubset;
+	// 	path: string;
+	// }) => Promise<ast.Resource>;
+	// writeResource: (args: {
+	// 	fs: FsPromisesSubset;
+	// 	resource: ast.Resource;
+	// 	path: string;
+	// }) => Promise<void>;
 	ideExtension: {
 		extractMessageReplacementOptions: (args: { id: string }) => string[];
 		/**

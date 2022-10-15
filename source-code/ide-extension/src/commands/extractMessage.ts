@@ -16,9 +16,9 @@ export const extractMessageCommand = {
 			return vscode.window.showWarningMessage(
 				"The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message."
 			);
-		} else if (state().config.referenceLanguage === undefined) {
+		} else if (state().config.referenceBundleId === undefined) {
 			return vscode.window.showWarningMessage(
-				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message."
+				"The `referenceBundleId` is not defined in the inlang.config.js but required to extract a message."
 			);
 		}
 		const id = await vscode.window.showInputBox({
@@ -38,7 +38,7 @@ export const extractMessageCommand = {
 		} else if (
 			chosenReplacementOption === "How to edit these replacement options?"
 		) {
-			// TODO #151
+			// TODO #152
 			await vscode.env.openExternal(
 				vscode.Uri.parse("https://github.com/inlang/inlang")
 			);

@@ -1,11 +1,16 @@
 export type Node<Name> = {
 	type: Name;
+	/**
+	 * Metadata is ignored by inlang.
+	 *
+	 * Use the metadata property to store additional
+	 * information for a particular node like parsing
+	 * and serialization information.
+	 */
+	metadata?: unknown;
 };
 
 export type Bundle = Node<"Bundle"> & {
-	/**
-	 * The identifier of a bundle is usually
-	 */
 	id: Identifier;
 	resources: Resource[];
 };
@@ -20,7 +25,7 @@ export type MessageComment = Node<"MessageComment"> & {
 
 export type Message = Node<"Message"> & {
 	id: Identifier;
-	comment: MessageComment;
+	comment?: MessageComment;
 	pattern: Pattern;
 };
 
