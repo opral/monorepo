@@ -3,11 +3,11 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		"./i18n/": {
+		"./i18n": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
-		"./result/": {
+		"./result": {
 			"types": "./dist/result/index.d.ts",
 			"import": "./dist/result/index.js"
 		}
