@@ -1,11 +1,17 @@
 {
-	"name": "@inlang/config",
+	"name": "@inlang/core",
 	"type": "module",
 	"private": true,
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+		"./ast": {
+			"types": "./dist/ast/index.d.ts"
+		},
+		"./config": {
+			"types": "./dist/config/index.d.ts"
+		},
+		"./query": {
+			"types": "./dist/query/index.d.ts",
+			"import": "./dist/query/index.js"
 		}
 	},
 	"files": [
@@ -16,13 +22,9 @@
 		"dev": "tsc --watch",
 		"test": "vitest run --passWithNoTests --coverage",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r ./dist"
-	},
-	"devDependencies": {
-		"@types/vscode": "^1.72.0"
+		"clean": "rm -r -f ./dist"
 	},
 	"dependencies": {
-		"@inlang/ast": "*",
-		"@inlang/i18n-utilities": "*"
+		"@inlang/utilities": "*"
 	}
 }

@@ -1,3 +1,14 @@
+# @inlang/core/ast
+
+The AST that inlang apps operate on, including related modules.
+
+### What is an AST?
+
+Translations (Messages) are usually stored in a file (Resource). An [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree) is a machine-processable representation of a file (Resource) and contained
+syntax (Messages). A parser creates (parses) the representation to an AST. A serializer reconstructs (serializes) a file from an AST.
+
+![AST visualization](./ast-visualization.png)
+
 ## Design goals and choices
 
 ### 1. Stay close(er) to the planned industry-standard MessageFormat 2.0
