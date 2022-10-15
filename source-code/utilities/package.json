@@ -1,11 +1,15 @@
 {
-	"name": "@inlang/i18n-utilities",
+	"name": "@inlang/utilities",
 	"type": "module",
 	"private": true,
 	"exports": {
-		".": {
+		"./i18n/": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./result/": {
+			"types": "./dist/result/index.d.ts",
+			"import": "./dist/result/index.js"
 		}
 	},
 	"files": [
@@ -16,5 +20,8 @@
 		"dev": "tsc --watch",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
+	},
+	"dependencies": {
+		"true-myth": "^6.2.0"
 	}
 }
