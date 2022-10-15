@@ -1,5 +1,5 @@
-import type { Config as InlangConfig } from "@inlang/config";
-import type { Bundle } from "@inlang/ast";
+import type { Config as InlangConfig } from "@inlang/core/config";
+import type { Bundle } from "@inlang/core/ast";
 
 /**
  * The state of the vscode extension.

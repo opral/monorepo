@@ -4,6 +4,7 @@
 	"exclude": ["**/*.test.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
-		"outDir": "dist"
+		"outDir": "./dist",
+		"rootDir": "./src"
 	}
 }
