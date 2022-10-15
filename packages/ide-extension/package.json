@@ -26,7 +26,7 @@
 		"build": "rollup --config",
 		"package": "npx vsce package",
 		"predev": "npm run clean",
-		"test": "vitest run",
+		"test": "vitest run --coverage",
 		"dev": "rollup --config --watch",
 		"clean": "rm -r -f dist",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
