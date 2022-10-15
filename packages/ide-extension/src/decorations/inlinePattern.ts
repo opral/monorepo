@@ -1,56 +1,41 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
 
-export async function showPattern(args: {
+export async function inlinePattern(args: {
 	activeTextEditor: vscode.TextEditor;
 }): Promise<unknown> {
-	if (state().config.referenceLanguage === undefined) {
+	if (state().config.referenceBundleId === undefined) {
 		return vscode.window.showWarningMessage(
-			"The `baseLanguageCode` musst be defined in the inlang.config.json to show patterns inline."
+			"The `referenceBundleId` musst be defined in the inlang.config.js to show patterns inline."
 		);
 	}
-	// let requestGrammar: AxiosResponse;
-	// try {
-	// 	requestGrammar = await axios(state.config.fetchI18nDetectionGrammarFrom);
-	// 	if (requestGrammar.status !== 200) {
-	// 		throw "";
-	// 	}
-	// } catch {
-	// 	return vscode.window.showWarningMessage(
-	// 		"Couldnt fetch the grammar from the provided `fetchI18nDetectionGrammarFrom` uri. Is the uri correct?"
-	// 	);
-	// }
-	// const grammar = await requestGrammar.data;
-	// const parser = peggy.generate(grammar);
 	/**
 	 * Outfactor the code below to a decorations/index.ts file which handles updates
-	 * for all decorations? (If more were to come)
+	 * for all decorations? (If more are to come)
 	 */
 	// initializing the decoration type once is extremely important.
 	// vscode uses the reference to detect what decorations to redraw.
 	// intializing a new decoration type in each update leads to an
 	// infinite "loop" of the same decorations
-	// const decorationType = vscode.window.createTextEditorDecorationType({});
-	// updateDecorations({
-	// 	parser,
-	// 	activeTextEditor: args.activeTextEditor,
-	// 	type: decorationType,
-	// });
-	// // update the decoartions each time the file is changed
-	// vscode.workspace.onDidChangeTextDocument(() =>
-	// 	updateDecorations({
-	// 		parser,
-	// 		activeTextEditor: args.activeTextEditor,
-	// 		type: decorationType,
-	// 	})
-	// );
+	const decorationType = vscode.window.createTextEditorDecorationType({});
+	updateDecorations({
+		activeTextEditor: args.activeTextEditor,
+		type: decorationType,
+	});
+	// update the decoartions each time the file is changed
+	vscode.workspace.onDidChangeTextDocument(() =>
+		updateDecorations({
+			activeTextEditor: args.activeTextEditor,
+			type: decorationType,
+		})
+	);
 }
 
 function updateDecorations(args: {
 	activeTextEditor: vscode.TextEditor;
 	type: vscode.TextEditorDecorationType;
 }): void {
-	// const sourceCode = args.activeTextEditor.document.getText();
+	const sourceCode = args.activeTextEditor.document.getText();
 	// const matches = args.parser.parse(sourceCode) as {
 	// 	id: string;
 	// 	location: {

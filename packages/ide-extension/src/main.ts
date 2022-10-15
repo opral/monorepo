@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import { ExtractMessage } from "./actions/extractMessage.js";
 import { setState, state } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
-import { showPattern } from "./decorations/showPattern.js";
+import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
+import fs from "node:fs/promises";
 
 export async function activate(
 	context: vscode.ExtensionContext
@@ -56,6 +57,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	setState({
 		config: configModule.config,
 		configPath: closestConfigPath,
+		// @ts-ignore
+		bundles: await state().config.readBundles({ fs: fs }),
 	});
 	// register the commands
 	args.context.subscriptions.push(
@@ -76,17 +79,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			)
 		);
 	}
-	// // register decorations
-	// showPattern({ activeTextEditor });
-	// register translation file watcher
-	// const fileWatcher = vscode.workspace
-	//   .createFileSystemWatcher(
-	//     translationFilesGlobPattern({
-	//       cwd: path.dirname(config.value.path),
-	//       pathPattern: config.value.config.pathPattern,
-	//     })
-	//   )
-	//   .onDidChange(() => restart({ context: args.context }));
+	// register decorations
+	inlinePattern({ activeTextEditor });
 }
 
 // this method is called when your extension is deactivated
