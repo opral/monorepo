@@ -1,4 +1,4 @@
-/** @type {import("@inlang/config").Config} */
+/** @type {import("@inlang/core/config").Config} */
 export const config = {
 	referenceBundleId: "en",
 	bundleIds: ["en", "de"],
@@ -46,10 +46,10 @@ export const config = {
 
 /**
  * @param {Record<string, string>} input
- * @returns {import("@inlang/ast").Resource}
+ * @returns {import("@inlang/core/ast").Resource}
  */
 function resourceFrom(input) {
-	/** @type {import("@inlang/ast").Resource['body']} */
+	/** @type {import("@inlang/core/ast").Resource['body']} */
 	let body = [];
 	for (const id in input) {
 		body.push({
