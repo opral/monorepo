@@ -21,7 +21,5 @@
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r ./dist"
 	},
-	"dependencies": {
-		"true-myth": "^6.2.0"
-	}
+	"dependencies": {}
 }
