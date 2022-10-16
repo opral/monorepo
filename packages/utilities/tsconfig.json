@@ -1,7 +1,6 @@
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
 	"include": ["src/**/*"],
-	"exclude": ["**/*.test.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"outDir": "dist"

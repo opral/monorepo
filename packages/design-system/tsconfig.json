@@ -2,11 +2,9 @@
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
 	"include": ["src/**/*"],
-	"exclude": ["**/*.test.*"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"outDir": "dist",
-		"sourceMap": false,
 		"experimentalDecorators": true
 	}
 }
