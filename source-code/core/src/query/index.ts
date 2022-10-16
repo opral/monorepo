@@ -1,4 +1,5 @@
 import type { Bundle, Message, Resource } from "../ast/index.js";
+import { Result } from "@inlang/utilities/result";
 
 export function query(bundle: Bundle) {
 	// let bundle: Bundle;
@@ -30,6 +31,21 @@ function get(
 }
 
 // using underscore to circumvent javascript reserved keyword 'delete'
-function _delete(bundle: Bundle, args: { id: Message["id"]["name"] }): any {
-	const messages = bundle.resources.flatMap((resource) => resource.body);
+function _delete(
+	bundle: Bundle,
+	args: { id: Message["id"]["name"] }
+): Result<Bundle, Error> {
+	// Copying the Bundle to ensure immutability.
+	// The JSON approach does not copy functions which
+	// theoretically could be stored in metadata by users.
+	const copy: Bundle = JSON.parse(JSON.stringify(bundle));
+	for (const [i, resource] of copy.resources.entries()) {
+		for (const [j, message] of resource.body.entries()) {
+			if (message.id.name === args.id) {
+				delete copy.resources[i].body[j];
+				return Result.ok(copy);
+			}
+		}
+	}
+	return Result.err(Error("Message did not exist."));
 }
