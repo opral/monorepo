@@ -46,6 +46,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const potentialConfigFileUris = await vscode.workspace.findFiles(
 		"**/inlang.config.js"
 	);
+	// @ts-ignore
+	const moduleData = `
+		export let x = 33452;
+	`;
+	var b64moduleData = "data:text/javascript;base64," + btoa(moduleData);
+	const grammar = await import(b64moduleData);
+
+	console.log({ grammar });
+
 	if (potentialConfigFileUris.length === 0) {
 		return;
 	}
@@ -58,7 +67,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		config: configModule.config,
 		configPath: closestConfigPath,
 		// @ts-ignore
-		bundles: await state().config.readBundles({ fs: fs }),
+		bundles: configModule.config.readBundles({ fs: fs }),
 	});
 	// register the commands
 	args.context.subscriptions.push(

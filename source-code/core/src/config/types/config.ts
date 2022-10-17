@@ -31,16 +31,30 @@ export type Config = {
 	 */
 	bundleIds: string[];
 	readBundles: (args: { fs: FsPromisesSubset }) => Promise<ast.Bundle[]>;
-	// readResource: (args: {
-	// 	fs: FsPromisesSubset;
-	// 	path: string;
-	// }) => Promise<ast.Resource>;
-	// writeResource: (args: {
-	// 	fs: FsPromisesSubset;
-	// 	resource: ast.Resource;
-	// 	path: string;
-	// }) => Promise<void>;
 	ideExtension: {
+		/**
+		 * Defines when a message is referenced.
+		 */
+		inlinePatternMatcher: (args: {
+			/**
+			 * The (code) text to match against.
+			 */
+			text: string;
+		}) => Promise<
+			Array<{
+				/**
+				 * The ID of the message.
+				 */
+				id: string;
+				/**
+				 * The position from where to where the pattern should be inlined.
+				 */
+				position: {
+					start: { line: number; character: number };
+					end: { line: number; character: number };
+				};
+			}>
+		>;
 		extractMessageReplacementOptions: (args: { id: string }) => string[];
 		/**
 		 * An array of VSCode DocumentSelectors.
