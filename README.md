@@ -9,11 +9,11 @@
     <h2 align="center">
         Git-based localization infrastructure
     </h2>
-    <b><p align="center">
+    <h4 align="center">
         <!-- <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> 
         ·  -->
         <a href="https://github.com/inlang/inlang/discussions" target="_blank">Community</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
-    </p></b>
+    </h4>
 </div>
 
 Inlang provides developer-frist localization infrastructure consisting of dev tools, an editor to manage translations, and automation via CI/CD. Your git repository is the single source of truth for localization.
