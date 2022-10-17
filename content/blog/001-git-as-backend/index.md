@@ -20,7 +20,7 @@ I built a prototype of a git-based translation editor a few months back. Super h
 
 There are drawbacks to a git-based back-end though:
 
-1. Git is a CLI, not an SDK. Building a professional application on top of git leads to numerous workarounds and really uglydifficult to maintain code.
+1. Git is a CLI, not an SDK. Building a professional application on top of git leads to numerous workarounds and <s>really ugly</s> difficult to maintain code.
 2. Git is too complicated, even for software engineers. Bringing the power of git to non-technical people (translators) is a difficult design challenge.
 3. Git offers great async collaboration, but no real-time collaboration.
 
