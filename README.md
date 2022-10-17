@@ -4,16 +4,16 @@
 
 <div>
     <p align="center">
-        <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/main/assets/logo-white-background.png"/>
+        <img width="390" src="./assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
         Git-based localization infrastructure
     </h2>
-    <h3 align="center">
+    <b><p align="center">
         <!-- <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> 
         ·  -->
         <a href="https://github.com/inlang/inlang/discussions" target="_blank">Community</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
-    </h3>
+    </p></b>
 </div>
 
 Inlang provides developer-frist localization infrastructure consisting of dev tools, an editor to manage translations, and automation via CI/CD. Your git repository is the single source of truth for localization.
