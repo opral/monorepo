@@ -1,1 +1,1 @@
-export * from "./types/config.js";
+export { Config } from "./schema.js";
