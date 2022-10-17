@@ -4,7 +4,7 @@
 
 <div>
     <p align="center">
-        <img width="390" src="./assets/logo-white-background.png"/>
+        <img width="300" src="./assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
         Git-based localization infrastructure
