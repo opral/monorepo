@@ -1,5 +1,5 @@
-import type * as ast from "../../ast/index.js";
-import type { FsPromisesSubset } from "./fsPromisesSubset.js";
+import type * as ast from "../ast/index.js";
+import type { FsPromisesSubset } from "./types/fsPromisesSubset.js";
 import type { DocumentSelector } from "vscode";
 
 /**
