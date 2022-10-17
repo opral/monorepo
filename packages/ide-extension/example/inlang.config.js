@@ -25,11 +25,13 @@ export const config = {
 			},
 		];
 	},
-	// resources: () => ({
-	// 	en: ["./resources/en.js"],
-	// 	de: ["./resources/de.js"],
-	// }),
 	ideExtension: {
+		inlinePatternMatcher: async ({ text }) => {
+			// @ts-ignore
+			const grammar = await import("https://cdn.jsdelivr.net/npm/peggy@2/+esm");
+			console.log({ grammar });
+			return [];
+		},
 		extractMessageReplacementOptions: ({ id }) => [
 			`{$t("${id}")}`,
 			`$t("${id}")`,
