@@ -16,7 +16,7 @@
     </h4>
 </div>
 
-Inlang provides developer-first localization infrastructure consisting of dev tools, an editor to manage translations, and automation via CI/CD. Your git repository is the single source of truth for localization.
+Inlang provides developer-first localization infrastructure that is built on git. Your git repository is the single source of truth for localization. The infrastructure consists of dev tools, an editor to manage translations, and automation via CI/CD.
 
 - [x] No lock-in.
 - [x] One-click setup.
