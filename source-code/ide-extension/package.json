@@ -1,0 +1,49 @@
+{
+	"name": "ide-extension",
+	"private": true,
+	"displayName": "inlang",
+	"type": "module",
+	"description": "i18n extension that makes you more productive.",
+	"publisher": "Inlang",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/inlang/inlang.git"
+	},
+	"icon": "assets/icon.png",
+	"version": "0.1.5",
+	"engines": {
+		"vscode": "^1.61.0"
+	},
+	"categories": [
+		"Other",
+		"Linters",
+		"Visualization"
+	],
+	"main": "./dist/main.cjs",
+	"scripts": {
+		"vscode:prepublish": "npm run build",
+		"build": "rollup --config",
+		"dev": "rollup --config --watch",
+		"package": "npx vsce package",
+		"test": "vitest run --coverage",
+		"clean": "rm -r -f ./dist ./.turbo",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
+	},
+	"dependencies": {
+		"@inlang/core": "*"
+	},
+	"devDependencies": {
+		"@rollup/plugin-node-resolve": "^15.0.0",
+		"@rollup/plugin-typescript": "^9.0.1",
+		"@types/vscode": "^1.61.0",
+		"rollup": "^3.1.0",
+		"vsce": "^2.6.7"
+	},
+	"activationEvents": [
+		"onLanguage:javascript",
+		"onLanguage:javascriptreact",
+		"onLanguage:typescript",
+		"onLanguage:typescriptreact",
+		"onLanguage:svelte"
+	]
+}

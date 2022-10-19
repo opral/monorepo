@@ -4,9 +4,10 @@
 		"build": {
 			"dependsOn": ["^build"]
 		},
-		"dev": {},
-		"test": {
-			"dependsOn": ["build"]
-		}
+		"dev": {
+			"cache": false
+		},
+		"clean": {},
+		"test": {}
 	}
 }

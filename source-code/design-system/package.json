@@ -22,11 +22,11 @@
 		"./src/svelte.d.ts"
 	],
 	"scripts": {
-		"build": "tsc --build",
+		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
-		"test": "vitest run",
+		"test": "vitest run --coverage",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist"
+		"clean": "rm -r -f ./dist ./.turbo"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
