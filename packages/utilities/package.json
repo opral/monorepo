@@ -19,7 +19,7 @@
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r ./dist"
+		"clean": "rm -r -f ./dist ./.turbo"
 	},
 	"dependencies": {}
 }
