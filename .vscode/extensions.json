@@ -1,0 +1,14 @@
+{
+	"recommendations": [
+		"usernamehw.errorlens",
+		"mhutchie.git-graph",
+		"github.vscode-pull-request-github",
+		"yzhang.markdown-all-in-one",
+		"bierner.markdown-preview-github-styles",
+		"bierner.markdown-mermaid",
+		"pkief.material-icon-theme",
+		"svelte.svelte-vscode",
+		"bradlc.vscode-tailwindcss",
+		"wayou.vscode-todo-highlight"
+	]
+}
