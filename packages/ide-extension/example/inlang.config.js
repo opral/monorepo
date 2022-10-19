@@ -7,9 +7,9 @@ export const config = {
 	// 	const resource = await import(path);
 	// 	return { type: "Resource", body: resource };
 	// },
-	readBundles: async ({ fs }) => {
-		const en = await import("./resources/en.js");
-		const de = await import("./resources/de.js");
+	readBundles: async ({ fs, $import }) => {
+		const en = await $import("./resources/en.js");
+		const de = await $import("./resources/de.js");
 		return [
 			{
 				type: "Bundle",
