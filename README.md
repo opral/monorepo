@@ -37,13 +37,13 @@ For a technical explanation of the architecture, read [RFC-001](https://github.c
 
 > :bulb: The apps and features you see below are the features that are available right now. More is planned. Stay up to date and get <a href="https://tally.so/r/3q4O59">notified</a> for new developments.
 
-### [Editor](apps/editor)
+### Editor
 
 A git-based translation management editor that combines collaboration of cloud-based solutions with the simplicity of a local-first solution as if Figma and VSCode had a child.
 
 ![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
 
-### [VS-Code-Extension](apps/vs-code-extension)
+### [IDE-Extension](source-code/ide-extension)
 
 Improve developers' workflows by (semi)automating repetitive tasks.
 
