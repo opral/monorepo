@@ -1,0 +1,31 @@
+{
+	"name": "@inlang/core",
+	"type": "module",
+	"private": true,
+	"exports": {
+		"./ast": {
+			"types": "./dist/ast/index.d.ts"
+		},
+		"./config": {
+			"types": "./dist/config/index.d.ts",
+			"import": "./dist/config/index.js"
+		},
+		"./query": {
+			"types": "./dist/query/index.d.ts",
+			"import": "./dist/query/index.js"
+		}
+	},
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"test": "vitest run --passWithNoTests --coverage",
+		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
+		"clean": "rm -r -f ./dist ./.turbo"
+	},
+	"dependencies": {
+		"@inlang/utilities": "*"
+	}
+}
