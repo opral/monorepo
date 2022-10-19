@@ -1,6 +1,7 @@
 import type * as ast from "../ast/index.js";
 import type { FsPromisesSubset } from "./types/fsPromisesSubset.js";
 import type { DocumentSelector } from "vscode";
+import type { $import } from "./environment-functions/$import.js";
 
 /**
  * Inlang config schema.
@@ -30,7 +31,10 @@ export type Config = {
 	 * The bunndles must include the reference bundle (id) itself.
 	 */
 	bundleIds: string[];
-	readBundles: (args: { fs: FsPromisesSubset }) => Promise<ast.Bundle[]>;
+	readBundles: (args: {
+		fs: FsPromisesSubset;
+		$import: typeof $import;
+	}) => Promise<ast.Bundle[]>;
 	ideExtension: {
 		/**
 		 * Defines when a message is referenced.
@@ -40,6 +44,7 @@ export type Config = {
 			 * The (code) text to match against.
 			 */
 			text: string;
+			$import: typeof $import;
 		}) => Promise<
 			Array<{
 				/**

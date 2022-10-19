@@ -4,6 +4,8 @@ import { setState, state } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
+import type { Config as InlangConfig } from "@inlang/core/config";
+import { $import } from "@inlang/core/config";
 import fs from "node:fs/promises";
 
 export async function activate(
@@ -46,15 +48,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const potentialConfigFileUris = await vscode.workspace.findFiles(
 		"**/inlang.config.js"
 	);
-	// @ts-ignore
-	const moduleData = `
-		export let x = 33452;
-	`;
-	var b64moduleData = "data:text/javascript;base64," + btoa(moduleData);
-	const grammar = await import(b64moduleData);
-
-	console.log({ grammar });
-
 	if (potentialConfigFileUris.length === 0) {
 		return;
 	}
@@ -62,13 +55,14 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		options: potentialConfigFileUris.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
 	});
-	const configModule = await import(closestConfigPath);
+	const configModule: InlangConfig = (await import(closestConfigPath)).config;
 	setState({
-		config: configModule.config,
+		config: configModule,
 		configPath: closestConfigPath,
-		// @ts-ignore
-		bundles: configModule.config.readBundles({ fs: fs }),
+		bundles: await configModule.readBundles({ $import, fs: fs as any }),
 	});
+	const b = state().bundles;
+	console.log(b);
 	// register the commands
 	args.context.subscriptions.push(
 		vscode.commands.registerCommand(
