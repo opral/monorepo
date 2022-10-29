@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { usePageContext } from "@src/renderer/hooks/usePageContext.js";
 import { Dialog } from "@headlessui/react";
 
-import { Navigation } from "../../components/Navigation.js";
+import { Navigation } from "./Navigation.js";
 
 function MenuIcon(props) {
 	return (
