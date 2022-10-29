@@ -1,8 +1,13 @@
-// The goal of this config is native ESM compilation.
-// see https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#how-can-i-make-my-typescript-project-output-esm
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
 	"compilerOptions": {
-		"moduleResolution": "Node16"
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"types": ["vite/client"],
+		"jsx": "react-jsx",
+		"esModuleInterop": true,
+		"paths": {
+			// need to be defined in the vite config too!
+			"@src/*": ["./src/*"]
+		}
 	}
 }

@@ -1,0 +1,5 @@
+/* This file contains global css that is imported by the server renderer */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
