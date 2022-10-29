@@ -1,5 +1,6 @@
 import plugin from "tailwindcss/plugin";
 import { styles as button } from "./button/styles.cjs";
+import { styles as link } from "./link/styles.cjs";
 import { parseConfig } from "./utilities/parseConfig.cjs";
 import type { Config } from "./types/config.cjs";
 
@@ -12,8 +13,10 @@ import type { Config } from "./types/config.cjs";
 export function configure(config: Config) {
 	const parsedConfig = parseConfig(config);
 	return plugin(({ addComponents }) => {
-		for (const component of button) {
-			addComponents(component(parsedConfig));
+		for (const component of [button, link]) {
+			for (const variant of component) {
+				addComponents(variant(parsedConfig));
+			}
 		}
 	});
 }
