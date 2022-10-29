@@ -1,4 +1,5 @@
 import type { PageContext } from "./types.js";
+import { PageContextProvider } from "./hooks/usePageContext.js";
 
 //! Not implemented yet.
 /**
@@ -13,10 +14,29 @@ export function PageLayout(props: {
 	pageContext: PageContext;
 	children: React.ReactNode;
 }) {
-	switch (props.pageContext.urlPathname) {
-		// case "/":
-		// 	return <Index>{props.children}</Index>;
-		default:
-			return <>{props.children}</>;
-	}
+	const Layout = () => {
+		switch (props.pageContext.urlPathname) {
+			// case "/":
+			// 	return <Index>{props.children}</Index>;
+			default:
+				return <>{props.children}</>;
+		}
+	};
+	return (
+		<WithProviders pageContext={props.pageContext}>{Layout()}</WithProviders>
+	);
+}
+
+/**
+ * Providing context to all pages.
+ */
+function WithProviders(props: {
+	pageContext: PageContext;
+	children: React.ReactNode;
+}) {
+	return (
+		<PageContextProvider pageContext={props.pageContext}>
+			{props.children}
+		</PageContextProvider>
+	);
 }
