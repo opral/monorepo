@@ -9,6 +9,10 @@
 import type { PageContext } from "@src/renderer/types.js";
 import { parseValidateAndRender } from "@src/services/markdoc/parseValidateAndRender.js";
 import fs from "node:fs/promises";
+// import { DocumentationLayout } from "./DocumentationLayout.js";
+import { Layout } from "./DocumentationLayout.js";
+//
+import SidebarNav from "@src/components/SidebarNav.js";
 
 export async function onBeforeRender(pageContext: PageContext) {
 	const text = await fs.readFile(
@@ -30,5 +34,11 @@ type PageProps = {
 };
 
 export function Page(props: PageProps) {
-	return <div className="p-10">{props.markdown}</div>;
+	return (
+		// md kann nicht so übergeben werden mdName={props.markdown}
+		<div>
+			<Layout />
+			<div className="p-10 prose">{props.markdown}</div>;
+		</div>
+	);
 }
