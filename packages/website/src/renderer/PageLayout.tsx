@@ -1,6 +1,7 @@
 import type { JSXElement } from "solid-js";
 import type { PageContext } from "./types.js";
-import { Dynamic, PropAliases, Show } from "solid-js/web";
+import { Dynamic } from "solid-js/web";
+import { EditorLayout } from "@src/editor/EditorLayout.jsx";
 
 /**
  * Nested layout(s).
@@ -12,14 +13,10 @@ import { Dynamic, PropAliases, Show } from "solid-js/web";
  */
 export function PageLayout(pageContext: PageContext) {
 	const Layout = () => {
-		switch (pageContext.urlPathname) {
-			// case "/":
-			// 	return IndexLayout;
-			// case "/editor":
-			// 	return EditorLayout;
-			default:
-				return FallbackLayout;
+		if (pageContext.urlPathname.startsWith("/editor")) {
+			return EditorLayout;
 		}
+		return FallbackLayout;
 	};
 	return (
 		<Dynamic component={Layout()}>

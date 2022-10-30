@@ -1,6 +1,6 @@
+import type { PageContext } from "./types.js";
 import { renderToString, generateHydrationScript } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
-import type { PageContext } from "./types.js";
 import { PageLayout } from "./PageLayout.jsx";
 
 // including global css
@@ -13,9 +13,10 @@ export const passToClient = ["pageProps"];
 export function render(pageContext: PageContext): unknown {
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
-	const { documentProps } = pageContext.exports;
-	const title = documentProps?.title ?? "Inlang";
-	const description = documentProps?.description ?? "";
+	const { Head } = pageContext.exports;
+	const head = Head?.({ pageContext: currentPageContext() });
+	const title = head?.title ?? "inlang";
+	const description = head?.description ?? "";
 	// generating the html from the server:
 	// 1. the server sends a hydration script for the client.
 	//    the client uses the hydration script to hydrate the page.
@@ -32,8 +33,13 @@ export function render(pageContext: PageContext): unknown {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>${title}</title>
         <meta name="description" content="${description}" />
-        <title>${title}</title>
+<!-- START import inter font -->
+		<link rel="preconnect" href="https://rsms.me/">
+		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<!-- END import inter font -->
+		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
       <body>
@@ -41,3 +47,13 @@ export function render(pageContext: PageContext): unknown {
       </body>
     </html>`;
 }
+
+const favicons = `
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+<link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+`;

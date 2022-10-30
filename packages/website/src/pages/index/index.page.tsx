@@ -1,7 +1,11 @@
+import type { PageHead } from "@src/renderer/types.js";
 import { Counter } from "./Counter.js";
 
-export const documentProps = {
-	title: "Lulatsch",
+export const Head: PageHead = () => {
+	return {
+		title: "inlang",
+		description: "Developer-first localization infrastructure for software.",
+	};
 };
 
 export function Page() {
