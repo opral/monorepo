@@ -9,12 +9,8 @@
 			"require": "./dist/tailwindPlugins.cjs"
 		},
 		"./components": {
-			"types": "./dist/components/types/index.d.ts",
-			"import": "./dist/components/index.js",
-			"require": "./dist/components.index.cjs.js"
-		},
-		"./types/svelte": {
-			"types": "./src/svelte.d.ts"
+			"types": "./src/components/index.ts",
+			"import": "./src/components/index.ts"
 		}
 	},
 	"files": [
@@ -30,8 +26,7 @@
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1",
-		"lit": "^2.3.1",
-		"lodash": "^4.17.21"
+		"solid-js": "^1.6.1"
 	},
 	"devDependencies": {
 		"@types/css": "^0.0.33",

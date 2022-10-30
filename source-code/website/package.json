@@ -8,6 +8,7 @@
 		"test": "vitest run --coverage"
 	},
 	"dependencies": {
+		"@inlang/design-system": "*",
 		"@markdoc/markdoc": "^0.1.13",
 		"solid-headless": "^0.13.0",
 		"solid-js": "^1.6.0",
