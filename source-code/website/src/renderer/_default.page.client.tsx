@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { hydrate } from "solid-js/web";
 import { PageLayout } from "./PageLayout.jsx";
+import { currentPageContext, setCurrentPageContext } from "./state.js";
 
 import type { PageContext } from "./types.js";
 
@@ -12,16 +13,11 @@ export const clientRouting = true;
 // take over rendering.
 let isHydrated = false;
 
-// wrapping the page context in a signal makes client side rendering
-// reactive. If the page context changes, <PageLayout> will render a
-// new page.
-export const [currentPageContext, setCurrentPageContext] =
-	createSignal<PageContext>();
-
 export function render(pageContext: PageContext) {
 	setCurrentPageContext(pageContext);
 	if (isHydrated === false) {
-		// the page has been rendered server-side, so we need to hydrate it
+		// 1. the page has been rendered server-side, so we need to hydrate it
+		// 2. by passing the currentPageContext, the layout is reactive.
 		hydrate(
 			() => <PageLayout {...currentPageContext()!} />,
 			document.getElementById("root")!

@@ -5,11 +5,13 @@ import { PageLayout } from "./PageLayout.jsx";
 
 // including global css
 import "./app.css";
+import { currentPageContext, setCurrentPageContext } from "./state.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps"];
 
 export function render(pageContext: PageContext): unknown {
+	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { documentProps } = pageContext.exports;
 	const title = documentProps?.title ?? "Inlang";
@@ -22,7 +24,9 @@ export function render(pageContext: PageContext): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const renderedPage = renderToString(() => <PageLayout {...pageContext} />);
+	const renderedPage = renderToString(() => (
+		<PageLayout {...currentPageContext()!} />
+	));
 	return escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
