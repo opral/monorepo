@@ -1,8 +1,13 @@
 ### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/128).
 
-# RFC 002: Editor (CAT)
+# RFC 002: Tech Stack and Architecture of the editor + website
 
-Translators, and developers to a certain extend, require an editor to create and manage translations. Such an editor is sometimes referred to as CAT (computer-assisted translation) editor.
+> TL;DR
+
+Architecture: Monolith
+Framework: [SolidJS](https://www.solidjs.com/)
+Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
+UI components: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
 
 ## Scope of this RFC
 
@@ -33,19 +38,17 @@ The requirements above resemble a fusion of VSCode and Figma. VSCode due to the 
 
 Git's async collaboration features are deemed to be sufficient. Product usage and feedback will reveal whether real-time collaboration is benefitial and desired.
 
-- TODO: Embeddable
+- Embeddable ❌
 
 Integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers. On the other hand, the requirement of the editor to work with local files reduces the benefit of an IDE integration. Offline support could be achieved by leveraging PWA (Progressive Web Application) features. The majority of professional content related applications like Google Docs, VSCode or Figma (all?) are architected as dedicated applications, illustrated by figure _(b)_.
 
 Reasons against embeddability are runtime dependent features like networking or sandboxing JavaScript. However, the inlang config already delegates those requirements out of the editor. A network request would be required for machine translations for example. But, the inlang config could contain a callback `onMachineTranslate`. The host would be responsible for making the network request.
 
-<!-- Considering that the editor requires sandboxing JavaScript, networking and more runtime dependent features, the overhead of encapsulating those features to make the editor embeddable seems unreasonbale. For the same reasons, choosing a monolith architecture that would mix a sophisticated web application with a semi-static website seems unfavourable. Hence, a seperated architecture is chosen. -->
-
 |            | Development speed | Maintenance effort | Potential extension |
 | ---------- | ----------------- | ------------------ | ------------------- |
-| Monolith   | +                 | -                  | -                   |
-| Separated  | o                 | +                  | o                   |
-| Embeddable | o                 | o                  | +                   |
+| Monolith   | +                 | +                  | o                   |
+| Separated  | o                 | o                  | o                   |
+| Embeddable | -                 | o                  | +                   |
 
 <figure>
     <img src="./assets/002-embedded-separated-legend.png" alt="Legend"/>
@@ -72,12 +75,83 @@ Reasons against embeddability are runtime dependent features like networking or 
     </figcaption>
 </figure>
 
-- TODO: SPA, SSR, MPA, (PWA)
+- SPA, SSR, MPA, (PWA)
 
-## Architecture
+The editor is a classical SPA while the website is SSR.
 
-## Appendix
+- SEO ✅ (website) ❔ (editor)
 
-### Gitpod architectur
+SEO is important for the website and might be important for the editor.
 
-Gitpod spins up a cloud based IDE. [This video](https://youtu.be/svV-uE0Cdjk?t=544) explains the architecture behind gitpod. One word: complex. The complexity seems to stem from the fact that high computation resources are required to execute code. Think of compiling a program. The inlang editor does not seem to require such computation power, and hence not such a complex architecture.
+## Choices
+
+A monolith architecture has been chosen. The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort.
+
+Framework: [SolidJS](https://www.solidjs.com/)
+Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
+UI components: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
+
+### website
+
+Control over the website is required to localize the website at some point. Website builders like Webflow support no localization.
+
+#### why vite-plugin-ssr?
+
+- Unify routing, auth, SEO of editor and website
+- Control over different rendering modes (important because SSR of website and SPA of editor)
+- Simple, no black box like a complete meta framework.
+- Configure localization as we please
+
+#### why not nextJS?
+
+- Unify editor and website codebase + routing
+  - NextJs is not made for SPA apps
+
+### editor
+
+#### why vite-plugin-ssr?
+
+- Unify routing, auth, SEO of editor and website
+- Maybe SEO becomes important (architecture can be adjusted to support SSR)
+
+#### Why not react router for the editor?
+
+- Routing and auth will differ from website
+- (No SSR, if SEO becomes important)
+
+## design system (ui library)
+
+### framework
+
+Vite-plugin-ssr is used across the website and editor. Thus, the hard requirement for React does not exist, opening the opportunity the evaluate other frameworks.
+
+## why solidjs?
+
+- Simple + built-in state management.
+  - faster product development
+  - better maintainability
+- Uses the platform (web components, native JS packages work)
+- Uses JSX, thereby synergy effects to React (worst case, switch to React is possible)
+- Runtime approach (compiler just transforms JSX)
+  - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
+- performance “for free”.
+  - Performance is likely important for the editor.
+- (Great documentation -> understandable for beginners)
+
+## why not react?
+
+- Anticipated slower developerment speed and higher maintainability effort.
+  - De-coupled state management
+  - Performance optimization needs to be conducted manually (likely important for the editor)
+
+## why not svelte?
+
+- No JSX
+  - Requires custom ide extensions for .svelte files
+  - not compatible with anything JSX
+- Typescript is a second-class citizen (partially because not compatible with JSX)
+- Syntax is nice but compiled output harder to grasp compared to SolidJS
+  - (Better debugging of SolidJS)
+- State management is inferior to SolidJS
+  - For example, async fetching of data
+  - State can only be used in Svelte components, otherwise workarounds are required.
