@@ -1,5 +1,5 @@
+import { createSignal, JSX } from "solid-js";
 import type { DesignSystemColors } from "../../tailwind.config.cjs";
-import type { JSX } from "solid-js";
 
 export function Button(
 	props: {
@@ -9,17 +9,21 @@ export function Button(
 	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
 ) {
 	const variant = variants[props.variant];
+	const [count, setCount] = createSignal(0);
 	return (
-		<button
-			classList={{
-				[base]: true,
-				[variant["disabled"]]: props.disabled,
-				[variant[props.color]]:
-					// props.disabled can be undefined or set to false
-					props.disabled === false || props.disabled === undefined,
-			}}
-			{...props}
-		/>
+		<>
+			<button
+				onClick={() => setCount(count() + 1)}
+				classList={{
+					[base]: true,
+					[variant["disabled"]]: props.disabled,
+					[variant[props.color]]:
+						// props.disabled can be undefined or set to false
+						props.disabled === false || props.disabled === undefined,
+				}}
+				{...props}
+			></button>
+		</>
 	);
 }
 

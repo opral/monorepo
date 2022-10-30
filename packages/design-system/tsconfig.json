@@ -4,7 +4,6 @@
 	"include": ["src/**/*"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
-		"outDir": "dist",
-		"experimentalDecorators": true
+		"outDir": "dist"
 	}
 }
