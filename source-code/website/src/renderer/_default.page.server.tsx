@@ -1,7 +1,7 @@
+import { renderToString, generateHydrationScript } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import type { PageContext } from "./types.js";
-import { PageLayout } from "./PageLayout.js";
-import { renderToString } from "react-dom/server";
+import { PageLayout } from "./PageLayout.jsx";
 
 // including global css
 import "./app.css";
@@ -22,12 +22,7 @@ export function render(pageContext: PageContext): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const { Page, pageProps } = pageContext;
-	const renderedPage = renderToString(
-		<PageLayout pageContext={pageContext}>
-			<Page {...pageProps}></Page>
-		</PageLayout>
-	);
+	const renderedPage = renderToString(() => <PageLayout {...pageContext} />);
 	return escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
@@ -35,6 +30,7 @@ export function render(pageContext: PageContext): unknown {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="${description}" />
         <title>${title}</title>
+        ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
       <body>
         <div id="root">${dangerouslySkipEscape(renderedPage)}</div>

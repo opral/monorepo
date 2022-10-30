@@ -1,23 +1,23 @@
 import type { DesignSystemColors } from "../../tailwind.config.cjs";
-import { clsx } from "clsx";
+import type { JSX } from "solid-js";
 
 export function Button(
 	props: {
 		color: DesignSystemColors[number];
 		variant: keyof typeof variants;
-		children: React.ReactNode;
-	} & React.ButtonHTMLAttributes<HTMLButtonElement>
+		children: JSX.Element;
+	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
 ) {
 	const variant = variants[props.variant];
-	const variantColor = variant[props.color];
 	return (
 		<button
-			className={clsx(
-				base,
-				// if disabled, show the disabled color variant
-				// else show the variant with appplied color pattern
-				props.disabled ? variant["disabled"] : variantColor
-			)}
+			classList={{
+				[base]: true,
+				[variant["disabled"]]: props.disabled,
+				[variant[props.color]]:
+					// props.disabled can be undefined or set to false
+					props.disabled === false || props.disabled === undefined,
+			}}
 			{...props}
 		/>
 	);
@@ -41,6 +41,6 @@ const variants: Record<
 			"bg-tertiary text-on-tertiary hover:bg-hover-tertiary focus-visible:bg-tertiary/50 active:bg-active-tertiary",
 		error:
 			"bg-error text-on-error hover:bg-hover-tertiary focus-visible:bg-tertiary/50 active:bg-active-tertiary",
-		disabled: "bg-disabled-container text-disabled-content",
+		disabled: "bg-disabled-container text-disabled-content ",
 	},
 };

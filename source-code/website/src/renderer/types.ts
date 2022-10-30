@@ -1,8 +1,8 @@
-import type React from "react";
+import type { Component } from "solid-js";
 import type { PageContextBuiltIn } from "vite-plugin-ssr";
 
 export type PageProps = {};
-export type PageContext = PageContextBuiltIn<React.ElementType> & {
+export type PageContext = PageContextBuiltIn<Component> & {
 	pageProps: PageProps;
 	exports: {
 		documentProps?: {
