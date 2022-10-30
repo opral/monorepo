@@ -15,7 +15,8 @@ let isHydrated = false;
 // wrapping the page context in a signal makes client side rendering
 // reactive. If the page context changes, <PageLayout> will render a
 // new page.
-const [currentPageContext, setCurrentPageContext] = createSignal<PageContext>();
+export const [currentPageContext, setCurrentPageContext] =
+	createSignal<PageContext>();
 
 export function render(pageContext: PageContext) {
 	setCurrentPageContext(pageContext);
@@ -28,3 +29,7 @@ export function render(pageContext: PageContext) {
 		isHydrated = true;
 	}
 }
+
+// export function usePageContext(pageContext:PageContext){
+
+// }
