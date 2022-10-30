@@ -12,10 +12,9 @@ export function Navigation(props: {
 
 	return (
 		<nav className={clsx("text-base lg:text-sm", props.className)}>
-			<Link href={"/block"}> komme ich weiter</Link>
 			<ul
 				role="list"
-				className="space-y-9 h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden pl-0.5 pb-16    "
+				className="space-y-9 h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden pl-0.5 pb-16  mb-8  "
 			>
 				{props.navigation.map((section) => (
 					<li key={section.title}>

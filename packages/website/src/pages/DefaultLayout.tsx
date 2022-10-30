@@ -1,5 +1,7 @@
 import { Button } from "@src/components/Button.js";
 import { Navigation } from "./documentation/Navigation.js";
+import { Header } from "./documentation/Header.js";
+import { Footer } from "./documentation/Footer.js";
 const navigation = [
 	{
 		title: "Introduction",
@@ -45,7 +47,8 @@ export function DefaultLayout(props: { children: React.ReactNode }) {
 	return (
 		<>
 			<div className="mx-auto max-w-7xl px-4   sm:px-6 lg:px-8">
-				<Navbar></Navbar>
+				<Header></Header>
+				{/* <Navbar></Navbar> */}
 				{props.children}
 
 				<div className="">
@@ -54,6 +57,7 @@ export function DefaultLayout(props: { children: React.ReactNode }) {
 						className="w-64 pr-8 xl:w-72 xl:pr-16"
 					/>
 				</div>
+				<Footer></Footer>
 				{/* <div className="hidden lg:relative lg:block lg:flex-none">
 					<div className="absolute inset-y-0 right-0 w-[50vw] bg-slate-50 dark:hidden" />
 					<div className="absolute top-16 bottom-0 right-0 hidden h-12 w-px bg-gradient-to-t from-slate-800 dark:block" />
