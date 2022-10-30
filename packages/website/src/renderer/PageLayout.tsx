@@ -1,7 +1,7 @@
+import type { JSXElement } from "solid-js";
 import type { PageContext } from "./types.js";
-import { PageContextProvider } from "./hooks/usePageContext.js";
+import { Dynamic, PropAliases, Show } from "solid-js/web";
 
-//! Not implemented yet.
 /**
  * Nested layout(s).
  *
@@ -10,33 +10,27 @@ import { PageContextProvider } from "./hooks/usePageContext.js";
  *
  * Read more https://vite-plugin-ssr.com/layouts#nested-layouts.
  */
-export function PageLayout(props: {
-	pageContext: PageContext;
-	children: React.ReactNode;
-}) {
+export function PageLayout(pageContext: PageContext) {
 	const Layout = () => {
-		switch (props.pageContext.urlPathname) {
+		switch (pageContext.urlPathname) {
 			// case "/":
-			// 	return <Index>{props.children}</Index>;
+			// 	return IndexLayout;
+			// case "/editor":
+			// 	return EditorLayout;
 			default:
-				return <>{props.children}</>;
+				return FallbackLayout;
 		}
 	};
 	return (
-		<WithProviders pageContext={props.pageContext}>{Layout()}</WithProviders>
+		<Dynamic component={Layout()}>
+			<Dynamic
+				component={pageContext.Page}
+				{...pageContext.pageProps}
+			></Dynamic>
+		</Dynamic>
 	);
 }
 
-/**
- * Providing context to all pages.
- */
-function WithProviders(props: {
-	pageContext: PageContext;
-	children: React.ReactNode;
-}) {
-	return (
-		<PageContextProvider pageContext={props.pageContext}>
-			{props.children}
-		</PageContextProvider>
-	);
+function FallbackLayout(props: { children: JSXElement }) {
+	return props.children;
 }

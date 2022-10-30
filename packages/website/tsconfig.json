@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"types": ["vite/client"],
-		"jsx": "react-jsx",
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
 		"esModuleInterop": true,
 		"paths": {
 			// need to be defined in the vite config too!

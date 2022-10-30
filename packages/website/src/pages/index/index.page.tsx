@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { DefaultLayout } from "../DefaultLayout.js";
-import { Navigation } from "../documentation/Navigation.js";
+import { Counter } from "./Counter.js";
+
+export const documentProps = {
+	title: "Lulatsch",
+};
+
 export function Page() {
-	const [count, setCount] = useState(0);
 	return (
-		<DefaultLayout>
-			{/* <h1>{count}</h1> */}
-			{/* <button
-				className="button button-fill-primary"
-				onClick={() => setCount(count + 1)}
-			>
-				Increment
-			</button> */}
-		</DefaultLayout>
+		<>
+			<h1 class="text-3xl font-bold">Welcome</h1>
+			<div>
+				This page is:
+				<ul>
+					<li>Rendered to HTML.</li>
+					<li>
+						Interactive. <Counter />
+					</li>
+				</ul>
+			</div>
+			<a href="/editor">editor</a>
+		</>
 	);
 }

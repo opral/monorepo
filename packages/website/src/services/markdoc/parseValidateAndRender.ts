@@ -1,7 +1,8 @@
 import Markdoc, { type Config, type ValidationError } from "@markdoc/markdoc";
-import { tags, components } from "./tags.js";
-import React from "react";
-import { renderToString } from "react-dom/server";
+import { tags } from "./tags.js";
+import { Callout } from "./Callout.jsx";
+import { renderWithSolid } from "./solidPlugin.js";
+import { renderToString } from "solid-js/web";
 
 /**
  * Renders a Markdoc document.
@@ -9,11 +10,9 @@ import { renderToString } from "react-dom/server";
  * Provide the markdown document as a string, the
  * function returns the rendered HTML as a string.
  *
- * @throws If the markdown document is invalid.
- * @serverside Only.
- * @note the rendered markdown is not interactive (useState, etc. will not work)
+ * @throws
  */
-export function parseValidateAndRender(text: string): string {
+export function parseValidateAndRender(text: string) {
 	const ast = Markdoc.parse(text);
 	const errors = Markdoc.validate(ast, markdocConfig);
 	if (errors.length > 0) {
@@ -23,8 +22,7 @@ export function parseValidateAndRender(text: string): string {
         `);
 	}
 	const content = Markdoc.transform(ast, markdocConfig);
-	const Component = Markdoc.renderers.react(content, React, { components });
-	return renderToString(Component as React.ReactElement);
+	return renderWithSolid(content, { components: { Callout } });
 }
 
 /**
