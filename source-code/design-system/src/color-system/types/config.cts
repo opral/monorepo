@@ -31,7 +31,8 @@ export type Config = {
 		 * color expression in products.
 		 */
 		tertiary: Color;
-		[custom: string]: Color;
+		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
+		// [custom: string]: Color;
 	};
 	neutralColors: {
 		/**
@@ -48,7 +49,8 @@ export type Config = {
 		 * surface variants, and component outlines.
 		 */
 		neutralVariant: Color;
-		[custom: string]: Color;
+		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
+		// [custom: string]: Color;
 	};
 	semanticColors: {
 		/**
@@ -57,7 +59,8 @@ export type Config = {
 		 * Is used to signal error states.
 		 */
 		error: Color;
-		[custom: string]: Color;
+		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
+		// [custom: string]: Color;
 	};
 	/**
 	 * The color levels of the color system.

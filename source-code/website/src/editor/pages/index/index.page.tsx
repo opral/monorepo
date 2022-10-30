@@ -1,4 +1,4 @@
-import { Button } from "@src/components/Button.js";
+import { Button } from "@src/components/Button.jsx";
 
 export function Page() {
 	return (

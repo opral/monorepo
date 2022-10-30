@@ -2,7 +2,6 @@ import plugin from "tailwindcss/plugin";
 import { generateTokens } from "./generateTokens.cjs";
 import type { Config } from "./types/config.cjs";
 import colors from "tailwindcss/colors.js";
-import { merge } from "lodash";
 
 /**
  * Entrypoint for the colorsystem.
@@ -10,11 +9,11 @@ import { merge } from "lodash";
  * The colorsystem has default values. Defining every property
  * in the config is not required.
  */
-export function configure(config: Partial<Config>) {
+export function configure() {
 	// merge mutates default config
 	// this line allows the user to specify a partial config
 	// and only change the primary color for example.
-	merge(USED_COLOR_SYSTEM_CONFIG, config);
+	// merge(USED_COLOR_SYSTEM_CONFIG, config);
 	const tokens = generateTokens(USED_COLOR_SYSTEM_CONFIG);
 	// @ts-ignore
 	return plugin(() => undefined, {

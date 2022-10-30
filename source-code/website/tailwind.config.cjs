@@ -1,27 +1,23 @@
-const {
-	colorSystem,
-	components,
-} = require("@inlang/design-system/tailwind-plugins");
+const { colorSystem, components } = require("@inlang/design-system");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ["./index.html", "./**/*.{js,ts,jsx,tsx}"],
+	content: ["./**/*.{js,ts,jsx,tsx}"],
 	theme: {
 		extend: {},
 	},
 	plugins: [
 		require("@tailwindcss/typography"),
 		require("@tailwindcss/forms"),
-		colorSystem.configure({}),
-		components.configure({ borderRadius: "DEFAULT" }),
+		colorSystem.configure(),
+		components.configure(),
 	],
-	// safelist: ["bg-tertiary"],
 };
 
 /**
  * @typedef {["primary","secondary","tertiary","error"]} DesignSystemColors
  *
- * Colors are defined in the design system.
+ * (Component) colors that are defined in the design system.
  *
  * Hardcoded for now. Implementation can be found in `design-system/src/color-system/tailwindPlugin.cts`
  */
