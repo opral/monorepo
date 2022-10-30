@@ -1,4 +1,4 @@
-import { createSignal, JSX } from "solid-js";
+import type { JSX } from "solid-js";
 import type { DesignSystemColors } from "../../tailwind.config.cjs";
 
 export function Button(
@@ -9,11 +9,9 @@ export function Button(
 	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
 ) {
 	const variant = variants[props.variant];
-	const [count, setCount] = createSignal(0);
 	return (
 		<>
 			<button
-				onClick={() => setCount(count() + 1)}
 				classList={{
 					[base]: true,
 					[variant["disabled"]]: props.disabled,
