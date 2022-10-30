@@ -1,13 +1,9 @@
+// Stencil specific config file.
 {
 	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
 	"include": ["src/**/*"],
 	"compilerOptions": {
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
-		"outDir": "dist",
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
-		// nobody knows why the module resolution must be node.
-		// crashes otherwise.
-		"moduleResolution": "node"
+		"lib": ["ESNext", "DOM"],
+		"outDir": "dist"
 	}
 }

@@ -1,13 +1,9 @@
-import type { Config } from "../../color-system/types/config.cjs";
 import { createSignal, JSX } from "solid-js";
-
-type ColorOptions =
-	| keyof Config["accentColors"]
-	| keyof Config["semanticColors"];
+import type { DesignSystemColors } from "../../tailwind.config.cjs";
 
 export function Button(
 	props: {
-		color: ColorOptions;
+		color: DesignSystemColors[number];
 		variant: keyof typeof variants;
 		children: JSX.Element;
 	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
@@ -36,7 +32,10 @@ const base =
 	"rounded py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
 
 // variants with nested color patterns
-const variants: Record<"fill", Record<ColorOptions | "disabled", string>> = {
+const variants: Record<
+	"fill",
+	Record<DesignSystemColors[number] | "disabled", string>
+> = {
 	fill: {
 		primary:
 			"bg-primary text-on-primary hover:bg-hover-primary focus-visible:bg-primary/50 active:bg-active-primary",
