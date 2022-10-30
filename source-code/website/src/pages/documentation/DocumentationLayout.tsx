@@ -183,7 +183,7 @@ const navigation = [
 // 	return currentSection;
 // }
 
-export function Layout({ children, title }) {
+export function DocumentationLayout() {
 	let pageContext = usePageContext();
 	let isHomePage = pageContext.urlPathname === "/";
 	let allLinks = navigation.flatMap((section) => section.links);
@@ -195,17 +195,17 @@ export function Layout({ children, title }) {
 	let section = navigation.find((section) =>
 		section.links.find((link) => link.href === pageContext.urlPathname)
 	);
-	let currentSection = useTableOfContents(tableOfContents);
+	// let currentSection = useTableOfContents(tableOfContents);
 
-	function isActive(section) {
-		if (section.id === currentSection) {
-			return true;
-		}
-		if (!section.children) {
-			return false;
-		}
-		return section.children.findIndex(isActive) > -1;
-	}
+	// function isActive(section) {
+	// 	if (section.id === currentSection) {
+	// 		return true;
+	// 	}
+	// 	if (!section.children) {
+	// 		return false;
+	// 	}
+	// 	return section.children.findIndex(isActive) > -1;
+	// }
 
 	return (
 		<>

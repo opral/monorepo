@@ -1,6 +1,7 @@
 import Markdoc, { type Config, type ValidationError } from "@markdoc/markdoc";
 import { tags, components } from "./tags.js";
 import React from "react";
+import { renderToString } from "react-dom/server";
 
 /**
  * Renders a Markdoc document.
@@ -9,8 +10,10 @@ import React from "react";
  * function returns the rendered HTML as a string.
  *
  * @throws If the markdown document is invalid.
+ * @serverside Only.
+ * @note the rendered markdown is not interactive (useState, etc. will not work)
  */
-export function parseValidateAndRender(text: string): React.ReactNode {
+export function parseValidateAndRender(text: string): string {
 	const ast = Markdoc.parse(text);
 	const errors = Markdoc.validate(ast, markdocConfig);
 	if (errors.length > 0) {
@@ -20,7 +23,8 @@ export function parseValidateAndRender(text: string): React.ReactNode {
         `);
 	}
 	const content = Markdoc.transform(ast, markdocConfig);
-	return Markdoc.renderers.react(content, React, { components });
+	const Component = Markdoc.renderers.react(content, React, { components });
+	return renderToString(Component as React.ReactElement);
 }
 
 /**
