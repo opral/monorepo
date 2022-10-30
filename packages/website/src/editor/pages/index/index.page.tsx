@@ -1,4 +1,4 @@
-import { Button } from "@src/components/Button.js";
+import { Button } from "@inlang/design-system/components";
 
 export function Page() {
 	return (

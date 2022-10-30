@@ -1,25 +1,33 @@
-import type { DesignSystemColors } from "../../tailwind.config.cjs";
-import type { JSX } from "solid-js";
+import type { Config } from "../../color-system/types/config.cjs";
+import { createSignal, JSX } from "solid-js";
+
+type ColorOptions =
+	| keyof Config["accentColors"]
+	| keyof Config["semanticColors"];
 
 export function Button(
 	props: {
-		color: DesignSystemColors[number];
+		color: ColorOptions;
 		variant: keyof typeof variants;
 		children: JSX.Element;
 	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
 ) {
 	const variant = variants[props.variant];
+	const [count, setCount] = createSignal(0);
 	return (
-		<button
-			classList={{
-				[base]: true,
-				[variant["disabled"]]: props.disabled,
-				[variant[props.color]]:
-					// props.disabled can be undefined or set to false
-					props.disabled === false || props.disabled === undefined,
-			}}
-			{...props}
-		/>
+		<>
+			<button
+				onClick={() => setCount(count() + 1)}
+				classList={{
+					[base]: true,
+					[variant["disabled"]]: props.disabled,
+					[variant[props.color]]:
+						// props.disabled can be undefined or set to false
+						props.disabled === false || props.disabled === undefined,
+				}}
+				{...props}
+			></button>
+		</>
 	);
 }
 
@@ -28,10 +36,7 @@ const base =
 	"rounded py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
 
 // variants with nested color patterns
-const variants: Record<
-	"fill",
-	Record<DesignSystemColors[number] | "disabled", string>
-> = {
+const variants: Record<"fill", Record<ColorOptions | "disabled", string>> = {
 	fill: {
 		primary:
 			"bg-primary text-on-primary hover:bg-hover-primary focus-visible:bg-primary/50 active:bg-active-primary",

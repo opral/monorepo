@@ -1,1 +1,3 @@
-// Export of all (unstyled) custom elements (web-components).
+//! Must export with file ending e.g. `.jsx`.
+
+export * from "./button/Button.jsx";
