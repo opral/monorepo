@@ -91,7 +91,7 @@ export function Page(props: PageProps) {
 					<Navigation sections={sections} />
 					<div class=" w-full prose" innerHTML={props.markdown}></div>;
 				</div>
-				<Footer />
+				{/* <Footer /> */}
 			</div>
 		</>
 	);
