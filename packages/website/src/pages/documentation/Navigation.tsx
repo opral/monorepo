@@ -1,5 +1,5 @@
 import { currentPageContext } from "@src/renderer/state.js";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, Switch, Match } from "solid-js";
 
 export function Navigation(props: {
 	sections: Array<{
@@ -7,12 +7,15 @@ export function Navigation(props: {
 		documents: Array<{ href: string; title: string }>;
 	}>;
 }) {
-	// TODO remove the first line in the navigation Bar above the first instruction
 	return (
-		<nav class="text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16">
+		<nav class="text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16 bg-surface-100">
+			<div> ich könnte mal eine Suche werden</div>
+			<hr class="border-b-2"></hr>
 			<ul
 				role="list"
-				class={`hidden lg:block fixed   text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16		 pb-10 px-8 overflow-y-auto" `}
+				// class="space-y-9 h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden pl-0.5 pb-16  mb-8  "
+
+				class={`h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden lg:block fixed   text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16 pb-10 `}
 			>
 				<For each={props.sections}>
 					{(section) => (
@@ -21,17 +24,28 @@ export function Navigation(props: {
 								class=" pt-4 
 							 lg:pb-2 lg:pt-6 "
 							>
-								<hr
-									class="pb-1  border-t-2
+								<Switch
+									fallback={
+										<>
+											<hr
+												class="pb-1  border-t-2
 							  "
-								></hr>
+											></hr>
+										</>
+									}
+								>
+									<Match when={section.title == "Introduction"}>
+										<></>
+									</Match>
+								</Switch>
+
 								<h2 class="font-display font-medium text-slate-900  ">
 									{section.title}
 								</h2>
 							</div>
 							<ul
 								role="list"
-								class="mt-2 space-y-2 border-l-2 border-slate-100  lg:mt-4 lg:space-y-4 lg:border-slate-200"
+								// class="mt-2 space-y-2 border-l-2 border-slate-100  lg:mt-4 lg:space-y-4 lg:border-slate-200"
 							>
 								<For each={section.documents}>
 									{(document) => (
@@ -40,12 +54,15 @@ export function Navigation(props: {
 												<a
 													class={`${
 														document.href === currentPageContext()?.urlPathname
-															? "font-semibold text-sky-500 before:bg-sky-500"
-															: "text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block "
+															? " text-on-surface"
+															: " text-slate-500"
+														// ? "font-semibold text-sky-500 before:bg-sky-500"
+														// : "text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block "
 													}
-														
-														block w-full pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full
+													link link-primary
 														`}
+													// block w-full pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full
+
 													href={document.href}
 												>
 													{document.title}
