@@ -1,9 +1,8 @@
 import { createSignal, For } from "solid-js";
+import logo from "../../../public/favicon/favicon.ico";
+import { Icon } from "@iconify-icon/solid";
 
-const links = [
-	{ name: "Docs", href: "/documantaion" },
-	{ name: "Docs", href: "/documantaion" },
-];
+const links = [{ name: "Docs", href: "/documantaion" }];
 
 export function Header() {
 	return (
@@ -14,13 +13,18 @@ export function Header() {
 			></div>
 			<div class="relative z-20">
 				<div class="mx-auto flex  items-center justify-between px-4 py-5 sm:px-6 sm:py-4 md:justify-start md:space-x-10 lg:px-8">
-					<div class="h-8 w-auto sm:h-10">
-						<a href="#" class="flex">
-							<span class="sr-only">Inlang</span>
-							<img class="h-8 w-auto sm:h-10" src="logo.svg" alt="" />
+					<div class="">
+						<a href="/" class="flex">
+							<img
+								class="h-8 w-auto sm:h-10"
+								src="../../../public/favicon/favicon.ico"
+								alt=" Company Logo"
+							/>
+							<span class=" self-center pl-2 text-2xl	font-bold">inlang</span>
 						</a>
 					</div>
 					{/* Responsive icon start */}
+
 					<div class="-my-2 -mr-2 md:hidden">
 						<button
 							type="button"
@@ -56,8 +60,9 @@ export function Header() {
 								)}
 							</For>
 						</nav>
+						{/* Start Sign in Button */}
 						<div class="flex items-center md:ml-12">
-							<a
+							{/* <a
 								href="#"
 								class="text-base font-medium text-gray-500 hover:text-gray-900"
 							>
@@ -68,11 +73,13 @@ export function Header() {
 								class="ml-8 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
 							>
 								Sign up
-							</a>
+							</a> */}
 						</div>
+						{/* Start Sign in Button */}
 					</div>
 				</div>
-				<div class="border-b-4 border-indigo-500 max-w-max "></div>
+
+				<div class="border-b-4 border-indigo-500 max-w-max "> </div>
 				<hr class="border-slate-200 "></hr>
 			</div>
 
