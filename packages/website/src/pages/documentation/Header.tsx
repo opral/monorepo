@@ -12,7 +12,7 @@ export function Header() {
 				aria-hidden="true"
 			></div>
 			<div class="relative z-20">
-				<div class="mx-auto flex  items-center justify-between px-4 py-5 sm:px-6 sm:py-4 md:justify-start md:space-x-10 lg:px-8">
+				<div class="mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 ">
 					<div class="">
 						<a href="/" class="flex">
 							<img
@@ -50,7 +50,7 @@ export function Header() {
 						</button>
 					</div>
 					{/*Responsive icon end  */}
-					<div class="hidden md:flex md:flex-1 md:items-center md:justify-between">
+					<div class="hidden   items-center md:flex md:flex-1  md:justify-between">
 						<nav class="flex space-x-10">
 							<For each={links}>
 								{(link) => (
@@ -61,7 +61,10 @@ export function Header() {
 							</For>
 						</nav>
 						{/* Start Sign in Button */}
-						<div class="flex items-center md:ml-12">
+						<div class="flex items-center self-center md:ml-12">
+							<a class="flex text-lg" href="https://github.com/inlang/inlang">
+								<Icon icon="codicon:github-inverted" />
+							</a>
 							{/* <a
 								href="#"
 								class="text-base font-medium text-gray-500 hover:text-gray-900"
