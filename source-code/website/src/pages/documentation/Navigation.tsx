@@ -9,10 +9,25 @@ export function Navigation(props: {
 }) {
 	return (
 		<nav class="text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16 bg-surface-100">
-			<div> ich könnte mal eine Suche werden</div>
-			<hr class="border-b-2"></hr>
+			{/* <div class="fixed border-b-2 "> ich könnte mal eine Suche werden</div> */}
 			<ul
 				role="list"
+				// class="space-y-9 h-[calc(100vh-4.5rem)] fixed overflow-y-auto overflow-x-hidden pl-0.5 pb-16  mb-8  "
+				// // class="
+				// // position: -webkit-sticky;
+				// // position: sticky;
+				// // top: var(--nav-height);
+				// // height: -webkit-calc(100vh - var(--nav-height));
+				// // height: -moz-calc(100vh - var(--nav-height));
+				// // h-[calc(100vh-4.5rem)]				-webkit-box-flex: 0;
+				// // -webkit-flex: 0 0 240px;
+				// // -moz-box-flex: 0;
+				// // -ms-flex: 0 0 240px;
+				// // flex: 0 0 240px;
+				// // overflow-y: auto;
+				// // padding: 2rem 0 2rem 2rem;
+				// // "
+				// // class={`calc(100vh - var(--nav-height)) overflow-y-auto overflow-x-hidden lg:block fixed   text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16 pb-10 `}
 				// class="space-y-9 h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden pl-0.5 pb-16  mb-8  "
 
 				class={`h-[calc(100vh-4.5rem)] overflow-y-auto overflow-x-hidden lg:block fixed   text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16 pb-10 `}
@@ -39,7 +54,7 @@ export function Navigation(props: {
 									</Match>
 								</Switch>
 
-								<h2 class="font-display font-medium text-slate-900  ">
+								<h2 class="font-display  text-lg font-medium text-slate-900  ">
 									{section.title}
 								</h2>
 							</div>
