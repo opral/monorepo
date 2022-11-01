@@ -13,30 +13,51 @@ const sections = [
 		],
 	},
 	{
-		title: "Introduction",
+		title: "Guide ",
 		documents: [
-			{ title: "Getting started", href: "/documentation" },
+			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "Introduction",
+		title: "Start",
 		documents: [
-			{ title: "Getting started", href: "/documentation" },
+			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "Introduction",
+		title: "Whatsapp",
 		documents: [
-			{ title: "Getting started", href: "/documentation" },
+			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "Introduction",
+		title: "Samuel",
 		documents: [
-			{ title: "Getting started", href: "/documentation" },
+			{ title: "Getting started", href: "/" },
+			{ title: "Installation", href: "/" },
+		],
+	},
+	{
+		title: "Klaus",
+		documents: [
+			{ title: "Getting started", href: "/" },
+			{ title: "Installation", href: "/" },
+		],
+	},
+	{
+		title: "Test",
+		documents: [
+			{ title: "Getting started", href: "/" },
+			{ title: "Installation", href: "/" },
+		],
+	},
+	{
+		title: "Test",
+		documents: [
+			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
