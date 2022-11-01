@@ -7,7 +7,7 @@ const links = [
 
 export function Header() {
 	return (
-		<div class="sticky top-0 z-40 bg-white 	">
+		<header class="sticky top-0 z-40 bg-white 	">
 			<div
 				class="pointer-events-none absolute inset-0 z-30 "
 				aria-hidden="true"
@@ -72,7 +72,8 @@ export function Header() {
 						</div>
 					</div>
 				</div>
-				<hr class="border-slate-200"></hr>
+				<div class="border-b-4 border-indigo-500 max-w-max "></div>
+				<hr class="border-slate-200 "></hr>
 			</div>
 
 			{/* <!--
@@ -155,6 +156,6 @@ export function Header() {
 					</div>
 				</div>
 			</div>
-		</div>
+		</header>
 	);
 }
