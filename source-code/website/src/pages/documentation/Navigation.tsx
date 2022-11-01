@@ -7,6 +7,7 @@ export function Navigation(props: {
 		documents: Array<{ href: string; title: string }>;
 	}>;
 }) {
+	// TODO remove the first line in the navigation Bar above the first instruction
 	return (
 		<nav class="text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16">
 			<ul
