@@ -11,17 +11,23 @@ export function Navigation(props: {
 		<nav class="text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16">
 			<ul
 				role="list"
-				class={`hidden lg:block fixed z-20 inset-0 top-[3.8125rem] left-[max(0px,calc(50%-45rem))] right-auto w-[19.5rem] pb-10 px-8 overflow-y-auto" `}
+				class={`hidden lg:block fixed   text-base lg:text-sm w-64 pr-8 xl:w-72 xl:pr-16		 pb-10 px-8 overflow-y-auto" `}
 			>
 				<For each={props.sections}>
 					{(section) => (
 						<>
-							<h2
-								class="font-display font-medium text-slate-900 py-2 border-t-2
-							 lg:py-4 "
+							<div
+								class=" pt-4 
+							 lg:pb-2 lg:pt-6 "
 							>
-								{section.title}
-							</h2>
+								<hr
+									class="pb-1  border-t-2
+							  "
+								></hr>
+								<h2 class="font-display font-medium text-slate-900  ">
+									{section.title}
+								</h2>
+							</div>
 							<ul
 								role="list"
 								class="mt-2 space-y-2 border-l-2 border-slate-100  lg:mt-4 lg:space-y-4 lg:border-slate-200"
@@ -31,11 +37,14 @@ export function Navigation(props: {
 										<>
 											<li class="relative">
 												<a
-													class={
+													class={`${
 														document.href === currentPageContext()?.urlPathname
 															? "font-semibold text-sky-500 before:bg-sky-500"
 															: "text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block "
 													}
+														
+														block w-full pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full
+														`}
 													href={document.href}
 												>
 													{document.title}
