@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/source-code-configs",
+	"name": "configs",
 	"files": [
 		"typescript/tsconfig.base.json",
 		"typescript/tsconfig.svelte.json"
