@@ -2,12 +2,17 @@
 
 # RFC 002: Tech Stack and Architecture of the editor + website
 
-> TL;DR
+## TL;DR
+
+Simplicity and control over feature-rich but complex off the shelf solutions.
+
+Importance of long-term maintainability, development velocity, and the possiblity to [dogfood](https://en.wikipedia.org/wiki/Eating_your_own_dog_food) is valued higher than faster short-term development velocity.
 
 Architecture: Monolith
 Framework: [SolidJS](https://www.solidjs.com/)
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
-UI components: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
+Design system: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
+Markdown: [Markdoc](https://markdoc.dev/)
 
 ## Scope of this RFC
 
@@ -91,7 +96,7 @@ Framework: [SolidJS](https://www.solidjs.com/)
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
 UI components: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
 
-### website
+### website (metaframework)
 
 Control over the website is required to localize the website at some point. Website builders like Webflow support no localization.
 
@@ -105,9 +110,9 @@ Control over the website is required to localize the website at some point. Webs
 #### why not nextJS?
 
 - Unify editor and website codebase + routing
-  - NextJs is not made for SPA apps
+- NextJs is not made for SPA apps
 
-### editor
+### editor (metaframework)
 
 #### why vite-plugin-ssr?
 
@@ -125,7 +130,7 @@ Control over the website is required to localize the website at some point. Webs
 
 Vite-plugin-ssr is used across the website and editor. Thus, the hard requirement for React does not exist, opening the opportunity the evaluate other frameworks.
 
-## why solidjs?
+#### why solidjs?
 
 - Simple + built-in state management.
   - faster product development
@@ -138,13 +143,13 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
   - Performance is likely important for the editor.
 - (Great documentation -> understandable for beginners)
 
-## why not react?
+#### why not react?
 
-- Anticipated slower developerment speed and higher maintainability effort.
+- Anticipated slower development speed and higher maintainability effort.
   - De-coupled state management
   - Performance optimization needs to be conducted manually (likely important for the editor)
 
-## why not svelte?
+#### why not svelte?
 
 - No JSX
   - Requires custom ide extensions for .svelte files
@@ -155,3 +160,23 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
 - State management is inferior to SolidJS
   - For example, async fetching of data
   - State can only be used in Svelte components, otherwise workarounds are required.
+
+## design system
+
+TailwindCSS + ZagJS. TailwindCSS provides fast styling and ZagJS provides fast component logic (that works with SolidJS). Both solutions are headless. A headless solution provides the possibility to incrementally develop our own design system over time instead of fighting pre-designed component libraries.
+
+## markdown
+
+### Why [Stripe's Markdoc](https://markdoc.dev/)?
+
+Simplicity. Markdoc is "just" a markdown parser with customizable validation. The AST can be used to render the markdown and custom components.
+
+- simple and customizable
+- built-in validation for custom tags
+- can be used to render interactive components like MDX (if required)
+- portable because plain markdown + own renderer, not compiling to javascript like mdx
+
+### Why not MDX?
+
+- compiling to javascript complicates things
+- dependent on javascript runtime (less portable)
