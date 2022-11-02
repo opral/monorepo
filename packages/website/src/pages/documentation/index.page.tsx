@@ -4,6 +4,7 @@ import { Header } from "./Header.jsx";
 import { Navigation } from "./Navigation.jsx";
 import { Footer } from "./Footer.jsx";
 
+// TODO #156 extract tableOfContents to separate file?
 const sections = [
 	{
 		title: "Introduction",
