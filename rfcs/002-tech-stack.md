@@ -9,10 +9,10 @@ Simplicity and control over feature-rich but complex off the shelf solutions.
 Importance of long-term maintainability, development velocity, and the possiblity to [dogfood](https://en.wikipedia.org/wiki/Eating_your_own_dog_food) is valued higher than faster short-term development velocity.
 
 Architecture: Monolith
-Framework: [SolidJS](https://www.solidjs.com/)
-Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
-Design system: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
-Markdown: [Markdoc](https://markdoc.dev/)
+Framework: [SolidJS](https://www.solidjs.com/)  
+Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)  
+Design system: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)  
+Markdown: [Markdoc](https://markdoc.dev/)  
 
 ## Scope of this RFC
 
