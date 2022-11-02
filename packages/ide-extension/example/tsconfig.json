@@ -1,3 +1,3 @@
 {
-	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json"
+	"extends": "configs/typescript/tsconfig.base.json"
 }
