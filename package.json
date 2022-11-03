@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "turbo run build",
 		"dev": "turbo run dev",
-		"clean": "turbo run clean",
+		"clean": "turbo run clean && rm -f -r ./node_modules && npm i",
 		"test": "turbo run test"
 	},
 	"engines": {
