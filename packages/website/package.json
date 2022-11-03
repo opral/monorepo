@@ -5,7 +5,8 @@
 		"dev": "vite",
 		"build": "vite build",
 		"preview": "vite build && vite preview",
-		"test": "vitest run --coverage"
+		"test": "vitest run --coverage",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/design-system": "*",

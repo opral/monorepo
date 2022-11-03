@@ -21,7 +21,7 @@
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
 		"dev": "tsc --watch",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"test": "vitest run --coverage"
