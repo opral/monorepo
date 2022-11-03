@@ -21,11 +21,13 @@
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage",
 		"dev": "tsc --watch",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist ./.turbo"
+		"test": "vitest run --coverage"
 	},
 	"dependencies": {
-		"isomorphic-git": "^1.21.0"
+		"isomorphic-git": "^1.21.0",
+		"memfs": "^3.4.9"
 	}
 }
