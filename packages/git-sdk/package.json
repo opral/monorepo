@@ -11,9 +11,9 @@
 			"types": "./dist/auth/index.d.ts",
 			"import": "./dist/auth/index.js"
 		},
-		"./filesystem": {
-			"types": "./dist/filesystem/index.d.ts",
-			"import": "./dist/filesystem/index.js"
+		"./fs": {
+			"types": "./dist/fs/index.d.ts",
+			"import": "./dist/fs/index.js"
 		}
 	},
 	"files": [
