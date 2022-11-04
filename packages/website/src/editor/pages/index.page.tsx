@@ -2,6 +2,7 @@ import type { GitRouteParams } from "./index.page.route.js";
 import { currentPageContext } from "@src/renderer/state.js";
 import type { PageHead } from "@src/renderer/types.js";
 import { createSignal, onMount } from "solid-js";
+import { onHello } from "./index.telefunc.js";
 
 export const Head: PageHead = () => {
 	return {
@@ -19,6 +20,9 @@ export function Page() {
 		await raw.init({ fs, dir: "/test-editor" });
 		const dir = await fs.promises.readdir("/test-editor");
 		console.log(dir);
+
+		const helloResult = await onHello({ name: "samuel" });
+		console.log(helloResult);
 	});
 
 	return (
