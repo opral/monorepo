@@ -23,7 +23,7 @@
 		"dev": "tsc --watch",
 		"test": "vitest run --passWithNoTests --coverage",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist ./.turbo"
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/utilities": "*"
