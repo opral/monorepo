@@ -8,6 +8,9 @@
 		"test": "vitest run --coverage",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
 	"dependencies": {
 		"@inlang/core": "*",
 		"@inlang/design-system": "*",
