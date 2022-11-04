@@ -28,10 +28,7 @@
 		"skipLibCheck": true,
 		// Lint JS files
 		"checkJs": true,
-		// Svelte Preprocess cannot figure out whether you have a value or a type, so tell TypeScript
-		// to enforce using `import type` instead of `import` for Types.
-		//
-		// For consistency across the source code, the setting is used in the base ts config.
+		// Distingish between type imports and code imports.
 		"importsNotUsedAsValues": "error"
 	}
 }

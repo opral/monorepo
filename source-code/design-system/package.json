@@ -16,9 +16,9 @@
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
-		"test": "vitest run --coverage",
+		"test": "vitest run --coverage --passWithNoTests",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist ./.turbo"
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1"

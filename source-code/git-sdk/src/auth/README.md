@@ -1,0 +1,1 @@
+Code to authenticate among different git providers.
