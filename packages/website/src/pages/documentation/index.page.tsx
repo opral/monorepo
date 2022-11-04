@@ -4,6 +4,15 @@ import { Header } from "./Header.jsx";
 import { Navigation } from "./Navigation.jsx";
 import { Footer } from "./Footer.jsx";
 
+import type { PageHead } from "@src/renderer/types.js";
+
+export const Head: PageHead = () => {
+	return {
+		title: "Documentation",
+		description: "Documentation",
+	};
+};
+
 // TODO #156 extract tableOfContents to separate file?
 const sections = [
 	{
@@ -65,10 +74,30 @@ const sections = [
 ];
 
 export async function onBeforeRender() {
+	// try {
+	// 	const content = await fs.readFile(
+	// 		"../../documentation/getting-started.md",
+	// 		"utf-8"
+	// 	);
+	// } catch (error) {
+	// 	if (error.code === "ENOENT") {
+	// 		console.log("File not found!");
+	// 	} else {
+	// 		throw err;
+	// 	}
+	// }
 	const text = await fs.readFile(
 		"../../documentation/getting-started.md",
-		"utf-8"
+		"utf8",
+		(err, data) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
+			console.log(data);
+		}
 	);
+
 	const markdown = parseValidateAndRender(text);
 	return {
 		pageContext: {
