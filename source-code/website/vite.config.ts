@@ -1,10 +1,16 @@
 import type { UserConfig } from "vite";
 import solid from "vite-plugin-solid";
 import { ssr } from "vite-plugin-ssr/plugin";
+import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
 
 export default await withFsPolyfills({
-	plugins: [solid({ ssr: true }), ssr()],
+	plugins: [
+		solid({ ssr: true }),
+		// ordering matters. telefunc must be before ssr
+		telefunc(),
+		ssr(),
+	],
 	resolve: {
 		alias: {
 			// must also be defined in tsconfig!
