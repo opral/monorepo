@@ -9,6 +9,10 @@
 		"paths": {
 			// need to be defined in the vite config too!
 			"@src/*": ["./src/*"]
-		}
+		},
+		
+		"resolveJsonModule": true,
+
+
 	}
 }
