@@ -11,7 +11,7 @@ export const Head: PageHead = () => {
 export function Page() {
 	return (
 		<>
-			<h1 class="text-3xl font-bold">Welcome</h1>
+			<h1 class="text-3xl font-bold bg-red-500">Welcome</h1>
 			<div>
 				This page is:
 				<ul>

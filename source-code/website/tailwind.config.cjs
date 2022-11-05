@@ -1,16 +1,28 @@
 const { colorSystem, components } = require("@inlang/design-system");
+const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	content: ["./**/*.{js,ts,jsx,tsx}"],
 	theme: {
 		extend: {},
+		// no tailwind colors. use design system colors
+		colors: {},
 	},
 	plugins: [
 		require("@tailwindcss/typography"),
 		require("@tailwindcss/forms"),
-		colorSystem.configure(),
 		components.configure(),
+		colorSystem.configure({
+			accentColors: {
+				primary: colors.orange,
+				secondary: colors.gray,
+				tertiary: colors.teal,
+			},
+			semanticColors: {
+				error: colors.red,
+			},
+		}),
 	],
 };
 
