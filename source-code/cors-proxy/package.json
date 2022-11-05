@@ -1,0 +1,19 @@
+{
+	"name": "@inlang/cors-proxy",
+	"main": "app.js",
+	"private": true,
+	"scripts": {
+		"dev": "node app.js",
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"@isomorphic-git/cors-proxy": "^2.7.1",
+		"cookie": "^0.5.0",
+		"dotenv": "^16.0.0",
+		"express": "^4.16.3",
+		"jose": "^4.8.1"
+	},
+	"engines": {
+		"node": ">=14"
+	}
+}
