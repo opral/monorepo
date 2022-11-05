@@ -1,37 +1,37 @@
 export const sections = [
 	{
-		title: "1",
+		title: "Introduction",
 		documents: [
 			{
 				title: "8 Items muss ich sehen",
 				href: "/documentation/getting-started",
 			},
-			{ title: "Installation", href: "/" },
+			{ title: "Installation", href: "/documentation/intro" },
 		],
 	},
 	{
-		title: "2 ",
+		title: "Junior",
 		documents: [
 			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "3",
+		title: "Senior",
 		documents: [
 			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "4",
+		title: "head",
 		documents: [
 			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
 		],
 	},
 	{
-		title: "5",
+		title: "Lead",
 		documents: [
 			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
