@@ -4,20 +4,12 @@ const links = [
 	{ name: "Blog", href: "/documantaion" },
 	{ name: "Docs", href: "/documantaion" },
 ];
-// position: relative;
-// display: -webkit-box;
-// display: -webkit-flex;
-// display: -moz-box;
-// display: -ms-flexbox;
-// display: flex;
-// z-index: 100;
-// width: 100%;
-// color: var(--dark);
-// padding: 1rem 0;
+
 export function Footer() {
 	return (
 		<footer
-			class=" // position: relative;
+			class=" 
+		// 	position: relative;
         // display: -webkit-box;
         // display: -webkit-flex;
         // display: -moz-box;
@@ -25,8 +17,9 @@ export function Footer() {
         // display: flex;
         // z-index: 100;
         // width: 100%;
-        // color: var(--dark);
-        // padding: 1rem 0;"
+        // padding: 1rem 0;
+		
+		"
 			aria-labelledby="footer-heading"
 		>
 			<h2 id="footer-heading" class="sr-only">

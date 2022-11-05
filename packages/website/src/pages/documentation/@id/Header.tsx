@@ -14,7 +14,7 @@ export function Header() {
 				aria-hidden="true"
 			></div>
 			<div class="relative z-20">
-				<div class="mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 ">
+				<div class=" px-4 sm:px-6 lg:px-8 mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 ">
 					<div class="">
 						<a href="/" class="flex">
 							<img
