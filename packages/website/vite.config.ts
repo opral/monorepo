@@ -3,6 +3,10 @@ import solid from "vite-plugin-solid";
 import { ssr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
+import { validateEnv } from "./env.js";
+
+// validate the env variables.
+validateEnv();
 
 export default await withFsPolyfills({
 	plugins: [
@@ -15,6 +19,7 @@ export default await withFsPolyfills({
 		alias: {
 			// must also be defined in tsconfig!
 			"@src": fileURLToPath(new URL("./src", import.meta.url)),
+			"@env": fileURLToPath(new URL("./env.ts", import.meta.url)),
 		},
 	},
 });

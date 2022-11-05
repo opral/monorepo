@@ -8,10 +8,8 @@
 		"esModuleInterop": true,
 		"paths": {
 			// need to be defined in the vite config too!
-			"@src/*": ["./src/*"]
-		},
-		
-
-
+			"@src/*": ["./src/*"],
+			"@env": ["./env.ts"]
+		}
 	}
 }

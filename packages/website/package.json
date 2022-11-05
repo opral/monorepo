@@ -16,9 +16,11 @@
 		"@inlang/design-system": "*",
 		"@inlang/git-sdk": "*",
 		"@markdoc/markdoc": "^0.1.13",
+		"dotenv": "^16.0.3",
 		"lodash-es": "^4.17.21",
 		"solid-js": "^1.6.0",
-		"telefunc": "^0.1.32"
+		"telefunc": "^0.1.32",
+		"zod": "^3.19.1"
 	},
 	"devDependencies": {
 		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
