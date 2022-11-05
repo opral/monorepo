@@ -8,8 +8,8 @@ export function Navigation(props: {
 	}>;
 }) {
 	return (
-		<div class="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto bg-surface-500 overflow-x-hidden  pl-0.5">
-			<nav class=" text-sm w-64  xl:w-72 px-8 pb-8	">
+		<div class="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto bg-surface-500 overflow-x-hidden   pl-0.5 md:block	hidden">
+			<nav class=" text-sm w-64  xl:w-72 px-8 pb-8 ">
 				{/* <div class="fixed border-b-2 "> ich könnte mal eine Suche werden</div> */}
 				<ul role="list" class={``}>
 					<For each={props.sections}>
