@@ -5,7 +5,6 @@ import { Navigation } from "./Navigation.jsx";
 import { Footer } from "./Footer.jsx";
 import { sections } from "./tableOfContent.jsx";
 import type { PageContext, PageHead } from "@src/renderer/types.js";
-// import data from "./directory.json";
 
 export const Head: PageHead = () => {
 	return {
