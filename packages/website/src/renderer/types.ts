@@ -1,5 +1,6 @@
 import type { Component } from "solid-js";
 import type { PageContextBuiltIn } from "vite-plugin-ssr";
+import type { passToClient } from "./_default.page.server.jsx";
 
 /**
  * The <head> content of a page.
@@ -10,12 +11,9 @@ export type PageHead = (args: { pageContext: PageContext }) => {
 };
 
 /**
- * The page context
+ * The page context available during rendering.
  */
-export type PageContext = PageContextBuiltIn<Component> & {
-	/**
-	 * Properties of the rendered page.
-	 */
+export type PageContextRenderer = PageContextBuiltIn & {
 	pageProps: Record<string, unknown>;
 	/**
 	 * Things that a file that contains a Page exports.
@@ -26,6 +24,17 @@ export type PageContext = PageContextBuiltIn<Component> & {
 		Head?: PageHead;
 	};
 };
+
+/**
+ * The page context that is available on the client.
+ *
+ * The avaiable page context is determined by the `passToClient`
+ * export in [_default.page.server.jsx](./_default.page.server.jsx).
+ */
+export type PageContext = Pick<
+	PageContextRenderer,
+	typeof passToClient[number]
+>;
 
 /**
  * The return of a `onBeforeRender` hook.

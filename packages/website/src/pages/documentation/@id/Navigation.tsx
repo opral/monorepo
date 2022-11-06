@@ -44,7 +44,7 @@ export function Navigation(props: {
 													<a
 														class={`${
 															document.href ===
-															currentPageContext()?.urlPathname
+															currentPageContext()?.urlParsed.pathname
 																? // TODO Change Color
 																  " text-primary "
 																: " text-on-surface/60"
