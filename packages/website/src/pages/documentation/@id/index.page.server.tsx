@@ -11,7 +11,7 @@ import { parseValidateAndRender } from "@src/services/markdoc/parseValidateAndRe
 import { Header } from "./Header.jsx";
 import { Navigation } from "./Navigation.jsx";
 import { Footer } from "./Footer.jsx";
-import { sections } from "./tableOfContent.jsx";
+import { tableOfContent } from "./tableOfContent.js";
 import type {
 	OnBeforeRender,
 	PageContext,
@@ -66,7 +66,7 @@ export function Page(props: PageProps) {
 			<div class="mx-auto max-w-screen-2xl ">
 				<Header />
 				<div class=" flex ">
-					<Navigation sections={sections} />
+					<Navigation sections={tableOfContent} />
 
 					{props.markdown ? (
 						<div class=" w-full prose" innerHTML={props.markdown}></div>
