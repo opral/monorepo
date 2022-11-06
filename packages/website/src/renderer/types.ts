@@ -9,13 +9,27 @@ export type PageHead = (args: { pageContext: PageContext }) => {
 	description?: string;
 };
 
-export type PageProps = {};
+/**
+ * The page context
+ */
 export type PageContext = PageContextBuiltIn<Component> & {
-	pageProps: PageProps;
 	/**
-	 * Things that a Page exports.
+	 * Properties of the rendered page.
 	 */
-	exports: {
+	pageProps: unknown;
+	/**
+	 * Things that a file that contains a Page exports.
+	 *
+	 * Like a Head object.
+	 */
+	exports?: {
 		Head?: PageHead;
 	};
+};
+
+/**
+ * The return of a `onBeforeRender` hook.
+ */
+export type OnBeforeRender = {
+	pageContext: Pick<PageContext, "pageProps">;
 };
