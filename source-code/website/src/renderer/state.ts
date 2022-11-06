@@ -1,12 +1,16 @@
 import { createSignal, type Accessor, type Setter } from "solid-js";
-import type { PageContext } from "./types.js";
+import type { PageContext, PageContextRenderer } from "./types.js";
 
 /**
  * The current page context.
  *
- * The page context is (and must be) set by the renderers, either server-side or client-side.
+ * The page context is (and must be) set by the renderers.
+ * Note that the page context on the client side is a subset
+ * of `PageContextRenderer`. If you are certain that the
+ * page context you are accessing is the `PageContextRenderer`,
+ * use a type cast `as PageContextRenderer`.
  */
 export const [currentPageContext, setCurrentPageContext] =
 	// type casting to avoid undefined type.
 	// the assumption is made that the renderers will set current page context
-	createSignal() as [Accessor<PageContext>, Setter<PageContext>];
+	createSignal() as [Accessor<PageContext>, Setter<PageContextRenderer>];

@@ -1,16 +1,17 @@
-import type { PageContext } from "./types.js";
-import { renderToString, generateHydrationScript } from "solid-js/web";
+import type { PageContextRenderer } from "./types.js";
+import { renderToString, generateHydrationScript, Dynamic } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
-import { PageLayout } from "./PageLayout.jsx";
 
 // including global css
 import "./app.css";
-import { currentPageContext, setCurrentPageContext } from "./state.js";
+import { setCurrentPageContext } from "./state.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps"];
+export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
 
-export function render(pageContext: PageContext): unknown {
+export function render(pageContext: PageContextRenderer): unknown {
+	// TODO this likely leads to server state pollution.
+	// TODO if so, contact @samuelstroschein.
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { Head } = pageContext.exports;
@@ -26,7 +27,7 @@ export function render(pageContext: PageContext): unknown {
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
 	const renderedPage = renderToString(() => (
-		<PageLayout {...currentPageContext()!} />
+		<Dynamic component={pageContext.Page} {...pageContext.pageProps}></Dynamic>
 	));
 	return escapeInject`<!DOCTYPE html>
     <html lang="en">
@@ -35,10 +36,10 @@ export function render(pageContext: PageContext): unknown {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>${title}</title>
         <meta name="description" content="${description}" />
-<!-- START import inter font -->
+		<!-- START import inter font -->
 		<link rel="preconnect" href="https://rsms.me/">
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-<!-- END import inter font -->
+		<!-- END import inter font -->
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
