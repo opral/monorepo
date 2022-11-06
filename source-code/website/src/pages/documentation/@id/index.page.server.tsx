@@ -10,13 +10,8 @@
 import { parseValidateAndRender } from "@src/services/markdoc/parseValidateAndRender.js";
 import { Header } from "./Header.jsx";
 import { Navigation } from "./Navigation.jsx";
-import { Footer } from "./Footer.jsx";
 import { tableOfContent } from "./tableOfContent.js";
-import type {
-	OnBeforeRender,
-	PageContext,
-	PageHead,
-} from "@src/renderer/types.js";
+import type { OnBeforeRender, PageHead } from "@src/renderer/types.js";
 
 export const Head: PageHead = () => {
 	return {
@@ -25,36 +20,29 @@ export const Head: PageHead = () => {
 	};
 };
 
-export async function onBeforeRender(
-	pageContext: PageContext
-): Promise<OnBeforeRender> {
+export const onBeforeRender: OnBeforeRender<PageProps> = async ({
+	pageContext,
+}) => {
 	const fs = await import("node:fs/promises");
-
+	let markdown: string | undefined;
 	try {
 		const text = await fs.readFile(
 			`../../documentation/${pageContext.routeParams.id}.md`,
 			"utf8"
 		);
-
-		const markdown = parseValidateAndRender(text);
+		markdown = parseValidateAndRender(text);
+	} catch (error) {
+		console.log("error in onBeforeRender", error);
+	} finally {
 		return {
 			pageContext: {
-				pageProps: {
+				props: {
 					markdown,
 				},
 			},
 		};
-	} catch (error) {
-		console.error(error);
-		return {
-			pageContext: {
-				pageProps: {
-					markdown: undefined,
-				},
-			},
-		};
 	}
-}
+};
 
 type PageProps = {
 	markdown?: string;
