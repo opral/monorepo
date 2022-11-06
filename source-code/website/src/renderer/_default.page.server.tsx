@@ -14,7 +14,7 @@ export function render(pageContext: PageContext): unknown {
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { Head } = pageContext.exports;
-	const head = Head?.({ pageContext: currentPageContext() });
+	const head = Head?.({ pageContext });
 	const title = head?.title ?? "inlang";
 	const description = head?.description ?? "";
 	// generating the html from the server:
