@@ -34,6 +34,7 @@ export type ColorTokens = {
 	"on-surface-variant": string;
 
 	outline: string;
+	"outline-variant": string;
 
 	error: string;
 	"on-error": string;
