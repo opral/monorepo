@@ -1,5 +1,5 @@
 import { currentPageContext } from "@src/renderer/state.js";
-import { createSignal, For, Switch, Match } from "solid-js";
+import { For, Switch, Match } from "solid-js";
 
 export function Navigation(props: {
 	sections: Array<{

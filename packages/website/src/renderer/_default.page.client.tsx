@@ -1,6 +1,5 @@
 import { Dynamic, hydrate } from "solid-js/web";
 import { currentPageContext, setCurrentPageContext } from "./state.js";
-
 import type { PageContextRenderer } from "./types.js";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
@@ -18,11 +17,11 @@ export function render(pageContext: PageContextRenderer) {
 		// 2. by passing the currentPageContext, the layout is reactive.
 		hydrate(
 			() => (
-				// to ensure reactive client side routing, the signal currentPageContext
-				// needs to be referenced, not the `pageContext` variable.
+				// need to pass reactive props to the page
+				// to have reactive routing
 				<Dynamic
 					component={(currentPageContext() as PageContextRenderer).Page}
-					{...currentPageContext().pageProps}
+					{...currentPageContext()?.props}
 				></Dynamic>
 			),
 			document.getElementById("root")!

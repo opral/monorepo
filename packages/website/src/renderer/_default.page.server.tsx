@@ -1,17 +1,15 @@
 import type { PageContextRenderer } from "./types.js";
 import { renderToString, generateHydrationScript, Dynamic } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
-
-// including global css
 import "./app.css";
 import { setCurrentPageContext } from "./state.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
+export const passToClient = ["props", "routeParams", "urlParsed"] as const;
 
 export function render(pageContext: PageContextRenderer): unknown {
-	// TODO this likely leads to server state pollution.
-	// TODO if so, contact @samuelstroschein.
+	// ! High chance of cross-request state pollution
+	// ! need to check if this is a problem in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { Head } = pageContext.exports;
@@ -27,7 +25,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
 	const renderedPage = renderToString(() => (
-		<Dynamic component={pageContext.Page} {...pageContext.pageProps}></Dynamic>
+		<Dynamic component={pageContext.Page} {...pageContext.props}></Dynamic>
 	));
 	return escapeInject`<!DOCTYPE html>
     <html lang="en">
