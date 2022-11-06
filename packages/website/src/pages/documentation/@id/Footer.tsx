@@ -2,7 +2,7 @@ export function Footer() {
 	return (
 		<footer
 			aria-labelledby="footer-heading"
-			class="  inset-x-0 bottom-0 z-40 bg-background border-t border-surface-100	"
+			class="  inset-x-0 bottom-0 z-40 bg-background border-t border-outline-variant	"
 		>
 			<h2 id="footer-heading" class="sr-only">
 				Footer
