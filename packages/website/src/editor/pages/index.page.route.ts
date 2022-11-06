@@ -15,9 +15,11 @@ export type GitRouteParams = {
 	repository: string;
 };
 
-export default function (pageContext: PageContext): {
-	routeParams: GitRouteParams;
-} {
+export default function (pageContext: PageContext) {
+	// if pathname does not include editor, this route does not apply.
+	if (pageContext.urlPathname.includes("/editor") === false) {
+		return false;
+	}
 	return {
 		routeParams: { provider: "github.com", repository: "xyz" },
 	};
