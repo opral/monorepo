@@ -19,7 +19,7 @@ export function Navigation(props: {
 									<Switch
 										fallback={
 											<>
-												<hr class="pt-2.5 border-t border-primary"></hr>
+												<hr class="pt-2.5 border-t border-outline-variant"></hr>
 											</>
 										}
 									>
