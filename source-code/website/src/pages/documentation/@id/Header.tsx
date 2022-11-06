@@ -1,5 +1,4 @@
 import { createSignal, For, Show } from "solid-js";
-import logo from "../../../public/favicon/favicon.ico";
 import { Icon } from "@iconify-icon/solid";
 
 const links = [{ name: "Docs", href: "/documantaion" }];
@@ -19,7 +18,7 @@ export function Header() {
 						<a href="/" class="flex">
 							<img
 								class="h-8 w-auto sm:h-10"
-								src="../../../public/favicon/favicon.ico"
+								src="/favicon/favicon.ico"
 								alt=" Company Logo"
 							/>
 							<span class=" self-center pl-2 text-2xl	font-bold">inlang</span>
@@ -87,7 +86,7 @@ export function Header() {
 									<a href="/" class="flex">
 										<img
 											class="h-8 w-auto sm:h-10"
-											src="../../../public/favicon/favicon.ico"
+											src="/favicon/favicon.ico"
 											alt=" Company Logo"
 										/>
 										<span class=" self-center pl-2 text-2xl	font-bold">
