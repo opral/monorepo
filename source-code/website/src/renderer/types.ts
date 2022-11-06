@@ -16,7 +16,7 @@ export type PageContext = PageContextBuiltIn<Component> & {
 	/**
 	 * Properties of the rendered page.
 	 */
-	pageProps: unknown;
+	pageProps: Record<string, unknown>;
 	/**
 	 * Things that a file that contains a Page exports.
 	 *
