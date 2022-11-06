@@ -63,19 +63,19 @@ type PageProps = {
 export function Page(props: PageProps) {
 	return (
 		<>
-			<div class="mx-auto max-w-screen-2xl ">
-				<Header />
+			<Header />
+			<div class="mx-auto max-w-screen-2xl  sm:px-6  ">
 				<div class=" flex ">
 					<Navigation sections={tableOfContent} />
 
 					{props.markdown ? (
-						<div class=" w-full prose" innerHTML={props.markdown}></div>
+						<div class=" w-full prose mx-auto" innerHTML={props.markdown}></div>
 					) : (
 						<p>schade</p>
 					)}
 				</div>
-				{/* <Footer /> */}
 			</div>
+			<Footer />
 		</>
 	);
 }
