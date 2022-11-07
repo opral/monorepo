@@ -43,7 +43,10 @@ export function Header() {
 					</div>
 					{/* Responsive icon start */}
 					<div class="self-center">
-						<a href="#" class="link  flex space-x-1">
+						<a
+							href="https://github.com/inlang/inlang"
+							class="link  flex space-x-1"
+						>
 							<span class="">GitHub</span>
 							<svg
 								class="h-6 w-6"
