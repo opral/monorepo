@@ -19,7 +19,7 @@ export function Header() {
 				<div class=" px-4 sm:px-6 lg:px-8 mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 ">
 					<div class="">
 		 */
-		<header class="sticky top-0 z-40 bg-background border-b border-outline-variant 	">
+		<header class="sticky top-0 z-40 bg-background border-b border-outline 	">
 			<nav class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0 ">
 				<div class="relative z-50 flex justify-between py-8  q">
 					<div class="relative z-10 flex items-center gap-16">
@@ -29,7 +29,7 @@ export function Header() {
 								src="/favicon/favicon.ico"
 								alt=" Company Logo"
 							/>
-							<span class=" self-center pl-2 text-xl	font-bold">inlang</span>
+							<span class=" self-center pl-2 text-xl font-bold">inlang</span>
 						</a>
 						<div class="hidden lg:flex lg:gap-10">
 							<For each={links}>
@@ -45,7 +45,7 @@ export function Header() {
 					<div class="self-center">
 						<a
 							href="https://github.com/inlang/inlang"
-							class="link  flex space-x-1"
+							class="link-primary  flex space-x-1"
 						>
 							<span class="">GitHub</span>
 							<svg
@@ -66,7 +66,7 @@ export function Header() {
 						<button
 							onClick={(e) => setShow(true)}
 							type="button"
-							class="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+							class="inline-flex items-center justify-center rounded-md bg-background p-2 text-primary "
 							aria-expanded="false"
 						>
 							<span class="sr-only">Open menu</span>
@@ -95,7 +95,7 @@ export function Header() {
 							"absolute inset-x-0 top-0 z-30 origin-top-right transform p-2 transition md:hidden"
 						}
 					>
-						<div class="divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+						<div class="divide-y-2 divide-gray-50 rounded-lg bg-background shadow-lg ring-1 ring-black ring-opacity-5">
 							<div class="px-5 pt-5 pb-6 sm:pb-8">
 								<div class="flex items-center justify-between">
 									<div class="">
@@ -114,7 +114,7 @@ export function Header() {
 										<button
 											onClick={(e) => setShow(false)}
 											type="button"
-											class="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+											class="inline-flex items-center justify-center rounded-md bg-background p-2 text-primary "
 										>
 											<span class="sr-only">Close menu</span>
 											{/* <!-- Heroicon name: outline/x-mark --> */}
