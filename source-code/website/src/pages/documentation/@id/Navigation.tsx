@@ -8,7 +8,7 @@ export function Navigation(props: {
 	}>;
 }) {
 	return (
-		<div class="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto bg-surface-500 overflow-x-hidden   pl-0.5 md:block	hidden">
+		<div class="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto bg-surface-100 overflow-x-hidden   pl-0.5 md:block	hidden">
 			<nav class=" text-sm w-64  xl:w-72 px-8 pb-8 ">
 				{/* <div class="fixed border-b-2 "> ich könnte mal eine Suche werden</div> */}
 				<ul role="list" class={``}>
@@ -19,6 +19,7 @@ export function Navigation(props: {
 									<Switch
 										fallback={
 											<>
+												{/* TODO change the border to border- */}
 												<hr class="pt-2.5 border-t border-outline-variant"></hr>
 											</>
 										}
@@ -28,7 +29,7 @@ export function Navigation(props: {
 										</Match>
 									</Switch>
 
-									<h2 class="font-display font-bold  py-1.5 ">
+									<h2 class="font-display font-bold text-on-surface  py-1.5 ">
 										{section.title}
 									</h2>
 								</div>
@@ -46,8 +47,8 @@ export function Navigation(props: {
 															document.href ===
 															currentPageContext()?.urlParsed.pathname
 																? // TODO Change Color
-																  " text-primary "
-																: " text-on-surface/60"
+																  " text-on-surface "
+																: " text-on-surface-variant"
 															// ? "font-semibold text-sky-500 before:bg-sky-500"
 															// : "text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block "
 														}
