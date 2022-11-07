@@ -61,8 +61,8 @@ export type PageContext<Props = Record<string, unknown>> = Pick<
  * 		}
  * ```
  */
-export type OnBeforeRender<Props> = (args: {
-	pageContext: PageContextRenderer;
-}) => Promise<{
+export type OnBeforeRender<Props> = (
+	pageContext: PageContext<Props>
+) => Promise<{
 	pageContext: Pick<PageContext<Props>, "props">;
 }>;
