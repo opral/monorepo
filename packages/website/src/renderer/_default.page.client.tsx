@@ -1,35 +1,28 @@
-import { Dynamic, hydrate } from "solid-js/web";
+import { Dynamic, render as solidRender } from "solid-js/web";
 import { currentPageContext, setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
 
-// is hydrated means the page has been server-side rendered and the
-// client took over. If isHydrated is `false`, the client needs to
-// take over rendering.
-let isHydrated = false;
+let isFirstRender = true;
 
 export function render(pageContext: PageContextRenderer) {
+	// setting the current page context triggers reactive changing
+	// of the curent page.
 	setCurrentPageContext(pageContext);
-	if (isHydrated === false) {
-		// 1. the page has been rendered server-side, so we need to hydrate it
-		// 2. by passing the currentPageContext, the layout is reactive.
-		hydrate(
+	// therefore, the site only needs to be rendered once.
+	if (isFirstRender) {
+		const rootElement = document.querySelector("#root") as HTMLElement;
+		solidRender(
 			() => (
-				// need to pass reactive props to the page
-				// to have reactive routing
 				<Dynamic
 					component={(currentPageContext() as PageContextRenderer).Page}
 					{...currentPageContext()?.props}
 				></Dynamic>
 			),
-			document.getElementById("root")!
+			rootElement
 		);
-		isHydrated = true;
+		isFirstRender = false;
 	}
 }
-
-// export function usePageContext(pageContext:PageContext){
-
-// }

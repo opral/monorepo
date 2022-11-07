@@ -1,5 +1,12 @@
+/**
+ * -------------------------------------
+ * SSR is currently disabled. Using client-side routing
+ * alone is easier for now.
+ * -------------------------------------
+ */
+
 import type { PageContextRenderer } from "./types.js";
-import { renderToString, generateHydrationScript, Dynamic } from "solid-js/web";
+import { generateHydrationScript, Dynamic } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import "./app.css";
 import { setCurrentPageContext } from "./state.js";
@@ -24,9 +31,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const renderedPage = renderToString(() => (
-		<Dynamic component={pageContext.Page} {...pageContext.props}></Dynamic>
-	));
+	// const renderedPage = renderToString(() => <ThePage></ThePage>);
 	return escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
@@ -42,7 +47,7 @@ export function render(pageContext: PageContextRenderer): unknown {
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
       <body>
-        <div id="root">${dangerouslySkipEscape(renderedPage)}</div>
+        <div id="root"></div>
       </body>
     </html>`;
 }
