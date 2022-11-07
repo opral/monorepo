@@ -36,7 +36,7 @@ export function Hero() {
 									<span class="block xl:inline">
 										Developer-first localization{" "}
 									</span>
-									<span class="block text-indigo-600 xl:inline">
+									<span class="block text-on-background xl:inline">
 										infrastructure for software
 									</span>
 								</h1>
@@ -50,7 +50,7 @@ export function Hero() {
 									<div class="rounded-md shadow">
 										<a
 											href="/documentation/intro"
-											class="flex w-full items-center justify-center rounded-md border border-outline bg-primary px-8 py-3 text-base font-medium text-on-primary  md:py-4 md:px-10 md:text-lg"
+											class="flex w-full items-center justify-center rounded-md   bg-primary px-8 py-3 text-base font-medium text-on-primary  md:py-4 md:px-10 md:text-lg"
 										>
 											Get started
 										</a>
@@ -58,7 +58,7 @@ export function Hero() {
 									<div class="mt-3 sm:mt-0 sm:ml-3">
 										<a
 											href="https://github.com/inlang/inlang"
-											class="flex w-full items-center justify-center rounded-md border border-outline bg-secondary-container px-8 py-3 text-base font-medium text-on-secondary-container  md:py-4 md:px-10 md:text-lg"
+											class="flex w-full items-center justify-center rounded-md   bg-secondary-container px-8 py-3 text-base font-medium text-on-secondary-container  md:py-4 md:px-10 md:text-lg"
 										>
 											View on Github
 										</a>
