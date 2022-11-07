@@ -19,7 +19,7 @@ export function Page() {
 					<Header />
 				</div>
 
-				<div class="mx-auto max-w-screen-2xl  place-content-center	 self-center h-full grow  sm:px-6 md:px-0 ">
+				<div class="mx-auto max-w-screen-2xl  place-content-center	 self-center h-full grow   ">
 					<Hero></Hero>
 				</div>
 
