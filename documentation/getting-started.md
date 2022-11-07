@@ -29,8 +29,8 @@ A sub heading
 
 The good thing is that many tools that convert Markdown in HTML or PDF are able to generate the index of your document, or links to the headers automatically (like Github does on the [source](http://git.io/vfz98
 
-{% callout type="note" %}
-Tags are composable!
+{% callout type="note" title="Hey you!" content="ich bin ein Content Tag und benutzt werden, da das Kind ein style bekommt durch tailwind props" %}
+ich bin zwar das Child aber habe leider schon ein style durch tailwind
 {% /callout %}
 # Theme Introduction
 

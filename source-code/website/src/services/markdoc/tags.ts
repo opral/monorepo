@@ -9,6 +9,7 @@ export const tags: Config["tags"] = {
 	callout: {
 		attributes: {
 			title: { type: "String" },
+			content: { type: "String" },
 			type: {
 				type: "String",
 				matches: ["note", "warning"],
