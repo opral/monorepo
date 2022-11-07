@@ -14,13 +14,14 @@ export const Head: PageHead = () => {
 export function Page() {
 	return (
 		<>
-			<div class="min-h-screen bg-on-background">
-				<Header></Header>
+			<div class="min-h-screen flex  content-center justify-center">
+				<div class="absolute inset-x-0 top-0 ">
+					<Header />
+				</div>
 
-				<div class="text-primary min-h-full bg-error h-full ">ad</div>
-				{/* <div class="mx-auto max-w-screen-2xl h-full  bg-on-background sm:px-6 ">
+				<div class="mx-auto max-w-screen-2xl  place-content-center	 self-center h-full grow  sm:px-6 md:px-0 ">
 					<Hero></Hero>
-				</div> */}
+				</div>
 
 				<div class="absolute inset-x-0 bottom-0 ">
 					<Footer />

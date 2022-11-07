@@ -1,7 +1,7 @@
 export function Hero() {
 	return (
 		<>
-			<div class=" h-full overflow-hidden  bg-background	 ">
+			<div class=" h-full overflow-hidden  bg-background sm:px-6 md:px-0	 ">
 				<div class="relative z-10 bg-background my-auto min-h-full    pb-8 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
 					{/* <svg
 						class="absolute inset-y-0 right-0 hidden h-full w-48 translate-x-1/2 transform text-white lg:block"
@@ -46,7 +46,7 @@ export function Hero() {
 									burgdoggen tenderloin, pastrami ball tip bacon shoulder t-bone
 									turducken landjaeger cupim picanha venison.
 								</p>
-								<div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+								{/* <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
 									<div class="rounded-md shadow">
 										<a
 											href="#"
@@ -63,7 +63,7 @@ export function Hero() {
 											Live demo
 										</a>
 									</div>
-								</div>
+								</div> */}
 							</div>
 						</main>
 					</div>
