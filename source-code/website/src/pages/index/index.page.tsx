@@ -23,9 +23,7 @@ export function Page() {
 					<Hero></Hero>
 				</div>
 
-				<div class="absolute inset-x-0 bottom-0 ">
-					<Footer />
-				</div>
+				<Footer />
 
 				{/* 
 			<div class="min-h-full	">
