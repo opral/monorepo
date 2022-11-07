@@ -64,6 +64,7 @@ export function Page(props: PageProps) {
 					)}
 				</div>
 			</div>
+
 			<Footer />
 		</>
 	);

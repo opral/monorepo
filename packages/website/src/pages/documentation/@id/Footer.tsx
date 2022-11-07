@@ -2,7 +2,7 @@ export function Footer() {
 	return (
 		<footer
 			aria-labelledby="footer-heading"
-			class="  inset-x-0 bottom-0 z-40 bg-background border-t border-outline-variant sm:px-6 md:px-0	"
+			class="fixed  inset-x-0 bottom-0 z-40 bg-background border-t border-outline-variant sm:px-6 md:px-0   	"
 		>
 			<h2 id="footer-heading" class="sr-only">
 				Footer
@@ -33,7 +33,7 @@ export function Footer() {
 						<a href="#" class="link ">
 							<span class="">Muss hier noch was hin ?</span>
 						</a>
-						<a href="#" class="link ">
+						<a href="https://github.com/inlang/inlang" class="link ">
 							<span class="sr-only">GitHub</span>
 							<svg
 								class="h-6 w-6"
