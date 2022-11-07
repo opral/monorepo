@@ -20,7 +20,7 @@ export function Header() {
 					<div class="">
 		 */
 		<header class="sticky top-0 z-40 bg-background border-b border-outline-variant 	">
-			<nav class="mx-auto max-w-screen-2xl  sm:px-6  ">
+			<nav class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0 ">
 				<div class="relative z-50 flex justify-between py-8  q">
 					<div class="relative z-10 flex items-center gap-16">
 						<a href="/" class="flex">
@@ -47,9 +47,6 @@ export function Header() {
 							class="flex  space-x-1.5"
 							href="https://github.com/inlang/inlang"
 						>
-							<p class="flex items-center self-center md:ml-12">
-								<Icon icon="codicon:github-inverted" />
-							</p>
 							<p>Github</p>
 							<p class="flex items-center self-center md:ml-12">
 								<Icon icon="codicon:github-inverted" />
