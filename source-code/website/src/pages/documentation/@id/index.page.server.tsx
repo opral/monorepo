@@ -12,6 +12,7 @@ import { Header } from "./Header.jsx";
 import { Navigation } from "./Navigation.jsx";
 import { tableOfContent } from "./tableOfContent.js";
 import type { OnBeforeRender, PageHead } from "@src/renderer/types.js";
+import { Footer } from "./Footer.jsx";
 
 export const Head: PageHead = () => {
 	return {
@@ -20,9 +21,9 @@ export const Head: PageHead = () => {
 	};
 };
 
-export const onBeforeRender: OnBeforeRender<PageProps> = async ({
-	pageContext,
-}) => {
+export const onBeforeRender: OnBeforeRender<PageProps> = async (
+	pageContext
+) => {
 	const fs = await import("node:fs/promises");
 	let markdown: string | undefined;
 	try {
