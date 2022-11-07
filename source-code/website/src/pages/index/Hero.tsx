@@ -47,23 +47,23 @@ export function Hero() {
 									turducken landjaeger cupim picanha venison.
 								</p>
 								{/* <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-									<div class="rounded-md shadow">
-										<a
-											href="#"
-											class="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg"
-										>
-											Get started
-										</a>
-									</div>
-									<div class="mt-3 sm:mt-0 sm:ml-3">
-										<a
-											href="#"
-											class="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 px-8 py-3 text-base font-medium text-indigo-700 hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
-										>
-											Live demo
-										</a>
-									</div>
-								</div> */}
+										<div class="rounded-md shadow">
+											<a
+												href="#"
+												class="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg"
+											>
+												Get started
+											</a>
+										</div>
+										<div class="mt-3 sm:mt-0 sm:ml-3">
+											<a
+												href="#"
+												class="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 px-8 py-3 text-base font-medium text-indigo-700 hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
+											>
+												Live demo
+											</a>
+										</div>
+									</div> */}
 							</div>
 						</main>
 					</div>
