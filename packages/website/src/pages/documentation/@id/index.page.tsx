@@ -22,7 +22,10 @@ export function Page(props: PageProps) {
 					<Navigation sections={tableOfContent} />
 
 					{props.markdown ? (
-						<div class=" w-full prose mx-auto" innerHTML={props.markdown}></div>
+						<div
+							class=" max-w-3xl px-8 pb-8 prose mx-auto"
+							innerHTML={props.markdown}
+						></div>
 					) : (
 						<p>schade</p>
 					)}

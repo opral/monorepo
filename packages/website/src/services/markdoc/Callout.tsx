@@ -1,5 +1,19 @@
 import type { JSXElement } from "solid-js";
-
-export function Callout(props: { children?: JSXElement }) {
-	return <div class="bg-red-500 p-4">{props?.children}</div>;
+// children get a default style use content for custome style
+export function Callout(props: {
+	title?: string;
+	children?: JSXElement;
+	content?: string;
+}) {
+	return (
+		<>
+			<div class="bg-primary-container  border border-outline p-4 my-4 rounded-md ">
+				<div class="text-on-primary-container font-display font-bold ">
+					{props.title}
+				</div>
+				<p class=" ">{props?.children}</p>
+				<div>{props.content}</div>
+			</div>
+		</>
+	);
 }
