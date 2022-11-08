@@ -20,7 +20,7 @@ function Header() {
 	const [show, setShow] = createSignal(false);
 
 	return (
-		<header class="sticky top-0 z-40 bg-background border-b border-outline-variant 	">
+		<header class="sticky top-0 z-40 bg-background border-b border-outline 	">
 			<nav class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0 ">
 				<div class="relative z-50 flex justify-between py-8  q">
 					<div class="relative z-10 flex items-center gap-16">
@@ -30,7 +30,7 @@ function Header() {
 								src="/favicon/favicon.ico"
 								alt=" Company Logo"
 							/>
-							<span class=" self-center pl-2 text-xl	font-bold">inlang</span>
+							<span class=" self-center pl-2 text-xl font-bold">inlang</span>
 						</a>
 						<div class="hidden lg:flex lg:gap-10">
 							<For each={links}>
@@ -46,7 +46,7 @@ function Header() {
 					<div class="self-center">
 						<a
 							href="https://github.com/inlang/inlang"
-							class="link  flex space-x-1"
+							class="link-primary  flex space-x-1"
 						>
 							<span class="">GitHub</span>
 							<svg
@@ -67,7 +67,7 @@ function Header() {
 						<button
 							onClick={(e) => setShow(true)}
 							type="button"
-							class="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+							class="inline-flex items-center justify-center rounded-md bg-background p-2 text-primary "
 							aria-expanded="false"
 						>
 							<span class="sr-only">Open menu</span>
@@ -96,7 +96,7 @@ function Header() {
 							"absolute inset-x-0 top-0 z-30 origin-top-right transform p-2 transition md:hidden"
 						}
 					>
-						<div class="divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+						<div class="divide-y-2 divide-gray-50 rounded-lg bg-background shadow-lg ring-1 ring-black ring-opacity-5">
 							<div class="px-5 pt-5 pb-6 sm:pb-8">
 								<div class="flex items-center justify-between">
 									<div class="">
@@ -115,7 +115,7 @@ function Header() {
 										<button
 											onClick={(e) => setShow(false)}
 											type="button"
-											class="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+											class="inline-flex items-center justify-center rounded-md bg-background p-2 text-primary "
 										>
 											<span class="sr-only">Close menu</span>
 											{/* <!-- Heroicon name: outline/x-mark --> */}
@@ -199,17 +199,20 @@ function Footer() {
 							<path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
 						</svg>
 					</a> */}
-						<a href="#" class="link">
+						<a href="#" class="link link-primary">
 							<span class="">Impressum</span>
 						</a>
 
-						<a href="#" class="link ">
+						<a href="#" class="link link-primary ">
 							<span class="">Kontakt</span>
 						</a>
-						<a href="#" class="link ">
+						<a href="#" class="link link-primary ">
 							<span class="">Muss hier noch was hin ?</span>
 						</a>
-						<a href="https://github.com/inlang/inlang" class="link ">
+						<a
+							href="https://github.com/inlang/inlang"
+							class="link link-primary"
+						>
 							<span class="sr-only">GitHub</span>
 							<svg
 								class="h-6 w-6"
