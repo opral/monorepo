@@ -1,9 +1,7 @@
 import type { PageHead } from "@src/renderer/types.js";
+import { Layout } from "../Layout.jsx";
 import { Counter } from "./Counter.js";
-import { Header } from "../documentation/@id/Header.jsx";
 import { Hero } from "./Hero.jsx";
-import { Footer } from "../documentation/@id/Footer.jsx";
-import { Feature } from "./Feature.jsx";
 export const Head: PageHead = () => {
 	return {
 		title: "inlang",
@@ -13,23 +11,19 @@ export const Head: PageHead = () => {
 
 export function Page() {
 	return (
-		<>
+		<Layout>
 			<div class="min-h-screen flex  content-center justify-center">
-				<div class="absolute inset-x-0 top-0 ">
-					<Header />
-				</div>
+				<div class="absolute inset-x-0 top-0 "></div>
 
 				<div class="mx-auto max-w-screen-2xl  place-content-center	 self-center h-full grow   ">
 					<Hero></Hero>
 				</div>
 
-				<Footer />
-
 				{/* 
 			<div class="min-h-full	">
-				
-			</div> */}
+			
+		</div> */}
 			</div>
-		</>
+		</Layout>
 	);
 }
