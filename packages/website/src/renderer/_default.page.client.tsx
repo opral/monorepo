@@ -22,7 +22,9 @@ export function render(pageContext: PageContextRenderer) {
 		setCurrentPage(() => pageContext.Page);
 		setCurrentPageProps(pageContext.props);
 		if (isFirstRender) {
-			hydrate(
+			// TODO switch to hydrate once solidjs 'nextSibling' bug is fixed
+			rootElement.innerHTML = "";
+			renderSolid(
 				() => (
 					<PageLayout
 						page={currentPage()!}
