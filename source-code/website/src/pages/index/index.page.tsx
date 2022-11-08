@@ -1,5 +1,5 @@
 import type { PageHead } from "@src/renderer/types.js";
-import { Layout } from "../Layout.jsx";
+import { Layout as RootLayout } from "../Layout.jsx";
 import { Counter } from "./Counter.js";
 import { Hero } from "./Hero.jsx";
 export const Head: PageHead = () => {
@@ -8,6 +8,10 @@ export const Head: PageHead = () => {
 		description: "Developer-first localization infrastructure for software.",
 	};
 };
+
+export function Layout() {
+	return RootLayout;
+}
 
 export function Page() {
 	return (

@@ -2,6 +2,7 @@ import type { Accessor, Component, JSXElement } from "solid-js";
 import type { PageContext, PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 import { Layout as IndexLayout } from "@src/pages/Layout.jsx";
+import { currentPageContext } from "./state.js";
 
 export type PageLayoutProps = Accessor<{
 	pageContext: PageContextRenderer;
@@ -17,17 +18,17 @@ export type PageLayoutProps = Accessor<{
  */
 export function PageLayout(props: {
 	page: Component;
-	pageContext: Accessor<Omit<PageContextRenderer, "Page">>;
+	pageProps: Record<string, unknown>;
 }) {
 	const Layout = () => {
-		if (props.pageContext().urlParsed.pathname.includes("/editor") === false) {
+		if (currentPageContext().urlParsed.pathname.includes("/editor") === false) {
 			return IndexLayout;
 		}
 		return FallbackLayout;
 	};
 	return (
 		<Dynamic component={Layout()}>
-			<Dynamic component={props.page} {...props.pageContext().props}></Dynamic>
+			<Dynamic component={props.page} {...props.pageProps}></Dynamic>
 		</Dynamic>
 	);
 }

@@ -26,7 +26,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 	const renderedPage = renderToString(() => (
 		<PageLayout
 			page={pageContext.Page}
-			pageContext={() => pageContext}
+			pageProps={pageContext.props}
 		></PageLayout>
 	));
 	return escapeInject`<!DOCTYPE html>
