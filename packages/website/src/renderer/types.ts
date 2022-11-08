@@ -14,11 +14,7 @@ export type PageHead = (args: { pageContext: PageContextRenderer }) => {
  * The page context available during rendering.
  */
 export type PageContextRenderer<Props = Record<string, unknown>> =
-	PageContextBuiltIn & {
-		/**
-		 * Whether or not the site is server side rendered.
-		 */
-		isServerSideRendered: boolean;
+	PageContextBuiltIn<Component> & {
 		/**
 		 * The properties of a page.
 		 */

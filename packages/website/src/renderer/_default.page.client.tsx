@@ -1,6 +1,8 @@
-import { hydrate, render as solidRender } from "solid-js/web";
-import { setCurrentPageContext } from "./state.js";
-import { ThePage } from "./ThePage.jsx";
+import { Component, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
+import { Dynamic, hydrate, render as renderSolid } from "solid-js/web";
+import { PageLayout } from "./PageLayout.jsx";
+import { currentPageContext, setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
@@ -9,16 +11,30 @@ export const clientRouting = true;
 let isFirstRender = true;
 const rootElement = document.querySelector("#root") as HTMLElement;
 
+const [currentPage, setCurrentPage] = createSignal<Component>();
+// const [currentPageProps, setCurrentPageProps] = createStore<
+// 	Record<string, unknown>
+// >({});
+
 export function render(pageContext: PageContextRenderer) {
-	setCurrentPageContext(pageContext);
-	if (pageContext.isServerSideRendered === true) {
-		console.log("hydration");
-		hydrate(() => <ThePage></ThePage>, rootElement);
-		pageContext.isServerSideRendered = false;
-		isFirstRender = false;
-	} else if (isFirstRender) {
-		console.log("first render");
-		solidRender(() => <ThePage></ThePage>, rootElement);
-		isFirstRender = false;
+	try {
+		setCurrentPageContext(pageContext);
+		setCurrentPage(() => pageContext.Page);
+		// setCurrentPageProps(pageContext.props);
+		if (isFirstRender) {
+			console.log("hydration");
+			hydrate(
+				() => (
+					<PageLayout
+						page={currentPage()!}
+						pageContext={currentPageContext as any}
+					></PageLayout>
+				),
+				rootElement
+			);
+			isFirstRender = false;
+		}
+	} catch (e) {
+		console.error("ERROR in renderer", e);
 	}
 }

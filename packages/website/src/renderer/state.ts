@@ -11,8 +11,6 @@ import type { PageContext, PageContextRenderer } from "./types.js";
  * use a type cast `as PageContextRenderer`.
  */
 export const [currentPageContext, setCurrentPageContext] = createSignal() as [
-	// only client side page context is available
 	Accessor<PageContext>,
-	// but only renderers can set the page context
-	Setter<PageContextRenderer>
+	Setter<PageContext>
 ];
