@@ -3,20 +3,12 @@ import { generateHydrationScript, Dynamic, renderToString } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import "./app.css";
 import { setCurrentPageContext } from "./state.js";
-import { ThePage } from "./ThePage.jsx";
+import { PageLayout } from "./PageLayout.jsx";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = [
-	"props",
-	"routeParams",
-	"urlParsed",
-	"isServerSideRendered",
-] as const;
+export const passToClient = ["props", "routeParams", "urlParsed"] as const;
 
 export function render(pageContext: PageContextRenderer): unknown {
-	pageContext.isServerSideRendered = true;
-	// ! High chance of cross-request state pollution
-	// ! need to check if this is a problem in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { Head } = pageContext.exports;
@@ -31,12 +23,13 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const renderedPage = renderToString(() => <ThePage></ThePage>);
-	return {
-		pageContext: {
-			isServerSideRendered: true,
-		},
-		documentHtml: escapeInject`<!DOCTYPE html>
+	const renderedPage = renderToString(() => (
+		<PageLayout
+			page={pageContext.Page}
+			pageContext={() => pageContext}
+		></PageLayout>
+	));
+	return escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
@@ -53,8 +46,7 @@ export function render(pageContext: PageContextRenderer): unknown {
       <body>
         <div id="root">${dangerouslySkipEscape(renderedPage)}</div>
       </body>
-    </html>`,
-	};
+    </html>`;
 }
 
 const favicons = `
