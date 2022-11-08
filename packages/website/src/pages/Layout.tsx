@@ -12,7 +12,6 @@ export function Layout(props: { children: JSXElement }) {
 }
 
 function Header() {
-	console.log("rendering Header");
 	const links = [
 		{ name: "Docs", href: "/documentation" },
 		{ name: "Editor", href: "/editor" },

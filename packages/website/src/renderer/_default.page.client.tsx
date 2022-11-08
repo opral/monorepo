@@ -12,22 +12,21 @@ let isFirstRender = true;
 const rootElement = document.querySelector("#root") as HTMLElement;
 
 const [currentPage, setCurrentPage] = createSignal<Component>();
-// const [currentPageProps, setCurrentPageProps] = createStore<
-// 	Record<string, unknown>
-// >({});
+const [currentPageProps, setCurrentPageProps] = createStore<
+	Record<string, unknown>
+>({});
 
 export function render(pageContext: PageContextRenderer) {
 	try {
 		setCurrentPageContext(pageContext);
 		setCurrentPage(() => pageContext.Page);
-		// setCurrentPageProps(pageContext.props);
+		setCurrentPageProps(pageContext.props);
 		if (isFirstRender) {
-			console.log("hydration");
 			hydrate(
 				() => (
 					<PageLayout
 						page={currentPage()!}
-						pageContext={currentPageContext as any}
+						pageProps={currentPageProps}
 					></PageLayout>
 				),
 				rootElement
