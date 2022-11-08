@@ -147,7 +147,7 @@ function Header() {
 									{/* TODO */}
 									<For each={links}>
 										{(link) => (
-											<a class="link-primary" target="_blank" href={link.href}>
+											<a class="link-primary" href={link.href}>
 												{link.name}
 											</a>
 										)}
