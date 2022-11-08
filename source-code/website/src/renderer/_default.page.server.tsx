@@ -1,20 +1,20 @@
-/**
- * -------------------------------------
- * SSR is currently disabled. Using client-side routing
- * alone is easier for now.
- * -------------------------------------
- */
-
 import type { PageContextRenderer } from "./types.js";
-import { generateHydrationScript, Dynamic } from "solid-js/web";
+import { generateHydrationScript, Dynamic, renderToString } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import "./app.css";
 import { setCurrentPageContext } from "./state.js";
+import { ThePage } from "./ThePage.jsx";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["props", "routeParams", "urlParsed"] as const;
+export const passToClient = [
+	"props",
+	"routeParams",
+	"urlParsed",
+	"isServerSideRendered",
+] as const;
 
 export function render(pageContext: PageContextRenderer): unknown {
+	pageContext.isServerSideRendered = true;
 	// ! High chance of cross-request state pollution
 	// ! need to check if this is a problem in the future
 	setCurrentPageContext(pageContext);
@@ -31,8 +31,12 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	// const renderedPage = renderToString(() => <ThePage></ThePage>);
-	return escapeInject`<!DOCTYPE html>
+	const renderedPage = renderToString(() => <ThePage></ThePage>);
+	return {
+		pageContext: {
+			isServerSideRendered: true,
+		},
+		documentHtml: escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
@@ -47,9 +51,10 @@ export function render(pageContext: PageContextRenderer): unknown {
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
       <body>
-        <div id="root"></div>
+        <div id="root">${dangerouslySkipEscape(renderedPage)}</div>
       </body>
-    </html>`;
+    </html>`,
+	};
 }
 
 const favicons = `

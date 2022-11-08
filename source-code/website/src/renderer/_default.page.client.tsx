@@ -1,28 +1,24 @@
-import { Dynamic, render as solidRender } from "solid-js/web";
-import { currentPageContext, setCurrentPageContext } from "./state.js";
+import { hydrate, render as solidRender } from "solid-js/web";
+import { setCurrentPageContext } from "./state.js";
+import { ThePage } from "./ThePage.jsx";
 import type { PageContextRenderer } from "./types.js";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
 
 let isFirstRender = true;
+const rootElement = document.querySelector("#root") as HTMLElement;
 
 export function render(pageContext: PageContextRenderer) {
-	// setting the current page context triggers reactive changing
-	// of the curent page.
 	setCurrentPageContext(pageContext);
-	// therefore, the site only needs to be rendered once.
-	if (isFirstRender) {
-		const rootElement = document.querySelector("#root") as HTMLElement;
-		solidRender(
-			() => (
-				<Dynamic
-					component={(currentPageContext() as PageContextRenderer).Page}
-					{...currentPageContext()?.props}
-				></Dynamic>
-			),
-			rootElement
-		);
+	if (pageContext.isServerSideRendered === true) {
+		console.log("hydration");
+		hydrate(() => <ThePage></ThePage>, rootElement);
+		pageContext.isServerSideRendered = false;
+		isFirstRender = false;
+	} else if (isFirstRender) {
+		console.log("first render");
+		solidRender(() => <ThePage></ThePage>, rootElement);
 		isFirstRender = false;
 	}
 }
