@@ -204,7 +204,7 @@ function Footer() {
 						</a>
 
 						<a href="mailto:hello@inlang.com" class="link link-primary ">
-							<span class="">say Hello to inlang!</span>
+							hello@inlang.com
 						</a>
 
 						<a
