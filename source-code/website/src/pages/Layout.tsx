@@ -199,8 +199,8 @@ function Footer() {
 			<div class="mx-auto max-w-screen-2xl py-2   ">
 				<div class="flex   items-center content-center sm:px-6 lg:px-0 mx-auto	  md:justify-between ">
 					<div class="flex  items-center space-x-6 md:order-2">
-						<a href="#" class="link link-primary">
-							<span class="">Impressum</span>
+						<a href="#" class="link link-primary font-light">
+							<span class="">imprint</span>
 						</a>
 
 						<a href="mailto:hello@inlang.com" class="link link-primary ">
