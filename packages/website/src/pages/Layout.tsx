@@ -1,5 +1,4 @@
 import { createSignal, For, JSXElement, Show } from "solid-js";
-import { Icon } from "@iconify-icon/solid";
 
 export function Layout(props: { children: JSXElement }) {
 	return (
@@ -171,7 +170,7 @@ function Header() {
 											<p>Github</p>
 											<p class="flex items-center self-center md:ml-12">
 												{" "}
-												<Icon icon="codicon:github-inverted" />
+												{/* <Icon icon="codicon:github-inverted" /> */}
 											</p>
 										</a>
 									</div>
