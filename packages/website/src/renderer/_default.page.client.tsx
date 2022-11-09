@@ -23,6 +23,7 @@ export function render(pageContext: PageContextRenderer) {
 		setCurrentPageProps(pageContext.props);
 		if (isFirstRender) {
 			// TODO switch to hydrate once solidjs 'nextSibling' bug is fixed
+			// TODO https://github.com/solidjs/solid/issues/1345
 			rootElement.innerHTML = "";
 			renderSolid(
 				() => (
