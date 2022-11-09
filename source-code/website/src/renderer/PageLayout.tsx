@@ -1,4 +1,4 @@
-import type { Accessor, Component, JSXElement } from "solid-js";
+import { Accessor, Component, ErrorBoundary, JSXElement } from "solid-js";
 import type { PageContext, PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 import { Layout as IndexLayout } from "@src/pages/Layout.jsx";
@@ -27,9 +27,29 @@ export function PageLayout(props: {
 		return FallbackLayout;
 	};
 	return (
-		<Dynamic component={Layout()}>
-			<Dynamic component={props.page} {...props.pageProps}></Dynamic>
-		</Dynamic>
+		<ErrorBoundary
+			fallback={(error) => {
+				console.error(error);
+				return (
+					<>
+						<p class="text-error text-lg font-medium">ERROR DURING RENDERING</p>
+						<p class="text-error">
+							Check the console for more information and please{" "}
+							<a
+								class="link"
+								href="https://github.com/inlang/inlang/issues/new/choose"
+							>
+								report the bug.
+							</a>
+						</p>
+					</>
+				);
+			}}
+		>
+			<Dynamic component={Layout()}>
+				<Dynamic component={props.page} {...props.pageProps}></Dynamic>
+			</Dynamic>
+		</ErrorBoundary>
 	);
 }
 
