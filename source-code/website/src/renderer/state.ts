@@ -1,4 +1,4 @@
-import { createSignal, type Accessor, type Setter } from "solid-js";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import type { PageContext, PageContextRenderer } from "./types.js";
 
 /**
@@ -10,7 +10,7 @@ import type { PageContext, PageContextRenderer } from "./types.js";
  * page context you are accessing is the `PageContextRenderer`,
  * use a type cast `as PageContextRenderer`.
  */
-export const [currentPageContext, setCurrentPageContext] = createSignal() as [
-	Accessor<PageContext>,
-	Setter<PageContext>
+export const [currentPageContext, setCurrentPageContext] = createStore({}) as [
+	PageContext,
+	SetStoreFunction<PageContextRenderer>
 ];

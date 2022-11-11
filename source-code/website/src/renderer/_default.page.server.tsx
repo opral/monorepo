@@ -9,6 +9,8 @@ import { PageLayout } from "./PageLayout.jsx";
 export const passToClient = ["props", "routeParams", "urlParsed"] as const;
 
 export function render(pageContext: PageContextRenderer): unknown {
+	//! TODO most likely cross request state pollution
+	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
 	const { Head } = pageContext.exports;
