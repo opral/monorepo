@@ -21,7 +21,7 @@ export function PageLayout(props: {
 	pageProps: Record<string, unknown>;
 }) {
 	const Layout = () => {
-		if (currentPageContext().urlParsed.pathname.includes("/editor") === false) {
+		if (currentPageContext.urlParsed.pathname.includes("/editor") === false) {
 			return IndexLayout;
 		}
 		return FallbackLayout;
