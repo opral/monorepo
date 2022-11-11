@@ -1,5 +1,6 @@
 import { createSignal, For, JSXElement, Show } from "solid-js";
 
+// command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<>

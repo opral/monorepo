@@ -30,19 +30,17 @@ export function Page() {
 	);
 
 	return (
-		<Layout>
-			<Switch fallback={<p>switch fallback trigerred. something went wrong</p>}>
-				<Match when={clone.loading || dir.loading}>
-					<p>loading ...</p>
-				</Match>
-				<Match when={clone.error || dir.error}>
-					<p> {clone.error ?? dir.error}</p>
-				</Match>
-				<Match when={dir()}>
-					<For each={dir()}>{(file) => <p>{file}</p>}</For>
-				</Match>
-			</Switch>
-		</Layout>
+		<Switch fallback={<p>switch fallback trigerred. something went wrong</p>}>
+			<Match when={clone.loading || dir.loading}>
+				<p>loading ...</p>
+			</Match>
+			<Match when={clone.error || dir.error}>
+				<p> {clone.error ?? dir.error}</p>
+			</Match>
+			<Match when={dir()}>
+				<For each={dir()}>{(file) => <p>{file}</p>}</For>
+			</Match>
+		</Switch>
 	);
 }
 
