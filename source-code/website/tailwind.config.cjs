@@ -40,7 +40,6 @@ module.exports = {
  */
 function usedClassWithDynamicColor() {
 	const designSystemColors = ["primary", "secondary", "tertiary", "error"];
-
 	const result = [];
 	const fs = require("fs");
 	const glob = require("fast-glob");
@@ -49,25 +48,29 @@ function usedClassWithDynamicColor() {
 		const content = fs.readFileSync(file, "utf-8");
 		// match everything with a `-` before string interpolation
 		// like `bg-${props.color}` or `bg-on-${color}`
-		const matches = content.match(/([^\s]*-\$\{(props.color|color)\})/g);
+		const matches = content.match(/([\w|-]*-*\$\{(props.color|color)\})/g);
 		if (matches) {
 			// iterate all possible color class possibilities
 			// and push them to result
 			for (const match of matches) {
 				if (match.includes("props.color")) {
 					result.push(
-						designSystemColors.map((color) => {
-							match.replace("${props.color}", color);
-						})
+						...designSystemColors.map((color) =>
+							match.replace("${props.color}", color)
+						)
 					);
 				} else {
 					result.push(
-						designSystemColors.map((color) => {
-							match.replace("${color}", color);
-						})
+						...designSystemColors.map((color) =>
+							match.replace("${color}", color)
+						)
 					);
 				}
 			}
 		}
 	}
+	console.log(
+		"whitelisted the following dynamic color classes for tailwind css:",
+		result
+	);
 }
