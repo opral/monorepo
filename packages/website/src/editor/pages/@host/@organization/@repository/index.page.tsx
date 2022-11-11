@@ -3,16 +3,7 @@ import { raw, http } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
 import { currentPageContext } from "@src/renderer/state.js";
 import type { PageContext, PageHead } from "@src/renderer/types.js";
-import {
-	createResource,
-	For,
-	Match,
-	onMount,
-	Show,
-	Suspense,
-	Switch,
-} from "solid-js";
-import { Layout } from "./Layout.jsx";
+import { createResource, For, Match, Switch } from "solid-js";
 import { onAuth } from "./index.telefunc.js";
 
 export const Head: PageHead = () => {
