@@ -4,10 +4,13 @@ import { normalizeProps, useMachine } from "@zag-js/solid";
 import type { JSXElement } from "solid-js";
 import { Icon } from "@src/components/Icon.jsx";
 
+// command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<div class="max-w-screen-lg p-4 mx-auto">
 			<Breadcrumbs></Breadcrumbs>
+			{/* divider */}
+			<div class="h-px w-full bg-outline-variant my-2"></div>
 			{props.children}
 		</div>
 	);
