@@ -148,6 +148,7 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
 - Anticipated slower development speed and higher maintainability effort.
   - De-coupled state management
   - Performance optimization needs to be conducted manually (likely important for the editor)
+- not ecosystem relied. custom UI components are used and no no external state management is required.  
 
 #### why not svelte?
 
