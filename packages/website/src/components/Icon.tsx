@@ -1,41 +1,27 @@
-/**
- * Icon API via spreaded props for the `<img>` tag.
- *
- * The icons make use of material symbols rounded.
- * You can find all available icons [here](https://fonts.google.com/icons?icon.style=Rounded).
- * The icon take care of the alt attribute automatically.
- *
- * **Example:**
- * ```tsx
- *  // defaults fontWeight 400
- * 	<img {...icon("done-rounded")} />
- * ```
- *
- * ```tsx
- *  // optionally, provide the fontWeight
- * 	<img {...icon("done-rounded", { fontWeight: 600 })} />
- * ```
- */
-export function icon(
-	name: MaterialSymbolIcons,
-	options?: {
-		/**
-		 * Defaults to 400
-		 */
-		fontWeight?: 100 | 200 | 300 | 400 | 500 | 600 | 700;
-	}
-): ImgTagSpreadableProps {
-	const optionsWithDefaults = { fontWeight: 400, ...options };
-	return {
-		src: `https://cdn.jsdelivr.net/npm/@material-symbols/svg-${optionsWithDefaults.fontWeight}@0.2.15/rounded/${name}.svg`,
-		alt: name,
-	};
-}
+import { mergeProps } from "solid-js";
 
-type ImgTagSpreadableProps = {
-	src: string;
-	alt: string;
-};
+type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700;
+
+export function Icon(props: {
+	name: MaterialSymbolIcons;
+	/** Defaults to w-4 h-4 */
+	class?: string;
+	/** Defaults to 400 */
+	fontWeight?: FontWeight;
+}) {
+	// setting default props
+	props = mergeProps(
+		{ fontWeight: 400 as FontWeight, class: "w-4 h-4" },
+		props
+	);
+
+	return (
+		<img
+			src={`https://cdn.jsdelivr.net/npm/@material-symbols/svg-${props.fontWeight}@0.2.15/rounded/${props.name}.svg`}
+			alt={props.name}
+		></img>
+	);
+}
 
 /**
  * Material symbol icon names.
