@@ -13,16 +13,3 @@
 		font-family: "Inter var", sans-serif;
 	}
 }
-
-/* TODO subset in the future */
-@font-face {
-	font-family: "Material Symbols Rounded";
-	font-style: normal;
-	font-weight: 400;
-	src: url(https://fonts.gstatic.com/s/materialsymbolsrounded/v68/syl0-zNym6YjUruM-QrEh7-nyTnjDwKNJ_190FjpZIvDmUSVOK7BDB_Qb9vUSzq3wzLK-P0J-V_Zs-QtQth3-jOc7TOVpeRL2w5rwZu2rIelXxeJKJBiCa8.woff2)
-		format("woff2");
-}
-
-.material-symbols-rounded {
-	font-family: "Material Symbols Rounded";
-}
