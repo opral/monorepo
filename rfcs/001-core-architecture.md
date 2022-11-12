@@ -1,3 +1,5 @@
+### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/127).
+
 # RFC 001: Core Architecture
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
