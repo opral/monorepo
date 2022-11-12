@@ -299,7 +299,7 @@ Translators need a dedicated editor to manage translations. Those editors exist 
 
 #### Proposal
 
-Develop a CAT editor that combines VSCode and Figma. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser.
+Develop a CAT editor that combines VSCode and Figma. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
 **Pros**
 
