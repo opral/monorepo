@@ -18,6 +18,7 @@
 		"@markdoc/markdoc": "^0.1.13",
 		"@zag-js/checkbox": "^0.2.1",
 		"@zag-js/menu": "^0.2.1",
+		"@zag-js/pressable": "^0.3.1",
 		"@zag-js/solid": "^0.2.1",
 		"dotenv": "^16.0.3",
 		"lodash-es": "^4.17.21",

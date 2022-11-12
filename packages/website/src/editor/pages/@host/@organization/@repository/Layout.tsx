@@ -1,14 +1,27 @@
-import { routeParams } from "./state.js";
-import * as checkbox from "@zag-js/checkbox";
+import { fsChange, routeParams } from "./state.js";
+import {
+	createMemo,
+	createResource,
+	createUniqueId,
+	For,
+	JSXElement,
+	Show,
+	Suspense,
+} from "solid-js";
+import * as menu from "@zag-js/menu";
 import { normalizeProps, useMachine } from "@zag-js/solid";
-import type { JSXElement } from "solid-js";
-import { Icon } from "@src/components/Icon.jsx";
+import { Button } from "@src/components/Button.jsx";
+import { raw } from "@inlang/git-sdk/api";
+import { fs } from "@inlang/git-sdk/fs";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="max-w-screen-lg p-4 mx-auto">
-			<Breadcrumbs></Breadcrumbs>
+		<div class="max-w-screen-xl p-4 mx-auto">
+			<div class="flex space-x-2 items-center">
+				<Breadcrumbs></Breadcrumbs>
+				<BranchMenu></BranchMenu>
+			</div>
 			{/* divider */}
 			<div class="h-px w-full bg-outline-variant my-2"></div>
 			{props.children}
@@ -32,5 +45,31 @@ function Breadcrumbs() {
 			<h3>/</h3>
 			<h3>{routeParams().repository}</h3>
 		</div>
+	);
+}
+
+function BranchMenu() {
+	const [state, send] = useMachine(menu.machine({ id: createUniqueId() }));
+	const api = createMemo(() => menu.connect(state, send, normalizeProps));
+	// TODO needs reactive refetching when branch or dir changes
+	const [branches] = createResource(fsChange, () =>
+		raw.listBranches({ fs, dir: "/" })
+	);
+
+	return (
+		<Show when={(branches() ?? []).length > 0}>
+			<Button variant="fill" color="primary" {...api().triggerProps}>
+				Actions <span aria-hidden>▾</span>
+			</Button>
+			<div {...api().positionerProps}>
+				<ul {...api().contentProps} class="bg-surface-100">
+					<For each={branches() ?? []}>
+						{(branch) => (
+							<li {...api().getItemProps({ id: branch })}>{branch}</li>
+						)}
+					</For>
+				</ul>
+			</div>
+		</Show>
 	);
 }

@@ -3,8 +3,9 @@ import { raw, http } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
 import { currentPageContext } from "@src/renderer/state.js";
 import type { PageContext, PageHead } from "@src/renderer/types.js";
-import { createResource, For, Match, Switch } from "solid-js";
+import { createEffect, createResource, For, Match, Switch } from "solid-js";
 import { onAuth } from "./index.telefunc.js";
+import { setFsChange } from "./state.js";
 
 export const Head: PageHead = () => {
 	return {
@@ -15,6 +16,11 @@ export const Head: PageHead = () => {
 
 export function Page() {
 	const [clone] = createResource(currentPageContext, cloneRepository);
+	createEffect(() => {
+		if (clone()) {
+			setFsChange(Date.now());
+		}
+	});
 	const [dir] = createResource(
 		clone,
 		() => fs.promises.readdir("/") as Promise<string[]>

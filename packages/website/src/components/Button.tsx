@@ -12,7 +12,7 @@ export function Button(
 			children?: JSX.Element;
 		}
 ) {
-	return <button class={button(props)} {...props}></button>;
+	return <button class={buttonStyle(props)} {...props}></button>;
 }
 
 /**
@@ -21,11 +21,11 @@ export function Button(
  * If you can, use the regular `<Button>` component.
  *
  * @example
- * 	<button class={button(args)}></button>
- * 	<a class={button()}></a>
+ * 	<button class={buttonStyle(args)}></button>
+ * 	<a class={buttonStyle()}></a>
  *
  */
-export function button(args: ButtonArgs) {
+export function buttonStyle(args: ButtonArgs) {
 	return baseStyle + " " + variantStyle(args);
 }
 
