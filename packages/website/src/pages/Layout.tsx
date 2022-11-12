@@ -6,7 +6,7 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<>
 			<Header></Header>
-			<div class="p-2 z-0">{props.children}</div>
+			<div class="p-4 z-0">{props.children}</div>
 
 			<Footer></Footer>
 		</>
