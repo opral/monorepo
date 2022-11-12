@@ -1,5 +1,3 @@
-# website
+# @inlang/website
 
-## TailwindCSS
-
-TODO: describe how tailwind CSS works in this package.
+This module is a monolith that contains inlang's website and editor to manage translations.

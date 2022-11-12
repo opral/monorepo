@@ -26,7 +26,7 @@
 		"dev": "rollup --config --watch",
 		"package": "npx vsce package",
 		"test": "vitest run --coverage",
-		"clean": "rm -r -f ./dist ./.turbo",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
 	},
 	"dependencies": {
