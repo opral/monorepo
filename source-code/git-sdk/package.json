@@ -7,13 +7,13 @@
 			"types": "./dist/api/index.d.ts",
 			"import": "./dist/api/index.js"
 		},
-		"./result": {
-			"types": "./dist/auth/index.d.ts",
-			"import": "./dist/auth/index.js"
-		},
 		"./fs": {
 			"types": "./dist/fs/index.d.ts",
 			"import": "./dist/fs/index.js"
+		},
+		"./host": {
+			"types": "./dist/auth/index.d.ts",
+			"import": "./dist/auth/index.js"
 		}
 	},
 	"files": [
