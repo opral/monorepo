@@ -45,8 +45,9 @@ export function render(pageContext: PageContextRenderer): unknown {
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
-      <body>
-        <div id="root">${dangerouslySkipEscape(renderedPage)}</div>
+      <body >
+        <div 
+		 id="root">${dangerouslySkipEscape(renderedPage)}</div>
       </body>
     </html>`;
 }
