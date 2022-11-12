@@ -111,52 +111,12 @@ Supporting different syntaxes and their features opens the question of how the A
 - Standardization via Unicode's MessageFormat 2.0 is in its infancy.
 - Supporting different syntaxes now is beneficial for adoption but standardization is beneficial and should be accounted for.
 - Fluent seems to be the best-designed syntax used in production.
+- Existing AST's are not designed for consumption, not for applications. 
 
-#### Proposal A
+#### Decision
 
-Design an AST based on MessageFormat 2.0's proposed [spec](https://github.com/unicode-org/message-format-wg/blob/develop/spec/syntax.md). While the spec might change, MessageFormat 2.0 will likely become the standard syntax, at least within the web ecosystem.
+Develop a custom AST that is inspired by Fluent and the upcoming MessageFormat 2.0 spec. During prototyping the observation has been made that inlang will most likely require custom AST nodes and thereby deviate from existing designs in any case. Most ASTs are designed for consumption rather than applications. Some ASTs like Fluent also impose numerous features that would have to be supported albeit the benefit and future is unclear. A good example are [Terms](https://projectfluent.org/fluent/guide/terms.html).  
 
-##### Pros
-
-- Standardization by leveraging the soon-to-be standard syntax.
-- The specification of Message Format 2.0 can be influenced by feedback from inlang since Message Format 2.0 is in stage 1/2.
-
-##### Cons
-
-- Message Format 2.0 is in its infancy. Breaking changes are to be expected.  
-   Since the AST is exposed to developers, those breaking changes are propagated and will not stay isolated within inlang.
-
-#### Proposal B
-
-Use [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most advanced and well-designed syntax.
-
-##### Pros
-
-- Fluent is used in production and takes away features that MessageFormat 2.0 will have. The moment MessageFormat 2.0 is released, support should be trivial.
-
-##### Cons
-
-- Fluent might support features that MessageFormat 2.0 will not support. That could lead to painful migrations or require extensions of MessageFormat 2.0.
-- Fluent itself is not widely adopted.
-- If MessageFormat 2.0 becomes the standard, Fluent is legacy.
-
-#### Proposal C
-
-Design a custom AST that does not heavily lean into a certain syntax and its supported features.
-
-##### Pros
-
-- Whether MessageFormat 2.0, Fluent, or something else becomes the standard does not matter.
-
-##### Cons
-
-- No existing design acts as a reference.
-
-  Leveraging MessageFormat 2.0 or Fluent provides a clear(er) path on how an AST should be designed.
-
-- Engineering complexity to support numerous syntax features.
-
-  Instead of leveraging one syntax and its features as a reference, inlang would have X features and developers need to navigate what features syntax Y supports. The latter leads to an inferior user experience.
 
 ### SDK
 
@@ -214,7 +174,7 @@ console.log(translate("example", { name: "Samuel" }));
 2. The internals are identical:  
    `Resource` -> `Reference and Format a Message` -> `Output`
 
-#### Proposal
+#### Decision
 
 Leverage existing SDKs instead of forcing a specific inlang SDK.
 
@@ -285,7 +245,7 @@ import Translated from 'i18n-sdk';
 - Platform-specific tooling like GitHub actions can be built on top of dev tools (the CLI).
 - An [IDE extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) speeds up development.
 
-#### Proposal
+#### Decision
 
 Develop a CLI and VSCode extension to extract and validate resources and messages.
 
@@ -490,21 +450,27 @@ The config itself requires an AST specification for developers to parse resource
 The `ast` and `config` packages are the core components that power inlang. The `ast` is used to act on resources whether it be CRUD operations or validation. The `config` package defines a schema (functions) that the `inlang.config.js` file implements. Among those functions is defined how resources are read, parsed to an AST, serialized from an AST, and written to the file system. Hence the dependency of `config` to `ast`. Furthermore, `config` provides sandboxing to import and securely execute the implemented code.
 
 ```mermaid
+
 flowchart LR
     Applications
     subgraph Packages
-        subgraph Providers
+        subgraph Hosts
                 GitHub
                 Azure
                 GitLab
                 Other[etc...]
         end
-        Providers-.-Host
-        git[git-js]
-        Host[git-provider-api]
-        validation
-        ast
-        config
+        subgraph "git-sdk"
+            git[git-sdk/api]
+            Host[git-sdk/host]
+        end
+        subgraph core
+            validation[core/validation]
+            ast[core/ast]
+            query[core/query]
+            config[core/config]
+        end
+        Hosts-.-Host
     end
     subgraph External[inlang.config.js]
         direction LR
@@ -520,25 +486,36 @@ flowchart LR
     git-->Applications
     ast-->config
     ast-->validation
+    ast-->query
+    query-->Applications
+
 ```
 
-#### git-provider-api
+#### git-sdk
 
-Git (hosting) providers add features on top of git like pull or merge requests and handle authorization differently. The `git-provider-api` provides one API that deals with the API differences between hosting providers.
+The SDK to build applications on top off git. 
 
-#### validation
-
-The `validation` package validates resources and messages based on the AST and can be used to further build on top.
-
-#### git-js
+##### git-sdk/api
 
 Git will be run in JS environments (browser and node). A package is required to make that work. Luckily, [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version.
 
-#### ast
+##### git-sdk/host
+
+Git (hosting) providers (hosts) add features on top of git like pull or merge requests and handle authorization differently. The `git-sdk/host` provides one API that deals with the API differences between hosting providers.
+
+#### core
+
+The core components and packages that depend on the AST.
+
+##### core/ast
 
 Defines the AST (abstract syntax tree) that every component, and hence inlang overall, builds upon.
 
-#### config
+##### core/validation
+
+Validates resources and messages based on the AST and can be used to further build on top.
+
+##### core/config
 
 Defines the config schema(s) and provides types and utility functions to create a config.
 
