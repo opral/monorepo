@@ -11,7 +11,7 @@ export function Footer() {
 			{/* <div class=" px-4 sm:px-6 lg:px-8 mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 "> */}
 			<div class="mx-auto max-w-screen-2xl p-2   ">
 				<div class=" md:flex grid grid-rows-2  items-center content-center sm:px-6 lg:px-0 mx-auto	  md:justify-between space-y-1 ">
-					<div class="flex  items-center space-x-4 md:order-2">
+					<div class="flex justify-between items-center space-x-4 md:order-2">
 						<a href="/legal.txt" class="link link-primary font-light">
 							<span class="">legal.txt</span>
 						</a>
