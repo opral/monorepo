@@ -9,9 +9,9 @@ export function Header() {
 	const [show, setShow] = createSignal(false);
 
 	return (
-		<header class="sticky z-40 top-0   max-w-screen-2xl ">
-			<nav class="">
-				<div class=" flex gap-8 p-4 bg-background border-b border-outline   ">
+		<header class="sticky z-40 top-0  border-b border-outline    ">
+			<nav class=" mx-auto max-w-screen-2xl">
+				<div class=" flex gap-8 p-4 bg-background   ">
 					<a href="/" class="flex items-center">
 						<img
 							class="h-8 w-auto "
@@ -131,7 +131,7 @@ export function Header() {
 					{/*Responsive icon end  */}
 				</div>
 				<Show when={show()}>
-					<div class=" absolute transform  shadow-md  transition ">
+					<div class=" absolute transform  shadow-md  transition border-t border-outline">
 						{/* <a href="/" class="flex items-center">
 								<img
 									class="h-8 w-auto "
