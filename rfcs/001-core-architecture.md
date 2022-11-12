@@ -112,25 +112,25 @@ Supporting different syntaxes and their features opens the question of how the A
 
 Design an AST based on MessageFormat 2.0's proposed [spec](https://github.com/unicode-org/message-format-wg/blob/develop/spec/syntax.md). While the spec might change, MessageFormat 2.0 will likely become the standard syntax, at least within the web ecosystem.
 
-**Pros**
+##### Pros
 
 - Standardization by leveraging the soon-to-be standard syntax.
 - The specification of Message Format 2.0 can be influenced by feedback from inlang since Message Format 2.0 is in stage 1/2.
 
-**Cons**
+##### Cons
 
 - Message Format 2.0 is in its infancy. Breaking changes are to be expected.  
-  Since the AST is exposed to developers, those breaking changes are propagated and will not stay isolated within inlang.
+   Since the AST is exposed to developers, those breaking changes are propagated and will not stay isolated within inlang.
 
 #### Proposal B
 
 Use [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most advanced and well-designed syntax.
 
-**Pros**
+##### Pros
 
 - Fluent is used in production and takes away features that MessageFormat 2.0 will have. The moment MessageFormat 2.0 is released, support should be trivial.
 
-**Cons**
+##### Cons
 
 - Fluent might support features that MessageFormat 2.0 will not support. That could lead to painful migrations or require extensions of MessageFormat 2.0.
 - Fluent itself is not widely adopted.
@@ -140,11 +140,11 @@ Use [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most adva
 
 Design a custom AST that does not heavily lean into a certain syntax and its supported features.
 
-**Pros**
+##### Pros
 
 - Whether MessageFormat 2.0, Fluent, or something else becomes the standard does not matter.
 
-**Cons**
+##### Cons
 
 - No existing design acts as a reference.
 
@@ -214,7 +214,7 @@ console.log(translate("example", { name: "Samuel" }));
 
 Leverage existing SDKs instead of forcing a specific inlang SDK.
 
-**Pros**
+##### Pros
 
 - Already localized codebases can easily adopt inlang.
 
@@ -224,7 +224,7 @@ Leverage existing SDKs instead of forcing a specific inlang SDK.
 
   One SDK to rule them all is unlikely a feasible idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n SDK obsolete. Supporting native localization features instead of forcing the use of an i18n SDK is arguably better. And so is supporting a suited localization approach, i.e. different i18n SDKs, better than forcing the usage of a specific, but less suited, i18n SDK onto developers.
 
-**Cons**
+##### Cons
 
 - The user experience could potentially be higher with a dedicated SDK.
 
@@ -232,11 +232,11 @@ Leverage existing SDKs instead of forcing a specific inlang SDK.
 
 Develop (and require) a dedicated SDK developed by inlang.
 
-**Pros**
+##### Pros
 
 - Potentially better user experience by delivering an "end to end" solution.
 
-**Cons**
+##### Cons
 
 - Adoption is severely limited.
 - Different SDKs exist because a "one size fits all" solution likely does not work.
@@ -326,14 +326,14 @@ Single-user editors are displaced by cloud-based editors for _simple_ string loc
 
 A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution and the collaboration of git is an order of magnitude better than existing solutions. Think of a combination of Figma and VSCode. VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
-**Pros**
+##### Pros
 
 - Leverage git workflows and features.
 - Easy adoption (just like [vscode.dev](https://vscode.dev)).
 - Not requiring a server: Synchronization pipelines are not required.
 - Not requiring a server: No lock-in. Translations are not stored and therefore not owned by inlang (enables CI/CD).
 
-**Cons**
+##### Cons
 
 - Engineering effort: Git is not meant to build applications on top off and to be run in the browser.
 - Design effort: Git is difficult to understand. Abstractions for translators need to be designed.
@@ -351,12 +351,12 @@ The hand-off between developers and translators requires automation. The current
 
 Leverage existing CI/CD infrastructure that is built on top of git like CircleCI, GitHub actions, and GitLab.
 
-**Pros**
+##### Pros
 
 - Easier adoption of inlang as a suite by not forcing the adoption of a dedicated automation layer.
 - The dev tools can be leveraged for automation.
 
-**Cons**
+##### Cons
 
 - No GUI (Graphical User Interface) - but also no GUI limitation of expressiveness.
 - Relying on external CI/CD infrastructure.
