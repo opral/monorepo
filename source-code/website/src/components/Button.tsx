@@ -1,48 +1,43 @@
-import type { JSX } from "solid-js";
 import type { DesignSystemColors } from "../../tailwind.config.cjs";
+import type { JSX } from "solid-js";
+
+type ButtonArgs = {
+	color: DesignSystemColors[number];
+	variant: "fill";
+};
 
 export function Button(
-	props: {
-		color: DesignSystemColors[number];
-		variant: keyof typeof variants;
-		children: JSX.Element;
-	} & JSX.ButtonHTMLAttributes<HTMLButtonElement>
+	props: ButtonArgs &
+		JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
+			children?: JSX.Element;
+		}
 ) {
-	const variant = variants[props.variant];
-	return (
-		<>
-			<button
-				classList={{
-					[base]: true,
-					[variant["disabled"]]: props.disabled,
-					[variant[props.color]]:
-						// props.disabled can be undefined or set to false
-						props.disabled === false || props.disabled === undefined,
-				}}
-				{...props}
-			></button>
-		</>
-	);
+	return <button class={button(props)} {...props}></button>;
 }
 
-// base style of a button
-const base =
+/**
+ * Button css classes.
+ *
+ * If you can, use the regular `<Button>` component.
+ *
+ * @example
+ * 	<button class={button(args)}></button>
+ * 	<a class={button()}></a>
+ *
+ */
+export function button(args: ButtonArgs) {
+	return baseStyle + " " + variantStyle(args);
+}
+
+/** the base style of the button that is consistent across all buttons, regardless of the variant */
+const baseStyle =
 	"rounded py-2 px-4 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
 
-// variants with nested color patterns
-const variants: Record<
-	"fill",
-	Record<DesignSystemColors[number] | "disabled", string>
-> = {
-	fill: {
-		primary:
-			"bg-primary text-on-primary hover:bg-hover-primary focus-visible:bg-primary/50 active:bg-active-primary",
-		secondary:
-			"bg-secondary text-on-secondary hover:bg-hover-secondary focus-visible:bg-secondary/50 active:bg-active-secondary",
-		tertiary:
-			"bg-tertiary text-on-tertiary hover:bg-hover-tertiary focus-visible:bg-tertiary/50 active:bg-active-tertiary",
-		error:
-			"bg-error text-on-error hover:bg-hover-tertiary focus-visible:bg-tertiary/50 active:bg-active-tertiary",
-		disabled: "bg-disabled-container text-disabled-content ",
-	},
-};
+function variantStyle(args: ButtonArgs): string {
+	switch (args.variant) {
+		case "fill":
+			return `disabled:bg-disabled-container disabled:text-disabled-content bg-${args.color} text-on-${args.color} hover:bg-hover-${args.color} active:bg-active-${args.color}`;
+		default:
+			throw Error(`Button variant ${args.variant} does not exist.`);
+	}
+}
