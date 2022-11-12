@@ -88,15 +88,20 @@ Anne added 3 new photos to her stream.
 
 Many different syntaxes and formats to store messages exist, even within one ecosystem. The web world has [Unicode's ICU MessageFormat](https://unicode-org.github.io/icu/) and [Mozilla's Fluent](https://projectfluent.org/) project, Apple's iOS uses Localizable Strings, Android uses XML and Flutter uses ARB files. A working group within Unicode has been working on an industry standard that recently [reached stage 1](https://github.com/tc39/proposal-intl-messageformat) called [MessageFormat 2.0](https://github.com/unicode-org/message-format-wg).
 
+The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers need to support different features. While one syntax and corresponding AST to rule them all should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
+
+Supporting different syntaxes and their features but ultimately lead the way for standardization opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design an custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
+
 #### Observations
 
-1. The sheer variety of syntaxes to express human languages and formats that store them are confusing.
+1. The sheer variety of syntaxes to express human languages are confusing.
 2. Standardization via Unicode's MessageFormat 2.0 is in its infancy.
-3. Fluent seems to be the most advanced existing system.
+3. Supporting different syntaxes now is beneficial for adoption but standardization should be accounted for.
+4. Fluent seems to be the most advanced syntax in production.
 
 #### Proposal A
 
-Build a "universal" AST on top of MessageFormat 2.0's proposed [spec](https://github.com/unicode-org/message-format-wg/blob/develop/spec/syntax.md). Other syntaxes could be parsed and serialized from and to that AST. By building the AST on top of Message Format 2.0, deeper integrations and features can be built.
+Design an AST based on MessageFormat 2.0's proposed [spec](https://github.com/unicode-org/message-format-wg/blob/develop/spec/syntax.md). While the spec might change, MessageFormat 2.0 will likely become the standard syntax, at least within the web ecosystem.
 
 **Pros**
 
@@ -110,7 +115,7 @@ Build a "universal" AST on top of MessageFormat 2.0's proposed [spec](https://gi
 
 #### Proposal B
 
-Build a "universal" AST on top of the [Fluent Project](https://projectfluent.org/) that will evolve into Message Format 2.0. Other syntaxes could be parsed and serialized from and to that AST. By building the AST on top of Fluent, deeper integrations and features can be build.
+Use the [Fluent's](https://projectfluent.org/) AST. Fluent seems to be the most advanced and well-designed syntax. Leveraging Fluent would speed up inlang's path to an MVP.
 
 **Pros**
 
@@ -122,9 +127,11 @@ Build a "universal" AST on top of the [Fluent Project](https://projectfluent.org
 
 - Fluent itself is not widely adopted.
 
+- If MessageFormat 2.0 becomes the standard, Fluent is legacy.
+
 #### Proposal C
 
-Build a "universal" AST that does not heavily lean into a certain syntax and its supported features.
+Design an own AST that does not heavily lean into a certain syntax and its supported features.
 
 **Pros**
 
@@ -316,8 +323,6 @@ Develop a CAT editor that combines VSCode and Figma. VSCode brings out-of-the-bo
 
 - Design effort: Git is difficult to understand. Abstractions for translators need to be designed.
 
-- Not requiring a server: Open source monetization through hosting is difficult, if not impossible.
-
 ### Automation (CI/CD)
 
 The hand-off between developers and translators requires automation. The current status quo of manual pinging is unbearable.
@@ -350,7 +355,7 @@ Interestingly, only two questions need to be elaborated, and both go hand-in-han
 1. How are messages (translations) stored?
 2. How are components configured and orchestrated?
 
-### Where are messages stored?
+### How are messages stored?
 
 The common pattern across larger projects is to store messages in dedicated resource files.
 
@@ -427,22 +432,7 @@ export const metadata = {
 
 One (the?) drawback of JS as config is exploit vulnerability. The JS config could contain malicious code that would be executed by inlang components. An example exploit: An attacker could steal user authentification information by writing malicious code in the config that reads authentification information from the editor. JS as config would require sandboxing to a certain degree to eliminate exploit vulnerability.
 
-### Sandboxing the config
 
-The config architecture of inlang is similar to Figma's plugin system. Figma allows developers to write plugins in JavaScript that are executed in the browser, similar to inlang's desire to execute config code in the browser. [This article](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/) on Figma's blog goes into great length on different sandboxing approaches and trade-offs. Figma initially chose the [Realms shim developed by Agoric](https://github.com/agoric/realms-shim/). The Agoric Realms approach was eventually compromised and Figma switched to a [WebAssembly-based JavaScript runtime](https://bellard.org/quickjs/).
-
-The design requirement for inlang are as follows:
-
-- Eliminate malicious attacks that have impact beyond inlang components.
-  A DOS (Denial of Service) attack by, for example, blocking the main thread via `while (true)` would be okay since it affects only a component itself and poses no harm outside of an app becoming unresponsive. Being able to access auth tokens stored in cookies via the global `window` variable in browsers could be devastating though.
-
-- Support ES Modules (ESM) to consume exported functions and variables on demand. Executing a config similar to `eval` is not of interest.
-
-- Execute async code. The filesystem API and other APIs are more readbale with an async API and will not block the main thread.
-
-- Support the import of external scripts/packages. The flexibility of defining `readResources` and `writeResources` is handy but the ability to import third party code that deals with reading and writing resources reduces the adoption friction.
-
-In response to the Realms shim compromise, Agoric designed the [SES (Secure ECMAScript)](https://github.com/endojs/endo/tree/master/packages/ses) proposal.
 
 ### Flowchart
 
