@@ -22,7 +22,7 @@ This RFC proposes a localization system that acknowledges git as translation sto
 
 - Focus on the web platform but keep other platforms (Flutter, iOS, Android) in mind.
 
-### Noe-goals
+### None-goals
 
 - Define detailed architecture of individual components.
 
@@ -88,7 +88,7 @@ Many different syntaxes and formats to store messages exist, even within one eco
 
 #### Observations
 
-1. The sheer variety of syntaxes and formats is confusing.
+1. The sheer variety of syntaxes to express human languages and formats that store them are confusing.
 2. Standardization via Unicode's MessageFormat 2.0 is in its infancy.
 3. Fluent seems to be the most advanced existing system.
 
@@ -187,7 +187,7 @@ console.log(translate("example", { name: "Samuel" }));
 
 #### Observations
 
-1. A variety of good and adopted open source SDKs exist ([1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), ...). Each serves a different programming language, framework, niche, or feature.
+1. A variety of good and adopted open source SDKs exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), ...]. Each serves a different programming language, framework, niche, or feature.
 
 2. The internals are indentical:  
    `Resource` -> `Reference and Format a Message` -> `Output`
@@ -341,7 +341,7 @@ Leverage existing CI/CD infrastructure that is built on top of git like CircleCI
 
 ## Architecture
 
-The following describes a foundational architecture that is designed to support the components listed above while sharing as much code and business logic as possible.
+The following describes a foundational architecture that is designed to support the components defined above while sharing as much code and business logic as possible.
 
 Interestingly, only two questions need to be elaborated, and both go hand-in-hand:
 
@@ -373,7 +373,7 @@ _Examplary inlang config:_
 }
 ```
 
-However, smaller projects store messages directly in code ([1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/Divine-Software/divine-companions/tree/master/localization), [3](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n)). The motivation behind storing messages in code is the ease of implementation and use.
+However, smaller projects store messages directly in code [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/Divine-Software/divine-companions/tree/master/localization), [3](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n)]. The motivation behind storing messages in code is the ease of implementation and use.
 
 #### Proposal
 
@@ -381,9 +381,9 @@ Be unopinionated where and in which format messages are stored to allow adoption
 
 ### How is inlang configured?
 
-Using JavaScript as a configuration format allows unopinionated workflows. Developers are empowered to adjust inlang, across every component, to their needs. The read and write problem of accessing resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file.
+Using JavaScript as a configuration format would allow unopinionated workflows. Developers are empowered to adjust inlang, across every component, to their needs. The read and write problem of resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file. Furthemore, JavaScript as config solves two common config file annoyances. First, comments are supported (looking at you JSON) and type annotations via JSDoc/TypeScript enable autocomplete and typesafety.
 
-\_Examplary flowchart that illustrates that the config file
+**Flowchart of JS as config**
 
 ```mermaid
 flowchart BT
@@ -396,10 +396,51 @@ flowchart BT
     end
 
     Config <--> |read & write callbacks| Resources
-    Config <--> |uses config callbacks as business logic| Components
+    Config <--> |uses config functions as business logic| Components
 ```
 
-TODO built a proof of concept showing that JS as config can be used in the browser.
+**Pseudocode inlang config**
+
+```js
+export function readResources(filesystem) {
+  // developers can specify how resources
+  // are read from the source code/files.
+  const resources = filesystem.readFile(...)
+  return resources;
+}
+
+export function writeResources(filesystem, resources) {
+  // developers can specify how resources
+  // are written to the source code/files.
+  filesystem.writeFile(resources)
+}
+
+// The config can also be used to export
+// variables or objects.
+export const metadata = {
+  language: "DE",
+}
+
+```
+
+One (the?) drawback of JS as config is exploit vulnerability. The JS config could contain malicious code that would be executed by inlang components. An example exploit: An attacker could steal user authentification information by writing malicious code in the config that reads authentification information from the editor. JS as config would require sandboxing to a certain degree to eliminate exploit vulnerability.
+
+### Sandboxing the config
+
+The config architecture of inlang is similar to Figma's plugin system. Figma allows developers to write plugins in JavaScript that are executed in the browser, similar to inlang's desire to execute config code in the browser. [This article](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/) on Figma's blog goes into great length on different sandboxing approaches and trade-offs. Figma initially chose the [Realms shim developed by Agoric](https://github.com/agoric/realms-shim/). The Agoric Realms approach was eventually compromised and Figma switched to a [WebAssembly-based JavaScript runtime](https://bellard.org/quickjs/).
+
+The design requirement for inlang are as follows:
+
+- Eliminate malicious attacks that have impact beyond inlang components.
+  A DOS (Denial of Service) attack by, for example, blocking the main thread via `while (true)` would be okay since it affects only a component itself and poses no harm outside of an app becoming unresponsive. Being able to access auth tokens stored in cookies via the global `window` variable in browsers could be devastating though.
+
+- Support ES Modules (ESM) to consume exported functions and variables on demand. Executing a config similar to `eval` is not of interest.
+
+- Execute async code. The filesystem API and other APIs are more readbale with an async API and will not block the main thread.
+
+- Support the import of external scripts/packages. The flexibility of defining `readResources` and `writeResources` is handy but the ability to import third party code that deals with reading and writing resources reduces the adoption friction.
+
+In response to the Realms shim compromise, Agoric designed the [SES (Secure ECMAScript)](https://github.com/endojs/endo/tree/master/packages/ses) proposal.
 
 ---
 
@@ -427,4 +468,4 @@ l10n = translators work.
 
 ### Message
 
-The basic unit of translation is called a message. Messages are containers for information. Messages are used to identify, store, and recall translation information to be used in the product ([source](https://projectfluent.org/fluent/guide/hello.html)).
+The basic unit of translation is called a message. Messages are containers for information. Messages are used to identify, store, and recall translation information to be used in the product [[source](https://projectfluent.org/fluent/guide/hello.html)].
