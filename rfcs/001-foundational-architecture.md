@@ -24,7 +24,7 @@ This RFC proposes a localization system that acknowledges git as translation sto
 
 ### None-goals
 
-- Define detailed architecture of individual components.
+- Define the detailed architecture of individual components.
 
 ## Components
 
@@ -90,7 +90,7 @@ Many different syntaxes and formats to store messages exist, even within one eco
 
 The sheer amount of syntaxes is overwhelming for users and localization providers alike. Users need to learn different syntaxes and localization providers need to support different features. While one syntax and corresponding AST to rule them all should be the end goal, for the sake of adoption, inlang should support a variety of syntaxes.
 
-Supporting different syntaxes and their features but ultimately lead the way for standardization opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design an custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
+Supporting different syntaxes and their features but ultimately leading the way for standardization opens the question of how the AST, that powers every other component, is designed: Leverage an existing AST of a specific syntax? Design a custom AST? Regardless of the answer, other formats must be parsed to that AST and serialized back to the initial format (round-trip).
 
 #### Observations
 
@@ -147,7 +147,7 @@ Design an own AST that does not heavily lean into a certain syntax and its suppo
 
 ### SDK
 
-Messages (strings) need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer perspective, the i18n SDK loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
+Messages (strings) need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer perspective, the i18n SDK loads resources, detects the language of a user and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
 
 #### Illustration
 
@@ -198,7 +198,7 @@ console.log(translate("example", { name: "Samuel" }));
 
 1. A variety of good and adopted open source SDKs exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), ...]. Each serves a different programming language, framework, niche, or feature.
 
-2. The internals are indentical:  
+2. The internals are identical:  
    `Resource` -> `Reference and Format a Message` -> `Output`
 
 #### Proposal
@@ -388,7 +388,7 @@ Be unopinionated where and in which format messages are stored to allow adoption
 
 ### How is inlang configured?
 
-Using JavaScript as a configuration format would allow unopinionated workflows. Developers are empowered to adjust inlang, across every component, to their needs. The read and write problem of resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file. Furthemore, JavaScript as config solves two common config file annoyances. First, comments are supported (looking at you JSON) and type annotations via JSDoc/TypeScript enable autocomplete and typesafety.
+Using JavaScript as a configuration format would allow unopinionated workflows. Developers are empowered to adjust inlang, across every component, to their needs. The read and write problem of resources could be solved by exposing `readResources` and `writeResources` as callbacks in a config file. Furthermore, JavaScript as config solves two common config file annoyances. First, comments are supported, and type annotations via JSDoc/TypeScript enable autocomplete and type safety.
 
 **Flowchart of JS as config**
 
@@ -413,7 +413,7 @@ export function readResources(filesystem) {
   // developers can specify how resources
   // are read from the source code/files.
   const resources = filesystem.readFile(...)
-  return resources;
+  return resources // as AST;
 }
 
 export function writeResources(filesystem, resources) {
@@ -432,7 +432,43 @@ export const metadata = {
 
 One (the?) drawback of JS as config is exploit vulnerability. The JS config could contain malicious code that would be executed by inlang components. An example exploit: An attacker could steal user authentification information by writing malicious code in the config that reads authentification information from the editor. JS as config would require sandboxing to a certain degree to eliminate exploit vulnerability.
 
+#### Proposal
 
+Leveraging JavaScript, or any programming language allows for tremendous flexibility and therefore unopinionated workflows. Flexibility is required: codebases differ, approaches to localize software differ, syntaxes differ, and last but not least workflows differ. JavaScript as config could even be used to adjust the business logic of components:
+
+```js
+// pseudocode that illustrates the possbility to
+// adjust how messages are machine translated.
+export async function onMachineTranslate(message) {
+  // or DeepL, Yandex, etc.
+  const googleTranslate = await import("google-translate");
+  return googleTranslate(message);
+}
+
+// pseudocode that illustrates the possiblity to adjust
+// the business logic of the editor.
+export const editor = {
+  // what should happen when a translator pressed "Save"
+  // (edited a message).
+  onSave: async (message) => {
+    // the message could be committed.
+    return commit(message);
+    // or a pull request can be opened.
+    return openPullRequest(message);
+    // or something else can happen
+    return somethingElse(message);
+  },
+  // and more...
+};
+```
+
+### Conclusion
+
+The common denominator across all proposed components is a JavaScript [instead of JSON/YAML/TOML] config and an AST.
+
+The JS config solves the storage [of messages] and different syntaxes [to express human languages] problems by exposing functions to developers and allowing them to define how resources are read, parsed, serialized, and written to the filesystem. Furthermore, developers are empowered to adjust the business logic of inlang components to the needs of the project. Due to the complexity of sandboxing JS, the detailed design of the config will follow in RFC-003.
+
+The config itself requires an AST specification for developers to parse resources to and serialize from which is further consumed by all inlang components. TODO: THE CHOICE HAS NOT BEEN MADE YET.
 
 ### Flowchart
 
@@ -495,7 +531,7 @@ Defines the AST (abstract syntax tree) that every component, and hence inlang ov
 
 Defines the config schema(s) and provides types and utility functions to create a config.
 
-#### Community packages
+#### Community code
 
 The JS inlang config file is supposed to be able to import external code. By providing import functionality, read, write and business logic functions can be shared.
 
