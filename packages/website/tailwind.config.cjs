@@ -48,22 +48,20 @@ function usedClassWithDynamicColor() {
 		const content = fs.readFileSync(file, "utf-8");
 		// match everything with a `-` before string interpolation
 		// like `bg-${props.color}` or `bg-on-${color}`
-		const matches = content.match(/([\w|-]*-*\$\{(props.color|color)\})/g);
+		const matches = content.match(/([\w|-]*-*\$\{(.)*color\})/g);
 		if (matches) {
 			// iterate all possible color class possibilities
 			// and push them to result
 			for (const match of matches) {
-				if (match.includes("props.color")) {
+				// bg-${args.color} text-on-${args.color} hover:bg-hover-${args.color} active:bg-active-${args.color}
+				const classes = match.split(" ");
+				for (const c of classes) {
 					result.push(
-						...designSystemColors.map((color) =>
-							match.replace("${props.color}", color)
-						)
-					);
-				} else {
-					result.push(
-						...designSystemColors.map((color) =>
-							match.replace("${color}", color)
-						)
+						...designSystemColors.map((color) => {
+							const replace = c.replace(/\$\{(.)*\}/, color);
+							console.log({ c, replace });
+							return replace;
+						})
 					);
 				}
 			}
@@ -73,4 +71,5 @@ function usedClassWithDynamicColor() {
 		"whitelisted the following dynamic color classes for tailwind css:",
 		result
 	);
+	return result;
 }
