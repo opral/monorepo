@@ -21,13 +21,14 @@
 	],
 	"main": "./dist/main.cjs",
 	"scripts": {
-		"vscode:prepublish": "npm run build",
-		"build": "rollup --config",
-		"dev": "rollup --config --watch",
-		"package": "npx vsce package",
-		"test": "vitest run --coverage",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
-		"format": "prettier ./src/** -w --config ../../.prettierrc.json"
+		"_COMMENT": "ide extension is not worked on right now.",
+		"_vscode:prepublish": "npm run build",
+		"_build": "rollup --config",
+		"_dev": "rollup --config --watch",
+		"_package": "npx vsce package",
+		"_test": "vitest run --coverage",
+		"_clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
+		"_format": "prettier ./src/** -w --config ../../.prettierrc.json"
 	},
 	"dependencies": {
 		"@inlang/core": "*"
