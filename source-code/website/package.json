@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build",
+		"_build": "DISABLED FOR NOW UNTIL ROLLUP POLYFILLS FOR FS HAVE BEEN ADDED (vite build)",
 		"preview": "vite build && vite preview",
 		"test": "vitest run --coverage",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
