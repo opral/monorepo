@@ -5,7 +5,8 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<>
 			<Header></Header>
-			{props.children}
+			<div class="p-2">{props.children}</div>
+
 			<Footer></Footer>
 		</>
 	);
@@ -24,7 +25,7 @@ function Header() {
 			<nav class="mx-auto max-w-screen-2xl  sm:px-6 2xl:px-0 ">
 				<div class="relative  flex justify-between py-8  q">
 					<Show when={show() == false}>
-						<div class="relative z-10 flex items-center gap-16">
+						<div class="relative z-10 p-2 flex items-center gap-16">
 							<a href="/" class="flex">
 								<img
 									class="h-8 w-auto "
@@ -44,7 +45,7 @@ function Header() {
 							</div>
 						</div>
 						{/* start icon social media   */}
-						<div class="self-center  space-x-2 md:flex sm:hidden ">
+						<div class="self-center  space-x-2 md:flex hidden ">
 							<a href="https://twitter.com/inlangHQ" class="flex space-x-1">
 								<span class="">Twitter</span>
 								<svg
@@ -110,12 +111,12 @@ function Header() {
 				<Show when={show()}>
 					<div
 						class={
-							"absolute inset-x-0 top-0 z-30 origin-top-right transform p-2 transition md:hidden"
+							"absolute inset-x-0 top-0 z-30 origin-top-right transform  transition md:hidden"
 						}
 					>
-						<div class="divide-y-2 divide-gray-50 rounded-lg bg-background shadow-lg ring-1 ring-black ring-opacity-5">
-							<div class="px-5 pt-5 pb-6 sm:pb-8">
-								<div class="flex items-center justify-between">
+						<div class=" bg-background shadow-md w-full ">
+							<div class="px-5 pt-5 pb-6 sm:pb-8 border-b border-outline">
+								<div class="flex items-center justify-between ">
 									<div class="">
 										<a href="/" class="flex">
 											<img
@@ -214,8 +215,8 @@ function Footer() {
 			</h2>
 			{/* <div class="w-screen border-t border-gray-200	"></div> */}
 			{/* <div class=" px-4 sm:px-6 lg:px-8 mx-auto flex  items-center justify-between  py-5  sm:py-4 md:justify-start md:space-x-10 "> */}
-			<div class="mx-auto max-w-screen-2xl py-2   ">
-				<div class="flex   items-center content-center sm:px-6 lg:px-0 mx-auto	  md:justify-between ">
+			<div class="mx-auto max-w-screen-2xl p-2   ">
+				<div class=" md:flex grid grid-rows-2  items-center content-center sm:px-6 lg:px-0 mx-auto	  md:justify-between ">
 					<div class="flex  items-center space-x-6 md:order-2">
 						<a href="#" class="link link-primary font-light">
 							<span class="">imprint</span>
@@ -259,9 +260,7 @@ function Footer() {
 						</a>
 					</div>
 
-					<p class="text-base self-center	 text-gray-400 ">
-						&copy; 2022 Inlang, Inc. All rights reserved.
-					</p>
+					<p class="text-base self-center	 text-gray-400 ">&copy; 2022 Inlang</p>
 				</div>
 			</div>
 		</footer>
