@@ -1,7 +1,7 @@
 export function Hero() {
 	return (
 		<>
-			<div class=" h-full overflow-hidden  bg-background sm:px-6 2xl:px-0	 ">
+			<div class=" h-full overflow-hidden  bg-background sm:px-6 md:px-0 xl:px-4	 ">
 				<div class="relative z-10 bg-background my-auto min-h-full    pb-8 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
 					<div>
 						<main class="mx-auto  sm:mt-12  md:mt-16 lg:mt-20  ">
