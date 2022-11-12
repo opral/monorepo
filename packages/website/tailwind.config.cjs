@@ -59,7 +59,6 @@ function usedClassWithDynamicColor() {
 					result.push(
 						...designSystemColors.map((color) => {
 							const replace = c.replace(/\$\{(.)*\}/, color);
-							console.log({ c, replace });
 							return replace;
 						})
 					);
@@ -67,9 +66,9 @@ function usedClassWithDynamicColor() {
 			}
 		}
 	}
-	console.log(
-		"whitelisted the following dynamic color classes for tailwind css:",
-		result
-	);
+	// console.log(
+	// 	"whitelisted the following dynamic color classes for tailwind css:",
+	// 	result
+	// );
 	return result;
 }
