@@ -15,7 +15,7 @@ export function Layout() {
 
 export function Page() {
 	return (
-		<div class="flex  content-center justify-center">
+		<div class="  min-h-screen flex  content-center justify-center">
 			<div class="mx-auto max-w-screen-2xl  place-content-center	 self-center h-full grow   ">
 				<Hero></Hero>
 			</div>
