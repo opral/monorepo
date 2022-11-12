@@ -26,7 +26,7 @@ Inlang provides developer-first localization infrastructure that is built on git
 For a technical explanation of the architecture, read [RFC-001](https://github.com/inlang/inlang/pull/127).
 
 <p align="center">
-    <img width="70%" max-width="50px" src="https://raw.githubusercontent.com/inlang/inlang/rfc-001-architecture/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
+    <img width="70%" max-width="50px" src="https://raw.githubusercontent.com/inlang/inlang/687a399073b197d3e6874b78dff1107fc47647cf/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
     <br/>
     <small align="center">
         Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
