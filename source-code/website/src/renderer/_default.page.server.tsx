@@ -46,8 +46,8 @@ export function render(pageContext: PageContextRenderer): unknown {
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
       <body >
-        <div style="  min-height: 100vh;
-		" id="root">${dangerouslySkipEscape(renderedPage)}</div>
+        <div 
+		 id="root">${dangerouslySkipEscape(renderedPage)}</div>
       </body>
     </html>`;
 }
