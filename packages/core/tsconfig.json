@@ -1,5 +1,5 @@
 {
-	"extends": "@inlang/source-code-configs/typescript/tsconfig.base.json",
+	"extends": "configs/typescript/tsconfig.base.json",
 	"include": ["src/**/*"],
 	// "exclude": ["**/*.test.ts"],
 	"compilerOptions": {
