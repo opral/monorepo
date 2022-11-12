@@ -473,7 +473,7 @@ flowchart LR
         Workflow[Business logic]
         Other2[And more...]
     end
-    Community[Commnunity packages]-->External
+    Community[Community code]-->|can be imported|External
     config-->External
     External-->Applications
     Host-->Applications
