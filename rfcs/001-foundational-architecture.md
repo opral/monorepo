@@ -470,7 +470,7 @@ The JS config solves the storage [of messages] and different syntaxes [to expres
 
 The config itself requires an AST specification for developers to parse resources to and serialize from which is further consumed by all inlang components. TODO: THE CHOICE HAS NOT BEEN MADE YET.
 
-### Flowchart
+### Dependency graph
 
 ```mermaid
 flowchart LR
@@ -488,12 +488,6 @@ flowchart LR
         validation
         ast
         config
-    end
-    subgraph Legend
-        direction LR
-        start1[ ] --->|depends on| stop1[ ]
-        style start1 height:0px;
-        style stop1 height:0px;
     end
     subgraph External[inlang.config.js]
         direction LR
