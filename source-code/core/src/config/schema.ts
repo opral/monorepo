@@ -33,6 +33,10 @@ export type Config = {
 	bundleIds: string[];
 	readBundles: (args: {
 		fs: FsPromisesSubset;
+		/**
+		 * @deprecated The function does not consider the working directory right now.
+		 * Do not use this argument.
+		 */
 		$import: typeof $import;
 	}) => Promise<ast.Bundle[]>;
 	// ideExtension?: {
