@@ -4,6 +4,7 @@ import { ssr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
 import { validateEnv } from "./env.js";
+import Icons from "unplugin-icons/vite";
 
 // validate the env variables.
 validateEnv();
@@ -14,6 +15,12 @@ export default await withFsPolyfills({
 		// ordering matters. telefunc must be before ssr
 		telefunc(),
 		ssr(),
+		// @ts-ignore
+		// only https://icon-sets.iconify.design/material-symbols/
+		// and https://icon-sets.iconify.design/cib/
+		// are installed indicated in the package.json @iconify-json/* packages.
+		// use those sites to search for icons.
+		Icons({ compiler: "solid" }),
 	],
 	resolve: {
 		alias: {
