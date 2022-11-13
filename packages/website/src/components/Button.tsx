@@ -1,9 +1,18 @@
+/**
+ * ---------------------------------------------------------------
+ * The button is based on Material 3 buttons.
+ *
+ * See https://m3.material.io/components/buttons/guidelines
+ * for references on how to use the buttons.
+ * ---------------------------------------------------------------
+ */
+
 import type { DesignSystemColors } from "../../tailwind.config.cjs";
 import type { JSX } from "solid-js";
 
 type ButtonProps = {
 	color: DesignSystemColors[number];
-	variant: "fill";
+	variant: "fill" | "outline" | "text";
 	// defaults to base. is optional to avoid merging of default props.
 	size?: "xs" | "sm" | "base" | "lg" | "xl";
 };
@@ -39,7 +48,7 @@ export function buttonStyle(args: ButtonProps) {
 
 /** the base style of the button that is consistent across all buttons, regardless of the variant */
 const baseStyle =
-	"inline-flex shrink items-center justify-center border border-transparent font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
+	"inline-flex shrink items-center justify-center border font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
 
 const size = {
 	xs: "px-2.5 py-1.5 text-xs rounded",
@@ -52,7 +61,10 @@ const size = {
 function variantStyle(args: ButtonProps): string {
 	switch (args.variant) {
 		case "fill":
-			return `disabled:bg-disabled-container disabled:text-disabled-content bg-${args.color} text-on-${args.color} hover:bg-hover-${args.color} active:bg-active-${args.color}`;
+			// fill has a border to ensure same height / style as the other button variants
+			return `border-${args.color} bg-${args.color} hover:border-hover-${args.color} text-on-${args.color} hover:bg-hover-${args.color} hover:border-hover-${args.color} active:bg-active-${args.color} active:border-active-${args.color} disabled:bg-disabled-container disabled:text-disabled-content disabled:border-disabled-container`;
+		case "outline":
+			return `border-outline text-${args.color} enabled:hover:border-hover-${args.color} enabled:hover:text-on-${args.color} enabled:hover:bg-hover-${args.color} enabled:hover:border-hover-${args.color} enabled:active:bg-active-${args.color} enabled:active:border-active-${args.color} disabled:border-on-surface/12 disabled:text-on-surface/30`;
 		default:
 			throw Error(`Button variant ${args.variant} does not exist.`);
 	}
