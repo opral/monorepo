@@ -68,9 +68,9 @@ function usedClassWithDynamicColor() {
 	}
 	// filter duplicates
 	result = [...new Set(result)];
-	console.log(
-		"whitelisted the following dynamic color classes for tailwind css:",
-		result
-	);
+	// console.log(
+	// 	"whitelisted the following dynamic color classes for tailwind css:",
+	// 	result
+	// );
 	return result;
 }
