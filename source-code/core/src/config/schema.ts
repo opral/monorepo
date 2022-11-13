@@ -33,7 +33,7 @@ export type Config = {
 	bundleIds: string[];
 	readBundles: (args: {
 		fs: FsPromisesSubset;
-		// $import: typeof $import;
+		$import: typeof $import;
 	}) => Promise<ast.Bundle[]>;
 	// ideExtension?: {
 	// 	/**
