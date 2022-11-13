@@ -52,7 +52,7 @@ const baseStyle =
 
 const size = {
 	xs: "px-2.5 py-1.5 text-xs rounded",
-	sm: "px-3 py-2 text-sm rounded-md",
+	sm: "px-3 py-1.5 text-sm rounded-md",
 	base: "px-4 py-2 text-sm rounded-md",
 	lg: "px-4 py-2 test-base rounded-md",
 	xl: "px-6 py-3 text-base rounded-md md:px-8 md:py-4 md:text-lg",
