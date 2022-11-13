@@ -64,7 +64,7 @@ function variantStyle(args: ButtonProps): string {
 			// fill has a border to ensure same height / style as the other button variants
 			return `border-${args.color} bg-${args.color} hover:border-hover-${args.color} text-on-${args.color} hover:bg-hover-${args.color} hover:border-hover-${args.color} active:bg-active-${args.color} active:border-active-${args.color} disabled:bg-disabled-container disabled:text-disabled-content disabled:border-disabled-container`;
 		case "outline":
-			return `border-outline text-${args.color} enabled:hover:border-hover-${args.color} enabled:hover:text-on-${args.color} enabled:hover:bg-hover-${args.color} enabled:hover:border-hover-${args.color} enabled:active:bg-active-${args.color} enabled:active:border-active-${args.color} disabled:border-on-surface/12 disabled:text-on-surface/30`;
+			return `border-outline text-${args.color} enabled:hover:border-hover-${args.color} hover:text-on-${args.color} enabled:hover:bg-hover-${args.color} enabled:hover:border-hover-${args.color} enabled:active:bg-active-${args.color} enabled:active:border-active-${args.color} disabled:border-on-surface/12 disabled:text-on-surface/30`;
 		default:
 			throw Error(`Button variant ${args.variant} does not exist.`);
 	}
