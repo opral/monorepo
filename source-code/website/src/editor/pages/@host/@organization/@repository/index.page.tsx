@@ -56,7 +56,7 @@ async function cloneRepository(pageContext: PageContext): Promise<boolean> {
 		dir: "/",
 		onAuth: onAuth,
 		corsProxy: clientSideEnv().VITE_CORS_PROXY_URL,
-		url: "https://github.com/samuelstroschein/launchhouse-demo",
+		url: `https://${host}/${organization}/${repository}`,
 	});
 	return true;
 }
