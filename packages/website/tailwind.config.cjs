@@ -40,7 +40,7 @@ module.exports = {
  */
 function usedClassWithDynamicColor() {
 	const designSystemColors = ["primary", "secondary", "tertiary", "error"];
-	const result = [];
+	let result = [];
 	const fs = require("fs");
 	const glob = require("fast-glob");
 	const files = glob.sync("src/**/*.{js,ts,jsx,tsx}");
@@ -66,9 +66,11 @@ function usedClassWithDynamicColor() {
 			}
 		}
 	}
-	// console.log(
-	// 	"whitelisted the following dynamic color classes for tailwind css:",
-	// 	result
-	// );
+	// filter duplicates
+	result = [...new Set(result)];
+	console.log(
+		"whitelisted the following dynamic color classes for tailwind css:",
+		result
+	);
 	return result;
 }
