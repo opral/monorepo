@@ -7,8 +7,7 @@ import {
 	JSXElement,
 	Show,
 } from "solid-js";
-import type { DesignSystemColors } from "../../tailwind.config.cjs";
-import { Icon } from "./Icon.jsx";
+import IconClose from "~icons/material-symbols/close-rounded";
 
 /**
  * @example
@@ -36,7 +35,7 @@ export function Checkbox(
 					{...api().controlProps}
 				>
 					<Show when={api().isChecked}>
-						<Icon name="done"></Icon>
+						<IconClose></IconClose>
 					</Show>
 				</div>
 				<span {...api().labelProps}>{props.children}</span>
