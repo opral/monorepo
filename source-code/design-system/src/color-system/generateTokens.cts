@@ -22,19 +22,19 @@ export function generateTokens(config: Config): ColorTokens {
 		background: white,
 		"on-background": neutralColors.neutral[900],
 		"surface-100": new TinyColor(neutralColors.neutral[900])
-			.setAlpha(0.05)
+			.lighten(88)
 			.toHex8String(),
 		"surface-200": new TinyColor(neutralColors.neutral[900])
-			.setAlpha(0.08)
+			.lighten(85)
 			.toHex8String(),
 		"surface-300": new TinyColor(neutralColors.neutral[900])
-			.setAlpha(0.11)
+			.lighten(82)
 			.toHex8String(),
 		"surface-400": new TinyColor(neutralColors.neutral[900])
-			.setAlpha(0.12)
+			.lighten(80)
 			.toHex8String(),
 		"surface-500": new TinyColor(neutralColors.neutral[900])
-			.setAlpha(0.14)
+			.lighten(78)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
 		"surface-variant": neutralColors.neutralVariant[100],
@@ -80,10 +80,10 @@ export function generateTokens(config: Config): ColorTokens {
 	//   .setAlpha(38)
 	//   .toHex8String();
 	tokens[`disabled-content`] = new TinyColor(tokens["on-surface"])
-		.setAlpha(0.38)
+		.lighten(60)
 		.toHex8String();
 	tokens[`disabled-container`] = new TinyColor(tokens["on-surface"])
-		.setAlpha(0.12)
+		.lighten(75)
 		.toHex8String();
 
 	return tokens as ColorTokens;
