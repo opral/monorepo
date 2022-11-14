@@ -19,7 +19,7 @@
 Inlang provides developer-first localization infrastructure that is built on git. Your git repository is the single source of truth for localization. The infrastructure consists of dev tools, an editor to manage translations, and automation via CI/CD.
 
 - [x] No lock-in.
-- [x] One-click setup.
+- [x] No integrations.
 - [x] Use CI/CD for automation.
 - [x] Avoid silos between developers and translators.
 
@@ -39,7 +39,7 @@ For a technical explanation of the architecture, read [RFC-001](https://github.c
 
 ### Editor
 
-A git-based translation management editor that combines collaboration of cloud-based solutions with the simplicity of a local-first solution as if Figma and VSCode had a child.
+A git-based translation management editor that combines collaboration of cloud-based solutions with the simplicity of a local-first solution.
 
 ![dashboard-example](https://user-images.githubusercontent.com/35429197/154271089-9acf02c3-7c6e-435c-9014-6ee21426ab4d.png)
 
