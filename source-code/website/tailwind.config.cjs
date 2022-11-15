@@ -1,3 +1,5 @@
+// @ts-ignore remove ts-ignore once "moduleResolution" is switched to `node16` again
+// see the tsconfig.json file
 const { colorSystem, components } = require("@inlang/design-system");
 const colors = require("tailwindcss/colors");
 
