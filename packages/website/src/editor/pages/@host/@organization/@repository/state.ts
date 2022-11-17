@@ -8,10 +8,10 @@ import type { EditorRouteParams } from "./types.js";
 export const [path, setPath] = createSignal("/");
 
 export const routeParams = () =>
-	currentPageContext.routeParams as EditorRouteParams;
+	currentPageContext().routeParams as EditorRouteParams;
 
 export const currentBranch = () =>
-	currentPageContext.urlParsed.search["branch"];
+	currentPageContext().urlParsed.search["branch"];
 
 /**
  * tracking file system changes to trigger re-builds.

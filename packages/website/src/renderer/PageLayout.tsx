@@ -22,10 +22,10 @@ export function PageLayout(props: {
 	pageProps: Record<string, unknown>;
 }) {
 	const Layout = () => {
-		if (currentPageContext.urlParsed.pathname.includes("/editor") === false) {
+		if (currentPageContext().urlParsed.pathname.includes("/editor") === false) {
 			return IndexLayout;
 		}
-		if (currentPageContext.urlParsed.pathname.includes("/editor") === true) {
+		if (currentPageContext().urlParsed.pathname.includes("/editor") === true) {
 			return EditorLayout;
 		}
 		return FallbackLayout;
