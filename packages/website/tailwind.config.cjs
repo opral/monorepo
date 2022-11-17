@@ -8,7 +8,7 @@ module.exports = {
 	content: ["./**/*.{js,ts,jsx,tsx}"],
 	theme: {
 		extend: {},
-		// no tailwind colors. use design system colors
+		// no tailwind colors. use color system colors only. see below
 		colors: {},
 	},
 	safelist: usedClassWithDynamicColor(),
@@ -16,32 +16,49 @@ module.exports = {
 		require("@tailwindcss/typography"),
 		require("@tailwindcss/forms"),
 		components.configure(),
+		// the colors align with shoelace's colors https://shoelace.style/tokens/color
 		colorSystem.configure({
 			accentColors: {
-				primary: colors.orange,
+				primary: colors.sky,
+				//! shoelace's secondary token is called neutral.
 				secondary: colors.gray,
-				tertiary: colors.teal,
+			},
+			neutralColors: {
+				neutral: colors.neutral,
+				neutralVariant: colors.stone,
 			},
 			semanticColors: {
-				error: colors.red,
+				success: colors.green,
+				warning: colors.amber,
+				danger: colors.red,
+			},
+			colorLevels: {
+				base: 600,
+				container: 200,
+				onContainer: 900,
 			},
 		}),
 	],
 };
 
 /**
- * @typedef {["primary","secondary","tertiary","error"]} DesignSystemColors
+ * @typedef {["primary","secondary","success","warning", "danger"]} DesignSystemColors
  *
- * (Component) colors that are defined in the design system.
- *
- * Hardcoded for now. Implementation can be found in `design-system/src/color-system/tailwindPlugin.cts`
+ * colors that are defined in the tailwind config.
  */
 
 /**
  * finds dynamic classes that need to be whitelisted for tailwind css
  */
 function usedClassWithDynamicColor() {
-	const designSystemColors = ["primary", "secondary", "tertiary", "error"];
+	/** @type {DesignSystemColors} */
+	const designSystemColors = [
+		"primary",
+		"secondary",
+		"success",
+		"warning",
+		"danger",
+	];
 	let result = [];
 	const fs = require("fs");
 	const glob = require("fast-glob");
