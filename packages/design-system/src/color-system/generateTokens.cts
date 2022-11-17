@@ -62,7 +62,9 @@ export function generateTokens(config: Config): ColorTokens {
 		// 1. no drag token.
 		// 2. press token = the active token
 		tokens[`hover-${name}`] =
-			color[(config.colorLevels.base + 100) as keyof Color];
+			// shoelace lightens the color on hover. TODO: change
+			// shoelace style eventually.
+			color[(config.colorLevels.base - 100) as keyof Color];
 		tokens[`focus-${name}`] =
 			color[(config.colorLevels.base + 200) as keyof Color];
 		tokens[`active-${name}`] =

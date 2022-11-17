@@ -1,6 +1,8 @@
 {
 	"extends": "configs/typescript/tsconfig.base.json",
 	"compilerOptions": {
+		// TODO remove when https://github.com/shoelace-style/shoelace/pull/1007 is merged
+		"moduleResolution": "node",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"types": ["vite/client", "unplugin-icons/types/solid"],
 		"jsx": "preserve",

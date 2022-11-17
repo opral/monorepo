@@ -4,6 +4,9 @@ import { hydrate } from "solid-js/web";
 import { PageLayout } from "./PageLayout.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
+// only imported client side as web components are not supported server side
+import "@shoelace-style/shoelace";
+import "@shoelace-style/shoelace/dist/themes/light.css";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
