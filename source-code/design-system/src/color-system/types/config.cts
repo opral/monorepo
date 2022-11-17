@@ -19,7 +19,7 @@ export type Config = {
 		 * Is used for less prominent components in the UI,
 		 * while expanding the opportunity for color expression.
 		 */
-		secondary: Color;
+		secondary?: Color;
 		/**
 		 * Tertiary color.
 		 *
@@ -30,7 +30,7 @@ export type Config = {
 		 * their discretion and is intended to support broader
 		 * color expression in products.
 		 */
-		tertiary: Color;
+		tertiary?: Color;
 		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
 		// [custom: string]: Color;
 	};
@@ -52,15 +52,14 @@ export type Config = {
 		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
 		// [custom: string]: Color;
 	};
+	/**
+	 * Semantic colors that your product needs like `error` or `success`.
+	 *
+	 * Custom colors pin specific hues that often are needed alongside expressive
+	 * colors in UI as a way to communicate conventional meaning, such as errors.
+	 */
 	semanticColors: {
-		/**
-		 * Error color.
-		 *
-		 * Is used to signal error states.
-		 */
-		error: Color;
-		// TODO Re-add when custom color are supported (or never if design-system is only used internally)
-		// [custom: string]: Color;
+		[custom: string]: Color;
 	};
 	/**
 	 * The color levels of the color system.

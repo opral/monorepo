@@ -83,7 +83,8 @@ export function MenuContent(props: {
 				{...api?.().contentProps}
 				classList={{
 					[`bg-${props.color}`]: true,
-					["w-32 min-w-fit rounded-md shadow-lg py-1.5"]: true,
+					["w-32 min-w-fit rounded-md shadow-lg py-1.5 border border-outline"]:
+						true,
 				}}
 			>
 				{props.children}
