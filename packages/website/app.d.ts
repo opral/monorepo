@@ -12,6 +12,12 @@ declare module "solid-js" {
 		type Props<T> = {
 			[K in keyof T as `prop:${string & K}`]?: T[K];
 		};
-		interface IntrinsicElements extends ElementProps<HTMLElementTagNameMap> {}
+		interface IntrinsicElements extends ElementProps<HTMLElementTagNameMap> {
+			// TODO remove once https://github.com/shoelace-style/shoelace/pull/1007 is released
+			"sl-dropdown": any;
+			"sl-button": any;
+			"sl-menu-item": any;
+			"sl-menu": any;
+		}
 	}
 }
