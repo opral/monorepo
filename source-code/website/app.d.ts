@@ -1,5 +1,4 @@
 import "solid-js";
-import type { SlButton } from "@shoelace-style/shoelace";
 
 // types for web components
 // see https://github.com/solidjs/solid/issues/616#issuecomment-1144074821
