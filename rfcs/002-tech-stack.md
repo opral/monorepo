@@ -11,8 +11,8 @@ Importance of long-term maintainability, development velocity, and the possiblit
 Architecture: Monolith  
 Framework: [SolidJS](https://www.solidjs.com/)  
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)  
-Design system: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)  
-Markdown: [Markdoc](https://markdoc.dev/)  
+Design system: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelace.style/) + [Zag.js](https://zagjs.com/)  
+Markdown: [Markdoc](https://markdoc.dev/)
 
 ## Scope of this RFC
 
@@ -94,7 +94,7 @@ A monolith architecture has been chosen. The website and editor are co-developed
 
 Framework: [SolidJS](https://www.solidjs.com/)
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
-UI components: [Tailwind](https://tailwindcss.com/) + [Zag.js](https://zagjs.com/)
+UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelace.style/) + [Zag.js](https://zagjs.com/)
 
 ### website (metaframework)
 
@@ -141,6 +141,7 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
 - performance “for free”.
   - Performance is likely important for the editor.
+- performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
 - (Great documentation -> understandable for beginners)
 
 #### why not react?
@@ -148,7 +149,6 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
 - Anticipated slower development speed and higher maintainability effort.
   - De-coupled state management
   - Performance optimization needs to be conducted manually (likely important for the editor)
-- not ecosystem relied. custom UI components are used and no no external state management is required.  
 
 #### why not svelte?
 
@@ -164,7 +164,7 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
 
 ## design system
 
-TailwindCSS + ZagJS. TailwindCSS provides fast styling and ZagJS provides fast component logic (that works with SolidJS). Both solutions are headless. A headless solution provides the possibility to incrementally develop our own design system over time instead of fighting pre-designed component libraries.
+TailwindCSS + Shoelace + ZagJS. TailwindCSS provides fast styling, Shoelace off the shelf components with style, and ZagJS provides component logic for custom components. The goal is to incrementally develop our own design system over time instead of fighting pre-designed component libraries. Shoelace is eas(ier) to (re-)style than other component libraries, easing our path to a custom design system.
 
 ## markdown
 
