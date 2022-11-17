@@ -7,7 +7,7 @@
  * ---------------------------------------------------------------
  */
 
-import type { DesignSystemColors } from "../../tailwind.config.cjs";
+import type { DesignSystemColors } from "../../../tailwind.config.cjs";
 import type { JSX } from "solid-js";
 
 type ButtonProps = {
