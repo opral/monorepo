@@ -36,8 +36,10 @@ export function PageLayout(props: {
 				console.error(error);
 				return (
 					<>
-						<p class="text-error text-lg font-medium">ERROR DURING RENDERING</p>
-						<p class="text-error">
+						<p class="text-danger text-lg font-medium">
+							ERROR DURING RENDERING
+						</p>
+						<p class="text-danger">
 							Check the console for more information and please{" "}
 							<a
 								class="link"
