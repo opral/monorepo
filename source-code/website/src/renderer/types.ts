@@ -10,15 +10,18 @@ export type PageHead = (args: { pageContext: PageContextRenderer }) => {
 	description?: string;
 };
 
+/** @deprecated is this type used anywhere? */
+export type Page<T> = (props: T) => Component;
+
 /**
  * The page context available during rendering.
  */
-export type PageContextRenderer<Props = Record<string, unknown>> =
+export type PageContextRenderer<PageProps = Record<string, unknown>> =
 	PageContextBuiltIn<Component> & {
 		/**
 		 * The properties of a page.
 		 */
-		props: Props;
+		props: PageProps;
 		/**
 		 * Things that a file that contains a Page exports.
 		 *
@@ -28,8 +31,6 @@ export type PageContextRenderer<Props = Record<string, unknown>> =
 			Head?: PageHead;
 		};
 	};
-
-export type Page<T> = (props: T) => Component;
 
 /**
  * The page context that is available on the client.
@@ -46,8 +47,8 @@ export type Page<T> = (props: T) => Component;
  * ```
  *
  */
-export type PageContext<Props = Record<string, unknown>> = Pick<
-	PageContextRenderer<Props>,
+export type PageContext<PageProps = Record<string, unknown>> = Pick<
+	PageContextRenderer<PageProps>,
 	typeof passToClient[number]
 >;
 
