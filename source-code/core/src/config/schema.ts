@@ -1,7 +1,5 @@
 import type * as ast from "../ast/index.js";
-import type { FsPromisesSubset } from "./types/fsPromisesSubset.js";
-import type { DocumentSelector } from "vscode";
-import type { $import } from "./environment-functions/$import.js";
+import type { $import, $fs } from "./environment-functions/index.js";
 
 /**
  * Inlang config schema.
@@ -32,12 +30,8 @@ export type Config = {
 	 */
 	bundleIds: string[];
 	readBundles: (args: {
-		fs: FsPromisesSubset;
-		/**
-		 * @deprecated The function does not consider the working directory right now.
-		 * Do not use this argument.
-		 */
-		$import: typeof $import;
+		$fs: $fs;
+		$import: (uri: string) => ReturnType<typeof $import>;
 	}) => Promise<ast.Bundle[]>;
 	// ideExtension?: {
 	// 	/**

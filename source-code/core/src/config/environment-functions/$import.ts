@@ -1,3 +1,5 @@
+import type { fs } from "memfs";
+
 /**
  * Importing ES modules either from a local path, or from a url.
  *
@@ -8,13 +10,27 @@
  * _[See test cases](./$import.test.js)_
  */
 // Some environments do not support the import of modules from a url.
-export async function $import(uri: string): Promise<any> {
-	if (uri.startsWith("http")) {
-		const moduleText = await (await fetch(uri)).text();
-		const withMimeType =
-			"data:application/javascript;base64," + btoa(moduleText);
-		return await import(withMimeType);
-	} else {
-		return await import(uri);
+export async function $import(
+	uri: string,
+	options: {
+		/** current working directory from which the import should be resolved */
+		basePath: string;
+		/** the fs from which the file can be read */
+		fs: typeof fs.promises;
 	}
+): Promise<any> {
+	// polyfill for environments that don't support dynamic
+	// http imports yet like VSCode.
+	let moduleAsText: string;
+	if (uri.startsWith("http")) {
+		moduleAsText = await (await fetch(uri)).text();
+	} else {
+		moduleAsText = (await options.fs.readFile(
+			`${options.basePath}/${uri}`,
+			"utf-8"
+		)) as string;
+	}
+	const moduleWithMimeType =
+		"data:application/javascript;base64," + btoa(moduleAsText);
+	return await import(moduleWithMimeType);
 }

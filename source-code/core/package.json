@@ -27,5 +27,8 @@
 	},
 	"dependencies": {
 		"@inlang/utilities": "*"
+	},
+	"devDependencies": {
+		"memfs": "^3.4.11"
 	}
 }
