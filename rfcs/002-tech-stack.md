@@ -144,7 +144,7 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
 - performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
 - (Great documentation -> understandable for beginners)
 
-Some videos about Solid's simple reactive system [0](https://www.youtube.com/watch?v=qB5jK-KeXOs)[1](https://www.youtube.com/watch?v=J70HXl1KhWE).
+Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
 
 #### why not react?
 
