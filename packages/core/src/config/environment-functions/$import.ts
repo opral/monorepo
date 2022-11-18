@@ -32,5 +32,5 @@ export async function $import(
 	}
 	const moduleWithMimeType =
 		"data:application/javascript;base64," + btoa(moduleAsText);
-	return await import(moduleWithMimeType);
+	return await import(/* @vite-ignore */ moduleWithMimeType);
 }
