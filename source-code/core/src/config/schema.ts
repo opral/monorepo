@@ -1,5 +1,5 @@
 import type * as ast from "../ast/index.js";
-import type { $import, $fs } from "./environment-functions/index.js";
+import type { $fs, initialize$import } from "./environment-functions/index.js";
 
 /**
  * Inlang config schema.
@@ -31,7 +31,7 @@ export type Config = {
 	bundleIds: string[];
 	readBundles: (args: {
 		$fs: $fs;
-		$import: (uri: string) => ReturnType<typeof $import>;
+		$import: ReturnType<typeof initialize$import>;
 	}) => Promise<ast.Bundle[]>;
 	// ideExtension?: {
 	// 	/**
