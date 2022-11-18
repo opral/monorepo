@@ -1,6 +1,23 @@
 import type { fs } from "memfs";
 
 /**
+ * Initializes the $import function.
+ *
+ * @example
+ * 	const $import = createImportFunction({ basePath: '/', fs: fs.promises });
+ * 	const module = await $import('./mock-module.js');
+ */
+export function initialize$import(args: {
+	/** the directory from which the import should be resolved */
+	basePath: string;
+	/** the fs from which the file can be read */
+	fs: typeof fs.promises;
+}): (uri: string) => ReturnType<typeof $import> {
+	// resembles a native import api
+	return (uri: string) => $import(uri, args);
+}
+
+/**
  * Importing ES modules either from a local path, or from a url.
  *
  * The imported module must be ESM. A good indicator is whether
@@ -9,10 +26,9 @@ import type { fs } from "memfs";
  *
  * _[See test cases](./$import.test.js)_
  */
-// Some environments do not support the import of modules from a url.
-export async function $import(
+async function $import(
 	uri: string,
-	options: {
+	environment: {
 		/** current working directory from which the import should be resolved */
 		basePath: string;
 		/** the fs from which the file can be read */
@@ -25,8 +41,8 @@ export async function $import(
 	if (uri.startsWith("http")) {
 		moduleAsText = await (await fetch(uri)).text();
 	} else {
-		moduleAsText = (await options.fs.readFile(
-			`${options.basePath}/${uri}`,
+		moduleAsText = (await environment.fs.readFile(
+			`${environment.basePath}/${uri}`,
 			"utf-8"
 		)) as string;
 	}
