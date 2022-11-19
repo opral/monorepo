@@ -12,6 +12,7 @@ export function initialize$import(args: {
 	basePath: string;
 	/** the fs from which the file can be read */
 	fs: typeof fs.promises;
+	fetch: typeof fetch;
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
 	return (uri: string) => $import(uri, args);
@@ -33,13 +34,15 @@ async function $import(
 		basePath: string;
 		/** the fs from which the file can be read */
 		fs: typeof fs.promises;
+		/** the http client (avoiding side-effects) */
+		fetch: typeof fetch;
 	}
 ): Promise<any> {
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 	let moduleAsText: string;
 	if (uri.startsWith("http")) {
-		moduleAsText = await (await fetch(uri)).text();
+		moduleAsText = await (await environment.fetch(uri)).text();
 	} else {
 		moduleAsText = (await environment.fs.readFile(
 			`${environment.basePath}/${uri}`,
