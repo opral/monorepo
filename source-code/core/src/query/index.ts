@@ -1,23 +1,34 @@
 import type { Bundle, Message, Resource } from "../ast/index.js";
 import { Result } from "@inlang/utilities/result";
 
+/**
+ * Query a bundle of messages.
+ *
+ * @example
+ * 	 const message = query(bundle).get({ id: "first-message" });
+ *
+ * @example
+ *  // Querying a single resource can be achieved by passing the resource in an array:
+ * 	const message = query([resource]).get({ id: "first-message" });
+ */
 export function query(bundle: Bundle) {
-	// let bundle: Bundle;
-	// if (node.type === "Resource") {
-	// 	bundle = {
-	// 		type: "Bundle",
-	// 		id: {
-	// 			type: "Identifier",
-	// 			name: "This bundle has a mock ID to support easier querying of resources.",
-	// 		},
-	// 		resources: [node],
-	// 	};
-	// } else {
-	// 	bundle = node;
-	// }
 	return {
+		/**
+		 * Get a message.
+		 *
+		 * Returns undefined if the message does not exist.
+		 */
 		get: (args: Parameters<typeof get>[1]) => get(bundle, args),
+		/**
+		 * Delete a message.
+		 *
+		 * Returns an error if the message did not exist.
+		 */
 		delete: (args: Parameters<typeof get>[1]) => _delete(bundle, args),
+		/**
+		 * Contained message ids in the bundle.
+		 */
+		ids: () => ids(bundle),
 	};
 }
 
@@ -48,4 +59,10 @@ function _delete(
 		}
 	}
 	return Result.err(Error("Message did not exist."));
+}
+
+function ids(bundle: Bundle): string[] {
+	return bundle.resources
+		.flatMap((resource) => resource.body)
+		.map((message) => message.id.name);
 }

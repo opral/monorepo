@@ -37,6 +37,13 @@ describe("query.delete", () => {
 	});
 });
 
+describe("query.ids", () => {
+	it("should return all message ids in the bundle", () => {
+		const result = query(mockBundle).ids();
+		expect(result).toEqual(["first-message", "second-message"]);
+	});
+});
+
 const mockBundle: Bundle = {
 	type: "Bundle",
 	id: { type: "Identifier", name: "mock" },
