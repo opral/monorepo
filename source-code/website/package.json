@@ -16,7 +16,7 @@
 		"@inlang/design-system": "*",
 		"@inlang/git-sdk": "*",
 		"@markdoc/markdoc": "^0.1.13",
-		"@shoelace-style/shoelace": "^2.0.0-beta.83",
+		"@shoelace-style/shoelace": "^2.0.0-beta.84",
 		"@zag-js/checkbox": "^0.2.1",
 		"@zag-js/menu": "^0.2.1",
 		"@zag-js/pressable": "^0.3.1",
