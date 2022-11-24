@@ -21,21 +21,25 @@ export function Hero() {
 									turducken landjaeger cupim picanha venison.
 								</p>
 								<div class="mt-5 sm:mt-8 sm:flex  justify-start">
-									<div class="rounded-md shadow">
-										<a
-											href="/documentation/intro"
-											class="flex w-full items-center justify-center rounded-md   bg-primary px-8 py-3 text-base font-medium text-on-primary  md:py-4 md:px-10 md:text-lg"
+									<div class="rounded-md shadow ">
+										<sl-button
+											prop:href="/documentation/intro"
+											class="w-full"
+											prop:size="large"
+											prop:variant="primary"
 										>
 											Get started
-										</a>
+										</sl-button>
 									</div>
 									<div class="mt-3 sm:mt-0 sm:ml-3">
-										<a
-											href="https://github.com/inlang/inlang"
-											class="flex w-full items-center justify-center rounded-md   bg-secondary-container px-8 py-3 text-base font-medium text-on-secondary-container  md:py-4 md:px-10 md:text-lg"
+										<sl-button
+											prop:href="https://github.com/inlang/inlang"
+											class="w-full"
+											prop:size="large"
+											prop:variant="neutral"
 										>
 											View on Github
-										</a>
+										</sl-button>
 									</div>
 								</div>
 							</div>
