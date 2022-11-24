@@ -42,7 +42,7 @@ export function Page() {
 			</Match>
 			<Match when={inlangConfig() && referenceBundle()}>
 				<div class="space-y-2">
-					<For each={query(referenceBundle()!).ids()}>
+					<For each={query(referenceBundle()!).includedMessageIds()}>
 						{(id) => (
 							<Messages
 								referenceBundleId={referenceBundle()!.id.name}

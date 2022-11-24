@@ -16,6 +16,7 @@ export type Bundle = Node<"Bundle"> & {
 };
 
 export type Resource = Node<"Resource"> & {
+	id: Identifier;
 	body: Array<Message>;
 };
 

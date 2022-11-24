@@ -84,7 +84,7 @@ describe("query.delete", () => {
 
 describe("query.ids", () => {
 	it("should return all message ids in the bundle", () => {
-		const result = query(mockBundle).ids();
+		const result = query(mockBundle).includedMessageIds();
 		expect(result).toEqual(["first-message", "second-message"]);
 	});
 });
@@ -95,6 +95,7 @@ const mockBundle: Bundle = {
 	resources: [
 		{
 			type: "Resource",
+			id: { type: "Identifier", name: "first-resource" },
 			body: [
 				{
 					type: "Message",
@@ -108,6 +109,7 @@ const mockBundle: Bundle = {
 		},
 		{
 			type: "Resource",
+			id: { type: "Identifier", name: "second-resource" },
 			body: [
 				{
 					type: "Message",
