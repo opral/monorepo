@@ -22,6 +22,7 @@ module.exports = {
 				primary: colors.sky,
 				//! shoelace's secondary token is called neutral.
 				secondary: colors.gray,
+				tertiary: colors.lime,
 			},
 			neutralColors: {
 				neutral: colors.neutral,
