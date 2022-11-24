@@ -103,7 +103,9 @@ function update(
 			}
 		}
 	}
-	return Result.err(Error("Message did not exist."));
+	return Result.err(
+		Error(`Message ${args.id} did not exist in bundle ${bundle.id.name}.`)
+	);
 }
 
 // using underscore to circumvent javascript reserved keyword 'delete'
@@ -123,7 +125,9 @@ function _delete(
 			}
 		}
 	}
-	return Result.err(Error("Message did not exist."));
+	return Result.err(
+		Error(`Message ${args.id} did not exist in bundle ${bundle.id.name}.`)
+	);
 }
 
 function includedMessageIds(bundle: Bundle): string[] {
