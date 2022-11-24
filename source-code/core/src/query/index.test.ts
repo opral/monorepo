@@ -47,6 +47,15 @@ describe("query.update", () => {
 			message?.pattern.elements
 		);
 	});
+
+	it("should return an error if the message does not exist", () => {
+		const result = query(mockBundle).update({
+			id: "none-existent-message",
+			// @ts-ignore
+			with: "",
+		});
+		expect(result.isErr).toBe(true);
+	});
 });
 
 describe("query.delete", () => {
