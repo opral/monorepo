@@ -1,11 +1,15 @@
-import { clientSideEnv } from "@env";
-import { raw, http } from "@inlang/git-sdk/api";
+import { query } from "@inlang/core/query";
 import { fs } from "@inlang/git-sdk/fs";
-import { currentPageContext } from "@src/renderer/state.js";
-import type { PageContext, PageHead } from "@src/renderer/types.js";
-import { createEffect, createResource, For, Match, Switch } from "solid-js";
-import { onAuth } from "./index.telefunc.js";
-import { setFsChange } from "./state.js";
+import type { PageHead } from "@src/renderer/types.js";
+import { createResource, For, Match, Show, Switch } from "solid-js";
+import { Messages } from "./Messages.jsx";
+import {
+	bundles,
+	inlangConfig,
+	referenceBundle,
+	repositoryIsCloned,
+} from "./state.js";
+import type * as ast from "@inlang/core/ast";
 
 export const Head: PageHead = () => {
 	return {
@@ -15,48 +19,65 @@ export const Head: PageHead = () => {
 };
 
 export function Page() {
-	const [clone] = createResource(currentPageContext, cloneRepository);
-	createEffect(() => {
-		if (clone()) {
-			setFsChange(Date.now());
+	/** Messages from all bundles for an id */
+	const messages = (id: ast.Message["id"]["name"]) => {
+		const result: Record<ast.Bundle["id"]["name"], ast.Message | undefined> =
+			{};
+		for (const bundle of bundles) {
+			result[bundle.id.name] = query(bundle).get({ id });
 		}
-	});
-	const [dir] = createResource(
-		clone,
-		() => fs.promises.readdir("/") as Promise<string[]>
-	);
+		return result;
+	};
 
 	return (
 		<Switch fallback={<p>switch fallback trigerred. something went wrong</p>}>
-			<Match when={clone.loading || dir.loading}>
+			<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
 				<p>loading ...</p>
 			</Match>
-			<Match when={clone.error || dir.error}>
-				<p> {clone.error ?? dir.error}</p>
+			<Match when={repositoryIsCloned.error || inlangConfig.error}>
+				<p> {repositoryIsCloned.error ?? inlangConfig.error}</p>
 			</Match>
-			<Match when={dir()}>
-				<For each={dir()}>{(file) => <p>{file}</p>}</For>
+			<Match when={inlangConfig() === undefined}>
+				<Directories></Directories>
+			</Match>
+			<Match when={inlangConfig() && referenceBundle()}>
+				<div class="space-y-2">
+					<For each={query(referenceBundle()!).ids()}>
+						{(id) => (
+							<Messages
+								referenceBundleId={referenceBundle()!.id.name}
+								messages={messages(id)}
+							></Messages>
+						)}
+					</For>
+				</div>
 			</Match>
 		</Switch>
 	);
 }
 
-async function cloneRepository(pageContext: PageContext): Promise<boolean> {
-	const { host, organization, repository } = pageContext.routeParams;
-	if (
-		host === undefined ||
-		organization === undefined ||
-		repository === undefined
-	) {
-		return false;
-	}
-	await raw.clone({
-		fs,
-		http,
-		dir: "/",
-		onAuth: onAuth,
-		corsProxy: clientSideEnv().VITE_CORS_PROXY_URL,
-		url: `https://${host}/${organization}/${repository}`,
-	});
-	return true;
+function Directories() {
+	const [dir] = createResource(
+		repositoryIsCloned,
+		() => fs.promises.readdir("/") as Promise<string[]>
+	);
+
+	return (
+		<>
+			<p>
+				No inlang.config.js has been found in the current directory. Navigate to
+				a directory that contains an inlang.config.js file.
+				<span class="text-danger italic">not implemented yet</span>
+			</p>
+			<Show when={dir.loading}>
+				<p>loading ...</p>
+			</Show>
+			<Show when={dir.error}>
+				<p class="text-danger">{dir.error}</p>
+			</Show>
+			<Show when={dir()}>
+				<For each={dir()}>{(file) => <p>{file}</p>}</For>
+			</Show>
+		</>
+	);
 }
