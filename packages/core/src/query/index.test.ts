@@ -11,6 +11,42 @@ describe("query.get", () => {
 		const result = query(mockBundle).get({ id: "none-existent-message" });
 		expect(result).toBeUndefined();
 	});
+	it("should return a new message object, not a reference (for immutability)", () => {
+		const result = query(mockBundle).get({ id: "first-message" });
+		result!.id.name = "changed";
+		const queryAgain = query(mockBundle).get({ id: "first-message" });
+		expect(queryAgain?.id.name).toBe("first-message");
+	});
+});
+
+describe("query.update", () => {
+	it("should update an existing message", () => {
+		const message = query(mockBundle).get({ id: "first-message" });
+		message!.pattern.elements = [{ type: "Text", value: "updated" }];
+		const updatedBundle = query(mockBundle)
+			.update({
+				id: "first-message",
+				with: message!,
+			})
+			.unwrap();
+		const updatedMessage = query(updatedBundle).get({ id: "first-message" });
+		expect(updatedMessage?.pattern.elements).toStrictEqual(
+			message?.pattern.elements
+		);
+	});
+
+	it("should be immutable", () => {
+		const message = query(mockBundle).get({ id: "first-message" });
+		message!.pattern.elements = [{ type: "Text", value: "updated" }];
+		query(mockBundle).update({
+			id: "first-message",
+			with: message!,
+		});
+		const queryMessageAgain = query(mockBundle).get({ id: "first-message" });
+		expect(queryMessageAgain?.pattern.elements).not.toBe(
+			message?.pattern.elements
+		);
+	});
 });
 
 describe("query.delete", () => {
