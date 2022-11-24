@@ -2,6 +2,45 @@ import { describe, expect, it } from "vitest";
 import type { Bundle, Message } from "../ast/index.js";
 import { query } from "./index.js";
 
+describe("query.create", () => {
+	it("should create a message", () => {
+		const bundle = query(mockBundle)
+			.create({
+				message: {
+					type: "Message",
+					id: { type: "Identifier", name: "new-message-123" },
+					pattern: { type: "Pattern", elements: [] },
+				},
+				resourceId: "first-resource",
+			})
+			.unwrap();
+		const message = query(bundle).get({ id: "new-message-123" });
+		expect(message?.id.name).toBe("new-message-123");
+	});
+	it("should return an error is the message already exists", () => {
+		const result = query(mockBundle).create({
+			message: {
+				type: "Message",
+				id: { type: "Identifier", name: "first-message" },
+				pattern: { type: "Pattern", elements: [] },
+			},
+			resourceId: "first-resource",
+		});
+		expect(result.isErr).toBe(true);
+	});
+	it("should return an error is the resource does not exist", () => {
+		const result = query(mockBundle).create({
+			message: {
+				type: "Message",
+				id: { type: "Identifier", name: "new-message-123" },
+				pattern: { type: "Pattern", elements: [] },
+			},
+			resourceId: "none-existent-resource",
+		});
+		expect(result.isErr).toBe(true);
+	});
+});
+
 describe("query.get", () => {
 	it("should return the message if the message exists", () => {
 		const result = query(mockBundle).get({ id: "first-message" });
