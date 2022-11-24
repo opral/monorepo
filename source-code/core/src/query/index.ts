@@ -14,6 +14,13 @@ import { Result } from "@inlang/utilities/result";
 export function query(bundle: Bundle) {
 	return {
 		/**
+		 * Creates a message in a bundle and particular resource.
+		 *
+		 * Returns an error if the message already exists, or the resource
+		 * does not exist.
+		 */
+		create: (args: Parameters<typeof create>[1]) => create(bundle, args),
+		/**
 		 * Get a message.
 		 *
 		 * Returns undefined if the message does not exist.
@@ -32,10 +39,39 @@ export function query(bundle: Bundle) {
 		 */
 		delete: (args: Parameters<typeof get>[1]) => _delete(bundle, args),
 		/**
-		 * Contained message ids in the bundle.
+		 * Included message ids in the bundle.
 		 */
-		ids: () => ids(bundle),
+		includedMessageIds: () => includedMessageIds(bundle),
 	};
+}
+
+function create(
+	bundle: Bundle,
+	args: { message: Message; resourceId: Resource["id"]["name"] }
+): Result<Bundle, Error> {
+	// Copying the Bundle to ensure immutability.
+	// The JSON approach does not copy functions which
+	// theoretically could be stored in metadata by users.
+	const copy: Bundle = JSON.parse(JSON.stringify(bundle));
+	if (get(copy, { id: args.message.id.name })) {
+		return Result.err(
+			Error(
+				`Message ${args.message.id.name} already exists in bundle ${bundle.id.name} and resource ${args.resourceId}.`
+			)
+		);
+	}
+	const resource = copy.resources.find(
+		(resource) => resource.id.name === args.resourceId
+	);
+	if (resource === undefined) {
+		return Result.err(
+			Error(
+				`Resource ${args.resourceId} does not exist in bundle ${bundle.id.name}.`
+			)
+		);
+	}
+	resource.body.push(args.message);
+	return Result.ok(copy);
 }
 
 function get(
@@ -90,7 +126,7 @@ function _delete(
 	return Result.err(Error("Message did not exist."));
 }
 
-function ids(bundle: Bundle): string[] {
+function includedMessageIds(bundle: Bundle): string[] {
 	return bundle.resources
 		.flatMap((resource) => resource.body)
 		.map((message) => message.id.name);
