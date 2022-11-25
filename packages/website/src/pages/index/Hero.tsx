@@ -1,3 +1,5 @@
+import IconGithub from "~icons/cib/github";
+
 export function Hero() {
 	return (
 		<>
@@ -38,6 +40,7 @@ export function Hero() {
 											prop:size="large"
 											prop:variant="neutral"
 										>
+											<IconGithub slot="suffix"></IconGithub>
 											View on Github
 										</sl-button>
 									</div>
