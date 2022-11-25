@@ -1,7 +1,9 @@
 import type * as ast from "@inlang/core/ast";
 import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
-import { inlangConfig } from "./state.js";
+import { bundles, inlangConfig, setBundles } from "./state.js";
 import IconSave from "~icons/material-symbols/save-outline-rounded";
+import { query } from "@inlang/core/query";
+import { clickOutside } from "@src/directives/clickOutside.js";
 
 export function Messages(props: {
 	referenceBundleId: ast.Bundle["id"]["name"];
@@ -41,7 +43,9 @@ export function Messages(props: {
 								</p>
 								<div class="col-span-3">
 									<PatternEditor
-										pattern={props.messages[bundleId]?.pattern}
+										bundleId={bundleId}
+										referenceMessage={referenceMessage()}
+										message={props.messages[bundleId]}
 									></PatternEditor>
 								</div>
 							</div>
@@ -53,34 +57,126 @@ export function Messages(props: {
 	);
 }
 
-function PatternEditor(props: { pattern: ast.Pattern | undefined }) {
+function PatternEditor(props: {
+	bundleId: ast.Bundle["id"]["name"];
+	referenceMessage: ast.Message;
+	message: ast.Message | undefined;
+}) {
+	/** throw if unimplemented features are used  */
+	if (
+		(props.message && props.message?.pattern.elements.length > 1) ||
+		(props.message && props.message?.pattern.elements[0].type !== "Text")
+	) {
+		throw Error(
+			"Not implemented. Only messages with one pattern element of type Text are supported for now."
+		);
+	}
+
+	/** whether the pattern is focused */
 	const [isFocused, setIsFocused] = createSignal(false);
 
+	/** the value of the pattern */
+	const [textValue, setTextValue] = createSignal(
+		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value
+	);
+
+	/** the bundle the message belongs to */
+	const bundle = () =>
+		bundles.find((bundle) => bundle.id.name === props.bundleId)!;
+
+	/** copy of the message to conduct and track changes */
+	const copy: () => ast.Message | undefined = () => {
+		if (props.message) {
+			return JSON.parse(JSON.stringify(props.message));
+		}
+		// create new message
+		else {
+			return {
+				type: "Message",
+				id: {
+					type: "Identifier",
+					name: props.referenceMessage.id.name,
+				},
+				pattern: {
+					type: "Pattern",
+					elements: [{ type: "Text", value: "" }],
+				},
+			};
+		}
+	};
+
+	const hasChanges = () =>
+		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
+		textValue();
+
 	return (
-		<>
-			<div
+		// outer element is needed for clickOutside directive
+		// to close the action bar when clicking outside
+		<div
+			ref={(element) => [
+				clickOutside(
+					element,
+					// only close the action bar if no outstanding changes exist
+					() => hasChanges() === false && setIsFocused(false)
+				),
+			]}
+		>
+			{/* TODO: #169 use proper text editor instead of input element */}
+			<sl-input
+				class="border-none p-0"
+				onFocus={() => setIsFocused(true)}
+				prop:value={textValue() ?? ""}
+				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
+			></sl-input>
+			{/* <div
+				onFocus={() => setIsFocused(true)}
+				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
 				contentEditable={true}
 				class="rounded border border-outline focus:outline-none py-2 px-3 focus:border-primary focus:ring focus:ring-primary-container"
-				onFocus={() => setIsFocused(true)}
-				onBlur={() => setIsFocused(false)}
 			>
-				<For each={props.pattern?.elements}>
+				<For each={copy()?.pattern.elements}>
 					{(element) => <PatternElement element={element}></PatternElement>}
 				</For>
-			</div>
+			</div> */}
 			{/* action bar */}
 			<Show when={isFocused()}>
 				<div class="flex items-center justify-end mt-2">
-					<sl-button>
+					<sl-button
+						prop:variant="primary"
+						prop:disabled={hasChanges() === false}
+						onClick={() => {
+							const _copy = copy();
+							const _textValue = textValue();
+							if (_textValue === undefined) {
+								return;
+							}
+							(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
+							try {
+								const newBundle = query(bundle())
+									// TODO: remove hardcoded resource id
+									.upsert({ message: _copy!, resourceId: "default" })
+									.unwrap();
+								setBundles(
+									bundles
+										.filter((bundle) => bundle.id.name !== props.bundleId)
+										.concat([newBundle])
+								);
+							} catch (e) {
+								console.error(e);
+								throw e;
+							}
+						}}
+					>
 						<IconSave slot="prefix"></IconSave>
 						Save
 					</sl-button>
 				</div>
 			</Show>
-		</>
+		</div>
 	);
 }
 
+/** will probably be replaced with #164 */
 function PatternElement(props: { element: ast.Text | ast.Placeholder }) {
 	/** Switch fallback error (non-exhaustive switch statement) */
 	const Error = (props: { code: string }) => (
@@ -122,7 +218,7 @@ function PatternElement(props: { element: ast.Text | ast.Placeholder }) {
 									</Placeholder>
 								</Match>
 								<Match when={expression.type === "Placeholder"}>
-									{/* recursive */}
+									{/* recursively call pattern element */}
 									<PatternElement element={props.element}></PatternElement>
 								</Match>
 							</>
