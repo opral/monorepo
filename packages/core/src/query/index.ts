@@ -33,6 +33,10 @@ export function query(bundle: Bundle) {
 		 */
 		update: (args: Parameters<typeof update>[1]) => update(bundle, args),
 		/**
+		 * Upserts a message.
+		 */
+		upsert: (args: Parameters<typeof upsert>[1]) => upsert(bundle, args),
+		/**
 		 * Delete a message.
 		 *
 		 * Returns an error if the message did not exist.
@@ -72,6 +76,20 @@ function create(
 	}
 	resource.body.push(args.message);
 	return Result.ok(copy);
+}
+
+function upsert(
+	bundle: Bundle,
+	args: { message: Message; resourceId: Resource["id"]["name"] }
+): Result<Bundle, Error> {
+	const existingMessage = get(bundle, { id: args.message.id.name });
+	if (existingMessage) {
+		return update(bundle, {
+			id: args.message.id.name,
+			with: args.message,
+		});
+	}
+	return create(bundle, args);
 }
 
 function get(

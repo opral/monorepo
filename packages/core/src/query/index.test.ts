@@ -97,6 +97,38 @@ describe("query.update", () => {
 	});
 });
 
+describe("query.upsert", () => {
+	it("should upsert a message if it does not exist", () => {
+		const bundle = query(mockBundle)
+			.upsert({
+				message: {
+					type: "Message",
+					id: { type: "Identifier", name: "new-message-1234" },
+					pattern: { type: "Pattern", elements: [] },
+				},
+				resourceId: "first-resource",
+			})
+			.unwrap();
+		const message = query(bundle).get({ id: "new-message-1234" });
+		expect(message?.id.name).toBe("new-message-1234");
+	});
+
+	it("should update an existing message", () => {
+		const message = query(mockBundle).get({ id: "first-message" });
+		message!.pattern.elements = [{ type: "Text", value: "updated" }];
+		const updatedBundle = query(mockBundle)
+			.upsert({
+				message: message!,
+				resourceId: "first-resource",
+			})
+			.unwrap();
+		const updatedMessage = query(updatedBundle).get({ id: "first-message" });
+		expect(updatedMessage?.pattern.elements).toStrictEqual(
+			message?.pattern.elements
+		);
+	});
+});
+
 describe("query.delete", () => {
 	it("should return a bundle without the deleted message if the message existed", () => {
 		const result = query(mockBundle).delete({ id: "first-message" });
