@@ -16,19 +16,23 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0  ">
-			<div class=" flex ">
-				<Navigation sections={tableOfContent} />
+		<>
+			<div class="bg-surface-100  flex grow"> </div>
 
-				{props.markdown ? (
-					<div
-						class=" max-w-3xl px-8 pb-8 prose mx-auto"
-						innerHTML={props.markdown}
-					></div>
-				) : (
-					<p>schade</p>
-				)}
+			<div class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0  ">
+				<div class=" flex ">
+					<Navigation sections={tableOfContent} />
+
+					{props.markdown ? (
+						<div
+							class=" max-w-3xl ml:px-8 pb-8 prose mx-auto"
+							innerHTML={props.markdown}
+						></div>
+					) : (
+						<p>schade</p>
+					)}
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }
