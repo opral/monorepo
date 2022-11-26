@@ -32,7 +32,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 		></PageLayout>
 	));
 	return escapeInject`<!DOCTYPE html>
-    <html lang="en" class="p-0 m-0">
+    <html lang="en" class="min-h-screen min-w-screen">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -45,9 +45,9 @@ export function render(pageContext: PageContextRenderer): unknown {
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
-      <body class=" p-0 m-0 h-full w-full">
+      <body class="min-h-screen min-w-screen">
 	<!-- setting min-h/w-screen to allow child elemtest to the entire screen  -->
-        <div class="h-full w-full" id="root">
+        <div class="min-h-screen min-w-screen" id="root">
 			${dangerouslySkipEscape(renderedPage)}
 		</div>
       </body>
