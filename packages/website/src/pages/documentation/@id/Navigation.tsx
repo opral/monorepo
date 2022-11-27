@@ -8,7 +8,7 @@ export function Navigation(props: {
 	}>;
 }) {
 	return (
-		<nav class=" hidden md:block w-full ">
+		<nav class="sticky top-[3.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto  md:block	hidden">
 			<ul role="list" class="divide-y divide-outline pr-4 min-h-full">
 				<For each={props.sections}>
 					{(section) => (
