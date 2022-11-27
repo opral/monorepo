@@ -6,7 +6,7 @@ import { Dynamic } from "solid-js/web";
 export function renderWithSolid(
 	node: RenderableTreeNodes,
 	args: {
-		components?: Record<string, Component<{ children: JSXElement }>>;
+		components?: Record<string, Component<any>>;
 	}
 ) {
 	// buggy render returns an object with t. no clue why that happens.
@@ -17,7 +17,7 @@ export function renderWithSolid(
 function buggyRender(
 	node: RenderableTreeNodes,
 	args: {
-		components?: Record<string, Component<{ children: JSXElement }>>;
+		components?: Record<string, Component>;
 	}
 ): { t: string } {
 	function deepRender(value: any): any {

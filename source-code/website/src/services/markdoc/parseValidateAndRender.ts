@@ -1,8 +1,6 @@
 import Markdoc, { type Config, type ValidationError } from "@markdoc/markdoc";
-import { tags } from "./tags.js";
-import { Callout } from "./Callout.jsx";
+import { tags, components } from "./components/index.js";
 import { renderWithSolid } from "./solidPlugin.js";
-import { renderToString } from "solid-js/web";
 
 /**
  * Renders a Markdoc document.
@@ -22,7 +20,9 @@ export function parseValidateAndRender(text: string) {
         `);
 	}
 	const content = Markdoc.transform(ast, markdocConfig);
-	return renderWithSolid(content, { components: { Callout } });
+	return renderWithSolid(content, {
+		components,
+	});
 }
 
 /**
