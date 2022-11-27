@@ -1,6 +1,6 @@
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
-import { onMount, lazy, getOwner, runWithOwner } from "solid-js";
-import { Dynamic, Portal, render } from "solid-js/web";
+import { onMount } from "solid-js";
+import { render } from "solid-js/web";
 import IconWarning from "~icons/material-symbols/warning-outline-rounded";
 import IconInfo from "~icons/material-symbols/info-outline-rounded";
 import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
