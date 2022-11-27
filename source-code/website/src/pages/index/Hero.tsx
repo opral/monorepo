@@ -36,6 +36,7 @@ export function Hero() {
 									<div class="mt-3 sm:mt-0 sm:ml-3">
 										<sl-button
 											prop:href="https://github.com/inlang/inlang"
+											prop:target="_blank"
 											class="w-full"
 											prop:size="large"
 											prop:variant="neutral"
