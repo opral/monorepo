@@ -16,7 +16,7 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="grid grid-cols-9 gap-10 w-full">
+		<div class="grid grid-cols-9 gap-10 py-4 w-full">
 			<div class="col-span-2 flex sticky top-0">
 				<Navigation sections={tableOfContent} />
 			</div>
