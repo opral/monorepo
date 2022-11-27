@@ -33,32 +33,33 @@ export const tableOfContent = [
 			{ title: "Installation", href: "/" },
 		],
 	},
-	{
-		title: "Lead",
-		documents: [
-			{ title: "Getting started", href: "/" },
-			{ title: "Installation", href: "/" },
-		],
-	},
-	{
-		title: "6",
-		documents: [
-			{ title: "Getting started", href: "/" },
-			{ title: "Installation", href: "/" },
-		],
-	},
-	{
-		title: "7",
-		documents: [
-			{ title: "Getting started", href: "/" },
-			{ title: "Installation", href: "/" },
-		],
-	},
-	{
-		title: "8",
-		documents: [
-			{ title: "Getting started", href: "/" },
-			{ title: "Installation", href: "/" },
-		],
-	},
+	// {
+	// 	title: "Lead",
+	// 	documents: [
+	// 		{ title: "Getting started", href: "/" },
+	// 		{ title: "Installation", href: "/" },
+	// 	],
+	// },
+	// {
+	// 	title: "6",
+	// 	documents: [
+	// 		{ title: "Getting started", href: "/" },
+	// 		{ title: "Installation", href: "/" },
+	// 	],
+	// },
+	// {
+	// 	title: "7",
+	// 	documents: [
+	// 		{ title: "Getting started", href: "/" },
+	// 		{ title: "Installation", href: "/" },
+	// 	],
+	// },
+	// {
+	// 	title: "8",
+	// 	documents: [
+	// 		{ title: "Getting started", href: "/" },
+	// 		{ title: "Installation", href: "/" },
+	// 		{ title: "Installation", href: "/" },
+	// 	],
+	// },
 ];

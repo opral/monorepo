@@ -1,7 +1,7 @@
 import { Navigation } from "./Navigation.jsx";
 import { tableOfContent } from "./tableOfContent.js";
 import type { PageHead } from "@src/renderer/types.js";
-import { Layout } from "@src/pages/Layout.jsx";
+import { Show } from "solid-js";
 
 export const Head: PageHead = () => {
 	return {
@@ -16,23 +16,36 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<>
-			<div class="bg-surface-100  flex grow"> </div>
-
-			<div class="mx-auto max-w-screen-2xl  sm:px-6 md:px-0  ">
-				<div class=" flex ">
-					<Navigation sections={tableOfContent} />
-
-					{props.markdown ? (
-						<div
-							class=" max-w-3xl ml:px-8 pb-8 prose mx-auto"
-							innerHTML={props.markdown}
-						></div>
-					) : (
-						<p>schade</p>
-					)}
-				</div>
+		<div class="grid grid-cols-9 gap-10 w-full">
+			<div class="col-span-2 flex sticky top-0">
+				<Navigation sections={tableOfContent} />
 			</div>
-		</>
+			<Show when={props.markdown} fallback={<Error></Error>}>
+				<div
+					class="col-span-7 ml:px-8 prose justify-self-center"
+					innerHTML={props.markdown}
+				></div>
+			</Show>
+		</div>
+	);
+}
+
+function Error() {
+	return (
+		<div>
+			<p class="text-danger text-lg font-medium">
+				The requested page could not be requested or rendered.
+			</p>
+			<p class="text-danger">
+				Please{" "}
+				<a
+					class="link text-primary"
+					target="_blank"
+					href="https://github.com/inlang/inlang/issues/new/choose"
+				>
+					report the bug.
+				</a>
+			</p>
+		</div>
 	);
 }
