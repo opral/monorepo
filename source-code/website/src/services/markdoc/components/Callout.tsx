@@ -1,12 +1,18 @@
 import type { JSXElement } from "solid-js";
+import IconWarning from "~icons/material-symbols/warning-outline-rounded";
+import IconInfo from "~icons/material-symbols/info-outline-rounded";
+import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
+import IconDanger from "~icons/material-symbols/dangerous-outline-rounded";
 // children get a default style use content for custome style
 export function Callout(props: {
 	title: string;
-	variant: "info" | "warning" | "danger";
+	variant: "info" | "warning" | "danger" | "success";
 	children: JSXElement;
 }) {
 	const color = () => {
 		switch (props.variant) {
+			case "success":
+				return "bg-success-container text-on-success-container";
 			case "info":
 				return "bg-primary-container text-on-primary-container";
 			case "warning":
