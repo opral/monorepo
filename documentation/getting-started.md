@@ -1,8 +1,6 @@
----
-title: Getting Started
----
 
-Headers
+
+#### Header
 -------
 
 There are two ways to define headers:
