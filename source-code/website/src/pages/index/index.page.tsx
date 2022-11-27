@@ -15,10 +15,8 @@ export function Layout() {
 
 export function Page() {
 	return (
-		<div class="h-full flex  content-center justify-center">
-			<div class="mx-auto max-w-screen-2xl place-content-center self-center h-full grow   ">
-				<Hero></Hero>
-			</div>
+		<div class="self-center grow sm:px-6 md:px-0">
+			<Hero></Hero>
 		</div>
 	);
 }
