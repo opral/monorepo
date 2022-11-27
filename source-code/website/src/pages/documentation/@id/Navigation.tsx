@@ -8,8 +8,8 @@ export function Navigation(props: {
 	}>;
 }) {
 	return (
-		<nav class="sticky top-[3.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto  md:block	hidden">
-			<ul role="list" class="divide-y divide-outline pr-4 min-h-full">
+		<nav class="sticky top-[3.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto  md:block w-full hidden">
+			<ul role="list" class="divide-y divide-outline pr-4 min-h-full ">
 				<For each={props.sections}>
 					{(section) => (
 						<li class="py-3">
@@ -19,12 +19,15 @@ export function Navigation(props: {
 									{(document) => (
 										<li>
 											<a
+												class="block w-full font-medium link link-primary"
 												classList={{
 													"text-primary":
 														document.href ===
 														currentPageContext().urlParsed.pathname,
+													"text-on-surface-variant":
+														document.href !==
+														currentPageContext().urlParsed.pathname,
 												}}
-												class="block w-full font-medium text-on-surface-variant link link-primary"
 												href={document.href}
 											>
 												{document.title}

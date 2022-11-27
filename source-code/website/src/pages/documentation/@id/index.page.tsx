@@ -16,13 +16,13 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="grid grid-cols-9 gap-10 py-4 w-full">
-			<div class="col-span-2 flex sticky top-0">
+		<div class="sm:grid sm:grid-cols-9 gap-10 py-4 w-full">
+			<div class="hidden sm:flex col-span-2 sticky top-0">
 				<Navigation sections={tableOfContent} />
 			</div>
 			<Show when={props.markdown} fallback={<Error></Error>}>
 				<div
-					class="col-span-7 ml:px-8 prose justify-self-center"
+					class=" sm:col-span-7 ml:px-8 prose justify-self-center"
 					innerHTML={props.markdown}
 				></div>
 			</Show>
