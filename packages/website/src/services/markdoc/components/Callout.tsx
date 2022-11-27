@@ -5,11 +5,21 @@ export function Callout(props: {
 	variant: "info" | "warning" | "danger";
 	children: JSXElement;
 }) {
+	const color = () => {
+		switch (props.variant) {
+			case "info":
+				return "bg-primary-container text-on-primary-container";
+			case "warning":
+				return "bg-warning-container text-on-warning-container";
+			case "danger":
+				return "bg-danger-container text-on-danger-container";
+		}
+	};
 	return (
-		<div class="not-prose bg-primary-container border border-outline p-4 my-4 rounded-md">
-			<h3 class="text-on-primary-container font-display font-bold text-lg pb-2">
-				{props.title}
-			</h3>
+		<div
+			class={`not-prose ${color()} border border-outline p-4 my-4 rounded-md`}
+		>
+			<h3 class="font-bold text-lg pb-2">{props.title}</h3>
 			{props.children}
 		</div>
 	);

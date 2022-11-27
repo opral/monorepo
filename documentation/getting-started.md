@@ -29,7 +29,7 @@ A sub heading
 
 The good thing is that many tools that convert Markdown in HTML or PDF are able to generate the index of your document, or links to the headers automatically (like Github does on the [source](http://git.io/vfz98
 
-{% Callout variant="info" title="Hey you!" %}
+{% Callout variant="danger" title="Hey you!" %}
 ich bin zwar das Child aber habe leider schon ein style durch tailwind
 {% /Callout %}
 # Theme Introduction
