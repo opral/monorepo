@@ -1,5 +1,5 @@
 import { currentPageContext } from "@src/renderer/state.js";
-import { For, Switch, Match } from "solid-js";
+import { For } from "solid-js";
 
 export function Navigation(props: {
 	sections: Array<{
@@ -8,67 +8,35 @@ export function Navigation(props: {
 	}>;
 }) {
 	return (
-		<div class="sticky top-[4.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto bg-surface-100 overflow-x-hidden md:block	hidden">
-			<nav class=" text-sm w-64  xl:w-72 px-4 pb-8 ">
-				{/* <div class="fixed border-b-2 "> ich könnte mal eine Suche werden</div> */}
-				<ul role="list" class={``}>
-					<For each={props.sections}>
-						{(section) => (
-							<>
-								<div class=" font-display font-medium  mt-6	">
-									<Switch
-										fallback={
-											<>
-												{/* TODO change the border to border- */}
-												<hr class="pt-2.5 border-t border-outline-variant"></hr>
-											</>
-										}
-									>
-										<Match when={section.title == "Introduction"}>
-											<></>
-										</Match>
-									</Switch>
-
-									<h2 class="font-display font-bold text-on-surface  py-1.5 ">
-										{section.title}
-									</h2>
-								</div>
-								<ul
-									role="list"
-									class=""
-									// class="mt-2 space-y-2 border-l-2 border-slate-100  lg:mt-4 lg:space-y-4 lg:border-slate-200"
-								>
-									<For each={section.documents}>
-										{(document) => (
-											<>
-												<li class="relative ">
-													<a
-														class={`${
-															document.href ===
-															currentPageContext().urlParsed.pathname
-																? // TODO Change Color
-																  " text-on-surface "
-																: " text-on-surface-variant"
-															// ? "font-semibold text-sky-500 before:bg-sky-500"
-															// : "text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block "
-														}
-															block w-full font-medium  my-2
-															link link-primary 
-																`}
-														href={document.href}
-													>
-														<span class="	">{document.title}</span>
-													</a>
-												</li>
-											</>
-										)}
-									</For>
-								</ul>
-							</>
-						)}
-					</For>
-				</ul>
-			</nav>
-		</div>
+		<nav class=" hidden md:block w-full ">
+			<ul role="list" class="divide-y divide-outline pr-4 min-h-full">
+				<For each={props.sections}>
+					{(section) => (
+						<li class="py-3">
+							<h2 class="font-bold text-on-surface pb-3">{section.title}</h2>
+							<ul class="space-y-1.5" role="list">
+								<For each={section.documents}>
+									{(document) => (
+										<li>
+											<a
+												classList={{
+													"text-primary":
+														document.href ===
+														currentPageContext().urlParsed.pathname,
+												}}
+												class="block w-full font-medium text-on-surface-variant link link-primary"
+												href={document.href}
+											>
+												{document.title}
+											</a>
+										</li>
+									)}
+								</For>
+							</ul>
+						</li>
+					)}
+				</For>
+			</ul>
+		</nav>
 	);
 }
