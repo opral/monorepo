@@ -44,11 +44,15 @@ export function PageLayout(props: {
 						<p class="text-danger">
 							Check the console for more information and please{" "}
 							<a
-								class="link"
+								class="link text-primary"
+								target="_blank"
 								href="https://github.com/inlang/inlang/issues/new/choose"
 							>
 								report the bug.
 							</a>
+						</p>
+						<p class="bg-danger-container text-on-danger-container rounded p-2 mt-4">
+							{error?.toString()}
 						</p>
 					</>
 				);

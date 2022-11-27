@@ -41,6 +41,10 @@ export function StateProvider(props: { children: JSXElement }) {
 		setBundles(await readBundles(config));
 	});
 
+	createEffect(() => {
+		console.log(bundles);
+	});
+
 	// if bundle changes, write to filesystem
 	// createEffect(async () => {
 	// 	// TODO write to filesystem
@@ -112,7 +116,6 @@ async function cloneRepository(
 	) {
 		return false;
 	}
-	console.log("reading resource");
 	await raw.clone({
 		fs: fs,
 		http,
