@@ -4,13 +4,13 @@ import { bundles, inlangConfig, setBundles } from "./state.js";
 import IconSave from "~icons/material-symbols/save-outline-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
+import { createToast } from "@src/components/Toast.jsx";
 
 export function Messages(props: {
 	referenceBundleId: ast.Bundle["id"]["name"];
 	messages: Record<ast.Bundle["id"]["name"], ast.Message | undefined>;
 }) {
 	const referenceMessage = () => props.messages[props.referenceBundleId]!;
-
 	return (
 		<sl-details>
 			<h3 slot="summary" class="font-medium">
@@ -161,8 +161,17 @@ function PatternEditor(props: {
 										.filter((bundle) => bundle.id.name !== props.bundleId)
 										.concat([newBundle])
 								);
+								createToast({
+									variant: "success",
+									title: "Success",
+									message: `The message has been updated.`,
+								});
 							} catch (e) {
-								console.error(e);
+								createToast({
+									variant: "danger",
+									title: "Error",
+									message: (e as Error).message,
+								});
 								throw e;
 							}
 						}}
