@@ -19,7 +19,7 @@ export const tags: Config["tags"] = {
 			title: { type: "String" },
 			variant: {
 				type: "String",
-				matches: ["info", "warning", "danger"],
+				matches: ["success", "info", "warning", "danger"],
 				errorLevel: "error",
 			},
 		},
