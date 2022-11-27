@@ -12,7 +12,7 @@ import IconMenu from "~icons/material-symbols/menu-rounded";
  * The dividers of the Header and Footer would not span the
  * entire width of the screen.
  */
-const layoutMargins = "max-w-screen-xl w-full mx-auto px-4";
+const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-8";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
