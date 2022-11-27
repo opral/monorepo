@@ -5,6 +5,7 @@ import IconWarning from "~icons/material-symbols/warning-outline-rounded";
 import IconInfo from "~icons/material-symbols/info-outline-rounded";
 import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
 import IconDanger from "~icons/material-symbols/dangerous-outline-rounded";
+import { Icon } from "./Icon.jsx";
 
 /**
  * Creates a toast imperatively.
@@ -25,7 +26,7 @@ export function createToast(props: Props) {
 }
 
 type Props = {
-	variant: "primary" | "success" | "warning" | "danger";
+	variant: "info" | "success" | "warning" | "danger";
 	title: string;
 	message: string;
 	/** defaults to 2000 */
@@ -39,33 +40,20 @@ function Toast(props: Props) {
 		alert?.toast();
 	});
 
-	const Icon = (props: any) => {
-		switch (props.variant) {
-			case "primary":
-				return <IconInfo {...props}></IconInfo>;
-			case "success":
-				return <IconSuccess {...props}></IconSuccess>;
-			case "warning":
-				return <IconWarning {...props}></IconWarning>;
-			case "danger":
-				return <IconDanger {...props}></IconDanger>;
-			default:
-				throw Error("Icon not implemented for variant " + props.variant);
-		}
-	};
-
 	return (
-		<sl-alert
-			ref={alert}
-			prop:variant={props.variant}
-			prop:closable={props.variant === "success" ? false : true}
-			prop:duration={
-				props.variant === "danger" ? undefined : props.duration ?? 2000
-			}
-		>
-			<Icon slot="icon" variant={props.variant}></Icon>
-			<h3 class="font-bold">{props.title}</h3>
-			<p>{props.message}</p>
-		</sl-alert>
+		<>
+			<sl-alert
+				ref={alert}
+				prop:variant={props.variant === "info" ? "primary" : props.variant}
+				prop:closable={props.variant === "success" ? false : true}
+				prop:duration={
+					props.variant === "danger" ? undefined : props.duration ?? 2000
+				}
+			>
+				<Icon name={props.variant} slot="icon"></Icon>
+				<h3 class="font-bold">{props.title}</h3>
+				<p>{props.message}</p>
+			</sl-alert>
+		</>
 	);
 }
