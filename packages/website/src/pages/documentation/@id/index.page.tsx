@@ -22,7 +22,7 @@ export function Page(props: PageProps) {
 			</div>
 			<Show when={props.markdown} fallback={<Error></Error>}>
 				<div
-					class=" sm:col-span-7 ml:px-8 prose justify-self-center"
+					class="w-full sm:col-span-7 ml:px-8 prose justify-self-center"
 					innerHTML={props.markdown}
 				></div>
 			</Show>
