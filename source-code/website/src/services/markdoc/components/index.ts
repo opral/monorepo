@@ -1,4 +1,12 @@
 import type { Config } from "@markdoc/markdoc";
+import { Callout } from "./Callout.jsx";
+
+/**
+ * The components that render custom tags
+ */
+export const components = {
+	Callout,
+};
 
 /**
  * Custom tags for MarkDoc.
@@ -6,14 +14,13 @@ import type { Config } from "@markdoc/markdoc";
  * See https://markdoc.dev/docs/tags.
  */
 export const tags: Config["tags"] = {
-	callout: {
+	Callout: {
 		attributes: {
 			title: { type: "String" },
-			content: { type: "String" },
-			type: {
+			variant: {
 				type: "String",
-				matches: ["note", "warning"],
-				errorLevel: "critical",
+				matches: ["success", "info", "warning", "danger"],
+				errorLevel: "error",
 			},
 		},
 		render: "Callout",

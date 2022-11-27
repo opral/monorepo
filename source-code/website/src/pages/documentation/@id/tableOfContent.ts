@@ -59,6 +59,7 @@ export const tableOfContent = [
 		documents: [
 			{ title: "Getting started", href: "/" },
 			{ title: "Installation", href: "/" },
+			{ title: "Installation", href: "/" },
 		],
 	},
 ];
