@@ -1,5 +1,5 @@
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
-import { onMount } from "solid-js";
+import { onMount, Show } from "solid-js";
 import { render } from "solid-js/web";
 import IconWarning from "~icons/material-symbols/warning-outline-rounded";
 import IconInfo from "~icons/material-symbols/info-outline-rounded";
@@ -28,7 +28,7 @@ export function showToast(props: Props) {
 type Props = {
 	variant: "info" | "success" | "warning" | "danger";
 	title: string;
-	message: string;
+	message?: string;
 	/** defaults to 2000 */
 	duration?: number;
 };
@@ -54,7 +54,9 @@ function Toast(props: Props) {
 			>
 				<Icon name={props.variant} slot="icon"></Icon>
 				<h3 class="font-bold">{props.title}</h3>
-				<p>{props.message}</p>
+				<Show when={props.message}>
+					<p>{props.message}</p>
+				</Show>
 			</sl-alert>
 		</>
 	);
