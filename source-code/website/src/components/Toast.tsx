@@ -13,13 +13,13 @@ import { Icon } from "./Icon.jsx";
  * !only works client side
  *
  * @example
- *  createToast({
+ *  showToast({
  *    variant: "success",
  *    title: "Success",
  *    message: "dss",
  *  });
  */
-export function createToast(props: Props) {
+export function showToast(props: Props) {
 	// render the toast on the document body.
 	// rendering instead of Portal avoids bugs that have been encountered
 	return render(() => <Toast {...props}></Toast>, document.body);
