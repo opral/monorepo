@@ -1,16 +1,37 @@
-import { fsChange, routeParams, StateProvider } from "./state.js";
-import { createResource, JSXElement, Show } from "solid-js";
-import { raw } from "@inlang/git-sdk/api";
+import {
+	fsChange,
+	unpushedChanges,
+	routeParams,
+	StateProvider,
+	pushChanges,
+} from "./state.js";
+import {
+	createEffect,
+	createResource,
+	createSignal,
+	ErrorBoundary,
+	JSXElement,
+	onCleanup,
+	onMount,
+	Show,
+} from "solid-js";
+import { raw, http } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
-import { fs as memfs } from "memfs";
+import { subSeconds, isAfter } from "date-fns";
+import { onAuth } from "./index.telefunc.js";
+import { currentPageContext } from "@src/renderer/state.js";
+import { showToast } from "@src/components/Toast.jsx";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<div class="max-w-screen-xl p-4 mx-auto">
-			<div class="flex space-x-6 items-center">
-				<Breadcrumbs></Breadcrumbs>
-				<BranchMenu></BranchMenu>
+			<div class="flex items-center justify-between">
+				<div class="flex items-center space-x-4">
+					<Breadcrumbs></Breadcrumbs>
+					<BranchMenu></BranchMenu>
+				</div>
+				<HasChangesAction></HasChangesAction>
 			</div>
 			<hr class="h-px w-full bg-outline-variant my-2"></hr>
 			{props.children}
@@ -40,11 +61,11 @@ function Breadcrumbs() {
  */
 function BranchMenu() {
 	const [branches] = createResource(fsChange, () => {
-		return raw.listBranches({ fs: memfs, dir: "/", remote: "origin" });
+		return raw.listBranches({ fs: fs, dir: "/", remote: "origin" });
 	});
 
 	const [currentBranch] = createResource(fsChange, () => {
-		return raw.currentBranch({ fs: memfs, dir: "/" });
+		return raw.currentBranch({ fs: fs, dir: "/" });
 	});
 
 	return (
@@ -90,5 +111,62 @@ function BranchMenu() {
 				</sl-dropdown>
 			</Show>
 		</StateProvider>
+	);
+}
+
+/** Actions that can be conducted if a commit has been made but not pushed yet. */
+function HasChangesAction() {
+	const [latestChange, setLatestChange] = createSignal<Date>();
+	const [showPulse, setShowPulse] = createSignal(false);
+	const [isLoading, setIsLoading] = createSignal(false);
+
+	createEffect(() => {
+		if (unpushedChanges()) {
+			setLatestChange(new Date());
+		}
+	});
+
+	// show the pulse if less than X seconds ago a change has been conducted
+	const interval = setInterval(() => {
+		const _latestChange = latestChange();
+		if (_latestChange === undefined) {
+			return setShowPulse(false);
+		}
+		const eightSecondsAgo = subSeconds(new Date(), 8);
+		return setShowPulse(isAfter(_latestChange, eightSecondsAgo));
+	}, 1000);
+
+	onCleanup(() => clearInterval(interval));
+
+	async function triggerPushChanges() {
+		setIsLoading(true);
+		const result = await pushChanges(currentPageContext());
+		setIsLoading(false);
+		if (result.isOk) {
+			showToast({
+				title: "Changes have been pushed",
+				variant: "success",
+			});
+		} else {
+			showToast({
+				title: "Failed to push changes",
+				message: "Please try again or file a bug. " + result.error,
+				variant: "danger",
+			});
+		}
+	}
+
+	return (
+		<sl-button
+			prop:disabled={(unpushedChanges() ?? []).length === 0}
+			onClick={triggerPushChanges}
+		>
+			Submit changes
+			<Show when={(unpushedChanges() ?? []).length > 0}>
+				<sl-badge prop:pill={true} prop:pulse={showPulse() ? true : false}>
+					{(unpushedChanges() ?? []).length}
+				</sl-badge>
+			</Show>
+		</sl-button>
 	);
 }
