@@ -13,3 +13,10 @@
 		font-family: "Inter var", sans-serif;
 	}
 }
+
+/* Overwriting the toast positioning. Read https://shoelace.style/components/alert?id=the-toast-stack */
+.sl-toast-stack {
+	right: 0;
+	bottom: 0;
+	top: auto !important;
+}
