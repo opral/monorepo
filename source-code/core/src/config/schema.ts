@@ -33,6 +33,11 @@ export type Config = {
 		$fs: $fs;
 		$import: ReturnType<typeof initialize$import>;
 	}) => Promise<ast.Bundle[]>;
+	writeBundles: (args: {
+		bundles: ast.Bundle[];
+		$fs: $fs;
+		$import: ReturnType<typeof initialize$import>;
+	}) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.
