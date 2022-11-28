@@ -33,6 +33,8 @@ type Props = {
 	duration?: number;
 };
 
+// the positioning is defined by https://shoelace.style/components/alert?id=the-toast-stack
+// aka the app.css file.
 function Toast(props: Props) {
 	let alert: SlAlert | undefined;
 
