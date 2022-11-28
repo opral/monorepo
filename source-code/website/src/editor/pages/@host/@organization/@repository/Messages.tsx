@@ -164,7 +164,7 @@ function PatternEditor(props: {
 								createToast({
 									variant: "success",
 									title: "Success",
-									message: `The message has been updated.`,
+									message: `The message has been committed.`,
 								});
 							} catch (e) {
 								createToast({
