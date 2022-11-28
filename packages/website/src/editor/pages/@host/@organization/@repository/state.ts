@@ -15,6 +15,8 @@ import { clientSideEnv } from "@env";
 import { Config as InlangConfig, initialize$import } from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
+import { Result } from "@inlang/utilities/result";
+import { addSeconds } from "date-fns";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -29,6 +31,8 @@ export function StateProvider(props: { children: JSXElement }) {
 	[repositoryIsCloned] = createResource(currentPageContext, cloneRepository);
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
+	// re-fetched if the file system changes
+	[unpushedChanges] = createResource(fsChange, _unpushedChanges);
 
 	// if the config is loaded, read the bundles
 	//! will lead to weird ux since this effect does not
@@ -41,25 +45,29 @@ export function StateProvider(props: { children: JSXElement }) {
 		setBundles(await readBundles(config));
 	});
 
-	createEffect(() => {
-		console.log(bundles);
+	//! Unexpected UX. If if the user conducted no changes,
+	//! the files might change due to reactivity.
+	createEffect(async () => {
+		const config = inlangConfig();
+		if (config === undefined) {
+			return;
+		}
+		await writeBundles(config, bundles);
 	});
-
-	// if bundle changes, write to filesystem
-	// createEffect(async () => {
-	// 	// TODO write to filesystem
-	// });
 
 	return props.children;
 }
+
+export let unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>;
 
 /**
  * Whether a repository is cloned and when it was cloned.
  *
  * The value is `false` if the repository is not cloned. Otherwise,
- * the number is a UNIX timestamp of when the repository was cloned.
+ * a Date is provided that reflects the time of when the repository
+ * was cloned.
  */
-export let repositoryIsCloned: Resource<false | number>;
+export let repositoryIsCloned: Resource<undefined | Date>;
 
 /**
  * The current inlang config.
@@ -86,7 +94,7 @@ export const searchParams = () =>
  *
  * setFsChange manually to `Date.now()`
  */
-export const [fsChange, setFsChange] = createSignal(Date.now());
+export const [fsChange, setFsChange] = createSignal(new Date());
 
 /**
  * The bundles.
@@ -101,20 +109,22 @@ export const referenceBundle = () =>
 		(bundle) => bundle.id.name === inlangConfig()?.referenceBundleId
 	);
 
+const [lastFetch, setLastFetch] = createSignal<Date>();
+
 // ------------------------------------------
 
 const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
 
 async function cloneRepository(
 	pageContext: PageContext
-): Promise<false | number> {
+): Promise<Date | undefined> {
 	const { host, organization, repository } = pageContext.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
 		repository === undefined
 	) {
-		return false;
+		return undefined;
 	}
 	await raw.clone({
 		fs: fs,
@@ -126,8 +136,51 @@ async function cloneRepository(
 	});
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
-	setFsChange(Date.now());
-	return Date.now();
+	const date = new Date();
+	setFsChange(date);
+	setLastFetch(date);
+	return date;
+}
+
+/**
+ * Pushed changes and pulls right afterwards.
+ */
+export async function pushChanges(
+	pageContext: PageContext
+): Promise<Result<void, Error>> {
+	const { host, organization, repository } = pageContext.routeParams;
+	if (
+		host === undefined ||
+		organization === undefined ||
+		repository === undefined
+	) {
+		return Result.err(Error("h3ni329 Invalid route params"));
+	}
+	const args = {
+		fs: fs,
+		http,
+		dir: "/",
+		onAuth: onAuth,
+		author: {
+			name: "samuelstroschein",
+		},
+		corsProxy: clientSideEnv().VITE_CORS_PROXY_URL,
+		url: `https://${host}/${organization}/${repository}`,
+	};
+	try {
+		const push = await raw.push(args);
+		if (push.ok === false) {
+			return Result.err(Error("Failed to push", { cause: push.error }));
+		}
+		await raw.pull(args);
+		const time = new Date();
+		// triggering a rebuild of everything fs related
+		setFsChange(time);
+		setLastFetch(time);
+		return Result.ok(undefined);
+	} catch (error) {
+		return Result.err((error as Error) ?? "h3ni329 Unknown error");
+	}
 }
 
 async function readInlangConfig(): Promise<InlangConfig | undefined> {
@@ -147,6 +200,42 @@ async function readBundles(config: InlangConfig) {
 	return bundles;
 }
 
-async function writeBundles(config: InlangConfig) {
-	// await config({ $import, $fs: fs.promises });
+async function writeBundles(config: InlangConfig, bundles: ast.Bundle[]) {
+	await config.writeBundles({ $import, $fs: fs.promises, bundles });
+	const status = await raw.statusMatrix({ fs, dir: "/" });
+	const filesWithUncomittedChanges = status.filter(
+		// files with unstaged and uncomitted changes
+		(row) => row[2] === 2 && row[3] === 1
+	);
+	// auto commit
+	for (const file of filesWithUncomittedChanges) {
+		await raw.add({ fs, dir: "/", filepath: file[0] });
+		await raw.commit({
+			fs,
+			dir: "/",
+			// TODO hardcoded
+			author: {
+				name: "samuelstroschein",
+			},
+			message: "inlang: update translations",
+		});
+	}
+	// triggering a side effect here to trigger a re-render
+	// of components that depends on fs
+	setFsChange(new Date());
+}
+
+async function _unpushedChanges() {
+	const repositoryClonedTime = repositoryIsCloned();
+	const lastFetchTime = lastFetch();
+	if (repositoryClonedTime === undefined) {
+		return [];
+	}
+	const unpushedChanges = await raw.log({
+		fs,
+		dir: "/",
+		// TODO #170 changes that have been pushed are shown as unpushed
+		since: lastFetchTime ? lastFetchTime : repositoryClonedTime,
+	});
+	return unpushedChanges;
 }
