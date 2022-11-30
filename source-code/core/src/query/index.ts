@@ -96,6 +96,8 @@ function get(
 	bundle: Bundle,
 	args: { id: Message["id"]["name"] }
 ): Message | undefined {
+	// TODO #172 add index to query messages faster
+	// looping over all bundles and their resources is a performance bottleneck
 	const messages = bundle.resources.flatMap((resource) => resource.body);
 	const message = messages.find((message) => message.id.name === args.id);
 	if (message) {

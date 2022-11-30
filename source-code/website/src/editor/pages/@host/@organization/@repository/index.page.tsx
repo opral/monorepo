@@ -29,20 +29,37 @@ export function Page() {
 		return result;
 	};
 
+	const inludedMessageIds = () => {
+		const _referenceBundle = referenceBundle();
+		if (_referenceBundle === undefined) {
+			return [];
+		}
+		return query(_referenceBundle).includedMessageIds();
+	};
+
 	return (
-		<Switch fallback={<p>switch fallback trigerred. something went wrong</p>}>
+		<Switch
+			fallback={
+				<p class="text-danger">
+					Switch fallback. This is likely an error. Please report it with code
+					e329jafs.
+				</p>
+			}
+		>
+			<Match when={repositoryIsCloned.error || inlangConfig.error}>
+				<p class="text-danger">
+					{repositoryIsCloned.error ?? inlangConfig.error}
+				</p>
+			</Match>
 			<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
 				<p>loading ...</p>
-			</Match>
-			<Match when={repositoryIsCloned.error || inlangConfig.error}>
-				<p> {repositoryIsCloned.error ?? inlangConfig.error}</p>
 			</Match>
 			<Match when={inlangConfig() === undefined}>
 				<Directories></Directories>
 			</Match>
 			<Match when={inlangConfig() && referenceBundle()}>
 				<div class="space-y-2">
-					<For each={query(referenceBundle()!).includedMessageIds()}>
+					<For each={inludedMessageIds()}>
 						{(id) => (
 							<Messages
 								referenceBundleId={referenceBundle()!.id.name}

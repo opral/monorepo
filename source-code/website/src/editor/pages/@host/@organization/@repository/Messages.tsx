@@ -10,49 +10,55 @@ export function Messages(props: {
 	referenceBundleId: ast.Bundle["id"]["name"];
 	messages: Record<ast.Bundle["id"]["name"], ast.Message | undefined>;
 }) {
+	const [isOpen, setIsOpen] = createSignal(false);
 	const referenceMessage = () => props.messages[props.referenceBundleId]!;
 	return (
-		<sl-details>
+		<sl-details
+			on:sl-show={() => setIsOpen(true)}
+			on:sl-after-hide={() => setIsOpen(false)}
+		>
 			<h3 slot="summary" class="font-medium">
 				{referenceMessage().id.name}
 			</h3>
-			<div class="grid grid-cols-5 gap-2">
-				<p class="text-secondary italic">
-					TODO: additional information would appear here
-				</p>
-				<div class="grid gap-2 col-span-4">
-					<For each={inlangConfig()?.bundleIds}>
-						{(bundleId) => (
-							<div class="grid grid-cols-4 gap-4">
-								<p class="flex justify-end pt-2">
-									<Show
-										when={bundleId === props.referenceBundleId}
-										fallback={bundleId}
-									>
-										<sl-tooltip class="hidden md:block">
-											<p slot="content">
-												The reference message acts as source of truth for the
-												other messages.
-											</p>
-											<span class="mr-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-												Reference:
-											</span>
-										</sl-tooltip>
-										{bundleId}
-									</Show>
-								</p>
-								<div class="col-span-3">
-									<PatternEditor
-										bundleId={bundleId}
-										referenceMessage={referenceMessage()}
-										message={props.messages[bundleId]}
-									></PatternEditor>
+			<Show when={isOpen()}>
+				<div class="grid grid-cols-5 gap-2">
+					<p class="text-secondary italic">
+						TODO: additional information would appear here
+					</p>
+					<div class="grid gap-2 col-span-4">
+						<For each={inlangConfig()?.bundleIds}>
+							{(bundleId) => (
+								<div class="grid grid-cols-4 gap-4">
+									<p class="flex justify-end pt-2">
+										<Show
+											when={bundleId === props.referenceBundleId}
+											fallback={bundleId}
+										>
+											<sl-tooltip class="hidden md:block">
+												<p slot="content">
+													The reference message acts as source of truth for the
+													other messages.
+												</p>
+												<span class="mr-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
+													Reference:
+												</span>
+											</sl-tooltip>
+											{bundleId}
+										</Show>
+									</p>
+									<div class="col-span-3">
+										<PatternEditor
+											bundleId={bundleId}
+											referenceMessage={referenceMessage()}
+											message={props.messages[bundleId]}
+										></PatternEditor>
+									</div>
 								</div>
-							</div>
-						)}
-					</For>
+							)}
+						</For>
+					</div>
 				</div>
-			</div>
+			</Show>
 		</sl-details>
 	);
 }
