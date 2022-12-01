@@ -11,4 +11,13 @@ tasks:
       nvm alias default 18.12
     command: npm run dev
 
-
+vscode:
+  extensions:
+    - "usernamehw.errorlens"
+    - "mhutchie.git-graph"
+    - "github.vscode-pull-request-github"
+    - "yzhang.markdown-all-in-one"
+    - "bierner.markdown-preview-github-styles"
+    - "bierner.markdown-mermaid"
+    - "pkief.material-icon-theme"
+    - "bradlc.vscode-tailwindcss"
