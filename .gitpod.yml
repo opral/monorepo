@@ -8,6 +8,14 @@ tasks:
       nvm alias default 18.12
     command: npm run dev
 
+ports: 
+  - name: "@inlang/website"
+    port: 3000
+    onOpen: open-browser
+  - name: "@inlang/cors-proxy"
+    port: 3001
+    onOpen: notify
+
 vscode:
   extensions:
     - aaron-bond.better-comments
