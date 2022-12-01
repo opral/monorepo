@@ -11,3 +11,10 @@ tasks:
 vscode:
   extensions:
     - aaron-bond.better-comments
+    - "usernamehw.errorlens"
+    - "mhutchie.git-graph"
+    - "yzhang.markdown-all-in-one"
+    - "bierner.markdown-preview-github-styles"
+    - "bierner.markdown-mermaid"
+    - "pkief.material-icon-theme"
+    - "bradlc.vscode-tailwindcss"
