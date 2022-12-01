@@ -4,7 +4,8 @@
 	"private": true,
 	"scripts": {
 		"dev": "node app.js",
-		"start": "node app.js"
+		"start": "node app.js",
+		"clean": ""
 	},
 	"dependencies": {
 		"@isomorphic-git/cors-proxy": "^2.7.1",
