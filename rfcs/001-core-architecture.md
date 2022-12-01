@@ -497,7 +497,7 @@ The SDK to build applications on top off git.
 
 ##### git-sdk/api
 
-Git will be run in JS environments (browser and node). A package is required to make that work. Luckily, [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version.
+Git will be run in JS environments (browser and node). [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version that is likely fast enough. If not, a switch to a wasm version of [libgit2](https://libgit2.org/) should be possible. In any case, git is a CLI and not an SDK. We expect to extend git substiantally as the requirements evolve. 
 
 ##### git-sdk/host
 
