@@ -3,12 +3,12 @@
 # and commit this file to your remote git repository to share the goodness with others.
 
 tasks:
-  - name: Use Node v18
-    command: |
+  - init: npm install && npm run build
+    # use node 18
+    before: |
       nvm i 18.12
       nvm use 18.12
       nvm alias default 18.12
-  - init: npm install && npm run build
     command: npm run dev
 
 
