@@ -4,7 +4,7 @@ import { Dynamic } from "solid-js/web";
 // TODO #168 lazy load layouts
 // TODO see https://www.solidjs.com/tutorial/async_lazy
 import { Layout as IndexLayout } from "@src/pages/Layout.jsx";
-import { Layout as EditorLayout } from "@src/editor/pages/@host/@organization/@repository/Layout.jsx";
+import { Layout as EditorLayout } from "@src/pages/editor/@host/@organization/@repository/Layout.jsx";
 import { currentPageContext } from "./state.js";
 
 export type PageLayoutProps = Accessor<{
