@@ -7,12 +7,28 @@
 /**
  * Environment variables that are avaibale ONLY server-side.
  *
+ * Server-side env variables include client-side env variables.
+ *
  * _Example_
  * ```ts
  * 	const env = getServerSideEnv();
  * ```
  */
-type ServerSideEnv = {
+export type ServerSideEnv = ClientSideEnv & {
+	/**
+	 * The secret key used to encrypt and decrypt JWEs.
+	 */
+	JWE_SECRET_KEY: string;
+
+	/**
+	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+	 */
+	GITHUB_APP_CLIENT_SECRET: string;
+
+	/**
+	 * @deprecated
+	 * TODO remove after #136 is complete.
+	 */
 	GITHUB_PERSONAL_ACCESS_TOKEN?: string;
 };
 
@@ -22,11 +38,17 @@ type ServerSideEnv = {
  * Read [vite's documenation](https://vitejs.dev/guide/env-and-mode.html#env-variables-and-modes)
  * for more information.
  */
-type ClientSideEnv = {
+export type ClientSideEnv = {
 	/**
 	 * The url of the proxy server for git requests.
 	 */
 	VITE_CORS_PROXY_URL: string;
+	/**
+	 * The github app client id.
+	 *
+	 * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
+	 */
+	VITE_GITHUB_APP_CLIENT_ID: string;
 };
 
 /**
@@ -54,12 +76,12 @@ export function clientSideEnv(): ClientSideEnv {
  *
  * Client side env varibales are automatically included.
  */
-export async function serverSideEnv(): Promise<ServerSideEnv & ClientSideEnv> {
+export async function serverSideEnv(): Promise<ServerSideEnv> {
 	try {
 		// dynamically importing dotenv to avoid clash with client side code
 		const dotenv = await import("dotenv");
 		dotenv.config();
-		return process.env as ServerSideEnv & ClientSideEnv;
+		return process.env as ServerSideEnv;
 	} catch (e) {
 		console.error(e);
 		throw Error(
@@ -81,5 +103,11 @@ export async function validateEnv() {
 		);
 	} else if (env.VITE_CORS_PROXY_URL === undefined) {
 		throw Error("Missing env variable VITE_CORS_PROXY_URL");
+	} else if (env.VITE_GITHUB_APP_CLIENT_ID === undefined) {
+		throw Error("Missing env variable VITE_GITHUB_APP_CLIENT_ID");
+	} else if (env.JWE_SECRET_KEY === undefined) {
+		throw Error("Missing env variable JWE_SECRET_KEY");
+	} else if (env.GITHUB_APP_CLIENT_SECRET === undefined) {
+		throw Error("Missing env variable GITHUB_APP_CLIENT_SECRET");
 	}
 }
