@@ -19,7 +19,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 	} finally {
 		return {
 			pageContext: {
-				props: {
+				pageProps: {
 					markdown,
 				},
 			},
