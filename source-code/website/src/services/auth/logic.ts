@@ -7,6 +7,9 @@ import type { LocalStorageSchema } from "../local-storage/index.js";
 const enc = "A128CBC-HS256";
 // dir = direct encryption
 const alg = "dir";
+// the scopes for the oauth app https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
+// email is required to commit with identity of who committed
+const scopes = "repo,user:email";
 
 /**
  * Encrypts a string using JWE.
@@ -49,6 +52,15 @@ export async function decryptAccessToken(args: {
 	} catch (error) {
 		return Result.err(error as Error);
 	}
+}
+
+/**
+ * The URL to redirect the user to in order to authenticate.
+ *
+ * Read https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity
+ */
+export function githubAuthUrl(githubAppClientId: string) {
+	return `https://github.com/login/oauth/authorize?client_id=${githubAppClientId}&scope=${scopes}`;
 }
 
 /**
