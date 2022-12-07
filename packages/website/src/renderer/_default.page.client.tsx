@@ -19,6 +19,9 @@ import "@shoelace-style/shoelace/dist/components/tag/tag.js";
 import "@shoelace-style/shoelace/dist/components/tooltip/tooltip.js";
 import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
+import "@shoelace-style/shoelace/dist/components/divider/divider.js";
+import "@shoelace-style/shoelace/dist/components/tree/tree.js";
+import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js";
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
