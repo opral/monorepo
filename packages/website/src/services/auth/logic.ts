@@ -119,6 +119,7 @@ export async function getUserInfo(args: { accessToken: string }): Promise<
 			headers: {
 				Accept: "application/vnd.github+json",
 				Authorization: `Bearer ${args.accessToken}`,
+				"X-GitHub-Api-Version": "2022-11-28",
 			},
 		});
 		if (request.status !== 200) {
