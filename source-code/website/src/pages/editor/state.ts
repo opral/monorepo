@@ -10,13 +10,13 @@ import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { fs } from "@inlang/git-sdk/fs";
 import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
-import { onAuth } from "./index.telefunc.js";
 import { clientSideEnv } from "@env";
 import { Config as InlangConfig, initialize$import } from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/utilities/result";
 import { addSeconds } from "date-fns";
+import { onAuth } from "./state.telefunc.js";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.

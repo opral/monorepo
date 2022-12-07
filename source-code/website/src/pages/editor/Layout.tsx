@@ -9,16 +9,13 @@ import {
 	createEffect,
 	createResource,
 	createSignal,
-	ErrorBoundary,
 	JSXElement,
 	onCleanup,
-	onMount,
 	Show,
 } from "solid-js";
-import { raw, http } from "@inlang/git-sdk/api";
+import { raw } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
 import { subSeconds, isAfter } from "date-fns";
-import { onAuth } from "./index.telefunc.js";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
 
@@ -42,6 +39,7 @@ export function Layout(props: { children: JSXElement }) {
 function Breadcrumbs() {
 	return (
 		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
+			{/* repository icon */}
 			<svg class="w-4 h-4" viewBox="0 0 16 16">
 				<path
 					fill="currentColor"
