@@ -47,7 +47,7 @@ function Header() {
 		{ name: "Docs", href: "/documentation" },
 	];
 
-	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(true);
+	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
 
 	return (
 		<header class="sticky top-0 z-50 w-full bg-background border-b border-outline-variant py-3">
