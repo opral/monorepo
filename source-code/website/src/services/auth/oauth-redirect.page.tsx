@@ -1,8 +1,9 @@
-import { currentPageContext } from "@src/renderer/state.js";
 import { Match, onMount, Switch } from "solid-js";
 import { navigate } from "vite-plugin-ssr/client/router";
-import { useLocalStorage } from "../local-storage/index.jsx";
-import type { LocalStorageSchema } from "../local-storage/index.js";
+import {
+	useLocalStorage,
+	type LocalStorageSchema,
+} from "@src/services/local-storage/index.js";
 
 export type PageProps = {
 	error?: string;
@@ -23,7 +24,6 @@ export function Page(props: PageProps) {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
 	onMount(() => {
-		console.log(props.data);
 		if (props.error) {
 			alert(props.error);
 		} else if (props.data) {
@@ -38,9 +38,10 @@ export function Page(props: PageProps) {
 				<p>success, redirecting ...</p>
 			</Match>
 			<Match when={props.error}>
-				<p class="text-on-danger-container p-2 bg-danger-container">
-					An error occured during login. Please report the bug. {props.error}
-				</p>
+				<div class="text-on-danger-container p-2 bg-danger-container">
+					<p>An error occured during login. Please report the bug.</p>
+					<p>{props.error}</p>
+				</div>
 			</Match>
 		</Switch>
 	);
