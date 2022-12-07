@@ -8,7 +8,7 @@ import {
 	inlangConfig,
 	referenceBundle,
 	repositoryIsCloned,
-} from "./state.js";
+} from "@src/pages/editor/state.js";
 import type * as ast from "@inlang/core/ast";
 
 export const Head: PageHead = () => {
