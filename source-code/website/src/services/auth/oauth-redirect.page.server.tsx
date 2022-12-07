@@ -19,6 +19,9 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 ) => {
 	try {
 		const code = pageContext.urlParsed.search["code"];
+		if (code === undefined) {
+			throw Error("No interim code found in URL.");
+		}
 		const accessToken = (
 			await exchangeInterimCodeForAccessToken({ code, env })
 		).unwrap();
