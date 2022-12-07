@@ -1,11 +1,12 @@
 import { Accessor, Component, ErrorBoundary, JSXElement } from "solid-js";
-import type { PageContext, PageContextRenderer } from "./types.js";
+import type { PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 // TODO #168 lazy load layouts
 // TODO see https://www.solidjs.com/tutorial/async_lazy
 import { Layout as IndexLayout } from "@src/pages/Layout.jsx";
 import { Layout as EditorLayout } from "@src/pages/editor/@host/@organization/@repository/Layout.jsx";
 import { currentPageContext } from "./state.js";
+import { LocalStorageProvider } from "@src/services/local-storage/index.js";
 
 export type PageLayoutProps = Accessor<{
 	pageContext: PageContextRenderer;
@@ -58,9 +59,11 @@ export function PageLayout(props: {
 				);
 			}}
 		>
-			<Dynamic component={Layout()}>
-				<Dynamic component={props.page} {...props.pageProps}></Dynamic>
-			</Dynamic>
+			<LocalStorageProvider>
+				<Dynamic component={Layout()}>
+					<Dynamic component={props.page} {...props.pageProps}></Dynamic>
+				</Dynamic>
+			</LocalStorageProvider>
 		</ErrorBoundary>
 	);
 }
