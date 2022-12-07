@@ -6,7 +6,7 @@ import { setCurrentPageContext } from "./state.js";
 import { PageLayout } from "./PageLayout.jsx";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["props", "routeParams", "urlParsed"] as const;
+export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
 
 export function render(pageContext: PageContextRenderer): unknown {
 	//! TODO most likely cross request state pollution
@@ -28,7 +28,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 	const renderedPage = renderToString(() => (
 		<PageLayout
 			page={pageContext.Page}
-			pageProps={pageContext.props}
+			pageProps={pageContext.pageProps}
 		></PageLayout>
 	));
 	return escapeInject`<!DOCTYPE html>
