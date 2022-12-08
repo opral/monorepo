@@ -8,6 +8,9 @@ import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvide
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
 
+import { tableOfContent } from "./documentation/@id/tableOfContent.js";
+import { currentPageContext } from "@src/renderer/state.js";
+
 /**
  * Ensure that all elements use the same margins.
  *
@@ -43,8 +46,9 @@ const socialMediaLinks = [
 ];
 function Header() {
 	const links = [
-		{ name: "Docs", href: "/documentation" },
 		{ name: "Editor", href: "/editor" },
+
+		{ name: "Docs", href: "/documentation" },
 	];
 
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
@@ -87,7 +91,8 @@ function Header() {
 							<UserDropdown></UserDropdown>
 						</div>
 					</div>
-					<div class="md:hidden z-50">
+
+					<div class="md:hidden flex items-center">
 						<button
 							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 							type="button"
@@ -105,17 +110,62 @@ function Header() {
 					</div>
 				</div>
 				<Show when={mobileMenuIsOpen()}>
-					<ol class="p-6 space-y-1 absolute shadow-md transition border-t border-outline w-screen bg-background ">
+					<ol class=" space-y-1 relativ  left-0 w-screen min-h-full  transition pt-3 border-outline bg-background overflow ">
 						<For each={links}>
 							{(link) => (
-								<li>
-									<a class="link link-primary" href={link.href}>
-										{link.name}
-									</a>
-								</li>
+								<>
+									<sl-tree class="tree-with-lines">
+										<sl-tree-item>
+											<a
+												class="link font-bold text-on-surface link-primary"
+												href={link.href}
+											>
+												{link.name}
+											</a>
+											<Show when={link.href === "/documentation"}>
+												<For each={tableOfContent}>
+													{(section) => (
+														<sl-tree-item class="p-3">
+															<h2 class="font-bold text-on-surface">
+																{section.title}
+															</h2>
+
+															<For each={section.documents}>
+																{(document) => (
+																	<sl-tree-item>
+																		<a
+																			class="block w-full font-medium link link-primary "
+																			onClick={() =>
+																				setMobileMenuIsOpen(!mobileMenuIsOpen())
+																			}
+																			classList={{
+																				"text-primary":
+																					document.href ===
+																					currentPageContext().urlParsed
+																						.pathname,
+																				"text-on-surface-variant":
+																					document.href !==
+																					currentPageContext().urlParsed
+																						.pathname,
+																			}}
+																			href={document.href}
+																		>
+																			{document.title}
+																		</a>
+																	</sl-tree-item>
+																)}
+															</For>
+														</sl-tree-item>
+													)}
+												</For>
+											</Show>
+										</sl-tree-item>
+									</sl-tree>
+								</>
 							)}
 						</For>
-						<For each={socialMediaLinks}>
+
+						{/* <For each={socialMediaLinks}>
 							{(link) => (
 								<li>
 									<a
@@ -128,7 +178,7 @@ function Header() {
 									</a>
 								</li>
 							)}
-						</For>
+						</For> */}
 					</ol>
 				</Show>
 			</nav>
