@@ -1,8 +1,12 @@
-import { createSignal, For, JSXElement, Show } from "solid-js";
+import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
 import IconTwitter from "~icons/cib/twitter";
 import IconGithub from "~icons/cib/github";
 import IconClose from "~icons/material-symbols/close-rounded";
 import IconMenu from "~icons/material-symbols/menu-rounded";
+import IconExpand from "~icons/material-symbols/expand-more-rounded";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { currentPageContext } from "@src/renderer/state.js";
+import { showToast } from "@src/components/Toast.jsx";
 
 /**
  * Ensure that all elements use the same margins.
@@ -80,6 +84,7 @@ function Header() {
 									</a>
 								)}
 							</For>
+							<UserDropdown></UserDropdown>
 						</div>
 					</div>
 					<div class="md:hidden z-50">
@@ -159,5 +164,46 @@ function Footer() {
 				</div>
 			</div>
 		</footer>
+	);
+}
+
+/**
+ * Dropdown with user information and actions.
+ */
+function UserDropdown() {
+	const [localStorage, setLocalStorage] = useLocalStorage();
+	const [showLoginDialog, setShowLoginDialog] = createSignal(false);
+
+	function onSignOut() {
+		setLocalStorage("user", undefined);
+		showToast()
+	}
+
+	return (
+		<Switch>
+			<Match when={localStorage.user}>
+				<sl-dropdown>
+					<div slot="trigger" class="flex items-center cursor-pointer">
+						<img
+							src={localStorage.user?.avatarUrl}
+							alt="user avatar"
+							class="w-6 h-6 rounded-full"
+						></img>
+						<IconExpand></IconExpand>
+					</div>
+					<sl-menu>
+						<sl-menu-item onClick={onSignOut}>Sign out</sl-menu-item>
+					</sl-menu>
+				</sl-dropdown>
+			</Match>
+			<Match
+				when={
+					localStorage.user === undefined &&
+					currentPageContext().urlParsed.pathname.includes("editor")
+				}
+			>
+				<sl-button>Log in</sl-button>
+			</Match>
+		</Switch>
 	);
 }
