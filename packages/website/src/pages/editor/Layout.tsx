@@ -24,7 +24,7 @@ import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
-			<div class="py-4">
+			<div class="py-4 w-full">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center space-x-4">
 						<Breadcrumbs></Breadcrumbs>
