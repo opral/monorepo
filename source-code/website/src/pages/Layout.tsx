@@ -2,12 +2,16 @@ import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
 import IconTwitter from "~icons/cib/twitter";
 import IconGithub from "~icons/cib/github";
 import IconClose from "~icons/material-symbols/close-rounded";
+import IconSignOut from "~icons/material-symbols/logout-rounded";
 import IconMenu from "~icons/material-symbols/menu-rounded";
 import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
 import { tableOfContent } from "./documentation/@id/tableOfContent.js";
+import { clientSideEnv } from "@env";
+import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { SignInDialog } from "@src/services/auth/index.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -64,7 +68,7 @@ function Header() {
 						<span class="self-center pl-2 text-xl font-bold">inlang</span>
 					</a>
 					<div class="grid grid-cols-2 w-full content-center">
-						<div class="hidden md:flex justify-start space-x-6">
+						<div class="hidden md:flex justify-start items-center space-x-6">
 							<For each={links}>
 								{(link) => (
 									<a class="link link-primary" href={link.href}>
@@ -220,38 +224,74 @@ function Footer() {
  */
 function UserDropdown() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
-	const [showLoginDialog, setShowLoginDialog] = createSignal(false);
+
+	let signInDialog: SlDialog | undefined;
 
 	function onSignOut() {
 		setLocalStorage("user", undefined);
-		// showToast();
+		showToast({
+			title: "Signed out",
+			variant: "success",
+		});
+	}
+
+	function onSignIn() {
+		signInDialog?.show();
 	}
 
 	return (
-		<Switch>
-			<Match when={localStorage.user}>
-				<sl-dropdown>
-					<div slot="trigger" class="flex items-center cursor-pointer">
-						<img
-							src={localStorage.user?.avatarUrl}
-							alt="user avatar"
-							class="w-6 h-6 rounded-full"
-						></img>
-						<IconExpand></IconExpand>
-					</div>
-					<sl-menu>
-						<sl-menu-item onClick={onSignOut}>Sign out</sl-menu-item>
-					</sl-menu>
-				</sl-dropdown>
-			</Match>
-			<Match
-				when={
-					localStorage.user === undefined &&
-					currentPageContext().urlParsed.pathname.includes("editor")
-				}
-			>
-				<sl-button>Log in</sl-button>
-			</Match>
-		</Switch>
+		<>
+			<Switch>
+				<Match when={localStorage.user}>
+					<sl-dropdown>
+						<div slot="trigger" class="flex items-center cursor-pointer">
+							<img
+								src={localStorage.user?.avatarUrl}
+								alt="user avatar"
+								class="w-6 h-6 rounded-full"
+							></img>
+							<IconExpand></IconExpand>
+						</div>
+						<sl-menu>
+							<div class="px-7 py-2 bg-surface-100 text-on-surface">
+								<p>Signed in as</p>
+								<p class="font-medium">{localStorage.user?.username}</p>
+							</div>
+							<sl-menu-item onClick={onSignOut}>
+								<IconSignOut slot="prefix"></IconSignOut>
+								Sign out
+							</sl-menu-item>
+						</sl-menu>
+					</sl-dropdown>
+				</Match>
+				<Match when={localStorage.user === undefined}>
+					<sl-button onClick={onSignIn}>
+						<span class="text-on-background font-medium text-base">
+							Sign in
+						</span>
+					</sl-button>
+					{/* 
+					The two button solution below is taken from GitHub. 
+					
+					I assume that they increased their sign up rate by explicitly showing
+					a sign up button. Not used for now to keep the design simple.
+				*/}
+					{/* <div class="flex">
+					<sl-button prop:variant="text">
+					<span class="text-on-background font-medium text-base">Log in</span>
+					</sl-button>
+					<sl-button>
+					<span class="text-on-background font-medium text-base">
+					Sign up
+					</span>
+					</sl-button>
+				</div> */}
+				</Match>
+			</Switch>
+			<SignInDialog
+				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
+				ref={signInDialog!}
+			></SignInDialog>
+		</>
 	);
 }

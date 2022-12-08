@@ -5,5 +5,5 @@
  * --------------------------------
  */
 
-export { LoginDialog } from "./LoginDialog.jsx";
+export { SignInDialog } from "./SignInDialog.jsx";
 export { decryptAccessToken } from "./logic.js";
