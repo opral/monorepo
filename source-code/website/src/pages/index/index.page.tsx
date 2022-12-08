@@ -9,14 +9,12 @@ export const Head: PageHead = () => {
 	};
 };
 
-export function Layout() {
-	return RootLayout;
-}
-
 export function Page() {
 	return (
-		<div class="self-center grow sm:px-6 md:px-0">
-			<Hero></Hero>
-		</div>
+		<RootLayout>
+			<div class="self-center grow sm:px-6 md:px-0">
+				<Hero></Hero>
+			</div>
+		</RootLayout>
 	);
 }

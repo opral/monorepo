@@ -3,7 +3,7 @@ import { generateHydrationScript, renderToString } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import "./app.css";
 import { setCurrentPageContext } from "./state.js";
-import { PageLayout } from "./PageLayout.jsx";
+import { ThePage } from "./ThePage.jsx";
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
@@ -26,10 +26,10 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
 	const renderedPage = renderToString(() => (
-		<PageLayout
+		<ThePage
 			page={pageContext.Page}
 			pageProps={pageContext.pageProps}
-		></PageLayout>
+		></ThePage>
 	));
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
