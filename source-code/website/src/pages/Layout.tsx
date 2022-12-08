@@ -7,9 +7,7 @@ import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
-
 import { tableOfContent } from "./documentation/@id/tableOfContent.js";
-import { currentPageContext } from "@src/renderer/state.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -226,7 +224,7 @@ function UserDropdown() {
 
 	function onSignOut() {
 		setLocalStorage("user", undefined);
-		showToast()
+		// showToast();
 	}
 
 	return (
