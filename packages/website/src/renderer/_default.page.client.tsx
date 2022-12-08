@@ -1,7 +1,7 @@
 import { Component, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { hydrate } from "solid-js/web";
-import { PageLayout } from "./PageLayout.jsx";
+import { ThePage } from "./ThePage.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 // only imported client side as web components are not supported server side
@@ -43,10 +43,7 @@ export function render(pageContext: PageContextRenderer) {
 		if (isFirstRender) {
 			hydrate(
 				() => (
-					<PageLayout
-						page={currentPage()!}
-						pageProps={currentPageProps}
-					></PageLayout>
+					<ThePage page={currentPage()!} pageProps={currentPageProps}></ThePage>
 				),
 				rootElement
 			);
