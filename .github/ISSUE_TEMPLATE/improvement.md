@@ -1,6 +1,6 @@
 ---
-name: Enhancement
-about: Something could be improved with a small change.
+name: Improvement
+about: Something could be improved.
 title: ''
 labels: 'type: enhancement'
 assignees: ''
