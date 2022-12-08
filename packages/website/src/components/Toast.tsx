@@ -1,10 +1,6 @@
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { onMount, Show } from "solid-js";
 import { render } from "solid-js/web";
-import IconWarning from "~icons/material-symbols/warning-outline-rounded";
-import IconInfo from "~icons/material-symbols/info-outline-rounded";
-import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
-import IconDanger from "~icons/material-symbols/dangerous-outline-rounded";
 import { Icon } from "./Icon.jsx";
 
 /**
@@ -43,21 +39,19 @@ function Toast(props: Props) {
 	});
 
 	return (
-		<>
-			<sl-alert
-				ref={alert}
-				prop:variant={props.variant === "info" ? "primary" : props.variant}
-				prop:closable={props.variant === "success" ? false : true}
-				prop:duration={
-					props.variant === "danger" ? undefined : props.duration ?? 2000
-				}
-			>
-				<Icon name={props.variant} slot="icon"></Icon>
-				<h3 class="font-bold">{props.title}</h3>
-				<Show when={props.message}>
-					<p>{props.message}</p>
-				</Show>
-			</sl-alert>
-		</>
+		<sl-alert
+			ref={alert}
+			prop:variant={props.variant === "info" ? "primary" : props.variant}
+			prop:closable={props.variant === "success" ? false : true}
+			prop:duration={
+				props.variant === "danger" ? undefined : props.duration ?? 2000
+			}
+		>
+			<Icon name={props.variant} slot="icon"></Icon>
+			<h3 class="font-bold">{props.title}</h3>
+			<Show when={props.message}>
+				<p>{props.message}</p>
+			</Show>
+		</sl-alert>
 	);
 }
