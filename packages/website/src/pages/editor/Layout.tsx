@@ -18,21 +18,24 @@ import { fs } from "@inlang/git-sdk/fs";
 import { subSeconds, isAfter } from "date-fns";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
+import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="max-w-screen-xl p-4 mx-auto">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center space-x-4">
-					<Breadcrumbs></Breadcrumbs>
-					<BranchMenu></BranchMenu>
+		<RootLayout>
+			<div class="py-4">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center space-x-4">
+						<Breadcrumbs></Breadcrumbs>
+						<BranchMenu></BranchMenu>
+					</div>
+					<HasChangesAction></HasChangesAction>
 				</div>
-				<HasChangesAction></HasChangesAction>
+				<hr class="h-px w-full bg-outline-variant my-2"></hr>
+				{props.children}
 			</div>
-			<hr class="h-px w-full bg-outline-variant my-2"></hr>
-			{props.children}
-		</div>
+		</RootLayout>
 	);
 }
 
