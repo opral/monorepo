@@ -56,15 +56,13 @@ export type ClientSideEnv = {
  *
  * _Example_
  * ```ts
- * 	 const env = clientSideEnv();
+ * 	 clientSideEnv.VITE_CORS_PROXY_URL;
  * ```
  *
  * Use `getServerSideEnv` for server-side env variables.
  */
-export function clientSideEnv(): ClientSideEnv {
-	// the function provides type-safety
-	return import.meta.env as unknown as ClientSideEnv;
-}
+export const clientSideEnv: ClientSideEnv = import.meta
+	.env as unknown as ClientSideEnv;
 
 /**
  * Get server side env variables.
