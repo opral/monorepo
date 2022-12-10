@@ -6,6 +6,9 @@
  *  - express.js that powers the server https://expressjs.com/
  *  - vite-plugin-ssr that powers routing and rendering https://vite-plugin-ssr.com/
  *  - telefunc that powers RPCs https://telefunc.com/
+ *
+ * !Note: This file has not hot module reload. If you change code, you need to restart the server
+ * !      by re-running `npm run dev`.
  * ------------------------------------
  */
 
@@ -14,6 +17,7 @@ import compression from "compression";
 import { createServer as createViteServer } from "vite";
 import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
+import { telefunc } from "telefunc";
 
 const isProduction = process.env.NODE_ENV === "production";
 /** the root path of the server (website/) */
@@ -27,8 +31,24 @@ async function runServer() {
 		appType: "custom",
 	});
 
+	// compress responses with gzip
 	app.use(compression());
+	// Parse & make HTTP request body available at `req.body` (required by telefunc)
+	app.use(express.text());
+	// use vite's connect instance as middleware
 	app.use(viteServer.middlewares);
+
+	// serving telefunc https://telefunc.com/
+	app.all("/_telefunc", async (request, response) => {
+		const { body, statusCode, contentType } = await telefunc({
+			url: request.originalUrl,
+			method: request.method,
+			body: request.body,
+		});
+		return response.status(statusCode).type(contentType).send(body);
+	});
+
+	// serving @src/pages and /public
 	app.get("*", async (request, response, next) => {
 		const pageContext = await renderPage({
 			urlOriginal: request.originalUrl,
@@ -39,6 +59,7 @@ async function runServer() {
 		const { body, statusCode, contentType } = pageContext.httpResponse;
 		return response.status(statusCode).type(contentType).send(body);
 	});
+
 	const port = process.env.PORT ?? 3000;
 	app.listen(port);
 	console.log(`Server running at http://localhost:${port}/`);
