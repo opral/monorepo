@@ -86,7 +86,7 @@ function Header() {
 							</For>
 						</div>
 					</div>
-
+					{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
 					<div class="md:hidden flex items-center">
 						<button
 							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
@@ -104,6 +104,7 @@ function Header() {
 						</button>
 					</div>
 				</div>
+				{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 				<Show when={mobileMenuIsOpen()}>
 					<ol class=" space-y-1 relativ  left-0 w-screen min-h-full  transition pt-3 border-outline bg-background overflow ">
 						<For each={links}>
