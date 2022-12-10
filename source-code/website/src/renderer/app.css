@@ -1,5 +1,7 @@
 /* This file contains global css that is imported by the server renderer */
 
+@import url("@shoelace-style/shoelace/dist/themes/light.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +9,7 @@
 /* The startup 101 font Inter https://rsms.me/inter/  */
 :root {
 	font-family: "Inter", sans-serif;
+	--sl-input-border-color: theme(colors.outline);
 }
 @supports (font-variation-settings: normal) {
 	:root {
