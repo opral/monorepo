@@ -11,6 +11,7 @@
 	font-family: "Inter", sans-serif;
 	--sl-input-border-color: theme(colors.outline);
 }
+/* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
 	:root {
 		font-family: "Inter var", sans-serif;
