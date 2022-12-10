@@ -39,8 +39,8 @@ export function generateTokens(config: Config): ColorTokens {
 		"on-surface": neutralColors.neutral[900],
 		"surface-variant": neutralColors.neutralVariant[100],
 		"on-surface-variant": neutralColors.neutralVariant[600],
-		outline: neutralColors.neutralVariant[400],
-		"outline-variant": neutralColors.neutralVariant[600],
+		outline: neutralColors.neutralVariant[300],
+		"outline-variant": neutralColors.neutralVariant[500],
 	};
 
 	// add accent and semantic colors
