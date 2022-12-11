@@ -12,9 +12,5 @@
 			"@src/*": ["./src/*"],
 			"@env": ["./env.ts"]
 		}
-	},
-	// https://stackoverflow.com/a/71426203
-	"ts-node": {
-		"esm": true
 	}
 }
