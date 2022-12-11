@@ -6,7 +6,6 @@ import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
-import "@shoelace-style/shoelace/dist/themes/light.css";
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/badge/badge.js";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
