@@ -1,5 +1,5 @@
 import type { OnBeforeRender } from "@src/renderer/types.js";
-import { parseValidateAndRender } from "@src/services/markdoc/parseValidateAndRender.js";
+import { parseValidateAndRender } from "@src/services/markdown/parseValidateAndRender.js";
 import type { PageProps } from "./index.page.jsx";
 
 // should only run server side
