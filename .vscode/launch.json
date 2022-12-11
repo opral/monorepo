@@ -24,7 +24,8 @@
 			"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
 			"args": ["run", "${relativeFile}"],
 			"smartStep": true,
-			"console": "integratedTerminal"
+			"console": "integratedTerminal",
+			"runtimeExecutable": "/opt/homebrew/bin/node"
 		}
 	]
 }
