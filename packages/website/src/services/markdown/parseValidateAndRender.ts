@@ -1,5 +1,5 @@
 import Markdoc, { type Config, type ValidationError } from "@markdoc/markdoc";
-import { tags, components } from "./components/index.js";
+import { markdocConfig, components } from "./components/config.js";
 import { renderWithSolid } from "./solidPlugin.js";
 
 /**
@@ -20,6 +20,7 @@ export function parseValidateAndRender(text: string) {
         `);
 	}
 	const content = Markdoc.transform(ast, markdocConfig);
+	// @ts-ignore
 	return renderWithSolid(content, {
 		components,
 	});
@@ -28,9 +29,6 @@ export function parseValidateAndRender(text: string) {
 /**
  * The Markdoc configuration.
  */
-const markdocConfig: Config = {
-	tags,
-};
 
 /**
  * Beautifies a Markdoc error.
