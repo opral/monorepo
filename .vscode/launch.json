@@ -6,7 +6,16 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "ide-extension",
+			"name": "npm run dev",
+			"type": "node",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run-script", "dev"],
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "debug ide-extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -15,17 +24,38 @@
 			],
 			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
 		},
+		// {
+		// 	"name": "Current test file",
+		// 	"type": "node",
+		// 	"request": "launch",
+		// 	"autoAttachChildProcesses": true,
+		// 	"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+		// 	"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+		// 	"args": ["run", "${relativeFile}"],
+		// 	"smartStep": true,
+		// 	"console": "integratedTerminal"
+		// },
 		{
-			"type": "node",
+			"name": "open @inlang/website in chrome",
+			"port": 3000,
 			"request": "launch",
-			"name": "Current test file",
-			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-			"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-			"args": ["run", "${relativeFile}"],
-			"smartStep": true,
-			"console": "integratedTerminal",
-			"runtimeExecutable": "/opt/homebrew/bin/node"
+			"type": "chrome",
+			"webRoot": "${workspaceFolder}/source-code/website",
+			// annoying bug. the website does not load if the server is not started beforehand. 
+			"file": "${workspaceFolder}/.vscode/wait-for-process.html"
+		}
+	],
+	"compounds": [
+		{
+			// start the entire dev environment
+			"name": "start development environement",
+			"configurations": ["npm run dev", "open @inlang/website in chrome"],
+			"stopAll": true,
+			"presentation": {
+				"hidden": false,
+				"group": "",
+				"order": 1
+			}
 		}
 	]
 }
