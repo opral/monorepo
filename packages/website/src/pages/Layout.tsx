@@ -43,8 +43,8 @@ const socialMediaLinks = [
 function Header() {
 	const links = [
 		{ name: "Editor", href: "/editor" },
-
 		{ name: "Docs", href: "/documentation" },
+		{ name: "Blog", href: "/blog" },
 	];
 
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
