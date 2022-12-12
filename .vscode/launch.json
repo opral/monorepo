@@ -41,14 +41,14 @@
 			"request": "launch",
 			"type": "chrome",
 			"webRoot": "${workspaceFolder}/source-code/website",
-			// annoying bug. the website does not load if the server is not started beforehand. 
+			// annoying bug. the website does not load if the server is not started beforehand.
 			"file": "${workspaceFolder}/.vscode/wait-for-process.html"
 		}
 	],
 	"compounds": [
 		{
 			// start the entire dev environment
-			"name": "start development environement",
+			"name": "start development environment",
 			"configurations": ["npm run dev", "open @inlang/website in chrome"],
 			"stopAll": true,
 			"presentation": {
