@@ -24,3 +24,16 @@
 	bottom: 0;
 	top: auto !important;
 }
+
+.sl-card::part(body) {
+	height: 48px;
+	padding: 10px;
+
+  }
+
+.card__body{
+	padding: 10px;
+
+}
+
+ 
