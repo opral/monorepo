@@ -42,7 +42,7 @@ export type ClientSideEnv = {
 	/**
 	 * The url of the proxy server for git requests.
 	 */
-	VITE_CORS_PROXY_URL: string;
+	VITE_GIT_REQUEST_PROXY_PATH: string;
 	/**
 	 * The github app client id.
 	 *
@@ -99,11 +99,20 @@ export async function validateEnv() {
 		console.warn(
 			"Missing env variable GITHUB_PERSONAL_ACCESS_TOKEN. As long as no git repo is cloned, no error should occur."
 		);
-	} else if (env.VITE_CORS_PROXY_URL === undefined) {
+	}
+	// VITE_GIT_REQUEST_PROXY_PATH
+	else if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
 		throw Error("Missing env variable VITE_CORS_PROXY_URL");
-	} else if (env.VITE_CORS_PROXY_URL.endsWith("/") === false) {
-		throw Error("VITE_CORS_PROXY_URL must end with a slash (/).");
-	} else if (env.VITE_GITHUB_APP_CLIENT_ID === undefined) {
+	} else if (
+		env.VITE_GIT_REQUEST_PROXY_PATH.startsWith("/") === false ||
+		env.VITE_GIT_REQUEST_PROXY_PATH.endsWith("/") === false
+	) {
+		throw Error(
+			"VITE_CORS_PROXY_URL must be a local path like that starts and ends with a slash `/` like `/git-proxy/`."
+		);
+	}
+	//
+	else if (env.VITE_GITHUB_APP_CLIENT_ID === undefined) {
 		throw Error("Missing env variable VITE_GITHUB_APP_CLIENT_ID");
 	} else if (env.JWE_SECRET_KEY === undefined) {
 		throw Error("Missing env variable JWE_SECRET_KEY");

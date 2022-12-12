@@ -131,7 +131,7 @@ async function cloneRepository(
 		http,
 		dir: "/",
 		onAuth: onAuth,
-		corsProxy: clientSideEnv.VITE_CORS_PROXY_URL,
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${organization}/${repository}`,
 	});
 	// triggering a side effect here to trigger a re-render
@@ -164,7 +164,7 @@ export async function pushChanges(
 		author: {
 			name: "samuelstroschein",
 		},
-		corsProxy: clientSideEnv.VITE_CORS_PROXY_URL,
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${organization}/${repository}`,
 	};
 	try {

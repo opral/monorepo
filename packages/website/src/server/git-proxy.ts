@@ -15,18 +15,15 @@ import type { Request, Response } from "express";
 import https from "node:https";
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js";
+import { serverSideEnv } from "@env";
 
-export const middleware = createMiddleware({});
+const middleware = createMiddleware({});
+const env = await serverSideEnv();
 
 export function proxy(request: Request, response: Response) {
-	/** if `/git-proxy/*` is the path, the wildcard `*` is removed */
-	const pathWithoutWildcard = proxyPath.slice(0, -1);
-	assert(request.url.startsWith(pathWithoutWildcard));
-	request.url = request.url.slice(pathWithoutWildcard.length);
-	assert(
-		proxyPath.length > 2 && request.url.startsWith("/"),
-		"The target URL must start with a leading slash if the proxy path is not `/` but something like `/git-proxy/*`."
-	);
+	assert(request.url.startsWith(env.VITE_GIT_REQUEST_PROXY_PATH));
+	// remove the proxy path from the request url
+	request.url = request.url.slice(env.VITE_GIT_REQUEST_PROXY_PATH.length);
 	return middleware(request, response);
 }
 
@@ -38,8 +35,6 @@ export function proxy(request: Request, response: Response) {
 // 		"https:/" + request.originalUrl.slice(pathWithoutWildcard.length);
 // 	request.pipe(https.request("https://api.github.com/graphql")).pipe(response);
 // }
-
-export const proxyPath = "/git-proxy/*";
 
 // export const proxy = createProxyMiddleware({
 // 	changeOrigin: true,
