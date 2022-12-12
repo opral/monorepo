@@ -91,7 +91,7 @@ function Header() {
 						<button
 							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 							type="button"
-							class="inline-flex items-center justify-center  bg-background  text-primary "
+							class="inline-flex items-center justify-center text-primary "
 						>
 							<span class="sr-only">
 								{mobileMenuIsOpen() ? "Close menu" : "Open menu"}
@@ -106,14 +106,14 @@ function Header() {
 				</div>
 				{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 				<Show when={mobileMenuIsOpen()}>
-					<ol class=" space-y-1 relativ  left-0 w-screen min-h-full  transition pt-3 border-outline bg-background overflow ">
+					<ol class=" space-y-1 relativ  w-screen min-h-full   pt-3  overflow ">
 						<For each={links}>
 							{(link) => (
 								<>
-									<sl-tree class="tree-with-lines">
+									<sl-tree class="tree-with-lines ">
 										<sl-tree-item>
 											<a
-												class="link font-bold text-on-surface link-primary"
+												class="link font-bold  text-on-surface link-primary"
 												href={link.href}
 											>
 												{link.name}
