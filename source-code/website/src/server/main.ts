@@ -18,6 +18,8 @@ import { createServer as createViteServer } from "vite";
 import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
 import { telefunc } from "telefunc";
+import http from "node:http";
+import { proxy } from "./git-proxy.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 /** the root path of the server (website/) */
@@ -33,20 +35,26 @@ async function runServer() {
 
 	// compress responses with gzip
 	app.use(compression());
-	// Parse & make HTTP request body available at `req.body` (required by telefunc)
-	app.use(express.text());
 	// use vite's connect instance as middleware
 	app.use(viteServer.middlewares);
 
 	// serving telefunc https://telefunc.com/
-	app.all("/_telefunc", async (request, response) => {
-		const { body, statusCode, contentType } = await telefunc({
-			url: request.originalUrl,
-			method: request.method,
-			body: request.body,
-		});
-		return response.status(statusCode).type(contentType).send(body);
-	});
+	app.all(
+		"/_telefunc",
+		// Parse & make HTTP request body available at `req.body` (required by telefunc)
+		app.use(express.text()),
+		// handle the request
+		async (request, response) => {
+			const { body, statusCode, contentType } = await telefunc({
+				url: request.originalUrl,
+				method: request.method,
+				body: request.body,
+			});
+			return response.status(statusCode).type(contentType).send(body);
+		}
+	);
+
+	app.all("/git-proxy/*", proxy);
 
 	// serving @src/pages and /public
 	app.get("*", async (request, response, next) => {
