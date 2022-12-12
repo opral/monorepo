@@ -101,6 +101,8 @@ export async function validateEnv() {
 		);
 	} else if (env.VITE_CORS_PROXY_URL === undefined) {
 		throw Error("Missing env variable VITE_CORS_PROXY_URL");
+	} else if (env.VITE_CORS_PROXY_URL.endsWith("/") === false) {
+		throw Error("VITE_CORS_PROXY_URL must end with a slash (/).");
 	} else if (env.VITE_GITHUB_APP_CLIENT_ID === undefined) {
 		throw Error("Missing env variable VITE_GITHUB_APP_CLIENT_ID");
 	} else if (env.JWE_SECRET_KEY === undefined) {
