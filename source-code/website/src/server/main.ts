@@ -18,10 +18,13 @@ import { createServer as createViteServer } from "vite";
 import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
 import { telefunc } from "telefunc";
-import http from "node:http";
 import { proxy } from "./git-proxy.js";
+import { serverSideEnv } from "@env";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+const env = await serverSideEnv();
+
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname;
 
@@ -54,7 +57,8 @@ async function runServer() {
 		}
 	);
 
-	app.all("/git-proxy/*", proxy);
+	// forward git requests to the proxy with wildcard `*`.
+	app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
 
 	// serving @src/pages and /public
 	app.get("*", async (request, response, next) => {
