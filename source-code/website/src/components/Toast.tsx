@@ -44,7 +44,7 @@ function Toast(props: Props) {
 			prop:variant={props.variant === "info" ? "primary" : props.variant}
 			prop:closable={props.variant === "success" ? false : true}
 			prop:duration={
-				props.variant === "danger" ? undefined : props.duration ?? 2000
+				props.variant === "danger" ? undefined : props.duration ?? 3000
 			}
 		>
 			<Icon name={props.variant} slot="icon"></Icon>

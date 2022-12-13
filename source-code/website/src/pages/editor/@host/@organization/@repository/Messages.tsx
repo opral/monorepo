@@ -1,7 +1,7 @@
 import type * as ast from "@inlang/core/ast";
 import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
 import { bundles, inlangConfig, setBundles } from "@src/pages/editor/state.js";
-import IconSave from "~icons/material-symbols/save-outline-rounded";
+import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
 import { showToast } from "@src/components/Toast.jsx";
@@ -168,9 +168,9 @@ function PatternEditor(props: {
 										.concat([newBundle])
 								);
 								showToast({
-									variant: "success",
-									title: "Success",
-									message: `The message has been committed.`,
+									variant: "info",
+									title: "The change has been committed.",
+									message: `Don't forget to push the changes.`,
 								});
 							} catch (e) {
 								showToast({
@@ -182,8 +182,8 @@ function PatternEditor(props: {
 							}
 						}}
 					>
-						<IconSave slot="prefix"></IconSave>
-						Save
+						<MaterialSymbolsCommitRounded slot="prefix"></MaterialSymbolsCommitRounded>
+						Commit
 					</sl-button>
 				</div>
 			</Show>

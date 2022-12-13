@@ -170,8 +170,9 @@ function HasChangesAction() {
 		<sl-button
 			prop:disabled={(unpushedChanges() ?? []).length === 0}
 			onClick={triggerPushChanges}
+			prop:loading={isLoading()}
 		>
-			Submit changes
+			Push changes
 			<Show when={(unpushedChanges() ?? []).length > 0}>
 				<sl-badge prop:pill={true} prop:pulse={showPulse() ? true : false}>
 					{(unpushedChanges() ?? []).length}
