@@ -30,11 +30,9 @@ export function Layout(props: { children: JSXElement }) {
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow"}>
-				<div class={layoutMargins}>
-					{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
-					{props.children}
-				</div>
+			<div class={"grow flex " + layoutMargins}>
+				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+				{props.children}
 			</div>
 			<Footer />
 		</div>
@@ -299,6 +297,10 @@ function UserDropdown() {
 			<SignInDialog
 				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
+				onClickOnSignInButton={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					signInDialog?.hide();
+				}}
 			></SignInDialog>
 		</>
 	);
