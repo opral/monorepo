@@ -24,12 +24,6 @@ export type ServerSideEnv = ClientSideEnv & {
 	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
 	 */
 	GITHUB_APP_CLIENT_SECRET: string;
-
-	/**
-	 * @deprecated
-	 * TODO remove after #136 is complete.
-	 */
-	GITHUB_PERSONAL_ACCESS_TOKEN?: string;
 };
 
 /**
@@ -95,13 +89,8 @@ export async function serverSideEnv(): Promise<ServerSideEnv> {
  */
 export async function validateEnv() {
 	const env = await serverSideEnv();
-	if (env.GITHUB_PERSONAL_ACCESS_TOKEN === undefined) {
-		console.warn(
-			"Missing env variable GITHUB_PERSONAL_ACCESS_TOKEN. As long as no git repo is cloned, no error should occur."
-		);
-	}
 	// VITE_GIT_REQUEST_PROXY_PATH
-	else if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
+	 if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
 		throw Error("Missing env variable VITE_CORS_PROXY_URL");
 	} else if (
 		env.VITE_GIT_REQUEST_PROXY_PATH.startsWith("/") === false ||
