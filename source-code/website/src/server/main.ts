@@ -82,6 +82,8 @@ async function runServer() {
  *
  * the server should never go down.
  * ! is broken. port is already in use
+ *
+ * TODO fix server restart on error https://github.com/inlang/inlang/issues/182
  */
 function runServerWithRetry() {
 	runServer().catch((error) => {
