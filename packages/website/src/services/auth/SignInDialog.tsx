@@ -20,13 +20,16 @@ export function SignInDialog(props: {
 }) {
 	return (
 		<sl-dialog ref={props.ref}>
+			<h3 slot="label">Sign in</h3>
+			<p>To conduct changes, you must sign in with a GitHub account.</p>
 			<sl-button
 				slot="footer"
+				prop:variant="primary"
 				prop:target="_blank"
 				prop:href={githubAuthUrl(props.githubAppClientId)}
 			>
 				<IconGithub slot="prefix"></IconGithub>
-				Login with GitHub
+				Sign in with GitHub
 			</sl-button>
 		</sl-dialog>
 	);
