@@ -1,3 +1,11 @@
+/**
+ * -------------------------------------
+ * This code is a plugin for markdoc that renders solid components.
+ *
+ * Read more about https://markdoc.dev/
+ * -------------------------------------
+ */
+
 import type { RenderableTreeNodes, Scalar } from "@markdoc/markdoc";
 import type { Component, JSXElement } from "solid-js";
 import { createComponent } from "solid-js";
