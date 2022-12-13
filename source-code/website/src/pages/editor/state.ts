@@ -31,8 +31,11 @@ export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
 
 	// re-fetched if currentPageContext changes
-	[repositoryIsCloned] = createResource(currentPageContext, () =>
-		cloneRepository(currentPageContext(), localStorage.user)
+	[repositoryIsCloned] = createResource(
+		// the fetch must account for the user and currentpagecontext to properly re-fetch
+		// when the user logs-in or out.
+		() => [currentPageContext, localStorage.user],
+		() => cloneRepository(currentPageContext(), localStorage.user)
 	);
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
