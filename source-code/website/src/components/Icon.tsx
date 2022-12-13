@@ -20,8 +20,8 @@ export function Icon(
 }
 
 // if you'd like to add icons, the following sets are available:
-//  - material symbols https://icon-sets.iconify.design/material-symbols/
-//  - core ui brands https://icon-sets.iconify.design/cib/
+//  - material symbols https://icones.netlify.app/collection/material-symbols
+//  - core ui brands https://icones.netlify.app/collection/cib
 //
 // the available icon sets are defined in the `package.json` file.
 // look out for "@iconify-json/*": "*" dependencies
