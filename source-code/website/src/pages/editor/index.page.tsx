@@ -11,7 +11,6 @@ export function Page() {
 			<a class="link link-primary" href="/editor/github.com/inlang/demo">
 				example
 			</a>
-			<p>hi {localStorage.user?.username}</p>
 		</EditorLayout>
 	);
 }
