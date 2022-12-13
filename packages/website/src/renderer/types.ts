@@ -21,7 +21,7 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
 		/**
 		 * The properties of a page.
 		 */
-		props: PageProps;
+		pageProps: PageProps;
 		/**
 		 * Things that a file that contains a Page exports.
 		 *
@@ -62,8 +62,10 @@ export type PageContext<PageProps = Record<string, unknown>> = Pick<
  * 		}
  * ```
  */
-export type OnBeforeRender<Props> = (
-	pageContext: PageContext<Props>
+export type OnBeforeRender<PageProps> = (
+	pageContext: PageContextRenderer
 ) => Promise<{
-	pageContext: Pick<PageContext<Props>, "props">;
+	pageContext: {
+		pageProps: PageProps;
+	};
 }>;

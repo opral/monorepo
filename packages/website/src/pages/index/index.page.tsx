@@ -1,6 +1,11 @@
 import type { PageHead } from "@src/renderer/types.js";
 import { Layout as RootLayout } from "../Layout.jsx";
 import { Hero } from "./Hero.jsx";
+import styles from "./github-markdown.module.css";
+
+export type PageProps = {
+	markdown: string;
+};
 
 export const Head: PageHead = () => {
 	return {
@@ -9,14 +14,16 @@ export const Head: PageHead = () => {
 	};
 };
 
-export function Layout() {
-	return RootLayout;
-}
-
-export function Page() {
+export function Page(props: PageProps) {
 	return (
-		<div class="self-center grow sm:px-6 md:px-0">
-			<Hero></Hero>
-		</div>
+		<RootLayout>
+			<div class="self-center grow sm:px-6 md:px-0 mb-8">
+				<Hero></Hero>
+				{/* rendering the github readme */}
+				<div class="p-4 md:p-6 rounded border border-outline">
+					<div class={styles["markdown-body"]} innerHTML={props.markdown}></div>
+				</div>
+			</div>
+		</RootLayout>
 	);
 }
