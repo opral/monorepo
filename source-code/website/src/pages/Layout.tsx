@@ -28,7 +28,14 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<div class="flex flex-col min-h-screen">
 			<Header />
-			<div class={`grow flex ${layoutMargins}`}>{props.children}</div>
+			{/* the outer div is growing to occupy the entire height and thereby
+			push the footer to the bottom */}
+			<div class={"grow"}>
+				<div class={layoutMargins}>
+					{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+					{props.children}
+				</div>
+			</div>
 			<Footer />
 		</div>
 	);
