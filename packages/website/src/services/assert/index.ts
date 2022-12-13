@@ -1,4 +1,11 @@
 /**
+ * --------------------------------
+ * This index file exports code that is supposed
+ * to be used outside of this directory.
+ * --------------------------------
+ */
+
+/**
  * Asserts a condition in development environment.
  *
  * Use `assert` to verify the correct usage of code by other developers.
