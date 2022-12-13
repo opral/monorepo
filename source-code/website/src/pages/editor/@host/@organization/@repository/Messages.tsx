@@ -1,6 +1,6 @@
 import type * as ast from "@inlang/core/ast";
 import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
-import { bundles, inlangConfig, setBundles } from "./state.js";
+import { bundles, inlangConfig, setBundles } from "@src/pages/editor/state.js";
 import IconSave from "~icons/material-symbols/save-outline-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
