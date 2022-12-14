@@ -11,7 +11,7 @@ import { tableOfContent } from "./tableOfContent.js";
 // }
 export function Page() {
 	return (
-		<div class=" flex-row min-h-full   items-center justify-center space-y-10 md:space-y-12 lg:space-y-14 py-4 mx-auto max-w-2xl ">
+		<div class=" flex-row min-h-full   items-center justify-center   mx-auto max-w-2xl divide-y divide-solid divide-outline  ">
 			<For each={tableOfContent}>
 				{(section) => (
 					// <sl-card class="card-overview min-h-full w-full">
@@ -28,17 +28,20 @@ export function Page() {
 					// 		<a class="link link-primary text-primary" href={section.href}>
 					// 			... read more
 					// 		</a>
+					//space-y-10 md:space-y-12 lg:space-y-14
 					// 	</span>
 					// </sl-card>
-					<div class="space-y-10 md:space-y-12 lg:space-y-14py">
-						<a href={section.href} class="text-ellipsis  space-y-2 ">
+
+					<div class=" py-12">
+						<a href={section.href} class="text-ellipsis  space-y-4  ">
 							<p class="text-xl font-bold tracking-tight text-on-backround truncate ">
 								{section.headline}
 							</p>
-							<p class="grid grid-row-2">
-								{section.title} adsasd asd asdsadasdsa a dasdsad
-							</p>
-							<img src={section.imageSrc} />
+							<p class="">{section.title} adsasd asd asdsadasdsa a dasdsad</p>
+							<img
+								class="object-contain w-full rounded"
+								src={section.imageSrc}
+							/>
 							<p class="text-primary">Read more…</p>
 						</a>
 					</div>
