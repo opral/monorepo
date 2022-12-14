@@ -1,6 +1,6 @@
 // import { onMount } from "solid-js";
 // import { navigate } from "vite-plugin-ssr/client/router";
-import { For } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { tableOfContent } from "./tableOfContent.js";
 
 // export function Page() {
@@ -11,7 +11,7 @@ import { tableOfContent } from "./tableOfContent.js";
 // }
 export function Page() {
 	return (
-		<div class=" flex-row min-h-full min-w-full items-center justify-center  space-y-4 md:space-y-0 py-4 mx-auto  ">
+		<div class=" flex-row min-h-full   items-center justify-center space-y-10 md:space-y-12 lg:space-y-14 py-4 mx-auto max-w-2xl ">
 			<For each={tableOfContent}>
 				{(section) => (
 					// <sl-card class="card-overview min-h-full w-full">
@@ -30,12 +30,17 @@ export function Page() {
 					// 		</a>
 					// 	</span>
 					// </sl-card>
-					<div>
-						<h1 class=" text-xl font-bold tracking-tight text-on-backround  ">
-							{" "}
-							{section.headline}
-						</h1>
-						<p> {section.title}</p>
+					<div class="space-y-10 md:space-y-12 lg:space-y-14py">
+						<a href={section.href} class="text-ellipsis  space-y-2 ">
+							<p class="text-xl font-bold tracking-tight text-on-backround truncate ">
+								{section.headline}
+							</p>
+							<p class="grid grid-row-2">
+								{section.title} adsasd asd asdsadasdsa a dasdsad
+							</p>
+							<img src={section.imageSrc} />
+							<p class="text-primary">Read more…</p>
+						</a>
 					</div>
 				)}
 			</For>
