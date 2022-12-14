@@ -18,13 +18,13 @@ export const tableOfContent = [
 		imageSrc: "",
 	},
 	{
-		title: "asäß",
+		headline: "asäß",
 		subHeadline: "8 Items muss ich sehen",
 		href: "/blog/getting-started",
 		imageSrc: "https://wallpapercave.com/wp/PPMnOZM.jpg",
 	},
 	{
-		title: "aßäßä",
+		headline: "aßäßä",
 		subHeadline:
 			"8 Items muss ich sehesdfdsfdsdsfsdfsdfdsb ffsdfsfsdsfdsdfa sdasdasasdasdsfaasdsads aadsadassdasdn",
 		href: "/blog/getting-started",
@@ -32,7 +32,7 @@ export const tableOfContent = [
 			"https://images.unsplash.com/photo-1559209172-0ff8f6d49ff7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
 	},
 	{
-		title: "aßäßä",
+		headline: "aßäßä",
 		subHeadline: "8 Items muss ich sehesdfdsfdsdsfsdfsdfdsb ffsdfsfsdsfdsdfsdn",
 		href: "/blog/getting-started",
 		imageSrc:
