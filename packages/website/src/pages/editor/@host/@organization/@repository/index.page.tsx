@@ -59,7 +59,7 @@ export function Page() {
 				<Match when={inlangConfig() === undefined}>
 					<Directories></Directories>
 				</Match>
-				<Match when={inlangConfig() && referenceBundle()}>
+				<Match when={inlangConfig()}>
 					<div class="space-y-2">
 						<For each={inludedMessageIds()}>
 							{(id) => (
