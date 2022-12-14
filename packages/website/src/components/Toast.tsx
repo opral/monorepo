@@ -1,6 +1,7 @@
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { onMount, Show } from "solid-js";
 import { render } from "solid-js/web";
+import type { SemanticColorTokens } from "../../tailwind.config.cjs";
 import { Icon } from "./Icon.jsx";
 
 /**
@@ -22,7 +23,7 @@ export function showToast(props: Props) {
 }
 
 type Props = {
-	variant: "info" | "success" | "warning" | "danger";
+	variant: SemanticColorTokens[number];
 	title: string;
 	message?: string;
 	/** defaults to 2000 */
