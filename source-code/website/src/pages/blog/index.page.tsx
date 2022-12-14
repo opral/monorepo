@@ -11,7 +11,7 @@ import { tableOfContent } from "./tableOfContent.js";
 // }
 export function Page() {
 	return (
-		<div class=" flex-row min-h-full   items-center justify-center   mx-auto max-w-2xl divide-y divide-solid divide-outline  ">
+		<div class=" flex-row min-h-full   items-center justify-center   mx-auto md:max-w-2xl divide-y divide-solid divide-outline  ">
 			<For each={tableOfContent}>
 				{(section) => (
 					<div class=" py-12">
