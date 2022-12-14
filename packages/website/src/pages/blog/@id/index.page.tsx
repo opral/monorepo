@@ -4,8 +4,8 @@ import { Show } from "solid-js";
 
 export const Head: PageHead = () => {
 	return {
-		title: "Documentation",
-		description: "Documentation",
+		title: "Blog",
+		description: "Blog",
 	};
 };
 
@@ -15,9 +15,12 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="py-4 w-full mx-auto">
+		<div class="py-4 w-full mx-auto divide-y divide-solid divide-outline">
 			<Show when={props.markdown} fallback={<Error></Error>}>
 				<div class=" prose mx-auto w-full" innerHTML={props.markdown}></div>
+				<a class=" flex justify-center link link-primary py-4" href="/blog">
+					&lt;- Back to Index
+				</a>
 			</Show>
 		</div>
 	);
