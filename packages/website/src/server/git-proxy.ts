@@ -32,21 +32,20 @@ export async function proxy(
 	const encryptedAccessToken = getAuthHeaderValue({
 		headers: request.headers as unknown as Record<string, string>,
 	});
-	if (encryptedAccessToken === undefined) {
-		return response.status(401).send("Unauthorized");
+	if (encryptedAccessToken) {
+		const decryptedAccessToken = await decryptAccessToken({
+			JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+			jwe: encryptedAccessToken,
+		});
+		if (decryptedAccessToken.isErr) {
+			console.error(decryptedAccessToken.error);
+			return next(decryptedAccessToken.error);
+		}
+		// set the authorization header (must be base64 encoded)
+		request.headers["authorization"] = `Basic ${btoa(
+			decryptedAccessToken.value
+		)}`;
 	}
-	const decryptedAccessToken = await decryptAccessToken({
-		JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-		jwe: encryptedAccessToken,
-	});
-	if (decryptedAccessToken.isErr) {
-		console.error(decryptedAccessToken.error);
-		return next(decryptedAccessToken.error);
-	}
-	// set the authorization header (must be base64 encoded)
-	request.headers["authorization"] = `Basic ${btoa(
-		decryptedAccessToken.value
-	)}`;
 	// remove the proxy path from the url
 	request.url = request.url.slice(env.VITE_GIT_REQUEST_PROXY_PATH.length);
 	return middleware(request, response);
