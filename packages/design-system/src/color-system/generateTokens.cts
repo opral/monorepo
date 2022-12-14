@@ -2,7 +2,7 @@ import type { Config } from "./types/config.cjs";
 import type { ColorTokens } from "./types/colorTokens.cjs";
 import { TinyColor } from "@ctrl/tinycolor";
 import type { Color } from "./types/color.cjs";
-
+const surface100Color = 82;
 // todos:
 // - support surface levels (100,200,300,400,500)
 //   see https://m3.material.io/styles/color/the-color-system/color-roles
@@ -22,19 +22,19 @@ export function generateTokens(config: Config): ColorTokens {
 		background: white,
 		"on-background": neutralColors.neutral[900],
 		"surface-100": new TinyColor(neutralColors.neutral[900])
-			.lighten(88)
+			.lighten(surface100Color)
 			.toHex8String(),
 		"surface-200": new TinyColor(neutralColors.neutral[900])
-			.lighten(85)
+			.lighten(surface100Color - 3)
 			.toHex8String(),
 		"surface-300": new TinyColor(neutralColors.neutral[900])
-			.lighten(82)
+			.lighten(surface100Color - 6)
 			.toHex8String(),
 		"surface-400": new TinyColor(neutralColors.neutral[900])
-			.lighten(80)
+			.lighten(surface100Color - 9)
 			.toHex8String(),
 		"surface-500": new TinyColor(neutralColors.neutral[900])
-			.lighten(78)
+			.lighten(surface100Color - 12)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
 		"surface-variant": neutralColors.neutralVariant[100],
