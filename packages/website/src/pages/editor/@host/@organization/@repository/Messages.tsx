@@ -1,10 +1,20 @@
 import type * as ast from "@inlang/core/ast";
-import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
+import {
+	createSignal,
+	For,
+	JSXElement,
+	Match,
+	Show,
+	Switch,
+	useTransition,
+} from "solid-js";
 import { bundles, inlangConfig, setBundles } from "@src/pages/editor/state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
 import { showToast } from "@src/components/Toast.jsx";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
 
 export function Messages(props: {
 	referenceBundleId: ast.Bundle["id"]["name"];
@@ -68,6 +78,8 @@ function PatternEditor(props: {
 	referenceMessage: ast.Message;
 	message: ast.Message | undefined;
 }) {
+	const [localStorage] = useLocalStorage();
+
 	/** throw if unimplemented features are used  */
 	if (
 		(props.message && props.message?.pattern.elements.length > 1) ||
@@ -146,10 +158,19 @@ function PatternEditor(props: {
 			</div> */}
 			{/* action bar */}
 			<Show when={isFocused()}>
-				<div class="flex items-center justify-end mt-2">
+				<div class="flex items-center justify-end mt-2 gap-2">
+					<Show when={hasChanges() && localStorage.user === undefined}>
+						<InlineNotification
+							title="Sign in"
+							message="You must be signed in to commit changes."
+							variant="info"
+						></InlineNotification>
+					</Show>
 					<sl-button
 						prop:variant="primary"
-						prop:disabled={hasChanges() === false}
+						prop:disabled={
+							hasChanges() === false || localStorage.user === undefined
+						}
 						onClick={() => {
 							const _copy = copy();
 							const _textValue = textValue();
