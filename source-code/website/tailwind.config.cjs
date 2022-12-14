@@ -18,6 +18,7 @@ module.exports = {
 		components.configure(),
 		// the colors align with shoelace's colors https://shoelace.style/tokens/color
 		colorSystem.configure({
+			//! the colors must satisfy the defined types below the config
 			accentColors: {
 				primary: colors.sky,
 				//! shoelace's secondary token is called neutral.
@@ -29,6 +30,8 @@ module.exports = {
 				neutralVariant: colors.stone,
 			},
 			semanticColors: {
+				// duplicate primary color for better semantic meaning
+				info: colors.sky,
 				success: colors.green,
 				warning: colors.amber,
 				danger: colors.red,
@@ -43,19 +46,35 @@ module.exports = {
 };
 
 /**
- * @typedef {["primary","secondary","success","warning", "danger"]} DesignSystemColors
+ * Color Tokens used in the design system.
  *
- * colors that are defined in the tailwind config.
+ * @typedef {[...AccentColorTokens, ...SemanticColorTokens]} ColorTokens
+ */
+
+/**
+ * Semantic colors used in the design system.
+ * https://m3.material.io/styles/color/the-color-system/key-colors-tones
+ *
+ * @typedef {["info", "success", "warning", "danger"]} SemanticColorTokens
+ */
+
+/**
+ * Accent colors used in the design system.
+ * https://m3.material.io/styles/color/the-color-system/key-colors-tones#a0d0c095-7068-46b3-bb67-28bc64d69f17
+ *
+ * @typedef {["primary","secondary", "tertiary"]} AccentColorTokens
  */
 
 /**
  * finds dynamic classes that need to be whitelisted for tailwind css
  */
 function usedClassWithDynamicColor() {
-	/** @type {DesignSystemColors} */
-	const designSystemColors = [
+	/** @type {ColorTokens} */
+	const colorTokens = [
 		"primary",
 		"secondary",
+		"tertiary",
+		"info",
 		"success",
 		"warning",
 		"danger",
@@ -67,8 +86,12 @@ function usedClassWithDynamicColor() {
 	for (const file of files) {
 		const content = fs.readFileSync(file, "utf-8");
 		// match everything with a `-` before string interpolation
-		// like `bg-${props.color}` or `bg-on-${color}`
-		const matches = content.match(/([\w|-]*-*\$\{(.)*color\})/g);
+		// and after string interpolation with a `-`
+		// must contain the world color or variant
+		// like `bg-${props.color}` or `bg-on-${color}-container`
+		const matches = content.match(
+			/([\w|-]*-*\$\{(.)*(color|variant)\}[-|\w]*)/g
+		);
 		if (matches) {
 			// iterate all possible color class possibilities
 			// and push them to result
@@ -77,8 +100,8 @@ function usedClassWithDynamicColor() {
 				const classes = match.split(" ");
 				for (const c of classes) {
 					result.push(
-						...designSystemColors.map((color) => {
-							const replace = c.replace(/\$\{(.)*\}/, color);
+						...colorTokens.map((token) => {
+							const replace = c.replace(/\$\{(.)*\}/, token);
 							return replace;
 						})
 					);
