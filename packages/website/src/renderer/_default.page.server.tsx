@@ -4,6 +4,9 @@ import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import { setCurrentPageContext } from "./state.js";
 import { ThePage } from "./ThePage.jsx";
 
+// import the css
+import "./app.css";
+
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
 
