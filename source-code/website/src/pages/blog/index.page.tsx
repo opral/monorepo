@@ -26,7 +26,9 @@ export function Page() {
 								class="object-contain w-full rounded"
 								src={section.imageSrc}
 							/>
-							<p class="text-primary">Read more…</p>
+							{/* using link-primary and text-primary to render the link color by default in primary 
+							but also get hover effects from link-primary */}
+							<p class="link text-primary link-primary">Read more…</p>
 						</a>
 					</div>
 				)}
