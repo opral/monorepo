@@ -24,6 +24,8 @@ export function generateTokens(config: Config): ColorTokens {
 	const tokens: Partial<ColorTokens> = {
 		background: white,
 		"on-background": neutralColors.neutral[900],
+		// the surface color spec is derived from
+		// https://m3.material.io/styles/color/the-color-system/color-roles
 		"surface-100": new TinyColor(neutralColors.neutral[900])
 			.lighten(surface100LightenValue)
 			.toHex8String(),
