@@ -20,7 +20,10 @@ import { URL } from "url";
 import { telefunc } from "telefunc";
 import { proxy } from "./git-proxy.js";
 import { serverSideEnv } from "@env";
+import sirv from "sirv";
 
+// the flag is set in the package.json scripts
+// via `NODE_ENV=production <command>`
 const isProduction = process.env.NODE_ENV === "production";
 
 const env = await serverSideEnv();
@@ -30,16 +33,22 @@ const rootPath = new URL("../..", import.meta.url).pathname;
 
 async function runServer() {
 	const app = express();
-	const viteServer = await createViteServer({
-		server: { middlewareMode: true },
-		root: rootPath,
-		appType: "custom",
-	});
-
 	// compress responses with gzip
 	app.use(compression());
-	// use vite's connect instance as middleware
-	app.use(viteServer.middlewares);
+
+	if (isProduction) {
+		// serve build files
+		app.use(sirv(`${rootPath}/dist/client`));
+	} else {
+		// start vite hot module reload dev server
+		const viteServer = await createViteServer({
+			server: { middlewareMode: true },
+			root: rootPath,
+			appType: "custom",
+		});
+		// use vite's connect instance as middleware
+		app.use(viteServer.middlewares);
+	}
 
 	// serving telefunc https://telefunc.com/
 	app.all(
