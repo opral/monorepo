@@ -29,6 +29,11 @@ export default await withFsPolyfills({
 			"@env": fileURLToPath(new URL("./env.ts", import.meta.url)),
 		},
 	},
+	build: {
+		// target is es2022 to support top level await
+		// https://caniuse.com/?search=top%20level%20await
+		target: "es2022",
+	},
 });
 
 /**
