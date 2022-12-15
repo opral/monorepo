@@ -11,12 +11,12 @@ import { tableOfContent } from "./tableOfContent.js";
 // }
 export function Page() {
 	return (
-		<div class=" flex-row min-h-full   items-center justify-center   mx-auto md:max-w-2xl divide-y divide-solid divide-outline  ">
+		<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
 			<For each={tableOfContent}>
 				{(section) => (
-					<div class=" py-12">
-						<a href={section.href} class="text-ellipsis  space-y-4  ">
-							<p class="text-xl font-bold tracking-tight text-on-backround truncate ">
+					<div class="py-12">
+						<a href={section.href} class="text-ellipsis space-y-4">
+							<p class="text-xl font-bold tracking-tight text-on-backround truncate">
 								{section.headline}
 							</p>
 							<p class="">{section.subHeadline}</p>
