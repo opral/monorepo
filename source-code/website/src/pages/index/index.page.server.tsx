@@ -2,8 +2,7 @@ import type { OnBeforeRender } from "@src/renderer/types.js";
 import { parseValidateAndRender } from "@src/services/markdown/index.js";
 import type { PageProps } from "./index.page.jsx";
 import fs from "node:fs";
-// @ts-ignore
-import marked from "marked";
+import { marked } from "marked";
 
 const text = fs.readFileSync(`../../README.md`, "utf-8");
 const markdown = marked.parse(text);
