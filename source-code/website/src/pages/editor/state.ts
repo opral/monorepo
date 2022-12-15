@@ -129,7 +129,6 @@ async function cloneRepository(
 ): Promise<Date | undefined> {
 	const { host, organization, repository } = pageContext.routeParams;
 	if (
-		user === undefined ||
 		host === undefined ||
 		organization === undefined ||
 		repository === undefined
@@ -140,9 +139,11 @@ async function cloneRepository(
 		fs: fs,
 		http,
 		dir: "/",
-		headers: createAuthHeader({
-			encryptedAccessToken: user.encryptedAccessToken,
-		}),
+		headers: user
+			? createAuthHeader({
+					encryptedAccessToken: user.encryptedAccessToken,
+			  })
+			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${organization}/${repository}`,
 	});
