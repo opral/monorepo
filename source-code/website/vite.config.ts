@@ -38,9 +38,8 @@ export default await withFsPolyfills({
  */
 async function withFsPolyfills(config: UserConfig): Promise<UserConfig> {
 	// import required modules
-	const nodePolyfills = await (
-		await import("rollup-plugin-polyfill-node")
-	).default;
+	const rollupNodePolyFill = (await import("rollup-plugin-node-polyfills"))
+		.default;
 	const { NodeGlobalsPolyfillPlugin } = await import(
 		"@esbuild-plugins/node-globals-polyfill"
 	);
@@ -52,11 +51,12 @@ async function withFsPolyfills(config: UserConfig): Promise<UserConfig> {
 		plugins: [
 			// @ts-ignore
 			// enable node polyfills in rollup
-			nodePolyfills(),
+			rollupNodePolyFill(),
 		],
 		resolve: {
 			alias: {
-				events: "rollup-plugin-polyfill-node",
+				events: "rollup-plugin-node-polyfills/polyfills/events",
+				path: "rollup-plugin-node-polyfills/polyfills/path",
 			},
 		},
 		optimizeDeps: {
