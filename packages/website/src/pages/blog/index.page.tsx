@@ -19,9 +19,7 @@ export function Page() {
 							<p class="text-xl font-bold tracking-tight text-on-backround truncate ">
 								{section.headline}
 							</p>
-							<p class="">
-								{section.subHeadline} adsasd asd asdsadasdsa a dasdsad
-							</p>
+							<p class="">{section.subHeadline}</p>
 							<img
 								class="object-contain w-full rounded"
 								src={section.imageSrc}
