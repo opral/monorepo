@@ -13,7 +13,7 @@ export const tableOfContent = [
 		headline: "8 Items muss ich sehen",
 
 		subHeadline:
-			"qä adasdasdas adasdasdasadasdasdas adasdasdasadasdasdas adasda adasdasdassdasadasdasdasadasdasdasadasdasdas ",
+			"qä adasdasdas adasdasdasadasdasdas adasdasdasadasdasdas adasda adasdasdassdasadasdasdasadasda sdasadasdasdas ",
 		href: "/blog/getting-started",
 		imageSrc: "",
 	},
