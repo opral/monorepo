@@ -47,8 +47,8 @@ export function render(pageContext: PageContextRenderer): unknown {
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
-      <body class="min-h-screen min-w-screen">
-	<!-- setting min-h/w-screen to allow child elemtest to the entire screen  -->
+      <body class="min-h-screen min-w-screen bg-background text-on-background">
+		<!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
         <div class="min-h-screen min-w-screen" id="root">
 			${dangerouslySkipEscape(renderedPage)}
 		</div>
