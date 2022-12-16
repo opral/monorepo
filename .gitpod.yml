@@ -1,4 +1,3 @@
-
 tasks:
   - init: npm install && npm run build
     # use node 18
@@ -8,13 +7,10 @@ tasks:
       nvm alias default 18.12
     command: npm run dev
 
-ports: 
+ports:
   - name: "@inlang/website"
     port: 3000
     onOpen: open-browser
-  - name: "@inlang/cors-proxy"
-    port: 3001
-    onOpen: notify
 
 vscode:
   extensions:
