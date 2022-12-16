@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "npx tsx ./src/server/main.ts",
-		"production": "cross-env NODE_ENV=production npx tsx ./src/server/main.ts",
+		"production": "NODE_ENV=production npx tsx ./src/server/main.ts",
 		"build": "vite build",
 		"preview": "vite build && npm run production",
 		"test": "vitest run --coverage",
