@@ -5,6 +5,10 @@ import { ThePage } from "./ThePage.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 
+// node polyfill
+import { Buffer } from "buffer";
+globalThis.Buffer = Buffer;
+
 // import the css
 import "./app.css";
 
