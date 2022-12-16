@@ -8,7 +8,7 @@
  * ------------------------------------
  */
 
-import { assert } from "@src/services/assert/index.js";
+// import { assert } from "@src/services/assert/index.js";
 import type { NextFunction, Request, Response } from "express";
 import { serverSideEnv } from "@env";
 // @ts-ignore
@@ -24,7 +24,9 @@ export async function proxy(
 	response: Response,
 	next: NextFunction
 ) {
-	assert(request.url.startsWith(env.VITE_GIT_REQUEST_PROXY_PATH));
+	// TODO enable after https://github.com/brillout/vite-plugin-ssr/discussions/560#discussioncomment-4420315
+	// TODO currently not using vite to bundle this file, hence the call below will not be pruned
+	// assert(request.url.startsWith(env.VITE_GIT_REQUEST_PROXY_PATH));
 	if (request.path.includes("github") === false) {
 		return response.status(500).send("Unsupported git hosting provider.");
 	}
@@ -48,5 +50,5 @@ export async function proxy(
 	}
 	// remove the proxy path from the url
 	request.url = request.url.slice(env.VITE_GIT_REQUEST_PROXY_PATH.length);
-	return middleware(request, response);
+	return middleware(request, response, next);
 }
