@@ -4,6 +4,14 @@ import { hydrate } from "solid-js/web";
 import { ThePage } from "./ThePage.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
+
+// node polyfill
+import { Buffer } from "buffer";
+globalThis.Buffer = Buffer;
+
+// import the css
+import "./app.css";
+
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
