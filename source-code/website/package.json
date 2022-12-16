@@ -3,9 +3,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "npx tsx ./src/server/main.ts",
-		"production": "NODE_ENV=production npx tsx ./src/server/main.ts",
+		"production": "cross-env NODE_ENV=production npx tsx ./src/server/main.ts",
 		"build": "vite build",
-		"preview": "vite build && vite preview",
+		"preview": "vite build && npm run production",
 		"test": "vitest run --coverage",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
@@ -37,8 +37,6 @@
 		"zod": "^3.19.1"
 	},
 	"devDependencies": {
-		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
-		"@esbuild-plugins/node-modules-polyfill": "^0.1.4",
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.22",
 		"@tailwindcss/forms": "^0.5.3",
