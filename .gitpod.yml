@@ -1,12 +1,13 @@
 tasks:
-  - init: npm install && npm run build
-    # 1. install doppler
-    # 2. install and use node 18
-    before: |
+  # 1. install doppler
+  # 2. install and use node 18
+  - init: |
       brew install dopplerhq/cli/doppler 
       nvm i 18.12
       nvm use 18.12
       nvm alias default 18.12
+    before: |
+      npm install
     # using doppler run to set env variables automatically
     # the DOPPLER_DEVELOPMENT_SERVICE_KEY is set in gitpod's UI
     command: doppler run --token $DOPPLER_DEVELOPMENT_SERVICE_KEY -- npm run dev
