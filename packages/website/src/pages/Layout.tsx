@@ -58,7 +58,7 @@ function Header() {
 		{ name: "Blog", href: "/blog" },
 	];
 
-	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
+	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(true);
 
 	return (
 		<header class="sticky top-0 z-50 w-full bg-surface-100 border-b border-outline-variant py-3">
@@ -118,58 +118,38 @@ function Header() {
 				</div>
 				{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 				<Show when={mobileMenuIsOpen()}>
-					<ol class=" space-y-1 relativ  w-screen min-h-full   pt-3  overflow ">
+					<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
 						<For each={links}>
 							{(link) => (
-								<>
-									<sl-tree class="tree-with-lines ">
-										<sl-tree-item>
+								<sl-tree class="tree-with-lines ">
+									<Switch
+										fallback={
 											<a
-												class="link font-bold  text-on-surface link-primary"
+												class="link font-bold grow min-w-full bg-on-surface text-on-surface link-primary w-full"
 												href={link.href}
+												onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 											>
-												{link.name}
+												<sl-tree-item>{link.name}</sl-tree-item>
 											</a>
-											<Show when={link.href === "/documentation"}>
+										}
+									>
+										<Match when={link.href === "/documentation"}>
+											<sl-tree-item>
+												{link.name}
+
 												<For each={tableOfContent}>
 													{(section) => (
-														<sl-tree-item class="p-3">
-															<h2 class="font-bold text-on-surface">
+														<sl-tree-item class="p-3 ">
+															<h2 class="font-bold text-on-surface ">
 																{section.title}
 															</h2>
-
-															<For each={section.documents}>
-																{(document) => (
-																	<sl-tree-item>
-																		<a
-																			class="block w-full font-medium link link-primary "
-																			onClick={() =>
-																				setMobileMenuIsOpen(!mobileMenuIsOpen())
-																			}
-																			classList={{
-																				"text-primary":
-																					document.href ===
-																					currentPageContext().urlParsed
-																						.pathname,
-																				"text-on-surface-variant":
-																					document.href !==
-																					currentPageContext().urlParsed
-																						.pathname,
-																			}}
-																			href={document.href}
-																		>
-																			{document.title}
-																		</a>
-																	</sl-tree-item>
-																)}
-															</For>
 														</sl-tree-item>
 													)}
 												</For>
-											</Show>
-										</sl-tree-item>
-									</sl-tree>
-								</>
+											</sl-tree-item>
+										</Match>
+									</Switch>
+								</sl-tree>
 							)}
 						</For>
 
