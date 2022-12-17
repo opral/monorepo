@@ -58,7 +58,7 @@ function Header() {
 		{ name: "Blog", href: "/blog" },
 	];
 
-	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(true);
+	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
 
 	return (
 		<header class="sticky top-0 z-50 w-full bg-surface-100 border-b border-outline-variant py-3">
@@ -99,7 +99,7 @@ function Header() {
 						</div>
 					</div>
 					{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
-					<div class="md:hidden flex items-center">
+					<div class=" md:hidden flex items-center">
 						<button
 							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 							type="button"
@@ -122,51 +122,16 @@ function Header() {
 						<For each={links}>
 							{(link) => (
 								<sl-tree class="tree-with-lines ">
-									<Switch
-										fallback={
-											<a
-												class="link font-bold grow min-w-full bg-on-surface text-on-surface link-primary w-full"
-												href={link.href}
-												onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-											>
-												<sl-tree-item>{link.name}</sl-tree-item>
-											</a>
-										}
+									<a
+										class="link grow min-w-full  text-on-surface link-primary w-full"
+										href={link.href}
+										onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 									>
-										<Match when={link.href === "/documentation"}>
-											<sl-tree-item>
-												{link.name}
-
-												<For each={tableOfContent}>
-													{(section) => (
-														<sl-tree-item class="p-3 ">
-															<h2 class="font-bold text-on-surface ">
-																{section.title}
-															</h2>
-														</sl-tree-item>
-													)}
-												</For>
-											</sl-tree-item>
-										</Match>
-									</Switch>
+										<sl-tree-item>{link.name}</sl-tree-item>
+									</a>
 								</sl-tree>
 							)}
 						</For>
-
-						{/* <For each={socialMediaLinks}>
-							{(link) => (
-								<li>
-									<a
-										class="link link-primary flex space-x-2 items-center"
-										href={link.href}
-										target="_blank"
-									>
-										<link.Icon></link.Icon>
-										<span>{link.name}</span>
-									</a>
-								</li>
-							)}
-						</For> */}
 					</ol>
 				</Show>
 			</nav>
