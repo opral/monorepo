@@ -8,7 +8,6 @@ import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
-import { tableOfContent } from "./documentation/@id/tableOfContent.js";
 import { clientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { SignInDialog } from "@src/services/auth/index.js";
@@ -54,8 +53,8 @@ const socialMediaLinks = [
 function Header() {
 	const links = [
 		{ name: "Editor", href: "/editor" },
-
 		{ name: "Docs", href: "/documentation" },
+		{ name: "Blog", href: "/blog" },
 	];
 
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
@@ -118,75 +117,20 @@ function Header() {
 				</div>
 				{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 				<Show when={mobileMenuIsOpen()}>
-					<ol class=" space-y-1 relativ  w-screen min-h-full   pt-3  overflow ">
+					<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
 						<For each={links}>
 							{(link) => (
-								<>
-									<sl-tree class="tree-with-lines ">
-										<sl-tree-item>
-											<a
-												class="link font-bold  text-on-surface link-primary"
-												href={link.href}
-											>
-												{link.name}
-											</a>
-											<Show when={link.href === "/documentation"}>
-												<For each={tableOfContent}>
-													{(section) => (
-														<sl-tree-item class="p-3">
-															<h2 class="font-bold text-on-surface">
-																{section.title}
-															</h2>
-
-															<For each={section.documents}>
-																{(document) => (
-																	<sl-tree-item>
-																		<a
-																			class="block w-full font-medium link link-primary "
-																			onClick={() =>
-																				setMobileMenuIsOpen(!mobileMenuIsOpen())
-																			}
-																			classList={{
-																				"text-primary":
-																					document.href ===
-																					currentPageContext().urlParsed
-																						.pathname,
-																				"text-on-surface-variant":
-																					document.href !==
-																					currentPageContext().urlParsed
-																						.pathname,
-																			}}
-																			href={document.href}
-																		>
-																			{document.title}
-																		</a>
-																	</sl-tree-item>
-																)}
-															</For>
-														</sl-tree-item>
-													)}
-												</For>
-											</Show>
-										</sl-tree-item>
-									</sl-tree>
-								</>
+								<sl-tree class="">
+									<a
+										class="link grow min-w-full text-on-surface link-primary w-full"
+										href={link.href}
+										onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+									>
+										<sl-tree-item>{link.name}</sl-tree-item>
+									</a>
+								</sl-tree>
 							)}
 						</For>
-
-						{/* <For each={socialMediaLinks}>
-							{(link) => (
-								<li>
-									<a
-										class="link link-primary flex space-x-2 items-center"
-										href={link.href}
-										target="_blank"
-									>
-										<link.Icon></link.Icon>
-										<span>{link.name}</span>
-									</a>
-								</li>
-							)}
-						</For> */}
 					</ol>
 				</Show>
 			</nav>

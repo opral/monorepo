@@ -24,3 +24,7 @@
 	bottom: 0;
 	top: auto !important;
 }
+
+.tree-with-lines {
+	--indent-guide-width: 2px;
+}
