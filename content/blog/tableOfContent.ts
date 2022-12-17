@@ -5,7 +5,7 @@ export const tableOfContent = [
 	{
 		headline: "8 Items muss ich sehen",
 		subHeadline: "Introduction",
-		href: "/content/blog/getting-started",
+		href: "001-git-as-backend/index",
 		imageSrc:
 			"https://p.bigstockphoto.com/GeFvQkBbSLaMdpKXF1Zv_bigstock-Aerial-View-Of-Blue-Lakes-And--227291596.jpg",
 	},
