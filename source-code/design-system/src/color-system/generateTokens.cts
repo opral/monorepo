@@ -22,21 +22,21 @@ export function generateTokens(config: Config): ColorTokens {
 		background: white,
 		"on-background": neutralColors.neutral[900],
 		// the surface color spec is derived from
-		// https://m3.material.io/styles/color/the-color-system/color-roles
+		// https://m3.material.io/styles/color/the-color-system/color-roles#c0cdc1ba-7e67-4d6a-b294-218f659ff648
 		"surface-100": new TinyColor(neutralColors.neutral[900])
-			.lighten(85)
+			.lighten(88)
 			.toHex8String(),
 		"surface-200": new TinyColor(neutralColors.neutral[900])
-			.lighten(82)
+			.lighten(85)
 			.toHex8String(),
 		"surface-300": new TinyColor(neutralColors.neutral[900])
-			.lighten(79)
+			.lighten(82)
 			.toHex8String(),
 		"surface-400": new TinyColor(neutralColors.neutral[900])
-			.lighten(78)
+			.lighten(81)
 			.toHex8String(),
 		"surface-500": new TinyColor(neutralColors.neutral[900])
-			.lighten(76)
+			.lighten(79)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
 		"surface-variant": neutralColors.neutralVariant[100],
