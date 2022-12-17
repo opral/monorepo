@@ -1,3 +1,4 @@
+import { Layout } from "@src/pages/Layout.jsx";
 import type { PageHead } from "@src/renderer/types.js";
 import { Show } from "solid-js";
 
@@ -14,20 +15,22 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="grid-row-2 py-4 w-full mx-auto ">
-			<Show when={props.markdown} fallback={<Error></Error>}>
-				<div
-					class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
-					innerHTML={props.markdown}
-				></div>
-			</Show>
-			<a
-				class="flex justify-center link link-primary py-4 text-primary "
-				href="/content/blog"
-			>
-				&lt;- Back to Blog
-			</a>
-		</div>
+		<Layout>
+			<div class="grid-row-2 py-4 w-full mx-auto ">
+				<Show when={props.markdown} fallback={<Error></Error>}>
+					<div
+						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
+						innerHTML={props.markdown}
+					></div>
+				</Show>
+				<a
+					class="flex justify-center link link-primary py-4 text-primary "
+					href="/blog"
+				>
+					&lt;- Back to Blog
+				</a>
+			</div>
+		</Layout>
 	);
 }
 
