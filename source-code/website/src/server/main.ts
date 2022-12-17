@@ -44,18 +44,14 @@ app.use(compression());
 // must happen before the request handlers
 if (isProduction) {
 	Sentry.init({
-		dsn: env.SENTRY_DSN,
+		dsn: env.SENTRY_DSN_SERVER,
 		integrations: [
 			// enable HTTP calls tracing
 			new Sentry.Integrations.Http({ tracing: true }),
 			// enable Express.js middleware tracing
 			new Tracing.Integrations.Express({ app }),
 		],
-
-		// Set tracesSampleRate to 1.0 to capture 100%
-		// of transactions for performance monitoring.
-		// We recommend adjusting this value in production
-		tracesSampleRate: 1.0,
+		tracesSampleRate: 0.8,
 	});
 
 	// RequestHandler creates a separate execution context using domains, so that every

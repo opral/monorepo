@@ -21,11 +21,11 @@ export type ServerSideEnv = ClientSideEnv & {
 	JWE_SECRET_KEY: string;
 
 	/**
-	 * The sentry dsn.
+	 * The sentry dsn for the server.
 	 *
 	 * Only available in production.
 	 */
-	SENTRY_DSN?: string;
+	SENTRY_DSN_SERVER?: string;
 
 	/**
 	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
@@ -50,6 +50,13 @@ export type ClientSideEnv = {
 	 * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
 	 */
 	VITE_GITHUB_APP_CLIENT_ID: string;
+
+	/**
+	 * The sentry dsn for the client.
+	 *
+	 * Only available in production.
+	 */
+	VITE_SENTRY_DSN_CLIENT?: string;
 };
 
 /**
