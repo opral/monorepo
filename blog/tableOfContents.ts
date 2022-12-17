@@ -1,6 +1,8 @@
 type Shema = {
 	[id: string]: {
+		/** filePath: "./number-folder-name/index.md" */
 		filePath: string;
+		/** Headline on the blog page overview */
 		headline: string;
 		subHeadline: string;
 		previewImageSrc: string;
