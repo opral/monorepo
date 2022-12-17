@@ -27,16 +27,16 @@ export function generateTokens(config: Config): ColorTokens {
 			.lighten(88)
 			.toHex8String(),
 		"surface-200": new TinyColor(neutralColors.neutral[900])
-			.lighten(84)
+			.lighten(85)
 			.toHex8String(),
 		"surface-300": new TinyColor(neutralColors.neutral[900])
-			.lighten(81)
+			.lighten(82)
 			.toHex8String(),
 		"surface-400": new TinyColor(neutralColors.neutral[900])
-			.lighten(80)
+			.lighten(81)
 			.toHex8String(),
 		"surface-500": new TinyColor(neutralColors.neutral[900])
-			.lighten(78)
+			.lighten(79)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
 		"surface-variant": neutralColors.neutralVariant[100],
