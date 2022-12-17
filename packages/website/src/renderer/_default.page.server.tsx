@@ -40,6 +40,8 @@ export function render(pageContext: PageContextRenderer): unknown {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>${title}</title>
         <meta name="description" content="${description}" />
+		<!-- theme-color means the background color of the iOS status bar  -->
+		<meta name="theme-color" content="#000000" />
 		<!-- START import inter font -->
 		<link rel="preconnect" href="https://rsms.me/">
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
