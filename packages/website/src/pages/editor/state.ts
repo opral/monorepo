@@ -117,7 +117,10 @@ export const referenceBundle = () =>
 		(bundle) => bundle.id.name === inlangConfig()?.referenceBundleId
 	);
 
-const [lastFetch, setLastFetch] = createSignal<Date>();
+/**
+ *  Date of the last push to the Repo
+ */
+const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
@@ -151,7 +154,6 @@ async function cloneRepository(
 	// of components that depends on fs
 	const date = new Date();
 	setFsChange(date);
-	setLastFetch(date);
 	return date;
 }
 
@@ -192,7 +194,7 @@ export async function pushChanges(
 		const time = new Date();
 		// triggering a rebuild of everything fs related
 		setFsChange(time);
-		setLastFetch(time);
+		setLastPush(time);
 		return Result.ok(undefined);
 	} catch (error) {
 		return Result.err((error as Error) ?? "h3ni329 Unknown error");
@@ -246,15 +248,16 @@ async function writeBundles(
 
 async function _unpushedChanges() {
 	const repositoryClonedTime = repositoryIsCloned();
-	const lastFetchTime = lastFetch();
+	const lastPushTime = lastPush();
 	if (repositoryClonedTime === undefined) {
 		return [];
 	}
+	debugger;
 	const unpushedChanges = await raw.log({
 		fs,
 		dir: "/",
 		// TODO #170 changes that have been pushed are shown as unpushed
-		since: lastFetchTime ? lastFetchTime : repositoryClonedTime,
+		since: lastPushTime ? lastPushTime : repositoryClonedTime,
 	});
 	return unpushedChanges;
 }
