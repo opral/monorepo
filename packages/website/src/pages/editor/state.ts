@@ -34,13 +34,26 @@ export function StateProvider(props: { children: JSXElement }) {
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
 		// when the user logs-in or out.
-		() => [currentPageContext, localStorage.user],
-		() => cloneRepository(currentPageContext(), localStorage.user)
+		() => ({
+			pageContext: currentPageContext(),
+			user: localStorage.user,
+		}),
+		cloneRepository
 	);
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
-	[unpushedChanges] = createResource(fsChange, _unpushedChanges);
+	[unpushedChanges] = createResource(
+		() => ({
+			repositoryClonedTime: repositoryIsCloned()!,
+			lastPushTime: lastPush(),
+			// while unpushed changes does not require last fs change,
+			// unpushed changed should react to fsCahnge. Hence, pass
+			// the signal to _unpushedChanges
+			lastFsChange: fsChange(),
+		}),
+		_unpushedChanges
+	);
 
 	// if the config is loaded, read the bundles
 	//! will lead to weird ux since this effect does not
@@ -117,17 +130,20 @@ export const referenceBundle = () =>
 		(bundle) => bundle.id.name === inlangConfig()?.referenceBundleId
 	);
 
-const [lastFetch, setLastFetch] = createSignal<Date>();
+/**
+ *  Date of the last push to the Repo
+ */
+const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
 const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
 
-async function cloneRepository(
-	pageContext: PageContext,
-	user: LocalStorageSchema["user"]
-): Promise<Date | undefined> {
-	const { host, organization, repository } = pageContext.routeParams;
+async function cloneRepository(args: {
+	pageContext: PageContext;
+	user: LocalStorageSchema["user"];
+}): Promise<Date | undefined> {
+	const { host, organization, repository } = args.pageContext.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -139,9 +155,9 @@ async function cloneRepository(
 		fs: fs,
 		http,
 		dir: "/",
-		headers: user
+		headers: args.user
 			? createAuthHeader({
-					encryptedAccessToken: user.encryptedAccessToken,
+					encryptedAccessToken: args.user.encryptedAccessToken,
 			  })
 			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
@@ -151,7 +167,6 @@ async function cloneRepository(
 	// of components that depends on fs
 	const date = new Date();
 	setFsChange(date);
-	setLastFetch(date);
 	return date;
 }
 
@@ -192,7 +207,7 @@ export async function pushChanges(
 		const time = new Date();
 		// triggering a rebuild of everything fs related
 		setFsChange(time);
-		setLastFetch(time);
+		setLastPush(time);
 		return Result.ok(undefined);
 	} catch (error) {
 		return Result.err((error as Error) ?? "h3ni329 Unknown error");
@@ -244,17 +259,17 @@ async function writeBundles(
 	setFsChange(new Date());
 }
 
-async function _unpushedChanges() {
-	const repositoryClonedTime = repositoryIsCloned();
-	const lastFetchTime = lastFetch();
-	if (repositoryClonedTime === undefined) {
+async function _unpushedChanges(args: {
+	repositoryClonedTime: Date;
+	lastPushTime?: Date;
+}) {
+	if (args.repositoryClonedTime === undefined) {
 		return [];
 	}
 	const unpushedChanges = await raw.log({
 		fs,
 		dir: "/",
-		// TODO #170 changes that have been pushed are shown as unpushed
-		since: lastFetchTime ? lastFetchTime : repositoryClonedTime,
+		since: args.lastPushTime ? args.lastPushTime : args.repositoryClonedTime,
 	});
 	return unpushedChanges;
 }
