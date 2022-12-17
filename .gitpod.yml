@@ -1,18 +1,17 @@
-# use the custom image defined in this repository
-image:
-  file: .gitpod.Dockerfile
-
 tasks:
-  # 1. install and use node 18
-  # 2. install dependencies
+  # 1. install doppler and set token
+  # 2. install and use node 18
+  # 3. install dependencies
   - init: |
+      brew install dopplerhq/cli/doppler
+      echo $DOPPLER_DEVELOPMENT_SERVICE_KEY | doppler configure set token
       nvm i 18.12
       nvm use 18.12
       nvm alias default 18.12
       npm install
     # using doppler run to set env variables automatically
     # the DOPPLER_DEVELOPMENT_SERVICE_KEY is set in gitpod's UI
-    command: doppler run --token $DOPPLER_DEVELOPMENT_SERVICE_KEY -- npm run dev
+    command: doppler run -- npm run dev
 
 ports:
   - name: "@inlang/website"
