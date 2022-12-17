@@ -1,5 +1,5 @@
 import type { OnBeforeRender } from "@src/renderer/types.js";
-import { parseValidateAndRender } from "@src/services/markdown/parseValidateAndRender.js";
+import { parseValidateAndRender } from "@src/services/markdown/index.js";
 import type { PageProps } from "./index.page.jsx";
 
 // should only run server side
@@ -19,7 +19,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 	} finally {
 		return {
 			pageContext: {
-				props: {
+				pageProps: {
 					markdown,
 				},
 			},

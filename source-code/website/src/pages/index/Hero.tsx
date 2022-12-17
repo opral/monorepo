@@ -2,7 +2,7 @@ import IconGithub from "~icons/cib/github";
 
 export function Hero() {
 	return (
-		<div class=" w-full">
+		<div class="py-20">
 			<h1 class="text-4xl font-bold tracking-tight text-on-backround sm:text-5xl md:text-6xl">
 				<span class="block xl:inline">Developer-first localization</span>
 

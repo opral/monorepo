@@ -10,13 +10,14 @@ import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { fs } from "@inlang/git-sdk/fs";
 import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
-import { onAuth } from "./index.telefunc.js";
 import { clientSideEnv } from "@env";
 import { Config as InlangConfig, initialize$import } from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/utilities/result";
-import { addSeconds } from "date-fns";
+import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { createAuthHeader } from "@src/services/auth/index.js";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -27,8 +28,15 @@ import { addSeconds } from "date-fns";
  * for simplicity.
  */
 export function StateProvider(props: { children: JSXElement }) {
+	const [localStorage] = useLocalStorage();
+
 	// re-fetched if currentPageContext changes
-	[repositoryIsCloned] = createResource(currentPageContext, cloneRepository);
+	[repositoryIsCloned] = createResource(
+		// the fetch must account for the user and currentpagecontext to properly re-fetch
+		// when the user logs-in or out.
+		() => [currentPageContext, localStorage.user],
+		() => cloneRepository(currentPageContext(), localStorage.user)
+	);
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
@@ -49,10 +57,10 @@ export function StateProvider(props: { children: JSXElement }) {
 	//! the files might change due to reactivity.
 	createEffect(async () => {
 		const config = inlangConfig();
-		if (config === undefined) {
+		if (config === undefined || localStorage.user === undefined) {
 			return;
 		}
-		await writeBundles(config, bundles);
+		await writeBundles(config, bundles, localStorage.user);
 	});
 
 	return props.children;
@@ -116,7 +124,8 @@ const [lastFetch, setLastFetch] = createSignal<Date>();
 const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
 
 async function cloneRepository(
-	pageContext: PageContext
+	pageContext: PageContext,
+	user: LocalStorageSchema["user"]
 ): Promise<Date | undefined> {
 	const { host, organization, repository } = pageContext.routeParams;
 	if (
@@ -130,8 +139,12 @@ async function cloneRepository(
 		fs: fs,
 		http,
 		dir: "/",
-		onAuth: onAuth,
-		corsProxy: clientSideEnv().VITE_CORS_PROXY_URL,
+		headers: user
+			? createAuthHeader({
+					encryptedAccessToken: user.encryptedAccessToken,
+			  })
+			: undefined,
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${organization}/${repository}`,
 	});
 	// triggering a side effect here to trigger a re-render
@@ -146,7 +159,8 @@ async function cloneRepository(
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(
-	pageContext: PageContext
+	pageContext: PageContext,
+	user: NonNullable<LocalStorageSchema["user"]>
 ): Promise<Result<void, Error>> {
 	const { host, organization, repository } = pageContext.routeParams;
 	if (
@@ -160,11 +174,13 @@ export async function pushChanges(
 		fs: fs,
 		http,
 		dir: "/",
-		onAuth: onAuth,
 		author: {
-			name: "samuelstroschein",
+			name: user.username,
 		},
-		corsProxy: clientSideEnv().VITE_CORS_PROXY_URL,
+		headers: createAuthHeader({
+			encryptedAccessToken: user.encryptedAccessToken,
+		}),
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${organization}/${repository}`,
 	};
 	try {
@@ -200,7 +216,11 @@ async function readBundles(config: InlangConfig) {
 	return bundles;
 }
 
-async function writeBundles(config: InlangConfig, bundles: ast.Bundle[]) {
+async function writeBundles(
+	config: InlangConfig,
+	bundles: ast.Bundle[],
+	user: NonNullable<LocalStorageSchema["user"]>
+) {
 	await config.writeBundles({ $import, $fs: fs.promises, bundles });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
@@ -213,9 +233,8 @@ async function writeBundles(config: InlangConfig, bundles: ast.Bundle[]) {
 		await raw.commit({
 			fs,
 			dir: "/",
-			// TODO hardcoded
 			author: {
-				name: "samuelstroschein",
+				name: user.username,
 			},
 			message: "inlang: update translations",
 		});

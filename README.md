@@ -4,7 +4,7 @@
 
 <div>
     <p align="center">
-        <img width="300" src="./assets/logo-white-background.png"/>
+        <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
         Git-based localization infrastructure
@@ -26,7 +26,7 @@ Inlang provides developer-first localization infrastructure that is built on git
 For a technical explanation of the architecture, read [RFC-001](https://github.com/inlang/inlang/pull/127).
 
 <p align="center">
-    <img width="70%" max-width="50px" src="https://raw.githubusercontent.com/inlang/inlang/687a399073b197d3e6874b78dff1107fc47647cf/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
+    <img width="70%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
     <br/>
     <small align="center">
         Inlang consits of developer tools, an editor for translators, and automation via existing CI/CD pipelines.     
@@ -57,6 +57,6 @@ Improve developers' workflows by (semi)automating repetitive tasks.
 
 ## Contributing
 
-The easiest way to contribute is to open this repository in Gitpod. Click on the banner below. 
+The easiest way to contribute is to open this repository in Gitpod. Click on the banner below.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/inlang/inlang)
