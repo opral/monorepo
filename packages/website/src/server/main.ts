@@ -12,7 +12,7 @@
  * ------------------------------------
  */
 
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import compression from "compression";
 import { createServer as createViteServer } from "vite";
 import { renderPage } from "vite-plugin-ssr";
@@ -23,7 +23,7 @@ import { serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
 
 // validate the env variables.
-validateEnv();
+await validateEnv();
 
 // the flag is set in the package.json scripts
 // via `NODE_ENV=production <command>`
@@ -34,21 +34,21 @@ const env = await serverSideEnv();
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname;
 
-async function runServer() {
-	const app = express();
-	// compress responses with gzip
-	app.use(compression());
+const app = express();
+// compress responses with gzip
+app.use(compression());
 
+async function runServer() {
 	if (isProduction) {
 		// serve build files
 		app.use(sirv(`${rootPath}/dist/client`));
 	} else {
-		// start vite hot module reload dev server
 		const viteServer = await createViteServer({
 			server: { middlewareMode: true },
 			root: rootPath,
 			appType: "custom",
 		});
+		// start vite hot module reload dev server
 		// use vite's connect instance as middleware
 		app.use(viteServer.middlewares);
 	}
@@ -73,37 +73,38 @@ async function runServer() {
 	app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
 
 	// serving @src/pages and /public
-	app.get("*", async (request, response, next) => {
-		const pageContext = await renderPage({
+	//! it is extremely important that a request handler is not async to catch errors
+	//! express does not catch async errors. hence, renderPage uses the callback pattern
+	app.get("*", (request, response, next) => {
+		renderPage({
 			urlOriginal: request.originalUrl,
-		});
-		if (pageContext.httpResponse === null) {
-			return next();
-		}
-		const { body, statusCode, contentType } = pageContext.httpResponse;
-		return response.status(statusCode).type(contentType).send(body);
+		})
+			.then((pageContext) => {
+				if (pageContext.httpResponse === null) {
+					return next();
+				}
+				const { body, statusCode, contentType } = pageContext.httpResponse;
+				return response.status(statusCode).type(contentType).send(body);
+			})
+			// pass the error to expresses error handling
+			.catch(next);
 	});
-
 	const port = process.env.PORT ?? 3000;
 	app.listen(port);
 	console.log(`Server running at http://localhost:${port}/`);
 }
 
-/**
- * run the server and restart it when an error occurs
- *
- * the server should never go down.
- * ! is broken. port is already in use
- *
- * TODO fix server restart on error https://github.com/inlang/inlang/issues/182
- */
-function runServerWithRetry() {
-	runServer().catch((error) => {
-		console.error(error);
-		console.log("restarting server in 1 second...");
-		setTimeout(runServerWithRetry, 1000);
-	});
+// TODO error reporting
+function logErrors(
+	error: unknown,
+	request: Request,
+	response: Response,
+	next: NextFunction
+) {
+	console.error(error);
+	next(error);
 }
 
-// starting the server
-runServerWithRetry();
+app.use(logErrors);
+
+runServer();
