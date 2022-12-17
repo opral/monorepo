@@ -1,5 +1,5 @@
 # use the custom image defined in this repository
-image: 
+image:
   file: .gitpod.Dockerfile
 
 tasks:
@@ -17,6 +17,10 @@ ports:
   - name: "@inlang/website"
     port: 3000
     onOpen: notify
+
+github:
+  prebuilds:
+    addBadge: true
 
 vscode:
   extensions:
