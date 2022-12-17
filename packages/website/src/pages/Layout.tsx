@@ -98,7 +98,7 @@ function Header() {
 						</div>
 					</div>
 					{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
-					<div class=" md:hidden flex items-center">
+					<div class="md:hidden flex items-center">
 						<button
 							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 							type="button"
@@ -120,9 +120,9 @@ function Header() {
 					<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
 						<For each={links}>
 							{(link) => (
-								<sl-tree class="tree-with-lines ">
+								<sl-tree class="">
 									<a
-										class="link grow min-w-full  text-on-surface link-primary w-full"
+										class="link grow min-w-full text-on-surface link-primary w-full"
 										href={link.href}
 										onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
 									>
