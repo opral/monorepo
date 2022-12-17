@@ -9,39 +9,41 @@ import {
 	createEffect,
 	createResource,
 	createSignal,
-	ErrorBoundary,
 	JSXElement,
 	onCleanup,
-	onMount,
 	Show,
 } from "solid-js";
-import { raw, http } from "@inlang/git-sdk/api";
+import { raw } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
 import { subSeconds, isAfter } from "date-fns";
-import { onAuth } from "./index.telefunc.js";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
+import { Layout as RootLayout } from "@src/pages/Layout.jsx";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="max-w-screen-xl p-4 mx-auto">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center space-x-4">
-					<Breadcrumbs></Breadcrumbs>
-					<BranchMenu></BranchMenu>
+		<RootLayout>
+			<div class="py-4 w-full">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center space-x-4">
+						<Breadcrumbs></Breadcrumbs>
+						<BranchMenu></BranchMenu>
+					</div>
+					<HasChangesAction></HasChangesAction>
 				</div>
-				<HasChangesAction></HasChangesAction>
+				<hr class="h-px w-full bg-outline-variant my-2"></hr>
+				{props.children}
 			</div>
-			<hr class="h-px w-full bg-outline-variant my-2"></hr>
-			{props.children}
-		</div>
+		</RootLayout>
 	);
 }
 
 function Breadcrumbs() {
 	return (
 		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
+			{/* repository icon */}
 			<svg class="w-4 h-4" viewBox="0 0 16 16">
 				<path
 					fill="currentColor"
@@ -119,6 +121,7 @@ function HasChangesAction() {
 	const [latestChange, setLatestChange] = createSignal<Date>();
 	const [showPulse, setShowPulse] = createSignal(false);
 	const [isLoading, setIsLoading] = createSignal(false);
+	const [localStorage] = useLocalStorage();
 
 	createEffect(() => {
 		if (unpushedChanges()) {
@@ -139,19 +142,26 @@ function HasChangesAction() {
 	onCleanup(() => clearInterval(interval));
 
 	async function triggerPushChanges() {
-		setIsLoading(true);
-		const result = await pushChanges(currentPageContext());
-		setIsLoading(false);
-		if (result.isOk) {
-			showToast({
-				title: "Changes have been pushed",
-				variant: "success",
+		if (localStorage.user === undefined) {
+			return showToast({
+				title: "Failed to push changes",
+				message: "Please login first",
+				variant: "warning",
 			});
-		} else {
-			showToast({
+		}
+		setIsLoading(true);
+		const result = await pushChanges(currentPageContext(), localStorage.user);
+		setIsLoading(false);
+		if (result.isErr) {
+			return showToast({
 				title: "Failed to push changes",
 				message: "Please try again or file a bug. " + result.error,
 				variant: "danger",
+			});
+		} else {
+			return showToast({
+				title: "Changes have been pushed",
+				variant: "success",
 			});
 		}
 	}
@@ -160,8 +170,9 @@ function HasChangesAction() {
 		<sl-button
 			prop:disabled={(unpushedChanges() ?? []).length === 0}
 			onClick={triggerPushChanges}
+			prop:loading={isLoading()}
 		>
-			Submit changes
+			Push changes
 			<Show when={(unpushedChanges() ?? []).length > 0}>
 				<sl-badge prop:pill={true} prop:pulse={showPulse() ? true : false}>
 					{(unpushedChanges() ?? []).length}
