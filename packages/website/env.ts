@@ -21,6 +21,13 @@ export type ServerSideEnv = ClientSideEnv & {
 	JWE_SECRET_KEY: string;
 
 	/**
+	 * The sentry dsn.
+	 *
+	 * Only available in production.
+	 */
+	SENTRY_DSN?: string;
+
+	/**
 	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
 	 */
 	GITHUB_APP_CLIENT_SECRET: string;
@@ -90,7 +97,7 @@ export async function serverSideEnv(): Promise<ServerSideEnv> {
 export async function validateEnv() {
 	const env = await serverSideEnv();
 	// VITE_GIT_REQUEST_PROXY_PATH
-	 if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
+	if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
 		throw Error("Missing env variable VITE_CORS_PROXY_URL");
 	} else if (
 		env.VITE_GIT_REQUEST_PROXY_PATH.startsWith("/") === false ||
