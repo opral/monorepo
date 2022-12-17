@@ -3,11 +3,7 @@ import solid from "vite-plugin-solid";
 import { ssr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
-import { validateEnv } from "./env.js";
 import Icons from "unplugin-icons/vite";
-
-// validate the env variables.
-validateEnv();
 
 export default await withNodePolyfills({
 	plugins: [
