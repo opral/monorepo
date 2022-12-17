@@ -8,7 +8,6 @@ import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
-import { tableOfContent } from "./documentation/@id/tableOfContent.js";
 import { clientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { SignInDialog } from "@src/services/auth/index.js";

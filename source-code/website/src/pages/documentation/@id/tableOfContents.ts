@@ -1,7 +1,7 @@
 /**
  * is the content of the documentation site  Sidenav
  */
-export const tableOfContent = [
+export const tableOfContents = [
 	{
 		title: "Introduction",
 		documents: [
