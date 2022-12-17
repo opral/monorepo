@@ -1,4 +1,4 @@
-Hey HN, while exploring how to design a developer-first localization solution (also known as i18n, aka offering software in different human languages), I realized that git as a backend might be superior to cloud-based backends for professional applications like Figma, Google Docs, & Co. I refer to a cloud-based backend as a backend where users operate on documents that are stored in a database, as opposed to documents in the form of files.
+While exploring how to design a developer-first localization solution (also known as i18n, aka offering software in different human languages), I realized that git as a backend might be superior to cloud-based backends for professional applications like Figma, Google Docs, & Co. I refer to a cloud-based backend as a backend where users operate on documents that are stored in a database, as opposed to documents in the form of files.
 
 ## Background
 
