@@ -40,7 +40,10 @@ export function StateProvider(props: { children: JSXElement }) {
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
-	[unpushedChanges] = createResource(fsChange, _unpushedChanges);
+	[unpushedChanges] = createResource(
+		() => [fsChange(), lastPush()],
+		() => _unpushedChanges()
+	);
 
 	// if the config is loaded, read the bundles
 	//! will lead to weird ux since this effect does not
@@ -252,11 +255,10 @@ async function _unpushedChanges() {
 	if (repositoryClonedTime === undefined) {
 		return [];
 	}
-	debugger;
+
 	const unpushedChanges = await raw.log({
 		fs,
 		dir: "/",
-		// TODO #170 changes that have been pushed are shown as unpushed
 		since: lastPushTime ? lastPushTime : repositoryClonedTime,
 	});
 	return unpushedChanges;
