@@ -19,8 +19,11 @@ import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
 import { telefunc } from "telefunc";
 import { proxy } from "./git-proxy.js";
-import { serverSideEnv } from "@env";
+import { serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
+
+// validate the env variables.
+validateEnv();
 
 // the flag is set in the package.json scripts
 // via `NODE_ENV=production <command>`
