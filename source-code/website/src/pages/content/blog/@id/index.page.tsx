@@ -15,22 +15,19 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<div class="py-4 w-full mx-auto divide-y divide-solid divide-outline sm:grid sm:grid-cols-9 gap-10">
-			<p class="sm:flex col-span-2  top-0">
-				<a
-					class="sticky h-fit top-[3.5rem] overflow-y-auto w-full "
-					href="/blog"
-				>
-					&lt;- Back to Blog
-				</a>
-			</p>
-
+		<div class="grid-row-2 py-4 w-full mx-auto ">
 			<Show when={props.markdown} fallback={<Error></Error>}>
 				<div
-					class="prose mx-auto w-full  sm:col-span-7 ml:px-8  justify-self-center"
+					class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
 					innerHTML={props.markdown}
 				></div>
 			</Show>
+			<a
+				class="flex justify-center link link-primary py-4 text-primary "
+				href="/blog"
+			>
+				&lt;- Back to Blog
+			</a>
 		</div>
 	);
 }
