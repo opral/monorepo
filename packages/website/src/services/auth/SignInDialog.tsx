@@ -1,5 +1,6 @@
 import type { ClientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { createSignal, Show } from "solid-js";
 import IconGithub from "~icons/cib/github";
 import { githubAuthUrl } from "./logic.js";
 
@@ -19,21 +20,29 @@ export function SignInDialog(props: {
 	githubAppClientId: ClientSideEnv["VITE_GITHUB_APP_CLIENT_ID"];
 	onClickOnSignInButton: () => void;
 }) {
+	// web component slots load eagarly. applying manual conditional rendering
+	// combats flickering on initial render
+	const [isShown, setIsShown] = createSignal(false);
 	return (
-		<sl-dialog ref={props.ref}>
-			<h3 slot="label">Sign in</h3>
-			<p>To conduct changes, you must sign in with a GitHub account.</p>
-
-			<sl-button
-				slot="footer"
-				prop:variant="primary"
-				prop:target="_blank"
-				prop:href={githubAuthUrl(props.githubAppClientId)}
-				onClick={props.onClickOnSignInButton}
-			>
-				<IconGithub slot="prefix"></IconGithub>
-				Sign in with GitHub
-			</sl-button>
+		<sl-dialog
+			ref={props.ref}
+			on:sl-show={() => setIsShown(true)}
+			on:sl-after-hide={() => setIsShown(false)}
+		>
+			<Show when={isShown()}>
+				<h3 slot="label">Sign in</h3>
+				<p>To conduct changes, you must sign in with a GitHub account.</p>
+				<sl-button
+					slot="footer"
+					prop:variant="primary"
+					prop:target="_blank"
+					prop:href={githubAuthUrl(props.githubAppClientId)}
+					onClick={props.onClickOnSignInButton}
+				>
+					<IconGithub slot="prefix"></IconGithub>
+					Sign in with GitHub
+				</sl-button>
+			</Show>
 		</sl-dialog>
 	);
 }
