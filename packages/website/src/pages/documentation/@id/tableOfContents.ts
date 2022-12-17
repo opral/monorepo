@@ -1,7 +1,12 @@
+type Shema = {
+	title: string;
+	documents: { title: string; href: string }[];
+}[];
+
 /**
  * is the content of the documentation site  Sidenav
  */
-export const tableOfContents = [
+export const tableOfContents: Shema = [
 	{
 		title: "Introduction",
 		documents: [
