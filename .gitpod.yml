@@ -1,11 +1,9 @@
-# use the custom image defined in this repository
-image:
-  file: .gitpod.Dockerfile
-
 tasks:
   - init: npm install && npm run build
-    # install and use node 18
+    # 1. install doppler
+    # 2. install and use node 18
     before: |
+      brew install dopplerhq/cli/doppler 
       nvm i 18.12
       nvm use 18.12
       nvm alias default 18.12
