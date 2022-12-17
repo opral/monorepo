@@ -1,12 +1,11 @@
-import { Navigation } from "./Navigation.jsx";
+import { Layout } from "@src/pages/Layout.jsx";
 import type { PageHead } from "@src/renderer/types.js";
 import { Show } from "solid-js";
-import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 
 export const Head: PageHead = () => {
 	return {
-		title: "Documentation",
-		description: "Documentation",
+		title: "Blog",
+		description: "Blog",
 	};
 };
 
@@ -16,20 +15,22 @@ export type PageProps = {
 
 export function Page(props: PageProps) {
 	return (
-		<RootLayout>
-			<div class="sm:grid sm:grid-cols-9 gap-10 py-4 w-full">
-				<div class="sm:flex col-span-2 sticky top-0">
-					<Navigation />
-				</div>
-
+		<Layout>
+			<div class="grid-row-2 py-4 w-full mx-auto ">
 				<Show when={props.markdown} fallback={<Error></Error>}>
 					<div
-						class="w-full sm:col-span-7 ml:px-8 prose justify-self-center"
+						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
 						innerHTML={props.markdown}
 					></div>
 				</Show>
+				<a
+					class="flex justify-center link link-primary py-4 text-primary "
+					href="/blog"
+				>
+					&lt;- Back to Blog
+				</a>
 			</div>
-		</RootLayout>
+		</Layout>
 	);
 }
 
