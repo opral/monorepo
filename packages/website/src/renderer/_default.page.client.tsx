@@ -4,6 +4,8 @@ import { hydrate } from "solid-js/web";
 import { ThePage } from "./ThePage.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
+import * as Sentry from "@sentry/browser";
+import { BrowserTracing } from "@sentry/tracing";
 
 // node polyfill
 import { Buffer } from "buffer";
@@ -30,6 +32,17 @@ import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/divider/divider.js";
 import "@shoelace-style/shoelace/dist/components/tree/tree.js";
 import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js";
+import { clientSideEnv } from "@env";
+
+// enable error logging via sentry in production
+if (import.meta.env.PROD) {
+	console.log({ isProduction: import.meta.env.PROD });
+	Sentry.init({
+		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
+		integrations: [new BrowserTracing()],
+		tracesSampleRate: 0.8,
+	});
+}
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
