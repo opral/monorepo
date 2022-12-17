@@ -44,7 +44,7 @@ function Header() {
 	const links = [
 		{ name: "Editor", href: "/editor" },
 		{ name: "Docs", href: "/documentation" },
-		{ name: "Blog", href: "/blog" },
+		{ name: "Blog", href: "/content/blog" },
 	];
 
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);

@@ -1,7 +1,7 @@
 // import { onMount } from "solid-js";
 // import { navigate } from "vite-plugin-ssr/client/router";
-import { createSignal, For, Show } from "solid-js";
-import { tableOfContent } from "./tableOfContent.js";
+import { For } from "solid-js";
+import { tableOfContent } from "../../../../../../content/blog/tableOfContent.js";
 
 // export function Page() {
 // 	onMount(() => {
