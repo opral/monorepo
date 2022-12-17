@@ -34,15 +34,25 @@ export function StateProvider(props: { children: JSXElement }) {
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
 		// when the user logs-in or out.
-		() => [currentPageContext, localStorage.user],
-		() => cloneRepository(currentPageContext(), localStorage.user)
+		() => ({
+			pageContext: currentPageContext(),
+			user: localStorage.user,
+		}),
+		cloneRepository
 	);
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
 	[unpushedChanges] = createResource(
-		() => [fsChange(), lastPush()],
-		() => _unpushedChanges()
+		() => ({
+			repositoryClonedTime: repositoryIsCloned()!,
+			lastPushTime: lastPush(),
+			// while unpushed changes does not require last fs change,
+			// unpushed changed should react to fsCahnge. Hence, pass
+			// the signal to _unpushedChanges
+			lastFsChange: fsChange(),
+		}),
+		_unpushedChanges
 	);
 
 	// if the config is loaded, read the bundles
@@ -129,11 +139,11 @@ const [lastPush, setLastPush] = createSignal<Date>();
 
 const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
 
-async function cloneRepository(
-	pageContext: PageContext,
-	user: LocalStorageSchema["user"]
-): Promise<Date | undefined> {
-	const { host, organization, repository } = pageContext.routeParams;
+async function cloneRepository(args: {
+	pageContext: PageContext;
+	user: LocalStorageSchema["user"];
+}): Promise<Date | undefined> {
+	const { host, organization, repository } = args.pageContext.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -145,9 +155,9 @@ async function cloneRepository(
 		fs: fs,
 		http,
 		dir: "/",
-		headers: user
+		headers: args.user
 			? createAuthHeader({
-					encryptedAccessToken: user.encryptedAccessToken,
+					encryptedAccessToken: args.user.encryptedAccessToken,
 			  })
 			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
@@ -249,17 +259,17 @@ async function writeBundles(
 	setFsChange(new Date());
 }
 
-async function _unpushedChanges() {
-	const repositoryClonedTime = repositoryIsCloned();
-	const lastPushTime = lastPush();
-	if (repositoryClonedTime === undefined) {
+async function _unpushedChanges(args: {
+	repositoryClonedTime: Date;
+	lastPushTime?: Date;
+}) {
+	if (args.repositoryClonedTime === undefined) {
 		return [];
 	}
-
 	const unpushedChanges = await raw.log({
 		fs,
 		dir: "/",
-		since: lastPushTime ? lastPushTime : repositoryClonedTime,
+		since: args.lastPushTime ? args.lastPushTime : args.repositoryClonedTime,
 	});
 	return unpushedChanges;
 }
