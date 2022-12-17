@@ -1,4 +1,3 @@
-import { tableOfContent } from "../tableOfContent.js";
 import type { PageHead } from "@src/renderer/types.js";
 import { Show } from "solid-js";
 
@@ -24,7 +23,7 @@ export function Page(props: PageProps) {
 			</Show>
 			<a
 				class="flex justify-center link link-primary py-4 text-primary "
-				href="/blog"
+				href="/content/blog"
 			>
 				&lt;- Back to Blog
 			</a>
