@@ -38,3 +38,4 @@ vscode:
     - "pkief.material-icon-theme"
     - "bradlc.vscode-tailwindcss"
     - "esbenp.prettier-vscode"
+    - eamodio.gitlens
