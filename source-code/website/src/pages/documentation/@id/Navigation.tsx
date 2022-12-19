@@ -9,7 +9,6 @@ export function Navigation() {
 				<Common></Common>
 			</nav>
 			{/* Mobile navbar */}
-
 			<nav class="sm:hidden overflow-y-auto overflow-auto min-w-full">
 				<sl-details>
 					<h3 slot="summary" class="font-medium">
@@ -23,7 +22,7 @@ export function Navigation() {
 }
 function Common() {
 	return (
-		<ul role="list" class="divide-y divide-outline pr-4 min-h-full">
+		<ul role="list" class="divide-y divide-outline min-h-full">
 			<For each={tableOfContents}>
 				{(section) => (
 					<li class="py-3">
