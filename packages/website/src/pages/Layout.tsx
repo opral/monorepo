@@ -45,7 +45,7 @@ const socialMediaLinks = [
 		Icon: IconTwitter,
 	},
 	{
-		name: "Github",
+		name: "GitHub",
 		href: "https://github.com/inlang/inlang",
 		Icon: IconGithub,
 	},
