@@ -53,7 +53,7 @@ const socialMediaLinks = [
 function Header() {
 	const links = [
 		{ name: "Editor", href: "/editor" },
-		{ name: "Docs", href: "/documentation" },
+		{ name: "Documentation", href: "/documentation" },
 		{ name: "Blog", href: "/blog" },
 	];
 
