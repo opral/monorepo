@@ -46,7 +46,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 		<link rel="preconnect" href="https://rsms.me/">
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<!-- END import inter font -->
-		${import.meta.env.PROD ? analytics : ""}
+		${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
