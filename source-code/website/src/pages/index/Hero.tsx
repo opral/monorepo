@@ -18,7 +18,7 @@ export function Hero() {
 					</span>
 				</span>
 			</h1>
-			<p class="mt-3 text-base text-on-backround  sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl ">
+			<p class="mt-3 text-base text-on-backround sm:mt-5 sm:max-w-3xl sm:text-lg md:mt-5 md:text-xl ">
 				Inlang turns your git repository into the collaboration and automation
 				hub for localization while keeping full control and flexibility.
 			</p>
