@@ -2,8 +2,8 @@ import IconGithub from "~icons/cib/github";
 
 export function Hero() {
 	return (
-		<div class="py-20">
-			<h1 class="text-4xl font-bold tracking-tight text-on-backround sm:text-5xl md:text-6xl">
+		<div class="py-8 sm:py-20">
+			<h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-on-backround">
 				<span class="block xl:inline">Developer-first localization</span>
 
 				<span class="block text-primary">infrastructure</span>
