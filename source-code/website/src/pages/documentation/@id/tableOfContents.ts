@@ -1,4 +1,4 @@
-type Shema = {
+type Schema = {
 	title: string;
 	documents: { title: string; href: string }[];
 }[];
@@ -6,7 +6,7 @@ type Shema = {
 /**
  * is the content of the documentation site  Sidenav
  */
-export const tableOfContents: Shema = [
+export const tableOfContents: Schema = [
 	{
 		title: "Introduction",
 		documents: [
