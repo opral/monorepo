@@ -9,9 +9,12 @@ export function Hero() {
 				<span class="block text-primary">
 					infrastructure{" "}
 					<span class="text-on-background">
-						built on git
-						{/* custom git color */}
-						<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
+						built on{" "}
+						<span class="inline-block">
+							git
+							{/* custom git color */}
+							<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
+						</span>
 					</span>
 				</span>
 			</h1>
