@@ -1,18 +1,23 @@
 import IconGithub from "~icons/cib/github";
+import CibGit from "~icons/cib/git";
 
 export function Hero() {
 	return (
-		<div class="py-8 sm:py-20">
+		<div class="py-8 md:py-14 lg:py-20">
 			<h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-on-backround">
 				<span class="block xl:inline">Developer-first localization</span>
-
-				<span class="block text-primary">infrastructure</span>
+				<span class="block text-primary">
+					infrastructure{" "}
+					<span class="text-on-background">
+						built on git
+						{/* custom git color */}
+						<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
+					</span>
+				</span>
 			</h1>
 			<p class="mt-3 text-base text-on-backround  sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl ">
-				Brisket swine hamburger landjaeger tenderloin, meatball ham hock
-				shoulder sausage meatloaf chislic. Filet mignon burgdoggen tenderloin,
-				pastrami ball tip bacon shoulder t-bone turducken landjaeger cupim
-				picanha venison.
+				Inlang turns your git repository into the collaboration and automation
+				hub for localization while keeping full control and flexibility.
 			</p>
 			<div class="mt-5 sm:mt-8 sm:flex justify-start">
 				<div class="rounded-md shadow ">
