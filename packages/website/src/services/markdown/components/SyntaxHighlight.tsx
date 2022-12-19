@@ -1,6 +1,6 @@
-import shiki from "shiki";
+import { getHighlighter } from "shiki";
 
-const highlighter = await shiki.getHighlighter({ theme: "dark-plus" });
+const highlighter = await getHighlighter({ theme: "dark-plus" });
 
 export function SyntaxHighlight(props: { language?: string; content: string }) {
 	const code = highlighter.codeToHtml(props.content, {
