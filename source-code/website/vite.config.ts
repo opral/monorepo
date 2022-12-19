@@ -4,6 +4,7 @@ import { ssr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
 import Icons from "unplugin-icons/vite";
+import { markdownHotModuleReload } from "./src/services/markdown/vitePlugin.js";
 
 export default await withNodePolyfills({
 	plugins: [
@@ -17,6 +18,7 @@ export default await withNodePolyfills({
 		// are installed indicated in the package.json @iconify-json/* packages.
 		// use those sites to search for icons.
 		Icons({ compiler: "solid" }),
+		// markdownHotModuleReload(),
 	],
 	resolve: {
 		alias: {
