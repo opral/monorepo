@@ -36,7 +36,6 @@ import { clientSideEnv } from "@env";
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
-	console.log({ isProduction: import.meta.env.PROD });
 	Sentry.init({
 		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
 		integrations: [new BrowserTracing()],
