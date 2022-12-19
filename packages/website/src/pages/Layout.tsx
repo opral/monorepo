@@ -142,9 +142,9 @@ function Footer() {
 	return (
 		<footer class="sticky z-40 w-full border-t border-outline-variant bg-surface-100 py-1">
 			<div class={`flex gap-8  ${layoutMargins}`}>
-				<a href="/legal.txt" class="link  link-primary font-light">
+				{/* <a href="/legal.txt" class="link  link-primary font-light">
 					<span class="">legal.txt</span>
-				</a>
+				</a> */}
 				<div class="flex  grow justify-end items-center  space-x-4 ">
 					<a href="mailto:hello@inlang.com" class="link link-primary ">
 						hello@inlang.com
