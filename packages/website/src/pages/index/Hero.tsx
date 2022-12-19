@@ -42,7 +42,7 @@ export function Hero() {
 						prop:variant="neutral"
 					>
 						<IconGithub slot="suffix"></IconGithub>
-						View on Github
+						View on GitHub
 					</sl-button>
 				</div>
 			</div>
