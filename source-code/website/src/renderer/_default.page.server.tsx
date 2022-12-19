@@ -46,6 +46,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 		<link rel="preconnect" href="https://rsms.me/">
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<!-- END import inter font -->
+		${import.meta.env.PROD ? analytics : ""}
 		${dangerouslySkipEscape(favicons)}
         ${dangerouslySkipEscape(generateHydrationScript())}
       </head>
@@ -66,4 +67,15 @@ const favicons = `
 <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
 <meta name="msapplication-TileColor" content="#da532c">
 <meta name="theme-color" content="#ffffff">
+`;
+
+const analytics = `
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5H3SDF7TVZ"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-5H3SDF7TVZ');
+</script>
 `;
