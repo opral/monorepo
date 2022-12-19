@@ -213,55 +213,55 @@ function PatternEditor(props: {
 }
 
 /** will probably be replaced with #164 */
-function PatternElement(props: { element: ast.Text | ast.Placeholder }) {
-	/** Switch fallback error (non-exhaustive switch statement) */
-	const Error = (props: { code: string }) => (
-		<span class="text-danger">
-			You encountered a bug. please file the bug and mention code {props.code}
-		</span>
-	);
+// function PatternElement(props: { element: ast.Text | ast.Placeholder }) {
+// 	/** Switch fallback error (non-exhaustive switch statement) */
+// 	const Error = (props: { code: string }) => (
+// 		<span class="text-danger">
+// 			You encountered a bug. please file the bug and mention code {props.code}
+// 		</span>
+// 	);
 
-	/** visually differentiate between text and placeholder elements */
-	const Placeholder = (props: { children: JSXElement }) => (
-		<code class="bg-tertiary-container rounded text-on-tertiary-container font-medium">
-			{props.children}
-		</code>
-	);
+// 	/** visually differentiate between text and placeholder elements */
+// 	const Placeholder = (props: { children: JSXElement }) => (
+// 		<code class="bg-tertiary-container rounded text-on-tertiary-container font-medium">
+// 			{props.children}
+// 		</code>
+// 	);
 
-	return (
-		<Switch fallback={<Error code="2903ns"></Error>}>
-			<Match when={props.element.type === "Text"}>
-				<span>{(props.element as ast.Text).value}</span>
-			</Match>
-			<Match when={props.element.type === "Placeholder"}>
-				<Switch fallback={<Error code="2203sfss"></Error>}>
-					{(() => {
-						// defining a variable to avoid type assertions and lengthier code
-						const expression = (props.element as ast.Placeholder).expression;
-						return (
-							<>
-								<Match when={expression.type === "Literal"}>
-									<Placeholder>{(expression as ast.Literal).value}</Placeholder>
-								</Match>
-								<Match when={expression.type === "Function"}>
-									<Placeholder>
-										{(expression as ast.Function).id.name}
-									</Placeholder>
-								</Match>
-								<Match when={expression.type === "Variable"}>
-									<Placeholder>
-										{(expression as ast.Variable).id.name}
-									</Placeholder>
-								</Match>
-								<Match when={expression.type === "Placeholder"}>
-									{/* recursively call pattern element */}
-									<PatternElement element={props.element}></PatternElement>
-								</Match>
-							</>
-						);
-					})()}
-				</Switch>
-			</Match>
-		</Switch>
-	);
-}
+// 	return (
+// 		<Switch fallback={<Error code="2903ns"></Error>}>
+// 			<Match when={props.element.type === "Text"}>
+// 				<span>{(props.element as ast.Text).value}</span>
+// 			</Match>
+// 			<Match when={props.element.type === "Placeholder"}>
+// 				<Switch fallback={<Error code="2203sfss"></Error>}>
+// 					{(() => {
+// 						// defining a variable to avoid type assertions and lengthier code
+// 						const expression = (props.element as ast.Placeholder).expression;
+// 						return (
+// 							<>
+// 								<Match when={expression.type === "Literal"}>
+// 									<Placeholder>{(expression as ast.Literal).value}</Placeholder>
+// 								</Match>
+// 								<Match when={expression.type === "Function"}>
+// 									<Placeholder>
+// 										{(expression as ast.Function).id.name}
+// 									</Placeholder>
+// 								</Match>
+// 								<Match when={expression.type === "Variable"}>
+// 									<Placeholder>
+// 										{(expression as ast.Variable).id.name}
+// 									</Placeholder>
+// 								</Match>
+// 								<Match when={expression.type === "Placeholder"}>
+// 									{/* recursively call pattern element */}
+// 									<PatternElement element={props.element}></PatternElement>
+// 								</Match>
+// 							</>
+// 						);
+// 					})()}
+// 				</Switch>
+// 			</Match>
+// 		</Switch>
+// 	);
+// }
