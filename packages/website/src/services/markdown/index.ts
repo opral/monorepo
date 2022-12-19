@@ -5,4 +5,5 @@
  * --------------------------------
  */
 
-export { parseValidateAndRender } from "./parseValidateAndRender.js";
+export { parseMarkdown, RequiredFrontmatter } from "./logic.js";
+export { markdownIndex } from "./vitePlugin.js";
