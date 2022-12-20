@@ -6,4 +6,14 @@
  */
 
 export { parseMarkdown, RequiredFrontmatter } from "./logic.js";
-export { markdownIndex } from "./vitePlugin.js";
+export {
+	/**
+	 * Use z(od) to extend the required frontmatter schema.
+	 *
+	 * @example
+	 *  const FrontmatterSchema = RequiredSchema.extend({
+	 *      example: z.string()
+	 *  })
+	 */
+	z,
+} from "zod";

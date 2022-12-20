@@ -31,8 +31,6 @@ export const RequiredFrontmatter = z.object({
  * function returns the rendered body of the markdown
  * as string and the [frontmatter](https://markdoc.dev/docs/frontmatter).
  *
- * @returns a tuple [href (the id), markdown (the markdown object)]
- *
  * @throws if validation of the markdown fails
  */
 export function parseMarkdown<

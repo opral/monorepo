@@ -4,7 +4,6 @@ import { ssr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
 import Icons from "unplugin-icons/vite";
-import { markdownHotModuleReload } from "./src/services/markdown/vitePlugin.js";
 
 export default await withNodePolyfills({
 	plugins: [
