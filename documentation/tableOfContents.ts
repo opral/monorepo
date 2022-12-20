@@ -11,7 +11,7 @@ export const FrontmatterSchema = RequiredFrontmatter;
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
 		// @ts-ignore
-		(await import("./intro.md?raw")).default,
+		(await import("./introduction.md?raw")).default,
 		// @ts-ignore
 		(await import("./design-principles.md?raw")).default,
 	],

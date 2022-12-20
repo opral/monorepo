@@ -5,7 +5,7 @@ import { Layout } from "@src/pages/Layout.jsx";
 export function Page() {
 	onMount(() => {
 		// redirect
-		navigate("/documentation/intro");
+		navigate("/documentation/introduction");
 	});
 	return <Layout>{""}</Layout>;
 }
