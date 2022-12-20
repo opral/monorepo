@@ -49,10 +49,10 @@ We are building tools that increases the developer experience in the context of 
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/one-config-to-power-everything.webp"
+    src="https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif"
 
-    alt="one config file to power all infrastructure tools"
+    alt="inlang ide extension"
 
-    caption="Sketch about the concept of one configuration file that powers all tools, automations and applications for localization that developers build on top of."
+    caption="The IDE extension is an example of the developer first approach."
 
 /%}
