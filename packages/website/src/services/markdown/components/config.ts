@@ -1,8 +1,9 @@
 import type { Config } from "@markdoc/markdoc";
+import { icons } from "@src/components/Icon.jsx";
 import { Callout } from "./Callout.jsx";
 import { Fence } from "./Fence.jsx";
 import { Figure } from "./Figure.jsx";
-
+import { QuickLink, QuickLinks } from "./QuickLinks.jsx";
 /**
  * The components that render custom nodes or tags
  */
@@ -10,6 +11,8 @@ export const components = {
 	Callout,
 	Fence,
 	Figure,
+	QuickLink,
+	QuickLinks,
 };
 
 /**
@@ -54,6 +57,19 @@ export const config: Config = {
 				caption: { type: "String" },
 			},
 			render: "Figure",
+		},
+		QuickLinks: {
+			render: "QuickLinks",
+		},
+		QuickLink: {
+			selfClosing: true,
+			render: "QuickLink",
+			attributes: {
+				title: { type: "String" },
+				description: { type: "String" },
+				icon: { type: "String", matches: Object.keys(icons) },
+				href: { type: "String" },
+			},
 		},
 	},
 };
