@@ -1,13 +1,13 @@
 import type { Config } from "@markdoc/markdoc";
 import { Callout } from "./Callout.jsx";
-import { SyntaxHighlight } from "./SyntaxHighlight.jsx";
+import { Fence } from "./Fence.jsx";
 
 /**
  * The components that render custom nodes or tags
  */
 export const components = {
 	Callout,
-	SyntaxHighlight,
+	Fence,
 };
 
 /**
@@ -16,7 +16,7 @@ export const components = {
 export const config: Config = {
 	nodes: {
 		fence: {
-			render: "SyntaxHighlight",
+			render: "Fence",
 			attributes: {
 				language: {
 					type: "String",
