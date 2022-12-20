@@ -20,5 +20,6 @@ export const FrontmatterSchema = RequiredFrontmatter.extend({
  * The ordering in the array determines the position in the blog.
  */
 export const tableOfContents: string[] = [
+	// @ts-expect-error
 	(await import("./001-git-as-backend/index.md?raw")).default,
 ];
