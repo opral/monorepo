@@ -8,7 +8,7 @@ import { ComponentProps, lazy, Suspense } from "solid-js";
  * the app with regards to the icons that are used.
  */
 export function Icon(
-	props: { name: keyof typeof icons } & ComponentProps<"svg"> & {
+	props: { name: AvailableIcon } & ComponentProps<"svg"> & {
 			slot?: string;
 		}
 ) {
@@ -20,6 +20,11 @@ export function Icon(
 		</Suspense>
 	);
 }
+
+/**
+ * The available icons.
+ */
+export type AvailableIcon = keyof typeof icons;
 
 // if you'd like to add icons, the following sets are available:
 //  - material symbols https://icones.netlify.app/collection/material-symbols
