@@ -1,5 +1,4 @@
 import { RequiredFrontmatter } from "@inlang/website/src/services/markdown/index.js";
-import { URL } from "node:url";
 
 /**
  * The frontmatter schema used to validate the markdown files in this directory.
@@ -7,13 +6,13 @@ import { URL } from "node:url";
 export const FrontmatterSchema = RequiredFrontmatter;
 
 /**
- * The absolute path to this file. Is used to prefix the relative paths in tableOfContents.
- */
-export const pathToFile = new URL(".", import.meta.url).pathname;
-
-/**
  * The table of contents split by categories.
  */
 export const tableOfContents: Record<string, string[]> = {
 	Introduction: ["./intro.md"],
 };
+
+/**
+ * The absolute path to this file. Is used to prefix the relative paths in tableOfContents.
+ */
+export const pathToFile = new URL(".", import.meta.url).pathname;

@@ -49,7 +49,7 @@ function Common(props: {
 													document.frontmatter.href ===
 													currentPageContext().urlParsed.pathname,
 												"text-on-surface-variant":
-													"documentation/" + document.frontmatter.href !==
+													document.frontmatter.href !==
 													currentPageContext().urlParsed.pathname,
 											}}
 											href={document.frontmatter.href}
