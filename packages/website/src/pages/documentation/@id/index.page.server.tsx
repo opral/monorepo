@@ -24,7 +24,7 @@ export type ProcessedTableOfContents = Record<
  * 		"/documentation/intro": document,
  * 	}
  */
-let index: Record<string, ReturnType<typeof parseMarkdown>> = {};
+let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
 
 /**
  * the table of contents without the html for each document
@@ -40,7 +40,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 ) => {
 	// dirty way to get reload of markdown (not hot reload though)
 	if (import.meta.env.DEV) {
-		generateIndexAndTableOfContents();
+		await generateIndexAndTableOfContents();
 	}
 	return {
 		pageContext: {
@@ -59,7 +59,10 @@ async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		let frontmatters: { frontmatter: any }[] = [];
 		for (const document of documents) {
-			const markdown = parseMarkdown({ text: document, FrontmatterSchema });
+			const markdown = await parseMarkdown({
+				text: document,
+				FrontmatterSchema,
+			});
 			// not pushing to processedTableOfContents directly in case
 			// the category is undefined so far
 			frontmatters.push({ frontmatter: markdown.frontmatter });

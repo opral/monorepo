@@ -1,4 +1,4 @@
-import { ComponentProps, lazy } from "solid-js";
+import { ComponentProps, lazy, Suspense } from "solid-js";
 
 /**
  * Icons available throughout inlang.
@@ -6,9 +6,6 @@ import { ComponentProps, lazy } from "solid-js";
  * Lazy loads icons under the hood. Bundling external
  * icons under this component ensures consistency across
  * the app with regards to the icons that are used.
- *
- * ! can not be used in only server side rendered environments for now
- * ! contact @samuelstroschein for more information.
  */
 export function Icon(
 	props: { name: keyof typeof icons } & ComponentProps<"svg"> & {
@@ -16,7 +13,12 @@ export function Icon(
 		}
 ) {
 	const ICON = lazy(() => icons[props.name]);
-	return <ICON {...props}></ICON>;
+	return (
+		// Suspense is required since the icons are lazy loaded.
+		<Suspense>
+			<ICON {...props}></ICON>
+		</Suspense>
+	);
 }
 
 // if you'd like to add icons, the following sets are available:

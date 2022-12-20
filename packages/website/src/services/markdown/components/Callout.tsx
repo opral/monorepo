@@ -1,8 +1,5 @@
+import { Icon } from "@src/components/Icon.jsx";
 import type { JSXElement } from "solid-js";
-import IconWarning from "~icons/material-symbols/warning-outline-rounded";
-import IconInfo from "~icons/material-symbols/info-outline-rounded";
-import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
-import IconDanger from "~icons/material-symbols/dangerous-outline-rounded";
 import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
 
 // children get a default style use content for custome style
@@ -11,22 +8,6 @@ export function Callout(props: {
 	variant: SemanticColorTokens[number];
 	children: JSXElement;
 }) {
-	const Icon = () => {
-		switch (props.variant) {
-			case "success":
-				return <IconSuccess />;
-
-			case "info":
-				return <IconInfo />;
-			case "warning":
-				return <IconWarning />;
-			case "danger":
-				return <IconDanger />;
-			default:
-				break;
-		}
-	};
-
 	const color = () => {
 		switch (props.variant) {
 			case "success":
@@ -44,7 +25,7 @@ export function Callout(props: {
 			class={`not-prose ${color()} border border-outline p-4 my-4 rounded-md`}
 		>
 			<h3 class="font-bold text-lg pb-2 flex items-center	gap-2">
-				<Icon></Icon>
+				<Icon name={props.variant}></Icon>
 				{props.title}
 			</h3>
 			{props.children}

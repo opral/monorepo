@@ -17,7 +17,7 @@ export const Head: PageHead = () => {
  */
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents;
-	markdown: ReturnType<typeof parseMarkdown>;
+	markdown: Awaited<ReturnType<typeof parseMarkdown>>;
 };
 
 export function Page(props: PageProps) {

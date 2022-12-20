@@ -1,6 +1,6 @@
 import Markdoc, { type ValidationError } from "@markdoc/markdoc";
 import { parse as parseYaml } from "yaml";
-import { renderWithSolid } from "./solidPlugin.js";
+import { renderMarkdownToString } from "./solidPlugin.js";
 import { z } from "zod";
 import { components, config } from "./components/config.js";
 
@@ -32,15 +32,15 @@ export const RequiredFrontmatter = z.object({
  *
  * @throws if validation of the markdown fails
  */
-export function parseMarkdown<
+export async function parseMarkdown<
 	FrontmatterSchema extends RequiredFrontmatter
 >(args: {
 	text: string;
 	FrontmatterSchema: typeof RequiredFrontmatter;
-}): {
+}): Promise<{
 	frontmatter: FrontmatterSchema;
 	html: string;
-} {
+}> {
 	const ast = Markdoc.parse(args.text);
 	const errors = Markdoc.validate(ast, config);
 	if (errors.length > 0) {
@@ -60,8 +60,7 @@ export function parseMarkdown<
 		},
 		...config,
 	});
-	// @ts-ignore
-	const html = renderWithSolid(content, {
+	const html = await renderMarkdownToString(content, {
 		components,
 	});
 	return {

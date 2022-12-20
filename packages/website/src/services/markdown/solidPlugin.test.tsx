@@ -1,14 +1,14 @@
 import Markdoc from "@markdoc/markdoc";
 import type { JSXElement } from "solid-js";
 import { describe, expect, it } from "vitest";
-import { renderWithSolid } from "./solidPlugin.js";
+import { renderMarkdownToString } from "./solidPlugin.js";
 import type { Config } from "@markdoc/markdoc";
 
 describe("parseValidateAndRender()", () => {
 	it("should return html", () => {
 		const ast = Markdoc.parse(mockValidMarkdown);
 		const content = Markdoc.transform(ast, mockMarkdocConfig);
-		const result = renderWithSolid(content, { components: { Callout } });
+		const result = renderMarkdownToString(content, { components: { Callout } });
 		expect(result).toBeTypeOf("string");
 	});
 });

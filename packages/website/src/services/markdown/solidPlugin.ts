@@ -9,25 +9,25 @@
 import type { RenderableTreeNodes, Scalar } from "@markdoc/markdoc";
 import type { Component, JSXElement } from "solid-js";
 import { createComponent } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { Dynamic, renderToStringAsync } from "solid-js/web";
 
-export function renderWithSolid(
+export async function renderMarkdownToString(
 	node: RenderableTreeNodes,
 	args: {
 		components?: Record<string, Component<any>>;
 	}
 ) {
-	// buggy render returns an object with t. no clue why that happens.
-	// the code has been taken rom the markdoc source code
-	return buggyRender(node, args).t;
+	// awaiting dynamically rendered components such as lazy loading.
+	const markdown = await renderToStringAsync(() => processMarkdown(node, args));
+	return markdown;
 }
 
-function buggyRender(
+function processMarkdown(
 	node: RenderableTreeNodes,
 	args: {
 		components?: Record<string, Component>;
 	}
-): { t: string } {
+): JSXElement {
 	function deepRender(value: any): any {
 		if (value == null || typeof value !== "object") return value;
 
@@ -75,7 +75,7 @@ function buggyRender(
 			...attr,
 		});
 	}
-	return render(node) as unknown as { t: string };
+	return render(node);
 }
 
 function Fragment(props: { children: JSXElement }) {
