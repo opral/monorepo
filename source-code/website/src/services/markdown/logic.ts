@@ -34,12 +34,12 @@ export const RequiredFrontmatter = z.object({
  * @throws if validation of the markdown fails
  */
 export function parseMarkdown<
-	FrontmatterSchema extends typeof RequiredFrontmatter
+	FrontmatterSchema extends RequiredFrontmatter
 >(args: {
 	text: string;
-	FrontmatterSchema: FrontmatterSchema;
+	FrontmatterSchema: typeof RequiredFrontmatter;
 }): {
-	frontmatter: RequiredFrontmatter;
+	frontmatter: FrontmatterSchema;
 	html: string;
 } {
 	const ast = Markdoc.parse(args.text);
@@ -66,7 +66,7 @@ export function parseMarkdown<
 		components,
 	});
 	return {
-		frontmatter,
+		frontmatter: frontmatter as FrontmatterSchema,
 		html,
 	};
 }
