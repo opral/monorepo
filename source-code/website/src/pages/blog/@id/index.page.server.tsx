@@ -4,7 +4,6 @@ import {
 	tableOfContents,
 	FrontmatterSchema,
 } from "../../../../../../content/blog/tableOfContents.js";
-import fs from "node:fs";
 import { parseMarkdown } from "@src/services/markdown/index.js";
 
 /**
@@ -13,7 +12,7 @@ import { parseMarkdown } from "@src/services/markdown/index.js";
  */
 export type ProcessedTableOfContents = Record<
 	string,
-	ReturnType<typeof parseMarkdown<FrontmatterSchema>>["frontmatter"]
+	Awaited<ReturnType<typeof parseMarkdown<FrontmatterSchema>>>["frontmatter"]
 >;
 
 /**
@@ -26,7 +25,7 @@ export type ProcessedTableOfContents = Record<
  */
 let index: Record<
 	string,
-	ReturnType<typeof parseMarkdown<FrontmatterSchema>>
+	Awaited<ReturnType<typeof parseMarkdown<FrontmatterSchema>>>
 > = {};
 
 /**
@@ -60,7 +59,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
  */
 async function generateIndexAndTableOfContents() {
 	for (const document of tableOfContents) {
-		const markdown = parseMarkdown<FrontmatterSchema>({
+		const markdown = await parseMarkdown<FrontmatterSchema>({
 			text: document,
 			FrontmatterSchema,
 		});
