@@ -1,6 +1,7 @@
 import type { Config } from "@markdoc/markdoc";
 import { Callout } from "./Callout.jsx";
 import { Fence } from "./Fence.jsx";
+import { Figure } from "./Figure.jsx";
 
 /**
  * The components that render custom nodes or tags
@@ -8,6 +9,7 @@ import { Fence } from "./Fence.jsx";
 export const components = {
 	Callout,
 	Fence,
+	Figure,
 };
 
 /**
@@ -43,6 +45,15 @@ export const config: Config = {
 				},
 			},
 			render: "Callout",
+		},
+		Figure: {
+			selfClosing: true,
+			attributes: {
+				src: { type: "String" },
+				alt: { type: "String" },
+				caption: { type: "String" },
+			},
+			render: "Figure",
 		},
 	},
 };
