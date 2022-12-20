@@ -17,6 +17,7 @@ export default await withNodePolyfills({
 		// are installed indicated in the package.json @iconify-json/* packages.
 		// use those sites to search for icons.
 		Icons({ compiler: "solid" }),
+		// markdownHotModuleReload(),
 	],
 	resolve: {
 		alias: {
