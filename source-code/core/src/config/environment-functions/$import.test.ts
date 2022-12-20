@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it } from "vitest";
 import { initialize$import } from "./$import.js";
 import { fs } from "memfs";
