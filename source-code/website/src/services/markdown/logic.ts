@@ -4,6 +4,7 @@ import { Callout } from "./components/Callout.jsx";
 import { SyntaxHighlight } from "./components/SyntaxHighlight.jsx";
 import { renderWithSolid } from "./solidPlugin.js";
 import { z } from "zod";
+import { components, config } from "./components/config.js";
 
 /**
  * The frontmatter that is required by the markdown service.
@@ -85,48 +86,3 @@ function beautifyError(error: ValidationError): string {
 	// - add information about the line and column of the error
 	return JSON.stringify(error, null, 4);
 }
-
-/**
- * The components that render custom nodes or tags
- */
-const components = {
-	Callout,
-	SyntaxHighlight,
-};
-
-/**
- * The Markdoc configuration.
- */
-const config: Config = {
-	nodes: {
-		fence: {
-			render: "SyntaxHighlight",
-			attributes: {
-				language: {
-					type: "String",
-				},
-				content: {
-					type: "String",
-				},
-			},
-		},
-	},
-	/**
-	 * Custom tags for MarkDoc.
-	 *
-	 * See https://markdoc.dev/docs/tags.
-	 */
-	tags: {
-		Callout: {
-			attributes: {
-				title: { type: "String" },
-				variant: {
-					type: "String",
-					matches: ["success", "info", "warning", "danger"],
-					errorLevel: "error",
-				},
-			},
-			render: "Callout",
-		},
-	},
-};
