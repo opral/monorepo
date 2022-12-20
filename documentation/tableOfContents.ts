@@ -9,7 +9,9 @@ export const FrontmatterSchema = RequiredFrontmatter;
  * The table of contents split by categories.
  */
 export const tableOfContents: Record<string, string[]> = {
-	Introduction: ["./intro.md"],
+	Overview: ["./intro.md", "./design-principles.md"],
+	// "Getting Started": [],
+	// Reference: [],
 };
 
 /**
