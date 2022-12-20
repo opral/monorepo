@@ -38,4 +38,4 @@ For example, what if a design tool like Figma would be built on such a Git SDK?
 
 Wouldn’t the development speed increase because designers and developers are able to collaborate in parallel instead of relying on sequential hand-offs? Wouldn’t innovation be fostered because such a version of Figma would have less lock-in and users could open the design file in another, more innovative front end, like (joke intended) Sketch? And wouldn’t open-source design become more viable because external contributors can simply open a pull request instead of requesting access to a document?
 
-A related and suggested read is “local first software” from Ink & Switch https://www.inkandswitch.com/local-first/. They point out several flaws of git as a backend compared to CRDTs
+A related and suggested read is [“local first software”](https://www.inkandswitch.com/local-first/) from Ink & Switch. They point out several flaws of git as a backend compared to CRDTs
