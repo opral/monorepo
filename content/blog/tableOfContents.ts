@@ -19,9 +19,6 @@ export const FrontmatterSchema = RequiredFrontmatter.extend({
  *
  * The ordering in the array determines the position in the blog.
  */
-export const tableOfContents: string[] = ["./001-git-as-backend/index.md"];
-
-/**
- * The absolute path to this file. Is used to prefix the relative paths in tableOfContents.
- */
-export const pathToFile = new URL(".", import.meta.url).pathname;
+export const tableOfContents: string[] = [
+	(await import("./001-git-as-backend/index.md?raw")).default,
+];
