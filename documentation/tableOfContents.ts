@@ -10,7 +10,9 @@ export const FrontmatterSchema = RequiredFrontmatter;
  */
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
+		// @ts-expect-error
 		(await import("./intro.md?raw")).default,
+		// @ts-expect-error
 		(await import("./design-principles.md?raw")).default,
 	],
 	// "Getting Started": [],
