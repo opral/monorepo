@@ -1,6 +1,8 @@
 import { Layout } from "@src/pages/Layout.jsx";
 import type { PageHead } from "@src/renderer/types.js";
+import type { parseMarkdown } from "@src/services/markdown/index.js";
 import { Show } from "solid-js";
+import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 
 export const Head: PageHead = () => {
 	return {
@@ -9,18 +11,22 @@ export const Head: PageHead = () => {
 	};
 };
 
+/**
+ * The page props are undefined if an error occurred during parsing of the markdown.
+ */
 export type PageProps = {
-	markdown?: string;
+	processedTableOfContents: ProcessedTableOfContents;
+	markdown: ReturnType<typeof parseMarkdown>;
 };
 
 export function Page(props: PageProps) {
 	return (
 		<Layout>
-			<div class="grid-row-2 py-4 w-full mx-auto ">
+			<div class="grid-row-2 py-10 w-full mx-auto ">
 				<Show when={props.markdown} fallback={<Error></Error>}>
 					<div
 						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
-						innerHTML={props.markdown}
+						innerHTML={props.markdown.html}
 					></div>
 				</Show>
 				<a

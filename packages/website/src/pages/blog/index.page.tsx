@@ -1,31 +1,23 @@
-// import { onMount } from "solid-js";
-// import { navigate } from "vite-plugin-ssr/client/router";
 import { For } from "solid-js";
-import { tableOfContents } from "../../../../../content/blog/tableOfContents.js";
 import { Layout } from "../Layout.jsx";
+import type { PageProps } from "./@id/index.page.jsx";
 
-// export function Page() {
-// 	onMount(() => {
-// 		// redirect
-// 		navigate("/blog/intro");
-// 	});
-// }
-export function Page() {
+export function Page(props: PageProps) {
 	return (
 		<Layout>
 			<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
-				<For each={Object.entries(tableOfContents)}>
-					{([id, section]) => (
+				<For each={Object.entries(props.processedTableOfContents)}>
+					{([href, frontmatter]) => (
 						<div class="py-12">
-							<a href={"/blog/" + id} class="text-ellipsis space-y-4">
-								<p class="text-xl font-bold tracking-tight text-on-backround truncate">
-									{section.headline}
-								</p>
-								<p class="">{section.subHeadline}</p>
-								<img
+							<a href={href} class="text-ellipsis space-y-4">
+								<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
+									{frontmatter.title}
+								</h2>
+								<p>{frontmatter.summary}</p>
+								{/* <img
 									class="object-contain w-full rounded"
 									src={section.previewImageSrc}
-								/>
+								/> */}
 								{/* using link-primary and text-primary to render the link color by default in primary 
 							but also get hover effects from link-primary */}
 								<p class="link text-primary link-primary">Read more…</p>
