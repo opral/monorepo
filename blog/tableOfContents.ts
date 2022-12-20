@@ -1,22 +1,27 @@
-type Shema = {
-	[id: string]: {
-		/** filePath: "./number-folder-name/index.md" */
-		filePath: string;
-		/** Headline on the blog page overview */
-		headline: string;
-		subHeadline: string;
-		previewImageSrc: string;
-	};
-};
+import {
+	RequiredFrontmatter,
+	z,
+} from "@inlang/website/src/services/markdown/index.js";
+
 /**
- * is the content of the documentation site  Sidenav
+ * The frontmatter schema used to validate the markdown files in this directory.
  */
-export const tableOfContents: Shema = {
-	"git-as-backend": {
-		filePath: "./001-git-as-backend/index.md",
-		headline: "8123123 muss ich sehen",
-		subHeadline: "Introduction",
-		previewImageSrc:
-			"https://p.bigstockphoto.com/GeFvQkBbSLaMdpKXF1Zv_bigstock-Aerial-View-Of-Blue-Lakes-And--227291596.jpg",
-	},
-};
+export type FrontmatterSchema = z.infer<typeof FrontmatterSchema>;
+export const FrontmatterSchema = RequiredFrontmatter.extend({
+	summary: z
+		.string({ description: "A brief summary to preview the post." })
+		.min(100)
+		.max(1000),
+});
+
+/**
+ * The table of contents is a simple list with the file name.
+ *
+ * The ordering in the array determines the position in the blog.
+ */
+export const tableOfContents: string[] = ["./001-git-as-backend/index.md"];
+
+/**
+ * The absolute path to this file. Is used to prefix the relative paths in tableOfContents.
+ */
+export const pathToFile = new URL(".", import.meta.url).pathname;
