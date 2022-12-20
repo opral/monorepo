@@ -3,11 +3,12 @@ import IconWarning from "~icons/material-symbols/warning-outline-rounded";
 import IconInfo from "~icons/material-symbols/info-outline-rounded";
 import IconSuccess from "~icons/material-symbols/check-circle-outline-rounded";
 import IconDanger from "~icons/material-symbols/dangerous-outline-rounded";
+import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
 
 // children get a default style use content for custome style
 export function Callout(props: {
 	title: string;
-	variant: "info" | "warning" | "danger" | "success";
+	variant: SemanticColorTokens[number];
 	children: JSXElement;
 }) {
 	const Icon = () => {
