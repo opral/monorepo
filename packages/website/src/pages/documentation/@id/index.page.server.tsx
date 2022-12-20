@@ -3,9 +3,7 @@ import type { PageProps } from "./index.page.jsx";
 import {
 	tableOfContents,
 	FrontmatterSchema,
-	pathToFile,
 } from "../../../../../../documentation/tableOfContents.js";
-import fs from "node:fs";
 import { parseMarkdown } from "@src/services/markdown/index.js";
 
 /**
@@ -60,9 +58,8 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		let frontmatters: { frontmatter: any }[] = [];
-		for (const documentPath of documents) {
-			const text = fs.readFileSync(pathToFile + documentPath, "utf-8");
-			const markdown = parseMarkdown({ text, FrontmatterSchema });
+		for (const document of documents) {
+			const markdown = parseMarkdown({ text: document, FrontmatterSchema });
 			// not pushing to processedTableOfContents directly in case
 			// the category is undefined so far
 			frontmatters.push({ frontmatter: markdown.frontmatter });

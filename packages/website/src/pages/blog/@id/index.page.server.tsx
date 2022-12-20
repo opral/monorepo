@@ -3,7 +3,6 @@ import type { PageProps } from "./index.page.jsx";
 import {
 	tableOfContents,
 	FrontmatterSchema,
-	pathToFile,
 } from "../../../../../../content/blog/tableOfContents.js";
 import fs from "node:fs";
 import { parseMarkdown } from "@src/services/markdown/index.js";
@@ -60,10 +59,9 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
  * Generates the index and table of contents.
  */
 async function generateIndexAndTableOfContents() {
-	for (const documentPath of tableOfContents) {
-		const text = fs.readFileSync(pathToFile + documentPath, "utf-8");
+	for (const document of tableOfContents) {
 		const markdown = parseMarkdown<FrontmatterSchema>({
-			text,
+			text: document,
 			FrontmatterSchema,
 		});
 		// not pushing to processedTableOfContents directly in case

@@ -9,12 +9,10 @@ export const FrontmatterSchema = RequiredFrontmatter;
  * The table of contents split by categories.
  */
 export const tableOfContents: Record<string, string[]> = {
-	Overview: ["./intro.md", "./design-principles.md"],
+	Overview: [
+		(await import("./intro.md?raw")).default,
+		(await import("./design-principles.md?raw")).default,
+	],
 	// "Getting Started": [],
 	// Reference: [],
 };
-
-/**
- * The absolute path to this file. Is used to prefix the relative paths in tableOfContents.
- */
-export const pathToFile = new URL(".", import.meta.url).pathname;
