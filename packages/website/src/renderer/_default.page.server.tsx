@@ -1,5 +1,5 @@
 import type { PageContextRenderer } from "./types.js";
-import { generateHydrationScript, renderToString } from "solid-js/web";
+import { generateHydrationScript, renderToStringAsync } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import { setCurrentPageContext } from "./state.js";
 import { ThePage } from "./ThePage.jsx";
@@ -10,7 +10,9 @@ import "./app.css";
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
 
-export function render(pageContext: PageContextRenderer): unknown {
+export async function render(
+	pageContext: PageContextRenderer
+): Promise<unknown> {
 	//! TODO most likely cross request state pollution
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
@@ -27,7 +29,7 @@ export function render(pageContext: PageContextRenderer): unknown {
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const renderedPage = renderToString(() => (
+	const renderedPage = await renderToStringAsync(() => (
 		<ThePage
 			page={pageContext.Page}
 			pageProps={pageContext.pageProps}
