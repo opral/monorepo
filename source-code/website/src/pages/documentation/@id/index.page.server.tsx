@@ -8,6 +8,10 @@ import {
 import fs from "node:fs";
 import { parseMarkdown } from "@src/services/markdown/index.js";
 
+/**
+ * the table of contents without the html for each document
+ * saving bandwith and speeding up the site)
+ */
 export type ProcessedTableOfContents = Record<
 	string,
 	// documents (re-creating the tableOfContents type to omit html)
