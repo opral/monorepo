@@ -1,7 +1,5 @@
-import Markdoc, { type ValidationError, Config } from "@markdoc/markdoc";
+import Markdoc, { type ValidationError } from "@markdoc/markdoc";
 import { parse as parseYaml } from "yaml";
-import { Callout } from "./components/Callout.jsx";
-import { SyntaxHighlight } from "./components/SyntaxHighlight.jsx";
 import { renderWithSolid } from "./solidPlugin.js";
 import { z } from "zod";
 import { components, config } from "./components/config.js";
