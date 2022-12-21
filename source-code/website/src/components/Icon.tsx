@@ -1,11 +1,11 @@
 import { ComponentProps, lazy, Suspense } from "solid-js";
 
 /**
- * Icons available throughout inlang.
+ * Icons helper component when static imports are unavailable (for example markdown).
  *
- * Lazy loads icons under the hood. Bundling external
- * icons under this component ensures consistency across
- * the app with regards to the icons that are used.
+ * Use iconify directly otherwise. The following sets are available:
+ *  - material symbols https://icones.netlify.app/collection/material-symbols
+ *  - core ui brands https://icones.netlify.app/collection/cib
  */
 export function Icon(
 	props: { name: AvailableIcon } & ComponentProps<"svg"> & {
