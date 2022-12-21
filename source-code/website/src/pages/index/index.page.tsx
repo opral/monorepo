@@ -20,9 +20,11 @@ export function Page(props: PageProps) {
 			<div class="self-center grow sm:px-6 md:px-0 mb-8">
 				<Hero></Hero>
 				{/* rendering the github readme */}
-				<div class="p-4 md:p-6 rounded border border-outline">
-					<div class={styles["markdown-body"]} innerHTML={props.markdown}></div>
-				</div>
+				<div
+					class="p-4 md:p-6 rounded-lg border border-outline"
+					classList={{ [styles["markdown-body"]]: true }}
+					innerHTML={props.markdown}
+				></div>
 			</div>
 		</RootLayout>
 	);
