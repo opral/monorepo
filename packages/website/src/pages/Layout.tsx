@@ -60,7 +60,9 @@ function Header() {
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
 
 	return (
-		<header class="sticky top-0 z-50 w-full bg-surface-1 border-b border-outline-variant py-3">
+		<header
+			class={`sticky top-0 z-50 w-full bg-background border-b border-outline py-3`}
+		>
 			<nav class={layoutMargins}>
 				<div class="flex gap-8">
 					<a href="/" class="flex items-center">
@@ -140,7 +142,7 @@ function Header() {
 
 function Footer() {
 	return (
-		<footer class="sticky z-40 w-full border-t border-outline-variant bg-surface-1 py-1">
+		<footer class="sticky z-40 w-full border-t border-outline bg-background py-2">
 			<div class={`flex gap-8  ${layoutMargins}`}>
 				{/* <a href="/legal.txt" class="link  link-primary font-light">
 					<span class="">legal.txt</span>
