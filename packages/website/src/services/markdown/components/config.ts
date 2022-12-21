@@ -4,6 +4,8 @@ import { Callout } from "./Callout.jsx";
 import { Fence } from "./Fence.jsx";
 import { Figure } from "./Figure.jsx";
 import { QuickLink, QuickLinks } from "./QuickLinks.jsx";
+import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
+
 /**
  * The components that render custom nodes or tags
  */
@@ -40,10 +42,9 @@ export const config: Config = {
 	tags: {
 		Callout: {
 			attributes: {
-				title: { type: "String" },
 				variant: {
 					type: "String",
-					matches: ["success", "info", "warning", "danger"],
+					matches: ["info", "success", "warning", "danger"],
 					errorLevel: "error",
 				},
 			},
