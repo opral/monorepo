@@ -1,3 +1,8 @@
+---
+title: Core architecture
+href: /documentation/rfc-core-architecture
+---
+
 ### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/127).
 
 # RFC 001: Core Architecture
@@ -111,12 +116,11 @@ Supporting different syntaxes and their features opens the question of how the A
 - Standardization via Unicode's MessageFormat 2.0 is in its infancy.
 - Supporting different syntaxes now is beneficial for adoption but standardization is beneficial and should be accounted for.
 - Fluent seems to be the best-designed syntax used in production.
-- Existing AST's are not designed for consumption, not for applications. 
+- Existing AST's are not designed for consumption, not for applications.
 
 #### Decision
 
-Develop a custom AST that is inspired by Fluent and the upcoming MessageFormat 2.0 spec. During prototyping the observation has been made that inlang will most likely require custom AST nodes and thereby deviate from existing designs in any case. Most ASTs are designed for consumption rather than applications. Some ASTs like Fluent also impose numerous features that would have to be supported albeit the benefit and future is unclear. A good example are [Terms](https://projectfluent.org/fluent/guide/terms.html).  
-
+Develop a custom AST that is inspired by Fluent and the upcoming MessageFormat 2.0 spec. During prototyping the observation has been made that inlang will most likely require custom AST nodes and thereby deviate from existing designs in any case. Most ASTs are designed for consumption rather than applications. Some ASTs like Fluent also impose numerous features that would have to be supported albeit the benefit and future is unclear. A good example are [Terms](https://projectfluent.org/fluent/guide/terms.html).
 
 ### SDK
 
@@ -148,8 +152,8 @@ flowchart LR
 
 ```json
 {
-  "example": "Welcome {$name} to this example.",
-  "info": "Click the button to continue."
+	"example": "Welcome {$name} to this example.",
+	"info": "Click the button to continue."
 }
 ```
 
@@ -351,7 +355,7 @@ _Exemplary inlang config:_
 
 ```json
 {
-  "pathPattern": "./resources/{languageCode}.ftl"
+	"pathPattern": "./resources/{languageCode}.ftl"
 }
 ```
 
@@ -415,25 +419,25 @@ Leveraging JavaScript, or any programming language allows for tremendous flexibi
 // pseudocode that illustrates the possbility to
 // adjust how messages are machine translated.
 export async function onMachineTranslate(message) {
-  // or DeepL, Yandex, etc.
-  const googleTranslate = await import("google-translate");
-  return googleTranslate(message);
+	// or DeepL, Yandex, etc.
+	const googleTranslate = await import("google-translate");
+	return googleTranslate(message);
 }
 
 // pseudocode that illustrates the possiblity to adjust
 // the business logic of the editor.
 export const editor = {
-  // what should happen when a translator pressed "Save"
-  // (edited a message).
-  onSave: async (message) => {
-    // the message could be committed.
-    return commit(message);
-    // or a pull request can be opened.
-    return openPullRequest(message);
-    // or something else can happen
-    return somethingElse(message);
-  },
-  // and more...
+	// what should happen when a translator pressed "Save"
+	// (edited a message).
+	onSave: async (message) => {
+		// the message could be committed.
+		return commit(message);
+		// or a pull request can be opened.
+		return openPullRequest(message);
+		// or something else can happen
+		return somethingElse(message);
+	},
+	// and more...
 };
 ```
 
@@ -493,11 +497,11 @@ flowchart LR
 
 #### git-sdk
 
-The SDK to build applications on top off git. 
+The SDK to build applications on top off git.
 
 ##### git-sdk/api
 
-Git will be run in JS environments (browser and node). [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version that is likely fast enough. If not, a switch to a wasm version of [libgit2](https://libgit2.org/) should be possible. In any case, git is a CLI and not an SDK. We expect to extend git substiantally as the requirements evolve. 
+Git will be run in JS environments (browser and node). [isomorphic git](https://github.com/isomorphic-git/isomorphic-git) provides a base version that is likely fast enough. If not, a switch to a wasm version of [libgit2](https://libgit2.org/) should be possible. In any case, git is a CLI and not an SDK. We expect to extend git substiantally as the requirements evolve.
 
 ##### git-sdk/host
 
