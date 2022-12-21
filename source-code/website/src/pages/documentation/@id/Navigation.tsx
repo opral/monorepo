@@ -8,7 +8,7 @@ export function Navigation(props: {
 	return (
 		<>
 			{/* desktop navbar */}
-			<nav class="hidden md:block sticky top-[3.5rem] h-[calc(100vh-4.5rem)] overflow-y-auto w-full">
+			<nav class="hidden md:block sticky top-[3.5rem] overflow-y-auto w-full">
 				<Common {...props}></Common>
 			</nav>
 			{/* Mobile navbar */}
