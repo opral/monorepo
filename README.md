@@ -7,7 +7,7 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        Git-based localization infrastructure
+        Developer-first localization infrastructure built on git
     </h2>
     <h4 align="center">
         <!-- <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> 
