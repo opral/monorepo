@@ -5,6 +5,8 @@ href: /documentation/introduction
 
 # {% $frontmatter.title %}
 
+Inlang is an a suite of infrastructure, tools, and apps that ease localization of software. Read more about inlang's approach to localization in the [design principles](/documentation/design-principles).
+
 {% Callout variant="info" %}
 
 Inlang is in public **alpha**. Read more about our breaking change policy [here](/documentation/breaking-changes).
@@ -14,31 +16,24 @@ Inlang is in public **alpha**. Read more about our breaking change policy [here]
 {% QuickLinks %}
 
     {% QuickLink
-        title="Installation"
-        icon="success"
-        href="/"
-        description="Step-by-step guides to setting up your system and installing the library."
+        title="Getting started"
+        icon="turn-slight-left"
+        href="/documentation/getting-started"
+        description="Step-by-step guide to setting up inlang."
     /%}
 
     {% QuickLink
-        title="Architecture guide"
-        icon="success"
-        href="/"
-        description="Learn how the internals work and contribute."
+        title="Design principles"
+        icon="architecture"
+        href="/documentation/design-principles"
+        description="Learn how inlang is designed."
     /%}
 
     {% QuickLink
-        title="Plugins"
-        icon="success"
-        href="/"
+        title="Build on inlang"
+        icon="construction"
+        href="/documentation/build-on-inlang"
         description="Extend the library with third-party plugins or write your own."
-    /%}
-
-    {% QuickLink
-        title="API reference"
-        icon="success"
-        href="/"
-        description="Learn to easily customize and modify your app's visual design to fit your brand."
     /%}
 
 {% /QuickLinks %}
