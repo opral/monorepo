@@ -44,7 +44,12 @@ export const config: Config = {
 			attributes: {
 				variant: {
 					type: "String",
-					matches: ["info", "success", "warning", "danger"],
+					matches: [
+						"info",
+						"success",
+						"warning",
+						"danger",
+					] satisfies SemanticColorTokens,
 					errorLevel: "error",
 				},
 			},
