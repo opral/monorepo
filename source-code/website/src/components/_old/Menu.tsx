@@ -68,12 +68,7 @@ export function MenuTrigger(props: { children?: JSXElement }) {
  * @param props.color surface color as defined in https://m3.material.io/components/menus/specs#ad796ca6-3d66-4e7e-9322-c0d93bff5423
  */
 export function MenuContent(props: {
-	color:
-		| "surface-100"
-		| "surface-200"
-		| "surface-300"
-		| "surface-400"
-		| "surface-500";
+	color: "surface-1" | "surface-2" | "surface-3" | "surface-4" | "surface-5";
 	children?: JSXElement;
 }) {
 	const api = useMenu();
