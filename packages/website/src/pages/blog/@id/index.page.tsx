@@ -23,7 +23,10 @@ export function Page(props: PageProps) {
 	return (
 		<Layout>
 			<div class="grid-row-2 py-10 w-full mx-auto ">
-				<Show when={props.markdown} fallback={<Error></Error>}>
+				<Show
+					when={props.markdown.html}
+					fallback={<p class="text-danger">{props.markdown.error}</p>}
+				>
 					<div
 						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
 						innerHTML={props.markdown.html}
@@ -37,25 +40,5 @@ export function Page(props: PageProps) {
 				</a>
 			</div>
 		</Layout>
-	);
-}
-
-function Error() {
-	return (
-		<div>
-			<p class="text-danger text-lg font-medium">
-				The requested page could not be requested or rendered.
-			</p>
-			<p class="text-danger">
-				Please{" "}
-				<a
-					class="link text-primary"
-					target="_blank"
-					href="https://github.com/inlang/inlang/issues/new/choose"
-				>
-					report the bug.
-				</a>
-			</p>
-		</div>
 	);
 }
