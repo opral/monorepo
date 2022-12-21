@@ -5,6 +5,12 @@ href: /documentation/introduction
 
 # {% $frontmatter.title %}
 
+{% Callout variant="info" %}
+
+Inlang is in public **alpha**. Read more about our breaking change policy [here](/documentation/breaking-changes).
+
+{% /Callout %}
+
 {% QuickLinks %}
 
     {% QuickLink

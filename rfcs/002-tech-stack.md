@@ -1,3 +1,8 @@
+---
+title: Tech stack
+href: /documentation/rfc-tech-stack
+---
+
 ### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/128).
 
 # RFC 002: Tech Stack and Architecture of the editor + website
