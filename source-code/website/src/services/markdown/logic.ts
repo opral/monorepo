@@ -30,7 +30,7 @@ export const RequiredFrontmatter = z.object({
  * function returns the rendered body of the markdown
  * as string and the [frontmatter](https://markdoc.dev/docs/frontmatter).
  *
- * @throws if validation of the markdown fails
+ * @returns either error or html for a given document
  */
 export async function parseMarkdown<
 	FrontmatterSchema extends RequiredFrontmatter
@@ -39,19 +39,21 @@ export async function parseMarkdown<
 	FrontmatterSchema: typeof RequiredFrontmatter;
 }): Promise<{
 	frontmatter: FrontmatterSchema;
-	html: string;
+	html?: string;
+	error?: string;
 }> {
 	const ast = Markdoc.parse(args.text);
-	const errors = Markdoc.validate(ast, config);
-	if (errors.length > 0) {
-		throw new Error(String.raw`
-            Markdoc validation failed.
-            ${errors.map((object) => beautifyError(object.error)).join("\n")}
-        `);
-	}
 	const frontmatter = args.FrontmatterSchema.parse(
 		parseYaml(ast.attributes.frontmatter ?? "")
 	);
+	const errors = Markdoc.validate(ast, config);
+	if (errors.length > 0) {
+		return {
+			frontmatter: frontmatter as FrontmatterSchema,
+			error: errors.map((object) => beautifyError(object.error)).join("\n"),
+		};
+	}
+
 	const content = Markdoc.transform(ast, {
 		// passing the frontmatter to variables
 		// see https://markdoc.dev/docs/frontmatter#parse-the-frontmatter
