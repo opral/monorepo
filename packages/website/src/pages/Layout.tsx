@@ -6,11 +6,12 @@ import IconSignOut from "~icons/material-symbols/logout-rounded";
 import IconMenu from "~icons/material-symbols/menu-rounded";
 import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
-import { currentPageContext } from "@src/renderer/state.js";
+import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { clientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { SignInDialog } from "@src/services/auth/index.js";
+import { currentPageContext } from "@src/renderer/state.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -52,11 +53,11 @@ const socialMediaLinks = [
 ];
 function Header() {
 	const links = [
-		{ name: "Editor", href: "/editor" },
 		{ name: "Documentation", href: "/documentation" },
 		{ name: "Blog", href: "/blog" },
 	];
 
+	const [localStorage] = useLocalStorage();
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
 
 	return (
@@ -82,21 +83,43 @@ function Header() {
 									</a>
 								)}
 							</For>
+							<div class="pl-2 flex space-x-4">
+								<For each={socialMediaLinks}>
+									{(link) => (
+										<a
+											target="_blank"
+											class="link link-primary flex space-x-2 items-center"
+											href={link.href}
+										>
+											<link.Icon class="w-5 h-5"></link.Icon>
+											{/* <span>{link.name}</span> */}
+										</a>
+									)}
+								</For>
+							</div>
 						</div>
-						<div class="hidden md:flex justify-end space-x-6">
-							<For each={socialMediaLinks}>
-								{(link) => (
-									<a
-										target="_blank"
-										class="link link-primary flex space-x-2 items-center"
-										href={link.href}
-									>
-										<link.Icon></link.Icon>
-										<span>{link.name}</span>
-									</a>
-								)}
-							</For>
-							<UserDropdown></UserDropdown>
+						<div class="hidden md:flex justify-end space-x-4 place-items-center">
+							<Show
+								when={
+									currentPageContext().urlParsed.pathname.includes("editor") ===
+									false
+								}
+							>
+								<sl-button onClick={() => navigate("/editor")}>
+									<span class="text-on-background font-medium text-base">
+										Open editor
+									</span>
+								</sl-button>
+							</Show>
+							{/* not overwhelming the user by only showing login button when not on landig page */}
+							<Show
+								when={
+									localStorage.user ||
+									currentPageContext().urlParsed.pathname.includes("editor")
+								}
+							>
+								<UserDropdown></UserDropdown>
+							</Show>
 						</div>
 					</div>
 					{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
