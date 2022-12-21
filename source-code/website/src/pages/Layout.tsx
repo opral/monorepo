@@ -60,7 +60,7 @@ function Header() {
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false);
 
 	return (
-		<header class="sticky top-0 z-50 w-full bg-surface-100 border-b border-outline-variant py-3">
+		<header class="sticky top-0 z-50 w-full bg-surface-1 border-b border-outline-variant py-3">
 			<nav class={layoutMargins}>
 				<div class="flex gap-8">
 					<a href="/" class="flex items-center">
@@ -140,7 +140,7 @@ function Header() {
 
 function Footer() {
 	return (
-		<footer class="sticky z-40 w-full border-t border-outline-variant bg-surface-100 py-1">
+		<footer class="sticky z-40 w-full border-t border-outline-variant bg-surface-1 py-1">
 			<div class={`flex gap-8  ${layoutMargins}`}>
 				{/* <a href="/legal.txt" class="link  link-primary font-light">
 					<span class="">legal.txt</span>
@@ -203,7 +203,7 @@ function UserDropdown() {
 							<IconExpand></IconExpand>
 						</div>
 						<sl-menu>
-							<div class="px-7 py-2 bg-surface-100 text-on-surface">
+							<div class="px-7 py-2 bg-surface-1 text-on-surface">
 								<p>Signed in as</p>
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>

@@ -20,14 +20,14 @@ export type ColorTokens = {
 	background: string;
 	"on-background": string;
 
-	"surface-100": string;
-	"surface-200": string;
-	"surface-300": string;
-	"surface-400": string;
-	"surface-500": string;
+	"surface-1": string;
+	"surface-2": string;
+	"surface-3": string;
+	"surface-4": string;
+	"surface-5": string;
 
 	// utility on-surface color. avoids the need to reference
-	// on-surface-100, on-surface-200, etc.
+	// on-surface-1, on-surface-2, etc.
 	"on-surface": string;
 
 	"surface-variant": string;
