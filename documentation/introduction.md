@@ -1,6 +1,6 @@
 ---
 title: Introduction
-href: /documentation/introduction
+href: /documentation
 ---
 
 # {% $frontmatter.title %}
