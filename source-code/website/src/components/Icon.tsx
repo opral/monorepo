@@ -37,4 +37,9 @@ export const icons = {
 	danger: import("~icons/material-symbols/dangerous-outline-rounded"),
 	info: import("~icons/material-symbols/info-outline-rounded"),
 	warning: import("~icons/material-symbols/warning-outline-rounded"),
+	"turn-slight-left": import(
+		"~icons/material-symbols/turn-slight-left-rounded"
+	),
+	architecture: import("~icons/material-symbols/architecture-rounded"),
+	construction: import("~icons/material-symbols/construction-rounded"),
 } as const;
