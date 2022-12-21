@@ -1,5 +1,5 @@
 ---
-title: Design Principles
+title: Design principles
 href: /documentation/design-principles
 ---
 
