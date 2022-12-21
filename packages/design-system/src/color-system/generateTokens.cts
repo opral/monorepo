@@ -39,7 +39,7 @@ export function generateTokens(config: Config): ColorTokens {
 			.setAlpha(0.14)
 			.toHex8String(),
 		"on-surface": neutralColors.neutral[900],
-		"surface-variant": neutralColors.neutralVariant[100],
+		"surface-variant": neutralColors.neutralVariant[200],
 		"on-surface-variant": neutralColors.neutralVariant[600],
 		outline: neutralColors.neutralVariant[300],
 		"outline-variant": neutralColors.neutralVariant[500],
