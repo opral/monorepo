@@ -10,15 +10,11 @@ export const FrontmatterSchema = RequiredFrontmatter;
  */
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
-		// @ts-ignore
 		(await import("./introduction.md?raw")).default,
-		// @ts-ignore
 		(await import("./design-principles.md?raw")).default,
-		// @ts-ignore
 		(await import("./breaking-changes.md?raw")).default,
 	],
 	Guide: [
-		// @ts-ignore
 		(await import("./getting-started.md?raw")).default,
 		(await import("./ci-cd.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,
