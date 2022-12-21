@@ -74,7 +74,7 @@ function Header() {
 						<span class="self-center pl-2 text-xl font-bold">inlang</span>
 					</a>
 					<div class="grid grid-cols-2 w-full content-center">
-						<div class="hidden md:flex justify-start items-center space-x-6">
+						<div class="hidden md:flex justify-start items-center space-x-4">
 							<For each={links}>
 								{(link) => (
 									<a class="link link-primary" href={link.href}>
