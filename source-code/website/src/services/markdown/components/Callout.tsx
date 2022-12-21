@@ -10,17 +10,19 @@ export function Callout(props: {
 	return (
 		<div
 			class={`
-				not-prose 
 				bg-${props.variant}-container
 				text-on-${props.variant}-container
 				border border-${props.variant} p-4 my-4 rounded-md
 			`}
 		>
-			<h3 class="font-semibold flex items-center gap-1.5">
+			{/* not an h3 to escape prosing https://tailwindcss.com/docs/typography-plugin */}
+			<div class="font-semibold flex items-center gap-1.5 pb-1">
 				<Icon name={props.variant} class="text-bold"></Icon>
 				{props.variant.toUpperCase()}
-			</h3>
-			{props.children}
+			</div>
+			{/* wrapped in a div and prose to re-initialize prosing and thereby remove
+			unexpected paddings and margins  */}
+			<div class="prose">{props.children}</div>
 		</div>
 	);
 }
