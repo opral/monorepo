@@ -24,12 +24,12 @@ export function Page(props: PageProps) {
 		<Layout>
 			<div class="grid-row-2 py-10 w-full mx-auto ">
 				<Show
-					when={props.markdown.html}
-					fallback={<p class="text-danger">{props.markdown.error}</p>}
+					when={props.markdown?.html}
+					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
 					<div
 						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
-						innerHTML={props.markdown.html}
+						innerHTML={props.markdown?.html}
 					></div>
 				</Show>
 				<a

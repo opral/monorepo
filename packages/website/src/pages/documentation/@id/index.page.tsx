@@ -33,12 +33,12 @@ export function Page(props: PageProps) {
 					</Show>
 				</div>
 				<Show
-					when={props.markdown.html}
-					fallback={<p class="text-danger">{props.markdown.error}</p>}
+					when={props.markdown?.html}
+					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
 					<div
 						class="pt-3 w-full sm:col-span-7 prose justify-self-center"
-						innerHTML={props?.markdown.html}
+						innerHTML={props.markdown?.html}
 					></div>
 				</Show>
 			</div>
