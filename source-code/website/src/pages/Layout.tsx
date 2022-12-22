@@ -166,7 +166,7 @@ function Header() {
 
 function Footer() {
 	return (
-		<footer class="sticky z-40 w-full border-t border-outline bg-background py-2">
+		<footer class="sticky z-40 w-full border-t border-outline bg-background py-1.5">
 			<div class={`flex gap-8  ${layoutMargins}`}>
 				{/* <a href="/legal.txt" class="link  link-primary font-light">
 					<span class="">legal.txt</span>
