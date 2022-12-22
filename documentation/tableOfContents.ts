@@ -13,6 +13,7 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./introduction.md?raw")).default,
 		(await import("./design-principles.md?raw")).default,
 		(await import("./breaking-changes.md?raw")).default,
+		(await import("./the-next-git.md?raw")).default,
 	],
 	Guide: [
 		(await import("./getting-started.md?raw")).default,
