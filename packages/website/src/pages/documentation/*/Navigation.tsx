@@ -27,7 +27,7 @@ function Common(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"];
 }) {
 	return (
-		<ul role="list" class="divide-y divide-outline min-h-full">
+		<ul role="list" class="divide-y divide-outline min-h-full bg-surface-2 p-5">
 			<For each={Object.keys(props.processedTableOfContents)}>
 				{(section) => (
 					<li class="py-3">
