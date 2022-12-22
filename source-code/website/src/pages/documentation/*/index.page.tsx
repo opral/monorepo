@@ -31,7 +31,12 @@ export function Page(props: PageProps) {
 				    (tested on an ultrawide monitor, works!) 
 				*/}
 				<nav class="hidden md:block -ml-[100rem] pl-[100rem] bg-surface-2 py-4 pr-8">
-					<NavbarCommon {...props}></NavbarCommon>
+					{/* `Show` is a hotfix when client side rendering loaded this page
+					 * filteredTableContents is not available on the client.
+					 */}
+					<Show when={props.processedTableOfContents}>
+						<NavbarCommon {...props} />
+					</Show>
 				</nav>
 				{/* Mobile navbar */}
 				<nav class="block md:hidden overflow-y-auto overflow-auto min-w-full pt-5">
@@ -39,7 +44,12 @@ export function Page(props: PageProps) {
 						<h3 slot="summary" class="font-medium">
 							Menu
 						</h3>
-						<NavbarCommon {...props}></NavbarCommon>
+						{/* `Show` is a hotfix when client side rendering loaded this page
+						 * filteredTableContents is not available on the client.
+						 */}
+						<Show when={props.processedTableOfContents}>
+							<NavbarCommon {...props} />
+						</Show>
 					</sl-details>
 				</nav>
 				<Show
