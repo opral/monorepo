@@ -1,11 +1,9 @@
 import type { OnBeforeRender } from "@src/renderer/types.js";
-import { parseValidateAndRender } from "@src/services/markdown/index.js";
 import type { PageProps } from "./index.page.jsx";
-import fs from "node:fs";
 import { marked } from "marked";
+import README from "../../../../../README.md?raw";
 
-const text = fs.readFileSync(`../../README.md`, "utf-8");
-const markdown = marked.parse(text);
+const markdown = marked.parse(README);
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async () => {
