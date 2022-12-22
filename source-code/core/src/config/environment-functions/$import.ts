@@ -1,6 +1,19 @@
 import type { fs } from "memfs";
 
 /**
+ * Importing ES modules either from a local path, or from a url.
+ *
+ * The imported module must be ESM. A good indicator is whether
+ * the "type" property in a package.json is set to "module" if
+ * node is used.
+ *
+ * Read more on https://inlang.com/documentation/config
+ */
+// explitcly export the interface of $import to be consumed
+// in the config with JSdoc.
+export type $import = typeof $import;
+
+/**
  * Initializes the $import function.
  *
  * @example
@@ -25,7 +38,7 @@ export function initialize$import(args: {
  * the "type" property in a package.json is set to "module" if
  * node is used.
  *
- * _[See test cases](./$import.test.js)_
+ * Read more on https://inlang.com/documentation/config
  */
 async function $import(
 	uri: string,
