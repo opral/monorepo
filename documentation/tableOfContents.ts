@@ -19,13 +19,13 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./ci-cd.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,
 	],
-	RFCs: [
-		(await import("../rfcs/001-core-architecture.md?raw")).default,
-		(await import("../rfcs/002-tech-stack.md?raw")).default,
-	],
 	Reference: [
 		(await import("./config.md?raw")).default,
 		(await import("./ast.md?raw")).default,
 		(await import("./query.md?raw")).default,
+	],
+	RFCs: [
+		(await import("../rfcs/001-core-architecture.md?raw")).default,
+		(await import("../rfcs/002-tech-stack.md?raw")).default,
 	],
 };
