@@ -23,7 +23,7 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	return (
 		<RootLayout>
-			<div class="sm:grid sm:grid-cols-9 gap-10 py-4 w-full">
+			<div class="sm:grid sm:grid-cols-9 gap-10 w-full">
 				<div class="sm:flex col-span-2 sticky top-0">
 					{/* `Show` is a hotfix when client side rendering loaded this page
 					 * filteredTableContents is not available on the client.
@@ -37,7 +37,7 @@ export function Page(props: PageProps) {
 					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
 					<div
-						class="pt-3 w-full sm:col-span-7 prose justify-self-center"
+						class="pt-6 w-full sm:col-span-7 prose justify-self-center"
 						innerHTML={props.markdown?.html}
 					></div>
 				</Show>

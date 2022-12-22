@@ -62,7 +62,8 @@ function Header() {
 
 	return (
 		<header
-			class={`sticky top-0 z-50 w-full bg-background border-b border-outline py-3`}
+			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
+			class={`sticky top-0 z-50 w-full bg-[#F3F3F3] border-b border-outline py-3`}
 		>
 			<nav class={layoutMargins}>
 				<div class="flex gap-8">
