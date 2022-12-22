@@ -4,64 +4,58 @@ import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-r
 
 export function Hero() {
 	return (
-		<div class="relative px-6 lg:px-8">
-			<div class="mx-auto max-w-3xl pt-20 pb-32 sm:pt-48 sm:pb-40">
-				<div>
-					<div class="hidden sm:mb-8 sm:flex sm:justify-center">
-						<div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
-							<span>
-								We are hiring engineers and designers.{" "}
-								<a
-									target="_blank"
-									href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
-									class="font-semibold text-primary"
-								>
-									<span class="absolute inset-0" aria-hidden="true"></span>
-									Careers <span aria-hidden="true">&rarr;</span>
-								</a>
+		<div class="mx-auto max-w-3xl pt-20 pb-32 sm:pt-48 sm:pb-40">
+			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
+				<div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
+					<span>
+						We are hiring engineers and designers.{" "}
+						<a
+							target="_blank"
+							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
+							class="font-semibold text-primary"
+						>
+							<span class="absolute inset-0" aria-hidden="true"></span>
+							Careers <span aria-hidden="true">&rarr;</span>
+						</a>
+					</span>
+				</div>
+			</div>
+			<div>
+				<h1 class="text-3xl sm:text-4xl font-bold tracking-tight sm:text-center md:text-5xl lg:text-6xl">
+					<span class="block xl:inline">Developer-first localization</span>
+					<span class="inline xl:block text-primary">
+						infrastructure{" "}
+						<span class="text-on-background">
+							built on{" "}
+							<span class="inline-block">
+								git
+								{/* custom git color */}
+								<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
 							</span>
-						</div>
-					</div>
-					<div>
-						<h1 class="text-3xl sm:text-4xl font-bold tracking-tight sm:text-center md:text-5xl lg:text-6xl">
-							<span class="block xl:inline">Developer-first localization</span>
-							<span class="inline xl:block text-primary">
-								infrastructure{" "}
-								<span class="text-on-background">
-									built on{" "}
-									<span class="inline-block">
-										git
-										{/* custom git color */}
-										<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
-									</span>
-								</span>
-							</span>
-						</h1>
-						<p class="mt-6 text-base sm:text-lg leading-8 text-gray-600 sm:text-center">
-							Inlang turns your git repository into the collaboration and
-							automation hub for localization while keeping full control and
-							flexibility.
-						</p>
-						<div class="mt-8 flex gap-x-4 sm:justify-center">
-							<sl-button
-								prop:href="/documentation/introduction"
-								prop:size="large"
-								prop:variant="primary"
-							>
-								Get started
-								<MaterialSymbolsArrowRightAltRounded slot="suffix"></MaterialSymbolsArrowRightAltRounded>
-							</sl-button>
-
-							<sl-button
-								prop:href="https://github.com/inlang/inlang"
-								prop:target="_blank"
-								prop:size="large"
-							>
-								View on GitHub
-								<IconGithub slot="suffix"></IconGithub>
-							</sl-button>
-						</div>
-					</div>
+						</span>
+					</span>
+				</h1>
+				<p class="mt-6 text-base sm:text-lg leading-8 text-gray-600 sm:text-center">
+					Inlang turns your git repository into the collaboration and automation
+					hub for localization while keeping full control and flexibility.
+				</p>
+				<div class="mt-8 flex gap-x-4 sm:justify-center">
+					<sl-button
+						prop:href="/documentation/introduction"
+						prop:size="large"
+						prop:variant="primary"
+					>
+						Get started
+						<MaterialSymbolsArrowRightAltRounded slot="suffix"></MaterialSymbolsArrowRightAltRounded>
+					</sl-button>
+					<sl-button
+						prop:href="https://github.com/inlang/inlang"
+						prop:target="_blank"
+						prop:size="large"
+					>
+						View on GitHub
+						<IconGithub slot="suffix"></IconGithub>
+					</sl-button>
 				</div>
 			</div>
 		</div>
