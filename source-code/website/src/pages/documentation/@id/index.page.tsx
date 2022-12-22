@@ -5,10 +5,10 @@ import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import type { parseMarkdown } from "@src/services/markdown/index.js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 
-export const Head: PageHead = () => {
+export const Head: PageHead<PageProps> = (props) => {
 	return {
-		title: "Documentation",
-		description: "Documentation",
+		title: props.pageContext.pageProps.markdown.frontmatter.title + " | inlang",
+		description: props.pageContext.pageProps.markdown.frontmatter.description,
 	};
 };
 

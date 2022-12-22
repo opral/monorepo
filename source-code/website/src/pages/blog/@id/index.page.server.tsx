@@ -12,7 +12,7 @@ import { parseMarkdown } from "@src/services/markdown/index.js";
  */
 export type ProcessedTableOfContents = Record<
 	string,
-	Awaited<ReturnType<typeof parseMarkdown<FrontmatterSchema>>>["frontmatter"]
+	Awaited<ReturnType<typeof parseMarkdown>>["frontmatter"]
 >;
 
 /**
@@ -23,10 +23,7 @@ export type ProcessedTableOfContents = Record<
  * 		"/documentation/intro": document,
  * 	}
  */
-let index: Record<
-	string,
-	Awaited<ReturnType<typeof parseMarkdown<FrontmatterSchema>>>
-> = {};
+let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
 
 /**
  * the table of contents without the html for each document
@@ -59,7 +56,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
  */
 async function generateIndexAndTableOfContents() {
 	for (const document of tableOfContents) {
-		const markdown = await parseMarkdown<FrontmatterSchema>({
+		const markdown = await parseMarkdown({
 			text: document,
 			FrontmatterSchema,
 		});

@@ -4,10 +4,10 @@ import type { parseMarkdown } from "@src/services/markdown/index.js";
 import { Show } from "solid-js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 
-export const Head: PageHead = () => {
+export const Head: PageHead<PageProps> = (props) => {
 	return {
-		title: "Blog",
-		description: "Blog",
+		title: props.pageContext.pageProps.markdown.frontmatter.title,
+		description: props.pageContext.pageProps.markdown.frontmatter.description,
 	};
 };
 

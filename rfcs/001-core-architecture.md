@@ -1,6 +1,7 @@
 ---
 title: Core architecture
 href: /documentation/rfc-core-architecture
+description: This RFC describes the architecture of inlang.
 ---
 
 ### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/127).

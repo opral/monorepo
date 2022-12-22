@@ -1,6 +1,7 @@
 ---
 title: Design principles
 href: /documentation/design-principles
+description: Learn more about the design principles behind inlang.
 ---
 
 # {% $frontmatter.title %}
