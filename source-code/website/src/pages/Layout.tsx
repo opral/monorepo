@@ -63,103 +63,106 @@ function Header() {
 	return (
 		<header
 			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-			class={`sticky top-0 z-50 w-full bg-[#F3F3F3] border-b border-outline py-3`}
+			class={`sticky top-0 z-50 w-full bg-background border-b border-outline `}
 		>
-			<nav class={layoutMargins}>
-				<div class="flex gap-8">
-					<a href="/" class="flex items-center">
-						<img
-							class="h-8 w-auto "
-							src="/favicon/favicon.ico"
-							alt="Company Logo"
-						/>
-						<span class="self-center pl-2 text-xl font-bold">inlang</span>
-					</a>
-					<div class="grid grid-cols-2 w-full content-center">
-						<div class="hidden md:flex justify-start items-center space-x-4">
-							<For each={links}>
-								{(link) => (
-									<a class="link link-primary" href={link.href}>
-										{link.name}
-									</a>
-								)}
-							</For>
-							<div class="pl-2 flex space-x-4">
-								<For each={socialMediaLinks}>
+			<div class="w-full h-full bg-surface-1 py-3">
+				<nav class={layoutMargins}>
+					<div class="flex gap-8">
+						<a href="/" class="flex items-center">
+							<img
+								class="h-8 w-auto "
+								src="/favicon/favicon.ico"
+								alt="Company Logo"
+							/>
+							<span class="self-center pl-2 text-xl font-bold">inlang</span>
+						</a>
+						<div class="grid grid-cols-2 w-full content-center">
+							<div class="hidden md:flex justify-start items-center space-x-4">
+								<For each={links}>
 									{(link) => (
-										<a
-											target="_blank"
-											class="link link-primary flex space-x-2 items-center"
-											href={link.href}
-										>
-											<link.Icon class="w-5 h-5"></link.Icon>
-											{/* <span>{link.name}</span> */}
+										<a class="link link-primary" href={link.href}>
+											{link.name}
 										</a>
 									)}
 								</For>
+								<div class="pl-2 flex space-x-4">
+									<For each={socialMediaLinks}>
+										{(link) => (
+											<a
+												target="_blank"
+												class="link link-primary flex space-x-2 items-center"
+												href={link.href}
+											>
+												<link.Icon class="w-5 h-5"></link.Icon>
+												{/* <span>{link.name}</span> */}
+											</a>
+										)}
+									</For>
+								</div>
+							</div>
+							<div class="hidden md:flex justify-end space-x-4 place-items-center">
+								<Show
+									when={
+										currentPageContext().urlParsed.pathname.includes(
+											"editor"
+										) === false
+									}
+								>
+									<sl-button onClick={() => navigate("/editor")}>
+										<span class="text-on-background font-medium text-base">
+											Open editor
+										</span>
+									</sl-button>
+								</Show>
+								{/* not overwhelming the user by only showing login button when not on landig page */}
+								<Show
+									when={
+										localStorage.user ||
+										currentPageContext().urlParsed.pathname.includes("editor")
+									}
+								>
+									<UserDropdown></UserDropdown>
+								</Show>
 							</div>
 						</div>
-						<div class="hidden md:flex justify-end space-x-4 place-items-center">
-							<Show
-								when={
-									currentPageContext().urlParsed.pathname.includes("editor") ===
-									false
-								}
+						{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
+						<div class="md:hidden flex items-center">
+							<button
+								onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+								type="button"
+								class="inline-flex items-center justify-center text-primary "
 							>
-								<sl-button onClick={() => navigate("/editor")}>
-									<span class="text-on-background font-medium text-base">
-										Open editor
-									</span>
-								</sl-button>
-							</Show>
-							{/* not overwhelming the user by only showing login button when not on landig page */}
-							<Show
-								when={
-									localStorage.user ||
-									currentPageContext().urlParsed.pathname.includes("editor")
-								}
-							>
-								<UserDropdown></UserDropdown>
-							</Show>
+								<span class="sr-only">
+									{mobileMenuIsOpen() ? "Close menu" : "Open menu"}
+								</span>
+								{mobileMenuIsOpen() ? (
+									<IconClose class="w-6 h-6"></IconClose>
+								) : (
+									<IconMenu class="w-6 h-6"></IconMenu>
+								)}
+							</button>
 						</div>
 					</div>
-					{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
-					<div class="md:hidden flex items-center">
-						<button
-							onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-							type="button"
-							class="inline-flex items-center justify-center text-primary "
-						>
-							<span class="sr-only">
-								{mobileMenuIsOpen() ? "Close menu" : "Open menu"}
-							</span>
-							{mobileMenuIsOpen() ? (
-								<IconClose class="w-6 h-6"></IconClose>
-							) : (
-								<IconMenu class="w-6 h-6"></IconMenu>
-							)}
-						</button>
-					</div>
-				</div>
-				{/* MobileNavbar includes the Navigation for the Documentations sites  */}
-				<Show when={mobileMenuIsOpen()}>
-					<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
-						<For each={links}>
-							{(link) => (
-								<sl-tree class="">
-									<a
-										class="link grow min-w-full text-on-surface link-primary w-full"
-										href={link.href}
-										onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-									>
-										<sl-tree-item>{link.name}</sl-tree-item>
-									</a>
-								</sl-tree>
-							)}
-						</For>
-					</ol>
-				</Show>
-			</nav>
+					{/* MobileNavbar includes the Navigation for the Documentations sites  */}
+					<Show when={mobileMenuIsOpen()}>
+						<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
+							<For each={links}>
+								{(link) => (
+									<sl-tree class="">
+										<a
+											class="link grow min-w-full text-on-surface link-primary w-full"
+											href={link.href}
+											onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+										>
+											<sl-tree-item>{link.name}</sl-tree-item>
+										</a>
+									</sl-tree>
+								)}
+							</For>
+						</ol>
+					</Show>
+				</nav>
+			</div>
 		</header>
 	);
 }
