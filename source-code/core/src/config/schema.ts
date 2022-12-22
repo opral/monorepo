@@ -1,10 +1,29 @@
 import type * as ast from "../ast/index.js";
-import type { $fs, initialize$import } from "./environment-functions/index.js";
+import type { $fs, $import } from "./environment-functions/index.js";
+
+/**
+ * The environment functions.
+ *
+ * Read more https://inlang.com/documentation/environment-functions
+ */
+export type EnvironmentFunctions = {
+	$fs: $fs;
+	$import: $import;
+};
+
+/**
+ * The inlang config function.
+ *
+ * Read more https://inlang.com/documentation/config
+ */
+export type Config = (args: EnvironmentFunctions) => Promise<ConfigSchema>;
 
 /**
  * Inlang config schema.
+ *
+ * Read more https://inlang.com/documentation/config
  */
-export type Config = {
+export type ConfigSchema = {
 	// /**
 	//  * The language that other languages are validated against.
 	//  *
@@ -29,15 +48,10 @@ export type Config = {
 	 * The bunndles must include the reference bundle (id) itself.
 	 */
 	bundleIds: string[];
-	readBundles: (args: {
-		$fs: $fs;
-		$import: ReturnType<typeof initialize$import>;
-	}) => Promise<ast.Bundle[]>;
-	writeBundles: (args: {
-		bundles: ast.Bundle[];
-		$fs: $fs;
-		$import: ReturnType<typeof initialize$import>;
-	}) => Promise<void>;
+	readBundles: (args: EnvironmentFunctions & {}) => Promise<ast.Bundle[]>;
+	writeBundles: (
+		args: EnvironmentFunctions & { bundles: ast.Bundle[] }
+	) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.

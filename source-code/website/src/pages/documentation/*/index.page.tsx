@@ -4,6 +4,7 @@ import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import type { parseMarkdown } from "@src/services/markdown/index.js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
+import { Callout } from "@src/services/markdown/components/Callout.jsx";
 
 export const Head: PageHead<PageProps> = (props) => {
 	return {
@@ -56,11 +57,33 @@ export function Page(props: PageProps) {
 					when={props.markdown?.html}
 					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
-					<div
-						// change the col-span to 2 if a right side nav bar should be rendered
-						class="w-full prose justify-self-center md:pt-6 md:col-span-3"
-						innerHTML={props.markdown?.html}
-					></div>
+					{/* 
+					rendering on the website is broken due to relative paths and 
+					the escaping of html. it is better to show the RFC's on the website
+					and refer to github for the rendered version than to not show them at all. 
+					*/}
+					<div class="w-full prose justify-self-center md:pt-6 md:col-span-3">
+						<Show
+							when={currentPageContext().urlParsed.pathname.includes("rfc")}
+						>
+							<Callout variant="warning">
+								<p>
+									The rendering of RFCs on the website might be broken.{" "}
+									<a
+										href="https://github.com/inlang/inlang/tree/main/rfcs"
+										target="_blank"
+									>
+										Read the RFC on GitHub instead.
+									</a>
+								</p>
+							</Callout>
+						</Show>
+						<div
+							// change the col-span to 2 if a right side nav bar should be rendered
+							class="w-full prose justify-self-center md:pt-6 md:col-span-3"
+							innerHTML={props.markdown?.html}
+						></div>
+					</div>
 				</Show>
 			</div>
 		</RootLayout>
