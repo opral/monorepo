@@ -10,7 +10,9 @@ description: This RFC describes the architecture of inlang.
 
 > In the context of this document, localization (L10n) oftentimes implicitly includes internationalization (i18n). Find a [glossary](#glossary) at the end of this document.
 
-**Inlang's goal** is to make software localization effortless for every stakeholder (developers, translators, product managers). We believe that localization is underutalized, and if the effort to localize is just low enough, the majority of projects and organizations will localize.
+**Inlang's first goal** is to make software localization easier for every stakeholder (developers, translators, product managers). We believe that localization is underutalized, and if the effort to localize is just low enough, the majority of projects and organizations will localize.
+
+**Inlang's second goal** might become the provision of infrastructure to build apps with built-in version control and automation. Whereas the first app to be build on such infrastructure is inlang itself.
 
 ## Background
 
@@ -20,7 +22,7 @@ What started with a [proof of concept](https://www.reddit.com/r/sveltejs/comment
 
 This RFC proposes a localization system that acknowledges git as the single source of truth, utilizes git for automation, and extends git to close collaboration gaps between developers and translators.
 
-In short, a git-based localization system for developers and translators.
+In short, a git-based localization system for developers and translators with a high degree of composability and automation.
 
 <br/>
 <figure>
