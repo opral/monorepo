@@ -41,7 +41,7 @@ export function Hero() {
 				</p>
 				<div class="mt-8 flex gap-x-4 sm:justify-center">
 					<sl-button
-						prop:href="/documentation/introduction"
+						prop:href="/documentation"
 						prop:size="large"
 						prop:variant="primary"
 					>
