@@ -16,6 +16,7 @@ export const tableOfContents: Record<string, string[]> = {
 	],
 	Guide: [
 		(await import("./getting-started.md?raw")).default,
+		(await import("./environment-functions.md?raw")).default,
 		(await import("./ci-cd.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,
 	],
