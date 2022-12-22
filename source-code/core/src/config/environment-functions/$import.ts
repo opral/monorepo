@@ -9,9 +9,14 @@ import type { fs } from "memfs";
  *
  * Read more on https://inlang.com/documentation/config
  */
-// explitcly export the interface of $import to be consumed
-// in the config with JSdoc.
-export type $import = typeof $import;
+//
+// - explitcly export the interface of $import to be consumed
+//   in the config with JSdoc.
+//
+// - not using ReturnType or FunctionArguments to increase DX
+//   when hovering over the type.
+//
+export type $import = (uri: string) => Promise<any>;
 
 /**
  * Initializes the $import function.
