@@ -11,7 +11,11 @@ import { fs } from "@inlang/git-sdk/fs";
 import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
-import { Config as InlangConfig, initialize$import } from "@inlang/core/config";
+import {
+	ConfigSchema as InlangConfigSchema,
+	EnvironmentFunctions,
+	initialize$import,
+} from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/utilities/result";
@@ -95,7 +99,7 @@ export let repositoryIsCloned: Resource<undefined | Date>;
  *
  * Undefined if no inlang config exists/has been found.
  */
-export let inlangConfig: Resource<InlangConfig | undefined>;
+export let inlangConfig: Resource<InlangConfigSchema | undefined>;
 
 /**
  * Route parameters like `/github.com/inlang/website`.
@@ -137,7 +141,10 @@ const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
-const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
+const environmentFunctions: EnvironmentFunctions = {
+	$import: initialize$import({ basePath: "/", fs: fs.promises, fetch }),
+	$fs: fs.promises,
+};
 
 async function cloneRepository(args: {
 	pageContext: PageContext;
@@ -214,7 +221,7 @@ export async function pushChanges(
 	}
 }
 
-async function readInlangConfig(): Promise<InlangConfig | undefined> {
+async function readInlangConfig(): Promise<InlangConfigSchema | undefined> {
 	const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
 	if (file === undefined) {
 		return undefined;
@@ -223,20 +230,20 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		"data:application/javascript;base64," + btoa(file.toString());
 
 	const module = await import(/* @vite-ignore */ withMimeType);
-	return module.config;
+	return module.config({ ...environmentFunctions });
 }
 
-async function readBundles(config: InlangConfig) {
-	const bundles = await config.readBundles({ $import, $fs: fs.promises });
+async function readBundles(config: InlangConfigSchema) {
+	const bundles = await config.readBundles({ ...environmentFunctions });
 	return bundles;
 }
 
 async function writeBundles(
-	config: InlangConfig,
+	config: InlangConfigSchema,
 	bundles: ast.Bundle[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	await config.writeBundles({ $import, $fs: fs.promises, bundles });
+	await config.writeBundles({ ...environmentFunctions, bundles });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
 		// files with unstaged and uncomitted changes
