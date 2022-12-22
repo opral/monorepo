@@ -21,3 +21,13 @@ That pattern differs from semantic versioning. Semantic versioning defines a ver
 ### 2. Experimental property in the config
 
 Properties in the config that are expected to change frequently are nested under `experimental`. Definitions under experimental can change at any time and do not lead to a `MAJOR` version bump.
+
+```ts
+export const config = {
+	// ... other properties
+	experimental: {
+		// properties nested under experimental
+		// are subject to breaking changes
+	},
+};
+```
