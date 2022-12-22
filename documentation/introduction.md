@@ -1,6 +1,7 @@
 ---
 title: Introduction
 href: /documentation
+description: Learn on how to get started with inlang, the design principles, and more.
 ---
 
 # {% $frontmatter.title %}

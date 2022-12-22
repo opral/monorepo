@@ -6,6 +6,7 @@ import { ThePage } from "./ThePage.jsx";
 
 // import the css
 import "./app.css";
+import { assert } from "@src/services/assert/index.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
@@ -17,10 +18,12 @@ export async function render(
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
-	const { Head } = pageContext.exports;
-	const head = Head?.({ pageContext });
-	const title = head?.title ?? "inlang";
-	const description = head?.description ?? "";
+	assert(pageContext.exports.Head, "A page must export a Head.");
+	const head = pageContext.exports.Head({ pageContext });
+	assert(
+		head.description.length < 160,
+		`A description of a Page should not exceed 160 characters. Otherwise, search engines will truncate the text. The provided description was ${head.description.length} characters long.`
+	);
 	// generating the html from the server:
 	// 1. the server sends a hydration script for the client.
 	//    the client uses the hydration script to hydrate the page.
@@ -38,19 +41,22 @@ export async function render(
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
       <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>${title}</title>
-        <meta name="description" content="${description}" />
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<!-- theme-color means the background color of the iOS status bar -->
-		<meta name="theme-color" content="#000000" />
+			<meta name="theme-color" content="#000000" />
 		<!-- START import inter font -->
-		<link rel="preconnect" href="https://rsms.me/">
-		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+			<link rel="preconnect" href="https://rsms.me/">
+			<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<!-- END import inter font -->
-		${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
-		${dangerouslySkipEscape(favicons)}
-        ${dangerouslySkipEscape(generateHydrationScript())}
+			${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
+			${dangerouslySkipEscape(favicons)}
+			${dangerouslySkipEscape(generateHydrationScript())}
+		<!-- START injecting meta tags from Page -->
+			<title>${head.title}</title>
+			<meta name="description" content="${head.description}" />
+			${dangerouslySkipEscape(head.meta ?? "")}
+		<!-- END injecting meta tags from Page -->
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
       <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">

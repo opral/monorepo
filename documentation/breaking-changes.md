@@ -1,6 +1,7 @@
 ---
 title: Breaking changes
 href: /documentation/breaking-changes
+description: How inlang deals with breaking changes during alpha/beta.
 ---
 
 # {% $frontmatter.title %}

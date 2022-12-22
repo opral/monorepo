@@ -1,6 +1,15 @@
+import type { PageHead } from "@src/renderer/types.js";
 import { For } from "solid-js";
 import { Layout } from "../Layout.jsx";
 import type { PageProps } from "./@id/index.page.jsx";
+
+export const Head: PageHead = (props) => {
+	return {
+		title: "inlang Blog - Developer-first localization infrastructure.",
+		description:
+			"Posts that revolve around inlang, git, and localization (i18n).",
+	};
+};
 
 export function Page(props: PageProps) {
 	return (
@@ -13,7 +22,7 @@ export function Page(props: PageProps) {
 								<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
 									{frontmatter.title}
 								</h2>
-								<p>{frontmatter.summary}</p>
+								<p>{frontmatter.description}</p>
 								{/* <img
 									class="object-contain w-full rounded"
 									src={section.previewImageSrc}

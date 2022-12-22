@@ -1,6 +1,7 @@
 ---
 title: Tech stack
 href: /documentation/rfc-tech-stack
+description: This RFC describes the tech stack of inlang.
 ---
 
 ### 💡 Discuss the RFC [here](https://github.com/inlang/inlang/pull/128).

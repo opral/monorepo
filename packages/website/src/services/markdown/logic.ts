@@ -21,6 +21,10 @@ export const RequiredFrontmatter = z.object({
 		})
 		.startsWith("/"),
 	title: z.string(),
+	description: z
+		.string({ description: "Description for SEO and prerendering purposes." })
+		.min(10)
+		.max(160),
 });
 
 /**

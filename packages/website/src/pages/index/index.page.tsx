@@ -7,10 +7,11 @@ export type PageProps = {
 	markdown: string;
 };
 
-export const Head: PageHead = () => {
+export const Head: PageHead = (props) => {
 	return {
-		title: "inlang",
-		description: "Developer-first localization infrastructure for software.",
+		title: "inlang Developer-first localization infrastructure.",
+		description:
+			"Inlang provides dev tools, an editor to manage translations and automation via CI/CD to streamline localization.",
 	};
 };
 
