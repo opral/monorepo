@@ -15,7 +15,7 @@ Expressing human languages is complex. So complex that code is required to expre
 ### Reference
 
 {% Callout variant="info" %}
-**The AST definition is small on purpose.** Feedback and requirements from users will define what Nodes and properties are added. Participate in the [discussions](https://github.com/inlang/inlang/discussions).  
+**The AST definition is small on purpose.** Feedback and requirements from users will define what nodes and properties are added. Participate in the [discussions](https://github.com/inlang/inlang/discussions).  
 {% /Callout %}
 
 _Up-to-date definitions of the AST can be found [here](https://github.com/inlang/inlang/blob/main/source-code/core/src/ast/index.ts)_
