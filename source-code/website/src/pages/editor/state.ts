@@ -1,5 +1,6 @@
 import { currentPageContext } from "@src/renderer/state.js";
 import {
+	batch,
 	createEffect,
 	createResource,
 	createSignal,
@@ -36,11 +37,12 @@ export function StateProvider(props: { children: JSXElement }) {
 	// re-fetched if currentPageContext changes
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
-		// when the user logs-in or out.
-		() => ({
+		// when the user logs-in or out. It is important to batch the reactive signals
+		// to avoid cloneRepository being called multiple times for one compound update.
+		batch(() => ({
 			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
-		}),
+		})),
 		cloneRepository
 	);
 
@@ -48,11 +50,13 @@ export function StateProvider(props: { children: JSXElement }) {
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
 	[unpushedChanges] = createResource(
+		// using batch does not work for this resource. don't know why.
+		// no related bug so far, hence leave it as is.
 		() => ({
 			repositoryClonedTime: repositoryIsCloned()!,
 			lastPushTime: lastPush(),
 			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsCahnge. Hence, pass
+			// unpushed changed should react to fsChange. Hence, pass
 			// the signal to _unpushedChanges
 			lastFsChange: fsChange(),
 		}),
