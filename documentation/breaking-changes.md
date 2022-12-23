@@ -9,7 +9,7 @@ description: How inlang deals with breaking changes during alpha/beta.
 **Inlang is in alpha. Breaking changes should be expected. Two mechanisms are in place to streamline breaking changes.**
 
 {% Callout variant="info" %}
-**Frequent breaking changes are not expected**. Inlang's public interface is small. In the majority of cases, only the [config](/documentation/config.md) schema is of relevance.
+Inlang's public interface is small. In the majority of breaking change cases, only the [config](/documentation/config.md) schema is of relevance.
 {% /Callout %}
 
 ### 1. Versioning (modified semantic versioning)
