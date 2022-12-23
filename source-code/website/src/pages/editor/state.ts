@@ -1,5 +1,6 @@
 import { currentPageContext } from "@src/renderer/state.js";
 import {
+	batch,
 	createEffect,
 	createResource,
 	createSignal,
@@ -8,10 +9,13 @@ import {
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { fs } from "@inlang/git-sdk/fs";
-import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
-import { Config as InlangConfig, initialize$import } from "@inlang/core/config";
+import {
+	ConfigSchema as InlangConfigSchema,
+	EnvironmentFunctions,
+	initialize$import,
+} from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/utilities/result";
@@ -33,22 +37,26 @@ export function StateProvider(props: { children: JSXElement }) {
 	// re-fetched if currentPageContext changes
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
-		// when the user logs-in or out.
-		() => ({
-			pageContext: currentPageContext(),
+		// when the user logs-in or out. It is important to batch the reactive signals
+		// to avoid cloneRepository being called multiple times for one compound update.
+		batch(() => ({
+			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
-		}),
+		})),
 		cloneRepository
 	);
+
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
 	[unpushedChanges] = createResource(
+		// using batch does not work for this resource. don't know why.
+		// no related bug so far, hence leave it as is.
 		() => ({
 			repositoryClonedTime: repositoryIsCloned()!,
 			lastPushTime: lastPush(),
 			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsCahnge. Hence, pass
+			// unpushed changed should react to fsChange. Hence, pass
 			// the signal to _unpushedChanges
 			lastFsChange: fsChange(),
 		}),
@@ -95,19 +103,19 @@ export let repositoryIsCloned: Resource<undefined | Date>;
  *
  * Undefined if no inlang config exists/has been found.
  */
-export let inlangConfig: Resource<InlangConfig | undefined>;
+export let inlangConfig: Resource<InlangConfigSchema | undefined>;
 
 /**
  * Route parameters like `/github.com/inlang/website`.
  */
 export const routeParams = () =>
-	currentPageContext().routeParams as EditorRouteParams;
+	currentPageContext.routeParams as EditorRouteParams;
 
 /**
  * Search parameters of editor route like `?branch=main`.
  */
 export const searchParams = () =>
-	currentPageContext().urlParsed.search as EditorSearchParams;
+	currentPageContext.urlParsed.search as EditorSearchParams;
 
 /**
  * The filesystem is not reactive, hence setFsChange to manually
@@ -137,13 +145,16 @@ const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
-const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
+const environmentFunctions: EnvironmentFunctions = {
+	$import: initialize$import({ basePath: "/", fs: fs.promises, fetch }),
+	$fs: fs.promises,
+};
 
 async function cloneRepository(args: {
-	pageContext: PageContext;
+	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
-	const { host, organization, repository } = args.pageContext.routeParams;
+	const { host, organization, repository } = args.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -174,10 +185,10 @@ async function cloneRepository(args: {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(
-	pageContext: PageContext,
+	routeParams: EditorRouteParams,
 	user: NonNullable<LocalStorageSchema["user"]>
 ): Promise<Result<void, Error>> {
-	const { host, organization, repository } = pageContext.routeParams;
+	const { host, organization, repository } = routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -214,7 +225,7 @@ export async function pushChanges(
 	}
 }
 
-async function readInlangConfig(): Promise<InlangConfig | undefined> {
+async function readInlangConfig(): Promise<InlangConfigSchema | undefined> {
 	const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
 	if (file === undefined) {
 		return undefined;
@@ -223,20 +234,21 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		"data:application/javascript;base64," + btoa(file.toString());
 
 	const module = await import(/* @vite-ignore */ withMimeType);
-	return module.config;
+	const initialized = await module.config({ ...environmentFunctions });
+	return initialized;
 }
 
-async function readBundles(config: InlangConfig) {
-	const bundles = await config.readBundles({ $import, $fs: fs.promises });
+async function readBundles(config: InlangConfigSchema) {
+	const bundles = await config.readBundles({ ...environmentFunctions });
 	return bundles;
 }
 
 async function writeBundles(
-	config: InlangConfig,
+	config: InlangConfigSchema,
 	bundles: ast.Bundle[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	await config.writeBundles({ $import, $fs: fs.promises, bundles });
+	await config.writeBundles({ ...environmentFunctions, bundles });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
 		// files with unstaged and uncomitted changes
