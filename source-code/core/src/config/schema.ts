@@ -45,7 +45,7 @@ export type ConfigSchema = {
 	/**
 	 * Bundle (ids) of this project.
 	 *
-	 * The bunndles must include the reference bundle (id) itself.
+	 * The bundles must include the reference bundle (id) itself.
 	 */
 	bundleIds: string[];
 	readBundles: (args: EnvironmentFunctions & {}) => Promise<ast.Bundle[]>;
