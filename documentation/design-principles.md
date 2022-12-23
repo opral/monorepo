@@ -6,9 +6,7 @@ description: Learn more about the design principles behind inlang.
 
 # {% $frontmatter.title %}
 
-- Git-based
-- Infrastructure approach
-- Developer-first
+**Git-based, infrastructure, and developer-first.**
 
 ## Git Based
 

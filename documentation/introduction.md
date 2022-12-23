@@ -6,7 +6,7 @@ description: Learn on how to get started with inlang, the design principles, and
 
 # {% $frontmatter.title %}
 
-Inlang is an a suite of infrastructure, tools, and apps that ease localization of software. Read more about inlang's approach to localization in the [design principles](/documentation/design-principles).
+**Inlang is an a suite of infrastructure, tools, and apps that ease localization of software. Read more about inlang's approach to localization in the [design principles](/documentation/design-principles).**
 
 {% Callout variant="info" %}
 
