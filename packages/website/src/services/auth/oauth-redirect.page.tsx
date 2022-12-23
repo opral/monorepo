@@ -6,6 +6,7 @@ import {
 import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
+import type { PageHead } from "@src/renderer/types.js";
 
 export type PageProps = {
 	error?: string;
@@ -13,6 +14,11 @@ export type PageProps = {
 		user: NonNullable<LocalStorageSchema["user"]>;
 	};
 };
+
+export const Head: PageHead = () => ({
+	title: "Auth redirect",
+	description: "Redirects to inlang.",
+});
 
 /**
  * The GitHub web application flow redirects to this page.
