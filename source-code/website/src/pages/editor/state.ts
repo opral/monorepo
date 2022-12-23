@@ -31,7 +31,6 @@ import { createAuthHeader } from "@src/services/auth/index.js";
  * for simplicity.
  */
 export function StateProvider(props: { children: JSXElement }) {
-	console.log("calling state provider ", new Date());
 	const [localStorage] = useLocalStorage();
 
 	// re-fetched if currentPageContext changes
@@ -44,10 +43,6 @@ export function StateProvider(props: { children: JSXElement }) {
 		}),
 		cloneRepository
 	);
-
-	createEffect(() => {
-		console.log(currentPageContext.routeParams, new Date());
-	});
 
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
