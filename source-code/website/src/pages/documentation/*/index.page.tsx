@@ -64,7 +64,7 @@ export function Page(props: PageProps) {
 					*/}
 					<div class="w-full prose justify-self-center md:pt-6 md:col-span-3">
 						<Show
-							when={currentPageContext().urlParsed.pathname.includes("rfc")}
+							when={currentPageContext.urlParsed.pathname.includes("rfc")}
 						>
 							<Callout variant="warning">
 								<p>
@@ -114,10 +114,10 @@ function NavbarCommon(props: {
 											classList={{
 												"text-primary":
 													document.frontmatter.href ===
-													currentPageContext().urlParsed.pathname,
+													currentPageContext.urlParsed.pathname,
 												"text-on-surface-variant":
 													document.frontmatter.href !==
-													currentPageContext().urlParsed.pathname,
+													currentPageContext.urlParsed.pathname,
 											}}
 											href={document.frontmatter.href}
 										>
