@@ -1,3 +1,8 @@
+/**
+ * A single node of the AST.
+ *
+ * Every other defintions are based on Node.
+ */
 export type Node<Name> = {
 	type: Name;
 	/**
@@ -10,37 +15,57 @@ export type Node<Name> = {
 	metadata?: unknown;
 };
 
+/**
+ * An identifier.
+ *
+ * Some Nodes have Identifiers such as a Bundle or Message.
+ */
 export type Identifier = Node<"Identifier"> & {
 	name: string;
 };
 
+/**
+ * A bundle holds a group of resources.
+ */
 export type Bundle = Node<"Bundle"> & {
 	id: Identifier;
 	resources: Resource[];
 };
 
+/**
+ * A resource is a collection of messages.
+ */
 export type Resource = Node<"Resource"> & {
 	id: Identifier;
 	body: Array<Message>;
 };
 
-export type MessageComment = Node<"MessageComment"> & {
-	value: string;
-};
-
+/**
+ * A message is what's rendered to a user.
+ */
 export type Message = Node<"Message"> & {
 	id: Identifier;
-	comment?: MessageComment;
+	// comment?: MessageComment;
 	pattern: Pattern;
 };
 
+/**
+ * A pattern denotes how a Message is composed.
+ */
 export type Pattern = Node<"Pattern"> & {
 	elements: Array<Text>;
 };
 
+/**
+ * Text can be translated.
+ */
 export type Text = Node<"Text"> & {
 	value: string;
 };
+
+// export type MessageComment = Node<"MessageComment"> & {
+// 	value: string;
+// };
 
 // export type Placeholder = Node<"Placeholder"> & {
 // 	expression: Expression;
