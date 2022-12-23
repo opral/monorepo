@@ -8,17 +8,16 @@ import {
 	inlangConfig,
 	referenceBundle,
 	repositoryIsCloned,
-	routeParams,
 } from "@src/pages/editor/state.js";
 import { Layout as EditorLayout } from "@src/pages/editor/Layout.jsx";
 import type * as ast from "@inlang/core/ast";
+import type { EditorRouteParams } from "@src/pages/editor/types.js";
 
-export const Head: PageHead = () => {
+export const Head: PageHead = (props) => {
+	const routeParams = props.pageContext.routeParams as EditorRouteParams;
 	return {
-		title: routeParams().organization + "/" + routeParams().repository,
-		description: `Contribute translations to ${
-			routeParams().repository
-		} via inlangs editor.`,
+		title: routeParams.organization + "/" + routeParams.repository,
+		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
 	};
 };
 
