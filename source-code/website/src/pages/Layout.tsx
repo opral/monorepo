@@ -103,7 +103,7 @@ function Header() {
 							<div class="hidden md:flex justify-end space-x-4 place-items-center">
 								<Show
 									when={
-										currentPageContext().urlParsed.pathname.includes(
+										currentPageContext.urlParsed.pathname.includes(
 											"editor"
 										) === false
 									}
@@ -118,7 +118,7 @@ function Header() {
 								<Show
 									when={
 										localStorage.user ||
-										currentPageContext().urlParsed.pathname.includes("editor")
+										currentPageContext.urlParsed.pathname.includes("editor")
 									}
 								>
 									<UserDropdown></UserDropdown>

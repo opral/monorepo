@@ -1,5 +1,6 @@
 import { currentPageContext } from "@src/renderer/state.js";
 import {
+	batch,
 	createEffect,
 	createResource,
 	createSignal,
@@ -8,7 +9,6 @@ import {
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { fs } from "@inlang/git-sdk/fs";
-import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
 import {
@@ -37,22 +37,26 @@ export function StateProvider(props: { children: JSXElement }) {
 	// re-fetched if currentPageContext changes
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
-		// when the user logs-in or out.
-		() => ({
-			pageContext: currentPageContext(),
+		// when the user logs-in or out. It is important to batch the reactive signals
+		// to avoid cloneRepository being called multiple times for one compound update.
+		batch(() => ({
+			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
-		}),
+		})),
 		cloneRepository
 	);
+
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
 	[unpushedChanges] = createResource(
+		// using batch does not work for this resource. don't know why.
+		// no related bug so far, hence leave it as is.
 		() => ({
 			repositoryClonedTime: repositoryIsCloned()!,
 			lastPushTime: lastPush(),
 			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsCahnge. Hence, pass
+			// unpushed changed should react to fsChange. Hence, pass
 			// the signal to _unpushedChanges
 			lastFsChange: fsChange(),
 		}),
@@ -105,13 +109,13 @@ export let inlangConfig: Resource<InlangConfigSchema | undefined>;
  * Route parameters like `/github.com/inlang/website`.
  */
 export const routeParams = () =>
-	currentPageContext().routeParams as EditorRouteParams;
+	currentPageContext.routeParams as EditorRouteParams;
 
 /**
  * Search parameters of editor route like `?branch=main`.
  */
 export const searchParams = () =>
-	currentPageContext().urlParsed.search as EditorSearchParams;
+	currentPageContext.urlParsed.search as EditorSearchParams;
 
 /**
  * The filesystem is not reactive, hence setFsChange to manually
@@ -147,10 +151,10 @@ const environmentFunctions: EnvironmentFunctions = {
 };
 
 async function cloneRepository(args: {
-	pageContext: PageContext;
+	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
-	const { host, organization, repository } = args.pageContext.routeParams;
+	const { host, organization, repository } = args.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -181,10 +185,10 @@ async function cloneRepository(args: {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(
-	pageContext: PageContext,
+	routeParams: EditorRouteParams,
 	user: NonNullable<LocalStorageSchema["user"]>
 ): Promise<Result<void, Error>> {
-	const { host, organization, repository } = pageContext.routeParams;
+	const { host, organization, repository } = routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
