@@ -1,7 +1,3 @@
-## Contributing
-
-The easiest way to contribute is to open this repository in Gitpod. Click on the banner below.
-
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/inlang/inlang)
 
 
