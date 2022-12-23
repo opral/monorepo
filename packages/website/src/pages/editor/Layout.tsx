@@ -20,6 +20,7 @@ import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import type { EditorRouteParams } from "./types.js";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -150,7 +151,10 @@ function HasChangesAction() {
 			});
 		}
 		setIsLoading(true);
-		const result = await pushChanges(currentPageContext(), localStorage.user);
+		const result = await pushChanges(
+			currentPageContext.routeParams as EditorRouteParams,
+			localStorage.user
+		);
 		setIsLoading(false);
 		if (result.isErr) {
 			return showToast({

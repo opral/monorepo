@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { fs } from "@inlang/git-sdk/fs";
-import type { PageContext } from "@src/renderer/types.js";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
 import {
@@ -32,6 +31,7 @@ import { createAuthHeader } from "@src/services/auth/index.js";
  * for simplicity.
  */
 export function StateProvider(props: { children: JSXElement }) {
+	console.log("calling state provider ", new Date());
 	const [localStorage] = useLocalStorage();
 
 	// re-fetched if currentPageContext changes
@@ -39,11 +39,16 @@ export function StateProvider(props: { children: JSXElement }) {
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
 		// when the user logs-in or out.
 		() => ({
-			pageContext: currentPageContext(),
+			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
 		}),
 		cloneRepository
 	);
+
+	createEffect(() => {
+		console.log(currentPageContext.routeParams, new Date());
+	});
+
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
 	// re-fetched if the file system changes
@@ -105,13 +110,13 @@ export let inlangConfig: Resource<InlangConfigSchema | undefined>;
  * Route parameters like `/github.com/inlang/website`.
  */
 export const routeParams = () =>
-	currentPageContext().routeParams as EditorRouteParams;
+	currentPageContext.routeParams as EditorRouteParams;
 
 /**
  * Search parameters of editor route like `?branch=main`.
  */
 export const searchParams = () =>
-	currentPageContext().urlParsed.search as EditorSearchParams;
+	currentPageContext.urlParsed.search as EditorSearchParams;
 
 /**
  * The filesystem is not reactive, hence setFsChange to manually
@@ -147,10 +152,10 @@ const environmentFunctions: EnvironmentFunctions = {
 };
 
 async function cloneRepository(args: {
-	pageContext: PageContext;
+	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
-	const { host, organization, repository } = args.pageContext.routeParams;
+	const { host, organization, repository } = args.routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
@@ -181,10 +186,10 @@ async function cloneRepository(args: {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(
-	pageContext: PageContext,
+	routeParams: EditorRouteParams,
 	user: NonNullable<LocalStorageSchema["user"]>
 ): Promise<Result<void, Error>> {
-	const { host, organization, repository } = pageContext.routeParams;
+	const { host, organization, repository } = routeParams;
 	if (
 		host === undefined ||
 		organization === undefined ||
