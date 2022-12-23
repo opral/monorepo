@@ -10,7 +10,7 @@ description: The reference for the config.
 
 The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `config`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `config` function.
 
-### Example
+## Example
 
 ```ts
 // filename: inlang.config.js
@@ -38,7 +38,7 @@ export async function config({ $import }) {
 }
 ```
 
-### Reference
+## Reference
 
 _Up-to-date implemenation can be found [here](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)_
 

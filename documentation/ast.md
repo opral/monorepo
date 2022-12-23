@@ -8,11 +8,9 @@ description: The reference for the AST.
 
 **Inlang operates on an AST (Abstract Syntax Tree). Using an AST gives inlang flexibility to adapt to different message syntaxes like ICU, formats such as JSON, ARB or JS, build linters for localization, and deliver an outstanding editing experience for translators.**
 
-### Why does inlang use an AST instead of treating Messages as strings?
-
 Expressing human languages is complex. So complex that code is required to express human languages. Code needs to be parsed, processed, and serialized to enable lintings, building a user interface, and more. Strings don't do justice to the complexity of human languages. Take a look at [this example sentence](https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/why-an-ast-is-required.webp) and the resulting complexity.
 
-### Reference
+## Reference
 
 {% Callout variant="info" %}
 **The AST definition is small on purpose.** Feedback and requirements from users will define what nodes and properties are added. Participate in the [discussions](https://github.com/inlang/inlang/discussions).  
