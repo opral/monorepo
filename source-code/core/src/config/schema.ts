@@ -16,14 +16,14 @@ export type EnvironmentFunctions = {
  *
  * Read more https://inlang.com/documentation/config
  */
-export type Config = (args: EnvironmentFunctions) => Promise<ConfigSchema>;
+export type InitializeConfig = (args: EnvironmentFunctions) => Promise<Config>;
 
 /**
  * Inlang config schema.
  *
  * Read more https://inlang.com/documentation/config
  */
-export type ConfigSchema = {
+export type Config = {
 	// /**
 	//  * The language that other languages are validated against.
 	//  *
