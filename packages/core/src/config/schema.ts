@@ -48,10 +48,11 @@ export type Config = {
 	 * The bundles must include the reference bundle (id) itself.
 	 */
 	bundleIds: string[];
-	readBundles: (args: EnvironmentFunctions & {}) => Promise<ast.Bundle[]>;
-	writeBundles: (
-		args: EnvironmentFunctions & { bundles: ast.Bundle[] }
-	) => Promise<void>;
+	readBundles: (args: { config: Config }) => Promise<ast.Bundle[]>;
+	writeBundles: (args: {
+		config: Config;
+		bundles: ast.Bundle[];
+	}) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.
