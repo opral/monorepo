@@ -7,11 +7,11 @@
  * ---------------------------------------------------------------
  */
 
-import type { DesignSystemColors } from "../../../tailwind.config.cjs";
+import type { ColorTokens } from "../../../tailwind.config.cjs";
 import type { JSX } from "solid-js";
 
 type ButtonProps = {
-	color: DesignSystemColors[number];
+	color: ColorTokens[number];
 	variant: "fill" | "outline" | "text";
 	// defaults to base. is optional to avoid merging of default props.
 	size?: "xs" | "sm" | "base" | "lg" | "xl";
