@@ -5,9 +5,9 @@ import { $import } from "@inlang/core/config";
 export async function inlinePattern(args: {
 	activeTextEditor: vscode.TextEditor;
 }): Promise<unknown> {
-	if (state().config.referenceBundleId === undefined) {
+	if (state().config.referenceLanguage === undefined) {
 		return vscode.window.showWarningMessage(
-			"The `referenceBundleId` musst be defined in the inlang.config.js to show patterns inline."
+			"The `referenceLanguage` musst be defined in the inlang.config.js to show patterns inline."
 		);
 	}
 	/**

@@ -12,7 +12,7 @@ import { fs } from "@inlang/git-sdk/fs";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
 import {
-	ConfigSchema as InlangConfigSchema,
+	Config as InlangConfig,
 	EnvironmentFunctions,
 	initialize$import,
 } from "@inlang/core/config";
@@ -63,7 +63,7 @@ export function StateProvider(props: { children: JSXElement }) {
 		_unpushedChanges
 	);
 
-	// if the config is loaded, read the bundles
+	// if the config is loaded, read the resources
 	//! will lead to weird ux since this effect does not
 	//! account for user intent
 	createEffect(async () => {
@@ -71,7 +71,7 @@ export function StateProvider(props: { children: JSXElement }) {
 		if (config === undefined) {
 			return;
 		}
-		setBundles(await readBundles(config));
+		setResources(await readResources(config));
 	});
 
 	//! Unexpected UX. If if the user conducted no changes,
@@ -81,7 +81,7 @@ export function StateProvider(props: { children: JSXElement }) {
 		if (config === undefined || localStorage.user === undefined) {
 			return;
 		}
-		await writeBundles(config, bundles, localStorage.user);
+		await writeResources(config, resources, localStorage.user);
 	});
 
 	return props.children;
@@ -103,7 +103,7 @@ export let repositoryIsCloned: Resource<undefined | Date>;
  *
  * Undefined if no inlang config exists/has been found.
  */
-export let inlangConfig: Resource<InlangConfigSchema | undefined>;
+export let inlangConfig: Resource<InlangConfig | undefined>;
 
 /**
  * Route parameters like `/github.com/inlang/website`.
@@ -126,16 +126,17 @@ export const searchParams = () =>
 export const [fsChange, setFsChange] = createSignal(new Date());
 
 /**
- * The bundles.
+ * The resources.
  */
-export const [bundles, setBundles] = createStore<ast.Bundle[]>([]);
+export const [resources, setResources] = createStore<ast.Resource[]>([]);
 
 /**
- * The reference bundle.
+ * The reference resource.
  */
-export const referenceBundle = () =>
-	bundles.find(
-		(bundle) => bundle.id.name === inlangConfig()?.referenceBundleId
+export const referenceResource = () =>
+	resources.find(
+		(resource) =>
+			resource.languageTag.language === inlangConfig()?.referenceLanguage
 	);
 
 /**
@@ -225,7 +226,7 @@ export async function pushChanges(
 	}
 }
 
-async function readInlangConfig(): Promise<InlangConfigSchema | undefined> {
+async function readInlangConfig(): Promise<InlangConfig | undefined> {
 	const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
 	if (file === undefined) {
 		return undefined;
@@ -238,17 +239,20 @@ async function readInlangConfig(): Promise<InlangConfigSchema | undefined> {
 	return initialized;
 }
 
-async function readBundles(config: InlangConfigSchema) {
-	const bundles = await config.readBundles({ ...environmentFunctions });
-	return bundles;
+async function readResources(config: InlangConfig) {
+	const resources = await config.readResources({
+		...environmentFunctions,
+		config,
+	});
+	return resources;
 }
 
-async function writeBundles(
-	config: InlangConfigSchema,
-	bundles: ast.Bundle[],
+async function writeResources(
+	config: InlangConfig,
+	resources: ast.Resource[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	await config.writeBundles({ ...environmentFunctions, bundles });
+	await config.writeResources({ ...environmentFunctions, resources, config });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
 		// files with unstaged and uncomitted changes

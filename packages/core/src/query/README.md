@@ -11,20 +11,20 @@ Immutability is good practice, eases CMD-Z (history) operations, plays nicely wi
 ## API
 
 ```js
-// single bundle queries
-bundle = query(bundle) // bundle
+// single resource queries
+resource = query(resource) // resource
 	.create(); // message
 
-bundle = query([resource]) // single resource
+resource = query(resource) // single resource
 	.get("id"); // message
 
-bundle = query(bundle) // bundle
+resource = query(resource) // resource
 	.update("id"); // message
 
-bundle = query(bundle) // bundle
+resource = query(resource) // resource
 	.delete("id"); // message
 
-// multiple bundle queries
-const bundles = [x, y, z];
-bundles = bundles.map((bundle) => query(bundle).delete("id"));
+// multiple resource queries
+const resources = [x, y, z];
+resources = resources.map((resource) => query(resource).delete("id"));
 ```

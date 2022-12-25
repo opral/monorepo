@@ -8,7 +8,11 @@ import {
 	Switch,
 	useTransition,
 } from "solid-js";
-import { bundles, inlangConfig, setBundles } from "@src/pages/editor/state.js";
+import {
+	resources,
+	inlangConfig,
+	setResources,
+} from "@src/pages/editor/state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
@@ -17,11 +21,14 @@ import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvide
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
 
 export function Messages(props: {
-	referenceBundleId: ast.Bundle["id"]["name"];
-	messages: Record<ast.Bundle["id"]["name"], ast.Message | undefined>;
+	messages: Record<
+		ast.Resource["languageTag"]["language"],
+		ast.Message | undefined
+	>;
 }) {
 	const [isOpen, setIsOpen] = createSignal(false);
-	const referenceMessage = () => props.messages[props.referenceBundleId]!;
+	const referenceMessage = () =>
+		props.messages[inlangConfig()!.referenceLanguage]!;
 	return (
 		<sl-details
 			on:sl-show={() => setIsOpen(true)}
@@ -36,13 +43,13 @@ export function Messages(props: {
 						TODO: additional information would appear here
 					</p>
 					<div class="grid gap-2 col-span-4">
-						<For each={inlangConfig()?.bundleIds}>
-							{(bundleId) => (
+						<For each={inlangConfig()?.languages}>
+							{(language) => (
 								<div class="grid grid-cols-4 gap-4">
 									<p class="flex justify-end pt-2">
 										<Show
-											when={bundleId === props.referenceBundleId}
-											fallback={bundleId}
+											when={language === inlangConfig()!.referenceLanguage}
+											fallback={language}
 										>
 											<sl-tooltip class="hidden md:block">
 												<p slot="content">
@@ -53,14 +60,14 @@ export function Messages(props: {
 													Reference:
 												</span>
 											</sl-tooltip>
-											{bundleId}
+											{language}
 										</Show>
 									</p>
 									<div class="col-span-3">
 										<PatternEditor
-											bundleId={bundleId}
+											language={language}
 											referenceMessage={referenceMessage()}
-											message={props.messages[bundleId]}
+											message={props.messages[language]}
 										></PatternEditor>
 									</div>
 								</div>
@@ -74,7 +81,7 @@ export function Messages(props: {
 }
 
 function PatternEditor(props: {
-	bundleId: ast.Bundle["id"]["name"];
+	language: ast.Resource["languageTag"]["language"];
 	referenceMessage: ast.Message;
 	message: ast.Message | undefined;
 }) {
@@ -98,9 +105,11 @@ function PatternEditor(props: {
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value
 	);
 
-	/** the bundle the message belongs to */
-	const bundle = () =>
-		bundles.find((bundle) => bundle.id.name === props.bundleId)!;
+	/** the resource the message belongs to */
+	const resource = () =>
+		resources.find(
+			(resource) => resource.languageTag.language === props.language
+		)!;
 
 	/** copy of the message to conduct and track changes */
 	const copy: () => ast.Message | undefined = () => {
@@ -179,14 +188,15 @@ function PatternEditor(props: {
 							}
 							(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
 							try {
-								const newBundle = query(bundle())
-									// TODO: remove hardcoded resource id
-									.upsert({ message: _copy!, resourceId: "default" })
+								const updatedResource = query(resource())
+									.upsert({ message: _copy! })
 									.unwrap();
-								setBundles(
-									bundles
-										.filter((bundle) => bundle.id.name !== props.bundleId)
-										.concat([newBundle])
+								setResources(
+									resources
+										.filter(
+											(_resource) => _resource.id.name !== resource().id.name
+										)
+										.concat([updatedResource])
 								);
 								showToast({
 									variant: "info",

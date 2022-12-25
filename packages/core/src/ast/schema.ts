@@ -20,7 +20,7 @@ export type Node<Name> = {
 /**
  * An identifier.
  *
- * Some Nodes have Identifiers such as a Bundle or Message.
+ * Some Nodes have Identifiers such as a Resource or Message.
  */
 export type Identifier = Node<"Identifier"> & {
 	name: string;

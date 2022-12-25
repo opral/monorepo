@@ -16,9 +16,11 @@ Expressing human languages is complex. So complex that code is required to expre
 **The AST definition is small on purpose.** Feedback and requirements from users will define what nodes and properties are added. Participate in the [discussions](https://github.com/inlang/inlang/discussions).  
 {% /Callout %}
 
-_Up-to-date definitions of the AST can be found [here](https://github.com/inlang/inlang/blob/main/source-code/core/src/ast/index.ts)_
+_Up-to-date definitions of the AST can be found [here](https://github.com/inlang/inlang/blob/main/source-code/core/src/ast/schema.ts)_
 
 ```ts
+import type { Iso639LanguageCode } from "./types.js";
+
 /**
  * A single node of the AST.
  *
@@ -39,18 +41,10 @@ export type Node<Name> = {
 /**
  * An identifier.
  *
- * Some Nodes have Identifiers such as a Bundle or Message.
+ * Some Nodes have Identifiers such as a Resource or Message.
  */
 export type Identifier = Node<"Identifier"> & {
 	name: string;
-};
-
-/**
- * A bundle holds a group of resources.
- */
-export type Bundle = Node<"Bundle"> & {
-	id: Identifier;
-	resources: Resource[];
 };
 
 /**
@@ -58,6 +52,7 @@ export type Bundle = Node<"Bundle"> & {
  */
 export type Resource = Node<"Resource"> & {
 	id: Identifier;
+	languageTag: LanguageTag;
 	body: Array<Message>;
 };
 
