@@ -4,9 +4,9 @@ import type { PageHead } from "@src/renderer/types.js";
 import { createResource, For, Match, Show, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
-	bundles,
+	resources,
 	inlangConfig,
-	referenceBundle,
+	referenceResource,
 	repositoryIsCloned,
 } from "@src/pages/editor/state.js";
 import { Layout as EditorLayout } from "@src/pages/editor/Layout.jsx";
@@ -22,22 +22,21 @@ export const Head: PageHead = (props) => {
 };
 
 export function Page() {
-	/** Messages from all bundles for an id */
+	/** Messages from all resources for an id */
 	const messages = (id: ast.Message["id"]["name"]) => {
-		const result: Record<ast.Bundle["id"]["name"], ast.Message | undefined> =
-			{};
-		for (const bundle of bundles) {
-			result[bundle.id.name] = query(bundle).get({ id });
+		const result: Record<string, ast.Message | undefined> = {};
+		for (const resource of resources) {
+			result[resource.id.name] = query(resource).get({ id });
 		}
 		return result;
 	};
 
 	const inludedMessageIds = () => {
-		const _referenceBundle = referenceBundle();
-		if (_referenceBundle === undefined) {
+		const _referenceResource = referenceResource();
+		if (_referenceResource === undefined) {
 			return [];
 		}
-		return query(_referenceBundle).includedMessageIds();
+		return query(_referenceResource).includedMessageIds();
 	};
 
 	return (
@@ -64,12 +63,7 @@ export function Page() {
 				<Match when={inlangConfig()}>
 					<div class="space-y-2">
 						<For each={inludedMessageIds()}>
-							{(id) => (
-								<Messages
-									referenceBundleId={referenceBundle()!.id.name}
-									messages={messages(id)}
-								></Messages>
-							)}
+							{(id) => <Messages messages={messages(id)}></Messages>}
 						</For>
 					</div>
 				</Match>
