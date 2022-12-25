@@ -21,19 +21,17 @@ The config must be named `inlang.config.js`, exist at the root of a repository, 
  * @type {import("@inlang/core/config").Config}
  */
 export async function config({ $import }) {
-	// importing an external dependency that defines the readBundles
-	// and writeBundles functions for typesafe-i18n
-	const { readBundles, writeBundles } = await $import(
+	// importing an external dependency that defines the readResources
+	// and writeResources functions for typesafe-i18n
+	const { readResources, writeResources } = await $import(
 		"https://cdn.jsdelivr.net/npm/inlang-config-typesafe-i18n@3.2"
 	);
 
-	const bundleIds = ["en", "de", "fr"];
-
 	return {
-		referenceBundleId: "en",
-		bundleIds: bundleIds,
-		readBundles: (args) => readBundles({ ...args, bundleIds }),
-		writeBundles: writeBundles,
+		referenceLanguage: "en",
+		languages: ["en", "fr", "de"],
+		readResources: readResources,
+		writeResources: writeResources,
 	};
 }
 ```
@@ -52,35 +50,36 @@ export type EnvironmentFunctions = {
 	$fs: $fs;
 	$import: $import;
 };
+
 /**
  * The inlang config function.
  *
  * Read more https://inlang.com/documentation/config
  */
-export type Config = (args: EnvironmentFunctions) => Promise<ConfigSchema>;
+export type InitializeConfig = (args: EnvironmentFunctions) => Promise<Config>;
+
 /**
  * Inlang config schema.
  *
  * Read more https://inlang.com/documentation/config
  */
-export type ConfigSchema = {
+export type Config = {
 	/**
-	 * The bundle (id) that other bundles are validated against.
+	 * The reference language that other messages are validated against.
 	 *
-	 * In most cases, the reference bundle is `en` (English).
+	 * In most cases, the reference lanugage is `en` (English).
 	 */
-	referenceBundleId: string;
+	referenceLanguage: Iso639LanguageCode;
 	/**
-	 * Bundle (ids) of this project.
+	 * Languages of this project.
 	 *
-	 * The bundles must include the reference bundle (id) itself.
+	 * The languages must include the reference language itself.
 	 */
-	bundleIds: string[];
-	readBundles: (args: EnvironmentFunctions & {}) => Promise<ast.Bundle[]>;
-	writeBundles: (
-		args: EnvironmentFunctions & {
-			bundles: ast.Bundle[];
-		}
-	) => Promise<void>;
+	languages: Iso639LanguageCode[];
+	readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
+	writeResources: (args: {
+		config: Config;
+		resources: ast.Resource[];
+	}) => Promise<void>;
 };
 ```

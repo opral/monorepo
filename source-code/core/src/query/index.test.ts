@@ -136,7 +136,7 @@ describe("query.delete", () => {
 });
 
 describe("query.ids", () => {
-	it("should return all message ids in the bundle", () => {
+	it("should return all message ids in the resource", () => {
 		const result = query(mockResource).includedMessageIds();
 		expect(result).toEqual(["first-message", "second-message"]);
 	});
