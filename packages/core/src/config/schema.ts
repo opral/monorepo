@@ -40,7 +40,7 @@ export type Config = {
 	readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
 	writeResources: (args: {
 		config: Config;
-		bundles: ast.Resource[];
+		resources: ast.Resource[];
 	}) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
