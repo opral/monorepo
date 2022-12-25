@@ -45,14 +45,6 @@ export type Message = Node<"Message"> & {
 };
 
 /**
- * A bundle holds a group of resources.
- */
-export type Bundle = Node<"Bundle"> & {
-	id: Identifier;
-	resources: Resource[];
-};
-
-/**
  * A pattern denotes how a Message is composed.
  */
 export type Pattern = Node<"Pattern"> & {
