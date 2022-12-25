@@ -1,4 +1,5 @@
 import type * as ast from "../ast/index.js";
+import type { Iso639LanguageCode } from "../ast/types.js";
 import type { $fs, $import } from "./environment-functions/index.js";
 
 /**
@@ -24,34 +25,22 @@ export type InitializeConfig = (args: EnvironmentFunctions) => Promise<Config>;
  * Read more https://inlang.com/documentation/config
  */
 export type Config = {
-	// /**
-	//  * The language that other languages are validated against.
-	//  *
-	//  * In most cases, the reference language is `en` (English).
-	//  */
-	// referenceLanguage: LanguageCode;
-	// /**
-	//  * Languages of this project.
-	//  *
-	//  * The languages must include the reference language itself.
-	//  */
-	// languages: LanguageCode[];
 	/**
-	 * The bundle (id) that other bundles are validated against.
+	 * The reference language that other messages are validated against.
 	 *
-	 * In most cases, the reference bundle is `en` (English).
+	 * In most cases, the reference lanugage is `en` (English).
 	 */
-	referenceBundleId: string;
+	referenceLanguage: Iso639LanguageCode;
 	/**
-	 * Bundle (ids) of this project.
+	 * Languages of this project.
 	 *
-	 * The bundles must include the reference bundle (id) itself.
+	 * The languages must include the reference language itself.
 	 */
-	bundleIds: string[];
-	readBundles: (args: { config: Config }) => Promise<ast.Bundle[]>;
-	writeBundles: (args: {
+	languages: Iso639LanguageCode[];
+	readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
+	writeResources: (args: {
 		config: Config;
-		bundles: ast.Bundle[];
+		bundles: ast.Resource[];
 	}) => Promise<void>;
 	// ideExtension?: {
 	// 	/**

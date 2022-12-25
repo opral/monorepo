@@ -1,157 +1,142 @@
-import type { Bundle, Message, Resource } from "../ast/index.js";
+import type { Message, Resource } from "../ast/index.js";
 import { Result } from "@inlang/utilities/result";
 
 /**
- * Query a bundle of messages.
+ * Query a resource.
+ *
+ * All actions are immutable.
  *
  * @example
- * 	 const message = query(bundle).get({ id: "first-message" });
+ * 	const message = query(resource).get({ id: "first-message" });
  *
  * @example
- *  // Querying a single resource can be achieved by passing the resource in an array:
- * 	const message = query([resource]).get({ id: "first-message" });
+ * 	const updatedResource = query(resource).delete({ id: "example" });
  */
-export function query(bundle: Bundle) {
+export function query(resource: Resource) {
 	return {
 		/**
-		 * Creates a message in a bundle and particular resource.
+		 * Creates a message in a resource.
 		 *
 		 * Returns an error if the message already exists, or the resource
 		 * does not exist.
 		 */
-		create: (args: Parameters<typeof create>[1]) => create(bundle, args),
+		create: (args: Parameters<typeof create>[1]) => create(resource, args),
 		/**
 		 * Get a message.
 		 *
 		 * Returns undefined if the message does not exist.
 		 */
-		get: (args: Parameters<typeof get>[1]) => get(bundle, args),
+		get: (args: Parameters<typeof get>[1]) => get(resource, args),
 		/**
 		 * Updates a message.
 		 *
 		 * Returns an error if the message does not exist.
 		 */
-		update: (args: Parameters<typeof update>[1]) => update(bundle, args),
+		update: (args: Parameters<typeof update>[1]) => update(resource, args),
 		/**
 		 * Upserts a message.
 		 */
-		upsert: (args: Parameters<typeof upsert>[1]) => upsert(bundle, args),
+		upsert: (args: Parameters<typeof upsert>[1]) => upsert(resource, args),
 		/**
 		 * Delete a message.
 		 *
 		 * Returns an error if the message did not exist.
 		 */
-		delete: (args: Parameters<typeof get>[1]) => _delete(bundle, args),
+		delete: (args: Parameters<typeof get>[1]) => _delete(resource, args),
 		/**
-		 * Included message ids in the bundle.
+		 * Included message ids in a resource.
 		 */
-		includedMessageIds: () => includedMessageIds(bundle),
+		includedMessageIds: () => includedMessageIds(resource),
 	};
 }
 
 function create(
-	bundle: Bundle,
-	args: { message: Message; resourceId: Resource["id"]["name"] }
-): Result<Bundle, Error> {
-	// Copying the Bundle to ensure immutability.
+	resource: Resource,
+	args: { message: Message }
+): Result<Resource, Error> {
+	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
-	const copy: Bundle = JSON.parse(JSON.stringify(bundle));
+	const copy: Resource = JSON.parse(JSON.stringify(resource));
 	if (get(copy, { id: args.message.id.name })) {
 		return Result.err(
 			Error(
-				`Message ${args.message.id.name} already exists in bundle ${bundle.id.name} and resource ${args.resourceId}.`
+				`Message ${args.message.id.name} already exists in resource ${resource.id.name}.`
 			)
 		);
 	}
-	const resource = copy.resources.find(
-		(resource) => resource.id.name === args.resourceId
-	);
-	if (resource === undefined) {
-		return Result.err(
-			Error(
-				`Resource ${args.resourceId} does not exist in bundle ${bundle.id.name}.`
-			)
-		);
-	}
-	resource.body.push(args.message);
+	copy.body.push(args.message);
 	return Result.ok(copy);
 }
 
 function upsert(
-	bundle: Bundle,
-	args: { message: Message; resourceId: Resource["id"]["name"] }
-): Result<Bundle, Error> {
-	const existingMessage = get(bundle, { id: args.message.id.name });
+	resource: Resource,
+	args: { message: Message }
+): Result<Resource, Error> {
+	const existingMessage = get(resource, { id: args.message.id.name });
 	if (existingMessage) {
-		return update(bundle, {
+		return update(resource, {
 			id: args.message.id.name,
 			with: args.message,
 		});
 	}
-	return create(bundle, args);
+	return create(resource, args);
 }
 
 function get(
-	bundle: Bundle,
+	resource: Resource,
 	args: { id: Message["id"]["name"] }
 ): Message | undefined {
-	// TODO #172 add index to query messages faster
-	// looping over all bundles and their resources is a performance bottleneck
-	const messages = bundle.resources.flatMap((resource) => resource.body);
-	const message = messages.find((message) => message.id.name === args.id);
+	const message = resource.body.find((message) => message.id.name === args.id);
 	if (message) {
-		//! do not return a reference to the message in a bundle
+		//! do not return a reference to the message in a resource
+		//! modifications to the returned message will leak into the
+		//! resource which is considered to be unmutable.
 		return JSON.parse(JSON.stringify(message));
 	}
 	return undefined;
 }
 
 function update(
-	bundle: Bundle,
+	resource: Resource,
 	args: { id: Message["id"]["name"]; with: Message }
-): Result<Bundle, Error> {
-	// Copying the Bundle to ensure immutability.
+): Result<Resource, Error> {
+	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
-	const copy: Bundle = JSON.parse(JSON.stringify(bundle));
-	for (const [i, resource] of copy.resources.entries()) {
-		for (const [j, message] of resource.body.entries()) {
-			if (message.id.name === args.id) {
-				copy.resources[i].body[j] = args.with;
-				return Result.ok(copy);
-			}
+	const copy: Resource = JSON.parse(JSON.stringify(resource));
+	for (const [i, message] of resource.body.entries()) {
+		if (message.id.name === args.id) {
+			copy.body[i] = args.with;
+			return Result.ok(copy);
 		}
 	}
 	return Result.err(
-		Error(`Message ${args.id} did not exist in bundle ${bundle.id.name}.`)
+		Error(`Message ${args.id} does not exist in resource ${resource.id.name}.`)
 	);
 }
 
 // using underscore to circumvent javascript reserved keyword 'delete'
 function _delete(
-	bundle: Bundle,
+	resource: Resource,
 	args: { id: Message["id"]["name"] }
-): Result<Bundle, Error> {
-	// Copying the Bundle to ensure immutability.
+): Result<Resource, Error> {
+	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
-	const copy: Bundle = JSON.parse(JSON.stringify(bundle));
-	for (const [i, resource] of copy.resources.entries()) {
-		for (const [j, message] of resource.body.entries()) {
-			if (message.id.name === args.id) {
-				delete copy.resources[i].body[j];
-				return Result.ok(copy);
-			}
+	const copy: Resource = JSON.parse(JSON.stringify(resource));
+	for (const [i, message] of resource.body.entries()) {
+		if (message.id.name === args.id) {
+			// deleting 1 element at i(ndex)
+			copy.body.splice(i, 1);
+			return Result.ok(copy);
 		}
 	}
 	return Result.err(
-		Error(`Message ${args.id} did not exist in bundle ${bundle.id.name}.`)
+		Error(`Message ${args.id} does not exist in resource ${resource.id.name}.`)
 	);
 }
 
-function includedMessageIds(bundle: Bundle): string[] {
-	return bundle.resources
-		.flatMap((resource) => resource.body)
-		.map((message) => message.id.name);
+function includedMessageIds(resource: Resource): string[] {
+	return resource.body.map((message) => message.id.name);
 }
