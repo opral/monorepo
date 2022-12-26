@@ -1,5 +1,5 @@
 ---
-title: Build on inlang
+title: Build apps on inlang
 href: /documentation/build-on-inlang
 description: Learn how to build on top of inlang.
 ---
