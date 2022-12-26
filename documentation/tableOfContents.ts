@@ -14,12 +14,13 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./design-principles.md?raw")).default,
 		(await import("./breaking-changes.md?raw")).default,
 		(await import("./the-next-git.md?raw")).default,
+		(await import("../CONTRIBUTING.md?raw")).default,
 	],
 	Guide: [
 		(await import("./getting-started.md?raw")).default,
-		(await import("./ci-cd.md?raw")).default,
+		(await import("./plugins.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,
-		(await import("../CONTRIBUTING.md?raw")).default,
+		(await import("./ci-cd.md?raw")).default,
 	],
 	Reference: [
 		(await import("./environment-functions.md?raw")).default,
