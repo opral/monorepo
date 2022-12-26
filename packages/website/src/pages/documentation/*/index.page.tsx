@@ -110,7 +110,7 @@ function NavbarCommon(props: {
 								{(document) => (
 									<li>
 										<a
-											onclick={() => navBarMobile?.hide()}
+											onClick={() => navBarMobile?.hide()}
 											class="block w-full font-medium link link-primary"
 											classList={{
 												"text-primary":
