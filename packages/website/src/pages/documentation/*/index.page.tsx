@@ -5,6 +5,7 @@ import type { parseMarkdown } from "@src/services/markdown/index.js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { Callout } from "@src/services/markdown/components/Callout.jsx";
+import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js";
 
 export const Head: PageHead<PageProps> = (props) => {
 	return {
@@ -20,6 +21,7 @@ export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents;
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>;
 };
+let navBarMobile: SlDetails | undefined;
 
 export function Page(props: PageProps) {
 	return (
@@ -41,7 +43,7 @@ export function Page(props: PageProps) {
 				</nav>
 				{/* Mobile navbar */}
 				<nav class="block md:hidden overflow-y-auto overflow-auto min-w-full pt-5">
-					<sl-details>
+					<sl-details ref={navBarMobile}>
 						<h3 slot="summary" class="font-medium">
 							Menu
 						</h3>
@@ -63,9 +65,7 @@ export function Page(props: PageProps) {
 					and refer to github for the rendered version than to not show them at all. 
 					*/}
 					<div class="w-full prose justify-self-center md:pt-6 md:col-span-3">
-						<Show
-							when={currentPageContext.urlParsed.pathname.includes("rfc")}
-						>
+						<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 							<Callout variant="warning">
 								<p>
 									The rendering of RFCs on the website might be broken.{" "}
@@ -110,6 +110,7 @@ function NavbarCommon(props: {
 								{(document) => (
 									<li>
 										<a
+											onclick={() => navBarMobile?.hide()}
 											class="block w-full font-medium link link-primary"
 											classList={{
 												"text-primary":
