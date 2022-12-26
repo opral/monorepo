@@ -1,5 +1,4 @@
 import type * as ast from "../ast/index.js";
-import type { Iso639LanguageCode } from "../ast/types.js";
 import type { $fs, $import } from "./environment-functions/index.js";
 
 /**
@@ -28,20 +27,26 @@ export type Config = {
 	/**
 	 * The reference language that other messages are validated against.
 	 *
+	 * The language must be an ISO-639-1 string. See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 * In most cases, the reference lanugage is `en` (English).
 	 */
-	referenceLanguage: Iso639LanguageCode;
+	referenceLanguage: string;
 	/**
 	 * Languages of this project.
 	 *
-	 * The languages must include the reference language itself.
+	 * The language must be an ISO-639-1 string and include the reference language itself.
+	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 */
-	languages: Iso639LanguageCode[];
-	readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
-	writeResources: (args: {
-		config: Config;
-		resources: ast.Resource[];
-	}) => Promise<void>;
+	languages: string[];
+	readResources: (
+		args: EnvironmentFunctions & { config: Config }
+	) => Promise<ast.Resource[]>;
+	writeResources: (
+		args: EnvironmentFunctions & {
+			config: Config;
+			resources: ast.Resource[];
+		}
+	) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.

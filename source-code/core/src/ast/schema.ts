@@ -1,5 +1,3 @@
-import type { Iso639LanguageCode } from "./types.js";
-
 /**
  * A single node of the AST.
  *
@@ -67,7 +65,12 @@ export type Text = Node<"Text"> & {
  * you need subtags like region.
  */
 export type LanguageTag = Node<"LanguageTag"> & {
-	language: Iso639LanguageCode;
+	/**
+	 * Language must be an ISO-639-1 string.
+	 *
+	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+	 */
+	language: string;
 };
 
 // export type MessageComment = Node<"MessageComment"> & {
