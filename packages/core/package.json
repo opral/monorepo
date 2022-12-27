@@ -1,7 +1,8 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"private": true,
+	"version": "0.3.0.prerelease.1",
+	"private": false,
 	"exports": {
 		"./ast": {
 			"types": "./dist/ast/index.d.ts"
