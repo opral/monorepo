@@ -18,7 +18,7 @@ import {
 } from "@inlang/core/config";
 import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
-import { Result } from "@inlang/utilities/result";
+import { Result } from "@inlang/core/utilities";
 import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { createAuthHeader } from "@src/services/auth/index.js";
