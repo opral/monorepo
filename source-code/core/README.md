@@ -9,3 +9,4 @@ Click on the modules to get to their respective READMEs.
 - [@inlang/core/ast](https://github.com/inlang/inlang/tree/main/source-code/core/src/ast/) - The AST.
 - [@inlang/core/config](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/) - The config that powers inlang.
 - [@inlang/core/query](https://github.com/inlang/inlang/tree/main/source-code/core/src/query/) - A query module for the AST.
+- [@inlang/core/utilities](https://github.com/inlang/inlang/tree/main/source-code/core/src/utilities/) - Utility types, functions, and more dealing that ease interactions with inlang, i18n, and localization.

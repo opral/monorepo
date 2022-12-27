@@ -1,5 +1,5 @@
 import type { Message, Resource } from "../ast/index.js";
-import { Result } from "@inlang/utilities/result";
+import { Result } from "@inlang/core/utilities";
 
 /**
  * Query a resource.
