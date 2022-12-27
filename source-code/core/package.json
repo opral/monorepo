@@ -8,7 +8,8 @@
 	},
 	"exports": {
 		"./ast": {
-			"types": "./dist/ast/index.d.ts"
+			"types": "./dist/ast/index.d.ts",
+			"import": "./dist/ast/index.js"
 		},
 		"./config": {
 			"types": "./dist/config/index.d.ts",
