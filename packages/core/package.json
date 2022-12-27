@@ -3,6 +3,9 @@
 	"type": "module",
 	"version": "0.3.0-prerelease.0",
 	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"exports": {
 		"./ast": {
 			"types": "./dist/ast/index.d.ts"
