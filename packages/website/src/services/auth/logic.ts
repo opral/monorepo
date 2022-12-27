@@ -1,5 +1,5 @@
 import type { ServerSideEnv } from "@env";
-import { Result } from "@inlang/utilities/result";
+import { Result } from "@inlang/core/utilities";
 import { CompactEncrypt, compactDecrypt, base64url } from "jose";
 import type { LocalStorageSchema } from "../local-storage/index.js";
 
