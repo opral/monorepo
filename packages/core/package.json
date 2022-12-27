@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.3.0-prerelease.0",
+	"version": "0.3.0-prerelease.1",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -18,6 +18,10 @@
 		"./query": {
 			"types": "./dist/query/index.d.ts",
 			"import": "./dist/query/index.js"
+		},
+		"./utilities": {
+			"types": "./dist/utilities/index.d.ts",
+			"import": "./dist/utilities/index.js"
 		}
 	},
 	"files": [
@@ -30,9 +34,7 @@
 		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/utilities": "*"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"memfs": "^3.4.11"
 	}
