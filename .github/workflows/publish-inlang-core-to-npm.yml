@@ -1,5 +1,7 @@
 on:
   push:
+    filter:
+      - "source-code/core/**"
     branches:
       - main
 
