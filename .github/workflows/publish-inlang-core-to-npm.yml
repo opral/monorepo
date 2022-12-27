@@ -1,6 +1,6 @@
 on:
   push:
-    filter:
+    paths:
       - "source-code/core/**"
     branches:
       - main
