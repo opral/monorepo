@@ -1,7 +1,5 @@
 on:
   pull_request:
-    paths:
-      - "source-code/core/**"
     branches:
       - main
 
