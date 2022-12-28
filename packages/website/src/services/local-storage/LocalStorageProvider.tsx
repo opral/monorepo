@@ -13,7 +13,26 @@ const LocalStorageContext = createContext();
 const LOCAL_STORAGE_KEY = "inlang-local-storage";
 
 /**
+ * Retrieves (gets) the local storage.
+ *
+ * This function is supposed to be used in a non-reactive
+ * environment (regular JS/TS, not JSX). If a reactive
+ * version is required, use `useLocalStorage()` instead.
+ */
+export function getLocalStorage(): LocalStorageSchema | undefined {
+	const json = localStorage.getItem(LOCAL_STORAGE_KEY);
+	// we all love javascript. error prevention here if cache contains "undefined"
+	if (json && json !== "undefined") {
+		return JSON.parse(json);
+	}
+}
+
+/**
  * Store that provides access to the local storage.
+ *
+ * Use this function in the context of components.
+ * If you need to retrieve the localStorage outside
+ * of JSX, use `getLocalStorage()` instead.
  */
 export function useLocalStorage(): [
 	get: LocalStorageSchema,
@@ -36,10 +55,9 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
 	// read from local storage on mount
 	onMount(() => {
-		const json = localStorage.getItem(LOCAL_STORAGE_KEY);
-		// we all love javascript. error prevention here if cache contains "undefined"
-		if (json && json !== "undefined") {
-			setStore(JSON.parse(json));
+		const storage = getLocalStorage();
+		if (storage) {
+			setStore(storage);
 		}
 		window.addEventListener("storage", onStorageSetByOtherWindow);
 	});
