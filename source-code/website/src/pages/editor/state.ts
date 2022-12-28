@@ -20,7 +20,10 @@ import { createStore } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/core/utilities";
 import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import {
+	getLocalStorage,
+	useLocalStorage,
+} from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { createAuthHeader } from "@src/services/auth/index.js";
 
 /**
@@ -71,17 +74,9 @@ export function StateProvider(props: { children: JSXElement }) {
 		if (config === undefined) {
 			return;
 		}
-		setResources(await readResources(config));
-	});
-
-	//! Unexpected UX. If if the user conducted no changes,
-	//! the files might change due to reactivity.
-	createEffect(async () => {
-		const config = inlangConfig();
-		if (config === undefined || localStorage.user === undefined) {
-			return;
-		}
-		await writeResources(config, resources, localStorage.user);
+		// setting the origin store because this should not trigger
+		// writing to the filesystem.
+		setOriginResources(await readResources(config));
 	});
 
 	return props.children;
@@ -125,10 +120,41 @@ export const searchParams = () =>
  */
 export const [fsChange, setFsChange] = createSignal(new Date());
 
+export { resources, setResources };
+
 /**
  * The resources.
+ *
+ * Read below why the setter function is called setOrigin.
  */
-export const [resources, setResources] = createStore<ast.Resource[]>([]);
+const [resources, setOriginResources] = createStore<ast.Resource[]>([]);
+
+/**
+ * Custom setStore function to trigger filesystem writes on changes.
+ *
+ * Listening to changes on an entire store is not possible, see
+ * https://github.com/solidjs/solid/discussions/829. A workaround
+ * (which seems much better than effects anyways) is to modify the
+ * setStore function to trigger the desired side-effect.
+ */
+const setResources: typeof setOriginResources = (...args: any) => {
+	// @ts-ignore
+	setOriginResources(...args);
+	const localStorage = getLocalStorage();
+	const config = inlangConfig();
+	if (config === undefined || localStorage?.user === undefined) {
+		return;
+	}
+	// write to filesystem
+
+	writeResources(
+		config,
+		// ...args are the resources
+		// @ts-ignore
+		...args,
+		localStorage.user
+	);
+};
 
 /**
  * The reference resource.
@@ -249,6 +275,8 @@ async function writeResources(
 	resources: ast.Resource[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
+	console.log("writing resources");
+	console.log(resources);
 	await config.writeResources({ config, resources });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
