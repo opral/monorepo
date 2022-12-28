@@ -56,11 +56,13 @@ async function $import(
 		fetch: typeof fetch;
 	}
 ): Promise<any> {
+	// avoiding browser built-in shadowing of fetch as global variable
+	const _fetch = environment.fetch;
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 	let moduleAsText: string;
 	if (uri.startsWith("http")) {
-		moduleAsText = await (await environment.fetch(uri)).text();
+		moduleAsText = await (await _fetch(uri)).text();
 	} else {
 		moduleAsText = (await environment.fs.readFile(
 			`${environment.workingDirectory}/${uri}`,
