@@ -28,7 +28,6 @@ export type Identifier = Node<"Identifier"> & {
  * A resource is a collection of messages.
  */
 export type Resource = Node<"Resource"> & {
-	id: Identifier;
 	languageTag: LanguageTag;
 	body: Array<Message>;
 };
