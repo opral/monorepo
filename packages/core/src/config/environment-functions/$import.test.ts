@@ -28,7 +28,11 @@ describe("$import", () => {
 		{ encoding: "utf-8" }
 	);
 
-	const $import = initialize$import({ basePath: "/", fs: fs.promises, fetch });
+	const $import = initialize$import({
+		workingDirectory: "/",
+		fs: fs.promises,
+		fetch,
+	});
 
 	it("should import a module from a local path", async () => {
 		const module = await $import("./mock-module.js");
@@ -49,9 +53,9 @@ describe("$import", () => {
 		expect(module.default("inlang.com")).toBe("http://inlang.com");
 	});
 
-	it("should import a relative file based on the basePath", async () => {
+	it("should import a relative file based on the workingDirectory", async () => {
 		const $import = initialize$import({
-			basePath: "/nested",
+			workingDirectory: "/nested",
 			fs: fs.promises,
 			fetch,
 		});

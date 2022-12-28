@@ -26,8 +26,8 @@ export type $import = (uri: string) => Promise<any>;
  * 	const module = await $import('./mock-module.js');
  */
 export function initialize$import(args: {
-	/** the directory from which the import should be resolved */
-	basePath: string;
+	/** the path from which the import should be resolved */
+	workingDirectory: string;
 	/** the fs from which the file can be read */
 	fs: typeof fs.promises;
 	fetch: typeof fetch;
@@ -48,8 +48,8 @@ export function initialize$import(args: {
 async function $import(
 	uri: string,
 	environment: {
-		/** current working directory from which the import should be resolved */
-		basePath: string;
+		/** directory from which the import should be resolved */
+		workingDirectory: string;
 		/** the fs from which the file can be read */
 		fs: typeof fs.promises;
 		/** the http client (avoiding side-effects) */
@@ -63,7 +63,7 @@ async function $import(
 		moduleAsText = await (await environment.fetch(uri)).text();
 	} else {
 		moduleAsText = (await environment.fs.readFile(
-			`${environment.basePath}/${uri}`,
+			`${environment.workingDirectory}/${uri}`,
 			"utf-8"
 		)) as string;
 	}
