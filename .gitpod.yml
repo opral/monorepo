@@ -10,13 +10,12 @@ tasks:
     # happens in before and not init because nvm is not persistent otherwise
     before: |
       nvm i 18.12
-      nvm use 18.12
       nvm alias default 18.12
       npm install
 
     # using doppler run to set env variables automatically
     # the DOPPLER_DEVELOPMENT_SERVICE_KEY is set in gitpod's UI
-    command: npm run dev
+    command: nvm use 18 && npm run dev
 
 ports:
   - name: "@inlang/website"
