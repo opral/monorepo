@@ -1,13 +1,5 @@
 import type * as ast from "@inlang/core/ast";
-import {
-	createSignal,
-	For,
-	JSXElement,
-	Match,
-	Show,
-	Switch,
-	useTransition,
-} from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import {
 	resources,
 	inlangConfig,
@@ -194,7 +186,9 @@ function PatternEditor(props: {
 								setResources(
 									resources
 										.filter(
-											(_resource) => _resource.id.name !== resource().id.name
+											(_resource) =>
+												_resource.languageTag.language !==
+												resource().languageTag.language
 										)
 										.concat([updatedResource])
 								);

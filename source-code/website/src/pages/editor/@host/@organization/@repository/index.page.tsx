@@ -26,7 +26,7 @@ export function Page() {
 	const messages = (id: ast.Message["id"]["name"]) => {
 		const result: Record<string, ast.Message | undefined> = {};
 		for (const resource of resources) {
-			result[resource.id.name] = query(resource).get({ id });
+			result[resource.languageTag.language] = query(resource).get({ id });
 		}
 		return result;
 	};
