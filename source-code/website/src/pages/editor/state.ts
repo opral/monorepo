@@ -240,10 +240,7 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 }
 
 async function readResources(config: InlangConfig) {
-	const resources = await config.readResources({
-		...environmentFunctions,
-		config,
-	});
+	const resources = await config.readResources();
 	return resources;
 }
 
@@ -252,7 +249,7 @@ async function writeResources(
 	resources: ast.Resource[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	await config.writeResources({ ...environmentFunctions, resources, config });
+	await config.writeResources({ resources });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
 		// files with unstaged and uncomitted changes
