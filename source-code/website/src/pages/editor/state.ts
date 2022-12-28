@@ -177,7 +177,20 @@ async function cloneRepository(args: {
 	});
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
+
 	const date = new Date();
+	//checked the existing branches and added a "inlang" translation branch, if this branch does not exist
+	const branches = await raw.listBranches({ fs, dir: "/", remote: "origin" });
+	if (branches.includes("inlang") === false) {
+		await raw.branch({ fs, dir: "/", ref: "inlang", checkout: true });
+	} else if (branches.includes("inlang") === true) {
+		// changed the branch to the "inlang" branch if it exists
+		await raw.checkout({
+			fs,
+			dir: "/",
+			ref: "inlang",
+		});
+	}
 	setFsChange(date);
 	return date;
 }
