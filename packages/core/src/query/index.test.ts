@@ -144,7 +144,6 @@ describe("query.ids", () => {
 
 const mockResource: Resource = {
 	type: "Resource",
-	id: { type: "Identifier", name: "first-resource" },
 	languageTag: {
 		type: "LanguageTag",
 		language: "en",
