@@ -147,7 +147,7 @@ const [lastPush, setLastPush] = createSignal<Date>();
 // ------------------------------------------
 
 const environmentFunctions: EnvironmentFunctions = {
-	$import: initialize$import({ basePath: "/", fs: fs.promises, fetch }),
+	$import: initialize$import({ workingDirectory: "/", fs: fs.promises, fetch }),
 	$fs: fs.promises,
 };
 
