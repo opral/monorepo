@@ -180,10 +180,10 @@ async function cloneRepository(args: {
 
 	const date = new Date();
 	//checked the existing branches and added a "inlang" translation branch, if this branch does not exist
-	let branches = await raw.listBranches({ fs, dir: "/", remote: "origin" });
-	if (branches.includes("inlang") == false) {
+	const branches = await raw.listBranches({ fs, dir: "/", remote: "origin" });
+	if (branches.includes("inlang") === false) {
 		await raw.branch({ fs, dir: "/", ref: "inlang", checkout: true });
-	} else if (branches.includes("inlang") == true) {
+	} else if (branches.includes("inlang") === true) {
 		// changed the branch to the "inlang" branch if it exists
 		await raw.checkout({
 			fs,
