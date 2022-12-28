@@ -38,15 +38,8 @@ export type Config = {
 	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 */
 	languages: string[];
-	readResources: (
-		args: EnvironmentFunctions & { config: Config }
-	) => Promise<ast.Resource[]>;
-	writeResources: (
-		args: EnvironmentFunctions & {
-			config: Config;
-			resources: ast.Resource[];
-		}
-	) => Promise<void>;
+	readResources: () => Promise<ast.Resource[]>;
+	writeResources: (args: { resources: ast.Resource[] }) => Promise<void>;
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.
