@@ -22,9 +22,9 @@ Mirrors node:fs/promises. If TypeScript complains, ignore the type error. The ty
 
 {% Callout variant="warning" %}
 
-Importing external code via `$import` is a security risk.
+**Importing external code via `$import` is a security risk.**
 
-The config and imported code is not sandboxed yet. Only `$import` external code that you trust (similar to NPM packages). See [#129](https://github.com/inlang/inlang/pull/129) for more information.
+Imported code is not sandboxed yet. Only `$import` external code that you trust (similar to NPM packages). See [#129](https://github.com/inlang/inlang/pull/129) for more information.
 
 {% /Callout %}
 
