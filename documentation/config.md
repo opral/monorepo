@@ -6,9 +6,9 @@ description: The reference for the config.
 
 # {% $frontmatter.title %}
 
-**The config powers all components of inlang.**
+**The config powers all apps, plugins, and automations. One config file to cover all localization needs (see [design principles](/documentation/design-principles)).**
 
-The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `config`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `config` function.
+The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `initializeConfig`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `initializeConfig` function. Read the [plugin](/documentation/plugins) documenation for more information on how to use external modules.
 
 ## Example
 
@@ -18,27 +18,30 @@ The config must be named `inlang.config.js`, exist at the root of a repository, 
 /**
  * Using JSDoc to get typesafety.
  * Note: the npm package @inlang/core must be installed.
- * @type {import("@inlang/core/config").Config}
+ * @type {import("@inlang/core/config").InitializeConfig}
  */
-export async function config({ $import }) {
-	// importing an external dependency that defines the readResources
-	// and writeResources functions for typesafe-i18n
-	const { readResources, writeResources } = await $import(
-		"https://cdn.jsdelivr.net/npm/inlang-config-typesafe-i18n@3.2"
+export async function initializeConfig(env) {
+	// importing a plugin from github
+	const plugin = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
 	);
-
+	const pluginConfig = {
+		pathPattern: "./{language}.json",
+	};
 	return {
 		referenceLanguage: "en",
-		languages: ["en", "fr", "de"],
-		readResources: readResources,
-		writeResources: writeResources,
+		languages: ["en", "de"],
+		readResources: (args) =>
+			plugin.readResources({ ...args, ...env, pluginConfig }),
+		writeResources: (args) =>
+			plugin.writeResources({ ...args, ...env, pluginConfig }),
 	};
 }
 ```
 
 ## Reference
 
-_Up-to-date implemenation can be found [here](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)_
+_Up-to-date implementation can be found [in the repository](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)._
 
 ```ts
 /**
@@ -67,15 +70,17 @@ export type Config = {
 	/**
 	 * The reference language that other messages are validated against.
 	 *
+	 * The language must be an ISO-639-1 string. See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 * In most cases, the reference lanugage is `en` (English).
 	 */
-	referenceLanguage: Iso639LanguageCode;
+	referenceLanguage: string;
 	/**
 	 * Languages of this project.
 	 *
-	 * The languages must include the reference language itself.
+	 * The language must be an ISO-639-1 string and include the reference language itself.
+	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 */
-	languages: Iso639LanguageCode[];
+	languages: string[];
 	readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
 	writeResources: (args: {
 		config: Config;
