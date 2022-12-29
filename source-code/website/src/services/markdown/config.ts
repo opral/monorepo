@@ -5,6 +5,7 @@ import { Fence } from "./nodes/Fence.jsx";
 import { Callout } from "./tags/Callout.jsx";
 import { Figure } from "./tags/Figure.jsx";
 import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx";
+import { Link } from "./nodes/Link.jsx";
 
 /**
  * The components that render custom nodes or tags
@@ -15,6 +16,7 @@ export const components = {
 	Figure,
 	QuickLink,
 	QuickLinks,
+	Link,
 };
 
 /**
@@ -34,6 +36,16 @@ export const config: Config = {
 					type: "String",
 				},
 				content: {
+					required: true,
+					type: "String",
+				},
+			},
+		},
+		link: {
+			render: "Link",
+			attributes: {
+				href: {
+					required: true,
 					type: "String",
 				},
 			},
