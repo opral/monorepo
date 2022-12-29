@@ -14,13 +14,13 @@ Inlang's config is executed in a variety of environments such as the browser, [N
 
 ### What environment functions are available?
 
-_Always up-to-date implementation can be found [here](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/environment-functions)_
+_Always up-to-date implementation can be found [in the repository](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/environment-functions)_
 
-`$fs`: **node:fs/promises**
+`$fs`: **memfs/promises**
 
-Reflects the `node:fs/promises`
+Mirrors node:fs/promises. If TypeScript complains, ignore the type error. The type error bug is tracked in [#154](https://github.com/inlang/inlang/issues/154).
 
-`$import` **dynamic import()**
+`$import`: **dynamic import()**
 
 Importing an ES module either from a local path in a git repository or from a url. Note that the imported module must not have imports itself. If dependencies are required for a module, the module needs to be bundled into one single file with [Rollup](https://rollupjs.org/guide/en/) for example.
 
