@@ -11,7 +11,7 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and npm works
 
 ## Starting the dev environment
 
-1. Click [here](https://gitpod.io/#https://github.com/inlang/inlang).
+1. [Open the repository in gitpod](https://gitpod.io/#https://github.com/inlang/inlang).
 2. Wait until the terminal is showing "listening on localhost:xxxx".
 3. Left click in the terminal on "localhost:xxxx".
 4. (Optionally, open the workspace in your local VSCode installation by clicking "Open in VSCode" in the top left menu bar.)
