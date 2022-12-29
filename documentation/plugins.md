@@ -34,7 +34,6 @@ The next steps depent on the plugin. Read the README of the plugin you want to u
 // inlang.config.js
 
 export async function initializeConfig(env) {
-	// importing plugin from local file for testing purposes
 	const plugin = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
 	);
