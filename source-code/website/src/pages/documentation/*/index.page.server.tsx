@@ -32,7 +32,7 @@ let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
  */
 let processedTableOfContents: ProcessedTableOfContents = {};
 
-generateIndexAndTableOfContents();
+await generateIndexAndTableOfContents();
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async (
