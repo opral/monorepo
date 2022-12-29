@@ -2,7 +2,7 @@ import Markdoc, { type ValidationError } from "@markdoc/markdoc";
 import { parse as parseYaml } from "yaml";
 import { renderMarkdownToString } from "./solidPlugin.js";
 import { z } from "zod";
-import { components, config } from "./components/config.js";
+import { components, config } from "./config.js";
 
 /**
  * The frontmatter that is required by the markdown service.
