@@ -28,7 +28,7 @@ export function Page(props: PageProps) {
 					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
 					<div
-						class="prose mx-auto w-full 7 ml:px-8 justify-self-center"
+						class="mx-auto w-full 7 ml:px-8 justify-self-center"
 						innerHTML={props.markdown?.html}
 					></div>
 				</Show>

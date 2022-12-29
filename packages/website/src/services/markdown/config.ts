@@ -6,6 +6,7 @@ import { Callout } from "./tags/Callout.jsx";
 import { Figure } from "./tags/Figure.jsx";
 import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx";
 import { Link } from "./nodes/Link.jsx";
+import { Document } from "./nodes/Document.jsx";
 
 /**
  * The components that render custom nodes or tags
@@ -17,6 +18,7 @@ export const components = {
 	QuickLink,
 	QuickLinks,
 	Link,
+	Document,
 };
 
 /**
@@ -29,6 +31,14 @@ export const config: Config = {
 	 * See https://markdoc.dev/docs/nodes
 	 */
 	nodes: {
+		document: {
+			render: "Document",
+			attributes: {
+				frontmatter: {
+					type: "String",
+				},
+			},
+		},
 		fence: {
 			render: "Fence",
 			attributes: {

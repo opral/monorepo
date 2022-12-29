@@ -17,7 +17,7 @@ export function Link(props: { href: string; children: JSXElement }) {
 				<a
 					href={props.href}
 					target="_blank"
-					class="inline-flex gap-0.5 items-center link link-primary"
+					class="inline-flex gap-0.5 items-center link link-primary m-0"
 				>
 					{props.children}
 					{/* using non-rounded version to increase readability on smaller font settings */}

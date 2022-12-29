@@ -64,7 +64,7 @@ export function Page(props: PageProps) {
 					the escaping of html. it is better to show the RFC's on the website
 					and refer to github for the rendered version than to not show them at all. 
 					*/}
-					<div class="w-full prose justify-self-center md:pt-6 md:col-span-3">
+					<div class="w-full justify-self-center md:pt-6 md:col-span-3">
 						<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 							<Callout variant="warning">
 								<p>
@@ -80,7 +80,7 @@ export function Page(props: PageProps) {
 						</Show>
 						<div
 							// change the col-span to 2 if a right side nav bar should be rendered
-							class="w-full prose justify-self-center md:pt-6 md:col-span-3"
+							class="w-full justify-self-center md:pt-6 md:col-span-3"
 							innerHTML={props.markdown?.html}
 						></div>
 					</div>
