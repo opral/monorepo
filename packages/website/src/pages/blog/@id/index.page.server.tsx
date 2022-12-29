@@ -31,7 +31,7 @@ let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
  */
 let processedTableOfContents: ProcessedTableOfContents = {};
 
-generateIndexAndTableOfContents();
+await generateIndexAndTableOfContents();
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async (
@@ -39,7 +39,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
 ) => {
 	// dirty way to get reload of markdown (not hot reload though)
 	if (import.meta.env.DEV) {
-		generateIndexAndTableOfContents();
+		await generateIndexAndTableOfContents();
 	}
 	return {
 		pageContext: {
