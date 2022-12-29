@@ -17,7 +17,7 @@ export function Link(props: { href: string; children: JSXElement }) {
 				<a
 					href={props.href}
 					target="_blank"
-					class="inline-flex gap-0.5 items-center"
+					class="inline-flex gap-0.5 items-center link link-primary"
 				>
 					{props.children}
 					{/* using non-rounded version to increase readability on smaller font settings */}
@@ -25,7 +25,9 @@ export function Link(props: { href: string; children: JSXElement }) {
 				</a>
 			</Match>
 			<Match when={isExternal() === false}>
-				<a href={props.href}>{props.children}</a>
+				<a href={props.href} class="link link-primary">
+					{props.children}
+				</a>
 			</Match>
 		</Switch>
 	);
