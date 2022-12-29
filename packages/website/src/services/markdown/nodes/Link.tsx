@@ -11,8 +11,6 @@ export function Link(props: { href: string; children: JSXElement }) {
 	/** whether a link is an external link */
 	const isExternal = () => props.href.startsWith("http");
 
-	console.log(props);
-
 	return (
 		<Switch>
 			<Match when={isExternal()}>
