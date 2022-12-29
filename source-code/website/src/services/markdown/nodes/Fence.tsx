@@ -14,5 +14,11 @@ export function Fence(props: { language?: string; content: string }) {
 	const code = highlighter.codeToHtml(props.content, {
 		lang: props.language,
 	});
-	return <div innerHTML={code}></div>;
+	return (
+		<div
+			innerHTML={code}
+			class="not-prose p-4 rounded overflow-auto"
+			style={{ "background-color": highlighter.getBackgroundColor() }}
+		></div>
+	);
 }
