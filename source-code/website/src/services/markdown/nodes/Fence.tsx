@@ -17,7 +17,7 @@ export function Fence(props: { language?: string; content: string }) {
 	return (
 		<div
 			innerHTML={code}
-			class="not-prose p-4 rounded overflow-auto"
+			class="not-prose p-4 rounded overflow-auto text-sm"
 			style={{ "background-color": highlighter.getBackgroundColor() }}
 		></div>
 	);
