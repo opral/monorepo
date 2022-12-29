@@ -1,10 +1,10 @@
 import type { Config } from "@markdoc/markdoc";
+import type { SemanticColorTokens } from "../../../tailwind.config.cjs";
 import { icons } from "@src/components/Icon.jsx";
-import { Callout } from "./Callout.jsx";
-import { Fence } from "./Fence.jsx";
-import { Figure } from "./Figure.jsx";
-import { QuickLink, QuickLinks } from "./QuickLinks.jsx";
-import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
+import { Fence } from "./nodes/Fence.jsx";
+import { Callout } from "./tags/Callout.jsx";
+import { Figure } from "./tags/Figure.jsx";
+import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx";
 
 /**
  * The components that render custom nodes or tags
@@ -21,6 +21,11 @@ export const components = {
  * The Markdoc configuration.
  */
 export const config: Config = {
+	/**
+	 * Custom nodes for Markdoc.
+	 *
+	 * See https://markdoc.dev/docs/nodes
+	 */
 	nodes: {
 		fence: {
 			render: "Fence",
