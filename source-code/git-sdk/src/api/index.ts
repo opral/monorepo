@@ -4,8 +4,11 @@ import _http from "isomorphic-git/http/web/index.js";
 /**
  * Raw git cli api.
  *
- * Use for faster development iterations and progressively
- * develop own api layer on top.
+ * The idea of the `git-sdk` is to abstract working with git as
+ * a CLI. Sometimes access to the "raw" git CLI is required to
+ * achieve actions that are unsupported, or not yet, supported
+ * by the `git-sdk`. Esepcially useful for faster development
+ * iterations and progressively develop own api layer on top.
  */
 export const raw = _git;
 
