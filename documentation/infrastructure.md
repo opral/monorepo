@@ -1,6 +1,6 @@
 ---
-title: Design principles
-href: /documentation/design-principles
+title: Infrastructure
+href: /documentation/infrastructure
 description: Learn more about the design principles behind inlang.
 ---
 

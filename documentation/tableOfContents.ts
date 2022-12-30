@@ -11,7 +11,7 @@ export const FrontmatterSchema = RequiredFrontmatter;
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
 		(await import("./introduction.md?raw")).default,
-		(await import("./design-principles.md?raw")).default,
+		(await import("./infrastructure.md?raw")).default,
 		(await import("./breaking-changes.md?raw")).default,
 		(await import("./the-next-git.md?raw")).default,
 		(await import("../CONTRIBUTING.md?raw")).default,
