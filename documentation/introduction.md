@@ -24,7 +24,7 @@ Inlang is in public **alpha**. Read more about our breaking change policy [here]
     /%}
 
     {% QuickLink
-        title="Design principles"
+        title="Infrastructure"
         icon="architecture"
         href="/documentation/design-principles"
         description="Learn how inlang is designed."
