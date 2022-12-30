@@ -6,6 +6,9 @@ const AUTH_HEADER_KEY = "x-inlang-authorization";
 /**
  * Create auth headers from client to server.
  *
+ * The encrypted access token can be retrieved with by the
+ * localStorage service. See /services/local-storage.
+ *
  * @example
  *  headers: {
  *      ...createAuthHeader(args),
