@@ -16,7 +16,7 @@ import type { EditorRouteParams } from "./types.js";
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
 	return {
-		title: routeParams.organization + "/" + routeParams.repository,
+		title: routeParams.owner + "/" + routeParams.repository,
 		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
 	};
 };
