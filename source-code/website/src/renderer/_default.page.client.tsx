@@ -51,9 +51,6 @@ let isFirstRender = true;
 const rootElement = document.querySelector("#root") as HTMLElement;
 
 const [currentPage, setCurrentPage] = createSignal<Component>();
-const [currentPageProps, setCurrentPageProps] = createStore<
-	Record<string, unknown>
->({});
 
 export function render(pageContext: PageContextRenderer) {
 	try {
@@ -61,11 +58,14 @@ export function render(pageContext: PageContextRenderer) {
 		document.title = pageContext.exports.Head({ pageContext }).title;
 		setCurrentPageContext(pageContext);
 		setCurrentPage(() => pageContext.Page);
-		setCurrentPageProps(pageContext.pageProps);
+		console.log(pageContext.pageProps);
 		if (isFirstRender) {
 			hydrate(
 				() => (
-					<ThePage page={currentPage()!} pageProps={currentPageProps}></ThePage>
+					<ThePage
+						page={currentPage()!}
+						pageProps={pageContext.pageProps}
+					></ThePage>
 				),
 				rootElement
 			);
