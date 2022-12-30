@@ -1,11 +1,19 @@
 /**
- * Repositories that are using inlang.
+ * Showcased repositories that are using inlang.
+ *
+ * If you want to showcase your repository, edit the following
+ * list and add your repository below.
  */
-export const repositories: string[] = [
-	"https://github.com/inlang/example",
-	"https://github.com/inlang/inlang",
+export const repositories: Repositories = [
+	{
+		owner: "inlang",
+		repository: "example",
+		description: "Example repository that showcases inlang.",
+	},
 ];
 
-async function getRepositoryInformation(url: string){
-    
-}
+type Repositories = Array<{
+	owner: string;
+	repository: string;
+	description: string;
+}>;
