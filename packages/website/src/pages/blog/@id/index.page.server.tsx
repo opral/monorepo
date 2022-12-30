@@ -56,7 +56,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
  */
 async function generateIndexAndTableOfContents() {
 	for (const document of tableOfContents) {
-		const markdown = await parseMarkdown({
+		const markdown = parseMarkdown({
 			text: document,
 			FrontmatterSchema,
 		});

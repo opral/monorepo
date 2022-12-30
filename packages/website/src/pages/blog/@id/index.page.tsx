@@ -1,6 +1,6 @@
 import { Layout } from "@src/pages/Layout.jsx";
 import type { PageHead } from "@src/renderer/types.js";
-import type { parseMarkdown } from "@src/services/markdown/index.js";
+import { Markdown, parseMarkdown } from "@src/services/markdown/index.js";
 import { Show } from "solid-js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 
@@ -24,13 +24,14 @@ export function Page(props: PageProps) {
 		<Layout>
 			<div class="grid-row-2 py-10 w-full mx-auto ">
 				<Show
-					when={props.markdown?.html}
+					when={props.markdown?.renderableTree}
 					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
-					<div
-						class="mx-auto w-full 7 ml:px-8 justify-self-center"
-						innerHTML={props.markdown?.html}
-					></div>
+					<div class="mx-auto w-full 7 ml:px-8 justify-self-center">
+						<Markdown
+							renderableTree={props.markdown.renderableTree!}
+						></Markdown>
+					</div>
 				</Show>
 				<a
 					class="flex justify-center link link-primary py-4 text-primary "

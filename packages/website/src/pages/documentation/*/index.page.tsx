@@ -1,7 +1,7 @@
 import type { PageHead } from "@src/renderer/types.js";
-import { For, onMount, Show } from "solid-js";
+import { For, Show } from "solid-js";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
-import type { parseMarkdown } from "@src/services/markdown/index.js";
+import { Markdown, parseMarkdown } from "@src/services/markdown/index.js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { Callout } from "@src/services/markdown/tags/Callout.jsx";
@@ -56,7 +56,7 @@ export function Page(props: PageProps) {
 					</sl-details>
 				</nav>
 				<Show
-					when={props.markdown?.html}
+					when={props.markdown?.renderableTree}
 					fallback={<p class="text-danger">{props.markdown?.error}</p>}
 				>
 					{/* 
@@ -81,8 +81,11 @@ export function Page(props: PageProps) {
 						<div
 							// change the col-span to 2 if a right side nav bar should be rendered
 							class="w-full justify-self-center md:col-span-3"
-							innerHTML={props.markdown?.html}
-						></div>
+						>
+							<Markdown
+								renderableTree={props.markdown.renderableTree!}
+							></Markdown>
+						</div>
 					</div>
 				</Show>
 			</div>

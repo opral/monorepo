@@ -1,8 +1,7 @@
 import Markdoc, { type ValidationError } from "@markdoc/markdoc";
 import { parse as parseYaml } from "yaml";
-import { renderMarkdownToString } from "./solidPlugin.js";
 import { z } from "zod";
-import { components, config } from "./config.js";
+import { config } from "./config.js";
 
 /**
  * The frontmatter that is required by the markdown service.
@@ -28,24 +27,31 @@ export const RequiredFrontmatter = z.object({
 });
 
 /**
- * Renders a Markdoc document.
+ * Parses a Markdoc document.
  *
  * Provide the markdown document as a string, the
- * function returns the rendered body of the markdown
- * as string and the [frontmatter](https://markdoc.dev/docs/frontmatter).
+ * function returns the a renderable tree and
+ * the [frontmatter](https://markdoc.dev/docs/frontmatter)
+ * if no error occured. If an error occured, renderableTree is undefined.
  *
- * @returns either error or html for a given document
+ * The renderable tree can be passed to `renderToElement`
+ *
+ * @example
+ * 	const renderableTree = parseMarkdown(args)
+ * 	const Element = renderToElement(args)
+ * 	<Element>
+ *
  */
-export async function parseMarkdown<
+export function parseMarkdown<
 	FrontmatterSchema extends RequiredFrontmatter
 >(args: {
 	text: string;
 	FrontmatterSchema: typeof RequiredFrontmatter;
-}): Promise<{
+}): {
 	frontmatter: FrontmatterSchema;
-	html?: string;
+	renderableTree?: Markdoc.RenderableTreeNode;
 	error?: string;
-}> {
+} {
 	const ast = Markdoc.parse(args.text);
 	const frontmatter = args.FrontmatterSchema.parse(
 		parseYaml(ast.attributes.frontmatter ?? "")
@@ -57,8 +63,7 @@ export async function parseMarkdown<
 			error: errors.map((object) => beautifyError(object.error)).join("\n"),
 		};
 	}
-
-	const content = Markdoc.transform(ast, {
+	const renderableTree = Markdoc.transform(ast, {
 		// passing the frontmatter to variables
 		// see https://markdoc.dev/docs/frontmatter#parse-the-frontmatter
 		variables: {
@@ -66,12 +71,9 @@ export async function parseMarkdown<
 		},
 		...config,
 	});
-	const html = await renderMarkdownToString(content, {
-		components,
-	});
 	return {
 		frontmatter: frontmatter as FrontmatterSchema,
-		html,
+		renderableTree,
 	};
 }
 

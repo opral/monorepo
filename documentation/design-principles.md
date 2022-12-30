@@ -12,7 +12,7 @@ description: Learn more about the design principles behind inlang.
 
 All tools and applications that inlang provides are built on Git, the version control, automation and collaboration system used by software engineers.
 
-The automation and collaboration power a version control system provides might just be what could make localization _substantially_ easier, if not any kind of content based workflow. Read more about the rationale in [git as a backend](/blog/git-as-backend).
+The automation and collaboration power a version control system provides might just be what could make localization _substantially_ easier, if not any kind of content based workflow. Read more about the rationale in [git as an SDK](/blog/git-as-sdk).
 
 {% Figure
 
