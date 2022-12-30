@@ -1,4 +1,5 @@
 import { createResource, Match, onMount, Suspense, Switch } from "solid-js";
+import mermaid from "mermaid";
 import { getHighlighter, Highlighter, Lang, setCDN } from "shiki";
 
 /**
@@ -61,16 +62,13 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 }
 
 function MermaidDiagram(props: Parameters<typeof Fence>[0]) {
-	// console.log({ mermaid });
-
 	onMount(() => {
-		console.log("hello");
-		// mermaid.mermaidAPI.render("g", props.content);
+		// @ts-ignore
+		mermaid.init();
 	});
-
 	return (
-		<Suspense>
-			<div></div>
-		</Suspense>
+		<div class="not-prose py-6 bg-surface-1 rounded">
+			<pre class="mermaid flex justify-center">{props.content}</pre>
+		</div>
 	);
 }
