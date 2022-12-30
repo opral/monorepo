@@ -10,7 +10,7 @@ This document has been written by me, [@samuelstroschein](https://twitter.com/sa
 
 ---
 
-# How exactly does inlang’s architecture work?
+## How exactly does inlang’s architecture work?
 
 Creation Date: March 5, 2022 8:33 PM
 
@@ -97,6 +97,7 @@ flowchart LR
 ```
 
 **Existing solutions have an architectual disadvantage.**
+
 Existing solutions choose a centralized database approach and, unbeknown to them, replicated many features of git without the major benefit of eliminating data silos and synchronization.
 
 Their architecture maintains two states. First, the git repository, and second the database. Both states need to be synchronized with each other. To conduct synchronization, version control and branching features of git had to be replicated. This architecture is a typical data silo architecture that gives rise to tools like [Zapier](https://zapier.com/) and “please not yet another tool” remarks.
@@ -130,9 +131,9 @@ flowchart LR
 
 **Why did existing solutions choose a centralized data silo architecture?**
 
-1. It’s the standard approach to build a SaaS.  
-   Weak argument but might be true.
+1. It’s the standard approach to build a SaaS.
+   - Weak argument but might be true.
 2. The technology was not ready/is emerging.
-   1. JavaScript became capable to run git in the browser recently [[source](https://github.com/isomorphic-git/isomorphic-git)] with workers and webassembly.
-   2. Since early 2022 Chromium-based browsers and Safari have access to the file system [[source](https://caniuse.com/native-filesystem-api)]. Which already leads to an influx of applications like [vscode.dev](https://vscode.dev/).
+   - JavaScript became capable to run git in the browser recently [[source](https://github.com/isomorphic-git/isomorphic-git)] with workers and webassembly.
+   - Since early 2022 Chromium-based browsers and Safari have access to the file system [[source](https://caniuse.com/native-filesystem-api)]. Which already leads to an influx of applications like [vscode.dev](https://vscode.dev/).
 3. Using a database is "good enough". There is only one way to find out whether a git-based architecture is breakthrough for localization: try it.
