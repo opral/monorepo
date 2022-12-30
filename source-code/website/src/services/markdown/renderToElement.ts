@@ -9,23 +9,23 @@
 import type { RenderableTreeNodes, Scalar } from "@markdoc/markdoc";
 import type { Component, JSXElement } from "solid-js";
 import { createComponent } from "solid-js";
-import { Dynamic, renderToStringAsync } from "solid-js/web";
+import { Dynamic } from "solid-js/web";
 
-export async function renderMarkdownToString(
+/**
+ * Renders a tree node to a solid element.
+ *
+ * Can be combined with Solids `renderToStringAsync` function
+ * to render the element to static html. Important: The `renderToElement`
+ * function must be called within the closure of `renderToStringAsync`.
+ * Otherwise, Solid can't render the Suspense component(s).
+ *
+ * @example
+ * 	const html = await renderToStringAsync(() => renderToElement(args));
+ */
+export function renderToElement(
 	node: RenderableTreeNodes,
 	args: {
 		components?: Record<string, Component<any>>;
-	}
-) {
-	// awaiting dynamically rendered components such as lazy loading.
-	const markdown = await renderToStringAsync(() => processMarkdown(node, args));
-	return markdown;
-}
-
-function processMarkdown(
-	node: RenderableTreeNodes,
-	args: {
-		components?: Record<string, Component>;
 	}
 ): JSXElement {
 	function deepRender(value: any): any {

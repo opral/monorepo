@@ -59,7 +59,7 @@ async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		let frontmatters: { frontmatter: any }[] = [];
 		for (const document of documents) {
-			const markdown = await parseMarkdown({
+			const markdown = parseMarkdown({
 				text: document,
 				FrontmatterSchema,
 			});

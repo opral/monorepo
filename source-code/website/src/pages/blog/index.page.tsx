@@ -15,7 +15,7 @@ export function Page(props: PageProps) {
 	return (
 		<Layout>
 			<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
-				<For each={Object.entries(props.processedTableOfContents)}>
+				<For each={Object.entries(props.processedTableOfContents ?? {})}>
 					{([href, frontmatter]) => (
 						<div class="py-12">
 							<a href={href} class="text-ellipsis space-y-4">
