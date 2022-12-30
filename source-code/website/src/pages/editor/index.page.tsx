@@ -1,5 +1,5 @@
 import type { PageHead } from "@src/renderer/types.js";
-import { Layout as EditorLayout } from "./Layout.jsx";
+import { Layout as RootLayout } from "../Layout.jsx";
 
 export const Head: PageHead = (props) => ({
 	title: "inlang Editor",
@@ -9,11 +9,11 @@ export const Head: PageHead = (props) => ({
 
 export function Page() {
 	return (
-		<EditorLayout>
+		<RootLayout>
 			<p>open a repository</p>
 			<a class="link link-primary" href="/editor/github.com/inlang/demo">
 				example
 			</a>
-		</EditorLayout>
+		</RootLayout>
 	);
 }

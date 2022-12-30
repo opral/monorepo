@@ -4,7 +4,7 @@ import {
 	resources,
 	inlangConfig,
 	setResources,
-} from "@src/pages/editor/state.js";
+} from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
