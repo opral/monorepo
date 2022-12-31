@@ -20,6 +20,8 @@ Inlang is git-based localization infrastructure and, simultaneously, a case stud
 
 Abusing a command line interface (CLI) to run in the browser with a virtual file system is cumbersome. The complexity of git will (likely?) overwhelm (non-technical) users. Yet, that is exactly what we are doing with inlang: The advantages seem to outweigh the costs. _Seem_ because we have to prove it. If inlang makes localization substantially easier, we might lead the path for version control based applications.
 
+We have a module called [git-sdk](https://github.com/inlang/inlang/tree/main/source-code/git-sdk) that we plan to incrementally develop based on the engineering and user experience requirements of inlang.  
+
 **Further read**
 
 - [What if a Git SDK to build apps exists?](/blog/git-as-sdk)
