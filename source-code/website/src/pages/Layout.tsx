@@ -30,7 +30,7 @@ export function Layout(props: { children: JSXElement }) {
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow flex " + layoutMargins}>
+			<div class={"grow flex flex-col " + layoutMargins}>
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
@@ -103,9 +103,8 @@ function Header() {
 							<div class="hidden md:flex justify-end space-x-4 place-items-center">
 								<Show
 									when={
-										currentPageContext.urlParsed.pathname.includes(
-											"editor"
-										) === false
+										currentPageContext.urlParsed.pathname.includes("editor") ===
+										false
 									}
 								>
 									<sl-button onClick={() => navigate("/editor")}>
