@@ -74,7 +74,7 @@ function Header() {
 								src="/favicon/favicon.ico"
 								alt="Company Logo"
 							/>
-							<span class="self-center pl-2 text-xl font-bold">inlang</span>
+							<span class="self-center pl-2 text-xl font-semibold">inlang</span>
 						</a>
 						<div class="grid grid-cols-2 w-full content-center">
 							<div class="hidden md:flex justify-start items-center space-x-4">
