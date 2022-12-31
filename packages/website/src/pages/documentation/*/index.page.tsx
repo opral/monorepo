@@ -21,9 +21,10 @@ export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents;
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>;
 };
-let navBarMobile: SlDetails | undefined;
 
 export function Page(props: PageProps) {
+	let mobileDetailMenu: SlDetails | undefined;
+
 	return (
 		<RootLayout>
 			{/* important: the responsive breakpoints must align throughout the markup! */}
@@ -43,7 +44,7 @@ export function Page(props: PageProps) {
 				</nav>
 				{/* Mobile navbar */}
 				<nav class="block md:hidden overflow-y-auto overflow-auto min-w-full pt-5">
-					<sl-details ref={navBarMobile}>
+					<sl-details ref={mobileDetailMenu}>
 						<h3 slot="summary" class="font-medium">
 							Menu
 						</h3>
@@ -51,7 +52,7 @@ export function Page(props: PageProps) {
 						 * filteredTableContents is not available on the client.
 						 */}
 						<Show when={props.processedTableOfContents}>
-							<NavbarCommon {...props} />
+							<NavbarCommon {...props} onLinkClick={() => mobileDetailMenu?.hide()} />
 						</Show>
 					</sl-details>
 				</nav>
@@ -95,6 +96,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"];
+	onLinkClick?: () => void;
 }) {
 	return (
 		<ul role="list" class="divide-y divide-outline w-full">
@@ -113,7 +115,7 @@ function NavbarCommon(props: {
 								{(document) => (
 									<li>
 										<a
-											onClick={() => navBarMobile?.hide()}
+											onClick={props.onLinkClick}
 											class="block w-full font-medium link link-primary"
 											classList={{
 												"text-primary":
