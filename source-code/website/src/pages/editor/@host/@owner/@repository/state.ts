@@ -181,12 +181,8 @@ async function cloneRepository(args: {
 	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
-	const { host, organization, repository } = args.routeParams;
-	if (
-		host === undefined ||
-		organization === undefined ||
-		repository === undefined
-	) {
+	const { host, owner, repository } = args.routeParams;
+	if (host === undefined || owner === undefined || repository === undefined) {
 		return undefined;
 	}
 	await raw.clone({
@@ -199,7 +195,7 @@ async function cloneRepository(args: {
 			  })
 			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		url: `https://${host}/${organization}/${repository}`,
+		url: `https://${host}/${owner}/${repository}`,
 	});
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
@@ -215,12 +211,8 @@ export async function pushChanges(
 	routeParams: EditorRouteParams,
 	user: NonNullable<LocalStorageSchema["user"]>
 ): Promise<Result<void, Error>> {
-	const { host, organization, repository } = routeParams;
-	if (
-		host === undefined ||
-		organization === undefined ||
-		repository === undefined
-	) {
+	const { host, owner, repository } = routeParams;
+	if (host === undefined || owner === undefined || repository === undefined) {
 		return Result.err(Error("h3ni329 Invalid route params"));
 	}
 	const args = {
@@ -234,7 +226,7 @@ export async function pushChanges(
 			encryptedAccessToken: user.encryptedAccessToken,
 		}),
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		url: `https://${host}/${organization}/${repository}`,
+		url: `https://${host}/${owner}/${repository}`,
 	};
 	try {
 		const push = await raw.push(args);

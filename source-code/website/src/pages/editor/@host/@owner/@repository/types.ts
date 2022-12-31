@@ -1,9 +1,9 @@
-/** @example `{host}/{organization}/{repository}` */
+/** @example `{host}/{owner}/{repository}` */
 export type EditorRouteParams = {
 	/** @example `github.com` */
 	host: string;
 	/** @example `inlang` */
-	organization: string;
+	owner: string;
 	/** @example `website` */
 	repository: string;
 };

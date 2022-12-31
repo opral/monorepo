@@ -1,16 +1,13 @@
 import type * as ast from "@inlang/core/ast";
 import { createSignal, For, Show } from "solid-js";
-import {
-	resources,
-	inlangConfig,
-	setResources,
-} from "@src/pages/editor/state.js";
+import { resources, inlangConfig, setResources } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
 import { showToast } from "@src/components/Toast.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
+import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outline-rounded";
 
 export function Messages(props: {
 	messages: Record<
@@ -18,57 +15,47 @@ export function Messages(props: {
 		ast.Message | undefined
 	>;
 }) {
-	const [isOpen, setIsOpen] = createSignal(false);
 	const referenceMessage = () =>
 		props.messages[inlangConfig()!.referenceLanguage]!;
+
 	return (
-		<sl-details
-			on:sl-show={() => setIsOpen(true)}
-			on:sl-after-hide={() => setIsOpen(false)}
-		>
-			<h3 slot="summary" class="font-medium">
+		<div class="border border-outline p-4 rounded">
+			<h3 slot="summary" class="font-medium pb-4">
 				{referenceMessage().id.name}
 			</h3>
-			<Show when={isOpen()}>
-				<div class="grid grid-cols-5 gap-2">
-					<p class="text-secondary italic">
-						TODO: additional information would appear here
-					</p>
-					<div class="grid gap-2 col-span-4">
-						<For each={inlangConfig()?.languages}>
-							{(language) => (
-								<div class="grid grid-cols-4 gap-4">
-									<p class="flex justify-end pt-2">
-										<Show
-											when={language === inlangConfig()!.referenceLanguage}
-											fallback={language}
-										>
-											<sl-tooltip class="hidden md:block">
-												<p slot="content">
-													The reference message acts as source of truth for the
-													other messages.
-												</p>
-												<span class="mr-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-													Reference:
-												</span>
-											</sl-tooltip>
-											{language}
-										</Show>
-									</p>
-									<div class="col-span-3">
-										<PatternEditor
-											language={language}
-											referenceMessage={referenceMessage()}
-											message={props.messages[language]}
-										></PatternEditor>
-									</div>
-								</div>
-							)}
-						</For>
-					</div>
-				</div>
-			</Show>
-		</sl-details>
+			<div class="grid gap-2 col-span-5">
+				<For each={inlangConfig()?.languages}>
+					{(language) => (
+						<div class="grid grid-cols-4 gap-4">
+							<p class="flex justify-start pt-2">
+								<Show
+									when={language === inlangConfig()!.referenceLanguage}
+									fallback={language}
+								>
+									{language}
+									<sl-tooltip class="hidden md:block">
+										<p slot="content">
+											The reference message acts as source of truth for the
+											other messages.
+										</p>
+										<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
+											Reference
+										</span>
+									</sl-tooltip>
+								</Show>
+							</p>
+							<div class="col-span-3">
+								<PatternEditor
+									language={language}
+									referenceMessage={referenceMessage()}
+									message={props.messages[language]}
+								></PatternEditor>
+							</div>
+						</div>
+					)}
+				</For>
+			</div>
+		</div>
 	);
 }
 
@@ -146,7 +133,12 @@ function PatternEditor(props: {
 				onFocus={() => setIsFocused(true)}
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-			></sl-input>
+			>
+				<MaterialSymbolsEditOutlineRounded
+					slot="suffix"
+					class="text-outline-variant"
+				></MaterialSymbolsEditOutlineRounded>
+			</sl-input>
 			{/* <div
 				onFocus={() => setIsFocused(true)}
 				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}

@@ -33,7 +33,6 @@ import "@shoelace-style/shoelace/dist/components/divider/divider.js";
 import "@shoelace-style/shoelace/dist/components/tree/tree.js";
 import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js";
 import { clientSideEnv } from "@env";
-import { assert } from "@src/services/assert/index.js";
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
