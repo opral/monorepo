@@ -63,7 +63,7 @@ function Header() {
 	return (
 		<header
 			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-			class={`sticky top-0 z-50 w-full bg-background border-b border-outline `}
+			class="sticky top-0 z-50 w-full bg-background border-b border-outline"
 		>
 			<div class="w-full h-full bg-surface-1 py-3">
 				<nav class={layoutMargins}>
