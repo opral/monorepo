@@ -27,7 +27,7 @@ export function Page(props: PageProps) {
 	return (
 		<RootLayout>
 			{/* important: the responsive breakpoints must align throughout the markup! */}
-			<div class="flex flex-col md:grid md:grid-cols-4 gap-10 w-full">
+			<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
 				{/* desktop navbar */}
 				{/* 
 					hacking the left margins to apply bg-surface-2 with 100rem 
