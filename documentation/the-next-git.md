@@ -6,9 +6,19 @@ description: Git, or more generalized version control, seems to be an appropriat
 
 # {% $frontmatter.title %}
 
-**Git as a backend may be superior to database-driven backends for various domains/applications. Inlang is git-based localization infrastructure and simultaneously a case study for version control-based applications. By building inlang, we might build a version control SDK.**
+**Inlang might bring version control to domains outside of software engineering.**
 
-Git provides unprecedented (async) collaboration, automation, and review workflows. Git as a backend for localization infrastructure seems to make so much sense that we are building git-based localization infrastructure. However, there are drawbacks to using git as a backend, including the fact that it is a command line interface (CLI) rather than a software development kit (SDK). The complexity of git will (likely?) overwhelm non-technical (and technical!) users. If git as a backend, collaboration, and automation hub makes sense though, inlang will make localization easier and might lead the path for version control-based applications.
+{% Figure
+
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/what-if-1000-artists.jpeg"
+    alt="What if 1000s of artists are able to create a song together?"
+    caption="A slide from one of the first presentations about inlang being built on git, and the possibilities version control might open. The image has been taken from the iconic iPod campaign."
+
+/%}
+
+Inlang is git-based localization infrastructure and, simultaneously, a case study for version control-based applications. Git provides unprecedented (async) collaboration, automation, and simple review flows out of the box. Wouldn't version control be benefitial to domains outside of software engineering? What if artists could collaborate on a song in the way software engineers collaborate on open source software? What if open source mechanical engineering would be as common as open source software? What if... version control enables new workflows and apps with built-in version control are better than their counterparts?
+
+Abusing a command line interface (CLI) to run in the browser with a virtual file system is cumbersome. The complexity of git will (likely?) overwhelm (non-technical) users. Yet, that is exactly what we are doing with inlang: The advantages seem to outweigh the costs. _Seem_ because we have to prove it. If inlang makes localization substantially easier, we might lead the path for version control based applications.
 
 **Further read**
 
