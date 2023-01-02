@@ -12,6 +12,8 @@ import {
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
+import { forkRepository, hello } from "./index.telefunc.js";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
@@ -38,9 +40,30 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
+	const [localStorage] = useLocalStorage();
 
 	return (
 		<EditorLayout>
+			<sl-button
+				onClick={async () => {
+					hello();
+					if (localStorage.user) {
+						debugger;
+						try {
+							const result = await forkRepository({
+								encryptedAccessToken: localStorage.user?.encryptedAccessToken,
+							});
+							if (result.isErr) {
+								console.error(result.error);
+							}
+						} catch (error) {
+							console.error(error);
+						}
+					}
+				}}
+			>
+				Fork
+			</sl-button>
 			<Switch
 				fallback={
 					<p class="text-danger">
