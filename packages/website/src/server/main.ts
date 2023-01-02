@@ -76,18 +76,27 @@ if (isProduction) {
 }
 
 // serving telefunc https://telefunc.com/
+//! it is extremely important that a request handler is not async to catch errors
+//! express does not catch async errors. hence, renderPage uses the callback pattern
 app.all(
-	"/_telefunc",
+	"/_telefunc/*",
+
 	// Parse & make HTTP request body available at `req.body` (required by telefunc)
 	app.use(express.text()),
 	// handle the request
-	async (request, response) => {
-		const { body, statusCode, contentType } = await telefunc({
+	(request, response, next) => {
+		console.log("reqeust telefunc");
+		telefunc({
 			url: request.originalUrl,
 			method: request.method,
 			body: request.body,
-		});
-		return response.status(statusCode).type(contentType).send(body);
+		})
+			.then((value) => {
+				const { body, statusCode, contentType } = value;
+				return response.status(statusCode).type(contentType).send(body);
+			})
+			// pass the error to expresses error handling
+			.catch(next);
 	}
 );
 
@@ -103,10 +112,11 @@ app.get("*", (request, response, next) => {
 	})
 		.then((pageContext) => {
 			if (pageContext.httpResponse === null) {
-				return next();
+				next();
+			} else {
+				const { body, statusCode, contentType } = pageContext.httpResponse;
+				return response.status(statusCode).type(contentType).send(body);
 			}
-			const { body, statusCode, contentType } = pageContext.httpResponse;
-			return response.status(statusCode).type(contentType).send(body);
 		})
 		// pass the error to expresses error handling
 		.catch(next);
