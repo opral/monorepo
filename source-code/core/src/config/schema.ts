@@ -43,6 +43,13 @@ export type Config = {
 		config: Config;
 		resources: ast.Resource[];
 	}) => Promise<void>;
+	/**
+	 * WARNING: Experimental properties are not required and
+	 * can change at any time and do not lead to a MAJOR version bump.
+	 *
+	 * Read more under https://inlang.com/documentation/breaking-changes
+	 */
+	// experimental?: {};
 	// ideExtension?: {
 	// 	/**
 	// 	 * Defines when a message is referenced.
