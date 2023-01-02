@@ -1,6 +1,11 @@
 import type * as ast from "@inlang/core/ast";
-import { createSignal, For, Show } from "solid-js";
-import { resources, inlangConfig, setResources } from "./state.js";
+import { createEffect, createSignal, For, Show } from "solid-js";
+import {
+	resources,
+	inlangConfig,
+	setResources,
+	referenceResource,
+} from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
@@ -8,6 +13,9 @@ import { showToast } from "@src/components/Toast.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
 import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outline-rounded";
+import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
+import { onMachineTranslate } from "./index.telefunc.js";
+import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -64,7 +72,14 @@ function PatternEditor(props: {
 	referenceMessage: ast.Message;
 	message: ast.Message | undefined;
 }) {
-	const [localStorage] = useLocalStorage();
+	const [localStorage, setLocalStorage] = useLocalStorage();
+
+	const [
+		showMachineLearningWarningDialog,
+		setShowMachineLearningWarningDialog,
+	] = createSignal(false);
+
+	let machineLearningWarningDialog: SlDialog | undefined;
 
 	/** throw if unimplemented features are used  */
 	if (
@@ -113,7 +128,76 @@ function PatternEditor(props: {
 
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
-		textValue();
+			textValue() && textValue() !== "";
+
+	/**
+	 * Saves the changes of the message.
+	 */
+	const handleSave = () => {
+		const _copy = copy();
+		const _textValue = textValue();
+		if (_textValue === undefined) {
+			return;
+		}
+		(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
+		try {
+			const updatedResource = query(resource())
+				.upsert({ message: _copy! })
+				.unwrap();
+			setResources(
+				resources
+					.filter(
+						(_resource) =>
+							_resource.languageTag.language !== resource().languageTag.language
+					)
+					.concat([updatedResource])
+			);
+			showToast({
+				variant: "info",
+				title: "The change has been committed.",
+				message: `Don't forget to push the changes.`,
+			});
+		} catch (e) {
+			showToast({
+				variant: "danger",
+				title: "Error",
+				message: (e as Error).message,
+			});
+			throw e;
+		}
+	};
+
+	const [machineTranslationIsLoading, setMachineTranslationIsLoading] =
+		createSignal(false);
+
+	const handleMachineTranslate = async () => {
+		const text = props.referenceMessage.pattern.elements[0].value;
+		if (text === undefined) {
+			return showToast({
+				variant: "info",
+				title: "Can't translate empty text",
+			});
+		} else if (localStorage.showMachineTranslationWarning) {
+			setShowMachineLearningWarningDialog(true);
+			return machineLearningWarningDialog?.show();
+		}
+		setMachineTranslationIsLoading(true);
+		const result = await onMachineTranslate({
+			referenceLanguage: referenceResource()!.languageTag.language,
+			targetLanguage: props.language,
+			text,
+		});
+		if (result.error) {
+			showToast({
+				variant: "warning",
+				title: "Machine translation failed.",
+				message: result.error,
+			});
+		} else {
+			setTextValue(result.data);
+		}
+		setMachineTranslationIsLoading(false);
+	};
 
 	return (
 		// outer element is needed for clickOutside directive
@@ -160,49 +244,66 @@ function PatternEditor(props: {
 						></InlineNotification>
 					</Show>
 					<sl-button
+						onClick={handleMachineTranslate}
+						prop:disabled={textValue() !== undefined && textValue() !== ""}
+						prop:loading={machineTranslationIsLoading()}
+						prop:variant="neutral"
+					>
+						<MaterialSymbolsRobotOutline slot="prefix"></MaterialSymbolsRobotOutline>
+						Machine translate
+					</sl-button>
+					<sl-button
 						prop:variant="primary"
 						prop:disabled={
 							hasChanges() === false || localStorage.user === undefined
 						}
-						onClick={() => {
-							const _copy = copy();
-							const _textValue = textValue();
-							if (_textValue === undefined) {
-								return;
-							}
-							(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
-							try {
-								const updatedResource = query(resource())
-									.upsert({ message: _copy! })
-									.unwrap();
-								setResources(
-									resources
-										.filter(
-											(_resource) =>
-												_resource.languageTag.language !==
-												resource().languageTag.language
-										)
-										.concat([updatedResource])
-								);
-								showToast({
-									variant: "info",
-									title: "The change has been committed.",
-									message: `Don't forget to push the changes.`,
-								});
-							} catch (e) {
-								showToast({
-									variant: "danger",
-									title: "Error",
-									message: (e as Error).message,
-								});
-								throw e;
-							}
-						}}
+						onClick={handleSave}
 					>
 						<MaterialSymbolsCommitRounded slot="prefix"></MaterialSymbolsCommitRounded>
 						Commit
 					</sl-button>
 				</div>
+			</Show>
+			<Show when={showMachineLearningWarningDialog()}>
+				<sl-dialog
+					prop:label="Machine translations pitfalls"
+					ref={machineLearningWarningDialog}
+				>
+					<ol class="">
+						<li>
+							1. Machine translations are not always correct. Always check and
+							correct the translation as necessary.
+						</li>
+						<br />
+						<li>
+							2. Machine translations do not exclude placeholders like "My name
+							is{" "}
+							<code class="bg-surface-1 py-0.5 px-1 rounded">{"{name}"}</code>
+							{'" '}
+							yet. Make sure that placeholders between the reference message and
+							translations match. For more information read{" "}
+							<a
+								href="https://github.com/orgs/inlang/discussions/228"
+								target="_blank"
+								class="link link-primary"
+							>
+								#228
+							</a>
+							.
+						</li>
+					</ol>
+					<sl-button
+						prop:variant="warning"
+						slot="footer"
+						onClick={() => {
+							setLocalStorage("showMachineTranslationWarning", false);
+							machineLearningWarningDialog?.hide();
+							handleMachineTranslate();
+						}}
+					>
+						Proceed with machine translating
+					</sl-button>
+				</sl-dialog>
 			</Show>
 		</div>
 	);
