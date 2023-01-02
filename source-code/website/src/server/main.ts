@@ -79,13 +79,11 @@ if (isProduction) {
 //! it is extremely important that a request handler is not async to catch errors.
 //! express does not catch async errors. hence, the callback pattern is used.
 app.all(
-	"/_telefunc/*",
-
+	"/_telefunc",
 	// Parse & make HTTP request body available at `req.body` (required by telefunc)
 	express.text(),
 	// handle the request
 	(request, response, next) => {
-
 		telefunc({
 			url: request.originalUrl,
 			method: request.method,
@@ -111,11 +109,10 @@ app.get("*", (request, response, next) => {
 	})
 		.then((pageContext) => {
 			if (pageContext.httpResponse === null) {
-				next();
-			} else {
-				const { body, statusCode, contentType } = pageContext.httpResponse;
-				return response.status(statusCode).type(contentType).send(body);
+				return next();
 			}
+			const { body, statusCode, contentType } = pageContext.httpResponse;
+			return response.status(statusCode).type(contentType).send(body);
 		})
 		// pass the error to expresses error handling
 		.catch(next);
