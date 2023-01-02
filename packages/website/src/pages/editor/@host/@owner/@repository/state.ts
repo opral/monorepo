@@ -25,7 +25,6 @@ import {
 	useLocalStorage,
 } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { createAuthHeader } from "@src/services/auth/index.js";
-import { forkRepository } from "./index.telefunc.js";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -202,7 +201,6 @@ async function cloneRepository(args: {
 	// of components that depends on fs
 	const date = new Date();
 	setFsChange(date);
-
 	return date;
 }
 
@@ -269,8 +267,8 @@ async function writeResources(
 	resources: ast.Resource[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	// console.log("writing resources");
-	// console.log(resources);
+	console.log("writing resources");
+	console.log(resources);
 	await config.writeResources({ config, resources });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
