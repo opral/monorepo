@@ -9,7 +9,7 @@ import "./app.css";
 import { assert } from "@src/services/assert/index.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams", "urlParsed"] as const;
+export const passToClient = ["pageProps", "routeParams"] as const;
 
 export async function render(
 	pageContext: PageContextRenderer
