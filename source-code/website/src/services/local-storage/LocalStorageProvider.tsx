@@ -6,7 +6,7 @@ import {
 	useContext,
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
-import type { LocalStorageSchema } from "./schema.js";
+import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
 const LocalStorageContext = createContext();
 
@@ -43,7 +43,8 @@ export function useLocalStorage(): [
 
 // use strg-f to find the usage of this provider
 export function LocalStorageProvider(props: { children: JSXElement }) {
-	const [store, setOriginStore] = createStore<LocalStorageSchema>({});
+	const [store, setOriginStore] =
+		createStore<LocalStorageSchema>(defaultLocalStorage);
 
 	/** custom setStore to trigger localStorage.setItem on change */
 	const setStore: typeof setOriginStore = (...args: any) => {

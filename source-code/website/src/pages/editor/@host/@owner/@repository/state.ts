@@ -23,7 +23,7 @@ import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
 import {
 	getLocalStorage,
 	useLocalStorage,
-} from "@src/services/local-storage/LocalStorageProvider.jsx";
+} from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
 
 /**
