@@ -86,10 +86,11 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
  * ```
  *
  */
+// urlParsed is available by default #246
 export type PageContext<PageProps = Record<string, unknown>> = Pick<
 	PageContextRenderer<PageProps>,
 	typeof passToClient[number]
->;
+> & { urlParsed: PageContextRenderer["urlParsed"] };
 
 /**
  * The return of a `onBeforeRender` hook.
