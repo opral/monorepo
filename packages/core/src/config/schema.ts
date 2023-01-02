@@ -44,7 +44,7 @@ export type Config = {
 		resources: ast.Resource[];
 	}) => Promise<void>;
 	/**
-	 * WARNING: Experimental properties are not required and
+	 * WARNING: Experimental properties are not required,
 	 * can change at any time and do not lead to a MAJOR version bump.
 	 *
 	 * Read more under https://inlang.com/documentation/breaking-changes
