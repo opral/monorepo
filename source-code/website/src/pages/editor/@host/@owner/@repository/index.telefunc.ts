@@ -1,4 +1,5 @@
 import { serverSideEnv } from "@env";
+import { assert } from "@src/services/assert/index.js";
 
 const env = await serverSideEnv();
 
@@ -26,6 +27,10 @@ export async function onMachineTranslate(args: {
 			{ method: "POST" }
 		);
 		const json = await response.json();
+		assert(
+			json.data.translations.length === 1,
+			"Expected exactly one translation. Hardcoded in the code for now."
+		);
 		if (response.ok) {
 			return { data: json.data.translations[0].translatedText };
 		}
