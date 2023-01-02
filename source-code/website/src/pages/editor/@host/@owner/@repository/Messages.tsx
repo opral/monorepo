@@ -115,6 +115,43 @@ function PatternEditor(props: {
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
 		textValue();
 
+	/**
+	 * Saves the changes of the message.
+	 */
+	const handleSave = () => {
+		const _copy = copy();
+		const _textValue = textValue();
+		if (_textValue === undefined) {
+			return;
+		}
+		(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
+		try {
+			const updatedResource = query(resource())
+				.upsert({ message: _copy! })
+				.unwrap();
+			setResources(
+				resources
+					.filter(
+						(_resource) =>
+							_resource.languageTag.language !== resource().languageTag.language
+					)
+					.concat([updatedResource])
+			);
+			showToast({
+				variant: "info",
+				title: "The change has been committed.",
+				message: `Don't forget to push the changes.`,
+			});
+		} catch (e) {
+			showToast({
+				variant: "danger",
+				title: "Error",
+				message: (e as Error).message,
+			});
+			throw e;
+		}
+	};
+
 	return (
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
@@ -164,40 +201,7 @@ function PatternEditor(props: {
 						prop:disabled={
 							hasChanges() === false || localStorage.user === undefined
 						}
-						onClick={() => {
-							const _copy = copy();
-							const _textValue = textValue();
-							if (_textValue === undefined) {
-								return;
-							}
-							(_copy?.pattern.elements[0] as ast.Text).value = _textValue;
-							try {
-								const updatedResource = query(resource())
-									.upsert({ message: _copy! })
-									.unwrap();
-								setResources(
-									resources
-										.filter(
-											(_resource) =>
-												_resource.languageTag.language !==
-												resource().languageTag.language
-										)
-										.concat([updatedResource])
-								);
-								showToast({
-									variant: "info",
-									title: "The change has been committed.",
-									message: `Don't forget to push the changes.`,
-								});
-							} catch (e) {
-								showToast({
-									variant: "danger",
-									title: "Error",
-									message: (e as Error).message,
-								});
-								throw e;
-							}
-						}}
+						onClick={handleSave}
 					>
 						<MaterialSymbolsCommitRounded slot="prefix"></MaterialSymbolsCommitRounded>
 						Commit
