@@ -21,6 +21,11 @@ export type ServerSideEnv = ClientSideEnv & {
 	JWE_SECRET_KEY: string;
 
 	/**
+	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+	 */
+	GITHUB_APP_CLIENT_SECRET: string;
+
+	/**
 	 * The sentry dsn for the server.
 	 *
 	 * Only available in production.
@@ -28,9 +33,12 @@ export type ServerSideEnv = ClientSideEnv & {
 	SENTRY_DSN_SERVER?: string;
 
 	/**
-	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+	 * The API key for Google Translate.
+	 *
+	 * Only available in production.
+	 * https://cloud.google.com/translate/docs/setup
 	 */
-	GITHUB_APP_CLIENT_SECRET: string;
+	GOOGLE_TRANSLATE_API_KEY?: string;
 };
 
 /**
