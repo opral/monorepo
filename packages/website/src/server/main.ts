@@ -81,7 +81,7 @@ if (isProduction) {
 app.all(
 	"/_telefunc",
 	// Parse & make HTTP request body available at `req.body` (required by telefunc)
-	app.use(express.text()),
+	express.text(),
 	// handle the request
 	(request, response, next) => {
 		telefunc({
