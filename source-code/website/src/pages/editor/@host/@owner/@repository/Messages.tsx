@@ -16,7 +16,6 @@ import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outl
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { Icon } from "@src/components/Icon.jsx";
 
 export function Messages(props: {
 	messages: Record<
@@ -129,7 +128,7 @@ function PatternEditor(props: {
 
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
-		textValue();
+			textValue() && textValue() !== "";
 
 	/**
 	 * Saves the changes of the message.
@@ -246,7 +245,9 @@ function PatternEditor(props: {
 					</Show>
 					<sl-button
 						onClick={handleMachineTranslate}
+						prop:disabled={textValue() !== undefined && textValue() !== ""}
 						prop:loading={machineTranslationIsLoading()}
+						prop:variant="neutral"
 					>
 						<MaterialSymbolsRobotOutline slot="prefix"></MaterialSymbolsRobotOutline>
 						Machine translate
