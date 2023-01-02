@@ -6,6 +6,7 @@
  */
 
 export {
+	getLocalStorage,
 	useLocalStorage,
 	LocalStorageProvider,
 } from "./LocalStorageProvider.js";
