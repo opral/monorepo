@@ -1,5 +1,4 @@
 import { serverSideEnv } from "@env";
-import { Result } from "@inlang/core/utilities";
 
 const env = await serverSideEnv();
 
