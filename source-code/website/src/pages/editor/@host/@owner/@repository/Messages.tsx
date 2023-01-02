@@ -1,6 +1,11 @@
 import type * as ast from "@inlang/core/ast";
 import { createSignal, For, Show } from "solid-js";
-import { resources, inlangConfig, setResources } from "./state.js";
+import {
+	resources,
+	inlangConfig,
+	setResources,
+	referenceResource,
+} from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
@@ -8,6 +13,8 @@ import { showToast } from "@src/components/Toast.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
 import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outline-rounded";
+import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
+import { onMachineTranslate } from "./index.telefunc.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -152,6 +159,35 @@ function PatternEditor(props: {
 		}
 	};
 
+	const [machineTranslationIsLoading, setMachineTranslationIsLoading] =
+		createSignal(false);
+
+	const handleMachineTranslate = async () => {
+		const text = props.referenceMessage.pattern.elements[0].value;
+		if (text === undefined) {
+			return showToast({
+				variant: "info",
+				title: "Can't translate empty text",
+			});
+		}
+		setMachineTranslationIsLoading(true);
+		const result = await onMachineTranslate({
+			referenceLanguage: referenceResource()!.languageTag.language,
+			targetLanguage: props.language,
+			text,
+		});
+		if (result.error) {
+			showToast({
+				variant: "warning",
+				title: "Machine translation failed.",
+				message: result.error,
+			});
+		} else {
+			setTextValue(result.data);
+		}
+		setMachineTranslationIsLoading(false);
+	};
+
 	return (
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
@@ -196,6 +232,13 @@ function PatternEditor(props: {
 							variant="info"
 						></InlineNotification>
 					</Show>
+					<sl-button
+						onClick={handleMachineTranslate}
+						prop:loading={machineTranslationIsLoading()}
+					>
+						<MaterialSymbolsRobotOutline slot="prefix"></MaterialSymbolsRobotOutline>
+						Machine translate
+					</sl-button>
 					<sl-button
 						prop:variant="primary"
 						prop:disabled={
