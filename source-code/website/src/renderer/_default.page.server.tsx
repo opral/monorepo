@@ -6,7 +6,7 @@ import { ThePage } from "./ThePage.jsx";
 
 // import the css
 import "./app.css";
-import { assert } from "@src/services/assert/index.js";
+import { assertUsage } from "@src/services/assert/index.js";
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams"] as const;
@@ -18,9 +18,9 @@ export async function render(
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
-	assert(pageContext.exports.Head, "A page must export a Head.");
+	assertUsage(pageContext.exports.Head, "A page must export a Head.");
 	const head = pageContext.exports.Head({ pageContext });
-	assert(
+	assertUsage(
 		head.description.length < 160,
 		`A description of a Page should not exceed 160 characters. Otherwise, search engines will truncate the text. The provided description was ${head.description.length} characters long.`
 	);
