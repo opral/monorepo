@@ -4,7 +4,7 @@ import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-r
 
 export function Hero() {
 	return (
-		<div class="mx-auto max-w-3xl pt-20 pb-32 sm:pt-48 sm:pb-40">
+		<div class="mx-auto max-w-3xl pt-16 pb-24 sm:pt-32 sm:pb-40">
 			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
 				<div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
 					<span>
@@ -35,7 +35,7 @@ export function Hero() {
 						</span>
 					</span>
 				</h1>
-				<p class="mt-6 text-base sm:text-lg leading-8 text-gray-600 sm:text-center">
+				<p class="mt-2 md:mt-6 text-base sm:text-lg md:leading-6 text-gray-600 sm:text-center">
 					Inlang turns your git repository into the collaboration and automation
 					hub for localization while keeping full control and flexibility.
 				</p>
