@@ -1,18 +1,15 @@
+Developer-first localization infrastructure that is built on git. Your git repository is the single source of truth for localization for collaboration and automation.
+
 <div>
     <p align="center">
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
-    <h2 align="center">
-        Developer-first localization infrastructure built on git
-    </h2>
     <h4 align="center">
         <!-- <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> 
         ·  -->
-        <a href="https://github.com/inlang/inlang/discussions" target="_blank">Community</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
+        <a href="https://github.com/inlang/inlang/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
     </h4>
 </div>
-
-Inlang provides developer-first localization infrastructure that is built on git. Your git repository is the single source of truth for localization. The infrastructure consists of dev tools, an editor to manage translations, and automation via CI/CD.
 
 # @inlang/core
 
