@@ -14,10 +14,12 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import { forkRepository } from "./index.telefunc.js";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
-
+let owner: string;
+let repository: string;
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
-	console.log(routeParams);
+	owner = routeParams.owner;
+	repository = routeParams.repository;
 	return {
 		title: routeParams.owner + "/" + routeParams.repository,
 		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
@@ -33,7 +35,6 @@ export function Page() {
 		}
 		return result;
 	};
-
 	const inludedMessageIds = () => {
 		const _referenceResource = referenceResource();
 		if (_referenceResource === undefined) {
@@ -46,12 +47,13 @@ export function Page() {
 		<EditorLayout>
 			<sl-button
 				onClick={async () => {
-					console.log(localStorage);
 					if (localStorage.user) {
 						try {
 							await forkRepository({
 								encryptedAccessToken: localStorage.user.encryptedAccessToken,
-								owner: "inlang/example",
+								owner: owner,
+								repository: repository,
+								username: localStorage.user.username,
 							});
 						} catch (error) {
 							console.error(error);
