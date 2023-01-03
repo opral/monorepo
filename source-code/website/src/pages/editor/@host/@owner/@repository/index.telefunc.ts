@@ -1,6 +1,9 @@
 import { serverSideEnv } from "@env";
 import { assertUsage } from "@src/services/assert/index.js";
-
+import { Result } from "@inlang/core/utilities";
+import { decryptAccessToken } from "@src/services/auth/logic.js";
+import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 const env = await serverSideEnv();
 
 /**
@@ -37,5 +40,40 @@ export async function onMachineTranslate(args: {
 		throw Error(json);
 	} catch (error) {
 		return { error: (error as Error).message };
+	}
+}
+export async function forkRepository(args: {
+	encryptedAccessToken: NonNullable<
+		LocalStorageSchema["user"]
+	>["encryptedAccessToken"];
+	pathname: string;
+}) {
+	console.log("fork");
+	try {
+		const decryptedAccessToken = (
+			await decryptAccessToken({
+				jwe: args.encryptedAccessToken,
+				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+			})
+		).unwrap();
+		console.log(decryptedAccessToken);
+		console.log(`https://api.github.com/repos/${args.pathname}/forks`);
+		const fork = await fetch(
+			`https://api.github.com/repos/${args.pathname}/forks`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${decryptedAccessToken}`,
+				},
+
+				body: JSON.stringify({ name: "inlangTranslation" }),
+			}
+		);
+		if (fork.ok) {
+			console.log("ich bin ok ", fork.ok);
+			return undefined;
+		} else throw Error(await fork.text());
+	} catch (error) {
+		return console.error(error);
 	}
 }
