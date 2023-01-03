@@ -267,8 +267,6 @@ async function writeResources(
 	resources: ast.Resource[],
 	user: NonNullable<LocalStorageSchema["user"]>
 ) {
-	console.log("writing resources");
-	console.log(resources);
 	await config.writeResources({ config, resources });
 	const status = await raw.statusMatrix({ fs, dir: "/" });
 	const filesWithUncomittedChanges = status.filter(
