@@ -7,6 +7,7 @@ import { Figure } from "./tags/Figure.jsx";
 import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx";
 import { Link } from "./nodes/Link.jsx";
 import { Document } from "./nodes/Document.jsx";
+import { Video } from "./tags/Video.jsx";
 
 /**
  * The components that render custom nodes or tags
@@ -19,6 +20,7 @@ export const components = {
 	QuickLinks,
 	Link,
 	Document,
+	Video,
 };
 
 /**
@@ -102,6 +104,13 @@ export const config: Config = {
 				description: { type: "String" },
 				icon: { type: "String", matches: Object.keys(icons) },
 				href: { type: "String" },
+			},
+		},
+		Video: {
+			selfClosing: true,
+			render: "Video",
+			attributes: {
+				src: { type: "String", required: true },
 			},
 		},
 	},
