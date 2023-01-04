@@ -50,14 +50,14 @@ In short, a git-based localization system for developers and translators with a 
 
 ## Components
 
-The following components are exposed to users when localizing software: A syntax to express human languages, dev tools, an SDK, automation (CI/CD), and a translation editor (also called CAT).
+The following components are exposed to users when localizing software: A syntax to express human languages, dev tools, an i18n library, automation (CI/CD), and a translation editor (also called CAT).
 
 > A user can either be a translator or developer.
 
 ```mermaid
 flowchart BT
     Syntax[Human Language Syntax]
-    SDK
+    Library
     DT[Dev Tools]
     Automation
     Editor
@@ -68,13 +68,13 @@ flowchart BT
 flowchart BT
     subgraph Components
       Syntax[Human Language Syntax]
-      SDK
+      Library
       DT[Dev Tools]
       CICD[CI/CD]
       Editor
     end
 
-    Developer---SDK
+    Developer---Library
     Developer---DT
     Developer---Syntax
     Developer---CICD
@@ -126,9 +126,9 @@ Supporting different syntaxes and their features opens the question of how the A
 
 Develop a custom AST that is inspired by Fluent and the upcoming MessageFormat 2.0 spec. During prototyping the observation has been made that inlang will most likely require custom AST nodes and thereby deviate from existing designs in any case. Most ASTs are designed for consumption rather than applications. Some ASTs like Fluent also impose numerous features that would have to be supported albeit the benefit and future is unclear. A good example are [Terms](https://projectfluent.org/fluent/guide/terms.html).
 
-### SDK
+### i18n Library
 
-Messages need to be retrieved and formatted. That's the job of an i18n SDK. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer's perspective, the i18n SDK loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
+Messages need to be retrieved and formatted. That's the job of an i18n library. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer's perspective, the i18n library loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
 
 #### Illustration
 
@@ -142,13 +142,13 @@ flowchart LR
       DE
     end
 
-    subgraph SDK
+    subgraph Library
         direction LR
         Language[Language detection]
         Formatting
     end
 
-    Resources-->SDK-->Output
+    Resources-->Library-->Output
 
 ```
 
@@ -164,7 +164,7 @@ flowchart LR
 ##### Retrieving a message
 
 ```jsx
-import translate from "sdk";
+import translate from "i18n-library";
 
 console.log(translate("example", { name: "Samuel" }));
 ```
@@ -177,32 +177,32 @@ console.log(translate("example", { name: "Samuel" }));
 
 #### Observations
 
-1. A variety of good and adopted open source SDKs exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), and more]. Each serves a different programming language, framework, niche, or feature.
+1. A variety of good and adopted open source libraries exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), and more]. Each serves a different programming language, framework, niche, or feature.
 
 2. The internals are identical:  
    `Resource` -> `Reference and Format a Message` -> `Output`
 
 #### Decision
 
-Leverage existing SDKs instead of forcing a specific inlang SDK.
+Leverage existing i18n libraries instead of forcing a specific inlang library.
 
 ##### Pros
 
 - Already localized codebases can easily adopt inlang.
 
-  Localized codebase use i18n SDKs, or custom build solutions. By being SDK agnostic, those codebases are not required to migrate to an SDK provided by inlang. Instead, inlang complements the existing SDK or solution in use.
+  Localized codebase use i18n libraries, or custom build solutions. By being i18n library agnostic, those codebases are not required to migrate to a library provided by inlang. Instead, inlang complements the existing library or solution in use.
 
-- Different SDKs have different design goals and trade-offs.
+- Different libraries have different design goals and trade-offs.
 
-  One SDK to rule them all is unlikely a feasible idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n SDK obsolete. Supporting native localization features instead of forcing the use of an i18n SDK is arguably better. And so is supporting a suited localization approach, i.e. different i18n SDKs, better than forcing the usage of a specific, but less suited, i18n SDK onto developers.
+  One library to rule them all is unlikely a feasible idea. Applications have different requirements. For example, different rendering techniques alone (client side vs server side) lead to different localization requirements. Furthermore, some languages and frameworks such as Apple's Swift language support localization out of the box, making the requirement for a (basic) i18n library obsolete. Supporting native localization features instead of forcing the use of an i18n library is arguably better. And so is supporting a suited localization approach, i.e. different i18n libraries, better than forcing the usage of a specific, but less suited, i18n library onto developers.
 
 ##### Cons
 
-- The user experience could potentially be higher with a dedicated SDK.
+- The user experience could potentially be higher with a dedicated library.
 
 #### Considered alternative
 
-Develop (and require) a dedicated SDK developed by inlang.
+Develop (and require) a dedicated library developed by inlang.
 
 ##### Pros
 
@@ -211,11 +211,11 @@ Develop (and require) a dedicated SDK developed by inlang.
 ##### Cons
 
 - Adoption is severely limited.
-- Different SDKs exist because a "one size fits all" solution likely does not work.
+- Different libraries exist because a "one size fits all" solution likely does not work.
 
 ### Dev tools
 
-Using an SDK does not relieve developers from two extremely time-consuming and ever-repeating tasks:
+Using a library does not relieve developers from two extremely time-consuming and ever-repeating tasks:
 
 1. Extracting hard-coded strings.
 
@@ -228,8 +228,8 @@ Using an SDK does not relieve developers from two extremely time-consuming and e
 Furthermore, the DX of localizing software, in general, is improvable. The pseudocode below illustrates some problems:
 
 ```jsx
-import translate from "i18n-sdk";
-import Translated from 'i18n-sdk';
+import translate from "i18n-library";
+import Translated from 'i18n-library';
 
 // What is info referring to?
 <p>{translate('info')}</p>
@@ -248,7 +248,7 @@ import Translated from 'i18n-sdk';
 
 #### Observations
 
-- Dev tools beyond SDKs are required to make localization effortless.
+- Dev tools beyond i18n libraries are required to make localization effortless.
 - A CLI enables developers to build custom CI/CD pipelines.
 - Platform-specific tooling like GitHub actions can be built on top of dev tools (the CLI).
 - An [IDE extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) speeds up development.
@@ -379,7 +379,7 @@ Using JavaScript as a configuration format would allow unopinionated storing of 
 flowchart BT
 
     subgraph Components
-      SDK
+      Library
       DT[Dev Tools]
       CICD[CI/CD]
       Editor
