@@ -7,7 +7,7 @@ import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvide
 import { response } from "express";
 const env = await serverSideEnv();
 /**
- * Translate text using Google Translate.
+ * decryptAccessToken the AcessToken for Github
  */
 async function AccessToken(args: {
 	encryptedAccessToken: NonNullable<
@@ -22,7 +22,9 @@ async function AccessToken(args: {
 	).unwrap();
 	return decryptedAccessToken;
 }
-
+/**
+ * Translate text using Google Translate.
+ */
 export async function onMachineTranslate(args: {
 	text: string;
 	referenceLanguage: string;
@@ -56,7 +58,9 @@ export async function onMachineTranslate(args: {
 		return { error: (error as Error).message };
 	}
 }
-
+/**
+ * Check the collaboration status of a user at a GitHub repo.
+ */
 export async function isCollaborator(args: {
 	owner: string;
 	repository: string;
@@ -84,6 +88,9 @@ export async function isCollaborator(args: {
 	return;
 }
 
+/**
+ * Forked a Github Repo
+ */
 export async function onForkRepository(args: {
 	encryptedAccessToken: NonNullable<
 		LocalStorageSchema["user"]
