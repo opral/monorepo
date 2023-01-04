@@ -135,9 +135,9 @@ Control over the website is required to localize the website at some point. Webs
 
 ### framework
 
-Vite-plugin-ssr is used across the website and editor. Thus, the hard requirement for React does not exist, opening the opportunity the evaluate other frameworks.
+Since the translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI, state management and (likely) performance is of high importance. SolidJS has been choosen as the frontend framework due to the coupling of state management and efficient reactive rendering. Choosing SolidJS is anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined. At the point of making the decision, the React ecosystem (Next.js, UI components, external state management) did not seem to outweight Solid's benefits.
 
-#### why solidjs?
+In summary, SolidJS has been choosen because:
 
 - Simple + built-in state management.
   - faster product development
@@ -148,7 +148,7 @@ Vite-plugin-ssr is used across the website and editor. Thus, the hard requiremen
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
 - performance “for free”.
   - Performance is likely important for the editor.
-- performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
+- some performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
 - (Great documentation -> understandable for beginners)
 
 Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
@@ -161,15 +161,15 @@ Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/w
 
 #### why not svelte?
 
+- State management is inferior to SolidJS
+  - For example, async fetching of data is "missing". 
+  - State can only be used in Svelte components, otherwise workarounds are required.
+
 - No JSX
   - Requires custom ide extensions for .svelte files
-  - not compatible with anything JSX
+  - not compatible with most JSX things.
+
 - Typescript is a second-class citizen (partially because not compatible with JSX)
-- Syntax is nice but compiled output harder to grasp compared to SolidJS
-  - (Better debugging of SolidJS)
-- State management is inferior to SolidJS
-  - For example, async fetching of data
-  - State can only be used in Svelte components, otherwise workarounds are required.
 
 ## design system
 
