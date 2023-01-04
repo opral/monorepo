@@ -15,7 +15,6 @@ export async function isCollaborator(args: {
 				},
 			}
 		);
-		console.log(collaborator.ok);
 		return Result.ok(collaborator.ok);
 	} catch (error) {
 		return Result.err(error as Error);

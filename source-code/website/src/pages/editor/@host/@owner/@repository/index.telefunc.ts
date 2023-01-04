@@ -84,12 +84,11 @@ export async function forkRepository(args: {
 					}
 				);
 				if (fork.ok) {
-					console.log("ich bin fork ", fork.ok);
+					console.log("Repo is forked ", fork.ok);
 					return undefined;
 				} else throw Error(await fork.text());
 			} catch (error) {
-				console.log("ich probiere zu forken hat aber nicht geklappt");
-
+				console.error(error);
 				return console.error(error);
 			}
 		}
