@@ -263,7 +263,9 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		"data:application/javascript;base64," + btoa(file.toString());
 
 	const module = await import(/* @vite-ignore */ withMimeType);
-	const initialized = await module.config({ ...environmentFunctions });
+	const initialized = await module.initializeConfig({
+		...environmentFunctions,
+	});
 	return initialized;
 }
 

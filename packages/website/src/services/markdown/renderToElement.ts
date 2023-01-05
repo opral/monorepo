@@ -16,8 +16,9 @@ import { Dynamic } from "solid-js/web";
  *
  * Can be combined with Solids `renderToStringAsync` function
  * to render the element to static html. Important: The `renderToElement`
- * function must be called within the closure of `renderToStringAsync`.
- * Otherwise, Solid can't render the Suspense component(s).
+ * function must be called within the closure of `renderToStringAsync`
+ * if no hydration occurs. Otherwise, Solid can't render the Suspense
+ * component(s) like lazy loading Icons.
  *
  * @example
  * 	const html = await renderToStringAsync(() => renderToElement(args));

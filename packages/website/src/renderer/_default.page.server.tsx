@@ -1,5 +1,5 @@
 import type { PageContextRenderer } from "./types.js";
-import { generateHydrationScript, renderToStringAsync } from "solid-js/web";
+import { generateHydrationScript, renderToString } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import { setCurrentPageContext } from "./state.js";
 import { ThePage } from "./ThePage.jsx";
@@ -32,7 +32,11 @@ export async function render(
 	//    pre-rendering the page makes the page immediately "visible"
 	//    to the user. Afterwards, the client hydrates the page and thereby
 	//    makes the page interactive.
-	const renderedPage = await renderToStringAsync(() => (
+	// ! important: renderToString is used instead of
+	// ! renderToStringAsync some async resources should
+	// ! not be loaded on the server (the editor for example).
+	// ! see https://github.com/inlang/inlang/issues/247
+	const renderedPage = renderToString(() => (
 		<ThePage
 			page={pageContext.Page}
 			pageProps={pageContext.pageProps}

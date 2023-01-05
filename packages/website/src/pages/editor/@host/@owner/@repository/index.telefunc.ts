@@ -31,8 +31,10 @@ export async function onMachineTranslate(args: {
 	targetLanguage: string;
 }): Promise<{ data?: string; error?: string }> {
 	try {
-		if (env.GOOGLE_TRANSLATE_API_KEY === undefined) {
-			throw Error("Missing env variable GOOGLE_TRANSLATE_API_KEY. ");
+		if (import.meta.env.MODE === "development") {
+			throw Error(
+				"Machine translations are disabled in production due to the missing env variable GOOGLE_TRANSLATE_API_KEY. "
+			);
 		}
 		const response = await fetch(
 			"https://translation.googleapis.com/language/translate/v2?" +
@@ -41,7 +43,7 @@ export async function onMachineTranslate(args: {
 					target: args.targetLanguage,
 					source: args.referenceLanguage,
 					format: "text",
-					key: env.GOOGLE_TRANSLATE_API_KEY,
+					key: env.GOOGLE_TRANSLATE_API_KEY!,
 				}),
 			{ method: "POST" }
 		);
