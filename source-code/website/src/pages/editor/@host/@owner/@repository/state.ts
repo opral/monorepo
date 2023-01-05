@@ -25,6 +25,8 @@ import {
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
+import { isCollaborator, onForkRepository } from "./index.telefunc.js";
+import { navigate } from "vite-plugin-ssr/client/router";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -36,7 +38,15 @@ import { createAuthHeader } from "@src/services/auth/index.js";
  */
 export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
-
+	createEffect(async () => {
+		const routeParams = currentPageContext.routeParams as EditorRouteParams;
+		forkOnCollaboration({
+			owner: routeParams.owner,
+			repository: routeParams.repository,
+			user: localStorage.user?.username,
+			encryptedAccessToken: localStorage.user?.encryptedAccessToken,
+		});
+	});
 	// re-fetched if currentPageContext changes
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
@@ -303,4 +313,39 @@ async function _unpushedChanges(args: {
 		since: args.lastPushTime ? args.lastPushTime : args.repositoryClonedTime,
 	});
 	return unpushedChanges;
+}
+//  * checked, whether the user has Access/Collaboration permission if not, Forking the Repo
+
+export async function forkOnCollaboration(args: {
+	owner: string;
+	repository: string;
+	user: string | undefined;
+	encryptedAccessToken: string | undefined;
+}) {
+	if (args.user && args.repository && args.encryptedAccessToken) {
+		const responseCollaborator = await isCollaborator({
+			encryptedAccessToken: args.encryptedAccessToken,
+			owner: args.owner,
+			repository: args.repository,
+			username: args.user,
+		});
+
+		// console.log(await responseCollaborator, "colls");
+
+		if (!responseCollaborator) {
+			const responseForking = await onForkRepository({
+				encryptedAccessToken: args.encryptedAccessToken,
+				owner: args.owner,
+				repository: args.repository,
+				username: args.user,
+			});
+			navigate(`/editor/github.com/${responseForking.full_name}`);
+
+			return responseForking;
+			// const json = await responseForking.json();
+			// console.log(await responseForking, "forking");
+			// console.log(json, "json");
+		}
+		return;
+	}
 }
