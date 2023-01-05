@@ -6,47 +6,98 @@ description: Learn on how to get started with inlang.
 
 # {% $frontmatter.title %}
 
-**One config file and everything works out of the box.**
+{% Callout variant="info" %}
+
+Inlang is in public **alpha**. Read more about our breaking change policy [here](/documentation/breaking-changes).
+
+{% /Callout %}
+
+{% Video src="https://youtu.be/rwqJ0RygAYc" /%}
 
 One single config file named `inlang.config.js` needs to be created at the root of the repository. The `inlang.config.js` file needs to export an `initializeConfig` function that returns an object that conforms to the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts). More often than not, you want to use a [plugin](/documentation/plugins) that defines parts of the config. Just in case, take a look at the [inlang example repository](https://github.com/inlang/example).
 
-```js
-// filename: inlang.config.js
+## Step-by-step
 
-export async function initializeConfig(env) {
-	// importing a plugin from github
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
-	);
-	// most plugins require additional configuration
-	const pluginConfig = {
-		pathPattern: "./{language}.json",
-	};
-	// returning the config
-	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		readResources: (args) =>
-			// spreading the args and env to forward the call to the plugin
-			plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) =>
-			// spreading the args and env to forward the call to the plugin
-			plugin.writeResources({ ...args, ...env, pluginConfig }),
-	};
-}
-```
+1. Create a new file named `inlang.config.js` in the root of your git repository.
 
-## Typesafety
+2. The newly created file needs to export an async function called `initializeConfig`.
+
+   ```ts
+   // filename: inlang.config.js
+
+   export async function initializeConfig(env) {}
+   ```
+
+3. `initializeConfig` must return an object that satisfies the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)
+
+   ```ts
+   // filename: inlang.config.js
+
+   export async function initializeConfig(env) {
+   	return {
+   		referenceLanguage: "en",
+   		languages: ["en", "de"],
+   		readResources: (args) => {
+   			// define how resources should be read
+   		},
+   		writeResources: (args) => {
+   			// define how resources should be written
+   		},
+   	};
+   }
+   ```
+
+4. In most cases, [plugins](/documentation/plugins) define parts of the config. Plugins can be imported via the `env.$import()` [environment function](/documentation/environment-functions).
+
+   ```js
+   // filename: inlang.config.js
+
+   export async function initializeConfig(env) {
+   	// importing a plugin
+   	const plugin = await env.$import(
+   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
+   	);
+
+   	// most plugins require additional config, read the plugins documentation
+   	// for the required config and correct usage.
+   	const pluginConfig = {
+   		pathPattern: "./{language}.json",
+   	};
+
+   	return {
+   		referenceLanguage: "en",
+   		languages: ["en", "de"],
+   		readResources: (args) => {
+   			// define how resources should be read
+   			return plugin.readResources(args);
+   		},
+   		writeResources: (args) => {
+   			// define how resources should be written
+   			return plugin.readResources(args);
+   		},
+   	};
+   }
+   ```
+
+## Adding typesafety to the config
 
 If inlang is used in a JavaScript environment like Node or Deno, typesafety can be achieved by installing [@inlang/core](https://www.npmjs.com/package/@inlang/core) and using [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html) in JavaScript.
 
-```js
-/**
- * Using JSDoc to get typesafety.
- *
- * @type {import("@inlang/core/config").InitializeConfig}
- */
-export async function initializeConfig(env) {
-	// ...
-}
-```
+1. Install `@inlang/core` as dev dependency.
+
+   ```bash
+   $ npm install @inlang/core --save-dev
+   ```
+
+2. Add the following JSDoc comment above the `initializeConfig` function.
+
+   ```js
+   /**
+    * @type {import("@inlang/core/config").InitializeConfig}
+    */
+   export async function initializeConfig(env) {
+   	//
+   	//
+   	//
+   }
+   ```

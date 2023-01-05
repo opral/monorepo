@@ -13,6 +13,7 @@ module.exports = {
 	},
 	safelist: usedClassWithDynamicColor(),
 	plugins: [
+		require("@tailwindcss/aspect-ratio"),
 		require("@tailwindcss/typography"),
 		require("@tailwindcss/forms"),
 		components.configure(),
