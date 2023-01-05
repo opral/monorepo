@@ -12,8 +12,6 @@ import {
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
-import { isCollaborator, onForkRepository } from "./index.telefunc.js";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 let owner: string;
 let repository: string;
 export const Head: PageHead = (props) => {
@@ -42,33 +40,9 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
-	const [localStorage] = useLocalStorage();
+
 	return (
 		<EditorLayout>
-			<sl-button
-				onClick={async () => {
-					if (localStorage.user && repository) {
-						const collaborator = await isCollaborator({
-							encryptedAccessToken: localStorage.user.encryptedAccessToken,
-							owner: owner,
-							repository: repository,
-							username: localStorage.user.username,
-						});
-						if (!collaborator) {
-							const forking = await onForkRepository({
-								encryptedAccessToken: localStorage.user.encryptedAccessToken,
-								owner: owner,
-								repository: repository,
-								username: localStorage.user.username,
-							});
-							console.log(collaborator, "colla");
-							console.log(forking, "forking");
-						}
-					}
-				}}
-			>
-				Fork
-			</sl-button>
 			<Switch
 				fallback={
 					<p class="text-danger">
