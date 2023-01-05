@@ -19,8 +19,6 @@ import {
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
-import { isCollaborator, onFork } from "@src/services/github/index.js";
-import { useLocalStorage } from "@src/services/local-storage/index.js";
 
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
