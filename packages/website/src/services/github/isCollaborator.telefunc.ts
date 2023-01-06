@@ -22,6 +22,6 @@ export async function isCollaborator(args: {
 			},
 		}
 	);
-
+	console.log(response.ok);
 	return response.ok;
 }
