@@ -148,7 +148,6 @@ In summary, SolidJS has been choosen because:
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
 - performance “for free”.
   - Performance is likely important for the editor.
-- some performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
 - (Great documentation -> understandable for beginners)
 
 Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
