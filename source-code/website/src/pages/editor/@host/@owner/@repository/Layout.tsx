@@ -4,6 +4,8 @@ import {
 	routeParams,
 	StateProvider as EditorStateProvider,
 	pushChanges,
+	userIsCollaborator,
+	forkingRepository,
 } from "./state.js";
 import {
 	createEffect,
@@ -21,20 +23,29 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import type { EditorRouteParams } from "./types.js";
+import { isCollaborator } from "@src/services/github/isCollaborator.telefunc.js";
+import { onFork } from "@src/services/github/index.js";
+import e, { response } from "express";
+import type { LocalStorageSchema } from "@src/services/local-storage/index.js";
+import { navigate } from "vite-plugin-ssr/client/router";
+import { boolean } from "zod";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
 			<EditorStateProvider>
-				<div class="py-4 w-full">
+				<div class="py-4 w-full space-y-2">
+					<ForkingBanner></ForkingBanner>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-4">
 							<Breadcrumbs></Breadcrumbs>
 							<BranchMenu></BranchMenu>
 						</div>
+
 						<HasChangesAction></HasChangesAction>
 					</div>
+
 					<hr class="h-px w-full bg-outline-variant my-2"></hr>
 					{props.children}
 				</div>
@@ -183,5 +194,111 @@ function HasChangesAction() {
 				</sl-badge>
 			</Show>
 		</sl-button>
+	);
+}
+
+// function Test() {
+// 	const [localStorage] = useLocalStorage();
+// 	createEffect(() => forking());
+// 	const [allowtoFork, setallowtoFork] = createSignal();
+
+// 	async function forking() {
+// 		if (localStorage.user?.username !== undefined) {
+// 			const responseCollaborator = await userIsCollaborator();
+// 			console.log(localStorage.user?.username, "hallo", responseCollaborator);
+// 			if (responseCollaborator === false) {
+// 				setallowtoFork(true);
+// 				console.log("ich bin kein colla", allowtoFork);
+// 				// const response = await onFork({
+// 				// 	owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+// 				// 	repository: (currentPageContext.routeParams as EditorRouteParams)
+// 				// 		.repository,
+// 				// 	encryptedAccessToken: localStorage.user.encryptedAccessToken,
+// 				// 	username: localStorage.user.username,
+// 				// });
+// 				// if (response.type === "success") {
+// 				// 	console.log(response);
+// 				// 	return navigate(
+// 				// 		`/editor/github.com/${response.owner}/${response.repository}`
+// 				// 	);
+// 				// } else {
+// 				// 	console.log(response);
+// 				// 	return response;
+// 				// }
+// 				return;
+// 			} else {
+// 				setallowtoFork(false);
+// 				return;
+// 			}
+// 		} else if (localStorage.user?.username === undefined) {
+// 			setallowtoFork(false);
+
+// 			console.log(localStorage.user?.username, "username ist nicht definiert");
+// 			return;
+// 		}
+// 	}
+
+// 	// if (localStorage.user === undefined) {
+// 	// 	console.log(localStorage.user, "wo ist mein button");
+// 	// 	return <sl-button onClick={forking}>forkinfffg</sl-button>;
+// 	// }
+// 	return (
+// 		<Show when={allowtoFork() === true}>
+// 			<sl-button onClick={forking}>forkinfffg</sl-button>;
+// 		</Show>
+// 	);
+// 	// return <sl-button onClick={forking}>forkinfffg</sl-button>;
+// }
+
+function ForkingBanner() {
+	const [localStorage] = useLocalStorage();
+	createEffect(() => colla());
+	const [allowToFork, setallowToFork] = createSignal();
+
+	async function colla() {
+		if (localStorage.user?.username !== undefined) {
+			const responseCollaborator = await userIsCollaborator();
+			if (responseCollaborator === false) {
+				return setallowToFork(true);
+			} else {
+				return setallowToFork(false);
+			}
+		} else {
+			return setallowToFork(false);
+		}
+	}
+	async function forking() {
+		const response = await onFork({
+			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+			repository: (currentPageContext.routeParams as EditorRouteParams)
+				.repository,
+			encryptedAccessToken: localStorage.user!.encryptedAccessToken,
+			username: localStorage.user!.username,
+		});
+		if (response.type === "success") {
+			console.log(response);
+			return navigate(
+				`/editor/github.com/${response.owner}/${response.repository}`
+			);
+		} else {
+			console.log(response);
+			return response;
+		}
+	}
+	return (
+		<Show when={allowToFork() === true}>
+			<sl-alert prop:variant="primary" prop:open={true}>
+				<div class="flex space-x-4">
+					<p>
+						You’re making changes in a project you don’t have write access to.
+						We’ve created a fork of this project for you to commit your proposed
+						changes to. Submitting a change will write it to a new branch in
+						your fork, so you can send a pull request.
+					</p>
+
+					<sl-button onClick={forking}>Fork your Repo</sl-button>
+				</div>
+			</sl-alert>
+		</Show>
 	);
 }
