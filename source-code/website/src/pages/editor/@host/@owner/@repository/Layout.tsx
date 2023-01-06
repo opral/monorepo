@@ -22,6 +22,8 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import type { EditorRouteParams } from "./types.js";
+import { onFork } from "@src/services/github/index.js";
+import { navigate } from "vite-plugin-ssr/client/router";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
