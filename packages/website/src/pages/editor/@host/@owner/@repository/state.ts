@@ -26,7 +26,7 @@ import {
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
-import { isCollaborator } from "@src/services/github/index.js";
+import { isCollaborator, onFork } from "@src/services/github/index.js";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -38,8 +38,8 @@ import { isCollaborator } from "@src/services/github/index.js";
  */
 export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
-
 	// re-fetched if currentPageContext changes
+	console.log(localStorage);
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
 		// when the user logs-in or out. It is important to batch the reactive signals
@@ -341,3 +341,4 @@ async function _unpushedChanges(args: {
 /**
  *
  */
+export async function forkingRepository() {}
