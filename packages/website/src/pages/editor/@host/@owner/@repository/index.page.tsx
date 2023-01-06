@@ -1,14 +1,7 @@
 import { query } from "@inlang/core/query";
 import { fs } from "@inlang/git-sdk/fs";
 import type { PageHead } from "@src/renderer/types.js";
-import {
-	createEffect,
-	createResource,
-	For,
-	Match,
-	Show,
-	Switch,
-} from "solid-js";
+import { createResource, For, Match, Show, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
 	resources,
@@ -19,12 +12,9 @@ import {
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
-import { isCollaborator, onFork } from "@src/services/github/index.js";
-import { useLocalStorage } from "@src/services/local-storage/index.js";
 
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
-
 	return {
 		title: routeParams.owner + "/" + routeParams.repository,
 		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
