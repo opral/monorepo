@@ -85,11 +85,7 @@ export function StateProvider(props: { children: JSXElement }) {
 				encryptedAccessToken: user.encryptedAccessToken,
 				username: user.username,
 			});
-			if (response.type === "success") {
-				return response.isCollaboratorOk;
-			} else if (response.type === "error") {
-				return response.error;
-			}
+			return response;
 		}
 	);
 	// if the config is loaded, read the resources
