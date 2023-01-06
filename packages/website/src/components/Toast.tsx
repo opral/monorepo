@@ -14,6 +14,8 @@ import { Icon } from "./Icon.jsx";
  *    variant: "success",
  *    title: "Success",
  *    message: "dss",
+ * duration: 3000,
+
  *  });
  */
 export function showToast(props: Props) {
@@ -26,7 +28,7 @@ type Props = {
 	variant: SemanticColorTokens[number];
 	title: string;
 	message?: string;
-	/** defaults to 2000 */
+	/** defaults to 3000 */
 	duration?: number;
 };
 
