@@ -195,13 +195,16 @@ function HasChangesAction() {
 function ForkingBanner() {
 	const [localStorage] = useLocalStorage();
 
-	async function forking() {
+	async function handleFork() {
+		if (localStorage.user === undefined) {
+			return;
+		}
 		const response = await onFork({
 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 			repository: (currentPageContext.routeParams as EditorRouteParams)
 				.repository,
-			encryptedAccessToken: localStorage.user!.encryptedAccessToken,
-			username: localStorage.user!.username,
+			encryptedAccessToken: localStorage.user.encryptedAccessToken,
+			username: localStorage.user.username,
 		});
 		if (response.type === "success") {
 			return navigate(
@@ -222,7 +225,7 @@ function ForkingBanner() {
 						your fork, so you can send a pull request.
 					</p>
 
-					<sl-button onClick={forking}>Fork your Repo</sl-button>
+					<sl-button onClick={handleFork}>Fork your Repo</sl-button>
 				</div>
 			</sl-alert>
 		</Show>
