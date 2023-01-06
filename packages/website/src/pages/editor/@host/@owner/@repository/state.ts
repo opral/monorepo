@@ -25,8 +25,8 @@ import {
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
+import { isCollaborator, onForkRepository } from "./index.telefunc.js";
 import { navigate } from "vite-plugin-ssr/client/router";
-import { isCollaborator } from "@src/services/github/index.js";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -38,7 +38,15 @@ import { isCollaborator } from "@src/services/github/index.js";
  */
 export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
-
+	createEffect(async () => {
+		const routeParams = currentPageContext.routeParams as EditorRouteParams;
+		forkOnCollaboration({
+			owner: routeParams.owner,
+			repository: routeParams.repository,
+			user: localStorage.user?.username,
+			encryptedAccessToken: localStorage.user?.encryptedAccessToken,
+		});
+	});
 	// re-fetched if currentPageContext changes
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
@@ -68,26 +76,6 @@ export function StateProvider(props: { children: JSXElement }) {
 		_unpushedChanges
 	);
 
-	[userIsCollaborator] = createResource(
-		/**
-		 *
-		 * @returns
-		 */
-		() => localStorage.user ?? "not logged in",
-		async (user) => {
-			if (typeof user === "string") {
-				return false;
-			}
-			const response = await isCollaborator({
-				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-				repository: (currentPageContext.routeParams as EditorRouteParams)
-					.repository,
-				encryptedAccessToken: user.encryptedAccessToken,
-				username: user.username,
-			});
-			return response;
-		}
-	);
 	// if the config is loaded, read the resources
 	//! will lead to weird ux since this effect does not
 	//! account for user intent
@@ -191,14 +179,6 @@ export const referenceResource = () =>
  *  Date of the last push to the Repo
  */
 const [lastPush, setLastPush] = createSignal<Date>();
-/**
- * whether or not if the user is a collaborator of this Repo
- *
- * when using this function, whether the user is logged in
- * @example
- * 	if (user && isCollaborator())
- */
-export let userIsCollaborator: Resource<boolean>;
 
 // ------------------------------------------
 
@@ -337,6 +317,37 @@ async function _unpushedChanges(args: {
 	return unpushedChanges;
 }
 //  * checked, whether the user has Access/Collaboration permission if not, Forking the Repo
-/**
- *
- */
+
+export async function forkOnCollaboration(args: {
+	owner: string;
+	repository: string;
+	user: string | undefined;
+	encryptedAccessToken: string | undefined;
+}) {
+	if (args.user && args.repository && args.encryptedAccessToken) {
+		const responseCollaborator = await isCollaborator({
+			encryptedAccessToken: args.encryptedAccessToken,
+			owner: args.owner,
+			repository: args.repository,
+			username: args.user,
+		});
+
+		// console.log(await responseCollaborator, "colls");
+
+		if (!responseCollaborator) {
+			const responseForking = await onForkRepository({
+				encryptedAccessToken: args.encryptedAccessToken,
+				owner: args.owner,
+				repository: args.repository,
+				username: args.user,
+			});
+			navigate(`/editor/github.com/${responseForking.full_name}`);
+
+			return responseForking;
+			// const json = await responseForking.json();
+			// console.log(await responseForking, "forking");
+			// console.log(json, "json");
+		}
+		return;
+	}
+}
