@@ -5,7 +5,6 @@ import {
 	StateProvider as EditorStateProvider,
 	pushChanges,
 	userIsCollaborator,
-	forkingRepository,
 } from "./state.js";
 import {
 	createEffect,
@@ -197,59 +196,6 @@ function HasChangesAction() {
 	);
 }
 
-// function Test() {
-// 	const [localStorage] = useLocalStorage();
-// 	createEffect(() => forking());
-// 	const [allowtoFork, setallowtoFork] = createSignal();
-
-// 	async function forking() {
-// 		if (localStorage.user?.username !== undefined) {
-// 			const responseCollaborator = await userIsCollaborator();
-// 			console.log(localStorage.user?.username, "hallo", responseCollaborator);
-// 			if (responseCollaborator === false) {
-// 				setallowtoFork(true);
-// 				console.log("ich bin kein colla", allowtoFork);
-// 				// const response = await onFork({
-// 				// 	owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-// 				// 	repository: (currentPageContext.routeParams as EditorRouteParams)
-// 				// 		.repository,
-// 				// 	encryptedAccessToken: localStorage.user.encryptedAccessToken,
-// 				// 	username: localStorage.user.username,
-// 				// });
-// 				// if (response.type === "success") {
-// 				// 	console.log(response);
-// 				// 	return navigate(
-// 				// 		`/editor/github.com/${response.owner}/${response.repository}`
-// 				// 	);
-// 				// } else {
-// 				// 	console.log(response);
-// 				// 	return response;
-// 				// }
-// 				return;
-// 			} else {
-// 				setallowtoFork(false);
-// 				return;
-// 			}
-// 		} else if (localStorage.user?.username === undefined) {
-// 			setallowtoFork(false);
-
-// 			console.log(localStorage.user?.username, "username ist nicht definiert");
-// 			return;
-// 		}
-// 	}
-
-// 	// if (localStorage.user === undefined) {
-// 	// 	console.log(localStorage.user, "wo ist mein button");
-// 	// 	return <sl-button onClick={forking}>forkinfffg</sl-button>;
-// 	// }
-// 	return (
-// 		<Show when={allowtoFork() === true}>
-// 			<sl-button onClick={forking}>forkinfffg</sl-button>;
-// 		</Show>
-// 	);
-// 	// return <sl-button onClick={forking}>forkinfffg</sl-button>;
-// }
-
 function ForkingBanner() {
 	const [localStorage] = useLocalStorage();
 	createEffect(() => colla());
@@ -276,12 +222,10 @@ function ForkingBanner() {
 			username: localStorage.user!.username,
 		});
 		if (response.type === "success") {
-			console.log(response);
 			return navigate(
 				`/editor/github.com/${response.owner}/${response.repository}`
 			);
 		} else {
-			console.log(response);
 			return response;
 		}
 	}
