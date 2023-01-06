@@ -5,6 +5,7 @@ import {
 	StateProvider as EditorStateProvider,
 	pushChanges,
 	userIsCollaborator,
+	isLoggedIn,
 } from "./state.js";
 import {
 	createEffect,
@@ -43,14 +44,18 @@ export function Layout(props: { children: JSXElement }) {
 						<HasChangesAction></HasChangesAction>
 					</div>
 
-					<hr class="h-px w-full bg-outline-variant my-2"></hr>
+					<hr class="h-px w-full bg-outline-variant my-2"> </hr>
 					{props.children}
 				</div>
 			</EditorStateProvider>
 		</RootLayout>
 	);
 }
-
+// function Login() {
+// 	const response = isLoggedIn();
+// 	console.log(response);
+// 	return response;
+// }
 function Breadcrumbs() {
 	return (
 		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
@@ -222,10 +227,20 @@ function ForkingBanner() {
 			username: localStorage.user.username,
 		});
 		if (response.type === "success") {
+			showToast({
+				variant: "success",
+				title: "The Fork has been created.",
+				message: `Don't forget to open a pull request`,
+			});
 			return navigate(
 				`/editor/github.com/${response.owner}/${response.repository}`
 			);
 		} else {
+			showToast({
+				variant: "danger",
+				title: "The creation of the fork failed.",
+				message: `Please try it again or report a bug`,
+			});
 			return response;
 		}
 	}
