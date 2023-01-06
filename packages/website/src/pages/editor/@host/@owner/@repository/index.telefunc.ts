@@ -1,10 +1,6 @@
 import { serverSideEnv } from "@env";
 import { assertUsage } from "@src/services/assert/index.js";
-import { Result } from "@inlang/core/utilities";
-import { decryptAccessToken } from "@src/services/auth/logic.js";
-import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
-import { response } from "express";
+
 const env = await serverSideEnv();
 
 /**
