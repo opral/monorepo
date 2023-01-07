@@ -8,7 +8,6 @@ import {
 	Resource,
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
-import { fs } from "@inlang/git-sdk/fs";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
 import {
@@ -25,6 +24,7 @@ import {
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
+import { createFsFromVolume, Volume } from "memfs";
 
 /**
  * `<StateProvider>` initializes state with a computations such resources.
@@ -172,10 +172,19 @@ const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
+/**
+ * In memory filesystem.
+ *
+ * Must be re-initialized on every cloneRepository call.
+ */
+let fs: typeof import("memfs").fs;
+
 async function cloneRepository(args: {
 	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
+	// reassgining (resetting) fs.
+	fs = createFsFromVolume(new Volume());
 	const { host, owner, repository } = args.routeParams;
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return undefined;
