@@ -40,10 +40,8 @@ export function Layout(props: { children: JSXElement }) {
 							<Breadcrumbs></Breadcrumbs>
 							<BranchMenu></BranchMenu>
 						</div>
-
 						<HasChangesAction></HasChangesAction>
 					</div>
-
 					<hr class="h-px w-full bg-outline-variant my-2"> </hr>
 					{props.children}
 				</div>
