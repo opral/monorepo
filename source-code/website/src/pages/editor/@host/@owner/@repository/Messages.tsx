@@ -1,10 +1,11 @@
 import type * as ast from "@inlang/core/ast";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import {
 	resources,
 	inlangConfig,
 	setResources,
 	referenceResource,
+	userIsCollaborator,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -216,6 +217,7 @@ function PatternEditor(props: {
 				class="border-none p-0"
 				onFocus={() => setIsFocused(true)}
 				prop:value={textValue() ?? ""}
+				prop:disabled={userIsCollaborator() === false}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 			>
 				<MaterialSymbolsEditOutlineRounded
