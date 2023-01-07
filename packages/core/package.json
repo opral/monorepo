@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.3.0-prerelease.6",
+	"version": "0.3.0-prerelease.7",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
