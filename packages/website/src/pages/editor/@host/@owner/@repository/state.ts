@@ -172,11 +172,6 @@ const [lastPush, setLastPush] = createSignal<Date>();
 
 // ------------------------------------------
 
-const environmentFunctions: EnvironmentFunctions = {
-	$import: initialize$import({ workingDirectory: "/", fs: fs.promises, fetch }),
-	$fs: fs.promises,
-};
-
 async function cloneRepository(args: {
 	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
@@ -246,6 +241,14 @@ export async function pushChanges(
 
 async function readInlangConfig(): Promise<InlangConfig | undefined> {
 	try {
+		const environmentFunctions: EnvironmentFunctions = {
+			$import: initialize$import({
+				workingDirectory: "/",
+				fs: fs.promises,
+				fetch,
+			}),
+			$fs: fs.promises,
+		};
 		const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
 		const withMimeType =
 			"data:application/javascript;base64," + btoa(file.toString());
