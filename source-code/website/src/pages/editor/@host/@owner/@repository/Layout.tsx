@@ -29,11 +29,9 @@ import type { EditorRouteParams } from "./types.js";
 import { onFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
-import { Icon } from "@src/components/Icon.jsx";
 import { SignInDialog } from "@src/services/auth/index.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { clientSideEnv } from "@env";
-import { Dynamic } from "solid-js/web";
 import { Banner } from "@src/components/Banner.jsx";
 
 // command-f this repo to find where the layout is called
@@ -42,7 +40,7 @@ export function Layout(props: { children: JSXElement }) {
 		<RootLayout>
 			<EditorStateProvider>
 				<div class="py-4 w-full space-y-2 flex flex-col grow">
-					<ForkingBanner></ForkingBanner>
+					<SignInBanner></SignInBanner>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-4">
 							<Breadcrumbs></Breadcrumbs>
@@ -205,7 +203,7 @@ function HasChangesAction() {
 	);
 }
 
-function ForkingBanner() {
+function SignInBanner() {
 	const [localStorage] = useLocalStorage();
 
 	let alert: SlAlert | undefined;
