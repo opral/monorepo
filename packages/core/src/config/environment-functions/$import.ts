@@ -26,22 +26,14 @@ export type $import = (uri: string) => Promise<any>;
  * 	const module = await $import('./mock-module.js');
  */
 export function initialize$import(args: {
-	/**
-	 * The path from which the import should be resolved.
-	 *
-	 * ! Be careful when using this argument, as it can lead to unexpected behavior.
-	 * The working directory for fs is not changed!
-	 *
-	 * @deprecated only use when you absolutely need to (for example in testing). Will likely be removed in the future.
-	 *
-	 */
-	workingDirectory?: string;
+	/** the path from which the import should be resolved */
+	workingDirectory: string;
 	/** the fs from which the file can be read */
 	fs: typeof fs.promises;
 	fetch: typeof fetch;
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
-	return (uri: string) => $import(uri, { workingDirectory: "/", ...args });
+	return (uri: string) => $import(uri, args);
 }
 
 /**
