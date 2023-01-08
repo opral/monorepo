@@ -72,17 +72,19 @@ export function StateProvider(props: { children: JSXElement }) {
 		 *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
 		 * Hence, a string needs to be passed to the fetch of the resource.
 		 */
-		() => localStorage.user ?? "not logged in",
-		async (user) => {
-			if (typeof user === "string") {
+		() => ({
+			user: localStorage.user ?? "not logged in",
+			routeParams: currentPageContext.routeParams as EditorRouteParams,
+		}),
+		async (args) => {
+			if (typeof args.user === "string") {
 				return false;
 			}
 			const response = await isCollaborator({
-				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-				repository: (currentPageContext.routeParams as EditorRouteParams)
-					.repository,
-				encryptedAccessToken: user.encryptedAccessToken,
-				username: user.username,
+				owner: args.routeParams.owner,
+				repository: args.routeParams.repository,
+				encryptedAccessToken: args.user.encryptedAccessToken,
+				username: args.user.username,
 			});
 			return response;
 		}
