@@ -25,3 +25,19 @@ User experience (design) related issues that make git hard(er) to understand/use
 ### If real-time collaboration within a branch exists, the concept of `push` and `pull` might become redundant (for the average user).
 
 @samuelstroschein TODO
+
+### What is does `clone` do?
+
+#### Problem
+
+Explaining git to users who have not used git before leads to questions around `clone`.
+
+#### Proposal
+
+An understandable replacement for `clone` might be `download`. "A repository has to be downloaded" before changes can be conducted is more comprehandable than "A repository has to be cloned" before changes can be conducted.
+
+### What is a repository?
+
+#### Problem
+
+Yeah... what is a repository? GitHub itself refers to repositories as "projects" in the UI. I (samuelstroschein) oftentimes explain a repository as "a special directory with super powers|version control".
