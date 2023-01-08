@@ -8,9 +8,6 @@ import IconExpand from "~icons/material-symbols/expand-more-rounded";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
-import { clientSideEnv } from "@env";
-import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { SignInDialog } from "@src/services/auth/index.js";
 import { currentPageContext } from "@src/renderer/state.js";
 
 /**
@@ -203,18 +200,12 @@ function Footer() {
 function UserDropdown() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
-	let signInDialog: SlDialog | undefined;
-
 	function onSignOut() {
 		setLocalStorage("user", undefined);
 		showToast({
 			title: "Signed out",
 			variant: "success",
 		});
-	}
-
-	function onSignIn() {
-		signInDialog?.show();
 	}
 
 	return (
@@ -242,38 +233,7 @@ function UserDropdown() {
 						</sl-menu>
 					</sl-dropdown>
 				</Match>
-				<Match when={localStorage.user === undefined}>
-					<sl-button onClick={onSignIn}>
-						<span class="text-on-background font-medium text-base">
-							Sign in
-						</span>
-					</sl-button>
-					{/* 
-					The two button solution below is taken from GitHub. 
-					
-					I assume that they increased their sign up rate by explicitly showing
-					a sign up button. Not used for now to keep the design simple.
-				*/}
-					{/* <div class="flex">
-					<sl-button prop:variant="text">
-					<span class="text-on-background font-medium text-base">Log in</span>
-					</sl-button>
-					<sl-button>
-					<span class="text-on-background font-medium text-base">
-					Sign up
-					</span>
-					</sl-button>
-				</div> */}
-				</Match>
 			</Switch>
-			<SignInDialog
-				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
-				ref={signInDialog!}
-				onClickOnSignInButton={() => {
-					// hide the sign in dialog to increase UX when switching back to this window
-					signInDialog?.hide();
-				}}
-			></SignInDialog>
 		</>
 	);
 }
