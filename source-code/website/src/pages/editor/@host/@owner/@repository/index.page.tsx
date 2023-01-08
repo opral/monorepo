@@ -1,6 +1,13 @@
 import { query } from "@inlang/core/query";
 import type { PageHead } from "@src/renderer/types.js";
-import { For, Match, Switch } from "solid-js";
+import {
+	createEffect,
+	createResource,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
 	resources,
@@ -13,8 +20,8 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
-import { isCollaborator, onForkRepository } from "./index.telefunc.js";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { isCollaborator } from "./index.telefunc.js";
+import { useLocalStorage } from "@src/services/local-storage/index.js";
 let owner: string;
 let repository: string;
 export const Head: PageHead = (props) => {
@@ -43,7 +50,16 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
-
+	const [localStorage] = useLocalStorage();
+	const [user] = createResource(localStorage.user, (user) =>
+		isCollaborator({
+			owner: owner,
+			repository: repository,
+			encryptedAccessToken: user.encryptedAccessToken,
+			username: user.username,
+		})
+	);
+	createEffect(() => console.log(user()));
 	return (
 		<EditorLayout>
 			<Switch
