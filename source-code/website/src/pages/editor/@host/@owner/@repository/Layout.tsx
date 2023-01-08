@@ -313,7 +313,7 @@ function SignInBanner() {
 									></path>
 								</svg>
 							</div>
-							Fork this project
+							Create a Pull Request{" "}
 						</sl-button>
 					</Banner>
 				</Match>
