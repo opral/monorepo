@@ -73,29 +73,17 @@ export async function isFork(args: {
 			})
 		).unwrap();
 		const response = await fetch(
-			`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
+			`https://api.github.com/repos/${args.owner}/${args.repository}`,
 			{
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${decryptedAccessToken}`,
 					"X-GitHub-Api-Version": "2022-11-28",
 				},
-				// body: JSON.stringify({
-				// 	name: `inlangTranslationFor-${args.owner}-${args.repository}`,
-				// }),
 			}
 		);
-		const fork = await response.json();
-
-		console.log(fork);
-		return fork;
-		if (response.status) {
-			const [fork] = await response.json();
-			if (fork.fork) {
-				console.log(fork.fork);
-			}
-			return fork.fork;
-		}
+		const json = await response.json();
+		return json.fork;
 	} catch (error) {
 		console.log(false);
 		return { type: "error", error: error };
