@@ -254,6 +254,28 @@ function ForkingBanner() {
 	return (
 		<>
 			<Switch fallback={<p></p>}>
+				<Match when={isLoggedIn() === false}>
+					<sl-alert prop:variant="warning" ref={alert}>
+						<Icon name="warning" slot="icon"></Icon>
+						<div class="flex space-x-4">
+							<p class="grow">
+								You’re currently not signed in. Please sign in to make changes
+								and work in this Project.
+							</p>
+							<sl-button onClick={onSignIn} prop:variant="primary">
+								<div slot="prefix">
+									<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
+										<path
+											fill="currentColor"
+											d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
+										></path>
+									</svg>
+								</div>
+								Sign in
+							</sl-button>
+						</div>
+					</sl-alert>
+				</Match>
 				<Match when={userIsCollaborator() === false && isLoggedIn() === true}>
 					<sl-alert prop:variant="primary" ref={alert}>
 						<Icon name="info" slot="icon"></Icon>
@@ -276,35 +298,12 @@ function ForkingBanner() {
 								Fork this repository
 							</sl-button>
 						</div>
-					</sl-alert>{" "}
-				</Match>
-				<Match when={isLoggedIn() === false}>
-					<sl-alert prop:variant="warning" ref={alert}>
-						<Icon name="warning" slot="icon"></Icon>
-						<div class="flex space-x-4">
-							<p>
-								You’re currently not signed in. Please sign in to make changes
-								and work in this Project.
-							</p>
-
-							<sl-button onClick={onSignIn} prop:variant="primary">
-								<div slot="prefix">
-									<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
-										<path
-											fill="currentColor"
-											d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
-										></path>
-									</svg>
-								</div>
-								Sign in
-							</sl-button>
-						</div>
-					</sl-alert>{" "}
+					</sl-alert>
 				</Match>
 			</Switch>
-			//{" "}
+
 			<Show when={userIsCollaborator() === false && isLoggedIn() === true}>
-				//{" "}
+				tut es doch auch nicht
 			</Show>
 			<SignInDialog
 				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
