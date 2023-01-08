@@ -20,14 +20,12 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
-import { isCollaborator } from "./index.telefunc.js";
+import { isCollaborator, onFork } from "@src/services/github/index.js";
 import { useLocalStorage } from "@src/services/local-storage/index.js";
-let owner: string;
-let repository: string;
+
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
-	owner = routeParams.owner;
-	repository = routeParams.repository;
+
 	return {
 		title: routeParams.owner + "/" + routeParams.repository,
 		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
@@ -50,16 +48,7 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
-	const [localStorage] = useLocalStorage();
-	const [user] = createResource(localStorage.user, (user) =>
-		isCollaborator({
-			owner: owner,
-			repository: repository,
-			encryptedAccessToken: user.encryptedAccessToken,
-			username: user.username,
-		})
-	);
-	createEffect(() => console.log(user()));
+
 	return (
 		<EditorLayout>
 			<Switch
