@@ -1,4 +1,5 @@
 import { query } from "@inlang/core/query";
+import { fs } from "@inlang/git-sdk/fs";
 import type { PageHead } from "@src/renderer/types.js";
 import { createResource, For, Match, Show, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
@@ -60,40 +61,7 @@ export function Page() {
 					<p>loading ...</p>
 				</Match>
 				<Match when={inlangConfig() === undefined}>
-					<div class="flex grow items-center justify-center">
-						<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-							<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
-							<h1 class="font-semibold pt-5">
-								The{" "}
-								<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-									inlang.config.js
-								</code>{" "}
-								file has not been found.
-							</h1>
-							<p class="pt-1.5">
-								Make sure that the inlang.config.js file exists at the root of
-								the repository, see discussion{" "}
-								<a
-									href="https://github.com/inlang/inlang/discussions/258"
-									target="_blank"
-									class="link link-primary"
-								>
-									#258
-								</a>
-								.
-							</p>
-							<a
-								class="self-end pt-5"
-								href="https://inlang.com/documentation/getting-started"
-								target="_blank"
-							>
-								<sl-button prop:variant="text">
-									I need help with getting started
-									<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
-								</sl-button>
-							</a>
-						</div>
-					</div>
+					<Directories></Directories>
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="space-y-2">
@@ -104,5 +72,31 @@ export function Page() {
 				</Match>
 			</Switch>
 		</EditorLayout>
+	);
+}
+
+function Directories() {
+	const [dir] = createResource(
+		repositoryIsCloned,
+		() => fs.promises.readdir("/") as Promise<string[]>
+	);
+
+	return (
+		<>
+			<p>
+				No inlang.config.js has been found in the current directory. Navigate to
+				a directory that contains an inlang.config.js file.
+				<span class="text-danger italic">not implemented yet</span>
+			</p>
+			<Show when={dir.loading}>
+				<p>loading ...</p>
+			</Show>
+			<Show when={dir.error}>
+				<p class="text-danger">{dir.error}</p>
+			</Show>
+			<Show when={dir()}>
+				<For each={dir()}>{(file) => <p>{file}</p>}</For>
+			</Show>
+		</>
 	);
 }

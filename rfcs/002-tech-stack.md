@@ -135,15 +135,7 @@ Control over the website is required to localize the website at some point. Webs
 
 ### framework
 
-A few things to consider: 
-
-1. The decision now is likely irreversible given the effort required to switch to another framework. 
-2. Inlang is a long-term project. I am confident that inlang is past an exploration phase of what needs to be build.
-3. The architecture, performance and state management requirements of the editor involve uncertainty.  
-
-The translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI. Thus, complex state management and (likely) performance is of high importance. SolidJS seems like the framework that learned from the best (Knockout, React, Angular, Vue) and bundles state management, good performance, SSR, and tooling (their community efforts) under one umbrella. 
-
-SolidJS has ultimately been choosen given the uncertainty of the editor's requirements in terms of performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined. 
+Since the translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI, state management and (likely) performance is of high importance. SolidJS has been choosen as the frontend framework due to the coupling of state management and efficient reactive rendering. Choosing SolidJS is anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined. At the point of making the decision, the React ecosystem (Next.js, UI components, external state management) did not seem to outweight Solid's benefits.
 
 In summary, SolidJS has been choosen because:
 
@@ -156,6 +148,7 @@ In summary, SolidJS has been choosen because:
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
 - performance “for free”.
   - Performance is likely important for the editor.
+- some performance optimizations of react are redundant. NextJS could be considered a performance optimization for SSR.
 - (Great documentation -> understandable for beginners)
 
 Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
