@@ -79,10 +79,11 @@ export async function forkRepository(args: {
 						method: "POST",
 						headers: {
 							Authorization: `Bearer ${decryptedAccessToken}`,
+							"X-GitHub-Api-Version": "2022-11-28",
 						},
-						body: JSON.stringify({
-							name: `inlangTranslationFor-${args.owner}-${args.repository}`,
-						}),
+						// body: JSON.stringify({
+						// 	name: `inlangTranslationFor-${args.owner}-${args.repository}`,
+						// }),
 					}
 				);
 				if (fork.ok) {
