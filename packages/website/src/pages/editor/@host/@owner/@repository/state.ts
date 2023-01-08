@@ -197,7 +197,7 @@ const [lastPush, setLastPush] = createSignal<Date>();
  * @example
  * 	if (user && isCollaborator())
  */
-export let userIsCollaborator: Resource<any>;
+export let userIsCollaborator: Resource<boolean>;
 
 // ------------------------------------------
 
