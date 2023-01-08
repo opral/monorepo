@@ -284,9 +284,8 @@ function ForkingBanner() {
 						<Icon name="warning" slot="icon"></Icon>
 						<div class="flex space-x-4">
 							<p>
-								You’re making changes in a project you don’t have write access
-								to. Create a fork of this project to commit your proposed
-								changes. Afterwards, you can send a pull request to the project.
+								You’re currently not signed in. Please sign in to make changes
+								and work in this Project.
 							</p>
 
 							<sl-button onClick={onSignIn} prop:variant="primary">
