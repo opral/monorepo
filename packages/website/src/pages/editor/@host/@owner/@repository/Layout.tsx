@@ -220,7 +220,6 @@ function ForkingBanner() {
 	let signInDialog: SlDialog | undefined;
 
 	function onSignIn() {
-		console.log("click");
 		signInDialog?.show();
 	}
 	async function handleFork() {
