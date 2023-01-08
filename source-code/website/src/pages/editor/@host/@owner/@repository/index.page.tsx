@@ -43,33 +43,9 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
-	const [localStorage] = useLocalStorage();
+
 	return (
 		<EditorLayout>
-			<sl-button
-				onClick={async () => {
-					if (localStorage.user && repository) {
-						const collaborator = await isCollaborator({
-							encryptedAccessToken: localStorage.user.encryptedAccessToken,
-							owner: owner,
-							repository: repository,
-							username: localStorage.user.username,
-						});
-						if (!collaborator) {
-							const forking = await onForkRepository({
-								encryptedAccessToken: localStorage.user.encryptedAccessToken,
-								owner: owner,
-								repository: repository,
-								username: localStorage.user.username,
-							});
-							console.log(collaborator, "colla");
-							console.log(forking, "forking");
-						}
-					}
-				}}
-			>
-				Fork
-			</sl-button>
 			<Switch
 				fallback={
 					<p class="text-danger">
