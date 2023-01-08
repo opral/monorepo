@@ -192,19 +192,7 @@ export const referenceResource = () =>
  *  Date of the last push to the Repo
  */
 const [lastPush, setLastPush] = createSignal<Date>();
-<<<<<<< HEAD
-/**
- * whether or not if the user is a collaborator of this Repo
- *
- * when using this function, whether the user is logged in
- * @example
- * 	if (user && isCollaborator())
- */
-export let userIsCollaborator: Resource<boolean>;
-// ------------------------------------------
 
-=======
->>>>>>> 7a507ad8642a744a15547a02fec43d87490b0a2e
 /**
  * whether or not if the user is a collaborator of this Repo
  *
