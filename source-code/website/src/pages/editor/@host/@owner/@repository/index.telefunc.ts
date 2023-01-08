@@ -71,7 +71,7 @@ export async function forkRepository(args: {
 			console.log("you are a collaborator", collaborator);
 		} else if (collaborator === false) {
 			try {
-				const fork = await fetch(
+				const response = await fetch(
 					`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
 					{
 						method: "POST",
@@ -84,10 +84,11 @@ export async function forkRepository(args: {
 						// }),
 					}
 				);
-				if (fork.ok) {
-					console.log("Repo is forked ", fork.ok);
-					return undefined;
-				} else throw Error(await fork.text());
+				if (response.ok) {
+					console.log("Repo is forked ", response.ok);
+					const json = await response.json();
+					return json;
+				} else throw Error(await response.text());
 			} catch (error) {
 				console.error(error);
 				return console.error(error);
