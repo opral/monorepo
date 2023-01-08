@@ -85,6 +85,7 @@ export function StateProvider(props: { children: JSXElement }) {
 				encryptedAccessToken: user.encryptedAccessToken,
 				username: user.username,
 			});
+			console.log(response, new Date());
 			return response;
 		}
 	);
@@ -198,7 +199,7 @@ const [lastPush, setLastPush] = createSignal<Date>();
  * @example
  * 	if (user && isCollaborator())
  */
-export let userIsCollaborator: Resource<boolean>;
+export let userIsCollaborator: Resource<any>;
 
 // ------------------------------------------
 
