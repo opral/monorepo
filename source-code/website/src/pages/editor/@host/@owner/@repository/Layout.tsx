@@ -5,7 +5,6 @@ import {
 	StateProvider as EditorStateProvider,
 	pushChanges,
 	userIsCollaborator,
-	isLoggedIn,
 } from "./state.js";
 import {
 	createEffect,
@@ -26,13 +25,15 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import type { EditorRouteParams } from "./types.js";
-import { onFork } from "@src/services/github/index.js";
+import { onFork, isFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { SignInDialog } from "@src/services/auth/index.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { clientSideEnv } from "@env";
-import { Banner } from "@src/components/Banner.jsx";
+import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
+import { Icon } from "@src/components/Icon.jsx";
+import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -55,11 +56,7 @@ export function Layout(props: { children: JSXElement }) {
 		</RootLayout>
 	);
 }
-// function Login() {
-// 	const response = isLoggedIn();
-// 	console.log(response);
-// 	return response;
-// }
+
 function Breadcrumbs() {
 	return (
 		<div class="flex flex-row items-center space-x-2 text-lg font-medium">
@@ -205,9 +202,18 @@ function HasChangesAction() {
 
 function SignInBanner() {
 	const [localStorage] = useLocalStorage();
-
 	let alert: SlAlert | undefined;
-
+	const [_isFork] = createResource(
+		() => localStorage.user,
+		(user) =>
+			isFork({
+				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+				repository: (currentPageContext.routeParams as EditorRouteParams)
+					.repository,
+				encryptedAccessToken: user.encryptedAccessToken,
+				username: user.username,
+			})
+	);
 	createEffect(() => {
 		// workaround for shoelace animation
 		if (userIsCollaborator() === false) {
@@ -223,6 +229,7 @@ function SignInBanner() {
 	function onSignIn() {
 		signInDialog?.show();
 	}
+
 	async function handleFork() {
 		if (localStorage.user === undefined) {
 			return;
@@ -255,28 +262,27 @@ function SignInBanner() {
 
 	return (
 		<>
-			<Switch fallback={<p></p>}>
-				<Match when={isLoggedIn() === false}>
+			<Switch fallback={<></>}>
+				<Match when={localStorage.user === undefined}>
 					<Banner
-						variant="warning"
-						message=<p>
-							You are currently not signed in. Please sign in to make changes
-							and work on this project.
-						</p>
+						variant="info"
+						message={`You are currently not signed in. 
+						Please sign in to make changes and work on this project.`}
 					>
 						<sl-button onClick={onSignIn} prop:variant="primary">
+							<MaterialSymbolsLoginRounded slot="prefix"></MaterialSymbolsLoginRounded>
 							Sign in
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match when={userIsCollaborator() === false && isLoggedIn() === true}>
+				<Match when={userIsCollaborator() === false && localStorage.user}>
 					<Banner
 						variant="info"
-						message=<p>
-							You’re making changes in a project you don’t have write access to.
-							Create a fork of this project to commit your proposed changes.
-							Afterwards, you can send a pull request to the project.
-						</p>
+						message={`
+							You’re making changes in a project you don’t have write access
+								to. Create a fork of this project to commit your proposed
+								changes. Afterwards, you can send a pull request to the project.
+								`}
 					>
 						<sl-button onClick={handleFork} prop:variant="primary">
 							<div slot="prefix">
@@ -302,5 +308,27 @@ function SignInBanner() {
 				}}
 			></SignInDialog>
 		</>
+	);
+}
+
+export function Banner(props: {
+	variant: SemanticColorTokens[number];
+	message: string;
+	children: JSXElement;
+}) {
+	let alert: SlAlert | undefined;
+
+	return (
+		<sl-alert
+			prop:variant={props.variant === "info" ? "primary" : props.variant}
+			ref={alert}
+			prop:open={true}
+		>
+			<Icon name={props.variant} slot="icon"></Icon>
+			<div class="flex space-x-4 items-center 	">
+				<p class="grow">{props.message}</p>
+				{props.children}
+			</div>
+		</sl-alert>
 	);
 }
