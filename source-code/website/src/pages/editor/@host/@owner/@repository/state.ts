@@ -25,8 +25,7 @@ import {
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
-import { navigate } from "vite-plugin-ssr/client/router";
-import { isCollaborator, onFork } from "@src/services/github/index.js";
+import { isCollaborator } from "@src/services/github/index.js";
 /**
  * `<StateProvider>` initializes state with a computations such resources.
  *
