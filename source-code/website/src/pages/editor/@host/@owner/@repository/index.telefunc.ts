@@ -4,8 +4,8 @@ import { Result } from "@inlang/core/utilities";
 import { decryptAccessToken } from "@src/services/auth/logic.js";
 import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { isCollaborator } from "@src/services/github/collaboratorRequest.js";
 const env = await serverSideEnv();
-
 /**
  * Translate text using Google Translate.
  */
@@ -48,34 +48,55 @@ export async function forkRepository(args: {
 	encryptedAccessToken: NonNullable<
 		LocalStorageSchema["user"]
 	>["encryptedAccessToken"];
-	pathname: string;
+	username: NonNullable<LocalStorageSchema["user"]>["username"];
+	owner: string;
+	repository: string;
 }) {
-	console.log("fork");
+	const decryptedAccessToken = (
+		await decryptAccessToken({
+			jwe: args.encryptedAccessToken,
+			JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+		})
+	).unwrap();
 	try {
-		const decryptedAccessToken = (
-			await decryptAccessToken({
-				jwe: args.encryptedAccessToken,
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+		const collaborator = (
+			await isCollaborator({
+				decryptedAccessToken: decryptedAccessToken,
+				owner: args.owner,
+				repository: args.repository,
+				username: args.username,
 			})
 		).unwrap();
-		console.log(decryptedAccessToken);
-		console.log(`https://api.github.com/repos/${args.pathname}/forks`);
-		const fork = await fetch(
-			`https://api.github.com/repos/${args.pathname}/forks`,
-			{
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${decryptedAccessToken}`,
-				},
+		if (collaborator) {
+			console.log("you are a collaborator", collaborator);
+		} else if (collaborator === false) {
+			try {
+				console.log("ich probiere zu forken");
 
-				body: JSON.stringify({ name: "inlangTranslation" }),
+				const fork = await fetch(
+					`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${decryptedAccessToken}`,
+						},
+						body: JSON.stringify({
+							name: `inlangTranslationFor-${args.owner}-${args.repository}`,
+						}),
+					}
+				);
+				if (fork.ok) {
+					console.log("ich bin fork ", fork.ok);
+					return undefined;
+				} else throw Error(await fork.text());
+			} catch (error) {
+				console.log("ich probiere zu forken hat aber nicht geklappt");
+
+				return console.error(error);
 			}
-		);
-		if (fork.ok) {
-			console.log("ich bin ok ", fork.ok);
-			return undefined;
-		} else throw Error(await fork.text());
+		}
 	} catch (error) {
-		return console.error(error);
+		console.log("error isCollaborator");
+		console.error(error);
 	}
 }
