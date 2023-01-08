@@ -70,7 +70,7 @@ export function StateProvider(props: { children: JSXElement }) {
 	[userIsCollaborator] = createResource(
 		/**
 		 *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
-         This is the reason why we need to send a "string" into the localStorage 
+		 * Hence, a string needs to be passed to the fetch of the resource.
 		 */
 		() => localStorage.user ?? "not logged in",
 		async (user) => {
