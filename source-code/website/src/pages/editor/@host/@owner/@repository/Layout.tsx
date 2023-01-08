@@ -198,21 +198,7 @@ function HasChangesAction() {
 
 function ForkingBanner() {
 	const [localStorage] = useLocalStorage();
-	createEffect(() => colla());
-	const [allowToFork, setallowToFork] = createSignal();
 
-	async function colla() {
-		if (localStorage.user?.username !== undefined) {
-			const responseCollaborator = await userIsCollaborator();
-			if (responseCollaborator === false) {
-				return setallowToFork(true);
-			} else {
-				return setallowToFork(false);
-			}
-		} else {
-			return setallowToFork(false);
-		}
-	}
 	async function forking() {
 		const response = await onFork({
 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
@@ -230,7 +216,7 @@ function ForkingBanner() {
 		}
 	}
 	return (
-		<Show when={allowToFork() === true}>
+		<Show when={userIsCollaborator() === false}>
 			<sl-alert prop:variant="primary" prop:open={true}>
 				<div class="flex space-x-4">
 					<p>
