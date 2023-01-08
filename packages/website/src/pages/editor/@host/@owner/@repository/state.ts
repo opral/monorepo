@@ -320,3 +320,25 @@ async function _unpushedChanges(args: {
 	});
 	return unpushedChanges;
 }
+
+async function pullAndMergeChanges(args: { user: LocalStorageSchema["user"] }) {
+	if (args.user === undefined) {
+		return;
+	}
+	const pull = await raw.pull({
+		fs,
+		http,
+		dir: "/",
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		author: {
+			name: args.user.username,
+		},
+		headers: createAuthHeader({
+			encryptedAccessToken: args.user.encryptedAccessToken,
+		}),
+	});
+	const time = new Date();
+	// triggering a rebuild of everything fs related
+	setFsChange(time);
+	return Result.ok(undefined);
+}
