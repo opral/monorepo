@@ -1,6 +1,6 @@
 import { query } from "@inlang/core/query";
 import type { PageHead } from "@src/renderer/types.js";
-import { createResource, For, Match, Show, Switch } from "solid-js";
+import { For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
 	resources,
@@ -13,8 +13,6 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
-import { isCollaborator, onFork } from "@src/services/github/index.js";
-import { useLocalStorage } from "@src/services/local-storage/index.js";
 
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
