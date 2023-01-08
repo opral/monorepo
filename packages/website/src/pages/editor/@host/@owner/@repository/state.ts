@@ -233,6 +233,14 @@ export async function pushChanges(
 		url: `https://${host}/${owner}/${repository}`,
 	};
 	try {
+		// pull changes before pushing
+		// https://github.com/inlang/inlang/issues/250
+		const _pull = await pull({ user: user });
+		if (_pull.isErr) {
+			return Result.err(
+				Error("Failed to pull: " + _pull.error.message, { cause: _pull.error })
+			);
+		}
 		const push = await raw.push(args);
 		if (push.ok === false) {
 			return Result.err(Error("Failed to push", { cause: push.error }));
@@ -321,24 +329,30 @@ async function _unpushedChanges(args: {
 	return unpushedChanges;
 }
 
-async function pullAndMergeChanges(args: { user: LocalStorageSchema["user"] }) {
-	if (args.user === undefined) {
-		return;
+async function pull(args: { user: NonNullable<LocalStorageSchema["user"]> }) {
+	try {
+		await raw.pull({
+			fs,
+			http,
+			dir: "/",
+			corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+			singleBranch: true,
+			author: {
+				name: args.user.username,
+			},
+			headers: createAuthHeader({
+				encryptedAccessToken: args.user.encryptedAccessToken,
+			}),
+			// try to not create a merge commit
+			// rebasing would be the best option but it is not supported by isomorphic-git
+			// a switch to https://libgit2.org/ seems unavoidable
+			fastForward: true,
+		});
+		const time = new Date();
+		// triggering a rebuild of everything fs related
+		setFsChange(time);
+		return Result.ok(undefined);
+	} catch (error) {
+		return Result.err(error as Error);
 	}
-	const pull = await raw.pull({
-		fs,
-		http,
-		dir: "/",
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		author: {
-			name: args.user.username,
-		},
-		headers: createAuthHeader({
-			encryptedAccessToken: args.user.encryptedAccessToken,
-		}),
-	});
-	const time = new Date();
-	// triggering a rebuild of everything fs related
-	setFsChange(time);
-	return Result.ok(undefined);
 }
