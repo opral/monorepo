@@ -13,9 +13,12 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
+import { forkRepository } from "./index.telefunc.js";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
 export const Head: PageHead = (props) => {
 	const routeParams = props.pageContext.routeParams as EditorRouteParams;
+	console.log(routeParams);
 	return {
 		title: routeParams.owner + "/" + routeParams.repository,
 		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
@@ -39,9 +42,26 @@ export function Page() {
 		}
 		return query(_referenceResource).includedMessageIds();
 	};
-
+	const [localStorage] = useLocalStorage();
 	return (
 		<EditorLayout>
+			<sl-button
+				onClick={async () => {
+					console.log(localStorage);
+					if (localStorage.user) {
+						try {
+							await forkRepository({
+								encryptedAccessToken: localStorage.user.encryptedAccessToken,
+								owner: "inlang/example",
+							});
+						} catch (error) {
+							console.error(error);
+						}
+					}
+				}}
+			>
+				Fork
+			</sl-button>
 			<Switch
 				fallback={
 					<p class="text-danger">
