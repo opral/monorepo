@@ -1,8 +1,6 @@
 # Git SDK notes
 
-This document is a collection of observations in regards to engineering and UX problems that have been made using git as SDK.
-
-This document is intended to collect requirements for a version control SDK, learning from git's mistakes or incompatibilities as an SDK.
+This document is a collection of observations in regards to engineering and UX problems that have been made using git as SDK. Those observations will likely serve as learnings and design requirements for a version control SDK (the next git).
 
 ## Engineering
 
