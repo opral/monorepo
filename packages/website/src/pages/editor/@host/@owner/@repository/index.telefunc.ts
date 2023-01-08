@@ -71,8 +71,6 @@ export async function forkRepository(args: {
 			console.log("you are a collaborator", collaborator);
 		} else if (collaborator === false) {
 			try {
-				console.log("ich probiere zu forken");
-
 				const fork = await fetch(
 					`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
 					{
