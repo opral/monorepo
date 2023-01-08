@@ -8,7 +8,11 @@ export async function onFork(args: {
 	encryptedAccessToken: string;
 	username: string;
 }): Promise<
-	| { type: "success"; owner: string; repository: string }
+	| {
+			type: "success";
+			owner: string;
+			repository: string;
+	  }
 	| { type: "error"; error: any }
 > {
 	try {
@@ -42,6 +46,58 @@ export async function onFork(args: {
 			throw Error(await response.text());
 		}
 	} catch (error) {
+		return { type: "error", error: error };
+	}
+}
+
+export async function isFork(args: {
+	owner: string;
+	repository: string;
+	encryptedAccessToken: string;
+	username: string;
+}) {
+	// : Promise<
+	// 	| {
+	// 			type: "success";
+	// 			owner: string;
+	// 			repository: string;
+	// 			workingOnFork: boolean;
+	// 	  }
+	// 	| { type: "error"; error: any }
+	// >
+	try {
+		const decryptedAccessToken = (
+			await decryptAccessToken({
+				jwe: args.encryptedAccessToken,
+				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+			})
+		).unwrap();
+		const response = await fetch(
+			`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
+			{
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${decryptedAccessToken}`,
+					"X-GitHub-Api-Version": "2022-11-28",
+				},
+				// body: JSON.stringify({
+				// 	name: `inlangTranslationFor-${args.owner}-${args.repository}`,
+				// }),
+			}
+		);
+		const fork = await response.json();
+
+		console.log(fork);
+		return fork;
+		if (response.status) {
+			const [fork] = await response.json();
+			if (fork.fork) {
+				console.log(fork.fork);
+			}
+			return fork.fork;
+		}
+	} catch (error) {
+		console.log(false);
 		return { type: "error", error: error };
 	}
 }
