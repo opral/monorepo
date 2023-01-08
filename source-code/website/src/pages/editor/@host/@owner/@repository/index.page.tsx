@@ -13,7 +13,7 @@ import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
-import { forkRepository } from "./index.telefunc.js";
+import { isCollaborator, onForkRepository } from "./index.telefunc.js";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 let owner: string;
 let repository: string;
@@ -48,16 +48,22 @@ export function Page() {
 		<EditorLayout>
 			<sl-button
 				onClick={async () => {
-					if (localStorage.user) {
-						try {
-							await forkRepository({
+					if (localStorage.user && repository) {
+						const collaborator = await isCollaborator({
+							encryptedAccessToken: localStorage.user.encryptedAccessToken,
+							owner: owner,
+							repository: repository,
+							username: localStorage.user.username,
+						});
+						if (!collaborator) {
+							const forking = await onForkRepository({
 								encryptedAccessToken: localStorage.user.encryptedAccessToken,
 								owner: owner,
 								repository: repository,
 								username: localStorage.user.username,
 							});
-						} catch (error) {
-							console.error(error);
+							console.log(collaborator, "colla");
+							console.log(forking, "forking");
 						}
 					}
 				}}
