@@ -39,7 +39,6 @@ import { isCollaborator, onFork } from "@src/services/github/index.js";
 export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
 	// re-fetched if currentPageContext changes
-	console.log(localStorage);
 	[repositoryIsCloned] = createResource(
 		// the fetch must account for the user and currentpagecontext to properly re-fetch
 		// when the user logs-in or out. It is important to batch the reactive signals
@@ -70,8 +69,8 @@ export function StateProvider(props: { children: JSXElement }) {
 
 	[userIsCollaborator] = createResource(
 		/**
-		 *
-		 * @returns
+		 *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
+         This is the reason why we need to send a "string" into the localStorage 
 		 */
 		() => localStorage.user ?? "not logged in",
 		async (user) => {
@@ -85,7 +84,6 @@ export function StateProvider(props: { children: JSXElement }) {
 				encryptedAccessToken: user.encryptedAccessToken,
 				username: user.username,
 			});
-			console.log(response, new Date());
 			return response;
 		}
 	);
@@ -351,8 +349,3 @@ async function _unpushedChanges(args: {
 	});
 	return unpushedChanges;
 }
-//  * checked, whether the user has Access/Collaboration permission if not, Forking the Repo
-/**
- *
- */
-export async function forkingRepository() {}
