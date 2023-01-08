@@ -8,7 +8,6 @@ import {
 	Resource,
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
-import { fs } from "@inlang/git-sdk/fs";
 import { http, raw } from "@inlang/git-sdk/api";
 import { clientSideEnv } from "@env";
 import {
@@ -27,7 +26,7 @@ import {
 import { createAuthHeader } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
 import { navigate } from "vite-plugin-ssr/client/router";
-import { isCollaborator } from "@src/services/github/index.js";
+import { isCollaborator, onFork } from "@src/services/github/index.js";
 /**
  * `<StateProvider>` initializes state with a computations such resources.
  *
@@ -192,7 +191,6 @@ export const referenceResource = () =>
  *  Date of the last push to the Repo
  */
 const [lastPush, setLastPush] = createSignal<Date>();
-
 /**
  * whether or not if the user is a collaborator of this Repo
  *
@@ -203,15 +201,19 @@ const [lastPush, setLastPush] = createSignal<Date>();
 export let userIsCollaborator: Resource<boolean>;
 // ------------------------------------------
 
-const environmentFunctions: EnvironmentFunctions = {
-	$import: initialize$import({ workingDirectory: "/", fs: fs.promises, fetch }),
-	$fs: fs.promises,
-};
+/**
+ * In memory filesystem.
+ *
+ * Must be re-initialized on every cloneRepository call.
+ */
+let fs: typeof import("memfs").fs;
 
 async function cloneRepository(args: {
 	routeParams: EditorRouteParams;
 	user: LocalStorageSchema["user"];
 }): Promise<Date | undefined> {
+	// reassgining (resetting) fs.
+	fs = createFsFromVolume(new Volume());
 	const { host, owner, repository } = args.routeParams;
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return undefined;
@@ -276,18 +278,28 @@ export async function pushChanges(
 }
 
 async function readInlangConfig(): Promise<InlangConfig | undefined> {
-	const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
-	if (file === undefined) {
+	try {
+		const environmentFunctions: EnvironmentFunctions = {
+			$import: initialize$import({
+				workingDirectory: "/",
+				fs: fs.promises,
+				fetch,
+			}),
+			$fs: fs.promises,
+		};
+		const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
+		const withMimeType =
+			"data:application/javascript;base64," + btoa(file.toString());
+
+		const module = await import(/* @vite-ignore */ withMimeType);
+		const initialized = await module.initializeConfig({
+			...environmentFunctions,
+		});
+		return initialized;
+	} catch {
+		// the config does not exist
 		return undefined;
 	}
-	const withMimeType =
-		"data:application/javascript;base64," + btoa(file.toString());
-
-	const module = await import(/* @vite-ignore */ withMimeType);
-	const initialized = await module.initializeConfig({
-		...environmentFunctions,
-	});
-	return initialized;
 }
 
 async function readResources(config: InlangConfig) {
