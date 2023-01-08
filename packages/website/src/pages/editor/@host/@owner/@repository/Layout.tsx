@@ -11,6 +11,7 @@ import {
 	createEffect,
 	createResource,
 	createSignal,
+	For,
 	JSXElement,
 	Match,
 	onCleanup,
@@ -32,13 +33,15 @@ import { Icon } from "@src/components/Icon.jsx";
 import { SignInDialog } from "@src/services/auth/index.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { clientSideEnv } from "@env";
+import { Dynamic } from "solid-js/web";
+import { Banner } from "@src/components/Banner.jsx";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
 			<EditorStateProvider>
-				<div class="py-4 w-full flex flex-col grow">
+				<div class="py-4 w-full space-y-2 flex flex-col grow">
 					<ForkingBanner></ForkingBanner>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-4">
@@ -251,60 +254,47 @@ function ForkingBanner() {
 			return response;
 		}
 	}
+
 	return (
 		<>
 			<Switch fallback={<p></p>}>
 				<Match when={isLoggedIn() === false}>
-					<sl-alert prop:variant="warning" ref={alert}>
-						<Icon name="warning" slot="icon"></Icon>
-						<div class="flex space-x-4">
-							<p class="grow">
-								You’re currently not signed in. Please sign in to make changes
-								and work in this Project.
-							</p>
-							<sl-button onClick={onSignIn} prop:variant="primary">
-								<div slot="prefix">
-									<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
-										<path
-											fill="currentColor"
-											d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
-										></path>
-									</svg>
-								</div>
-								Sign in
-							</sl-button>
-						</div>
-					</sl-alert>
+					<Banner
+						variant="warning"
+						message=<p>
+							You are currently not signed in. Please sign in to make changes
+							and work on this project.
+						</p>
+					>
+						<sl-button onClick={onSignIn} prop:variant="primary">
+							Sign in
+						</sl-button>
+					</Banner>
 				</Match>
 				<Match when={userIsCollaborator() === false && isLoggedIn() === true}>
-					<sl-alert prop:variant="primary" ref={alert}>
-						<Icon name="info" slot="icon"></Icon>
-						<div class="flex space-x-4">
-							<p>
-								You’re making changes in a project you don’t have write access
-								to. Create a fork of this project to commit your proposed
-								changes. Afterwards, you can send a pull request to the project.
-							</p>
-
-							<sl-button onClick={handleFork} prop:variant="primary">
-								<div slot="prefix">
-									<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
-										<path
-											fill="currentColor"
-											d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
-										></path>
-									</svg>
-								</div>
-								Fork this repository
-							</sl-button>
-						</div>
-					</sl-alert>
+					<Banner
+						variant="info"
+						message=<p>
+							You’re making changes in a project you don’t have write access to.
+							Create a fork of this project to commit your proposed changes.
+							Afterwards, you can send a pull request to the project.
+						</p>
+					>
+						<sl-button onClick={handleFork} prop:variant="primary">
+							<div slot="prefix">
+								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
+									<path
+										fill="currentColor"
+										d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
+									></path>
+								</svg>
+							</div>
+							Fork this project
+						</sl-button>
+					</Banner>
 				</Match>
 			</Switch>
 
-			<Show when={userIsCollaborator() === false && isLoggedIn() === true}>
-				tut es doch auch nicht
-			</Show>
 			<SignInDialog
 				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
