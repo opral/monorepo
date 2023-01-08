@@ -1,11 +1,11 @@
 import { decryptAccessToken } from "../auth/logic.js";
 import { serverSideEnv } from "@env";
+
 const env = await serverSideEnv();
+
 /**
  * Collaborator of a Github Repository,
  * Fetch function to get the Collaboraotr of a Github Repo.
- * @param args
- * @returns
  */
 export async function isCollaborator(args: {
 	owner: string;
