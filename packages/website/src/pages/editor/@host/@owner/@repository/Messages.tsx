@@ -1,11 +1,18 @@
 import type * as ast from "@inlang/core/ast";
-import { createSignal, For, Show } from "solid-js";
+import {
+	createEffect,
+	createResource,
+	createSignal,
+	For,
+	Show,
+} from "solid-js";
 import {
 	resources,
 	inlangConfig,
 	setResources,
 	referenceResource,
 	userIsCollaborator,
+	unpushedChanges,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -17,6 +24,12 @@ import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outl
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { currentPageContext } from "@src/renderer/state.js";
+import type { EditorRouteParams } from "./types.js";
+import { syncFork } from "@src/services/github/index.js";
+// import { syncFork } from "@src/services/github/index.js";
+// import { currentPageContext } from "@src/renderer/state.js";
+// import type { EditorRouteParams } from "./types.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -130,7 +143,39 @@ function PatternEditor(props: {
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
 			textValue() && textValue() !== "";
+	//TODO implement the sync function in each msg
+	//!! importent check, if the repo is a Fork. If not don't use the function
+	// const [_syncFroking] = createResource(hasChanges, async () => {
+	// 	if (localStorage.user === undefined) {
+	// 		return;
+	// 	}
+	// 	const response = await syncFork({
+	// 		owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 
+	// 		repository: (currentPageContext.routeParams as EditorRouteParams)
+	// 			.repository,
+	// 		username: localStorage.user?.username,
+	// 		encryptedAccessToken: localStorage.user?.encryptedAccessToken,
+	// 	});
+	// 	console.log(response);
+	// 	if (response.type === "success") {
+	// 		showToast({
+	// 			variant: "success",
+	// 			title: "The Fork has been created.",
+	// 			message: `${response.status}`,
+	// 		});
+	// 		return;
+	// 	} else {
+	// 		showToast({
+	// 			variant: "danger",
+	// 			title: "The creation of the fork failed.",
+	// 			message: `Please try it again or report a bug`,
+	// 		});
+	// 		return response;
+	// 	}
+	// });
+
+	// createEffect(() => console.log(_syncFroking));
 	/**
 	 * Saves the changes of the message.
 	 */
