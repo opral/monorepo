@@ -78,12 +78,8 @@ export async function syncFork(args: {
 		}
 	);
 	const responseMessage = await response.json();
-	if (response.status === 409 || 422 | 200) {
-		return {
-			status: response.status,
-			message: responseMessage.message,
-		};
-	} else {
-		throw response;
-	}
+	return {
+		status: response.status,
+		message: responseMessage.message,
+	};
 }
