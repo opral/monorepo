@@ -41,3 +41,9 @@ An understandable replacement for `clone` might be `download`. "A repository has
 #### Problem
 
 Yeah... what is a repository? GitHub itself refers to repositories as "projects" in the UI. I (samuelstroschein) oftentimes explain a repository as "a special directory with super powers|version control".
+
+### Reverting changes must be possible without appending to the commit history
+
+#### Problem
+
+Reverting changes (commits) is notoriously difficult. The workarounds include deleting local repositories, deleting forks to re-fork, and more.
