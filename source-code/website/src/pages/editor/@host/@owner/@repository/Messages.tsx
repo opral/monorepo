@@ -13,6 +13,7 @@ import {
 	referenceResource,
 	userIsCollaborator,
 	unpushedChanges,
+	repositoryInformation,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -26,8 +27,8 @@ import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { currentPageContext } from "@src/renderer/state.js";
 import type { EditorRouteParams } from "./types.js";
-import { syncFork } from "@src/services/github/index.js";
-// import { syncFork } from "@src/services/github/index.js";
+import { syncFork as _syncFroking } from "@src/services/github/index.js";
+
 // import { currentPageContext } from "@src/renderer/state.js";
 // import type { EditorRouteParams } from "./types.js";
 
@@ -140,42 +141,57 @@ function PatternEditor(props: {
 		}
 	};
 
+	// const [_isFork] = createResource(
+	// 	() => localStorage.user,
+	// 	async (user) => {
+	// 		const response = await isFork({
+	// 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+	// 			repository: (currentPageContext.routeParams as EditorRouteParams)
+	// 				.repository,
+	// 			encryptedAccessToken: user.encryptedAccessToken,
+	// 			username: user.username,
+	// 		});
+	// 		if (response.type === "success") {
+	// 			return response.fork;
+	// 		} else {
+	// 			return response;
+	// 		}
+	// 	}
+	// );
+
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
 			textValue() && textValue() !== "";
 	//TODO implement the sync function in each msg
 	//!! importent check, if the repo is a Fork. If not don't use the function
-	// const [_syncFroking] = createResource(hasChanges, async () => {
-	// 	if (localStorage.user === undefined) {
-	// 		return;
-	// 	}
-	// 	const response = await syncFork({
-	// 		owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 
-	// 		repository: (currentPageContext.routeParams as EditorRouteParams)
-	// 			.repository,
-	// 		username: localStorage.user?.username,
-	// 		encryptedAccessToken: localStorage.user?.encryptedAccessToken,
-	// 	});
-	// 	console.log(response);
-	// 	if (response.type === "success") {
-	// 		showToast({
-	// 			variant: "success",
-	// 			title: "The Fork has been created.",
-	// 			message: `${response.status}`,
-	// 		});
-	// 		return;
-	// 	} else {
-	// 		showToast({
-	// 			variant: "danger",
-	// 			title: "The creation of the fork failed.",
-	// 			message: `Please try it again or report a bug`,
-	// 		});
-	// 		return response;
-	// 	}
-	// });
+	if (repositoryInformation().fork) {
+		/**
+		 * If on the parent reposistorie are changes, this funciton sync the parent and the child or return the
+		 * error, why a sync is not possible
+		 */
+		const [syncFork] = createResource(hasChanges, () => {
+			if (localStorage.user === undefined) {
+				return;
+			}
+			const response = _syncFroking({
+				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+				repository: (currentPageContext.routeParams as EditorRouteParams)
+					.repository,
+				encryptedAccessToken: localStorage.user?.encryptedAccessToken,
+			});
+			return response;
+		});
+		createEffect(() => {
+			if (syncFork()?.status === 409 || 422)
+				showToast({
+					variant: "danger",
+					title: "Sync error,please solved this Error manuel",
+					message: syncFork()?.message,
+				});
+		});
+	}
 
-	// createEffect(() => console.log(_syncFroking));
 	/**
 	 * Saves the changes of the message.
 	 */
