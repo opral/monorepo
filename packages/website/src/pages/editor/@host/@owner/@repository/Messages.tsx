@@ -1,18 +1,11 @@
 import type * as ast from "@inlang/core/ast";
-import {
-	createEffect,
-	createResource,
-	createSignal,
-	For,
-	Show,
-} from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import {
 	resources,
 	inlangConfig,
 	setResources,
 	referenceResource,
 	userIsCollaborator,
-	repositoryInformation,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -24,8 +17,6 @@ import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outl
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { currentPageContext } from "@src/renderer/state.js";
-import type { EditorRouteParams } from "./types.js";
 import { syncFork as _syncFork } from "@src/services/github/index.js";
 
 export function Messages(props: {
@@ -158,37 +149,6 @@ function PatternEditor(props: {
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
 			textValue() && textValue() !== "";
-	//TODO implement the sync function in each msg
-	//!! importent check, if the repo is a Fork. If not don't use the function
-
-	if (repositoryInformation().fork) {
-		/**
-		 * If on the parent reposistorie are changes, this funciton sync the parent and the child or return the
-		 * error, why a sync is not possible
-		 */
-		const [syncFork] = createResource(hasChanges, () => {
-			if (localStorage.user === undefined) {
-				return;
-			}
-			const response = _syncFork({
-				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-				repository: (currentPageContext.routeParams as EditorRouteParams)
-					.repository,
-				encryptedAccessToken: localStorage.user?.encryptedAccessToken,
-			});
-			return response;
-		});
-		createEffect(() => {
-			if (syncFork()?.status === undefined) {
-				console.log("ja und");
-			} else if (syncFork()?.status === 409 || 422)
-				showToast({
-					variant: "danger",
-					title: "Sync error,please solved this Error manuel",
-					message: syncFork()?.message,
-				});
-		});
-	}
 
 	/**
 	 * Saves the changes of the message.
