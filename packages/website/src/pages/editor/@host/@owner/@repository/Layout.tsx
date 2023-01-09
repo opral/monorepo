@@ -205,6 +205,7 @@ function HasChangesAction() {
 
 function SignInBanner() {
 	const [localStorage] = useLocalStorage();
+	const [isLoading, setIsLoading] = createSignal(false);
 
 	let alert: SlAlert | undefined;
 
@@ -226,6 +227,7 @@ function SignInBanner() {
 	}
 
 	async function handleFork() {
+		setIsLoading(true);
 		if (localStorage.user === undefined) {
 			return;
 		}
@@ -242,6 +244,7 @@ function SignInBanner() {
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			});
+			setIsLoading(false);
 			return navigate(
 				`/editor/github.com/${response.owner}/${response.repository}`
 			);
@@ -279,7 +282,11 @@ function SignInBanner() {
 								changes. Afterwards, you can send a pull request to the project.
 								`}
 					>
-						<sl-button onClick={handleFork} prop:variant="primary">
+						<sl-button
+							onClick={handleFork}
+							prop:variant="primary"
+							prop:loading={isLoading()}
+						>
 							<div slot="prefix">
 								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
 									<path
@@ -293,28 +300,36 @@ function SignInBanner() {
 					</Banner>
 				</Match>
 				<Match when={hasPushedChanges() && repositoryInformation().fork}>
-					<Banner variant="success" message={"Pull request"}>
+					<Banner
+						variant="success"
+						message={`You are working in a forced project. Please make a "pull request" to transfer your changes to the parent project:
+							"${repositoryInformation().parent.full_name}"`}
+					>
 						<sl-button
 							prop:target="_blank"
 							prop:href={`https://github.com/${
 								repositoryInformation().parent.full_name
 							}/compare/main...${repositoryInformation().owner.login}:${
 								repositoryInformation().name
-							}:main?expand=1`}
+							}:main?expand=1;title=Update%20translations%20with%20inlang;body=This%20translations%20are%20made%20with%20inlang.com`}
 							prop:variant="success"
 							// ugly workaround to close a the banner
 							// after the button has been clicked
 							onClick={() => setHasPushedChanges(false)}
 						>
 							<div slot="prefix">
-								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
+								<svg width="1em" height="1em" viewBox="0 0 24 24">
 									<path
 										fill="currentColor"
-										d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
+										d="M16 19.25a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm-14.5 0a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm0-14.5a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0ZM4.75 3a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 3Zm0 14.5a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 17.5Zm14.5 0a1.75 1.75 0 1 0 .001 3.501a1.75 1.75 0 0 0-.001-3.501Z"
+									></path>
+									<path
+										fill="currentColor"
+										d="M13.405 1.72a.75.75 0 0 1 0 1.06L12.185 4h4.065A3.75 3.75 0 0 1 20 7.75v8.75a.75.75 0 0 1-1.5 0V7.75a2.25 2.25 0 0 0-2.25-2.25h-4.064l1.22 1.22a.75.75 0 0 1-1.061 1.06l-2.5-2.5a.75.75 0 0 1 0-1.06l2.5-2.5a.75.75 0 0 1 1.06 0ZM4.75 7.25A.75.75 0 0 1 5.5 8v8A.75.75 0 0 1 4 16V8a.75.75 0 0 1 .75-.75Z"
 									></path>
 								</svg>
 							</div>
-							Create a pull request
+							Create pull request
 						</sl-button>
 					</Banner>
 				</Match>
