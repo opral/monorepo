@@ -25,7 +25,10 @@ import {
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
-
+import {
+	isCollaborator,
+	repositoryInformation as _repositoryInformation,
+} from "@src/services/github/index.js";
 /**
  * `<StateProvider>` initializes state with a computations such resources.
  *
@@ -38,16 +41,12 @@ export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
 
 	// re-fetched if currentPageContext changes
-	[repositoryIsCloned] = createResource(
-		// the fetch must account for the user and currentpagecontext to properly re-fetch
-		// when the user logs-in or out. It is important to batch the reactive signals
-		// to avoid cloneRepository being called multiple times for one compound update.
-		batch(() => ({
+	[repositoryIsCloned] = createResource(() => {
+		return {
 			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
-		})),
-		cloneRepository
-	);
+		};
+	}, cloneRepository);
 
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
@@ -64,6 +63,47 @@ export function StateProvider(props: { children: JSXElement }) {
 			lastFsChange: fsChange(),
 		}),
 		_unpushedChanges
+	);
+
+	[userIsCollaborator] = createResource(
+		/**
+		 *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
+		 * Hence, a string needs to be passed to the fetch of the resource.
+		 */
+		() => ({
+			user: localStorage.user ?? "not logged in",
+			routeParams: currentPageContext.routeParams as EditorRouteParams,
+		}),
+		async (args) => {
+			if (typeof args.user === "string") {
+				return false;
+			}
+			const response = await isCollaborator({
+				owner: args.routeParams.owner,
+				repository: args.routeParams.repository,
+				encryptedAccessToken: args.user.encryptedAccessToken,
+				username: args.user.username,
+			});
+			return response;
+		}
+	);
+
+	[repositoryInformation] = createResource(
+		() => {
+			if (localStorage.user === undefined) {
+				return false;
+			}
+			return {
+				user: localStorage.user,
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+			};
+		},
+		async (args) =>
+			_repositoryInformation({
+				owner: args.routeParams.owner,
+				repository: args.routeParams.repository,
+				encryptedAccessToken: args.user.encryptedAccessToken,
+			})
 	);
 
 	// if the config is loaded, read the resources
@@ -99,6 +139,8 @@ export let repositoryIsCloned: Resource<undefined | Date>;
  * Undefined if no inlang config exists/has been found.
  */
 export let inlangConfig: Resource<InlangConfig | undefined>;
+
+export let repositoryInformation: Resource<any>;
 
 /**
  * Route parameters like `/github.com/inlang/website`.
@@ -169,7 +211,14 @@ export const referenceResource = () =>
  *  Date of the last push to the Repo
  */
 const [lastPush, setLastPush] = createSignal<Date>();
-
+/**
+ * whether or not if the user is a collaborator of this Repo
+ *
+ * when using this function, whether the user is logged in
+ * @example
+ * 	if (user && isCollaborator())
+ */
+export let userIsCollaborator: Resource<boolean>;
 // ------------------------------------------
 
 /**

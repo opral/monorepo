@@ -31,7 +31,6 @@ export function Page() {
 		}
 		return result;
 	};
-
 	const inludedMessageIds = () => {
 		const _referenceResource = referenceResource();
 		if (_referenceResource === undefined) {
