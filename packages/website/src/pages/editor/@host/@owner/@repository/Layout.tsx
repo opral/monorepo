@@ -311,7 +311,7 @@ function SignInBanner() {
 								repositoryInformation().parent.full_name
 							}/compare/main...${repositoryInformation().owner.login}:${
 								repositoryInformation().name
-							}:main?expand=1;title=Update%20translations%20with%20inlang;body=This%20translations%20are%20made%20with%20inlang.com`}
+							}:main?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20made%20to%20the%20translations`}
 							prop:variant="success"
 							// ugly workaround to close a the banner
 							// after the button has been clicked
