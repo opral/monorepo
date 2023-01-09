@@ -42,7 +42,7 @@ Markdown: [Markdoc](https://markdoc.dev/)
 
 - Git integration ✅
 - One-click "ready to use" ✅
-- Compatible with local and remote files ✅
+- Compatible with local and remote files ❔
 
 The requirements above resemble a fusion of VSCode and Figma. VSCode due to the tight git integration that localization of software requires, and Figma due to the browser-based architecture. Figma does not need to be downloaded, installed and opened. Open a link in the browser and get started. A similar "one click ready to use" experience is desired for the inlang editor. VSCode recently released their effort to bring VSCode into the browser, see https://vscode.dev/. VSCode.dev brings another feature that the inlang editor requires: Local repositories and remote repositories can be used. Local repositories would allow developers to easily use the inlang editor while remote repositories make life easy for translators.
 
@@ -105,7 +105,7 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 ### website (metaframework)
 
-Control over the website is required to localize the website at some point. Website builders like Webflow support no localization.
+VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. High control is required to localize inlang (yes, other metaframeworks like Next.js 13 or SvelteKit only support i18n via workarounds) and because of the editor. The editor is a classical SPA app with SSR components. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase.
 
 #### why vite-plugin-ssr?
 
