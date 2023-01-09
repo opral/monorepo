@@ -39,17 +39,14 @@ import {
  */
 export function StateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage();
+
 	// re-fetched if currentPageContext changes
-	[repositoryIsCloned] = createResource(
-		// the fetch must account for the user and currentpagecontext to properly re-fetch
-		// when the user logs-in or out. It is important to batch the reactive signals
-		// to avoid cloneRepository being called multiple times for one compound update.
-		batch(() => ({
+	[repositoryIsCloned] = createResource(() => {
+		return {
 			routeParams: currentPageContext.routeParams as EditorRouteParams,
 			user: localStorage.user,
-		})),
-		cloneRepository
-	);
+		};
+	}, cloneRepository);
 
 	// re-fetched if respository has been cloned
 	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
