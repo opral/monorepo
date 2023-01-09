@@ -34,6 +34,7 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
+const [isPushedChanges, setIsPushedChanges] = createSignal(false);
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -177,6 +178,7 @@ function HasChangesAction() {
 				variant: "danger",
 			});
 		} else {
+			setIsPushedChanges(true);
 			return showToast({
 				title: "Changes have been pushed",
 				variant: "success",
@@ -202,7 +204,11 @@ function HasChangesAction() {
 
 function SignInBanner() {
 	const [localStorage] = useLocalStorage();
+	const [PullRequestUrl, setPullRequestUrl] = createSignal("");
+	const [fork, setFork] = createSignal(false);
+
 	let alert: SlAlert | undefined;
+	//TODO get the main url for te PR
 	const [_isFork] = createResource(
 		() => localStorage.user,
 		async (user) => {
@@ -214,13 +220,16 @@ function SignInBanner() {
 				username: user.username,
 			});
 			if (response.type === "success") {
-				return response.fork;
+				setPullRequestUrl(
+					`https://github.com/${response.parent_full_name}/compare/main...${response.json.owner.login}:${response.json.name}:main?expand=1`
+				);
+				setFork(response.fork);
+				return response;
 			} else {
 				return response;
 			}
 		}
 	);
-
 	createEffect(() => {
 		// workaround for shoelace animation
 		if (userIsCollaborator() === false) {
@@ -305,16 +314,19 @@ function SignInBanner() {
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match
-					when={(unpushedChanges() ?? []).length > 0 && _isFork() === true}
-				>
+				<Match when={isPushedChanges() && fork()}>
 					<Banner
 						variant="success"
 						message={`
 							Pull Request	
 								`}
 					>
-						<sl-button onClick={handleFork} prop:variant="primary">
+						<sl-button
+							prop:target="_blank"
+							prop:href={PullRequestUrl()}
+							prop:variant="primary"
+							onClick={() => setIsPushedChanges(false)}
+						>
 							<div slot="prefix">
 								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
 									<path
@@ -323,7 +335,7 @@ function SignInBanner() {
 									></path>
 								</svg>
 							</div>
-							Create a Pull Request{" "}
+							` Create a Pull Request{" "}
 						</sl-button>
 					</Banner>
 				</Match>
