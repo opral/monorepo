@@ -144,6 +144,7 @@ export async function syncFork(args: {
 				message: json.message,
 			};
 		} else {
+			//!! @jannesblobel
 			throw Error(await response);
 		}
 	} catch (error) {
