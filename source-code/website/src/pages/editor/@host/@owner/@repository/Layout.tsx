@@ -4,14 +4,18 @@ import {
 	routeParams,
 	StateProvider as EditorStateProvider,
 	pushChanges,
+	userIsCollaborator,
+	repositoryInformation,
 } from "./state.js";
 import {
 	createEffect,
 	createResource,
 	createSignal,
 	JSXElement,
+	Match,
 	onCleanup,
 	Show,
+	Switch,
 } from "solid-js";
 import { raw } from "@inlang/git-sdk/api";
 import { fs } from "@inlang/git-sdk/fs";
@@ -21,13 +25,26 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import type { EditorRouteParams } from "./types.js";
+import { onFork } from "@src/services/github/index.js";
+import { navigate } from "vite-plugin-ssr/client/router";
+import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import { SignInDialog } from "@src/services/auth/index.js";
+import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { clientSideEnv } from "@env";
+import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
+import { Icon } from "@src/components/Icon.jsx";
+import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
+import { isServer } from "solid-js/web";
+
+const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
 			<EditorStateProvider>
-				<div class="py-4 w-full flex flex-col grow">
+				<div class="py-4 w-full space-y-2 flex flex-col grow">
+					<SignInBanner></SignInBanner>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-4">
 							<Breadcrumbs></Breadcrumbs>
@@ -35,7 +52,7 @@ export function Layout(props: { children: JSXElement }) {
 						</div>
 						<HasChangesAction></HasChangesAction>
 					</div>
-					<hr class="h-px w-full bg-outline-variant my-2"></hr>
+					<hr class="h-px w-full bg-outline-variant my-2"> </hr>
 					{props.children}
 				</div>
 			</EditorStateProvider>
@@ -163,6 +180,7 @@ function HasChangesAction() {
 				variant: "danger",
 			});
 		} else {
+			setHasPushedChanges(true);
 			return showToast({
 				title: "Changes have been pushed",
 				variant: "success",
@@ -183,5 +201,171 @@ function HasChangesAction() {
 				</sl-badge>
 			</Show>
 		</sl-button>
+	);
+}
+
+function SignInBanner() {
+	const [localStorage] = useLocalStorage();
+	const [isLoading, setIsLoading] = createSignal(false);
+
+	let alert: SlAlert | undefined;
+
+	createEffect(() => {
+		// workaround for shoelace animation
+		if (userIsCollaborator() === false) {
+			setTimeout(() => {
+				alert?.show();
+			}, 50);
+		} else {
+			alert?.hide();
+		}
+	});
+
+	let signInDialog: SlDialog | undefined;
+
+	function onSignIn() {
+		signInDialog?.show();
+	}
+
+	async function handleFork() {
+		setIsLoading(true);
+		if (localStorage.user === undefined) {
+			return;
+		}
+		const response = await onFork({
+			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+			repository: (currentPageContext.routeParams as EditorRouteParams)
+				.repository,
+			encryptedAccessToken: localStorage.user.encryptedAccessToken,
+			username: localStorage.user.username,
+		});
+		if (response.type === "success") {
+			showToast({
+				variant: "success",
+				title: "The Fork has been created.",
+				message: `Don't forget to open a pull request`,
+			});
+			setIsLoading(false);
+			return navigate(
+				`/editor/github.com/${response.owner}/${response.repository}`
+			);
+		} else {
+			showToast({
+				variant: "danger",
+				title: "The creation of the fork failed.",
+				message: `Please try it again or report a bug`,
+			});
+			return response;
+		}
+	}
+
+	return (
+		<>
+			<Switch>
+				<Match when={localStorage.user === undefined}>
+					<Banner
+						variant="info"
+						message={`You are currently not signed in. 
+						Please sign in to make changes and work on this project.`}
+					>
+						<sl-button onClick={onSignIn} prop:variant="primary">
+							<MaterialSymbolsLoginRounded slot="prefix"></MaterialSymbolsLoginRounded>
+							Sign in
+						</sl-button>
+					</Banner>
+				</Match>
+				<Match when={userIsCollaborator() === false && localStorage.user}>
+					<Banner
+						variant="info"
+						message={`
+							You’re making changes in a project you don’t have write access
+								to. Create a fork of this project to commit your proposed
+								changes. Afterwards, you can send a pull request to the project.
+								`}
+					>
+						<sl-button
+							onClick={handleFork}
+							prop:variant="primary"
+							prop:loading={isLoading()}
+						>
+							<div slot="prefix">
+								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
+									<path
+										fill="currentColor"
+										d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
+									></path>
+								</svg>
+							</div>
+							Fork this project
+						</sl-button>
+					</Banner>
+				</Match>
+				<Match when={hasPushedChanges() && repositoryInformation().fork}>
+					<Banner
+						variant="success"
+						message={`You are working in a forced project. Please make a "pull request" to transfer your changes to the parent project:
+							"${repositoryInformation().parent.full_name}"`}
+					>
+						<sl-button
+							prop:target="_blank"
+							prop:href={`https://github.com/${
+								repositoryInformation().parent.full_name
+							}/compare/main...${repositoryInformation().owner.login}:${
+								repositoryInformation().name
+							}:main?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20made%20to%20the%20translations`}
+							prop:variant="success"
+							// ugly workaround to close a the banner
+							// after the button has been clicked
+							onClick={() => setHasPushedChanges(false)}
+						>
+							<div slot="prefix">
+								<svg width="1em" height="1em" viewBox="0 0 24 24">
+									<path
+										fill="currentColor"
+										d="M16 19.25a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm-14.5 0a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm0-14.5a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0ZM4.75 3a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 3Zm0 14.5a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 17.5Zm14.5 0a1.75 1.75 0 1 0 .001 3.501a1.75 1.75 0 0 0-.001-3.501Z"
+									></path>
+									<path
+										fill="currentColor"
+										d="M13.405 1.72a.75.75 0 0 1 0 1.06L12.185 4h4.065A3.75 3.75 0 0 1 20 7.75v8.75a.75.75 0 0 1-1.5 0V7.75a2.25 2.25 0 0 0-2.25-2.25h-4.064l1.22 1.22a.75.75 0 0 1-1.061 1.06l-2.5-2.5a.75.75 0 0 1 0-1.06l2.5-2.5a.75.75 0 0 1 1.06 0ZM4.75 7.25A.75.75 0 0 1 5.5 8v8A.75.75 0 0 1 4 16V8a.75.75 0 0 1 .75-.75Z"
+									></path>
+								</svg>
+							</div>
+							Create pull request
+						</sl-button>
+					</Banner>
+				</Match>
+			</Switch>
+			{/* <sl-button onClick={handlesncForking}>can i fork this thing</sl-button> */}
+			<SignInDialog
+				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
+				ref={signInDialog!}
+				onClickOnSignInButton={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					signInDialog?.hide();
+				}}
+			></SignInDialog>
+		</>
+	);
+}
+
+function Banner(props: {
+	variant: SemanticColorTokens[number];
+	message: string;
+	children: JSXElement;
+}) {
+	let alert: SlAlert | undefined;
+
+	return (
+		<sl-alert
+			prop:variant={props.variant === "info" ? "primary" : props.variant}
+			ref={alert}
+			prop:open={true}
+		>
+			<Icon name={props.variant} slot="icon"></Icon>
+			<div class="flex space-x-4 items-center">
+				<p class="grow">{props.message}</p>
+				{props.children}
+			</div>
+		</sl-alert>
 	);
 }

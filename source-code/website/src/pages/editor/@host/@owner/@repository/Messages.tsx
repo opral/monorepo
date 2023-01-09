@@ -1,10 +1,11 @@
 import type * as ast from "@inlang/core/ast";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import {
 	resources,
 	inlangConfig,
 	setResources,
 	referenceResource,
+	userIsCollaborator,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -16,6 +17,7 @@ import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outl
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { syncFork as _syncFork } from "@src/services/github/index.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -126,6 +128,24 @@ function PatternEditor(props: {
 		}
 	};
 
+	// const [_isFork] = createResource(
+	// 	() => localStorage.user,
+	// 	async (user) => {
+	// 		const response = await isFork({
+	// 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
+	// 			repository: (currentPageContext.routeParams as EditorRouteParams)
+	// 				.repository,
+	// 			encryptedAccessToken: user.encryptedAccessToken,
+	// 			username: user.username,
+	// 		});
+	// 		if (response.type === "success") {
+	// 			return response.fork;
+	// 		} else {
+	// 			return response;
+	// 		}
+	// 	}
+	// );
+
 	const hasChanges = () =>
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !==
 			textValue() && textValue() !== "";
@@ -216,6 +236,7 @@ function PatternEditor(props: {
 				class="border-none p-0"
 				onFocus={() => setIsFocused(true)}
 				prop:value={textValue() ?? ""}
+				prop:disabled={userIsCollaborator() === false}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 			>
 				<MaterialSymbolsEditOutlineRounded
