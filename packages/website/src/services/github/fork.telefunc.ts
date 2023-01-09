@@ -54,60 +54,36 @@ export async function syncFork(args: {
 	owner: string;
 	repository: string;
 	encryptedAccessToken: string;
-	username: string;
-}): Promise<
-	| {
-			type: "success";
-			status: number;
-			message: any;
-	  }
-	| {
-			type: "fail";
-			status: number;
-			message: any;
-	  }
-	| { type: "error"; error: any }
-> {
-	try {
-		const decryptedAccessToken = (
-			await decryptAccessToken({
-				jwe: args.encryptedAccessToken,
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-			})
-		).unwrap();
-		const response = await fetch(
-			`https://api.github.com/repos/${args.owner}/${args.repository}/merge-upstream`,
-			{
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${decryptedAccessToken}`,
-					"X-GitHub-Api-Version": "2022-11-28",
-				},
-				body: JSON.stringify({
-					branch: "main",
-				}),
-			}
-		);
-		console.log(response.status);
-		const json = await response.json();
-
-		if (response.status === 200) {
-			return {
-				type: "success",
-				status: response.status,
-				message: json.message,
-			};
-		} else if (response.status === 409 || 422) {
-			return {
-				type: "fail",
-				status: response.status,
-				message: json.message,
-			};
-		} else {
-			//!! @jannesblobel
-			throw response;
+}): Promise<{
+	status: number;
+	message: string;
+}> {
+	const decryptedAccessToken = (
+		await decryptAccessToken({
+			jwe: args.encryptedAccessToken,
+			JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+		})
+	).unwrap();
+	const response = await fetch(
+		`https://api.github.com/repos/${args.owner}/${args.repository}/merge-upstream`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${decryptedAccessToken}`,
+				"X-GitHub-Api-Version": "2022-11-28",
+			},
+			body: JSON.stringify({
+				branch: "main",
+			}),
 		}
-	} catch (error) {
-		return { type: "error", error: error };
+	);
+	const responseMessage = await response.json();
+	if (response.status === 409 || 422 | 200) {
+		return {
+			status: response.status,
+			message: responseMessage.message,
+		};
+	} else {
+		throw response;
 	}
 }
