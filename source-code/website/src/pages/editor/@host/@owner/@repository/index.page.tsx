@@ -1,6 +1,6 @@
 import { query } from "@inlang/core/query";
 import type { PageHead } from "@src/renderer/types.js";
-import { For, Match, Switch } from "solid-js";
+import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
 	resources,
@@ -23,21 +23,36 @@ export const Head: PageHead = (props) => {
 };
 
 export function Page() {
-	/** Messages from all resources for an id */
-	const messages = (id: ast.Message["id"]["name"]) => {
-		const result: Record<string, ast.Message | undefined> = {};
+	/**
+	 * Messages for a particular message id in all languages
+	 *
+	 * @example
+	 * 	{
+	 *    "hello.welcome": {
+	 *      "en": { ... },
+	 *      "de": { ... },
+	 *    }
+	 *  }
+	 */
+	const messages = createMemo(() => {
+		const result: {
+			[id: string]: {
+				[language: string]: ast.Message | undefined;
+			};
+		} = {};
 		for (const resource of resources) {
-			result[resource.languageTag.language] = query(resource).get({ id });
+			for (const id of query(resource).includedMessageIds()) {
+				// defining the initial object, otherwise the following assignment will fail
+				// with "cannot set property 'x' of undefined"
+				if (result[id] === undefined) {
+					result[id] = {};
+				}
+				// assigning the message
+				result[id][resource.languageTag.language] = query(resource).get({ id });
+			}
 		}
 		return result;
-	};
-	const inludedMessageIds = () => {
-		const _referenceResource = referenceResource();
-		if (_referenceResource === undefined) {
-			return [];
-		}
-		return query(_referenceResource).includedMessageIds();
-	};
+	});
 
 	return (
 		<EditorLayout>
@@ -95,8 +110,8 @@ export function Page() {
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="space-y-2">
-						<For each={inludedMessageIds()}>
-							{(id) => <Messages messages={messages(id)}></Messages>}
+						<For each={Object.keys(messages())}>
+							{(id) => <Messages messages={messages()[id]}></Messages>}
 						</For>
 					</div>
 				</Match>
