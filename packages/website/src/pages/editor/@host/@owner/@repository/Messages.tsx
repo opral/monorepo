@@ -183,7 +183,9 @@ function PatternEditor(props: {
 			return response;
 		});
 		createEffect(() => {
-			if (syncFork()?.status === 409 || 422)
+			if (syncFork()?.status === undefined) {
+				console.log("ja und");
+			} else if (syncFork()?.status === 409 || 422)
 				showToast({
 					variant: "danger",
 					title: "Sync error,please solved this Error manuel",
