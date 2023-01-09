@@ -346,7 +346,7 @@ function Banner(props: {
 			prop:open={true}
 		>
 			<Icon name={props.variant} slot="icon"></Icon>
-			<div class="flex space-x-4 items-center 	">
+			<div class="flex space-x-4 items-center">
 				<p class="grow">{props.message}</p>
 				{props.children}
 			</div>
