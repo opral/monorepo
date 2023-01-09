@@ -205,15 +205,22 @@ function SignInBanner() {
 	let alert: SlAlert | undefined;
 	const [_isFork] = createResource(
 		() => localStorage.user,
-		(user) =>
-			isFork({
+		async (user) => {
+			const response = await isFork({
 				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 				repository: (currentPageContext.routeParams as EditorRouteParams)
 					.repository,
 				encryptedAccessToken: user.encryptedAccessToken,
 				username: user.username,
-			})
+			});
+			if (response.type === "success") {
+				return response.fork;
+			} else {
+				return response;
+			}
+		}
 	);
+
 	createEffect(() => {
 		// workaround for shoelace animation
 		if (userIsCollaborator() === false) {
@@ -224,6 +231,7 @@ function SignInBanner() {
 			alert?.hide();
 		}
 	});
+
 	let signInDialog: SlDialog | undefined;
 
 	function onSignIn() {
@@ -297,7 +305,9 @@ function SignInBanner() {
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match when={(unpushedChanges()?.length ?? 0 > 0) && _isFork}>
+				<Match
+					when={(unpushedChanges() ?? []).length > 0 && _isFork() === true}
+				>
 					<Banner
 						variant="success"
 						message={`
@@ -318,7 +328,7 @@ function SignInBanner() {
 					</Banner>
 				</Match>
 			</Switch>
-
+			{/* <sl-button onClick={handlesncForking}>can i fork this thing</sl-button> */}
 			<SignInDialog
 				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
