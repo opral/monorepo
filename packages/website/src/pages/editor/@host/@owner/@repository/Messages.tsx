@@ -12,7 +12,6 @@ import {
 	setResources,
 	referenceResource,
 	userIsCollaborator,
-	unpushedChanges,
 	repositoryInformation,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
@@ -27,10 +26,7 @@ import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { currentPageContext } from "@src/renderer/state.js";
 import type { EditorRouteParams } from "./types.js";
-import { syncFork as _syncFroking } from "@src/services/github/index.js";
-
-// import { currentPageContext } from "@src/renderer/state.js";
-// import type { EditorRouteParams } from "./types.js";
+import { syncFork as _syncFork } from "@src/services/github/index.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -174,7 +170,7 @@ function PatternEditor(props: {
 			if (localStorage.user === undefined) {
 				return;
 			}
-			const response = _syncFroking({
+			const response = _syncFork({
 				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 				repository: (currentPageContext.routeParams as EditorRouteParams)
 					.repository,
