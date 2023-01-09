@@ -5,12 +5,12 @@ import {
 	StateProvider as EditorStateProvider,
 	pushChanges,
 	userIsCollaborator,
+	repositoryInformation,
 } from "./state.js";
 import {
 	createEffect,
 	createResource,
 	createSignal,
-	For,
 	JSXElement,
 	Match,
 	onCleanup,
@@ -25,7 +25,7 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import type { EditorRouteParams } from "./types.js";
-import { onFork, isFork } from "@src/services/github/index.js";
+import { onFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { SignInDialog } from "@src/services/auth/index.js";
@@ -34,7 +34,8 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
-const [isPushedChanges, setIsPushedChanges] = createSignal(false);
+
+const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -178,7 +179,7 @@ function HasChangesAction() {
 				variant: "danger",
 			});
 		} else {
-			setIsPushedChanges(true);
+			setHasPushedChanges(true);
 			return showToast({
 				title: "Changes have been pushed",
 				variant: "success",
@@ -204,32 +205,9 @@ function HasChangesAction() {
 
 function SignInBanner() {
 	const [localStorage] = useLocalStorage();
-	const [PullRequestUrl, setPullRequestUrl] = createSignal("");
-	const [fork, setFork] = createSignal(false);
 
 	let alert: SlAlert | undefined;
-	//TODO get the main url for te PR
-	const [_isFork] = createResource(
-		() => localStorage.user,
-		async (user) => {
-			const response = await isFork({
-				owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-				repository: (currentPageContext.routeParams as EditorRouteParams)
-					.repository,
-				encryptedAccessToken: user.encryptedAccessToken,
-				username: user.username,
-			});
-			if (response.type === "success") {
-				setPullRequestUrl(
-					`https://github.com/${response.parent_full_name}/compare/main...${response.json.owner.login}:${response.json.name}:main?expand=1`
-				);
-				setFork(response.fork);
-				return response;
-			} else {
-				return response;
-			}
-		}
-	);
+
 	createEffect(() => {
 		// workaround for shoelace animation
 		if (userIsCollaborator() === false) {
@@ -314,18 +292,19 @@ function SignInBanner() {
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match when={isPushedChanges() && fork()}>
-					<Banner
-						variant="success"
-						message={`
-							Pull Request	
-								`}
-					>
+				<Match when={hasPushedChanges() && repositoryInformation().fork}>
+					<Banner variant="success" message={"Pull request"}>
 						<sl-button
 							prop:target="_blank"
-							prop:href={PullRequestUrl()}
-							prop:variant="primary"
-							onClick={() => setIsPushedChanges(false)}
+							prop:href={`https://github.com/${
+								repositoryInformation().parent.full_name
+							}/compare/main...${repositoryInformation().owner.login}:${
+								repositoryInformation().name
+							}:main?expand=1`}
+							prop:variant="success"
+							// ugly workaround to close a the banner
+							// after the button has been clicked
+							onClick={() => setHasPushedChanges(false)}
 						>
 							<div slot="prefix">
 								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
@@ -335,7 +314,7 @@ function SignInBanner() {
 									></path>
 								</svg>
 							</div>
-							` Create a Pull Request{" "}
+							Create a pull request
 						</sl-button>
 					</Banner>
 				</Match>
@@ -353,7 +332,7 @@ function SignInBanner() {
 	);
 }
 
-export function Banner(props: {
+function Banner(props: {
 	variant: SemanticColorTokens[number];
 	message: string;
 	children: JSXElement;
