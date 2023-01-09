@@ -62,6 +62,8 @@ export async function isFork(args: {
 	| {
 			type: "success";
 			fork: boolean;
+			parent_full_name: string;
+			json: any;
 	  }
 	| { type: "error"; error: any }
 > {
@@ -88,6 +90,8 @@ export async function isFork(args: {
 			return {
 				type: "success",
 				fork: json.fork,
+				parent_full_name: json.source.full_name,
+				json: json,
 			};
 		} else {
 			throw Error(await response.text());
@@ -109,7 +113,7 @@ export async function syncFork(args: {
 			message: any;
 	  }
 	| {
-			type: "success";
+			type: "fail";
 			status: number;
 			message: any;
 	  }
@@ -136,16 +140,23 @@ export async function syncFork(args: {
 			}
 		);
 		console.log(response.status);
-		if (response.status === 409 || 422 || 200) {
-			const json = await response.json();
+		const json = await response.json();
+
+		if (response.status === 200) {
 			return {
 				type: "success",
 				status: response.status,
 				message: json.message,
 			};
+		} else if (response.status === 409 || 422) {
+			return {
+				type: "fail",
+				status: response.status,
+				message: json.message,
+			};
 		} else {
 			//!! @jannesblobel
-			throw Error(await response);
+			throw response;
 		}
 	} catch (error) {
 		return { type: "error", error: error };
