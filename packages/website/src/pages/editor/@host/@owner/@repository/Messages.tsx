@@ -25,13 +25,31 @@ export function Messages(props: {
 		ast.Message | undefined
 	>;
 }) {
-	const referenceMessage = () =>
-		props.messages[inlangConfig()!.referenceLanguage]!;
+	const referenceMessage = () => {
+		return props.messages[inlangConfig()!.referenceLanguage];
+	};
+
+	/**
+	 * The id of the message.
+	 *
+	 * If the reference language is not defined, the first message id is used.
+	 */
+	const id: () => ast.Message["id"]["name"] = () => {
+		if (referenceMessage()) {
+			return referenceMessage()!.id.name;
+		}
+		for (const message of Object.values(props.messages)) {
+			if (message?.id.name !== undefined) {
+				return message.id.name;
+			}
+		}
+		throw Error("No message id found");
+	};
 
 	return (
 		<div class="border border-outline p-4 rounded">
 			<h3 slot="summary" class="font-medium pb-4">
-				{referenceMessage().id.name}
+				{id()}
 			</h3>
 			<div class="grid gap-2 col-span-5">
 				<For each={inlangConfig()?.languages}>
@@ -57,6 +75,7 @@ export function Messages(props: {
 							<div class="col-span-3">
 								<PatternEditor
 									language={language}
+									id={id()}
 									referenceMessage={referenceMessage()}
 									message={props.messages[language]}
 								></PatternEditor>
@@ -71,7 +90,8 @@ export function Messages(props: {
 
 function PatternEditor(props: {
 	language: ast.Resource["languageTag"]["language"];
-	referenceMessage: ast.Message;
+	id: ast.Message["id"]["name"];
+	referenceMessage?: ast.Message;
 	message: ast.Message | undefined;
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage();
@@ -118,7 +138,7 @@ function PatternEditor(props: {
 				type: "Message",
 				id: {
 					type: "Identifier",
-					name: props.referenceMessage.id.name,
+					name: props.id,
 				},
 				pattern: {
 					type: "Pattern",
@@ -191,6 +211,12 @@ function PatternEditor(props: {
 		createSignal(false);
 
 	const handleMachineTranslate = async () => {
+		if (props.referenceMessage === undefined) {
+			return showToast({
+				variant: "info",
+				title: "Can't translate if the reference message does not exist.",
+			});
+		}
 		const text = props.referenceMessage.pattern.elements[0].value;
 		if (text === undefined) {
 			return showToast({
@@ -266,7 +292,10 @@ function PatternEditor(props: {
 					</Show>
 					<sl-button
 						onClick={handleMachineTranslate}
-						prop:disabled={textValue() !== undefined && textValue() !== ""}
+						prop:disabled={
+							(textValue() !== undefined && textValue() !== "") ||
+							props.referenceMessage === undefined
+						}
 						prop:loading={machineTranslationIsLoading()}
 						prop:variant="neutral"
 					>
