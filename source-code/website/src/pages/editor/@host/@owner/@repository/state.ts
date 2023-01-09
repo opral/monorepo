@@ -25,7 +25,10 @@ import {
 } from "@src/services/local-storage/index.js";
 import { createAuthHeader } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
-import { isCollaborator } from "@src/services/github/index.js";
+import {
+	isCollaborator,
+	repositoryInformation as _repositoryInformation,
+} from "@src/services/github/index.js";
 /**
  * `<StateProvider>` initializes state with a computations such resources.
  *
@@ -88,6 +91,24 @@ export function StateProvider(props: { children: JSXElement }) {
 		}
 	);
 
+	[repositoryInformation] = createResource(
+		() => {
+			if (localStorage.user === undefined) {
+				return false;
+			}
+			return {
+				user: localStorage.user,
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+			};
+		},
+		async (args) =>
+			_repositoryInformation({
+				owner: args.routeParams.owner,
+				repository: args.routeParams.repository,
+				encryptedAccessToken: args.user.encryptedAccessToken,
+			})
+	);
+
 	// if the config is loaded, read the resources
 	//! will lead to weird ux since this effect does not
 	//! account for user intent
@@ -121,6 +142,8 @@ export let repositoryIsCloned: Resource<undefined | Date>;
  * Undefined if no inlang config exists/has been found.
  */
 export let inlangConfig: Resource<InlangConfig | undefined>;
+
+export let repositoryInformation: Resource<any>;
 
 /**
  * Route parameters like `/github.com/inlang/website`.
