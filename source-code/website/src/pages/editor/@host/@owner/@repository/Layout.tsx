@@ -34,6 +34,7 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
+import { isServer } from "solid-js/web";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
@@ -260,7 +261,7 @@ function SignInBanner() {
 
 	return (
 		<>
-			<Switch fallback={<></>}>
+			<Switch>
 				<Match when={localStorage.user === undefined}>
 					<Banner
 						variant="info"
