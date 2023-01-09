@@ -4,7 +4,7 @@ import { decryptAccessToken } from "../auth/index.js";
 const env = await serverSideEnv();
 
 /**
- * You can get more information than just the forking Information. Infos Like: Main repo, owner, updated at ....
+ * You can get informations Like: Main repo, owner, updated at ....
  * https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
  */
 export async function repositoryInformation(args: {
