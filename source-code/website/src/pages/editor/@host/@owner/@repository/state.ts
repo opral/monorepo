@@ -92,10 +92,15 @@ export function StateProvider(props: { children: JSXElement }) {
 		() => {
 			if (localStorage.user === undefined) {
 				return false;
+			} else if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false;
 			}
 			return {
 				user: localStorage.user,
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				routeParams: currentPageContext.routeParams,
 			};
 		},
 		async (args) =>
