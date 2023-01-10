@@ -6,6 +6,7 @@ import {
 	pushChanges,
 	userIsCollaborator,
 	repositoryInformation,
+	currentBranch,
 } from "./state.js";
 import {
 	createEffect,
@@ -310,9 +311,15 @@ function SignInBanner() {
 							prop:target="_blank"
 							prop:href={`https://github.com/${
 								repositoryInformation().parent.full_name
-							}/compare/main...${repositoryInformation().owner.login}:${
+							}/compare/${currentBranch}...${
+								repositoryInformation().owner.login
+							}:${
 								repositoryInformation().name
-							}:main?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20made%20to%20the%20translations`}
+							}:${currentBranch}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub%2F${
+								(currentPageContext.routeParams as EditorRouteParams).owner
+							}%2F${
+								(currentPageContext.routeParams as EditorRouteParams).repository
+							}%20.`}
 							prop:variant="success"
 							// ugly workaround to close a the banner
 							// after the button has been clicked
