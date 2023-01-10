@@ -346,18 +346,19 @@ async function writeResources(
 		// files with unstaged and uncomitted changes
 		(row) => row[2] === 2 && row[3] === 1
 	);
-	// auto commit
+	// add all changes
 	for (const file of filesWithUncomittedChanges) {
 		await raw.add({ fs, dir: "/", filepath: file[0] });
-		await raw.commit({
-			fs,
-			dir: "/",
-			author: {
-				name: user.username,
-			},
-			message: "inlang: update translations",
-		});
 	}
+	// commit changes
+	await raw.commit({
+		fs,
+		dir: "/",
+		author: {
+			name: user.username,
+		},
+		message: "inlang: update translations",
+	});
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	setFsChange(new Date());
