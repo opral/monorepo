@@ -111,6 +111,13 @@ export function StateProvider(props: { children: JSXElement }) {
 			})
 	);
 
+	[currentBranch] = createResource(repositoryIsCloned, async () => {
+		const branch = await raw.currentBranch({
+			fs
+		});
+		return branch ?? undefined;
+	});
+
 	// if the config is loaded, read the resources
 	//! will lead to weird ux since this effect does not
 	//! account for user intent
@@ -137,6 +144,11 @@ export let unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>;
  * was cloned.
  */
 export let repositoryIsCloned: Resource<undefined | Date>;
+
+/**
+ * The current branch.
+ */
+export let currentBranch: Resource<string | undefined>;
 
 /**
  * The current inlang config.
