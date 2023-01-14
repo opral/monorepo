@@ -23,7 +23,7 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
-import { createAuthHeader } from "@src/services/auth/index.js";
+import { AUTH_HEADER_KEY } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
 import {
 	isCollaborator,
@@ -113,7 +113,7 @@ export function StateProvider(props: { children: JSXElement }) {
 
 	[currentBranch] = createResource(repositoryIsCloned, async () => {
 		const branch = await raw.currentBranch({
-			fs
+			fs,
 		});
 		return branch ?? undefined;
 	});
@@ -260,9 +260,9 @@ async function cloneRepository(args: {
 		http,
 		dir: "/",
 		headers: args.user
-			? createAuthHeader({
-					encryptedAccessToken: args.user.encryptedAccessToken,
-			  })
+			? {
+					[AUTH_HEADER_KEY]: args.user.encryptedAccessToken,
+			  }
 			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
@@ -292,9 +292,9 @@ export async function pushChanges(
 		author: {
 			name: user.username,
 		},
-		headers: createAuthHeader({
-			encryptedAccessToken: user.encryptedAccessToken,
-		}),
+		headers: {
+			[AUTH_HEADER_KEY]: user.encryptedAccessToken,
+		},
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 	};
@@ -407,9 +407,9 @@ async function pull(args: { user: NonNullable<LocalStorageSchema["user"]> }) {
 			author: {
 				name: args.user.username,
 			},
-			headers: createAuthHeader({
-				encryptedAccessToken: args.user.encryptedAccessToken,
-			}),
+			headers: {
+				[AUTH_HEADER_KEY]: args.user.encryptedAccessToken,
+			},
 			// try to not create a merge commit
 			// rebasing would be the best option but it is not supported by isomorphic-git
 			// a switch to https://libgit2.org/ seems unavoidable
