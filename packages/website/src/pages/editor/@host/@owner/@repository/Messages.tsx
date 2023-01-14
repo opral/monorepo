@@ -45,13 +45,61 @@ export function Messages(props: {
 		}
 		throw Error("No message id found");
 	};
-
+	console.log(inlangConfig());
 	return (
-		<div class="border border-outline p-4 rounded">
-			<h3 slot="summary" class="font-medium pb-4">
+		<div class="border border-outline p-4 rounde space-y-4">
+			<h3 slot="summary" class="font-medium   ">
 				{id()}
 			</h3>
-			<div class="grid gap-2 col-span-5">
+			<div class="grid grid-cols-2 gap-4">
+				<div class="flex-col self-center space-y-1">
+					<div class="flex justify-start ">
+						{inlangConfig()!.referenceLanguage}
+						<sl-tooltip class="hidden md:block">
+							<p slot="content">
+								The reference message acts as source of truth for the other
+								messages.
+							</p>
+							<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
+								Reference
+							</span>
+						</sl-tooltip>
+					</div>
+
+					<PatternEditor
+						language={inlangConfig()!.referenceLanguage}
+						id={id()}
+						referenceMessage={referenceMessage()}
+						message={props.messages[inlangConfig()!.referenceLanguage]}
+					></PatternEditor>
+				</div>
+				<div>
+					<For each={inlangConfig()?.languages}>
+						{(language) => (
+							<Show
+								when={
+									language !== inlangConfig()!.referenceLanguage &&
+									language !== ""
+								}
+							>
+								<div class="grid grid-cols-10 py-2 ">
+									<div class="justify-self-center ">{language}</div>
+									<div class="col-span-9">
+										<PatternEditor
+											language={language}
+											id={id()}
+											referenceMessage={referenceMessage()}
+											message={props.messages[language]}
+										></PatternEditor>
+									</div>
+								</div>
+							</Show>
+						)}
+					</For>
+				</div>
+			</div>
+
+			{/* <div class="grid gap-2 col-span-5">
 				<For each={inlangConfig()?.languages}>
 					{(language) => (
 						<div class="grid grid-cols-4 gap-4">
@@ -83,7 +131,7 @@ export function Messages(props: {
 						</div>
 					)}
 				</For>
-			</div>
+			</div> */}
 		</div>
 	);
 }
@@ -258,7 +306,11 @@ function PatternEditor(props: {
 			]}
 		>
 			{/* TODO: #169 use proper text editor instead of input element */}
-			<sl-input
+			<sl-textarea
+				prop:resize="auto"
+				// prop:filled={true}
+				prop:size="small"
+				prop:rows={1}
 				class="border-none p-0"
 				onFocus={() => setIsFocused(true)}
 				prop:value={textValue() ?? ""}
@@ -269,7 +321,7 @@ function PatternEditor(props: {
 					slot="suffix"
 					class="text-outline-variant"
 				></MaterialSymbolsEditOutlineRounded>
-			</sl-input>
+			</sl-textarea>
 			{/* <div
 				onFocus={() => setIsFocused(true)}
 				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
