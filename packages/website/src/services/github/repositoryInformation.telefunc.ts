@@ -31,6 +31,6 @@ export async function repositoryInformation(args: {
 	if (response.ok) {
 		return await response.json();
 	} else {
-		throw Error(await response.text());
+		return undefined;
 	}
 }
