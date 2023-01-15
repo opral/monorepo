@@ -2,7 +2,12 @@ import { query } from "@inlang/core/query";
 import type { PageHead } from "@src/renderer/types.js";
 import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
-import { resources, inlangConfig, repositoryIsCloned } from "./state.js";
+import {
+	resources,
+	inlangConfig,
+	repositoryIsCloned,
+	routeParams,
+} from "./state.js";
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
@@ -59,49 +64,22 @@ export function Page() {
 					</p>
 				}
 			>
-				<Match when={repositoryIsCloned.error || inlangConfig.error}>
+				<Match when={repositoryIsCloned.error?.message.includes("404")}>
+					<RepositoryDoesNotExistOrNotAuthorizedCard></RepositoryDoesNotExistOrNotAuthorizedCard>
+				</Match>
+				<Match when={repositoryIsCloned.error}>
+					<p class="text-danger">{repositoryIsCloned.error.message}</p>
+				</Match>
+				<Match when={inlangConfig.error}>
 					<p class="text-danger">
-						{repositoryIsCloned.error ?? inlangConfig.error}
+						The config could not be read: {inlangConfig.error.message}
 					</p>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
 					<p>loading ...</p>
 				</Match>
 				<Match when={inlangConfig() === undefined}>
-					<div class="flex grow items-center justify-center">
-						<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-							<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
-							<h1 class="font-semibold pt-5">
-								The{" "}
-								<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-									inlang.config.js
-								</code>{" "}
-								file has not been found.
-							</h1>
-							<p class="pt-1.5">
-								Make sure that the inlang.config.js file exists at the root of
-								the repository, see discussion{" "}
-								<a
-									href="https://github.com/inlang/inlang/discussions/258"
-									target="_blank"
-									class="link link-primary"
-								>
-									#258
-								</a>
-								.
-							</p>
-							<a
-								class="self-end pt-5"
-								href="https://inlang.com/documentation/getting-started"
-								target="_blank"
-							>
-								<sl-button prop:variant="text">
-									I need help with getting started
-									<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
-								</sl-button>
-							</a>
-						</div>
-					</div>
+					<NoInlangConfigFoundCard></NoInlangConfigFoundCard>
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="space-y-2">
@@ -112,5 +90,79 @@ export function Page() {
 				</Match>
 			</Switch>
 		</EditorLayout>
+	);
+}
+
+function NoInlangConfigFoundCard() {
+	return (
+		<div class="flex grow items-center justify-center">
+			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
+				<h1 class="font-semibold pt-5">
+					The{" "}
+					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+						inlang.config.js
+					</code>{" "}
+					file has not been found.
+				</h1>
+				<p class="pt-1.5">
+					Make sure that the inlang.config.js file exists at the root of the
+					repository, see discussion{" "}
+					<a
+						href="https://github.com/inlang/inlang/discussions/258"
+						target="_blank"
+						class="link link-primary"
+					>
+						#258
+					</a>
+					.
+				</p>
+				<a
+					class="self-end pt-5"
+					href="https://inlang.com/documentation/getting-started"
+					target="_blank"
+				>
+					<sl-button prop:variant="text">
+						I need help with getting started
+						<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
+					</sl-button>
+				</a>
+			</div>
+		</div>
+	);
+}
+
+function RepositoryDoesNotExistOrNotAuthorizedCard() {
+	return (
+		<div class="flex grow items-center justify-center">
+			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+				<h1 class="self-center text-5xl font-light">404</h1>
+				<h2 class="font-semibold pt-5">The repository has not been found.</h2>
+				<p class="pt-1.5">
+					Make sure that you the repository owner{" "}
+					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+						{routeParams().owner}
+					</code>{" "}
+					and the repository name{" "}
+					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
+						{routeParams().repository}
+					</code>{" "}
+					contain no mistake.
+					<span class="pt-2 block">
+						Alternatively, you might not have access to the repository.
+					</span>
+				</p>
+				<a
+					class="self-end pt-5"
+					href="https://github.com/inlang/inlang/discussions/categories/help-questions-answers"
+					target="_blank"
+				>
+					<sl-button prop:variant="text">
+						I need help
+						<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
+					</sl-button>
+				</a>
+			</div>
+		</div>
 	);
 }
