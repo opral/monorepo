@@ -45,7 +45,6 @@ export function Messages(props: {
 		}
 		throw Error("No message id found");
 	};
-	console.log(inlangConfig());
 	return (
 		<div class="border border-outline p-4 rounde space-y-4">
 			<h3 slot="summary" class="font-medium   ">
