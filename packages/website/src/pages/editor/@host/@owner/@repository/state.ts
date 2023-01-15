@@ -49,19 +49,29 @@ export function StateProvider(props: { children: JSXElement }) {
 	}, cloneRepository);
 
 	// re-fetched if respository has been cloned
-	[inlangConfig] = createResource(repositoryIsCloned, readInlangConfig);
+	[inlangConfig] = createResource(() => {
+		if (repositoryIsCloned.error) {
+			return false;
+		}
+		return repositoryIsCloned();
+	}, readInlangConfig);
 	// re-fetched if the file system changes
 	[unpushedChanges] = createResource(
 		// using batch does not work for this resource. don't know why.
 		// no related bug so far, hence leave it as is.
-		() => ({
-			repositoryClonedTime: repositoryIsCloned()!,
-			lastPushTime: lastPush(),
-			// while unpushed changes does not require last fs change,
-			// unpushed changed should react to fsChange. Hence, pass
-			// the signal to _unpushedChanges
-			lastFsChange: fsChange(),
-		}),
+		() => {
+			if (repositoryIsCloned.error) {
+				return false;
+			}
+			return {
+				repositoryClonedTime: repositoryIsCloned()!,
+				lastPushTime: lastPush(),
+				// while unpushed changes does not require last fs change,
+				// unpushed changed should react to fsChange. Hence, pass
+				// the signal to _unpushedChanges
+				lastFsChange: fsChange(),
+			};
+		},
 		_unpushedChanges
 	);
 
@@ -111,12 +121,20 @@ export function StateProvider(props: { children: JSXElement }) {
 			})
 	);
 
-	[currentBranch] = createResource(repositoryIsCloned, async () => {
-		const branch = await raw.currentBranch({
-			fs,
-		});
-		return branch ?? undefined;
-	});
+	[currentBranch] = createResource(
+		() => {
+			if (repositoryIsCloned.error) {
+				return false;
+			}
+			return repositoryIsCloned();
+		},
+		async () => {
+			const branch = await raw.currentBranch({
+				fs,
+			});
+			return branch ?? undefined;
+		}
+	);
 
 	// if the config is loaded, read the resources
 	//! will lead to weird ux since this effect does not
