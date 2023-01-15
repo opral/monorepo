@@ -2,12 +2,7 @@ import { query } from "@inlang/core/query";
 import type { PageHead } from "@src/renderer/types.js";
 import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
-import {
-	resources,
-	inlangConfig,
-	referenceResource,
-	repositoryIsCloned,
-} from "./state.js";
+import { resources, inlangConfig, repositoryIsCloned } from "./state.js";
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import type { EditorRouteParams } from "./types.js";
