@@ -275,7 +275,14 @@ function SignInBanner() {
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match when={userIsCollaborator() === false && localStorage.user}>
+				<Match
+					when={
+						userIsCollaborator.error === false &&
+						repositoryInformation.loading === false &&
+						userIsCollaborator() === false &&
+						localStorage.user
+					}
+				>
 					<Banner
 						variant="info"
 						message={`
@@ -301,7 +308,14 @@ function SignInBanner() {
 						</sl-button>
 					</Banner>
 				</Match>
-				<Match when={hasPushedChanges() && repositoryInformation().fork}>
+				<Match
+					when={
+						repositoryInformation.error === false &&
+						repositoryInformation.loading === false &&
+						hasPushedChanges() &&
+						repositoryInformation().fork
+					}
+				>
 					<Banner
 						variant="success"
 						message={`You are working in a forced project. Please make a "pull request" to transfer your changes to the parent project:
