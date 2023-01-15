@@ -359,9 +359,13 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 			...environmentFunctions,
 		});
 		return initialized;
-	} catch {
-		// the config does not exist
-		return undefined;
+	} catch (error) {
+		if ((error as Error).message.includes("ENOENT")) {
+			// the config does not exist
+			return undefined;
+		} else {
+			throw error;
+		}
 	}
 }
 

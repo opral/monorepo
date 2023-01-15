@@ -72,7 +72,8 @@ export function Page() {
 				</Match>
 				<Match when={inlangConfig.error}>
 					<p class="text-danger">
-						The config could not be read: {inlangConfig.error.message}
+						An error occured while initializing the config:{" "}
+						{inlangConfig.error.message}
 					</p>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
