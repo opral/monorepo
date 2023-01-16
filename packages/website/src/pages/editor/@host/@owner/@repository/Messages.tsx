@@ -47,35 +47,34 @@ export function Messages(props: {
 		throw Error("No message id found");
 	};
 	return (
-		<div class="border border-outline p-4 rounde space-y-4">
-			<h3 slot="summary" class="font-medium   ">
+		<div class="border border-outline p-4">
+			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
-			<div class="grid grid-cols-2 gap-4">
-				<div class="flex-col self-center">
-					<div class="flex justify-start ">
-						{inlangConfig()?.referenceLanguage}
+			<div class="grid grid-cols-2 gap-16">
+				<div class="grid grid-cols-12">
+					<div class="self-center">{inlangConfig()?.referenceLanguage}</div>
+					<div class="col-span-11 self-center">
+						<PatternEditor
+							language={inlangConfig()!.referenceLanguage}
+							id={id()}
+							referenceMessage={referenceMessage()}
+							message={props.messages[inlangConfig()!.referenceLanguage]}
+						></PatternEditor>
 					</div>
-
-					<PatternEditor
-						language={inlangConfig()!.referenceLanguage}
-						id={id()}
-						referenceMessage={referenceMessage()}
-						message={props.messages[inlangConfig()!.referenceLanguage]}
-					></PatternEditor>
 				</div>
 				<div class="flex flex-col gap-2">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
-							<Show when={language !== inlangConfig()!.referenceLanguage}>
+							<Show when={language !== inlangConfig()?.referenceLanguage}>
 								<div
-									class="grid grid-cols-10"
+									class="grid grid-cols-12"
 									classList={{
 										hidden: filteredLanguages().includes(language) === false,
 									}}
 								>
-									<div class="justify-self-center">{language}</div>
-									<div class="col-span-9">
+									<div class="self-center">{language}</div>
+									<div class="col-span-11">
 										<PatternEditor
 											language={language}
 											id={id()}
