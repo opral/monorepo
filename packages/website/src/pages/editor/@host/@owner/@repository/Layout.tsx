@@ -219,8 +219,8 @@ function LanguageFilter() {
 				<sl-button slot="trigger" prop:caret={true}>
 					Languages
 				</sl-button>
-				<sl-menu class="min-w-full  px-8 space-y-1">
-					<div class="flex space-x-6 ">
+				<sl-menu class="min-w-full px-8 space-y-1">
+					<div class="flex space-x-6">
 						<a
 							class="cursor-pointer text-sm font-normal link link-primary"
 							onClick={() =>
