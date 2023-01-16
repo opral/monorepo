@@ -219,16 +219,16 @@ function LanguageFilter() {
 				</sl-button>
 				<sl-menu class="min-w-full py-4 px-8">
 					<div class="flex space-x-6 py-2">
-						<p
-							class="font-light link link-primary"
+						<a
+							class="cursor-pointer font-light link link-primary"
 							onClick={() =>
 								setFilteredLanguages(() => inlangConfig()!.languages)
 							}
 						>
 							Select all
-						</p>
+						</a>
 						<a
-							class="font-light link link-primary"
+							class="cursor-pointer font-light link link-primary"
 							onClick={() => setFilteredLanguages([])}
 						>
 							Reset
