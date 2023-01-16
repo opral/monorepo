@@ -47,7 +47,7 @@ export function Messages(props: {
 		throw Error("No message id found");
 	};
 	return (
-		<div class="border border-outline p-4 rounde space-y-4">
+		<div class="border border-outline p-4 rounde ">
 			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
@@ -69,7 +69,7 @@ export function Messages(props: {
 				<div class="space-y-1">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
-							<Show when={language !== inlangConfig()!.referenceLanguage}>
+							<Show when={language !== inlangConfig()?.referenceLanguage}>
 								<div
 									class="flex"
 									classList={{
