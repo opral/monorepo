@@ -47,12 +47,12 @@ export function Messages(props: {
 		throw Error("No message id found");
 	};
 	return (
-		<div class="border border-outline p-4 rounde ">
+		<div class="border border-outline p-4  ">
 			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
-			<div class="grid grid-cols-2 gap-6">
-				<div class="flex-col self-center space-y-1">
+			<div class="grid grid-cols-2 gap-16">
+				<div class="flex-col self-center">
 					<div class="flex">
 						{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
 						<div class="min-w-min w-7">{inlangConfig()!.referenceLanguage}</div>
