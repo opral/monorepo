@@ -6,6 +6,7 @@ import {
 	setResources,
 	referenceResource,
 	userIsCollaborator,
+	filteredLanguages,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -45,44 +46,51 @@ export function Messages(props: {
 		}
 		throw Error("No message id found");
 	};
-
 	return (
 		<div class="border border-outline p-4 rounded">
-			<h3 slot="summary" class="font-medium pb-4">
+			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
-			<div class="grid gap-2 col-span-5">
-				<For each={inlangConfig()?.languages}>
-					{(language) => (
-						<div class="grid grid-cols-4 gap-4">
-							<p class="flex justify-start pt-2">
-								<Show
-									when={language === inlangConfig()!.referenceLanguage}
-									fallback={language}
+			<div class="grid grid-cols-2 gap-16">
+				<div class="flex self-center">
+					{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
+					<div class="min-w-min w-8 self-center">
+						{inlangConfig()!.referenceLanguage}
+					</div>
+					<div class="grow">
+						<PatternEditor
+							language={inlangConfig()!.referenceLanguage}
+							id={id()}
+							referenceMessage={referenceMessage()}
+							message={props.messages[inlangConfig()!.referenceLanguage]}
+						></PatternEditor>
+					</div>
+				</div>
+				<div class="flex flex-col gap-2">
+					<For each={inlangConfig()?.languages}>
+						{(language) => (
+							<Show when={language !== inlangConfig()?.referenceLanguage}>
+								<div
+									class="flex"
+									classList={{
+										hidden: filteredLanguages().includes(language) === false,
+									}}
 								>
-									{language}
-									<sl-tooltip class="hidden md:block">
-										<p slot="content">
-											The reference message acts as source of truth for the
-											other messages.
-										</p>
-										<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-											Reference
-										</span>
-									</sl-tooltip>
-								</Show>
-							</p>
-							<div class="col-span-3">
-								<PatternEditor
-									language={language}
-									id={id()}
-									referenceMessage={referenceMessage()}
-									message={props.messages[language]}
-								></PatternEditor>
-							</div>
-						</div>
-					)}
-				</For>
+									{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
+									<div class="min-w-min w-8 self-center">{language}</div>
+									<div class="grow">
+										<PatternEditor
+											language={language}
+											id={id()}
+											referenceMessage={referenceMessage()}
+											message={props.messages[language]}
+										></PatternEditor>
+									</div>
+								</div>
+							</Show>
+						)}
+					</For>
+				</div>
 			</div>
 		</div>
 	);
@@ -258,18 +266,16 @@ function PatternEditor(props: {
 			]}
 		>
 			{/* TODO: #169 use proper text editor instead of input element */}
-			<sl-input
+			<sl-textarea
+				prop:resize="auto"
+				prop:size="small"
+				prop:rows={1}
 				class="border-none p-0"
 				onFocus={() => setIsFocused(true)}
 				prop:value={textValue() ?? ""}
 				prop:disabled={userIsCollaborator() === false}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-			>
-				<MaterialSymbolsEditOutlineRounded
-					slot="suffix"
-					class="text-outline-variant"
-				></MaterialSymbolsEditOutlineRounded>
-			</sl-input>
+			></sl-textarea>
 			{/* <div
 				onFocus={() => setIsFocused(true)}
 				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
