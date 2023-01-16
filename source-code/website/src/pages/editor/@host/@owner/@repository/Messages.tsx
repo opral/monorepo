@@ -53,8 +53,8 @@ export function Messages(props: {
 			</h3>
 			<div class="grid grid-cols-2 gap-16">
 				<div class="flex self-center">
-					{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
-					<div class="min-w-min w-7">{inlangConfig()!.referenceLanguage}</div>
+					{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
+					<div class="min-w-min w-8">{inlangConfig()!.referenceLanguage}</div>
 					<div class="grow">
 						<PatternEditor
 							language={inlangConfig()!.referenceLanguage}
@@ -74,8 +74,8 @@ export function Messages(props: {
 										hidden: filteredLanguages().includes(language) === false,
 									}}
 								>
-									{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
-									<div class="min-w-min w-7">{language}</div>
+									{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
+									<div class="min-w-min w-8">{language}</div>
 									<div class="grow">
 										<PatternEditor
 											language={language}
