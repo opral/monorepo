@@ -6,6 +6,7 @@ import {
 	setResources,
 	referenceResource,
 	userIsCollaborator,
+	filteredLanguages,
 } from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
@@ -75,14 +76,14 @@ export function Messages(props: {
 				<div>
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
-							<Show
-								when={
-									language !== inlangConfig()!.referenceLanguage &&
-									language !== ""
-								}
-							>
-								<div class="grid grid-cols-10 py-2 ">
-									<div class="justify-self-center ">{language}</div>
+							<Show when={language !== inlangConfig()!.referenceLanguage}>
+								<div
+									class="grid grid-cols-10 py-2 "
+									classList={{
+										hidden: filteredLanguages().includes(language) === false,
+									}}
+								>
+									<div class="justify-self-center">{language}</div>
 									<div class="col-span-9">
 										<PatternEditor
 											language={language}
@@ -307,7 +308,6 @@ function PatternEditor(props: {
 			{/* TODO: #169 use proper text editor instead of input element */}
 			<sl-textarea
 				prop:resize="auto"
-				// prop:filled={true}
 				prop:size="small"
 				prop:rows={1}
 				class="border-none p-0"
