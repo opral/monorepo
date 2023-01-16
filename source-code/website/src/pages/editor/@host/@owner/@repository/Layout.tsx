@@ -217,7 +217,7 @@ function LanguageFilter() {
 		<Show when={inlangConfig()?.languages}>
 			<sl-dropdown>
 				<sl-button slot="trigger" prop:caret={true}>
-					Language{" "}
+					Languages
 				</sl-button>
 				<sl-menu class="min-w-full py-4 px-8">
 					<div class="flex space-x-6 py-2">
