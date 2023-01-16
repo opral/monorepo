@@ -64,7 +64,7 @@ export function Messages(props: {
 						></PatternEditor>
 					</div>
 				</div>
-				<div class="space-y-1">
+				<div class="flex flex-col gap-2">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<Show when={language !== inlangConfig()?.referenceLanguage}>
