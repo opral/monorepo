@@ -219,10 +219,10 @@ function LanguageFilter() {
 				<sl-button slot="trigger" prop:caret={true}>
 					Languages
 				</sl-button>
-				<sl-menu class="min-w-full py-4 px-8">
-					<div class="flex space-x-6 py-2">
+				<sl-menu class="min-w-full py-4 px-8 space-y-1">
+					<div class="flex space-x-6 ">
 						<a
-							class="cursor-pointer font-light link link-primary"
+							class="cursor-pointer text-sm font-normal link link-primary"
 							onClick={() =>
 								setFilteredLanguages(() => inlangConfig()!.languages)
 							}
@@ -230,10 +230,10 @@ function LanguageFilter() {
 							Select all
 						</a>
 						<a
-							class="cursor-pointer font-light link link-primary"
+							class="cursor-pointer text-sm font-normal link link-primary"
 							onClick={() => setFilteredLanguages([])}
 						>
-							Reset
+							Deselect all
 						</a>
 					</div>
 					<hr></hr>
