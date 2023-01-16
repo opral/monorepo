@@ -52,18 +52,16 @@ export function Messages(props: {
 				{id()}
 			</h3>
 			<div class="grid grid-cols-2 gap-16">
-				<div class="flex-col self-center">
-					<div class="flex">
-						{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
-						<div class="min-w-min w-7">{inlangConfig()!.referenceLanguage}</div>
-						<div class="grow">
-							<PatternEditor
-								language={inlangConfig()!.referenceLanguage}
-								id={id()}
-								referenceMessage={referenceMessage()}
-								message={props.messages[inlangConfig()!.referenceLanguage]}
-							></PatternEditor>
-						</div>
+				<div class="flex self-center">
+					{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
+					<div class="min-w-min w-7">{inlangConfig()!.referenceLanguage}</div>
+					<div class="grow">
+						<PatternEditor
+							language={inlangConfig()!.referenceLanguage}
+							id={id()}
+							referenceMessage={referenceMessage()}
+							message={props.messages[inlangConfig()!.referenceLanguage]}
+						></PatternEditor>
 					</div>
 				</div>
 				<div class="space-y-1">
