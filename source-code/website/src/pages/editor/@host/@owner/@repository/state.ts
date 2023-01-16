@@ -197,6 +197,10 @@ export const searchParams = () =>
  */
 export const [fsChange, setFsChange] = createSignal(new Date());
 
+export const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>(
+	[]
+);
+
 export { resources, setResources };
 
 /**
@@ -355,9 +359,12 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 			"data:application/javascript;base64," + btoa(file.toString());
 
 		const module = await import(/* @vite-ignore */ withMimeType);
-		const initialized = await module.initializeConfig({
+		const initialized: InlangConfig = await module.initializeConfig({
 			...environmentFunctions,
 		});
+
+		//initialises/ set the inital signal for  the language of the language filter for the messages
+		setFilteredLanguages(initialized.languages);
 		return initialized;
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
