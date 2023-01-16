@@ -54,7 +54,9 @@ export function Messages(props: {
 			<div class="grid grid-cols-2 gap-16">
 				<div class="flex self-center">
 					{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
-					<div class="min-w-min w-8">{inlangConfig()!.referenceLanguage}</div>
+					<div class="min-w-min w-8 self-center">
+						{inlangConfig()!.referenceLanguage}
+					</div>
 					<div class="grow">
 						<PatternEditor
 							language={inlangConfig()!.referenceLanguage}
@@ -75,7 +77,7 @@ export function Messages(props: {
 									}}
 								>
 									{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
-									<div class="min-w-min w-8">{language}</div>
+									<div class="min-w-min w-8 self-center">{language}</div>
 									<div class="grow">
 										<PatternEditor
 											language={language}
