@@ -52,18 +52,9 @@ export function Messages(props: {
 				{id()}
 			</h3>
 			<div class="grid grid-cols-2 gap-4">
-				<div class="flex-col self-center space-y-1">
+				<div class="flex-col self-center">
 					<div class="flex justify-start ">
-						{inlangConfig()!.referenceLanguage}
-						<sl-tooltip class="hidden md:block">
-							<p slot="content">
-								The reference message acts as source of truth for the other
-								messages.
-							</p>
-							<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-								Reference
-							</span>
-						</sl-tooltip>
+						{inlangConfig()?.referenceLanguage}
 					</div>
 
 					<PatternEditor
@@ -73,12 +64,12 @@ export function Messages(props: {
 						message={props.messages[inlangConfig()!.referenceLanguage]}
 					></PatternEditor>
 				</div>
-				<div>
+				<div class="flex flex-col gap-2">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<Show when={language !== inlangConfig()!.referenceLanguage}>
 								<div
-									class="grid grid-cols-10 py-2 "
+									class="grid grid-cols-10"
 									classList={{
 										hidden: filteredLanguages().includes(language) === false,
 									}}
