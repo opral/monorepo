@@ -48,43 +48,37 @@ export function Messages(props: {
 	};
 	return (
 		<div class="border border-outline p-4 rounde space-y-4">
-			<h3 slot="summary" class="font-medium   ">
+			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
-			<div class="grid grid-cols-2 gap-4">
+			<div class="grid grid-cols-2 gap-6">
 				<div class="flex-col self-center space-y-1">
-					<div class="flex justify-start ">
-						{inlangConfig()!.referenceLanguage}
-						<sl-tooltip class="hidden md:block">
-							<p slot="content">
-								The reference message acts as source of truth for the other
-								messages.
-							</p>
-							<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-								Reference
-							</span>
-						</sl-tooltip>
+					<div class="flex">
+						{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
+						<div class="min-w-min w-7">{inlangConfig()!.referenceLanguage}</div>
+						<div class="grow">
+							<PatternEditor
+								language={inlangConfig()!.referenceLanguage}
+								id={id()}
+								referenceMessage={referenceMessage()}
+								message={props.messages[inlangConfig()!.referenceLanguage]}
+							></PatternEditor>
+						</div>
 					</div>
-
-					<PatternEditor
-						language={inlangConfig()!.referenceLanguage}
-						id={id()}
-						referenceMessage={referenceMessage()}
-						message={props.messages[inlangConfig()!.referenceLanguage]}
-					></PatternEditor>
 				</div>
-				<div>
+				<div class="space-y-1">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<Show when={language !== inlangConfig()!.referenceLanguage}>
 								<div
-									class="grid grid-cols-10 py-2 "
+									class="flex"
 									classList={{
 										hidden: filteredLanguages().includes(language) === false,
 									}}
 								>
-									<div class="justify-self-center">{language}</div>
-									<div class="col-span-9">
+									{/* min-w-min in case, w-7 is not wide enough for the contry code  */}
+									<div class="min-w-min w-7">{language}</div>
+									<div class="grow">
 										<PatternEditor
 											language={language}
 											id={id()}
@@ -98,40 +92,6 @@ export function Messages(props: {
 					</For>
 				</div>
 			</div>
-
-			{/* <div class="grid gap-2 col-span-5">
-				<For each={inlangConfig()?.languages}>
-					{(language) => (
-						<div class="grid grid-cols-4 gap-4">
-							<p class="flex justify-start pt-2">
-								<Show
-									when={language === inlangConfig()!.referenceLanguage}
-									fallback={language}
-								>
-									{language}
-									<sl-tooltip class="hidden md:block">
-										<p slot="content">
-											The reference message acts as source of truth for the
-											other messages.
-										</p>
-										<span class="ml-1.5 text-secondary underline decoration-dotted underline-offset-2 text-sm hover:cursor-pointer">
-											Reference
-										</span>
-									</sl-tooltip>
-								</Show>
-							</p>
-							<div class="col-span-3">
-								<PatternEditor
-									language={language}
-									id={id()}
-									referenceMessage={referenceMessage()}
-									message={props.messages[language]}
-								></PatternEditor>
-							</div>
-						</div>
-					)}
-				</For>
-			</div> */}
 		</div>
 	);
 }
@@ -315,12 +275,7 @@ function PatternEditor(props: {
 				prop:value={textValue() ?? ""}
 				prop:disabled={userIsCollaborator() === false}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-			>
-				<MaterialSymbolsEditOutlineRounded
-					slot="suffix"
-					class="text-outline-variant"
-				></MaterialSymbolsEditOutlineRounded>
-			</sl-textarea>
+			></sl-textarea>
 			{/* <div
 				onFocus={() => setIsFocused(true)}
 				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
