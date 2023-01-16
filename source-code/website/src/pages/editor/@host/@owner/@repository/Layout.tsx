@@ -7,11 +7,15 @@ import {
 	userIsCollaborator,
 	repositoryInformation,
 	currentBranch,
+	inlangConfig,
+	setFilteredLanguages,
+	filteredLanguages,
 } from "./state.js";
 import {
 	createEffect,
 	createResource,
 	createSignal,
+	For,
 	JSXElement,
 	Match,
 	onCleanup,
@@ -35,10 +39,10 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
-import { isServer } from "solid-js/web";
+import { addMilliseconds } from "date-fns/esm";
+import { filter } from "compression";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
-
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
@@ -51,7 +55,10 @@ export function Layout(props: { children: JSXElement }) {
 							<Breadcrumbs></Breadcrumbs>
 							<BranchMenu></BranchMenu>
 						</div>
-						<HasChangesAction></HasChangesAction>
+						<sl-button-group prop:label="filterbar">
+							<LanguageFilter></LanguageFilter>
+							<HasChangesAction></HasChangesAction>
+						</sl-button-group>{" "}
 					</div>
 					<hr class="h-px w-full bg-outline-variant my-2"> </hr>
 					{props.children}
@@ -205,6 +212,58 @@ function HasChangesAction() {
 	);
 }
 
+function LanguageFilter() {
+	return (
+		<Show when={inlangConfig()?.languages}>
+			<sl-dropdown>
+				<sl-button slot="trigger" prop:caret={true}>
+					Languages
+				</sl-button>
+				<sl-menu class="p-4 rounded">
+					<div class="flex gap-6">
+						<a
+							class="cursor-pointer text-sm font-medium link link-primary"
+							onClick={() =>
+								setFilteredLanguages(() => inlangConfig()!.languages)
+							}
+						>
+							Select all
+						</a>
+						<a
+							class="cursor-pointer text-sm font-normal link link-primary"
+							onClick={() => setFilteredLanguages([])}
+						>
+							Deselect all
+						</a>
+					</div>
+					<hr class="border-outline my-2"></hr>
+					<For each={inlangConfig()?.languages}>
+						{(language) => (
+							<Show when={language !== inlangConfig()!.referenceLanguage}>
+								<sl-checkbox
+									class="block"
+									prop:checked={filteredLanguages().includes(language)}
+									on:sl-change={(event: any) => {
+										if (event.target.__checked) {
+											setFilteredLanguages((value) => [...value, language]);
+										} else {
+											setFilteredLanguages((value) =>
+												value.filter((_language) => _language !== language)
+											);
+										}
+									}}
+								>
+									{language}
+								</sl-checkbox>
+							</Show>
+						)}
+					</For>
+				</sl-menu>
+			</sl-dropdown>
+		</Show>
+	);
+}
+
 function SignInBanner() {
 	const [localStorage] = useLocalStorage();
 	const [isLoading, setIsLoading] = createSignal(false);
@@ -259,7 +318,6 @@ function SignInBanner() {
 			return response;
 		}
 	}
-
 	return (
 		<>
 			<Switch>
@@ -277,8 +335,8 @@ function SignInBanner() {
 				</Match>
 				<Match
 					when={
-						userIsCollaborator.error === false &&
-						repositoryInformation.loading === false &&
+						userIsCollaborator.error === undefined &&
+						userIsCollaborator.loading === false &&
 						userIsCollaborator() === false &&
 						localStorage.user
 					}
@@ -310,7 +368,7 @@ function SignInBanner() {
 				</Match>
 				<Match
 					when={
-						repositoryInformation.error === false &&
+						repositoryInformation.error === undefined &&
 						repositoryInformation.loading === false &&
 						hasPushedChanges() &&
 						repositoryInformation().fork
@@ -318,7 +376,7 @@ function SignInBanner() {
 				>
 					<Banner
 						variant="success"
-						message={`You are working in a forced project. Please make a "pull request" to transfer your changes to the parent project:
+						message={`You are working in a forked project. Please make a "pull request" to transfer your changes to the parent project:
 							"${repositoryInformation().parent.full_name}"`}
 					>
 						<sl-button
@@ -375,7 +433,6 @@ function Banner(props: {
 	children: JSXElement;
 }) {
 	let alert: SlAlert | undefined;
-
 	return (
 		<sl-alert
 			prop:variant={props.variant === "info" ? "primary" : props.variant}
