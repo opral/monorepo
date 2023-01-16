@@ -213,7 +213,6 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	createEffect(() => console.log(filteredLanguages()));
 	return (
 		<Show when={inlangConfig()?.languages}>
 			<sl-dropdown>
