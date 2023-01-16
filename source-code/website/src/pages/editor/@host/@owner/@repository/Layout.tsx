@@ -39,6 +39,8 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
+import { addMilliseconds } from "date-fns/esm";
+import { filter } from "compression";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 // command-f this repo to find where the layout is called
@@ -211,6 +213,7 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
+	createEffect(() => console.log(filteredLanguages()));
 	return (
 		<Show when={inlangConfig()?.languages}>
 			<sl-dropdown>
@@ -219,20 +222,55 @@ function LanguageFilter() {
 				</sl-button>
 				<sl-menu class="min-w-full py-4 px-8">
 					<div class="flex space-x-6 py-2">
-						<a
-							class="cursor-pointer font-light link link-primary"
-							onClick={() =>
-								setFilteredLanguages(() => inlangConfig()!.languages)
-							}
-						>
-							Select all
-						</a>
-						<a
-							class="cursor-pointer font-light link link-primary"
-							onClick={() => setFilteredLanguages([])}
-						>
-							Reset
-						</a>
+						<Switch>
+							<Match
+								when={
+									filteredLanguages().length <= inlangConfig()!.languages.length
+								}
+							>
+								<a
+									class="cursor-not-allowed font-light link link-primary "
+									onClick={() =>
+										setFilteredLanguages(() => inlangConfig()!.languages)
+									}
+								>
+									Select all
+								</a>
+							</Match>
+							<Match
+								when={
+									filteredLanguages().length !==
+									inlangConfig()?.languages.length
+								}
+							>
+								<a
+									class="cursor-pointer font-light link link-primary"
+									onClick={() =>
+										setFilteredLanguages(() => inlangConfig()!.languages)
+									}
+								>
+									Select all
+								</a>
+							</Match>
+						</Switch>
+						<Switch>
+							<Match when={filteredLanguages().length === 0}>
+								<a
+									class="cursor-not-allowed font-light link link-primary "
+									onClick={() => setFilteredLanguages([])}
+								>
+									Reset
+								</a>
+							</Match>
+							<Match when={filteredLanguages().length !== 0}>
+								<a
+									class="cursor-pointer font-light link link-primary"
+									onClick={() => setFilteredLanguages([])}
+								>
+									Reset
+								</a>
+							</Match>
+						</Switch>
 					</div>
 					<hr></hr>
 					<div>
