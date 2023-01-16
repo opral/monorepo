@@ -219,10 +219,10 @@ function LanguageFilter() {
 				<sl-button slot="trigger" prop:caret={true}>
 					Languages
 				</sl-button>
-				<sl-menu class="min-w-full px-4 space-y-1">
-					<div class="flex space-x-6">
+				<sl-menu class="p-4 rounded">
+					<div class="flex gap-6">
 						<a
-							class="cursor-pointer text-sm font-normal link link-primary"
+							class="cursor-pointer text-sm font-medium link link-primary"
 							onClick={() =>
 								setFilteredLanguages(() => inlangConfig()!.languages)
 							}
@@ -236,31 +236,28 @@ function LanguageFilter() {
 							Deselect all
 						</a>
 					</div>
-					<hr></hr>
-					<div>
-						<For each={inlangConfig()?.languages}>
-							{(language) => (
-								<Show when={language !== inlangConfig()!.referenceLanguage}>
-									<div>
-										<sl-checkbox
-											on:sl-change={(event: any) => {
-												if (event.target.__checked) {
-													setFilteredLanguages((value) => [...value, language]);
-												} else {
-													setFilteredLanguages((value) =>
-														value.filter((_language) => _language !== language)
-													);
-												}
-											}}
-											prop:checked={filteredLanguages().includes(language)}
-										>
-											{language}
-										</sl-checkbox>
-									</div>
-								</Show>
-							)}
-						</For>
-					</div>
+					<hr class="border-outline my-2"></hr>
+					<For each={inlangConfig()?.languages}>
+						{(language) => (
+							<Show when={language !== inlangConfig()!.referenceLanguage}>
+								<sl-checkbox
+									class="block"
+									prop:checked={filteredLanguages().includes(language)}
+									on:sl-change={(event: any) => {
+										if (event.target.__checked) {
+											setFilteredLanguages((value) => [...value, language]);
+										} else {
+											setFilteredLanguages((value) =>
+												value.filter((_language) => _language !== language)
+											);
+										}
+									}}
+								>
+									{language}
+								</sl-checkbox>
+							</Show>
+						)}
+					</For>
 				</sl-menu>
 			</sl-dropdown>
 		</Show>
