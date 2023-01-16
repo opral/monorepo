@@ -47,7 +47,7 @@ export function Messages(props: {
 		throw Error("No message id found");
 	};
 	return (
-		<div class="border border-outline p-4  ">
+		<div class="border border-outline p-4 rounded">
 			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
