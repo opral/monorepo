@@ -364,7 +364,13 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		});
 
 		//initialises/ set the inital signal for  the language of the language filter for the messages
-		setFilteredLanguages(initialized.languages);
+		// .filter removes the referenceLanguage from the array languages
+		setFilteredLanguages(
+			initialized.languages.filter(
+				(languages) => languages !== initialized.referenceLanguage
+			)
+		);
+
 		return initialized;
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
