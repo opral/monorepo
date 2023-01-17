@@ -18,7 +18,11 @@ export async function render(
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
 	// metadata of the page.
-	assertUsage(pageContext.exports.Head, "A page must export a Head.");
+
+	assertUsage(
+		pageContext.exports.Head,
+		"A page must export a Head function. See example how other pages export a Head"
+	);
 	const head = pageContext.exports.Head({ pageContext });
 	assertUsage(
 		head.description.length < 160,
