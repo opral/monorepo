@@ -1,11 +1,6 @@
-import { decryptAccessToken } from "../auth/logic.js";
-import { serverSideEnv } from "@env";
-const env = await serverSideEnv();
-
 export async function onFork(args: {
 	owner: string;
 	repository: string;
-	encryptedAccessToken: string;
 	username: string;
 }): Promise<
 	| {
@@ -16,12 +11,6 @@ export async function onFork(args: {
 	| { type: "error"; error: any }
 > {
 	try {
-		const decryptedAccessToken = (
-			await decryptAccessToken({
-				jwe: args.encryptedAccessToken,
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-			})
-		).unwrap();
 		const response = await fetch(
 			`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
 			{
@@ -53,17 +42,10 @@ export async function onFork(args: {
 export async function syncFork(args: {
 	owner: string;
 	repository: string;
-	encryptedAccessToken: string;
 }): Promise<{
 	status: number;
 	message: string;
 }> {
-	const decryptedAccessToken = (
-		await decryptAccessToken({
-			jwe: args.encryptedAccessToken,
-			JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-		})
-	).unwrap();
 	const response = await fetch(
 		`https://api.github.com/repos/${args.owner}/${args.repository}/merge-upstream`,
 		{

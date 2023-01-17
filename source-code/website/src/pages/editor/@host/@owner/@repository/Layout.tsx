@@ -296,7 +296,6 @@ function SignInBanner() {
 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 			repository: (currentPageContext.routeParams as EditorRouteParams)
 				.repository,
-			encryptedAccessToken: localStorage.user.encryptedAccessToken,
 			username: localStorage.user.username,
 		});
 		if (response.type === "success") {
