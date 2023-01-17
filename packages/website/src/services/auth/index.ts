@@ -7,4 +7,3 @@
 
 export { SignInDialog } from "./SignInDialog.jsx";
 export { decryptAccessToken } from "./logic.js";
-export { AUTH_HEADER_KEY } from "./auth-header.js";
