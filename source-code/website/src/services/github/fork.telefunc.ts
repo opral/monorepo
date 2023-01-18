@@ -1,3 +1,5 @@
+import { getContext } from "telefunc";
+
 export async function onFork(args: {
 	owner: string;
 	repository: string;
@@ -11,12 +13,13 @@ export async function onFork(args: {
 	| { type: "error"; error: any }
 > {
 	try {
+		const context = getContext();
 		const response = await fetch(
 			`https://api.github.com/repos/${args.owner}/${args.repository}/forks`,
 			{
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${decryptedAccessToken}`,
+					Authorization: `Bearer ${context.githubAccessToken}`,
 					"X-GitHub-Api-Version": "2022-11-28",
 				},
 				// body: JSON.stringify({
@@ -46,12 +49,13 @@ export async function syncFork(args: {
 	status: number;
 	message: string;
 }> {
+	const context = getContext();
 	const response = await fetch(
 		`https://api.github.com/repos/${args.owner}/${args.repository}/merge-upstream`,
 		{
 			method: "POST",
 			headers: {
-				Authorization: `Bearer ${decryptedAccessToken}`,
+				Authorization: `Bearer ${context.githubAccessToken}`,
 				"X-GitHub-Api-Version": "2022-11-28",
 			},
 			body: JSON.stringify({
