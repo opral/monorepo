@@ -89,11 +89,11 @@ Reasons against embeddability are runtime dependent features like networking or 
 
 - SPA, SSR, MPA, (PWA)
 
-The editor is a classical SPA while the website is SSR.
+The editor is a classical SPA while the website is SSR. Note however that the experience of using the editor should not be hidden behind a login screen. After all, inlang is great to crowd source translations.
 
 - SEO ✅ (website) ❔ (editor)
 
-SEO is important for the website and might be important for the editor.
+SEO is important for the website and might be important for the editor.  
 
 ## Choices
 
@@ -105,7 +105,7 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 ### website (metaframework)
 
-VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. High control is required to localize inlang (yes, other metaframeworks like Next.js 13 or SvelteKit only support i18n via workarounds) and because of the editor. The editor is a classical SPA app with SSR components. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase.
+VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Furthermore, higher control is required to localize inlang (other metaframeworks like Next.js 13 or SvelteKit only support i18n via workarounds) and because of the editor. The editor is a classical SPA app with SSR components. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase.
 
 #### why vite-plugin-ssr?
 
