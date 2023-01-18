@@ -3,7 +3,7 @@ import { useLocalStorage } from "@src/services/local-storage/index.js";
 import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
-import { getUserInfo } from "./oauth-callback.telefunc.js";
+import { getUserInfo } from "../logic.telefunc.js";
 
 /**
  * The GitHub web application flow redirects to this page.
