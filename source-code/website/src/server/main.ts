@@ -75,6 +75,8 @@ if (isProduction) {
 	app.use(viteServer.middlewares);
 }
 
+// ------------------------ START ROUTES ------------------------
+
 // serving telefunc https://telefunc.com/
 //! it is extremely important that a request handler is not async to catch errors.
 //! express does not catch async errors. hence, the callback pattern is used.
@@ -109,14 +111,17 @@ app.get("*", (request, response, next) => {
 	})
 		.then((pageContext) => {
 			if (pageContext.httpResponse === null) {
-				return next();
+				next();
+			} else {
+				const { body, statusCode, contentType } = pageContext.httpResponse;
+				response.status(statusCode).type(contentType).send(body);
 			}
-			const { body, statusCode, contentType } = pageContext.httpResponse;
-			return response.status(statusCode).type(contentType).send(body);
 		})
 		// pass the error to expresses error handling
 		.catch(next);
 });
+
+// ------------------------ END ROUTES ------------------------
 
 const port = process.env.PORT ?? 3000;
 app.listen(port);
