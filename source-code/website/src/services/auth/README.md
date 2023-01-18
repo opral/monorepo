@@ -12,7 +12,7 @@ Auth uses [(GitHub) OAuth](https://docs.github.com/en/developers/apps/building-o
 
 ### Architecture
 
-Client-side requests are tunneled through a server that adds authentification tokens based on the client's encrypted JWT (JWE) when making requests to git hosts like GitHub or GitLab.
+Client-side requests are tunneled through a server that adds authentification tokens based on a cookie session that contains an encrypted access token when making requests to git hosts like GitHub or GitLab.
 
 The nature of executing external JavaScript on the client via the config entails the requirement to never store, not even in memory for 1s, an access token from a git host. The chosen encryption algorithm is symmetric to ease implementation and because the client is not supposed to encrypt or decrypt anything.
 
