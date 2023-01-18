@@ -1,5 +1,4 @@
 import { query } from "@inlang/core/query";
-import type { PageHead } from "@src/renderer/types.js";
 import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
@@ -10,17 +9,9 @@ import {
 } from "./state.js";
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
-import type { EditorRouteParams } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
-
-export const Head: PageHead = (props) => {
-	const routeParams = props.pageContext.routeParams as EditorRouteParams;
-	return {
-		title: routeParams.owner + "/" + routeParams.repository,
-		description: `Contribute translations to ${routeParams.repository} via inlangs editor.`,
-	};
-};
+import { Meta, Title } from "@solidjs/meta";
 
 export function Page() {
 	/**
@@ -55,42 +46,53 @@ export function Page() {
 	});
 
 	return (
-		<EditorLayout>
-			<Switch
-				fallback={
-					<p class="text-danger">
-						Switch fallback. This is likely an error. Please report it with code
-						e329jafs.
-					</p>
-				}
-			>
-				<Match when={repositoryIsCloned.error?.message.includes("404")}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard></RepositoryDoesNotExistOrNotAuthorizedCard>
-				</Match>
-				<Match when={repositoryIsCloned.error}>
-					<p class="text-danger">{repositoryIsCloned.error.message}</p>
-				</Match>
-				<Match when={inlangConfig.error}>
-					<p class="text-danger">
-						An error occured while initializing the config:{" "}
-						{inlangConfig.error.message}
-					</p>
-				</Match>
-				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
-					<p>loading ...</p>
-				</Match>
-				<Match when={inlangConfig() === undefined}>
-					<NoInlangConfigFoundCard></NoInlangConfigFoundCard>
-				</Match>
-				<Match when={inlangConfig()}>
-					<div class="space-y-2">
-						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]}></Messages>}
-						</For>
-					</div>
-				</Match>
-			</Switch>
-		</EditorLayout>
+		<>
+			<Title>
+				{routeParams().owner}/{routeParams().repository}
+			</Title>
+			<Meta
+				name="description"
+				content={`Contribute translations to ${
+					routeParams().repository
+				} via inlangs editor.`}
+			></Meta>
+			<EditorLayout>
+				<Switch
+					fallback={
+						<p class="text-danger">
+							Switch fallback. This is likely an error. Please report it with
+							code e329jafs.
+						</p>
+					}
+				>
+					<Match when={repositoryIsCloned.error?.message.includes("404")}>
+						<RepositoryDoesNotExistOrNotAuthorizedCard></RepositoryDoesNotExistOrNotAuthorizedCard>
+					</Match>
+					<Match when={repositoryIsCloned.error}>
+						<p class="text-danger">{repositoryIsCloned.error.message}</p>
+					</Match>
+					<Match when={inlangConfig.error}>
+						<p class="text-danger">
+							An error occured while initializing the config:{" "}
+							{inlangConfig.error.message}
+						</p>
+					</Match>
+					<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
+						<p>loading ...</p>
+					</Match>
+					<Match when={inlangConfig() === undefined}>
+						<NoInlangConfigFoundCard></NoInlangConfigFoundCard>
+					</Match>
+					<Match when={inlangConfig()}>
+						<div class="space-y-2">
+							<For each={Object.keys(messages())}>
+								{(id) => <Messages messages={messages()[id]}></Messages>}
+							</For>
+						</div>
+					</Match>
+				</Switch>
+			</EditorLayout>
+		</>
 	);
 }
 
