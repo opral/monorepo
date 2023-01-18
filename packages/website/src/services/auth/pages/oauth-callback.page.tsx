@@ -1,18 +1,9 @@
-import { createEffect, createResource, Match, onMount, Switch } from "solid-js";
-import {
-	useLocalStorage,
-	type LocalStorageSchema,
-} from "@src/services/local-storage/index.js";
+import { createEffect, createResource, Match, Switch } from "solid-js";
+import { useLocalStorage } from "@src/services/local-storage/index.js";
 import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
-import type { PageHead } from "@src/renderer/types.js";
 import { getUserInfo } from "./oauth-callback.telefunc.js";
-
-export const Head: PageHead = () => ({
-	title: "Auth redirect",
-	description: "Redirects to inlang.",
-});
 
 /**
  * The GitHub web application flow redirects to this page.
