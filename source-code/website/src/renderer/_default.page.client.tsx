@@ -1,11 +1,12 @@
 import { Component, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { hydrate } from "solid-js/web";
-import { ThePage } from "./ThePage.jsx";
+import { Root } from "./Root.jsx";
 import { setCurrentPageContext } from "./state.js";
 import type { PageContextRenderer } from "./types.js";
 import * as Sentry from "@sentry/browser";
 import { BrowserTracing } from "@sentry/tracing";
+import { MetaProvider } from "@solidjs/meta";
 
 // node polyfill
 import { Buffer } from "buffer";
@@ -59,15 +60,15 @@ const [currentPageProps, setCurrentPageProps] = createStore<
 
 export function render(pageContext: PageContextRenderer) {
 	try {
-		// dynamically setting the document title on client side routing
-		document.title = pageContext.exports.Head({ pageContext }).title;
 		setCurrentPageContext(pageContext);
 		setCurrentPage(() => pageContext.Page);
 		setCurrentPageProps(pageContext.pageProps);
 		if (isFirstRender) {
 			hydrate(
 				() => (
-					<ThePage page={currentPage()!} pageProps={currentPageProps}></ThePage>
+					<MetaProvider>
+						<Root page={currentPage()!} pageProps={currentPageProps}></Root>
+					</MetaProvider>
 				),
 				rootElement
 			);
