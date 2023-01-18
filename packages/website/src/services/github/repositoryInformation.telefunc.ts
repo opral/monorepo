@@ -1,5 +1,4 @@
-import { serverSideEnv } from "@env";
-import { decryptAccessToken } from "../auth/index.js";
+import { getContext } from "telefunc";
 
 /**
  * You can get informations Like: Main repo, owner, updated at ....
@@ -9,12 +8,13 @@ export async function repositoryInformation(args: {
 	owner: string;
 	repository: string;
 }): Promise<any> {
+	const context = getContext();
 	const response = await fetch(
 		`https://api.github.com/repos/${args.owner}/${args.repository}`,
 		{
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${decryptedAccessToken}`,
+				Authorization: `Bearer ${context.githubAccessToken}`,
 				"X-GitHub-Api-Version": "2022-11-28",
 			},
 		}

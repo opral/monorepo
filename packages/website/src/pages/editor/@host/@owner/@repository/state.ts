@@ -23,7 +23,6 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
-import { AUTH_HEADER_KEY } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
 import {
 	isCollaborator,
