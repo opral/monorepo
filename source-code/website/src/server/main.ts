@@ -50,9 +50,9 @@ app.use(compression());
 
 app.use(
 	cookieSession({
-		name: "session",
+		name: "inlang-session",
 		httpOnly: true,
-		secure: isProduction ? true : false,
+		// secure: isProduction ? true : false,
 		secret: env.COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	})
@@ -121,6 +121,7 @@ app.all(
 				})
 				.catch(next);
 		} else {
+			console.log("no session token");
 			telefunc({
 				context: { githubAccessToken: undefined },
 				url: request.originalUrl,

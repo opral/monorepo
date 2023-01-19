@@ -11,6 +11,7 @@ import { getContext } from "telefunc";
 export async function getUserInfo(): Promise<
 	LocalStorageSchema["user"] | undefined
 > {
+	console.log("getUserInfo() called", new Date());
 	const context = getContext();
 	console.log("context", context);
 	if (context.githubAccessToken === undefined) {
