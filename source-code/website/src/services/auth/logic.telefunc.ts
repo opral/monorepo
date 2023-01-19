@@ -24,10 +24,12 @@ export async function getUserInfo(): Promise<
 			"X-GitHub-Api-Version": "2022-11-28",
 		},
 	});
-	if (request.status !== 200) {
+	console.log("request ", request);
+	if (request.ok === false) {
 		throw Error("Failed to get user info " + request.statusText);
 	}
 	const requestBody = await request.json();
+	console.log("requestBody ", requestBody);
 	return {
 		username: requestBody.login,
 		avatarUrl: requestBody.avatar_url,

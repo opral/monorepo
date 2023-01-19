@@ -19,6 +19,7 @@ export function Page() {
 	const [userInfo] = createResource(getUserInfo);
 
 	createEffect(() => {
+		console.log(userInfo);
 		if (userInfo.error === undefined && userInfo()) {
 			setLocalStorage("user", userInfo());
 		}
