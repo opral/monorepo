@@ -4,7 +4,7 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Match, Switch } from "solid-js";
 
 export const Head: PageHead = (props) => ({
-	title: "inlang Editor",
+	title: "inlang Error",
 	description:
 		"Manage translations and localization processes with inlang's editor.",
 });
