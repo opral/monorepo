@@ -27,6 +27,7 @@ import cookieSession from "cookie-session";
 import { router as authService } from "@src/services/auth/server.js";
 import { decryptAccessToken } from "@src/services/auth/logic.js";
 import { config } from "telefunc";
+import { onBug as onTelefuncBug } from "telefunc";
 
 // https://telefunc.com/disableNamingConvention
 config.disableNamingConvention = true;
@@ -170,3 +171,8 @@ if (isProduction) {
 	// The error handler must be before any other error middleware and after all controllers
 	app.use(Sentry.Handlers.errorHandler());
 }
+
+onTelefuncBug((error) => {
+	console.error(error);
+	Sentry.captureException(error);
+});
