@@ -63,9 +63,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		}
 		// initialize the user in local storage
 		getUserInfo()
-			// set user to the user that is logged in
-			.then((user) => setStore("user", user))
-			// set user to undefined if no user is logged in
+			.then((userOrUndefined) => setStore("user", userOrUndefined))
+			// set user to undefined if an error occurs
 			.catch(() => setStore("user", undefined));
 
 		// listen for changes in other windows
