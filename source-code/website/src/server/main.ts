@@ -27,6 +27,7 @@ import cookieSession from "cookie-session";
 import { router as authService } from "@src/services/auth/server.js";
 import { decryptAccessToken } from "@src/services/auth/logic.js";
 import { config } from "telefunc";
+import { onBug as onTelefuncBug } from "telefunc";
 
 // https://telefunc.com/disableNamingConvention
 config.disableNamingConvention = true;
@@ -49,11 +50,11 @@ app.use(compression());
 
 app.use(
 	cookieSession({
-		name: "session",
+		name: "inlang-session",
 		httpOnly: true,
 		secure: isProduction ? true : false,
-		secret: env.COOKIE_SECRET,
 		domain: isProduction ? "inlang.com" : undefined,
+		secret: env.COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	})
 );
@@ -101,27 +102,36 @@ app.all(
 	// Parse & make HTTP request body available at `req.body` (required by telefunc)
 	express.text(),
 	// handle the request
-	async (request, response, next) => {
-		try {
-			// decrypting the access token if it exists
-			const accessToken = request.session?.encryptedAccessToken
-				? await decryptAccessToken({
-						jwe: request.session.encryptedAccessToken,
-						JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-				  })
-				: undefined;
-			// handling the request
-			const { body, statusCode, contentType } = await telefunc({
-				context: {
-					githubAccessToken: accessToken,
-				},
+	(request, response, next) => {
+		// decrypting the access token if it exists
+		if (request.session?.encryptedAccessToken) {
+			decryptAccessToken({
+				jwe: request.session.encryptedAccessToken,
+				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+			})
+				.then((accessToken) =>
+					telefunc({
+						context: { githubAccessToken: accessToken },
+						url: request.originalUrl,
+						method: request.method,
+						body: request.body,
+					})
+				)
+				.then(({ body, statusCode, contentType }) => {
+					response.status(statusCode).type(contentType).send(body);
+				})
+				.catch(next);
+		} else {
+			telefunc({
+				context: { githubAccessToken: undefined },
 				url: request.originalUrl,
 				method: request.method,
 				body: request.body,
-			});
-			response.status(statusCode).type(contentType).send(body);
-		} catch (error) {
-			next(error);
+			})
+				.then(({ body, statusCode, contentType }) => {
+					response.status(statusCode).type(contentType).send(body);
+				})
+				.catch(next);
 		}
 	}
 );
@@ -161,3 +171,8 @@ if (isProduction) {
 	// The error handler must be before any other error middleware and after all controllers
 	app.use(Sentry.Handlers.errorHandler());
 }
+
+onTelefuncBug((error) => {
+	console.error(error);
+	Sentry.captureException(error);
+});
