@@ -52,8 +52,7 @@ app.use(
 		name: "session",
 		httpOnly: true,
 		secure: isProduction ? true : false,
-		// TODO set this to a real secret
-		secret: isProduction ? "very-secret" : "not-so-secret",
+		secret: env.COOKIE_SECRET,
 		domain: isProduction ? "inlang.com" : undefined,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	})
