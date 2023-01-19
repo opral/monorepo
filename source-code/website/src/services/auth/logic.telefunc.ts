@@ -9,9 +9,12 @@ import { getContext } from "telefunc";
  * @throws
  */
 export async function getUserInfo(): Promise<
-	NonNullable<LocalStorageSchema["user"]>
+	LocalStorageSchema["user"] | undefined
 > {
 	const context = getContext();
+	if (context.githubAccessToken === undefined) {
+		return undefined;
+	}
 	const request = await fetch("https://api.github.com/user", {
 		headers: {
 			Accept: "application/vnd.github+json",
