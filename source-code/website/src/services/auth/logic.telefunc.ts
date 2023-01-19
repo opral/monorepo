@@ -9,7 +9,7 @@ import { getContext } from "telefunc";
  * @throws
  */
 export async function getUserInfo(): Promise<
-	LocalStorageSchema["user"] | undefined
+	LocalStorageSchema["user"] | undefined | string
 > {
 	const context = getContext();
 	if (context.githubAccessToken === undefined) {
@@ -25,7 +25,7 @@ export async function getUserInfo(): Promise<
 	});
 	console.log("request ", request.statusText);
 	if (request.status !== 200) {
-		throw Error("Failed to get user info " + request.statusText);
+		return "Failed to get user info " + request.statusText;
 	}
 	const requestBody = await request.json();
 	return {

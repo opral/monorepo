@@ -63,7 +63,13 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		}
 		// initialize the user in local storage
 		getUserInfo()
-			.then((userOrUndefined) => setStore("user", userOrUndefined))
+			.then((userOrUndefined) => {
+				if (typeof userOrUndefined === "string") {
+					console.error(userOrUndefined);
+				} else {
+					setStore("user", userOrUndefined);
+				}
+			})
 			// set user to undefined if an error occurs
 			.catch(() => setStore("user", undefined));
 
