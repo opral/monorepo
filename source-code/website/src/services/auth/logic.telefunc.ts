@@ -11,9 +11,7 @@ import { getContext } from "telefunc";
 export async function getUserInfo(): Promise<
 	LocalStorageSchema["user"] | undefined
 > {
-	console.log("getUserInfo() called", new Date());
 	const context = getContext();
-	console.log("context", context);
 	if (context.githubAccessToken === undefined) {
 		return undefined;
 	}
@@ -24,12 +22,10 @@ export async function getUserInfo(): Promise<
 			"X-GitHub-Api-Version": "2022-11-28",
 		},
 	});
-	console.log("request ", request);
 	if (request.ok === false) {
 		throw Error("Failed to get user info " + request.statusText);
 	}
 	const requestBody = await request.json();
-	console.log("requestBody ", requestBody);
 	return {
 		username: requestBody.login,
 		avatarUrl: requestBody.avatar_url,
