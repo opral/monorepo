@@ -54,7 +54,6 @@ app.use(
 		httpOnly: true,
 		secure: isProduction ? true : false,
 		secret: env.COOKIE_SECRET,
-		domain: isProduction ? "inlang.com" : undefined,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	})
 );
