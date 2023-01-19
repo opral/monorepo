@@ -7,7 +7,7 @@ export const Head: PageHead = (props) => ({
 	description:
 		"Manage translations and localization processes with inlang's editor.",
 });
-
+//TODO add header and footer if its possible
 export function Page(pageContext: PageContextRenderer) {
 	if (pageContext.is404) {
 		return (
