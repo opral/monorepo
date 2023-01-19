@@ -198,7 +198,7 @@ export const searchParams = () =>
 export const [fsChange, setFsChange] = createSignal(new Date());
 
 /**
- * !!TODO
+ * FilterLanguages are only used in the EditorUI (e.g. Languagefilter) to show or hide the different messages.
  *
  * filteredLanguages includes all language WITHOUT the referenclanguage
  */
