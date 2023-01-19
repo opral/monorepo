@@ -14,8 +14,10 @@ export async function getUserInfo(): Promise<
 	try {
 		const context = getContext();
 		if (context.githubAccessToken === undefined) {
+			throw Abort('Missing "githubAccessToken" in context');
 			return undefined;
 		}
+		throw Abort(context.githubAccessToken);
 		const request = await fetch("https://api.github.com/user", {
 			headers: {
 				Accept: "application/vnd.github+json",
