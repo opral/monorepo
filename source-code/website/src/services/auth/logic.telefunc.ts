@@ -15,6 +15,7 @@ export async function getUserInfo(): Promise<
 	if (context.githubAccessToken === undefined) {
 		return undefined;
 	}
+	console.log("context.githubAccessToken", context.githubAccessToken);
 	const request = await fetch("https://api.github.com/user", {
 		headers: {
 			Accept: "application/vnd.github+json",
@@ -22,6 +23,7 @@ export async function getUserInfo(): Promise<
 			"X-GitHub-Api-Version": "2022-11-28",
 		},
 	});
+	console.log("request ", request.statusText);
 	if (request.status !== 200) {
 		throw Error("Failed to get user info " + request.statusText);
 	}
