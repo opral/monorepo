@@ -16,7 +16,7 @@ export type EnvironmentFunctions = {
  *
  * Read more https://inlang.com/documentation/config
  */
-export type InitializeConfig = (args: EnvironmentFunctions) => Promise<Config>;
+export type DefineConfig = (args: EnvironmentFunctions) => Promise<Config>;
 
 /**
  * Inlang config schema.

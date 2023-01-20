@@ -353,19 +353,18 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 			"data:application/javascript;base64," + btoa(file.toString());
 
 		const module = await import(/* @vite-ignore */ withMimeType);
-		const initialized: InlangConfig = await module.initializeConfig({
+		const config: InlangConfig = await module.defineConfig({
 			...environmentFunctions,
 		});
 
 		//initialises/ set the inital signal for  the language of the language filter for the messages
 		// .filter removes the referenceLanguage from the array languages
 		setFilteredLanguages(
-			initialized.languages.filter(
-				(languages) => languages !== initialized.referenceLanguage
+			config.languages.filter(
+				(languages) => languages !== config.referenceLanguage
 			)
 		);
-
-		return initialized;
+		return config;
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
 			// the config does not exist
