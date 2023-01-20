@@ -253,17 +253,20 @@ function PatternEditor(props: {
 					() => hasChanges() === false && setIsFocused(false)
 				),
 			]}
-			class="grid grid-row-2 gap-2 grow"
+			class="grid grid-row-2 gap-2 grow border border-outline p-2 rounded	"
 		>
-			<div class="flex">
-				<div class="min-w-min w-8 self-center">{props.language}</div>
+			<div class="flex flex-col gap-1">
+				{/* <div class="">{props.language}</div> */}
+				<sl-badge prop:variant="neutral" prop:pill={true}>
+					{props.language}
+				</sl-badge>
 
 				{/* TODO: #169 use proper text editor instead of input element */}
 				<sl-textarea
 					prop:resize="auto"
 					prop:size="small"
 					prop:rows={1}
-					class="border-none grow self-center"
+					class="border-none grow "
 					onFocus={() => setIsFocused(true)}
 					prop:value={textValue() ?? ""}
 					prop:disabled={userIsCollaborator() === false}
