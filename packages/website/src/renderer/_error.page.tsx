@@ -12,16 +12,16 @@ export const Head: PageHead = (props) => ({
 export function Page(pageContext: PageContextRenderer) {
 	return (
 		<div class="min-h-screen flex  items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg bg-danger-container">
+			<div class="border border-outline p-8 rounded flex flex-col max-w-lg bg-danger-container gap-4">
 				<Switch>
 					<Match when={pageContext.is404}>
 						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
-						<h1 class="font-semibold pt-5 ">404</h1>
-						<p class="pt-1.5">
-							Something went wrong, we couldn't find your page.
-						</p>
+						<div class="flex flex-col gap-2">
+							<h1 class="font-semibold  ">404</h1>
+							<p>Something went wrong, we couldn't find your page.</p>
+						</div>
 
-						<a class="self-end pt-5" href="https://inlang.com">
+						<a class="self-end " href="https://inlang.com">
 							<sl-button prop:variant="text">
 								Back home to inlang.com
 								<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
@@ -30,11 +30,14 @@ export function Page(pageContext: PageContextRenderer) {
 					</Match>
 					<Match when={!pageContext.is404}>
 						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
-						<h1 class="font-semibold pt-5 ">Error</h1>
-						<p class="pt-1.5">
-							Houston we have a problem. Sincere apologies. Please Try again
-							later and report this Bug.
-						</p>
+						<div class="flex flex-col gap-2">
+							<h1 class="font-semibold ">Error</h1>
+							<p>
+								Houston we have a problem. Sincere apologies. Please Try again
+								later and report this Bug.
+							</p>
+						</div>
+
 						<a
 							class="self-end pt-5"
 							href="https://github.com/inlang/inlang/issues/new/choose"
