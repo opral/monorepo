@@ -12,17 +12,15 @@ Auth uses [(GitHub) OAuth](https://docs.github.com/en/developers/apps/building-o
 
 ### Architecture
 
-Client-side requests are tunneled through a server that adds authentification tokens based on the client's encrypted JWT (JWE) when making requests to git hosts like GitHub or GitLab.
+Client-side requests are tunneled through a server that adds authentification tokens based on a cookie session that contains an encrypted access token when making requests to git hosts like GitHub or GitLab.
 
 The nature of executing external JavaScript on the client via the config entails the requirement to never store, not even in memory for 1s, an access token from a git host. The chosen encryption algorithm is symmetric to ease implementation and because the client is not supposed to encrypt or decrypt anything.
 
 ### Procedure
 
-1. The user is prompted to log in and thereby forwarded to the git host via [LoginDialog](./LoginDialog.tsx).
-2. SERVER-SIDE: The git host redirects back to a site of inlang with an interim code after a successful login [oauth-redirect.page.server.tsx](./oauth-redirect.page.server.tsx).
-3. SERVER-SIDE: The interim code is exchanged for an encrypted JWT (JWE) that contains the access token [oauth-redirect.page.server.tsx](./oauth-redirect.page.server.tsx)
-4. SERVER-SIDE: The server passes the encrypted access token to the client [oauth-redirect.page.server.tsx](./oauth-redirect.page.server.tsx).
-5. CLIENT-SIDE: The client stores the encrypted access token in local storage [oauth-redirect.page.tsx](./oauth-redirect.page.tsx).
-
+1. The user is prompted to log in and thereby forwarded to the git host via [LoginDialog](./components/LoginDialog.tsx).
+2. SERVER-SIDE: The git host redirects back to a site of inlang with an interim code after a successful login [server.ts](./server.ts).
+3. SERVER-SIDE: The interim code is exchanged for an encrypted JWT (JWE) that contains the access token [server.ts](./server.ts)
+4. SERVER-SIDE: The server stores the encrypted access token in a cookie session [server.ts](./server.ts).
 
 It is extremely important that step 3 never leaks the interim code client side and is, therefore, processed server-side. Otherwise, an attacker could intercept the interim code and exchange it for an access token.

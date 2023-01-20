@@ -1,16 +1,10 @@
-import type { PageHead } from "@src/renderer/types.js";
 import { createSignal, For, Show } from "solid-js";
 import { Layout as RootLayout } from "../Layout.jsx";
 import { repositories } from "./repositories.js";
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { z } from "zod";
-
-export const Head: PageHead = (props) => ({
-	title: "inlang Editor",
-	description:
-		"Manage translations and localization processes with inlang's editor.",
-});
+import { Meta, Title } from "@solidjs/meta";
 
 export function Page() {
 	/** is not reactive because window is not reactive */
@@ -29,69 +23,76 @@ export function Page() {
 	}
 
 	return (
-		<RootLayout>
-			{/* START search bar */}
-			<div class="h-64 sm:h-96 pt-4 flex flex-col items-center justify-center">
-				{/* using a column to ease responsive design (mobile would be tricky othersie) */}
-				<div class="flex flex-col gap-4 justify-center items-center w-full">
-					<sl-input
-						class="border-none p-0 w-full max-w-xl"
-						prop:size={isMobile() ? "medium" : "large"}
-						prop:placeholder="Paste a link of a repository on GitHub"
-						// when pressing enter
-						on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
-						onInput={(event) => {
-							// @ts-ignore
-							setInput(event.target.value);
-						}}
-					>
-						<Show when={input().length > 10 && isValidUrl() === false}>
-							<p slot="help-text" class="text-danger p-2">
-								The url must be a link to a GitHub repository like
-								https://github.com/inlang/example
-							</p>
-						</Show>
-					</sl-input>
-					<div class="flex gap-2">
-						{/* the button is on the left to resemble a google search */}
-						<sl-button
-							class="w-32"
-							prop:variant={isValidUrl() ? "primary" : "default"}
-							prop:size={isMobile() ? "small" : "medium"}
-							prop:disabled={isValidUrl() === false}
-							onClick={navigateToEditor}
+		<>
+			<Title>inlang Editor</Title>
+			<Meta
+				name="description"
+				content="Contribute to open source projects and manage translations with inlang's editor."
+			></Meta>
+			<RootLayout>
+				{/* START search bar */}
+				<div class="h-64 sm:h-96 pt-4 flex flex-col items-center justify-center">
+					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
+					<div class="flex flex-col gap-4 justify-center items-center w-full">
+						<sl-input
+							class="border-none p-0 w-full max-w-xl"
+							prop:size={isMobile() ? "medium" : "large"}
+							prop:placeholder="Paste a link of a repository on GitHub"
+							// when pressing enter
+							on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
+							onInput={(event) => {
+								// @ts-ignore
+								setInput(event.target.value);
+							}}
 						>
-							Open
-						</sl-button>
-						<a href="/documentation/getting-started">
+							<Show when={input().length > 10 && isValidUrl() === false}>
+								<p slot="help-text" class="text-danger p-2">
+									The url must be a link to a GitHub repository like
+									https://github.com/inlang/example
+								</p>
+							</Show>
+						</sl-input>
+						<div class="flex gap-2">
+							{/* the button is on the left to resemble a google search */}
 							<sl-button
-								prop:variant="text"
+								class="w-32"
+								prop:variant={isValidUrl() ? "primary" : "default"}
 								prop:size={isMobile() ? "small" : "medium"}
+								prop:disabled={isValidUrl() === false}
+								onClick={navigateToEditor}
 							>
-								How to get started?
+								Open
 							</sl-button>
-						</a>
+							<a href="/documentation/getting-started">
+								<sl-button
+									prop:variant="text"
+									prop:size={isMobile() ? "small" : "medium"}
+								>
+									How to get started?
+								</sl-button>
+							</a>
+						</div>
 					</div>
 				</div>
-			</div>
-			{/* END search bar */}
-			<hr class="w-full border-t border-outline"></hr>
-			{/* START repository grid */}
-			<h2 class="text-xl font-medium pt-6 pb-1">Community projects</h2>
-			<p class="pb-2">
-				Inlang is a great tool that helps communities translate their projects
-				by easing contributions.
-			</p>
-			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
-				<For each={repositories}>
-					{(repository) => (
-						<RepositoryCard repository={repository}></RepositoryCard>
-					)}
-				</For>
-				<AddRepositoryCard></AddRepositoryCard>
-			</div>
-			{/* END repository grid */}
-		</RootLayout>
+				{/* END search bar */}
+				<hr class="w-full border-t border-outline"></hr>
+				{/* START repository grid */}
+				<h2 class="text-xl font-medium pt-6 pb-1">Community projects</h2>
+				<p class="pb-2">
+					Inlang is a great tool that helps communities translate their projects
+					by easing contributions.
+				</p>
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
+					<For each={repositories}>
+						{(repository) => (
+							<RepositoryCard repository={repository}></RepositoryCard>
+						)}
+					</For>
+					<AddRepositoryCard></AddRepositoryCard>
+				</div>
+				{/* END repository grid */}
+			</RootLayout>
+		</>
 	);
 }
 

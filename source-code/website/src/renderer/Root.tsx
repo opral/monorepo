@@ -3,7 +3,7 @@ import type { PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 import { LocalStorageProvider } from "@src/services/local-storage/index.js";
 
-export type ThePageProps = Accessor<{
+export type RootProps = Accessor<{
 	pageContext: PageContextRenderer;
 }>;
 
@@ -14,7 +14,7 @@ export type ThePageProps = Accessor<{
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export function ThePage(props: {
+export function Root(props: {
 	page: Component;
 	pageProps: Record<string, unknown>;
 }) {

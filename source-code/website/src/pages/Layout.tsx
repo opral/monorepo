@@ -9,6 +9,7 @@ import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvide
 import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
+import { onSignOut } from "@src/services/auth/onSignOut.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -200,12 +201,21 @@ function Footer() {
 function UserDropdown() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
-	function onSignOut() {
-		setLocalStorage("user", undefined);
-		showToast({
-			title: "Signed out",
-			variant: "success",
-		});
+	async function handleSignOut() {
+		try {
+			await onSignOut({ setLocalStorage });
+			showToast({
+				title: "Signed out",
+				variant: "success",
+			});
+		} catch (error) {
+			showToast({
+				title: "Error",
+				variant: "danger",
+				// @ts-ignore
+				message: error?.message,
+			});
+		}
 	}
 
 	return (
@@ -226,7 +236,7 @@ function UserDropdown() {
 								<p>Signed in as</p>
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>
-							<sl-menu-item onClick={onSignOut}>
+							<sl-menu-item onClick={handleSignOut}>
 								<IconSignOut slot="prefix"></IconSignOut>
 								Sign out
 							</sl-menu-item>

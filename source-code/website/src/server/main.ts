@@ -23,6 +23,14 @@ import { serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import cookieSession from "cookie-session";
+import { router as authService } from "@src/services/auth/server.js";
+import { decryptAccessToken } from "@src/services/auth/logic.js";
+import { config } from "telefunc";
+import { onBug as onTelefuncBug } from "telefunc";
+
+// https://telefunc.com/disableNamingConvention
+config.disableNamingConvention = true;
 
 // validate the env variables.
 await validateEnv();
@@ -40,6 +48,17 @@ const app = express();
 // compress responses with gzip
 app.use(compression());
 
+app.use(
+	cookieSession({
+		name: "inlang-session",
+		httpOnly: true,
+		// secure: isProduction ? true : false,
+		// domain: isProduction ? "inlang.com" : undefined,
+		secret: env.COOKIE_SECRET,
+		maxAge: 7 * 24 * 3600 * 1000, // 1 week
+	})
+);
+
 // setup sentry error tracking
 // must happen before the request handlers
 if (isProduction) {
@@ -51,7 +70,7 @@ if (isProduction) {
 			// enable Express.js middleware tracing
 			new Tracing.Integrations.Express({ app }),
 		],
-		tracesSampleRate: 0.8,
+		tracesSampleRate: 0.1,
 	});
 
 	// RequestHandler creates a separate execution context using domains, so that every
@@ -75,30 +94,52 @@ if (isProduction) {
 	app.use(viteServer.middlewares);
 }
 
+// ------------------------ START ROUTES ------------------------
+
 // serving telefunc https://telefunc.com/
-//! it is extremely important that a request handler is not async to catch errors.
-//! express does not catch async errors. hence, the callback pattern is used.
 app.all(
 	"/_telefunc",
 	// Parse & make HTTP request body available at `req.body` (required by telefunc)
 	express.text(),
 	// handle the request
 	(request, response, next) => {
-		telefunc({
-			url: request.originalUrl,
-			method: request.method,
-			body: request.body,
-		})
-			.then((value) => {
-				const { body, statusCode, contentType } = value;
-				response.status(statusCode).type(contentType).send(body);
+		// decrypting the access token if it exists
+		if (request.session?.encryptedAccessToken) {
+			decryptAccessToken({
+				jwe: request.session.encryptedAccessToken,
+				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
 			})
-			.catch((error) => next(error));
+				.then((accessToken) =>
+					telefunc({
+						context: { githubAccessToken: accessToken },
+						url: request.originalUrl,
+						method: request.method,
+						body: request.body,
+					})
+				)
+				.then(({ body, statusCode, contentType }) => {
+					response.status(statusCode).type(contentType).send(body);
+				})
+				.catch(next);
+		} else {
+			telefunc({
+				context: { githubAccessToken: undefined },
+				url: request.originalUrl,
+				method: request.method,
+				body: request.body,
+			})
+				.then(({ body, statusCode, contentType }) => {
+					response.status(statusCode).type(contentType).send(body);
+				})
+				.catch(next);
+		}
 	}
 );
 
 // forward git requests to the proxy with wildcard `*`.
 app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
+
+app.use("/services/auth", authService);
 
 // serving @src/pages and /public
 //! it is extremely important that a request handler is not async to catch errors
@@ -109,14 +150,17 @@ app.get("*", (request, response, next) => {
 	})
 		.then((pageContext) => {
 			if (pageContext.httpResponse === null) {
-				return next();
+				next();
+			} else {
+				const { body, statusCode, contentType } = pageContext.httpResponse;
+				response.status(statusCode).type(contentType).send(body);
 			}
-			const { body, statusCode, contentType } = pageContext.httpResponse;
-			return response.status(statusCode).type(contentType).send(body);
 		})
 		// pass the error to expresses error handling
 		.catch(next);
 });
+
+// ------------------------ END ROUTES ------------------------
 
 const port = process.env.PORT ?? 3000;
 app.listen(port);
@@ -127,3 +171,8 @@ if (isProduction) {
 	// The error handler must be before any other error middleware and after all controllers
 	app.use(Sentry.Handlers.errorHandler());
 }
+
+onTelefuncBug((error) => {
+	console.error(error);
+	Sentry.captureException(error);
+});

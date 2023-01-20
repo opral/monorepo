@@ -2,11 +2,11 @@ import type { PageContextRenderer } from "./types.js";
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import { setCurrentPageContext } from "./state.js";
-import { ThePage } from "./ThePage.jsx";
+import { Root } from "./Root.jsx";
 
 // import the css
 import "./app.css";
-import { assertUsage } from "@src/services/assert/index.js";
+import { MetaProvider, renderTags } from "@solidjs/meta";
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams"] as const;
@@ -17,17 +17,6 @@ export async function render(
 	//! TODO most likely cross request state pollution
 	//! Need to look into this in the future
 	setCurrentPageContext(pageContext);
-	// metadata of the page.
-
-	assertUsage(
-		pageContext.exports.Head,
-		"A page must export a Head function. See example how other pages export a Head"
-	);
-	const head = pageContext.exports.Head({ pageContext });
-	assertUsage(
-		head.description.length < 160,
-		`A description of a Page should not exceed 160 characters. Otherwise, search engines will truncate the text. The provided description was ${head.description.length} characters long.`
-	);
 	// generating the html from the server:
 	// 1. the server sends a hydration script for the client.
 	//    the client uses the hydration script to hydrate the page.
@@ -40,12 +29,17 @@ export async function render(
 	// ! renderToStringAsync some async resources should
 	// ! not be loaded on the server (the editor for example).
 	// ! see https://github.com/inlang/inlang/issues/247
+
+	// from solidjs meta
+	// mutated during render so you can include in server-rendered template later
+	const tags: any[] = [];
+
 	const renderedPage = renderToString(() => (
-		<ThePage
-			page={pageContext.Page}
-			pageProps={pageContext.pageProps}
-		></ThePage>
+		<MetaProvider tags={tags}>
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps}></Root>
+		</MetaProvider>
 	));
+
 	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
       <head>
@@ -60,11 +54,7 @@ export async function render(
 			${dangerouslySkipEscape(import.meta.env.PROD ? analytics : "")}
 			${dangerouslySkipEscape(favicons)}
 			${dangerouslySkipEscape(generateHydrationScript())}
-		<!-- START injecting meta tags from Page -->
-			<title>${head.title}</title>
-			<meta name="description" content="${head.description}" />
-			${dangerouslySkipEscape(head.meta ?? "")}
-		<!-- END injecting meta tags from Page -->
+			${dangerouslySkipEscape(renderTags(tags))}
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
       <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
