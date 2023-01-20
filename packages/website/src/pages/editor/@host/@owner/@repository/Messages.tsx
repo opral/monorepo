@@ -264,7 +264,7 @@ function PatternEditor(props: {
 					prop:resize="auto"
 					prop:size="small"
 					prop:rows={1}
-					class="border-none grow"
+					class="border-none grow self-center"
 					onFocus={() => setIsFocused(true)}
 					prop:value={textValue() ?? ""}
 					prop:disabled={userIsCollaborator() === false}
