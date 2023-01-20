@@ -39,13 +39,13 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js";
 import { clientSideEnv } from "@env";
 
 // enable error logging via sentry in production
-if (import.meta.env.PROD) {
-	Sentry.init({
-		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
-		integrations: [new BrowserTracing()],
-		tracesSampleRate: 0.8,
-	});
-}
+// if (import.meta.env.PROD) {
+// 	Sentry.init({
+// 		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
+// 		integrations: [new BrowserTracing()],
+// 		tracesSampleRate: 0.8,
+// 	});
+// }
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
 export const clientRouting = true;
