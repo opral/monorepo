@@ -1,9 +1,10 @@
 import type { PageContextRenderer, PageHead } from "./types.js";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
+import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
 import { Match, Switch } from "solid-js";
 
-export const Head: PageHead = (props) => ({
+export const Head: PageHead = () => ({
 	title: "inlang Error",
 	description:
 		"Manage translations and localization processes with inlang's editor.",
@@ -20,10 +21,10 @@ export function Page(pageContext: PageContextRenderer) {
 							<p>Something went wrong, we couldn't find your page.</p>
 						</div>
 
-						<a class="self-end " href="https://inlang.com">
+						<a href="https://inlang.com">
 							<sl-button prop:variant="text">
+								<MaterialSymbolsArrowBackRounded slot="prefix"></MaterialSymbolsArrowBackRounded>
 								Back home to inlang.com
-								<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
 							</sl-button>
 						</a>
 					</Match>
@@ -36,7 +37,6 @@ export function Page(pageContext: PageContextRenderer) {
 								later and report this Bug.
 							</p>
 						</div>
-
 						<a
 							class="self-end pt-5"
 							href="https://github.com/inlang/inlang/issues/new/choose"
