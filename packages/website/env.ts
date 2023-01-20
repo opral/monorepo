@@ -39,6 +39,11 @@ export type ServerSideEnv = ClientSideEnv & {
 	 * https://cloud.google.com/translate/docs/setup
 	 */
 	GOOGLE_TRANSLATE_API_KEY?: string;
+
+	/**
+	 * The secret for signing cookies.
+	 */
+	COOKIE_SECRET: string;
 };
 
 /**
@@ -129,5 +134,7 @@ export async function validateEnv() {
 		throw Error("Missing env variable JWE_SECRET_KEY");
 	} else if (env.GITHUB_APP_CLIENT_SECRET === undefined) {
 		throw Error("Missing env variable GITHUB_APP_CLIENT_SECRET");
+	} else if (env.COOKIE_SECRET === undefined) {
+		throw Error("Missing env variable COOKIE_SECRET");
 	}
 }

@@ -33,14 +33,12 @@ import type { EditorRouteParams } from "./types.js";
 import { onFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
-import { SignInDialog } from "@src/services/auth/index.js";
+import { SignInDialog } from "@src/services/auth/components/SignInDialog.jsx";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
-import { addMilliseconds } from "date-fns/esm";
-import { filter } from "compression";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 // command-f this repo to find where the layout is called
@@ -296,7 +294,6 @@ function SignInBanner() {
 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 			repository: (currentPageContext.routeParams as EditorRouteParams)
 				.repository,
-			encryptedAccessToken: localStorage.user.encryptedAccessToken,
 			username: localStorage.user.username,
 		});
 		if (response.type === "success") {

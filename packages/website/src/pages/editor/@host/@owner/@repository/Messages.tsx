@@ -153,7 +153,6 @@ function PatternEditor(props: {
 	// 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
 	// 			repository: (currentPageContext.routeParams as EditorRouteParams)
 	// 				.repository,
-	// 			encryptedAccessToken: user.encryptedAccessToken,
 	// 			username: user.username,
 	// 		});
 	// 		if (response.type === "success") {

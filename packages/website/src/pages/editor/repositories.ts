@@ -10,6 +10,11 @@ export const repositories: Repositories = [
 		repository: "example",
 		description: "Example repository that showcases inlang.",
 	},
+	{
+		owner: "osmosis-labs",
+		repository: "osmosis-frontend",
+		description: "Web interface for Osmosis Zone"
+	}
 ];
 
 type Repositories = Array<{
