@@ -8,7 +8,6 @@ export const Head: PageHead = (props) => ({
 	description:
 		"Manage translations and localization processes with inlang's editor.",
 });
-//TODO add header and footer if its possible
 export function Page(pageContext: PageContextRenderer) {
 	return (
 		<div class="min-h-screen flex  items-center justify-center">
