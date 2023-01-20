@@ -81,7 +81,8 @@ export function Page() {
 						<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 							{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 							<div>
-								<sl-spinner style="font-size: 2rem;"></sl-spinner>
+								{/* use font-size to change the spinner size    */}
+								<sl-spinner class="text-4xl"></sl-spinner>
 							</div>
 
 							<p class="text-lg">
