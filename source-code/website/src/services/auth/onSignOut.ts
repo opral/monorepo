@@ -10,5 +10,5 @@ export async function onSignOut(args: {
 	// sign out on the server
 	await fetch("/services/auth/sign-out", { method: "POST" });
 	// sign out on the client by setting the user to undefined
-	args.setLocalStorage({ user: undefined });
+	args.setLocalStorage("user", undefined);
 }
