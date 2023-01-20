@@ -61,24 +61,24 @@ app.use(
 
 // setup sentry error tracking
 // must happen before the request handlers
-// if (isProduction) {
-// 	Sentry.init({
-// 		dsn: env.SENTRY_DSN_SERVER,
-// 		integrations: [
-// 			// enable HTTP calls tracing
-// 			new Sentry.Integrations.Http({ tracing: true }),
-// 			// enable Express.js middleware tracing
-// 			new Tracing.Integrations.Express({ app }),
-// 		],
-// 		tracesSampleRate: 0.8,
-// 	});
+if (isProduction) {
+	Sentry.init({
+		dsn: env.SENTRY_DSN_SERVER,
+		integrations: [
+			// enable HTTP calls tracing
+			new Sentry.Integrations.Http({ tracing: true }),
+			// enable Express.js middleware tracing
+			new Tracing.Integrations.Express({ app }),
+		],
+		tracesSampleRate: 0.8,
+	});
 
-// 	// RequestHandler creates a separate execution context using domains, so that every
-// 	// transaction/span/breadcrumb is attached to its own Hub instance
-// 	app.use(Sentry.Handlers.requestHandler());
-// 	// TracingHandler creates a trace for every incoming request
-// 	app.use(Sentry.Handlers.tracingHandler());
-// }
+	// RequestHandler creates a separate execution context using domains, so that every
+	// transaction/span/breadcrumb is attached to its own Hub instance
+	app.use(Sentry.Handlers.requestHandler());
+	// TracingHandler creates a trace for every incoming request
+	app.use(Sentry.Handlers.tracingHandler());
+}
 
 if (isProduction) {
 	// serve build files
