@@ -194,6 +194,11 @@ export const searchParams = () =>
  */
 export const [fsChange, setFsChange] = createSignal(new Date());
 
+/**
+ * !!TODO
+ *
+ * filteredLanguages includes all language WITHOUT the referenclanguage
+ */
 export const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>(
 	[]
 );
