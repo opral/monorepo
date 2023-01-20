@@ -47,45 +47,35 @@ export function Messages(props: {
 		throw Error("No message id found");
 	};
 	return (
-		<div class="border border-outline p-4 rounded">
+		<div class="border border-outline p-4 rounded flex flex-col gap-4">
 			<h3 slot="summary" class="font-medium">
 				{id()}
 			</h3>
 			<div class="grid grid-cols-2 gap-16">
 				<div class="flex self-center">
-					{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
-					<div class="min-w-min w-8 self-center">
-						{inlangConfig()!.referenceLanguage}
-					</div>
-					<div class="grow">
-						<PatternEditor
-							language={inlangConfig()!.referenceLanguage}
-							id={id()}
-							referenceMessage={referenceMessage()}
-							message={props.messages[inlangConfig()!.referenceLanguage]}
-						></PatternEditor>
-					</div>
+					<PatternEditor
+						language={inlangConfig()!.referenceLanguage}
+						id={id()}
+						referenceMessage={referenceMessage()}
+						message={props.messages[inlangConfig()!.referenceLanguage]}
+					></PatternEditor>
 				</div>
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-4">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<Show when={language !== inlangConfig()?.referenceLanguage}>
 								<div
-									class="flex"
+									class="flex "
 									classList={{
 										hidden: filteredLanguages().includes(language) === false,
 									}}
 								>
-									{/* min-w-min in case, w-8 is not wide enough for the contry code  */}
-									<div class="min-w-min w-8 self-center">{language}</div>
-									<div class="grow">
-										<PatternEditor
-											language={language}
-											id={id()}
-											referenceMessage={referenceMessage()}
-											message={props.messages[language]}
-										></PatternEditor>
-									</div>
+									<PatternEditor
+										language={language}
+										id={id()}
+										referenceMessage={referenceMessage()}
+										message={props.messages[language]}
+									></PatternEditor>
 								</div>
 							</Show>
 						)}
@@ -263,18 +253,24 @@ function PatternEditor(props: {
 					() => hasChanges() === false && setIsFocused(false)
 				),
 			]}
+			class="grid grid-row-2 gap-2 grow 	"
 		>
-			{/* TODO: #169 use proper text editor instead of input element */}
-			<sl-textarea
-				prop:resize="auto"
-				prop:size="small"
-				prop:rows={1}
-				class="border-none p-0"
-				onFocus={() => setIsFocused(true)}
-				prop:value={textValue() ?? ""}
-				prop:disabled={userIsCollaborator() === false}
-				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-			></sl-textarea>
+			<div class="flex flex-col gap-1">
+				<div class="">{props.language}</div>
+
+				{/* TODO: #169 use proper text editor instead of input element */}
+				<sl-textarea
+					prop:resize="auto"
+					prop:size="small"
+					prop:rows={1}
+					class="border-none grow "
+					onFocus={() => setIsFocused(true)}
+					prop:value={textValue() ?? ""}
+					prop:disabled={userIsCollaborator() === false}
+					onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
+				></sl-textarea>
+			</div>
+
 			{/* <div
 				onFocus={() => setIsFocused(true)}
 				onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
@@ -287,7 +283,7 @@ function PatternEditor(props: {
 			</div> */}
 			{/* action bar */}
 			<Show when={isFocused()}>
-				<div class="flex items-center justify-end mt-2 gap-2">
+				<div class="flex items-center justify-end  gap-2">
 					<Show when={hasChanges() && localStorage.user === undefined}>
 						<InlineNotification
 							title="Sign in"
