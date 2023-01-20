@@ -61,11 +61,6 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		if (storage) {
 			setStore(storage);
 		}
-		// initialize the user in local storage
-		getUserInfo()
-			.then((userOrUndefined) => setStore("user", userOrUndefined))
-			// set user to undefined if an error occurs
-			.catch(() => setStore("user", undefined));
 
 		// listen for changes in other windows
 		window.addEventListener("storage", onStorageSetByOtherWindow);
