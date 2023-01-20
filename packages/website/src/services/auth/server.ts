@@ -38,5 +38,5 @@ router.get("/github-oauth-callback", async (request, response, next) => {
  */
 router.post("/sign-out", (request, response, next) => {
 	request.session = undefined;
-	response.status(200).send("OK");
+	response.status(200).send();
 });
