@@ -4,6 +4,7 @@ import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
 import { getUserInfo } from "../logic.telefunc.js";
+import { isServer } from "solid-js/web";
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -16,7 +17,10 @@ import { getUserInfo } from "../logic.telefunc.js";
 export function Page() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
-	const [userInfo] = createResource(getUserInfo);
+	const [userInfo] = createResource(() => {
+		console.log("fetching user info ", new Date());
+		return isServer ? undefined : getUserInfo();
+	});
 
 	createEffect(() => {
 		if (userInfo.error === undefined && userInfo()) {
