@@ -19,7 +19,7 @@ export function Page() {
 
 	const [userInfo] = createResource(() => {
 		console.log("fetching user info ", new Date());
-		return isServer ? undefined : getUserInfo();
+		return getUserInfo();
 	});
 
 	createEffect(() => {
