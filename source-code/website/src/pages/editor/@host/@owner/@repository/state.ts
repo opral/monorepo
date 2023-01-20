@@ -194,6 +194,11 @@ export const searchParams = () =>
  */
 export const [fsChange, setFsChange] = createSignal(new Date());
 
+/**
+ * FilterLanguages are only used in the EditorUI (e.g. Languagefilter) to show or hide the different messages.
+ *
+ * filteredLanguages includes all language WITHOUT the referenclanguage
+ */
 export const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>(
 	[]
 );
@@ -353,7 +358,13 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		});
 
 		//initialises/ set the inital signal for  the language of the language filter for the messages
-		setFilteredLanguages(initialized.languages);
+		// .filter removes the referenceLanguage from the array languages
+		setFilteredLanguages(
+			initialized.languages.filter(
+				(languages) => languages !== initialized.referenceLanguage
+			)
+		);
+
 		return initialized;
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
