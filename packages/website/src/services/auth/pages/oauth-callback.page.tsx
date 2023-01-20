@@ -17,6 +17,8 @@ import { isServer } from "solid-js/web";
 export function Page() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
+	// ! Extremely important to wrap the get user function
+	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
 	const [userInfo] = createResource(() => getUserInfo());
 
 	createEffect(() => {
