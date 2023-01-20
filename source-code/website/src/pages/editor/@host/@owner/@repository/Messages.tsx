@@ -253,13 +253,10 @@ function PatternEditor(props: {
 					() => hasChanges() === false && setIsFocused(false)
 				),
 			]}
-			class="grid grid-row-2 gap-2 grow border border-outline p-2 rounded	"
+			class="grid grid-row-2 gap-2 grow 	"
 		>
 			<div class="flex flex-col gap-1">
-				{/* <div class="">{props.language}</div> */}
-				<sl-badge prop:variant="neutral" prop:pill={true}>
-					{props.language}
-				</sl-badge>
+				<div class="">{props.language}</div>
 
 				{/* TODO: #169 use proper text editor instead of input element */}
 				<sl-textarea
