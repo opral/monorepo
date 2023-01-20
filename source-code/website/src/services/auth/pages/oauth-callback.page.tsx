@@ -17,10 +17,7 @@ import { isServer } from "solid-js/web";
 export function Page() {
 	const [localStorage, setLocalStorage] = useLocalStorage();
 
-	const [userInfo] = createResource(() => {
-		console.log("fetching user info ", new Date());
-		return getUserInfo();
-	});
+	const [userInfo] = createResource(getUserInfo);
 
 	createEffect(() => {
 		if (userInfo.error === undefined && userInfo()) {
