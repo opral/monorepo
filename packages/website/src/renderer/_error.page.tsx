@@ -24,7 +24,7 @@ export function Page(pageContext: PageContextRenderer) {
 						<a href="https://inlang.com">
 							<sl-button prop:variant="text">
 								<MaterialSymbolsArrowBackRounded slot="prefix"></MaterialSymbolsArrowBackRounded>
-								Back home to inlang.com
+								Back to inlang.com
 							</sl-button>
 						</a>
 					</Match>
