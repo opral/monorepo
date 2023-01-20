@@ -2,7 +2,7 @@ import type { ClientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { createSignal, Show } from "solid-js";
 import IconGithub from "~icons/cib/github";
-import { githubAuthUrl } from "./logic.js";
+import { githubAuthUrl } from "../logic.js";
 
 /**
  * A dialog that prompts the user to login with GitHub.

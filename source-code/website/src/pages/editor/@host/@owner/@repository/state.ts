@@ -23,7 +23,6 @@ import {
 	getLocalStorage,
 	useLocalStorage,
 } from "@src/services/local-storage/index.js";
-import { AUTH_HEADER_KEY } from "@src/services/auth/index.js";
 import { createFsFromVolume, Volume } from "memfs";
 import {
 	isCollaborator,
@@ -91,7 +90,6 @@ export function StateProvider(props: { children: JSXElement }) {
 			const response = await isCollaborator({
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
-				encryptedAccessToken: args.user.encryptedAccessToken,
 				username: args.user.username,
 			});
 			return response;
@@ -117,7 +115,6 @@ export function StateProvider(props: { children: JSXElement }) {
 			_repositoryInformation({
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
-				encryptedAccessToken: args.user.encryptedAccessToken,
 			})
 	);
 
@@ -286,11 +283,6 @@ async function cloneRepository(args: {
 		fs: fs,
 		http,
 		dir: "/",
-		headers: args.user
-			? {
-					[AUTH_HEADER_KEY]: args.user.encryptedAccessToken,
-			  }
-			: undefined,
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 	});
@@ -318,9 +310,6 @@ export async function pushChanges(
 		dir: "/",
 		author: {
 			name: user.username,
-		},
-		headers: {
-			[AUTH_HEADER_KEY]: user.encryptedAccessToken,
 		},
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
@@ -446,9 +435,6 @@ async function pull(args: { user: NonNullable<LocalStorageSchema["user"]> }) {
 			singleBranch: true,
 			author: {
 				name: args.user.username,
-			},
-			headers: {
-				[AUTH_HEADER_KEY]: args.user.encryptedAccessToken,
 			},
 			// try to not create a merge commit
 			// rebasing would be the best option but it is not supported by isomorphic-git

@@ -6,6 +6,7 @@ import {
 	useContext,
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
+import { getUserInfo } from "../auth/logic.telefunc.js";
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
 const LocalStorageContext = createContext();
@@ -60,10 +61,18 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		if (storage) {
 			setStore(storage);
 		}
+		// initialize the user in local storage
+		getUserInfo()
+			.then((userOrUndefined) => setStore("user", userOrUndefined))
+			// set user to undefined if an error occurs
+			.catch(() => setStore("user", undefined));
+
+		// listen for changes in other windows
 		window.addEventListener("storage", onStorageSetByOtherWindow);
 	});
 
 	onCleanup(() => {
+		// remove listener
 		window.removeEventListener("storage", onStorageSetByOtherWindow);
 	});
 
