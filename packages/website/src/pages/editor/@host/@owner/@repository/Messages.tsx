@@ -53,33 +53,29 @@ export function Messages(props: {
 			</h3>
 			<div class="grid grid-cols-2 gap-16">
 				<div class="flex self-center">
-					<div class="grow">
-						<PatternEditor
-							language={inlangConfig()!.referenceLanguage}
-							id={id()}
-							referenceMessage={referenceMessage()}
-							message={props.messages[inlangConfig()!.referenceLanguage]}
-						></PatternEditor>
-					</div>
+					<PatternEditor
+						language={inlangConfig()!.referenceLanguage}
+						id={id()}
+						referenceMessage={referenceMessage()}
+						message={props.messages[inlangConfig()!.referenceLanguage]}
+					></PatternEditor>
 				</div>
 				<div class="flex flex-col gap-4">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<Show when={language !== inlangConfig()?.referenceLanguage}>
 								<div
-									class="flex"
+									class="flex "
 									classList={{
 										hidden: filteredLanguages().includes(language) === false,
 									}}
 								>
-									<div class="grow">
-										<PatternEditor
-											language={language}
-											id={id()}
-											referenceMessage={referenceMessage()}
-											message={props.messages[language]}
-										></PatternEditor>
-									</div>
+									<PatternEditor
+										language={language}
+										id={id()}
+										referenceMessage={referenceMessage()}
+										message={props.messages[language]}
+									></PatternEditor>
 								</div>
 							</Show>
 						)}
@@ -257,7 +253,7 @@ function PatternEditor(props: {
 					() => hasChanges() === false && setIsFocused(false)
 				),
 			]}
-			class="grid grid-row-2 gap-2"
+			class="grid grid-row-2 gap-2 grow"
 		>
 			<div class="flex">
 				<div class="min-w-min w-8 self-center">{props.language}</div>
@@ -267,7 +263,7 @@ function PatternEditor(props: {
 					prop:resize="auto"
 					prop:size="small"
 					prop:rows={1}
-					class="border-none  grow"
+					class="border-none grow"
 					onFocus={() => setIsFocused(true)}
 					prop:value={textValue() ?? ""}
 					prop:disabled={userIsCollaborator() === false}
