@@ -70,7 +70,7 @@ if (isProduction) {
 			// enable Express.js middleware tracing
 			new Tracing.Integrations.Express({ app }),
 		],
-		tracesSampleRate: 0.8,
+		tracesSampleRate: 0.1,
 	});
 
 	// RequestHandler creates a separate execution context using domains, so that every
