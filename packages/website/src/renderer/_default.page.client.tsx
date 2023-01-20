@@ -43,7 +43,7 @@ if (import.meta.env.PROD) {
 	Sentry.init({
 		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
 		integrations: [new BrowserTracing()],
-		tracesSampleRate: 0.8,
+		tracesSampleRate: 0.1,
 	});
 }
 
