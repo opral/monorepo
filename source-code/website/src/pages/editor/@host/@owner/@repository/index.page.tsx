@@ -78,13 +78,15 @@ export function Page() {
 						</p>
 					</Match>
 					<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
-						<div class="flex flex-col grow justify-center items-center min-w-full">
+						<div class="flex flex-col grow justify-center items-center min-w-full gap-2">
 							{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 							<div>
-								<sl-spinner style="font-size: 50px; --track-width: 10px;"></sl-spinner>
+								<sl-spinner style="font-size: 2rem;"></sl-spinner>
 							</div>
 
-							<p>cloning repositories can take a few minutes...</p>
+							<p class="text-lg">
+								cloning repositories can take a few minutes...
+							</p>
 						</div>
 					</Match>
 					<Match when={inlangConfig() === undefined}>
