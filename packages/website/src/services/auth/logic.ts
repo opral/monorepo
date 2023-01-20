@@ -1,7 +1,5 @@
 import type { ServerSideEnv } from "@env";
-import { Result } from "@inlang/core/utilities";
 import { CompactEncrypt, compactDecrypt, base64url } from "jose";
-import type { LocalStorageSchema } from "../local-storage/index.js";
 
 // enc = encoding
 const enc = "A128CBC-HS256";
@@ -16,11 +14,13 @@ const scopes = "repo,user:email";
  *
  * The string being the interim code returned from
  * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+ *
+ * @throws
  */
 export async function encryptAccessToken(args: {
 	accessToken: string;
 	JWE_SECRET_KEY: ServerSideEnv["JWE_SECRET_KEY"];
-}): Promise<Result<string, Error>> {
+}): Promise<string> {
 	try {
 		const secret = base64url.decode(args.JWE_SECRET_KEY);
 		const jwe = await new CompactEncrypt(
@@ -28,9 +28,9 @@ export async function encryptAccessToken(args: {
 		)
 			.setProtectedHeader({ alg, enc })
 			.encrypt(secret);
-		return Result.ok(jwe);
+		return jwe;
 	} catch (error) {
-		return Result.err(error as Error);
+		throw Error("Failed to encrypt access token", { cause: error });
 	}
 }
 
@@ -38,20 +38,17 @@ export async function encryptAccessToken(args: {
  * Decrypts a JWE obtained by `exchangeInterimCodeForJwe`.
  *
  * @important only call this function on the server-side.
+ * @throws if the decryption fails
  */
 export async function decryptAccessToken(args: {
 	jwe: string;
 	JWE_SECRET_KEY: ServerSideEnv["JWE_SECRET_KEY"];
-}): Promise<Result<string, Error>> {
-	try {
-		const { plaintext } = await compactDecrypt(
-			args.jwe,
-			base64url.decode(args.JWE_SECRET_KEY)
-		);
-		return Result.ok(new TextDecoder().decode(plaintext));
-	} catch (error) {
-		return Result.err(error as Error);
-	}
+}): Promise<string> {
+	const { plaintext } = await compactDecrypt(
+		args.jwe,
+		base64url.decode(args.JWE_SECRET_KEY)
+	);
+	return new TextDecoder().decode(plaintext);
 }
 
 /**
@@ -71,66 +68,27 @@ export function githubAuthUrl(githubAppClientId: string) {
 export async function exchangeInterimCodeForAccessToken(args: {
 	code: string;
 	env: ServerSideEnv;
-}): Promise<Result<string, Error>> {
-	try {
-		// fetch post request to github
-		const request = await fetch(
-			`https://github.com/login/oauth/access_token?client_id=${args.env.VITE_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
-			{
-				method: "POST",
-				headers: {
-					Accept: "application/json",
-				},
-			}
-		);
-		if (request.ok === false) {
-			throw Error("exchanging the interim token failed", {
-				cause: request.statusText,
-			});
-		}
-		const requestBody = await request.json();
-		if (requestBody.error) {
-			return Result.err(
-				Error("exchanging the interim token failed", {
-					cause: requestBody.error_description,
-				})
-			);
-		}
-		return Result.ok(requestBody.access_token);
-	} catch (error) {
-		return Result.err(error as Error);
-	}
-}
-
-/**
- * Get the user info from the GitHub API.
- *
- * Read https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
- */
-export async function getUserInfo(args: { accessToken: string }): Promise<
-	Result<
-		// user that can't be undefined without the encryptedAccessToken
-		Omit<NonNullable<LocalStorageSchema["user"]>, "encryptedAccessToken">,
-		Error
-	>
-> {
-	try {
-		const request = await fetch("https://api.github.com/user", {
+}): Promise<string> {
+	// fetch post request to github
+	const request = await fetch(
+		`https://github.com/login/oauth/access_token?client_id=${args.env.VITE_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
+		{
+			method: "POST",
 			headers: {
-				Accept: "application/vnd.github+json",
-				Authorization: `Bearer ${args.accessToken}`,
-				"X-GitHub-Api-Version": "2022-11-28",
+				Accept: "application/json",
 			},
-		});
-		if (request.status !== 200) {
-			throw Error("Failed to get user info " + request.statusText);
 		}
-		const requestBody = await request.json();
-		return Result.ok({
-			username: requestBody.login,
-			avatarUrl: requestBody.avatar_url,
+	);
+	if (request.ok === false) {
+		throw Error("exchanging the interim token failed", {
+			cause: request.statusText,
 		});
-	} catch (error) {
-		return Result.err(error as Error);
 	}
+	const requestBody = await request.json();
+	if (requestBody.error) {
+		throw Error("Exchanging the interim token failed", {
+			cause: requestBody.error_description,
+		});
+	}
+	return requestBody.access_token;
 }
