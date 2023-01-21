@@ -1,5 +1,6 @@
 import type { ServerSideEnv } from "@env";
 import { CompactEncrypt, compactDecrypt, base64url } from "jose";
+import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
 
 // enc = encoding
 const enc = "A128CBC-HS256";
@@ -80,6 +81,7 @@ export async function exchangeInterimCodeForAccessToken(args: {
 		}
 	);
 	if (request.ok === false) {
+		console.error(request.statusText);
 		throw Error("exchanging the interim token failed", {
 			cause: request.statusText,
 		});
@@ -92,3 +94,40 @@ export async function exchangeInterimCodeForAccessToken(args: {
 	}
 	return requestBody.access_token;
 }
+
+// /**
+//  * Get the user info from the GitHub API.
+//  *
+//  * Read https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
+//  * @throws
+//  */
+// export async function getGithubUserInfo(args: {
+// 	githubAccessToken: string;
+// }): Promise<LocalStorageSchema["user"] | undefined> {
+// 	if (args.githubAccessToken === undefined) {
+// 		return undefined;
+// 	}
+
+// 	const request = await fetch("https://api.github.com/user", {
+// 		headers: {
+// 			Accept: "application/vnd.github+json",
+// 			Authorization: `Bearer ${args.githubAccessToken}`,
+// 			"X-GitHub-Api-Version": "2022-11-28",
+// 		},
+// 	});
+
+// 	if (request.ok === false) {
+// 		throw Error("Failed to get user info " + request.statusText);
+// 	}
+
+// 	const requestBody = await request.json();
+// 	return {
+// 		username: requestBody.login,
+// 		avatarUrl: requestBody.avatar_url,
+// 	};
+// }
+
+// const getSessionData = async (args: {}) => {
+// 	if (true) {
+// 	}
+// };

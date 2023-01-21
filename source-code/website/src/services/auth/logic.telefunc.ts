@@ -5,13 +5,13 @@ import { getContext } from "telefunc";
  * Get the user info from the GitHub API.
  *
  * Read https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
- *
  * @throws
  */
 export async function getUserInfo(): Promise<
 	LocalStorageSchema["user"] | undefined
 > {
 	const context = getContext();
+
 	if (context.githubAccessToken === undefined) {
 		return undefined;
 	}

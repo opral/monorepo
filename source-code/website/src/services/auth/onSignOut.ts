@@ -6,9 +6,12 @@ import type { LocalStorageSchema } from "../local-storage/schema.js";
  */
 export async function onSignOut(args: {
 	setLocalStorage: SetStoreFunction<LocalStorageSchema>;
+	onlyClientSide?: boolean;
 }) {
-	// sign out on the server
-	await fetch("/services/auth/sign-out", { method: "POST" });
-	// sign out on the client by setting the user to undefined
+	if (!args.onlyClientSide) {
+		// sign out on the server
+		await fetch("/services/auth/sign-out", { method: "POST" });
+	}
+
 	args.setLocalStorage("user", undefined);
 }
