@@ -245,7 +245,7 @@ const setResources: typeof setOriginResources = (...args: any) => {
 export const referenceResource = () =>
 	resources.find(
 		(resource) =>
-			resource.languageTag.language === inlangConfig()?.referenceLanguage
+			resource.languageTag.name === inlangConfig()?.referenceLanguage
 	);
 
 /**

@@ -39,7 +39,7 @@ export function Page() {
 					result[id] = {};
 				}
 				// assigning the message
-				result[id][resource.languageTag.language] = query(resource).get({ id });
+				result[id][resource.languageTag.name] = query(resource).get({ id });
 			}
 		}
 		return result;
