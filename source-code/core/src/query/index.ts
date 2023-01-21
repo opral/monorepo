@@ -61,7 +61,7 @@ function create(
 	if (get(copy, { id: args.message.id.name })) {
 		return Result.err(
 			Error(
-				`Message ${args.message.id.name} already exists in resource ${resource.languageTag.language}.`
+				`Message ${args.message.id.name} already exists in resource ${resource.languageTag.name}.`
 			)
 		);
 	}
@@ -113,7 +113,7 @@ function update(
 	}
 	return Result.err(
 		Error(
-			`Message ${args.id} does not exist in resource ${resource.languageTag.language}.`
+			`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`
 		)
 	);
 }
@@ -136,7 +136,7 @@ function _delete(
 	}
 	return Result.err(
 		Error(
-			`Message ${args.id} does not exist in resource ${resource.languageTag.language}.`
+			`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`
 		)
 	);
 }

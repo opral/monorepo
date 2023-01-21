@@ -245,7 +245,7 @@ const setResources: typeof setOriginResources = (...args: any) => {
 export const referenceResource = () =>
 	resources.find(
 		(resource) =>
-			resource.languageTag.language === inlangConfig()?.referenceLanguage
+			resource.languageTag.name === inlangConfig()?.referenceLanguage
 	);
 
 /**
@@ -353,19 +353,30 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 			"data:application/javascript;base64," + btoa(file.toString());
 
 		const module = await import(/* @vite-ignore */ withMimeType);
-		const initialized: InlangConfig = await module.initializeConfig({
-			...environmentFunctions,
-		});
+		// account for breaking change from renaming the config
+		// https://github.com/inlang/inlang/issues/291
+		//
+		// this code can be removed once https://github.com/osmosis-labs/osmosis-frontend
+		// is updated to use the new config name
+		let config: InlangConfig;
+		if (module.defineConfig) {
+			config = await module.defineConfig({
+				...environmentFunctions,
+			});
+		} else {
+			config = await module.initializeConfig({
+				...environmentFunctions,
+			});
+		}
 
 		//initialises/ set the inital signal for  the language of the language filter for the messages
 		// .filter removes the referenceLanguage from the array languages
 		setFilteredLanguages(
-			initialized.languages.filter(
-				(languages) => languages !== initialized.referenceLanguage
+			config.languages.filter(
+				(languages) => languages !== config.referenceLanguage
 			)
 		);
-
-		return initialized;
+		return config;
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
 			// the config does not exist

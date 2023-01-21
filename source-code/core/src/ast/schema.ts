@@ -59,17 +59,21 @@ export type Text = Node<"Text"> & {
  * A language tag that identifies a human language.
  *
  * The node is planned to obey to [IETF BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
- * For now, only a language itself can be defined without regions etc.
- * Participate in the [discussions](https://github.com/inlang/inlang/discussions) if
- * you need subtags like region.
+ * For now, only a name that acts as an ID can be set. See
+ * https://github.com/inlang/inlang/issues/296
  */
 export type LanguageTag = Node<"LanguageTag"> & {
+	/**
+	 * The ID of the language.
+	 */
+	name: string;
+
 	/**
 	 * Language must be an ISO-639-1 string.
 	 *
 	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 	 */
-	language: string;
+	// language: string;
 };
 
 // export type MessageComment = Node<"MessageComment"> & {
