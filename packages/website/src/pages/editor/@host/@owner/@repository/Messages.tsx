@@ -22,7 +22,7 @@ import { syncFork as _syncFork } from "@src/services/github/index.js";
 
 export function Messages(props: {
 	messages: Record<
-		ast.Resource["languageTag"]["language"],
+		ast.Resource["languageTag"]["name"],
 		ast.Message | undefined
 	>;
 }) {
@@ -87,7 +87,7 @@ export function Messages(props: {
 }
 
 function PatternEditor(props: {
-	language: ast.Resource["languageTag"]["language"];
+	language: ast.Resource["languageTag"]["name"];
 	id: ast.Message["id"]["name"];
 	referenceMessage?: ast.Message;
 	message: ast.Message | undefined;
@@ -122,7 +122,7 @@ function PatternEditor(props: {
 	/** the resource the message belongs to */
 	const resource = () =>
 		resources.find(
-			(resource) => resource.languageTag.language === props.language
+			(resource) => resource.languageTag.name === props.language
 		)!;
 
 	/** copy of the message to conduct and track changes */
@@ -185,7 +185,7 @@ function PatternEditor(props: {
 				resources
 					.filter(
 						(_resource) =>
-							_resource.languageTag.language !== resource().languageTag.language
+							_resource.languageTag.name !== resource().languageTag.name
 					)
 					.concat([updatedResource])
 			);
@@ -226,7 +226,7 @@ function PatternEditor(props: {
 		}
 		setMachineTranslationIsLoading(true);
 		const result = await onMachineTranslate({
-			referenceLanguage: referenceResource()!.languageTag.language,
+			referenceLanguage: referenceResource()!.languageTag.name,
 			targetLanguage: props.language,
 			text,
 		});
