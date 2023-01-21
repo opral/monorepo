@@ -146,7 +146,7 @@ const mockResource: Resource = {
 	type: "Resource",
 	languageTag: {
 		type: "LanguageTag",
-		language: "en",
+		name: "en",
 	},
 	body: [
 		{
