@@ -4,7 +4,6 @@ import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
 import { getUserInfo } from "../logic.telefunc.js";
-import { isServer } from "solid-js/web";
 
 /**
  * The GitHub web application flow redirects to this page.

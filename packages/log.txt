@@ -1,0 +1,48 @@
+
+> dev
+> turbo run dev
+
+• Packages in scope: @inlang/core, @inlang/design-system, @inlang/git-sdk, @inlang/website, configs, ide-extension
+• Running dev in 6 packages
+• Remote caching disabled
+@inlang/design-system:dev: cache bypass, force executing 08566be2c0c4c112
+@inlang/core:dev: cache bypass, force executing b8948592850756da
+@inlang/git-sdk:dev: cache bypass, force executing 91e826a1e04781bd
+@inlang/git-sdk:build: cache hit, replaying output 2f422f546dee00d3
+@inlang/git-sdk:build: yarn run v1.22.15
+@inlang/git-sdk:build: $ tsc --build ./tsconfig.build.json
+@inlang/git-sdk:build: Done in 1.50s.
+@inlang/design-system:build: cache hit, replaying output 7327070d3dcab090
+@inlang/design-system:build: yarn run v1.22.15
+@inlang/design-system:build: $ tsc --build ./tsconfig.build.json
+@inlang/design-system:build: Done in 1.56s.
+@inlang/core:build: cache hit, replaying output 668150cfa532d1e1
+@inlang/core:build: yarn run v1.22.15
+@inlang/core:build: warning package.json: No license field
+@inlang/core:build: $ tsc --build ./tsconfig.build.json
+@inlang/core:build: Done in 1.72s.
+@inlang/website:dev: cache bypass, force executing bef74c88b3852d13
+@inlang/core:dev: yarn run v1.22.15
+@inlang/design-system:dev: yarn run v1.22.15
+@inlang/git-sdk:dev: yarn run v1.22.15
+@inlang/core:dev: warning package.json: No license field
+@inlang/website:dev: yarn run v1.22.15
+@inlang/core:dev: $ tsc --watch
+@inlang/git-sdk:dev: $ tsc --watch
+@inlang/design-system:dev: $ tsc --watch
+@inlang/website:dev: warning package.json: No license field
+@inlang/website:dev: $ npx tsx ./src/server/main.ts
+@inlang/git-sdk:dev: c16:32:44 - Starting compilation in watch mode...
+@inlang/git-sdk:dev: 
+@inlang/design-system:dev: c16:32:44 - Starting compilation in watch mode...
+@inlang/design-system:dev: 
+@inlang/core:dev: c16:32:44 - Starting compilation in watch mode...
+@inlang/core:dev: 
+@inlang/website:dev: (node:70436) ExperimentalWarning: Custom ESM Loaders is an experimental feature and might change at any time
+@inlang/website:dev: (Use `node --trace-warnings ...` to show where the warning was created)
+@inlang/git-sdk:dev: 
+@inlang/git-sdk:dev: 16:32:44 - Found 0 errors. Watching for file changes.
+@inlang/design-system:dev: 
+@inlang/design-system:dev: 16:32:45 - Found 0 errors. Watching for file changes.
+@inlang/core:dev: 
+@inlang/core:dev: 16:32:45 - Found 0 errors. Watching for file changes.
