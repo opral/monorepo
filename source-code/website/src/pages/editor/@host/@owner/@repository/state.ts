@@ -28,6 +28,7 @@ import {
   isCollaborator,
   repositoryInformation as _repositoryInformation,
 } from "@src/services/github/index.js";
+import { isServer } from "solid-js/web";
 /**
  * `<StateProvider>` initializes state with a computations such resources.
  *
@@ -41,6 +42,10 @@ export function StateProvider(props: { children: JSXElement }) {
 
   // re-fetched if currentPageContext changes
   [repositoryIsCloned] = createResource(() => {
+    // don't run server side
+    if (isServer === false) {
+      return false;
+    }
     return {
       routeParams: currentPageContext.routeParams as EditorRouteParams,
       user: localStorage.user,
@@ -49,7 +54,8 @@ export function StateProvider(props: { children: JSXElement }) {
 
   // re-fetched if respository has been cloned
   [inlangConfig] = createResource(() => {
-    if (repositoryIsCloned.error) {
+    // don't run server side
+    if (isServer || repositoryIsCloned.error) {
       return false;
     }
     return repositoryIsCloned();
@@ -59,7 +65,8 @@ export function StateProvider(props: { children: JSXElement }) {
     // using batch does not work for this resource. don't know why.
     // no related bug so far, hence leave it as is.
     () => {
-      if (repositoryIsCloned.error) {
+      // don't run server side
+      if (isServer || repositoryIsCloned.error) {
         return false;
       }
       return {
@@ -79,10 +86,16 @@ export function StateProvider(props: { children: JSXElement }) {
      *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
      * Hence, a string needs to be passed to the fetch of the resource.
      */
-    () => ({
-      user: localStorage.user ?? "not logged in",
-      routeParams: currentPageContext.routeParams as EditorRouteParams,
-    }),
+    () => {
+      // don't run server side
+      if (isServer) {
+        return false;
+      }
+      return {
+        user: localStorage.user ?? "not logged in",
+        routeParams: currentPageContext.routeParams as EditorRouteParams,
+      };
+    },
     async (args) => {
       if (typeof args.user === "string") {
         return false;
@@ -98,9 +111,9 @@ export function StateProvider(props: { children: JSXElement }) {
 
   [repositoryInformation] = createResource(
     () => {
-      if (localStorage.user === undefined) {
-        return false;
-      } else if (
+      if (
+        isServer ||
+        localStorage.user === undefined ||
         currentPageContext.routeParams.owner === undefined ||
         currentPageContext.routeParams.repository === undefined
       ) {
@@ -120,7 +133,7 @@ export function StateProvider(props: { children: JSXElement }) {
 
   [currentBranch] = createResource(
     () => {
-      if (repositoryIsCloned.error) {
+      if (isServer || repositoryIsCloned.error) {
         return false;
       }
       return repositoryIsCloned();
