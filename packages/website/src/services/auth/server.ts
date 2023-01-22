@@ -86,6 +86,6 @@ router.post(
 			);
 		}
 
-		res.status(200).send("created session");
+		res.status(200).send("Created session or session already existed.");
 	}
 );
