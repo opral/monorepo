@@ -12,7 +12,7 @@ The design requirement for inlang are as follows:
 
 - **Async. Otherwise, the main thread (UI) is blocked each time some config code is executed.**   
 
-  This point is unrelated to the DOS argument. The DOS argument "crashed" the app once, and it's clear that the config is malicious. Blocking the main thread with each execution entails that the UI will lag. A bad UX, not a malicious attack.  
+  This point is unrelated to the DOS argument. The DOS argument "crashed" the app once, and it's clear that the config is malicious. Blocking the main thread with each execution entails that the UI will lag. A bad UX, not a malicious attack. Running config related code in a webworker could mitigate the need for async. However, plugins would not have access to the DOM. Whether access to the DOM is required or not is to be determined. 
 
 - **Support the import of external scripts/packages.** 
 
