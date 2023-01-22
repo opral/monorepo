@@ -5,12 +5,12 @@ import type { Resource } from "@inlang/core/ast";
  * The state of the vscode extension.
  */
 type State = {
-	config: InlangConfig;
-	/**
-	 * The config path is useful to resolve relative paths in the config.
-	 */
-	configPath: string;
-	resources: Resource[];
+  config: InlangConfig;
+  /**
+   * The config path is useful to resolve relative paths in the config.
+   */
+  configPath: string;
+  resources: Resource[];
 };
 
 let _state: State;
@@ -22,7 +22,7 @@ let _state: State;
  * this function is a wrapper to assign the `state` variable.
  */
 export function setState(state: State) {
-	_state = state;
+  _state = state;
 }
 
 /**
@@ -34,5 +34,5 @@ export function setState(state: State) {
  * State that is not reflected = endless bugs.
  */
 export function state(): State {
-	return _state;
+  return _state;
 }

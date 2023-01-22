@@ -34,16 +34,16 @@ One single config file named `inlang.config.js` needs to be created at the root 
    // filename: inlang.config.js
 
    export async function defineConfig(env) {
-   	return {
-   		referenceLanguage: "en",
-   		languages: ["en", "de"],
-   		readResources: (args) => {
-   			// define how resources should be read
-   		},
-   		writeResources: (args) => {
-   			// define how resources should be written
-   		},
-   	};
+     return {
+       referenceLanguage: "en",
+       languages: ["en", "de"],
+       readResources: (args) => {
+         // define how resources should be read
+       },
+       writeResources: (args) => {
+         // define how resources should be written
+       },
+     };
    }
    ```
 
@@ -53,29 +53,29 @@ One single config file named `inlang.config.js` needs to be created at the root 
    // filename: inlang.config.js
 
    export async function defineConfig(env) {
-   	// importing a plugin
-   	const plugin = await env.$import(
-   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
-   	);
+     // importing a plugin
+     const plugin = await env.$import(
+       "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
+     );
 
-   	// most plugins require additional config, read the plugins documentation
-   	// for the required config and correct usage.
-   	const pluginConfig = {
-   		pathPattern: "./{language}.json",
-   	};
+     // most plugins require additional config, read the plugins documentation
+     // for the required config and correct usage.
+     const pluginConfig = {
+       pathPattern: "./{language}.json",
+     };
 
-   	return {
-   		referenceLanguage: "en",
-   		languages: ["en", "de"],
-   		readResources: (args) => {
-   			// define how resources should be read
-   			return plugin.readResources(args);
-   		},
-   		writeResources: (args) => {
-   			// define how resources should be written
-   			return plugin.readResources(args);
-   		},
-   	};
+     return {
+       referenceLanguage: "en",
+       languages: ["en", "de"],
+       readResources: (args) => {
+         // define how resources should be read
+         return plugin.readResources(args);
+       },
+       writeResources: (args) => {
+         // define how resources should be written
+         return plugin.readResources(args);
+       },
+     };
    }
    ```
 
@@ -96,8 +96,8 @@ If inlang is used in a JavaScript environment like Node or Deno, typesafety can 
     * @type {import("@inlang/core/config").DefineConfig}
     */
    export async function defineConfig(env) {
-   	//
-   	//
-   	//
+     //
+     //
+     //
    }
    ```

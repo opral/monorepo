@@ -93,7 +93,7 @@ The editor is a classical SPA while the website is SSR. Note however that the ex
 
 - SEO ✅ (website) ❔ (editor)
 
-SEO is important for the website and might be important for the editor.  
+SEO is important for the website and might be important for the editor.
 
 ## Choices
 
@@ -135,15 +135,15 @@ VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level m
 
 ### framework
 
-A few things to consider: 
+A few things to consider:
 
-1. The decision now is likely irreversible given the effort required to switch to another framework. 
+1. The decision now is likely irreversible given the effort required to switch to another framework.
 2. Inlang is a long-term project. I am confident that inlang is past an exploration phase of what needs to be build.
-3. The architecture, performance and state management requirements of the editor involve uncertainty.  
+3. The architecture, performance and state management requirements of the editor involve uncertainty.
 
-The translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI. Thus, complex state management and (likely) performance is of high importance. SolidJS seems like the framework that learned from the best (Knockout, React, Angular, Vue) and bundles state management, good performance, SSR, and tooling (their community efforts) under one umbrella. 
+The translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI. Thus, complex state management and (likely) performance is of high importance. SolidJS seems like the framework that learned from the best (Knockout, React, Angular, Vue) and bundles state management, good performance, SSR, and tooling (their community efforts) under one umbrella.
 
-SolidJS has ultimately been choosen given the uncertainty of the editor's requirements in terms of performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined. 
+SolidJS has ultimately been choosen given the uncertainty of the editor's requirements in terms of performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined.
 
 In summary, SolidJS has been choosen because:
 
@@ -169,10 +169,12 @@ Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/w
 #### why not svelte?
 
 - State management is inferior to SolidJS
-  - For example, async fetching of data is "missing". 
+
+  - For example, async fetching of data is "missing".
   - State can only be used in Svelte components, otherwise workarounds are required.
 
 - No JSX
+
   - Requires custom ide extensions for .svelte files
   - not compatible with most JSX things.
 

@@ -9,7 +9,7 @@ import { components } from "./config.js";
  * 	<Markdown renderableTree={renderableTree} />
  */
 export function Markdown(props: {
-	renderableTree: Markdoc.RenderableTreeNode;
+  renderableTree: Markdoc.RenderableTreeNode;
 }) {
-	return <>{renderToElement(props.renderableTree, { components })} </>;
+  return <>{renderToElement(props.renderableTree, { components })} </>;
 }

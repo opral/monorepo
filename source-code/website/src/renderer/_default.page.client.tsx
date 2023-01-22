@@ -41,11 +41,11 @@ import { clientSideEnv } from "@env";
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
-	Sentry.init({
-		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
-		integrations: [new BrowserTracing()],
-		tracesSampleRate: 0.1,
-	});
+  Sentry.init({
+    dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
+    integrations: [new BrowserTracing()],
+    tracesSampleRate: 0.1,
+  });
 }
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
@@ -56,26 +56,26 @@ const rootElement = document.querySelector("#root") as HTMLElement;
 
 const [currentPage, setCurrentPage] = createSignal<Component>();
 const [currentPageProps, setCurrentPageProps] = createStore<
-	Record<string, unknown>
+  Record<string, unknown>
 >({});
 
 export function render(pageContext: PageContextRenderer) {
-	try {
-		setCurrentPageContext(pageContext);
-		setCurrentPage(() => pageContext.Page);
-		setCurrentPageProps(pageContext.pageProps);
-		if (isFirstRender) {
-			hydrate(
-				() => (
-					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} />
-					</MetaProvider>
-				),
-				rootElement
-			);
-			isFirstRender = false;
-		}
-	} catch (e) {
-		console.error("ERROR in renderer", e);
-	}
+  try {
+    setCurrentPageContext(pageContext);
+    setCurrentPage(() => pageContext.Page);
+    setCurrentPageProps(pageContext.pageProps);
+    if (isFirstRender) {
+      hydrate(
+        () => (
+          <MetaProvider>
+            <Root page={currentPage()!} pageProps={currentPageProps} />
+          </MetaProvider>
+        ),
+        rootElement
+      );
+      isFirstRender = false;
+    }
+  } catch (e) {
+    console.error("ERROR in renderer", e);
+  }
 }

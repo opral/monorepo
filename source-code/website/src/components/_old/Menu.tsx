@@ -35,14 +35,14 @@ const useMenu = () => useContext(MenuContext);
  *  </Menu>
  */
 export function Menu(props: { children: JSXElement }) {
-	const [state, send] = useMachine(menu.machine({ id: createUniqueId() }));
-	const api = createMemo(() => menu.connect(state, send, normalizeProps));
+  const [state, send] = useMachine(menu.machine({ id: createUniqueId() }));
+  const api = createMemo(() => menu.connect(state, send, normalizeProps));
 
-	return (
-		<MenuContext.Provider value={api}>
-			<div>{props.children}</div>
-		</MenuContext.Provider>
-	);
+  return (
+    <MenuContext.Provider value={api}>
+      <div>{props.children}</div>
+    </MenuContext.Provider>
+  );
 }
 
 /**
@@ -57,8 +57,8 @@ export function Menu(props: { children: JSXElement }) {
  *  </MenuTrigger>
  */
 export function MenuTrigger(props: { children?: JSXElement }) {
-	const api = useMenu();
-	return <div {...api?.().triggerProps}>{props.children}</div>;
+  const api = useMenu();
+  return <div {...api?.().triggerProps}>{props.children}</div>;
 }
 
 /**
@@ -68,46 +68,46 @@ export function MenuTrigger(props: { children?: JSXElement }) {
  * @param props.color surface color as defined in https://m3.material.io/components/menus/specs#ad796ca6-3d66-4e7e-9322-c0d93bff5423
  */
 export function MenuContent(props: {
-	color: "surface-1" | "surface-2" | "surface-3" | "surface-4" | "surface-5";
-	children?: JSXElement;
+  color: "surface-1" | "surface-2" | "surface-3" | "surface-4" | "surface-5";
+  children?: JSXElement;
 }) {
-	const api = useMenu();
-	return (
-		<div {...api?.().positionerProps}>
-			<ul
-				{...api?.().contentProps}
-				classList={{
-					[`bg-${props.color}`]: true,
-					["w-32 min-w-fit rounded-md shadow-lg py-1.5 border border-outline"]:
-						true,
-				}}
-			>
-				{props.children}
-			</ul>
-		</div>
-	);
+  const api = useMenu();
+  return (
+    <div {...api?.().positionerProps}>
+      <ul
+        {...api?.().contentProps}
+        classList={{
+          [`bg-${props.color}`]: true,
+          ["w-32 min-w-fit rounded-md shadow-lg py-1.5 border border-outline"]:
+            true,
+        }}
+      >
+        {props.children}
+      </ul>
+    </div>
+  );
 }
 
 /**
  * A menu item.
  */
 export function MenuItem(
-	props: {
-		id: string;
-		children?: JSXElement;
-	} & JSX.HTMLAttributes<HTMLLIElement>
+  props: {
+    id: string;
+    children?: JSXElement;
+  } & JSX.HTMLAttributes<HTMLLIElement>
 ) {
-	const api = useMenu();
-	return (
-		<li
-			{...props}
-			{...api?.().getItemProps({ id: props.id })}
-			classList={{
-				"text-on-surface text-sm block py-1 px-3 hover:bg-on-surface/10 cursor-pointer":
-					true,
-			}}
-		>
-			{props.children}
-		</li>
-	);
+  const api = useMenu();
+  return (
+    <li
+      {...props}
+      {...api?.().getItemProps({ id: props.id })}
+      classList={{
+        "text-on-surface text-sm block py-1 px-3 hover:bg-on-surface/10 cursor-pointer":
+          true,
+      }}
+    >
+      {props.children}
+    </li>
+  );
 }
