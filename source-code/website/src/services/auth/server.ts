@@ -5,11 +5,8 @@ import {
 	exchangeInterimCodeForAccessToken,
 } from "./logic.js";
 import crypto from "crypto";
-import {
-	InlangSessionRequest,
-	createSession,
-	verifyInlangSession,
-} from "./session/server.js";
+import { createSession, verifyInlangSession } from "./lib/session/server.js";
+import type { InlangSessionRequest } from "./lib/session/types.server.js";
 
 export const router = express.Router();
 
@@ -65,14 +62,30 @@ router.get(
  */
 router.post(
 	"/sign-out",
-	verifyInlangSession({ sessionRequired: true }),
+	verifyInlangSession({ sessionRequired: false }),
 	async (req: InlangSessionRequest, res) => {
 		// This will delete the session from the db and from the frontend (cookies)
-		console.log("session", req.session);
 		if (req.session) {
 			await req.session.revokeSession();
 		}
 
 		res.status(200).send("signed out");
+	}
+);
+
+router.post(
+	"/create-session",
+	verifyInlangSession({ sessionRequired: false }),
+	async (req: InlangSessionRequest, res) => {
+		if (!req.session) {
+			const session = await createSession(
+				res,
+				Math.random().toString(),
+				{ test: "testData" },
+				{ ssssrrr: "testData" }
+			);
+		}
+
+		res.status(200).send("created session");
 	}
 );

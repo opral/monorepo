@@ -1,7 +1,8 @@
 import type { ClientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { createSignal, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import IconGithub from "~icons/cib/github";
+import { tryCreateSession } from "../lib/session/client.js";
 import { githubAuthUrl } from "../logic.js";
 
 /**
@@ -23,6 +24,12 @@ export function SignInDialog(props: {
 	// web component slots load eagarly. applying manual conditional rendering
 	// combats flickering on initial render
 	const [isShown, setIsShown] = createSignal(false);
+
+	createEffect(async () => {
+		console.log("creating");
+		await tryCreateSession();
+	}, []);
+
 	return (
 		<sl-dialog
 			ref={props.ref}
@@ -35,8 +42,8 @@ export function SignInDialog(props: {
 				<sl-button
 					slot="footer"
 					prop:variant="primary"
-					prop:target="_blank"
 					prop:href={githubAuthUrl(props.githubAppClientId)}
+					prop:target="_blank"
 					onClick={props.onClickOnSignInButton}
 				>
 					<IconGithub slot="prefix"></IconGithub>

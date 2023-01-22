@@ -28,6 +28,28 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
 	}
 }
 
+export interface SetLocalStorage {
+	(key: keyof LocalStorageSchema, value: any): void;
+}
+
+/**
+ * Updates a key using inlangs custom local storage structure.
+ * @param key The key to update
+ * @param value The value to update the key with
+ */
+export const setLocalStorage: SetLocalStorage = (key, value) => {
+	if (!key) {
+		return;
+	}
+
+	const store = getLocalStorage();
+
+	localStorage.setItem(
+		LOCAL_STORAGE_KEY,
+		JSON.stringify({ ...store, [key]: value })
+	);
+};
+
 /**
  * Store that provides access to the local storage.
  *
@@ -82,10 +104,9 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			return console.warn(
 				`unknown localStorage key "${event.key}" was changed by another tab.`
 			);
-		}
-		if (event.newValue === null) {
+		} else if (event.newValue === null) {
 			return console.error(
-				'localStorage key "store" was deleted by another tab. this should not happen.'
+				`localStorage key "${LOCAL_STORAGE_KEY}" was deleted by another tab. this should not happen.`
 			);
 		}
 		// setting the origin store to not trigger a loop

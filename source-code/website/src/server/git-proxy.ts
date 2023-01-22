@@ -14,10 +14,8 @@ import { serverSideEnv } from "@env";
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js";
 import { decryptAccessToken } from "@src/services/auth/logic.js";
-import {
-	InlangSessionRequest,
-	verifyInlangSession,
-} from "@src/services/auth/session/server.js";
+import { verifyInlangSession } from "@src/services/auth/lib/session/server.js";
+import type { InlangSessionRequest } from "@src/services/auth/lib/session/types.server.js";
 
 const middleware = createMiddleware({});
 const env = await serverSideEnv();
@@ -42,7 +40,6 @@ gitProxyRouter.all(
 			let sessionData;
 			if (request.session != undefined) {
 				sessionData = await request.session.getSessionData();
-				console.log("sessionDataa", sessionData);
 			}
 
 			const encryptedAccessToken = sessionData?.encryptedAccessToken;
