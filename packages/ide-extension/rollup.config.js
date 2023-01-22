@@ -9,21 +9,21 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
  */
 
 export default {
-	input: "src/main.ts",
-	output: {
-		sourcemap: true,
-		// .cjs because the package.json defines "type": "module",
-		// .cjs indicates that the file should not be treated as es module
-		// but commonjs instead
-		file: "dist/main.cjs",
-		format: "cjs",
-	},
-	// the vscode dependency is provided by vscode.
-	external: ["vscode"],
-	plugins: [
-		// nodeResolve = bundle the dependencies
-		nodeResolve(),
-		// typescript = compile typescript
-		typescript(),
-	],
+  input: "src/main.ts",
+  output: {
+    sourcemap: true,
+    // .cjs because the package.json defines "type": "module",
+    // .cjs indicates that the file should not be treated as es module
+    // but commonjs instead
+    file: "dist/main.cjs",
+    format: "cjs",
+  },
+  // the vscode dependency is provided by vscode.
+  external: ["vscode"],
+  plugins: [
+    // nodeResolve = bundle the dependencies
+    nodeResolve(),
+    // typescript = compile typescript
+    typescript(),
+  ],
 };

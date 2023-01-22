@@ -49,91 +49,91 @@ const app = express();
 app.use(compression());
 
 app.use(
-	cookieSession({
-		name: "inlang-session",
-		httpOnly: true,
-		// secure: isProduction ? true : false,
-		// domain: isProduction ? "inlang.com" : undefined,
-		secret: env.COOKIE_SECRET,
-		maxAge: 7 * 24 * 3600 * 1000, // 1 week
-	})
+  cookieSession({
+    name: "inlang-session",
+    httpOnly: true,
+    // secure: isProduction ? true : false,
+    // domain: isProduction ? "inlang.com" : undefined,
+    secret: env.COOKIE_SECRET,
+    maxAge: 7 * 24 * 3600 * 1000, // 1 week
+  })
 );
 
 // setup sentry error tracking
 // must happen before the request handlers
 if (isProduction) {
-	Sentry.init({
-		dsn: env.SENTRY_DSN_SERVER,
-		integrations: [
-			// enable HTTP calls tracing
-			new Sentry.Integrations.Http({ tracing: true }),
-			// enable Express.js middleware tracing
-			new Tracing.Integrations.Express({ app }),
-		],
-		tracesSampleRate: 0.1,
-	});
+  Sentry.init({
+    dsn: env.SENTRY_DSN_SERVER,
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+    tracesSampleRate: 0.1,
+  });
 
-	// RequestHandler creates a separate execution context using domains, so that every
-	// transaction/span/breadcrumb is attached to its own Hub instance
-	app.use(Sentry.Handlers.requestHandler());
-	// TracingHandler creates a trace for every incoming request
-	app.use(Sentry.Handlers.tracingHandler());
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 }
 
 if (isProduction) {
-	// serve build files
-	app.use(sirv(`${rootPath}/dist/client`));
+  // serve build files
+  app.use(sirv(`${rootPath}/dist/client`));
 } else {
-	const viteServer = await createViteServer({
-		server: { middlewareMode: true },
-		root: rootPath,
-		appType: "custom",
-	});
-	// start vite hot module reload dev server
-	// use vite's connect instance as middleware
-	app.use(viteServer.middlewares);
+  const viteServer = await createViteServer({
+    server: { middlewareMode: true },
+    root: rootPath,
+    appType: "custom",
+  });
+  // start vite hot module reload dev server
+  // use vite's connect instance as middleware
+  app.use(viteServer.middlewares);
 }
 
 // ------------------------ START ROUTES ------------------------
 
 // serving telefunc https://telefunc.com/
 app.all(
-	"/_telefunc",
-	// Parse & make HTTP request body available at `req.body` (required by telefunc)
-	express.text(),
-	// handle the request
-	(request, response, next) => {
-		// decrypting the access token if it exists
-		if (request.session?.encryptedAccessToken) {
-			decryptAccessToken({
-				jwe: request.session.encryptedAccessToken,
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-			})
-				.then((accessToken) =>
-					telefunc({
-						context: { githubAccessToken: accessToken },
-						url: request.originalUrl,
-						method: request.method,
-						body: request.body,
-					})
-				)
-				.then(({ body, statusCode, contentType }) => {
-					response.status(statusCode).type(contentType).send(body);
-				})
-				.catch(next);
-		} else {
-			telefunc({
-				context: { githubAccessToken: undefined },
-				url: request.originalUrl,
-				method: request.method,
-				body: request.body,
-			})
-				.then(({ body, statusCode, contentType }) => {
-					response.status(statusCode).type(contentType).send(body);
-				})
-				.catch(next);
-		}
-	}
+  "/_telefunc",
+  // Parse & make HTTP request body available at `req.body` (required by telefunc)
+  express.text(),
+  // handle the request
+  (request, response, next) => {
+    // decrypting the access token if it exists
+    if (request.session?.encryptedAccessToken) {
+      decryptAccessToken({
+        jwe: request.session.encryptedAccessToken,
+        JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+      })
+        .then((accessToken) =>
+          telefunc({
+            context: { githubAccessToken: accessToken },
+            url: request.originalUrl,
+            method: request.method,
+            body: request.body,
+          })
+        )
+        .then(({ body, statusCode, contentType }) => {
+          response.status(statusCode).type(contentType).send(body);
+        })
+        .catch(next);
+    } else {
+      telefunc({
+        context: { githubAccessToken: undefined },
+        url: request.originalUrl,
+        method: request.method,
+        body: request.body,
+      })
+        .then(({ body, statusCode, contentType }) => {
+          response.status(statusCode).type(contentType).send(body);
+        })
+        .catch(next);
+    }
+  }
 );
 
 // forward git requests to the proxy with wildcard `*`.
@@ -145,19 +145,19 @@ app.use("/services/auth", authService);
 //! it is extremely important that a request handler is not async to catch errors
 //! express does not catch async errors. hence, renderPage uses the callback pattern
 app.get("*", (request, response, next) => {
-	renderPage({
-		urlOriginal: request.originalUrl,
-	})
-		.then((pageContext) => {
-			if (pageContext.httpResponse === null) {
-				next();
-			} else {
-				const { body, statusCode, contentType } = pageContext.httpResponse;
-				response.status(statusCode).type(contentType).send(body);
-			}
-		})
-		// pass the error to expresses error handling
-		.catch(next);
+  renderPage({
+    urlOriginal: request.originalUrl,
+  })
+    .then((pageContext) => {
+      if (pageContext.httpResponse === null) {
+        next();
+      } else {
+        const { body, statusCode, contentType } = pageContext.httpResponse;
+        response.status(statusCode).type(contentType).send(body);
+      }
+    })
+    // pass the error to expresses error handling
+    .catch(next);
 });
 
 // ------------------------ END ROUTES ------------------------
@@ -168,11 +168,11 @@ console.log(`Server running at http://localhost:${port}/`);
 
 // log to sentry
 if (isProduction) {
-	// The error handler must be before any other error middleware and after all controllers
-	app.use(Sentry.Handlers.errorHandler());
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 }
 
 onTelefuncBug((error) => {
-	console.error(error);
-	Sentry.captureException(error);
+  console.error(error);
+  Sentry.captureException(error);
 });

@@ -8,17 +8,17 @@ import { ComponentProps, lazy, Suspense } from "solid-js";
  *  - core ui brands https://icones.netlify.app/collection/cib
  */
 export function Icon(
-	props: { name: AvailableIcon } & ComponentProps<"svg"> & {
-			slot?: string;
-		}
+  props: { name: AvailableIcon } & ComponentProps<"svg"> & {
+      slot?: string;
+    }
 ) {
-	const ICON = lazy(() => icons[props.name]);
-	return (
-		// Suspense is required since the icons are lazy loaded.
-		<Suspense>
-			<ICON {...props} />
-		</Suspense>
-	);
+  const ICON = lazy(() => icons[props.name]);
+  return (
+    // Suspense is required since the icons are lazy loaded.
+    <Suspense>
+      <ICON {...props} />
+    </Suspense>
+  );
 }
 
 /**
@@ -33,13 +33,13 @@ export type AvailableIcon = keyof typeof icons;
 // the available icon sets are defined in the `package.json` file.
 // look out for "@iconify-json/*": "*" dependencies
 export const icons = {
-	success: import("~icons/material-symbols/check-circle-outline-rounded"),
-	danger: import("~icons/material-symbols/dangerous-outline-rounded"),
-	info: import("~icons/material-symbols/info-outline-rounded"),
-	warning: import("~icons/material-symbols/warning-outline-rounded"),
-	"turn-slight-left": import(
-		"~icons/material-symbols/turn-slight-left-rounded"
-	),
-	architecture: import("~icons/material-symbols/architecture-rounded"),
-	construction: import("~icons/material-symbols/construction-rounded"),
+  success: import("~icons/material-symbols/check-circle-outline-rounded"),
+  danger: import("~icons/material-symbols/dangerous-outline-rounded"),
+  info: import("~icons/material-symbols/info-outline-rounded"),
+  warning: import("~icons/material-symbols/warning-outline-rounded"),
+  "turn-slight-left": import(
+    "~icons/material-symbols/turn-slight-left-rounded"
+  ),
+  architecture: import("~icons/material-symbols/architecture-rounded"),
+  construction: import("~icons/material-symbols/construction-rounded"),
 } as const;

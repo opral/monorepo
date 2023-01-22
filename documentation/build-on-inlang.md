@@ -30,12 +30,12 @@ import { defineConfig } from "./inlang.config.js";
 
 // initializing the environment functions
 const env = {
-	$import: initialize$import({
-		workingDirectory: "/example",
-		fs: $fs,
-		fetch,
-	}),
-	$fs: fs,
+  $import: initialize$import({
+    workingDirectory: "/example",
+    fs: $fs,
+    fetch,
+  }),
+  $fs: fs,
 };
 
 // the `defineConfig` function is directly imported from `./inlang.config.js`
@@ -48,9 +48,9 @@ const resources = await config.readResources({ config });
 //
 // the example below checks if "first-message" exsits in all resources
 for (const resource of resources) {
-	const message = query(resource).get({ id: "first-message" });
-	if (message === undefined) {
-		throw Error("The message must be defined");
-	}
+  const message = query(resource).get({ id: "first-message" });
+  if (message === undefined) {
+    throw Error("The message must be defined");
+  }
 }
 ```

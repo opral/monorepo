@@ -7,11 +7,11 @@ const markdown = marked.parse(README);
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async () => {
-	return {
-		pageContext: {
-			pageProps: {
-				markdown: markdown,
-			},
-		},
-	};
+  return {
+    pageContext: {
+      pageProps: {
+        markdown: markdown,
+      },
+    },
+  };
 };

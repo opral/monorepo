@@ -11,6 +11,6 @@ import type { PageContext, PageContextRenderer } from "./types.js";
  * use a type cast `as PageContextRenderer`.
  */
 export const [currentPageContext, setCurrentPageContext] = createStore({}) as [
-	PageContext,
-	SetStoreFunction<PageContextRenderer>
+  PageContext,
+  SetStoreFunction<PageContextRenderer>
 ];

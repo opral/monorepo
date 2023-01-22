@@ -12,35 +12,35 @@ import { MetaProvider, renderTags } from "@solidjs/meta";
 export const passToClient = ["pageProps", "routeParams"] as const;
 
 export async function render(
-	pageContext: PageContextRenderer
+  pageContext: PageContextRenderer
 ): Promise<unknown> {
-	//! TODO most likely cross request state pollution
-	//! Need to look into this in the future
-	setCurrentPageContext(pageContext);
-	// generating the html from the server:
-	// 1. the server sends a hydration script for the client.
-	//    the client uses the hydration script to hydrate the page.
-	//    without hydration, no interactivity.
-	// 2. the page is pre-rendered via `renderedPage`.
-	//    pre-rendering the page makes the page immediately "visible"
-	//    to the user. Afterwards, the client hydrates the page and thereby
-	//    makes the page interactive.
-	// ! important: renderToString is used instead of
-	// ! renderToStringAsync some async resources should
-	// ! not be loaded on the server (the editor for example).
-	// ! see https://github.com/inlang/inlang/issues/247
+  //! TODO most likely cross request state pollution
+  //! Need to look into this in the future
+  setCurrentPageContext(pageContext);
+  // generating the html from the server:
+  // 1. the server sends a hydration script for the client.
+  //    the client uses the hydration script to hydrate the page.
+  //    without hydration, no interactivity.
+  // 2. the page is pre-rendered via `renderedPage`.
+  //    pre-rendering the page makes the page immediately "visible"
+  //    to the user. Afterwards, the client hydrates the page and thereby
+  //    makes the page interactive.
+  // ! important: renderToString is used instead of
+  // ! renderToStringAsync some async resources should
+  // ! not be loaded on the server (the editor for example).
+  // ! see https://github.com/inlang/inlang/issues/247
 
-	// from solidjs meta
-	// mutated during render so you can include in server-rendered template later
-	const tags: any[] = [];
+  // from solidjs meta
+  // mutated during render so you can include in server-rendered template later
+  const tags: any[] = [];
 
-	const renderedPage = renderToString(() => (
-		<MetaProvider tags={tags}>
-			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
-		</MetaProvider>
-	));
+  const renderedPage = renderToString(() => (
+    <MetaProvider tags={tags}>
+      <Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+    </MetaProvider>
+  ));
 
-	return escapeInject`<!DOCTYPE html>
+  return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
       <head>
 			<meta charset="UTF-8" />
