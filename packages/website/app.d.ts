@@ -12,7 +12,9 @@ declare module "solid-js" {
 		type Props<T> = {
 			[K in keyof T as `prop:${string & K}`]?: T[K];
 		};
-		type IntrinsicElements = ElementProps<HTMLElementTagNameMap>;
+		// types for shoelace do not work when the no empty interface rule is not disabled
+		// eslint-disable-next-line @typescript-eslint/no-empty-interface
+		interface IntrinsicElements extends ElementProps<HTMLElementTagNameMap> {}
 	}
 }
 
