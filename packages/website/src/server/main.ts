@@ -28,12 +28,12 @@ import { decryptAccessToken } from "@src/services/auth/logic.js";
 import { config } from "telefunc";
 import { onBug as onTelefuncBug } from "telefunc";
 import {
-	InlangSessionRequest,
 	sessionMiddleware,
 	verifyInlangSession,
 	initSession,
 	sessionErrorHandler,
-} from "@src/services/auth/session/server.js";
+} from "@src/services/auth/lib/session/server.js";
+import type { InlangSessionRequest } from "@src/services/auth/lib/session/types.server.js";
 
 await initSession();
 
@@ -122,6 +122,8 @@ app.all(
 		if (request.session != undefined) {
 			sessionData = await request.session.getSessionData();
 		}
+
+		console.log("telefunc sessionData", sessionData);
 
 		if (sessionData?.encryptedAccessToken) {
 			decryptAccessToken({

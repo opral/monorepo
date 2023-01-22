@@ -170,7 +170,7 @@ export async function validateEnv() {
 	if (env.NODE_ENV == "production") {
 		validateSupertokens(env);
 	} else {
-		if (env.VITE_SUPERTOKENS_IN_DEV == "true") {
+		if (env.VITE_SUPERTOKENS_IN_DEV) {
 			validateSupertokens(env);
 		}
 	}

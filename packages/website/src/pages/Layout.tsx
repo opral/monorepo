@@ -22,23 +22,7 @@ import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { onSignOut } from "@src/services/auth/onSignOut.js";
-import SuperTokens from "supertokens-web-js";
-import Session from "supertokens-web-js/recipe/session";
-import { clientSideEnv } from "@env";
-
-// init supertokens sesssion
-if (typeof window != "undefined" && clientSideEnv.VITE_SUPERTOKENS_IN_DEV) {
-	console.log("init supertokens session", window.location.origin);
-
-	SuperTokens.init({
-		appInfo: {
-			apiDomain: window.location.origin,
-			appName: clientSideEnv.VITE_SUPERTOKENS_APP_NAME ?? "inlang",
-			apiBasePath: "/session",
-		},
-		recipeList: [Session.init({})],
-	});
-}
+import { getAccessTokenPayload } from "@src/services/auth/lib/session/client.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -53,6 +37,14 @@ const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-8";
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const [localStorage, setLocalStorage] = useLocalStorage();
+
+	createEffect(async () => {
+		setInterval(async () => {
+			const accessTokenPayload = await getAccessTokenPayload().then(
+				console.log
+			);
+		}, 5000);
+	});
 
 	return (
 		<div class="flex flex-col min-h-screen">
