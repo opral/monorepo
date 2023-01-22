@@ -125,7 +125,7 @@ describe("query.delete", () => {
 		expect(message).toBeUndefined();
 	});
 	it("should be immutable", () => {
-		const result = query(mockResource).delete({ id: "first-message" }).unwrap();
+		query(mockResource).delete({ id: "first-message" }).unwrap();
 		const message = query(mockResource).get({ id: "first-message" });
 		expect(message).toBeDefined();
 	});

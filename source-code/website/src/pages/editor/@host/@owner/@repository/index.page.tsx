@@ -55,7 +55,7 @@ export function Page() {
 				content={`Contribute translations to ${
 					routeParams().repository
 				} via inlangs editor.`}
-			></Meta>
+			/>
 			<EditorLayout>
 				<Switch
 					fallback={
@@ -66,7 +66,7 @@ export function Page() {
 					}
 				>
 					<Match when={repositoryIsCloned.error?.message.includes("404")}>
-						<RepositoryDoesNotExistOrNotAuthorizedCard></RepositoryDoesNotExistOrNotAuthorizedCard>
+						<RepositoryDoesNotExistOrNotAuthorizedCard />
 					</Match>
 					<Match when={repositoryIsCloned.error}>
 						<p class="text-danger">{repositoryIsCloned.error.message}</p>
@@ -82,7 +82,7 @@ export function Page() {
 							{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 							<div>
 								{/* use font-size to change the spinner size    */}
-								<sl-spinner class="text-4xl"></sl-spinner>
+								<sl-spinner class="text-4xl" />
 							</div>
 
 							<p class="text-lg">
@@ -91,12 +91,12 @@ export function Page() {
 						</div>
 					</Match>
 					<Match when={inlangConfig() === undefined}>
-						<NoInlangConfigFoundCard></NoInlangConfigFoundCard>
+						<NoInlangConfigFoundCard />
 					</Match>
 					<Match when={inlangConfig()}>
 						<div class="space-y-2">
 							<For each={Object.keys(messages())}>
-								{(id) => <Messages messages={messages()[id]}></Messages>}
+								{(id) => <Messages messages={messages()[id]} />}
 							</For>
 						</div>
 					</Match>
@@ -110,7 +110,7 @@ function NoInlangConfigFoundCard() {
 	return (
 		<div class="flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
+				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 				<h1 class="font-semibold pt-5">
 					The{" "}
 					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
@@ -137,7 +137,7 @@ function NoInlangConfigFoundCard() {
 				>
 					<sl-button prop:variant="text">
 						I need help with getting started
-						<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
+						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>
 			</div>
@@ -172,7 +172,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard() {
 				>
 					<sl-button prop:variant="text">
 						I need help
-						<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
+						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>
 			</div>

@@ -36,7 +36,7 @@ export async function render(
 
 	const renderedPage = renderToString(() => (
 		<MetaProvider tags={tags}>
-			<Root page={pageContext.Page} pageProps={pageContext.pageProps}></Root>
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
 		</MetaProvider>
 	));
 

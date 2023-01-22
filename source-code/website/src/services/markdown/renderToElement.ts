@@ -26,11 +26,13 @@ import { Dynamic } from "solid-js/web";
 export function renderToElement(
 	node: RenderableTreeNodes,
 	args: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		components?: Record<string, Component<any>>;
 	}
 ): JSXElement {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function deepRender(value: any): any {
-		if (value == null || typeof value !== "object") return value;
+		if (value == undefined || typeof value !== "object") return value;
 
 		if (Array.isArray(value)) {
 			return value.map((item) => deepRender(item));
@@ -61,6 +63,7 @@ export function renderToElement(
 		const { name, attributes = {}, children = [] } = node;
 
 		const attr =
+			// eslint-disable-next-line unicorn/no-null
 			Object.keys(attributes).length === 0 ? null : deepRender(attributes);
 
 		if (args.components?.[name]) {
@@ -80,5 +83,6 @@ export function renderToElement(
 }
 
 function Fragment(props: { children: JSXElement }) {
+	// eslint-disable-next-line solid/reactivity
 	return props.children;
 }

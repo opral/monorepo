@@ -1,12 +1,6 @@
 import * as checkbox from "@zag-js/checkbox";
 import { normalizeProps, useMachine } from "@zag-js/solid";
-import {
-	createEffect,
-	createMemo,
-	createUniqueId,
-	JSXElement,
-	Show,
-} from "solid-js";
+import { createMemo, createUniqueId, JSXElement, Show } from "solid-js";
 import IconClose from "~icons/material-symbols/close-rounded";
 
 /**
@@ -35,12 +29,12 @@ export function Checkbox(
 					{...api().controlProps}
 				>
 					<Show when={api().isChecked}>
-						<IconClose></IconClose>
+						<IconClose />
 					</Show>
 				</div>
 				<span {...api().labelProps}>{props.children}</span>
 				{/* input is hidden and only exists for accessibility purposes */}
-				<input {...api().inputProps} class=""></input>
+				<input {...api().inputProps} class="" />
 			</label>
 		</>
 	);

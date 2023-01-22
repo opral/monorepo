@@ -18,7 +18,7 @@ export function QuickLink(props: {
 	return (
 		<div class="group relative rounded-xl border border-outline hover:transition-colors duration-200 hover:bg-primary-container hover:border-primary hover:text-on-primary-container">
 			<div class="relative overflow-hidden rounded-lg p-6">
-				<Icon name={props.icon} class="h-8 w-8"></Icon>
+				<Icon name={props.icon} class="h-8 w-8" />
 				<h2 class="mt-4 text-base font-medium">
 					<a href={props.href}>
 						<span class="absolute -inset-px rounded-xl" />

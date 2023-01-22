@@ -68,7 +68,7 @@ export function render(pageContext: PageContextRenderer) {
 			hydrate(
 				() => (
 					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps}></Root>
+						<Root page={currentPage()!} pageProps={currentPageProps} />
 					</MetaProvider>
 				),
 				rootElement

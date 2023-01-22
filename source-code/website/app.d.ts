@@ -1,4 +1,3 @@
-import type { Session } from "@src/server/types.js";
 import "solid-js";
 
 // types for web components
@@ -13,7 +12,7 @@ declare module "solid-js" {
 		type Props<T> = {
 			[K in keyof T as `prop:${string & K}`]?: T[K];
 		};
-		interface IntrinsicElements extends ElementProps<HTMLElementTagNameMap> {}
+		type IntrinsicElements = ElementProps<HTMLElementTagNameMap>;
 	}
 }
 

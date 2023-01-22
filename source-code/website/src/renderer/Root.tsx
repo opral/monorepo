@@ -1,4 +1,4 @@
-import { Accessor, Component, ErrorBoundary } from "solid-js";
+import { Accessor, Component, createEffect, ErrorBoundary } from "solid-js";
 import type { PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 import { LocalStorageProvider } from "@src/services/local-storage/index.js";
@@ -19,18 +19,18 @@ export function Root(props: {
 	pageProps: Record<string, unknown>;
 }) {
 	return (
-		<ErrorBoundary
-			fallback={(error) => <ErrorMessage error={error}></ErrorMessage>}
-		>
+		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<LocalStorageProvider>
-				<Dynamic component={props.page} {...props.pageProps}></Dynamic>
+				<Dynamic component={props.page} {...props.pageProps} />
 			</LocalStorageProvider>
 		</ErrorBoundary>
 	);
 }
 
 function ErrorMessage(props: { error: Error }) {
-	console.error("ERROR in renderer", props.error);
+	createEffect(() => {
+		console.error("ERROR in renderer", props.error);
+	});
 	return (
 		<>
 			<p class="text-danger text-lg font-medium">ERROR DURING RENDERING</p>

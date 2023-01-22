@@ -4,7 +4,6 @@ import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
 import { getUserInfo } from "../logic.telefunc.js";
-import { isServer } from "solid-js/web";
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -15,7 +14,7 @@ import { isServer } from "solid-js/web";
  * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
 export function Page() {
-	const [localStorage, setLocalStorage] = useLocalStorage();
+	const [, setLocalStorage] = useLocalStorage();
 
 	// ! Extremely important to wrap the get user function
 	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
@@ -42,7 +41,7 @@ export function Page() {
 				<Match when={userInfo()}>
 					<div class="items-center justify-center flex grow">
 						<div class="flex flex-col border rounded-lg border-outline p-10 max-w-sm">
-							<MaterialSymbolsCheckCircleRounded class="text-success w-16 h-16 self-center"></MaterialSymbolsCheckCircleRounded>
+							<MaterialSymbolsCheckCircleRounded class="text-success w-16 h-16 self-center" />
 							<h2 class="text-xl font-medium self-center pt-2">
 								Successfully logged in
 							</h2>
@@ -55,7 +54,7 @@ export function Page() {
 									window.close();
 								}}
 							>
-								<MaterialSymbolsArrowBackRounded slot="prefix"></MaterialSymbolsArrowBackRounded>
+								<MaterialSymbolsArrowBackRounded slot="prefix" />
 								Return to app
 							</sl-button>
 						</div>

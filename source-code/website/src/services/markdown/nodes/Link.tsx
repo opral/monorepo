@@ -21,7 +21,7 @@ export function Link(props: { href: string; children: JSXElement }) {
 				>
 					{props.children}
 					{/* using non-rounded version to increase readability on smaller font settings */}
-					<MaterialSymbolsArrowOutward></MaterialSymbolsArrowOutward>
+					<MaterialSymbolsArrowOutward />
 				</a>
 			</Match>
 			<Match when={isExternal() === false}>

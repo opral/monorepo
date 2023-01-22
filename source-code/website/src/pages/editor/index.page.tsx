@@ -28,7 +28,7 @@ export function Page() {
 			<Meta
 				name="description"
 				content="Contribute to open source projects and manage translations with inlang's editor."
-			></Meta>
+			 />
 			<RootLayout>
 				{/* START search bar */}
 				<div class="h-64 sm:h-96 pt-4 flex flex-col items-center justify-center">
@@ -75,7 +75,7 @@ export function Page() {
 					</div>
 				</div>
 				{/* END search bar */}
-				<hr class="w-full border-t border-outline"></hr>
+				<hr class="w-full border-t border-outline" />
 				{/* START repository grid */}
 				<h2 class="text-xl font-medium pt-6 pb-1">Community projects</h2>
 				<p class="pb-2">
@@ -85,10 +85,10 @@ export function Page() {
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
 					<For each={repositories}>
 						{(repository) => (
-							<RepositoryCard repository={repository}></RepositoryCard>
+							<RepositoryCard repository={repository} />
 						)}
 					</For>
-					<AddRepositoryCard></AddRepositoryCard>
+					<AddRepositoryCard />
 				</div>
 				{/* END repository grid */}
 			</RootLayout>
@@ -120,7 +120,7 @@ function RepositoryCard(props: { repository: typeof repositories[number] }) {
 					<img
 						class="w-8 h-8 rounded-sm"
 						src={`https://github.com/${props.repository.owner}.png?size=40`}
-					></img>
+					 />
 				</div>
 				<p class="pt-3">{props.repository.description}</p>
 			</div>
@@ -147,7 +147,7 @@ function AddRepositoryCard() {
 			class={`rounded border p-4 flex flex-col justify-between gap-6 border-info text-on-info-container bg-info-container`}
 		>
 			{/* empty div to achieve justify-between effect whereas the p is centered */}
-			<div></div>
+			<div />
 			<p>Get more contributions by adding your repository to this list.</p>
 			<a
 				href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/editor/repositories.ts"
@@ -156,7 +156,7 @@ function AddRepositoryCard() {
 				{/* @ts-ignore By accident, the button looks really cool without a variant in this case. */}
 				<sl-button class="w-full" prop:variant="">
 					Add your community
-					<MaterialSymbolsArrowOutward slot="suffix"></MaterialSymbolsArrowOutward>
+					<MaterialSymbolsArrowOutward slot="suffix" />
 				</sl-button>
 			</a>
 		</div>

@@ -47,15 +47,15 @@ export function Layout(props: { children: JSXElement }) {
 		<RootLayout>
 			<EditorStateProvider>
 				<div class="py-4 w-full space-y-2 flex flex-col grow">
-					<SignInBanner></SignInBanner>
+					<SignInBanner />
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-4">
-							<Breadcrumbs></Breadcrumbs>
-							<BranchMenu></BranchMenu>
+							<Breadcrumbs />
+							<BranchMenu />
 						</div>
 						<sl-button-group prop:label="filterbar">
-							<LanguageFilter></LanguageFilter>
-							<HasChangesAction></HasChangesAction>
+							<LanguageFilter />
+							<HasChangesAction />
 						</sl-button-group>{" "}
 					</div>
 					<hr class="h-px w-full bg-outline-variant my-2"> </hr>
@@ -234,13 +234,14 @@ function LanguageFilter() {
 							Deselect all
 						</a>
 					</div>
-					<hr class="border-outline my-2"></hr>
+					<hr class="border-outline my-2" />
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
-							<Show when={language !== inlangConfig()!.referenceLanguage}>
+							<Show when={language !== inlangConfig()?.referenceLanguage}>
 								<sl-checkbox
 									class="block"
 									prop:checked={filteredLanguages().includes(language)}
+									// eslint-disable-next-line @typescript-eslint/no-explicit-any
 									on:sl-change={(event: any) => {
 										if (event.target.__checked) {
 											setFilteredLanguages((value) => [...value, language]);
@@ -325,7 +326,7 @@ function SignInBanner() {
 						Please sign in to make changes and work on this project.`}
 					>
 						<sl-button onClick={onSignIn} prop:variant="primary">
-							<MaterialSymbolsLoginRounded slot="prefix"></MaterialSymbolsLoginRounded>
+							<MaterialSymbolsLoginRounded slot="prefix" />
 							Sign in
 						</sl-button>
 					</Banner>
@@ -356,7 +357,7 @@ function SignInBanner() {
 									<path
 										fill="currentColor"
 										d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
-									></path>
+									/>
 								</svg>
 							</div>
 							Fork this project
@@ -399,11 +400,11 @@ function SignInBanner() {
 									<path
 										fill="currentColor"
 										d="M16 19.25a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm-14.5 0a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm0-14.5a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0ZM4.75 3a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 3Zm0 14.5a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 17.5Zm14.5 0a1.75 1.75 0 1 0 .001 3.501a1.75 1.75 0 0 0-.001-3.501Z"
-									></path>
+									/>
 									<path
 										fill="currentColor"
 										d="M13.405 1.72a.75.75 0 0 1 0 1.06L12.185 4h4.065A3.75 3.75 0 0 1 20 7.75v8.75a.75.75 0 0 1-1.5 0V7.75a2.25 2.25 0 0 0-2.25-2.25h-4.064l1.22 1.22a.75.75 0 0 1-1.061 1.06l-2.5-2.5a.75.75 0 0 1 0-1.06l2.5-2.5a.75.75 0 0 1 1.06 0ZM4.75 7.25A.75.75 0 0 1 5.5 8v8A.75.75 0 0 1 4 16V8a.75.75 0 0 1 .75-.75Z"
-									></path>
+									/>
 								</svg>
 							</div>
 							Create pull request
@@ -419,7 +420,7 @@ function SignInBanner() {
 					// hide the sign in dialog to increase UX when switching back to this window
 					signInDialog?.hide();
 				}}
-			></SignInDialog>
+			/>
 		</>
 	);
 }
@@ -436,7 +437,7 @@ function Banner(props: {
 			ref={alert}
 			prop:open={true}
 		>
-			<Icon name={props.variant} slot="icon"></Icon>
+			<Icon name={props.variant} slot="icon" />
 			<div class="flex space-x-4 items-center">
 				<p class="grow">{props.message}</p>
 				{props.children}

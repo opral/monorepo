@@ -28,7 +28,7 @@ export function Button(
 ) {
 	return (
 		// using classList instead of class avoids merge bugs between props.class and buttonStyle
-		<button classList={{ [buttonStyle(props)]: true }} {...props}></button>
+		<button classList={{ [buttonStyle(props)]: true }} {...props} />
 	);
 }
 

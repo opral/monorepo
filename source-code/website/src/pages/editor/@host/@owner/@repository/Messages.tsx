@@ -1,5 +1,5 @@
 import type * as ast from "@inlang/core/ast";
-import { createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import {
 	resources,
 	inlangConfig,
@@ -14,11 +14,9 @@ import { clickOutside } from "@src/directives/clickOutside.js";
 import { showToast } from "@src/components/Toast.jsx";
 import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
-import MaterialSymbolsEditOutlineRounded from "~icons/material-symbols/edit-outline-rounded";
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { syncFork as _syncFork } from "@src/services/github/index.js";
 
 export function Messages(props: {
 	messages: Record<
@@ -58,7 +56,7 @@ export function Messages(props: {
 						id={id()}
 						referenceMessage={referenceMessage()}
 						message={props.messages[inlangConfig()!.referenceLanguage]}
-					></PatternEditor>
+					/>
 				</div>
 				<div class="flex flex-col gap-4">
 					<For each={inlangConfig()?.languages}>
@@ -75,7 +73,7 @@ export function Messages(props: {
 										id={id()}
 										referenceMessage={referenceMessage()}
 										message={props.messages[language]}
-									></PatternEditor>
+									/>
 								</div>
 							</Show>
 						)}
@@ -102,49 +100,47 @@ function PatternEditor(props: {
 	let machineLearningWarningDialog: SlDialog | undefined;
 
 	/** throw if unimplemented features are used  */
-	if (
-		(props.message && props.message?.pattern.elements.length > 1) ||
-		(props.message && props.message?.pattern.elements[0].type !== "Text")
-	) {
-		throw Error(
-			"Not implemented. Only messages with one pattern element of type Text are supported for now."
-		);
-	}
+	createEffect(() => {
+		if (
+			(props.message && props.message?.pattern.elements.length > 1) ||
+			(props.message && props.message?.pattern.elements[0].type !== "Text")
+		) {
+			throw Error(
+				"Not implemented. Only messages with one pattern element of type Text are supported for now."
+			);
+		}
+	});
 
 	/** whether the pattern is focused */
 	const [isFocused, setIsFocused] = createSignal(false);
 
 	/** the value of the pattern */
 	const [textValue, setTextValue] = createSignal(
+		// eslint-disable-next-line solid/reactivity
 		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value
 	);
 
 	/** the resource the message belongs to */
 	const resource = () =>
-		resources.find(
-			(resource) => resource.languageTag.name === props.language
-		)!;
+		resources.find((resource) => resource.languageTag.name === props.language)!;
 
 	/** copy of the message to conduct and track changes */
-	const copy: () => ast.Message | undefined = () => {
-		if (props.message) {
-			return JSON.parse(JSON.stringify(props.message));
-		}
-		// create new message
-		else {
-			return {
-				type: "Message",
-				id: {
-					type: "Identifier",
-					name: props.id,
-				},
-				pattern: {
-					type: "Pattern",
-					elements: [{ type: "Text", value: "" }],
-				},
-			};
-		}
-	};
+	const copy: () => ast.Message | undefined = () =>
+		props.message
+			? // clone message
+			  structuredClone(props.message)
+			: // new message
+			  {
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: props.id,
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [{ type: "Text", value: "" }],
+					},
+			  };
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -181,14 +177,13 @@ function PatternEditor(props: {
 			const updatedResource = query(resource())
 				.upsert({ message: _copy! })
 				.unwrap();
-			setResources(
-				resources
-					.filter(
-						(_resource) =>
-							_resource.languageTag.name !== resource().languageTag.name
-					)
-					.concat([updatedResource])
-			);
+			setResources([
+				...resources.filter(
+					(_resource) =>
+						_resource.languageTag.name !== resource().languageTag.name
+				),
+				updatedResource,
+			]);
 			showToast({
 				variant: "info",
 				title: "The change has been committed.",
@@ -250,6 +245,7 @@ function PatternEditor(props: {
 				clickOutside(
 					element,
 					// only close the action bar if no outstanding changes exist
+					// eslint-disable-next-line solid/reactivity
 					() => hasChanges() === false && setIsFocused(false)
 				),
 			]}
@@ -268,7 +264,7 @@ function PatternEditor(props: {
 					prop:value={textValue() ?? ""}
 					prop:disabled={userIsCollaborator() === false}
 					onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-				></sl-textarea>
+				/>
 			</div>
 
 			{/* <div
@@ -289,7 +285,7 @@ function PatternEditor(props: {
 							title="Sign in"
 							message="You must be signed in to commit changes."
 							variant="info"
-						></InlineNotification>
+						/>
 					</Show>
 					<sl-button
 						onClick={handleMachineTranslate}
@@ -300,7 +296,7 @@ function PatternEditor(props: {
 						prop:loading={machineTranslationIsLoading()}
 						prop:variant="neutral"
 					>
-						<MaterialSymbolsRobotOutline slot="prefix"></MaterialSymbolsRobotOutline>
+						<MaterialSymbolsRobotOutline slot="prefix" />
 						Machine translate
 					</sl-button>
 					<sl-button
@@ -310,7 +306,7 @@ function PatternEditor(props: {
 						}
 						onClick={handleSave}
 					>
-						<MaterialSymbolsCommitRounded slot="prefix"></MaterialSymbolsCommitRounded>
+						<MaterialSymbolsCommitRounded slot="prefix" />
 						Commit
 					</sl-button>
 				</div>
