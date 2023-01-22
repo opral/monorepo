@@ -89,5 +89,5 @@ function beautifyError(error: ValidationError): string {
 	// TODO:
 	// - add information about the name and path of the document
 	// - add information about the line and column of the error
-	return JSON.stringify(error, null, 4);
+	return JSON.stringify(error, undefined, 4);
 }

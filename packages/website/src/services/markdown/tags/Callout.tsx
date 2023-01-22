@@ -17,7 +17,7 @@ export function Callout(props: {
 		>
 			{/* not an h3 to escape prosing https://tailwindcss.com/docs/typography-plugin */}
 			<div class="font-semibold flex items-center gap-1.5 pb-1">
-				<Icon name={props.variant} class="text-bold"></Icon>
+				<Icon name={props.variant} class="text-bold" />
 				{props.variant.toUpperCase()}
 			</div>
 			{/* wrapped in a div and prose to re-initialize prosing and thereby remove

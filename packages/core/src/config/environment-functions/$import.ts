@@ -68,15 +68,12 @@ async function $import(
 	const _fetch = environment.fetch;
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
-	let moduleAsText: string;
-	if (uri.startsWith("http")) {
-		moduleAsText = await (await _fetch(uri)).text();
-	} else {
-		moduleAsText = (await environment.fs.readFile(
-			`${environment.workingDirectory}/${uri}`,
-			"utf-8"
-		)) as string;
-	}
+	const moduleAsText = uri.startsWith("http")
+		? await (await _fetch(uri)).text()
+		: ((await environment.fs.readFile(
+				`${environment.workingDirectory}/${uri}`,
+				"utf-8"
+		  )) as string);
 	const moduleWithMimeType =
 		"data:application/javascript;base64," + btoa(moduleAsText);
 	return await import(/* @vite-ignore */ moduleWithMimeType);

@@ -28,9 +28,8 @@ export const extractMessageCommand = {
 			return;
 		}
 		const chosenReplacementOption = await vscode.window.showQuickPick(
-			state()
-				.config.ideExtension.extractMessageReplacementOptions({ id })
-				.concat("How to edit these replacement options?"),
+			[...state()
+				.config.ideExtension.extractMessageReplacementOptions({ id }), "How to edit these replacement options?"],
 			{ title: "Replace highlighted text with:" }
 		);
 		if (chosenReplacementOption === undefined) {

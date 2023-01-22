@@ -59,7 +59,7 @@ export type Text = Node<"Text"> & {
  * A language tag that identifies a human language.
  *
  * The node is planned to obey to [IETF BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
- * For now, only a name that acts as an ID can be set. See
+ * For now, only a name that acts as an ID can be set. See
  * https://github.com/inlang/inlang/issues/296
  */
 export type LanguageTag = Node<"LanguageTag"> & {

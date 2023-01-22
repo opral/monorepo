@@ -25,7 +25,7 @@ export function Page(props: PageProps) {
 			<Meta
 				name="description"
 				content={props.markdown.frontmatter?.description}
-			></Meta>
+			 />
 			<RootLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
@@ -90,7 +90,7 @@ export function Page(props: PageProps) {
 							>
 								<Markdown
 									renderableTree={props.markdown.renderableTree!}
-								></Markdown>
+								 />
 							</div>
 						</div>
 					</Show>

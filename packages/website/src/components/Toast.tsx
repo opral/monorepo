@@ -21,7 +21,7 @@ import { Icon } from "./Icon.jsx";
 export function showToast(props: Props) {
 	// render the toast on the document body.
 	// rendering instead of Portal avoids bugs that have been encountered
-	return render(() => <Toast {...props}></Toast>, document.body);
+	return render(() => <Toast {...props} />, document.body);
 }
 
 type Props = {
@@ -50,7 +50,7 @@ function Toast(props: Props) {
 				props.variant === "danger" ? undefined : props.duration ?? 3000
 			}
 		>
-			<Icon name={props.variant} slot="icon"></Icon>
+			<Icon name={props.variant} slot="icon" />
 			<h3 class="font-bold">{props.title}</h3>
 			<Show when={props.message}>
 				<p>{props.message}</p>

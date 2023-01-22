@@ -15,7 +15,7 @@ export function Page(pageContext: PageContextRenderer) {
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg bg-danger-container gap-4">
 				<Switch>
 					<Match when={pageContext.is404}>
-						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
+						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 						<div class="flex flex-col gap-2">
 							<h1 class="font-semibold  ">404</h1>
 							<p>Something went wrong, we couldn't find your page.</p>
@@ -23,13 +23,13 @@ export function Page(pageContext: PageContextRenderer) {
 
 						<a href="https://inlang.com">
 							<sl-button prop:variant="text">
-								<MaterialSymbolsArrowBackRounded slot="prefix"></MaterialSymbolsArrowBackRounded>
+								<MaterialSymbolsArrowBackRounded slot="prefix" />
 								Back to inlang.com
 							</sl-button>
 						</a>
 					</Match>
 					<Match when={!pageContext.is404}>
-						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center"></MaterialSymbolsUnknownDocumentOutlineRounded>
+						<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 						<div class="flex flex-col gap-2">
 							<h1 class="font-semibold ">Error</h1>
 							<p>
@@ -44,7 +44,7 @@ export function Page(pageContext: PageContextRenderer) {
 						>
 							<sl-button prop:variant="text">
 								Report a Bug
-								<MaterialSymbolsArrowOutwardRounded slot="suffix"></MaterialSymbolsArrowOutwardRounded>
+								<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 							</sl-button>
 						</a>
 					</Match>

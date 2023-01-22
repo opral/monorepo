@@ -91,7 +91,7 @@ function Header() {
 												class="link link-primary flex space-x-2 items-center"
 												href={link.href}
 											>
-												<link.Icon class="w-5 h-5"></link.Icon>
+												<link.Icon class="w-5 h-5" />
 												{/* <span>{link.name}</span> */}
 											</a>
 										)}
@@ -118,7 +118,7 @@ function Header() {
 										currentPageContext.urlParsed.pathname.includes("editor")
 									}
 								>
-									<UserDropdown></UserDropdown>
+									<UserDropdown />
 								</Show>
 							</div>
 						</div>
@@ -133,9 +133,9 @@ function Header() {
 									{mobileMenuIsOpen() ? "Close menu" : "Open menu"}
 								</span>
 								{mobileMenuIsOpen() ? (
-									<IconClose class="w-6 h-6"></IconClose>
+									<IconClose class="w-6 h-6" />
 								) : (
-									<IconMenu class="w-6 h-6"></IconMenu>
+									<IconMenu class="w-6 h-6" />
 								)}
 							</button>
 						</div>
@@ -183,7 +183,7 @@ function Footer() {
 									class="link link-primary flex space-x-2 items-center"
 									href={link.href}
 								>
-									<link.Icon></link.Icon>
+									<link.Icon />
 									<span class="sr-only">{link.name}</span>
 								</a>
 							)}
@@ -228,8 +228,8 @@ function UserDropdown() {
 								src={localStorage.user?.avatarUrl}
 								alt="user avatar"
 								class="w-6 h-6 rounded-full"
-							></img>
-							<IconExpand></IconExpand>
+							 />
+							<IconExpand />
 						</div>
 						<sl-menu>
 							<div class="px-7 py-2 bg-surface-1 text-on-surface">
@@ -237,7 +237,7 @@ function UserDropdown() {
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>
 							<sl-menu-item onClick={handleSignOut}>
-								<IconSignOut slot="prefix"></IconSignOut>
+								<IconSignOut slot="prefix" />
 								Sign out
 							</sl-menu-item>
 						</sl-menu>

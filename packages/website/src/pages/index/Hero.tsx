@@ -14,7 +14,7 @@ export function Hero() {
 							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
 							class="font-semibold text-primary"
 						>
-							<span class="absolute inset-0" aria-hidden="true"></span>
+							<span class="absolute inset-0" aria-hidden="true" />
 							Careers <span aria-hidden="true">&rarr;</span>
 						</a>
 					</span>
@@ -30,7 +30,7 @@ export function Hero() {
 							<span class="inline-block">
 								git
 								{/* custom git color */}
-								<CibGit class="text-[#F54D27] inline pl-2 md:pl-3"></CibGit>
+								<CibGit class="text-[#F54D27] inline pl-2 md:pl-3" />
 							</span>
 						</span>
 					</span>
@@ -46,7 +46,7 @@ export function Hero() {
 						prop:variant="primary"
 					>
 						Get started
-						<MaterialSymbolsArrowRightAltRounded slot="suffix"></MaterialSymbolsArrowRightAltRounded>
+						<MaterialSymbolsArrowRightAltRounded slot="suffix" />
 					</sl-button>
 					<sl-button
 						prop:href="https://github.com/inlang/inlang"
@@ -54,7 +54,7 @@ export function Hero() {
 						prop:size="large"
 					>
 						View on GitHub
-						<IconGithub slot="suffix"></IconGithub>
+						<IconGithub slot="suffix" />
 					</sl-button>
 				</div>
 			</div>

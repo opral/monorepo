@@ -20,7 +20,7 @@ export function Page(props: PageProps) {
 			<Meta
 				name="description"
 				content={props.markdown.frontmatter?.description}
-			></Meta>
+			 />
 			<Layout>
 				<div class="grid-row-2 py-10 w-full mx-auto ">
 					<Show
@@ -30,7 +30,7 @@ export function Page(props: PageProps) {
 						<div class="mx-auto w-full 7 ml:px-8 justify-self-center">
 							<Markdown
 								renderableTree={props.markdown.renderableTree!}
-							></Markdown>
+							 />
 						</div>
 					</Show>
 					<a

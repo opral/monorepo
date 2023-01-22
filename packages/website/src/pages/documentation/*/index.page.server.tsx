@@ -24,13 +24,13 @@ export type ProcessedTableOfContents = Record<
  * 		"/documentation/intro": document,
  * 	}
  */
-let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
+const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
 
 /**
  * the table of contents without the html for each document
  * saving bandwith and speeding up the site)
  */
-let processedTableOfContents: ProcessedTableOfContents = {};
+const processedTableOfContents: ProcessedTableOfContents = {};
 
 await generateIndexAndTableOfContents();
 
@@ -57,7 +57,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (
  */
 async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
-		let frontmatters: { frontmatter: any }[] = [];
+		const frontmatters: { frontmatter: any }[] = [];
 		for (const document of documents) {
 			const markdown = parseMarkdown({
 				text: document,

@@ -1,4 +1,4 @@
-import { JSXElement, Show } from "solid-js";
+import { Show } from "solid-js";
 import type { SemanticColorTokens } from "../../../tailwind.config.cjs";
 import { Icon } from "../Icon.jsx";
 
@@ -16,7 +16,7 @@ export function InlineNotification(props: {
 		<div
 			class={`flex rounded gap-2 items-center px-4 py-2 bg-surface-variant text-on-surface border-l-4 border-l-${props.variant}`}
 		>
-			<Icon name={props.variant} class={`text-${props.variant} mr-1`}></Icon>
+			<Icon name={props.variant} class={`text-${props.variant} mr-1`} />
 			<div class="flex gap-1.5">
 				<h3 class="font-medium">{props.title}</h3>
 				<Show when={props.message}>

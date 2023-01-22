@@ -19,9 +19,5 @@ export async function repositoryInformation(args: {
 			},
 		}
 	);
-	if (response.ok) {
-		return await response.json();
-	} else {
-		return undefined;
-	}
+	return response.ok ? (await response.json()) : undefined;
 }

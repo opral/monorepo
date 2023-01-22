@@ -2,6 +2,7 @@ import { assertUsage } from "@src/services/assert/index.js";
 
 export function Video(props: { src: string }) {
 	assertUsage(
+		// eslint-disable-next-line solid/reactivity
 		props.src.includes("youtu.be") || props.src.includes("youtube"),
 		"Video tag only supports youtube videos"
 	);
@@ -22,7 +23,7 @@ export function Video(props: { src: string }) {
 				class="rounded"
 				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 				allowfullscreen
-			></iframe>
+			/>
 		</div>
 	);
 }

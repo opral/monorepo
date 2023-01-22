@@ -37,9 +37,9 @@ export function SignInDialog(props: {
 					prop:variant="primary"
 					prop:target="_blank"
 					prop:href={githubAuthUrl(props.githubAppClientId)}
-					onClick={props.onClickOnSignInButton}
+					onClick={() => props.onClickOnSignInButton()}
 				>
-					<IconGithub slot="prefix"></IconGithub>
+					<IconGithub slot="prefix" />
 					Sign in with GitHub
 				</sl-button>
 			</Show>

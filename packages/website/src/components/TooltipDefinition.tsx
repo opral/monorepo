@@ -1,4 +1,4 @@
-import type { Component, ComponentProps, JSXElement } from "solid-js";
+import type { JSXElement } from "solid-js";
 
 /**
  * A tooltip that provides additional information about a term.

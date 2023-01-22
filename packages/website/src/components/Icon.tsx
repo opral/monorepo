@@ -16,7 +16,7 @@ export function Icon(
 	return (
 		// Suspense is required since the icons are lazy loaded.
 		<Suspense>
-			<ICON {...props}></ICON>
+			<ICON {...props} />
 		</Suspense>
 	);
 }

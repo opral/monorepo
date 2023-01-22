@@ -23,13 +23,13 @@ export type ProcessedTableOfContents = Record<
  * 		"/documentation/intro": document,
  * 	}
  */
-let index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
+const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {};
 
 /**
  * the table of contents without the html for each document
  * saving bandwith and speeding up the site)
  */
-let processedTableOfContents: ProcessedTableOfContents = {};
+const processedTableOfContents: ProcessedTableOfContents = {};
 
 await generateIndexAndTableOfContents();
 

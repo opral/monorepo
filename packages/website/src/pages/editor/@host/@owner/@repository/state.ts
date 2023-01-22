@@ -1,6 +1,6 @@
+/* eslint-disable solid/reactivity */
 import { currentPageContext } from "@src/renderer/state.js";
 import {
-	batch,
 	createEffect,
 	createResource,
 	createSignal,
@@ -302,7 +302,7 @@ export async function pushChanges(
 ): Promise<Result<void, Error>> {
 	const { host, owner, repository } = routeParams;
 	if (host === undefined || owner === undefined || repository === undefined) {
-		return Result.err(Error("h3ni329 Invalid route params"));
+		return Result.err(new Error("h3ni329 Invalid route params"));
 	}
 	const args = {
 		fs: fs,
@@ -320,12 +320,14 @@ export async function pushChanges(
 		const _pull = await pull({ user: user });
 		if (_pull.isErr) {
 			return Result.err(
-				Error("Failed to pull: " + _pull.error.message, { cause: _pull.error })
+				new Error("Failed to pull: " + _pull.error.message, {
+					cause: _pull.error,
+				})
 			);
 		}
 		const push = await raw.push(args);
 		if (push.ok === false) {
-			return Result.err(Error("Failed to push", { cause: push.error }));
+			return Result.err(new Error("Failed to push", { cause: push.error }));
 		}
 		await raw.pull(args);
 		const time = new Date();
@@ -358,16 +360,13 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
 		//
 		// this code can be removed once https://github.com/osmosis-labs/osmosis-frontend
 		// is updated to use the new config name
-		let config: InlangConfig;
-		if (module.defineConfig) {
-			config = await module.defineConfig({
-				...environmentFunctions,
-			});
-		} else {
-			config = await module.initializeConfig({
-				...environmentFunctions,
-			});
-		}
+		const config: InlangConfig = await (module.defineConfig
+			? module.defineConfig({
+					...environmentFunctions,
+			  })
+			: module.initializeConfig({
+					...environmentFunctions,
+			  }));
 
 		//initialises/ set the inital signal for  the language of the language filter for the messages
 		// .filter removes the referenceLanguage from the array languages

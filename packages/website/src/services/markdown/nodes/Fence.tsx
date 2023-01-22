@@ -14,10 +14,10 @@ export function Fence(props: { language?: string; content: string }) {
 	return (
 		<Switch>
 			<Match when={props.language === "mermaid"}>
-				<MermaidDiagram {...props}></MermaidDiagram>
+				<MermaidDiagram {...props} />
 			</Match>
 			<Match when={props.language !== "mermaid"}>
-				<SyntaxHighlight {...props}></SyntaxHighlight>
+				<SyntaxHighlight {...props} />
 			</Match>
 		</Switch>
 	);
@@ -53,10 +53,11 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 	return (
 		<Suspense>
 			<div
+				// eslint-disable-next-line solid/no-innerhtml
 				innerHTML={code()}
 				class="not-prose p-4 rounded overflow-auto text-sm"
 				style={{ "background-color": highlighter.getBackgroundColor() }}
-			></div>
+			/>
 		</Suspense>
 	);
 }

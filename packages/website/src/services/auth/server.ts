@@ -36,7 +36,7 @@ router.get("/github-oauth-callback", async (request, response, next) => {
 /**
  * Sign out by setting the session to undefined.
  */
-router.post("/sign-out", (request, response, next) => {
+router.post("/sign-out", (request, response) => {
 	request.session = undefined;
 	response.status(201).send();
 });
