@@ -10,6 +10,7 @@ import type { PageContext, PageContextRenderer } from "./types.js";
  * page context you are accessing is the `PageContextRenderer`,
  * use a type cast `as PageContextRenderer`.
  */
+// eslint-disable-next-line solid/reactivity
 export const [currentPageContext, setCurrentPageContext] = createStore({}) as [
   PageContext,
   SetStoreFunction<PageContextRenderer>
