@@ -81,6 +81,12 @@ One single config file named `inlang.config.js` needs to be created at the root 
 
 ## Adding typesafety to the config
 
+{% Callout variant="info" %}
+
+Your codebase must use, or be able to use, `moduleResolution: "node16"`. Read [#298](https://github.com/inlang/inlang/issues/298) for more information.
+
+{% /Callout %}
+
 If inlang is used in a JavaScript environment like Node or Deno, typesafety can be achieved by installing [@inlang/core](https://www.npmjs.com/package/@inlang/core) and using [JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html) in JavaScript.
 
 1. Install `@inlang/core` as dev dependency.
@@ -99,5 +105,15 @@ If inlang is used in a JavaScript environment like Node or Deno, typesafety can 
      //
      //
      //
+   }
+   ```
+
+3. Add `checkJs: true` and `moduleResolution: node16` to your `tsconfig.json`.
+
+   ```js
+   compilerOptions: {
+     // ...
+     checkJs: true;
+     moduleResolution: "node16";
    }
    ```
