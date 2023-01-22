@@ -50,14 +50,12 @@ export function Messages(props: {
         {id()}
       </h3>
       <div class="grid grid-cols-2 gap-16">
-        <div class="flex self-center">
-          <PatternEditor
-            language={inlangConfig()!.referenceLanguage}
-            id={id()}
-            referenceMessage={referenceMessage()}
-            message={props.messages[inlangConfig()!.referenceLanguage]}
-          />
-        </div>
+        <PatternEditor
+          language={inlangConfig()!.referenceLanguage}
+          id={id()}
+          referenceMessage={referenceMessage()}
+          message={props.messages[inlangConfig()!.referenceLanguage]}
+        />
         <div class="flex flex-col gap-4">
           <For each={inlangConfig()?.languages}>
             {(language) => (
