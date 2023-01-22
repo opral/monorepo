@@ -38,4 +38,4 @@ vscode:
     - "bradlc.vscode-tailwindcss"
     - "esbenp.prettier-vscode"
     - eamodio.gitlens
-    - "github.copilot"
+    - dbaeumer.vscode-eslint
