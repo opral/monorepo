@@ -4,15 +4,15 @@
  * Every other defintions are based on Node.
  */
 export type Node<Name> = {
-	type: Name;
-	/**
-	 * Metadata is ignored by inlang.
-	 *
-	 * Use the metadata property to store additional
-	 * information for a particular node like parsing
-	 * and serialization information.
-	 */
-	metadata?: unknown;
+  type: Name;
+  /**
+   * Metadata is ignored by inlang.
+   *
+   * Use the metadata property to store additional
+   * information for a particular node like parsing
+   * and serialization information.
+   */
+  metadata?: unknown;
 };
 
 /**
@@ -21,55 +21,59 @@ export type Node<Name> = {
  * Some Nodes have Identifiers such as a Resource or Message.
  */
 export type Identifier = Node<"Identifier"> & {
-	name: string;
+  name: string;
 };
 
 /**
  * A resource is a collection of messages.
  */
 export type Resource = Node<"Resource"> & {
-	languageTag: LanguageTag;
-	body: Array<Message>;
+  languageTag: LanguageTag;
+  body: Array<Message>;
 };
 
 /**
  * A message is what's rendered to a user.
  */
 export type Message = Node<"Message"> & {
-	id: Identifier;
-	// comment?: MessageComment;
-	pattern: Pattern;
+  id: Identifier;
+  // comment?: MessageComment;
+  pattern: Pattern;
 };
 
 /**
  * A pattern denotes how a Message is composed.
  */
 export type Pattern = Node<"Pattern"> & {
-	elements: Array<Text>;
+  elements: Array<Text>;
 };
 
 /**
  * Text can be translated.
  */
 export type Text = Node<"Text"> & {
-	value: string;
+  value: string;
 };
 
 /**
  * A language tag that identifies a human language.
  *
  * The node is planned to obey to [IETF BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
- * For now, only a language itself can be defined without regions etc.
- * Participate in the [discussions](https://github.com/inlang/inlang/discussions) if
- * you need subtags like region.
+ * For now, only a name that acts as an ID can be set. See
+ * https://github.com/inlang/inlang/issues/296
  */
 export type LanguageTag = Node<"LanguageTag"> & {
-	/**
-	 * Language must be an ISO-639-1 string.
-	 *
-	 * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
-	 */
-	language: string;
+  /**
+   * The ID of the language.
+   */
+  name: string;
+
+  /**
+   * Language must be an ISO-639-1 string.
+   *
+   * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+   */
+  // language: string;
 };
 
 // export type MessageComment = Node<"MessageComment"> & {

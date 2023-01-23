@@ -6,12 +6,12 @@ import type { passToClient } from "./_default.page.server.jsx";
  * The page context available during rendering.
  */
 export type PageContextRenderer<PageProps = Record<string, unknown>> =
-	PageContextBuiltIn<Component> & {
-		/**
-		 * The properties of a page.
-		 */
-		pageProps: PageProps;
-	};
+  PageContextBuiltIn<Component> & {
+    /**
+     * The properties of a page.
+     */
+    pageProps: PageProps;
+  };
 
 /**
  * The page context that is available on the client.
@@ -30,8 +30,8 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
  */
 // urlParsed is available by default #246
 export type PageContext<PageProps = Record<string, unknown>> = Pick<
-	PageContextRenderer<PageProps>,
-	typeof passToClient[number]
+  PageContextRenderer<PageProps>,
+  (typeof passToClient)[number]
 > & { urlParsed: PageContextRenderer["urlParsed"] };
 
 /**
@@ -45,9 +45,9 @@ export type PageContext<PageProps = Record<string, unknown>> = Pick<
  * ```
  */
 export type OnBeforeRender<PageProps> = (
-	pageContext: PageContextRenderer
+  pageContext: PageContextRenderer
 ) => Promise<{
-	pageContext: {
-		pageProps: PageProps;
-	};
+  pageContext: {
+    pageProps: PageProps;
+  };
 }>;

@@ -24,7 +24,7 @@ flowchart LR
       style stop1 height:0px;
       start2[ ] --->|highly automatable| stop2[ ]
       style start2 height:0px;
-      style stop2 height:0px; 
+      style stop2 height:0px;
     end
     linkStyle 0 stroke:red;
     linkStyle 2 stroke:red;

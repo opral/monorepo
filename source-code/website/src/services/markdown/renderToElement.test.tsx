@@ -6,14 +6,14 @@ import { renderToElement } from "./renderToElement.js";
 import { renderToStringAsync } from "solid-js/web";
 
 describe("markdownToElement()", () => {
-	it("should return html when combined with renderToString", async () => {
-		const ast = Markdoc.parse(mockValidMarkdown);
-		const content = Markdoc.transform(ast, mockMarkdocConfig);
-		const result = await renderToStringAsync(() =>
-			renderToElement(content, { components: { Callout } })
-		);
-		expect(result).toBeTypeOf("string");
-	});
+  it("should return html when combined with renderToString", async () => {
+    const ast = Markdoc.parse(mockValidMarkdown);
+    const content = Markdoc.transform(ast, mockMarkdocConfig);
+    const result = await renderToStringAsync(() =>
+      renderToElement(content, { components: { Callout } })
+    );
+    expect(result).toBeTypeOf("string");
+  });
 });
 
 const mockValidMarkdown = `
@@ -30,21 +30,21 @@ Tags are composable!
 `;
 
 const mockMarkdocConfig: Config = {
-	tags: {
-		callout: {
-			attributes: {
-				title: { type: "String" },
-				type: {
-					type: "String",
-					matches: ["note", "warning"],
-					errorLevel: "critical",
-				},
-			},
-			render: "Callout",
-		},
-	},
+  tags: {
+    callout: {
+      attributes: {
+        title: { type: "String" },
+        type: {
+          type: "String",
+          matches: ["note", "warning"],
+          errorLevel: "critical",
+        },
+      },
+      render: "Callout",
+    },
+  },
 };
 
 function Callout(props: { children: JSXElement }) {
-	return <div class="bg-blue-500">{props.children}</div>;
+  return <div class="bg-blue-500">{props.children}</div>;
 }

@@ -1,41 +1,41 @@
 {
-	"name": "@inlang/core",
-	"type": "module",
-	"version": "0.3.0-prerelease.7",
-	"private": false,
-	"publishConfig": {
-		"access": "public"
-	},
-	"exports": {
-		"./ast": {
-			"types": "./dist/ast/index.d.ts",
-			"import": "./dist/ast/index.js"
-		},
-		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"import": "./dist/config/index.js"
-		},
-		"./query": {
-			"types": "./dist/query/index.d.ts",
-			"import": "./dist/query/index.js"
-		},
-		"./utilities": {
-			"types": "./dist/utilities/index.d.ts",
-			"import": "./dist/utilities/index.js"
-		}
-	},
-	"files": [
-		"./dist"
-	],
-	"scripts": {
-		"build": "tsc --build ./tsconfig.build.json",
-		"dev": "tsc --watch",
-		"test": "vitest run --passWithNoTests --coverage",
-		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"memfs": "^3.4.11"
-	}
+  "name": "@inlang/core",
+  "type": "module",
+  "version": "0.3.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    "./ast": {
+      "types": "./dist/ast/index.d.ts",
+      "import": "./dist/ast/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js"
+    },
+    "./utilities": {
+      "types": "./dist/utilities/index.d.ts",
+      "import": "./dist/utilities/index.js"
+    }
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json",
+    "dev": "tsc --watch",
+    "test": "vitest run --passWithNoTests --coverage",
+    "format": "prettier ./src/** -w --config ../../.prettierrc.json",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "memfs": "^3.4.11"
+  }
 }

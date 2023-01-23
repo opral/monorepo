@@ -31,7 +31,7 @@ By de-coupling data from functionality, the Schema (objects) can be used as the 
 // If the AST consists of pure objects
 import type { Resource } from "@inlang/schema";
 const resource: Resource = {
-	// ...
+  // ...
 };
 
 // the functionality of the ast can be extended with function

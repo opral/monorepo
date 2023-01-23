@@ -1,14 +1,13 @@
 ---
 name: Improvement
 about: Something could be improved.
-title: ''
-labels: 'type: improvement'
-assignees: ''
-
+title: ""
+labels: "type: improvement"
+assignees: ""
 ---
 
-## Problem 
+## Problem
 
-## Proposal 
+## Proposal
 
-## Additional information 
+## Additional information
