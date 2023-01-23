@@ -58,7 +58,8 @@ router.get(
 );
 
 /**
- * Sign out by revoking the session
+ * Sign out by revoking the session if one exists.
+ * Returns 401 if the accessToken is no longer valid. A correctly initialized frontend will then attempt to refresh the session and call the route again.
  */
 router.post(
 	"/sign-out",
@@ -73,17 +74,16 @@ router.post(
 	}
 );
 
+/**
+ * Creates a new session if the requesting client doesn't already have one.
+ * Returns 401 if the accessToken is no longer valid. A correctly initialized frontend will then attempt to refresh the session and call the route again.
+ */
 router.post(
 	"/create-session",
 	verifyInlangSession({ sessionRequired: false }),
 	async (req: InlangSessionRequest, res) => {
 		if (!req.session) {
-			const session = await createSession(
-				res,
-				Math.random().toString(),
-				{ test: "testData" },
-				{ ssssrrr: "testData" }
-			);
+			const session = await createSession(res, Math.random().toString());
 		}
 
 		res.status(200).send("Created session or session already existed.");

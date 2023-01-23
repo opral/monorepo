@@ -38,9 +38,10 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js";
 
 import { clientSideEnv } from "@env";
 import { initClientSession } from "@src/services/auth/lib/session/client.js";
-import { setLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
-await initClientSession({ setLocalStorage });
+// Initialize the session logic.
+// This has to happen before the first API calls to routes that require the session logic are made.
+await initClientSession();
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {

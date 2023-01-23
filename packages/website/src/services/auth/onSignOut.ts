@@ -1,9 +1,7 @@
-import type { SetStoreFunction } from "solid-js/store";
-import type { SetLocalStorage } from "../local-storage/LocalStorageProvider.jsx";
-import type { LocalStorageSchema } from "../local-storage/schema.js";
+import type { SetLocalStorage } from "../local-storage/schema.js";
 
 /**
- * This function is called when the user clicks the "Sign Out" button.
+ * This function is called when the user clicks the "Sign Out" button. Or when supertokens.onSignOut is called.
  */
 export async function onSignOut(args: {
 	setLocalStorage: SetLocalStorage;
