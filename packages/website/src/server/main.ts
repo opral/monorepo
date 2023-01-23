@@ -35,13 +35,13 @@ import {
 } from "@src/services/auth/lib/session/server.js";
 import type { InlangSessionRequest } from "@src/services/auth/lib/session/types.server.js";
 
+// validate the env variables.
+await validateEnv();
+
 await initSession();
 
 // https://telefunc.com/disableNamingConvention
 config.disableNamingConvention = true;
-
-// validate the env variables.
-await validateEnv();
 
 // the flag is set in the package.json scripts
 // via `NODE_ENV=production <command>`
