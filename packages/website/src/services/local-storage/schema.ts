@@ -20,10 +20,3 @@ export type LocalStorageSchema = {
 export const defaultLocalStorage: LocalStorageSchema = {
   showMachineTranslationWarning: true,
 };
-
-/**
- * The setter for the custom localStorage logic.
- */
-export interface SetLocalStorage {
-  (key: keyof LocalStorageSchema, value: any): void;
-}
