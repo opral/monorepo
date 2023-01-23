@@ -18,22 +18,30 @@ import { createServer as createViteServer } from "vite";
 import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
 import { telefunc } from "telefunc";
-import { proxy } from "./git-proxy.js";
+import { gitProxyRouter } from "./git-proxy.js";
 import { serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
-import cookieSession from "cookie-session";
 import { router as authService } from "@src/services/auth/server.js";
 import { decryptAccessToken } from "@src/services/auth/logic.js";
 import { config } from "telefunc";
 import { onBug as onTelefuncBug } from "telefunc";
-
-// https://telefunc.com/disableNamingConvention
-config.disableNamingConvention = true;
+import {
+  sessionMiddleware,
+  verifyInlangSession,
+  initSession,
+  sessionErrorHandler,
+} from "@src/services/auth/lib/session/server.js";
+import type { InlangSessionRequest } from "@src/services/auth/lib/session/types.server.js";
 
 // validate the env variables.
 await validateEnv();
+
+await initSession();
+
+// https://telefunc.com/disableNamingConvention
+config.disableNamingConvention = true;
 
 // the flag is set in the package.json scripts
 // via `NODE_ENV=production <command>`
@@ -45,19 +53,11 @@ const env = await serverSideEnv();
 const rootPath = new URL("../..", import.meta.url).pathname;
 
 const app = express();
+
+app.use(sessionMiddleware());
+
 // compress responses with gzip
 app.use(compression());
-
-app.use(
-  cookieSession({
-    name: "inlang-session",
-    httpOnly: true,
-    // secure: isProduction ? true : false,
-    // domain: isProduction ? "inlang.com" : undefined,
-    secret: env.COOKIE_SECRET,
-    maxAge: 7 * 24 * 3600 * 1000, // 1 week
-  })
-);
 
 // setup sentry error tracking
 // must happen before the request handlers
@@ -97,30 +97,40 @@ if (isProduction) {
 // ------------------------ START ROUTES ------------------------
 
 // serving telefunc https://telefunc.com/
+// SuperTokens sessionData is used to retrieve the GitHub access token.
 app.all(
   "/_telefunc",
   // Parse & make HTTP request body available at `req.body` (required by telefunc)
   express.text(),
-  // handle the request
-  (request, response, next) => {
+  verifyInlangSession({ sessionRequired: false }),
+  async (request: InlangSessionRequest, response, next) => {
     // decrypting the access token if it exists
-    if (request.session?.encryptedAccessToken) {
+
+    let sessionData;
+    if (request.session != undefined) {
+      sessionData = await request.session.getSessionData();
+    }
+
+    if (sessionData?.encryptedAccessToken) {
       decryptAccessToken({
-        jwe: request.session.encryptedAccessToken,
+        jwe: sessionData.encryptedAccessToken,
         JWE_SECRET_KEY: env.JWE_SECRET_KEY,
       })
-        .then((accessToken) =>
-          telefunc({
+        .then((accessToken) => {
+          return telefunc({
             context: { githubAccessToken: accessToken },
             url: request.originalUrl,
             method: request.method,
             body: request.body,
-          })
-        )
+          });
+        })
         .then(({ body, statusCode, contentType }) => {
           response.status(statusCode).type(contentType).send(body);
         })
-        .catch(next);
+        .catch((e) => {
+          console.error(e);
+          next();
+        });
     } else {
       telefunc({
         context: { githubAccessToken: undefined },
@@ -136,8 +146,7 @@ app.all(
   }
 );
 
-// forward git requests to the proxy with wildcard `*`.
-app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
+app.use(gitProxyRouter);
 
 app.use("/services/auth", authService);
 
@@ -161,6 +170,7 @@ app.get("*", (request, response, next) => {
 });
 
 // ------------------------ END ROUTES ------------------------
+app.use(sessionErrorHandler);
 
 const port = process.env.PORT ?? 3000;
 app.listen(port);
