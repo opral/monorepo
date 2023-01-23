@@ -12,7 +12,7 @@ export type Node<Name> = {
    * information for a particular node like parsing
    * and serialization information.
    */
-  metadata?: unknown;
+  metadata?: any;
 };
 
 /**
