@@ -21,10 +21,10 @@ Plugins can be imported via the `$import` [environment function](/documentation/
 ```js
 // inlang.config.js
 
-export async function initializeConfig(env) {
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
-	);
+export async function defineConfig(env) {
+  const plugin = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
+  );
 }
 ```
 
@@ -33,21 +33,21 @@ The next steps depent on the plugin. Read the README of the plugin you want to u
 ```js
 // inlang.config.js
 
-export async function initializeConfig(env) {
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
-	);
-	const pluginConfig = {
-		pathPattern: "./{language}.json",
-	};
-	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		readResources: (args) =>
-			plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) =>
-			plugin.writeResources({ ...args, ...env, pluginConfig }),
-	};
+export async function defineConfig(env) {
+  const plugin = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
+  );
+  const pluginConfig = {
+    pathPattern: "./{language}.json",
+  };
+  return {
+    referenceLanguage: "en",
+    languages: ["en", "de"],
+    readResources: (args) =>
+      plugin.readResources({ ...args, ...env, pluginConfig }),
+    writeResources: (args) =>
+      plugin.writeResources({ ...args, ...env, pluginConfig }),
+  };
 }
 ```
 

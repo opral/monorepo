@@ -1,33 +1,33 @@
 {
-	"name": "@inlang/git-sdk",
-	"type": "module",
-	"private": true,
-	"exports": {
-		"./api": {
-			"types": "./dist/api/index.d.ts",
-			"import": "./dist/api/index.js"
-		},
-		"./fs": {
-			"types": "./dist/fs/index.d.ts",
-			"import": "./dist/fs/index.js"
-		},
-		"./host": {
-			"types": "./dist/auth/index.d.ts",
-			"import": "./dist/auth/index.js"
-		}
-	},
-	"files": [
-		"./dist"
-	],
-	"scripts": {
-		"build": "tsc --build ./tsconfig.build.json",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
-		"dev": "tsc --watch",
-		"format": "prettier ./src/** -w --config ../../.prettierrc.json",
-		"test": "vitest run --coverage"
-	},
-	"dependencies": {
-		"isomorphic-git": "^1.21.0",
-		"memfs": "^3.4.9"
-	}
+  "name": "@inlang/git-sdk",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
+    },
+    "./fs": {
+      "types": "./dist/fs/index.d.ts",
+      "import": "./dist/fs/index.js"
+    },
+    "./host": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
+    }
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
+    "dev": "tsc --watch",
+    "format": "prettier ./src/** -w --config ../../.prettierrc.json",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "isomorphic-git": "^1.21.0",
+    "memfs": "^3.4.9"
+  }
 }

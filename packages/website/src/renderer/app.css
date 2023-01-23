@@ -8,23 +8,23 @@
 
 /* The startup 101 font Inter https://rsms.me/inter/  */
 :root {
-	font-family: "Inter", sans-serif;
-	--sl-input-border-color: theme(colors.outline);
+  font-family: "Inter", sans-serif;
+  --sl-input-border-color: theme(colors.outline);
 }
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
-	:root {
-		font-family: "Inter var", sans-serif;
-	}
+  :root {
+    font-family: "Inter var", sans-serif;
+  }
 }
 
 /* Overwriting the toast positioning. Read https://shoelace.style/components/alert?id=the-toast-stack */
 .sl-toast-stack {
-	right: 0;
-	bottom: 0;
-	top: auto !important;
+  right: 0;
+  bottom: 0;
+  top: auto !important;
 }
 
 .tree-with-lines {
-	--indent-guide-width: 2px;
+  --indent-guide-width: 2px;
 }

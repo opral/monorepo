@@ -8,7 +8,7 @@ description: The reference for the config.
 
 **The config powers all apps, plugins, and automations. One config file to cover all localization needs (see [design principles](/documentation/design-principles)).**
 
-The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `initializeConfig`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `initializeConfig` function. Read the [plugin](/documentation/plugins) documenation for more information on how to use external modules.
+The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `defineConfig`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `defineConfig` function. Read the [plugin](/documentation/plugins) documenation for more information on how to use external modules.
 
 ## Example
 
@@ -18,24 +18,24 @@ The config must be named `inlang.config.js`, exist at the root of a repository, 
 /**
  * Using JSDoc to get typesafety.
  * Note: the npm package @inlang/core must be installed.
- * @type {import("@inlang/core/config").InitializeConfig}
+ * @type {import("@inlang/core/config").DefineConfig}
  */
-export async function initializeConfig(env) {
-	// importing a plugin from github
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
-	);
-	const pluginConfig = {
-		pathPattern: "./{language}.json",
-	};
-	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		readResources: (args) =>
-			plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) =>
-			plugin.writeResources({ ...args, ...env, pluginConfig }),
-	};
+export async function defineConfig(env) {
+  // importing a plugin from github
+  const plugin = await env.$import(
+    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
+  );
+  const pluginConfig = {
+    pathPattern: "./{language}.json",
+  };
+  return {
+    referenceLanguage: "en",
+    languages: ["en", "de"],
+    readResources: (args) =>
+      plugin.readResources({ ...args, ...env, pluginConfig }),
+    writeResources: (args) =>
+      plugin.writeResources({ ...args, ...env, pluginConfig }),
+  };
 }
 ```
 

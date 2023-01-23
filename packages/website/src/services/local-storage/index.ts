@@ -6,9 +6,9 @@
  */
 
 export {
-	getLocalStorage,
-	useLocalStorage,
-	LocalStorageProvider,
+  getLocalStorage,
+  useLocalStorage,
+  LocalStorageProvider,
 } from "./LocalStorageProvider.js";
 
 export type { LocalStorageSchema } from "./schema.js";

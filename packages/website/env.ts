@@ -15,30 +15,30 @@
  * ```
  */
 export type ServerSideEnv = ClientSideEnv & {
-	/**
-	 * The secret key used to encrypt and decrypt JWEs.
-	 */
-	JWE_SECRET_KEY: string;
+  /**
+   * The secret key used to encrypt and decrypt JWEs.
+   */
+  JWE_SECRET_KEY: string;
 
-	/**
-	 * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
-	 */
-	GITHUB_APP_CLIENT_SECRET: string;
+  /**
+   * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+   */
+  GITHUB_APP_CLIENT_SECRET: string;
 
-	/**
-	 * The sentry dsn for the server.
-	 *
-	 * Only available in production.
-	 */
-	SENTRY_DSN_SERVER?: string;
+  /**
+   * The sentry dsn for the server.
+   *
+   * Only available in production.
+   */
+  SENTRY_DSN_SERVER?: string;
 
-	/**
-	 * The API key for Google Translate.
-	 *
-	 * Only available in production.
-	 * https://cloud.google.com/translate/docs/setup
-	 */
-	GOOGLE_TRANSLATE_API_KEY?: string;
+  /**
+   * The API key for Google Translate.
+   *
+   * Only available in production.
+   * https://cloud.google.com/translate/docs/setup
+   */
+  GOOGLE_TRANSLATE_API_KEY?: string;
 
 	/**
 	 * The connection uri for super tokens.
@@ -108,7 +108,7 @@ export type ClientSideEnv = {
  * Use `getServerSideEnv` for server-side env variables.
  */
 export const clientSideEnv: ClientSideEnv = import.meta
-	.env as unknown as ClientSideEnv;
+  .env as unknown as ClientSideEnv;
 
 /**
  * Get server side env variables.
@@ -121,17 +121,17 @@ export const clientSideEnv: ClientSideEnv = import.meta
  * Client side env varibales are automatically included.
  */
 export async function serverSideEnv(): Promise<ServerSideEnv> {
-	try {
-		// dynamically importing dotenv to avoid clash with client side code
-		const dotenv = await import("dotenv");
-		dotenv.config();
-		return process.env as ServerSideEnv;
-	} catch (e) {
-		console.error(e);
-		throw Error(
-			"You likely tried to get server-side env variables from the client-side. Use `clientSideEnv() instead."
-		);
-	}
+  try {
+    // dynamically importing dotenv to avoid clash with client side code
+    const dotenv = await import("dotenv");
+    dotenv.config();
+    return process.env as ServerSideEnv;
+  } catch (e) {
+    console.error(e);
+    throw Error(
+      "You likely tried to get server-side env variables from the client-side. Use `clientSideEnv() instead."
+    );
+  }
 }
 
 /**

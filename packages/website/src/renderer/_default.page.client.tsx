@@ -35,6 +35,7 @@ import "@shoelace-style/shoelace/dist/components/tree/tree.js";
 import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js";
 import "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js";
 import "@shoelace-style/shoelace/dist/components/button-group/button-group.js";
+import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
 
 import { clientSideEnv } from "@env";
 import { initClientSession } from "@src/services/auth/lib/session/client.js";
@@ -45,11 +46,11 @@ await initClientSession();
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
-	Sentry.init({
-		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
-		integrations: [new BrowserTracing()],
-		tracesSampleRate: 0.1,
-	});
+  Sentry.init({
+    dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
+    integrations: [new BrowserTracing()],
+    tracesSampleRate: 0.1,
+  });
 }
 
 // see https://vite-plugin-ssr.com/clientRouting#page-content
@@ -60,26 +61,26 @@ const rootElement = document.querySelector("#root") as HTMLElement;
 
 const [currentPage, setCurrentPage] = createSignal<Component>();
 const [currentPageProps, setCurrentPageProps] = createStore<
-	Record<string, unknown>
+  Record<string, unknown>
 >({});
 
 export function render(pageContext: PageContextRenderer) {
-	try {
-		setCurrentPageContext(pageContext);
-		setCurrentPage(() => pageContext.Page);
-		setCurrentPageProps(pageContext.pageProps);
-		if (isFirstRender) {
-			hydrate(
-				() => (
-					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps}></Root>
-					</MetaProvider>
-				),
-				rootElement
-			);
-			isFirstRender = false;
-		}
-	} catch (e) {
-		console.error("ERROR in renderer", e);
-	}
+  try {
+    setCurrentPageContext(pageContext);
+    setCurrentPage(() => pageContext.Page);
+    setCurrentPageProps(pageContext.pageProps);
+    if (isFirstRender) {
+      hydrate(
+        () => (
+          <MetaProvider>
+            <Root page={currentPage()!} pageProps={currentPageProps} />
+          </MetaProvider>
+        ),
+        rootElement
+      );
+      isFirstRender = false;
+    }
+  } catch (e) {
+    console.error("ERROR in renderer", e);
+  }
 }

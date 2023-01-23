@@ -14,36 +14,36 @@ Inlang is in public **alpha**. Read more about our breaking change policy [here]
 
 {% Video src="https://youtu.be/rwqJ0RygAYc" /%}
 
-One single config file named `inlang.config.js` needs to be created at the root of the repository. The `inlang.config.js` file needs to export an `initializeConfig` function that returns an object that conforms to the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts). More often than not, you want to use a [plugin](/documentation/plugins) that defines parts of the config. Just in case, take a look at the [inlang example repository](https://github.com/inlang/example).
+One single config file named `inlang.config.js` needs to be created at the root of the repository. The `inlang.config.js` file needs to export an `defineConfig` function that returns an object that conforms to the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts). More often than not, you want to use a [plugin](/documentation/plugins) that defines parts of the config. Just in case, take a look at the [inlang example repository](https://github.com/inlang/example).
 
 ## Step-by-step
 
 1. Create a new file named `inlang.config.js` in the root of your git repository.
 
-2. The newly created file needs to export an async function called `initializeConfig`.
+2. The newly created file needs to export an async function called `defineConfig`.
 
    ```ts
    // filename: inlang.config.js
 
-   export async function initializeConfig(env) {}
+   export async function defineConfig(env) {}
    ```
 
-3. `initializeConfig` must return an object that satisfies the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)
+3. `defineConfig` must return an object that satisfies the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)
 
    ```ts
    // filename: inlang.config.js
 
-   export async function initializeConfig(env) {
-   	return {
-   		referenceLanguage: "en",
-   		languages: ["en", "de"],
-   		readResources: (args) => {
-   			// define how resources should be read
-   		},
-   		writeResources: (args) => {
-   			// define how resources should be written
-   		},
-   	};
+   export async function defineConfig(env) {
+     return {
+       referenceLanguage: "en",
+       languages: ["en", "de"],
+       readResources: (args) => {
+         // define how resources should be read
+       },
+       writeResources: (args) => {
+         // define how resources should be written
+       },
+     };
    }
    ```
 
@@ -52,30 +52,30 @@ One single config file named `inlang.config.js` needs to be created at the root 
    ```js
    // filename: inlang.config.js
 
-   export async function initializeConfig(env) {
-   	// importing a plugin
-   	const plugin = await env.$import(
-   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
-   	);
+   export async function defineConfig(env) {
+     // importing a plugin
+     const plugin = await env.$import(
+       "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
+     );
 
-   	// most plugins require additional config, read the plugins documentation
-   	// for the required config and correct usage.
-   	const pluginConfig = {
-   		pathPattern: "./{language}.json",
-   	};
+     // most plugins require additional config, read the plugins documentation
+     // for the required config and correct usage.
+     const pluginConfig = {
+       pathPattern: "./{language}.json",
+     };
 
-   	return {
-   		referenceLanguage: "en",
-   		languages: ["en", "de"],
-   		readResources: (args) => {
-   			// define how resources should be read
-   			return plugin.readResources(args);
-   		},
-   		writeResources: (args) => {
-   			// define how resources should be written
-   			return plugin.readResources(args);
-   		},
-   	};
+     return {
+       referenceLanguage: "en",
+       languages: ["en", "de"],
+       readResources: (args) => {
+         // define how resources should be read
+         return plugin.readResources(args);
+       },
+       writeResources: (args) => {
+         // define how resources should be written
+         return plugin.readResources(args);
+       },
+     };
    }
    ```
 
@@ -89,15 +89,15 @@ If inlang is used in a JavaScript environment like Node or Deno, typesafety can 
    $ npm install @inlang/core --save-dev
    ```
 
-2. Add the following JSDoc comment above the `initializeConfig` function.
+2. Add the following JSDoc comment above the `defineConfig` function.
 
    ```js
    /**
-    * @type {import("@inlang/core/config").InitializeConfig}
+    * @type {import("@inlang/core/config").DefineConfig}
     */
-   export async function initializeConfig(env) {
-   	//
-   	//
-   	//
+   export async function defineConfig(env) {
+     //
+     //
+     //
    }
    ```
