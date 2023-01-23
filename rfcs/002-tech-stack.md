@@ -97,7 +97,7 @@ SEO is important for the website and might be important for the editor.
 
 ## Choices
 
-A monolith architecture has been chosen. The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort.
+A monolith architecture has been chosen. The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort. For example, the monolith architecture enables the usage of sessions that store GitHub access tokens. Inlang does not require a dedicated auth system as no user data is stored. The need for a dedicated auth systems (and database) will surely arise. For now, it seems easier to leverage one server with sessions for authorization without the need to stitch microservices together.  
 
 Framework: [SolidJS](https://www.solidjs.com/)
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
@@ -105,7 +105,7 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 ### website (metaframework)
 
-VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Furthermore, higher control is required to localize inlang (other metaframeworks like Next.js 13 or SvelteKit only support i18n via workarounds) and because of the editor. The editor is a classical SPA app with SSR components. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase.
+VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr enables us to define how specific routes should be rendered. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
 
 #### why vite-plugin-ssr?
 
