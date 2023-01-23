@@ -1,19 +1,16 @@
 import { query } from "@inlang/core/query";
 import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
-import {
-  resources,
-  inlangConfig,
-  repositoryIsCloned,
-  routeParams,
-} from "./state.js";
 import { Layout as EditorLayout } from "./Layout.jsx";
 import type * as ast from "@inlang/core/ast";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
 import { Meta, Title } from "@solidjs/meta";
+import { useEditorState } from "./State.jsx";
 
 export function Page() {
+  const { resources, routeParams, repositoryIsCloned, inlangConfig } =
+    useEditorState();
   /**
    * Messages for a particular message id in all languages
    *
@@ -146,6 +143,8 @@ function NoInlangConfigFoundCard() {
 }
 
 function RepositoryDoesNotExistOrNotAuthorizedCard() {
+  const { routeParams } = useEditorState();
+
   return (
     <div class="flex grow items-center justify-center">
       <div class="border border-outline p-8 rounded flex flex-col max-w-lg">
