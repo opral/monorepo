@@ -58,7 +58,7 @@ export const initSession = () => {
     supertokens.init(config);
   } else {
     console.info(
-      "Supertokens session disabled for the dev environment. Enable by setting the env var 'SUPERTOKENS_ENABLE' to 'true'"
+      "Supertokens session disabled for the dev environment. Enable by setting the env var 'VITE_SUPERTOKENS_IN_DEV' to 'true'"
     );
   }
 };
