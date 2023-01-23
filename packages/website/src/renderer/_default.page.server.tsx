@@ -34,11 +34,15 @@ export async function render(
   // mutated during render so you can include in server-rendered template later
   const tags: any[] = [];
 
-  const renderedPage = renderToString(() => (
-    <MetaProvider tags={tags}>
-      <Root page={pageContext.Page} pageProps={pageContext.pageProps} />
-    </MetaProvider>
-  ));
+  const isEditor = pageContext.urlPathname.startsWith("editor");
+
+  const renderedPage = isEditor
+    ? undefined
+    : renderToString(() => (
+        <MetaProvider tags={tags}>
+          <Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+        </MetaProvider>
+      ));
 
   return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
@@ -58,7 +62,7 @@ export async function render(
       </head>
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
       <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
-		${dangerouslySkipEscape(renderedPage)}
+		    ${isEditor ? "" : dangerouslySkipEscape(renderedPage!)}
       </body>
     </html>`;
 }
