@@ -109,11 +109,12 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
   /** changed in another window should be reflected. thus listen for changes  */
   const onStorageSetByOtherWindow = (event: StorageEvent) => {
-    if (event.key !== LOCAL_STORAGE_KEY) {
-      return console.warn(
-        `unknown localStorage key "${event.key}" was changed by another tab.`
-      );
-    } else if (event.newValue === null) {
+    // this happens when external services change the local storage
+    // if (event.key !== LOCAL_STORAGE_KEY) {
+    // return console.warn(
+    //   `unknown localStorage key "${event.key}" was changed by another tab.`
+    // );
+    if (event.newValue === null) {
       return console.error(
         `localStorage key "${LOCAL_STORAGE_KEY}" was deleted by another tab. this should not happen.`
       );
