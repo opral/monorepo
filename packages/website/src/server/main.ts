@@ -170,7 +170,7 @@ app.get("*", (request, response, next) => {
 });
 
 // ------------------------ END ROUTES ------------------------
-app.use(sessionErrorHandler);
+app.use(sessionErrorHandler());
 
 const port = process.env.PORT ?? 3000;
 app.listen(port);
