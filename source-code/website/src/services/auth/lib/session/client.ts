@@ -16,35 +16,35 @@ import { LOCAL_SESSION_COOKIE_NAME } from "./types.js";
 import { setLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
 const supertokensEnabled =
-	clientSideEnv.NODE_ENV == "production" ||
-	clientSideEnv.VITE_SUPERTOKENS_IN_DEV !== undefined;
+  clientSideEnv.NODE_ENV == "production" ||
+  clientSideEnv.VITE_SUPERTOKENS_IN_DEV !== undefined;
 
 const config = {
-	appInfo: {
-		apiDomain: "http://localhost:3000",
-		appName: clientSideEnv.VITE_SUPERTOKENS_APP_NAME ?? "inlang",
-		apiBasePath: "/",
-	},
-	recipeList: [
-		Session.init({
-			override: {
-				functions(originalImplementation) {
-					return {
-						...originalImplementation,
-						signOut(input) {
-							onSignOut({
-								// executing the correct sign out cleanup logic
-								setLocalStorage: setLocalStorage,
-								onlyClientSide: true,
-							});
-							return originalImplementation.signOut(input);
-						},
-					};
-				},
-			},
-		}),
-	],
-	enableDebugLogs: false,
+  appInfo: {
+    apiDomain: clientSideEnv.VITE_FRONTEND_BASE_URL!,
+    appName: clientSideEnv.VITE_SUPERTOKENS_APP_NAME ?? "inlang",
+    apiBasePath: "/",
+  },
+  recipeList: [
+    Session.init({
+      override: {
+        functions(originalImplementation) {
+          return {
+            ...originalImplementation,
+            signOut(input) {
+              onSignOut({
+                // executing the correct sign out cleanup logic
+                setLocalStorage: setLocalStorage,
+                onlyClientSide: true,
+              });
+              return originalImplementation.signOut(input);
+            },
+          };
+        },
+      },
+    }),
+  ],
+  enableDebugLogs: false,
 };
 
 /**
@@ -53,11 +53,11 @@ const config = {
  * For development, this initializes the simplified local session logic.
  */
 export const initClientSession = async () => {
-	// init supertokens sesssion
-	if (typeof window != "undefined" && clientSideEnv.VITE_SUPERTOKENS_IN_DEV) {
-		SuperTokens.init(config);
-		await Session.attemptRefreshingSession();
-	}
+  // init supertokens sesssion
+  if (typeof window != "undefined" && clientSideEnv.VITE_SUPERTOKENS_IN_DEV) {
+    SuperTokens.init(config);
+    await Session.attemptRefreshingSession();
+  }
 };
 
 /**
@@ -65,7 +65,7 @@ export const initClientSession = async () => {
  * This function has to be called before the Oauth flow is started!
  */
 export const tryCreateSession = async () => {
-	await fetch("/services/auth/create-session", { method: "POST" });
+  await fetch("/services/auth/create-session", { method: "POST" });
 };
 
 /**
@@ -73,16 +73,16 @@ export const tryCreateSession = async () => {
  * @returns The accessToken payload or undefined if no session is active
  */
 export const getAccessTokenPayload = async () => {
-	if (supertokensEnabled) {
-		try {
-			return await Session.getAccessTokenPayloadSecurely();
-		} catch {
-			return undefined;
-		}
-	} else {
-		return getLocalSessionCookie(
-			document.cookie,
-			LOCAL_SESSION_COOKIE_NAME.ACCESS_TOKEN_PAYLOAD
-		);
-	}
+  if (supertokensEnabled) {
+    try {
+      return await Session.getAccessTokenPayloadSecurely();
+    } catch {
+      return undefined;
+    }
+  } else {
+    return getLocalSessionCookie(
+      document.cookie,
+      LOCAL_SESSION_COOKIE_NAME.ACCESS_TOKEN_PAYLOAD
+    );
+  }
 };
