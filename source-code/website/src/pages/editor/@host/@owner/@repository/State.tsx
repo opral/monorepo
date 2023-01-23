@@ -29,7 +29,6 @@ import {
   isCollaborator,
   repositoryInformation as _repositoryInformation,
 } from "@src/services/github/index.js";
-import { isServer } from "solid-js/web";
 
 type EditorStateSchema = {
   /**
@@ -222,10 +221,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
      * Hence, a string needs to be passed to the fetch of the resource.
      */
     () => {
-      // don't run server side
-      // if (isServer) {
-      //   return false;
-      // }
       return {
         user: localStorage?.user ?? "not logged in",
         routeParams: currentPageContext.routeParams as EditorRouteParams,
@@ -247,7 +242,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
   const [githubRepositoryInformation] = createResource(
     () => {
       if (
-        // isServer ||
         localStorage?.user === undefined ||
         currentPageContext.routeParams.owner === undefined ||
         currentPageContext.routeParams.repository === undefined
@@ -305,14 +299,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
       return;
     }
     // write to filesystem
-
-    writeResources(
+    writeResources({
       config,
-      // ...args are the resources
-      // @ts-ignore
-      ...args,
-      localStorage.user
-    );
+      setFsChange,
+      resources,
+      user: localStorage.user,
+    });
   };
 
   return (
@@ -470,13 +462,13 @@ async function readResources(config: InlangConfig) {
   return resources;
 }
 
-async function writeResources(
-  config: InlangConfig,
-  resources: ast.Resource[],
-  user: NonNullable<LocalStorageSchema["user"]>,
-  setFsChange: (date: Date) => void
-) {
-  await config.writeResources({ config, resources });
+async function writeResources(args: {
+  config: InlangConfig;
+  resources: ast.Resource[];
+  user: NonNullable<LocalStorageSchema["user"]>;
+  setFsChange: (date: Date) => void;
+}) {
+  await args.config.writeResources({ ...args });
   const status = await raw.statusMatrix({ fs, dir: "/" });
   const filesWithUncomittedChanges = status.filter(
     // files with unstaged and uncomitted changes
@@ -491,13 +483,13 @@ async function writeResources(
     fs,
     dir: "/",
     author: {
-      name: user.username,
+      name: args.user.username,
     },
     message: "inlang: update translations",
   });
   // triggering a side effect here to trigger a re-render
   // of components that depends on fs
-  setFsChange(new Date());
+  args.setFsChange(new Date());
 }
 
 async function _unpushedChanges(args: {
