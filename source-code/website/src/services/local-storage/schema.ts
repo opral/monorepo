@@ -25,5 +25,5 @@ export const defaultLocalStorage: LocalStorageSchema = {
  * The setter for the custom localStorage logic.
  */
 export interface SetLocalStorage {
-	(key: keyof LocalStorageSchema, value: any): void;
+  (key: keyof LocalStorageSchema, value: any): void;
 }

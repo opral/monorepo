@@ -1,8 +1,7 @@
 import type { ClientSideEnv } from "@env";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
-import { createEffect, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import IconGithub from "~icons/cib/github";
-import { tryCreateSession } from "../lib/session/client.js";
 import { githubAuthUrl } from "../logic.js";
 
 /**

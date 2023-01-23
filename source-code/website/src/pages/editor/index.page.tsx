@@ -1,12 +1,10 @@
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { Layout as RootLayout } from "../Layout.jsx";
 import { repositories } from "./repositories.js";
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { z } from "zod";
 import { Meta, Title } from "@solidjs/meta";
-import { initClientSession } from "@src/services/auth/lib/session/client.js";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 
 export function Page() {
   /** is not reactive because window is not reactive */

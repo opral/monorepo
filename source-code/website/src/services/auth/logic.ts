@@ -1,6 +1,5 @@
 import type { ServerSideEnv } from "@env";
 import { CompactEncrypt, compactDecrypt, base64url } from "jose";
-import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
 
 // enc = encoding
 const enc = "A128CBC-HS256";
