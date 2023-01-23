@@ -1,9 +1,3 @@
-/**
- * This file contains the local storage provider and also non reactive versions.
- *
- * This custom implementation uses only one key in the actual local storage and works with JSON.stringify() / .parse() to emulate the behaviour of the normal localStorage interface.
- */
-
 import {
   createContext,
   JSXElement,
@@ -13,11 +7,7 @@ import {
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
 import { getUserInfo } from "../auth/logic.telefunc.js";
-import {
-  defaultLocalStorage,
-  LocalStorageSchema,
-  SetLocalStorage,
-} from "./schema.js";
+import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
 const LocalStorageContext = createContext();
 
@@ -37,27 +27,6 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
     return JSON.parse(json);
   }
 }
-
-/**
- * Updates a key using inlangs custom local storage structure.
- *
- * This is the non-reactive version of `useLocalStorage()` (regular JS/TS, not JSX).
- * Use the reactive version if you are in a JSX environment.
- * @param key The key to update
- * @param value The value to update the key with
- */
-export const setLocalStorage: SetLocalStorage = (key, value) => {
-  if (!key) {
-    return;
-  }
-
-  const store = getLocalStorage();
-
-  localStorage.setItem(
-    LOCAL_STORAGE_KEY,
-    JSON.stringify({ ...store, [key]: value })
-  );
-};
 
 /**
  * Store that provides access to the local storage.
@@ -109,14 +78,14 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
   /** changed in another window should be reflected. thus listen for changes  */
   const onStorageSetByOtherWindow = (event: StorageEvent) => {
-    // this happens when external services change the local storage
     // if (event.key !== LOCAL_STORAGE_KEY) {
-    // return console.warn(
-    //   `unknown localStorage key "${event.key}" was changed by another tab.`
-    // );
+    //   return console.warn(
+    //     `unknown localStorage key "${event.key}" was changed by another tab.`
+    //   );
+    // }
     if (event.newValue === null) {
       return console.error(
-        `localStorage key "${LOCAL_STORAGE_KEY}" was deleted by another tab. this should not happen.`
+        'localStorage key "store" was deleted by another tab. this should not happen.'
       );
     }
     // setting the origin store to not trigger a loop
