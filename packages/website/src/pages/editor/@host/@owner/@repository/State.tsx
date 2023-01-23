@@ -1,11 +1,12 @@
-/* eslint-disable solid/reactivity */
 import { currentPageContext } from "@src/renderer/state.js";
 import {
-  createEffect,
+  createContext,
   createResource,
   createSignal,
   JSXElement,
   Resource,
+  Setter,
+  useContext,
 } from "solid-js";
 import type { EditorRouteParams, EditorSearchParams } from "./types.js";
 import { http, raw } from "@inlang/git-sdk/api";
@@ -15,7 +16,7 @@ import {
   EnvironmentFunctions,
   initialize$import,
 } from "@inlang/core/config";
-import { createStore } from "solid-js/store";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/core/utilities";
 import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
@@ -28,37 +29,178 @@ import {
   isCollaborator,
   repositoryInformation as _repositoryInformation,
 } from "@src/services/github/index.js";
+import { isServer } from "solid-js/web";
+
+type EditorStateSchema = {
+  /**
+   * Whether a repository is cloned and when it was cloned.
+   *
+   * The value is `false` if the repository is not cloned. Otherwise,
+   * a Date is provided that reflects the time of when the repository
+   * was cloned.
+   */
+  repositoryIsCloned: Resource<undefined | Date>;
+  /**
+   * The current branch.
+   */
+  currentBranch: Resource<string | undefined>;
+  /**
+   * The current inlang config.
+   *
+   * Undefined if no inlang config exists/has been found.
+   */
+  inlangConfig: Resource<InlangConfig | undefined>;
+  /**
+   * Unpushed changes in the repository.
+   */
+  unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>;
+  /**
+   * Additional informaiton about a repository provided by GitHub.
+   */
+  githubRepositoryInformation: Resource<any>;
+  /**
+   * Route parameters like `/github.com/inlang/website`.
+   *
+   * Utility to access the route parameters in a typesafe manner.
+   */
+  routeParams: () => EditorRouteParams;
+
+  /**
+   * Search parameters of editor route like `?branch=main`.
+   *
+   * Utility to access the route parameters in a typesafe manner.
+   */
+  searchParams: () => EditorSearchParams;
+
+  /**
+   * The filesystem is not reactive, hence setFsChange to manually
+   * trigger re-renders.
+   *
+   * setFsChange manually to `Date.now()`
+   */
+  fsChange: () => Date;
+  setFsChange: Setter<Date>;
+
+  /**
+   * FilterLanguages show or hide the different messages.
+   *
+   * FilteredLanguages includes all language WITHOUT the referenclanguage
+   */
+  filteredLanguages: () => string[];
+  setFilteredLanguages: Setter<string[]>;
+
+  /**
+   * The resources in a given repository.
+   */
+  resources: ast.Resource[];
+  setResources: SetStoreFunction<ast.Resource[]>;
+
+  /**
+   * The reference resource.
+   */
+  referenceResource: () => ast.Resource | undefined;
+
+  /**
+   * Whether the user is a collaborator of the repository.
+   *
+   * Check whether the user is logged in before using this resource.
+   * Otherwise, the resource might throw an error.
+   *
+   * @example
+   * 	if (user && isCollaborator())
+   */
+  userIsCollaborator: Resource<boolean>;
+
+  /**
+   * The last time the repository was pushed.
+   */
+  setLastPush: Setter<Date>;
+};
+
+const EditorStateContext = createContext<EditorStateSchema>();
+
+export const useEditorState = () => {
+  const context = useContext(EditorStateContext);
+  if (context === undefined) {
+    throw Error(
+      "The EditorStateContext is undefined. useEditorState must be used within a EditorStateProvider"
+    );
+  }
+  return context;
+};
+
 /**
- * `<StateProvider>` initializes state with a computations such resources.
+ * `<EditorStateProvider>` initializes state with a computations such resources.
  *
- * Otherwise, the resources would be created with no root element.
- * See https://www.solidjs.com/docs/latest/api#createroot. Avoiding
- * to use Context https://www.solidjs.com/tutorial/stores_context
- * for simplicity.
+ * See https://www.solidjs.com/tutorial/stores_context.
  */
-export function StateProvider(props: { children: JSXElement }) {
-  const [localStorage] = useLocalStorage();
+export function EditorStateProvider(props: { children: JSXElement }) {
+  /**
+   *  Date of the last push to the Repo
+   */
+  const [lastPush, setLastPush] = createSignal<Date>();
+
+  const routeParams = () => currentPageContext.routeParams as EditorRouteParams;
+
+  const searchParams = () =>
+    currentPageContext.urlParsed.search as EditorSearchParams;
+
+  const [fsChange, setFsChange] = createSignal(new Date());
+
+  const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([]);
+
+  /**
+   * The reference resource.
+   */
+  const referenceResource = () =>
+    resources.find(
+      (resource) =>
+        resource.languageTag.name === inlangConfig()?.referenceLanguage
+    );
+
+  const [localStorage] = useLocalStorage() ?? [];
 
   // re-fetched if currentPageContext changes
-  [repositoryIsCloned] = createResource(() => {
+  const [repositoryIsCloned] = createResource(() => {
     return {
       routeParams: currentPageContext.routeParams as EditorRouteParams,
-      user: localStorage.user,
+      user: localStorage?.user,
+      setFsChange,
     };
   }, cloneRepository);
 
   // re-fetched if respository has been cloned
-  [inlangConfig] = createResource(() => {
-    if (repositoryIsCloned.error) {
-      return false;
+  const [inlangConfig] = createResource(
+    () => {
+      if (repositoryIsCloned.error) {
+        return false;
+      }
+      return repositoryIsCloned();
+    },
+    async () => {
+      const config = await readInlangConfig();
+      if (config) {
+        // setting the origin store because this should not trigger
+        // writing to the filesystem.
+        setOriginResources(await readResources(config));
+        //initialises/ set the inital signal for  the language of the language filter for the messages
+        // .filter removes the referenceLanguage from the array languages
+        setFilteredLanguages(
+          config.languages.filter(
+            (languages) => languages !== config.referenceLanguage
+          )
+        );
+      }
+      return config;
     }
-    return repositoryIsCloned();
-  }, readInlangConfig);
+  );
+
   // re-fetched if the file system changes
-  [unpushedChanges] = createResource(
+  const [unpushedChanges] = createResource(
     // using batch does not work for this resource. don't know why.
     // no related bug so far, hence leave it as is.
     () => {
+      // don't run server side
       if (repositoryIsCloned.error) {
         return false;
       }
@@ -74,15 +216,21 @@ export function StateProvider(props: { children: JSXElement }) {
     _unpushedChanges
   );
 
-  [userIsCollaborator] = createResource(
+  const [userIsCollaborator] = createResource(
     /**
      *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
      * Hence, a string needs to be passed to the fetch of the resource.
      */
-    () => ({
-      user: localStorage.user ?? "not logged in",
-      routeParams: currentPageContext.routeParams as EditorRouteParams,
-    }),
+    () => {
+      // don't run server side
+      // if (isServer) {
+      //   return false;
+      // }
+      return {
+        user: localStorage?.user ?? "not logged in",
+        routeParams: currentPageContext.routeParams as EditorRouteParams,
+      };
+    },
     async (args) => {
       if (typeof args.user === "string") {
         return false;
@@ -96,11 +244,11 @@ export function StateProvider(props: { children: JSXElement }) {
     }
   );
 
-  [repositoryInformation] = createResource(
+  const [githubRepositoryInformation] = createResource(
     () => {
-      if (localStorage.user === undefined) {
-        return false;
-      } else if (
+      if (
+        // isServer ||
+        localStorage?.user === undefined ||
         currentPageContext.routeParams.owner === undefined ||
         currentPageContext.routeParams.repository === undefined
       ) {
@@ -118,7 +266,7 @@ export function StateProvider(props: { children: JSXElement }) {
       })
   );
 
-  [currentBranch] = createResource(
+  const [currentBranch] = createResource(
     () => {
       if (repositoryIsCloned.error) {
         return false;
@@ -133,133 +281,68 @@ export function StateProvider(props: { children: JSXElement }) {
     }
   );
 
-  // if the config is loaded, read the resources
-  //! will lead to weird ux since this effect does not
-  //! account for user intent
-  createEffect(async () => {
+  /**
+   * The resources.
+   *
+   * Read below why the setter function is called setOrigin.
+   */
+  const [resources, setOriginResources] = createStore<ast.Resource[]>([]);
+
+  /**
+   * Custom setStore function to trigger filesystem writes on changes.
+   *
+   * Listening to changes on an entire store is not possible, see
+   * https://github.com/solidjs/solid/discussions/829. A workaround
+   * (which seems much better than effects anyways) is to modify the
+   * setStore function to trigger the desired side-effect.
+   */
+  const setResources: typeof setOriginResources = (...args: any) => {
+    // @ts-ignore
+    setOriginResources(...args);
+    const localStorage = getLocalStorage();
     const config = inlangConfig();
-    if (config === undefined) {
+    if (config === undefined || localStorage?.user === undefined) {
       return;
     }
-    // setting the origin store because this should not trigger
-    // writing to the filesystem.
-    setOriginResources(await readResources(config));
-  });
+    // write to filesystem
 
-  return props.children;
+    writeResources(
+      config,
+      // ...args are the resources
+      // @ts-ignore
+      ...args,
+      localStorage.user
+    );
+  };
+
+  return (
+    <EditorStateContext.Provider
+      value={
+        {
+          repositoryIsCloned,
+          currentBranch,
+          inlangConfig,
+          unpushedChanges,
+          githubRepositoryInformation,
+          routeParams,
+          searchParams,
+          fsChange,
+          setFsChange,
+          filteredLanguages,
+          setFilteredLanguages,
+          resources,
+          setResources,
+          referenceResource,
+          userIsCollaborator,
+          setLastPush,
+        } satisfies EditorStateSchema
+      }
+    >
+      {props.children}
+    </EditorStateContext.Provider>
+  );
 }
 
-export let unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>;
-
-/**
- * Whether a repository is cloned and when it was cloned.
- *
- * The value is `false` if the repository is not cloned. Otherwise,
- * a Date is provided that reflects the time of when the repository
- * was cloned.
- */
-export let repositoryIsCloned: Resource<undefined | Date>;
-
-/**
- * The current branch.
- */
-export let currentBranch: Resource<string | undefined>;
-
-/**
- * The current inlang config.
- *
- * Undefined if no inlang config exists/has been found.
- */
-export let inlangConfig: Resource<InlangConfig | undefined>;
-
-export let repositoryInformation: Resource<any>;
-
-/**
- * Route parameters like `/github.com/inlang/website`.
- */
-export const routeParams = () =>
-  currentPageContext.routeParams as EditorRouteParams;
-
-/**
- * Search parameters of editor route like `?branch=main`.
- */
-export const searchParams = () =>
-  currentPageContext.urlParsed.search as EditorSearchParams;
-
-/**
- * The filesystem is not reactive, hence setFsChange to manually
- * trigger re-renders.
- *
- * setFsChange manually to `Date.now()`
- */
-export const [fsChange, setFsChange] = createSignal(new Date());
-
-/**
- * FilterLanguages are only used in the EditorUI (e.g. Languagefilter) to show or hide the different messages.
- *
- * filteredLanguages includes all language WITHOUT the referenclanguage
- */
-export const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>(
-  []
-);
-
-export { resources, setResources };
-
-/**
- * The resources.
- *
- * Read below why the setter function is called setOrigin.
- */
-const [resources, setOriginResources] = createStore<ast.Resource[]>([]);
-
-/**
- * Custom setStore function to trigger filesystem writes on changes.
- *
- * Listening to changes on an entire store is not possible, see
- * https://github.com/solidjs/solid/discussions/829. A workaround
- * (which seems much better than effects anyways) is to modify the
- * setStore function to trigger the desired side-effect.
- */
-const setResources: typeof setOriginResources = (...args: any) => {
-  // @ts-ignore
-  setOriginResources(...args);
-  const localStorage = getLocalStorage();
-  const config = inlangConfig();
-  if (config === undefined || localStorage?.user === undefined) {
-    return;
-  }
-  // write to filesystem
-
-  writeResources(
-    config,
-    // ...args are the resources
-    // @ts-ignore
-    ...args,
-    localStorage.user
-  );
-};
-
-/**
- * The reference resource.
- */
-export const referenceResource = () =>
-  resources.find(
-    (resource) =>
-      resource.languageTag.name === inlangConfig()?.referenceLanguage
-  );
-
-/**
- *  Date of the last push to the Repo
- */
-const [lastPush, setLastPush] = createSignal<Date>();
-/**
- * whether or not if the user is a collaborator of this Repo
- *
- * when using this function, whether the user is logged in
- * @example
- * 	if (user && isCollaborator())
- */
-export let userIsCollaborator: Resource<boolean>;
 // ------------------------------------------
 
 /**
@@ -272,6 +355,7 @@ let fs: typeof import("memfs").fs;
 async function cloneRepository(args: {
   routeParams: EditorRouteParams;
   user: LocalStorageSchema["user"];
+  setFsChange: (date: Date) => void;
 }): Promise<Date | undefined> {
   // reassgining (resetting) fs.
   fs = createFsFromVolume(new Volume());
@@ -289,7 +373,7 @@ async function cloneRepository(args: {
   // triggering a side effect here to trigger a re-render
   // of components that depends on fs
   const date = new Date();
-  setFsChange(date);
+  args.setFsChange(date);
   return date;
 }
 
@@ -298,7 +382,9 @@ async function cloneRepository(args: {
  */
 export async function pushChanges(
   routeParams: EditorRouteParams,
-  user: NonNullable<LocalStorageSchema["user"]>
+  user: NonNullable<LocalStorageSchema["user"]>,
+  setFsChange: (date: Date) => void,
+  setLastPush: (date: Date) => void
 ): Promise<Result<void, Error>> {
   const { host, owner, repository } = routeParams;
   if (host === undefined || owner === undefined || repository === undefined) {
@@ -317,7 +403,7 @@ export async function pushChanges(
   try {
     // pull changes before pushing
     // https://github.com/inlang/inlang/issues/250
-    const _pull = await pull({ user: user });
+    const _pull = await pull({ user: user, setFsChange });
     if (_pull.isErr) {
       return Result.err(
         new Error("Failed to pull: " + _pull.error.message, {
@@ -368,13 +454,6 @@ async function readInlangConfig(): Promise<InlangConfig | undefined> {
           ...environmentFunctions,
         }));
 
-    //initialises/ set the inital signal for  the language of the language filter for the messages
-    // .filter removes the referenceLanguage from the array languages
-    setFilteredLanguages(
-      config.languages.filter(
-        (languages) => languages !== config.referenceLanguage
-      )
-    );
     return config;
   } catch (error) {
     if ((error as Error).message.includes("ENOENT")) {
@@ -394,7 +473,8 @@ async function readResources(config: InlangConfig) {
 async function writeResources(
   config: InlangConfig,
   resources: ast.Resource[],
-  user: NonNullable<LocalStorageSchema["user"]>
+  user: NonNullable<LocalStorageSchema["user"]>,
+  setFsChange: (date: Date) => void
 ) {
   await config.writeResources({ config, resources });
   const status = await raw.statusMatrix({ fs, dir: "/" });
@@ -435,7 +515,10 @@ async function _unpushedChanges(args: {
   return unpushedChanges;
 }
 
-async function pull(args: { user: NonNullable<LocalStorageSchema["user"]> }) {
+async function pull(args: {
+  user: NonNullable<LocalStorageSchema["user"]>;
+  setFsChange: (date: Date) => void;
+}) {
   try {
     await raw.pull({
       fs,
@@ -453,7 +536,7 @@ async function pull(args: { user: NonNullable<LocalStorageSchema["user"]> }) {
     });
     const time = new Date();
     // triggering a rebuild of everything fs related
-    setFsChange(time);
+    args.setFsChange(time);
     return Result.ok(undefined);
   } catch (error) {
     return Result.err(error as Error);

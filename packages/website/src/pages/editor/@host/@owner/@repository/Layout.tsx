@@ -1,16 +1,4 @@
-import {
-  fsChange,
-  unpushedChanges,
-  routeParams,
-  StateProvider as EditorStateProvider,
-  pushChanges,
-  userIsCollaborator,
-  repositoryInformation,
-  currentBranch,
-  inlangConfig,
-  setFilteredLanguages,
-  filteredLanguages,
-} from "./state.js";
+import { EditorStateProvider, pushChanges, useEditorState } from "./State.jsx";
 import {
   createEffect,
   createResource,
@@ -41,32 +29,32 @@ import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
+
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
   return (
     <RootLayout>
-      <EditorStateProvider>
-        <div class="py-4 w-full space-y-2 flex flex-col grow">
-          <SignInBanner />
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-              <Breadcrumbs />
-              <BranchMenu />
-            </div>
-            <sl-button-group prop:label="filterbar">
-              <LanguageFilter />
-              <HasChangesAction />
-            </sl-button-group>{" "}
+      <div class="py-4 w-full space-y-2 flex flex-col grow">
+        <SignInBanner />
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <Breadcrumbs />
+            <BranchMenu />
           </div>
-          <hr class="h-px w-full bg-outline-variant my-2"> </hr>
-          {props.children}
+          <sl-button-group prop:label="filterbar">
+            <LanguageFilter />
+            <HasChangesAction />
+          </sl-button-group>{" "}
         </div>
-      </EditorStateProvider>
+        <hr class="h-px w-full bg-outline-variant my-2"> </hr>
+        {props.children}
+      </div>
     </RootLayout>
   );
 }
 
 function Breadcrumbs() {
+  const { routeParams } = useEditorState();
   return (
     <div class="flex flex-row items-center space-x-2 text-lg font-medium">
       {/* repository icon */}
@@ -88,6 +76,8 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
+  const { fsChange } = useEditorState();
+
   const [branches] = createResource(fsChange, () => {
     return raw.listBranches({ fs: fs, dir: "/", remote: "origin" });
   });
@@ -142,6 +132,8 @@ function BranchMenu() {
 
 /** Actions that can be conducted if a commit has been made but not pushed yet. */
 function HasChangesAction() {
+  const { unpushedChanges, setFsChange, setLastPush } = useEditorState();
+
   const [latestChange, setLatestChange] = createSignal<Date>();
   const [showPulse, setShowPulse] = createSignal(false);
   const [isLoading, setIsLoading] = createSignal(false);
@@ -166,7 +158,7 @@ function HasChangesAction() {
   onCleanup(() => clearInterval(interval));
 
   async function triggerPushChanges() {
-    if (localStorage.user === undefined) {
+    if (localStorage?.user === undefined) {
       return showToast({
         title: "Failed to push changes",
         message: "Please login first",
@@ -176,7 +168,9 @@ function HasChangesAction() {
     setIsLoading(true);
     const result = await pushChanges(
       currentPageContext.routeParams as EditorRouteParams,
-      localStorage.user
+      localStorage.user,
+      setFsChange,
+      setLastPush
     );
     setIsLoading(false);
     if (result.isErr) {
@@ -211,6 +205,8 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
+  const { inlangConfig, setFilteredLanguages, filteredLanguages } =
+    useEditorState();
   return (
     <Show when={inlangConfig()?.languages}>
       <sl-dropdown>
@@ -264,6 +260,8 @@ function LanguageFilter() {
 }
 
 function SignInBanner() {
+  const { userIsCollaborator, githubRepositoryInformation, currentBranch } =
+    useEditorState();
   const [localStorage] = useLocalStorage();
   const [isLoading, setIsLoading] = createSignal(false);
 
@@ -319,7 +317,7 @@ function SignInBanner() {
   return (
     <>
       <Switch>
-        <Match when={localStorage.user === undefined}>
+        <Match when={localStorage?.user === undefined}>
           <Banner
             variant="info"
             message={`You are currently not signed in. 
@@ -336,7 +334,7 @@ function SignInBanner() {
             userIsCollaborator.error === undefined &&
             userIsCollaborator.loading === false &&
             userIsCollaborator() === false &&
-            localStorage.user
+            localStorage?.user
           }
         >
           <Banner
@@ -366,25 +364,25 @@ function SignInBanner() {
         </Match>
         <Match
           when={
-            repositoryInformation.error === undefined &&
-            repositoryInformation.loading === false &&
+            githubRepositoryInformation.error === undefined &&
+            githubRepositoryInformation.loading === false &&
             hasPushedChanges() &&
-            repositoryInformation().fork
+            githubRepositoryInformation().fork
           }
         >
           <Banner
             variant="success"
             message={`You are working in a forked project. Please make a "pull request" to transfer your changes to the parent project:
-							"${repositoryInformation().parent.full_name}"`}
+							"${githubRepositoryInformation().parent.full_name}"`}
           >
             <sl-button
               prop:target="_blank"
               prop:href={`https://github.com/${
-                repositoryInformation().parent.full_name
+                githubRepositoryInformation().parent.full_name
               }/compare/${currentBranch}...${
-                repositoryInformation().owner.login
+                githubRepositoryInformation().owner.login
               }:${
-                repositoryInformation().name
+                githubRepositoryInformation().name
               }:${currentBranch}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub%2F${
                 (currentPageContext.routeParams as EditorRouteParams).owner
               }%2F${

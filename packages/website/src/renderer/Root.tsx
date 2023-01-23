@@ -2,6 +2,7 @@ import { Accessor, Component, createEffect, ErrorBoundary } from "solid-js";
 import type { PageContextRenderer } from "./types.js";
 import { Dynamic } from "solid-js/web";
 import { LocalStorageProvider } from "@src/services/local-storage/index.js";
+import { EditorStateProvider } from "@src/pages/editor/@host/@owner/@repository/State.jsx";
 
 export type RootProps = Accessor<{
   pageContext: PageContextRenderer;
@@ -21,7 +22,9 @@ export function Root(props: {
   return (
     <ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
       <LocalStorageProvider>
-        <Dynamic component={props.page} {...props.pageProps} />
+        <EditorStateProvider>
+          <Dynamic component={props.page} {...props.pageProps} />
+        </EditorStateProvider>
       </LocalStorageProvider>
     </ErrorBoundary>
   );
