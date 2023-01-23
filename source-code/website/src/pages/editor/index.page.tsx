@@ -97,7 +97,7 @@ export function Page() {
 /**
  * A card that displays a repository.
  */
-function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
+function RepositoryCard(props: { repository: typeof repositories[number] }) {
   const isExampleRepository = () =>
     props.repository.owner === "inlang" &&
     props.repository.repository === "example";
