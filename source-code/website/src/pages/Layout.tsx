@@ -1,28 +1,15 @@
-import {
-	createEffect,
-	createSignal,
-	For,
-	JSXElement,
-	Match,
-	Show,
-	Switch,
-} from "solid-js";
+import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js";
 import IconTwitter from "~icons/cib/twitter";
 import IconGithub from "~icons/cib/github";
 import IconClose from "~icons/material-symbols/close-rounded";
 import IconSignOut from "~icons/material-symbols/logout-rounded";
 import IconMenu from "~icons/material-symbols/menu-rounded";
 import IconExpand from "~icons/material-symbols/expand-more-rounded";
-import {
-	getLocalStorage,
-	LocalStorageProvider,
-	useLocalStorage,
-} from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { onSignOut } from "@src/services/auth/onSignOut.js";
-import { getAccessTokenPayload } from "@src/services/auth/lib/session/client.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -36,16 +23,6 @@ const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-8";
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const [localStorage, setLocalStorage] = useLocalStorage();
-
-	createEffect(async () => {
-		setInterval(async () => {
-			const accessTokenPayload = await getAccessTokenPayload().then(
-				console.log
-			);
-		}, 5000);
-	});
-
 	return (
 		<div class="flex flex-col min-h-screen">
 			<Header />

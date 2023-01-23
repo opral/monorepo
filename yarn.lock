@@ -2210,7 +2210,7 @@
     "domelementtype" "^2.3.0"
     "domhandler" "^5.0.1"
 
-"dotenv@^16.0.3":
+"dotenv@^16.0.0", "dotenv@^16.0.3":
   "integrity" "sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ=="
   "resolved" "https://registry.npmjs.org/dotenv/-/dotenv-16.0.3.tgz"
   "version" "16.0.3"
@@ -2379,7 +2379,7 @@
   "resolved" "https://registry.npmjs.org/expand-template/-/expand-template-2.0.3.tgz"
   "version" "2.0.3"
 
-"express@^4.18.2":
+"express@^4.16.3", "express@^4.18.2":
   "integrity" "sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ=="
   "resolved" "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
   "version" "4.18.2"
@@ -2900,7 +2900,7 @@
   dependencies:
     "@panva/asn1.js" "^1.0.0"
 
-"jose@^4.11.1":
+"jose@^4.11.1", "jose@^4.8.1":
   "integrity" "sha512-YRv4Tk/Wlug8qicwqFNFVEZSdbROCHRAC6qu/i0dyNKr5JQdoa2pIGoS04lLO/jXQX7Z9omoNewYIVIxqZBd9Q=="
   "resolved" "https://registry.npmjs.org/jose/-/jose-4.11.1.tgz"
   "version" "4.11.1"

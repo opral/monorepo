@@ -54,18 +54,6 @@ const rootPath = new URL("../..", import.meta.url).pathname;
 
 const app = express();
 
-app.use(async (req, res, next) => {
-	if (!req.url.startsWith("/services") && !req.url.includes("api")) {
-		return next();
-	}
-	console.log(
-		new Date(Date.now()).toLocaleTimeString("de"),
-		"req.url",
-		req.url
-	);
-	next();
-});
-
 app.use(sessionMiddleware());
 
 // compress responses with gzip
@@ -122,8 +110,6 @@ app.all(
 		if (request.session != undefined) {
 			sessionData = await request.session.getSessionData();
 		}
-
-		console.log("telefunc sessionData", sessionData);
 
 		if (sessionData?.encryptedAccessToken) {
 			decryptAccessToken({

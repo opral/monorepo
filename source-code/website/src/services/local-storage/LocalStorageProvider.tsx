@@ -1,3 +1,9 @@
+/**
+ * This file contains the local storage provider and also non reactive versions.
+ *
+ * This custom implementation uses only one key in the actual local storage and works with JSON.stringify() / .parse() to emulate the behaviour of the normal localStorage interface.
+ */
+
 import {
 	createContext,
 	JSXElement,
@@ -7,7 +13,11 @@ import {
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
 import { getUserInfo } from "../auth/logic.telefunc.js";
-import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
+import {
+	defaultLocalStorage,
+	LocalStorageSchema,
+	SetLocalStorage,
+} from "./schema.js";
 
 const LocalStorageContext = createContext();
 
@@ -28,12 +38,11 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
 	}
 }
 
-export interface SetLocalStorage {
-	(key: keyof LocalStorageSchema, value: any): void;
-}
-
 /**
  * Updates a key using inlangs custom local storage structure.
+ *
+ * This is the non-reactive version of `useLocalStorage()` (regular JS/TS, not JSX).
+ * Use the reactive version if you are in a JSX environment.
  * @param key The key to update
  * @param value The value to update the key with
  */

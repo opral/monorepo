@@ -1,3 +1,12 @@
+/**
+ * Session logic for the backend using supertokens for production and a simplified local version for simpler development.
+ * Opt in to supertokens in development by setting the env variable 'VITE_SUPERTOKENS_IN_DEV' to 'true'.
+ * Also check to set the other required env vars, which are listed in the development setup guid.
+ * @see <ADD_URL>
+ * @see https://supertokens.com/docs/session/introduction
+ * @author Leo Grützner
+ */
+
 import { verifySession } from "supertokens-node/recipe/session/framework/express/index.js";
 import { middleware as supertokensMiddleware } from "supertokens-node/framework/express/index.js";
 import cookie from "cookie";
@@ -6,7 +15,6 @@ import crypto from "crypto";
 import { serverSideEnv } from "@env";
 import supertokens from "supertokens-node";
 import { errorHandler as supertokensErrorHandler } from "supertokens-node/framework/express";
-import cors from "cors";
 import type { TypeInput } from "supertokens-node/lib/build/types.js";
 import { LOCAL_SESSION_COOKIE_NAME } from "./types.js";
 import type {
@@ -30,7 +38,7 @@ const config: TypeInput = {
 	appInfo: {
 		// learn more about this on https://supertokens.com/docs/session/appinfo
 		appName: env.VITE_SUPERTOKENS_APP_NAME ?? "inlang",
-		apiDomain: env.SUPERTOKENS_CONNECTION_URI!,
+		apiDomain: "http://localhost:3000",
 		websiteDomain: "http://localhost:3000",
 		apiBasePath: "/",
 	},
@@ -39,19 +47,28 @@ const config: TypeInput = {
 
 let sessionStorage: Record<string, InlangSessionCacheEntry>;
 
-const supertokensEnabled = env.VITE_SUPERTOKENS_IN_DEV !== undefined;
+const supertokensEnabled =
+	env.NODE_ENV == "production" || env.VITE_SUPERTOKENS_IN_DEV !== undefined;
 
+/**
+ * Initializes the session logic, which must happen in the backend before any other supertokens functions are called. Check to set the required env vars, if working with supertokens, which is by disabled in the development environment by default.
+ */
 export const initSession = () => {
 	if (supertokensEnabled) {
 		supertokens.init(config);
 	} else {
-		console.log(
+		console.info(
 			"Supertokens session disabled for the dev environment. Enable by setting the env var 'SUPERTOKENS_ENABLE' to 'true'"
 		);
 	}
 };
 
-// Doesn't support all of the supertokens session reciep features in dev environment
+/**
+ * Inlang session middleware for express
+ * Use in API routes when working with a session
+ * @param args sessionRequired: if true, the request will be rejected if no VALID session is linked to the request or if the
+ * @example app.use(verifyInlangSession({ sessionRequired: false }));
+ */
 export const verifyInlangSession = (args: {
 	sessionRequired: boolean;
 }): InlangSessionMiddleware => {
@@ -86,14 +103,15 @@ export const verifyInlangSession = (args: {
 	}
 };
 
+/** Add this middleware before you use verifySession or getSession in an API route
+ * @returns Express middleware
+ * @example app.use(sessionMiddleware());
+ */
 export const sessionMiddleware = () => {
 	if (supertokensEnabled) {
 		return [
-			cors({
-				origin: "http://localhost:300",
-				allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
-				credentials: true,
-			}),
+			// if we'll need to add cors support, this would be the place to do it
+			// check: https://supertokens.com/docs/session/quick-setup/backend
 			supertokensMiddleware(),
 		];
 	} else {
@@ -105,6 +123,15 @@ export const sessionMiddleware = () => {
 	}
 };
 
+/**
+ * Creates a session using supertokens for production and a simplified local session logic for development.
+ * @param res Express response object
+ * @param userId User id
+ * @param accessTokenPayload Access token payload
+ * @param sessionData Session data
+ * @returns Session object
+ * @throws Error if supertokens is enabled and the session creation fails
+ */
 export const createSession = (
 	res: Response,
 	userId: string,
@@ -123,6 +150,14 @@ export const createSession = (
 	}
 };
 
+/**
+ * Creates a session object that can be attached to the request object (dev replacement for supertokens request.session)
+ * @param res Express response object
+ * @param userId User id
+ * @param accessTokenPayload Access token payload
+ * @param sessionData Session data
+ * @returns Cache session object
+ */
 const createLocalSession = (
 	res: Response,
 	userId: string,
@@ -149,6 +184,12 @@ const createLocalSession = (
 	return getLocalSession(res, handle);
 };
 
+/**
+ * Constructs a session object from a session chache entry that can be attached to the request object (dev replacement for supertokens request.session)
+ * @param res Express response object
+ * @param handle Session hanlde
+ * @returns Cache session object
+ */
 const getLocalSession = (res: Response, handle: string): InlangSession => {
 	if (!sessionStorage) {
 		sessionStorage = {};
@@ -179,6 +220,12 @@ const getLocalSession = (res: Response, handle: string): InlangSession => {
 	return session;
 };
 
+/**
+ * Create a session in the cache (for dev environment)
+ * @param userId UserId for the session
+ * @param sessionData Unserialized session data
+ * @returns Session handle
+ */
 const createCacheSession = (userId: string, sessionData?: any) => {
 	const sessionEntry: InlangSessionCacheEntry = {
 		handle: crypto.randomBytes(20).toString("hex"),
@@ -194,6 +241,10 @@ const createCacheSession = (userId: string, sessionData?: any) => {
 	return sessionEntry.handle;
 };
 
+/**
+ * Express error handler for the inlang session implementation
+ * @returns Express error handler
+ */
 export const sessionErrorHandler = () => {
 	if (supertokensEnabled) {
 		return supertokensErrorHandler();
@@ -209,6 +260,14 @@ export const sessionErrorHandler = () => {
 	}
 };
 
+/**
+ * Add a cookie to the response header
+ * @param response Express response object
+ * @param type Cookie type form LOCAL_SESSION_COOKIE_NAME
+ * @param value Unserialized value
+ * @param options Cookie options like httpOnly
+ * @returns void
+ */
 const setLocalSessionCookieHeader = (
 	res: Response,
 	type: LOCAL_SESSION_COOKIE_NAME,

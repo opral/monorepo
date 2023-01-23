@@ -26,7 +26,6 @@ export function SignInDialog(props: {
 	const [isShown, setIsShown] = createSignal(false);
 
 	createEffect(async () => {
-		console.log("creating");
 		await tryCreateSession();
 	}, []);
 
