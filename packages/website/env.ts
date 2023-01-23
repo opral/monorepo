@@ -95,6 +95,13 @@ export type ClientSideEnv = {
    * Only affecting the dev.
    */
   VITE_SUPERTOKENS_IN_DEV?: string;
+
+  /**
+   * The bas url of the frontend
+   * @example http://localhost:3000
+   * @example https://inlang.com
+   */
+  VITE_FRONTEND_BASE_URL?: string;
 };
 
 /**
@@ -149,6 +156,7 @@ const validateSingle = (name: string, value?: string) => {
 const validateSupertokens = (env: ServerSideEnv) => {
   validateSingle("SUPERTOKENS_API_KEY", env.SUPERTOKENS_API_KEY);
   validateSingle("SUPERTOKENS_CONNECTION_URI", env.SUPERTOKENS_CONNECTION_URI);
+  validateSingle("VITE_FRONTEND_BASE_URL", env.VITE_FRONTEND_BASE_URL);
 };
 
 /**
@@ -170,7 +178,7 @@ export async function validateEnv() {
   if (env.NODE_ENV == "production") {
     validateSupertokens(env);
   } else {
-    if (env.VITE_SUPERTOKENS_IN_DEV) {
+    if (env.VITE_SUPERTOKENS_IN_DEV !== undefined) {
       validateSupertokens(env);
     }
   }
