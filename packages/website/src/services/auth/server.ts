@@ -83,7 +83,7 @@ router.post(
   verifyInlangSession({ sessionRequired: false }),
   async (req: InlangSessionRequest, res) => {
     if (!req.session) {
-      const session = await createSession(res, Math.random().toString());
+      await createSession(res, Math.random().toString());
     }
 
     res.status(201).send("Created session or session already existed.");

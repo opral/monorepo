@@ -72,35 +72,29 @@ export const initSession = () => {
 export const verifyInlangSession = (args: {
   sessionRequired: boolean;
 }): InlangSessionMiddleware => {
-  if (supertokensEnabled) {
-    return verifySession(args) as InlangSessionMiddleware;
-  } else {
-    return async (
-      req: InlangSessionRequest,
-      res: Response,
-      next: NextFunction
-    ) => {
-      const handle = getLocalSessionCookie(
-        req.header("cookie") ?? "",
-        LOCAL_SESSION_COOKIE_NAME.SESSION_ID
-      );
+  return supertokensEnabled
+    ? (verifySession(args) as InlangSessionMiddleware)
+    : async (req: InlangSessionRequest, res: Response, next: NextFunction) => {
+        const handle = getLocalSessionCookie(
+          req.header("cookie") ?? "",
+          LOCAL_SESSION_COOKIE_NAME.SESSION_ID
+        );
 
-      const unauthorized = () => {
-        res.status(401).json({ message: "Unauthorized" });
-      };
+        const unauthorized = () => {
+          res.status(401).json({ message: "Unauthorized" });
+        };
 
-      if (handle) {
-        req.session = getLocalSession(res, handle);
-        if (args.sessionRequired && !req.session) {
+        if (handle) {
+          req.session = getLocalSession(res, handle);
+          if (args.sessionRequired && !req.session) {
+            return unauthorized();
+          }
+        } else if (args.sessionRequired) {
           return unauthorized();
         }
-      } else if (args.sessionRequired) {
-        return unauthorized();
-      }
 
-      next();
-    };
-  }
+        next();
+      };
 };
 
 /** Add this middleware before you use verifySession or getSession in an API route
@@ -138,16 +132,9 @@ export const createSession = (
   accessTokenPayload?: any,
   sessionData?: any
 ) => {
-  if (supertokensEnabled) {
-    return Session.createNewSession(
-      res,
-      userId,
-      accessTokenPayload,
-      sessionData
-    );
-  } else {
-    return createLocalSession(res, userId, accessTokenPayload, sessionData);
-  }
+  return supertokensEnabled
+    ? Session.createNewSession(res, userId, accessTokenPayload, sessionData)
+    : createLocalSession(res, userId, accessTokenPayload, sessionData);
 };
 
 /**
@@ -246,18 +233,11 @@ const createCacheSession = (userId: string, sessionData?: any) => {
  * @returns Express error handler
  */
 export const sessionErrorHandler = () => {
-  if (supertokensEnabled) {
-    return supertokensErrorHandler();
-  } else {
-    return async (
-      err: any,
-      req: Request,
-      res: Response,
-      next: NextFunction
-    ) => {
-      next(err);
-    };
-  }
+  return supertokensEnabled
+    ? supertokensErrorHandler()
+    : async (err: any, req: Request, res: Response, next: NextFunction) => {
+        next(err);
+      };
 };
 
 /**
@@ -276,7 +256,7 @@ const setLocalSessionCookieHeader = (
 ) => {
   res.setHeader(
     "Set-Cookie",
-    cookie.serialize(type, JSON.stringify(value ?? null), {
+    cookie.serialize(type, JSON.stringify(value ?? undefined), {
       httpOnly: options.httpOnly,
       path: "/",
     })

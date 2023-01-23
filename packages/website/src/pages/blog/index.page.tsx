@@ -1,4 +1,3 @@
-import { clientSideEnv } from "@env";
 import { Title, Meta } from "@solidjs/meta";
 import { For } from "solid-js";
 import { Layout } from "../Layout.jsx";
