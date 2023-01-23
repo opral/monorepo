@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query";
-import { createEffect, createMemo, For, Match, Switch } from "solid-js";
+import { createMemo, For, Match, Switch } from "solid-js";
 import { Messages } from "./Messages.jsx";
 import {
   resources,
