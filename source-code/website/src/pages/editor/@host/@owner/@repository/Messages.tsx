@@ -1,13 +1,5 @@
 import type * as ast from "@inlang/core/ast";
 import { createEffect, createSignal, For, Show } from "solid-js";
-import {
-  resources,
-  inlangConfig,
-  setResources,
-  referenceResource,
-  userIsCollaborator,
-  filteredLanguages,
-} from "./state.js";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
 import { query } from "@inlang/core/query";
 import { clickOutside } from "@src/directives/clickOutside.js";
@@ -17,6 +9,7 @@ import { InlineNotification } from "@src/components/notification/InlineNotificat
 import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import { useEditorState } from "./State.jsx";
 
 export function Messages(props: {
   messages: Record<
@@ -24,6 +17,7 @@ export function Messages(props: {
     ast.Message | undefined
   >;
 }) {
+  const { inlangConfig, filteredLanguages } = useEditorState();
   const referenceMessage = () => {
     return props.messages[inlangConfig()!.referenceLanguage];
   };
@@ -91,6 +85,8 @@ function PatternEditor(props: {
   message: ast.Message | undefined;
 }) {
   const [localStorage, setLocalStorage] = useLocalStorage();
+  const { resources, setResources, referenceResource, userIsCollaborator } =
+    useEditorState();
 
   const [
     showMachineLearningWarningDialog,
