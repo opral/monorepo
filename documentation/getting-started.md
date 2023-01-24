@@ -67,14 +67,10 @@ One single config file named `inlang.config.js` needs to be created at the root 
      return {
        referenceLanguage: "en",
        languages: ["en", "de"],
-       readResources: (args) => {
-         // define how resources should be read
-         return plugin.readResources(args);
-       },
-       writeResources: (args) => {
-         // define how resources should be written
-         return plugin.readResources(args);
-       },
+      readResources: (args) =>
+      plugin.readResources({ ...args, ...env, pluginConfig }),
+    writeResources: (args) =>
+      plugin.writeResources({ ...args, ...env, pluginConfig }),
      };
    }
    ```
