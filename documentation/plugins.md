@@ -57,7 +57,7 @@ export async function defineConfig(env) {
 Read on how to write plugins in the [plugin template repository](https://github.com/inlang/plugin-template).
 {% Figure
 
-src="https://user-images.githubusercontent.com/72493222/214284097-0df93553-de53-4d55-894b-7dc1d244d73a.png"
+src="https://user-images.githubusercontent.com/72493222/214296359-1ddd2fdb-03f3-4993-a493-9b1a353c4b88.png"
 
 alt="visualisation of the inlang AST/object"
 
