@@ -43,36 +43,19 @@ export function Messages(props: {
       <h3 slot="summary" class="font-medium">
         {id()}
       </h3>
-      <div class="grid grid-cols-2 gap-16">
-        <div class="flex self-center">
-          <PatternEditor
-            language={inlangConfig()!.referenceLanguage}
-            id={id()}
-            referenceMessage={referenceMessage()}
-            message={props.messages[inlangConfig()!.referenceLanguage]}
-          />
-        </div>
-        <div class="flex flex-col gap-4">
-          <For each={inlangConfig()?.languages}>
-            {(language) => (
-              <Show when={language !== inlangConfig()?.referenceLanguage}>
-                <div
-                  class="flex "
-                  classList={{
-                    hidden: filteredLanguages().includes(language) === false,
-                  }}
-                >
-                  <PatternEditor
-                    language={language}
-                    id={id()}
-                    referenceMessage={referenceMessage()}
-                    message={props.messages[language]}
-                  />
-                </div>
-              </Show>
-            )}
-          </For>
-        </div>
+      <div class="flex flex-col gap-4">
+        <For each={inlangConfig()?.languages}>
+          {(language) => (
+            <Show when={filteredLanguages().includes(language)}>
+              <PatternEditor
+                language={language}
+                id={id()}
+                referenceMessage={referenceMessage()}
+                message={props.messages[language]}
+              />
+            </Show>
+          )}
+        </For>
       </div>
     </div>
   );
@@ -245,11 +228,10 @@ function PatternEditor(props: {
           () => hasChanges() === false && setIsFocused(false)
         ),
       ]}
-      class="grid grid-row-2 gap-2 grow 	"
+      class="grid grid-row-2 gap-2 grow"
     >
       <div class="flex flex-col gap-1">
-        <div class="">{props.language}</div>
-
+        <div>{props.language}</div>
         {/* TODO: #169 use proper text editor instead of input element */}
         <sl-textarea
           prop:resize="auto"

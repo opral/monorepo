@@ -82,8 +82,6 @@ type EditorStateSchema = {
 
   /**
    * FilterLanguages show or hide the different messages.
-   *
-   * FilteredLanguages includes all language WITHOUT the referenclanguage
    */
   filteredLanguages: () => string[];
   setFilteredLanguages: Setter<string[]>;
@@ -182,13 +180,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
         // setting the origin store because this should not trigger
         // writing to the filesystem.
         setOriginResources(await readResources(config));
-        //initialises/ set the inital signal for  the language of the language filter for the messages
-        // .filter removes the referenceLanguage from the array languages
-        setFilteredLanguages(
-          config.languages.filter(
-            (languages) => languages !== config.referenceLanguage
-          )
-        );
+        // initialises the languages to all languages
+        setFilteredLanguages(config.languages);
       }
       return config;
     }
