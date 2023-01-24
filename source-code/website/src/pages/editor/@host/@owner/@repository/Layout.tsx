@@ -1,4 +1,4 @@
-import { EditorStateProvider, pushChanges, useEditorState } from "./State.jsx";
+import { pushChanges, useEditorState } from "./State.jsx";
 import {
   createEffect,
   createResource,
@@ -236,24 +236,26 @@ function LanguageFilter() {
           <hr class="border-outline my-2" />
           <For each={inlangConfig()?.languages}>
             {(language) => (
-              <Show when={language !== inlangConfig()?.referenceLanguage}>
-                <sl-checkbox
-                  class="block"
-                  prop:checked={filteredLanguages().includes(language)}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  on:sl-change={(event: any) => {
-                    if (event.target.__checked) {
-                      setFilteredLanguages((value) => [...value, language]);
-                    } else {
-                      setFilteredLanguages((value) =>
-                        value.filter((_language) => _language !== language)
-                      );
-                    }
-                  }}
-                >
-                  {language}
-                </sl-checkbox>
-              </Show>
+              <sl-checkbox
+                class="block"
+                prop:disabled={language === inlangConfig()?.referenceLanguage}
+                prop:checked={filteredLanguages().includes(language)}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                on:sl-change={(event: any) => {
+                  if (event.target.__checked) {
+                    setFilteredLanguages((value) => [...value, language]);
+                  } else {
+                    setFilteredLanguages((value) =>
+                      value.filter((_language) => _language !== language)
+                    );
+                  }
+                }}
+              >
+                {language}{" "}
+                {language === inlangConfig()?.referenceLanguage
+                  ? "(reference)"
+                  : ""}
+              </sl-checkbox>
             )}
           </For>
         </sl-menu>
