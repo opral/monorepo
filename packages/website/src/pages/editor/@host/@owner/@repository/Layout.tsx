@@ -224,7 +224,7 @@ function LanguageFilter() {
               Select all
             </a>
             <a
-              class="cursor-pointer text-sm font-normal link link-primary"
+              class="cursor-pointer text-sm font-medium link link-primary"
               // filter all except the reference language
               onClick={() =>
                 setFilteredLanguages([inlangConfig()!.referenceLanguage])
