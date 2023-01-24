@@ -225,7 +225,10 @@ function LanguageFilter() {
             </a>
             <a
               class="cursor-pointer text-sm font-normal link link-primary"
-              onClick={() => setFilteredLanguages([])}
+              // filter all except the reference language
+              onClick={() =>
+                setFilteredLanguages([inlangConfig()!.referenceLanguage])
+              }
             >
               Deselect all
             </a>
