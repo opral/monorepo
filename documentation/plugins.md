@@ -22,7 +22,8 @@ Plugins can be imported via the `$import` [environment function](/documentation/
 // inlang.config.js
 
 export async function defineConfig(env) {
-  const plugin = await env.$import(
+  const plugin = await env.$import
+
     "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
   );
 }
@@ -54,3 +55,5 @@ export async function defineConfig(env) {
 ## Writing plugins
 
 Read on how to write plugins in the [plugin template repository](https://github.com/inlang/plugin-template).
+
+![AST visual](https://user-images.githubusercontent.com/72493222/214282031-ff1079e7-0d40-4d55-b051-1625e1cc5ab4.png)
