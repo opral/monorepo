@@ -364,7 +364,6 @@ async function cloneRepository(args: {
   if (host === undefined || owner === undefined || repository === undefined) {
     return undefined;
   }
-  console.log("cloning repository");
   await raw.clone({
     fs: args.fs,
     http,
@@ -376,7 +375,6 @@ async function cloneRepository(args: {
   // of components that depends on fs
   const date = new Date();
   args.setFsChange(date);
-  console.log("cloned repository");
   return date;
 }
 
@@ -442,7 +440,6 @@ async function readInlangConfig(args: {
       }),
       $fs: args.fs.promises,
     };
-    console.log("reading inlang config", await args.fs.promises.readdir("/"));
     const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8");
     const withMimeType =
       "data:application/javascript;base64," + btoa(file.toString());
