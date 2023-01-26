@@ -348,10 +348,9 @@ function SignInBanner() {
           <Banner
             variant="info"
             message={`
-							You’re making changes in a project you don’t have write access
-								to. Create a fork of this project to commit your proposed
-								changes. Afterwards, you can send a pull request to the project.
-								`}
+            You do not have write access to ${routeParams().owner}/${
+              routeParams().owner
+            }. Fork this project to make changes.`}
           >
             <sl-button
               onClick={handleFork}
@@ -366,7 +365,7 @@ function SignInBanner() {
                   />
                 </svg>
               </div>
-              Fork {routeParams().owner}/{routeParams().repository}
+              Fork this project
             </sl-button>
           </Banner>
         </Match>
