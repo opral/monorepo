@@ -347,7 +347,7 @@ function SignInBanner() {
             variant="info"
             message={`
             You do not have write access to ${routeParams().owner}/${
-              routeParams().owner
+              routeParams().repository
             }. Fork this project to make changes.`}
           >
             <sl-button
