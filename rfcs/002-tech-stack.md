@@ -107,14 +107,14 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr partially enables the monolith architecture by specifying a server that renders vite-plugin-ssr sites and supporting SPA and SSR render modes. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
 
-#### why vite-plugin-ssr?
+#### Why vite-plugin-ssr?
 
 - Control over different rendering modes (important because SSR of website and SPA of editor)
 - Maybe SEO becomes important for the editor too (architecture can be adjusted to support SSR)
 - If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay indentical.  
 - High control/no magic blackbox. For example, localization can be configured as we please and require. 
 
-#### why not something like Next.js?
+#### Why not something like Next.js?
 
 - Unify editor and website codebase + routing
 - NextJs is not made for SPA apps
@@ -124,9 +124,9 @@ VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level m
 - Routing and auth will differ from website making unbundling of the monolith stack difficult/require us to use microservices from the get go.
 - (No SSR, if SEO becomes important for the editor)
 
-## design system (ui library)
+## Design System (UI library)
 
-### framework
+### Framework
 
 A few things to consider:
 
@@ -138,7 +138,7 @@ The translation management editor is running on top of a virtual file system tha
 
 SolidJS has ultimately been choosen given the uncertainty of the editor's requirements in terms of performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined.
 
-In summary, SolidJS has been choosen because:
+**In summary, SolidJS has been choosen because:**
 
 - Simple + built-in state management.
   - faster product development
@@ -153,13 +153,13 @@ In summary, SolidJS has been choosen because:
 
 Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
 
-#### why not react?
+#### Why not React?
 
 - Anticipated slower development speed and higher maintainability effort.
   - De-coupled state management
   - Performance optimization needs to be conducted manually (likely important for the editor)
 
-#### why not svelte?
+#### Why not Svelte?
 
 - State management is inferior to SolidJS
 
@@ -173,11 +173,11 @@ Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/w
 
 - Typescript is a second-class citizen (partially because not compatible with JSX)
 
-## design system
+## Design system
 
 TailwindCSS + Shoelace + ZagJS. TailwindCSS provides fast styling, Shoelace off the shelf components with style, and ZagJS provides component logic for custom components. The goal is to incrementally develop our own design system over time instead of fighting pre-designed component libraries. Shoelace is eas(ier) to (re-)style than other component libraries, easing our path to a custom design system.
 
-## markdown
+## Markdown
 
 ### Why [Stripe's Markdoc](https://markdoc.dev/)?
 
