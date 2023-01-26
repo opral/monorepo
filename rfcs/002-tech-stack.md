@@ -15,7 +15,7 @@ Simplicity and control over feature-rich but complex off the shelf solutions.
 
 Importance of long-term maintainability, development velocity, and the possiblity to [dogfood](https://en.wikipedia.org/wiki/Eating_your_own_dog_food) is valued higher than faster short-term development velocity.
 
-Architecture: Monolith  
+Architecture: Monolith, designed to be split in the future.
 Framework: [SolidJS](https://www.solidjs.com/)  
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)  
 Design system: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelace.style/) + [Zag.js](https://zagjs.com/)  
@@ -93,43 +93,36 @@ The editor is a classical SPA while the website is SSR. Note however that the ex
 
 - SEO ✅ (website) ❔ (editor)
 
-SEO is important for the website and might be important for the editor.
+SEO is important for the website and might be important for the editor. 
 
 ## Choices
 
-A monolith architecture has been chosen. The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort. For example, the monolith architecture enables the usage of sessions that store GitHub access tokens. Inlang does not require a dedicated auth system as no user data is stored. The need for a dedicated auth systems (and database) will surely arise. For now, it seems easier to leverage one server with sessions for authorization without the need to stitch microservices together.  
+A monolith architecture has been chosen. The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort. For example, inlang does not require a dedicated auth system as no user data is stored. The need for a dedicated auth systems (and databases) will surely arise. For now, it seems easier to leverage one server with sessions for authorization without the need to stitch microservices together. As the requirements evolve, the monolith can be split into a website, editor and server without much overhead given that vite-plugin-ssr has been choosen as metaframework.
 
 Framework: [SolidJS](https://www.solidjs.com/)
 Metaframework: [Vite Plugin SSR](https://vite-plugin-ssr.com/)
 UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelace.style/) + [Zag.js](https://zagjs.com/)
 
-### website (metaframework)
+### Metaframework
 
-VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr enables us to define how specific routes should be rendered. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
+VPS (vite-plugin-ssr) has been chosen as metaframework. VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr partially enables the monolith architecture by specifying a server that renders vite-plugin-ssr sites and supporting SPA and SSR render modes. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
 
 #### why vite-plugin-ssr?
 
-- Unify routing, auth, SEO of editor and website
 - Control over different rendering modes (important because SSR of website and SPA of editor)
-- Simple, no black box like a complete meta framework.
-- Configure localization as we please
+- Maybe SEO becomes important for the editor too (architecture can be adjusted to support SSR)
+- If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay indentical.  
+- High control/no magic blackbox. For example, localization can be configured as we please and require. 
 
-#### why not nextJS?
+#### why not something like Next.js?
 
 - Unify editor and website codebase + routing
 - NextJs is not made for SPA apps
 
-### editor (metaframework)
+#### Why not react/tanstack/solid router for the editor?
 
-#### why vite-plugin-ssr?
-
-- Unify routing, auth, SEO of editor and website
-- Maybe SEO becomes important (architecture can be adjusted to support SSR)
-
-#### Why not react router for the editor?
-
-- Routing and auth will differ from website
-- (No SSR, if SEO becomes important)
+- Routing and auth will differ from website making unbundling of the monolith stack difficult/require us to use microservices from the get go.
+- (No SSR, if SEO becomes important for the editor)
 
 ## design system (ui library)
 
