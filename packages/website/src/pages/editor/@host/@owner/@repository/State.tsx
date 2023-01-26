@@ -72,6 +72,11 @@ type EditorStateSchema = {
   searchParams: () => EditorSearchParams;
 
   /**
+   * Virtual filesystem
+   */
+  fs: () => typeof import("memfs").fs;
+
+  /**
    * The filesystem is not reactive, hence setFsChange to manually
    * trigger re-renders.
    *
@@ -146,6 +151,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
   const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([]);
 
+  const [fs, setFs] = createSignal<typeof import("memfs").fs>(
+    createFsFromVolume(new Volume())
+  );
+
   /**
    * The reference resource.
    */
@@ -159,7 +168,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
   // re-fetched if currentPageContext changes
   const [repositoryIsCloned] = createResource(() => {
+    // re-initialize fs on every cloneRepository call
+    // until subdirectories are supported
+    setFs(createFsFromVolume(new Volume()));
     return {
+      fs: fs(),
       routeParams: currentPageContext.routeParams as EditorRouteParams,
       user: localStorage?.user,
       setFsChange,
@@ -169,13 +182,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
   // re-fetched if respository has been cloned
   const [inlangConfig] = createResource(
     () => {
-      if (repositoryIsCloned.error) {
+      if (
+        repositoryIsCloned.error ||
+        repositoryIsCloned.loading ||
+        repositoryIsCloned() === undefined
+      ) {
         return false;
       }
-      return repositoryIsCloned();
+      return {
+        fs: fs(),
+      };
     },
-    async () => {
-      const config = await readInlangConfig();
+    async (args) => {
+      const config = await readInlangConfig(args);
       if (config) {
         // setting the origin store because this should not trigger
         // writing to the filesystem.
@@ -188,25 +207,24 @@ export function EditorStateProvider(props: { children: JSXElement }) {
   );
 
   // re-fetched if the file system changes
-  const [unpushedChanges] = createResource(
-    // using batch does not work for this resource. don't know why.
-    // no related bug so far, hence leave it as is.
-    () => {
-      // don't run server side
-      if (repositoryIsCloned.error) {
-        return false;
-      }
-      return {
-        repositoryClonedTime: repositoryIsCloned()!,
-        lastPushTime: lastPush(),
-        // while unpushed changes does not require last fs change,
-        // unpushed changed should react to fsChange. Hence, pass
-        // the signal to _unpushedChanges
-        lastFsChange: fsChange(),
-      };
-    },
-    _unpushedChanges
-  );
+  const [unpushedChanges] = createResource(() => {
+    if (
+      repositoryIsCloned.error ||
+      repositoryIsCloned.loading ||
+      repositoryIsCloned() === undefined
+    ) {
+      return false;
+    }
+    return {
+      fs: fs(),
+      repositoryClonedTime: repositoryIsCloned()!,
+      lastPushTime: lastPush(),
+      // while unpushed changes does not require last fs change,
+      // unpushed changed should react to fsChange. Hence, pass
+      // the signal to _unpushedChanges
+      lastFsChange: fsChange(),
+    };
+  }, _unpushedChanges);
 
   const [userIsCollaborator] = createResource(
     /**
@@ -255,15 +273,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
   const [currentBranch] = createResource(
     () => {
-      if (repositoryIsCloned.error) {
+      if (
+        repositoryIsCloned.error ||
+        repositoryIsCloned.loading ||
+        repositoryIsCloned() === undefined
+      ) {
         return false;
       }
-      return repositoryIsCloned();
+      return {
+        fs: fs(),
+      };
     },
-    async () => {
-      const branch = await raw.currentBranch({
-        fs,
-      });
+    async (args) => {
+      const branch = await raw.currentBranch(args);
       return branch ?? undefined;
     }
   );
@@ -293,6 +315,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
     }
     // write to filesystem
     writeResources({
+      fs: fs(),
       config,
       setFsChange,
       resources,
@@ -320,6 +343,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
           referenceResource,
           userIsCollaborator,
           setLastPush,
+          fs,
         } satisfies EditorStateSchema
       }
     >
@@ -330,26 +354,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 // ------------------------------------------
 
-/**
- * In memory filesystem.
- *
- * Must be re-initialized on every cloneRepository call.
- */
-let fs: typeof import("memfs").fs;
-
 async function cloneRepository(args: {
+  fs: typeof import("memfs").fs;
   routeParams: EditorRouteParams;
   user: LocalStorageSchema["user"];
   setFsChange: (date: Date) => void;
 }): Promise<Date | undefined> {
-  // reassgining (resetting) fs.
-  fs = createFsFromVolume(new Volume());
   const { host, owner, repository } = args.routeParams;
   if (host === undefined || owner === undefined || repository === undefined) {
     return undefined;
   }
+  console.log("cloning repository");
   await raw.clone({
-    fs: fs,
+    fs: args.fs,
     http,
     dir: "/",
     corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
@@ -359,28 +376,30 @@ async function cloneRepository(args: {
   // of components that depends on fs
   const date = new Date();
   args.setFsChange(date);
+  console.log("cloned repository");
   return date;
 }
 
 /**
  * Pushed changes and pulls right afterwards.
  */
-export async function pushChanges(
-  routeParams: EditorRouteParams,
-  user: NonNullable<LocalStorageSchema["user"]>,
-  setFsChange: (date: Date) => void,
-  setLastPush: (date: Date) => void
-): Promise<Result<void, Error>> {
-  const { host, owner, repository } = routeParams;
+export async function pushChanges(args: {
+  fs: typeof import("memfs").fs;
+  routeParams: EditorRouteParams;
+  user: NonNullable<LocalStorageSchema["user"]>;
+  setFsChange: (date: Date) => void;
+  setLastPush: (date: Date) => void;
+}): Promise<Result<void, Error>> {
+  const { host, owner, repository } = args.routeParams;
   if (host === undefined || owner === undefined || repository === undefined) {
     return Result.err(new Error("h3ni329 Invalid route params"));
   }
-  const args = {
-    fs: fs,
+  const requestArgs = {
+    fs: args.fs,
     http,
     dir: "/",
     author: {
-      name: user.username,
+      name: args.user.username,
     },
     corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
     url: `https://${host}/${owner}/${repository}`,
@@ -388,7 +407,7 @@ export async function pushChanges(
   try {
     // pull changes before pushing
     // https://github.com/inlang/inlang/issues/250
-    const _pull = await pull({ user: user, setFsChange });
+    const _pull = await pull(args);
     if (_pull.isErr) {
       return Result.err(
         new Error("Failed to pull: " + _pull.error.message, {
@@ -396,32 +415,35 @@ export async function pushChanges(
         })
       );
     }
-    const push = await raw.push(args);
+    const push = await raw.push(requestArgs);
     if (push.ok === false) {
       return Result.err(new Error("Failed to push", { cause: push.error }));
     }
-    await raw.pull(args);
+    await raw.pull(requestArgs);
     const time = new Date();
     // triggering a rebuild of everything fs related
-    setFsChange(time);
-    setLastPush(time);
+    args.setFsChange(time);
+    args.setLastPush(time);
     return Result.ok(undefined);
   } catch (error) {
     return Result.err((error as Error) ?? "h3ni329 Unknown error");
   }
 }
 
-async function readInlangConfig(): Promise<InlangConfig | undefined> {
+async function readInlangConfig(args: {
+  fs: typeof import("memfs").fs;
+}): Promise<InlangConfig | undefined> {
   try {
     const environmentFunctions: EnvironmentFunctions = {
       $import: initialize$import({
         workingDirectory: "/",
-        fs: fs.promises,
+        fs: args.fs.promises,
         fetch,
       }),
-      $fs: fs.promises,
+      $fs: args.fs.promises,
     };
-    const file = await fs.promises.readFile("./inlang.config.js", "utf-8");
+    console.log("reading inlang config", await args.fs.promises.readdir("/"));
+    const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8");
     const withMimeType =
       "data:application/javascript;base64," + btoa(file.toString());
 
@@ -456,24 +478,25 @@ async function readResources(config: InlangConfig) {
 }
 
 async function writeResources(args: {
+  fs: typeof import("memfs").fs;
   config: InlangConfig;
   resources: ast.Resource[];
   user: NonNullable<LocalStorageSchema["user"]>;
   setFsChange: (date: Date) => void;
 }) {
   await args.config.writeResources({ ...args });
-  const status = await raw.statusMatrix({ fs, dir: "/" });
+  const status = await raw.statusMatrix({ fs: args.fs, dir: "/" });
   const filesWithUncomittedChanges = status.filter(
     // files with unstaged and uncomitted changes
     (row) => row[2] === 2 && row[3] === 1
   );
   // add all changes
   for (const file of filesWithUncomittedChanges) {
-    await raw.add({ fs, dir: "/", filepath: file[0] });
+    await raw.add({ fs: args.fs, dir: "/", filepath: file[0] });
   }
   // commit changes
   await raw.commit({
-    fs,
+    fs: args.fs,
     dir: "/",
     author: {
       name: args.user.username,
@@ -486,6 +509,7 @@ async function writeResources(args: {
 }
 
 async function _unpushedChanges(args: {
+  fs: typeof import("memfs").fs;
   repositoryClonedTime: Date;
   lastPushTime?: Date;
 }) {
@@ -493,7 +517,7 @@ async function _unpushedChanges(args: {
     return [];
   }
   const unpushedChanges = await raw.log({
-    fs,
+    fs: args.fs,
     dir: "/",
     since: args.lastPushTime ? args.lastPushTime : args.repositoryClonedTime,
   });
@@ -501,12 +525,13 @@ async function _unpushedChanges(args: {
 }
 
 async function pull(args: {
+  fs: typeof import("memfs").fs;
   user: NonNullable<LocalStorageSchema["user"]>;
   setFsChange: (date: Date) => void;
 }) {
   try {
     await raw.pull({
-      fs,
+      fs: args.fs,
       http,
       dir: "/",
       corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,

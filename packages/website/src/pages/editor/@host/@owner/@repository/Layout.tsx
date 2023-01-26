@@ -76,14 +76,10 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-  const { fsChange } = useEditorState();
+  const { fsChange, currentBranch } = useEditorState();
 
   const [branches] = createResource(fsChange, () => {
     return raw.listBranches({ fs: fs, dir: "/", remote: "origin" });
-  });
-
-  const [currentBranch] = createResource(fsChange, () => {
-    return raw.currentBranch({ fs: fs, dir: "/" });
   });
 
   return (
@@ -132,7 +128,8 @@ function BranchMenu() {
 
 /** Actions that can be conducted if a commit has been made but not pushed yet. */
 function HasChangesAction() {
-  const { unpushedChanges, setFsChange, setLastPush } = useEditorState();
+  const { unpushedChanges, setFsChange, setLastPush, routeParams, fs } =
+    useEditorState();
 
   const [latestChange, setLatestChange] = createSignal<Date>();
   const [showPulse, setShowPulse] = createSignal(false);
@@ -166,12 +163,13 @@ function HasChangesAction() {
       });
     }
     setIsLoading(true);
-    const result = await pushChanges(
-      currentPageContext.routeParams as EditorRouteParams,
-      localStorage.user,
+    const result = await pushChanges({
+      fs: fs(),
+      routeParams: routeParams(),
+      user: localStorage.user,
       setFsChange,
-      setLastPush
-    );
+      setLastPush,
+    });
     setIsLoading(false);
     if (result.isErr) {
       return showToast({
