@@ -265,8 +265,12 @@ function LanguageFilter() {
 }
 
 function SignInBanner() {
-  const { userIsCollaborator, githubRepositoryInformation, currentBranch } =
-    useEditorState();
+  const {
+    userIsCollaborator,
+    githubRepositoryInformation,
+    currentBranch,
+    routeParams,
+  } = useEditorState();
   const [localStorage] = useLocalStorage();
   const [isLoading, setIsLoading] = createSignal(false);
 
@@ -295,9 +299,8 @@ function SignInBanner() {
       return;
     }
     const response = await onFork({
-      owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-      repository: (currentPageContext.routeParams as EditorRouteParams)
-        .repository,
+      owner: routeParams().owner,
+      repository: routeParams().repository,
       username: localStorage.user.username,
     });
     if (response.type === "success") {
@@ -363,7 +366,7 @@ function SignInBanner() {
                   />
                 </svg>
               </div>
-              Fork this project
+              Fork {routeParams().owner}/{routeParams().repository}
             </sl-button>
           </Banner>
         </Match>
