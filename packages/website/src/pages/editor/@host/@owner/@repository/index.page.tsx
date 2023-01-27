@@ -82,8 +82,33 @@ export function Page() {
                 <sl-spinner class="text-4xl" />
               </div>
 
-              <p class="text-lg">
-                cloning repositories can take a few minutes...
+              <p class="text-lg font-medium">
+                Cloning large repositories can take a few minutes...
+              </p>
+              <br />
+              <p class="max-w-lg">
+                We are working on increasing the performance as part of our{" "}
+                <a
+                  class="link link-primary"
+                  href="https://inlang.com/documentation/the-next-git"
+                  target="_blank"
+                >
+                  the next git
+                </a>{" "}
+                thesis. Progress can be tracked in{" "}
+                <a
+                  href="https://github.com/orgs/inlang/projects/9"
+                  target="_blank"
+                  class="link link-primary"
+                >
+                  project #9
+                </a>
+                .
+                <br />
+                <br />
+                TL;DR you are currently cloning a real git repo, in the browser,
+                on top of a virtual file system, which might lead to a new
+                generation of software.
               </p>
             </div>
           </Match>
