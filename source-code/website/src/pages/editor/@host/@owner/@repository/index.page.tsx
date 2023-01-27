@@ -93,7 +93,7 @@ export function Page() {
                   href="https://inlang.com/documentation/the-next-git"
                   target="_blank"
                 >
-                  the next git
+                  next git
                 </a>{" "}
                 thesis. Progress can be tracked in{" "}
                 <a
