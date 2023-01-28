@@ -30,7 +30,8 @@ function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
     >
       <div>
         <div class="flex items-center justify-between gap-2">
-          <p class="font-medium">
+          {/* break all in case the repository name is too long */}
+          <p class="font-medium break-all">
             {props.repository.owner}/{props.repository.repository}
           </p>
           <img
