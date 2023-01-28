@@ -8,7 +8,7 @@ import { Icon } from "../Icon.jsx";
  * Read more https://carbondesignsystem.com/components/notification/usage#inline-notifications
  */
 export function InlineNotification(props: {
-  title: string;
+  title?: string;
   message?: string;
   variant: SemanticColorTokens[number];
 }) {
