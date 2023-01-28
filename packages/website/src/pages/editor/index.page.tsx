@@ -29,7 +29,16 @@ export function Page() {
       />
       <RootLayout>
         {/* START search bar */}
-        <div class="h-64 sm:h-96 pt-4 flex flex-col items-center justify-center">
+        <div class="pt-4 flex flex-col items-center justify-center grow">
+          {/* negative margin as a dirty way of centering the search bar */}
+          <div class="flex p-10 items-center justify-center gap-4 -mt-32">
+            <img
+              src="/favicon/android-chrome-256x256.png"
+              alt="inlang logo"
+              class="w-20 h-20"
+            />
+            <h2 class="text-6xl font-bold">inlang</h2>
+          </div>
           {/* using a column to ease responsive design (mobile would be tricky othersie) */}
           <div class="flex flex-col gap-4 justify-center items-center w-full">
             <sl-input
@@ -73,7 +82,6 @@ export function Page() {
           </div>
         </div>
         {/* END search bar */}
-        <hr class="w-full border-t border-outline" />
       </RootLayout>
     </>
   );
