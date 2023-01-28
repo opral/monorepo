@@ -66,7 +66,7 @@ function AddRepositoryCard() {
       <div />
       <p>Get contributions and grow your open source project.</p>
       <a
-        href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/editor/repositories.ts"
+        href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
         target="_blank"
       >
         {/* @ts-ignore By accident, the button looks really cool without a variant in this case. */}
