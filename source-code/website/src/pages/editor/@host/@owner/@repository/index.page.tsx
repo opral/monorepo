@@ -89,18 +89,19 @@ export function Page() {
               <p class="max-w-lg">
                 TL;DR you are currently cloning a real git repo, in the browser,
                 on top of a virtual file system, which might lead to a new
-                generation of software.
-                <br />
-                <br />
-                We are working on increasing the performance as part of our{" "}
+                generation of software (see{" "}
                 <a
                   class="link link-primary"
                   href="https://inlang.com/documentation/the-next-git"
                   target="_blank"
                 >
                   next git
-                </a>{" "}
-                thesis. Progress can be tracked in{" "}
+                </a>
+                ).
+                <br />
+                <br />
+                We are working on increasing the performance. Progress can be
+                tracked in{" "}
                 <a
                   href="https://github.com/orgs/inlang/projects/9"
                   target="_blank"
