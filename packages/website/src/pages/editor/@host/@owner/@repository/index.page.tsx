@@ -87,6 +87,11 @@ export function Page() {
               </p>
               <br />
               <p class="max-w-lg">
+                TL;DR you are currently cloning a real git repo, in the browser,
+                on top of a virtual file system, which might lead to a new
+                generation of software.
+                <br />
+                <br />
                 We are working on increasing the performance as part of our{" "}
                 <a
                   class="link link-primary"
@@ -104,11 +109,6 @@ export function Page() {
                   project #9
                 </a>
                 .
-                <br />
-                <br />
-                TL;DR you are currently cloning a real git repo, in the browser,
-                on top of a virtual file system, which might lead to a new
-                generation of software.
               </p>
             </div>
           </Match>
