@@ -263,6 +263,12 @@ function PatternEditor(props: {
               variant="info"
             />
           </Show>
+          <Show when={hasChanges() && userIsCollaborator() === false}>
+            <InlineNotification
+              message="Fork the project to commit changes."
+              variant="info"
+            />
+          </Show>
           <sl-button
             onClick={handleMachineTranslate}
             prop:disabled={
@@ -278,7 +284,7 @@ function PatternEditor(props: {
           <sl-button
             prop:variant="primary"
             prop:disabled={
-              hasChanges() === false || localStorage.user === undefined
+              hasChanges() === false || userIsCollaborator() === false
             }
             onClick={handleSave}
           >
