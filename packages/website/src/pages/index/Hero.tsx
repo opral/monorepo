@@ -4,7 +4,7 @@ import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-r
 
 export function Hero() {
   return (
-    <div class="mx-auto max-w-3xl py-16">
+    <div class="mx-auto max-w-3xl py-16 md:py-24">
       <div class="hidden sm:mb-8 sm:flex sm:justify-center">
         <div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
           <span>
