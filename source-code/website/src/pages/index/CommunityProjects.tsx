@@ -35,7 +35,7 @@ function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
             {props.repository.owner}/{props.repository.repository}
           </p>
           <img
-            class="w-8 h-8 rounded-sm"
+            class="w-9 h-9 rounded-sm"
             src={`https://github.com/${props.repository.owner}.png?size=40`}
           />
         </div>
