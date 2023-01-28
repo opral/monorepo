@@ -6,11 +6,9 @@ export function CommunityProjects() {
   return (
     <div>
       {/* START repository grid */}
-      <h2 class="text-xl font-medium pt-6 pb-1">Community projects</h2>
-      <p class="pb-2">
-        Inlang is a great tool that helps communities translate their projects
-        by easing contributions.
-      </p>
+      <h2 class="text-2xl font-medium pt-6 pb-1">
+        Open source projects that use inlang
+      </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
         <For each={repositories}>
           {(repository) => <RepositoryCard repository={repository} />}
@@ -26,17 +24,9 @@ export function CommunityProjects() {
  * A card that displays a repository.
  */
 function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
-  const isExampleRepository = () =>
-    props.repository.owner === "inlang" &&
-    props.repository.repository === "example";
-
   return (
     <div
-      class={`rounded border p-4 flex flex-col justify-between gap-5 ${
-        isExampleRepository()
-          ? "border-secondary bg-secondary-container text-on-secondary-container"
-          : "border-outline"
-      }`}
+      class={`rounded border p-4 flex flex-col justify-between gap-5 border-outline`}
     >
       <div>
         <div class="flex items-center justify-between gap-2">
@@ -55,7 +45,7 @@ function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
       >
         <sl-button
           class="w-full"
-          prop:variant={isExampleRepository() ? "neutral" : undefined}
+          // prop:variant={isExampleRepository() ? "neutral" : undefined}
         >
           Open
         </sl-button>
@@ -70,18 +60,18 @@ function RepositoryCard(props: { repository: (typeof repositories)[number] }) {
 function AddRepositoryCard() {
   return (
     <div
-      class={`rounded border p-4 flex flex-col justify-between gap-6 border-info text-on-info-container bg-info-container`}
+      class={`rounded border p-4 flex flex-col justify-between gap-6 border-secondary bg-secondary-container text-on-secondary-container`}
     >
       {/* empty div to achieve justify-between effect whereas the p is centered */}
       <div />
-      <p>Get more contributions by adding your repository to this list.</p>
+      <p>Get contributions and grow your open source project.</p>
       <a
         href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/editor/repositories.ts"
         target="_blank"
       >
         {/* @ts-ignore By accident, the button looks really cool without a variant in this case. */}
-        <sl-button class="w-full" prop:variant="">
-          Add your community
+        <sl-button class="w-full" prop:variant="neutral">
+          Add your repository
           <MaterialSymbolsArrowOutward slot="suffix" />
         </sl-button>
       </a>
