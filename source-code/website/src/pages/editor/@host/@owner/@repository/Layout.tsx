@@ -27,6 +27,7 @@ import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
 import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
+import CibGithub from "~icons/cib/github";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
@@ -326,12 +327,11 @@ function SignInBanner() {
         <Match when={localStorage?.user === undefined}>
           <Banner
             variant="info"
-            message={`You are currently not signed in. 
-						Please sign in to make changes and work on this project.`}
+            message="The repository has been cloned locally. You must sign in with your GitHub account to commit and push changes."
           >
             <sl-button onClick={onSignIn} prop:variant="primary">
-              <MaterialSymbolsLoginRounded slot="prefix" />
-              Sign in
+              Sign in with GitHub
+              <CibGithub slot="suffix" />
             </sl-button>
           </Banner>
         </Match>

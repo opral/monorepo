@@ -240,7 +240,6 @@ function PatternEditor(props: {
           class="border-none grow "
           onFocus={() => setIsFocused(true)}
           prop:value={textValue() ?? ""}
-          prop:disabled={userIsCollaborator() === false}
           onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
         />
       </div>
@@ -260,8 +259,7 @@ function PatternEditor(props: {
         <div class="flex items-center justify-end  gap-2">
           <Show when={hasChanges() && localStorage.user === undefined}>
             <InlineNotification
-              title="Sign in"
-              message="You must be signed in to commit changes."
+              message="Sign in to commit changes."
               variant="info"
             />
           </Show>
