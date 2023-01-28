@@ -10,15 +10,15 @@ export const repositories: Repositories = [
     repository: "example",
     description: "Example repository that showcases inlang.",
   },
+   {
+    owner: "jazzband",
+    repository: "djangorestframework-simplejwt",
+    description: "A JSON Web Token authentication plugin for the Django REST Framework.",
+  },
   {
     owner: "osmosis-labs",
     repository: "osmosis-frontend",
     description: "Web interface for Osmosis Zone",
-  },
-  {
-    owner: "jazzband",
-    repository: "djangorestframework-simplejwt",
-    description: "A JSON Web Token authentication plugin for the Django REST Framework.",
   },
 ];
 
