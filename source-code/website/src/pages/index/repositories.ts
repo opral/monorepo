@@ -15,6 +15,11 @@ export const repositories: Repositories = [
     repository: "osmosis-frontend",
     description: "Web interface for Osmosis Zone",
   },
+  {
+    owner: "jazzband",
+    repository: "djangorestframework-simplejwt",
+    description: "A JSON Web Token authentication plugin for the Django REST Framework.",
+  },
 ];
 
 type Repositories = Array<{
