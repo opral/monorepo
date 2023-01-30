@@ -1,20 +1,15 @@
+[![](https://dcbadge.vercel.app/api/server/gdMPPWy57R)](https://discord.gg/gdMPPWy57R) [![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/inlangHQ)
+
 <div>
     <p align="center">
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        Developer-first localization infrastructure <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps.</i></a>
+        Developer-first localization infrastructure <br/> <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps.</i></a>
     </h2>
-    <h3 align="center">
-        <a href="https://inlang.com/documentation" target="_blank">Get Started</a> 
-        · 
-        <a href="https://github.com/inlang/inlang/discussions" target="_blank">Discussions</a> 
-        · 
-        <a href="https://twitter.com/inlangHQ" target="_blank">Twitter 🐦</a>
-    </h3>
 </div>
 
-Increase i18n and localization productivity with dev tools, an editor to manage translations, and automation via CI/CD. Inlang turns your git repository into the single source of truth for localization:
+Inlang turns your git repository into the single source of truth for localization. Increase i18n and localization productivity with dev tools, an editor to manage translations, and automation via CI/CD:
 
 - [x] no synchronization pipelines required.
 - [x] automation via CI/CD.
@@ -23,6 +18,26 @@ Increase i18n and localization productivity with dev tools, an editor to manage 
 <p align="center">
     <img width="60%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
 </p>
+
+## Documentation
+
+Documentation can be found on [inlang.com/documentation](https://inlang.com/documentation).
+
+## Community & Support
+
+**[📖 Example](https://github.com/inlang/example)** - An example repository that uses inlang.
+
+**[🌱 Ecosystem](https://github.com/inlang/ecosystem)** - Plugins, resources, and more.
+
+**[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
+
+**[💬 Forum](https://github.com/inlang/inlang/discussions)** - Get help, ask questions, request features, and discuss inlang.
+
+**[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
+
+**[✉️ Email](mailto:hello@inlang.com)** - Inquiries.
+
+# Applications
 
 ## Editor
 
@@ -46,14 +61,8 @@ Validate and extract messages in a repository with inlang's CLI.
 
 ![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
 
-## Automation
+## Automation (CI/CD)
 
 Use dev tools like the CLI to automate localization tasks via CI/CD pipelines.
 
 More is coming soon...
-
-## Community & Support
-
-- [GitHub Discussions](https://github.com/inlang/inlang/discussions): feedback and questions.
-- [GitHub Issues](https://github.com/inlang/inlang/issues): bugs you encounter using inlang.
-- [Email](mailto:hello@inlang.com): anything else.
