@@ -10,6 +10,7 @@ import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
 import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { useEditorState } from "./State.jsx";
+import { createVisibilityObserver } from "@solid-primitives/intersection-observer";
 
 export function Messages(props: {
   messages: Record<
@@ -38,15 +39,35 @@ export function Messages(props: {
     }
     throw Error("No message id found");
   };
+
+  // performance optimization to only render visible elements
+  // see https://github.com/inlang/inlang/issues/333
+  const useVisibilityObserver = createVisibilityObserver();
+  let patternListElement: HTMLDivElement | undefined;
+  const elementIsVisible = useVisibilityObserver(() => patternListElement);
+  // has been rendered should be true if the element was visible
+  const [hasBeenRendered, setHasBeenRendered] = createSignal(false);
+  createEffect(() => {
+    if (elementIsVisible()) {
+      setHasBeenRendered(true);
+    }
+  });
+
   return (
     <div class="border border-outline p-4 rounded flex flex-col gap-4">
       <h3 slot="summary" class="font-medium">
         {id()}
       </h3>
-      <div class="flex flex-col gap-4">
+      <div ref={patternListElement} class="flex flex-col gap-4">
         <For each={inlangConfig()?.languages}>
           {(language) => (
-            <Show when={filteredLanguages().includes(language)}>
+            <Show
+              when={
+                filteredLanguages().includes(language) &&
+                // only render if visible or has been rendered before
+                (elementIsVisible() || hasBeenRendered())
+              }
+            >
               <PatternEditor
                 language={language}
                 id={id()}
