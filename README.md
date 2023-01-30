@@ -22,7 +22,7 @@ Inlang turns your git repository into the single source of truth for localizatio
 
 ## Documentation
 
-Documentation can be found on [inlang.com/documentation](https://inlang.com/documentation).
+Go to [inlang.com/documentation](https://inlang.com/documentation).
 
 ## Community & Support
 
