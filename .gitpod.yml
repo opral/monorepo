@@ -1,10 +1,9 @@
 tasks:
   # - install doppler
   # - download the development env files
-  # THE DOPPLER TOKEN IS PUBLIC to enable contributors to easily contribute.  
   - init: |
       brew install dopplerhq/cli/doppler
-      doppler secrets download --token dp.st.development.boee8PnFtAe7SiDSluNahTNiTi2KezS2Duq4aSxztky --no-file --format env >  ./source-code/website/.env
+      doppler secrets download --token $DOPPLER_DEVELOPMENT_TOKEN_WEBSITE --no-file --format env >  ./source-code/website/.env
 
     # - install and use node 18
     # - install dependencies
