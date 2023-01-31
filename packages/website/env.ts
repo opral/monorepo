@@ -1,6 +1,9 @@
 /**
  * --------------------------------
  * Env file and variables related code.
+ *
+ * Create an `.env` file that contains the variables
+ * defined in the schemas below.
  * --------------------------------
  */
 
