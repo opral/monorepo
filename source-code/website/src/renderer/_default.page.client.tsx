@@ -15,6 +15,9 @@ globalThis.Buffer = Buffer;
 // import the css
 import "./app.css";
 
+// import analytics
+import "@src/services/analytics/index.js";
+
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";

@@ -26,8 +26,8 @@ import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialo
 import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
 import { Icon } from "@src/components/Icon.jsx";
-import MaterialSymbolsLoginRounded from "~icons/material-symbols/login-rounded";
 import CibGithub from "~icons/cib/github";
+import { analytics } from "@src/services/analytics/index.js";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
@@ -164,6 +164,10 @@ function HasChangesAction() {
       });
     }
     setIsLoading(true);
+    analytics.capture("push changes", {
+      owner: routeParams().owner,
+      repository: routeParams().repository,
+    });
     const result = await pushChanges({
       fs: fs(),
       routeParams: routeParams(),
@@ -297,6 +301,10 @@ function SignInBanner() {
     if (localStorage.user === undefined) {
       return;
     }
+    analytics.capture("create fork", {
+      owner: routeParams().owner,
+      repository: routeParams().repository,
+    });
     const response = await onFork({
       owner: routeParams().owner,
       repository: routeParams().repository,
@@ -394,9 +402,15 @@ function SignInBanner() {
                 (currentPageContext.routeParams as EditorRouteParams).repository
               }%20.`}
               prop:variant="success"
-              // ugly workaround to close a the banner
+              // ugly workaround to close  the banner
               // after the button has been clicked
-              onClick={() => setHasPushedChanges(false)}
+              onClick={() => {
+                analytics.capture("open pull request", {
+                  owner: routeParams().owner,
+                  repository: routeParams().repository,
+                });
+                setHasPushedChanges(false);
+              }}
             >
               <div slot="prefix">
                 <svg width="1em" height="1em" viewBox="0 0 24 24">
