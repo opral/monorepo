@@ -4,6 +4,7 @@ import { Layout } from "@src/pages/Layout.jsx";
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded";
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded";
 import { getUserInfo } from "../logic.telefunc.js";
+import { analytics } from "@src/services/analytics/index.js";
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -22,6 +23,9 @@ export function Page() {
 
   createEffect(() => {
     if (userInfo.error === undefined && userInfo()) {
+      analytics.identify(undefined, {
+        githubUsername: userInfo()?.username,
+      });
       setLocalStorage("user", userInfo());
     }
   });

@@ -11,6 +11,7 @@ import { onMachineTranslate } from "./index.telefunc.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { useEditorState } from "./State.jsx";
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer";
+import { analytics } from "@src/services/analytics/index.js";
 
 export function Messages(props: {
   messages: Record<
@@ -89,8 +90,13 @@ function PatternEditor(props: {
   message: ast.Message | undefined;
 }) {
   const [localStorage, setLocalStorage] = useLocalStorage();
-  const { resources, setResources, referenceResource, userIsCollaborator } =
-    useEditorState();
+  const {
+    resources,
+    setResources,
+    referenceResource,
+    userIsCollaborator,
+    routeParams,
+  } = useEditorState();
 
   const [
     showMachineLearningWarningDialog,
@@ -166,7 +172,12 @@ function PatternEditor(props: {
   /**
    * Saves the changes of the message.
    */
-  const handleSave = () => {
+  const handleCommit = () => {
+    analytics.capture("commit changes", {
+      targetLanguage: props.language,
+      owner: routeParams().owner,
+      repository: routeParams().repository,
+    });
     const _copy = copy();
     const _textValue = textValue();
     if (_textValue === undefined) {
@@ -203,6 +214,11 @@ function PatternEditor(props: {
     createSignal(false);
 
   const handleMachineTranslate = async () => {
+    analytics.capture("create machine translation", {
+      targetLanguage: props.language,
+      owner: routeParams().owner,
+      repository: routeParams().repository,
+    });
     if (props.referenceMessage === undefined) {
       return showToast({
         variant: "info",
@@ -307,7 +323,7 @@ function PatternEditor(props: {
             prop:disabled={
               hasChanges() === false || userIsCollaborator() === false
             }
-            onClick={handleSave}
+            onClick={handleCommit}
           >
             <MaterialSymbolsCommitRounded slot="prefix" />
             Commit
