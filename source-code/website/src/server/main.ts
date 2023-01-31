@@ -19,7 +19,7 @@ import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
 import { telefunc } from "telefunc";
 import { proxy } from "./git-proxy.js";
-import { serverSideEnv, validateEnv } from "@env";
+import { isProduction, serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
@@ -34,10 +34,6 @@ config.disableNamingConvention = true;
 
 // validate the env variables.
 await validateEnv();
-
-// the flag is set in the package.json scripts
-// via `NODE_ENV=production <command>`
-const isProduction = process.env.NODE_ENV === "production";
 
 const env = await serverSideEnv();
 

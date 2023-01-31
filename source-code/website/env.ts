@@ -5,6 +5,12 @@
  */
 
 /**
+ * The flag is set in the package.json scripts
+ * via `NODE_ENV=production <command>`
+ */
+export const isProduction = process.env.NODE_ENV === "production";
+
+/**
  * Environment variables that are avaibale ONLY server-side.
  *
  * Server-side env variables include client-side env variables.
@@ -70,6 +76,11 @@ export type ClientSideEnv = {
    * Only available in production.
    */
   VITE_SENTRY_DSN_CLIENT?: string;
+
+  /**
+   * Posthog https://posthog.com/ token.
+   */
+  VITE_POSTHOG_TOKEN?: string;
 };
 
 /**
@@ -136,5 +147,16 @@ export async function validateEnv() {
     throw Error("Missing env variable GITHUB_APP_CLIENT_SECRET");
   } else if (env.COOKIE_SECRET === undefined) {
     throw Error("Missing env variable COOKIE_SECRET");
+  }
+  if (isProduction) {
+    if (env.VITE_SENTRY_DSN_CLIENT === undefined) {
+      throw Error("Missing env variable VITE_SENTRY_DSN_CLIENT");
+    } else if (env.SENTRY_DSN_SERVER === undefined) {
+      throw Error("Missing env variable SENTRY_DSN_SERVER");
+    } else if (env.GOOGLE_TRANSLATE_API_KEY === undefined) {
+      throw Error("Missing env variable GOOGLE_TRANSLATE_API_KEY");
+    } else if (env.VITE_POSTHOG_TOKEN === undefined) {
+      throw Error("Missing env variable VITE_POSTHOG_TOKEN");
+    }
   }
 }
