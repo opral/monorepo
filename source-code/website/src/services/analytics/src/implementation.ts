@@ -1,8 +1,9 @@
 import { clientSideEnv, isProduction } from "@env";
 import { posthog } from "posthog-js";
+import { isServer } from "solid-js/web";
 
 // automatically initialize posthog when this file is imported
-if (isProduction) {
+if (isProduction && isServer === false) {
   if (clientSideEnv.VITE_POSTHOG_TOKEN === undefined) {
     throw Error("Missing env variable VITE_POSTHOG_TOKEN");
   }
