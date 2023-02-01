@@ -16,10 +16,10 @@ export function Page(props: PageProps) {
   return (
     <>
       {/* frontmatter is undefined on first client side nav  */}
-      <Title>{props.markdown.frontmatter?.title}</Title>
+      <Title>{props.markdown?.frontmatter?.title}</Title>
       <Meta
         name="description"
-        content={props.markdown.frontmatter?.description}
+        content={props.markdown?.frontmatter?.description}
       />
       <Layout>
         <div class="grid-row-2 py-10 w-full mx-auto ">

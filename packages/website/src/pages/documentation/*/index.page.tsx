@@ -21,10 +21,10 @@ export function Page(props: PageProps) {
   return (
     <>
       {/* frontmatter is undefined on first client side nav  */}
-      <Title>{props.markdown.frontmatter?.title}</Title>
+      <Title>{props.markdown?.frontmatter?.title}</Title>
       <Meta
         name="description"
-        content={props.markdown.frontmatter?.description}
+        content={props.markdown?.frontmatter?.description}
       />
       <RootLayout>
         {/* important: the responsive breakpoints must align throughout the markup! */}
