@@ -10,6 +10,7 @@ import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
 import { onSignOut } from "@src/services/auth/onSignOut.js";
+import { analytics } from "@src/services/analytics/index.js";
 
 /**
  * Ensure that all elements use the same margins.
@@ -208,6 +209,8 @@ function UserDropdown() {
         title: "Signed out",
         variant: "success",
       });
+      // https://posthog.com/docs/integrate/client/js#reset-after-logout
+      analytics.reset();
     } catch (error) {
       showToast({
         title: "Error",

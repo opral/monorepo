@@ -7,7 +7,6 @@ import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbol
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
 import { Meta, Title } from "@solidjs/meta";
 import { useEditorState } from "./State.jsx";
-import { analytics } from "@src/services/analytics/index.js";
 
 export function Page() {
   const { resources, routeParams, repositoryIsCloned, inlangConfig } =
