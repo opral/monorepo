@@ -65,9 +65,9 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
     // initialize the user in local storage
     getUserInfo()
       .then((userOrUndefined) => {
-        analytics.identify(undefined, {
-          githubUsername: userOrUndefined?.username,
-        });
+        if (userOrUndefined !== undefined) {
+          analytics.identify(userOrUndefined.username);
+        }
         setStore("user", userOrUndefined);
       })
       // set user to undefined if an error occurs

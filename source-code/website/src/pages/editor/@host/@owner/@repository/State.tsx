@@ -29,6 +29,7 @@ import {
   isCollaborator,
   repositoryInformation as _repositoryInformation,
 } from "@src/services/github/index.js";
+import { analytics } from "@src/services/analytics/index.js";
 
 type EditorStateSchema = {
   /**
@@ -167,17 +168,27 @@ export function EditorStateProvider(props: { children: JSXElement }) {
   const [localStorage] = useLocalStorage() ?? [];
 
   // re-fetched if currentPageContext changes
-  const [repositoryIsCloned] = createResource(() => {
-    // re-initialize fs on every cloneRepository call
-    // until subdirectories are supported
-    setFs(createFsFromVolume(new Volume()));
-    return {
-      fs: fs(),
-      routeParams: currentPageContext.routeParams as EditorRouteParams,
-      user: localStorage?.user,
-      setFsChange,
-    };
-  }, cloneRepository);
+  const [repositoryIsCloned] = createResource(
+    () => {
+      // re-initialize fs on every cloneRepository call
+      // until subdirectories are supported
+      setFs(createFsFromVolume(new Volume()));
+      return {
+        fs: fs(),
+        routeParams: currentPageContext.routeParams as EditorRouteParams,
+        user: localStorage?.user,
+        setFsChange,
+      };
+    },
+    async (args) => {
+      const result = await cloneRepository(args);
+      analytics.capture("clone repository", {
+        owner: args.routeParams.owner,
+        repository: args.routeParams.repository,
+      });
+      return result;
+    }
+  );
 
   // re-fetched if respository has been cloned
   const [inlangConfig] = createResource(
