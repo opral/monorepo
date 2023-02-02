@@ -25,7 +25,12 @@ export const analytics = new Proxy(posthog, {
     if (typeof target[prop] !== "function") {
       // don't wrap non-functions
       return target[prop];
-    } else if (isProduction && isServer === false) {
+    } else if (
+      // deactivate in development
+      isProduction === false ||
+      // deactivate on server
+      isServer
+    ) {
       // return empty function that simpy does nothing
       return () => undefined;
     }
