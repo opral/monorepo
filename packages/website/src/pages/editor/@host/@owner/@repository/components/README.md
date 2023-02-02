@@ -1,1 +1,0 @@
-components dedicated for the editor
