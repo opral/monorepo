@@ -9,7 +9,7 @@ import { showToast } from "@src/components/Toast.jsx";
 import { clickOutside } from "@src/directives/clickOutside.js";
 import { InlineNotification } from "@src/components/notification/InlineNotification.jsx";
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded";
-import MaterialSymbolsRobotOutline from "~icons/material-symbols/robot-outline";
+import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded";
 import { onMachineTranslate } from "./PatternEditor.telefunc.js";
 
 /**
@@ -247,7 +247,7 @@ export function PatternEditor(props: {
             prop:loading={machineTranslationIsLoading()}
             prop:variant="neutral"
           >
-            <MaterialSymbolsRobotOutline slot="prefix" />
+            <MaterialSymbolsTranslateRounded slot="prefix" />
             Machine translate
           </sl-button>
           <sl-button
