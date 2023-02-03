@@ -296,7 +296,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
       };
     },
     async (args) => {
-      const branch = await raw.currentBranch(args);
+      const branch = await raw.currentBranch({
+        fs: args.fs,
+        dir: "/",
+      });
       return branch ?? undefined;
     }
   );
