@@ -7,18 +7,22 @@ href: /documentation/contributing
 
 # Contributing
 
-Inlang is setup as monorepo with [turborepo](https://turbo.build/) and npm workspaces.
+Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM workspaces.
 
-## Starting the dev environment
+## Development
 
-1. [Open the repository in gitpod](https://gitpod.io/#https://github.com/inlang/inlang).
-2. Wait until the terminal is showing "listening on localhost:xxxx".
-3. Left click in the terminal on "localhost:xxxx".
-4. (Optionally, open the workspace in your local VSCode installation by clicking "Open in VSCode" in the top left menu bar.)
+1. **Fork** the project on Github
+2. **Open** the freshly cloned project with Visual Studio Code and [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+3. **Install** the projects dependencies with `npm install`.
+4. **Run** the tests with `npm test`.
+5. **Create** a branch for your new feature or improvement.
+6. **Debug** and write tests for your changes.
+   - Use the preconfigured launch scripts in Visual Studio Codes `Run and Debug` view.
+7. **Contribute** your changes via a upstream pull request.
 
-## Debugging
+### Workspaces
 
-1. (If running, stop `npm run dev`.)
-2. Press `F5`.
-3. Wait until the terminal is showing "listening on localhost:3000".
-4. Open "localhost:xxxx" in the browser that has been opened.
+#### `ide-extension`
+
+- Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project.
+- Launch `debug ide-exension tests` via Visual Studio Codes `Run and Debug` view to debug the extensions tests.
