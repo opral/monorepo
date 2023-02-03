@@ -30,6 +30,19 @@
       ],
       "preLaunchTask": "tsc: watch - source-code/ide-extension/tsconfig.json",
     },
+    {
+      "name": "debug ide-exension tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
+        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/test/**/*.js"
+      ],
+      "preLaunchTask": "tsc: watch - source-code/ide-extension/tsconfig.json",
+    },
     // {
     // 	"name": "Current test file",
     // 	"type": "node",
