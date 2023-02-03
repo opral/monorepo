@@ -10,41 +10,51 @@
     "url": "https://github.com/inlang/inlang.git"
   },
   "icon": "assets/icon.png",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.74.1"
   },
   "categories": [
     "Other",
     "Linters",
     "Visualization"
   ],
-  "main": "./dist/main.cjs",
-  "scripts": {
-    "_COMMENT": "ide extension is not worked on right now.",
-    "_vscode:prepublish": "npm run build",
-    "_build": "rollup --config",
-    "_dev": "rollup --config --watch",
-    "_package": "npx vsce package",
-    "_test": "vitest run --coverage",
-    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
-    "_format": "prettier ./src/** -w --config ../../.prettierrc.json"
-  },
-  "dependencies": {
-    "@inlang/core": "*"
-  },
-  "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "@rollup/plugin-typescript": "^9.0.1",
-    "@types/vscode": "^1.61.0",
-    "rollup": "^3.1.0",
-    "vsce": "^2.6.7"
-  },
   "activationEvents": [
     "onLanguage:javascript",
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
     "onLanguage:svelte"
-  ]
+  ],
+  "main": "./dist/main.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlang.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "_watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./dist/test/runTest.js",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.1",
+    "@types/glob": "^8.0.1",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.33.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.1.0",
+    "typescript": "^4.9.4",
+    "@vscode/test-electron": "^2.2.2"
+  }
 }
