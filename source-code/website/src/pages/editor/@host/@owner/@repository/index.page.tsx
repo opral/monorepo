@@ -7,6 +7,7 @@ import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbol
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
 import { Meta, Title } from "@solidjs/meta";
 import { useEditorState } from "./State.jsx";
+import { PreviewMessageFeatures } from "./components/PreviewMessageFeatures.jsx";
 
 export function Page() {
   const { resources, routeParams, repositoryIsCloned, inlangConfig } =
@@ -118,6 +119,7 @@ export function Page() {
           </Match>
           <Match when={inlangConfig()}>
             <div class="space-y-2">
+              <PreviewMessageFeatures />
               <For each={Object.keys(messages())}>
                 {(id) => <Messages messages={messages()[id]} />}
               </For>
