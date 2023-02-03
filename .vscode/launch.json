@@ -11,18 +11,24 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run-script", "dev"],
+      "runtimeArgs": [
+        "run-script",
+        "dev"
+      ],
       "console": "integratedTerminal"
     },
     {
       "name": "debug ide-extension",
       "type": "extensionHost",
       "request": "launch",
-      "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension"
+        "--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
+        "${workspaceFolder}/source-code/ide-extension/example"
       ],
-      "outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/source-code/ide-extension/dist/**/*.js"
+      ],
+      "preLaunchTask": "tsc: watch - source-code/ide-extension/tsconfig.json",
     },
     // {
     // 	"name": "Current test file",
@@ -49,7 +55,10 @@
     {
       // start the entire dev environment
       "name": "start development environment",
-      "configurations": ["npm run dev", "open @inlang/website in chrome"],
+      "configurations": [
+        "npm run dev",
+        "open @inlang/website in chrome"
+      ],
       "stopAll": true,
       "presentation": {
         "hidden": false,
