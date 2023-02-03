@@ -69,9 +69,11 @@ export type LanguageTag = Node<"LanguageTag"> & {
   name: string;
 
   /**
-   * Language must be an ISO-639-1 string.
    *
-   * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+   * The language can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
+   *
+   * @see https://www.ietf.org/rfc/bcp/bcp47.txt
+   * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
    */
   // language: string;
 };
