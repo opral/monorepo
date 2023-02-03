@@ -28,7 +28,7 @@ github:
 
 vscode:
   extensions:
-    - aaron-bond.better-comments
+    - "aaron-bond.better-comments"
     - "usernamehw.errorlens"
     - "mhutchie.git-graph"
     - "yzhang.markdown-all-in-one"
@@ -37,5 +37,5 @@ vscode:
     - "pkief.material-icon-theme"
     - "bradlc.vscode-tailwindcss"
     - "esbenp.prettier-vscode"
-    - eamodio.gitlens
-    - dbaeumer.vscode-eslint
+    - "eamodio.gitlens"
+    - "dbaeumer.vscode-eslint"
