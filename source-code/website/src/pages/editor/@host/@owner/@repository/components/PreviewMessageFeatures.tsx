@@ -18,8 +18,9 @@ export function PreviewMessageFeatures() {
   };
 
   return (
-    <div class="border border-outline p-4 rounded grid grid-cols-1 md:grid-cols-3 gap-10">
-      <div class="flex flex-col grow gap-4 md:col-span-2">
+    // lower opacity to make the preview less distracting
+    <div class="border border-outline p-4 rounded grid grid-flow-row md:grid-flow-col gap-10 opacity-60">
+      <div class="flex flex-col grow gap-4">
         <a
           class="font-medium hover:ring-2 hover:ring-primary "
           href="https://github.com/inlang/inlang/discussions/categories/feedback"
@@ -103,12 +104,12 @@ export function PreviewMessageFeatures() {
         </div>
       </div>
       <a
-        class="hover:ring-2 hover:ring-primary"
+        class="hover:ring-2 hover:ring-primary place-self-center"
         href="https://github.com/inlang/inlang/discussions/171"
         target="_blank"
       >
         <img
-          class="rounded-md object-contain hover:ring-2 hover:ring-primary"
+          class="rounded object-contain hover:ring-2 hover:ring-primary md:max-h-96"
           src="/images/preview-feature-screenshots.png"
           alt="preview feature screenshots"
         />
