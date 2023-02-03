@@ -25,12 +25,13 @@ export const analytics = new Proxy(posthog, {
   // posthog in development and on the server.
   get: (target, prop: keyof typeof posthog) => {
     if (
+      posthog.has_opted_in_capturing() === false ||
       // only disable functions
-      typeof target[prop] !== "function" &&
-      // deactivate in development
-      (isProduction === false ||
-        // deactivate on server
-        isServer)
+      (typeof target[prop] !== "function" &&
+        // deactivate in development
+        (isProduction === false ||
+          // deactivate on server
+          isServer))
     ) {
       // return empty function that simpy does nothing
       return () => undefined;
