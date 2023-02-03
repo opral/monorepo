@@ -7,9 +7,11 @@ if (isProduction && isServer === false) {
   if (clientSideEnv.VITE_POSTHOG_TOKEN === undefined) {
     throw Error("Missing env variable VITE_POSTHOG_TOKEN");
   }
-  posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
-    api_host: "https://eu.posthog.com",
-  });
+  if (posthog.has_opted_in_capturing()) {
+    posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
+      api_host: "https://eu.posthog.com",
+    });
+  }
 }
 
 /**
