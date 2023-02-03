@@ -27,15 +27,20 @@ export type Config = {
   /**
    * The reference language that other messages are validated against.
    *
-   * The language must be an ISO-639-1 string. See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
-   * In most cases, the reference lanugage is `en` (English).
+   * The languages can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
+   * In most cases, the reference lanugage is `en-US` (American English).
+   *
+   * @see https://www.ietf.org/rfc/bcp/bcp47.txt
+   * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
    */
   referenceLanguage: string;
   /**
-   * Languages of this project.
+   * Available languages in this project.
    *
-   * The language must be an ISO-639-1 string and include the reference language itself.
-   * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
+   * The languages can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
+   *
+   * @see https://www.ietf.org/rfc/bcp/bcp47.txt
+   * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
    */
   languages: string[];
   readResources: (args: { config: Config }) => Promise<ast.Resource[]>;
