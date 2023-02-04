@@ -3,7 +3,7 @@ export type LintRule =
 
 export type LintInformation = {
 	type: LintRule
-	message: string,
+	message: string
 }
 
 export type LintResult = {
