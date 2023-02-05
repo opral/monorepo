@@ -1,6 +1,6 @@
 import { Icon } from "@src/components/Icon.jsx";
 import type { JSXElement } from "solid-js";
-import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
+import type { SemanticColorTokens } from "../../../../../tailwind.config.cjs";
 
 // children get a default style use content for custome style
 export function Callout(props: {
