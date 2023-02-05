@@ -5,7 +5,7 @@ import IconClose from "~icons/material-symbols/close-rounded";
 import IconSignOut from "~icons/material-symbols/logout-rounded";
 import IconMenu from "~icons/material-symbols/menu-rounded";
 import IconExpand from "~icons/material-symbols/expand-more-rounded";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { useLocalStorage } from "@src/services/local-storage/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
