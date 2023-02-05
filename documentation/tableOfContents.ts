@@ -29,7 +29,7 @@ export const tableOfContents: Record<string, string[]> = {
     (await import("./query.md?raw")).default,
   ],
   RFCs: [
-    (await import("../rfcs/001-core-architecture.md?raw")).default,
-    (await import("../rfcs/002-tech-stack.md?raw")).default,
+    (await import("../rfcs/core-architecture/RFC.md?raw")).default,
+    (await import("../rfcs/tech-stack/RFC.md?raw")).default,
   ],
 };
