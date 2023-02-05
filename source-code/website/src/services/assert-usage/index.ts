@@ -5,10 +5,4 @@
  * --------------------------------
  */
 
-export {
-  getLocalStorage,
-  useLocalStorage,
-  LocalStorageProvider,
-} from "./src/LocalStorageProvider.js";
-
-export type { LocalStorageSchema } from "./src/schema.js";
+export { assertUsage } from "./src/implementation.js";

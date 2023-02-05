@@ -1,3 +1,3 @@
-export { isCollaborator } from "./isCollaborator.telefunc.js";
-export { onFork, syncFork } from "./fork.telefunc.js";
-export { repositoryInformation } from "./repositoryInformation.telefunc.js";
+export { isCollaborator } from "./src/isCollaborator.telefunc.js";
+export { onFork, syncFork } from "./src/fork.telefunc.js";
+export { repositoryInformation } from "./src/repositoryInformation.telefunc.js";

@@ -1,5 +1,5 @@
 import { isProduction, serverSideEnv } from "@env";
-import { assertUsage } from "@src/services/assert/index.js";
+import { assertUsage } from "@src/services/assert-usage/index.js";
 
 const env = await serverSideEnv();
 

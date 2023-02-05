@@ -6,8 +6,8 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
-import { analytics } from "../analytics/index.js";
-import { getUserInfo } from "../auth/logic.telefunc.js";
+import { analytics } from "@src/services/analytics/index.js";
+import { getUserInfo } from "@src/services/auth/index.js";
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
 const LocalStorageContext = createContext();

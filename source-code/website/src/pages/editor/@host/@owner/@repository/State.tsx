@@ -19,7 +19,7 @@ import {
 import { createStore, SetStoreFunction } from "solid-js/store";
 import type * as ast from "@inlang/core/ast";
 import { Result } from "@inlang/core/utilities";
-import type { LocalStorageSchema } from "@src/services/local-storage/schema.js";
+import type { LocalStorageSchema } from "@src/services/local-storage/index.js";
 import {
   getLocalStorage,
   useLocalStorage,

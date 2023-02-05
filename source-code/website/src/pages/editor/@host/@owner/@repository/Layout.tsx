@@ -1,7 +1,6 @@
 import { pushChanges, useEditorState } from "./State.jsx";
 import {
   createEffect,
-  createResource,
   createSignal,
   For,
   JSXElement,
@@ -10,18 +9,16 @@ import {
   Show,
   Switch,
 } from "solid-js";
-import { raw } from "@inlang/git-sdk/api";
-import { fs } from "@inlang/git-sdk/fs";
 import { subSeconds, isAfter } from "date-fns";
 import { currentPageContext } from "@src/renderer/state.js";
 import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
-import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvider.jsx";
+import { useLocalStorage } from "@src/services/local-storage/index.js";
 import type { EditorRouteParams } from "./types.js";
 import { onFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
-import { SignInDialog } from "@src/services/auth/components/SignInDialog.jsx";
+import { SignInDialog } from "@src/services/auth/index.js";
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import { clientSideEnv } from "@env";
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs";
