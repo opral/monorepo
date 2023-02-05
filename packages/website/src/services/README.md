@@ -4,6 +4,7 @@ Services are "services" that are not core of inlang but are required to build in
 
 ## Structure of services
 
+```
 .
 ├── src (contains the implementation of the service)/
 │ ├── ...
@@ -12,3 +13,4 @@ Services are "services" that are not core of inlang but are required to build in
 ├── index.ts (exports that work on both client and server)
 ├── index.client.ts (exports that only work on the client)
 └── index.server.ts (exports that only work on the server)
+```
