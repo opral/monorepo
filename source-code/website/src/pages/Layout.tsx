@@ -9,7 +9,7 @@ import { useLocalStorage } from "@src/services/local-storage/LocalStorageProvide
 import { navigate } from "vite-plugin-ssr/client/router";
 import { showToast } from "@src/components/Toast.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
-import { onSignOut } from "@src/services/auth/onSignOut.js";
+import { onSignOut } from "@src/services/auth/index.js";
 import { analytics } from "@src/services/analytics/index.js";
 
 /**

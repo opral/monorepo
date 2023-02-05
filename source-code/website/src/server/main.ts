@@ -24,8 +24,10 @@ import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import cookieSession from "cookie-session";
-import { router as authService } from "@src/services/auth/server.js";
-import { decryptAccessToken } from "@src/services/auth/logic.js";
+import {
+  router as authService,
+  decryptAccessToken,
+} from "@src/services/auth/index.server.js";
 import { config } from "telefunc";
 import { onBug as onTelefuncBug } from "telefunc";
 
