@@ -8,5 +8,5 @@ RFC stands for _request for comments_. RFCs are written proposals that seek feed
 
 **RFC's**
 
-- [002 tech stack](tech-stack/RFC.md)
-- [001 core architecture](core-architecture/RFC.md)
+- [RFC-002 Tech Stack](tech-stack/RFC.md)
+- [RFC-001 Core Architecture](core-architecture/RFC.md)
