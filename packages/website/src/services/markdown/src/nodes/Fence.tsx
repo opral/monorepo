@@ -2,6 +2,9 @@ import { createResource, Match, onMount, Suspense, Switch } from "solid-js";
 import mermaid from "mermaid";
 import { getHighlighter, Highlighter, Lang, setCDN } from "shiki";
 
+// importing themes and language colors from a cdn
+setCDN("https://cdn.jsdelivr.net/npm/shiki/");
+
 /**
  * Custom fence blocks.
  *
@@ -23,10 +26,6 @@ export function Fence(props: { language?: string; content: string }) {
   );
 }
 
-// importing themes and language colors frmo a cdn client side
-if (import.meta.env.SSR === false) {
-  setCDN("https://unpkg.com/shiki/");
-}
 const highlighter: Highlighter = await getHighlighter({
   theme: "dark-plus",
   // preventing layout shift on client side be pre-fecthing
