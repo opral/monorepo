@@ -13,7 +13,7 @@ import type { NextFunction, Request, Response } from "express";
 import { serverSideEnv } from "@env";
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js";
-import { decryptAccessToken } from "@src/services/auth/logic.js";
+import { decryptAccessToken } from "@src/services/auth/index.server.js";
 
 const middleware = createMiddleware({});
 const env = await serverSideEnv();

@@ -1,5 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
-import type { LocalStorageSchema } from "../local-storage/schema.js";
+import type { LocalStorageSchema } from "@src/services/local-storage/index.js";
 
 /**
  * This function is called when the user clicks the "Sign Out" button.

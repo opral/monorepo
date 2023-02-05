@@ -18,9 +18,9 @@ The nature of executing external JavaScript on the client via the config entails
 
 ### Procedure
 
-1. The user is prompted to log in and thereby forwarded to the git host via [LoginDialog](./components/LoginDialog.tsx).
-2. SERVER-SIDE: The git host redirects back to a site of inlang with an interim code after a successful login [server.ts](./server.ts).
-3. SERVER-SIDE: The interim code is exchanged for an encrypted JWT (JWE) that contains the access token [server.ts](./server.ts)
-4. SERVER-SIDE: The server stores the encrypted access token in a cookie session [server.ts](./server.ts).
+1. The user is prompted to log in and thereby forwarded to the git host via [LoginDialog](./src/components/LoginDialog.tsx).
+2. SERVER-SIDE: The git host redirects back to a site of inlang with an interim code after a successful login [router.ts](./src/router.ts).
+3. SERVER-SIDE: The interim code is exchanged for an encrypted JWT (JWE) that contains the access token [router.ts](./src/router.ts)
+4. SERVER-SIDE: The server stores the encrypted access token in a cookie session [router.ts](./src/router.ts).
 
 It is extremely important that step 3 never leaks the interim code client side and is, therefore, processed server-side. Otherwise, an attacker could intercept the interim code and exchange it for an access token.
