@@ -1,5 +1,5 @@
 import type { Config } from "@markdoc/markdoc";
-import type { SemanticColorTokens } from "../../../tailwind.config.cjs";
+import type { SemanticColorTokens } from "../../../../tailwind.config.cjs";
 import { icons } from "@src/components/Icon.jsx";
 import { Fence } from "./nodes/Fence.jsx";
 import { Callout } from "./tags/Callout.jsx";
