@@ -7,18 +7,43 @@ href: /documentation/contributing
 
 # Contributing
 
-Inlang is setup as monorepo with [turborepo](https://turbo.build/) and npm workspaces.
+Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM workspaces.
 
-## Starting the dev environment
+## Prerequisites
 
-1. [Open the repository in gitpod](https://gitpod.io/#https://github.com/inlang/inlang).
-2. Wait until the terminal is showing "listening on localhost:xxxx".
-3. Left click in the terminal on "localhost:xxxx".
-4. (Optionally, open the workspace in your local VSCode installation by clicking "Open in VSCode" in the top left menu bar.)
+- [Docker](https://www.docker.com/)
+- [VSCode](https://vscode.dev/)
+- [The dev containers extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+## Getting started
+
+1. Open the repository in VSCode.
+2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`.
+3. `npm install` to install dependencies
+4. `npm run dev` to run the development environment.
+5. `npm run test` to run the tests.
+6. `npm run build` to compile a production build.
 
 ## Debugging
 
 1. (If running, stop `npm run dev`.)
 2. Press `F5`.
 3. Wait until the terminal is showing "listening on localhost:3000".
-4. Open "localhost:xxxx" in the browser that has been opened.
+4. Open "localhost:xxxx" in the browser.
+
+## Contributing changes
+
+1. **Fork** the project on Github
+2. **Open** the freshly cloned project with Visual Studio Code and [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+3. **Create** a branch for your new feature or improvement.
+4. **Test** with `npm run test`
+5. **Debug** and write tests for your changes.
+   - Use the preconfigured launch scripts in Visual Studio Codes `Run and Debug` view.
+6. **Contribute** your changes via a upstream pull request.
+
+### Workspaces
+
+#### `ide-extension`
+
+- Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project.
+- Launch `debug ide-exension tests` via Visual Studio Codes `Run and Debug` view to debug the extensions tests.
