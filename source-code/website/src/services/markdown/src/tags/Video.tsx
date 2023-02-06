@@ -1,4 +1,4 @@
-import { assertUsage } from "@src/services/assert/index.js";
+import { assertUsage } from "@src/services/assert-usage/index.js";
 
 export function Video(props: { src: string }) {
   assertUsage(

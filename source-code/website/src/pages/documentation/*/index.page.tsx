@@ -3,7 +3,7 @@ import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js";
 import type { ProcessedTableOfContents } from "./index.page.server.jsx";
 import { currentPageContext } from "@src/renderer/state.js";
-import { Callout } from "@src/services/markdown/tags/Callout.jsx";
+import { Callout } from "@src/services/markdown/src/tags/Callout.jsx";
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js";
 import { Meta, Title } from "@solidjs/meta";
 

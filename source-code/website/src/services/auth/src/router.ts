@@ -3,8 +3,11 @@ import express from "express";
 import {
   encryptAccessToken,
   exchangeInterimCodeForAccessToken,
-} from "./logic.js";
+} from "./implementation.js";
 
+/**
+ * Routes for the auth service
+ */
 export const router = express.Router();
 
 const env = await serverSideEnv();

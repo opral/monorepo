@@ -7,9 +7,11 @@ if (isProduction && isServer === false) {
   if (clientSideEnv.VITE_POSTHOG_TOKEN === undefined) {
     throw Error("Missing env variable VITE_POSTHOG_TOKEN");
   }
-  posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
-    api_host: "https://eu.posthog.com",
-  });
+  if (posthog.has_opted_in_capturing()) {
+    posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
+      api_host: "https://eu.posthog.com",
+    });
+  }
 }
 
 /**
@@ -22,12 +24,18 @@ export const analytics = new Proxy(posthog, {
   // wrapping the posthog function in a proxy to disable
   // posthog in development and on the server.
   get: (target, prop: keyof typeof posthog) => {
-    if (typeof target[prop] !== "function") {
-      // don't wrap non-functions
-      return target[prop];
-    } else if (isProduction && isServer === false) {
+    if (
+      posthog.has_opted_in_capturing() === false ||
+      // only disable functions
+      (typeof target[prop] !== "function" &&
+        // deactivate in development
+        (isProduction === false ||
+          // deactivate on server
+          isServer))
+    ) {
       // return empty function that simpy does nothing
       return () => undefined;
     }
+    return target[prop];
   },
 });

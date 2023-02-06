@@ -1,5 +1,5 @@
-import { serverSideEnv } from "@env";
-import { assertUsage } from "@src/services/assert/index.js";
+import { isProduction, serverSideEnv } from "@env";
+import { assertUsage } from "@src/services/assert-usage/index.js";
 
 const env = await serverSideEnv();
 
@@ -12,9 +12,9 @@ export async function onMachineTranslate(args: {
   targetLanguage: string;
 }): Promise<{ data?: string; error?: string }> {
   try {
-    if (import.meta.env.MODE === "development") {
+    if (isProduction === false) {
       throw Error(
-        "Machine translations are disabled in production due to the missing env variable GOOGLE_TRANSLATE_API_KEY. "
+        "Machine translations are disabled in development. An env variable is missing."
       );
     }
     const response = await fetch(
