@@ -15,24 +15,16 @@
 import express from "express";
 import compression from "compression";
 import { createServer as createViteServer } from "vite";
-import { renderPage } from "vite-plugin-ssr";
 import { URL } from "url";
-import { telefunc } from "telefunc";
 import { proxy } from "./git-proxy.js";
 import { isProduction, serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import cookieSession from "cookie-session";
-import {
-  router as authService,
-  decryptAccessToken,
-} from "@src/services/auth/index.server.js";
-import { config } from "telefunc";
-import { onBug as onTelefuncBug } from "telefunc";
-
-// https://telefunc.com/disableNamingConvention
-config.disableNamingConvention = true;
+import { router as authService } from "@src/services/auth/index.server.js";
+import { router as telefunc } from "./telefunc.js";
+import { router as vitePluginSsr } from "./vite-plugin-ssr.js";
 
 // validate the env variables.
 await validateEnv();
@@ -95,69 +87,14 @@ if (isProduction) {
 
 // ------------------------ START ROUTES ------------------------
 
-// serving telefunc https://telefunc.com/
-app.all(
-  "/_telefunc",
-  // Parse & make HTTP request body available at `req.body` (required by telefunc)
-  express.text(),
-  // handle the request
-  (request, response, next) => {
-    // decrypting the access token if it exists
-    if (request.session?.encryptedAccessToken) {
-      decryptAccessToken({
-        jwe: request.session.encryptedAccessToken,
-        JWE_SECRET_KEY: env.JWE_SECRET_KEY,
-      })
-        .then((accessToken) =>
-          telefunc({
-            context: { githubAccessToken: accessToken },
-            url: request.originalUrl,
-            method: request.method,
-            body: request.body,
-          })
-        )
-        .then(({ body, statusCode, contentType }) => {
-          response.status(statusCode).type(contentType).send(body);
-        })
-        .catch(next);
-    } else {
-      telefunc({
-        context: { githubAccessToken: undefined },
-        url: request.originalUrl,
-        method: request.method,
-        body: request.body,
-      })
-        .then(({ body, statusCode, contentType }) => {
-          response.status(statusCode).type(contentType).send(body);
-        })
-        .catch(next);
-    }
-  }
-);
-
 // forward git requests to the proxy with wildcard `*`.
 app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
 
 app.use("/services/auth", authService);
 
-// serving @src/pages and /public
-//! it is extremely important that a request handler is not async to catch errors
-//! express does not catch async errors. hence, renderPage uses the callback pattern
-app.get("*", (request, response, next) => {
-  renderPage({
-    urlOriginal: request.originalUrl,
-  })
-    .then((pageContext) => {
-      if (pageContext.httpResponse === null) {
-        next();
-      } else {
-        const { body, statusCode, contentType } = pageContext.httpResponse;
-        response.status(statusCode).type(contentType).send(body);
-      }
-    })
-    // pass the error to expresses error handling
-    .catch(next);
-});
+app.use(telefunc);
+
+app.use(vitePluginSsr);
 
 // ------------------------ END ROUTES ------------------------
 
@@ -170,8 +107,3 @@ if (isProduction) {
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());
 }
-
-onTelefuncBug((error) => {
-  console.error(error);
-  Sentry.captureException(error);
-});
