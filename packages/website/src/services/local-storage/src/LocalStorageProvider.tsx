@@ -6,8 +6,8 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
-import { analytics } from "../analytics/index.js";
-import { getUserInfo } from "../auth/logic.telefunc.js";
+import { analytics } from "@src/services/analytics/index.js";
+import { getUserInfo } from "@src/services/auth/index.js";
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
 const LocalStorageContext = createContext();
@@ -89,16 +89,13 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
     //     `unknown localStorage key "${event.key}" was changed by another tab.`
     //   );
     // }
-    if (event.newValue === null) {
-      return console.error(
-        'localStorage key "store" was deleted by another tab. this should not happen.'
-      );
+    if (event.key === LOCAL_STORAGE_KEY && event.newValue) {
+      // setting the origin store to not trigger a loop
+      // using reconcile to ensure that the store is updated
+      // even though json.parse and json.stringify are used.
+      // read more here https://github.com/solidjs/solid/issues/1407#issuecomment-1344186955
+      setOriginStore(reconcile(JSON.parse(event.newValue)));
     }
-    // setting the origin store to not trigger a loop
-    // using reconcile to ensure that the store is updated
-    // even though json.parse and json.stringify are used.
-    // read more here https://github.com/solidjs/solid/issues/1407#issuecomment-1344186955
-    setOriginStore(reconcile(JSON.parse(event.newValue)));
   };
 
   return (
