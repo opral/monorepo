@@ -78,7 +78,7 @@ cached2.lint
 
 
 // ------------------------------------------------------------------------------------------------
-// variant 3: Resource & LIntResult
+// variant 3: Resource & LintResult
 
 export type Resource3 = {
 	languageTag: string;
