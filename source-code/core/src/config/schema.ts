@@ -1,5 +1,6 @@
 import type * as ast from "../ast/index.js";
 import type { FS } from "../fs/index.js";
+import type { LintRule } from '../lint/schema.js';
 import type { $import } from "./environment-functions/index.js";
 
 /**
@@ -49,6 +50,10 @@ export type Config = {
     config: Config;
     resources: ast.Resource[];
   }) => Promise<void>;
+  lint?: {
+    rules: LintRule[]
+  }
+
   /**
    * WARNING: Experimental properties are not required,
    * can change at any time and do not lead to a MAJOR version bump.
