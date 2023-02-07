@@ -121,8 +121,14 @@ function BranchMenu() {
 
 /** Actions that can be conducted if a commit has been made but not pushed yet. */
 function HasChangesAction() {
-  const { unpushedChanges, setFsChange, setLastPush, routeParams, fs } =
-    useEditorState();
+  const {
+    unpushedChanges,
+    setFsChange,
+    setLastPush,
+    routeParams,
+    fs,
+    setLastPullTime,
+  } = useEditorState();
 
   const [latestChange, setLatestChange] = createSignal<Date>();
   const [showPulse, setShowPulse] = createSignal(false);
@@ -166,6 +172,7 @@ function HasChangesAction() {
       user: localStorage.user,
       setFsChange,
       setLastPush,
+      setLastPullTime,
     });
     setIsLoading(false);
     if (result.isErr) {
