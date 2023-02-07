@@ -6,10 +6,26 @@ import type * as ast from "@inlang/core/ast";
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded";
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded";
 import { Meta, Title } from "@solidjs/meta";
-import { useEditorState } from "./State.jsx";
+import { EditorStateProvider, useEditorState } from "./State.jsx";
 import { PreviewMessageFeatures } from "./components/PreviewMessageFeatures.jsx";
 
 export function Page() {
+  return (
+    <EditorStateProvider>
+      <EditorLayout>
+        <TheActualPage />
+      </EditorLayout>
+    </EditorStateProvider>
+  );
+}
+
+/**
+ * The actual page that contains markup.
+ *
+ * This is separated from the Page component because the EditorStateProvider
+ * is required to use the useEditorState hook.
+ */
+function TheActualPage() {
   const { resources, routeParams, repositoryIsCloned, inlangConfig } =
     useEditorState();
   /**
@@ -42,7 +58,6 @@ export function Page() {
     }
     return result;
   });
-
   return (
     <>
       <Title>
@@ -54,79 +69,77 @@ export function Page() {
           routeParams().repository
         } via inlangs editor.`}
       />
-      <EditorLayout>
-        <Switch
-          fallback={
-            <p class="text-danger">
-              Switch fallback. This is likely an error. Please report it with
-              code e329jafs.
-            </p>
-          }
-        >
-          <Match when={repositoryIsCloned.error?.message.includes("404")}>
-            <RepositoryDoesNotExistOrNotAuthorizedCard />
-          </Match>
-          <Match when={repositoryIsCloned.error}>
-            <p class="text-danger">{repositoryIsCloned.error.message}</p>
-          </Match>
-          <Match when={inlangConfig.error}>
-            <p class="text-danger">
-              An error occured while initializing the config:{" "}
-              {inlangConfig.error.message}
-            </p>
-          </Match>
-          <Match when={repositoryIsCloned.loading || inlangConfig.loading}>
-            <div class="flex flex-col grow justify-center items-center min-w-full gap-2">
-              {/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
-              <div>
-                {/* use font-size to change the spinner size    */}
-                <sl-spinner class="text-4xl" />
-              </div>
+      <Switch
+        fallback={
+          <p class="text-danger">
+            Switch fallback. This is likely an error. Please report it with code
+            e329jafs.
+          </p>
+        }
+      >
+        <Match when={repositoryIsCloned.error?.message.includes("404")}>
+          <RepositoryDoesNotExistOrNotAuthorizedCard />
+        </Match>
+        <Match when={repositoryIsCloned.error}>
+          <p class="text-danger">{repositoryIsCloned.error.message}</p>
+        </Match>
+        <Match when={inlangConfig.error}>
+          <p class="text-danger">
+            An error occured while initializing the config:{" "}
+            {inlangConfig.error.message}
+          </p>
+        </Match>
+        <Match when={repositoryIsCloned.loading || inlangConfig.loading}>
+          <div class="flex flex-col grow justify-center items-center min-w-full gap-2">
+            {/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
+            <div>
+              {/* use font-size to change the spinner size    */}
+              <sl-spinner class="text-4xl" />
+            </div>
 
-              <p class="text-lg font-medium">
-                Cloning large repositories can take a few minutes...
-              </p>
+            <p class="text-lg font-medium">
+              Cloning large repositories can take a few minutes...
+            </p>
+            <br />
+            <p class="max-w-lg">
+              TL;DR you are currently cloning a real git repo, in the browser,
+              on top of a virtual file system, which might lead to a new
+              generation of software (see{" "}
+              <a
+                class="link link-primary"
+                href="https://inlang.com/documentation/the-next-git"
+                target="_blank"
+              >
+                next git
+              </a>
+              ).
               <br />
-              <p class="max-w-lg">
-                TL;DR you are currently cloning a real git repo, in the browser,
-                on top of a virtual file system, which might lead to a new
-                generation of software (see{" "}
-                <a
-                  class="link link-primary"
-                  href="https://inlang.com/documentation/the-next-git"
-                  target="_blank"
-                >
-                  next git
-                </a>
-                ).
-                <br />
-                <br />
-                We are working on increasing the performance. Progress can be
-                tracked in{" "}
-                <a
-                  href="https://github.com/orgs/inlang/projects/9"
-                  target="_blank"
-                  class="link link-primary"
-                >
-                  project #9
-                </a>
-                .
-              </p>
-            </div>
-          </Match>
-          <Match when={inlangConfig() === undefined}>
-            <NoInlangConfigFoundCard />
-          </Match>
-          <Match when={inlangConfig()}>
-            <div class="space-y-2">
-              <PreviewMessageFeatures />
-              <For each={Object.keys(messages())}>
-                {(id) => <Messages messages={messages()[id]} />}
-              </For>
-            </div>
-          </Match>
-        </Switch>
-      </EditorLayout>
+              <br />
+              We are working on increasing the performance. Progress can be
+              tracked in{" "}
+              <a
+                href="https://github.com/orgs/inlang/projects/9"
+                target="_blank"
+                class="link link-primary"
+              >
+                project #9
+              </a>
+              .
+            </p>
+          </div>
+        </Match>
+        <Match when={inlangConfig() === undefined}>
+          <NoInlangConfigFoundCard />
+        </Match>
+        <Match when={inlangConfig()}>
+          <div class="space-y-2">
+            <PreviewMessageFeatures />
+            <For each={Object.keys(messages())}>
+              {(id) => <Messages messages={messages()[id]} />}
+            </For>
+          </div>
+        </Match>
+      </Switch>
     </>
   );
 }
