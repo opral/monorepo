@@ -14,7 +14,8 @@
         "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "GitHub.vscode-pull-request-github"
       ]
     }
   }
