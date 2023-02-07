@@ -6,7 +6,6 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
-import { analytics } from "@src/services/analytics/index.js";
 import { getUserInfo } from "@src/services/auth/index.js";
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js";
 
@@ -65,9 +64,6 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
     // initialize the user in local storage
     getUserInfo()
       .then((userOrUndefined) => {
-        if (userOrUndefined !== undefined) {
-          analytics.identify(userOrUndefined.username);
-        }
         setStore("user", userOrUndefined);
       })
       // set user to undefined if an error occurs
