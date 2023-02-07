@@ -34,7 +34,11 @@
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
     "dev": "tsc --watch",
-    "test": "vitest run --passWithNoTests --coverage",
+    "test": "tsc && vitest",
+    "tsc": "tsc --noEmit",
+    "tsc:watch": "tsc --noEmit",
+    "vitest": "vitest run --passWithNoTests --coverage",
+    "vitest:watch": "vitest watch --passWithNoTests --coverage",
     "format": "prettier ./src/** -w --config ../../.prettierrc.json",
     "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
