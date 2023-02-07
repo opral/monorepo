@@ -17,7 +17,7 @@ Inlang turns your git repository into the single source of truth for localizatio
 - [x] avoid silos between developers and translators.
 
 <p align="center">
-    <img width="60%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/assets/001-git-based-architecture.png" alt="Git-based architecture">
+    <img width="60%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png" alt="Git-based architecture">
 </p>
 
 ## Documentation
