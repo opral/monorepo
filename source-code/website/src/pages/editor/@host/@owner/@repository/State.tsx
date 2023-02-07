@@ -1,6 +1,7 @@
 import { currentPageContext } from "@src/renderer/state.js";
 import {
   createContext,
+  createEffect,
   createResource,
   createSignal,
   JSXElement,
@@ -27,6 +28,7 @@ import {
 import { createFsFromVolume, Volume } from "memfs";
 import { github } from "@src/services/github/index.js";
 import { analytics } from "@src/services/analytics/index.js";
+import { showToast } from "@src/components/Toast.jsx";
 
 type EditorStateSchema = {
   /**
@@ -117,6 +119,11 @@ type EditorStateSchema = {
    * The last time the repository was pushed.
    */
   setLastPush: Setter<Date>;
+
+  /**
+   * The last time the repository has been pulled.
+   */
+  setLastPullTime: Setter<Date>;
 };
 
 const EditorStateContext = createContext<EditorStateSchema>();
@@ -206,9 +213,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
     async (args) => {
       const config = await readInlangConfig(args);
       if (config) {
-        // setting the origin store because this should not trigger
-        // writing to the filesystem.
-        setOriginResources(await readResources(config));
         // initialises the languages to all languages
         setFilteredLanguages(config.languages);
       }
@@ -229,6 +233,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
       fs: fs(),
       repositoryClonedTime: repositoryIsCloned()!,
       lastPushTime: lastPush(),
+      lastPullTime: lastPullTime(),
       // while unpushed changes does not require last fs change,
       // unpushed changed should react to fsChange. Hence, pass
       // the signal to _unpushedChanges
@@ -312,6 +317,67 @@ export function EditorStateProvider(props: { children: JSXElement }) {
     }
   );
 
+  // syncing a forked repository
+  //
+  // If a repository is a fork, it needs to be synced with the upstream repository.
+  // This is done by merging the upstream repository into the forked repository.
+  //
+  // https://github.com/inlang/inlang/issues/326
+  //
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [maybeSyncForkOnClone] = createResource(
+    () => {
+      if (
+        (githubRepositoryInformation() &&
+          githubRepositoryInformation()?.data.fork !== true) ||
+        currentBranch() === undefined
+      ) {
+        return false;
+      }
+      // pass all reactive variables
+      return {
+        branch: currentBranch()!,
+        owner: routeParams().owner,
+        repo: routeParams().repository,
+        fs: fs(),
+        setFsChange: setFsChange,
+        user: localStorage.user,
+      };
+    },
+    async (args) => {
+      try {
+        // merge upstream
+        const response = await github.request(
+          "POST /repos/{owner}/{repo}/merge-upstream",
+          {
+            branch: args.branch,
+            owner: args.owner,
+            repo: args.repo,
+          }
+        );
+        if (response.data.merge_type && response.data.merge_type !== "none") {
+          showToast({
+            variant: "info",
+            title: "Synced fork",
+            message:
+              "The fork has been synced with its parent repository. The latest changes will be pulled.",
+          });
+          // pull afterwards
+          await pull({ setLastPullTime, ...args });
+        }
+      } catch (error) {
+        showToast({
+          variant: "warning",
+          title: "Syncing fork failed",
+          message:
+            "The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
+        });
+        // rethrow for resource.error to work
+        throw error;
+      }
+    }
+  );
+
   /**
    * The resources.
    *
@@ -345,6 +411,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
     });
   };
 
+  const [lastPullTime, setLastPullTime] = createSignal<Date>();
+
+  /**
+   * If a change in the filesystem is detected, re-read the resources.
+   */
+  createEffect(() => {
+    if (!inlangConfig.error && inlangConfig() && fsChange()) {
+      // setting the origin store because this should not trigger
+      // writing to the filesystem.
+      readResources(inlangConfig()!).then(setOriginResources);
+    }
+  });
+
   return (
     <EditorStateContext.Provider
       value={
@@ -366,6 +445,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
           userIsCollaborator,
           setLastPush,
           fs,
+          setLastPullTime,
         } satisfies EditorStateSchema
       }
     >
@@ -409,6 +489,7 @@ export async function pushChanges(args: {
   user: NonNullable<LocalStorageSchema["user"]>;
   setFsChange: (date: Date) => void;
   setLastPush: (date: Date) => void;
+  setLastPullTime: (date: Date) => void;
 }): Promise<Result<void, Error>> {
   const { host, owner, repository } = args.routeParams;
   if (host === undefined || owner === undefined || repository === undefined) {
@@ -531,22 +612,35 @@ async function _unpushedChanges(args: {
   fs: typeof import("memfs").fs;
   repositoryClonedTime: Date;
   lastPushTime?: Date;
+  lastPullTime?: Date;
 }) {
   if (args.repositoryClonedTime === undefined) {
     return [];
   }
+  // filter out undefined values and sort by date
+  // get the last event
+  const lastRelevantEvent = [
+    args.lastPushTime,
+    args.repositoryClonedTime,
+    args.lastPullTime,
+  ]
+    .filter((value) => value !== undefined)
+    .sort((a, b) => a!.getTime() - b!.getTime())
+    .at(-1);
+
   const unpushedChanges = await raw.log({
     fs: args.fs,
     dir: "/",
-    since: args.lastPushTime ? args.lastPushTime : args.repositoryClonedTime,
+    since: lastRelevantEvent,
   });
   return unpushedChanges;
 }
 
 async function pull(args: {
   fs: typeof import("memfs").fs;
-  user: NonNullable<LocalStorageSchema["user"]>;
+  user: LocalStorageSchema["user"];
   setFsChange: (date: Date) => void;
+  setLastPullTime: (date: Date) => void;
 }) {
   try {
     await raw.pull({
@@ -556,7 +650,7 @@ async function pull(args: {
       corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
       singleBranch: true,
       author: {
-        name: args.user.username,
+        name: args.user?.username,
       },
       // try to not create a merge commit
       // rebasing would be the best option but it is not supported by isomorphic-git
@@ -566,6 +660,7 @@ async function pull(args: {
     const time = new Date();
     // triggering a rebuild of everything fs related
     args.setFsChange(time);
+    args.setLastPullTime(time);
     return Result.ok(undefined);
   } catch (error) {
     return Result.err(error as Error);
