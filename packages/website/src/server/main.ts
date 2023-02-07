@@ -23,6 +23,7 @@ import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import cookieSession from "cookie-session";
 import { router as authService } from "@src/services/auth/index.server.js";
+import { router as githubService } from "@src/services/github/index.server.js";
 import { router as telefunc } from "./telefunc.js";
 import { router as vitePluginSsr } from "./vite-plugin-ssr.js";
 
@@ -93,6 +94,8 @@ app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy);
 app.use("/services/auth", authService);
 
 app.use(telefunc);
+
+app.use(githubService);
 
 app.use(vitePluginSsr);
 

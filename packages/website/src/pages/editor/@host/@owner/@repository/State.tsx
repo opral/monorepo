@@ -25,10 +25,7 @@ import {
   useLocalStorage,
 } from "@src/services/local-storage/index.js";
 import { createFsFromVolume, Volume } from "memfs";
-import {
-  isCollaborator,
-  repositoryInformation as _repositoryInformation,
-} from "@src/services/github/index.js";
+import { github } from "@src/services/github/index.js";
 import { analytics } from "@src/services/analytics/index.js";
 
 type EditorStateSchema = {
@@ -57,7 +54,9 @@ type EditorStateSchema = {
   /**
    * Additional informaiton about a repository provided by GitHub.
    */
-  githubRepositoryInformation: Resource<any>;
+  githubRepositoryInformation: Resource<
+    Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
+  >;
   /**
    * Route parameters like `/github.com/inlang/website`.
    *
@@ -249,15 +248,24 @@ export function EditorStateProvider(props: { children: JSXElement }) {
       };
     },
     async (args) => {
+      // user is not logged in, see the returned object above
       if (typeof args.user === "string") {
         return false;
       }
-      const response = await isCollaborator({
-        owner: args.routeParams.owner,
-        repository: args.routeParams.repository,
-        username: args.user.username,
-      });
-      return response;
+      try {
+        const response = await github.request(
+          "GET /repos/{owner}/{repo}/collaborators/{username}",
+          {
+            owner: args.routeParams.owner,
+            repo: args.routeParams.repository,
+            username: args.user.username,
+          }
+        );
+        return response.status === 204 ? true : false;
+      } catch (error) {
+        // the user is not a collaborator, hence the request will fail
+        return false;
+      }
     }
   );
 
@@ -276,9 +284,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
       };
     },
     async (args) =>
-      _repositoryInformation({
+      github.request("GET /repos/{owner}/{repo}", {
         owner: args.routeParams.owner,
-        repository: args.routeParams.repository,
+        repo: args.routeParams.repository,
       })
   );
 
