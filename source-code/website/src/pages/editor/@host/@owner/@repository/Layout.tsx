@@ -15,7 +15,6 @@ import { showToast } from "@src/components/Toast.jsx";
 import { Layout as RootLayout } from "@src/pages/Layout.jsx";
 import { useLocalStorage } from "@src/services/local-storage/index.js";
 import type { EditorRouteParams } from "./types.js";
-import { onFork } from "@src/services/github/index.js";
 import { navigate } from "vite-plugin-ssr/client/router";
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { SignInDialog } from "@src/services/auth/index.js";
@@ -25,6 +24,7 @@ import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx";
 import CibGithub from "~icons/cib/github";
 import { analytics } from "@src/services/analytics/index.js";
+import { github } from "@src/services/github/index.js";
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false);
 
@@ -297,21 +297,19 @@ function SignInBanner() {
       owner: routeParams().owner,
       repository: routeParams().repository,
     });
-    const response = await onFork({
+    const response = await github.rest.repos.createFork({
       owner: routeParams().owner,
-      repository: routeParams().repository,
-      username: localStorage.user.username,
+      repo: routeParams().repository,
     });
-    if (response.type === "success") {
+    if (response.status === 202) {
       showToast({
         variant: "success",
         title: "The Fork has been created.",
         message: `Don't forget to open a pull request`,
       });
       setIsLoading(false);
-      return navigate(
-        `/editor/github.com/${response.owner}/${response.repository}`
-      );
+      // full name is owner/repo
+      return navigate(`/editor/github.com/${response.data.full_name}`);
     } else {
       showToast({
         variant: "danger",
@@ -372,22 +370,22 @@ function SignInBanner() {
             githubRepositoryInformation.error === undefined &&
             githubRepositoryInformation.loading === false &&
             hasPushedChanges() &&
-            githubRepositoryInformation().fork
+            githubRepositoryInformation()?.data.fork
           }
         >
           <Banner
             variant="success"
             message={`You are working in a forked project. Please make a "pull request" to transfer your changes to the parent project:
-							"${githubRepositoryInformation().parent.full_name}"`}
+							"${githubRepositoryInformation()?.data.parent?.full_name}"`}
           >
             <sl-button
               prop:target="_blank"
               prop:href={`https://github.com/${
-                githubRepositoryInformation().parent.full_name
+                githubRepositoryInformation()?.data.parent?.full_name
               }/compare/${currentBranch()}...${
-                githubRepositoryInformation().owner.login
+                githubRepositoryInformation()?.data.owner.login
               }:${
-                githubRepositoryInformation().name
+                githubRepositoryInformation()?.data.name
               }:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
                 (currentPageContext.routeParams as EditorRouteParams).owner
               }%2F${
