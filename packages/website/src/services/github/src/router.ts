@@ -2,7 +2,6 @@ import { serverSideEnv } from "@env";
 import { decryptAccessToken } from "@src/services/auth/index.server.js";
 import { PATH } from "./implementation.js";
 import express from "express";
-import stream from "node:stream";
 
 /**
  * Routes for the GitHub service.
@@ -32,10 +31,14 @@ router.all(PATH + "*", async (request, response, next) => {
       },
       body: request.body,
     });
-    response
-      .status(res.status)
-      .contentType(res.headers.get("content-type")!)
-      .send(await res.json());
+    if (res.headers.get("content-type")?.includes("json")) {
+      response
+        .status(res.status)
+        .contentType(res.headers.get("content-type")!)
+        .send(await res.json());
+    } else {
+      response.status(res.status).send(res.body);
+    }
   } catch (error) {
     next(error);
   }
