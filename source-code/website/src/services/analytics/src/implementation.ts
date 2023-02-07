@@ -28,9 +28,10 @@ export const analytics = new Proxy(posthog, {
   // posthog in development and on the server.
   get: (target, prop: keyof typeof posthog) => {
     if (
-      // deactivate on server and in development
+      // deactivate in development and on the server
+      // be returning a mock function that does nothing
       (isProduction === false || isServer) &&
-      typeof target[prop] !== "function"
+      typeof target[prop] === "function"
     ) {
       // return empty function that simpy does nothing
       return () => undefined;
