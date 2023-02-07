@@ -23,7 +23,7 @@ router.all(PATH + "*", async (request, response, next) => {
       jwe: encryptedAccessToken,
     });
     // slicing the path to remove the path prefix
-    fetch(request.url.slice(PATH.length), {
+    const res = await fetch(request.url.slice(PATH.length), {
       method: request.method,
       headers: {
         // set the authorization header (must be base64 encoded)
@@ -31,7 +31,11 @@ router.all(PATH + "*", async (request, response, next) => {
         "X-GitHub-Api-Version": "2022-11-28",
       },
       body: request.body,
-    }).then((res) => stream.Readable.fromWeb(res.body as any).pipe(response));
+    });
+    response
+      .status(res.status)
+      .contentType(res.headers.get("content-type")!)
+      .send(await res.json());
   } catch (error) {
     next(error);
   }
