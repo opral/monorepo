@@ -47,6 +47,10 @@ export function PatternEditor(props: {
         "Not implemented. Only messages with one pattern element of type Text are supported for now."
       );
     }
+    // if the message is updated externally, update the text value
+    else if (props.message) {
+      setTextValue(props.message.pattern.elements[0].value);
+    }
   });
 
   /** whether the pattern is focused */
