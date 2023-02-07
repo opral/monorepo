@@ -1,6 +1,6 @@
 import type { UserConfig } from "vite";
 import solid from "vite-plugin-solid";
-import { ssr } from "vite-plugin-ssr/plugin";
+import { ssr as vitePluginSsr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
 import { fileURLToPath, URL } from "url";
 import Icons from "unplugin-icons/vite";
@@ -10,7 +10,8 @@ export default await withNodePolyfills({
     solid({ ssr: true }),
     // ordering matters. telefunc must be before ssr
     telefunc(),
-    ssr(),
+    // the metaframework https://vite-plugin-ssr.com/
+    vitePluginSsr(),
     // @ts-ignore
     // only https://icon-sets.iconify.design/material-symbols/
     // and https://icon-sets.iconify.design/cib/
