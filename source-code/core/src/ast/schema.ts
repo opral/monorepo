@@ -1,59 +1,77 @@
+export type NodeName =
+  | 'Identifier'
+  | 'Resource'
+  | 'Message'
+  | 'Pattern'
+  | 'Text'
+  | 'LanguageTag'
+
+type ExtensionInformation = {
+  [node in NodeName | 'Node']?: Record<string, unknown>
+}
+
 /**
  * A single node of the AST.
  *
- * Every other defintions are based on Node.
+ * Every other definitions are based on Node.
  */
-export type Node<Name> = {
-  type: Name;
-  /**
-   * Metadata is ignored by inlang.
-   *
-   * Use the metadata property to store additional
-   * information for a particular node like parsing
-   * and serialization information.
-   */
-  metadata?: any;
-};
+type Node<Name extends NodeName, Extension extends ExtensionInformation = ExtensionInformation> =
+  Extension[Name] & Extension['Node'] & {
+    type: Name
+    /**
+     * Metadata is ignored by inlang.
+     *
+     * Use the metadata property to store additional
+     * information for a particular node like parsing
+     * and serialization information.
+     */
+    metadata?: any;
+  }
 
 /**
  * An identifier.
  *
  * Some Nodes have Identifiers such as a Resource or Message.
  */
-export type Identifier = Node<"Identifier"> & {
-  name: string;
-};
+export type Identifier<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"Identifier", Extension> & {
+    name: string;
+  };
 
 /**
  * A resource is a collection of messages.
  */
-export type Resource = Node<"Resource"> & {
-  languageTag: LanguageTag;
-  body: Array<Message>;
-};
+export type Resource<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"Resource", Extension> & {
+    languageTag: LanguageTag<Extension>;
+    body: Array<Message<Extension>>;
+  };
 
 /**
  * A message is what's rendered to a user.
  */
-export type Message = Node<"Message"> & {
-  id: Identifier;
-  // comment?: MessageComment;
-  pattern: Pattern;
-};
+export type Message<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"Message", Extension> & {
+    id: Identifier<Extension>;
+    // comment?: MessageComment;
+    pattern: Pattern<Extension>;
+  };
 
 /**
  * A pattern denotes how a Message is composed.
  */
-export type Pattern = Node<"Pattern"> & {
-  elements: Array<Text>;
-};
+export type Pattern<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"Pattern", Extension> & {
+    elements: Array<Text<Extension>>;
+  };
 
 /**
  * Text can be translated.
  */
-export type Text = Node<"Text"> & {
-  value: string;
-};
+export type Text<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"Text", Extension> & {
+    value: string;
+  };
 
 /**
  * A language tag that identifies a human language.
@@ -62,21 +80,22 @@ export type Text = Node<"Text"> & {
  * For now, only a name that acts as an ID can be set. See
  * https://github.com/inlang/inlang/issues/296
  */
-export type LanguageTag = Node<"LanguageTag"> & {
-  /**
-   * The ID of the language.
-   */
-  name: string;
+export type LanguageTag<Extension extends ExtensionInformation = ExtensionInformation> =
+  Node<"LanguageTag", Extension> & {
+    /**
+     * The ID of the language.
+     */
+    name: string;
 
-  /**
-   *
-   * The language can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
-   *
-   * @see https://www.ietf.org/rfc/bcp/bcp47.txt
-   * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-   */
-  // language: string;
-};
+    /**
+     *
+     * The language can be named freely. It's advisable to follow the IETF BCP 47 language tag scheme.
+     *
+     * @see https://www.ietf.org/rfc/bcp/bcp47.txt
+     * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+     */
+    // language: string;
+  };
 
 // export type MessageComment = Node<"MessageComment"> & {
 // 	value: string;
