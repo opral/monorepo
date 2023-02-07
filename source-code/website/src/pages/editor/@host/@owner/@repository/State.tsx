@@ -247,6 +247,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
      * Hence, a string needs to be passed to the fetch of the resource.
      */
     () => {
+      // do not fetch if no owner or repository is given
+      // can happen if the user navigated away from the editor
+      if (
+        currentPageContext.routeParams.owner === undefined ||
+        currentPageContext.routeParams.repository === undefined
+      ) {
+        return false;
+      }
       return {
         user: localStorage?.user ?? "not logged in",
         routeParams: currentPageContext.routeParams as EditorRouteParams,
