@@ -1,5 +1,5 @@
 import { it, describe, expect } from "vitest";
-import * as auth from "./logic.js";
+import * as auth from "./implementation.js";
 
 describe("auth service", () => {
   const mockSecret = "bWmlgSgQLZgoZv+0dh/Y7NNtsowIfh7y2phtEz0EIME=";
