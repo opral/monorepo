@@ -14,7 +14,7 @@ Inlang turns your git repository into the single source of truth for localizatio
 - [x] no hosting, accounts, and synchronization required.
 - [x] use git workflows like pull requests.
 - [x] automation via CI/CD.
-- [x] avoid silos between developers and translators.
+- [x] single source of truth that developers and translators collaborate on.
 
 <p align="center">
     <img width="60%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png" alt="Git-based architecture">
