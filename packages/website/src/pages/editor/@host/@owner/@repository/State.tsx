@@ -339,6 +339,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
         (githubRepositoryInformation() &&
           githubRepositoryInformation()?.data.fork !== true) ||
         currentBranch() === undefined ||
+        localStorage.user === undefined ||
         // route params can be undefined if the user navigated away from the editor
         routeParams().owner === undefined ||
         routeParams().repository === undefined
