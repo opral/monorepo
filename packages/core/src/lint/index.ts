@@ -2,8 +2,6 @@ import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config } from '../config/schema.js'
 import type { LintableNode, LintedNode, LintRule, LintType, TargetReferenceParameterTuple } from './schema.js'
 
-class LintError extends Error { }
-
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
 
@@ -75,82 +73,85 @@ export const lint = async (config: Config) => {
 
 export type LintParameters<Node extends LintableNode> = [LintRule, ...TargetReferenceParameterTuple<Node>, unknown]
 
+// --------------------------------------------------------------------------------------------------------------------
+
+const shouldProcessResourceChildren = (lintRule: LintRule) => !!lintRule.visitors.Message || shouldProcessMessageChildren(lintRule)
+
 const processResource = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Resource>): Promise<void> => {
-	const { before, visit, after } = lintRule.visitors.Resource || {}
+	const { enter, leave } = lintRule.visitors.Resource || {}
 
-	const payloadBefore = before
-		? await before(target as Resource, reference, payloadInitial)
+	const payloadEnter = enter
+		? await enter(target as Resource, reference, payloadInitial)
 		: payloadInitial
-	if (payloadBefore === 'skip') return
-
-	const processedReferenceMessages = new Set<string>()
-
-	const payloadVisit = visit
-		? await visit(target as Resource, reference, payloadBefore)
-		: payloadBefore
+	if (payloadEnter === 'skip') return
 
 	// process children
-	for (const targetMessage of target?.body || []) {
-		const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
+	if (shouldProcessResourceChildren(lintRule)) {
+		const processedReferenceMessages = new Set<string>()
 
-		await processMessage(lintRule, targetMessage, referenceMessage, payloadVisit)
+		for (const targetMessage of target?.body || []) {
+			const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
 
-		if (referenceMessage) {
-			processedReferenceMessages.add(referenceMessage.id.name)
+			await processMessage(lintRule, targetMessage, referenceMessage, payloadEnter)
+
+			if (referenceMessage) {
+				processedReferenceMessages.add(referenceMessage.id.name)
+			}
+		}
+
+		const nonVisitedReferenceMessages = (reference?.body || [])
+			.filter(({ id }) => !processedReferenceMessages.has(id.name))
+		for (const referenceNode of nonVisitedReferenceMessages) {
+			await processMessage(lintRule, undefined, referenceNode, payloadEnter)
+			processedReferenceMessages.add(referenceNode.id.name)
 		}
 	}
-	const nonVisitedReferenceMessages = (reference?.body || [])
-		.filter(({ id }) => !processedReferenceMessages.has(id.name))
-	for (const referenceNode of nonVisitedReferenceMessages) {
-		await processMessage(lintRule, undefined, referenceNode, payloadVisit)
-		processedReferenceMessages.add(referenceNode.id.name)
-	}
 
-	if (after) {
-		await after(target as Resource, reference, payloadVisit)
+	if (leave) {
+		await leave(target as Resource, reference, payloadEnter)
 	}
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+
+const shouldProcessMessageChildren = (lintRule: LintRule) => !!lintRule.visitors.Pattern
 
 const processMessage = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Message>): Promise<void> => {
-	const { before, visit, after } = lintRule.visitors.Message || {}
+	const { enter, leave } = lintRule.visitors.Message || {}
 
-	const payloadBefore = before
-		? await before(target as Message, reference as Message, payloadInitial)
+	const payloadEnter = enter
+		? await enter(target as Message, reference as Message, payloadInitial)
 		: payloadInitial
-	if (payloadBefore === 'skip') return
-
-	const payloadVisit = visit
-		? await visit(target as Message, reference, payloadBefore)
-		: payloadBefore
+	if (payloadEnter === 'skip') return
 
 	// process children
-	await processPattern(
-		lintRule,
-		...[target?.pattern, reference?.pattern] as TargetReferenceParameterTuple<Pattern>,
-		payloadVisit
-	)
+	if (shouldProcessMessageChildren(lintRule)) {
+		await processPattern(
+			lintRule,
+			...[target?.pattern, reference?.pattern] as TargetReferenceParameterTuple<Pattern>,
+			payloadEnter
+		)
+	}
 
-	if (after) {
-		await after(target as Message, reference, payloadVisit)
+	if (leave) {
+		await leave(target as Message, reference, payloadEnter)
 	}
 }
 
-const processPattern = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Pattern>): Promise<void> => {
-	const { before, visit, after } = lintRule.visitors.Pattern || {}
+// --------------------------------------------------------------------------------------------------------------------
 
-	const payloadBefore = before
+const processPattern = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Pattern>): Promise<void> => {
+	const { enter: before, leave: after } = lintRule.visitors.Pattern || {}
+
+	const payloadEnter = before
 		? await before(target as Pattern, reference, payloadInitial)
 		: payloadInitial
-	if (payloadBefore === 'skip') return
-
-	const payloadVisit = visit
-		? await visit(target as Pattern, reference, payloadBefore)
-		: payloadBefore
+	if (payloadEnter === 'skip') return
 
 	// process children
 	// TODO: how can we iterate over Elements? We can't really match them
 
 	if (after) {
-		await after(target as Pattern, reference, payloadVisit)
+		await after(target as Pattern, reference, payloadEnter)
 	}
 }

@@ -19,12 +19,12 @@ const missingKeyRule = (() => {
 		},
 		visitors: {
 			Resource: {
-				before: (target, _reference, _payload) => {
+				enter: (target, _reference, _payload) => {
 					if (target && target.languageTag.name === referenceLanguage) return 'skip'
 				},
 			},
 			Message: {
-				visit: (target, reference, _payload) => {
+				enter: (target, reference, _payload) => {
 					if (!target) {
 						reporter.reportError(reference, `Message with id '${reference?.id.name}' missing`)
 					}
@@ -46,12 +46,12 @@ const additionalKeyRule = (() => {
 		},
 		visitors: {
 			Resource: {
-				before: (target, _reference, _payload) => {
+				enter: (target, _reference, _payload) => {
 					if (target && target.languageTag.name === referenceLanguage) return 'skip'
 				},
 			},
 			Message: {
-				visit: (target, reference, _payload) => {
+				enter: (target, reference, _payload) => {
 					if (!reference) {
 						reporter.reportError(target, `Message with id '${target?.id.name}' is specified, mut missing in the reference`)
 					}
