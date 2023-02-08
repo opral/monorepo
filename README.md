@@ -11,7 +11,7 @@
 
 Inlang turns your git repository into the single source of truth for localization. Increase i18n and localization productivity with dev tools, an editor to manage translations, and automation via CI/CD:
 
-- [x] no hosting, accounts, and synchronization required.
+- [x] no hosting, extra accounts, or synchronization required.
 - [x] use git workflows like pull requests.
 - [x] automation via CI/CD.
 - [x] single source of truth that developers and translators collaborate on.
