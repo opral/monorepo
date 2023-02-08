@@ -27,15 +27,31 @@ export const analytics = new Proxy(posthog, {
   // wrapping the posthog function in a proxy to disable
   // posthog in development and on the server.
   get: (target, prop: keyof typeof posthog) => {
+    // deactivate in development and on the server
+    // be returning a mock function that does nothing
     if (
-      // deactivate in development and on the server
-      // be returning a mock function that does nothing
       (isProduction === false || isServer) &&
       typeof target[prop] === "function"
     ) {
-      // return empty function that simpy does nothing
       return () => undefined;
     }
+    // wrap the function in a try catch block to
+    // prevent console spamming in case of errors (e.g. network errors)
+    // that don't effect the user experience
+    else if (typeof target[prop] === "function") {
+      return (...args: any) => {
+        try {
+          target[prop](args);
+        } catch (e) {
+          // log to console in development
+          // in fhe future -> log to sentry
+          if (isProduction === false) {
+            console.error(e);
+          }
+        }
+      };
+    }
+    // return properties that are no function as is
     return target[prop];
   },
 });
