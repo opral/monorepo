@@ -1,58 +1,63 @@
 import { describe, expect, it } from "vitest";
 import type { Config } from '../config/schema.js';
 import { lint } from './index.js';
-import type { LintRuleInit } from './schema.js';
+import { inspect } from 'util';
+import type { LintRuleInit, Reporter } from './schema.js';
 
-const testRule = (() => {
+
+const debug = (element: unknown) => console.info(inspect(element, false, 999))
+
+const missingKeyRule = (() => {
+	let reporter: Reporter
 	let referenceLanguage: string
-	let languages: string[]
 
 	return {
-		id: 'test-rule',
+		id: 'missingKey',
 		initialize: (config) => {
-			console.log('init');
+			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
-			languages = config.languages
 		},
-		visit: {
+		visitors: {
 			Resource: {
-				before: (target, reference) => {
-					console.log('Resource before', target, reference);
+				before: (target, _reference, _payload) => {
 					if (target && target.languageTag.name === referenceLanguage) return 'skip'
 				},
-				lint: (target, reference) => {
-					console.log('Resource lint', target, reference);
-				},
-				after: (target, reference) => {
-					console.log('Resource after', target, reference);
-				}
 			},
 			Message: {
-				before: (target, reference) => {
-					console.log('Message before', target, reference);
+				visit: (target, reference, _payload) => {
+					if (!target) {
+						reporter.reportError(reference, `Message with id '${reference?.id.name}' missing`)
+					}
 				},
-				lint: (target, reference) => {
-					console.log('Message lint', target, reference);
-				},
-				after: (target, reference) => {
-					console.log('Message after', target, reference);
-				}
 			},
-			Pattern: {
-				before: (target, reference) => {
-					console.log('Pattern before', target, reference);
-				},
-				lint: (target, reference) => {
-					console.log('Pattern lint', target, reference);
-				},
-				after: (target, reference) => {
-					console.log('Pattern after', target, reference);
-				}
-			}
 		},
-		teardown: () => {
-			console.log('teardown');
-		}
+	}
+}) satisfies LintRuleInit
+
+const additionalKeyRule = (() => {
+	let reporter: Reporter
+	let referenceLanguage: string
+
+	return {
+		id: 'additionalKey',
+		initialize: (config) => {
+			reporter = config.reporter
+			referenceLanguage = config.referenceLanguage
+		},
+		visitors: {
+			Resource: {
+				before: (target, _reference, _payload) => {
+					if (target && target.languageTag.name === referenceLanguage) return 'skip'
+				},
+			},
+			Message: {
+				visit: (target, reference, _payload) => {
+					if (!reference) {
+						reporter.reportError(target, `Message with id '${target?.id.name}' is specified, mut missing in the reference`)
+					}
+				},
+			},
+		},
 	}
 }) satisfies LintRuleInit
 
@@ -86,18 +91,10 @@ const dummyConfig = {
 			body: [
 				{
 					type: "Message",
-					id: { type: "Identifier", name: "first-message" },
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: "Willkommen zu dieser Anwendung." }],
-					},
-				},
-				{
-					type: "Message",
 					id: { type: "Identifier", name: "second-message" },
 					pattern: {
 						type: "Pattern",
-						elements: [{ type: "Text", value: "Oops." }],
+						elements: [{ type: "Text", value: "Test" }],
 					},
 				}
 			],
@@ -105,7 +102,10 @@ const dummyConfig = {
 	},
 	writeResources: async () => undefined,
 	lint: {
-		rules: [testRule()],
+		rules: [
+			missingKeyRule(),
+			additionalKeyRule(),
+		],
 	}
 } satisfies Config
 
@@ -113,6 +113,6 @@ describe("lint", () => {
 	it("lint", async () => {
 		const result = await lint(dummyConfig)
 
-		console.log(11, result);
+		debug(result);
 	})
 })
