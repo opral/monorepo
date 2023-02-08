@@ -1,6 +1,6 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config } from '../config/schema.js'
-import type { LintableNode, LintRule, TargetReferenceParameterTuple } from './schema.js'
+import type { LintableNode, LintedNode, LintRule, LintType, TargetReferenceParameterTuple } from './schema.js'
 
 class LintError extends Error { }
 
@@ -14,6 +14,27 @@ const getLintRulesFromConfig = (config: Config) => {
 	return lint.rules
 }
 
+const createReporter = (id: string) => {
+	const report = (type: LintType, node: LintableNode | undefined, message: string, metadata?: unknown) => {
+		if (!node) return
+
+		node.lint = [
+			...((node as LintedNode).lint || []),
+			{
+				id,
+				type,
+				message,
+				...(metadata ? { metadata } : undefined)
+			}
+		]
+	}
+
+	return {
+		reportError: report.bind(undefined, 'error'),
+		reportWarning: report.bind(undefined, 'warning')
+	}
+}
+
 export const lint = async (config: Config) => {
 	const { referenceLanguage, languages, readResources } = config
 
@@ -23,119 +44,113 @@ export const lint = async (config: Config) => {
 		return
 	}
 
-	const resources = await readResources({ config });
+	const resources = structuredClone(await readResources({ config }));
 
 	const reference = getResourceForLanguage(resources, referenceLanguage);
 
 	// TODO: process this in parallel to speed things up
-	const results = []
 	for (const lintRule of lintRules) {
-		if (lintRule.initialize) {
-			await lintRule.initialize({ referenceLanguage, languages })
-		}
+		const reporter = createReporter(lintRule.id)
+
+		const payload = await lintRule.initialize({ referenceLanguage, languages, reporter })
 
 		for (const language of languages) {
 			const target = getResourceForLanguage(resources, language);
 
-			const result = await processResource(
+			await processResource(
 				lintRule,
-				...[target, reference] as TargetReferenceParameterTuple<Resource>,
-				undefined
+				target as Resource,
+				reference,
+				payload,
 			)
-
-			results.push(result)
 		}
 
 		if (lintRule.teardown) {
-			await lintRule.teardown()
+			await lintRule.teardown(payload)
 		}
 	}
 
-	return results
+	return resources
 }
 
 export type LintParameters<Node extends LintableNode> = [LintRule, ...TargetReferenceParameterTuple<Node>, unknown]
 
-const processResource = async (...[lintRule, target, reference]: LintParameters<Resource>) => {
-	const { before, lint, after } = lintRule.visit.Resource || {}
+const processResource = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Resource>): Promise<void> => {
+	const { before, visit, after } = lintRule.visitors.Resource || {}
 
-	const beforePayload = before
-		? await before(...[target, reference] as TargetReferenceParameterTuple<Resource>)
-		: undefined
-
-	if (beforePayload === 'skip') return
+	const payloadBefore = before
+		? await before(target as Resource, reference, payloadInitial)
+		: payloadInitial
+	if (payloadBefore === 'skip') return
 
 	const processedReferenceMessages = new Set<string>()
 
-	if (lint) {
-		await lint(...[target, reference] as TargetReferenceParameterTuple<Resource>)
-	}
+	const payloadVisit = visit
+		? await visit(target as Resource, reference, payloadBefore)
+		: payloadBefore
 
 	// process children
 	for (const targetMessage of target?.body || []) {
 		const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
 
-
-		await processMessage(lintRule, targetMessage, referenceMessage, beforePayload)
+		await processMessage(lintRule, targetMessage, referenceMessage, payloadVisit)
 
 		if (referenceMessage) {
 			processedReferenceMessages.add(referenceMessage.id.name)
 		}
 	}
-
 	const nonVisitedReferenceMessages = (reference?.body || [])
 		.filter(({ id }) => !processedReferenceMessages.has(id.name))
 	for (const referenceNode of nonVisitedReferenceMessages) {
-		await processMessage(lintRule, undefined, referenceNode, beforePayload)
+		await processMessage(lintRule, undefined, referenceNode, payloadVisit)
 		processedReferenceMessages.add(referenceNode.id.name)
 	}
 
 	if (after) {
-		await after(...[target, reference] as TargetReferenceParameterTuple<Resource>)
+		await after(target as Resource, reference, payloadVisit)
 	}
 }
 
-const processMessage = async (...[lintRule, target, reference]: LintParameters<Message>) => {
-	const { before, lint, after } = lintRule.visit.Message || {}
+const processMessage = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Message>): Promise<void> => {
+	const { before, visit, after } = lintRule.visitors.Message || {}
 
-	const beforePayload = before
-		? await before(...[target, reference] as TargetReferenceParameterTuple<Message>)
-		: undefined
-	if (beforePayload === 'skip') return
+	const payloadBefore = before
+		? await before(target as Message, reference as Message, payloadInitial)
+		: payloadInitial
+	if (payloadBefore === 'skip') return
 
-	if (lint) {
-		await lint(...[target, reference] as TargetReferenceParameterTuple<Message>)
-	}
+	const payloadVisit = visit
+		? await visit(target as Message, reference, payloadBefore)
+		: payloadBefore
 
 	// process children
 	await processPattern(
 		lintRule,
 		...[target?.pattern, reference?.pattern] as TargetReferenceParameterTuple<Pattern>,
-		beforePayload
+		payloadVisit
 	)
 
 	if (after) {
-		await after(...[target, reference] as TargetReferenceParameterTuple<Message>)
+		await after(target as Message, reference, payloadVisit)
 	}
 }
 
-const processPattern = async (...[lintRule, target, reference]: LintParameters<Pattern>) => {
-	const { before, lint, after } = lintRule.visit.Pattern || {}
+const processPattern = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Pattern>): Promise<void> => {
+	const { before, visit, after } = lintRule.visitors.Pattern || {}
 
-	const beforePayload = before
-		? await before(...[target, reference] as TargetReferenceParameterTuple<Pattern>)
-		: undefined
+	const payloadBefore = before
+		? await before(target as Pattern, reference, payloadInitial)
+		: payloadInitial
+	if (payloadBefore === 'skip') return
 
-	if (beforePayload === 'skip') return
-
-	if (lint) {
-		await lint(...[target, reference] as TargetReferenceParameterTuple<Pattern>)
-	}
+	const payloadVisit = visit
+		? await visit(target as Pattern, reference, payloadBefore)
+		: payloadBefore
 
 	// process children
 	// TODO: how can we iterate over Elements? We can't really match them
 
 	if (after) {
-		await after(...[target, reference] as TargetReferenceParameterTuple<Pattern>)
+		await after(target as Pattern, reference, payloadVisit)
 	}
 }
