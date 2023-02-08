@@ -18,10 +18,9 @@ export type LintableNode =
 	| Pattern
 
 type NodeVisitor<Node extends LintableNode> = {
-	before?: (
+	enter?: (
 		...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<'skip' | void | unknown>
-	visit?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void | unknown>
-	after?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void | unknown>
+	leave?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void | unknown>
 }
 
 export type Reporter = {
