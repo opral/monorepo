@@ -1,6 +1,6 @@
 import { describe, test } from "vitest";
 import type { Config } from '../config/schema.js';
-import { lint } from './index.js';
+import { lint } from './linter.js';
 import { inspect } from 'util';
 import type { LintRuleInit, Reporter } from './schema.js';
 
