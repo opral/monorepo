@@ -2,16 +2,18 @@ import { describe, test } from "vitest";
 import type { Config } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
-import type { LintRuleInit, Reporter } from './schema.js';
+import type { LintConfigSettings, LintRuleInit, Reporter } from './schema.js';
+import { parseLintType } from './reporter.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
-const missingKeyRule = (() => {
+const missingKeyRule = ((settings?) => {
 	let reporter: Reporter
 	let referenceLanguage: string
 
 	return {
 		id: 'missingKey',
+		type: parseLintType(settings, 'error'),
 		initialize: (config) => {
 			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
@@ -25,7 +27,7 @@ const missingKeyRule = (() => {
 			Message: {
 				enter: ({ target, reference }) => {
 					if (!target && reference) {
-						reporter.reportError(reference, `Message with id '${reference.id.name}' missing`)
+						reporter.reportIssue(reference, `Message with id '${reference.id.name}' missing`)
 					}
 				},
 			},
@@ -52,7 +54,7 @@ const additionalKeyRule = (() => {
 			Message: {
 				enter: ({ target, reference }) => {
 					if (!reference && target) {
-						reporter.reportError(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
+						reporter.reportIssue(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
 					}
 				},
 			},

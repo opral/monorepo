@@ -1,32 +1,12 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config } from '../config/schema.js'
-import type { LintableNode, LintedNode, LintRule, LintType, TargetReferenceParameterTuple } from './schema.js'
+import { createReporter } from './reporter.js';
+import type { LintableNode, LintRule, TargetReferenceParameterTuple } from './schema.js'
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
 
 const getLintRulesFromConfig = (config: Config) => config?.lint?.rules || []
-
-const createReporter = (id: string) => {
-	const report = (type: LintType, node: LintableNode, message: string, metadata?: unknown) => {
-		if (!node) return
-
-		node.lint = [
-			...((node as LintedNode).lint || []),
-			{
-				id,
-				type,
-				message,
-				...(metadata ? { metadata } : undefined)
-			}
-		]
-	}
-
-	return {
-		reportError: report.bind(undefined, 'error'),
-		reportWarning: report.bind(undefined, 'warning')
-	}
-}
 
 export const lint = async (config: Config) => {
 	const { referenceLanguage, languages, readResources } = config
@@ -42,7 +22,9 @@ export const lint = async (config: Config) => {
 	const reference = getResourceForLanguage(resources, referenceLanguage);
 
 	for (const lintRule of lintRules) {
-		const reporter = createReporter(lintRule.id)
+		if (!lintRule.type) continue
+
+		const reporter = createReporter(lintRule.id, lintRule.type)
 
 		const payload = await lintRule.initialize({ referenceLanguage, languages, reporter })
 

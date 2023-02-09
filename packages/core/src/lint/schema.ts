@@ -7,14 +7,10 @@ type MaybePromise<T> = T | Promise<T>
 
 export type LintType = 'error' | 'warning'
 
-type LintConfigOption<Option> = false | LintType | Option
+export type LintConfigSettings<Settings> = boolean | LintType | Settings
 
-type LintConfig<Config = Record<string, unknown>> = {
-	[Key in keyof Config]?: LintConfigOption<Config[Key]>
-}
-
-export type LintRuleInit<Config extends Record<string, unknown> | undefined = undefined> =
-	(...options: [undefined extends Config ? never : LintConfig<Config>]) => LintRule
+export type LintRuleInit<Settings = never> =
+	(settings?: LintConfigSettings<Settings>) => LintRule
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -37,15 +33,15 @@ type NodeVisitor<Node extends LintableNode> = {
 	leave?: <Input>(param: VisitorParam<Node, Input>) => MaybePromise<void>
 }
 
-export type Reporter = {
-	reportError: (node: LintableNode, message: string, metadata?: unknown) => void
-	reportWarning: (node: LintableNode, message: string, metadata?: unknown) => void
-}
-
 // --------------------------------------------------------------------------------------------------------------------
+
+export type Reporter = {
+	reportIssue: (node: LintableNode, message: string, metadata?: unknown) => void
+}
 
 export type LintRule = {
 	id: string
+	type: false | LintType
 	initialize: (config: Pick<Config, 'referenceLanguage' | 'languages'> & { reporter: Reporter }) => MaybePromise<unknown>
 	visitors: {
 		[Key in LintableNode['type']]?: NodeVisitor<GetByType<LintableNode, Key>>
