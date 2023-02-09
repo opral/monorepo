@@ -5,9 +5,9 @@ export type MaybePromise<T> = T | Promise<T>
 
 // --------------------------------------------------------------------------------------------------------------------
 
-export type LintType = 'error' | 'warning'
+export type LintLevel = 'error' | 'warning'
 
-export type LintConfigSettings<Settings> = boolean | LintType | Settings
+export type LintConfigSettings<Settings> = boolean | LintLevel | Settings
 
 export type LintRuleInit<Settings = never> =
 	(settings?: LintConfigSettings<Settings>) => LintRule
@@ -16,7 +16,7 @@ export type LintRuleInit<Settings = never> =
 
 export type LintResult = {
 	id: `${string}.${string}` // e.g. 'inlangStandardRules.missingKey'
-	type: LintType
+	level: LintLevel
 	message: string
 	metadata?: unknown
 }

@@ -1,7 +1,7 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config } from '../config/schema.js'
 import { createReporter } from './reporter.js';
-import { getLintRulesFromConfig, LintableNode, LintRule, TargetReferenceParameterTuple } from './rule.js';
+import { getLintRulesFromConfig, LintableNode, LintableNodeByType, LintRule, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
@@ -15,14 +15,14 @@ export const lint = async (config: Config) => {
 		return
 	}
 
-	const resources = structuredClone(await readResources({ config }));
+	const resources = await readResources({ config });
 
 	const reference = getResourceForLanguage(resources, referenceLanguage);
 
 	for (const lintRule of lintRules) {
-		if (!lintRule.type) continue
+		if (!lintRule.level) continue
 
-		const reporter = createReporter(lintRule.id, lintRule.type)
+		const reporter = createReporter(lintRule.id, lintRule.level)
 
 		const payload = await lintRule.initialize({ referenceLanguage, languages, reporter })
 
@@ -45,7 +45,19 @@ export const lint = async (config: Config) => {
 	return resources
 }
 
-export type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & {
+
+// --------------------------------------------------------------------------------------------------------------------
+
+const getVisitorFunctions = (visitors: NodeVisitors, node: LintableNode['type']) => {
+	const visitor = visitors[node] as NodeVisitor<LintableNodeByType<LintableNode, typeof node>> | undefined
+	if (!visitor) return { enter: undefined, leave: undefined }
+
+	if (typeof visitor === 'object') return visitor
+
+	return { enter: visitor, leave: undefined }
+}
+
+type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & {
 	lintRule: LintRule
 	payload: unknown
 }
@@ -61,7 +73,7 @@ const processResource = async ({
 	reference,
 	payload: payloadInitial
 }: ProcessNodeParam<Resource>): Promise<void> => {
-	const { enter, leave } = lintRule.visitors.Resource || {}
+	const { enter, leave } = getVisitorFunctions(lintRule.visitors, 'Resource')
 
 	const payloadEnter = enter
 		? await enter({ target: target as Resource, reference, payload: payloadInitial })
@@ -115,7 +127,7 @@ const processMessage = async ({
 	reference,
 	payload: payloadInitial
 }: ProcessNodeParam<Message>): Promise<void> => {
-	const { enter, leave } = lintRule.visitors.Message || {}
+	const { enter, leave } = getVisitorFunctions(lintRule.visitors, 'Message')
 
 	const payloadEnter = enter
 		? await enter({ target: target as Message, reference, payload: payloadInitial })
@@ -145,7 +157,7 @@ const processPattern = async ({
 	reference,
 	payload: payloadInitial
 }: ProcessNodeParam<Pattern>): Promise<void> => {
-	const { enter, leave } = lintRule.visitors.Pattern || {}
+	const { enter, leave } = getVisitorFunctions(lintRule.visitors, 'Pattern')
 
 	const payloadEnter = enter
 		? await enter({ target: target as Pattern, reference, payload: payloadInitial })

@@ -1,12 +1,14 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config } from '../config/schema.js';
 import type { Reporter } from './reporter.js';
-import type { LintType, MaybePromise } from './schema.js';
+import type { LintLevel, MaybePromise } from './schema.js';
 
 export type LintableNode =
 	| Resource
 	| Message
 	| Pattern
+
+export type LintableNodeByType<Node extends { type: string }, Key> = Node extends { type: Key } ? Node : never
 
 export type TargetReferenceParameterTuple<Node extends LintableNode> =
 	| { target: Node, reference: Node }
@@ -17,21 +19,29 @@ type VisitorParam<Node extends LintableNode, Input> = TargetReferenceParameterTu
 	payload?: Input
 }
 
-type NodeVisitor<Node extends LintableNode> = {
-	enter?: <Input, Output>(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void | Output>
-	leave?: <Input>(param: VisitorParam<Node, Input>) => MaybePromise<void>
+type EnterNodeFunction<Node extends LintableNode, Input, Output> =
+	(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void | Output>
+
+type LeaveNodeFunction<Node extends LintableNode, Input> =
+	(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void>
+
+export type NodeVisitor<Node extends LintableNode> =
+	| EnterNodeFunction<Node, any, any>
+	| {
+		enter?: EnterNodeFunction<Node, any, any>
+		leave?: LeaveNodeFunction<Node, any>
+	}
+
+export type NodeVisitors = {
+	[Key in LintableNode['type']]?: NodeVisitor<LintableNodeByType<LintableNode, Key>>
 }
 
 export type LintRule = {
 	id: string
-	type: false | LintType
+	level: false | LintLevel
 	initialize: (param: Pick<Config, 'referenceLanguage' | 'languages'> & { reporter: Reporter }) => MaybePromise<unknown>
-	visitors: {
-		[Key in LintableNode['type']]?: NodeVisitor<GetByType<LintableNode, Key>>
-	},
+	visitors: NodeVisitors
 	teardown?: (payload: unknown) => MaybePromise<void>
 }
-
-type GetByType<Node extends { type: string }, Key> = Node extends { type: Key } ? Node : never
 
 export const getLintRulesFromConfig = (config: Config) => config?.lint?.rules || []
