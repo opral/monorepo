@@ -1,12 +1,9 @@
 import * as vscode from "vscode";
-import { ExtractMessage } from "./actions/extractMessage.js";
-import { setState, state } from "./state.js";
+import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import type { Config as InlangConfig } from "@inlang/core/config";
-import { $import } from "@inlang/core/config";
-import fs from "node:fs/promises";
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -58,11 +55,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   const configModule: InlangConfig = (await import(closestConfigPath)).config;
   setState({
     config: configModule,
-    configPath: closestConfigPath,
-    bundles: await configModule.readBundles({ $import, fs: fs as any }),
+    configPath: closestConfigPath
   });
-  const b = state().bundles;
-  console.log(b);
+
   // register the commands
   args.context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -70,18 +65,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
       extractMessageCommand.callback
     )
   );
-  // register the code actions
-  for (const language of state().config.ideExtension.documentSelectors) {
-    args.context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(
-        language,
-        new ExtractMessage(),
-        {
-          providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
-        }
-      )
-    );
-  }
+
   // register decorations
   inlinePattern({ activeTextEditor });
 }
