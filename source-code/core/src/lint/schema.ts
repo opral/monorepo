@@ -3,31 +3,46 @@ import type { Config } from '../config/schema.js'
 
 type MaybePromise<T> = T | Promise<T>
 
+// --------------------------------------------------------------------------------------------------------------------
+
 export type LintType = 'error' | 'warning'
 
+type LintConfigOption<Option> = false | LintType | Option
+
 type LintConfig<Config = Record<string, unknown>> = {
-	[Key in keyof Config]?: false | LintType | Config[Key]
+	[Key in keyof Config]?: LintConfigOption<Config[Key]>
 }
 
 export type LintRuleInit<Config extends Record<string, unknown> | undefined = undefined> =
 	(...options: [undefined extends Config ? never : LintConfig<Config>]) => LintRule
+
+// --------------------------------------------------------------------------------------------------------------------
 
 export type LintableNode =
 	| Resource
 	| Message
 	| Pattern
 
+export type TargetReferenceParameterTuple<Node extends LintableNode> =
+	| { target: Node, reference: Node }
+	| { target: Node, reference: Node | undefined }
+	| { target: Node | undefined, reference: Node }
+
+type VisitorParam<Node extends LintableNode, Input> = TargetReferenceParameterTuple<Node> & {
+	payload?: Input
+}
+
 type NodeVisitor<Node extends LintableNode> = {
-	enter?: (
-		...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<'skip' | void | unknown>
-	leave?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void>
+	enter?: <Input, Output>(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void | Output>
+	leave?: <Input>(param: VisitorParam<Node, Input>) => MaybePromise<void>
 }
 
 export type Reporter = {
-	reportError: (node: LintableNode | undefined, message: string, metadata?: unknown) => void
-	reportWarning: (node: LintableNode | undefined, message: string, metadata?: unknown) => void
+	reportError: (node: LintableNode, message: string, metadata?: unknown) => void
+	reportWarning: (node: LintableNode, message: string, metadata?: unknown) => void
 }
 
+// --------------------------------------------------------------------------------------------------------------------
 
 export type LintRule = {
 	id: string
@@ -40,10 +55,7 @@ export type LintRule = {
 
 type GetByType<Node extends { type: string }, Key> = Node extends { type: Key } ? Node : never
 
-export type TargetReferenceParameterTuple<Node extends LintableNode> =
-	| [Node, Node]
-	| [Node, Node | undefined]
-	| [Node | undefined, Node]
+// --------------------------------------------------------------------------------------------------------------------
 
 export type LintResult = {
 	id: `${string}.${string}` // e.g. 'inlangStandardRules.missingKey'
@@ -55,6 +67,7 @@ export type LintResult = {
 type LintInformation = {
 	lint?: LintResult[]
 }
+
 type LintedResource = Resource & LintInformation
 type LintedMessage = Message & LintInformation
 type LintedPattern = Pattern & LintInformation

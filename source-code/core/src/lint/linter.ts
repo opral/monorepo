@@ -5,15 +5,10 @@ import type { LintableNode, LintedNode, LintRule, LintType, TargetReferenceParam
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
 
-const getLintRulesFromConfig = (config: Config) => {
-	const { lint } = config
-	if (!lint) return []
-
-	return lint.rules
-}
+const getLintRulesFromConfig = (config: Config) => config?.lint?.rules || []
 
 const createReporter = (id: string) => {
-	const report = (type: LintType, node: LintableNode | undefined, message: string, metadata?: unknown) => {
+	const report = (type: LintType, node: LintableNode, message: string, metadata?: unknown) => {
 		if (!node) return
 
 		node.lint = [
@@ -46,7 +41,6 @@ export const lint = async (config: Config) => {
 
 	const reference = getResourceForLanguage(resources, referenceLanguage);
 
-	// TODO: process this in parallel to speed things up
 	for (const lintRule of lintRules) {
 		const reporter = createReporter(lintRule.id)
 
@@ -55,12 +49,12 @@ export const lint = async (config: Config) => {
 		for (const language of languages) {
 			const target = getResourceForLanguage(resources, language);
 
-			await processResource(
+			await processResource({
 				lintRule,
-				target as Resource,
+				target: target as Resource,
 				reference,
-				payload,
-			)
+				payload
+			})
 		}
 
 		if (lintRule.teardown) {
@@ -71,18 +65,26 @@ export const lint = async (config: Config) => {
 	return resources
 }
 
-export type LintParameters<Node extends LintableNode> = [LintRule, ...TargetReferenceParameterTuple<Node>, unknown]
+export type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & {
+	lintRule: LintRule
+	payload: unknown
+}
 
 // --------------------------------------------------------------------------------------------------------------------
 
 const shouldProcessResourceChildren = (lintRule: LintRule) =>
 	!!lintRule.visitors.Message || shouldProcessMessageChildren(lintRule)
 
-const processResource = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Resource>): Promise<void> => {
+const processResource = async ({
+	lintRule,
+	target,
+	reference,
+	payload: payloadInitial
+}: ProcessNodeParam<Resource>): Promise<void> => {
 	const { enter, leave } = lintRule.visitors.Resource || {}
 
 	const payloadEnter = enter
-		? await enter(target as Resource, reference, payloadInitial)
+		? await enter({ target: target as Resource, reference, payload: payloadInitial })
 		: payloadInitial
 	if (payloadEnter === 'skip') return
 
@@ -93,7 +95,12 @@ const processResource = async (...[lintRule, target, reference, payloadInitial]:
 		for (const targetMessage of target?.body || []) {
 			const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
 
-			await processMessage(lintRule, targetMessage, referenceMessage, payloadEnter)
+			await processMessage({
+				lintRule,
+				target: targetMessage as Message,
+				reference: referenceMessage,
+				payload: payloadEnter
+			})
 
 			if (referenceMessage) {
 				processedReferenceMessages.add(referenceMessage.id.name)
@@ -103,13 +110,18 @@ const processResource = async (...[lintRule, target, reference, payloadInitial]:
 		const nonVisitedReferenceMessages = (reference?.body || [])
 			.filter(({ id }) => !processedReferenceMessages.has(id.name))
 		for (const referenceNode of nonVisitedReferenceMessages) {
-			await processMessage(lintRule, undefined, referenceNode, payloadEnter)
+			await processMessage({
+				lintRule,
+				target: undefined,
+				reference: referenceNode,
+				payload: payloadEnter
+			})
 			processedReferenceMessages.add(referenceNode.id.name)
 		}
 	}
 
 	if (leave) {
-		await leave(target as Resource, reference, payloadEnter)
+		await leave({ target: target as Resource, reference, payload: payloadEnter })
 	}
 }
 
@@ -117,36 +129,46 @@ const processResource = async (...[lintRule, target, reference, payloadInitial]:
 
 const shouldProcessMessageChildren = (lintRule: LintRule) => !!lintRule.visitors.Pattern
 
-const processMessage = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Message>): Promise<void> => {
+const processMessage = async ({
+	lintRule,
+	target,
+	reference,
+	payload: payloadInitial
+}: ProcessNodeParam<Message>): Promise<void> => {
 	const { enter, leave } = lintRule.visitors.Message || {}
 
 	const payloadEnter = enter
-		? await enter(target as Message, reference as Message, payloadInitial)
+		? await enter({ target: target as Message, reference, payload: payloadInitial })
 		: payloadInitial
 	if (payloadEnter === 'skip') return
 
 	// process children
 	if (shouldProcessMessageChildren(lintRule)) {
-		await processPattern(
+		await processPattern({
 			lintRule,
-			target?.pattern as Pattern,
-			reference?.pattern,
-			payloadEnter
-		)
+			target: target?.pattern as Pattern,
+			reference: reference?.pattern,
+			payload: payloadEnter
+		})
 	}
 
 	if (leave) {
-		await leave(target as Message, reference, payloadEnter)
+		await leave({ target: target as Message, reference, payload: payloadEnter })
 	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const processPattern = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Pattern>): Promise<void> => {
+const processPattern = async ({
+	lintRule,
+	target,
+	reference,
+	payload: payloadInitial
+}: ProcessNodeParam<Pattern>): Promise<void> => {
 	const { enter, leave } = lintRule.visitors.Pattern || {}
 
 	const payloadEnter = enter
-		? await enter(target as Pattern, reference, payloadInitial)
+		? await enter({ target: target as Pattern, reference, payload: payloadInitial })
 		: payloadInitial
 	if (payloadEnter === 'skip') return
 
@@ -154,6 +176,6 @@ const processPattern = async (...[lintRule, target, reference, payloadInitial]: 
 	// TODO: how can we iterate over Elements? We can't really match them between `target` and `resource`
 
 	if (leave) {
-		await leave(target as Pattern, reference, payloadEnter)
+		await leave({ target: target as Pattern, reference, payload: payloadEnter })
 	}
 }
