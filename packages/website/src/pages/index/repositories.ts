@@ -20,6 +20,11 @@ export const repositories: Repositories = [
     repository: "osmosis-frontend",
     description: "Web interface for Osmosis Zone",
   },
+  {
+    owner: "allinurl",
+    repository: "goaccess",
+    description: "GoAccess is a real-time web log analyzer and interactive viewer",
+  },
 ];
 
 type Repositories = Array<{
