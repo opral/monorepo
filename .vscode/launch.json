@@ -18,9 +18,9 @@
       "name": "debug ide-extension",
       "type": "extensionHost",
       "request": "launch",
-      "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension"
+        "--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
+        "${workspaceFolder}/source-code/ide-extension/example"
       ],
       "outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
     },

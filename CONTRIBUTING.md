@@ -13,7 +13,7 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 
 - [Docker](https://www.docker.com/)
 - [VSCode](https://vscode.dev/)
-- [The dev containers extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [VSCode extension: Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 ## Getting started
 
@@ -34,7 +34,7 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 ## Contributing changes
 
 1. **Fork** the project on Github
-2. **Open** the freshly cloned project with Visual Studio Code and [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+2. **Open** the freshly cloned project with Visual Studio Code and [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 3. **Create** a branch for your new feature or improvement.
 4. **Test** with `npm run test`
 5. **Debug** and write tests for your changes.
@@ -45,5 +45,6 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 
 #### `ide-extension`
 
-- Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project.
+- Clone `https://github.com/inlang/example` into `source-code/ide-extension` for debugging with `git clone https://github.com/inlang/example source-code/ide-extension/example`.
+- Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project, after you run the development environment with `npm run dev`.
 - Launch `debug ide-exension tests` via Visual Studio Codes `Run and Debug` view to debug the extensions tests.

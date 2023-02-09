@@ -3,9 +3,11 @@
 src/**
 .gitignore
 .yarnrc
-.eslintrc.cjs
-.prettierrc
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
+
+example/**
+../../**
+../**
