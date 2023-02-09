@@ -3,61 +3,57 @@ import type { Config } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
 import type { LintRuleInit } from './schema.js';
-import { parseLintType, Reporter } from './reporter.js';
+import { parseLintSettings, Reporter } from './reporter.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
 const missingKeyRule = ((settings?) => {
+	const { level } = parseLintSettings(settings, 'error')
+
 	let reporter: Reporter
 	let referenceLanguage: string
 
 	return {
 		id: 'missingKey',
-		type: parseLintType(settings, 'error'),
-		initialize: (config) => {
+		level,
+		initialize: async (config) => {
 			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
 		},
 		visitors: {
-			Resource: {
-				enter: ({ target }) => {
-					if (target && target.languageTag.name === referenceLanguage) return 'skip'
-				},
+			Resource: ({ target }) => {
+				if (target && target.languageTag.name === referenceLanguage) return 'skip'
 			},
-			Message: {
-				enter: ({ target, reference }) => {
-					if (!target && reference) {
-						reporter.reportIssue(reference, `Message with id '${reference.id.name}' missing`)
-					}
-				},
-			},
+			Message: ({ target, reference }) => {
+				if (!target && reference) {
+					reporter.report(reference, `Message with id '${reference.id.name}' missing`)
+				}
+			}
 		},
 	}
 }) satisfies LintRuleInit
 
 const additionalKeyRule = ((settings?) => {
+	const { level } = parseLintSettings(settings, 'error')
+
 	let reporter: Reporter
 	let referenceLanguage: string
 
 	return {
 		id: 'additionalKey',
-		type: parseLintType(settings, 'error'),
+		level,
 		initialize: (config) => {
 			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
 		},
 		visitors: {
-			Resource: {
-				enter: ({ target }) => {
-					if (target && target.languageTag.name === referenceLanguage) return 'skip'
-				},
+			Resource: ({ target }) => {
+				if (target && target.languageTag.name === referenceLanguage) return 'skip'
 			},
-			Message: {
-				enter: ({ target, reference }) => {
-					if (!reference && target) {
-						reporter.reportIssue(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
-					}
-				},
+			Message: ({ target, reference }) => {
+				if (!reference && target) {
+					reporter.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
+				}
 			},
 		},
 	}
@@ -105,11 +101,16 @@ const dummyConfig = {
 	writeResources: async () => undefined,
 	lint: {
 		rules: [
-			missingKeyRule(),
+			missingKeyRule('warning'),
 			additionalKeyRule(),
 		],
 	}
 } satisfies Config
+
+test("debug code", async () => {
+	const result = await lint(dummyConfig)
+	debug(result)
+})
 
 describe("lint", () => {
 	describe("rules", async () => {

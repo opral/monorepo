@@ -1,32 +1,29 @@
 import type { LintableNode } from './rule.js'
-import type { LintConfigSettings, LintedNode, LintType } from './schema.js'
+import type { LintConfigSettings, LintedNode, LintLevel } from './schema.js'
 
 export type Reporter = {
-	reportIssue: (node: LintableNode, message: string, metadata?: unknown) => void
+	report: (node: LintableNode, message: string, metadata?: unknown) => void
 }
 
-export const parseLintType = (settings: LintConfigSettings<unknown>, defaultLevel: LintType): false | LintType => {
-	if (settings === false) return false
-	if (settings === 'error') return 'error'
-	if (settings === 'warning') return 'warning'
+export const parseLintSettings = <T>(settings: LintConfigSettings<T>, defaultLevel: LintLevel): { level: false | LintLevel, options: T } => {
 
-	return defaultLevel
+	const [level, options] = Array.isArray(settings) ? settings : [settings ?? defaultLevel]
+
+	return { level, options }
 }
 
-export const createReporter = (id: string, type: LintType) => {
-	return {
-		reportIssue: (node: LintableNode, message: string, metadata?: unknown) => {
-			if (!node) return
+export const createReporter = (id: string, level: LintLevel): Reporter => ({
+	report: (node: LintableNode, message: string, metadata?: unknown) => {
+		if (!node) return
 
-			node.lint = [
-				...((node as LintedNode).lint || []),
-				{
-					id,
-					type,
-					message,
-					...(metadata ? { metadata } : undefined)
-				}
-			]
-		}
+		node.lint = [
+			...((node as LintedNode).lint || []),
+			{
+				id,
+				level,
+				message,
+				...(metadata ? { metadata } : undefined)
+			}
+		]
 	}
-}
+})
