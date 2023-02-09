@@ -1,8 +1,6 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { LintRule } from './rule.js'
 
-export type MaybePromise<T> = T | Promise<T>
-
 // --------------------------------------------------------------------------------------------------------------------
 
 export type LintLevel = 'error' | 'warning'
@@ -25,8 +23,8 @@ type LintInformation = {
 	lint?: LintResult[]
 }
 
-type LintedResource = Resource & LintInformation
-type LintedMessage = Message & LintInformation
-type LintedPattern = Pattern & LintInformation
+export type LintedResource = Resource & LintInformation
+export type LintedMessage = Message & LintInformation
+export type LintedPattern = Pattern & LintInformation
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern

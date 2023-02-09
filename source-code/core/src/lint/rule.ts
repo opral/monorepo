@@ -1,7 +1,8 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Reporter } from './reporter.js';
-import type { LintLevel, MaybePromise } from './schema.js';
+import type { LintLevel } from './schema.js';
+import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
 	| Resource
