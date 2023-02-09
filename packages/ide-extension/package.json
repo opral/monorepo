@@ -20,6 +20,14 @@
     "Visualization"
   ],
   "main": "./dist/main.cjs",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlang.extractMessage",
+        "title": "Extract Message"
+      }
+    ]
+  },
   "scripts": {
     "_vscode:prepublish": "npm run build",
     "_build": "rollup --config",
@@ -30,7 +38,8 @@
     "_format": "prettier ./src/** -w --config ../../.prettierrc.json"
   },
   "dependencies": {
-    "@inlang/core": "*"
+    "@inlang/core": "*",
+    "node-fetch": "^2.6.9"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",
