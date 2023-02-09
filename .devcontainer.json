@@ -1,6 +1,6 @@
 {
   "name": "inlang-dev-container",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
   "customizations": {
     "vscode": {
       "extensions": [
