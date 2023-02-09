@@ -18,14 +18,14 @@ const missingKeyRule = (() => {
 		},
 		visitors: {
 			Resource: {
-				enter: (target, _reference, _payload) => {
+				enter: ({ target }) => {
 					if (target && target.languageTag.name === referenceLanguage) return 'skip'
 				},
 			},
 			Message: {
-				enter: (target, reference, _payload) => {
-					if (!target) {
-						reporter.reportError(reference, `Message with id '${reference?.id.name}' missing`)
+				enter: ({ target, reference }) => {
+					if (!target && reference) {
+						reporter.reportError(reference, `Message with id '${reference.id.name}' missing`)
 					}
 				},
 			},
@@ -45,14 +45,14 @@ const additionalKeyRule = (() => {
 		},
 		visitors: {
 			Resource: {
-				enter: (target, _reference, _payload) => {
+				enter: ({ target }) => {
 					if (target && target.languageTag.name === referenceLanguage) return 'skip'
 				},
 			},
 			Message: {
-				enter: (target, reference, _payload) => {
-					if (!reference) {
-						reporter.reportError(target, `Message with id '${target?.id.name}' is specified, mut missing in the reference`)
+				enter: ({ target, reference }) => {
+					if (!reference && target) {
+						reporter.reportError(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
 					}
 				},
 			},
@@ -227,6 +227,10 @@ describe("lint", () => {
 	})
 
 	describe("reporter", async () => {
+		test("should leave original resources untouched and operate on a copy", async () => {
+
+		})
+
 		describe("should attach 'lint' attribute", async () => {
 			describe("to 'Resource' node", async () => {
 				test("as 'error'", async () => {
@@ -325,6 +329,16 @@ describe("lint", () => {
 					test("'leave'", async () => {
 
 					})
+				})
+			})
+
+			describe("if node gets passed to the reporter `Reporter`", async () => {
+				test("for 'error'", async () => {
+
+				})
+
+				test("for 'warning'", async () => {
+
 				})
 			})
 		})
