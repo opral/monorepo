@@ -184,8 +184,8 @@ const processPattern = async ({
 		: payloadInitial
 	if (payloadEnter === 'skip') return
 
-	// process children
-	// TODO: how can we iterate over Elements? We can't really match them between `target` and `resource`
+	// we can't really iterate over elements because we can't match them between `target` and `resource`
+	// to have a consistent API, we allow both `enter` and `leave` even if `leave` does not make sense in this case
 
 	if (leave) {
 		await leave({ target: target as Pattern, reference, payload: payloadEnter })
