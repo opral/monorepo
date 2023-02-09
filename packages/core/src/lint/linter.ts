@@ -1,12 +1,10 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config } from '../config/schema.js'
 import { createReporter } from './reporter.js';
-import type { LintableNode, LintRule, TargetReferenceParameterTuple } from './schema.js'
+import { getLintRulesFromConfig, LintableNode, LintRule, TargetReferenceParameterTuple } from './rule.js';
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
-
-const getLintRulesFromConfig = (config: Config) => config?.lint?.rules || []
 
 export const lint = async (config: Config) => {
 	const { referenceLanguage, languages, readResources } = config

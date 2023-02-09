@@ -1,4 +1,9 @@
-import type { LintableNode, LintConfigSettings, LintedNode, LintType } from './schema.js'
+import type { LintableNode } from './rule.js'
+import type { LintConfigSettings, LintedNode, LintType } from './schema.js'
+
+export type Reporter = {
+	reportIssue: (node: LintableNode, message: string, metadata?: unknown) => void
+}
 
 export const parseLintType = (settings: LintConfigSettings<unknown>, defaultLevel: LintType): false | LintType => {
 	if (settings === false) return false

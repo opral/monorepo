@@ -2,8 +2,8 @@ import { describe, test } from "vitest";
 import type { Config } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
-import type { LintConfigSettings, LintRuleInit, Reporter } from './schema.js';
-import { parseLintType } from './reporter.js';
+import type { LintRuleInit } from './schema.js';
+import { parseLintType, Reporter } from './reporter.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
@@ -35,12 +35,13 @@ const missingKeyRule = ((settings?) => {
 	}
 }) satisfies LintRuleInit
 
-const additionalKeyRule = (() => {
+const additionalKeyRule = ((settings?) => {
 	let reporter: Reporter
 	let referenceLanguage: string
 
 	return {
 		id: 'additionalKey',
+		type: parseLintType(settings, 'error'),
 		initialize: (config) => {
 			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
@@ -233,35 +234,25 @@ describe("lint", () => {
 
 		})
 
+		test("should be able to disable rule", async () => {
+
+		})
+
+		test("should be able to override lint type", async () => {
+
+		})
+
 		describe("should attach 'lint' attribute", async () => {
-			describe("to 'Resource' node", async () => {
-				test("as 'error'", async () => {
+			test("to 'Resource' node", async () => {
 
-				})
-
-				test("as 'warning'", async () => {
-
-				})
 			})
 
-			describe("to 'Message' node", async () => {
-				test("as 'error'", async () => {
+			test("to 'Message' node", async () => {
 
-				})
-
-				test("as 'warning'", async () => {
-
-				})
 			})
 
-			describe("to 'Pattern' node", async () => {
-				test("as 'error'", async () => {
+			test("to 'Pattern' node", async () => {
 
-				})
-
-				test("as 'warning'", async () => {
-
-				})
 			})
 		})
 	})
@@ -334,14 +325,8 @@ describe("lint", () => {
 				})
 			})
 
-			describe("if node gets passed to the reporter `Reporter`", async () => {
-				test("for 'error'", async () => {
+			test("if no node gets passed to the reporter", async () => {
 
-				})
-
-				test("for 'warning'", async () => {
-
-				})
 			})
 		})
 	})
