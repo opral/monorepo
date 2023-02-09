@@ -4,6 +4,9 @@ import { extractMessageCommand } from "./commands/extractMessage.js";
 import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import type { Config as InlangConfig } from "@inlang/core/config";
+import { initialize$import } from "@inlang/core/config";
+import fs from "node:fs/promises";
+import fetch from 'node-fetch';
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -52,7 +55,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     options: potentialConfigFileUris.map((uri) => uri.path),
     to: activeTextEditor.document.uri.path,
   });
-  const configModule: InlangConfig = (await import(closestConfigPath)).config;
+
+  const $import = initialize$import({ fs, fetch });
+  const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $import });
   setState({
     config: configModule,
     configPath: closestConfigPath
