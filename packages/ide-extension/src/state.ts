@@ -1,5 +1,4 @@
 import type { Config as InlangConfig } from "@inlang/core/config";
-import type { Resource } from "@inlang/core/ast";
 
 /**
  * The state of the vscode extension.
@@ -10,7 +9,6 @@ type State = {
    * The config path is useful to resolve relative paths in the config.
    */
   configPath: string;
-  resources: Resource[];
 };
 
 let _state: State;

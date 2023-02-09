@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { state } from "../state.js";
 import {
   extractMessageCommand,
   ExtractMessageCommandArgs,
