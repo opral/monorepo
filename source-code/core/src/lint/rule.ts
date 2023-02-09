@@ -1,5 +1,5 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
-import type { Config } from '../config/schema.js';
+import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Reporter } from './reporter.js';
 import type { LintLevel, MaybePromise } from './schema.js';
 
@@ -39,7 +39,12 @@ export type NodeVisitors = {
 export type LintRule = {
 	id: string
 	level: false | LintLevel
-	initialize: (param: Pick<Config, 'referenceLanguage' | 'languages'> & { reporter: Reporter }) => MaybePromise<unknown>
+	initialize: (
+		param: Pick<Config, 'referenceLanguage' | 'languages'> & {
+			env: EnvironmentFunctions,
+			reporter: Reporter
+		}
+	) => MaybePromise<unknown>
 	visitors: NodeVisitors
 	teardown?: (payload: unknown) => MaybePromise<void>
 }

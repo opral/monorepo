@@ -1,5 +1,5 @@
-import { describe, test } from "vitest";
-import type { Config } from '../config/schema.js';
+import { describe, test, vi } from "vitest";
+import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
 import type { LintRuleInit } from './schema.js';
@@ -59,6 +59,11 @@ const additionalKeyRule = ((settings?) => {
 	}
 }) satisfies LintRuleInit
 
+const dummyEnv: EnvironmentFunctions = {
+	$fs: vi.fn() as any,
+	$import: vi.fn(),
+}
+
 const dummyConfig = {
 	referenceLanguage: 'en',
 	languages: ['en', 'de'],
@@ -108,7 +113,7 @@ const dummyConfig = {
 } satisfies Config
 
 test("debug code", async () => {
-	const result = await lint(dummyConfig)
+	const result = await lint(dummyConfig, dummyEnv)
 	debug(result)
 })
 
