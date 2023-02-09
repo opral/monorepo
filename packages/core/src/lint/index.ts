@@ -7,5 +7,4 @@ export type { LintRule } from './rule.js'
 // TODO: add `createRuleCollection` utility function
 
 // TODO: create utility functions to check and get lint issues
-// TODO: process rules in parallel to speed things up
 // TODO: add debug logs

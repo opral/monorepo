@@ -1,7 +1,7 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config, EnvironmentFunctions } from '../config/schema.js'
 import { createReporter } from './reporter.js';
-import { getLintRulesFromConfig, LintableNode, LintableNodeByType, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
+import { getLintRulesFromConfig, LintableNode, LintableNodeByType, LintRule, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
@@ -19,31 +19,51 @@ export const lint = async (config: Config, env: EnvironmentFunctions) => {
 
 	const reference = getResourceForLanguage(resources, referenceLanguage);
 
-	for (const lintRule of lintRules) {
-		const { level, id, initialize, visitors, teardown } = lintRule
-		if (!level) continue
-
-		const reporter = createReporter(id, level)
-
-		const payload = await initialize({ env, referenceLanguage, languages, reporter })
-
-		for (const language of languages) {
-			const target = getResourceForLanguage(resources, language);
-
-			await processResource({
-				visitors,
-				target: target as Resource,
-				reference,
-				payload
-			})
-		}
-
-		if (teardown) {
-			await teardown(payload)
-		}
-	}
+	await Promise.all(
+		lintRules.map(lintRule =>
+			processLintRule({ env, lintRule, referenceLanguage, languages, reference, resources })
+		)
+	)
 
 	return resources
+}
+
+const processLintRule = async ({
+	env,
+	lintRule,
+	referenceLanguage,
+	languages,
+	reference,
+	resources,
+}: {
+	env: EnvironmentFunctions,
+	lintRule: LintRule,
+	referenceLanguage: string,
+	languages: string[],
+	reference: Resource | undefined,
+	resources: Resource[]
+}) => {
+	const { level, id, initialize, visitors, teardown } = lintRule
+	if (!level) return
+
+	const reporter = createReporter(id, level)
+
+	const payload = await initialize({ env, referenceLanguage, languages, reporter })
+
+	for (const language of languages) {
+		const target = getResourceForLanguage(resources, language);
+
+		await processResource({
+			visitors,
+			target: target as Resource,
+			reference,
+			payload
+		})
+	}
+
+	if (teardown) {
+		await teardown(payload)
+	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
