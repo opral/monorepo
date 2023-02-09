@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
-import { $import } from "@inlang/core/config";
 
 export async function inlinePattern(args: {
   activeTextEditor: vscode.TextEditor;
@@ -38,11 +37,11 @@ async function updateDecorations(args: {
 }): Promise<void> {
   const sourceCode = args.activeTextEditor.document.getText();
   console.log({ sourceCode });
-  const matches = await state().config.ideExtension.inlinePatternMatcher({
-    text: sourceCode,
-    $import,
-  });
-  console.log({ matches });
+  //const matches = await state().config.ideExtension.inlinePatternMatcher({
+  //  text: sourceCode,
+  //  $import,
+  //});
+  //console.log({ matches });
   // const matches = args.parser.parse(sourceCode) as {
   // 	id: string;
   // 	location: {
