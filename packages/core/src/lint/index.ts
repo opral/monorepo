@@ -75,7 +75,8 @@ export type LintParameters<Node extends LintableNode> = [LintRule, ...TargetRefe
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const shouldProcessResourceChildren = (lintRule: LintRule) => !!lintRule.visitors.Message || shouldProcessMessageChildren(lintRule)
+const shouldProcessResourceChildren = (lintRule: LintRule) =>
+	!!lintRule.visitors.Message || shouldProcessMessageChildren(lintRule)
 
 const processResource = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Resource>): Promise<void> => {
 	const { enter, leave } = lintRule.visitors.Resource || {}
@@ -128,7 +129,8 @@ const processMessage = async (...[lintRule, target, reference, payloadInitial]: 
 	if (shouldProcessMessageChildren(lintRule)) {
 		await processPattern(
 			lintRule,
-			...[target?.pattern, reference?.pattern] as TargetReferenceParameterTuple<Pattern>,
+			target?.pattern as Pattern,
+			reference?.pattern,
 			payloadEnter
 		)
 	}
@@ -141,17 +143,17 @@ const processMessage = async (...[lintRule, target, reference, payloadInitial]: 
 // --------------------------------------------------------------------------------------------------------------------
 
 const processPattern = async (...[lintRule, target, reference, payloadInitial]: LintParameters<Pattern>): Promise<void> => {
-	const { enter: before, leave: after } = lintRule.visitors.Pattern || {}
+	const { enter, leave } = lintRule.visitors.Pattern || {}
 
-	const payloadEnter = before
-		? await before(target as Pattern, reference, payloadInitial)
+	const payloadEnter = enter
+		? await enter(target as Pattern, reference, payloadInitial)
 		: payloadInitial
 	if (payloadEnter === 'skip') return
 
 	// process children
-	// TODO: how can we iterate over Elements? We can't really match them
+	// TODO: how can we iterate over Elements? We can't really match them between `target` and `resource`
 
-	if (after) {
-		await after(target as Pattern, reference, payloadEnter)
+	if (leave) {
+		await leave(target as Pattern, reference, payloadEnter)
 	}
 }

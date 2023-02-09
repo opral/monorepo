@@ -20,7 +20,7 @@ export type LintableNode =
 type NodeVisitor<Node extends LintableNode> = {
 	enter?: (
 		...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<'skip' | void | unknown>
-	leave?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void | unknown>
+	leave?: (...[target, reference, payload]: [...TargetReferenceParameterTuple<Node>, unknown]) => MaybePromise<void>
 }
 
 export type Reporter = {
