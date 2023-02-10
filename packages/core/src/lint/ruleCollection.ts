@@ -1,10 +1,10 @@
-import type { LintConfigSettings, LintRuleInit } from './rule.js';
+import type { LintConfigSettings, LintRule } from './rule.js';
 
-type CollectionSettings<RulesSettings extends Record<string, LintRuleInit>> = {
+type CollectionSettings<RulesSettings extends Record<string, LintRule>> = {
 	[Key in keyof RulesSettings]?: Parameters<RulesSettings[Key]>[0] | Parameters<RulesSettings[Key]>
 }
 
-export const createRuleCollection = <RulesSettings extends Record<string, LintRuleInit>>(rules: RulesSettings) =>
+export const createRuleCollection = <RulesSettings extends Record<string, LintRule>>(rules: RulesSettings) =>
 	(settings: CollectionSettings<RulesSettings> = {}) =>
 		Object.entries(rules)
 			.map(([id, rule]) => {
