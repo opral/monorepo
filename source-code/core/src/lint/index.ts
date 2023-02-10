@@ -9,3 +9,9 @@ export type { ConfiguredLintRule, LintRule } from './rule.js'
 //		- for correct parameter handling
 //		- for correct return type
 // TODO: add debug logs
+
+// TODO: documentation
+//    - how to use the lint functionality
+//    - how to create a rule
+//    - how to test a rule
+//    - how to publish a rule
