@@ -2,21 +2,17 @@ import { test, vi } from "vitest";
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
-import { parseLintSettings, Reporter } from './reporter.js';
-import type { LintRule } from './rule.js';
+import type { Reporter } from './reporter.js';
+import { createRule, LintRule } from './rule.js';
 import { createRuleCollection } from './ruleCollection.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
-const missingKeyRule = ((...settings) => {
-	const { level } = parseLintSettings(settings, 'error')
-
+const missingKeyRule = createRule('inlang.missingKey', () => {
 	let reporter: Reporter
 	let referenceLanguage: string
 
 	return {
-		id: 'inlang.missingKey',
-		level,
 		initialize: async (config) => {
 			reporter = config.reporter
 			referenceLanguage = config.referenceLanguage
@@ -34,31 +30,33 @@ const missingKeyRule = ((...settings) => {
 	}
 }) satisfies LintRule
 
-const additionalKeyRule = ((...settings) => {
-	const { level } = parseLintSettings(settings, 'error')
+const additionalKeyRule = createRule<{ test: boolean }>(
+	'inlang.additionalKey',
+	(options) => {
+		let reporter: Reporter
+		let referenceLanguage: string
 
-	let reporter: Reporter
-	let referenceLanguage: string
+		if (options?.test) {
+			console.log('test')
+		}
 
-	return {
-		id: 'inlang.additionalKey',
-		level,
-		initialize: (config) => {
-			reporter = config.reporter
-			referenceLanguage = config.referenceLanguage
-		},
-		visitors: {
-			Resource: ({ target }) => {
-				if (target && target.languageTag.name === referenceLanguage) return 'skip'
+		return {
+			initialize: (config) => {
+				reporter = config.reporter
+				referenceLanguage = config.referenceLanguage
 			},
-			Message: ({ target, reference }) => {
-				if (!reference && target) {
-					reporter.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
-				}
+			visitors: {
+				Resource: ({ target }) => {
+					if (target && target.languageTag.name === referenceLanguage) return 'skip'
+				},
+				Message: ({ target, reference }) => {
+					if (!reference && target) {
+						reporter.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
+					}
+				},
 			},
-		},
-	}
-}) satisfies LintRule<{ test: boolean }>
+		}
+	})
 
 export const standardRules = createRuleCollection({
 	missingKeyRule: missingKeyRule,
