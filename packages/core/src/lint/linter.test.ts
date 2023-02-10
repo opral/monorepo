@@ -2,8 +2,8 @@ import { describe, test, vi } from "vitest";
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
-import type { LintRuleInit } from './schema.js';
 import { parseLintSettings, Reporter } from './reporter.js';
+import type { LintRuleInit } from './rule.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
@@ -14,7 +14,7 @@ const missingKeyRule = ((settings?) => {
 	let referenceLanguage: string
 
 	return {
-		id: 'missingKey',
+		id: 'inlang.missingKey',
 		level,
 		initialize: async (config) => {
 			reporter = config.reporter
@@ -40,7 +40,7 @@ const additionalKeyRule = ((settings?) => {
 	let referenceLanguage: string
 
 	return {
-		id: 'additionalKey',
+		id: 'inlang.additionalKey',
 		level,
 		initialize: (config) => {
 			reporter = config.reporter
@@ -117,237 +117,234 @@ test("debug code", async () => {
 	debug(result)
 })
 
-describe("lint", () => {
-	describe("rules", async () => {
-		test("should not start linting if no rules are specified", async () => {
+// --------------------------------------------------------------------------------------------------------------------
 
-		})
-
-		test("should process all resources", async () => {
-
-		})
-
-		test("should process all resources for all rules", async () => {
-
-		})
-	})
-
-	describe("initialize", async () => {
-		test("should call 'initialize' with all params", async () => {
-
-		})
-	})
-
-	describe("teardown", async () => {
-		test("should call 'teardown' if present", async () => {
-
-		})
+describe("rules", async () => {
+	test("should be able to disable rule", async () => {
 
 	})
 
-	describe("visitors", () => {
-		test("should visit all nodes exactly once", async () => {
+	test("should be able to override lint type", async () => {
 
-		})
-
-		describe("should await", async () => {
-			describe("'Resource'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
-
-			describe("'Message'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
-
-			describe("'Pattern'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
-		})
-
-		describe("should skip processing children", async () => {
-			describe("if no visitor is specified", async () => {
-				describe("for 'Resource'", async () => {
-					test("node", async () => {
-
-					})
-
-					describe("but not if children has visitor specified", async () => {
-						test("for Message", async () => {
-
-						})
-
-						test("for Pattern", async () => {
-
-						})
-					})
-				})
-
-				describe("for Message", async () => {
-					test("node", async () => {
-
-					})
-
-					describe("but not if children has visitor specified", async () => {
-						test("for Pattern", async () => {
-
-						})
-					})
-				})
-
-				describe("for Pattern", async () => {
-					test("node", async () => {
-
-					})
-				})
-			})
-
-			describe("if 'skip' get's returned by a visitor", async () => {
-				test("for 'Resource'", async () => {
-
-				})
-
-				test("for 'Message'", async () => {
-
-				})
-
-				test("for 'Pattern'", async () => {
-
-				})
-			})
-		})
 	})
 
-	describe("reporter", async () => {
-		test("should leave original resources untouched and operate on a copy", async () => {
+	test("should not start linting if no rules are specified", async () => {
+
+	})
+
+	test("should process all 'Resources'", async () => {
+
+	})
+
+	test("should process all 'Resources' for all rules", async () => {
+
+	})
+})
+
+// --------------------------------------------------------------------------------------------------------------------
+
+describe("visitors", () => {
+	test("should visit all nodes exactly once", async () => {
+
+	})
+
+	describe("should await", async () => {
+		test("'initialize'", async () => {
 
 		})
 
-		test("should be able to disable rule", async () => {
+		test("'teardown'", async () => {
 
 		})
 
-		test("should be able to override lint type", async () => {
-
-		})
-
-		describe("should attach 'lint' attribute", async () => {
-			test("to 'Resource' node", async () => {
+		describe("'Resource'", async () => {
+			test("'enter'", async () => {
 
 			})
 
-			test("to 'Message' node", async () => {
+			test("'leave'", async () => {
+
+			})
+		})
+
+		describe("'Message'", async () => {
+			test("'enter'", async () => {
 
 			})
 
-			test("to 'Pattern' node", async () => {
+			test("'leave'", async () => {
+
+			})
+		})
+
+		describe("'Pattern'", async () => {
+			test("'enter'", async () => {
+
+			})
+
+			test("'leave'", async () => {
 
 			})
 		})
 	})
 
-	describe("exceptions", async () => {
-		describe("should not kill process", async () => {
-			test("if 'teardown' is not present", async () => {
+	describe("should skip processing children", async () => {
+		describe("if no visitor is specified", async () => {
+			describe("for 'Resource'", async () => {
+				test("node", async () => {
+
+				})
+
+				describe("but not if children has visitor specified", async () => {
+					test("for Message", async () => {
+
+					})
+
+					test("for Pattern", async () => {
+
+					})
+				})
+			})
+
+			describe("for Message", async () => {
+				test("node", async () => {
+
+				})
+
+				describe("but not if children has visitor specified", async () => {
+					test("for Pattern", async () => {
+
+					})
+				})
+			})
+
+			describe("for Pattern", async () => {
+				test("node", async () => {
+
+				})
+			})
+		})
+
+		describe("if 'skip' get's returned by a visitor", async () => {
+			test("for 'Resource'", async () => {
 
 			})
 
+			test("for 'Message'", async () => {
+
+			})
+
+			test("for 'Pattern'", async () => {
+
+			})
+		})
+	})
+})
+
+// --------------------------------------------------------------------------------------------------------------------
+
+describe("exceptions", async () => {
+	describe("should not kill process", async () => {
+		test("if 'teardown' is not present", async () => {
+
+		})
+
+		describe("for 'Resource'", async () => {
+			test("if not present", async () => {
+
+			})
+
+			test("if 'enter' is not present", async () => {
+
+			})
+
+			test("if 'leave' is not present", async () => {
+
+			})
+		})
+
+		describe("for 'Message'", async () => {
+			test("if not present", async () => {
+
+			})
+
+			test("if 'enter' is not present", async () => {
+
+			})
+
+			test("if 'leave' is not present", async () => {
+
+			})
+		})
+
+		describe("for 'Pattern'", async () => {
+			test("if not present", async () => {
+
+			})
+
+			test("if 'enter' is not present", async () => {
+
+			})
+
+			test("if 'leave' is not present", async () => {
+
+			})
+		})
+
+		describe("if visitor throws", async () => {
 			describe("in 'Resource'", async () => {
-				test("if 'enter' is not present", async () => {
+				test("'enter'", async () => {
 
 				})
 
-				test("if 'leave' is not present", async () => {
+				test("'leave'", async () => {
 
 				})
 			})
 
 			describe("in 'Message'", async () => {
-				test("if 'enter' is not present", async () => {
+				test("'enter'", async () => {
 
 				})
 
-				test("if 'leave' is not present", async () => {
+				test("'leave'", async () => {
 
 				})
 			})
 
 			describe("in 'Pattern'", async () => {
-				test("if 'enter' is not present", async () => {
+				test("'enter'", async () => {
 
 				})
 
-				test("if 'leave' is not present", async () => {
+				test("'leave'", async () => {
 
-				})
-			})
-
-			describe("if visitor throws", async () => {
-				describe("in 'Resource'", async () => {
-					test("'enter'", async () => {
-
-					})
-
-					test("'leave'", async () => {
-
-					})
-				})
-
-				describe("in 'Message'", async () => {
-					test("'enter'", async () => {
-
-					})
-
-					test("'leave'", async () => {
-
-					})
-				})
-
-				describe("in 'Pattern'", async () => {
-					test("'enter'", async () => {
-
-					})
-
-					test("'leave'", async () => {
-
-					})
 				})
 			})
+		})
+	})
+})
 
-			test("if no node gets passed to the reporter", async () => {
+// --------------------------------------------------------------------------------------------------------------------
+
+describe("payloads", async () => {
+	describe("should receive the payload", async () => {
+		test("in 'initialize", async () => {
+
+		})
+
+		describe("in 'teardown'", async () => {
+			test("from the 'initialize' function", async () => {
+
+			})
+
+			test("'undefined' if no payload returned from 'initialize'", async () => {
 
 			})
 		})
 	})
 
-	describe("payloads", async () => {
-		describe("should receive the payload", async () => {
-			describe("in teardown", async () => {
-				test("from the 'initialize' function", async () => {
-
-				})
-			})
-		})
-
-		// test pass copy instead of object reference
-		// test altering payloads
-		// test not returning payloads
-	})
+	// test pass copy instead of object reference
+	// test altering payloads
+	// test not returning payloads
 })
