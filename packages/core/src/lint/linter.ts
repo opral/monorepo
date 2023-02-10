@@ -37,8 +37,8 @@ const processLintRule = async ({
 	resources,
 }: {
 	env: EnvironmentFunctions,
-	referenceLanguage: string,
 	lintRule: ConfiguredLintRule,
+	referenceLanguage: string,
 	languages: string[],
 	reference: Resource | undefined,
 	resources: Resource[]
