@@ -54,11 +54,11 @@ describe("createReporter", async () => {
 
 		})
 
-		test("should set the passed `payload`", async () => {
+		test("should set the passed `metadata`", async () => {
 
 		})
 
-		test("should not set `payload` if nothing get's passed", async () => {
+		test("should not set `metadata` if nothing get's passed", async () => {
 
 		})
 	})
