@@ -5,4 +5,7 @@ export type { ConfiguredLintRule as LintRule, LintRule as LintRuleInit } from '.
 
 // TODO: write actual tests
 // TODO: write type definition tests
+// TODO: create helper functions so plugin authors can test their own rules
+//		- for correct parameter handling
+//		- for correct return type
 // TODO: add debug logs

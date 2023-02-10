@@ -37,7 +37,7 @@ export type NodeVisitors = {
 }
 
 export type LintConfigSettings<Settings> =
-	[] | [boolean | LintLevel] | [boolean | LintLevel, Settings?]
+	[] | [boolean | LintLevel] | [LintLevel, Settings?]
 
 export type LintRule<Settings = never> =
 	(...settings: LintConfigSettings<Settings>) => ConfiguredLintRule
