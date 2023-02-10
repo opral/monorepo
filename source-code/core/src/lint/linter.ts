@@ -37,15 +37,14 @@ const processLintRule = async ({
 	resources,
 }: {
 	env: EnvironmentFunctions,
-		lintRule: ConfiguredLintRule,
 	referenceLanguage: string,
+	lintRule: ConfiguredLintRule,
 	languages: string[],
 	reference: Resource | undefined,
 	resources: Resource[]
 }) => {
 	const { level, id, initialize, visitors, teardown } = lintRule
 	if (!level) return
-	console.log(11, id, level);
 
 	const reporter = createReporter(id, level)
 
