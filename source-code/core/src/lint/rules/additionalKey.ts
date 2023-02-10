@@ -1,13 +1,13 @@
-import type { Reporter } from '../reporter.js'
+import type { Context } from '../context.js'
 import { createRule } from '../rule.js'
 
 export const additionalKeyRule = createRule('inlang.additionalKey', () => {
-	let reporter: Reporter
+	let context: Context
 	let referenceLanguage: string
 
 	return {
 		initialize: (config) => {
-			reporter = config.reporter
+			context = config.context
 			referenceLanguage = config.referenceLanguage
 		},
 		visitors: {
@@ -16,7 +16,7 @@ export const additionalKeyRule = createRule('inlang.additionalKey', () => {
 			},
 			Message: ({ target, reference }) => {
 				if (!reference && target) {
-					reporter.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
+					context.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
 				}
 			},
 		},

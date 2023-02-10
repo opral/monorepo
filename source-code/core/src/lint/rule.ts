@@ -1,6 +1,6 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
-import { LintLevel, parseLintSettings, Reporter } from './reporter.js';
+import { LintLevel, parseLintSettings, Context } from './context.js';
 import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
@@ -50,7 +50,7 @@ export type ConfiguredLintRule = {
 	initialize: (
 		param: Pick<Config, 'referenceLanguage' | 'languages'> & {
 			env: EnvironmentFunctions,
-			reporter: Reporter
+			context: Context
 		}
 	) => MaybePromise<unknown>
 	visitors: NodeVisitors
