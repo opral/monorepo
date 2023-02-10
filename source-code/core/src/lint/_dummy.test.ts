@@ -3,7 +3,7 @@ import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
 import { parseLintSettings, Reporter } from './reporter.js';
-import type { LintRuleInit } from './rule.js';
+import type { LintRule } from './rule.js';
 import { createRuleCollection } from './ruleCollection.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
@@ -32,7 +32,7 @@ const missingKeyRule = ((...settings) => {
 			}
 		},
 	}
-}) satisfies LintRuleInit
+}) satisfies LintRule
 
 const additionalKeyRule = ((...settings) => {
 	const { level } = parseLintSettings(settings, 'error')
@@ -58,7 +58,7 @@ const additionalKeyRule = ((...settings) => {
 			},
 		},
 	}
-}) satisfies LintRuleInit<{ test: boolean }>
+}) satisfies LintRule<{ test: boolean }>
 
 export const standardRules = createRuleCollection({
 	missingKeyRule: missingKeyRule,

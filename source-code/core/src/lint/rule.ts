@@ -39,12 +39,12 @@ export type NodeVisitors = {
 export type LintConfigSettings<Settings> =
 	[] | [boolean | LintLevel] | [boolean | LintLevel, Settings?]
 
-export type LintRuleInit<Settings = never> =
-	(...settings: LintConfigSettings<Settings>) => LintRule
+export type LintRule<Settings = never> =
+	(...settings: LintConfigSettings<Settings>) => ConfiguredLintRule
 
 export type LintRuleId = `${string}.${string}` // e.g. 'inlangStandardRules.missingKey'
 
-export type LintRule = {
+export type ConfiguredLintRule = {
 	id: LintRuleId
 	level: false | LintLevel
 	initialize: (
