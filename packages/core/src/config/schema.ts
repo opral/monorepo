@@ -51,7 +51,7 @@ export type Config = {
     resources: ast.Resource[];
   }) => Promise<void>;
   lint?: {
-    rules: LintRule[]
+    rules: (LintRule | LintRule[])[]
   }
 
   /**

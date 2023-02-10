@@ -45,6 +45,7 @@ const processLintRule = async ({
 }) => {
 	const { level, id, initialize, visitors, teardown } = lintRule
 	if (!level) return
+	console.log(11, id, level);
 
 	const reporter = createReporter(id, level)
 

@@ -4,10 +4,11 @@ import { lint } from './linter.js';
 import { inspect } from 'util';
 import { parseLintSettings, Reporter } from './reporter.js';
 import type { LintRuleInit } from './rule.js';
+import { createRuleCollection } from './ruleCollection.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
-const missingKeyRule = ((settings?) => {
+const missingKeyRule = ((...settings) => {
 	const { level } = parseLintSettings(settings, 'error')
 
 	let reporter: Reporter
@@ -33,7 +34,7 @@ const missingKeyRule = ((settings?) => {
 	}
 }) satisfies LintRuleInit
 
-const additionalKeyRule = ((settings?) => {
+const additionalKeyRule = ((...settings) => {
 	const { level } = parseLintSettings(settings, 'error')
 
 	let reporter: Reporter
@@ -57,7 +58,35 @@ const additionalKeyRule = ((settings?) => {
 			},
 		},
 	}
-}) satisfies LintRuleInit
+}) satisfies LintRuleInit<{ test: boolean }>
+
+export const standardRules = createRuleCollection({
+	missingKeyRule: missingKeyRule,
+	missingKeyRule1: missingKeyRule,
+	missingKeyRule2: missingKeyRule,
+	missingKeyRule3: missingKeyRule,
+	additionalKeyRule: additionalKeyRule,
+	additionalKeyRule1: additionalKeyRule,
+	additionalKeyRule2: additionalKeyRule,
+	additionalKeyRule3: additionalKeyRule,
+	additionalKeyRule4: additionalKeyRule,
+});
+
+standardRules({
+	missingKeyRule: false,
+	missingKeyRule1: 'error',
+	missingKeyRule2: ['error'],
+	// @ts-expect-error
+	missingKeyRule3: ['error', 'cool'],
+
+	additionalKeyRule: false,
+	additionalKeyRule1: 'warning',
+	additionalKeyRule2: ['error'],
+	additionalKeyRule3: ['error', { test: true }],
+	// @ts-expect-error
+	additionalKeyRule4: ['error', { test: 'uncool' }],
+});
+
 
 const dummyEnv: EnvironmentFunctions = {
 	$fs: vi.fn() as any,
@@ -106,8 +135,9 @@ const dummyConfig = {
 	writeResources: async () => undefined,
 	lint: {
 		rules: [
+			standardRules(),
 			missingKeyRule('warning'),
-			additionalKeyRule(),
+			additionalKeyRule(true),
 		],
 	}
 } satisfies Config
