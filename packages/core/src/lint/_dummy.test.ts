@@ -2,89 +2,17 @@ import { test, vi } from "vitest";
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
 import { inspect } from 'util';
-import type { Reporter } from './reporter.js';
-import { createRule, LintRule } from './rule.js';
 import { createRuleCollection } from './ruleCollection.js';
+import { additionalKeyRule } from './rules/additionalKey.js';
+import { missingKeyRule } from './rules/missingKey.js';
+import { createBrandingRule } from './rules/brandingRule.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
-const missingKeyRule = createRule('inlang.missingKey', () => {
-	let reporter: Reporter
-	let referenceLanguage: string
-
-	return {
-		initialize: async (config) => {
-			reporter = config.reporter
-			referenceLanguage = config.referenceLanguage
-		},
-		visitors: {
-			Resource: ({ target }) => {
-				if (target && target.languageTag.name === referenceLanguage) return 'skip'
-			},
-			Message: ({ target, reference }) => {
-				if (!target && reference) {
-					reporter.report(reference, `Message with id '${reference.id.name}' missing`)
-				}
-			}
-		},
-	}
-}) satisfies LintRule
-
-const additionalKeyRule = createRule<{ test: boolean }>(
-	'inlang.additionalKey',
-	(options) => {
-		let reporter: Reporter
-		let referenceLanguage: string
-
-		if (options?.test) {
-			console.log('test')
-		}
-
-		return {
-			initialize: (config) => {
-				reporter = config.reporter
-				referenceLanguage = config.referenceLanguage
-			},
-			visitors: {
-				Resource: ({ target }) => {
-					if (target && target.languageTag.name === referenceLanguage) return 'skip'
-				},
-				Message: ({ target, reference }) => {
-					if (!reference && target) {
-						reporter.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
-					}
-				},
-			},
-		}
-	})
-
 export const standardRules = createRuleCollection({
-	missingKeyRule: missingKeyRule,
-	missingKeyRule1: missingKeyRule,
-	missingKeyRule2: missingKeyRule,
-	missingKeyRule3: missingKeyRule,
-	additionalKeyRule: additionalKeyRule,
-	additionalKeyRule1: additionalKeyRule,
-	additionalKeyRule2: additionalKeyRule,
-	additionalKeyRule3: additionalKeyRule,
-	additionalKeyRule4: additionalKeyRule,
+	missingKeyRule,
+	additionalKeyRule,
 });
-
-standardRules({
-	missingKeyRule: false,
-	missingKeyRule1: 'error',
-	missingKeyRule2: ['error'],
-	// @ts-expect-error
-	missingKeyRule3: ['error', 'cool'],
-
-	additionalKeyRule: false,
-	additionalKeyRule1: 'warning',
-	additionalKeyRule2: ['error'],
-	additionalKeyRule3: ['error', { test: true }],
-	// @ts-expect-error
-	additionalKeyRule4: ['error', { test: 'uncool' }],
-});
-
 
 const dummyEnv: EnvironmentFunctions = {
 	$fs: vi.fn() as any,
@@ -107,7 +35,7 @@ const dummyConfig = {
 					id: { type: "Identifier", name: "first-message" },
 					pattern: {
 						type: "Pattern",
-						elements: [{ type: "Text", value: "Welcome to this app." }],
+						elements: [{ type: "Text", value: "Welcome to this Redbull app." }],
 					},
 				}
 			],
@@ -134,8 +62,9 @@ const dummyConfig = {
 	lint: {
 		rules: [
 			standardRules(),
-			missingKeyRule('warning'),
-			additionalKeyRule(true),
+			// missingKeyRule('warning'),
+			// additionalKeyRule(true),
+			createBrandingRule('Red Bull', ['redbull', 'RedBull', 'Redbull'])(),
 		],
 	}
 } satisfies Config

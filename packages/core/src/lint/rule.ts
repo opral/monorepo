@@ -59,7 +59,7 @@ export type ConfiguredLintRule = {
 
 export const getLintRulesFromConfig = (config: Config) => (config.lint?.rules || []).flat()
 
-export const createRule = <Settings = never>(
+export const createRule = <Settings>(
 	id: LintRuleId,
 	configureLintRule: (settings?: Settings) => Omit<ConfiguredLintRule, 'id' | 'level'>
 ) =>
