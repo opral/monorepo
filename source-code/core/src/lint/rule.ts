@@ -1,7 +1,6 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
-import type { Reporter } from './reporter.js';
-import type { LintLevel } from './schema.js';
+import type { LintConfigSettings, LintLevel, Reporter } from './reporter.js';
 import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
@@ -37,8 +36,13 @@ export type NodeVisitors = {
 	[Key in LintableNode['type']]?: NodeVisitor<LintableNodeByType<LintableNode, Key>>
 }
 
+export type LintRuleInit<Settings = never> =
+	(settings?: LintConfigSettings<Settings>) => LintRule
+
+export type LintRuleId = `${string}.${string}` // e.g. 'inlangStandardRules.missingKey'
+
 export type LintRule = {
-	id: string
+	id: LintRuleId
 	level: false | LintLevel
 	initialize: (
 		param: Pick<Config, 'referenceLanguage' | 'languages'> & {
@@ -50,4 +54,4 @@ export type LintRule = {
 	teardown?: (payload: unknown) => MaybePromise<void>
 }
 
-export const getLintRulesFromConfig = (config: Config) => config?.lint?.rules || []
+export const getLintRulesFromConfig = (config: Config) => config.lint?.rules || []

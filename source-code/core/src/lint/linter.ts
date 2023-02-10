@@ -95,9 +95,9 @@ const processResource = async ({
 }: ProcessNodeParam<Resource>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, 'Resource')
 
-	const payloadEnter = enter
-		? await enter({ target: target as Resource, reference, payload: payloadInitial })
-		: payloadInitial
+	const payloadEnter = (enter
+		&& await enter({ target: target as Resource, reference, payload: payloadInitial }))
+		?? payloadInitial
 	if (payloadEnter === 'skip') return
 
 	// process children
@@ -149,9 +149,9 @@ const processMessage = async ({
 }: ProcessNodeParam<Message>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, 'Message')
 
-	const payloadEnter = enter
-		? await enter({ target: target as Message, reference, payload: payloadInitial })
-		: payloadInitial
+	const payloadEnter = (enter
+		&& await enter({ target: target as Message, reference, payload: payloadInitial }))
+		?? payloadInitial
 	if (payloadEnter === 'skip') return
 
 	// process children
@@ -179,9 +179,9 @@ const processPattern = async ({
 }: ProcessNodeParam<Pattern>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, 'Pattern')
 
-	const payloadEnter = enter
-		? await enter({ target: target as Pattern, reference, payload: payloadInitial })
-		: payloadInitial
+	const payloadEnter = (enter
+		&& await enter({ target: target as Pattern, reference, payload: payloadInitial }))
+		?? payloadInitial
 	if (payloadEnter === 'skip') return
 
 	// we can't really iterate over elements because we can't match them between `target` and `resource`
