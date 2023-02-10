@@ -1,9 +1,7 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
-import type { LintableNode, LintRuleId } from './rule.js'
+import type { LintableNode, LintConfigSettings, LintRuleId } from './rule.js'
 
 export type LintLevel = 'error' | 'warning'
-
-export type LintConfigSettings<Settings> = boolean | LintLevel | Settings
 
 export type LintReport = {
 	id: LintRuleId
@@ -26,11 +24,17 @@ export type Reporter = {
 	report: (node: LintableNode, message: string, metadata?: unknown) => void
 }
 
-export const parseLintSettings = <T>(settings: LintConfigSettings<T>, defaultLevel: LintLevel): { level: false | LintLevel, options: T } => {
+export const parseLintSettings = <T>(settings: LintConfigSettings<T> | undefined, defaultLevel: LintLevel): { level: false | LintLevel, options: T | undefined } => {
+	const [parsedLevel, options] = settings || []
 
-	const [level, options] = Array.isArray(settings) ? settings : [settings ?? defaultLevel]
+	const level = parsedLevel === undefined || parsedLevel === true
+		? defaultLevel
+		: parsedLevel
 
-	return { level, options }
+	return {
+		level,
+		options,
+	}
 }
 
 export const createReporter = (id: LintRuleId, level: LintLevel): Reporter => ({

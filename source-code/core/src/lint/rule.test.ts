@@ -8,4 +8,8 @@ describe("getLintRulesFromConfig", async () => {
 	test("should return all specified lint rules", async () => {
 
 	})
+
+	test("should flatten lint rules", async () => {
+
+	})
 })
