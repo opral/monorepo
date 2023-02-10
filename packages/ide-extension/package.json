@@ -39,9 +39,10 @@
   },
   "dependencies": {
     "@inlang/core": "*",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/vscode": "^1.75.0",
