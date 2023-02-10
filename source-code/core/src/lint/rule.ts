@@ -1,6 +1,6 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
-import type { LintLevel, Reporter } from './reporter.js';
+import { LintLevel, parseLintSettings, Reporter } from './reporter.js';
 import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
@@ -58,3 +58,17 @@ export type ConfiguredLintRule = {
 }
 
 export const getLintRulesFromConfig = (config: Config) => (config.lint?.rules || []).flat()
+
+export const createRule = <Settings = never>(
+	id: LintRuleId,
+	configureLintRule: (settings?: Settings) => Omit<ConfiguredLintRule, 'id' | 'level'>
+) =>
+	((...settings) => {
+		const { level, options } = parseLintSettings(settings, 'error')
+
+		return {
+			...configureLintRule(options),
+			id,
+			level,
+		}
+	}) satisfies LintRule<Settings>
