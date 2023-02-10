@@ -20,7 +20,7 @@ export type LintedPattern = Pattern & LintInformation
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
 
-export type Reporter = {
+export type Context = {
 	report: (node: LintableNode, message: string, metadata?: unknown) => void
 }
 
@@ -37,7 +37,7 @@ export const parseLintSettings = <T>(settings: LintConfigSettings<T> | undefined
 	}
 }
 
-export const createReporter = (id: LintRuleId, level: LintLevel): Reporter => ({
+export const createContext = (id: LintRuleId, level: LintLevel): Context => ({
 	report: (node: LintableNode, message: string, metadata?: unknown) => {
 		if (!node) return
 

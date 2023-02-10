@@ -1,6 +1,6 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config, EnvironmentFunctions } from '../config/schema.js'
-import { createReporter } from './reporter.js';
+import { createContext } from './context.js';
 import { getLintRulesFromConfig, LintableNode, LintableNodeByType, ConfiguredLintRule, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
@@ -46,9 +46,9 @@ const processLintRule = async ({
 	const { level, id, initialize, visitors, teardown } = lintRule
 	if (!level) return
 
-	const reporter = createReporter(id, level)
+	const context = createContext(id, level)
 
-	const payload = await initialize({ env, referenceLanguage, languages, reporter })
+	const payload = await initialize({ env, referenceLanguage, languages, context })
 
 	for (const language of languages) {
 		const target = getResourceForLanguage(resources, language);

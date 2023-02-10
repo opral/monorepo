@@ -1,4 +1,4 @@
-import type { LintedNode, LintReport, LintedResource, LintedMessage, LintedPattern, LintLevel } from './reporter.js';
+import type { LintedNode, LintReport, LintedResource, LintedMessage, LintedPattern, LintLevel } from './context.js';
 import { unhandled } from './_utilities.js';
 
 export const getAllLintReports = (node: LintedNode, nested = true): LintReport[] => {

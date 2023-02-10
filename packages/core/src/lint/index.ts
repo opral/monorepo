@@ -1,6 +1,6 @@
 export { lint } from './linter.js'
 export * from './query.js'
-export { type Reporter, parseLintSettings } from './reporter.js'
+export { type Context, parseLintSettings } from './context.js'
 export type { ConfiguredLintRule, LintRule } from './rule.js'
 
 // TODO: write actual tests
