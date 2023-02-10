@@ -12,7 +12,7 @@ export type LintRuleInit<Settings = never> =
 
 // --------------------------------------------------------------------------------------------------------------------
 
-export type LintResult = {
+export type LintReport = {
 	id: `${string}.${string}` // e.g. 'inlangStandardRules.missingKey'
 	level: LintLevel
 	message: string
@@ -20,7 +20,7 @@ export type LintResult = {
 }
 
 type LintInformation = {
-	lint?: LintResult[]
+	lint?: LintReport[]
 }
 
 export type LintedResource = Resource & LintInformation
