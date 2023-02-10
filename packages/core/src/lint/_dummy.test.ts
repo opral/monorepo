@@ -9,7 +9,7 @@ import { createBrandingRule } from './rules/brandingRule.js';
 
 const debug = (element: unknown) => console.info(inspect(element, false, 999))
 
-export const standardRules = createRuleCollection({
+const standardRules = createRuleCollection({
 	missingKeyRule,
 	additionalKeyRule,
 });
