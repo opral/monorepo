@@ -16,7 +16,7 @@ export const additionalKeyRule = createRule('inlang.additionalKey', () => {
 			},
 			Message: ({ target, reference }) => {
 				if (!reference && target) {
-					context.report(target, `Message with id '${target.id.name}' is specified, mut missing in the reference`)
+					context.report(target, `Message with id '${target.id.name}' is specified, but missing in the reference`)
 				}
 			},
 		},
