@@ -21,7 +21,7 @@ export type LintedPattern = Pattern & LintInformation
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
 
 export type Context = {
-	report: (node: LintableNode, message: string, metadata?: unknown) => void
+	report: (args: { node: LintableNode, message: string, metadata?: unknown }) => void
 }
 
 export const parseLintSettings = <T>(settings: LintConfigSettings<T> | undefined, defaultLevel: LintLevel): { level: false | LintLevel, options: T | undefined } => {
@@ -37,8 +37,8 @@ export const parseLintSettings = <T>(settings: LintConfigSettings<T> | undefined
 	}
 }
 
-export const createContext = (id: LintRuleId, level: LintLevel): Context => ({
-	report: (node: LintableNode, message: string, metadata?: unknown) => {
+export const createContext = (id: LintRuleId, level: LintLevel) => ({
+	report: ({ node, message, metadata }) => {
 		if (!node) return
 
 		node.lint = [
@@ -51,7 +51,7 @@ export const createContext = (id: LintRuleId, level: LintLevel): Context => ({
 			} satisfies LintReport
 		]
 	}
-})
+}  satisfies Context)
 
 // TODO: print also the trace to that report
 // e.g. Resource['de']->Message['first-message']

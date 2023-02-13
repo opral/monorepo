@@ -16,7 +16,10 @@ export const missingKeyRule = createRule('inlang.missingKey', () => {
 			},
 			Message: ({ target, reference }) => {
 				if (!target && reference) {
-					context.report(reference, `Message with id '${reference.id.name}' missing`)
+					context.report({
+						node: reference,
+						message: `Message with id '${reference.id.name}' missing`
+					})
 				}
 			}
 		},

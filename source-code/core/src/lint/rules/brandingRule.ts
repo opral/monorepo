@@ -16,7 +16,10 @@ export const createBrandingRule = (brandName: string, incorrectBrandingNames: st
 					.flatMap(element => incorrectBrandingNames.filter(word => element.value.includes(word)))
 
 				for (const incorrectlyBrandedElement of incorrectlyBrandedWords) {
-					context.report(target, `Element '${incorrectlyBrandedElement}' is incorrectly branded and should be replaced with '${brandName}'`)
+					context.report({
+						node: target,
+						message: `Element '${incorrectlyBrandedElement}' is incorrectly branded and should be replaced with '${brandName}'`
+					})
 				}
 			}
 		},
