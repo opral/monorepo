@@ -14,9 +14,15 @@ type LintInformation = {
 	lint?: LintReport[]
 }
 
-export type LintedResource = Resource & LintInformation
-export type LintedMessage = Message & LintInformation
-export type LintedPattern = Pattern & LintInformation
+type Extension = {
+	Resource: LintInformation
+	Message: LintInformation
+	Pattern: LintInformation
+}
+
+export type LintedResource = Resource<Extension>
+export type LintedMessage = Message<Extension>
+export type LintedPattern = Pattern<Extension>
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
 
