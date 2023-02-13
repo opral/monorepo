@@ -61,10 +61,11 @@ export const getLintRulesFromConfig = (config: Config) => (config.lint?.rules ||
 
 export const createRule = <Settings>(
 	id: LintRuleId,
+	defaultLevel: LintLevel,
 	configureLintRule: (settings?: Settings) => Omit<ConfiguredLintRule, 'id' | 'level'>
 ) =>
 	((...settings) => {
-		const { level, options } = parseLintSettings(settings, 'error')
+		const { level, options } = parseLintSettings(settings, defaultLevel)
 
 		return {
 			...configureLintRule(options),
