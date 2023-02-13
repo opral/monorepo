@@ -6,9 +6,9 @@ export const missingKeyRule = createRule('inlang.missingKey', () => {
 	let referenceLanguage: string
 
 	return {
-		initialize: (config) => {
-			context = config.context
-			referenceLanguage = config.referenceLanguage
+		initialize: (args) => {
+			context = args.context
+			referenceLanguage = args.referenceLanguage
 		},
 		visitors: {
 			Resource: ({ target }) => {

@@ -5,8 +5,8 @@ export const createBrandingRule = (brandName: string, incorrectBrandingNames: st
 	let context: Context
 
 	return {
-		initialize: (config) => {
-			context = config.context
+		initialize: (args) => {
+			context = args.context
 		},
 		visitors: {
 			Pattern: ({ target }) => {
