@@ -15,8 +15,8 @@ const dummyEnv: EnvironmentFunctions = {
 
 const doLint = (rules: ConfiguredLintRule[], resources: Resource[]) => {
 	const config = ({
-		referenceLanguage: 'en',
-		languages: ['en', 'de'],
+		referenceLanguage: resources[0].languageTag.name,
+		languages: resources.map(resource => resource.languageTag.name),
 		readResources: async () => resources,
 		writeResources: async () => undefined,
 		lint: { rules }
