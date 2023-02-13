@@ -1,15 +1,13 @@
 import { test, vi } from "vitest";
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import { lint } from './linter.js';
-import { inspect } from 'util';
 import { createRuleCollection } from './ruleCollection.js';
 import { additionalKeyRule } from './rules/additionalKey.js';
 import { missingKeyRule } from './rules/missingKey.js';
 import { createBrandingRule } from './rules/brandingRule.js';
 import { printReport } from './context.js';
 import { getAllLintReports } from './query.js';
-
-const debug = (element: unknown) => console.info(inspect(element, false, 999))
+import { debug } from './_utilities.js';
 
 const standardRules = createRuleCollection({
 	missingKeyRule,
@@ -71,14 +69,14 @@ const dummyConfig = {
 	}
 } satisfies Config
 
-test("debug code", async () => {
-	const results = await lint(dummyConfig, dummyEnv)
-	debug(results)
+// test("debug code", async () => {
+// 	const results = await lint(dummyConfig, dummyEnv)
+// 	debug(results)
 
-	results?.forEach(r => {
-		const reports = getAllLintReports(r)
-		reports.forEach(report => {
-			console.log(printReport(report))
-		});
-	})
-})
+// 	results?.forEach(r => {
+// 		const reports = getAllLintReports(r)
+// 		reports.forEach(report => {
+// 			console.log(printReport(report))
+// 		});
+// 	})
+// })
