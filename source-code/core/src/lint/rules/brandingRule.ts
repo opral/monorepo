@@ -1,7 +1,7 @@
 import type { Context } from '../context.js'
 import { createRule } from '../rule.js'
 
-export const createBrandingRule = (brandName: string, incorrectBrandingNames: string[]) => createRule('inlang.brandingRule', () => {
+export const createBrandingRule = (brandName: string, incorrectBrandingNames: string[]) => createRule('inlang.brandingRule', 'error', () => {
 	let context: Context
 
 	return {

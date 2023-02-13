@@ -36,7 +36,7 @@
     "dev": "tsc --watch",
     "test": "tsc && vitest",
     "tsc": "tsc --noEmit",
-    "tsc:watch": "tsc --noEmit",
+    "tsc:watch": "tsc --noEmit --watch",
     "vitest": "vitest run --passWithNoTests --coverage",
     "vitest:watch": "vitest watch --passWithNoTests --coverage",
     "format": "prettier ./src/** -w --config ../../.prettierrc.json",

@@ -92,7 +92,7 @@ describe("lint", async () => {
 		})
 
 		test("should be able to override lint type", async () => {
-			const rule = createRule('error.rule', () => {
+			const rule = createRule('error.rule', 'error', () => {
 				let context: Context
 
 				return ({
