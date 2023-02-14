@@ -2,9 +2,35 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { Message, Resource } from '../ast/schema.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Context } from './context.js';
-import { lint } from './linter.js';
+import { getLintRulesFromConfig, lint } from './linter.js';
 import { ConfiguredLintRule, createRule } from './rule.js';
 import { debug } from './_utilities.js';
+
+describe("getLintRulesFromConfig", async () => {
+	const rule1 = { id: 'rule.1' } as unknown as ConfiguredLintRule
+	const rule2 = { id: 'rule.2' } as unknown as ConfiguredLintRule
+
+	test("should return an empty `Array` if no lint attribute is present", async () => {
+		const rules = getLintRulesFromConfig({} as Config)
+		expect(rules).toHaveLength(0)
+	})
+
+	test("should return all specified lint rules", async () => {
+		const rules = getLintRulesFromConfig({ lint: { rules: [rule1, rule2] } } as Config)
+		expect(rules).toHaveLength(2)
+		expect(rules[0].id).toBe(rule1.id)
+		expect(rules[1].id).toBe(rule2.id)
+	})
+
+	test("should flatten lint rules", async () => {
+		const rules = getLintRulesFromConfig({ lint: { rules: [[rule2], rule1] } } as Config)
+		expect(rules).toHaveLength(2)
+		expect(rules[0].id).toBe(rule2.id)
+		expect(rules[1].id).toBe(rule1.id)
+	})
+})
+
+// --------------------------------------------------------------------------------------------------------------------
 
 vi.spyOn(console, 'warn')
 

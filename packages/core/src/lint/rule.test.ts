@@ -1,19 +1,5 @@
 import { describe, test } from "vitest";
 
-describe("getLintRulesFromConfig", async () => {
-	test("should return an empty `Array` if no lint attribute is present", async () => {
-
-	})
-
-	test("should return all specified lint rules", async () => {
-
-	})
-
-	test("should flatten lint rules", async () => {
-
-	})
-})
-
 describe("createRule", async () => {
 	describe("calling the function should", async () => {
 		describe("return an object with", async () => {
