@@ -24,7 +24,7 @@
     "commands": [
       {
         "command": "inlang.extractMessage",
-        "title": "Extract Message"
+        "title": "Inlang: Extract Message"
       }
     ]
   },

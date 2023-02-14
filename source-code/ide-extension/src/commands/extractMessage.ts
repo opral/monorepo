@@ -3,9 +3,12 @@ import { state } from "../state.js";
 import { query } from "@inlang/core/query"
 import type { Message } from '@inlang/core/ast';
 
+/**
+ *
+ */
 export const extractMessageCommand = {
   id: "inlang.extractMessage",
-  title: "Extract Message",
+  title: "Inlang: Extract Message",
   callback: async function (textEditor: vscode.TextEditor) {
     const { ideExtension, referenceLanguage, readResources, writeResources } = state().config;
 

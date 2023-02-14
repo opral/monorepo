@@ -1,37 +1,27 @@
 import * as vscode from "vscode";
 import {
   extractMessageCommand,
-  ExtractMessageCommandArgs,
 } from "../commands/extractMessage.js";
 
 /**
- * Provides code actions for converting :) to a smiley emoji.
+ *
  */
 export class ExtractMessage implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [
     vscode.CodeActionKind.QuickFix,
   ];
 
-  public async provideCodeActions(
-    document: vscode.TextDocument
-  ): Promise<vscode.CodeAction[]> {
-    const activeTextEditor = vscode.window.activeTextEditor;
+  public async provideCodeActions(_document: vscode.TextDocument, range: vscode.Range): Promise<vscode.CodeAction[] | undefined> {
     // user has not highlighted text
-    if (activeTextEditor === undefined || activeTextEditor.selection.isEmpty) {
-      return [];
+    if (range.isEmpty) {
+      return;
     }
     const extractMessageAction = new vscode.CodeAction(
       `Inlang: Extract Message`
     );
-    // workaround to get typesafety when passing down the arguments
-    const args: ExtractMessageCommandArgs = {
-      pattern: document.getText(activeTextEditor.selection),
-      activeTextEditor,
-    };
     extractMessageAction.command = {
       title: extractMessageCommand.title,
       command: extractMessageCommand.id,
-      arguments: [args],
     };
     return [extractMessageAction];
   }
