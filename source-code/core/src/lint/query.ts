@@ -45,7 +45,7 @@ export const getAllLintReportsByLevel = (level: LintLevel, node: LintedNode, nes
 
 export const getAllLintErrors = getAllLintReportsByLevel.bind(undefined, 'error')
 
-export const getAllLintWarnings = getAllLintReportsByLevel.bind(undefined, 'warning')
+export const getAllLintwarns = getAllLintReportsByLevel.bind(undefined, 'warn')
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -57,8 +57,8 @@ export const getAllLintErrorsWithId = (id: string, node: LintedNode, nested = tr
 	getAllLintErrors(node, nested)
 		.filter(report => report.id === id)
 
-export const getAllLintWarningsWithId = (id: string, node: LintedNode, nested = true): LintReport[] =>
-	getAllLintWarnings(node, nested)
+export const getAllLintwarnsWithId = (id: string, node: LintedNode, nested = true): LintReport[] =>
+	getAllLintwarns(node, nested)
 		.filter(report => report.id === id)
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ export const hasLintReports = (node: LintedNode, nested = true): boolean =>
 export const hasLintErrors = (node: LintedNode, nested = true): boolean =>
 	getAllLintErrors(node, nested).length > 0
 
-export const hasLintWarnings = (node: LintedNode, nested = true): boolean =>
+export const hasLintwarns = (node: LintedNode, nested = true): boolean =>
 	getAllLintErrors(node, nested).length > 0
 
 export const hasLintReportsWithId = (id: string, node: LintedNode, nested = true): boolean =>
@@ -78,5 +78,5 @@ export const hasLintReportsWithId = (id: string, node: LintedNode, nested = true
 export const hasLintErrorsWithId = (id: string, node: LintedNode, nested = true): boolean =>
 	getAllLintErrorsWithId(id, node, nested).length > 0
 
-export const hasLintWarningsWithId = (id: string, node: LintedNode, nested = true): boolean =>
-	getAllLintWarningsWithId(id, node, nested).length > 0
+export const hasLintwarnsWithId = (id: string, node: LintedNode, nested = true): boolean =>
+	getAllLintwarnsWithId(id, node, nested).length > 0

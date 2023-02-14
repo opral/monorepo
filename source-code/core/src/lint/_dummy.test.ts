@@ -62,7 +62,7 @@ const dummyConfig = {
 	lint: {
 		rules: [
 			standardRules(),
-			// missingKeyRule('warning'),
+			// missingKeyRule('warn'),
 			// additionalKeyRule(true),
 			createBrandingRule('Red Bull', ['redbull', 'RedBull', 'Redbull'])(),
 		],

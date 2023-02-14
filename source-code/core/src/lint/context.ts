@@ -1,7 +1,7 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { LintableNode, LintConfigSettings, LintRuleId } from './rule.js'
 
-export type LintLevel = 'error' | 'warning'
+export type LintLevel = 'error' | 'warn'
 
 export type LintReport = {
 	id: LintRuleId

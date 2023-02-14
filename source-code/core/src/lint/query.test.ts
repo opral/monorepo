@@ -108,7 +108,7 @@ describe("getAllLintErrors", async () => {
 	})
 })
 
-describe("getAllLintWarnings", async () => {
+describe("getAllLintwarns", async () => {
 	describe("'Resource'", async () => {
 		test("nested", async () => {
 
@@ -216,7 +216,7 @@ describe("getAllLintErrorsWithId", async () => {
 	})
 })
 
-describe("getAllLintWarningsWithId", async () => {
+describe("getAllLintwarnsWithId", async () => {
 	describe("'Resource'", async () => {
 		test("nested", async () => {
 
@@ -324,7 +324,7 @@ describe("hasLintErrors", async () => {
 	})
 })
 
-describe("hasLintWarnings", async () => {
+describe("hasLintwarns", async () => {
 	describe("'Resource'", async () => {
 		test("nested", async () => {
 
@@ -432,7 +432,7 @@ describe("hasLintErrorsWithId", async () => {
 	})
 })
 
-describe("hasLintWarningsWithId", async () => {
+describe("hasLintwarnsWithId", async () => {
 	describe("'Resource'", async () => {
 		test("nested", async () => {
 

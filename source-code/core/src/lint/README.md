@@ -38,7 +38,7 @@ The promise returns an `Array` of all `Resources`. The nodes of the `Resource` a
 The `inlang.config.js` file supports a `lint` property you can use to configure the linting process.
 
 The `lint` property expects an `Array` of [`rules`](#lint-rules) or [`collections`](#lint-collections). Rules can be configured by passing parameters to the function call.
- - the first parameter is the lint level. Currently supported levels are `'error'` and `'warning'`
+ - the first parameter is the lint level. Currently supported levels are `'error'` and `'warn'`
  - the second parameter is a custom configuration for the given rule. Some rules may be configured and some rules might not support this.
 
 You can also disable a rule by passing `false` as the first parameter.
@@ -56,8 +56,8 @@ export async function defineConfig(env) {
 		rules: [
 			// uses the standard configuration
 			missingKeyRule(),
-			// set's the lint level to 'warning'
-			missingKeyRule('warning'),
+			// set's the lint level to 'warn'
+			missingKeyRule('warn'),
 			// uses the standard lint level and passes custom options to the rule
 			missingKeyRule(true, { threshold: 4 }),
 			// disables the rule if it runs on mondays
@@ -103,9 +103,9 @@ export async function defineConfig(env) {
 		rules: [
 			// uses the standard configuration
 			inlangStandardRules(),
-			// set's the lint level for the `missingKey` rule to 'warning'
+			// set's the lint level for the `missingKey` rule to 'warn'
 			inlangStandardRules({
-				missingKey: 'warning',
+				missingKey: 'warn',
 			}),
 			// uses the standard lint level and passes custom options to the `missingKey` rule
 			inlangStandardRules({

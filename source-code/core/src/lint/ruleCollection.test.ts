@@ -28,7 +28,7 @@ describe("createRuleCollection", async () => {
 
 			})
 
-			test("'warning'", async () => {
+			test("'warn'", async () => {
 
 			})
 		})
@@ -46,7 +46,7 @@ describe("createRuleCollection", async () => {
 
 			})
 
-			test("'warning'", async () => {
+			test("'warn'", async () => {
 
 			})
 		})
