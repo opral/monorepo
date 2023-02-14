@@ -45,6 +45,6 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 
 #### `ide-extension`
 
-- Clone `https://github.com/inlang/example` into `source-code/ide-extension` for debugging with `git clone https://github.com/inlang/example source-code/ide-extension/example`.
+- Clone `https://github.com/inlang/example` into `source-code/ide-extension` for debugging with `git clone https://github.com/inlang/example source-code/ide-extension/example` and install dependencies `cd source-code/ide-extension/example && npm install`.
 - Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project, after you run the development environment with `npm run dev`.
 - Launch `debug ide-exension tests` via Visual Studio Codes `Run and Debug` view to debug the extensions tests.
