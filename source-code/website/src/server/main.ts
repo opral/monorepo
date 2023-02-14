@@ -22,10 +22,11 @@ import sirv from "sirv";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import cookieSession from "cookie-session";
+import { router as vitePluginSsr } from "./vite-plugin-ssr.js";
+import { router as telefunc } from "./telefunc.js";
 import { router as authService } from "@src/services/auth/index.server.js";
 import { router as githubService } from "@src/services/github/index.server.js";
-import { router as telefunc } from "./telefunc.js";
-import { router as vitePluginSsr } from "./vite-plugin-ssr.js";
+import { router as analyticsService } from "@src/services/analytics/index.server.js";
 
 // validate the env variables.
 await validateEnv();
@@ -98,6 +99,8 @@ app.use(telefunc);
 app.use(githubService);
 
 app.use(vitePluginSsr);
+
+app.use(analyticsService);
 
 // ------------------------ END ROUTES ------------------------
 
