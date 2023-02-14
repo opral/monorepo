@@ -21,7 +21,7 @@ describe("parseLintSettings", async () => {
 	})
 
 	test("when `error` get's passed", async () => {
-		const settings = parseLintSettings(['error'], 'warning')
+		const settings = parseLintSettings(['error'], 'warn')
 
 		expect(settings).toMatchObject({
 			level: 'error',
@@ -29,11 +29,11 @@ describe("parseLintSettings", async () => {
 		})
 	})
 
-	test("when `warning` get's passed", async () => {
-		const settings = parseLintSettings(['warning'], 'error')
+	test("when `warn` get's passed", async () => {
+		const settings = parseLintSettings(['warn'], 'error')
 
 		expect(settings).toMatchObject({
-			level: 'warning',
+			level: 'warn',
 			options: undefined,
 		})
 	})
@@ -65,7 +65,7 @@ describe("parseLintSettings", async () => {
 			}
 		}
 
-		const settings = parseLintSettings(['error', options], 'warning')
+		const settings = parseLintSettings(['error', options], 'warn')
 
 		expect(settings).toMatchObject({
 			level: 'error',
@@ -188,7 +188,7 @@ describe("printReport", async () => {
 
 		})
 
-		test("should use `console.warn` on 'warning'", async () => {
+		test("should use `console.warn` on 'warn'", async () => {
 
 		})
 	})

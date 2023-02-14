@@ -1,7 +1,7 @@
 import type { Context } from '../context.js'
 import { createRule } from '../rule.js'
 
-export const additionalKeyRule = createRule('inlang.additionalKey', 'warning', () => {
+export const additionalKeyRule = createRule('inlang.additionalKey', 'warn', () => {
 	let context: Context
 	let referenceLanguage: string
 

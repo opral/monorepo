@@ -80,9 +80,9 @@ const errorRule = {
 	}
 } satisfies ConfiguredLintRule
 
-const warningRule = {
-	id: 'warning.rule',
-	level: 'warning',
+const warnRule = {
+	id: 'warn.rule',
+	level: 'warn',
 	initialize: vi.fn(),
 	visitors: {
 		Pattern: vi.fn(),
@@ -130,9 +130,9 @@ describe("lint", async () => {
 			})
 
 			const resources = [referenceResource]
-			const result = await doLint([rule('warning')], resources);
+			const result = await doLint([rule('warn')], resources);
 			expect(result?.[0].body[0].pattern.lint?.[0])
-				.toMatchObject({ id: 'error.rule', level: 'warning', message: 'Test' })
+				.toMatchObject({ id: 'error.rule', level: 'warn', message: 'Test' })
 		})
 
 		test("should not start linting if no rules are specified", async () => {
@@ -152,11 +152,11 @@ describe("lint", async () => {
 
 		test("should process all 'Resources' for all rules", async () => {
 			const resources = [referenceResource, targetResource]
-			const result = await doLint([errorRule, warningRule], resources);
+			const result = await doLint([errorRule, warnRule], resources);
 
 			expect(result).toMatchObject(resources)
 			expect(errorRule.visitors.Pattern).toHaveBeenCalledTimes(2)
-			expect(warningRule.visitors.Pattern).toHaveBeenCalledTimes(2)
+			expect(warnRule.visitors.Pattern).toHaveBeenCalledTimes(2)
 		})
 	})
 
