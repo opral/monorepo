@@ -5,8 +5,9 @@ import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import type { Config as InlangConfig } from "@inlang/core/config";
 import { initialize$import } from "@inlang/core/config";
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import fetch from 'node-fetch';
+import { dirname } from 'node:path';
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -56,8 +57,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     to: activeTextEditor.document.uri.path,
   });
 
-  const $import = initialize$import({ fs, fetch });
-  const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $import });
+  // Change current working directory to configuration file directory, so relative paths to the languages files work.
+  // Otherwise the current working directory path is the directory where the node binary resides.
+  process.chdir(dirname(closestConfigPath));
+
+  // TODO: find better typing for fs
+  const $import = initialize$import({ fs: fs.promises as any, fetch });
+  const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
   setState({
     config: configModule,
     configPath: closestConfigPath
@@ -65,7 +71,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // register the commands
   args.context.subscriptions.push(
-    vscode.commands.registerCommand(
+    vscode.commands.registerTextEditorCommand(
       extractMessageCommand.id,
       extractMessageCommand.callback
     )
