@@ -60,7 +60,7 @@ export type Config = {
     /**
      * Defines when a message is referenced.
      */
-    inlinePatternMatcher: (args: {
+    inlinePatternMatcher?: (args: {
       /**
        * The (code) text to match against.
        */
@@ -82,7 +82,7 @@ export type Config = {
     >;
     extractMessageOptions: {
       id: string,
-      callback: (selection: string) => string;
+      callback: (messageId: string, selection: string) => string;
     }[];
     /**
      * An array of VSCode DocumentSelectors.

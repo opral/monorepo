@@ -1,16 +1,13 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
-
-export type ExtractMessageCommandArgs = {
-  pattern: string;
-  activeTextEditor: vscode.TextEditor;
-};
+import { query } from "@inlang/core/query"
+import type { Message } from '@inlang/core/ast';
 
 export const extractMessageCommand = {
   id: "inlang.extractMessage",
   title: "Extract Message",
-  callback: async function (args: ExtractMessageCommandArgs) {
-    const { ideExtension, referenceLanguage } = state().config;
+  callback: async function (textEditor: vscode.TextEditor) {
+    const { ideExtension, referenceLanguage, readResources, writeResources } = state().config;
 
     // guards
     if (!ideExtension) {
@@ -28,10 +25,10 @@ export const extractMessageCommand = {
       );
     }
 
-    const id = await vscode.window.showInputBox({
+    const messageId = await vscode.window.showInputBox({
       title: "Enter the ID:",
     });
-    if (id === undefined) {
+    if (messageId === undefined) {
       return;
     }
 
@@ -60,9 +57,28 @@ export const extractMessageCommand = {
         "Couldn't find choosen extract option."
       );
     }
-    await args.activeTextEditor.edit((editor) => {
-      editor.replace(args.activeTextEditor.selection, 'Test');
+
+    const messageValue = textEditor.document.getText(textEditor.selection);
+    const message: Message = {
+      type: 'Message',
+      id: { type: 'Identifier', name: messageId },
+      pattern: { type: 'Pattern', elements: [{ type: 'Text', value: messageValue }] }
+    };
+    const resources = await readResources({ config: state().config });
+    const referenceResource = resources.find((resource) => resource.languageTag.name === referenceLanguage);
+    if (referenceResource) {
+      await writeResources({
+        config: state().config,
+        resources: resources.map((resource) =>
+          resource.languageTag.name === referenceLanguage
+            ? query(referenceResource).upsert({ message }).unwrap()
+            : resource
+        )
+      });
+    }
+    await textEditor.edit((editor) => {
+      editor.replace(textEditor.selection, extractMessageOption.callback(messageId, messageValue));
     });
-    return vscode.window.showInformationMessage("Pattern extracted.");
+    return vscode.window.showInformationMessage("Message extracted.");
   },
 } as const;
