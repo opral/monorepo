@@ -3,18 +3,17 @@ import { posthog } from "posthog-js";
 import { isServer } from "solid-js/web";
 
 // automatically initialize posthog when this file is imported
-if (isProduction && isServer === false) {
+if (
+  isProduction &&
+  isServer === false &&
+  posthog.has_opted_out_capturing() === false
+) {
   if (clientSideEnv.VITE_POSTHOG_TOKEN === undefined) {
     throw Error("Missing env variable VITE_POSTHOG_TOKEN");
   }
-  if (posthog.has_opted_out_capturing() === false) {
-    posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
-      api_host: "https://eu.posthog.com",
-      // no cookie banner required
-      // https://posthog.com/tutorials/cookieless-tracking
-      persistence: "memory",
-    });
-  }
+  posthog.init(clientSideEnv.VITE_POSTHOG_TOKEN, {
+    api_host: "https://eu.posthog.com",
+  });
 }
 
 /**
