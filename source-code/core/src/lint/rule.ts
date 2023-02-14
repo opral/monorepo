@@ -57,8 +57,6 @@ export type ConfiguredLintRule = {
 	teardown?: (payload: unknown) => MaybePromise<void>
 }
 
-export const getLintRulesFromConfig = (config: Config) => (config.lint?.rules || []).flat()
-
 export const createRule = <Settings>(
 	id: LintRuleId,
 	defaultLevel: LintLevel,
