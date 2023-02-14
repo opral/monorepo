@@ -8,6 +8,7 @@ import { initialize$import } from "@inlang/core/config";
 import fs from "node:fs";
 import fetch from 'node-fetch';
 import { dirname } from 'node:path';
+import { ExtractMessage } from './actions/extractMessage.js';
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -69,12 +70,23 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     configPath: closestConfigPath
   });
 
-  // register the commands
+  // register commands
   args.context.subscriptions.push(
     vscode.commands.registerTextEditorCommand(
       extractMessageCommand.id,
       extractMessageCommand.callback
     )
+  );
+
+  // register source actions
+  args.context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider([
+      { language: 'javascript' },
+      { language: 'javascriptreact' },
+      { language: 'typescript' },
+      { language: 'typescriptreact' },
+      { language: 'svelte' }
+    ], new ExtractMessage(), { providedCodeActionKinds: ExtractMessage.providedCodeActionKinds })
   );
 
   // register decorations
