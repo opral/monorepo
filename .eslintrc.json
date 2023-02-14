@@ -23,7 +23,7 @@
     "unicorn/prefer-object-from-entries": "warn",
     "unicorn/prefer-spread": "warn",
     "unicorn/prefer-string-slice": "warn",
-    "unicorn/prefer-ternary": "warn",
+    "unicorn/prefer-ternary": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off",
     // conflicts with SolidJS
