@@ -41,10 +41,10 @@ export const analytics = new Proxy(posthog, {
     else if (typeof target[prop] === "function") {
       return (...args: any) => {
         try {
-          target[prop](args);
+          target[prop](...args);
         } catch (e) {
           // log to console in development
-          // in fhe future -> log to sentry
+          // in the future -> log to sentry
           if (isProduction === false) {
             console.error(e);
           }
