@@ -5,7 +5,7 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        Developer-first localization infrastructure <br/> <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps.</i></a>
+        Git-based localization infrastructure <br/> <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps.</i></a>
     </h2>
 </div>
 
