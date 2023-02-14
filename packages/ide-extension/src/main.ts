@@ -62,7 +62,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   // Otherwise the current working directory path is the directory where the node binary resides.
   process.chdir(dirname(closestConfigPath));
 
-  // TODO: find better typing for fs
+  // TODO: find better fs (vscode.workspace.fs)
   const $import = initialize$import({ fs: fs.promises as any, fetch });
   const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
   setState({
@@ -81,6 +81,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   // register source actions
   args.context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider([
+      // TODO: improve with #348
       { language: 'javascript' },
       { language: 'javascriptreact' },
       { language: 'typescript' },
