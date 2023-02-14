@@ -6,7 +6,7 @@ Function with CRUD (Create, Retrieve, Update, Delete) queries for the AST.
 
 ### 1. Immutable operations
 
-Immutability is good practice, eases CMD-Z (history) operations, plays nicely with `map`, and is more or less required for Svelte. Svelte uses explicit mutation (expressed by the assignation symbol `=` i.e. `x = y`) to track reactivity.
+Immutability is good practice, eases CMD-Z (history) operations, plays nicely with `map`, and reactive systems that require explicit mutation (expressed by the assignation symbol `=` i.e. `x = y`) or setter functions to track reactivity.
 
 ## API
 

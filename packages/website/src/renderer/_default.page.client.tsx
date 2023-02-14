@@ -41,6 +41,7 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js";
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
 
 import { clientSideEnv } from "@env";
+import { analytics } from "@src/services/analytics/index.js";
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
@@ -80,6 +81,8 @@ export function render(pageContext: PageContextRenderer) {
       );
       isFirstRender = false;
     }
+    // https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
+    analytics.capture("$pageview");
   } catch (e) {
     console.error("ERROR in renderer", e);
   }

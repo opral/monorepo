@@ -34,6 +34,7 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
     "jose": "^4.11.1",
     "lodash-es": "^4.17.21",
     "marked": "^4.2.4",

@@ -1,5 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js";
+import { analytics } from "@src/services/analytics/index.js";
 
 /**
  * This function is called when the user clicks the "Sign Out" button.
@@ -11,4 +12,6 @@ export async function onSignOut(args: {
   await fetch("/services/auth/sign-out", { method: "POST" });
   // sign out on the client by setting the user to undefined
   args.setLocalStorage("user", undefined);
+  // https://posthog.com/docs/integrate/client/js#reset-after-logout
+  analytics.reset();
 }
