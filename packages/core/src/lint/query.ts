@@ -1,4 +1,5 @@
 import type { LintedNode, LintReport, LintedResource, LintedMessage, LintedPattern, LintLevel } from './context.js';
+import type { LintRuleId } from './rule.js';
 import { unhandled } from './_utilities.js';
 
 export const getAllLintReports = (node: LintedNode, nested = true): LintReport[] => {
@@ -45,20 +46,20 @@ export const getAllLintReportsByLevel = (level: LintLevel, node: LintedNode, nes
 
 export const getAllLintErrors = getAllLintReportsByLevel.bind(undefined, 'error')
 
-export const getAllLintwarns = getAllLintReportsByLevel.bind(undefined, 'warn')
+export const getAllLintWarnings = getAllLintReportsByLevel.bind(undefined, 'warn')
 
 // --------------------------------------------------------------------------------------------------------------------
 
-export const getAllLintReportsWithId = (id: string, node: LintedNode, nested = true): LintReport[] =>
+export const getAllLintReportsWithId = (id: LintRuleId, node: LintedNode, nested = true): LintReport[] =>
 	getAllLintReports(node, nested)
 		.filter(report => report.id === id)
 
-export const getAllLintErrorsWithId = (id: string, node: LintedNode, nested = true): LintReport[] =>
+export const getAllLintErrorsWithId = (id: LintRuleId, node: LintedNode, nested = true): LintReport[] =>
 	getAllLintErrors(node, nested)
 		.filter(report => report.id === id)
 
-export const getAllLintwarnsWithId = (id: string, node: LintedNode, nested = true): LintReport[] =>
-	getAllLintwarns(node, nested)
+export const getAllLintWarningsWithId = (id: LintRuleId, node: LintedNode, nested = true): LintReport[] =>
+	getAllLintWarnings(node, nested)
 		.filter(report => report.id === id)
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -69,14 +70,14 @@ export const hasLintReports = (node: LintedNode, nested = true): boolean =>
 export const hasLintErrors = (node: LintedNode, nested = true): boolean =>
 	getAllLintErrors(node, nested).length > 0
 
-export const hasLintwarns = (node: LintedNode, nested = true): boolean =>
+export const hasLintWarnings = (node: LintedNode, nested = true): boolean =>
 	getAllLintErrors(node, nested).length > 0
 
-export const hasLintReportsWithId = (id: string, node: LintedNode, nested = true): boolean =>
+export const hasLintReportsWithId = (id: LintRuleId, node: LintedNode, nested = true): boolean =>
 	getAllLintReportsWithId(id, node, nested).length > 0
 
-export const hasLintErrorsWithId = (id: string, node: LintedNode, nested = true): boolean =>
+export const hasLintErrorsWithId = (id: LintRuleId, node: LintedNode, nested = true): boolean =>
 	getAllLintErrorsWithId(id, node, nested).length > 0
 
-export const hasLintwarnsWithId = (id: string, node: LintedNode, nested = true): boolean =>
-	getAllLintwarnsWithId(id, node, nested).length > 0
+export const hasLintWarningsWithId = (id: LintRuleId, node: LintedNode, nested = true): boolean =>
+	getAllLintWarningsWithId(id, node, nested).length > 0
