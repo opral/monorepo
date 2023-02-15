@@ -32,7 +32,7 @@ describe("getLintRulesFromConfig", async () => {
 
 // --------------------------------------------------------------------------------------------------------------------
 
-vi.spyOn(console, 'warn')
+vi.spyOn(console, 'warn').mockImplementation(vi.fn)
 
 const dummyEnv: EnvironmentFunctions = {
 	$fs: vi.fn() as any,
