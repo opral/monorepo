@@ -21,7 +21,7 @@ const getAllLintReportsFromResource = ({ lint, body }: LintedResource, nested: b
 	[
 		...(lint || []),
 		...(nested
-			? body.flatMap(message => getAllLintReports(message, nested))
+			? body.flatMap(message => getAllLintReportsFromMessage(message, nested))
 			: []
 		)
 	]
@@ -30,7 +30,7 @@ const getAllLintReportsFromMessage = ({ lint, pattern }: LintedMessage, nested: 
 	[
 		...(lint || []),
 		...(nested
-			? getAllLintReports(pattern)
+			? getAllLintReportsFromPattern(pattern)
 			: []
 		)
 	]
