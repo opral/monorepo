@@ -28,9 +28,7 @@ export const extractMessageCommand = {
       );
     }
 
-    const messageId = await vscode.window.showInputBox({
-      title: "Enter the ID:",
-    });
+    const messageId = await vscode.window.showInputBox({ title: "Enter the ID:" });
     if (messageId === undefined) {
       return;
     }
@@ -56,9 +54,7 @@ export const extractMessageCommand = {
     const extractMessageOption = ideExtension.extractMessageOptions.find(o => o.id === extractMessageOptionId);
 
     if (extractMessageOption === undefined) {
-      return vscode.window.showWarningMessage(
-        "Couldn't find choosen extract option."
-      );
+      return vscode.window.showWarningMessage("Couldn't find choosen extract option.");
     }
 
     const messageValue = textEditor.document.getText(textEditor.selection);
@@ -67,17 +63,20 @@ export const extractMessageCommand = {
       id: { type: 'Identifier', name: messageId },
       pattern: { type: 'Pattern', elements: [{ type: 'Text', value: messageValue }] }
     };
+    // read all available resources
     const resources = await readResources({ config: state().config });
+    // find reference langauge resource
     const referenceResource = resources.find((resource) => resource.languageTag.name === referenceLanguage);
     if (referenceResource) {
-      await writeResources({
-        config: state().config,
-        resources: resources.map((resource) =>
-          resource.languageTag.name === referenceLanguage
-            ? query(referenceResource).upsert({ message }).unwrap()
-            : resource
-        )
-      });
+      const newResource = query(referenceResource).upsert({ message });
+      if (newResource.isOk) {
+        await writeResources({
+          config: state().config,
+          resources: resources.map((resource) => (resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource))
+        });
+      } else {
+        return vscode.window.showErrorMessage("Couldn't upsert new message.");
+      }
     }
     await textEditor.edit((editor) => {
       editor.replace(textEditor.selection, extractMessageOption.callback(messageId, messageValue));
