@@ -64,10 +64,11 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // TODO: find better fs (vscode.workspace.fs)
   const $import = initialize$import({ fs: fs.promises as any, fetch });
-  const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
+  const config: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
+  const resources = await config.readResources({ config });
   setState({
-    config: configModule,
-    configPath: closestConfigPath
+    config: config,
+    resources
   });
 
   // register commands
