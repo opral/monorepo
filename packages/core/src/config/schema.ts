@@ -58,19 +58,19 @@ export type Config = {
 
   ideExtension?: {
     /**
-     * Defines when a message is referenced.
+     * Defines finders for inlined translations.
+     *
+     * @param args represents the data to conduct the search on
+     * @returns a promise with matched inlined translations
      */
-    inlinePatternMatcher?: (args: {
-      /**
-       * The (code) text to match against.
-       */
-      text: string;
+    inlinedTranslationFinders?: (args: {
+      documentText: string;
     }) => Promise<
       Array<{
         /**
-         * The ID of the message.
+         * The messages id.
          */
-        id: string;
+        messageId: string;
         /**
          * The position from where to where the pattern should be inlined.
          */
@@ -79,11 +79,13 @@ export type Config = {
           end: { line: number; character: number };
         };
       }>
-    >;
+    >[];
+
     extractMessageOptions: {
       id: string,
       callback: (messageId: string, selection: string) => string;
     }[];
+
     /**
      * An array of VSCode DocumentSelectors.
      *
