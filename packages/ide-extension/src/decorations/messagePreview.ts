@@ -1,37 +1,54 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
 
-export async function messagePreview(args: {
-  activeTextEditor: vscode.TextEditor;
-}): Promise<unknown> {
+let bounceTimer: NodeJS.Timer | undefined = undefined;
+
+export async function messagePreview(args: { activeTextEditor: vscode.TextEditor, context: vscode.ExtensionContext }) {
+  const { context } = args;
+  let { activeTextEditor } = args;
+
   if (state().config.referenceLanguage === undefined) {
     return vscode.window.showWarningMessage(
       "The `referenceLanguage` musst be defined in the inlang.config.js to show patterns inline."
     );
   }
-  /**
-   * Outfactor the code below to a decorations/index.ts file which handles updates
-   * for all decorations? (If more are to come)
-   */
-  // initializing the decoration type once is extremely important.
-  // vscode uses the reference to detect what decorations to redraw.
-  // intializing a new decoration type in each update leads to an
-  // infinite "loop" of the same decorations
-  const decorationType = vscode.window.createTextEditorDecorationType({});
-  await updateDecorations({
-    activeTextEditor: args.activeTextEditor,
-    type: decorationType,
-  });
-  // update the decoartions each time the file is changed
-  vscode.workspace.onDidChangeTextDocument(() =>
-    updateDecorations({
-      activeTextEditor: args.activeTextEditor,
-      type: decorationType,
-    })
-  );
+
+  if (activeTextEditor) {
+    triggerUpdateDecorations();
+  }
+
+  vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor) {
+      activeTextEditor = editor;
+      triggerUpdateDecorations();
+    }
+  }, undefined, context.subscriptions);
+
+  vscode.workspace.onDidChangeTextDocument(event => {
+    if (activeTextEditor && event.document === activeTextEditor.document) {
+      triggerUpdateDecorations(true);
+    }
+  }, undefined, context.subscriptions);
+
+  function triggerUpdateDecorations(throttle = false) {
+    if (bounceTimer) {
+      clearTimeout(bounceTimer);
+      bounceTimer = undefined;
+    }
+    if (throttle) {
+      bounceTimer = setTimeout(updateDecorations, 500);
+    } else {
+      updateDecorations();
+    }
+  }
+
+  function updateDecorations() {
+    return;
+  }
 }
 
-async function updateDecorations(args: {
+
+async function updateDecorations2(args: {
   activeTextEditor: vscode.TextEditor;
   type: vscode.TextEditorDecorationType;
 }): Promise<void> {

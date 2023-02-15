@@ -91,7 +91,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   );
 
   // register decorations
-  messagePreview({ activeTextEditor });
+  messagePreview({ activeTextEditor, context: args.context });
 }
 
 // this method is called when your extension is deactivated
