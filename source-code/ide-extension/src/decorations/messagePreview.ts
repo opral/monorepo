@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
 
-export async function inlinePattern(args: {
+export async function messagePreview(args: {
   activeTextEditor: vscode.TextEditor;
 }): Promise<unknown> {
   if (state().config.referenceLanguage === undefined) {

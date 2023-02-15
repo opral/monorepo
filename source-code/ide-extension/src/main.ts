@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
-import { inlinePattern } from "./decorations/inlinePattern.js";
+import { messagePreview } from "./decorations/messagePreview.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import type { Config as InlangConfig } from "@inlang/core/config";
 import { initialize$import } from "@inlang/core/config";
@@ -91,7 +91,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   );
 
   // register decorations
-  inlinePattern({ activeTextEditor });
+  messagePreview({ activeTextEditor });
 }
 
 // this method is called when your extension is deactivated
