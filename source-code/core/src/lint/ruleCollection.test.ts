@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { ConfiguredLintRule, LintRule } from './rule.js';
 import { createRuleCollection } from './ruleCollection.js';
 import { parseLintSettings } from './context.js';
@@ -38,6 +38,10 @@ vi.spyOn(console, 'log').mockImplementation(vi.fn)
 // --------------------------------------------------------------------------------------------------------------------
 
 describe("createRuleCollection", async () => {
+	beforeEach(() => {
+		vi.resetAllMocks()
+	})
+
 	test("once called, should return an `Array` of all specified rules", async () => {
 		const rules = collection()
 
@@ -120,11 +124,11 @@ describe("createRuleCollection", async () => {
 				some: 'option',
 				debug: true
 			}
-
 			const rules = collection({ rule1: ['warn', options] })
 
 			rules[0].initialize(...([] as unknown as Parameters<ConfiguredLintRule['initialize']>))
 
+			expect(console.log).toHaveBeenCalledOnce()
 			expect(console.log).toHaveBeenCalledWith(options)
 		})
 	})
