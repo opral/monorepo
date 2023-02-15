@@ -80,10 +80,25 @@ export type Config = {
         };
       }>
     >;
+
+    /**
+     * Defines the options to extract messages.
+     */
     extractMessageOptions: {
+      /**
+       * Unique identifier and title of the extraction option.
+       */
       id: string,
+      /**
+       * Function which is called, when the user finished the message extraction command.
+       *
+       * @param messageId is entered by the user
+       * @param selection is the text which was extracted
+       * @returns the code which is inserted into the document
+       */
       callback: (messageId: string, selection: string) => string;
     }[];
+
     /**
      * An array of VSCode DocumentSelectors.
      *
