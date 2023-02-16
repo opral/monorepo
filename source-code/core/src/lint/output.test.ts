@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, type MockContext, test, vi } from "vitest";
-import type { Identifier, LanguageTag, Message, Pattern } from '../ast/schema.js';
+import type { Identifier, LanguageTag, Message } from '../ast/schema.js';
 import type { LintedMessage, LintedResource, LintReport } from './context.js';
 import { print, printReport } from './output.js';
 
