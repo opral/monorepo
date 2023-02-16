@@ -54,41 +54,55 @@ export type Config = {
    *
    * Read more under https://inlang.com/documentation/breaking-changes
    */
-  // experimental?: {};
-  // ideExtension?: {
-  // 	/**
-  // 	 * Defines when a message is referenced.
-  // 	 */
-  // 	inlinePatternMatcher: (args: {
-  // 		/**
-  // 		 * The (code) text to match against.
-  // 		 */
-  // 		text: string;
-  // 		$import: typeof $import;
-  // 	}) => Promise<
-  // 		Array<{
-  // 			/**
-  // 			 * The ID of the message.
-  // 			 */
-  // 			id: string;
-  // 			/**
-  // 			 * The position from where to where the pattern should be inlined.
-  // 			 */
-  // 			position: {
-  // 				start: { line: number; character: number };
-  // 				end: { line: number; character: number };
-  // 			};
-  // 		}>
-  // 	>;
-  // 	extractMessageReplacementOptions: (args: { id: string }) => string[];
-  // 	/**
-  // 	 * An array of VSCode DocumentSelectors.
-  // 	 *
-  // 	 * The document selectors specify for which files/programming languages
-  // 	 * (typescript, svelte, etc.) the extension should be activated.
-  // 	 *
-  // 	 * See https://code.visualstudio.com/api/references/document-selector
-  // 	 */
-  // 	documentSelectors: DocumentSelector[];
-  // };
+  experimental?: object;
+
+  ideExtension?: {
+    /**
+     * Defines when a message is referenced.
+     */
+    inlinePatternMatcher?: (args: {
+      /**
+       * The (code) text to match against.
+       */
+      text: string;
+    }) => Promise<
+      Array<{
+        /**
+         * The ID of the message.
+         */
+        id: string;
+        /**
+         * The position from where to where the pattern should be inlined.
+         */
+        position: {
+          start: { line: number; character: number };
+          end: { line: number; character: number };
+        };
+      }>
+    >;
+
+    /**
+     * Defines the options to extract messages.
+     */
+    extractMessageOptions: {
+      /**
+       * Function which is called, when the user finished the message extraction command.
+       *
+       * @param messageId is the message identifier entered by the user
+       * @param selection is the text which was extracted
+       * @returns the code which is inserted into the document
+       */
+      callback: (messageId: string, selection: string) => string;
+    }[];
+
+    /**
+     * An array of VSCode DocumentSelectors.
+     *
+     * The document selectors specify for which files/programming languages
+     * (typescript, svelte, etc.) the extension should be activated.
+     *
+     * See https://code.visualstudio.com/api/references/document-selector
+     */
+    // documentSelectors: DocumentSelector[];
+  };
 };
