@@ -3,7 +3,7 @@ import type { Message, Pattern, Resource } from '../ast/schema.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Context } from './context.js';
 import { getLintRulesFromConfig, lint } from './linter.js';
-import { ConfiguredLintRule, createRule } from './rule.js';
+import { ConfiguredLintRule, createRule, EnterNodeFunction, LintableNode, NodeVisitor } from './rule.js';
 
 describe("getLintRulesFromConfig", async () => {
 	const rule1 = { id: 'rule.1' } as unknown as ConfiguredLintRule
@@ -210,19 +210,18 @@ describe("lint", async () => {
 			await doLint([rule], [referenceResource])
 
 			expect(onEnter).toHaveBeenCalledTimes(3)
-			expect((onEnter as unknown as MockContext<Resource, unknown>).calls[0][0])
-				.toMatchObject({ type: 'Resource' })
-			expect((onEnter as unknown as MockContext<Message, unknown>).calls[1][0])
-				.toMatchObject({ type: 'Message' })
-			expect((onEnter as unknown as MockContext<Pattern, unknown>).calls[2][0])
-				.toMatchObject({ type: 'Pattern' })
+			const onEnterCalls = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls
+			expect(onEnterCalls[0][0]).toMatchObject({ type: 'Resource' })
+			expect(onEnterCalls[1][0]).toMatchObject({ type: 'Message' })
+			expect(onEnterCalls[2][0]).toMatchObject({ type: 'Pattern' })
 
 			expect(onLeave).toHaveBeenCalledTimes(3)
-			expect((onLeave as unknown as MockContext<Pattern, unknown>).calls[0][0])
+			const onLeaveCalls = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls
+			expect(onLeaveCalls[0][0])
 				.toMatchObject({ type: 'Pattern' })
-			expect((onLeave as unknown as MockContext<Message, unknown>).calls[1][0])
+			expect(onLeaveCalls[1][0])
 				.toMatchObject({ type: 'Message' })
-			expect((onLeave as unknown as MockContext<Resource, unknown>).calls[2][0])
+			expect(onLeaveCalls[2][0])
 				.toMatchObject({ type: 'Resource' })
 		})
 
@@ -553,24 +552,233 @@ describe("lint", async () => {
 	// -----------------------------------------------------------------------------------------------------------------
 
 	describe("payloads", async () => {
+		const onEnter = vi.fn()
+		const onLeave = vi.fn()
+
+		const rule = {
+			id: 'lint.rule',
+			level: 'error',
+			initialize: (args) => {
+				onEnter(args)
+				return { initialize: true }
+			},
+			visitors: {
+				Resource: {
+					enter: ({ payload }) => {
+						onEnter(payload)
+						return { ...payload, resource: true }
+					},
+					leave: ({ payload }) => {
+						onLeave(payload)
+					}
+				},
+				Message: {
+					enter: ({ payload }) => {
+						onEnter(payload)
+						return { ...payload, message: true }
+					},
+					leave: ({ payload }) => {
+						onLeave(payload)
+					}
+				},
+				Pattern: {
+					enter: ({ payload }) => {
+						onEnter(payload)
+						return { ...payload, pattern: true }
+					},
+					leave: ({ payload }) => {
+						onLeave(payload)
+					}
+				},
+			},
+			teardown: ({ payload }) => {
+				onLeave(payload)
+			},
+		} satisfies ConfiguredLintRule
+
 		describe("should receive the payload", async () => {
 			test("in 'initialize", async () => {
+				await doLint([rule], [referenceResource])
 
+				const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[0][0] as Parameters<ConfiguredLintRule['initialize']>[0]
+				expect(payload.referenceLanguage).toBe('en')
+				expect(payload.languages).toMatchObject(['en'])
+				expect(payload.env).toBe(dummyEnv)
+				expect(payload.context.report).toBeDefined()
+			})
+
+			describe("in 'Resource'", async () => {
+				describe("enter", async () => {
+					test("from the 'initialize' function", async () => {
+						await doLint([rule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[1][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true
+						})
+					})
+
+					test("'undefined' if no payload returned from 'initialize'", async () => {
+						const modifiedRule = {
+							...rule, initialize: vi.fn()
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[0][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toBeUndefined()
+					})
+				})
+
+				describe("leave", async () => {
+					test("from the 'enter' function", async () => {
+						await doLint([rule], [referenceResource])
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[2][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+						})
+					})
+
+					test("from the 'initialize' function if no payload returned from 'enter'", async () => {
+						const modifiedRule = {
+							...rule, visitors: { ...rule.visitors, Resource: { ...rule.visitors.Resource, enter: vi.fn() } }
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[2][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+						})
+					})
+				})
+			})
+
+			describe("in 'Message'", async () => {
+				describe("enter", async () => {
+					test("from the 'initialize' function", async () => {
+						await doLint([rule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[2][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true
+						})
+					})
+
+					test("from the 'initialize' function if no payload returned from 'Resource'", async () => {
+						const modifiedRule = {
+							...rule, visitors: { ...rule.visitors, Resource: { ...rule.visitors.Resource, enter: vi.fn() } }
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[1][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+						})
+					})
+				})
+
+				describe("leave", async () => {
+					test("from the 'enter' function", async () => {
+						await doLint([rule], [referenceResource])
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[1][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+							message: true,
+						})
+					})
+
+					test("from the 'initialize' function if no payload returned from 'enter'", async () => {
+						const modifiedRule = {
+							...rule, visitors: { ...rule.visitors, Message: { ...rule.visitors.Message, enter: vi.fn() } }
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[1][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+						})
+					})
+				})
+			})
+
+			describe("in 'Pattern'", async () => {
+				describe("enter", async () => {
+					test("from the 'initialize' function", async () => {
+						await doLint([rule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[3][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+							message: true
+						})
+					})
+
+					test("from the 'Resource' function if no payload returned from 'Message'", async () => {
+						const modifiedRule = {
+							...rule, visitors: { ...rule.visitors, Message: { ...rule.visitors.Message, enter: vi.fn() } }
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls[2][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+						})
+					})
+				})
+
+				describe("leave", async () => {
+					test("from the 'enter' function", async () => {
+						await doLint([rule], [referenceResource])
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[0][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+							message: true,
+							pattern: true,
+						})
+					})
+
+					test("from the 'Message' function if no payload returned from 'enter'", async () => {
+						const modifiedRule = {
+							...rule, visitors: { ...rule.visitors, Pattern: { ...rule.visitors.Pattern, enter: vi.fn() } }
+						} as ConfiguredLintRule
+						await doLint([modifiedRule], [referenceResource])
+
+						const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[0][0] as Parameters<EnterNodeFunction<LintableNode, unknown, unknown>>[0]
+						expect(payload).toMatchObject({
+							initialize: true,
+							resource: true,
+							message: true,
+						})
+					})
+				})
 			})
 
 			describe("in 'teardown'", async () => {
 				test("from the 'initialize' function", async () => {
+					await doLint([rule], [referenceResource])
 
+					const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[3][0] as Parameters<ConfiguredLintRule['initialize']>[0]
+					expect(payload).toMatchObject({
+						initialize: true
+					})
 				})
 
 				test("'undefined' if no payload returned from 'initialize'", async () => {
+					const modifiedRule = {
+						...rule, initialize: vi.fn()
+					} as ConfiguredLintRule
+					await doLint([modifiedRule], [referenceResource])
 
+					const payload = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls[3][0] as Parameters<ConfiguredLintRule['initialize']>[0]
+					expect(payload).toBeUndefined()
 				})
 			})
 		})
-
-		// test pass copy instead of object reference
-		// test altering payloads
-		// test not returning payloads
 	})
 })

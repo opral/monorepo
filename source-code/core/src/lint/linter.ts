@@ -65,7 +65,7 @@ const processLintRule = async ({
 	}
 
 	if (teardown) {
-		await teardown(payload)
+		await teardown({ payload })
 	}
 }
 
@@ -89,6 +89,8 @@ type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple
 
 const shouldProcessResourceChildren = (visitors: NodeVisitors) =>
 	!!visitors.Message || shouldProcessMessageChildren(visitors)
+
+// TODO: test passing `undefined` for reference
 
 const processResource = async ({
 	visitors,
