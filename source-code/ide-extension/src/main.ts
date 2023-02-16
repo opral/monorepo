@@ -59,6 +59,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // Change current working directory to configuration file directory, so relative paths to the languages files work.
   // Otherwise the current working directory path is the directory where the node binary resides.
+  // See https://github.com/inlang/inlang/pull/372#discussion_r1107285786
+  // See https://github.com/microsoft/vscode-discussions/discussions/466
   process.chdir(dirname(closestConfigPath));
 
   // TODO: find better fs (vscode.workspace.fs)

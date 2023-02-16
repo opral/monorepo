@@ -22,22 +22,19 @@ export type $import = (uri: string) => Promise<any>;
  * Initializes the $import function.
  *
  * @example
- * 	const $import = createImportFunction({ basePath: '/', fs: fs.promises });
- * 	const module = await $import('./mock-module.js');
+ * const $import = initialize$import({ fs: fs.promises, fetch });
+ * const module = await $import('./some-module.js');
  */
 export function initialize$import(args: {
   /**
-   * The path from which the import should be resolved.
+   * Directory from which the import should be resolved. Be careful, as the working directory of the fs is not changed!
    *
-   * ! Be careful when using this argument, as it can lead to unexpected behavior.
-   * The working directory for fs is not changed!
-   *
-   * @deprecated only use when you absolutely need to (for example in testing). Will likely be removed in the future.
-   *
+   * @deprecated, because it can lead to unintended side effects. Use only for testings. Likely to be removed in the future.
    */
   workingDirectory?: string;
   /** the fs from which the file can be read */
   fs: typeof fs.promises;
+  /** http client implementation */
   fetch: typeof fetch;
 }): (uri: string) => ReturnType<typeof $import> {
   // resembles a native import api
@@ -60,7 +57,7 @@ async function $import(
     workingDirectory: string;
     /** the fs from which the file can be read */
     fs: typeof fs.promises;
-    /** the http client (avoiding side-effects) */
+    /** http client implementation */
     fetch: typeof fetch;
   }
 ): Promise<any> {
