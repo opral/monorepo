@@ -13,7 +13,7 @@ export const getAllLintReports = (node: LintedNode, nested = true): LintReport[]
 			return getAllLintReportsFromPattern(node)
 
 		default:
-			return unhandled(type)
+			return unhandled(type, node)
 	}
 }
 
