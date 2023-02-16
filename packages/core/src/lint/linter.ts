@@ -109,7 +109,7 @@ const processResource = async ({
 	if (shouldProcessResourceChildren(visitors)) {
 		const processedReferenceMessages = new Set<string>()
 
-		for (const targetMessage of target?.body || []) {
+		for (const targetMessage of (target as Resource).body) {
 			const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
 
 			await processMessage({
@@ -124,7 +124,7 @@ const processResource = async ({
 			}
 		}
 
-		const nonVisitedReferenceMessages = (reference?.body || [])
+		const nonVisitedReferenceMessages = ((reference as Resource).body)
 			.filter(({ id }) => !processedReferenceMessages.has(id.name))
 		for (const referenceNode of nonVisitedReferenceMessages) {
 			await processMessage({

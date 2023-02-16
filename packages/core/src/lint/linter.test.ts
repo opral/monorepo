@@ -4,6 +4,7 @@ import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Context } from './context.js';
 import { getLintRulesFromConfig, lint } from './linter.js';
 import { ConfiguredLintRule, createRule, EnterNodeFunction, LintableNode, NodeVisitor } from './rule.js';
+import { debug } from './_utilities.js';
 
 describe("getLintRulesFromConfig", async () => {
 	const rule1 = { id: 'rule.1' } as unknown as ConfiguredLintRule
@@ -223,6 +224,16 @@ describe("lint", async () => {
 				.toMatchObject({ type: 'Message' })
 			expect(onLeaveCalls[2][0])
 				.toMatchObject({ type: 'Resource' })
+		})
+
+		test("should visit all Message nodes from reference if not present in target", async () => {
+			await doLint([rule], [referenceResource, createResource('de', createMessage('second-message', 'Test'))])
+
+			expect(onEnter).toHaveBeenCalledTimes(8)
+			const calls = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls
+
+			expect(calls[6][0]).toBeUndefined()
+			expect(calls[7][0]).toBeUndefined()
 		})
 
 		test("should await all functions", async () => {

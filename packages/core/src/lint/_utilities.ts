@@ -6,4 +6,4 @@ export const unhandled = (type: never, context?: unknown): never => {
 
 export type MaybePromise<T> = T | Promise<T>
 
-export const debug = (element: unknown) => console.info(inspect(element, false, 999))
+export const debug = (element: unknown) => console.debug(inspect(element, false, 999))
