@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../state.js";
+import { setState, state } from "../state.js";
 import { query } from "@inlang/core/query"
 import type { Message } from '@inlang/core/ast';
 
@@ -10,7 +10,7 @@ export const extractMessageCommand = {
   id: "inlang.extractMessage",
   title: "Inlang: Extract Message",
   callback: async function (textEditor: vscode.TextEditor) {
-    const { ideExtension, referenceLanguage, readResources, writeResources } = state().config;
+    const { ideExtension, referenceLanguage, writeResources } = state().config;
 
     // guards
     if (!ideExtension) {
@@ -73,7 +73,8 @@ export const extractMessageCommand = {
           config: state().config,
           resources
         });
-        state().resources = resources;
+        // update resources in extension state
+        setState({ ...state(), resources });
       } else {
         return vscode.window.showErrorMessage("Couldn't upsert new message.");
       }

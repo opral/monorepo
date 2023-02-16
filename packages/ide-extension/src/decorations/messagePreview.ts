@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
+import { debounce } from "throttle-debounce";
 import { state } from "../state.js";
 
-let bounceTimer: NodeJS.Timer | undefined = undefined;
 
 export async function messagePreview(args: { activeTextEditor: vscode.TextEditor, context: vscode.ExtensionContext }) {
   const { context } = args;
@@ -14,37 +14,27 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
   }
 
   if (activeTextEditor) {
-    triggerUpdateDecorations();
-  }
-
-  vscode.window.onDidChangeActiveTextEditor(editor => {
-    if (editor) {
-      activeTextEditor = editor;
-      triggerUpdateDecorations();
-    }
-  }, undefined, context.subscriptions);
-
-  vscode.workspace.onDidChangeTextDocument(event => {
-    if (activeTextEditor && event.document === activeTextEditor.document) {
-      triggerUpdateDecorations(true);
-    }
-  }, undefined, context.subscriptions);
-
-  function triggerUpdateDecorations(throttle = false) {
-    if (bounceTimer) {
-      clearTimeout(bounceTimer);
-      bounceTimer = undefined;
-    }
-    if (throttle) {
-      bounceTimer = setTimeout(updateDecorations, 500);
-    } else {
-      updateDecorations();
-    }
+    updateDecorations();
   }
 
   function updateDecorations() {
     return;
   }
+
+  const debouncedUpdateDecorations = debounce(500, updateDecorations);
+
+  vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor) {
+      activeTextEditor = editor;
+      debouncedUpdateDecorations();
+    }
+  }, undefined, context.subscriptions);
+
+  vscode.workspace.onDidChangeTextDocument(event => {
+    if (activeTextEditor && event.document === activeTextEditor.document) {
+      updateDecorations();
+    }
+  }, undefined, context.subscriptions);
 }
 
 
