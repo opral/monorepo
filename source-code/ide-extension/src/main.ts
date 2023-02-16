@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
+import { debounce } from "throttle-debounce";
 import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { messagePreview } from "./decorations/messagePreview.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
-import { initialize$import } from "@inlang/core/config";
+import { DefineConfig, initialize$import } from "@inlang/core/config";
 import fs from "node:fs";
 import fetch from 'node-fetch';
 import { dirname } from 'node:path';
@@ -65,12 +66,21 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // TODO: find better fs (vscode.workspace.fs)
   const $import = initialize$import({ fs: fs.promises as any, fetch });
-  const module = await import(closestConfigPath);
-  const config = await module.defineConfig({ $fs: fs.promises, $import });
-  const resources = await config.readResources({ config });
-  setState({
-    config,
-    resources
+  const module: { defineConfig: DefineConfig } = await import(closestConfigPath);
+  const config = await module.defineConfig({ $fs: fs.promises as any, $import });
+  const loadResources = async () => {
+    const resources = await config.readResources({ config })
+    setState({
+      config,
+      resources
+    });
+  }
+  const debouncedLoadResources = debounce(1000, loadResources);
+  await loadResources();
+
+  // register event listeners
+  vscode.workspace.onDidChangeTextDocument(() => {
+    debouncedLoadResources();
   });
 
   // register commands
