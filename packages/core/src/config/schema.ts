@@ -86,13 +86,9 @@ export type Config = {
      */
     extractMessageOptions: {
       /**
-       * Unique identifier and title of the extraction option.
-       */
-      id: string,
-      /**
        * Function which is called, when the user finished the message extraction command.
        *
-       * @param messageId is entered by the user
+       * @param messageId is the message identifier entered by the user
        * @param selection is the text which was extracted
        * @returns the code which is inserted into the document
        */

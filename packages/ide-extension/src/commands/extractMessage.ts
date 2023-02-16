@@ -33,17 +33,20 @@ export const extractMessageCommand = {
       return;
     }
 
-    const extractMessageOptionId = await vscode.window.showQuickPick(
+    const messageValue = textEditor.document.getText(textEditor.selection);
+    const preparedExtractOptions = ideExtension.extractMessageOptions.map((option) => option.callback(messageId, messageValue));
+
+    const preparedExtractOption = await vscode.window.showQuickPick(
       [
-        ...ideExtension.extractMessageOptions.map(o => o.id),
+        ...preparedExtractOptions,
         "How to edit these replacement options?",
       ],
       { title: "Replace highlighted text with:" }
     );
-    if (extractMessageOptionId === undefined) {
+    if (preparedExtractOption === undefined) {
       return;
     } else if (
-      extractMessageOptionId === "How to edit these replacement options?"
+      preparedExtractOption === "How to edit these replacement options?"
     ) {
       // TODO #152
       return vscode.env.openExternal(
@@ -51,13 +54,10 @@ export const extractMessageCommand = {
       );
     }
 
-    const extractMessageOption = ideExtension.extractMessageOptions.find(o => o.id === extractMessageOptionId);
-
-    if (extractMessageOption === undefined) {
+    if (preparedExtractOption === undefined) {
       return vscode.window.showWarningMessage("Couldn't find choosen extract option.");
     }
 
-    const messageValue = textEditor.document.getText(textEditor.selection);
     const message: Message = {
       type: 'Message',
       id: { type: 'Identifier', name: messageId },
@@ -79,7 +79,7 @@ export const extractMessageCommand = {
       }
     }
     await textEditor.edit((editor) => {
-      editor.replace(textEditor.selection, extractMessageOption.callback(messageId, messageValue));
+      editor.replace(textEditor.selection, preparedExtractOption);
     });
     return vscode.window.showInformationMessage("Message extracted.");
   },
