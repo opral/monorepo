@@ -1,10 +1,9 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { Message, Resource } from '../ast/schema.js';
+import { beforeEach, describe, expect, MockContext, test, vi } from "vitest";
+import type { Message, Pattern, Resource } from '../ast/schema.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
 import type { Context } from './context.js';
 import { getLintRulesFromConfig, lint } from './linter.js';
 import { ConfiguredLintRule, createRule } from './rule.js';
-import { debug } from './_utilities.js';
 
 describe("getLintRulesFromConfig", async () => {
 	const rule1 = { id: 'rule.1' } as unknown as ConfiguredLintRule
@@ -33,6 +32,7 @@ describe("getLintRulesFromConfig", async () => {
 // --------------------------------------------------------------------------------------------------------------------
 
 vi.spyOn(console, 'warn').mockImplementation(vi.fn)
+vi.spyOn(console, 'info').mockImplementation(vi.fn)
 
 const dummyEnv: EnvironmentFunctions = {
 	$fs: vi.fn() as any,
@@ -163,98 +163,230 @@ describe("lint", async () => {
 	// -----------------------------------------------------------------------------------------------------------------
 
 	describe("visitors", () => {
-		test("should visit all nodes exactly once", async () => {
+		const onEnter = vi.fn()
+		const onLeave = vi.fn()
 
+		const rule = {
+			id: 'lint.rule',
+			level: 'error',
+			initialize: () => Promise.resolve(console.info('initialize')),
+			visitors: {
+				Resource: {
+					enter: ({ target }) => {
+						onEnter(target)
+						return Promise.resolve(console.info('Resource enter'))
+					},
+					leave: ({ target }) => {
+						onLeave(target)
+						return Promise.resolve(console.info('Resource leave'))
+					}
+				},
+				Message: {
+					enter: ({ target }) => {
+						onEnter(target)
+						return Promise.resolve(console.info('Message enter'))
+					},
+					leave: ({ target }) => {
+						onLeave(target)
+						return Promise.resolve(console.info('Message leave'))
+					}
+				},
+				Pattern: {
+					enter: ({ target }) => {
+						onEnter(target)
+						return Promise.resolve(console.info('Pattern enter'))
+					},
+					leave: ({ target }) => {
+						onLeave(target)
+						return Promise.resolve(console.info('Pattern leave'))
+					}
+				},
+			},
+			teardown: () => Promise.resolve(console.info('teardown')),
+		} satisfies ConfiguredLintRule
+
+		test("should visit all nodes exactly once", async () => {
+			await doLint([rule], [referenceResource])
+
+			expect(onEnter).toHaveBeenCalledTimes(3)
+			expect((onEnter as unknown as MockContext<Resource, unknown>).calls[0][0])
+				.toMatchObject({ type: 'Resource' })
+			expect((onEnter as unknown as MockContext<Message, unknown>).calls[1][0])
+				.toMatchObject({ type: 'Message' })
+			expect((onEnter as unknown as MockContext<Pattern, unknown>).calls[2][0])
+				.toMatchObject({ type: 'Pattern' })
+
+			expect(onLeave).toHaveBeenCalledTimes(3)
+			expect((onLeave as unknown as MockContext<Pattern, unknown>).calls[0][0])
+				.toMatchObject({ type: 'Pattern' })
+			expect((onLeave as unknown as MockContext<Message, unknown>).calls[1][0])
+				.toMatchObject({ type: 'Message' })
+			expect((onLeave as unknown as MockContext<Resource, unknown>).calls[2][0])
+				.toMatchObject({ type: 'Resource' })
 		})
 
-		describe("should await", async () => {
-			test("'initialize'", async () => {
+		test("should await all functions", async () => {
+			await doLint([rule], [referenceResource])
 
-			})
-
-			test("'teardown'", async () => {
-
-			})
-
-			describe("'Resource'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
-
-			describe("'Message'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
-
-			describe("'Pattern'", async () => {
-				test("'enter'", async () => {
-
-				})
-
-				test("'leave'", async () => {
-
-				})
-			})
+			expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+			expect(console.info).toHaveBeenNthCalledWith(2, 'Resource enter')
+			expect(console.info).toHaveBeenNthCalledWith(3, 'Message enter')
+			expect(console.info).toHaveBeenNthCalledWith(4, 'Pattern enter')
+			expect(console.info).toHaveBeenNthCalledWith(5, 'Pattern leave')
+			expect(console.info).toHaveBeenNthCalledWith(6, 'Message leave')
+			expect(console.info).toHaveBeenNthCalledWith(7, 'Resource leave')
+			expect(console.info).toHaveBeenNthCalledWith(8, 'teardown')
 		})
 
 		describe("should skip processing children", async () => {
 			describe("if no visitor is specified", async () => {
 				describe("for 'Resource'", async () => {
 					test("node", async () => {
+						const modifiedRule = {
+							...rule, visitors: {}
+						} as ConfiguredLintRule
 
+						await doLint([modifiedRule], [referenceResource])
+
+						expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+						expect(console.info).toHaveBeenNthCalledWith(2, 'teardown')
 					})
 
 					describe("but not if children has visitor specified", async () => {
 						test("for Message", async () => {
+							const modifiedRule = {
+								...rule, visitors: { Message: rule.visitors.Message.enter }
+							} as ConfiguredLintRule
 
+							await doLint([modifiedRule], [referenceResource])
+
+							expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+							expect(console.info).toHaveBeenNthCalledWith(2, 'Message enter')
+							expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 						})
 
 						test("for Pattern", async () => {
+							const modifiedRule = {
+								...rule, visitors: { Pattern: rule.visitors.Pattern.enter }
+							} as ConfiguredLintRule
 
+							await doLint([modifiedRule], [referenceResource])
+
+							expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+							expect(console.info).toHaveBeenNthCalledWith(2, 'Pattern enter')
+							expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 						})
 					})
 				})
 
 				describe("for Message", async () => {
 					test("node", async () => {
+						const modifiedRule = {
+							...rule, visitors: { Resource: rule.visitors.Resource.enter }
+						} as ConfiguredLintRule
 
+						await doLint([modifiedRule], [referenceResource])
+
+						expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+						expect(console.info).toHaveBeenNthCalledWith(2, 'Resource enter')
+						expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 					})
 
 					describe("but not if children has visitor specified", async () => {
 						test("for Pattern", async () => {
+							const modifiedRule = {
+								...rule, visitors: { Pattern: rule.visitors.Pattern.enter }
+							} as ConfiguredLintRule
 
+							await doLint([modifiedRule], [referenceResource])
+
+							expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+							expect(console.info).toHaveBeenNthCalledWith(2, 'Pattern enter')
+							expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 						})
 					})
 				})
 
 				describe("for Pattern", async () => {
 					test("node", async () => {
+						const modifiedRule = {
+							...rule, visitors: { Message: rule.visitors.Message.enter }
+						} as ConfiguredLintRule
 
+						await doLint([modifiedRule], [referenceResource])
+
+						expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+						expect(console.info).toHaveBeenNthCalledWith(2, 'Message enter')
+						expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 					})
 				})
 			})
 
 			describe("if 'skip' get's returned by a visitor", async () => {
 				test("for 'Resource'", async () => {
+					const modifiedRule = {
+						...rule,
+						visitors: {
+							Resource: {
+								enter: (...args) => {
+									rule.visitors.Resource.enter(...args)
+									return 'skip'
+								},
+								leave: rule.visitors.Resource.leave,
+							},
+							Message: rule.visitors.Message.enter,
+							Pattern: rule.visitors.Pattern.enter,
+						}
+					} as ConfiguredLintRule
 
+					await doLint([modifiedRule], [referenceResource])
+
+					expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+					expect(console.info).toHaveBeenNthCalledWith(2, 'Resource enter')
+					expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 				})
 
 				test("for 'Message'", async () => {
+					const modifiedRule = {
+						...rule,
+						visitors: {
+							Message: {
+								enter: (...args) => {
+									rule.visitors.Message.enter(...args)
+									return 'skip'
+								},
+								leave: rule.visitors.Message.leave,
+							},
+							Pattern: rule.visitors.Pattern.enter,
+						}
+					} as ConfiguredLintRule
 
+					await doLint([modifiedRule], [referenceResource])
+
+					expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+					expect(console.info).toHaveBeenNthCalledWith(2, 'Message enter')
+					expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 				})
 
 				test("for 'Pattern'", async () => {
+					const modifiedRule = {
+						...rule,
+						visitors: {
+							Pattern: {
+								enter: (...args) => {
+									rule.visitors.Pattern.enter(...args)
+									return 'skip'
+								},
+								leave: rule.visitors.Pattern.leave,
+							}
+						}
+					} as ConfiguredLintRule
 
+					await doLint([modifiedRule], [referenceResource])
+
+					expect(console.info).toHaveBeenNthCalledWith(1, 'initialize')
+					expect(console.info).toHaveBeenNthCalledWith(2, 'Pattern enter')
+					expect(console.info).toHaveBeenNthCalledWith(3, 'teardown')
 				})
 			})
 		})
