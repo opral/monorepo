@@ -24,6 +24,7 @@ export const lint = async (config: Config, env: EnvironmentFunctions) => {
 	await Promise.all(
 		lintRules.map(lintRule =>
 			processLintRule({ env, lintRule, referenceLanguage, languages, reference, resources })
+				.catch(e => console.error(`Unexpected error in lint rule '${lintRule.id}':`, e))
 		)
 	)
 
