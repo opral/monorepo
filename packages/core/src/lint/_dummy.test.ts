@@ -5,7 +5,7 @@ import { createRuleCollection } from './ruleCollection.js';
 import { additionalKeyRule } from './rules/additionalKey.js';
 import { missingKeyRule } from './rules/missingKey.js';
 import { createBrandingRule } from './rules/brandingRule.js';
-import { printReport } from './output.js';
+import { print, printReport } from './output.js';
 import { getAllLintReports } from './query.js';
 import { debug } from './_utilities.js';
 
@@ -71,13 +71,8 @@ const dummyConfig = {
 
 test("debug code", async () => {
 	const results = await lint(dummyConfig, dummyEnv)
-	debug(results)
 
-
-	results?.forEach(r => {
-		const reports = getAllLintReports(r)
-		reports.forEach(report => {
-			console.log(printReport(report))
-		});
-	})
+	if (results) for (const r of results) {
+		print(r)
+	}
 })
