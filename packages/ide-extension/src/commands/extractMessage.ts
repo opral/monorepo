@@ -1,80 +1,86 @@
 import * as vscode from "vscode";
 import { state } from "../state.js";
+import { query } from "@inlang/core/query"
+import type { Message } from '@inlang/core/ast';
 
-export type ExtractMessageCommandArgs = {
-  pattern: string;
-  activeTextEditor: vscode.TextEditor;
-};
-
+/**
+ * Helps the user to extract messages from the active text editor.
+ */
 export const extractMessageCommand = {
   id: "inlang.extractMessage",
-  title: "Extract Message",
-  callback: async function (args: ExtractMessageCommandArgs) {
-    if (
-      state().config.ideExtension.extractMessageReplacementOptions === undefined
-    ) {
+  title: "Inlang: Extract Message",
+  callback: async function (textEditor: vscode.TextEditor) {
+    const { ideExtension, referenceLanguage, readResources, writeResources } = state().config;
+
+    // guards
+    if (!ideExtension) {
+      return vscode.window.showWarningMessage(
+        "There is no `ideExtension` object in the inlang.config.json configured."
+      );
+    }
+    if (ideExtension.extractMessageOptions === undefined) {
       return vscode.window.showWarningMessage(
         "The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message."
       );
-    } else if (state().config.referenceLanguage === undefined) {
+    } else if (referenceLanguage === undefined) {
       return vscode.window.showWarningMessage(
         "The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message."
       );
     }
-    const id = await vscode.window.showInputBox({
-      title: "Enter the ID:",
-    });
-    if (id === undefined) {
+
+    const messageId = await vscode.window.showInputBox({ title: "Enter the ID:" });
+    if (messageId === undefined) {
       return;
     }
-    const chosenReplacementOption = await vscode.window.showQuickPick(
+
+    const messageValue = textEditor.document.getText(textEditor.selection);
+    const preparedExtractOptions = ideExtension.extractMessageOptions.map((option) => option.callback(messageId, messageValue));
+
+    const preparedExtractOption = await vscode.window.showQuickPick(
       [
-        ...state().config.ideExtension.extractMessageReplacementOptions({ id }),
+        ...preparedExtractOptions,
         "How to edit these replacement options?",
       ],
       { title: "Replace highlighted text with:" }
     );
-    if (chosenReplacementOption === undefined) {
+    if (preparedExtractOption === undefined) {
       return;
     } else if (
-      chosenReplacementOption === "How to edit these replacement options?"
+      preparedExtractOption === "How to edit these replacement options?"
     ) {
       // TODO #152
-      await vscode.env.openExternal(
+      return vscode.env.openExternal(
         vscode.Uri.parse("https://github.com/inlang/inlang")
       );
     }
-    // 	let create: Result<void, Error>;
-    // 	if (id.includes(".")) {
-    // 		create = state.resources.createAttribute({
-    // 			messageId: id.split(".")[0],
-    // 			id: id.split(".")[1],
-    // 			pattern: args.pattern,
-    // 			languageCode: "en",
-    // 		});
-    // 	} else {
-    // 		create = state.resources.createMessage({
-    // 			id,
-    // 			pattern: args.pattern,
-    // 			languageCode: state.config.baseLanguageCode as LanguageCode,
-    // 		});
-    // 	}
-    // 	if (create.isErr) {
-    // 		return vscode.window.showErrorMessage(create.error.message);
-    // 	}
-    // 	const write = writeTranslationFiles({
-    // 		cwd: state.configPath,
-    // 		resources: state.resources,
-    // 		...state.config,
-    // 	});
-    // 	if (write.isErr) {
-    // 		return vscode.window.showErrorMessage(write.error.message);
-    // 	}
-    // 	// replacing the pattern once all possible errors are ruled out.
-    // 	await args.activeTextEditor.edit((editor) => {
-    // 		editor.replace(args.activeTextEditor.selection, replacementPattern);
-    // 	});
-    // 	return vscode.window.showInformationMessage("Pattern extracted.");
-    // },
+
+    if (preparedExtractOption === undefined) {
+      return vscode.window.showWarningMessage("Couldn't find choosen extract option.");
+    }
+
+    const message: Message = {
+      type: 'Message',
+      id: { type: 'Identifier', name: messageId },
+      pattern: { type: 'Pattern', elements: [{ type: 'Text', value: messageValue }] }
+    };
+    // read all available resources
+    const resources = await readResources({ config: state().config });
+    // find reference langauge resource
+    const referenceResource = resources.find((resource) => resource.languageTag.name === referenceLanguage);
+    if (referenceResource) {
+      const newResource = query(referenceResource).upsert({ message });
+      if (newResource.isOk) {
+        await writeResources({
+          config: state().config,
+          resources: resources.map((resource) => (resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource))
+        });
+      } else {
+        return vscode.window.showErrorMessage("Couldn't upsert new message.");
+      }
+    }
+    await textEditor.edit((editor) => {
+      editor.replace(textEditor.selection, preparedExtractOption);
+    });
+    return vscode.window.showInformationMessage("Message extracted.");
   },
 } as const;

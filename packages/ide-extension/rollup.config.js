@@ -1,5 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import commonjs from '@rollup/plugin-commonjs';
 
 /**
  * What is rollup used for?
@@ -15,7 +16,9 @@ export default {
     // .cjs because the package.json defines "type": "module",
     // .cjs indicates that the file should not be treated as es module
     // but commonjs instead
-    file: "dist/main.cjs",
+    dir: "dist/",
+    entryFileNames: "[name].cjs",
+    chunkFileNames: "[name]-[hash].cjs",
     format: "cjs",
   },
   // the vscode dependency is provided by vscode.
@@ -25,5 +28,6 @@ export default {
     nodeResolve(),
     // typescript = compile typescript
     typescript(),
+    commonjs(),
   ],
 };

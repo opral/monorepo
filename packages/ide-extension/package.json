@@ -12,7 +12,7 @@
   "icon": "assets/icon.png",
   "version": "0.1.6",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.74.1"
   },
   "categories": [
     "Other",
@@ -20,6 +20,14 @@
     "Visualization"
   ],
   "main": "./dist/main.cjs",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlang.extractMessage",
+        "title": "Inlang: Extract Message"
+      }
+    ]
+  },
   "scripts": {
     "_vscode:prepublish": "npm run build",
     "_build": "rollup --config",
@@ -30,9 +38,11 @@
     "_format": "prettier ./src/** -w --config ../../.prettierrc.json"
   },
   "dependencies": {
-    "@inlang/core": "*"
+    "@inlang/core": "*",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/vscode": "^1.75.0",

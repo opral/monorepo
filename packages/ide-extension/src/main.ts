@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
-import { ExtractMessage } from "./actions/extractMessage.js";
-import { setState, state } from "./state.js";
+import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
-import type { Config as InlangConfig } from "@inlang/core/config";
-import { $import } from "@inlang/core/config";
-import fs from "node:fs/promises";
+import { initialize$import } from "@inlang/core/config";
+import fs from "node:fs";
+import fetch from 'node-fetch';
+import { dirname } from 'node:path';
+import { ExtractMessage } from './actions/extractMessage.js';
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -55,33 +56,42 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     options: potentialConfigFileUris.map((uri) => uri.path),
     to: activeTextEditor.document.uri.path,
   });
-  const configModule: InlangConfig = (await import(closestConfigPath)).config;
+
+  // Change current working directory to configuration file directory, so relative paths to the languages files work.
+  // Otherwise the current working directory path is the directory where the node binary resides.
+  // See https://github.com/inlang/inlang/pull/372#discussion_r1107285786
+  // See https://github.com/microsoft/vscode-discussions/discussions/466
+  process.chdir(dirname(closestConfigPath));
+
+  // TODO: find better fs (vscode.workspace.fs)
+  const $import = initialize$import({ fs: fs.promises as any, fetch });
+  const module = await import(closestConfigPath);
+  const config = await module.defineConfig({ $fs: fs.promises, $import });
   setState({
-    config: configModule,
-    configPath: closestConfigPath,
-    bundles: await configModule.readBundles({ $import, fs: fs as any }),
+    config,
+    configPath: closestConfigPath
   });
-  const b = state().bundles;
-  console.log(b);
-  // register the commands
+
+  // register commands
   args.context.subscriptions.push(
-    vscode.commands.registerCommand(
+    vscode.commands.registerTextEditorCommand(
       extractMessageCommand.id,
       extractMessageCommand.callback
     )
   );
-  // register the code actions
-  for (const language of state().config.ideExtension.documentSelectors) {
-    args.context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(
-        language,
-        new ExtractMessage(),
-        {
-          providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
-        }
-      )
-    );
-  }
+
+  // register source actions
+  args.context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider([
+      // TODO: improve with #348
+      { language: 'javascript' },
+      { language: 'javascriptreact' },
+      { language: 'typescript' },
+      { language: 'typescriptreact' },
+      { language: 'svelte' }
+    ], new ExtractMessage(), { providedCodeActionKinds: ExtractMessage.providedCodeActionKinds })
+  );
+
   // register decorations
   inlinePattern({ activeTextEditor });
 }
