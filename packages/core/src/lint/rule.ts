@@ -19,10 +19,10 @@ type VisitorParam<Node extends LintableNode, Input> = TargetReferenceParameterTu
 	payload?: Input
 }
 
-type EnterNodeFunction<Node extends LintableNode, Input, Output> =
+export type EnterNodeFunction<Node extends LintableNode, Input, Output> =
 	(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void | Output>
 
-type LeaveNodeFunction<Node extends LintableNode, Input> =
+export type LeaveNodeFunction<Node extends LintableNode, Input> =
 	(param: VisitorParam<Node, Input>) => MaybePromise<'skip' | void>
 
 export type NodeVisitor<Node extends LintableNode> =
@@ -54,7 +54,7 @@ export type ConfiguredLintRule = {
 		}
 	) => MaybePromise<unknown>
 	visitors: NodeVisitors
-	teardown?: (payload: unknown) => MaybePromise<void>
+	teardown?: (param: { payload: unknown }) => MaybePromise<void>
 }
 
 export const createRule = <Settings>(
