@@ -16,7 +16,7 @@ The automation and collaboration power a version control system provides might j
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/assets/001-git-based-architecture.png"
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png"
 
     alt="git-based localization infrastructure"
 

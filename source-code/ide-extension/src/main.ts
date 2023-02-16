@@ -3,7 +3,6 @@ import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { messagePreview } from "./decorations/messagePreview.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
-import type { Config as InlangConfig } from "@inlang/core/config";
 import { initialize$import } from "@inlang/core/config";
 import fs from "node:fs";
 import fetch from 'node-fetch';
@@ -60,14 +59,17 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // Change current working directory to configuration file directory, so relative paths to the languages files work.
   // Otherwise the current working directory path is the directory where the node binary resides.
+  // See https://github.com/inlang/inlang/pull/372#discussion_r1107285786
+  // See https://github.com/microsoft/vscode-discussions/discussions/466
   process.chdir(dirname(closestConfigPath));
 
   // TODO: find better fs (vscode.workspace.fs)
   const $import = initialize$import({ fs: fs.promises as any, fetch });
-  const config: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
+  const module = await import(closestConfigPath);
+  const config = await module.defineConfig({ $fs: fs.promises, $import });
   const resources = await config.readResources({ config });
   setState({
-    config: config,
+    config,
     resources
   });
 
