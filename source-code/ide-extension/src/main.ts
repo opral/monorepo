@@ -3,7 +3,6 @@ import { setState } from "./state.js";
 import { extractMessageCommand } from "./commands/extractMessage.js";
 import { inlinePattern } from "./decorations/inlinePattern.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
-import type { Config as InlangConfig } from "@inlang/core/config";
 import { initialize$import } from "@inlang/core/config";
 import fs from "node:fs";
 import fetch from 'node-fetch';
@@ -64,9 +63,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // TODO: find better fs (vscode.workspace.fs)
   const $import = initialize$import({ fs: fs.promises as any, fetch });
-  const configModule: InlangConfig = await (await import(closestConfigPath)).defineConfig({ $fs: fs.promises, $import });
+  const module = await import(closestConfigPath);
+  const config = await module.defineConfig({ $fs: fs.promises, $import });
   setState({
-    config: configModule,
+    config,
     configPath: closestConfigPath
   });
 
