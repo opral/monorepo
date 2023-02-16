@@ -4,7 +4,7 @@ import { query } from "@inlang/core/query"
 import type { Message } from '@inlang/core/ast';
 
 /**
- *
+ * Helps the user to extract messages from the active text editor.
  */
 export const extractMessageCommand = {
   id: "inlang.extractMessage",
