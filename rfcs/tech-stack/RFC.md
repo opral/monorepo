@@ -149,6 +149,7 @@ SolidJS has ultimately been choosen given the uncertainty of the editor's requir
 - Uses JSX, thereby synergy effects to React (worst case, switch to React is possible)
 - Runtime approach (compiler just transforms JSX)
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
+  - The reactive system is de-coupled from rendering. Thus, the reactive system can be used in other applications like the ide-extension.
 - performance “for free”.
   - Performance is likely important for the editor.
 - (Great documentation -> understandable for beginners)
