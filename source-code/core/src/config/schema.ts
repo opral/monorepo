@@ -58,12 +58,12 @@ export type Config = {
 
   ideExtension?: {
     /**
-     * Defines finders for inlined translations.
+     * Defines finders for translations inside the code.
      *
      * @param args represents the data to conduct the search on
      * @returns a promise with matched inlined translations
      */
-    inlinedTranslationFinders?: (args: {
+    translationFinders: ((args: {
       documentText: string;
     }) => Promise<
       Array<{
@@ -79,7 +79,7 @@ export type Config = {
           end: { line: number; character: number };
         };
       }>
-    >[];
+    >)[];
 
     /**
      * Defines the options to extract messages.
