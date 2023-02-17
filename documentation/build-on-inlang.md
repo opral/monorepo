@@ -6,15 +6,37 @@ description: Learn how to build on top of inlang.
 
 # {% $frontmatter.title %}
 
-**Inlang is designed to build upon with the `@inlang/core` package.**
+## Introduction
 
-The [@inlang/core](https://github.com/inlang/inlang/tree/main/source-code/core) package is all one needs to build an app, a GitHub action, a CLI, an SDK, and more. All inlang apps themselves use the `@inlang/core` package.
+Inlang is designed to be build upon. The [@inlang/core](https://github.com/inlang/inlang/tree/main/source-code/core) module provides everything one needs to build apps, GitHub actions, and more.
 
 {% Callout variant="info" %}
 
 **The documentation is work in progress.** Reach out via [discussions](https://github.com/inlang/inlang/discussions) or email `hello@inlang.com` if you have questions.
 
 {% /Callout %}
+
+If you build on inlang, the "logic" usually resembles the following flow:
+
+```
+config.readResources() -> query(AST) -> config.writeResources()
+```
+
+```js
+// The `inlang.config.js` file can be imported by your application
+const { defineConfig } = await import("./inlang.config.js");
+const config = defineConfig(/** arguments */);
+
+// get the resources (AST)
+let resources = config.readResources(/** arguments */);
+
+// modify the resources with @inlang/core/query
+resources = query(resources).delete({ id: "outdated-message" });
+resources = query(resources).update({ id: "hello", with: "Hello from inlang" });
+
+// write the resources to the filesystem
+config.writeResources(resources);
+```
 
 ## Example
 
