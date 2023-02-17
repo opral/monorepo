@@ -63,7 +63,7 @@ export type Config = {
      * @param args represents the data to conduct the search on
      * @returns a promise with matched inlined translations
      */
-    translationFinders: ((args: {
+    messageFinders: ((args: {
       documentText: string;
     }) => Promise<
       Array<{
