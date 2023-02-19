@@ -1,11 +1,15 @@
 import * as vscode from "vscode";
 import { debounce } from "throttle-debounce";
+import { query } from '@inlang/core/query';
 import { state } from "../state.js";
-
 
 export async function messagePreview(args: { activeTextEditor: vscode.TextEditor, context: vscode.ExtensionContext }) {
   const { context } = args;
-  let { activeTextEditor } = args;
+  const { referenceLanguage } = state().config;
+  const referenceResource = state().resources.find((resource) => resource.languageTag.name === referenceLanguage);
+  let activeTextEditor = vscode.window.activeTextEditor;
+
+  const messagePreview = vscode.window.createTextEditorDecorationType({});
 
   if (state().config.referenceLanguage === undefined) {
     return vscode.window.showWarningMessage(
@@ -13,12 +17,39 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
     );
   }
 
-  if (activeTextEditor) {
-    updateDecorations();
-  }
+  updateDecorations();
 
-  function updateDecorations() {
-    return;
+  async function updateDecorations() {
+    if (!activeTextEditor || !referenceResource) {
+      return;
+    }
+
+    const wrappedDecorations = state().config.ideExtension?.messageFinders.map(async (finder) => {
+      const messages = await finder({ documentText: args.activeTextEditor.document.getText() });
+      return messages.map((message) => {
+        const translation = query(referenceResource).get({ id: message.messageId })?.pattern.elements;
+        const translationText = translation && translation.length > 0 ? translation[0].value : undefined;
+        const range = new vscode.Range(
+          // VSCode starts to count lines and columns from zero
+          new vscode.Position(message.position.start.line - 1, message.position.start.character - 1),
+          new vscode.Position(message.position.end.line - 1, message.position.end.character - 1)
+        );
+        const decoration: vscode.DecorationOptions = {
+          range,
+          renderOptions: {
+            after: {
+              contentText: translationText ?? `ERROR: '${message.messageId}' not found`,
+              margin: '0 0.5rem',
+              backgroundColor: translationText ? 'rgb(45 212 191/.15)' : 'rgb(244 63 94/.15)',
+              border: translationText ? '1px solid rgb(45 212 191/.50)' : '1px solid rgb(244 63 94/.50)',
+            },
+          }
+        };
+        return decoration;
+      });
+    });
+    const decorations = (await Promise.all(wrappedDecorations || [])).flat();
+    activeTextEditor.setDecorations(messagePreview, decorations);
   }
 
   const debouncedUpdateDecorations = debounce(500, updateDecorations);
@@ -35,65 +66,4 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
       updateDecorations();
     }
   }, undefined, context.subscriptions);
-}
-
-
-async function updateDecorations2(args: {
-  activeTextEditor: vscode.TextEditor;
-  type: vscode.TextEditorDecorationType;
-}): Promise<void> {
-  const sourceCode = args.activeTextEditor.document.getText();
-  console.log({ sourceCode });
-  //const matches = await state().config.ideExtension.inlinePatternMatcher({
-  //  text: sourceCode,
-  //  $import,
-  //});
-  //console.log({ matches });
-  // const matches = args.parser.parse(sourceCode) as {
-  // 	id: string;
-  // 	location: {
-  // 		start: { offset: number; line: number; column: number };
-  // 		end: { offset: number; line: number; column: number };
-  // 	};
-  // }[];
-  // const decorations: vscode.DecorationOptions[] = [];
-  // for (const match of matches) {
-  // 	// getting either the message or attribute pattern
-  // 	const messageOrAttribute = match.id.includes(".")
-  // 		? state.resources.getAttribute({
-  // 				messageId: match.id.split(".")[0],
-  // 				id: match.id.split(".")[1],
-  // 				languageCode: state.config.baseLanguageCode as LanguageCode,
-  // 		  })
-  // 		: state.resources.getMessage({
-  // 				id: match.id,
-  // 				languageCode: state.config.baseLanguageCode as LanguageCode,
-  // 		  });
-  // 	// the parser starts a file from line 0, while vscode starts from line 1 -> thus -1
-  // const range = new vscode.Range(
-  // 	new vscode.Position(
-  // 		match.location.start.line - 1,
-  // 		match.location.start.column
-  // 	),
-  // 	new vscode.Position(match.location.end.line - 1, match.location.end.column)
-  // );
-  // 	const pattern = messageOrAttribute?.value;
-  // 	const color = pattern ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)";
-  // 	const borderColor = pattern ? "rgb(45 212 191/.50)" : "rgb(244 63 94/.50)"; // more opacity
-  // 	const decoration: vscode.DecorationOptions = {
-  // 		range,
-  // 		renderOptions: {
-  // 			after: {
-  // 				border: `0.1rem solid ${borderColor}`,
-  // 				backgroundColor: color,
-  // 				contentText: pattern
-  // 					? serializePattern(pattern)
-  // 					: "ERROR: The id does not exist.",
-  // 				margin: "0.2rem",
-  // 			},
-  // 		},
-  // 	};
-  // 	decorations.push(decoration);
-  // }
-  // args.activeTextEditor.setDecorations(args.type, decorations);
 }
