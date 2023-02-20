@@ -11,7 +11,9 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
   let activeTextEditor = vscode.window.activeTextEditor;
 
   const messagePreview = vscode.window.createTextEditorDecorationType({
-    textDecoration: 'dashed'
+    after: {
+      margin: '0 0.5rem',
+    }
   });
 
   if (referenceLanguage === undefined) {
@@ -51,7 +53,6 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
           renderOptions: {
             after: {
               contentText: truncatedTranslationText ?? `ERROR: '${message.messageId}' not found`,
-              margin: '0 0.5rem',
               backgroundColor: translationText ? 'rgb(45 212 191/.15)' : 'rgb(244 63 94/.15)',
               border: translationText ? '1px solid rgb(45 212 191/.50)' : '1px solid rgb(244 63 94/.50)',
             },
