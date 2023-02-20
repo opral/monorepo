@@ -6,15 +6,22 @@ import { state } from "../state.js";
 export async function messagePreview(args: { activeTextEditor: vscode.TextEditor, context: vscode.ExtensionContext }) {
   const { context } = args;
   const { referenceLanguage } = state().config;
+  const maximumPreviewLength = state().config.ideExtension?.preview?.maximumLength;
   const referenceResource = state().resources.find((resource) => resource.languageTag.name === referenceLanguage);
   let activeTextEditor = vscode.window.activeTextEditor;
 
-  const messagePreview = vscode.window.createTextEditorDecorationType({});
+  const messagePreview = vscode.window.createTextEditorDecorationType({
+    textDecoration: 'dashed'
+  });
 
-  if (state().config.referenceLanguage === undefined) {
+  if (referenceLanguage === undefined) {
     return vscode.window.showWarningMessage(
       "The `referenceLanguage` musst be defined in the inlang.config.js to show patterns inline."
     );
+  }
+
+  if (maximumPreviewLength && maximumPreviewLength < 1) {
+    return;
   }
 
   updateDecorations();
@@ -29,6 +36,11 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
       return messages.map((message) => {
         const translation = query(referenceResource).get({ id: message.messageId })?.pattern.elements;
         const translationText = translation && translation.length > 0 ? translation[0].value : undefined;
+        const truncatedTranslationText = translationText && (
+          translationText.length > (maximumPreviewLength || 0)
+            ? `${translationText.slice(0, maximumPreviewLength)}...`
+            : translationText
+        );
         const range = new vscode.Range(
           // VSCode starts to count lines and columns from zero
           new vscode.Position(message.position.start.line - 1, message.position.start.character - 1),
@@ -38,12 +50,13 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
           range,
           renderOptions: {
             after: {
-              contentText: translationText ?? `ERROR: '${message.messageId}' not found`,
+              contentText: truncatedTranslationText ?? `ERROR: '${message.messageId}' not found`,
               margin: '0 0.5rem',
               backgroundColor: translationText ? 'rgb(45 212 191/.15)' : 'rgb(244 63 94/.15)',
               border: translationText ? '1px solid rgb(45 212 191/.50)' : '1px solid rgb(244 63 94/.50)',
             },
-          }
+          },
+          hoverMessage: translationText
         };
         return decoration;
       });
