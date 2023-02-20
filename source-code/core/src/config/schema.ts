@@ -58,12 +58,12 @@ export type Config = {
 
   ideExtension?: {
     /**
-     * Defines finders for translations inside the code.
+     * Defines matchers for message references inside the code.
      *
      * @param args represents the data to conduct the search on
-     * @returns a promise with matched inlined translations
+     * @returns a promise with matched message references
      */
-    messageFinders: ((args: {
+    messageReferenceMatchers: ((args: {
       documentText: string;
     }) => Promise<
       Array<{
@@ -72,7 +72,7 @@ export type Config = {
          */
         messageId: string;
         /**
-         * The position from where to where the pattern should be inlined.
+         * The position from where to where the reference can be found.
          */
         position: {
           start: { line: number; character: number };

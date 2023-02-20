@@ -24,8 +24,8 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
       return;
     }
 
-    const wrappedDecorations = state().config.ideExtension?.messageFinders.map(async (finder) => {
-      const messages = await finder({ documentText: args.activeTextEditor.document.getText() });
+    const wrappedDecorations = state().config.ideExtension?.messageReferenceMatchers.map(async (matcher) => {
+      const messages = await matcher({ documentText: args.activeTextEditor.document.getText() });
       return messages.map((message) => {
         const translation = query(referenceResource).get({ id: message.messageId })?.pattern.elements;
         const translationText = translation && translation.length > 0 ? translation[0].value : undefined;
