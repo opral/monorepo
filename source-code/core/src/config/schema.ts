@@ -58,18 +58,6 @@ export type Config = {
 
   ideExtension?: {
     /**
-     * Defines how message previews look like.
-     */
-    preview?: {
-      /**
-       * Defines the maximum length of a preview before it's truncated.
-       *
-       * If not defined, the message previews are not truncated.
-       * If set to lower than 1, message previews are deactivated.
-       */
-      maximumLength?: number;
-    }
-    /**
      * Defines matchers for message references inside the code.
      *
      * @param args represents the data to conduct the search on

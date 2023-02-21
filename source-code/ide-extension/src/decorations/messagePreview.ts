@@ -3,10 +3,11 @@ import { debounce } from "throttle-debounce";
 import { query } from '@inlang/core/query';
 import { state } from "../state.js";
 
+const MAXIMUM_PREVIEW_LENGTH = 40;
+
 export async function messagePreview(args: { activeTextEditor: vscode.TextEditor, context: vscode.ExtensionContext }) {
   const { context } = args;
   const { referenceLanguage } = state().config;
-  const maximumPreviewLength = state().config.ideExtension?.preview?.maximumLength;
   const referenceResource = state().resources.find((resource) => resource.languageTag.name === referenceLanguage);
   let activeTextEditor = vscode.window.activeTextEditor;
 
@@ -22,10 +23,6 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
     );
   }
 
-  if (maximumPreviewLength && maximumPreviewLength < 1) {
-    return;
-  }
-
   updateDecorations();
 
   async function updateDecorations() {
@@ -39,8 +36,8 @@ export async function messagePreview(args: { activeTextEditor: vscode.TextEditor
         const translation = query(referenceResource).get({ id: message.messageId })?.pattern.elements;
         const translationText = translation && translation.length > 0 ? translation[0].value : undefined;
         const truncatedTranslationText = translationText && (
-          translationText.length > (maximumPreviewLength || 0)
-            ? `${translationText.slice(0, maximumPreviewLength)}...`
+          translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+            ? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
             : translationText
         );
         const range = new vscode.Range(
