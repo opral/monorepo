@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../state.js";
+import { setState, state } from "../state.js";
 import { query } from "@inlang/core/query"
 import type { Message } from '@inlang/core/ast';
 
@@ -10,7 +10,7 @@ export const extractMessageCommand = {
   id: "inlang.extractMessage",
   title: "Inlang: Extract Message",
   callback: async function (textEditor: vscode.TextEditor) {
-    const { ideExtension, referenceLanguage, readResources, writeResources } = state().config;
+    const { ideExtension, referenceLanguage, writeResources } = state().config;
 
     // guards
     if (!ideExtension) {
@@ -63,17 +63,18 @@ export const extractMessageCommand = {
       id: { type: 'Identifier', name: messageId },
       pattern: { type: 'Pattern', elements: [{ type: 'Text', value: messageValue }] }
     };
-    // read all available resources
-    const resources = await readResources({ config: state().config });
     // find reference langauge resource
-    const referenceResource = resources.find((resource) => resource.languageTag.name === referenceLanguage);
+    const referenceResource = state().resources.find((resource) => resource.languageTag.name === referenceLanguage);
     if (referenceResource) {
       const newResource = query(referenceResource).upsert({ message });
       if (newResource.isOk) {
+        const resources = state().resources.map((resource) => (resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource));
         await writeResources({
           config: state().config,
-          resources: resources.map((resource) => (resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource))
+          resources
         });
+        // update resources in extension state
+        setState({ ...state(), resources });
       } else {
         return vscode.window.showErrorMessage("Couldn't upsert new message.");
       }
