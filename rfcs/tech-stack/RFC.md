@@ -42,17 +42,19 @@ Markdown: [Markdoc](https://markdoc.dev/)
 - One-click "ready to use" ✅
 - Compatible with local and remote files ❔
 
-The requirements above resemble a fusion of VSCode and Figma. VSCode due to the tight git integration that localization of software requires, and Figma due to the browser-based architecture. Figma does not need to be downloaded, installed and opened. Open a link in the browser and get started. A similar "one click ready to use" experience is desired for the inlang editor. VSCode recently released their effort to bring VSCode into the browser, see https://vscode.dev/. VSCode.dev brings another feature that the inlang editor requires: Local repositories and remote repositories can be used. Local repositories would allow developers to easily use the inlang editor while remote repositories make life easy for translators.
+The requirements above resemble a fusion of VSCode and Figma. VSCode due to the tight git integration that localization of software requires, and Figma due to the browser-based architecture. Figma does not need to be downloaded, installed and opened. Open a link in the browser and get started. A similar "one click ready to use" experience is desired for the inlang editor. VSCode recently released their effort to bring VSCode into the browser, see https://vscode.dev/. VSCode.dev brings another feature that the inlang editor requires: Local repositories and remote repositories can be used. Local repositories would allow developers to easily use the inlang editor, while remote repositories would make life easy for translators.
 
 - Real-time collaboration ❔
 
-Git's async collaboration features are deemed to be sufficient. Product usage and feedback will reveal whether real-time collaboration is benefitial and desired.
+Git's async collaboration features are expected to be sufficient for the start. Product usage and feedback will reveal whether real-time collaboration is required.
 
-- Embeddable ❌
+- Embeddable ❔
 
-Integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers. On the other hand, the requirement of the editor to work with local files reduces the benefit of an IDE integration. Offline support could be achieved by leveraging PWA (Progressive Web Application) features. The majority of professional content related applications like Google Docs, VSCode or Figma (all?) are architected as dedicated applications, illustrated by figure _(b)_.
+Making the editor embeddable, like Microsoft's Monaco that powers VSCode could lead to interesting usecases. 
 
-Reasons against embeddability are runtime dependent features like networking or sandboxing JavaScript. However, the inlang config already delegates those requirements out of the editor. A network request would be required for machine translations for example. But, the inlang config could contain a callback `onMachineTranslate`. The host would be responsible for making the network request.
+For example, integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers by removing the requirement for app/context switching. Furthermore, the editor could work with local repositories, removing the requirement for a backend entirely. Leveraging PWA (Progressive Web Application) features can achieve full offline support. 
+
+Reasons against embeddability include runtime-dependent features like networking, web worker support, and more. For the sake of increasing development speed, embeddability is not focused on, but accounted for by the architecture. The metaframework vite-plugin-ssr allows the unbundling of the editor from a monolith architecture. 
 
 |            | Development speed | Maintenance effort | Potential extension |
 | ---------- | ----------------- | ------------------ | ------------------- |
@@ -95,7 +97,7 @@ SEO is important for the website and might be important for the editor.
 
 ## Choices
 
-A monolith architecture has been chosen. 
+A monolithic architecture has been chosen. 
 
 The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort. For example, inlang does not require a dedicated auth system as no user data is stored. The need for a dedicated auth systems (and databases) will surely arise. For now, it seems easier to leverage one server with sessions for authorization without the need to stitch microservices together. As the requirements evolve, the monolith can be split into a website, editor and server without much overhead given that vite-plugin-ssr has been choosen as metaframework.
 
@@ -107,23 +109,23 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 VPS (vite-plugin-ssr) has been chosen as metaframework to enable a monolith architecture that can be unbundled in the future. 
 
-VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr partially enables the monolith architecture by specifying a server that renders vite-plugin-ssr sites and supporting SPA and SSR render modes. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR usecase. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
+VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr partially enables the monolith architecture by specifying a server that renders vite-plugin-ssr sites and supporting SPA and SSR render modes. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server-side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR use case. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
 
 #### Why vite-plugin-ssr?
 
 - Control over different rendering modes (important because SSR of website and SPA of editor)
 - Maybe SEO becomes important for the editor too (architecture can be adjusted to support SSR)
-- If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay indentical.  
+- If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay identical.  
 - High control/no magic blackbox. For example, localization can be configured as we please and require. 
 
 #### Why not something like Next.js?
 
 - Unify editor and website codebase + routing
-- NextJs is not made for SPA apps
+- NextJS is not made for SPA apps
 
 #### Why not react/tanstack/solid router for the editor?
 
-- Routing and auth will differ from website making unbundling of the monolith stack difficult/require us to use microservices from the get go.
+- Routing and auth will differ from website, making unbundling of the monolith stack difficult/require us to use microservices from the get go.
 - (No SSR, if SEO becomes important for the editor)
 
 ## Design System (UI library)
@@ -138,9 +140,9 @@ A few things to consider:
 
 The translation management editor is running on top of a virtual file system that queries an inefficient (hacked) CLI. Thus, complex state management and (likely) performance is of high importance. SolidJS seems like the framework that learned from the best (Knockout, React, Angular, Vue) and bundles state management, good performance, SSR, and tooling (their community efforts) under one umbrella.
 
-SolidJS has ultimately been choosen given the uncertainty of the editor's requirements in terms of performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice waries risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined.
+SolidJS has ultimately been chosen given the uncertainty of the editor's requirements regarding performance and state management that will emerge. Furthermore, the tight coupling and best practices of SolidJS are anticipated to lead to faster development cycles, fewer bugs, and ultimately a better product. However, the choice varies risks: Whether the benefits of SolidJS outweigh the ecosystem that React has is to be determined.
 
-**In summary, SolidJS has been choosen because:**
+**In summary, SolidJS has been chosen because:**
 
 - Simple + built-in state management.
   - faster product development
