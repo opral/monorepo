@@ -58,28 +58,28 @@ export type Config = {
 
   ideExtension?: {
     /**
-     * Defines when a message is referenced.
+     * Defines matchers for message references inside the code.
+     *
+     * @param args represents the data to conduct the search on
+     * @returns a promise with matched message references
      */
-    inlinePatternMatcher?: (args: {
-      /**
-       * The (code) text to match against.
-       */
-      text: string;
+    messageReferenceMatchers: ((args: {
+      documentText: string;
     }) => Promise<
       Array<{
         /**
-         * The ID of the message.
+         * The messages id.
          */
-        id: string;
+        messageId: string;
         /**
-         * The position from where to where the pattern should be inlined.
+         * The position from where to where the reference can be found.
          */
         position: {
           start: { line: number; character: number };
           end: { line: number; character: number };
         };
       }>
-    >;
+    >)[];
 
     /**
      * Defines the options to extract messages.
