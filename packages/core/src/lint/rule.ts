@@ -71,7 +71,7 @@ export type LintRuleInitializer<Settings = never> =
 export type LintRule = {
 	id: LintRuleId
 	level: false | LintLevel
-	initialize: (
+	setup: (
 		param: Pick<Config, 'referenceLanguage' | 'languages'> & {
 			env: EnvironmentFunctions,
 			context: Context
@@ -93,7 +93,7 @@ export type LintRule = {
  * ```
  * const myRule = createLintRule<{ strict: boolean }>('my.rule', 'error', (settings) => {
  *    return {
- * 		initialize: () => {
+ * 		setup: () => {
  * 			if (settings?.strict) return { token: '123' }
  *
  * 			return { token: '456' }

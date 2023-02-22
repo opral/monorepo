@@ -14,16 +14,16 @@ expectType<Parameters<typeof createLintRule>[1]>('error')
 expectType<Parameters<typeof createLintRule>[1]>('something')
 
 expectType<Parameters<typeof createLintRule>[2]>(() => ({
-	initialize: () => undefined,
+	setup: () => undefined,
 	visitors: {}
 }))
-// @ts-expect-error third parameter must return an initialize function
+// @ts-expect-error third parameter must return an setup function
 expectType<Parameters<typeof createLintRule>[2]>(() => ({
 	visitors: {}
 }))
 // @ts-expect-error third parameter must return the visitors object
 expectType<Parameters<typeof createLintRule>[2]>(() => ({
-	initialize: () => undefined
+	setup: () => undefined
 }))
 
 // rule -----------------------------------------------------------------------
@@ -31,7 +31,7 @@ expectType<Parameters<typeof createLintRule>[2]>(() => ({
 const rule = createLintRule(
 	'a.b',
 	'error', () => ({
-		initialize: () => undefined,
+		setup: () => undefined,
 		visitors: {},
 	})
 )

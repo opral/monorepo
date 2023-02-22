@@ -46,12 +46,12 @@ const processLintRule = async ({
 	reference: Resource | undefined,
 	resources: Resource[]
 }) => {
-	const { level, id, initialize, visitors, teardown } = lintRule
+	const { level, id, setup, visitors, teardown } = lintRule
 	if (!level) return
 
 	const context = createContext(id, level)
 
-	const payload = await initialize({ env, referenceLanguage, languages, context })
+	const payload = await setup({ env, referenceLanguage, languages, context })
 
 	for (const language of languages) {
 		const target = getResourceForLanguage(resources, language);
