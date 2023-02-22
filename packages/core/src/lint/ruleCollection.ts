@@ -33,6 +33,6 @@ export const createLintRuleCollection = <RulesSettings extends Record<string, Li
 					...(Array.isArray(settingsForRule)
 						? settingsForRule
 						: [settingsForRule]
-					) as LintConfigArguments<never>
+					) as LintConfigArguments<any>
 				)
 			})
