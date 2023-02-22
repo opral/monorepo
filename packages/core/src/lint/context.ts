@@ -1,5 +1,5 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
-import type { LintableNode, LintConfigOptions, LintRuleId } from './rule.js'
+import type { LintableNode, LintConfigArguments, LintRuleId } from './rule.js'
 
 export type LintLevel = 'error' | 'warn'
 
@@ -34,14 +34,14 @@ export type Context = {
 }
 
 /**
- * An utility function to parse the options passed to a lint rule. It will extract the lint rule and the rule specific settings.
+ * An utility function to parse the arguments passed to a lint rule. It will extract the lint rule and the rule specific settings.
  *
- * @param options the settings object pass
+ * @param args the settings object pass
  * @param defaultLevel the fallback lint level that get's used when no lint level is specified
- * @returns the extracted information from the passed options
+ * @returns the extracted information from the passed arguments
  */
-export const parseLintConfigOptions = <T>(options: LintConfigOptions<T> | undefined, defaultLevel: LintLevel): { level: false | LintLevel, settings: T | undefined } => {
-	const [parsedLevel, settings] = options || []
+export const parseLintConfigArguments = <T>(args: LintConfigArguments<T> | undefined, defaultLevel: LintLevel): { level: false | LintLevel, settings: T | undefined } => {
+	const [parsedLevel, settings] = args || []
 
 	const level = parsedLevel === undefined || parsedLevel === true
 		? defaultLevel

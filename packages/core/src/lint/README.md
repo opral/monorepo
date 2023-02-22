@@ -58,7 +58,7 @@ export async function defineConfig(env) {
 			missingKeyRule(),
 			// set's the lint level to 'warn'
 			missingKeyRule('warn'),
-			// uses the standard lint level and passes custom options to the rule
+			// uses the standard lint level and passes custom settings to the rule
 			missingKeyRule(true, { threshold: 4 }),
 			// disables the rule if it runs on mondays
 			missingKeyRule(!isTodayMonday),
@@ -107,7 +107,7 @@ export async function defineConfig(env) {
 			inlangStandardRules({
 				missingKey: 'warn',
 			}),
-			// uses the standard lint level and passes custom options to the `missingKey` rule
+			// uses the standard lint level and passes custom settings to the `missingKey` rule
 			inlangStandardRules({
 				missingKey: [true, { threshold: 4 }],
 			}),
