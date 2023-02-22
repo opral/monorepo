@@ -1,7 +1,7 @@
 import type { Resource, Message, Pattern } from '../ast/schema.js'
 import type { Config, EnvironmentFunctions } from '../config/schema.js'
 import { createContext, LintedResource } from './context.js';
-import type { LintableNode, LintableNodeByType, ConfiguredLintRule, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
+import type { LintableNode, LintableNodeByType, LintRule, NodeVisitor, NodeVisitors, TargetReferenceParameterTuple } from './rule.js';
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language);
@@ -40,7 +40,7 @@ const processLintRule = async ({
 	resources,
 }: {
 	env: EnvironmentFunctions,
-	lintRule: ConfiguredLintRule,
+		lintRule: LintRule,
 	referenceLanguage: string,
 	languages: string[],
 	reference: Resource | undefined,

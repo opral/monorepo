@@ -27,17 +27,18 @@ export type LintedPattern = Pattern<Extension>
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
 
 /**
- *
+ * The context provides utility functions for a lint rule.
  */
 export type Context = {
 	report: (args: { node: LintableNode, message: string, metadata?: unknown }) => void
 }
 
 /**
+ * An utility function to parse the lint settings passed to a lint rule. It will extract the lint rule and the rule specific settings.
  *
- * @param settings
- * @param defaultLevel
- * @returns
+ * @param settings the settings object pass
+ * @param defaultLevel the fallback lint level that get's used when no lint level is specified
+ * @returns the extracted information from the passed settings
  */
 export const parseLintSettings = <T>(settings: LintConfigSettings<T> | undefined, defaultLevel: LintLevel): { level: false | LintLevel, options: T | undefined } => {
 	const [parsedLevel, options] = settings || []

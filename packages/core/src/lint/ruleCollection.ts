@@ -1,20 +1,29 @@
-import type { ConfiguredLintRule, LintConfigSettings, LintRule } from './rule.js';
+import type { LintRule, LintConfigSettings, LintRuleInitializer } from './rule.js';
 
 /**
- * A collection of lint rules.
+ * An utility type to add strong type definitions for a lint rule collection.
  */
-export type RuleCollection = <RulesSettings extends Record<string, LintRule>>(settings?: CollectionSettings<RulesSettings>) => ConfiguredLintRule[];
+export type RuleCollectionInitializer<RulesSettings extends Record<string, LintRuleInitializer>> = (settings?: CollectionSettings<RulesSettings>) => LintRule[];
 
-type CollectionSettings<RulesSettings extends Record<string, LintRule>> = {
+type CollectionSettings<RulesSettings extends Record<string, LintRuleInitializer>> = {
 	[Key in keyof RulesSettings]?: Parameters<RulesSettings[Key]>[0] | Parameters<RulesSettings[Key]>
 }
 
 /**
+ * An utility function that adds strong type definitions for a collection of lint rules.
  *
- * @param rules
- * @returns
+ * @param rules the rules for this collection
+ * @returns an initializer function to configure all lint rules in the collection
+ *
+ * @example
+ * ```
+ * const myRuleCollection = createLintRuleCollection({
+ * 	'missingKey': missingKeyRule,
+ * 	'invalidKey': invalidKeyRule,
+ * })
+ * ```
  */
-export const createRuleCollection = <RulesSettings extends Record<string, LintRule>>(rules: RulesSettings): RuleCollection =>
+export const createLintRuleCollection = <RulesSettings extends Record<string, LintRuleInitializer>>(rules: RulesSettings): RuleCollectionInitializer<RulesSettings> =>
 	(settings = {}) =>
 		Object.entries(rules)
 			.map(([id, rule]) => {
