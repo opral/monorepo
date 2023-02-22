@@ -1,4 +1,4 @@
-import type { LintRule, LintConfigSettings, LintRuleInitializer } from './rule.js';
+import type { LintRule, LintConfigOptions, LintRuleInitializer } from './rule.js';
 
 /**
  * An utility type to add strong type definitions for a lint rule collection.
@@ -33,6 +33,6 @@ export const createLintRuleCollection = <RulesSettings extends Record<string, Li
 					...(Array.isArray(settingsForRule)
 						? settingsForRule
 						: [settingsForRule]
-					) as LintConfigSettings<never>
+					) as LintConfigOptions<never>
 				)
 			})

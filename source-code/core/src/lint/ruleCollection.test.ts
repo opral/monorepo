@@ -1,24 +1,24 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { LintRule, LintRuleInitializer } from './rule.js';
 import { createLintRuleCollection } from './ruleCollection.js';
-import { parseLintSettings } from './context.js';
+import { parseLintConfigOptions } from './context.js';
 
 const rule1Id = "rule.1"
 const rule2Id = "rule.2"
 
-const rule1 = ((...settings) => {
-	const { level, options } = parseLintSettings(settings, 'error')
+const rule1 = ((...options) => {
+	const { level, settings } = parseLintConfigOptions(options, 'error')
 
 	return {
 		id: rule1Id,
 		level,
-		setup: async () => console.log(options),
+		setup: async () => console.log(settings),
 		visitors: {}
 	}
 }) satisfies LintRuleInitializer<any>
 
 const rule2 = ((...settings) => {
-	const { level } = parseLintSettings(settings, 'warn')
+	const { level } = parseLintConfigOptions(settings, 'warn')
 
 	return {
 		id: rule2Id,

@@ -1,63 +1,63 @@
 import { describe, expect, test } from "vitest";
-import { createContext, LintedResource, parseLintSettings } from './context.js';
+import { createContext, LintedResource, parseLintConfigOptions } from './context.js';
 
-describe("parseLintSettings", async () => {
+describe("parseLintConfigOptions", async () => {
 	test("when `undefined` get's passed", async () => {
-		const settings = parseLintSettings(undefined, 'error')
+		const options = parseLintConfigOptions(undefined, 'error')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'error',
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when an empty Array get's passed", async () => {
-		const settings = parseLintSettings([], 'error')
+		const options = parseLintConfigOptions([], 'error')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'error',
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when `error` get's passed", async () => {
-		const settings = parseLintSettings(['error'], 'warn')
+		const options = parseLintConfigOptions(['error'], 'warn')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'error',
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when `warn` get's passed", async () => {
-		const settings = parseLintSettings(['warn'], 'error')
+		const options = parseLintConfigOptions(['warn'], 'error')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'warn',
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when `true` get's passed", async () => {
-		const settings = parseLintSettings([true], 'error')
+		const options = parseLintConfigOptions([true], 'error')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'error',
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when `false` get's passed", async () => {
-		const settings = parseLintSettings([false], 'error')
+		const options = parseLintConfigOptions([false], 'error')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: false,
-			options: undefined,
+			settings: undefined,
 		})
 	})
 
 	test("when custom `settings` get's passed", async () => {
-		const options = {
+		const settings = {
 			custom: true,
 			prop: [123, 456],
 			nested: {
@@ -65,11 +65,11 @@ describe("parseLintSettings", async () => {
 			}
 		}
 
-		const settings = parseLintSettings(['error', options], 'warn')
+		const options = parseLintConfigOptions(['error', settings], 'warn')
 
-		expect(settings).toMatchObject({
+		expect(options).toMatchObject({
 			level: 'error',
-			options,
+			settings,
 		})
 	})
 })
