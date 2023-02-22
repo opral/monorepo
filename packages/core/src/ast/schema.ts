@@ -6,6 +6,19 @@ export type NodeName =
   | 'Text'
   | 'LanguageTag'
 
+/**
+ * A utility type to extend any node with a new property.
+ * Does this recursively for all child nodes.
+ *
+ * @example attach a verified property to all nodes
+ * ```
+ * type VerifiedResource = Resource<{ verified: boolean }>
+ * ```
+ * @example attach a verified property only to the Message node
+ * ```
+ * type ResourceWithVerifiedMessages = Resource<{ Message: { verified: boolean } }>
+ * ```
+ */
 type ExtensionInformation = {
   [node in NodeName | 'Node']?: Record<string, unknown>
 }
