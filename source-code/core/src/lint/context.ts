@@ -30,7 +30,7 @@ export type LintedNode = LintedResource | LintedMessage | LintedPattern
  * The context provides utility functions for a lint rule.
  */
 export type Context = {
-	report: (args: { node: LintableNode, message: string, metadata?: unknown }) => void
+	report: (information: { node: LintableNode, message: string, metadata?: unknown }) => void
 }
 
 /**

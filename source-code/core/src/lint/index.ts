@@ -14,6 +14,3 @@ export { createLintRuleCollection as createRuleCollection, type RuleCollectionIn
 //    - how to create a rule
 //    - how to test a rule
 //    - how to publish a rule
-
-// TODO: decide on naming
-// `Args`, `Options`, `Settings`, `Params` ...

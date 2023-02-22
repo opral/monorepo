@@ -124,7 +124,7 @@ describe("lint", async () => {
 				let context: Context
 
 				return ({
-					setup: (args) => context = args.context,
+					setup: (param) => context = param.context,
 					visitors: {
 						Pattern: ({ target }) => context.report({ node: target!, message: 'Test' }),
 					}
@@ -339,8 +339,8 @@ describe("lint", async () => {
 						...rule,
 						visitors: {
 							Resource: {
-								enter: (...args) => {
-									rule.visitors.Resource.enter(...args)
+								enter: (...param) => {
+									rule.visitors.Resource.enter(...param)
 									return 'skip'
 								},
 								leave: rule.visitors.Resource.leave,
@@ -362,8 +362,8 @@ describe("lint", async () => {
 						...rule,
 						visitors: {
 							Message: {
-								enter: (...args) => {
-									rule.visitors.Message.enter(...args)
+								enter: (...param) => {
+									rule.visitors.Message.enter(...param)
 									return 'skip'
 								},
 								leave: rule.visitors.Message.leave,
@@ -384,8 +384,8 @@ describe("lint", async () => {
 						...rule,
 						visitors: {
 							Pattern: {
-								enter: (...args) => {
-									rule.visitors.Pattern.enter(...args)
+								enter: (...param) => {
+									rule.visitors.Pattern.enter(...param)
 									return 'skip'
 								},
 								leave: rule.visitors.Pattern.leave,
@@ -569,8 +569,8 @@ describe("lint", async () => {
 		const rule = {
 			id: 'lint.rule',
 			level: 'error',
-			setup: (args) => {
-				onEnter(args)
+			setup: (param) => {
+				onEnter(param)
 				return { setup: true }
 			},
 			visitors: {
