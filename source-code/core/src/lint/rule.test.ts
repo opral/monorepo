@@ -12,9 +12,9 @@ const rule1 = createLintRule('my.id', 'error', () => {
 })
 
 const teardown = () => undefined
-const rule2 = createLintRule('my.id', 'error', (options) => {
+const rule2 = createLintRule('my.id', 'error', (settings) => {
 	return {
-		setup: () => console.log(options),
+		setup: () => console.log(settings),
 		visitors,
 		teardown,
 	}
@@ -75,7 +75,7 @@ describe("createLintRule", async () => {
 				expect(configuredRule.level).toBe('warn')
 			})
 
-			test("pass `undefined` for options if not specified", async () => {
+			test("pass `undefined` for settings if not specified", async () => {
 				const configuredRule = rule2('error')
 
 				configuredRule.setup(...([] as unknown as Parameters<LintRule['setup']>))
@@ -84,17 +84,17 @@ describe("createLintRule", async () => {
 				expect(console.log).toHaveBeenCalledWith(undefined)
 			})
 
-			test("pass the options object if defined", async () => {
-				const options = {
+			test("pass the settings object if defined", async () => {
+				const settings = {
 					some: 'option',
 					debug: true
 				}
-				const configuredRule = rule2('error', options)
+				const configuredRule = rule2('error', settings)
 
 				configuredRule.setup(...([] as unknown as Parameters<LintRule['setup']>))
 
 				expect(console.log).toHaveBeenCalledOnce()
-				expect(console.log).toHaveBeenCalledWith(options)
+				expect(console.log).toHaveBeenCalledWith(settings)
 			})
 		})
 	})

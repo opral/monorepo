@@ -1,6 +1,6 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
-import { LintLevel, parseLintConfigOptions, Context } from './context.js';
+import { LintLevel, parseLintConfigArguments, Context } from './context.js';
 import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
@@ -36,7 +36,7 @@ export type NodeVisitors = {
 	[Key in LintableNode['type']]?: NodeVisitor<LintableNodeByType<LintableNode, Key>>
 }
 
-export type LintConfigOptions<Settings> =
+export type LintConfigArguments<Settings> =
 	[] | [boolean | LintLevel] | [LintLevel, Settings?]
 
 /**
@@ -62,11 +62,11 @@ export type LintRuleId = `${string}.${string}`
  * ```
  */
 export type LintRuleInitializer<Settings = never> =
-	(...settings: LintConfigOptions<Settings>) => LintRule
+	(...args: LintConfigArguments<Settings>) => LintRule
 
 
 /**
- * A lint rule that was configured with the lint level and config options.
+ * A lint rule that was configured with the lint level and lint specific settings.
  */
 export type LintRule = {
 	id: LintRuleId
@@ -82,11 +82,11 @@ export type LintRule = {
 }
 
 /**
- * An utility function that encapsulates the parsing of the configuration options passed to the lint rule.
+ * An utility function that encapsulates the parsing of the arguments passed to the lint rule.
  *
  * @param id the unique lint id of this lint rule
  * @param defaultLevel the default lint level this rule should have
- * @param configureLintRule a callback function that get passed the configuration options and need to return rule specific implementation details
+ * @param configureLintRule a callback function that get passed the arguments and need to return rule specific implementation details
  * @returns a lint rule
  *
  * @example
@@ -108,8 +108,8 @@ export const createLintRule = <Settings>(
 	defaultLevel: LintLevel,
 	configureLintRule: (settings?: Settings) => Omit<LintRule, 'id' | 'level'>
 ) =>
-	((...options) => {
-		const { level, settings } = parseLintConfigOptions(options, defaultLevel)
+	((...args) => {
+		const { level, settings } = parseLintConfigArguments(args, defaultLevel)
 
 		return {
 			...configureLintRule(settings),

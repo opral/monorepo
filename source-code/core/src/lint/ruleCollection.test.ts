@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { LintRule, LintRuleInitializer } from './rule.js';
 import { createLintRuleCollection } from './ruleCollection.js';
-import { parseLintConfigOptions } from './context.js';
+import { parseLintConfigArguments } from './context.js';
 
 const rule1Id = "rule.1"
 const rule2Id = "rule.2"
 
-const rule1 = ((...options) => {
-	const { level, settings } = parseLintConfigOptions(options, 'error')
+const rule1 = ((...args) => {
+	const { level, settings } = parseLintConfigArguments(args, 'error')
 
 	return {
 		id: rule1Id,
@@ -18,7 +18,7 @@ const rule1 = ((...options) => {
 }) satisfies LintRuleInitializer<any>
 
 const rule2 = ((...settings) => {
-	const { level } = parseLintConfigOptions(settings, 'warn')
+	const { level } = parseLintConfigArguments(settings, 'warn')
 
 	return {
 		id: rule2Id,
@@ -120,16 +120,16 @@ describe("createLintRuleCollection", async () => {
 		})
 
 		test("pass rule specific settings", async () => {
-			const options = {
+			const settings = {
 				some: 'option',
 				debug: true
 			}
-			const rules = collection({ rule1: ['warn', options] })
+			const rules = collection({ rule1: ['warn', settings] })
 
 			rules[0].setup(...([] as unknown as Parameters<LintRule['setup']>))
 
 			expect(console.log).toHaveBeenCalledOnce()
-			expect(console.log).toHaveBeenCalledWith(options)
+			expect(console.log).toHaveBeenCalledWith(settings)
 		})
 	})
 })
