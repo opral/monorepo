@@ -46,7 +46,7 @@ You can also disable a rule by passing `false` as the first parameter.
 _inlang.config.js_
 ```js
 /**
- * @type {import("@@inlang/core/config").DefineConfig}
+ * @type {import("@inlang/core/config").DefineConfig}
  */
 export async function defineConfig(env) {
   return {

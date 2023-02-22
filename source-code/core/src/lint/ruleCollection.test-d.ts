@@ -1,17 +1,17 @@
 import { expectType } from 'tsd'
-import type { ConfiguredLintRule, LintRule } from './rule.js'
-import { createRuleCollection } from './ruleCollection.js'
+import type { LintRule, LintRuleInitializer } from './rule.js'
+import { createLintRuleCollection } from './ruleCollection.js'
 
 // eslint-disable-next-line unicorn/no-null
-const rule: LintRule = null as any
+const rule: LintRuleInitializer = null as any
 // eslint-disable-next-line unicorn/no-null
-const ruleWIthSettings: LintRule<{ some: { nested: 'setting' }, setting: boolean }> = null as any
+const ruleWIthSettings: LintRuleInitializer<{ some: { nested: 'setting' }, setting: boolean }> = null as any
 
-const ruleCollection = createRuleCollection({ rule, ruleWIthSettings })
+const ruleCollection = createLintRuleCollection({ rule, ruleWIthSettings })
 
 // parameters -----------------------------------------------------------------
 
-expectType<Parameters<typeof createRuleCollection>[0]>({ rule })
+expectType<Parameters<typeof createLintRuleCollection>[0]>({ rule })
 
 expectType<Parameters<typeof ruleCollection>[0]>({ rule: 'error' })
 expectType<Parameters<typeof ruleCollection>[0]>({ rule: false })
@@ -35,4 +35,4 @@ expectType<Parameters<typeof ruleCollection>[0]>({ ruleWIthSettings: ['warn', { 
 
 // collection -----------------------------------------------------------------
 
-expectType<ConfiguredLintRule[]>(ruleCollection())
+expectType<LintRule[]>(ruleCollection())

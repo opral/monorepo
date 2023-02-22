@@ -42,7 +42,7 @@ export type LintConfigSettings<Settings> =
 /**
  * The unique id of a lint rule.
  *
- * Example:
+ * @example
  * ```
  * 'inlangStandardRules.missingKey'
  * ```
@@ -54,21 +54,21 @@ export type LintRuleId = `${string}.${string}`
  *
  * @example  a rule that does not expects any parameters
  * ```
- * const myRule: LintRule = // implementation
+ * const myRule: LintRuleInitializer = // implementation
  * ```
  * @example a rule that accepts parameters
  * ```
- * const myRule: LintRule<{ strict: boolean }> = // implementation
+ * const myRule: LintRuleInitializer<{ strict: boolean }> = // implementation
  * ```
  */
-export type LintRule<Settings = never> =
-	(...settings: LintConfigSettings<Settings>) => ConfiguredLintRule
+export type LintRuleInitializer<Settings = never> =
+	(...settings: LintConfigSettings<Settings>) => LintRule
 
 
 /**
  * A lint rule that was configured with the lint level and config options.
  */
-export type ConfiguredLintRule = {
+export type LintRule = {
 	id: LintRuleId
 	level: false | LintLevel
 	initialize: (
@@ -91,7 +91,7 @@ export type ConfiguredLintRule = {
  *
  * @example
  * ```
- * const myRule = createRule<{ strict: boolean }>('my.rule', 'error', (settings) => {
+ * const myRule = createLintRule<{ strict: boolean }>('my.rule', 'error', (settings) => {
  *    return {
  * 		initialize: () => {
  * 			if (settings?.strict) return { token: '123' }
@@ -103,10 +103,10 @@ export type ConfiguredLintRule = {
  * })
  * ```
  */
-export const createRule = <Settings>(
+export const createLintRule = <Settings>(
 	id: LintRuleId,
 	defaultLevel: LintLevel,
-	configureLintRule: (settings?: Settings) => Omit<ConfiguredLintRule, 'id' | 'level'>
+	configureLintRule: (settings?: Settings) => Omit<LintRule, 'id' | 'level'>
 ) =>
 	((...settings) => {
 		const { level, options } = parseLintSettings(settings, defaultLevel)
@@ -116,4 +116,4 @@ export const createRule = <Settings>(
 			id,
 			level,
 		}
-	}) satisfies LintRule<Settings>
+	}) satisfies LintRuleInitializer<Settings>

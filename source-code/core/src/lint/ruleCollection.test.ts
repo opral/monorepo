@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { ConfiguredLintRule, LintRule } from './rule.js';
-import { createRuleCollection } from './ruleCollection.js';
+import type { LintRule, LintRuleInitializer } from './rule.js';
+import { createLintRuleCollection } from './ruleCollection.js';
 import { parseLintSettings } from './context.js';
 
 const rule1Id = "rule.1"
@@ -15,7 +15,7 @@ const rule1 = ((...settings) => {
 		initialize: async () => console.log(options),
 		visitors: {}
 	}
-}) satisfies LintRule<any>
+}) satisfies LintRuleInitializer<any>
 
 const rule2 = ((...settings) => {
 	const { level } = parseLintSettings(settings, 'warn')
@@ -26,9 +26,9 @@ const rule2 = ((...settings) => {
 		initialize: () => undefined,
 		visitors: {}
 	}
-}) satisfies LintRule
+}) satisfies LintRuleInitializer
 
-const collection = createRuleCollection({
+const collection = createLintRuleCollection({
 	rule1,
 	rule2,
 })
@@ -37,7 +37,7 @@ vi.spyOn(console, 'log').mockImplementation(vi.fn)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-describe("createRuleCollection", async () => {
+describe("createLintRuleCollection", async () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
@@ -126,7 +126,7 @@ describe("createRuleCollection", async () => {
 			}
 			const rules = collection({ rule1: ['warn', options] })
 
-			rules[0].initialize(...([] as unknown as Parameters<ConfiguredLintRule['initialize']>))
+			rules[0].initialize(...([] as unknown as Parameters<LintRule['initialize']>))
 
 			expect(console.log).toHaveBeenCalledOnce()
 			expect(console.log).toHaveBeenCalledWith(options)

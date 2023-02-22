@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { ConfiguredLintRule, createRule } from './rule.js';
+import { LintRule, createLintRule } from './rule.js';
 
 const initialize = () => undefined
 const visitors = {}
 
-const rule1 = createRule('my.id', 'error', () => {
+const rule1 = createLintRule('my.id', 'error', () => {
 	return {
 		initialize,
 		visitors,
@@ -12,7 +12,7 @@ const rule1 = createRule('my.id', 'error', () => {
 })
 
 const teardown = () => undefined
-const rule2 = createRule('my.id', 'error', (options) => {
+const rule2 = createLintRule('my.id', 'error', (options) => {
 	return {
 		initialize: () => console.log(options),
 		visitors,
@@ -24,7 +24,7 @@ const rule2 = createRule('my.id', 'error', (options) => {
 
 vi.spyOn(console, 'log').mockImplementation(vi.fn)
 
-describe("createRule", async () => {
+describe("createLintRule", async () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
@@ -78,7 +78,7 @@ describe("createRule", async () => {
 			test("pass `undefined` for options if not specified", async () => {
 				const configuredRule = rule2('error')
 
-				configuredRule.initialize(...([] as unknown as Parameters<ConfiguredLintRule['initialize']>))
+				configuredRule.initialize(...([] as unknown as Parameters<LintRule['initialize']>))
 
 				expect(console.log).toHaveBeenCalledOnce()
 				expect(console.log).toHaveBeenCalledWith(undefined)
@@ -91,7 +91,7 @@ describe("createRule", async () => {
 				}
 				const configuredRule = rule2('error', options)
 
-				configuredRule.initialize(...([] as unknown as Parameters<ConfiguredLintRule['initialize']>))
+				configuredRule.initialize(...([] as unknown as Parameters<LintRule['initialize']>))
 
 				expect(console.log).toHaveBeenCalledOnce()
 				expect(console.log).toHaveBeenCalledWith(options)
