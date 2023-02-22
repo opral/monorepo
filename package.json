@@ -18,16 +18,16 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
-    "@vitest/coverage-c8": "^0.24.3",
+    "@vitest/coverage-c8": "^0.28.5",
     "concurrently": "^7.4.0",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-unicorn": "^45.0.2",
     "jsdom": "^20.0.3",
     "prettier": "2.8.3",
-    "turbo": "^1.7.3",
+    "turbo": "^1.8.2",
     "typescript": "^4.9.4",
-    "vitest": "^0.24.3"
+    "vitest": "^0.28.5"
   },
   "dependencies": {
     "eslint-plugin-solid": "^0.9.3"

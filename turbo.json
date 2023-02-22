@@ -9,6 +9,8 @@
       "cache": false
     },
     "clean": {},
-    "test": {}
+    "test": {
+      "dependsOn": ["^build"]
+    }
   }
 }
