@@ -1,8 +1,8 @@
 export { lint } from './linter.js'
 export * from './query.js'
-export { type Context, parseLintSettings } from './context.js'
-export { createLintRule as createLintRule, type LintRule as ConfiguredLintRule, type LintRuleInitializer, type LintRuleId } from './rule.js'
-export { createLintRuleCollection as createRuleCollection, type RuleCollectionInitializer as RuleCollection } from './ruleCollection.js'
+export { type Context, parseLintConfigOptions } from './context.js'
+export { createLintRule, type LintRule, type LintRuleInitializer, type LintRuleId } from './rule.js'
+export { createLintRuleCollection, type RuleCollectionInitializer } from './ruleCollection.js'
 
 // TODO: create helper functions so plugin authors can test their own rules
 //		- for correct parameter handling

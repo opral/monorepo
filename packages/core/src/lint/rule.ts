@@ -1,6 +1,6 @@
 import type { Message, Pattern, Resource } from '../ast/index.js';
 import type { Config, EnvironmentFunctions } from '../config/schema.js';
-import { LintLevel, parseLintSettings, Context } from './context.js';
+import { LintLevel, parseLintConfigOptions, Context } from './context.js';
 import type { MaybePromise } from './_utilities.js';
 
 export type LintableNode =
@@ -36,7 +36,7 @@ export type NodeVisitors = {
 	[Key in LintableNode['type']]?: NodeVisitor<LintableNodeByType<LintableNode, Key>>
 }
 
-export type LintConfigSettings<Settings> =
+export type LintConfigOptions<Settings> =
 	[] | [boolean | LintLevel] | [LintLevel, Settings?]
 
 /**
@@ -62,7 +62,7 @@ export type LintRuleId = `${string}.${string}`
  * ```
  */
 export type LintRuleInitializer<Settings = never> =
-	(...settings: LintConfigSettings<Settings>) => LintRule
+	(...settings: LintConfigOptions<Settings>) => LintRule
 
 
 /**
@@ -108,11 +108,11 @@ export const createLintRule = <Settings>(
 	defaultLevel: LintLevel,
 	configureLintRule: (settings?: Settings) => Omit<LintRule, 'id' | 'level'>
 ) =>
-	((...settings) => {
-		const { level, options } = parseLintSettings(settings, defaultLevel)
+	((...options) => {
+		const { level, settings } = parseLintConfigOptions(options, defaultLevel)
 
 		return {
-			...configureLintRule(options),
+			...configureLintRule(settings),
 			id,
 			level,
 		}
