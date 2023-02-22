@@ -12,7 +12,7 @@ const rule1 = ((...settings) => {
 	return {
 		id: rule1Id,
 		level,
-		initialize: async () => console.log(options),
+		setup: async () => console.log(options),
 		visitors: {}
 	}
 }) satisfies LintRuleInitializer<any>
@@ -23,7 +23,7 @@ const rule2 = ((...settings) => {
 	return {
 		id: rule2Id,
 		level,
-		initialize: () => undefined,
+		setup: () => undefined,
 		visitors: {}
 	}
 }) satisfies LintRuleInitializer
@@ -126,7 +126,7 @@ describe("createLintRuleCollection", async () => {
 			}
 			const rules = collection({ rule1: ['warn', options] })
 
-			rules[0].initialize(...([] as unknown as Parameters<LintRule['initialize']>))
+			rules[0].setup(...([] as unknown as Parameters<LintRule['setup']>))
 
 			expect(console.log).toHaveBeenCalledOnce()
 			expect(console.log).toHaveBeenCalledWith(options)

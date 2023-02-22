@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { LintRule, createLintRule } from './rule.js';
 
-const initialize = () => undefined
+const setup = () => undefined
 const visitors = {}
 
 const rule1 = createLintRule('my.id', 'error', () => {
 	return {
-		initialize,
+		setup,
 		visitors,
 	}
 })
@@ -14,7 +14,7 @@ const rule1 = createLintRule('my.id', 'error', () => {
 const teardown = () => undefined
 const rule2 = createLintRule('my.id', 'error', (options) => {
 	return {
-		initialize: () => console.log(options),
+		setup: () => console.log(options),
 		visitors,
 		teardown,
 	}
@@ -43,10 +43,10 @@ describe("createLintRule", async () => {
 				expect(configuredRule.level).toBe('error')
 			})
 
-			test("the passed `initialize` function", async () => {
+			test("the passed `setup` function", async () => {
 				const configuredRule = rule1()
 
-				expect(configuredRule.initialize).toBe(initialize)
+				expect(configuredRule.setup).toBe(setup)
 			})
 
 			test("the passed visitors", async () => {
@@ -78,7 +78,7 @@ describe("createLintRule", async () => {
 			test("pass `undefined` for options if not specified", async () => {
 				const configuredRule = rule2('error')
 
-				configuredRule.initialize(...([] as unknown as Parameters<LintRule['initialize']>))
+				configuredRule.setup(...([] as unknown as Parameters<LintRule['setup']>))
 
 				expect(console.log).toHaveBeenCalledOnce()
 				expect(console.log).toHaveBeenCalledWith(undefined)
@@ -91,7 +91,7 @@ describe("createLintRule", async () => {
 				}
 				const configuredRule = rule2('error', options)
 
-				configuredRule.initialize(...([] as unknown as Parameters<LintRule['initialize']>))
+				configuredRule.setup(...([] as unknown as Parameters<LintRule['setup']>))
 
 				expect(console.log).toHaveBeenCalledOnce()
 				expect(console.log).toHaveBeenCalledWith(options)
