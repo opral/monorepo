@@ -1,5 +1,5 @@
 {
-  "name": "ide-extension",
+  "name": "@inlang/ide-extension",
   "private": true,
   "displayName": "inlang",
   "type": "module",
