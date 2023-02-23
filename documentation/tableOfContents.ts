@@ -12,7 +12,8 @@ export const tableOfContents: Record<string, string[]> = {
   Overview: [
     (await import("./introduction.md?raw")).default,
     (await import("./design-principles.md?raw")).default,
-    (await import("./breaking-changes.md?raw")).default,
+    (await import("./project-status.md?raw")).default,
+    (await import("./code-organization.md?raw")).default,
     (await import("./the-next-git.md?raw")).default,
     (await import("../CONTRIBUTING.md?raw")).default,
   ],
