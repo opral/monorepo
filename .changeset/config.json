@@ -2,14 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [
-    [
-      "source-code/core",
-      "source-code/ide-extension",
-      "source-code/git-sdk",
-      "source-code/website"
-    ]
-  ],
+  "fixed": [["core", "ide-extension", "git-sdk", "website"]],
   "linked": [],
   "access": "restricted",
   "baseBranch": "main",
