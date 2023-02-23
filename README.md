@@ -32,7 +32,7 @@ Go to [inlang.com/documentation](https://inlang.com/documentation).
 
 **[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
 
-**[💬 Forum](https://github.com/inlang/inlang/discussions)** - Get help, ask questions, request features, and discuss inlang.
+**[💬 Discussions](https://github.com/inlang/inlang/discussions)** - Get help, ask questions, request features, and discuss inlang.
 
 **[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
 
