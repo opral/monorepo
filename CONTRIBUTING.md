@@ -1,8 +1,8 @@
 ---
 # the frontmatter is only relevant for rendering this site on the website
 title: Contributing
-description: Learn on how to contribute to inlang.
 href: /documentation/contributing
+description: Learn on how to contribute to inlang.
 ---
 
 # Contributing
@@ -33,13 +33,14 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 
 ## Contributing changes
 
-1. **Fork** the project on Github
+1. **Fork** the project on Github.
 2. **Open** the freshly cloned project with Visual Studio Code and [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 3. **Create** a branch for your new feature or improvement.
-4. **Test** with `npm run test`
+4. **Test** with `npm run test`.
 5. **Debug** and write tests for your changes.
    - Use the preconfigured launch scripts in Visual Studio Codes `Run and Debug` view.
-6. **Contribute** your changes via a upstream pull request.
+6. **Describe** your changes by running `npx changeset` and answering the questions. (learn more [here](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md#adding-a-changeset))
+7. **Contribute** your changes via a upstream pull request.
 
 ### Workspaces
 
