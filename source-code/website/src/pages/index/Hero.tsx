@@ -8,7 +8,7 @@ export function Hero() {
       <div class="hidden sm:mb-8 sm:flex sm:justify-center">
         <div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
           <span>
-            We are hiring engineers and designers.{" "}
+            We are hiring engineers to make localization simple.{" "}
             <a
               target="_blank"
               href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
@@ -22,11 +22,10 @@ export function Hero() {
       </div>
       <div>
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight sm:text-center md:text-5xl lg:text-6xl">
-          <span class="block xl:inline">Developer-first localization</span>
-          <span class="inline xl:block text-primary">
-            infrastructure{" "}
+          <span class="block xl:inline text-primary">
+            Localization infrastructure{" "}
             <span class="text-on-background">
-              built on{" "}
+              for software built on{" "}
               <span class="inline-block">
                 git
                 {/* custom git color */}
@@ -36,8 +35,8 @@ export function Hero() {
           </span>
         </h1>
         <p class="mt-2 md:mt-6 text-base sm:text-lg md:leading-6 text-gray-600 sm:text-center">
-          Inlang turns your git repository into the collaboration and automation
-          hub for localization while keeping full control and flexibility.
+          Inlang makes localization (i18n) simple by leveraging git repositories
+          as collaboration and automation hub for localization.
         </p>
         <div class="mt-8 flex gap-x-4 sm:justify-center">
           <sl-button
