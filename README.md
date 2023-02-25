@@ -5,28 +5,13 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        localization infrastructure for software <br/> <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps.</i></a>
+        localization infrastructure for software <br/> <a href="https://inlang.com/documentation/the-next-git" target="_blank"><i>and test-case for git-based apps. </i></a>
     </h2>
 </div>
 
-Inlang turns your git repository into the single source of truth for localization. Increase i18n and localization productivity with dev tools, an editor to manage translations, and automation via CI/CD:
-
-- [x] no hosting, extra accounts, or synchronization required.
-- [x] use git(hub) workflows like pull requests.
-- [x] automation via CI/CD.
-- [x] single source of truth that developers and translators collaborate on.
-
-<p align="center">
-    <img width="60%" max-width="50px" src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png" alt="Git-based architecture">
-</p>
-
-## Documentation
-
-Go to [inlang.com/documentation](https://inlang.com/documentation).
-
 ## Community & Support
 
-**[📖 Example](https://github.com/inlang/example)** - An example repository that uses inlang.
+**[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
 
 **[🌱 Ecosystem](https://github.com/inlang/ecosystem)** - Plugins, resources, and more.
 
@@ -36,34 +21,36 @@ Go to [inlang.com/documentation](https://inlang.com/documentation).
 
 **[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
 
-**[✉️ Email](mailto:hello@inlang.com)** - Inquiries.
+**[📖 Example](https://github.com/inlang/example)** - An example repository that uses inlang.
 
-# Applications
+## Applications
 
-## Editor
+### Editor
 
-Let non-technical team members (translators) manage messages in a repository. The editor is a baby of VSCode and Figma, combining a git based editor with a web-based and simple to use editor.
+Manage translations in a git repository. 
+
+- [x] works with local files.
+- [x] no hosting, extra accounts, or synchronization required.
+- [x] collaborate with translators with git(hub) workflows like pull requests.
 
 ![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
 
-## Dev tools
-
-Inlang is designed to be extended, the dev tools below are a small selection of dev tools that are maintained by inlang. With the [@inlang/core module](https://inlang.com/documentation/build-on-inlang), you are able to build tools according your needs. Read more about the [infrastructure design principle](https://inlang.com/documentation/design-principles).
 
 ### IDE-Extension ([get notified](https://tally.so/r/wgbOpJ))
 
-Improve developers' productivity by (semi)automating repetitive tasks like the extraction of messages, seeing localization related errors directly in the IDE and more.
+Improve developers' productivity. 
+
+- [x] extract translations
+- [x] see errors directly in the IDE
 
 ![Screen Recording 2022-02-15 at 15 02 26](https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif)
 
 ### CLI ([get notified](https://tally.so/r/wgbOpJ))
 
-Validate and extract messages in a repository with inlang's CLI.
+Automate localization via CI/CD.
+
+- [x] validate translations
+- [x] auto machine translate
 
 ![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
 
-## Automation (CI/CD)
-
-Use dev tools like the CLI to automate localization tasks via CI/CD pipelines.
-
-More is coming soon...
