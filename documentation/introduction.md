@@ -6,7 +6,7 @@ description: Learn on how to get started with inlang, the design principles, and
 
 # {% $frontmatter.title %}
 
-**Inlang is infrastructure that consists of extendable tools and apps, striving to simplify localization to the extend that localization will become the default. Simultaneously, inlang acts a test-case for [version control based apps](/documentation/the-next-git).**
+**Inlang is infrastructure that consists of extendable tools and apps to make localization simple.**
 
 {% Video src="https://youtu.be/KEKxHSkLD6Y" /%}
 
