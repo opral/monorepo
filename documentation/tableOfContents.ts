@@ -24,9 +24,10 @@ export const tableOfContents: Record<string, string[]> = {
     (await import("./ci-cd.md?raw")).default,
   ],
   Reference: [
-    (await import("./environment-functions.md?raw")).default,
-    (await import("./config.md?raw")).default,
     (await import("./ast.md?raw")).default,
+    (await import("./config.md?raw")).default,
+    (await import("./environment-functions.md?raw")).default,
+    (await import("./file-system.md?raw")).default,
     (await import("./query.md?raw")).default,
   ],
   RFCs: [
