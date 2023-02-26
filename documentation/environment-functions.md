@@ -14,9 +14,9 @@ Inlang's config is executed in a variety of environments such as the browser, [N
 
 Always up-to-date reference can be found [in the repository](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/environment-functions).
 
-`$fs`: **memfs/promises**
+`$fs`: **FS**
 
-Mirrors node:fs/promises. If TypeScript complains, ignore the type error. The type error bug is tracked in [#154](https://github.com/inlang/inlang/issues/154).
+Is an implementation of a file system. `node:fs` and `memfs` fit without any wrapper. `vscode.workspace.fs` needs a wrapper. Read more about the internal file system of inlang [here](./file-system).
 
 `$import`: **dynamic import()**
 
