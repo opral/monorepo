@@ -1,12 +1,10 @@
-import type { PathLike, OpenMode } from 'node:fs';
-import type { FileHandle } from 'node:fs/promises';
-import type { Stream } from 'node:stream';
+type ReadFileOptions = ({ encoding?: BufferEncoding; flag?: string; }) | BufferEncoding;
 
-type Options = ({
-  encoding?: null | undefined;
-  flag?: OpenMode | undefined;
-});
-
-export type readFile = (id: PathLike | FileHandle, options?: Options) => Promise<string | Buffer>;
-export type writeFile = (file: PathLike | FileHandle, data: string | Stream) => Promise<void>;
-export type readdir = (path: PathLike) => Promise<string[] | Buffer[]>;
+/**
+ * Minimal filesystem required by inlang to work
+ */
+export type FS = {
+  readFile: (id: string, options?: ReadFileOptions) => Promise<string | Buffer>;
+  writeFile: (file: string, data: string) => Promise<void>;
+  readdir: (path: string) => Promise<Array<string | object>>;
+}
