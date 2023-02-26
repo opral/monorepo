@@ -6,9 +6,7 @@ export function CommunityProjects() {
   return (
     <div>
       {/* START repository grid */}
-      <h2 class="text-2xl font-medium pt-6 pb-1">
-        Open source projects that use inlang
-      </h2>
+      <h2 class="text-2xl font-medium">Projects that use inlang</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">
         <For each={repositories}>
           {(repository) => <RepositoryCard repository={repository} />}
@@ -65,7 +63,7 @@ function AddRepositoryCard() {
     >
       {/* empty div to achieve justify-between effect whereas the p is centered */}
       <div />
-      <p>Get contributions and grow your open source project.</p>
+      <p>Get contributions for your project.</p>
       <a
         href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
         target="_blank"

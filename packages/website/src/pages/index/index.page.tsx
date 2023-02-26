@@ -22,7 +22,7 @@ export function Page(props: PageProps) {
           <div class="flex flex-col gap-12">
             {/* rendering the github readme */}
             <div
-              class="p-4 md:p-6 rounded-lg border border-outline"
+              class="mb-8 p-4 md:p-6 rounded-lg border border-outline"
               classList={{ [styles["markdown-body"]]: true }}
               // eslint-disable-next-line solid/no-innerhtml
               innerHTML={props.markdown}
