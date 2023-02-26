@@ -25,9 +25,11 @@
 
 ## Applications
 
+![applications of inlang](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/applications.webp)
+
 ### Editor
 
-Manage translations in a git repository. 
+Manage translations in a git repository.
 
 - [x] works with local files.
 - [x] no hosting, extra accounts, or synchronization required.
@@ -35,10 +37,9 @@ Manage translations in a git repository.
 
 ![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
 
-
 ### IDE-Extension ([get notified](https://tally.so/r/wgbOpJ))
 
-Improve developers' productivity. 
+Improve the DX when working on localized codebases.
 
 - [x] extract translations
 - [x] see errors directly in the IDE
@@ -53,4 +54,3 @@ Automate localization via CI/CD.
 - [x] auto machine translate
 
 ![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
-
