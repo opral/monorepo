@@ -25,7 +25,7 @@
 
 ## Applications
 
-![applications of inlang](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/applications.webp)
+Inlang consists of multipe applications that can be used individually, or in combination with each other.
 
 ### Editor
 
