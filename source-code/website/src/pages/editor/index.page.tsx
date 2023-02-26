@@ -3,6 +3,7 @@ import { Layout as RootLayout } from "../Layout.jsx";
 import { navigate } from "vite-plugin-ssr/client/router";
 import { z } from "zod";
 import { Meta, Title } from "@solidjs/meta";
+import { CommunityProjects } from "../index/CommunityProjects.jsx";
 
 export function Page() {
   /** is not reactive because window is not reactive */
@@ -82,6 +83,7 @@ export function Page() {
           </div>
         </div>
         {/* END search bar */}
+        <CommunityProjects />
       </RootLayout>
     </>
   );
