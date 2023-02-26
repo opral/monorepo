@@ -1,5 +1,6 @@
 import type * as ast from "../ast/index.js";
-import type { $fs, $import } from "./environment-functions/index.js";
+import type { FS } from "../fs/index.js";
+import type { $import } from "./environment-functions/index.js";
 
 /**
  * The environment functions.
@@ -7,7 +8,7 @@ import type { $fs, $import } from "./environment-functions/index.js";
  * Read more https://inlang.com/documentation/environment-functions
  */
 export type EnvironmentFunctions = {
-  $fs: $fs;
+  $fs: FS;
   $import: $import;
 };
 

@@ -65,9 +65,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   process.chdir(dirname(closestConfigPath));
 
   // TODO: find better fs (vscode.workspace.fs)
-  const $import = initialize$import({ fs: fs.promises as any, fetch });
+  const $import = initialize$import({ fs: fs.promises, fetch });
   const module: { defineConfig: DefineConfig } = await import(closestConfigPath);
-  const config = await module.defineConfig({ $fs: fs.promises as any, $import });
+  const config = await module.defineConfig({ $fs: fs.promises, $import });
   const loadResources = async () => {
     const resources = await config.readResources({ config })
     setState({

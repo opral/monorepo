@@ -1,4 +1,4 @@
-import type { fs } from "memfs";
+import type { FS } from "../../fs/index.js";
 
 /**
  * Importing ES modules either from a local path, or from a url.
@@ -33,7 +33,7 @@ export function initialize$import(args: {
    */
   workingDirectory?: string;
   /** the fs from which the file can be read */
-  fs: typeof fs.promises;
+  fs: FS;
   /** http client implementation */
   fetch: typeof fetch;
 }): (uri: string) => ReturnType<typeof $import> {
@@ -56,7 +56,7 @@ async function $import(
     /** directory from which the import should be resolved */
     workingDirectory: string;
     /** the fs from which the file can be read */
-    fs: typeof fs.promises;
+    fs: FS;
     /** http client implementation */
     fetch: typeof fetch;
   }
@@ -68,9 +68,9 @@ async function $import(
   const moduleAsText = uri.startsWith("http")
     ? await (await _fetch(uri)).text()
     : ((await environment.fs.readFile(
-        `${environment.workingDirectory}/${uri}`,
-        "utf-8"
-      )) as string);
+      `${environment.workingDirectory}/${uri}`,
+      "utf-8"
+    )) as string);
   const moduleWithMimeType =
     "data:application/javascript;base64," + btoa(moduleAsText);
   return await import(/* @vite-ignore */ moduleWithMimeType);
