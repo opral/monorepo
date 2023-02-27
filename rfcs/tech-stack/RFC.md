@@ -144,32 +144,23 @@ SolidJS has ultimately been chosen given the uncertainty of the editor's require
 
 **In summary, SolidJS has been chosen because:**
 
-- Simple + built-in state management.
-  - faster product development
-  - better maintainability
-- Uses the platform (web components, native JS packages work)
-- Uses JSX, thereby synergy effects to React (worst case, switch to React is possible)
+- Performance is likely going to be crucial for the editor. 
+- Uses JSX, thereby synergy effects to React (worst case, switch to React easier than fro Svelte)
 - Runtime approach (compiler just transforms JSX)
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
   - The reactive system is de-coupled from rendering. Thus, the reactive system can be used in other applications like the ide-extension.
-- performance “for free”.
-  - Performance is likely important for the editor.
-- (Great documentation -> understandable for beginners)
 
-Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/watch?v=qB5jK-KeXOs) [[1]](https://www.youtube.com/watch?v=J70HXl1KhWE).
 
 #### Why not React?
 
-- Anticipated slower development speed and higher maintainability effort.
-  - De-coupled state management
-  - Performance optimization needs to be conducted manually (likely important for the editor)
+- Performance is likely going to be crucial for the editor.
 
 #### Why not Svelte?
 
 - State management is inferior to SolidJS
 
   - For example, async fetching of data is "missing".
-  - State can only be used in Svelte components, otherwise workarounds are required.
+  - State can only be used in Svelte components; otherwise workarounds are required.
 
 - No JSX
 
@@ -180,7 +171,7 @@ Some videos about Solid's simple reactive system [[0]](https://www.youtube.com/w
 
 ## Design system
 
-TailwindCSS + Shoelace + ZagJS. TailwindCSS provides fast styling, Shoelace off the shelf components with style, and ZagJS provides component logic for custom components. The goal is to incrementally develop our own design system over time instead of fighting pre-designed component libraries. Shoelace is eas(ier) to (re-)style than other component libraries, easing our path to a custom design system.
+TailwindCSS + Shoelace + ZagJS. TailwindCSS provides fast styling, Shoelace off-the shelf components with style, and ZagJS provides component logic for custom components. The goal is to incrementally develop our own design system over time instead of fighting pre-designed component libraries. Shoelace is eas(ier) to (re-)style than other component libraries, easing our path to a custom design system.
 
 ## Markdown
 
