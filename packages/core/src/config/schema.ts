@@ -69,9 +69,7 @@ export type Config = {
      * @param args represents the data to conduct the search on
      * @returns a promise with matched message references
      */
-    messageReferenceMatchers: ((args: {
-      documentText: string;
-    }) => Promise<
+    messageReferenceMatchers: ((args: { documentText: string }) => Promise<
       Array<{
         /**
          * The messages id.
