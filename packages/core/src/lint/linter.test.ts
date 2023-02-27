@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest";
-import type { Message, Pattern, Resource } from "../ast/schema.js";
+import type { Message, Resource } from "../ast/schema.js";
 import type { Config, EnvironmentFunctions } from "../config/schema.js";
 import type { Context } from "./context.js";
 import { getLintRulesFromConfig, lint } from "./linter.js";
@@ -8,9 +8,7 @@ import {
   createLintRule,
   EnterNodeFunction,
   LintableNode,
-  NodeVisitor,
 } from "./rule.js";
-import { debug } from "./_utilities.js";
 
 describe("getLintRulesFromConfig", async () => {
   const rule1 = { id: "rule.1" } as unknown as LintRule;

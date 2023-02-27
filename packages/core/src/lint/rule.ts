@@ -61,7 +61,7 @@ export type LintRuleId = `${string}.${string}`;
 /**
  * An utility type to add strong type definitions for a lint rule.
  *
- * @example  a rule that does not expects any parameters
+ * @example a rule that does not expects any parameters
  * ```
  * const myRule: LintRuleInitializer = // implementation
  * ```

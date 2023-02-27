@@ -55,7 +55,7 @@ const getAllLintReportsFromMessage = (
 
 const getAllLintReportsFromPattern = ({
   lint,
-}: LintedPattern): LintReport[] => [...(lint || [])];
+}: LintedPattern): LintReport[] => lint || [];
 
 // --------------------------------------------------------------------------------------------------------------------
 

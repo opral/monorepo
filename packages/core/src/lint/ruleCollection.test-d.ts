@@ -1,10 +1,9 @@
+/* eslint-disable unicorn/no-null */
 import { expectType } from "tsd";
 import type { LintRule, LintRuleInitializer } from "./rule.js";
 import { createLintRuleCollection } from "./ruleCollection.js";
 
-// eslint-disable-next-line unicorn/no-null
 const rule: LintRuleInitializer = null as any;
-// eslint-disable-next-line unicorn/no-null
 const ruleWIthSettings: LintRuleInitializer<{
   some: { nested: "setting" };
   setting: boolean;
