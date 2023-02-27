@@ -11,7 +11,7 @@ export function Hero() {
             We are hiring engineers to make localization simple.{" "}
             <a
               target="_blank"
-              href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
+              href="https://angel.co/l/2ykzNn"
               class="font-semibold text-primary"
             >
               <span class="absolute inset-0" aria-hidden="true" />
