@@ -9,7 +9,8 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "clean": "npm run clean -ws && rm -f -r ./node_modules",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "changeset": "changeset"
   },
   "engines": {
     "npm": ">=8.0.0",
