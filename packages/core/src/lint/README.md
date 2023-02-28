@@ -13,7 +13,7 @@ Use cases could be:
 
 ## Usage
 
-> In the future we will provide a `CLI` to make it easier to use this package.
+> Note: In the future we will provide a `CLI` to make it easier to use this package.
 
 ### custom implementation
 
@@ -32,7 +32,34 @@ The promise returns an `Array` of all `Resources`. The nodes of the `Resource` a
 
 #### utility functions
 
-<!-- TODO -->
+Utility functions provide an easy way to check if a `Resource` has a `lint` attribute. All utility functions can be imported from `@inlang/core/lint`. Per default nodes are checked recursively for the `lint` attribute. You can pass `false` as the last argument to just check a node without it's children.
+
+Example:
+```ts
+import { getLintErrors } from '@inlang/core/lint';
+
+// recursively check all nodes for lint errors
+const errors = getLintErrors(lintedResource);
+
+// just check a single node for lint errors
+const errors = getLintErrors(lintedResource, false);
+```
+
+Here is a list of all provided utility functions:
+
+  - **`getLintReports`**: Extracts all lint reports that are present on the given node.
+  - **`getLintReportsByLevel`**: Extracts all lint reports with a certain lint level that are present on the given node.
+  - **`getLintErrors`**: Extracts all lint reports with the 'error' lint level that are present on the given node.
+  - **`getLintWarnings`**: Extracts all lint reports with the 'warn' lint level that are present on the given node.
+  - **`getLintReportsWithId`**: Extracts all lint reports with a certain lint id that are present on the given node.
+  - **`getLintErrorsWithId`**: Extracts all lint reports with a certain lint id and the 'error' lint level that are present on the given node.
+  - **`getLintWarningsWithId`**: Extracts all lint reports with a certain lint id and the 'warn' lint level that are present on the given node.
+  - **`hasLintReports`**: Checks if a given node has lint reports attached to it.
+  - **`hasLintErrors`**: Checks if a given node has lint reports with the 'error' lint level attached to it.
+  - **`hasLintWarnings`**: Checks if a given node has lint reports with the 'warn' lint level attached to it.
+  - **`hasLintReportsWithId`**: Checks if a given node has lint reports with a certain lint id attached to it.
+  - **`hasLintErrorsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'error' lint level attached to it.
+  - **`hasLintWarningsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'warn' lint level attached to it.
 
 ## Configuration
 
@@ -73,11 +100,7 @@ export async function defineConfig(env) {
 
 ## Lint Rules
 
-There already exist some lint rules you can use to check your `Resources` against.
-
-<!-- TODO: link to awesome-inlang repo -->
-
-Or you can write your own rules.
+There already exist some lint rules you can use to check your `Resources` against. You can find them [here](https://github.com/inlang/ecosystem). Or you can write your own rules.
 
 ### Creating your own lint rule
 
