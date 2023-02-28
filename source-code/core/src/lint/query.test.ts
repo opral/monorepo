@@ -7,13 +7,13 @@ import type {
   LintReport,
 } from "./context.js";
 import {
-  getAllLintErrors,
-  getAllLintErrorsWithId,
-  getAllLintReports,
-  getAllLintReportsByLevel,
-  getAllLintReportsWithId,
-  getAllLintWarnings,
-  getAllLintWarningsWithId,
+  getLintErrors,
+  getLintErrorsWithId,
+  getLintReports,
+  getLintReportsByLevel,
+  getLintReportsWithId,
+  getLintWarnings,
+  getLintWarningsWithId,
   hasLintErrors,
   hasLintErrorsWithId,
   hasLintReports,
@@ -108,16 +108,16 @@ const resource2 = createLintedResource("de", undefined, message3);
 
 // --------------------------------------------------------------------------------------------------------------------
 
-describe("getAllLintReports", async () => {
+describe("getLintReports", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReports(resource, true);
+      const reports = getLintReports(resource, true);
 
       expect(reports).toHaveLength(12);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReports(resource, false);
+      const reports = getLintReports(resource, false);
 
       expect(reports).toHaveLength(3);
     });
@@ -125,13 +125,13 @@ describe("getAllLintReports", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReports(message, true);
+      const reports = getLintReports(message, true);
 
       expect(reports).toHaveLength(6);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReports(message, false);
+      const reports = getLintReports(message, false);
 
       expect(reports).toHaveLength(3);
     });
@@ -139,13 +139,13 @@ describe("getAllLintReports", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReports(pattern, true);
+      const reports = getLintReports(pattern, true);
 
       expect(reports).toHaveLength(3);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReports(pattern, false);
+      const reports = getLintReports(pattern, false);
 
       expect(reports).toHaveLength(3);
     });
@@ -153,23 +153,23 @@ describe("getAllLintReports", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintReports({ type: "unknown" } as unknown as LintableNode)
+      getLintReports({ type: "unknown" } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
 // --------------------------------------------------------------------------------------------------------------------
 
-describe("getAllLintReportsByLevel", async () => {
+describe("getLintReportsByLevel", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsByLevel("error", resource, true);
+      const reports = getLintReportsByLevel("error", resource, true);
 
       expect(reports).toHaveLength(6);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsByLevel("error", resource, false);
+      const reports = getLintReportsByLevel("error", resource, false);
 
       expect(reports).toHaveLength(2);
     });
@@ -177,13 +177,13 @@ describe("getAllLintReportsByLevel", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsByLevel("error", message, true);
+      const reports = getLintReportsByLevel("error", message, true);
 
       expect(reports).toHaveLength(2);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsByLevel("error", message, false);
+      const reports = getLintReportsByLevel("error", message, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -191,13 +191,13 @@ describe("getAllLintReportsByLevel", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsByLevel("error", pattern, true);
+      const reports = getLintReportsByLevel("error", pattern, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsByLevel("error", pattern, false);
+      const reports = getLintReportsByLevel("error", pattern, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -205,23 +205,23 @@ describe("getAllLintReportsByLevel", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintReportsByLevel("warn", {
+      getLintReportsByLevel("warn", {
         type: "unknown",
       } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
-describe("getAllLintErrors", async () => {
+describe("getLintErrors", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrors(resource, true);
+      const reports = getLintErrors(resource, true);
 
       expect(reports).toHaveLength(6);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrors(resource, false);
+      const reports = getLintErrors(resource, false);
 
       expect(reports).toHaveLength(2);
     });
@@ -229,13 +229,13 @@ describe("getAllLintErrors", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrors(message, true);
+      const reports = getLintErrors(message, true);
 
       expect(reports).toHaveLength(2);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrors(message, false);
+      const reports = getLintErrors(message, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -243,13 +243,13 @@ describe("getAllLintErrors", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrors(pattern, true);
+      const reports = getLintErrors(pattern, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrors(pattern, false);
+      const reports = getLintErrors(pattern, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -257,21 +257,21 @@ describe("getAllLintErrors", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintErrors({ type: "unknown" } as unknown as LintableNode)
+      getLintErrors({ type: "unknown" } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
-describe("getAllLintWarnings", async () => {
+describe("getLintWarnings", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarnings(resource, true);
+      const reports = getLintWarnings(resource, true);
 
       expect(reports).toHaveLength(6);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarnings(resource, false);
+      const reports = getLintWarnings(resource, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -279,13 +279,13 @@ describe("getAllLintWarnings", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarnings(message2, true);
+      const reports = getLintWarnings(message2, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarnings(message2, false);
+      const reports = getLintWarnings(message2, false);
 
       expect(reports).toHaveLength(0);
     });
@@ -293,13 +293,13 @@ describe("getAllLintWarnings", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarnings(pattern, true);
+      const reports = getLintWarnings(pattern, true);
 
       expect(reports).toHaveLength(2);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarnings(pattern, false);
+      const reports = getLintWarnings(pattern, false);
 
       expect(reports).toHaveLength(2);
     });
@@ -307,23 +307,23 @@ describe("getAllLintWarnings", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintWarnings({ type: "unknown" } as unknown as LintableNode)
+      getLintWarnings({ type: "unknown" } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
 // --------------------------------------------------------------------------------------------------------------------
 
-describe("getAllLintReportsWithId", async () => {
+describe("getLintReportsWithId", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsWithId("id.3", resource, true);
+      const reports = getLintReportsWithId("id.3", resource, true);
 
       expect(reports).toHaveLength(3);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsWithId("id.3", resource, false);
+      const reports = getLintReportsWithId("id.3", resource, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -331,13 +331,13 @@ describe("getAllLintReportsWithId", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsWithId("id.2", message, true);
+      const reports = getLintReportsWithId("id.2", message, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsWithId("id.2", message, false);
+      const reports = getLintReportsWithId("id.2", message, false);
 
       expect(reports).toHaveLength(0);
     });
@@ -345,13 +345,13 @@ describe("getAllLintReportsWithId", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintReportsWithId("id.1", pattern, true);
+      const reports = getLintReportsWithId("id.1", pattern, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintReportsWithId("id.1", pattern, false);
+      const reports = getLintReportsWithId("id.1", pattern, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -359,23 +359,23 @@ describe("getAllLintReportsWithId", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintReportsWithId("some.id", {
+      getLintReportsWithId("some.id", {
         type: "unknown",
       } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
-describe("getAllLintErrorsWithId", async () => {
+describe("getLintErrorsWithId", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrorsWithId("id.3", resource, true);
+      const reports = getLintErrorsWithId("id.3", resource, true);
 
       expect(reports).toHaveLength(3);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrorsWithId("id.3", resource, false);
+      const reports = getLintErrorsWithId("id.3", resource, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -383,13 +383,13 @@ describe("getAllLintErrorsWithId", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrorsWithId("id.2", message, true);
+      const reports = getLintErrorsWithId("id.2", message, true);
 
       expect(reports).toHaveLength(0);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrorsWithId("id.2", message, false);
+      const reports = getLintErrorsWithId("id.2", message, false);
 
       expect(reports).toHaveLength(0);
     });
@@ -397,13 +397,13 @@ describe("getAllLintErrorsWithId", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintErrorsWithId("id.1", pattern, true);
+      const reports = getLintErrorsWithId("id.1", pattern, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintErrorsWithId("id.1", pattern, false);
+      const reports = getLintErrorsWithId("id.1", pattern, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -411,23 +411,23 @@ describe("getAllLintErrorsWithId", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintErrorsWithId("some.id", {
+      getLintErrorsWithId("some.id", {
         type: "unknown",
       } as unknown as LintableNode)
     ).toThrow();
   });
 });
 
-describe("getAllLintWarningsWithId", async () => {
+describe("getLintWarningsWithId", async () => {
   describe("'Resource'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarningsWithId("id.5", resource, true);
+      const reports = getLintWarningsWithId("id.5", resource, true);
 
       expect(reports).toHaveLength(0);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarningsWithId("id.5", resource, false);
+      const reports = getLintWarningsWithId("id.5", resource, false);
 
       expect(reports).toHaveLength(0);
     });
@@ -435,13 +435,13 @@ describe("getAllLintWarningsWithId", async () => {
 
   describe("'Message'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarningsWithId("id.2", message, true);
+      const reports = getLintWarningsWithId("id.2", message, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarningsWithId("id.2", message, false);
+      const reports = getLintWarningsWithId("id.2", message, false);
 
       expect(reports).toHaveLength(0);
     });
@@ -449,13 +449,13 @@ describe("getAllLintWarningsWithId", async () => {
 
   describe("'Pattern'", async () => {
     test("nested", async () => {
-      const reports = getAllLintWarningsWithId("id.2", pattern, true);
+      const reports = getLintWarningsWithId("id.2", pattern, true);
 
       expect(reports).toHaveLength(1);
     });
 
     test("not nested", async () => {
-      const reports = getAllLintWarningsWithId("id.2", pattern, false);
+      const reports = getLintWarningsWithId("id.2", pattern, false);
 
       expect(reports).toHaveLength(1);
     });
@@ -463,7 +463,7 @@ describe("getAllLintWarningsWithId", async () => {
 
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
-      getAllLintWarningsWithId("some.id", {
+      getLintWarningsWithId("some.id", {
         type: "unknown",
       } as unknown as LintableNode)
     ).toThrow();

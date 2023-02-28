@@ -4,7 +4,7 @@ import type {
   LintedResource,
   LintReport,
 } from "./context.js";
-import { getAllLintReports, hasLintReports } from "./query.js";
+import { getLintReports, hasLintReports } from "./query.js";
 
 // TODO: improve output with better layout and coloring
 
@@ -14,7 +14,7 @@ export const print = (resource: LintedResource) => {
   const separator = `Resource['${resource.languageTag.name}']`;
   console.info(separator);
 
-  const reports = getAllLintReports(resource, false);
+  const reports = getLintReports(resource, false);
   for (const report of reports) {
     printReport(report, "info");
   }
@@ -30,7 +30,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
   const separator = `${prefix} -> Message['${message.id.name}']`;
   console.info(separator);
 
-  const reports = getAllLintReports(message, false);
+  const reports = getLintReports(message, false);
   for (const report of reports) {
     printReport(report, "info");
   }
@@ -41,7 +41,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
 const printPattern = (pattern: LintedPattern) => {
   if (!hasLintReports(pattern)) return;
 
-  const reports = getAllLintReports(pattern, false);
+  const reports = getLintReports(pattern, false);
   for (const report of reports) {
     printReport(report, "info");
   }
