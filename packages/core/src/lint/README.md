@@ -152,7 +152,16 @@ export async function defineConfig(env) {
 
 ### Creating your own lint collection
 
-<!-- TODO -->
-<!-- show utility functions to create a collection -->
-<!-- how to pass configuration -->
-<!-- how to type it correctly -->
+A lint collection groups multiple lint rules together. You can use the provided `createLintRuleCollection` function to create a collection. By using the provided function, you will get back a strongly typed rule collection.
+
+Example:
+```ts
+import { createLintRuleCollection } from "@inlang/core/lint";
+
+const myRuleCollection = createLintRuleCollection({
+ 	'missingKey': missingKeyRule,
+ 	'invalidKey': invalidKeyRule,
+});
+```
+
+The `createLintRuleCollection` expects an object where the key is the name of the provided rule and the value is the rule itself. You can add as many rules as you want.
