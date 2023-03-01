@@ -8,8 +8,8 @@ Use cases could be:
 - check if the name of a brand always uses the same naming schema e.g. `MyApp` instead of `my-app` or `myApp`
 - check if the tone of a message does not sound aggressive
 - check if the translated message does not exceed a certain length
-- ... and probably a ton of other use cases. Please tell us if we should add one to this list.
-<!-- TODO: link to discussion -->
+- ... and probably a ton of other use cases. Please [tell us](https://github.com/inlang/inlang/discussions/406) if we should add one to this list.
+
 
 ## Usage
 
