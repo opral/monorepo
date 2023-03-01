@@ -5,7 +5,7 @@ Developer-first localization infrastructure that is built on git. Your git repos
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h4 align="center">
-        <!-- <a href="https://inlang.dev/docs/getting-started" target="_blank">Get Started</a> 
+        <!-- <a href="https://inlang.com/documentation" target="_blank">Get Started</a>
         ·  -->
         <a href="https://github.com/inlang/inlang/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
     </h4>

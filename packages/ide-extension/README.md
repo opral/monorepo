@@ -6,7 +6,7 @@
         Open Source Localization Solution for Software
     </h2>
     <h3 align="center">
-        <a href="https://inlang.dev" target="_blank">Website</a> · <a href="https://github.com/inlang/inlang" target="_blank">GitHub</a> · <a href="https://inlang.dev/docs/intro" target="_blank">Documentation</a> 
+        <a href="https://inlang.com" target="_blank">Website</a> · <a href="https://github.com/inlang/inlang" target="_blank">GitHub</a> · <a href="https://inlang.com/documentation" target="_blank">Documentation</a>
     </h3>
 </div>
 
