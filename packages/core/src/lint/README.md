@@ -1,4 +1,10 @@
-# `@inlang/core/lint`
+---
+title: Lint
+href: /documentation/lint
+description: Check `Resources` for potential errors and other insights.
+---
+
+# {% $frontmatter.title %}
 
 This package provides the functionality to automatically check `Resources` for potential errors and other insights.
 
