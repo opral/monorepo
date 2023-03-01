@@ -36,8 +36,8 @@ expectType<Parameters<typeof ruleCollection>[0]>({ rule: ["error", true] });
 expectType<Parameters<typeof ruleCollection>[0]>({
   ruleWIthSettings: ["warn", { some: { nested: "setting" }, setting: false }],
 });
-// @ts-expect-error object does not match
 expectType<Parameters<typeof ruleCollection>[0]>({
+  // @ts-expect-error object does not match
   ruleWIthSettings: ["warn", { some: { nested: false }, setting: true }],
 });
 
