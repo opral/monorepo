@@ -18,7 +18,7 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 ## Getting started
 
 1. Open the repository in VSCode.
-2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`.
+2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`. Make sure to allocate enough memory in your Docker setup (4GB).
 3. `npm install` to install dependencies
 4. `npm run dev` to run the development environment.
 5. `npm run test` to run the tests.
