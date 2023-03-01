@@ -29,6 +29,7 @@ export const tableOfContents: Record<string, string[]> = {
     (await import("./environment-functions.md?raw")).default,
     (await import("./file-system.md?raw")).default,
     (await import("./query.md?raw")).default,
+    (await import("../source-code/core/src/lint/README.md?raw")).default,
   ],
   RFCs: [
     (await import("../rfcs/core-architecture/RFC.md?raw")).default,
