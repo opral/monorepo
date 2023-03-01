@@ -2,7 +2,6 @@
   "name": "@inlang/core",
   "type": "module",
   "version": "0.3.1",
-  "private": false,
   "publishConfig": {
     "access": "public"
   },
@@ -33,13 +32,17 @@
   ],
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
-    "dev": "tsc --watch",
-    "test": "vitest run --passWithNoTests --coverage",
+    "dev": "npm run tsc:watch",
+    "test": "tsc && vitest",
+    "tsc": "tsc --noEmit",
+    "tsc:watch": "tsc --noEmit --watch",
+    "vitest": "vitest run --passWithNoTests --coverage",
+    "vitest:watch": "vitest watch --passWithNoTests --coverage",
     "format": "prettier ./src/** -w --config ../../.prettierrc.json",
     "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
-  "dependencies": {},
   "devDependencies": {
-    "memfs": "^3.4.11"
+    "memfs": "^3.4.11",
+    "tsd": "^0.25.0"
   }
 }

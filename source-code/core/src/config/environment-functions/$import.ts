@@ -68,9 +68,9 @@ async function $import(
   const moduleAsText = uri.startsWith("http")
     ? await (await _fetch(uri)).text()
     : ((await environment.fs.readFile(
-      `${environment.workingDirectory}/${uri}`,
-      "utf-8"
-    )) as string);
+        `${environment.workingDirectory}/${uri}`,
+        "utf-8"
+      )) as string);
   const moduleWithMimeType =
     "data:application/javascript;base64," + btoa(moduleAsText);
   return await import(/* @vite-ignore */ moduleWithMimeType);

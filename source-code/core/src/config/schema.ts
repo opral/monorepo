@@ -1,5 +1,6 @@
 import type * as ast from "../ast/index.js";
 import type { FS } from "../fs/index.js";
+import type { LintRule } from "../lint/rule.js";
 import type { $import } from "./environment-functions/index.js";
 
 /**
@@ -49,6 +50,10 @@ export type Config = {
     config: Config;
     resources: ast.Resource[];
   }) => Promise<void>;
+  lint?: {
+    rules: (LintRule | LintRule[])[];
+  };
+
   /**
    * WARNING: Experimental properties are not required,
    * can change at any time and do not lead to a MAJOR version bump.
@@ -64,9 +69,7 @@ export type Config = {
      * @param args represents the data to conduct the search on
      * @returns a promise with matched message references
      */
-    messageReferenceMatchers: ((args: {
-      documentText: string;
-    }) => Promise<
+    messageReferenceMatchers: ((args: { documentText: string }) => Promise<
       Array<{
         /**
          * The messages id.
