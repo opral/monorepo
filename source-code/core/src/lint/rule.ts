@@ -1,7 +1,7 @@
 import type { Message, Pattern, Resource } from "../ast/index.js";
 import type { Config, EnvironmentFunctions } from "../config/schema.js";
+import type { MaybePromise } from '../utilities/types.js';
 import { LintLevel, parseLintConfigArguments, Context } from "./context.js";
-import type { MaybePromise } from "./_utilities.js";
 
 export type LintableNode = Resource | Message | Pattern;
 

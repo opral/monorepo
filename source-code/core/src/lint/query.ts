@@ -1,3 +1,4 @@
+import { unhandled } from '../utilities/debug.js';
 import type {
   LintedNode,
   LintReport,
@@ -7,7 +8,6 @@ import type {
   LintLevel,
 } from "./context.js";
 import type { LintRuleId } from "./rule.js";
-import { unhandled } from "./_utilities.js";
 
 /**
  * Extracts all lint reports that are present on the given node.
