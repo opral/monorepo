@@ -6,8 +6,6 @@ import type {
 } from "./context.js";
 import { getLintReports, hasLintReports } from "./query.js";
 
-// TODO: improve output with better layout and coloring
-
 export const print = (resource: LintedResource) => {
   if (!hasLintReports(resource)) return;
 
