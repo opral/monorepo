@@ -1,6 +1,6 @@
 import type { Message, Pattern, Resource } from "../ast/index.js";
 import type { Config, EnvironmentFunctions } from "../config/schema.js";
-import type { MaybePromise } from '../utilities/types.js';
+import type { MaybePromise } from "../utilities/types.js";
 import { LintLevel, parseLintConfigArguments, Context } from "./context.js";
 
 export type LintableNode = Resource | Message | Pattern;
@@ -33,9 +33,9 @@ export type LeaveNodeFunction<Node extends LintableNode, Input> = (
 export type NodeVisitor<Node extends LintableNode> =
   | EnterNodeFunction<Node, any, any>
   | {
-    enter?: EnterNodeFunction<Node, any, any>;
-    leave?: LeaveNodeFunction<Node, any>;
-  };
+      enter?: EnterNodeFunction<Node, any, any>;
+      leave?: LeaveNodeFunction<Node, any>;
+    };
 
 export type NodeVisitors = {
   [Key in LintableNode["type"]]?: NodeVisitor<
@@ -43,12 +43,12 @@ export type NodeVisitors = {
   >;
 };
 
-export type LintConfigArguments<Settings = never, RequireSettings extends boolean = false> =
-  RequireSettings extends true
+export type LintConfigArguments<
+  Settings = never,
+  RequireSettings extends boolean = false
+> = RequireSettings extends true
   ? [boolean | LintLevel, Settings]
-  : []
-  | [boolean | LintLevel]
-  | [boolean | LintLevel, Settings?];
+  : [] | [boolean | LintLevel] | [boolean | LintLevel, Settings?];
 
 /**
  * The unique id of a lint rule.
@@ -76,9 +76,10 @@ export type LintRuleId = `${string}.${string}`;
  * const myRule: LintRuleInitializer<{ strict: boolean }, true> = // implementation
  * ```
  */
-export type LintRuleInitializer<Settings = never, RequireSettings extends boolean = false> = (
-  ...args: LintConfigArguments<Settings, RequireSettings>
-) => LintRule;
+export type LintRuleInitializer<
+  Settings = never,
+  RequireSettings extends boolean = false
+> = (...args: LintConfigArguments<Settings, RequireSettings>) => LintRule;
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
@@ -118,13 +119,19 @@ export type LintRule = {
  * })
  * ```
  */
-export const createLintRule = <Settings = never, RequireSettings extends boolean = false>(
+export const createLintRule = <
+  Settings = never,
+  RequireSettings extends boolean = false
+>(
   id: LintRuleId,
   defaultLevel: LintLevel,
   configureLintRule: (settings?: Settings) => Omit<LintRule, "id" | "level">
 ) =>
   ((...args) => {
-    const { level, settings } = parseLintConfigArguments<Settings>(args, defaultLevel);
+    const { level, settings } = parseLintConfigArguments<Settings>(
+      args,
+      defaultLevel
+    );
 
     return {
       ...configureLintRule(settings),

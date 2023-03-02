@@ -1,4 +1,4 @@
-import { unhandled } from '../utilities/debug.js';
+import { unhandled } from "../utilities/debug.js";
 import type {
   LintedNode,
   LintReport,
@@ -43,23 +43,22 @@ const getLintReportsFromResource = (
   { lint, body }: LintedResource,
   nested: boolean
 ): LintReport[] => [
-    ...(lint || []),
-    ...(nested
-      ? body.flatMap((message) => getLintReportsFromMessage(message, nested))
-      : []),
-  ];
+  ...(lint || []),
+  ...(nested
+    ? body.flatMap((message) => getLintReportsFromMessage(message, nested))
+    : []),
+];
 
 const getLintReportsFromMessage = (
   { lint, pattern }: LintedMessage,
   nested: boolean
 ): LintReport[] => [
-    ...(lint || []),
-    ...(nested ? getLintReportsFromPattern(pattern) : []),
-  ];
+  ...(lint || []),
+  ...(nested ? getLintReportsFromPattern(pattern) : []),
+];
 
-const getLintReportsFromPattern = ({
-  lint,
-}: LintedPattern): LintReport[] => lint || [];
+const getLintReportsFromPattern = ({ lint }: LintedPattern): LintReport[] =>
+  lint || [];
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -87,10 +86,7 @@ export const getLintReportsByLevel = (
  * @param nested if set to `false` will just return the lint reports directly attached on this node
  * @returns a list of lint reports
  */
-export const getLintErrors = getLintReportsByLevel.bind(
-  undefined,
-  "error"
-);
+export const getLintErrors = getLintReportsByLevel.bind(undefined, "error");
 
 /**
  * Extracts all lint reports with the 'warn' lint level that are present on the given node.
@@ -100,10 +96,7 @@ export const getLintErrors = getLintReportsByLevel.bind(
  * @param nested if set to `false` will just return the lint reports directly attached on this node
  * @returns a list of lint reports
  */
-export const getLintWarnings = getLintReportsByLevel.bind(
-  undefined,
-  "warn"
-);
+export const getLintWarnings = getLintReportsByLevel.bind(undefined, "warn");
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -165,8 +158,10 @@ export const getLintWarningsWithId = (
  * @param nested if set to `false` will just return the lint reports directly attached on this node
  * @returns `true` iff the given node has lint reports
  */
-export const hasLintReports = (node: LintedNode | LintedNode[], nested = true): boolean =>
-  getLintReports(node, nested).length > 0;
+export const hasLintReports = (
+  node: LintedNode | LintedNode[],
+  nested = true
+): boolean => getLintReports(node, nested).length > 0;
 
 /**
  * Checks if a given node has lint reports with the 'error' lint level attached to it.
@@ -176,8 +171,10 @@ export const hasLintReports = (node: LintedNode | LintedNode[], nested = true): 
  * @param nested if set to `false` will just return the lint reports directly attached on this node
  * @returns `true` iff the given node has lint reports
  */
-export const hasLintErrors = (node: LintedNode | LintedNode[], nested = true): boolean =>
-  getLintErrors(node, nested).length > 0;
+export const hasLintErrors = (
+  node: LintedNode | LintedNode[],
+  nested = true
+): boolean => getLintErrors(node, nested).length > 0;
 
 /**
  * Checks if a given node has lint reports with the 'warn' lint level attached to it.
@@ -187,8 +184,10 @@ export const hasLintErrors = (node: LintedNode | LintedNode[], nested = true): b
  * @param nested if set to `false` will just return the lint reports directly attached on this node
  * @returns `true` iff the given node has lint reports
  */
-export const hasLintWarnings = (node: LintedNode | LintedNode[], nested = true): boolean =>
-  getLintErrors(node, nested).length > 0;
+export const hasLintWarnings = (
+  node: LintedNode | LintedNode[],
+  nested = true
+): boolean => getLintErrors(node, nested).length > 0;
 
 /**
  * Checks if a given node has lint reports with a certain lint id attached to it.
