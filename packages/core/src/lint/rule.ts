@@ -46,7 +46,7 @@ export type NodeVisitors = {
 export type LintConfigArguments<Settings> =
   | []
   | [boolean | LintLevel]
-  | [LintLevel, Settings?];
+  | [boolean | LintLevel, Settings?];
 
 /**
  * The unique id of a lint rule.
