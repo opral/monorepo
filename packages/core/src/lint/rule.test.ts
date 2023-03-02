@@ -12,7 +12,7 @@ const rule1 = createLintRule("my.id", "error", () => {
 });
 
 const teardown = () => undefined;
-const rule2 = createLintRule("my.id", "error", (settings) => {
+const rule2 = createLintRule<any>("my.id", "error", (settings) => {
   return {
     setup: () => console.log(settings),
     visitors,
