@@ -1,5 +1,12 @@
 # @inlang/ide-extension
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [e5a88c8]
+  - @inlang/core@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes

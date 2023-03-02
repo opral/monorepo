@@ -1,7 +1,7 @@
 {
   "name": "@inlang/git-sdk",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "exports": {
     "./api": {
