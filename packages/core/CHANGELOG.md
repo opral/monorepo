@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.4.1
+
+### Patch Changes
+
+- e5a88c8: add `/lint` to the package exports map
+
 ## 0.4.0
 
 ### Minor Changes
