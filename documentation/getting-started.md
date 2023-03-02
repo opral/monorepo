@@ -14,9 +14,17 @@ If you don't use JSON in your project, check out all the other [plugins](https:/
 
 1. Create a new file named `inlang.config.js` in the root of your git repository.
    Example:
-<img src="https://user-images.githubusercontent.com/72493222/222404451-9e5cf370-5ff1-4e12-939e-135687423e70.png"  height="200">
+   {% Figure
 
-2. Copie/paste the code below in the config and change the `pathPattern` into your directory structure.
+   src="https://user-images.githubusercontent.com/72493222/222404451-9e5cf370-5ff1-4e12-939e-135687423e70.png"
+
+   alt="inlang config example"
+
+   width="300"
+
+   /%}
+
+1. Copie/paste the code below in the config and change the `pathPattern` into your directory structure.
 
    ```js
    // filename: inlang.config.js
@@ -45,7 +53,7 @@ If you don't use JSON in your project, check out all the other [plugins](https:/
    }
    ```
 
-3. Commit the config and open your project in the [inlang editor](https://inlang.com/editor)
+1. Commit the config and open your project in the [inlang editor](https://inlang.com/editor)
 
 ## Adding typesafety to the config
 
