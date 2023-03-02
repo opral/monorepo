@@ -18,6 +18,10 @@
       "types": "./dist/fs/index.d.ts",
       "import": "./dist/fs/index.js"
     },
+    "./lint": {
+      "types": "./dist/lint/index.d.ts",
+      "import": "./dist/lint/index.js"
+    },
     "./query": {
       "types": "./dist/query/index.d.ts",
       "import": "./dist/query/index.js"
