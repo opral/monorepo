@@ -1,5 +1,13 @@
 # @inlang/core
 
+## 0.4.2
+
+### Patch Changes
+
+- f28da6b: allow to call lint query functions with multiple nodes
+- f28da6b: create utility functions to test lint rules
+- f28da6b: add possibility to specify required settings
+
 ## 0.4.1
 
 ### Patch Changes
