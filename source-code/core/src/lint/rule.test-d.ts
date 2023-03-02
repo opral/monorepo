@@ -63,6 +63,47 @@ expectType<Parameters<LintRuleInitializer<{ debug: true }>>[1]>(true);
 // @ts-expect-error rule expect object with debug property as settings
 expectType<Parameters<LintRuleInitializer<{ debug: true }>>[1]>({});
 
+rule()
+rule('warn')
+rule('error')
+rule(false)
+rule(true)
+rule(true, undefined)
+// @ts-expect-error does not accept settings
+rule(true, { debug: true })
+
+// ----------------------------------------------------------------------------
+
+const ruleWithOptionalSettings = createLintRule<{ test: boolean }>("a.b", "error", () => ({
+  setup: () => undefined,
+  visitors: {},
+}));
+
+ruleWithOptionalSettings()
+ruleWithOptionalSettings('error')
+ruleWithOptionalSettings('error', { test: true })
+ruleWithOptionalSettings('warn')
+ruleWithOptionalSettings('warn', { test: true })
+ruleWithOptionalSettings(false)
+ruleWithOptionalSettings(false, { test: true })
+ruleWithOptionalSettings(true)
+ruleWithOptionalSettings(true, { test: true })
+
+// ----------------------------------------------------------------------------
+
+const ruleWithRequiredSettings = createLintRule<{ test: boolean }, true>("a.b", "error", () => ({
+  setup: () => undefined,
+  visitors: {},
+}));
+
+// @ts-expect-error requires settings to be passed
+ruleWithRequiredSettings()
+// @ts-expect-error requires settings to be passed
+ruleWithRequiredSettings('warn')
+// @ts-expect-error requires correct settings object to be passed
+ruleWithRequiredSettings(true, {})
+ruleWithRequiredSettings(true, { test: true })
+
 // configured rule ------------------------------------------------------------
 
 const configuredRule = rule();
