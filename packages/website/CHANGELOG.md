@@ -1,5 +1,15 @@
 # @inlang/website
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [f28da6b]
+- Updated dependencies [f28da6b]
+- Updated dependencies [f28da6b]
+  - @inlang/core@0.4.2
+  - @inlang/git-sdk@0.4.2
+
 ## 0.4.1
 
 ### Patch Changes
