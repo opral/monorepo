@@ -6,54 +6,74 @@ description: Learn on how to get started with inlang.
 
 # {% $frontmatter.title %}
 
-One single config file named `inlang.config.js` needs to be created at the root of the repository.
+{% Callout variant="info" %}
 
-If you don't use JSON in your project, check out all the other [plugins](https://github.com/inlang/ecosystem) we support.
+Inlang is in public **alpha**. Read more about our breaking change policy [here](/documentation/breaking-changes).
 
-## Step-by-step for JSON files
+{% /Callout %}
+
+{% Video src="https://youtu.be/rwqJ0RygAYc" /%}
+
+One single config file named `inlang.config.js` needs to be created at the root of the repository. The `inlang.config.js` file needs to export an `defineConfig` function that returns an object that conforms to the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts). More often than not, you want to use a [plugin](/documentation/plugins) that defines parts of the config. Just in case, take a look at the [inlang example repository](https://github.com/inlang/example).
+
+## Step-by-step
 
 1. Create a new file named `inlang.config.js` in the root of your git repository.
-   Example:
-   {% Figure
 
-   src="https://user-images.githubusercontent.com/72493222/222404451-9e5cf370-5ff1-4e12-939e-135687423e70.png"
+2. The newly created file needs to export an async function called `defineConfig`.
 
-   alt="inlang config example"
+   ```ts
+   // filename: inlang.config.js
 
-   width="300"
+   export async function defineConfig(env) {}
+   ```
 
-   /%}
+3. `defineConfig` must return an object that satisfies the [config schema](https://github.com/inlang/inlang/blob/main/source-code/core/src/config/schema.ts)
 
-1. Copie/paste the code below in the config and change the `pathPattern` into your directory structure.
+   ```ts
+   // filename: inlang.config.js
+
+   export async function defineConfig(env) {
+     return {
+       referenceLanguage: "en",
+       languages: ["en", "de"],
+       readResources: (args) => {
+         // define how resources should be read
+       },
+       writeResources: (args) => {
+         // define how resources should be written
+       },
+     };
+   }
+   ```
+
+4. In most cases, [plugins](/documentation/plugins) define parts of the config. Plugins can be imported via the `env.$import()` [environment function](/documentation/environment-functions).
 
    ```js
    // filename: inlang.config.js
 
    export async function defineConfig(env) {
-     // importing the json plugin
+     // importing a plugin
      const plugin = await env.$import(
-       "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js"
+       "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1.0.0/dist/index.js"
      );
 
+     // most plugins require additional config, read the plugins documentation
+     // for the required config and correct usage.
      const pluginConfig = {
-       pathPattern: ".example/{language}.json",
+       pathPattern: "./{language}.json",
      };
 
      return {
        referenceLanguage: "en",
-       languages: await plugin.getLanguages({
-         ...env,
-         pluginConfig,
-       }),
-       readResources: (args) =>
-         plugin.readResources({ ...args, ...env, pluginConfig }),
-       writeResources: (args) =>
-         plugin.writeResources({ ...args, ...env, pluginConfig }),
+       languages: ["en", "de"],
+      readResources: (args) =>
+      plugin.readResources({ ...args, ...env, pluginConfig }),
+    writeResources: (args) =>
+      plugin.writeResources({ ...args, ...env, pluginConfig }),
      };
    }
    ```
-
-1. Commit the config and open your project in the [inlang editor](https://inlang.com/editor)
 
 ## Adding typesafety to the config
 
@@ -67,9 +87,9 @@ If inlang is used in a JavaScript environment like Node or Deno, typesafety can 
 
 1. Install `@inlang/core` as dev dependency.
 
-```bash
-$ npm install @inlang/core --save-dev
-```
+   ```bash
+   $ npm install @inlang/core --save-dev
+   ```
 
 2. Add the following JSDoc comment above the `defineConfig` function.
 

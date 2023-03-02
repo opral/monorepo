@@ -90,8 +90,6 @@ export const config: Config = {
         src: { type: "String" },
         alt: { type: "String" },
         caption: { type: "String" },
-        height: { type: "String" },
-        width: { type: "String" },
       },
       render: "Figure",
     },
