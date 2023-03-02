@@ -5,10 +5,9 @@ import { extractMessageCommand } from "./commands/extractMessage.js";
 import { messagePreview } from "./decorations/messagePreview.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import { DefineConfig, initialize$import } from "@inlang/core/config";
-import fs from "node:fs";
 import fetch from 'node-fetch';
-import { dirname } from 'node:path';
 import { ExtractMessage } from './actions/extractMessage.js';
+import { createFileSystemMapper } from './utils/createFileSystemMapper.js';
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -58,16 +57,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     to: activeTextEditor.document.uri.path,
   });
 
-  // Change current working directory to configuration file directory, so relative paths to the languages files work.
-  // Otherwise the current working directory path is the directory where the node binary resides.
-  // See https://github.com/inlang/inlang/pull/372#discussion_r1107285786
-  // See https://github.com/microsoft/vscode-discussions/discussions/466
-  process.chdir(dirname(closestConfigPath));
+  const workspace = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
+  if (!workspace) {
+    return;
+  }
 
-  // TODO: find better fs (vscode.workspace.fs)
-  const $import = initialize$import({ fs: fs.promises, fetch });
+  const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri);
+  const $import = initialize$import({ fs: fileSystemMapper, fetch });
   const module: { defineConfig: DefineConfig } = await import(closestConfigPath);
-  const config = await module.defineConfig({ $fs: fs.promises, $import });
+  const config = await module.defineConfig({ $fs: fileSystemMapper, $import });
   const loadResources = async () => {
     const resources = await config.readResources({ config })
     setState({
