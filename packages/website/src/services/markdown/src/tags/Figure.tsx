@@ -7,12 +7,9 @@ export function Figure(props: {
 }) {
   return (
     <figure>
-      <img
-        src={props.src}
-        alt={props.alt}
-        height={props.height}
-        width={props.width}
-      />
+      <div class={`${props.width} ${props.height}`}>
+        <img src={props.src} alt={props.alt} />
+      </div>
       <figcaption>{props.caption}</figcaption>
     </figure>
   );
