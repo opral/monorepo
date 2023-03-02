@@ -16,7 +16,6 @@ Use cases could be:
 - check if the translated message does not exceed a certain length
 - ... and probably a ton of other use cases. Please [tell us](https://github.com/inlang/inlang/discussions/406) if we should add one to this list.
 
-
 ## Usage
 
 > Note: In the future we will provide a `CLI` to make it easier to use this package.
@@ -41,8 +40,9 @@ The promise returns an `Array` of all `Resources`. The nodes of the `Resource` a
 Utility functions provide an easy way to check if a `Resource` has a `lint` attribute. All utility functions can be imported from `@inlang/core/lint`. Per default nodes are checked recursively for the `lint` attribute. You can pass `false` as the last argument to just check a node without it's children.
 
 Example:
+
 ```ts
-import { getLintErrors } from '@inlang/core/lint';
+import { getLintErrors } from "@inlang/core/lint";
 
 // recursively check all nodes for lint errors
 const errors = getLintErrors(lintedResource);
@@ -53,19 +53,19 @@ const errors = getLintErrors(lintedResource, false);
 
 Here is a list of all provided utility functions:
 
-  - **`getLintReports`**: Extracts all lint reports that are present on the given node.
-  - **`getLintReportsByLevel`**: Extracts all lint reports with a certain lint level that are present on the given node.
-  - **`getLintErrors`**: Extracts all lint reports with the 'error' lint level that are present on the given node.
-  - **`getLintWarnings`**: Extracts all lint reports with the 'warn' lint level that are present on the given node.
-  - **`getLintReportsWithId`**: Extracts all lint reports with a certain lint id that are present on the given node.
-  - **`getLintErrorsWithId`**: Extracts all lint reports with a certain lint id and the 'error' lint level that are present on the given node.
-  - **`getLintWarningsWithId`**: Extracts all lint reports with a certain lint id and the 'warn' lint level that are present on the given node.
-  - **`hasLintReports`**: Checks if a given node has lint reports attached to it.
-  - **`hasLintErrors`**: Checks if a given node has lint reports with the 'error' lint level attached to it.
-  - **`hasLintWarnings`**: Checks if a given node has lint reports with the 'warn' lint level attached to it.
-  - **`hasLintReportsWithId`**: Checks if a given node has lint reports with a certain lint id attached to it.
-  - **`hasLintErrorsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'error' lint level attached to it.
-  - **`hasLintWarningsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'warn' lint level attached to it.
+- **`getLintReports`**: Extracts all lint reports that are present on the given node.
+- **`getLintReportsByLevel`**: Extracts all lint reports with a certain lint level that are present on the given node.
+- **`getLintErrors`**: Extracts all lint reports with the 'error' lint level that are present on the given node.
+- **`getLintWarnings`**: Extracts all lint reports with the 'warn' lint level that are present on the given node.
+- **`getLintReportsWithId`**: Extracts all lint reports with a certain lint id that are present on the given node.
+- **`getLintErrorsWithId`**: Extracts all lint reports with a certain lint id and the 'error' lint level that are present on the given node.
+- **`getLintWarningsWithId`**: Extracts all lint reports with a certain lint id and the 'warn' lint level that are present on the given node.
+- **`hasLintReports`**: Checks if a given node has lint reports attached to it.
+- **`hasLintErrors`**: Checks if a given node has lint reports with the 'error' lint level attached to it.
+- **`hasLintWarnings`**: Checks if a given node has lint reports with the 'warn' lint level attached to it.
+- **`hasLintReportsWithId`**: Checks if a given node has lint reports with a certain lint id attached to it.
+- **`hasLintErrorsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'error' lint level attached to it.
+- **`hasLintWarningsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'warn' lint level attached to it.
 
 ## Configuration
 
@@ -113,15 +113,16 @@ There already exist some lint rules you can use to check your `Resources` agains
 You can use the provided `createLintRule` function to create a lint rule. By using the provided function, you will get back a strongly typed rule.
 
 Example:
+
 ```ts
-import { createLintRule, type Context } from '@inlang/core/lint';
+import { createLintRule, type Context } from "@inlang/core/lint";
 
 const myLintRule = createLintRule<{ apiKey: string }>(
-  'myService.checkGrammar',
-  'error',
+  "myService.checkGrammar",
+  "error",
   (settings) => {
     if (!settings?.apiKey) {
-      throw new Error('You need to provide an API key');
+      throw new Error("You need to provide an API key");
     }
 
     let context: Context;
@@ -143,13 +144,14 @@ const myLintRule = createLintRule<{ apiKey: string }>(
             node: target,
             message: `Message with id '${reference.id.name}' contains a grammar error: ${result.details}`,
           });
-        }
+        },
       },
       teardown: async () => {
         await service.closeConnection();
-      }
-    }
-  });
+      },
+    };
+  }
+);
 ```
 
 The `createLintRule` expects 3 parameters.
@@ -159,47 +161,52 @@ The `createLintRule` expects 3 parameters.
 2. The default lint level used by this rule.\
    If a user does not specify lint level, the default level will be used to report lint violations.
 3. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
+
    - `setup`: A function that can be used to open connections or setup other stuff that will be used during the lint process.\
       The `setup` function gets called with the following parameter: `{ env, referenceLanguage, languages, context }` where
-       - `env` are the [environment functions](https://inlang.com/documentation/environment-functions) used to e.g. be able to import modules.
-       - `referenceLanguage` is the reference language of ths repository.
-       - `languages` is an array of the supported languages.
-       - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.
-      The function can return an object, that will be passed as the `payload` attribute to all subsequent steps in the linting process.
+     - `env` are the [environment functions](https://inlang.com/documentation/environment-functions) used to e.g. be able to import modules.
+     - `referenceLanguage` is the reference language of ths repository.
+     - `languages` is an array of the supported languages.
+     - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.
+       The function can return an object, that will be passed as the `payload` attribute to all subsequent steps in the linting process.
    - `visitors`: An object that contains functions that will be called during the linting process.\
      The linting process will visit each node recursively and then calls the corresponding `visitors` function if specified. The `visitor` object expects the following properties:
-       - `Resource` _(optional)_: the visitor functions that will be called when a Resource node gets processed.
-       - `Message` _(optional)_: the visitor functions that will be called when a Message node gets processed.
-       - `Pattern` _(optional)_: the visitor functions that will be called when a Pattern node gets processed.
-      Those properties can be either a single function or an object with a `enter` and/or `leave` function:
-      ```ts
-      visitors: {
-        Message: () => { /* implementation */ },
-        Pattern: {
-          enter: () => { /* implementation */ },
-          leave: () => { /* implementation */ },
-        },
-      }
-      ```
-      The `enter` function get's called when a node get's visited. If this node contains children, those will be processed afterwards. Once all children have been processed, the `leave` function will be called. When using a single function, the function is treated as the `enter`function.
 
-      The `enter` function get's called with the following parameter: `{ target, reference, payload }` where
-       - `target` is the node that got visited.
-       - `reference` is the corresponding node of the reference language.
-       - `payload` the object returned by the `setup` or a parent's `enter` function.
-      The function can optionally return
-       - `'skip'` to skip the processing of all child nodes.
-       - an object, that get's passed as `payload` to all children and the `leave` function.
+     - `Resource` _(optional)_: the visitor functions that will be called when a Resource node gets processed.
+     - `Message` _(optional)_: the visitor functions that will be called when a Message node gets processed.
+     - `Pattern` _(optional)_: the visitor functions that will be called when a Pattern node gets processed.
+       Those properties can be either a single function or an object with a `enter` and/or `leave` function:
 
-      Be aware that `target` or `reference` could be `undefined` if the corresponding node does not exist on the target or reference resource.
+     ```ts
+     visitors: {
+       Message: () => { /* implementation */ },
+       Pattern: {
+         enter: () => { /* implementation */ },
+         leave: () => { /* implementation */ },
+       },
+     }
+     ```
 
-      The `leave` function receives the same payload as the `enter` function, but does not return anything.
+     The `enter` function get's called when a node get's visited. If this node contains children, those will be processed afterwards. Once all children have been processed, the `leave` function will be called. When using a single function, the function is treated as the `enter`function.
+
+     The `enter` function get's called with the following parameter: `{ target, reference, payload }` where
+
+     - `target` is the node that got visited.
+     - `reference` is the corresponding node of the reference language.
+     - `payload` the object returned by the `setup` or a parent's `enter` function.
+       The function can optionally return
+     - `'skip'` to skip the processing of all child nodes.
+     - an object, that get's passed as `payload` to all children and the `leave` function.
+
+     Be aware that `target` or `reference` could be `undefined` if the corresponding node does not exist on the target or reference resource.
+
+     The `leave` function receives the same payload as the `enter` function, but does not return anything.
 
    - `teardown` _(optional)_: A function that can be used to close opened connections.\
       The `teardown` function gets called with the following parameter: `{ payload }` where
-      - `payload` is the object returned by the `setup` function.
+     - `payload` is the object returned by the `setup` function.
 
-  All defined functions can be synchronous or asynchronous. The lint process traverses all nodes in sequence and awaits each step individually. Keep that in mind. It could affect the performance if you call a lot of long-running functions.
+All defined functions can be synchronous or asynchronous. The lint process traverses all nodes in sequence and awaits each step individually. Keep that in mind. It could affect the performance if you call a lot of long-running functions.
 
 #### Manual processing of nodes
 
@@ -225,20 +232,19 @@ A lint rule can expect a `settings` object. To specify what type of settings the
 
 ```ts
 // expects no settings
-const myRule = createLintRule(/* ... */)
+const myRule = createLintRule(/* ... */);
 
 // expects settings of type `{ threshold: number }`
-const myRule = createLintRule<{ threshold: number }>(/* ... */)
+const myRule = createLintRule<{ threshold: number }>(/* ... */);
 ```
 
 The settings will be passed by a user to configure the behavior of the lint rule.
 
 _inlang.config.js_
+
 ```ts
 lint: {
-  rules: [
-    myRule('warn', { threshold: 4 }),
-  ]
+  rules: [myRule("warn", { threshold: 4 })];
 }
 ```
 
@@ -283,12 +289,13 @@ export async function defineConfig(env) {
 A lint collection groups multiple lint rules together. You can use the provided `createLintRuleCollection` function to create a collection. By using the provided function, you will get back a strongly typed rule collection.
 
 Example:
+
 ```ts
 import { createLintRuleCollection } from "@inlang/core/lint";
 
 const myRuleCollection = createLintRuleCollection({
- 	'missingKey': missingKeyRule,
- 	'invalidKey': invalidKeyRule,
+  missingKey: missingKeyRule,
+  invalidKey: invalidKeyRule,
 });
 ```
 
