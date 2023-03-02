@@ -5,7 +5,7 @@ import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-r
 export function Hero() {
   return (
     <div class="mx-auto max-w-3xl py-16 md:py-24">
-      <div class="hidden sm:mb-8 sm:flex sm:justify-center">
+      {/* <div class="hidden sm:mb-8 sm:flex sm:justify-center">
         <div class="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-primary-container hover:ring-primary">
           <span>
             We are hiring engineers to make localization simple.{" "}
@@ -19,7 +19,7 @@ export function Hero() {
             </a>
           </span>
         </div>
-      </div>
+      </div> */}
       <div>
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight sm:text-center md:text-5xl lg:text-6xl">
           <span class="block xl:inline text-primary">
