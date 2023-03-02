@@ -151,6 +151,12 @@ describe("getLintReports", async () => {
     });
   });
 
+  test("should support an array of nodes", async () => {
+    const reports = getLintReports([resource, message, pattern]);
+
+    expect(reports).toHaveLength(21);
+  });
+
   test("should throw an error if node type does not get handled", async () => {
     expect(() =>
       getLintReports({ type: "unknown" } as unknown as LintableNode)
