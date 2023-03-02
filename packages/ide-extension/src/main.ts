@@ -57,11 +57,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
     to: activeTextEditor.document.uri.path,
   });
 
+  // get current workspace
   const workspace = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
   if (!workspace) {
     return;
   }
 
+  // initialize inlang core and resources for current workspace
   const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri);
   const $import = initialize$import({ fs: fileSystemMapper, fetch });
   const module: { defineConfig: DefineConfig } = await import(closestConfigPath);
