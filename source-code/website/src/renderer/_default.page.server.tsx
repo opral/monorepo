@@ -1,50 +1,48 @@
-import type { PageContextRenderer } from "./types.js";
-import { generateHydrationScript, renderToString } from "solid-js/web";
-import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
-import { setCurrentPageContext } from "./state.js";
-import { Root } from "./Root.jsx";
+import type { PageContextRenderer } from "./types.js"
+import { generateHydrationScript, renderToString } from "solid-js/web"
+import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr"
+import { setCurrentPageContext } from "./state.js"
+import { Root } from "./Root.jsx"
 
 // import the css
-import "./app.css";
-import { MetaProvider, renderTags } from "@solidjs/meta";
+import "./app.css"
+import { MetaProvider, renderTags } from "@solidjs/meta"
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams"] as const;
+export const passToClient = ["pageProps", "routeParams"] as const
 
-export async function render(
-  pageContext: PageContextRenderer
-): Promise<unknown> {
-  //! TODO most likely cross request state pollution
-  //! Need to look into this in the future
-  setCurrentPageContext(pageContext);
-  // generating the html from the server:
-  // 1. the server sends a hydration script for the client.
-  //    the client uses the hydration script to hydrate the page.
-  //    without hydration, no interactivity.
-  // 2. the page is pre-rendered via `renderedPage`.
-  //    pre-rendering the page makes the page immediately "visible"
-  //    to the user. Afterwards, the client hydrates the page and thereby
-  //    makes the page interactive.
-  // ! important: renderToString is used instead of
-  // ! renderToStringAsync some async resources should
-  // ! not be loaded on the server (the editor for example).
-  // ! see https://github.com/inlang/inlang/issues/247
+export async function render(pageContext: PageContextRenderer): Promise<unknown> {
+	//! TODO most likely cross request state pollution
+	//! Need to look into this in the future
+	setCurrentPageContext(pageContext)
+	// generating the html from the server:
+	// 1. the server sends a hydration script for the client.
+	//    the client uses the hydration script to hydrate the page.
+	//    without hydration, no interactivity.
+	// 2. the page is pre-rendered via `renderedPage`.
+	//    pre-rendering the page makes the page immediately "visible"
+	//    to the user. Afterwards, the client hydrates the page and thereby
+	//    makes the page interactive.
+	// ! important: renderToString is used instead of
+	// ! renderToStringAsync some async resources should
+	// ! not be loaded on the server (the editor for example).
+	// ! see https://github.com/inlang/inlang/issues/247
 
-  // from solidjs meta
-  // mutated during render so you can include in server-rendered template later
-  const tags: any[] = [];
+	// from solidjs meta
+	// mutated during render so you can include in server-rendered template later
+	const tags: any[] = []
 
-  const isEditor = pageContext.urlPathname.startsWith("editor");
+	const isEditor = pageContext.urlPathname.startsWith("editor")
 
-  const renderedPage = isEditor
-    ? undefined
-    : renderToString(() => (
-        <MetaProvider tags={tags}>
-          <Root page={pageContext.Page} pageProps={pageContext.pageProps} />
-        </MetaProvider>
-      ));
+	const renderedPage = isEditor
+		? undefined
+		: renderToString(() => (
+				<MetaProvider tags={tags}>
+					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+				</MetaProvider>
+		  ))
 
-  return escapeInject`<!DOCTYPE html>
+	return escapeInject`<!DOCTYPE html>
     <html lang="en" class="min-h-screen min-w-screen">
       <head>
 			<meta charset="UTF-8" />
@@ -64,7 +62,7 @@ export async function render(
       <body class="min-h-screen min-w-screen bg-background text-on-background" id="root">
 		    ${isEditor ? "" : dangerouslySkipEscape(renderedPage!)}
       </body>
-    </html>`;
+    </html>`
 }
 
 const favicons = `
@@ -75,7 +73,7 @@ const favicons = `
 <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
 <meta name="msapplication-TileColor" content="#da532c">
 <meta name="theme-color" content="#ffffff">
-`;
+`
 
 const analytics = `
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5H3SDF7TVZ"></script>
@@ -86,4 +84,4 @@ gtag('js', new Date());
 
 gtag('config', 'G-5H3SDF7TVZ');
 </script>
-`;
+`

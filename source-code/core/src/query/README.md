@@ -13,18 +13,18 @@ Immutability is good practice, eases CMD-Z (history) operations, plays nicely wi
 ```js
 // single resource queries
 resource = query(resource) // resource
-  .create(); // message
+	.create() // message
 
 resource = query(resource) // single resource
-  .get("id"); // message
+	.get("id") // message
 
 resource = query(resource) // resource
-  .update("id"); // message
+	.update("id") // message
 
 resource = query(resource) // resource
-  .delete("id"); // message
+	.delete("id") // message
 
 // multiple resource queries
-const resources = [x, y, z];
-resources = resources.map((resource) => query(resource).delete("id"));
+const resources = [x, y, z]
+resources = resources.map((resource) => query(resource).delete("id"))
 ```

@@ -29,24 +29,24 @@ By de-coupling data from functionality, the Schema (objects) can be used as the 
 
 ```ts
 // If the AST consists of pure objects
-import type { Resource } from "@inlang/schema";
+import type { Resource } from "@inlang/schema"
 const resource: Resource = {
-  // ...
-};
+	// ...
+}
 
 // the functionality of the ast can be extended with function
 
 // from inlang
-import { query } from "@inlang/schema/query";
+import { query } from "@inlang/schema/query"
 // the community
-import { format } from "community";
+import { format } from "community"
 // or your own
 function example(resource: Resource) {}
 
 // inlang exports a query function
-const message = query(resource).get("some-id");
+const message = query(resource).get("some-id")
 // someone created an awesome format function
-const formattedMessage = format(message);
+const formattedMessage = format(message)
 
 // one is able to mix and match since the AST definition are pure objects.
 ```

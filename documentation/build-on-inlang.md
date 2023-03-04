@@ -24,18 +24,18 @@ config.readResources() -> query(AST) -> config.writeResources()
 
 ```js
 // The `inlang.config.js` file can be imported by your application
-const { defineConfig } = await import("./inlang.config.js");
-const config = defineConfig(/** arguments */);
+const { defineConfig } = await import("./inlang.config.js")
+const config = defineConfig(/** arguments */)
 
 // get the resources (AST)
-let resources = config.readResources(/** arguments */);
+let resources = config.readResources(/** arguments */)
 
 // modify the resources with @inlang/core/query
-resources = query(resources).delete({ id: "outdated-message" });
-resources = query(resources).update({ id: "hello", with: "Hello from inlang" });
+resources = query(resources).delete({ id: "outdated-message" })
+resources = query(resources).update({ id: "hello", with: "Hello from inlang" })
 
 // write the resources to the filesystem
-config.writeResources(resources);
+config.writeResources(resources)
 ```
 
 ## Example
@@ -45,34 +45,34 @@ The following is a script that demonstrates how you can build on top of inlang.
 ```js
 // filename: example-script.js
 
-import fs from "node:fs/promises";
-import { query } from "@inlang/core/query";
-import { initialize$import } from "@inlang/core/config";
-import { defineConfig } from "./inlang.config.js";
+import fs from "node:fs/promises"
+import { query } from "@inlang/core/query"
+import { initialize$import } from "@inlang/core/config"
+import { defineConfig } from "./inlang.config.js"
 
 // initializing the environment functions
 const env = {
-  $import: initialize$import({
-    workingDirectory: "/example",
-    fs: $fs,
-    fetch,
-  }),
-  $fs: fs,
-};
+	$import: initialize$import({
+		workingDirectory: "/example",
+		fs: $fs,
+		fetch,
+	}),
+	$fs: fs,
+}
 
 // the `defineConfig` function is directly imported from `./inlang.config.js`
-const config = await defineConfig(env);
+const config = await defineConfig(env)
 
 // the config gives access to readingResources and more
-const resources = await config.readResources({ config });
+const resources = await config.readResources({ config })
 
 // --- validate resources according to your logic ---
 //
 // the example below checks if "first-message" exsits in all resources
 for (const resource of resources) {
-  const message = query(resource).get({ id: "first-message" });
-  if (message === undefined) {
-    throw Error("The message must be defined");
-  }
+	const message = query(resource).get({ id: "first-message" })
+	if (message === undefined) {
+		throw Error("The message must be defined")
+	}
 }
 ```

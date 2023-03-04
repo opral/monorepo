@@ -1,6 +1,6 @@
-import typescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
+import typescript from "@rollup/plugin-typescript"
+import { nodeResolve } from "@rollup/plugin-node-resolve"
+import commonjs from "@rollup/plugin-commonjs"
 
 /**
  * What is rollup used for?
@@ -10,24 +10,24 @@ import commonjs from "@rollup/plugin-commonjs";
  */
 
 export default {
-  input: "src/main.ts",
-  output: {
-    sourcemap: true,
-    // .cjs because the package.json defines "type": "module",
-    // .cjs indicates that the file should not be treated as es module
-    // but commonjs instead
-    dir: "dist/",
-    entryFileNames: "[name].cjs",
-    chunkFileNames: "[name]-[hash].cjs",
-    format: "cjs",
-  },
-  // the vscode dependency is provided by vscode.
-  external: ["vscode"],
-  plugins: [
-    // nodeResolve = bundle the dependencies
-    nodeResolve(),
-    // typescript = compile typescript
-    typescript(),
-    commonjs(),
-  ],
-};
+	input: "src/main.ts",
+	output: {
+		sourcemap: true,
+		// .cjs because the package.json defines "type": "module",
+		// .cjs indicates that the file should not be treated as es module
+		// but commonjs instead
+		dir: "dist/",
+		entryFileNames: "[name].cjs",
+		chunkFileNames: "[name]-[hash].cjs",
+		format: "cjs",
+	},
+	// the vscode dependency is provided by vscode.
+	external: ["vscode"],
+	plugins: [
+		// nodeResolve = bundle the dependencies
+		nodeResolve(),
+		// typescript = compile typescript
+		typescript(),
+		commonjs(),
+	],
+}

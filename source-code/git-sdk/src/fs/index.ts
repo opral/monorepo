@@ -4,4 +4,4 @@
  * isomorphic-git has a bug that makes working with fs.promise
  * impossible.
  */
-export { fs } from "memfs";
+export { fs } from "memfs"

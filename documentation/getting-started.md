@@ -29,26 +29,24 @@ If you don't use JSON in your project, check out all the other [plugins](https:/
    // filename: inlang.config.js
 
    export async function defineConfig(env) {
-     // importing the json plugin
-     const plugin = await env.$import(
-       "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js"
-     );
+   	// importing the json plugin
+   	const plugin = await env.$import(
+   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+   	)
 
-     const pluginConfig = {
-       pathPattern: ".example/{language}.json",
-     };
+   	const pluginConfig = {
+   		pathPattern: ".example/{language}.json",
+   	}
 
-     return {
-       referenceLanguage: "en",
-       languages: await plugin.getLanguages({
-         ...env,
-         pluginConfig,
-       }),
-       readResources: (args) =>
-         plugin.readResources({ ...args, ...env, pluginConfig }),
-       writeResources: (args) =>
-         plugin.writeResources({ ...args, ...env, pluginConfig }),
-     };
+   	return {
+   		referenceLanguage: "en",
+   		languages: await plugin.getLanguages({
+   			...env,
+   			pluginConfig,
+   		}),
+   		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
+   		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
+   	}
    }
    ```
 
@@ -77,9 +75,9 @@ $ npm install @inlang/core --save-dev
     * @type {import("@inlang/core/config").DefineConfig}
     */
    export async function defineConfig(env) {
-     //
-     //
-     //
+   	//
+   	//
+   	//
    }
    ```
 
@@ -87,8 +85,8 @@ $ npm install @inlang/core --save-dev
 
    ```js
    compilerOptions: {
-     // ...
-     checkJs: true;
-     moduleResolution: "node16";
+   	// ...
+   	checkJs: true
+   	moduleResolution: "node16"
    }
    ```

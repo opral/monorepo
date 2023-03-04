@@ -25,12 +25,12 @@ Use cases could be:
 You can use the `lint` function provided by `@inlang/core/lint`.
 
 ```ts
-import { lint } from "@inlang/core/eslint";
+import { lint } from "@inlang/core/eslint"
 
-const config = {}; // the resolved config from `inlang.config.js`
-const env = {}; // the environment functions
+const config = {} // the resolved config from `inlang.config.js`
+const env = {} // the environment functions
 
-const result = await lint(config, env);
+const result = await lint(config, env)
 ```
 
 The promise returns an `Array` of all `Resources`. The nodes of the `Resource` and it's children can have a `lint` attribute attached. If present, the `lint` attribute will contain an `Array` of `LintResults`. To make it easier to see if one of the lint rules reported a violation, `inlang` provides some [utility functions](#utility-functions).
@@ -42,13 +42,13 @@ Utility functions provide an easy way to check if a `Resource` has a `lint` attr
 Example:
 
 ```ts
-import { getLintErrors } from "@inlang/core/lint";
+import { getLintErrors } from "@inlang/core/lint"
 
 // recursively check all nodes for lint errors
-const errors = getLintErrors(lintedResource);
+const errors = getLintErrors(lintedResource)
 
 // just check a single node for lint errors
-const errors = getLintErrors(lintedResource, false);
+const errors = getLintErrors(lintedResource, false)
 ```
 
 Here is a list of all provided utility functions:
@@ -85,22 +85,22 @@ _inlang.config.js_
  * @type {import("@inlang/core/config").DefineConfig}
  */
 export async function defineConfig(env) {
-  return {
-    referenceLanguage: "en",
-    languages: ["en", "de"],
-    lint: {
-      rules: [
-        // uses the standard configuration
-        missingKeyRule(),
-        // set's the lint level to 'warn'
-        missingKeyRule("warn"),
-        // uses the standard lint level and passes custom settings to the rule
-        missingKeyRule(true, { threshold: 4 }),
-        // disables the rule if it runs on mondays
-        missingKeyRule(!isTodayMonday),
-      ],
-    },
-  };
+	return {
+		referenceLanguage: "en",
+		languages: ["en", "de"],
+		lint: {
+			rules: [
+				// uses the standard configuration
+				missingKeyRule(),
+				// set's the lint level to 'warn'
+				missingKeyRule("warn"),
+				// uses the standard lint level and passes custom settings to the rule
+				missingKeyRule(true, { threshold: 4 }),
+				// disables the rule if it runs on mondays
+				missingKeyRule(!isTodayMonday),
+			],
+		},
+	}
 }
 ```
 
@@ -115,43 +115,43 @@ You can use the provided `createLintRule` function to create a lint rule. By usi
 Example:
 
 ```ts
-import { createLintRule, type Context } from "@inlang/core/lint";
+import { createLintRule, type Context } from "@inlang/core/lint"
 
 const myLintRule = createLintRule<{ apiKey: string }>(
-  "myService.checkGrammar",
-  "error",
-  (settings) => {
-    if (!settings?.apiKey) {
-      throw new Error("You need to provide an API key");
-    }
+	"myService.checkGrammar",
+	"error",
+	(settings) => {
+		if (!settings?.apiKey) {
+			throw new Error("You need to provide an API key")
+		}
 
-    let context: Context;
-    let service;
+		let context: Context
+		let service
 
-    return {
-      setup: async (args) => {
-        context = args.context;
+		return {
+			setup: async (args) => {
+				context = args.context
 
-        service = await connectToGrammarService(context.apiKey);
-      },
-      visitors: {
-        Message: async ({ target, reference }) => {
-          if (!target) return;
+				service = await connectToGrammarService(context.apiKey)
+			},
+			visitors: {
+				Message: async ({ target, reference }) => {
+					if (!target) return
 
-          const result = await service.checkGrammar(target);
+					const result = await service.checkGrammar(target)
 
-          context.report({
-            node: target,
-            message: `Message with id '${reference.id.name}' contains a grammar error: ${result.details}`,
-          });
-        },
-      },
-      teardown: async () => {
-        await service.closeConnection();
-      },
-    };
-  }
-);
+					context.report({
+						node: target,
+						message: `Message with id '${reference.id.name}' contains a grammar error: ${result.details}`,
+					})
+				},
+			},
+			teardown: async () => {
+				await service.closeConnection()
+			},
+		}
+	},
+)
 ```
 
 The `createLintRule` expects 3 parameters.
@@ -232,10 +232,10 @@ A lint rule can expect a `settings` object. To specify what type of settings the
 
 ```ts
 // expects no settings
-const myRule = createLintRule(/* ... */);
+const myRule = createLintRule(/* ... */)
 
 // expects settings of type `{ threshold: number }`
-const myRule = createLintRule<{ threshold: number }>(/* ... */);
+const myRule = createLintRule<{ threshold: number }>(/* ... */)
 ```
 
 The settings will be passed by a user to configure the behavior of the lint rule.
@@ -244,7 +244,7 @@ _inlang.config.js_
 
 ```ts
 lint: {
-  rules: [myRule("warn", { threshold: 4 })];
+	rules: [myRule("warn", { threshold: 4 })]
 }
 ```
 
@@ -259,28 +259,28 @@ _inlang.config.js_
  * @type {import("@@inlang/core/config").DefineConfig}
  */
 export async function defineConfig(env) {
-  return {
-    referenceLanguage: "en",
-    languages: ["en", "de"],
-    lint: {
-      rules: [
-        // uses the standard configuration
-        inlangStandardRules(),
-        // set's the lint level for the `missingKey` rule to 'warn'
-        inlangStandardRules({
-          missingKey: "warn",
-        }),
-        // uses the standard lint level and passes custom settings to the `missingKey` rule
-        inlangStandardRules({
-          missingKey: [true, { threshold: 4 }],
-        }),
-        // disables the `missingKey` rule if it runs on mondays
-        inlangStandardRules({
-          missingKey: !isTodayMonday,
-        }),
-      ],
-    },
-  };
+	return {
+		referenceLanguage: "en",
+		languages: ["en", "de"],
+		lint: {
+			rules: [
+				// uses the standard configuration
+				inlangStandardRules(),
+				// set's the lint level for the `missingKey` rule to 'warn'
+				inlangStandardRules({
+					missingKey: "warn",
+				}),
+				// uses the standard lint level and passes custom settings to the `missingKey` rule
+				inlangStandardRules({
+					missingKey: [true, { threshold: 4 }],
+				}),
+				// disables the `missingKey` rule if it runs on mondays
+				inlangStandardRules({
+					missingKey: !isTodayMonday,
+				}),
+			],
+		},
+	}
 }
 ```
 
@@ -291,12 +291,12 @@ A lint collection groups multiple lint rules together. You can use the provided 
 Example:
 
 ```ts
-import { createLintRuleCollection } from "@inlang/core/lint";
+import { createLintRuleCollection } from "@inlang/core/lint"
 
 const myRuleCollection = createLintRuleCollection({
-  missingKey: missingKeyRule,
-  invalidKey: invalidKeyRule,
-});
+	missingKey: missingKeyRule,
+	invalidKey: invalidKeyRule,
+})
 ```
 
 The `createLintRuleCollection` expects an object where the key is the name of the provided rule and the value is the rule itself. You can add as many rules as you want.

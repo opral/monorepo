@@ -1,21 +1,21 @@
-import type { Resource } from "@inlang/core/ast";
-import type { Config as InlangConfig } from "@inlang/core/config";
+import type { Resource } from "@inlang/core/ast"
+import type { Config as InlangConfig } from "@inlang/core/config"
 
 /**
  * The state of the vscode extension.
  */
 type State = {
-  /**
-   * Closest inlang configuration.
-   */
-  config: InlangConfig;
-  /**
-   * All ressources found by the inlang configuration.
-   */
-  resources: Resource[];
-};
+	/**
+	 * Closest inlang configuration.
+	 */
+	config: InlangConfig
+	/**
+	 * All ressources found by the inlang configuration.
+	 */
+	resources: Resource[]
+}
 
-let _state: State;
+let _state: State
 
 /**
  * Set the state.
@@ -24,7 +24,7 @@ let _state: State;
  * this function is a wrapper to assign the `state` variable.
  */
 export function setState(state: State) {
-  _state = state;
+	_state = state
 }
 
 /**
@@ -36,5 +36,5 @@ export function setState(state: State) {
  * State that is not reflected = endless bugs.
  */
 export function state(): State {
-  return _state;
+	return _state
 }

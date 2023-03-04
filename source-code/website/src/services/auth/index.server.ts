@@ -1,2 +1,2 @@
-export { router } from "./src/router.js";
-export * from "./src/implementation.js";
+export { router } from "./src/router.js"
+export * from "./src/implementation.js"

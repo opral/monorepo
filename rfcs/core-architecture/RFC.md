@@ -156,17 +156,17 @@ flowchart LR
 
 ```json
 {
-  "example": "Welcome {$name} to this example.",
-  "info": "Click the button to continue."
+	"example": "Welcome {$name} to this example.",
+	"info": "Click the button to continue."
 }
 ```
 
 ##### Retrieving a message
 
 ```jsx
-import translate from "i18n-library";
+import translate from "i18n-library"
 
-console.log(translate("example", { name: "Samuel" }));
+console.log(translate("example", { name: "Samuel" }))
 ```
 
 ##### Output
@@ -359,7 +359,7 @@ _Exemplary inlang config:_
 
 ```json
 {
-  "pathPattern": "./resources/{languageCode}.ftl"
+	"pathPattern": "./resources/{languageCode}.ftl"
 }
 ```
 
@@ -423,26 +423,26 @@ Leveraging JavaScript, or any programming language allows for tremendous flexibi
 // pseudocode that illustrates the possbility to
 // adjust how messages are machine translated.
 export async function onMachineTranslate(message) {
-  // or DeepL, Yandex, etc.
-  const googleTranslate = await import("google-translate");
-  return googleTranslate(message);
+	// or DeepL, Yandex, etc.
+	const googleTranslate = await import("google-translate")
+	return googleTranslate(message)
 }
 
 // pseudocode that illustrates the possiblity to adjust
 // the business logic of the editor.
 export const editor = {
-  // what should happen when a translator pressed "Save"
-  // (edited a message).
-  onSave: async (message) => {
-    // the message could be committed.
-    return commit(message);
-    // or a pull request can be opened.
-    return openPullRequest(message);
-    // or something else can happen
-    return somethingElse(message);
-  },
-  // and more...
-};
+	// what should happen when a translator pressed "Save"
+	// (edited a message).
+	onSave: async (message) => {
+		// the message could be committed.
+		return commit(message)
+		// or a pull request can be opened.
+		return openPullRequest(message)
+		// or something else can happen
+		return somethingElse(message)
+	},
+	// and more...
+}
 ```
 
 ### Conclusion

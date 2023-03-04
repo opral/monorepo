@@ -5,32 +5,30 @@
  * list and add your repository below.
  */
 export const repositories: Repositories = [
-  {
-    owner: "inlang",
-    repository: "example",
-    description: "Example repository that showcases inlang.",
-  },
-  {
-    owner: "jazzband",
-    repository: "djangorestframework-simplejwt",
-    description:
-      "A JSON Web Token authentication plugin for the Django REST Framework.",
-  },
-  {
-    owner: "osmosis-labs",
-    repository: "osmosis-frontend",
-    description: "Web interface for Osmosis Zone",
-  },
-  {
-    owner: "allinurl",
-    repository: "goaccess",
-    description:
-      "GoAccess is a real-time web log analyzer and interactive viewer",
-  },
-];
+	{
+		owner: "inlang",
+		repository: "example",
+		description: "Example repository that showcases inlang.",
+	},
+	{
+		owner: "jazzband",
+		repository: "djangorestframework-simplejwt",
+		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
+	},
+	{
+		owner: "osmosis-labs",
+		repository: "osmosis-frontend",
+		description: "Web interface for Osmosis Zone",
+	},
+	{
+		owner: "allinurl",
+		repository: "goaccess",
+		description: "GoAccess is a real-time web log analyzer and interactive viewer",
+	},
+]
 
 type Repositories = Array<{
-  owner: string;
-  repository: string;
-  description: string;
-}>;
+	owner: string
+	repository: string
+	description: string
+}>

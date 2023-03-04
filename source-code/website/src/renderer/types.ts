@@ -1,17 +1,17 @@
-import type { Component } from "solid-js";
-import type { PageContextBuiltIn } from "vite-plugin-ssr";
-import type { passToClient } from "./_default.page.server.jsx";
+import type { Component } from "solid-js"
+import type { PageContextBuiltIn } from "vite-plugin-ssr"
+import type { passToClient } from "./_default.page.server.jsx"
 
 /**
  * The page context available during rendering.
  */
 export type PageContextRenderer<PageProps = Record<string, unknown>> =
-  PageContextBuiltIn<Component> & {
-    /**
-     * The properties of a page.
-     */
-    pageProps: PageProps;
-  };
+	PageContextBuiltIn<Component> & {
+		/**
+		 * The properties of a page.
+		 */
+		pageProps: PageProps
+	}
 
 /**
  * The page context that is available on the client.
@@ -30,9 +30,9 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
  */
 // urlParsed is available by default #246
 export type PageContext<PageProps = Record<string, unknown>> = Pick<
-  PageContextRenderer<PageProps>,
-  (typeof passToClient)[number]
-> & { urlParsed: PageContextRenderer["urlParsed"] };
+	PageContextRenderer<PageProps>,
+	(typeof passToClient)[number]
+> & { urlParsed: PageContextRenderer["urlParsed"] }
 
 /**
  * The return of a `onBeforeRender` hook.
@@ -44,10 +44,8 @@ export type PageContext<PageProps = Record<string, unknown>> = Pick<
  * 		}
  * ```
  */
-export type OnBeforeRender<PageProps> = (
-  pageContext: PageContextRenderer
-) => Promise<{
-  pageContext: {
-    pageProps: PageProps;
-  };
-}>;
+export type OnBeforeRender<PageProps> = (pageContext: PageContextRenderer) => Promise<{
+	pageContext: {
+		pageProps: PageProps
+	}
+}>

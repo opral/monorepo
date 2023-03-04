@@ -1,1 +1,1 @@
-export { github } from "./src/implementation.js";
+export { github } from "./src/implementation.js"
