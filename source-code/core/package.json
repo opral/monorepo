@@ -41,12 +41,18 @@
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
     "dev": "npm run tsc:watch",
+    "---- TEST ----------------------------------------------------------": "",
     "test": "tsc && vitest",
     "tsc": "tsc --noEmit",
     "tsc:watch": "tsc --noEmit --watch",
     "vitest": "vitest run --passWithNoTests --coverage",
     "vitest:watch": "vitest watch --passWithNoTests --coverage",
-    "format": "prettier ./src/** -w --config ../../.prettierrc.json",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "eslint --ignore-path ../../.gitignore --cache .",
+    "lint:fix": "eslint --ignore-path ../../.gitignore --cache --fix .",
+    "format": "prettier ./** -w --config ../../.prettierrc.json --ignore-path ../../.gitignore --check",
+    "format:fix": "prettier ./** -w --config ../../.prettierrc.json --ignore-path ../../.gitignore --write",
+    "---- OTHER ---------------------------------------------------------": "",
     "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
   "devDependencies": {
