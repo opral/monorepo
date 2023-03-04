@@ -32,7 +32,7 @@
  * @param {Object} opts Optional options object that alters the output.
  */
 /* legacy: obj, showHidden, depth, colors*/
-export function inspect(obj: object, opts: object) {
+export function inspect(obj: any, opts: object) {
   // default options
   const ctx = {
     seen: [],
