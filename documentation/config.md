@@ -21,21 +21,19 @@ The config must be named `inlang.config.js`, exist at the root of a repository, 
  * @type {import("@inlang/core/config").DefineConfig}
  */
 export async function defineConfig(env) {
-  // importing a plugin from github
-  const plugin = await env.$import(
-    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
-  );
-  const pluginConfig = {
-    pathPattern: "./{language}.json",
-  };
-  return {
-    referenceLanguage: "en",
-    languages: ["en", "de"],
-    readResources: (args) =>
-      plugin.readResources({ ...args, ...env, pluginConfig }),
-    writeResources: (args) =>
-      plugin.writeResources({ ...args, ...env, pluginConfig }),
-  };
+	// importing a plugin from github
+	const plugin = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js",
+	)
+	const pluginConfig = {
+		pathPattern: "./{language}.json",
+	}
+	return {
+		referenceLanguage: "en",
+		languages: ["en", "de"],
+		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
+		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
+	}
 }
 ```
 

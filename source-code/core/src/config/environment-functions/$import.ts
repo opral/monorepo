@@ -1,4 +1,4 @@
-import type { FS } from "../../fs/index.js";
+import type { FS } from "../../fs/index.js"
 
 /**
  * Importing ES modules either from a local path, or from a url.
@@ -16,7 +16,7 @@ import type { FS } from "../../fs/index.js";
 // - not using ReturnType or FunctionArguments to increase DX
 //   when hovering over the type.
 //
-export type $import = (uri: string) => Promise<any>;
+export type $import = (uri: string) => Promise<any>
 
 /**
  * Initializes the $import function.
@@ -26,19 +26,19 @@ export type $import = (uri: string) => Promise<any>;
  * const module = await $import('./some-module.js');
  */
 export function initialize$import(args: {
-  /**
-   * Directory from which the import should be resolved. Be careful, as the working directory of the fs is not changed!
-   *
-   * @deprecated, because it can lead to unintended side effects. Use only for testings. Likely to be removed in the future.
-   */
-  workingDirectory?: string;
-  /** the fs from which the file can be read */
-  fs: FS;
-  /** http client implementation */
-  fetch: typeof fetch;
+	/**
+	 * Directory from which the import should be resolved. Be careful, as the working directory of the fs is not changed!
+	 *
+	 * @deprecated, because it can lead to unintended side effects. Use only for testings. Likely to be removed in the future.
+	 */
+	workingDirectory?: string
+	/** the fs from which the file can be read */
+	fs: FS
+	/** http client implementation */
+	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
-  // resembles a native import api
-  return (uri: string) => $import(uri, { workingDirectory: "/", ...args });
+	// resembles a native import api
+	return (uri: string) => $import(uri, { workingDirectory: "/", ...args })
 }
 
 /**
@@ -51,27 +51,23 @@ export function initialize$import(args: {
  * Read more on https://inlang.com/documentation/config
  */
 async function $import(
-  uri: string,
-  environment: {
-    /** directory from which the import should be resolved */
-    workingDirectory: string;
-    /** the fs from which the file can be read */
-    fs: FS;
-    /** http client implementation */
-    fetch: typeof fetch;
-  }
+	uri: string,
+	environment: {
+		/** directory from which the import should be resolved */
+		workingDirectory: string
+		/** the fs from which the file can be read */
+		fs: FS
+		/** http client implementation */
+		fetch: typeof fetch
+	},
 ): Promise<any> {
-  // avoiding browser built-in shadowing of fetch as global variable
-  const _fetch = environment.fetch;
-  // polyfill for environments that don't support dynamic
-  // http imports yet like VSCode.
-  const moduleAsText = uri.startsWith("http")
-    ? await (await _fetch(uri)).text()
-    : ((await environment.fs.readFile(
-        `${environment.workingDirectory}/${uri}`,
-        "utf-8"
-      )) as string);
-  const moduleWithMimeType =
-    "data:application/javascript;base64," + btoa(moduleAsText);
-  return await import(/* @vite-ignore */ moduleWithMimeType);
+	// avoiding browser built-in shadowing of fetch as global variable
+	const _fetch = environment.fetch
+	// polyfill for environments that don't support dynamic
+	// http imports yet like VSCode.
+	const moduleAsText = uri.startsWith("http")
+		? await (await _fetch(uri)).text()
+		: ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, "utf-8")) as string)
+	const moduleWithMimeType = "data:application/javascript;base64," + btoa(moduleAsText)
+	return await import(/* @vite-ignore */ moduleWithMimeType)
 }

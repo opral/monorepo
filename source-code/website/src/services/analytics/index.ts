@@ -1,1 +1,1 @@
-export { analytics } from "./src/implementation.js";
+export { analytics } from "./src/implementation.js"

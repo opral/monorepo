@@ -3,10 +3,10 @@ name: Lint Code
 on:
   pull_request:
     branches:
-      - 'main'
+      - "main"
   push:
     branches:
-      - 'main'
+      - "main"
 
 jobs:
   lint:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       - run: npm install --no-save
 

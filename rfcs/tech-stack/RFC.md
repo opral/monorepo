@@ -11,7 +11,7 @@ description: This RFC describes the tech stack of inlang.
 
 ## TL;DR
 
-Simplicity and control over off the shelf solutions in light of ambigious requirements of localization infrastructure. 
+Simplicity and control over off the shelf solutions in light of ambigious requirements of localization infrastructure.
 
 Architecture: Monolith, designed to be split in the future.
 Framework: [SolidJS](https://www.solidjs.com/)  
@@ -50,11 +50,11 @@ Git's async collaboration features are expected to be sufficient for the start. 
 
 - Embeddable ❔
 
-Making the editor embeddable, like Microsoft's Monaco that powers VSCode could lead to interesting usecases. 
+Making the editor embeddable, like Microsoft's Monaco that powers VSCode could lead to interesting usecases.
 
-For example, integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers by removing the requirement for app/context switching. Furthermore, the editor could work with local repositories, removing the requirement for a backend entirely. Leveraging PWA (Progressive Web Application) features can achieve full offline support. 
+For example, integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers by removing the requirement for app/context switching. Furthermore, the editor could work with local repositories, removing the requirement for a backend entirely. Leveraging PWA (Progressive Web Application) features can achieve full offline support.
 
-Reasons against embeddability include runtime-dependent features like networking, web worker support, and more. For the sake of increasing development speed, embeddability is not focused on, but accounted for by the architecture. The metaframework vite-plugin-ssr allows the unbundling of the editor from a monolith architecture. 
+Reasons against embeddability include runtime-dependent features like networking, web worker support, and more. For the sake of increasing development speed, embeddability is not focused on, but accounted for by the architecture. The metaframework vite-plugin-ssr allows the unbundling of the editor from a monolith architecture.
 
 |            | Development speed | Maintenance effort | Potential extension |
 | ---------- | ----------------- | ------------------ | ------------------- |
@@ -93,11 +93,11 @@ The editor is a classical SPA while the website is SSR. Note however that the ex
 
 - SEO ✅ (website) ❔ (editor)
 
-SEO is important for the website and might be important for the editor. 
+SEO is important for the website and might be important for the editor.
 
 ## Choices
 
-A monolithic architecture has been chosen. 
+A monolithic architecture has been chosen.
 
 The website and editor are co-developed in one codebase to increase development speed and reduce maintenance effort. For example, inlang does not require a dedicated auth system as no user data is stored. The need for a dedicated auth systems (and databases) will surely arise. For now, it seems easier to leverage one server with sessions for authorization without the need to stitch microservices together. As the requirements evolve, the monolith can be split into a website, editor and server without much overhead given that vite-plugin-ssr has been choosen as metaframework.
 
@@ -107,7 +107,7 @@ UI components: [Tailwind](https://tailwindcss.com/) + [Shoelace](https://shoelac
 
 ### Metaframework
 
-VPS (vite-plugin-ssr) has been chosen as metaframework to enable a monolith architecture that can be unbundled in the future. 
+VPS (vite-plugin-ssr) has been chosen as metaframework to enable a monolith architecture that can be unbundled in the future.
 
 VPS is a low(er) level metaframework with high control and customization possibilities. Classical metaframework like Next.js or Remix are focused on SSR apps. Next.js can be used to build SPAs but that involves workarounds and ends up with fighting the framework. Vite-plugin-ssr partially enables the monolith architecture by specifying a server that renders vite-plugin-ssr sites and supporting SPA and SSR render modes. For example, the editor under `inlang.com/editor` could be rendered as SPA while the rest of the website is server-side rendered. A side benefit of vite-plugin-ssr is the possibility to leverage SSR for the editor too. Cloning repositories, for example, can take a minute for larger repositories. Loading initial data (like cloning a repo) is a classical example of an SSR use case. Furthermore, vite-plugin-ssr allows us to decouple the editor from the website in the future. Routing, RPC calls and more stay identical.
 
@@ -115,8 +115,8 @@ VPS is a low(er) level metaframework with high control and customization possibi
 
 - Control over different rendering modes (important because SSR of website and SPA of editor)
 - Maybe SEO becomes important for the editor too (architecture can be adjusted to support SSR)
-- If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay identical.  
-- High control/no magic blackbox. For example, localization can be configured as we please and require. 
+- If the monolith is broken up into a server, website and editor, vite-plugin-ssr "simply" needs to be unbundled. The routing, templating and server logic stay identical.
+- High control/no magic blackbox. For example, localization can be configured as we please and require.
 
 #### Why not something like Next.js?
 
@@ -144,12 +144,11 @@ SolidJS has ultimately been chosen given the uncertainty of the editor's require
 
 **In summary, SolidJS has been chosen because:**
 
-- Performance is likely going to be crucial for the editor. 
+- Performance is likely going to be crucial for the editor.
 - Uses JSX, thereby synergy effects to React (worst case, switch to React easier than fro Svelte)
 - Runtime approach (compiler just transforms JSX)
   - Reactivity works in plain JS, in contrast to Svelte, leading to less workarounds
   - The reactive system is de-coupled from rendering. Thus, the reactive system can be used in other applications like the ide-extension.
-
 
 #### Why not React?
 

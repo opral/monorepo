@@ -1,1 +1,6 @@
-{}
+{
+	"semi": false,
+	"useTabs": true,
+	"trailingComma": "all",
+	"printWidth": 100
+}

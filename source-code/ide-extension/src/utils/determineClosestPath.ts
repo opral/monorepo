@@ -1,4 +1,4 @@
-import nodePath from "node:path";
+import nodePath from "node:path"
 
 /**
  * Determines the closest path from the `options` compared to the `to` path.
@@ -16,17 +16,17 @@ import nodePath from "node:path";
         });
         >> 'some/path/packages/config.json'
  */
-export function determineClosestPath(args: { options: string[]; to: string; }): string {
-  const result = {
-    path: args.options[0],
-    distance: nodePath.relative(args.options[0], args.to).length,
-  };
-  for (const path of args.options) {
-    const distance = nodePath.relative(path, args.to).length;
-    if (distance < result.distance) {
-      result.path = path;
-      result.distance = distance;
-    }
-  }
-  return result.path;
+export function determineClosestPath(args: { options: string[]; to: string }): string {
+	const result = {
+		path: args.options[0],
+		distance: nodePath.relative(args.options[0], args.to).length,
+	}
+	for (const path of args.options) {
+		const distance = nodePath.relative(path, args.to).length
+		if (distance < result.distance) {
+			result.path = path
+			result.distance = distance
+		}
+	}
+	return result.path
 }
