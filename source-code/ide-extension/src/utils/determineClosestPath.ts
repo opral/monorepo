@@ -1,4 +1,4 @@
-import nodePath from "path";
+import nodePath from "node:path";
 
 /**
  * Determines the closest path from the `options` compared to the `to` path.

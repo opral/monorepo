@@ -22,10 +22,16 @@
   ],
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
-    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
     "dev": "tsc --watch",
-    "format": "prettier ./src/** -w --config ../../.prettierrc.json",
-    "test": "vitest run --coverage"
+    "---- TEST ----------------------------------------------------------": "",
+    "test": "vitest run --coverage",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "cd ../.. && npm run lint:base ./source-code/git-sdk",
+    "lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/git-sdk",
+    "format": "cd ../.. && npm run format:base ./source-code/git-sdk",
+    "format:fix": "cd ../.. && npm run format:fix:base ./source-code/git-sdk",
+    "---- OTHER ---------------------------------------------------------": "",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
   "dependencies": {
     "isomorphic-git": "^1.21.0",

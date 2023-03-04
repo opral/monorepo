@@ -22,16 +22,17 @@
     "forceConsistentCasingInFileNames": true,
     // only include certain types in node modules, see https://stackoverflow.com/a/69649992
     // commonjs types of imported dependencies error out otherwise
-    "types": ["node"],
+    "types": [],
     // Don't check imported libraries for type errors.
     // The imported libraries might have different settings/whatever.
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     // Lint JS files
     "checkJs": true,
     // Distingish between type imports and code imports.
     "importsNotUsedAsValues": "error",
     // tremendous helper to avoid hard to debug bugs.
     // see https://github.com/inlang/inlang/issues/157
-    "noImplicitAny": true
+    "noImplicitAny": true,
   }
 }

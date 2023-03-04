@@ -1,4 +1,4 @@
-import { unhandled } from "../utilities/debug.js";
+import { unhandled } from "../utilities/error-handling.js";
 import type {
   LintedNode,
   LintReport,
