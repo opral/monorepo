@@ -22,7 +22,7 @@
 		"forceConsistentCasingInFileNames": true,
 		// only include certain types in node modules, see https://stackoverflow.com/a/69649992
 		// commonjs types of imported dependencies error out otherwise
-		"types": [],
+		"types": ["node"],
 		// Don't check imported libraries for type errors.
 		// The imported libraries might have different settings/whatever.
 		"skipLibCheck": true,
