@@ -2,7 +2,7 @@ import type { UserConfig } from "vite";
 import solid from "vite-plugin-solid";
 import { ssr as vitePluginSsr } from "vite-plugin-ssr/plugin";
 import { telefunc } from "telefunc/vite";
-import { fileURLToPath, URL } from "url";
+import { fileURLToPath, URL } from "node:url";
 import Icons from "unplugin-icons/vite";
 
 export default await withNodePolyfills({

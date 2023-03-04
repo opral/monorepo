@@ -15,7 +15,7 @@
 import express from "express";
 import compression from "compression";
 import { createServer as createViteServer } from "vite";
-import { URL } from "url";
+import { URL } from "node:url";
 import { proxy } from "./git-proxy.js";
 import { isProduction, serverSideEnv, validateEnv } from "@env";
 import sirv from "sirv";
