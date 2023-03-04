@@ -1,4 +1,4 @@
-import { lint as lintImplementation, LintRule } from "@inlang/core/lint";
+import { lint as lintImplementation, LintRule } from "./index.js";
 import type { Config, EnvironmentFunctions } from "@inlang/core/config";
 import type { Message, Resource } from "@inlang/core/ast";
 import { vi } from "vitest";
