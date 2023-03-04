@@ -41,12 +41,18 @@
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
     "dev": "npm run tsc:watch",
+    "---- TEST ----------------------------------------------------------": "",
     "test": "tsc && vitest",
     "tsc": "tsc --noEmit",
     "tsc:watch": "tsc --noEmit --watch",
     "vitest": "vitest run --passWithNoTests --coverage",
     "vitest:watch": "vitest watch --passWithNoTests --coverage",
-    "format": "prettier ./src/** -w --config ../../.prettierrc.json",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "cd ../.. && npm run lint:base ./source-code/core",
+    "lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+    "format": "cd ../.. && npm run format:base ./source-code/core",
+    "format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+    "---- OTHER ---------------------------------------------------------": "",
     "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
   "devDependencies": {

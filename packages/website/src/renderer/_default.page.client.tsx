@@ -9,7 +9,7 @@ import { BrowserTracing } from "@sentry/tracing";
 import { MetaProvider } from "@solidjs/meta";
 
 // node polyfill
-import { Buffer } from "buffer";
+import { Buffer } from "node:buffer";
 globalThis.Buffer = Buffer;
 
 // import the css

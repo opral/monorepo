@@ -7,8 +7,15 @@
     "production": "NODE_ENV=production npx tsx ./src/server/main.ts",
     "build": "vite build",
     "preview": "vite build && npm run production",
+    "---- TEST ----------------------------------------------------------": "",
     "_COMMENT": "TESTS ARE NOT WORKING BECAUSE 'window is not defined'. not important for now.",
     "_test": "vitest run --coverage",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "cd ../.. && npm run lint:base ./source-code/website",
+    "lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/website",
+    "format": "cd ../.. && npm run format:base ./source-code/website",
+    "format:fix": "cd ../.. && npm run format:fix:base ./source-code/website",
+    "---- OTHER ---------------------------------------------------------": "",
     "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
   "engines": {

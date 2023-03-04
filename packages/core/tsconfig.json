@@ -1,8 +1,6 @@
 {
   "extends": "configs/typescript/tsconfig.base.json",
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "compilerOptions": {
     // DOM because of fetch. TODO: extract fetch from this package and
     // let fetch be provided by the environment.
