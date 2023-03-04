@@ -4,5 +4,9 @@
   "gitlens.showWelcomeOnInstall": false,
   "gitlens.showWhatsNewAfterUpgrades": false,
   "gitlens.plusFeatures.enabled": false,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.associations": {
+    ".eslintrc.json": "jsonc",
+    "tsconfig*.json": "jsonc",
+  }
 }
