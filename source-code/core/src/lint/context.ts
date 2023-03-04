@@ -1,4 +1,5 @@
 import type { Resource, Message, Pattern } from "../ast/schema.js";
+import type { Pretty } from "../utilities/types.js";
 import type { LintableNode, LintConfigArguments, LintRuleId } from "./rule.js";
 
 export type LintLevel = "error" | "warn";
@@ -20,9 +21,9 @@ type Extension = {
   Pattern: LintInformation;
 };
 
-export type LintedResource = Resource<Extension>;
-export type LintedMessage = Message<Extension>;
-export type LintedPattern = Pattern<Extension>;
+export type LintedResource = Pretty<Resource<Extension>>;
+export type LintedMessage = Pretty<Message<Extension>>;
+export type LintedPattern = Pretty<Pattern<Extension>>;
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern;
 
