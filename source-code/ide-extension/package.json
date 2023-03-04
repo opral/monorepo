@@ -33,9 +33,15 @@
     "_build": "rollup --config",
     "dev": "rollup --config --watch",
     "_package": "npx vsce package",
+    "---- TEST ----------------------------------------------------------": "",
     "_test": "vitest run --coverage",
-    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules",
-    "_format": "prettier ./src/** -w --config ../../.prettierrc.json"
+    "---- LINT ----------------------------------------------------------": "",
+    "_lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
+    "_lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
+    "_format": "cd ../.. && npm run format:base ./source-code/ide-extension",
+    "_format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
+    "---- OTHER ---------------------------------------------------------": "",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
   },
   "dependencies": {
     "@inlang/core": "*",
