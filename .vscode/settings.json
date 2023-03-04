@@ -7,6 +7,6 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.associations": {
     ".eslintrc.json": "jsonc",
-    "tsconfig*.json": "jsonc",
+    "tsconfig*.json": "jsonc"
   }
 }

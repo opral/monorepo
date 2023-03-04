@@ -14,7 +14,7 @@
     "lint:base": "eslint --ignore-path .gitignore --cache",
     "lint:fix:base": "npm run lint:base --fix",
     "lint": "turbo run lint && npm run lint:base .",
-    "lint:fix": "turbo run lint:fix && lint:fix:base .",
+    "lint:fix": "turbo run lint:fix && npm run lint:fix:base .",
     "format:base": "prettier --ignore-path .gitignore --check",
     "format:fix:base": "prettier --ignore-path .gitignore --write",
     "format": "turbo run format && npm run format:base --ignore source-code .",

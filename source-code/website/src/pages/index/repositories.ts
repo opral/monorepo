@@ -10,10 +10,11 @@ export const repositories: Repositories = [
     repository: "example",
     description: "Example repository that showcases inlang.",
   },
-   {
+  {
     owner: "jazzband",
     repository: "djangorestframework-simplejwt",
-    description: "A JSON Web Token authentication plugin for the Django REST Framework.",
+    description:
+      "A JSON Web Token authentication plugin for the Django REST Framework.",
   },
   {
     owner: "osmosis-labs",
@@ -23,7 +24,8 @@ export const repositories: Repositories = [
   {
     owner: "allinurl",
     repository: "goaccess",
-    description: "GoAccess is a real-time web log analyzer and interactive viewer",
+    description:
+      "GoAccess is a real-time web log analyzer and interactive viewer",
   },
 ];
 

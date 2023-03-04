@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { setState, state } from "../state.js";
-import { query } from "@inlang/core/query"
-import type { Message } from '@inlang/core/ast';
+import { query } from "@inlang/core/query";
+import type { Message } from "@inlang/core/ast";
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -28,19 +28,20 @@ export const extractMessageCommand = {
       );
     }
 
-    const messageId = await vscode.window.showInputBox({ title: "Enter the ID:" });
+    const messageId = await vscode.window.showInputBox({
+      title: "Enter the ID:",
+    });
     if (messageId === undefined) {
       return;
     }
 
     const messageValue = textEditor.document.getText(textEditor.selection);
-    const preparedExtractOptions = ideExtension.extractMessageOptions.map((option) => option.callback(messageId, messageValue));
+    const preparedExtractOptions = ideExtension.extractMessageOptions.map(
+      (option) => option.callback(messageId, messageValue)
+    );
 
     const preparedExtractOption = await vscode.window.showQuickPick(
-      [
-        ...preparedExtractOptions,
-        "How to edit these replacement options?",
-      ],
+      [...preparedExtractOptions, "How to edit these replacement options?"],
       { title: "Replace highlighted text with:" }
     );
     if (preparedExtractOption === undefined) {
@@ -55,23 +56,34 @@ export const extractMessageCommand = {
     }
 
     if (preparedExtractOption === undefined) {
-      return vscode.window.showWarningMessage("Couldn't find choosen extract option.");
+      return vscode.window.showWarningMessage(
+        "Couldn't find choosen extract option."
+      );
     }
 
     const message: Message = {
-      type: 'Message',
-      id: { type: 'Identifier', name: messageId },
-      pattern: { type: 'Pattern', elements: [{ type: 'Text', value: messageValue }] }
+      type: "Message",
+      id: { type: "Identifier", name: messageId },
+      pattern: {
+        type: "Pattern",
+        elements: [{ type: "Text", value: messageValue }],
+      },
     };
     // find reference langauge resource
-    const referenceResource = state().resources.find((resource) => resource.languageTag.name === referenceLanguage);
+    const referenceResource = state().resources.find(
+      (resource) => resource.languageTag.name === referenceLanguage
+    );
     if (referenceResource) {
       const newResource = query(referenceResource).upsert({ message });
       if (newResource.isOk) {
-        const resources = state().resources.map((resource) => (resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource));
+        const resources = state().resources.map((resource) =>
+          resource.languageTag.name === referenceLanguage
+            ? newResource.unwrap()
+            : resource
+        );
         await writeResources({
           config: state().config,
-          resources
+          resources,
         });
         // update resources in extension state
         setState({ ...state(), resources });

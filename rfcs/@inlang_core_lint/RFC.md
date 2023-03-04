@@ -8,31 +8,32 @@ Question: should this be implemented under the `@inlang/core/lint` or `@inlang/l
 
 1. I have investigated if [this](https://github.com/orgs/inlang/discussions/319#discussioncomment-4850815) is possible and I could not make it work.
 
-	I have tried 3 different ways to do it. Take a look at the [`experiment-1.ts`](https://github.com/ivanhofer/inlang/blob/lint/source-code/core/src/lint/experiment-1.ts) file to see the examples. I find variant 3 to be the best because it does not hide the properties behind an abstraction (see screenshots below). It can be easily extended in the future with additional properties.
+   I have tried 3 different ways to do it. Take a look at the [`experiment-1.ts`](https://github.com/ivanhofer/inlang/blob/lint/source-code/core/src/lint/experiment-1.ts) file to see the examples. I find variant 3 to be the best because it does not hide the properties behind an abstraction (see screenshots below). It can be easily extended in the future with additional properties.
 
 2. We need to extend the Resource type on each level (`Resource`, `Message`, `Pattern`) because each level could have lint information attached to it.
 
-	- "missing key" would be on the `Resource` level
-	- "missing parameter" would be on the `Message` level
-	- "unknown parameter" would be on the `Pattern` level
+   - "missing key" would be on the `Resource` level
+   - "missing parameter" would be on the `Message` level
+   - "unknown parameter" would be on the `Pattern` level
 
-	Maybe `Pattern` requires another level in the future, but if we solve the problem for the first 3 levels, adding the 4th should be easy.
+   Maybe `Pattern` requires another level in the future, but if we solve the problem for the first 3 levels, adding the 4th should be easy.
 
-	Kind of similar to the `metadata` property which can be present on all levels. If we solve the problem for `lint`, we can get rid of the non-typed `metadata` property and plugin authors can use a slightly different approach (additional properties should be scoped to a "namespace"-like object). The result would be a `Resource` with correctly typed `metadata` property.
+   Kind of similar to the `metadata` property which can be present on all levels. If we solve the problem for `lint`, we can get rid of the non-typed `metadata` property and plugin authors can use a slightly different approach (additional properties should be scoped to a "namespace"-like object). The result would be a `Resource` with correctly typed `metadata` property.
 
-	See [`experiment-2.ts`](https://github.com/ivanhofer/inlang/blob/lint/source-code/core/src/lint/experiment-2.ts) for an example how this could be done. The only downside is, that those generics make the code harder to read. And VS Code will show jibberish when hovering over a variable (see screenshots below). But the only alternative I can see is to define each Permutation manually which is even worse.
+   See [`experiment-2.ts`](https://github.com/ivanhofer/inlang/blob/lint/source-code/core/src/lint/experiment-2.ts) for an example how this could be done. The only downside is, that those generics make the code harder to read. And VS Code will show jibberish when hovering over a variable (see screenshots below). But the only alternative I can see is to define each Permutation manually which is even worse.
 
 3. What information would a lint error emit?
 
-	```ts
-	type LintInformation = {
-		type: LintRule // which rule emitted the error
-		message: string // a string that informs what is wrong
-	}
-	```
-	Question: Anything else?
+   ```ts
+   type LintInformation = {
+     type: LintRule; // which rule emitted the error
+     message: string; // a string that informs what is wrong
+   };
+   ```
 
-	Question: Should any lint rule be able to extend this object?
+   Question: Anything else?
+
+   Question: Should any lint rule be able to extend this object?
 
 <!------------------------------------------------------------------------------------------------>
 
@@ -99,7 +100,6 @@ Question: If no plugin get's specified do we want to allow to get rid of the `ru
 
 vs.
 
-
 ```js
 {
 	linting: {
@@ -116,12 +116,12 @@ The `@inlang/core/lint` package should provide useful utility functions that mak
 
 e.g.
 
- - `doesResourceContainIssues` should recursively check if a `Node` contains `error`s or `warn`s
- - `doesResourceContainErrors` see above + filter for `error`s
- - `doesResourceContainWarnings` see above + filter for `warns`s
- - `listAllLintIssues` should flatten all `error`s and `warn`s of a `Node` to a list
- - `getAllErrors` see above + filter for `error`s
- - `getAllWarnings` see above + filter for `warn`s
+- `doesResourceContainIssues` should recursively check if a `Node` contains `error`s or `warn`s
+- `doesResourceContainErrors` see above + filter for `error`s
+- `doesResourceContainWarnings` see above + filter for `warns`s
+- `listAllLintIssues` should flatten all `error`s and `warn`s of a `Node` to a list
+- `getAllErrors` see above + filter for `error`s
+- `getAllWarnings` see above + filter for `warn`s
 
 Those are some basics and we can add any functionality in the future.
 

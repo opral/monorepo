@@ -1,17 +1,18 @@
 import * as vscode from "vscode";
-import {
-  extractMessageCommand,
-} from "../commands/extractMessage.js";
+import { extractMessageCommand } from "../commands/extractMessage.js";
 
 /**
  * Show light bulb quick fixes when text is selected, offering message extraction.
  */
 export class ExtractMessage implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [
-    vscode.CodeActionKind.QuickFix
+    vscode.CodeActionKind.QuickFix,
   ];
 
-  public async provideCodeActions(_document: vscode.TextDocument, range: vscode.Range): Promise<vscode.CodeAction[] | undefined> {
+  public async provideCodeActions(
+    _document: vscode.TextDocument,
+    range: vscode.Range
+  ): Promise<vscode.CodeAction[] | undefined> {
     // return if no text is selected
     if (range.isEmpty) {
       return;

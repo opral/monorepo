@@ -33,6 +33,6 @@
     "importsNotUsedAsValues": "error",
     // tremendous helper to avoid hard to debug bugs.
     // see https://github.com/inlang/inlang/issues/157
-    "noImplicitAny": true,
+    "noImplicitAny": true
   }
 }

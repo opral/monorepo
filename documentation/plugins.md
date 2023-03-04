@@ -63,5 +63,3 @@ alt="visualisation of the inlang AST/object"
 
 caption="Visualisation of the inlang AST/object"
 /%}
-
-

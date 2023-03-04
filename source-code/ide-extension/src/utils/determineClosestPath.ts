@@ -16,7 +16,10 @@ import nodePath from "node:path";
         });
         >> 'some/path/packages/config.json'
  */
-export function determineClosestPath(args: { options: string[]; to: string; }): string {
+export function determineClosestPath(args: {
+  options: string[];
+  to: string;
+}): string {
   const result = {
     path: args.options[0],
     distance: nodePath.relative(args.options[0], args.to).length,

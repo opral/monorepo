@@ -5,9 +5,9 @@ import { extractMessageCommand } from "./commands/extractMessage.js";
 import { messagePreview } from "./decorations/messagePreview.js";
 import { determineClosestPath } from "./utils/determineClosestPath.js";
 import { DefineConfig, initialize$import } from "@inlang/core/config";
-import fetch from 'node-fetch';
-import { ExtractMessage } from './actions/extractMessage.js';
-import { createFileSystemMapper } from './utils/createFileSystemMapper.js';
+import fetch from "node-fetch";
+import { ExtractMessage } from "./actions/extractMessage.js";
+import { createFileSystemMapper } from "./utils/createFileSystemMapper.js";
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -58,23 +58,30 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
   });
 
   // get current workspace
-  const workspace = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
+  const workspace = vscode.workspace.getWorkspaceFolder(
+    vscode.Uri.parse(closestConfigPath)
+  );
   if (!workspace) {
     return;
   }
 
   // initialize inlang core and resources for current workspace
-  const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri);
+  const fileSystemMapper = createFileSystemMapper(
+    vscode.workspace.fs,
+    workspace.uri
+  );
   const $import = initialize$import({ fs: fileSystemMapper, fetch });
-  const module: { defineConfig: DefineConfig } = await import(closestConfigPath);
+  const module: { defineConfig: DefineConfig } = await import(
+    closestConfigPath
+  );
   const config = await module.defineConfig({ $fs: fileSystemMapper, $import });
   const loadResources = async () => {
-    const resources = await config.readResources({ config })
+    const resources = await config.readResources({ config });
     setState({
       config,
-      resources
+      resources,
     });
-  }
+  };
   const debouncedLoadResources = debounce(1000, loadResources);
   await loadResources();
 
@@ -93,14 +100,18 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
   // register source actions
   args.context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider([
-      // TODO: improve with #348
-      { language: 'javascript' },
-      { language: 'javascriptreact' },
-      { language: 'typescript' },
-      { language: 'typescriptreact' },
-      { language: 'svelte' }
-    ], new ExtractMessage(), { providedCodeActionKinds: ExtractMessage.providedCodeActionKinds })
+    vscode.languages.registerCodeActionsProvider(
+      [
+        // TODO: improve with #348
+        { language: "javascript" },
+        { language: "javascriptreact" },
+        { language: "typescript" },
+        { language: "typescriptreact" },
+        { language: "svelte" },
+      ],
+      new ExtractMessage(),
+      { providedCodeActionKinds: ExtractMessage.providedCodeActionKinds }
+    )
   );
 
   // register decorations

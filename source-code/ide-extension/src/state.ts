@@ -1,4 +1,4 @@
-import type { Resource } from '@inlang/core/ast';
+import type { Resource } from "@inlang/core/ast";
 import type { Config as InlangConfig } from "@inlang/core/config";
 
 /**
