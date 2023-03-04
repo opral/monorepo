@@ -1,6 +1,6 @@
-import type * as Markdoc from "@markdoc/markdoc";
-import { renderToElement } from "./renderToElement.js";
-import { components } from "./config.js";
+import type * as Markdoc from "@markdoc/markdoc"
+import { renderToElement } from "./renderToElement.js"
+import { components } from "./config.js"
 
 /**
  * This component renders a Markdoc renderable tree.
@@ -8,8 +8,6 @@ import { components } from "./config.js";
  * @example
  * 	<Markdown renderableTree={renderableTree} />
  */
-export function Markdown(props: {
-  renderableTree: Markdoc.RenderableTreeNode;
-}) {
-  return <>{renderToElement(props.renderableTree, { components })} </>;
+export function Markdown(props: { renderableTree: Markdoc.RenderableTreeNode }) {
+	return <>{renderToElement(props.renderableTree, { components })} </>
 }

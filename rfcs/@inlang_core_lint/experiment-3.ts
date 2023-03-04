@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // types
 
-type LintLevel =
-	| 'warn'
-	| 'error'
+type LintLevel = "warn" | "error"
 
 type LintSetting<Config = undefined> =
 	| false
@@ -16,10 +14,7 @@ type LintSettings<Key extends string, Config = undefined> = {
 
 type LintingConfig =
 	| false
-	| (
-		& LintSettings<'missing_property'>
-		& LintSettings<'missing_key', { ignore: Array<string> }>
-	)
+	| (LintSettings<"missing_property"> & LintSettings<"missing_key", { ignore: Array<string> }>)
 
 type InlangConfig = {
 	// ... all other properties
@@ -29,11 +24,10 @@ type InlangConfig = {
 // ------------------------------------------------------------------------------------------------
 // examples
 
-
 // to completely disable linting
 {
 	const config: InlangConfig = {
-		linting: false
+		linting: false,
 	}
 }
 
@@ -41,8 +35,8 @@ type InlangConfig = {
 {
 	const config: InlangConfig = {
 		linting: {
-			missing_property: false
-		}
+			missing_property: false,
+		},
 	}
 }
 
@@ -50,8 +44,8 @@ type InlangConfig = {
 {
 	const config: InlangConfig = {
 		linting: {
-			missing_property: 'warn'
-		}
+			missing_property: "warn",
+		},
 	}
 }
 
@@ -59,7 +53,7 @@ type InlangConfig = {
 {
 	const config: InlangConfig = {
 		linting: {
-			missing_key: ['warn', { ignore: ['test-key'] }]
-		}
+			missing_key: ["warn", { ignore: ["test-key"] }],
+		},
 	}
 }

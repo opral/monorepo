@@ -6,10 +6,10 @@
  * -------------------------------------
  */
 
-import type { RenderableTreeNodes, Scalar } from "@markdoc/markdoc";
-import type { Component, JSXElement } from "solid-js";
-import { createComponent } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import type { RenderableTreeNodes, Scalar } from "@markdoc/markdoc"
+import type { Component, JSXElement } from "solid-js"
+import { createComponent } from "solid-js"
+import { Dynamic } from "solid-js/web"
 
 /**
  * Renders a tree node to a solid element.
@@ -24,65 +24,65 @@ import { Dynamic } from "solid-js/web";
  * 	const html = await renderToStringAsync(() => renderToElement(args));
  */
 export function renderToElement(
-  node: RenderableTreeNodes,
-  args: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    components?: Record<string, Component<any>>;
-  }
+	node: RenderableTreeNodes,
+	args: {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		components?: Record<string, Component<any>>
+	},
 ): JSXElement {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function deepRender(value: any): any {
-    if (value == undefined || typeof value !== "object") return value;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	function deepRender(value: any): any {
+		if (value == undefined || typeof value !== "object") return value
 
-    if (Array.isArray(value)) {
-      return value.map((item) => deepRender(item));
-    }
+		if (Array.isArray(value)) {
+			return value.map((item) => deepRender(item))
+		}
 
-    if (value.$$mdType === "Tag") {
-      return render(value);
-    }
+		if (value.$$mdType === "Tag") {
+			return render(value)
+		}
 
-    if (typeof value !== "object") {
-      return value;
-    }
+		if (typeof value !== "object") {
+			return value
+		}
 
-    const output: Record<string, Scalar> = {};
-    for (const [k, v] of Object.entries(value)) output[k] = deepRender(v);
-    return output;
-  }
+		const output: Record<string, Scalar> = {}
+		for (const [k, v] of Object.entries(value)) output[k] = deepRender(v)
+		return output
+	}
 
-  function render(node: RenderableTreeNodes): JSXElement | null {
-    if (Array.isArray(node)) {
-      return createComponent(Fragment, { children: node.map(render) });
-    }
+	function render(node: RenderableTreeNodes): JSXElement | null {
+		if (Array.isArray(node)) {
+			return createComponent(Fragment, { children: node.map(render) })
+		}
 
-    if (node === null || typeof node !== "object") {
-      return node;
-    }
+		if (node === null || typeof node !== "object") {
+			return node
+		}
 
-    const { name, attributes = {}, children = [] } = node;
+		const { name, attributes = {}, children = [] } = node
 
-    const attr =
-      // eslint-disable-next-line unicorn/no-null
-      Object.keys(attributes).length === 0 ? null : deepRender(attributes);
+		const attr =
+			// eslint-disable-next-line unicorn/no-null
+			Object.keys(attributes).length === 0 ? null : deepRender(attributes)
 
-    if (args.components?.[name]) {
-      return createComponent(args.components[name], {
-        ...attr,
-        children: children.map(render),
-      });
-    }
+		if (args.components?.[name]) {
+			return createComponent(args.components[name], {
+				...attr,
+				children: children.map(render),
+			})
+		}
 
-    return Dynamic({
-      component: name,
-      children: children.map(render),
-      ...attr,
-    });
-  }
-  return render(node);
+		return Dynamic({
+			component: name,
+			children: children.map(render),
+			...attr,
+		})
+	}
+	return render(node)
 }
 
 function Fragment(props: { children: JSXElement }) {
-  // eslint-disable-next-line solid/reactivity
-  return props.children;
+	// eslint-disable-next-line solid/reactivity
+	return props.children
 }

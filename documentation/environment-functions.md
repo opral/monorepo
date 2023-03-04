@@ -31,5 +31,5 @@ Imported code is not sandboxed yet. Only `$import` external code that you trust 
 Importing an ES module either from a local path in a git repository or from a url. Note that the imported module must not have imports itself. If dependencies are required for a module, the module needs to be bundled into one single file. For an example of bundling, take a look at the [official plugin template](https://github.com/inlang/plugin-template).
 
 ```ts
-$import("https://cdn.jsdelivr.net/gh/inlang/ecosystem/plugin.js");
+$import("https://cdn.jsdelivr.net/gh/inlang/ecosystem/plugin.js")
 ```

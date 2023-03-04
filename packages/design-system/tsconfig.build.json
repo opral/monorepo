@@ -1,8 +1,8 @@
 // Exclude test and source map files when building for production
 {
-  "extends": "./tsconfig.json",
-  "exclude": ["**/*.test.ts", "**/*.tsx"],
-  "compilerOptions": {
-    "sourceMap": false
-  }
+	"extends": "./tsconfig.json",
+	"exclude": ["**/*.test.ts", "**/*.tsx"],
+	"compilerOptions": {
+		"sourceMap": false
+	}
 }

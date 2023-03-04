@@ -1,1 +1,1 @@
-Using https://posthog.com/. 
+Using https://posthog.com/.

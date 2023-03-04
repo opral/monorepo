@@ -18,14 +18,14 @@ Properties in the config that are expected to change frequently are nested under
 
 ```ts
 export async function config() {
-  // ... code
+	// ... code
 
-  return {
-    // ... other properties
-    experimental: {
-      // properties nested under experimental
-      // are subject to breaking changes
-    },
-  };
+	return {
+		// ... other properties
+		experimental: {
+			// properties nested under experimental
+			// are subject to breaking changes
+		},
+	}
 }
 ```

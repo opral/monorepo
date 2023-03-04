@@ -1,62 +1,62 @@
 {
-  "name": "@inlang/core",
-  "type": "module",
-  "version": "0.4.2",
-  "publishConfig": {
-    "access": "public"
-  },
-  "exports": {
-    "./ast": {
-      "types": "./dist/ast/index.d.ts",
-      "import": "./dist/ast/index.js"
-    },
-    "./config": {
-      "types": "./dist/config/index.d.ts",
-      "import": "./dist/config/index.js"
-    },
-    "./fs": {
-      "types": "./dist/fs/index.d.ts",
-      "import": "./dist/fs/index.js"
-    },
-    "./lint": {
-      "types": "./dist/lint/index.d.ts",
-      "import": "./dist/lint/index.js"
-    },
-    "./lint/test-utilities": {
-      "types": "./dist/lint/test-utilities.d.ts",
-      "import": "./dist/lint/test-utilities.js"
-    },
-    "./query": {
-      "types": "./dist/query/index.d.ts",
-      "import": "./dist/query/index.js"
-    },
-    "./utilities": {
-      "types": "./dist/utilities/index.d.ts",
-      "import": "./dist/utilities/index.js"
-    }
-  },
-  "files": [
-    "./dist"
-  ],
-  "scripts": {
-    "build": "tsc --build ./tsconfig.build.json",
-    "dev": "npm run tsc:watch",
-    "---- TEST ----------------------------------------------------------": "",
-    "test": "tsc && vitest",
-    "tsc": "tsc --noEmit",
-    "tsc:watch": "tsc --noEmit --watch",
-    "vitest": "vitest run --passWithNoTests --coverage",
-    "vitest:watch": "vitest watch --passWithNoTests --coverage",
-    "---- LINT ----------------------------------------------------------": "",
-    "lint": "cd ../.. && npm run lint:base ./source-code/core",
-    "lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
-    "format": "cd ../.. && npm run format:base ./source-code/core",
-    "format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
-    "---- OTHER ---------------------------------------------------------": "",
-    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
-  },
-  "devDependencies": {
-    "memfs": "^3.4.11",
-    "tsd": "^0.25.0"
-  }
+	"name": "@inlang/core",
+	"type": "module",
+	"version": "0.4.2",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		"./ast": {
+			"types": "./dist/ast/index.d.ts",
+			"import": "./dist/ast/index.js"
+		},
+		"./config": {
+			"types": "./dist/config/index.d.ts",
+			"import": "./dist/config/index.js"
+		},
+		"./fs": {
+			"types": "./dist/fs/index.d.ts",
+			"import": "./dist/fs/index.js"
+		},
+		"./lint": {
+			"types": "./dist/lint/index.d.ts",
+			"import": "./dist/lint/index.js"
+		},
+		"./lint/test-utilities": {
+			"types": "./dist/lint/test-utilities.d.ts",
+			"import": "./dist/lint/test-utilities.js"
+		},
+		"./query": {
+			"types": "./dist/query/index.d.ts",
+			"import": "./dist/query/index.js"
+		},
+		"./utilities": {
+			"types": "./dist/utilities/index.d.ts",
+			"import": "./dist/utilities/index.js"
+		}
+	},
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "npm run tsc:watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc && vitest",
+		"tsc": "tsc --noEmit",
+		"tsc:watch": "tsc --noEmit --watch",
+		"vitest": "vitest run --passWithNoTests --coverage",
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"devDependencies": {
+		"memfs": "^3.4.11",
+		"tsd": "^0.25.0"
+	}
 }
