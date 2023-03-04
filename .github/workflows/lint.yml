@@ -22,5 +22,8 @@ jobs:
 
       - run: npm install --no-save
 
+      - name: run format
+        run: npm run format
+
       - name: run linters
-        run: npm lint
+        run: npm run lint
