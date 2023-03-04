@@ -71,6 +71,7 @@ type ParsedConfig = {
 /**
  * Parses the config.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseConfig(config: Config): ParsedConfig {
   return {
     borderRadius: (size) => mapBorderRadius({ size, config }),
@@ -82,7 +83,7 @@ function parseConfig(config: Config): ParsedConfig {
    *
    * @example
    *    const baseSize = "lg"
-  
+
    *    mapBorderRadius("sm")
    *    >> "md"
    *
