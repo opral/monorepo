@@ -2,7 +2,7 @@
 
 /** @type { Record<string, string[]> } */
 const config = {
-	'*.{json,md,dockerfile}': [
+	'*.{json,md,dockerfile,yml,yaml}': [
 		'npm run format:fix:base',
 	],
 	'!(apps/dashboard/**)/**/*.{js,cjs,mjs,ts,mts,d.ts}': [
