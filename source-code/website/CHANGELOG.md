@@ -1,5 +1,13 @@
 # @inlang/website
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [fc30d4b]
+  - @inlang/core@0.4.3
+  - @inlang/git-sdk@0.4.3
+
 ## 0.4.2
 
 ### Patch Changes
