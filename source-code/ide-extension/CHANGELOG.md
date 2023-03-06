@@ -1,5 +1,12 @@
 # @inlang/ide-extension
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [fc30d4b]
+  - @inlang/core@0.4.3
+
 ## 0.4.2
 
 ### Patch Changes
