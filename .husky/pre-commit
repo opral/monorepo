@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run lint-staged
+# load env variables from '.env' file
+export $(grep -v '^#' .env)
+
+# run lint-staged if enabled
+if [ "$ENABLE_PRE_COMMIT_HOOK" = "true" ]
+then
+	npm run lint-staged
+fi
