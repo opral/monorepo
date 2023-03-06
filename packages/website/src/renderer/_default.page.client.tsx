@@ -1,6 +1,6 @@
 import { Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
-import { hydrate, render as renderSolid } from "solid-js/web"
+import { hydrate, render as renderApp } from "solid-js/web"
 import { Root } from "./Root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
@@ -69,14 +69,16 @@ export function render(pageContext: PageContextRenderer) {
 		setCurrentPageProps(pageContext.pageProps)
 		if (isFirstRender) {
 			// editor is client side rendered only
-			;(isEditor ? renderSolid : hydrate)(
-				() => (
-					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} />
-					</MetaProvider>
-				),
-				rootElement,
-			)
+			isEditor
+				? renderApp
+				: hydrate(
+						() => (
+							<MetaProvider>
+								<Root page={currentPage()!} pageProps={currentPageProps} />
+							</MetaProvider>
+						),
+						rootElement,
+				  )
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
