@@ -68,17 +68,18 @@ export function render(pageContext: PageContextRenderer) {
 		setCurrentPage(() => pageContext.Page)
 		setCurrentPageProps(pageContext.pageProps)
 		if (isFirstRender) {
-			// editor is client side rendered only
-			isEditor
-				? renderApp
-				: hydrate(
-						() => (
-							<MetaProvider>
-								<Root page={currentPage()!} pageProps={currentPageProps} />
-							</MetaProvider>
-						),
-						rootElement,
-				  )
+			// The editor is only rendered client-side.
+			//
+			// In the future, the editor might be server-side rendered.
+			// For now, the trouble of isomorphic rendering the editor is not worth it.
+			;(isEditor ? renderApp : hydrate)(
+				() => (
+					<MetaProvider>
+						<Root page={currentPage()!} pageProps={currentPageProps} />
+					</MetaProvider>
+				),
+				rootElement,
+			)
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
