@@ -419,6 +419,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (!inlangConfig.error && inlangConfig() && fsChange()) {
 			// setting the origin store because this should not trigger
 			// writing to the filesystem.
+			// @ts-expect-error
 			readResources(inlangConfig()!).then(setOriginResources)
 		}
 	})
