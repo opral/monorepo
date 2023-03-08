@@ -1,16 +1,12 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "strict": true,
-    "target": "ES2020",
-    "module": "ES2020",
-    "noImplicitAny": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "outDir": "dist",
-    "removeComments": true,
-    "declaration": false,
-    "allowJs": false
-  },
-  "include": ["src/**/**.ts"]
+	"extends": "configs/typescript/tsconfig.base.json",
+	"compilerOptions": {
+		"target": "ES2020",
+		"outDir": "dist",
+		// remove comments and declarations from the output
+		// to decrease the bundle size of the CLI
+		"removeComments": true,
+		"declaration": false
+	},
+	"include": ["src/**/**.ts"]
 }
