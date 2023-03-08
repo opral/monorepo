@@ -6,7 +6,8 @@
 		// remove comments and declarations from the output
 		// to decrease the bundle size of the CLI
 		"removeComments": true,
-		"declaration": false
+		"declaration": false,
+		"sourceMap": false
 	},
 	"include": ["src/**/**.ts"]
 }
