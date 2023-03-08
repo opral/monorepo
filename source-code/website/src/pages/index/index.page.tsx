@@ -1,8 +1,8 @@
-import { Layout as RootLayout } from "../Layout.jsx"
-import { Hero } from "./Hero.jsx"
+import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import styles from "./github-markdown.module.css"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "./CommunityProjects.jsx"
+import Hero from "@src/components/landingpage/sections/01-hero/index.jsx"
 
 export type PageProps = {
 	markdown: string

@@ -38,6 +38,21 @@ export function Layout(props: { children: JSXElement }) {
 	)
 }
 
+export const LandingPageLayout = (props: { children: JSXElement }) => {
+	return (
+		<div class="flex flex-col min-h-screen">
+			<Header />
+			{/* the outer div is growing to occupy the entire height and thereby
+			push the footer to the bottom */}
+			<div class={"grow flex flex-col "}>
+				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
+				{props.children}
+			</div>
+			<Footer />
+		</div>
+	)
+}
+
 const socialMediaLinks = [
 	{
 		name: "Twitter",
