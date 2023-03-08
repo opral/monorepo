@@ -5,9 +5,10 @@ import injectEnvVariables from "rollup-plugin-inject-process-env"
 
 // Retrieving the package version attribute for env variable injection.
 // https://www.stefanjudis.com/snippets/how-to-import-json-files-in-es-modules-node-js/
-// import { createRequire } from "module"
-// const require = createRequire(import.meta.url)
-// const packageVersion = require("./package.json").version
+import { createRequire } from "module"
+// polyfilling require
+const require = createRequire(import.meta.url)
+const packageVersion = require("./package.json").version
 
 /**
  * What is rollup used for?
@@ -31,7 +32,7 @@ export default {
 		typescript(),
 		// commonjs = because of commonjs peer dependencies (peggy.js)
 		commonjs(),
-		// // inject = pass env variables into the compiled code to not
-		// injectEnvVariables({ PACKAGE_VERSION: packageVersion, ...env }),
+		// inject = pass env variables into the compiled code to not
+		injectEnvVariables({ PACKAGE_VERSION: packageVersion }),
 	],
 }
