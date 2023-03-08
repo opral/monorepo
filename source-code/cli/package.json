@@ -12,6 +12,9 @@
 	"bin": {
 		"inlang": "./bin/run.js"
 	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
 	"files": [
 		"/bin",
 		"/dist"
