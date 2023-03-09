@@ -34,7 +34,7 @@ export const SectionLayout = (props: SectionLayoutProps) => {
 						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
 					</div>
 				</div>
-				<div class={"relative h-24 z-1"}>{props.children}</div>
+				<div class={"relative z-1"}>{props.children}</div>
 			</div>
 		</div>
 	)
