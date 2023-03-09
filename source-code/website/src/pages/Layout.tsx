@@ -11,7 +11,7 @@ import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
 import { analytics } from "@src/services/analytics/index.js"
-import { Button, sectionType } from "./index/components/Button.jsx"
+import { Button, buttonType } from "./index/components/Button.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -68,9 +68,8 @@ const socialMediaLinks = [
 ]
 function Header() {
 	const links = [
-		{ name: "Blog", href: "/blog", type: "text" },
-		{ name: "Docs", href: "/documentation", type: "text" },
-		// { name: "Open Editor", href: "/editor", type: "secondary" },
+		{ name: "Blog", href: "/blog", type: "text" as buttonType },
+		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 	]
 
 	const [localStorage] = useLocalStorage()

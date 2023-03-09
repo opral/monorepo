@@ -1,8 +1,8 @@
 import type { JSXElement } from "solid-js"
 
-export type sectionType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"
+export type buttonType = "primary" | "secondary" | "secondaryOnGray" | "text" | "textPrimary"
 
-const bgColor = (type: sectionType) => {
+const bgColor = (type: buttonType) => {
 	switch (type) {
 		case "primary":
 			return "text-white bg-surface-800 hover:bg-surface-900 px-4 "
@@ -19,13 +19,13 @@ const bgColor = (type: sectionType) => {
 	}
 }
 
-interface SectionLayoutProps {
+interface ButtonProps {
 	children: JSXElement
-	type: sectionType
+	type: buttonType
 	href?: string
 }
 
-export const Button = (props: SectionLayoutProps) => {
+export const Button = (props: ButtonProps) => {
 	return (
 		<a href={props.href}>
 			<button
