@@ -7,10 +7,10 @@ const Hero = () => {
 		<SectionLayout type="lightGrey">
 			<div class="w-full flex pt-16">
 				<div class="w-1/2 flex flex-col gap-8 px-10 py-32">
-					<h1 class="text-6xl font-bold text-surface-900 leading-tight pr-16">
+					<h1 class="text-6xl font-extrabold text-surface-900 pr-16">
 						Localization infrastructure for software
 					</h1>
-					<p class="font-medium text-surface-600 w-3/4 leading-relaxed">
+					<p class="text-surface-600 w-3/4 leading-relaxed">
 						inlang makes localization (l10n) simple by leveraging git repositories as collaboration
 						and automation hub for localization.
 					</p>

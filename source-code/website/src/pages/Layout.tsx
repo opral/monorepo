@@ -6,12 +6,12 @@ import IconSignOut from "~icons/material-symbols/logout-rounded"
 import IconMenu from "~icons/material-symbols/menu-rounded"
 import IconExpand from "~icons/material-symbols/expand-more-rounded"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { navigate } from "vite-plugin-ssr/client/router"
 import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { Button, buttonType } from "./index/components/Button.jsx"
+import { SectionLayout } from "./index/components/sectionLayout.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -21,7 +21,7 @@ import { Button, buttonType } from "./index/components/Button.jsx"
  * The dividers of the Header and Footer would not span the
  * entire width of the screen.
  */
-const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-8"
+const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -30,7 +30,7 @@ export function Layout(props: { children: JSXElement }) {
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow flex flex-col " + layoutMargins}>
+			<div class={"grow flex pb-24 flex-col min-h-screen " + layoutMargins}>
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
@@ -78,10 +78,10 @@ function Header() {
 	return (
 		<header
 			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-			class="sticky top-0 z-50 w-full"
+			class="sticky top-0 z-50 w-full bg-background border-b border-surface-100"
 		>
 			<div class="w-full h-full py-6 px-10">
-				<nav class={layoutMargins}>
+				<nav class="max-w-screen-xl w-full mx-auto px-10">
 					<div class="flex">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
@@ -164,11 +164,67 @@ function Header() {
 
 function Footer() {
 	return (
-		<footer class="sticky z-40 w-full border-t border-outline bg-background py-1.5">
-			<div class={`flex gap-8  ${layoutMargins}`}>
-				{/* <a href="/legal.txt" class="link  link-primary font-light">
-					<span class="">legal.txt</span>
-				</a> */}
+		<footer class="border-t border-surface-100">
+			<SectionLayout type="lightGrey">
+				<div class="flex py-16">
+					<div class="w-1/4 px-10 flex flex-col justify-between">
+						<a href="/" class="flex items-center w-fit">
+							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
+							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
+						</a>
+						<p class="text-surface-700 font-medium">© inlang 2022</p>
+					</div>
+					<div class="w-1/4 px-10 flex flex-col gap-4 pt-2">
+						<p class="font-semibold text-surface-900">Docs</p>
+						<a
+							href="https://inlang.com/documentation/getting-started"
+							class="font-medium text-surface-500"
+						>
+							Getting Started
+						</a>
+						<a href="https://inlang.com/documentation" class="font-medium text-surface-500">
+							Introduction
+						</a>
+						<a
+							href="https://inlang.com/documentation/design-principles"
+							class="font-medium text-surface-500"
+						>
+							Design Principles
+						</a>
+						<a
+							href="https://inlang.com/documentation/contributing"
+							class="font-medium text-surface-500"
+						>
+							Contribute
+						</a>
+					</div>
+					<div class="w-1/4 px-10 flex flex-col gap-4 pt-2">
+						<p class="font-semibold text-surface-900">Resources</p>
+						<a href="https://inlang.com/blog" class="font-medium text-surface-500">
+							Blog
+						</a>
+						<a href="https://github.com/inlang/inlang" class="font-medium text-surface-500">
+							GitHub
+						</a>
+						<a href="https://twitter.com/inlangHQ" class="font-medium text-surface-500">
+							Twitter
+						</a>
+					</div>
+					<div class="w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 rounded-xl py-10">
+						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
+						<p class="text-surface-600">
+							We welcome your input, feedback, and ideas! If you would like to get in touch with us,
+							please don't hesitate to send us an email.
+						</p>
+						<a href="mailto:hellop@inlang.com">
+							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md">
+								Get in Touch
+							</button>
+						</a>
+					</div>
+				</div>
+			</SectionLayout>
+			{/* <div class={`flex gap-8  ${layoutMargins}`}>
 				<div class="flex  grow justify-end items-center  space-x-4 ">
 					<a href="mailto:hello@inlang.com" class="link link-primary ">
 						hello@inlang.com
@@ -188,7 +244,7 @@ function Footer() {
 						</For>
 					</div>
 				</div>
-			</div>
+			</div> */}
 		</footer>
 	)
 }

@@ -1,16 +1,17 @@
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import styles from "./github-markdown.module.css"
 import { Meta, Title } from "@solidjs/meta"
-import { CommunityProjects } from "./CommunityProjects.jsx"
 import Hero from "./sections/01-hero/index.jsx"
 import Credibility from "./sections/02-credibility/index.jsx"
 import Editor from "./sections/03-editor/index.jsx"
+import VsCodeExtension from "./sections/04-vscodExtension/index.jsx"
+import Cli from "./sections/05-cli/index.jsx"
 
 export type PageProps = {
 	markdown: string
 }
 
-export function Page(props: PageProps) {
+export function Page() {
 	return (
 		<>
 			<Title>inlang Developer-first localization infrastructure.</Title>
@@ -19,20 +20,12 @@ export function Page(props: PageProps) {
 				content="Inlang provides dev tools, an editor to manage translations and automation via CI/CD to streamline localization."
 			/>
 			<RootLayout>
-				<div class="self-center grow sm:px-6 md:px-0 mb-8 flex flex-col">
+				<div>
 					<Hero />
 					<Credibility />
 					<Editor />
-					<div class="flex flex-col gap-12">
-						{/* rendering the github readme */}
-						<div
-							class="mb-8 p-4 md:p-6 rounded-lg border border-outline"
-							classList={{ [styles["markdown-body"]]: true }}
-							// eslint-disable-next-line solid/no-innerhtml
-							innerHTML={props.markdown}
-						/>
-					</div>
-					<CommunityProjects />
+					<VsCodeExtension />
+					<Cli />
 				</div>
 			</RootLayout>
 		</>
