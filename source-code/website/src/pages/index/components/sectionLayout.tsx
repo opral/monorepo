@@ -1,6 +1,6 @@
 import type { JSXElement } from "solid-js"
 
-const landingpageGrid = "max-w-screen-xl w-full mx-auto px-4 sm:px-8"
+const landingpageGrid = "max-w-screen-xl w-full mx-auto"
 type sectionType = "white" | "lightGrey" | "dark"
 
 const bgColor = (type: sectionType) => {
@@ -23,9 +23,19 @@ interface SectionLayoutProps {
 
 export const SectionLayout = (props: SectionLayoutProps) => {
 	return (
-		<div class={"relative w-full " + bgColor(props.type)}>
-			<div class="absolute top-0 left-0 h-full w-full z-0" />
-			<div class={"relative h-24 z-1 " + landingpageGrid}>{props.children}</div>
+		<div class={"w-full " + bgColor(props.type)}>
+			<div class={"relative " + landingpageGrid}>
+				<div class={"absolute top-0 left-0 h-full w-full z-0"}>
+					<div class="flex w-full h-full justify-between mx-auto">
+						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
+						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
+						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
+						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
+						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
+					</div>
+				</div>
+				<div class={"relative h-24 z-1"}>{props.children}</div>
+			</div>
 		</div>
 	)
 }
