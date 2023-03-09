@@ -6,9 +6,7 @@
  * Minimal filesystem required by inlang
  */
 export type FS = {
-	readFile:
-		| ((path: string) => Promise<Buffer>)
-		| ((path: string, options?: { encoding: "utf-8" }) => Promise<string>)
+	readFile: (path: string, options?: { encoding: "utf-8" }) => Promise<string | Buffer>
 	writeFile: (path: string, data: string) => Promise<void>
 	readdir: (path: string) => Promise<Array<string | object>>
 	mkdir: (path: string, options?: { recursive: boolean }) => Promise<void | string | undefined>
