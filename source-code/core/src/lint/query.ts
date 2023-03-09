@@ -1,4 +1,4 @@
-import { unhandled } from "../utilities/error-handling.js"
+import { unhandled } from "./error-handling.js"
 import type {
 	LintedNode,
 	LintReport,

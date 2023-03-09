@@ -1,5 +1,5 @@
 import type { Resource, Message, Pattern } from "../ast/schema.js"
-import type { Pretty } from "../utilities/types.js"
+import type { Pretty } from "./types.js"
 import type { LintableNode, LintConfigArguments, LintRuleId } from "./rule.js"
 
 export type LintLevel = "error" | "warn"
