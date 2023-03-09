@@ -24,6 +24,20 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 5. `npm run test` to run the tests.
 6. `npm run build` to compile a production build.
 
+### For Windows users
+
+There is a problem with Hot Module Reloading (HMR) within the Windows file system. To fix this problem, you can use the Linux subsystem:
+
+1. Start the dev container first
+2. Navigate to the Linux subsystem with `cd $HOME` & `cd /mnt`.
+3. Clone the inlang repo into the Linux subsystem
+4. Navigate to the inlang repo
+5. Run `npm install` & `npm run dev`
+
+**Note:**
+Make sure that the user has the right to edit files.
+For Docker Desktop, the user should be `node`.
+
 ## Debugging
 
 1. (If running, stop `npm run dev`.)
