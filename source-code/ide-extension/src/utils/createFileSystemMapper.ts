@@ -20,5 +20,8 @@ export function createFileSystemMapper(target: vscode.FileSystem, base: vscode.U
 		writeFile: async (file, data) => {
 			return target.writeFile(vscode.Uri.joinPath(base, file), new TextEncoder().encode(data))
 		},
+		mkdir: async (path) => {
+			return target.createDirectory(vscode.Uri.joinPath(base, path))
+		},
 	}
 }
