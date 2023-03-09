@@ -1,3 +1,7 @@
+/**
+ * !Not naming this file *.test.ts to avoid vitest running this file.
+ */
+
 // eslint-disable-next-line no-restricted-imports
 import fs from "node:fs/promises"
 import { fs as memfs } from "memfs"
