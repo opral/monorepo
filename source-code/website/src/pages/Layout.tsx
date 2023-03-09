@@ -11,6 +11,7 @@ import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
 import { analytics } from "@src/services/analytics/index.js"
+import { Button, sectionType } from "./index/components/Button.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -67,8 +68,9 @@ const socialMediaLinks = [
 ]
 function Header() {
 	const links = [
-		{ name: "Documentation", href: "/documentation" },
-		{ name: "Blog", href: "/blog" },
+		{ name: "Blog", href: "/blog", type: "text" },
+		{ name: "Docs", href: "/documentation", type: "text" },
+		// { name: "Open Editor", href: "/editor", type: "secondary" },
 	]
 
 	const [localStorage] = useLocalStorage()
@@ -77,25 +79,18 @@ function Header() {
 	return (
 		<header
 			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-			class="sticky top-0 z-50 w-full bg-background border-b border-outline"
+			class="sticky top-0 z-50 w-full"
 		>
-			<div class="w-full h-full bg-surface-1 py-3">
+			<div class="w-full h-full py-6 px-10">
 				<nav class={layoutMargins}>
-					<div class="flex gap-8">
-						<a href="/" class="flex items-center">
-							<img class="h-8 w-auto " src="/favicon/favicon.ico" alt="Company Logo" />
-							<span class="self-center pl-2 text-xl font-semibold">inlang</span>
+					<div class="flex">
+						<a href="/" class="flex items-center w-fit">
+							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
+							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
-						<div class="grid grid-cols-2 w-full content-center">
-							<div class="hidden md:flex justify-start items-center space-x-4">
-								<For each={links}>
-									{(link) => (
-										<a class="link link-primary" href={link.href}>
-											{link.name}
-										</a>
-									)}
-								</For>
-								<div class="pl-2 flex space-x-4">
+						<div class="w-full content-center">
+							<div class="hidden md:flex justify-end items-center gap-8">
+								<div class="flex gap-8">
 									<For each={socialMediaLinks}>
 										{(link) => (
 											<a
@@ -109,12 +104,18 @@ function Header() {
 										)}
 									</For>
 								</div>
-							</div>
-							<div class="hidden md:flex justify-end space-x-4 place-items-center">
+								<For each={links}>
+									{(link) => (
+										<Button type={link.type} href={link.href}>
+											{link.name}
+										</Button>
+									)}
+								</For>
 								<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
-									<sl-button onClick={() => navigate("/editor")}>
-										<span class="text-on-background font-medium text-base">Open editor</span>
-									</sl-button>
+									<Button type="secondary" href="/editor">
+										{" "}
+										Open Editor{" "}
+									</Button>
 								</Show>
 								{/* not overwhelming the user by only showing login button when not on landig page */}
 								<Show
