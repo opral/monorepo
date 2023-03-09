@@ -42,7 +42,7 @@ export async function mockEnvironment(args: {
 async function copyDirectory(args: { copyFrom: FS; copyTo: FS; path: string }) {
 	// create directory
 	await args.copyTo.mkdir(args.path, { recursive: true })
-	for (const file of await args.copyFrom.readdir("./" + args.path)) {
+	for (const file of await args.copyFrom.readdir(args.path)) {
 		const isFile = (file as string).includes(".")
 		if (isFile) {
 			await args.copyTo.writeFile(
