@@ -19,6 +19,7 @@ export function Page(props: PageProps) {
 			<RootLayout>
 				<div class="self-center grow sm:px-6 md:px-0 mb-8 flex flex-col">
 					<Hero />
+					<Hero />
 					<div class="flex flex-col gap-12">
 						{/* rendering the github readme */}
 						<div
