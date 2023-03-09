@@ -1,11 +1,11 @@
-/**
- * This file contains the Zod schema for the AST.
- *
- * The zod schema is used for validation in /test.
- * Read more at https://zod.dev/
- */
-
 import { z } from "zod"
+
+/**
+ * The zod schemas for the AST.
+ *
+ * The zod schema can be used to parse and validate
+ * the AST nodes. Read more at https://zod.dev/
+ */
 
 const Node = z.object({
 	type: z.string(),
