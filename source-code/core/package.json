@@ -55,8 +55,14 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
+	"dependencies": {
+		"zod": "^3.21.4"
+	},
 	"devDependencies": {
-		"memfs": "^3.4.11",
+		"memfs": "^3.4.13",
 		"tsd": "^0.25.0"
 	}
 }

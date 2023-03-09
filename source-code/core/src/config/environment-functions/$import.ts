@@ -67,7 +67,9 @@ async function $import(
 	// http imports yet like VSCode.
 	const moduleAsText = uri.startsWith("http")
 		? await (await _fetch(uri)).text()
-		: ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, "utf-8")) as string)
+		: ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, {
+				encoding: "utf-8",
+		  })) as string)
 	const moduleWithMimeType = "data:application/javascript;base64," + btoa(moduleAsText)
 	return await import(/* @vite-ignore */ moduleWithMimeType)
 }
