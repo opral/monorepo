@@ -19,22 +19,22 @@ module.exports = {
 		require("@tailwindcss/typography"),
 		require("@tailwindcss/forms"),
 		components.configure(),
-		// the colors align with shoelace's colors https://shoelace.style/tokens/color
+		//the colors align with shoelace's colors https://shoelace.style/tokens/color
 		colorSystem.configure({
 			//! the colors must satisfy the defined types below the config
 			accentColors: {
-				primary: colors.sky,
+				primary: colors.cyan,
 				//! shoelace's secondary token is called neutral.
-				secondary: colors.gray,
+				secondary: colors.slate,
 				tertiary: colors.lime,
 			},
 			neutralColors: {
-				neutral: colors.neutral,
-				neutralVariant: colors.stone,
+				neutral: colors.slate,
+				neutralVariant: colors.zinc,
 			},
 			semanticColors: {
 				// duplicate primary color for better semantic meaning
-				info: colors.sky,
+				info: colors.slate,
 				success: colors.green,
 				warning: colors.amber,
 				danger: colors.red,
@@ -103,10 +103,7 @@ function usedClassWithDynamicColor() {
 		}
 	}
 	// filter duplicates
-	result = [...new Set(result)]
-	// console.log(
-	// 	"whitelisted the following dynamic color classes for tailwind css:",
-	// 	result
-	// );
+	// result = [...new Set(result)]
+	// console.log("whitelisted the following dynamic color classes for tailwind css:", result)
 	return result
 }

@@ -23,6 +23,18 @@ export function generateTokens(config: Config): ColorTokens {
 		// https://m3.material.io/styles/color/the-color-system/color-roles#c0cdc1ba-7e67-4d6a-b294-218f659ff648
 		// using neutral colors though to not be too colorful (while we don't have a designer on the team that
 		// ensures that colors are matching the overall design)
+		//new values subject to change
+		"surface-50": neutralColors.neutral[50],
+		"surface-100": neutralColors.neutral[100],
+		"surface-200": neutralColors.neutral[200],
+		"surface-300": neutralColors.neutral[300],
+		"surface-400": neutralColors.neutral[400],
+		"surface-500": neutralColors.neutral[500],
+		"surface-600": neutralColors.neutral[600],
+		"surface-700": neutralColors.neutral[700],
+		"surface-800": neutralColors.neutral[800],
+		"surface-900": neutralColors.neutral[900],
+		//old values
 		"surface-1": new TinyColor(neutralColors.neutral[900]).setAlpha(0.05).toHex8String(),
 		"surface-2": new TinyColor(neutralColors.neutral[900]).setAlpha(0.08).toHex8String(),
 		"surface-3": new TinyColor(neutralColors.neutral[900]).setAlpha(0.11).toHex8String(),
