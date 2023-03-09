@@ -53,7 +53,6 @@ import { defineConfig } from "./inlang.config.js"
 // initializing the environment functions
 const env = {
 	$import: initialize$import({
-		workingDirectory: "/example",
 		fs: $fs,
 		fetch,
 	}),
