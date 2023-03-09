@@ -3,6 +3,8 @@ import styles from "./github-markdown.module.css"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "./CommunityProjects.jsx"
 import Hero from "./sections/01-hero/index.jsx"
+import Credibility from "./sections/02-credibility/index.jsx"
+import Editor from "./sections/03-editor/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -19,6 +21,8 @@ export function Page(props: PageProps) {
 			<RootLayout>
 				<div class="self-center grow sm:px-6 md:px-0 mb-8 flex flex-col">
 					<Hero />
+					<Credibility />
+					<Editor />
 					<div class="flex flex-col gap-12">
 						{/* rendering the github readme */}
 						<div
