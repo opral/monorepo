@@ -3,7 +3,7 @@ import prompts from "prompts"
 
 export const init = new Command()
 	.command("init")
-	.description("Get up and running by creating the config file.")
+	.description("Initialize the inlang.config.js file.")
 	.action(async () => {
 		const response1 = await prompts({
 			type: "autocomplete",
