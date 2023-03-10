@@ -21,10 +21,12 @@ const Editor = () => {
 							<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
 							<div class="columns-2 gap-x-10 text-surface-700">{data.body}</div>
 							<div class="flex gap-8 items-center">
-								<Button type="primary">Open Editor</Button>
+								<Button type="primary" href="/editor">
+									Open Editor
+								</Button>
 								<Button type="text">Create config</Button>
 							</div>
-							<img src={editorImage} class="bg-background rounded-3xl mt-8" />
+							<img src={editorImage} alt="inlang editor" class="bg-background rounded-3xl mt-8" />
 						</div>
 					</div>
 					<div class="absolute top-0 left-0 h-full w-[2px] bg-hover-primary z-0" />

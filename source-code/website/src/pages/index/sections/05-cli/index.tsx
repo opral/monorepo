@@ -23,12 +23,8 @@ const Cli = () => {
 							</div>
 							<div class="flex flex-col justify-center items-center w-1/2 gap-4">
 								<div class="flex">
-									<Button type="secondary" href="">
-										validate
-									</Button>
-									<Button type="secondaryOnGray" href="">
-										extract
-									</Button>
+									<Button type="secondary">validate</Button>
+									<Button type="secondaryOnGray">extract</Button>
 								</div>
 								<div class="rounded-lg shadow-sm border border-surface-200">
 									<CliSVG />

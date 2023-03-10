@@ -39,7 +39,7 @@ const Credibility = () => {
 									class="flex flex-col gap-2 justify-center items-center text-surface-500 hover:text-surface-900"
 									href={item.link}
 								>
-									<img class="w-12 h-12" src={item.img} />
+									<img class="w-12 h-12" src={item.img} alt={item.name + "profile picture"} />
 									<p class="text-sm">{item.name}</p>
 								</a>
 							</div>

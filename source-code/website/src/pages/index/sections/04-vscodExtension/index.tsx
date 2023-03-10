@@ -17,12 +17,17 @@ const VsCodeExtension = () => {
 							<div class="px-10 py-40 flex flex-col gap-8 w-1/2">
 								<FeatureGitTitle
 									circleColor="primary"
-									titleColor="surface-300"
+									titleColor="surface-100"
 									title={data.title}
 								/>
 								<div class="text-surface-400">{data.body}</div>
 								<div class="flex gap-8 items-center">
-									<Button type="secondaryOnGray">Add extension</Button>
+									<Button
+										type="secondary"
+										href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension"
+									>
+										Add extension
+									</Button>
 								</div>
 							</div>
 							<div class="flex justify-center items-center w-1/2">

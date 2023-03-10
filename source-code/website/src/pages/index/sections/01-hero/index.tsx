@@ -15,8 +15,12 @@ const Hero = () => {
 						and automation hub for localization.
 					</p>
 					<div class="flex gap-6">
-						<Button type="primary">Get started</Button>
-						<Button type="text">View on GitHub</Button>
+						<Button type="primary" href="/documentation">
+							Get started
+						</Button>
+						<Button type="text" href="https://github.com/inlang/inlang">
+							View on GitHub
+						</Button>
 					</div>
 				</div>
 				<div class="relative w-1/2 -ml-[8px]">
