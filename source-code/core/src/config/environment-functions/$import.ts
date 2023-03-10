@@ -26,19 +26,13 @@ export type $import = (uri: string) => Promise<any>
  * const module = await $import('./some-module.js');
  */
 export function initialize$import(args: {
-	/**
-	 * Directory from which the import should be resolved. Be careful, as the working directory of the fs is not changed!
-	 *
-	 * @deprecated, because it can lead to unintended side effects. Use only for testings. Likely to be removed in the future.
-	 */
-	workingDirectory?: string
 	/** the fs from which the file can be read */
 	fs: FS
 	/** http client implementation */
 	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
-	return (uri: string) => $import(uri, { workingDirectory: "/", ...args })
+	return (uri: string) => $import(uri, args)
 }
 
 /**
@@ -53,8 +47,6 @@ export function initialize$import(args: {
 async function $import(
 	uri: string,
 	environment: {
-		/** directory from which the import should be resolved */
-		workingDirectory: string
 		/** the fs from which the file can be read */
 		fs: FS
 		/** http client implementation */
@@ -67,7 +59,9 @@ async function $import(
 	// http imports yet like VSCode.
 	const moduleAsText = uri.startsWith("http")
 		? await (await _fetch(uri)).text()
-		: ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, "utf-8")) as string)
+		: ((await environment.fs.readFile(uri, {
+				encoding: "utf-8",
+		  })) as string)
 	const moduleWithMimeType = "data:application/javascript;base64," + btoa(moduleAsText)
 	return await import(/* @vite-ignore */ moduleWithMimeType)
 }
