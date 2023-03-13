@@ -1,3 +1,5 @@
+import { createSignal, Show } from "solid-js"
+import { createStore } from "solid-js/store"
 import { Button } from "../../components/Button.jsx"
 import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
@@ -8,6 +10,9 @@ const data = {
 }
 
 const Cli = () => {
+	// toggle between validate and extract
+	const [cliSlider, setCliSlider] = createSignal("validate")
+
 	return (
 		<>
 			<SectionLayout type="white">
@@ -23,11 +28,21 @@ const Cli = () => {
 							</div>
 							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 xl:py-40 mt-8 flex flex-col-reverse gap-4 xl:flex-col justify-center items-center w-full xl:w-1/2">
 								<div class="flex">
-									<Button type="secondary">validate</Button>
-									<Button type="secondaryOnGray">extract</Button>
+									<Button type="secondary" function={() => setCliSlider("validate")}>
+										validate
+									</Button>
+									<Button type="secondaryOnGray" function={() => setCliSlider("extract")}>
+										extract
+									</Button>
 								</div>
 								<div class="rounded-xl shadow-sm border border-surface-200 w-full">
-									<CliSVG />
+									<Show when={cliSlider() === "validate"}>
+										<CliSVG />
+									</Show>
+									<Show when={cliSlider() === "extract"}>
+										<CliSVG />
+										<div>extract</div>
+									</Show>
 								</div>
 							</div>
 						</div>
