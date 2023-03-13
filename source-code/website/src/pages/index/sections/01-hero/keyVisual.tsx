@@ -2,10 +2,10 @@ function KeyVisual() {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			width="534"
-			height="594"
+			width="100%"
 			fill="none"
 			viewBox="0 0 534 594"
+			class="w-full h-auto md:w-2/3 xl:w-[543px]"
 		>
 			<rect
 				width="131.994"

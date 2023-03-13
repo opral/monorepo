@@ -182,15 +182,15 @@ function Footer() {
 	return (
 		<footer class="border-t border-surface-100">
 			<SectionLayout type="lightGrey">
-				<div class="flex py-16">
-					<div class="w-1/4 px-10 flex flex-col justify-between">
+				<div class="flex flex-row flex-wrap py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
+					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 						<p class="text-surface-700 font-medium">© inlang 2022</p>
 					</div>
-					<div class="w-1/4 px-10 flex flex-col gap-4 pt-2">
+					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Docs</p>
 						<a
 							href="https://inlang.com/documentation/getting-started"
@@ -214,7 +214,7 @@ function Footer() {
 							Contribute
 						</a>
 					</div>
-					<div class="w-1/4 px-10 flex flex-col gap-4 pt-2">
+					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Resources</p>
 						<a href="https://inlang.com/blog" class="font-medium text-surface-500">
 							Blog
@@ -226,7 +226,7 @@ function Footer() {
 							Twitter
 						</a>
 					</div>
-					<div class="w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 rounded-xl py-10">
+					<div class="w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 rounded-xl py-10">
 						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
 						<p class="text-surface-600">
 							We welcome your input, feedback, and ideas! If you would like to get in touch with us,

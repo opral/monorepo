@@ -25,7 +25,7 @@ export function Page() {
 					<Credibility />
 					<Editor />
 					<VsCodeExtension />
-					<Cli />
+					{/* <Cli /> */}
 				</div>
 			</RootLayout>
 		</>
