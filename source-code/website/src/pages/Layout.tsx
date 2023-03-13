@@ -26,11 +26,11 @@ const layoutMargins = "max-w-screen-xl w-full mx-auto px-4 sm:px-10 "
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	return (
-		<div class="flex flex-col min-h-screen">
+		<div class="flex flex-col">
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow flex pt-24 pb-24 flex-col min-h-screen gap-8 lg:gap-0" + layoutMargins}>
+			<div class={"grow flex flex-col min-h-screen " + layoutMargins}>
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
