@@ -10,13 +10,13 @@ const bgColor = (type: buttonType) => {
 		case "secondary":
 			return "text-surface-800 bg-surface-200 hover:text-surface-900 hover:bg-surface-300 px-4 "
 		case "secondaryOnGray":
-			return "text-surface-700 bg-white hover:text-surface-900 hover:bg-surface-300 px-4"
+			return "text-surface-700 bg-background hover:text-surface-900 hover:bg-surface-300 px-4"
 		case "text":
 			return "text-surface-700 hover:text-surface-900"
 		case "textPrimary":
 			return "text-primary-600 hover:text-primary-800"
 		default:
-			return "text-surface-700 bg-white hover:text-surface-900 hover:bg-surface-300 px-4"
+			return "text-surface-700 bg-background hover:text-surface-900 hover:bg-surface-300 px-4"
 	}
 }
 
