@@ -65,7 +65,6 @@ const socialMediaLinks = [
 		name: "GitHub",
 		href: "https://github.com/inlang/inlang",
 		Icon: IconGithub,
-		screenreader: "GitHub Profile",
 	},
 ]
 
@@ -82,17 +81,10 @@ function Header(props: { landingpage?: boolean }) {
 		<>
 			<header
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-				class="sticky top-0 z-50 w-full bg-background/0 border-b border-surface-100"
+				class="sticky top-0 z-50 w-full bg-background border-b border-surface-400/10"
 			>
-				<Show when={props.landingpage === true}>
-					<div class="absolute -z-10 left-0 right-0 h-[88px]">
-						<SectionLayout type="lightGrey">
-							<div class="w-full h-[88px]" />
-						</SectionLayout>
-					</div>
-				</Show>
-				<div class={`w-full h-full py-6 px-10 + ${props.landingpage && "bg-surface-50"}`}>
-					<nav class={"max-w-screen-xl w-full mx-auto md:px-10"}>
+				<div class={`w-full h-full py-6 px-4 sm:px-10 + ${props.landingpage && "px-10"}`}>
+					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
 								<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />
@@ -111,8 +103,7 @@ function Header(props: { landingpage?: boolean }) {
 													href={link.href}
 												>
 													<link.Icon class="w-5 h-5" />
-													{/* <span>{link.name}</span> */}
-													<span class="sr-only">{link.screenreader}</span>
+													<span class="sr-only">{link.name}</span>
 												</a>
 											)}
 										</For>
