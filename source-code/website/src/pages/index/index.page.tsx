@@ -27,7 +27,6 @@ export function Page() {
 					<Editor />
 					<VsCodeExtension />
 					<Cli />
-					<GetStarted />
 				</div>
 			</RootLayout>
 		</>

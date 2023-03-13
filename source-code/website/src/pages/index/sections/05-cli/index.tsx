@@ -13,26 +13,26 @@ const Cli = () => {
 			<SectionLayout type="white">
 				<div class="relative">
 					<div class="relative z-10">
-						<div class="flex w-full items-center">
-							<div class="px-10 py-40 flex flex-col gap-8 w-1/2">
+						<div class="pt-10 pb-10 flex flex-wrap w-full items-center">
+							<div class="pl-20 pr-10 xl:px-10 py-10 xl:py-40 flex flex-col gap-8 w-full xl:w-1/2">
 								<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
 								<div class="text-surface-600">{data.body}</div>
-								<div class="flex gap-8 items-center font-mono text-surface-600 h-10 px-4 border border-surface-200 bg-surface-50 w-fit text-sm rounded-md">
+								<div class="flex gap-8 items-center font-mono text-surface-600 h-10 px-4 border border-surface-200 bg-surface-50 w-fit text-xs sm:text-sm rounded-md">
 									npm install inlang/cli
 								</div>
 							</div>
-							<div class="flex flex-col justify-center items-center w-1/2 gap-4">
+							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 xl:py-40 mt-8 flex flex-col-reverse gap-4 xl:flex-col justify-center items-center w-full xl:w-1/2">
 								<div class="flex">
 									<Button type="secondary">validate</Button>
 									<Button type="secondaryOnGray">extract</Button>
 								</div>
-								<div class="rounded-lg shadow-sm border border-surface-200">
+								<div class="rounded-xl shadow-sm border border-surface-200 w-full">
 									<CliSVG />
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="absolute top-0 left-0 h-full w-[2px] from-hover-primary z-0 bg-gradient-to-b" />
+					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] from-hover-primary z-0 bg-gradient-to-b" />
 				</div>
 			</SectionLayout>
 		</>
@@ -45,10 +45,11 @@ const CliSVG = () => {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			width="440"
-			height="242"
+			// width="440"
+			// height="242"
 			fill="none"
 			viewBox="0 0 440 242"
+			class="w-full"
 		>
 			<g clip-path="url(#clip0_137_395)">
 				<rect width="441" height="243" x="-0.5" y="-0.5" fill="#fff" stroke="#DBDCDF" rx="8.5" />

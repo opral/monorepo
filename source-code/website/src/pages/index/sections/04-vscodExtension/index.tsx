@@ -14,13 +14,13 @@ const VsCodeExtension = () => {
 				<div class="relative">
 					<div class="relative z-10">
 						<div class="pt-10 pb-10 flex flex-wrap w-full items-center">
-							<div class="px-20 xl:px-10 py-10 xl:py-40 flex flex-col gap-8 w-full xl:w-1/2">
+							<div class="pl-20 pr-10 xl:px-10 py-10 xl:py-40 flex flex-col gap-8 w-full xl:w-1/2">
 								<FeatureGitTitle
 									circleColor="primary"
 									titleColor="surface-300"
 									title={data.title}
 								/>
-								<div class="text-surface-300">{data.body}</div>
+								<div class="text-surface-400">{data.body}</div>
 								<div class="flex gap-8 items-center">
 									<Button
 										type="secondary"
@@ -30,7 +30,7 @@ const VsCodeExtension = () => {
 									</Button>
 								</div>
 							</div>
-							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 mt-8 flex justify-center items-center w-full xl:w-1/2">
+							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 xl:py-40 mt-8 flex justify-center items-center w-full xl:w-1/2">
 								<div class="rounded-2xl shadow-xl w-full xl:w-2/3">
 									<ExtensionSVG />
 								</div>
