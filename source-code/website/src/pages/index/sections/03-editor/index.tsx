@@ -26,7 +26,9 @@ const Editor = () => {
 								<Button type="primary" href="/editor">
 									Open Editor
 								</Button>
-								<Button type="text">Create config</Button>
+								<Button type="text" chevron>
+									Create config
+								</Button>
 							</div>
 						</div>
 						<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">

@@ -18,7 +18,7 @@ const Hero = () => {
 						<Button type="primary" href="/documentation">
 							Get started
 						</Button>
-						<Button type="text" href="https://github.com/inlang/inlang">
+						<Button type="text" href="https://github.com/inlang/inlang" chevron>
 							View on GitHub
 						</Button>
 					</div>
