@@ -176,7 +176,7 @@ function Footer() {
 	return (
 		<footer class="border-t border-surface-100">
 			<SectionLayout type="lightGrey">
-				<div class="flex flex-row flex-wrap py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
+				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />

@@ -31,7 +31,7 @@ const VsCodeExtension = () => {
 									titleColor="surface-300"
 									title={data.title}
 								/>
-								<div class="text-surface-300">{data.body}</div>
+								<div class="text-surface-300 md:w-3/4 xl:w-full">{data.body}</div>
 								<div class="flex gap-8 items-center">
 									<Button
 										type="secondary"
