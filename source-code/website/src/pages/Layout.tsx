@@ -39,10 +39,10 @@ export function Layout(props: { children: JSXElement }) {
 	)
 }
 
-export const LandingPageLayout = (props: { children: JSXElement }) => {
+export const LandingPageLayout = (props: { children: JSXElement; landingpage?: boolean }) => {
 	return (
 		<div class="flex flex-col min-h-screen">
-			<Header />
+			<Header landingpage={props.landingpage} />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
 			<div class={"grow flex flex-col "}>
@@ -66,7 +66,8 @@ const socialMediaLinks = [
 		Icon: IconGithub,
 	},
 ]
-function Header() {
+
+function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
 		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
@@ -76,89 +77,104 @@ function Header() {
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 
 	return (
-		<header
-			// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-			class="sticky top-0 z-50 w-full bg-background border-b border-surface-100"
-		>
-			<div class="w-full h-full py-6 px-10">
-				<nav class="max-w-screen-xl w-full mx-auto px-10">
-					<div class="flex">
-						<a href="/" class="flex items-center w-fit">
-							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
-							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
-						</a>
-						<div class="w-full content-center">
-							<div class="hidden md:flex justify-end items-center gap-8">
-								<div class="flex gap-8">
-									<For each={socialMediaLinks}>
+		<>
+			<header
+				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
+				class="sticky top-0 z-50 w-full bg-background/0 border-b border-surface-100"
+			>
+				<Show when={props.landingpage === true}>
+					<div class="absolute -z-10 left-0 right-0 h-[88px]">
+						<SectionLayout type="lightGrey">
+							<div class="w-full h-[88px]" />
+						</SectionLayout>
+					</div>
+				</Show>
+				<div class="w-full h-full py-6 px-10">
+					<nav class="max-w-screen-xl w-full mx-auto px-10">
+						<div class="flex">
+							<a href="/" class="flex items-center w-fit">
+								<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
+								<span class="self-center pl-2 text-left font-semibold text-surface-900">
+									inlang
+								</span>
+							</a>
+							<div class="w-full content-center">
+								<div class="hidden md:flex justify-end items-center gap-8">
+									<div class="flex gap-8">
+										<For each={socialMediaLinks}>
+											{(link) => (
+												<a
+													target="_blank"
+													class="link link-primary flex space-x-2 items-center"
+													href={link.href}
+												>
+													<link.Icon class="w-5 h-5" />
+													{/* <span>{link.name}</span> */}
+												</a>
+											)}
+										</For>
+									</div>
+									<For each={links}>
 										{(link) => (
-											<a
-												target="_blank"
-												class="link link-primary flex space-x-2 items-center"
-												href={link.href}
-											>
-												<link.Icon class="w-5 h-5" />
-												{/* <span>{link.name}</span> */}
-											</a>
+											<Button type={link.type} href={link.href}>
+												{link.name}
+											</Button>
 										)}
 									</For>
-								</div>
-								<For each={links}>
-									{(link) => (
-										<Button type={link.type} href={link.href}>
-											{link.name}
+									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
+										<Button type="secondary" href="/editor">
+											{" "}
+											Open Editor{" "}
 										</Button>
-									)}
-								</For>
-								<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
-									<Button type="secondary" href="/editor">
-										{" "}
-										Open Editor{" "}
-									</Button>
-								</Show>
-								{/* not overwhelming the user by only showing login button when not on landig page */}
-								<Show
-									when={
-										localStorage.user || currentPageContext.urlParsed.pathname.includes("editor")
-									}
+									</Show>
+									{/* not overwhelming the user by only showing login button when not on landig page */}
+									<Show
+										when={
+											localStorage.user || currentPageContext.urlParsed.pathname.includes("editor")
+										}
+									>
+										<UserDropdown />
+									</Show>
+								</div>
+							</div>
+							{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
+							<div class="md:hidden flex items-center">
+								<button
+									onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+									type="button"
+									class="inline-flex items-center justify-center text-primary "
 								>
-									<UserDropdown />
-								</Show>
+									<span class="sr-only">{mobileMenuIsOpen() ? "Close menu" : "Open menu"}</span>
+									{mobileMenuIsOpen() ? (
+										<IconClose class="w-6 h-6" />
+									) : (
+										<IconMenu class="w-6 h-6" />
+									)}
+								</button>
 							</div>
 						</div>
-						{/* Controll the Dropdown/Navbar  if its open then Show MobileNavMenue */}
-						<div class="md:hidden flex items-center">
-							<button
-								onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-								type="button"
-								class="inline-flex items-center justify-center text-primary "
-							>
-								<span class="sr-only">{mobileMenuIsOpen() ? "Close menu" : "Open menu"}</span>
-								{mobileMenuIsOpen() ? <IconClose class="w-6 h-6" /> : <IconMenu class="w-6 h-6" />}
-							</button>
-						</div>
-					</div>
-					{/* MobileNavbar includes the Navigation for the Documentations sites  */}
-					<Show when={mobileMenuIsOpen()}>
-						<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
-							<For each={links}>
-								{(link) => (
-									<sl-tree class="">
-										<a
-											class="link grow min-w-full text-on-surface link-primary w-full"
-											href={link.href}
-											onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
-										>
-											<sl-tree-item>{link.name}</sl-tree-item>
-										</a>
-									</sl-tree>
-								)}
-							</For>
-						</ol>
-					</Show>
-				</nav>
-			</div>
-		</header>
+						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
+						<Show when={mobileMenuIsOpen()}>
+							<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
+								<For each={links}>
+									{(link) => (
+										<sl-tree class="">
+											<a
+												class="link grow min-w-full text-on-surface link-primary w-full"
+												href={link.href}
+												onClick={() => setMobileMenuIsOpen(!mobileMenuIsOpen())}
+											>
+												<sl-tree-item>{link.name}</sl-tree-item>
+											</a>
+										</sl-tree>
+									)}
+								</For>
+							</ol>
+						</Show>
+					</nav>
+				</div>
+			</header>
+		</>
 	)
 }
 

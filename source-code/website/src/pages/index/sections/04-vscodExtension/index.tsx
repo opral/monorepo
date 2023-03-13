@@ -17,10 +17,10 @@ const VsCodeExtension = () => {
 							<div class="px-10 py-40 flex flex-col gap-8 w-1/2">
 								<FeatureGitTitle
 									circleColor="primary"
-									titleColor="surface-100"
+									titleColor="surface-300"
 									title={data.title}
 								/>
-								<div class="text-surface-400">{data.body}</div>
+								<div class="text-surface-300">{data.body}</div>
 								<div class="flex gap-8 items-center">
 									<Button
 										type="secondary"

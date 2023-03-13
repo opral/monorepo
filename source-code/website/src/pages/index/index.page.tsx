@@ -19,7 +19,7 @@ export function Page() {
 				name="description"
 				content="Inlang provides dev tools, an editor to manage translations and automation via CI/CD to streamline localization."
 			/>
-			<RootLayout>
+			<RootLayout landingpage>
 				<div>
 					<Hero />
 					<Credibility />
