@@ -25,7 +25,7 @@ export const SectionLayout = (props: SectionLayoutProps) => {
 	return (
 		<div class={"w-full " + bgColor(props.type)}>
 			<div class={"relative " + landingpageGrid}>
-				<div class={"absolute top-0 left-0 h-full w-full z-0"}>
+				<div class={"invisible xl:visible absolute top-0 left-0 h-full w-full z-0 "}>
 					<div class="flex w-full h-full justify-between mx-auto">
 						<div class="h-full w-[2px] bg-surface-400 opacity-10" />
 						<div class="h-full w-[2px] bg-surface-400 opacity-10" />

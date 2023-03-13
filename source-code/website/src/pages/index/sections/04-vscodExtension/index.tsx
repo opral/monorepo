@@ -13,8 +13,8 @@ const VsCodeExtension = () => {
 			<SectionLayout type="dark">
 				<div class="relative">
 					<div class="relative z-10">
-						<div class="flex w-full items-center">
-							<div class="px-10 py-40 flex flex-col gap-8 w-1/2">
+						<div class="pt-10 pb-10 flex flex-wrap w-full items-center">
+							<div class="px-20 xl:px-10 py-10 xl:py-40 flex flex-col gap-8 w-full xl:w-1/2">
 								<FeatureGitTitle
 									circleColor="primary"
 									titleColor="surface-100"
@@ -30,14 +30,14 @@ const VsCodeExtension = () => {
 									</Button>
 								</div>
 							</div>
-							<div class="flex justify-center items-center w-1/2">
-								<div class="rounded-2xl shadow-xl">
+							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 mt-8 flex justify-center items-center w-full xl:w-1/2">
+								<div class="rounded-2xl shadow-xl w-full xl:w-2/3">
 									<ExtensionSVG />
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="absolute top-0 left-0 h-full w-[2px] bg-hover-primary z-0" />
+					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] bg-hover-primary z-0" />
 				</div>
 			</SectionLayout>
 		</>
@@ -48,13 +48,7 @@ export default VsCodeExtension
 
 const ExtensionSVG = () => {
 	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="458"
-			height="269"
-			fill="none"
-			viewBox="0 0 458 269"
-		>
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 458 269" class="w-full">
 			<rect width="458" height="268.221" fill="#0F172A" rx="16.7" />
 			<path fill="#fff" fill-opacity="0.5" d="M247.979 159.414H356.786V178.392H247.979z" />
 			<rect width="287.199" height="87.298" x="91.094" y="8" fill="#1E293B" rx="16.7" />

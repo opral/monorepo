@@ -31,10 +31,10 @@ const Credibility = () => {
 				<div class="bg-background rounded-full h-9 px-4 flex justify-center items-center w-fit border border-surface-200 my-4 text-surface-500 text-sm">
 					❤️ Loved by developers at
 				</div>
-				<div class="w-full flex">
+				<div class="w-full flex flex-wrap">
 					<For each={links}>
 						{(item) => (
-							<div class="w-1/4 px-10 flex justify-center items-center pb-12">
+							<div class="w-1/2 md:w-1/4 px-10 flex justify-center items-center pb-12">
 								<a
 									class="flex flex-col gap-2 justify-center items-center text-surface-500 hover:text-surface-900"
 									href={item.link}

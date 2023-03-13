@@ -11,25 +11,29 @@ const data = {
 const Editor = () => {
 	return (
 		<>
-			<SectionLayout type="lightGrey">
-				<SvgGitCurve />
-			</SectionLayout>
+			<div class="hidden xl:block">
+				<SectionLayout type="lightGrey">
+					<SvgGitCurve />
+				</SectionLayout>
+			</div>
 			<SectionLayout type="lightGrey">
 				<div class="relative">
-					<div class="relative z-10">
-						<div class="px-10 pt-10 pb-40 flex flex-col gap-8">
+					<div class="relative z-10 py-10">
+						<div class="ml-10 xl:ml-0 px-10 pt-10 pb-10 flex flex-col gap-8">
 							<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
-							<div class="columns-2 gap-x-10 text-surface-700">{data.body}</div>
+							<div class="columns-1 xl:columns-2 gap-x-10 text-surface-700">{data.body}</div>
 							<div class="flex gap-8 items-center">
 								<Button type="primary" href="/editor">
 									Open Editor
 								</Button>
 								<Button type="text">Create config</Button>
 							</div>
+						</div>
+						<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">
 							<img src={editorImage} alt="inlang editor" class="bg-background rounded-3xl mt-8" />
 						</div>
 					</div>
-					<div class="absolute top-0 left-0 h-full w-[2px] bg-hover-primary z-0" />
+					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] bg-hover-primary z-0" />
 				</div>
 			</SectionLayout>
 		</>
