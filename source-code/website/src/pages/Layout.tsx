@@ -30,7 +30,7 @@ export function Layout(props: { children: JSXElement }) {
 			<Header />
 			{/* the outer div is growing to occupy the entire height and thereby
 			push the footer to the bottom */}
-			<div class={"grow flex pb-24 flex-col min-h-screen " + layoutMargins}>
+			<div class={"grow flex pt-24 pb-24 flex-col min-h-screen gap-8 lg:gap-0" + layoutMargins}>
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
