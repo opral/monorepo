@@ -89,12 +89,8 @@ function Header(props: { landingpage?: boolean }) {
 						</SectionLayout>
 					</div>
 				</Show>
-				<div class={"w-full h-full py-6 px-10 " + props.landingpage && "bg-surface-50"}>
-					<nav
-						class={
-							"max-w-screen-xl w-full mx-auto md:px-10 " + props.landingpage && "bg-surface-50"
-						}
-					>
+				<div class={`w-full h-full py-6 px-10 + ${props.landingpage && "bg-surface-50"}`}>
+					<nav class={"max-w-screen-xl w-full mx-auto md:px-10"}>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
 								<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
