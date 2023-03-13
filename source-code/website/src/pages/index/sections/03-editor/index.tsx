@@ -2,6 +2,7 @@ import { Button } from "../../components/Button.jsx"
 import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import editorImage from "./../../assets/editor-image.png"
+import editorVideo from "./../../assets/editor-video.mp4"
 
 const data = {
 	title: "Editor",
@@ -34,11 +35,16 @@ const Editor = () => {
 							</div>
 						</div>
 						<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">
-							<img
-								src={editorImage}
-								alt="inlang editor"
-								class="bg-background rounded-3xl mt-8 h-full w-full"
-							/>
+							{/* <img src={editorImage} alt="inlang editor" class="bg-background rounded-3xl mt-8" /> */}
+							<video
+								class="bg-background rounded-3xl mt-8 border border-surface-500/20"
+								autoplay
+								loop
+								poster={editorImage}
+								muted
+							>
+								<source src={editorVideo} type="video/mp4" />
+							</video>
 						</div>
 					</div>
 					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] bg-hover-primary z-0" />
