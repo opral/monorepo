@@ -33,7 +33,9 @@ const Editor = () => {
 						<div class="grid grid-cols-2">
 							<div class="col-span-2 xl:col-span-1 ml-10 xl:ml-0 px-10 pt-10 pb-10 flex flex-col gap-8">
 								<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
-								<div class="columns-1 gap-x-10 text-surface-700 md:w-3/4">{data.body}</div>
+								<div class="columns-1 gap-x-10 text-surface-700 md:w-3/4 xl:w-full">
+									{data.body}
+								</div>
 								<div class="flex gap-8 items-center">
 									<Button type="primary" href="/editor">
 										Open Editor
