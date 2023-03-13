@@ -5,8 +5,8 @@ import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 
 const data = {
-	title: "Inlang CLI",
-	body: "Stet clita kasd gubergren. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.",
+	title: "inlang CLI",
+	body: "Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
 }
 
 const Cli = () => {

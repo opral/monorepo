@@ -5,7 +5,7 @@ import editorImage from "./../../assets/editor-image.png"
 
 const data = {
 	title: "Editor",
-	body: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.",
+	body: "Simplifies translation management by managing translations in a Git repository without the need for hosting, additional accounts, or synchronization. It works with local files and lets you collaborate with translators via Git workflows like pull requests.",
 }
 
 const Editor = () => {
@@ -19,16 +19,18 @@ const Editor = () => {
 			<SectionLayout type="lightGrey">
 				<div class="relative">
 					<div class="relative z-10 py-10">
-						<div class="ml-10 xl:ml-0 px-10 pt-10 pb-10 flex flex-col gap-8">
-							<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
-							<div class="columns-1 xl:columns-2 gap-x-10 text-surface-700">{data.body}</div>
-							<div class="flex gap-8 items-center">
-								<Button type="primary" href="/editor">
-									Open Editor
-								</Button>
-								<Button type="text" href="/documentation/getting-started" chevron>
-									Create config
-								</Button>
+						<div class="grid grid-cols-2">
+							<div class="col-span-2 xl:col-span-1 ml-10 xl:ml-0 px-10 pt-10 pb-10 flex flex-col gap-8">
+								<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
+								<div class="columns-1 gap-x-10 text-surface-700 md:w-3/4">{data.body}</div>
+								<div class="flex gap-8 items-center">
+									<Button type="primary" href="/editor">
+										Open Editor
+									</Button>
+									<Button type="text" href="/documentation/getting-started" chevron>
+										Create config
+									</Button>
+								</div>
 							</div>
 						</div>
 						<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">

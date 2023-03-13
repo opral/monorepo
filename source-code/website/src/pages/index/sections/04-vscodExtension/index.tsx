@@ -3,8 +3,8 @@ import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 
 const data = {
-	title: "VS Code Extension",
-	body: "Stet clita kasd gubergren. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.",
+	title: "IDE Extension",
+	body: "Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
 }
 
 const VsCodeExtension = () => {
@@ -20,7 +20,7 @@ const VsCodeExtension = () => {
 									titleColor="surface-300"
 									title={data.title}
 								/>
-								<div class="text-surface-400">{data.body}</div>
+								<div class="text-surface-300">{data.body}</div>
 								<div class="flex gap-8 items-center">
 									<Button
 										type="secondary"
