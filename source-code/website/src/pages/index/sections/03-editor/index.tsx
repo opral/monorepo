@@ -5,7 +5,17 @@ import editorImage from "./../../assets/editor-image.png"
 
 const data = {
 	title: "Editor",
-	body: "Simplifies translation management by managing translations in a Git repository without the need for hosting, additional accounts, or synchronization. It works with local files and lets you collaborate with translators via Git workflows like pull requests.",
+	body: () => {
+		return (
+			<>
+				Simplifies translation management by keeping translations in a Git repository without the
+				need for hosting, additional accounts, or synchronization. It works with local files and
+				allows you to{" "}
+				<span class="text-primary">collaborate with translators via Git workflows</span> such as
+				pull requests.
+			</>
+		)
+	},
 }
 
 const Editor = () => {

@@ -4,7 +4,20 @@ import { SectionLayout } from "../../components/sectionLayout.jsx"
 
 const data = {
 	title: "IDE Extension",
-	body: "Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
+	body: () => {
+		return (
+			<>
+				Improves developer experience when working on localized codebases by
+				<span class="text-primary"> extracting translations </span>
+				and
+				<span class="text-primary">
+					{" "}
+					extracting translations and performing error checking directly in your IDE.{" "}
+				</span>
+				This saves time and reduces the risk of errors.
+			</>
+		)
+	},
 }
 
 const VsCodeExtension = () => {

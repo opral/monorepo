@@ -1,12 +1,19 @@
 import { createSignal, Show } from "solid-js"
-import { createStore } from "solid-js/store"
 import { Button } from "../../components/Button.jsx"
 import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 
 const data = {
 	title: "inlang CLI",
-	body: "Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
+	body: () => {
+		return (
+			<>
+				Automates localization via CI/CD through{" "}
+				<span class="text-primary">translation validation and automatic machine translation.</span>{" "}
+				This saves time and reduces errors, resulting in a more efficient localization process.
+			</>
+		)
+	},
 }
 
 const Cli = () => {
