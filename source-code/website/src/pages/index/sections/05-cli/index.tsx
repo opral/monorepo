@@ -27,7 +27,7 @@ const Cli = () => {
 								</div>
 							</div>
 							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40 xl:py-40 mt-8 flex flex-col-reverse gap-4 xl:flex-col justify-center items-center w-full xl:w-1/2">
-								<div class="flex">
+								<div class="flex gap-2">
 									<Button type="secondary" function={() => setCliSlider("validate")}>
 										validate
 									</Button>

@@ -26,13 +26,17 @@ const Editor = () => {
 								<Button type="primary" href="/editor">
 									Open Editor
 								</Button>
-								<Button type="text" chevron>
+								<Button type="text" href="/documentation/getting-started" chevron>
 									Create config
 								</Button>
 							</div>
 						</div>
 						<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">
-							<img src={editorImage} alt="inlang editor" class="bg-background rounded-3xl mt-8" />
+							<img
+								src={editorImage}
+								alt="inlang editor"
+								class="bg-background rounded-3xl mt-8 h-full w-full"
+							/>
 						</div>
 					</div>
 					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] bg-hover-primary z-0" />

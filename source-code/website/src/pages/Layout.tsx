@@ -59,11 +59,13 @@ const socialMediaLinks = [
 		name: "Twitter",
 		href: "https://twitter.com/inlangHQ",
 		Icon: IconTwitter,
+		screenreader: "Twitter Profile",
 	},
 	{
 		name: "GitHub",
 		href: "https://github.com/inlang/inlang",
 		Icon: IconGithub,
+		screenreader: "GitHub Profile",
 	},
 ]
 
@@ -93,7 +95,7 @@ function Header(props: { landingpage?: boolean }) {
 					<nav class={"max-w-screen-xl w-full mx-auto md:px-10"}>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
-								<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
+								<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang
 								</span>
@@ -110,6 +112,7 @@ function Header(props: { landingpage?: boolean }) {
 												>
 													<link.Icon class="w-5 h-5" />
 													{/* <span>{link.name}</span> */}
+													<span class="sr-only">{link.screenreader}</span>
 												</a>
 											)}
 										</For>
@@ -185,7 +188,7 @@ function Footer() {
 				<div class="flex flex-row flex-wrap py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
-							<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
+							<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 						<p class="text-surface-700 font-medium">© inlang 2022</p>
