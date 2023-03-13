@@ -89,8 +89,12 @@ function Header(props: { landingpage?: boolean }) {
 						</SectionLayout>
 					</div>
 				</Show>
-				<div class="w-full h-full py-6 px-10">
-					<nav class="max-w-screen-xl w-full mx-auto px-10">
+				<div class={"w-full h-full py-6 px-10 " + props.landingpage && "bg-surface-50"}>
+					<nav
+						class={
+							"max-w-screen-xl w-full mx-auto md:px-10 " + props.landingpage && "bg-surface-50"
+						}
+					>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
 								<img class="h-8 w-auto" src="/favicon/favicon.ico" alt="Company Logo" />
@@ -155,7 +159,7 @@ function Header(props: { landingpage?: boolean }) {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-screen min-h-full pt-3 overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 overflow">
 								<For each={links}>
 									{(link) => (
 										<sl-tree class="">
