@@ -3,7 +3,9 @@
 	"changelog": "@changesets/cli/changelog",
 	"commit": false,
 	"fixed": [],
-	"linked": [["@inlang/core", "@inlang/ide-extension", "@inlang/git-sdk", "@inlang/website"]],
+	"linked": [
+		["@inlang/core", "@inlang/ide-extension", "@inlang/git-sdk", "@inlang/website", "configs"]
+	],
 	"access": "restricted",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
