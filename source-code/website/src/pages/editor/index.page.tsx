@@ -30,14 +30,14 @@ export function Page() {
 			/>
 			<RootLayout>
 				{/* START search bar */}
-				<div class="pt-4 flex flex-col items-center justify-center grow">
+				<div class="pt-28 lg:pt-16 flex flex-col items-center justify-center grow">
 					{/* negative margin as a dirty way of centering the search bar */}
 					<div class="flex p-10 items-center justify-center gap-4 -mt-32">
 						<img src="/favicon/android-chrome-256x256.png" alt="inlang logo" class="w-20 h-20" />
 						<h2 class="text-6xl font-bold">inlang</h2>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
-					<div class="flex flex-col gap-4 justify-center items-center w-full">
+					<div class="flex flex-col pb-8 lg:pb-0 gap-4 justify-center items-center w-full">
 						<sl-input
 							class="border-none p-0 w-full max-w-xl"
 							prop:size={isMobile() ? "medium" : "large"}
