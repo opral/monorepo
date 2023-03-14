@@ -10,7 +10,7 @@ const data = {
 const GetStarted = () => {
 	return (
 		<>
-			<SectionLayout type="lightGrey">
+			<SectionLayout showLines={true} type="lightGrey">
 				<div class="relative">
 					<div class="relative z-10 py-10">
 						<div class="md:grid md:grid-cols-2">

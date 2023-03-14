@@ -10,7 +10,9 @@ const data = {
 		return (
 			<>
 				Automates localization via CI/CD through{" "}
-				<span class="text-primary">translation validation and automatic machine translation.</span>{" "}
+				<span class="text-primary font-medium">
+					translation validation and automatic machine translation.
+				</span>{" "}
 				This saves time and reduces errors, resulting in a more efficient localization process.
 			</>
 		)
@@ -23,7 +25,7 @@ const Cli = () => {
 
 	return (
 		<>
-			<SectionLayout type="white">
+			<SectionLayout showLines={true} type="white">
 				<div class="relative">
 					<div class="relative z-10">
 						<div class="pt-10 pb-10 flex flex-wrap w-full items-center">

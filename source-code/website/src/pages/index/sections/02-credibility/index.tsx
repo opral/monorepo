@@ -26,7 +26,7 @@ const links = [
 
 const Credibility = () => {
 	return (
-		<SectionLayout type="white">
+		<SectionLayout showLines={true} type="white">
 			<div class="flex flex-col justify-center items-center py-4 gap-8">
 				<div class="bg-background rounded-full h-9 px-4 flex justify-center items-center w-fit border border-surface-200 my-4 text-surface-500 text-sm">
 					❤️ Loved by developers at

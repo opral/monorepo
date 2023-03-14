@@ -9,9 +9,12 @@ const data = {
 		return (
 			<>
 				Improves developer experience when working on localized codebases by
-				<span class="text-primary"> extracting translations </span>
+				<span class="text-primary font-medium"> extracting translations </span>
 				and
-				<span class="text-primary"> performing error checking directly in your IDE. </span>
+				<span class="text-primary font-medium">
+					{" "}
+					performing error checking directly in your IDE.{" "}
+				</span>
 				This saves time and reduces the risk of errors.
 			</>
 		)
@@ -21,7 +24,7 @@ const data = {
 const VsCodeExtension = () => {
 	return (
 		<>
-			<SectionLayout type="dark">
+			<SectionLayout showLines={true} type="dark">
 				<div class="relative">
 					<div class="relative z-10">
 						<div class="pt-10 pb-10 flex flex-wrap w-full items-center">

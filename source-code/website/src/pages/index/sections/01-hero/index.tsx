@@ -4,10 +4,10 @@ import KeyVisual from "./keyVisual.jsx"
 
 const Hero = () => {
 	return (
-		<SectionLayout type="lightGrey">
+		<SectionLayout showLines={true} type="lightGrey">
 			<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
 				<div class="w-full xl:w-1/2 flex flex-col gap-8 px-10 py-16 md:py-32">
-					<h1 class="text-4xl md:text-6xl font-extrabold text-surface-900 pr-16">
+					<h1 class="text-4xl md:text-6xl font-extrabold text-surface-900 pr-16 tracking-tight">
 						Localization infrastructure for software
 					</h1>
 					<p class="text-surface-600 w-3/4 leading-relaxed">

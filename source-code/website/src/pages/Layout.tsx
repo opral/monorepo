@@ -34,7 +34,7 @@ export function Layout(props: { children: JSXElement }) {
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
-			<Footer />
+			<Footer isLandingPage={false} />
 		</div>
 	)
 }
@@ -49,7 +49,7 @@ export const LandingPageLayout = (props: { children: JSXElement; landingpage?: b
 				{/* the children are wrapped in a div to avoid flex and grow being applied to them from the outer div */}
 				{props.children}
 			</div>
-			<Footer />
+			<Footer isLandingPage />
 		</div>
 	)
 }
@@ -83,11 +83,11 @@ function Header(props: { landingpage?: boolean }) {
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
 				class="sticky top-0 z-50 w-full bg-background border-b border-surface-400/10"
 			>
-				<div class={`w-full h-full py-6 px-4 sm:px-10 + ${props.landingpage && "px-10"}`}>
+				<div class={`w-full h-full py-4 px-4 sm:px-10 + ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
-								<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />
+								<img class="h-9 w-9" src="/favicon/favicon.ico" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang
 								</span>
@@ -172,14 +172,14 @@ function Header(props: { landingpage?: boolean }) {
 	)
 }
 
-function Footer() {
+const Footer = (props: { isLandingPage: boolean }) => {
 	return (
 		<footer class="border-t border-surface-100">
-			<SectionLayout type="lightGrey">
+			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
 				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
-							<img class="h-8 w-8" src="/favicon/favicon.ico" alt="Company Logo" />
+							<img class="h-9 w-9" src="/favicon/favicon.ico" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 						<p class="text-surface-700 font-medium">© inlang 2022</p>
@@ -188,39 +188,51 @@ function Footer() {
 						<p class="font-semibold text-surface-900">Docs</p>
 						<a
 							href="https://inlang.com/documentation/getting-started"
-							class="font-medium text-surface-500"
+							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Getting Started
 						</a>
-						<a href="https://inlang.com/documentation" class="font-medium text-surface-500">
+						<a
+							href="https://inlang.com/documentation"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
 							Introduction
 						</a>
 						<a
 							href="https://inlang.com/documentation/design-principles"
-							class="font-medium text-surface-500"
+							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Design Principles
 						</a>
 						<a
 							href="https://inlang.com/documentation/contributing"
-							class="font-medium text-surface-500"
+							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Contribute
 						</a>
 					</div>
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Resources</p>
-						<a href="https://inlang.com/blog" class="font-medium text-surface-500">
+						<a
+							href="https://inlang.com/blog"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
 							Blog
 						</a>
-						<a href="https://github.com/inlang/inlang" class="font-medium text-surface-500">
+						<a
+							href="https://github.com/inlang/inlang"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
 							GitHub
 						</a>
-						<a href="https://twitter.com/inlangHQ" class="font-medium text-surface-500">
+						<a
+							href="https://twitter.com/inlangHQ"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
 							Twitter
 						</a>
 					</div>
-					<div class="w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 rounded-xl py-10">
+					<div class="w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 py-10">
 						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
 						<p class="text-surface-600">
 							We welcome your input, feedback, and ideas! If you would like to get in touch with us,
