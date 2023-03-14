@@ -47,8 +47,7 @@ export const extractMessageCommand = {
 		if (preparedExtractOption === undefined) {
 			return
 		} else if (preparedExtractOption === "How to edit these replacement options?") {
-			// TODO #152
-			return vscode.env.openExternal(vscode.Uri.parse("https://github.com/inlang/inlang"))
+			return vscode.env.openExternal(vscode.Uri.parse("https://inlang.com/documentation/getting-started"))
 		}
 
 		if (preparedExtractOption === undefined) {
