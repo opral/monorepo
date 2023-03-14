@@ -20,6 +20,19 @@ export type ColorTokens = {
 	background: string
 	"on-background": string
 
+	//new
+	"surface-50": string
+	"surface-100": string
+	"surface-200": string
+	"surface-300": string
+	"surface-400": string
+	"surface-500": string
+	"surface-600": string
+	"surface-700": string
+	"surface-800": string
+	"surface-900": string
+
+	//old
 	"surface-1": string
 	"surface-2": string
 	"surface-3": string
