@@ -52,6 +52,68 @@ If you don't use JSON in your project, check out all the other [plugins](https:/
 
 2. Commit the config and open your project in the [inlang editor](https://inlang.com/editor)
 
+## Configure `ide-extension`
+
+Within the object your configuration returns the `ideExtension` configures the `ide-extension`.
+
+```js
+// filename: inlang.config.js
+
+export async function defineConfig(env) {
+	// ...
+	return {
+		// ...
+		ideExtension: {
+			messageReferenceMatchers: [
+				async (args) => {
+					const regex = /(?<!\w){?t\(['"](?<messageId>\S+)['"]\)}?/gm
+					const str = args.documentText
+					let match
+					const result = []
+
+					while ((match = regex.exec(str)) !== null) {
+						const startLine = (str.slice(0, Math.max(0, match.index)).match(/\n/g) || []).length + 1
+						const startPos = match.index - str.lastIndexOf("\n", match.index - 1)
+						const endPos =
+							match.index +
+							match[0].length -
+							str.lastIndexOf("\n", match.index + match[0].length - 1)
+						const endLine =
+							(str.slice(0, Math.max(0, match.index + match[0].length)).match(/\n/g) || []).length +
+							1
+
+						if (match.groups && "messageId" in match.groups) {
+							result.push({
+								messageId: match.groups["messageId"],
+								position: {
+									start: {
+										line: startLine,
+										character: startPos,
+									},
+									end: {
+										line: endLine,
+										character: endPos,
+									},
+								},
+							})
+						}
+					}
+					return result
+				},
+			],
+			extractMessageOptions: [
+				{
+					callback: (messageId) => `{t("${messageId}")}`,
+				},
+				{
+					callback: (messageId) => `t("${messageId}")`,
+				},
+			],
+		},
+	}
+}
+```
+
 ## Adding typesafety to the config
 
 {% Callout variant="info" %}
