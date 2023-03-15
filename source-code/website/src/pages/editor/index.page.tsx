@@ -1,11 +1,19 @@
-import { createSignal, Show } from "solid-js"
+import { createSignal, onMount, Show } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "../index/CommunityProjects.jsx"
+import { libgit } from "@inlang/git-sdk/api"
 
 export function Page() {
+	onMount(() => {
+		libgit().then(({ instance }: any) => {
+			// use instance
+			console.log(instance)
+		})
+	})
+
 	/** is not reactive because window is not reactive */
 	const isMobile = () => window.screen.width < 640
 	const [input, setInput] = createSignal("")
