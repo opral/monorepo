@@ -5,7 +5,7 @@ import injectEnvVariables from "rollup-plugin-inject-process-env"
 
 // Retrieving the package version attribute for env variable injection.
 // https://www.stefanjudis.com/snippets/how-to-import-json-files-in-es-modules-node-js/
-import { createRequire } from "module"
+import { createRequire } from "node:module"
 // polyfilling require
 const require = createRequire(import.meta.url)
 const packageVersion = require("./package.json").version
