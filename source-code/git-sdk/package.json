@@ -34,6 +34,8 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@rollup/plugin-typescript": "^11.0.0",
+		"@rollup/plugin-wasm": "^6.1.2",
 		"isomorphic-git": "^1.21.0",
 		"memfs": "^3.4.9"
 	}
