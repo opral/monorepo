@@ -6,7 +6,7 @@ import type { FS } from "@inlang/core/fs"
 import type { EnvironmentFunctions } from "@inlang/core/config"
 import { Result } from "@inlang/core/utilities"
 
-const openapi = new OpenAIApi(new Configuration())
+const openapi = new OpenAIApi()
 
 // skipping tests due to costs of invoking the openai api
 describe.skip("generating config files", () => {
@@ -15,8 +15,8 @@ describe.skip("generating config files", () => {
 		async () => {
 			const fs = Volume.fromJSON({
 				"locales/en.json": JSON.stringify({ hello: "hello from en" }),
-				"locales/fr.json": JSON.stringify({ hello: "hello from fr" }),
-				"locales/de.json": JSON.stringify({ hello: "hello from de" }),
+				"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
+				"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
 				"locales/utils.js": JSON.stringify("jibberish"),
 				"main.js": "export function hello() { return 'hello' }",
 			})
