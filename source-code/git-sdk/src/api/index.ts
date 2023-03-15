@@ -1,10 +1,15 @@
 import _git from "isomorphic-git"
 import _http from "isomorphic-git/http/web/index.js"
+
+// following below docs for bundling the wasm file:
+// https://github.com/rollup/plugins/tree/master/packages/wasm/#usage-1
+
 // @ts-ignore
+// TODO: it doesn't like this import, can't find the file
+// > Failed to resolve import "../lg2.wasm" from "../git-sdk/dist/api/index.js". Does the file exist?
+//  rollup -c completes without errors though
 import wasm from "../lg2.wasm"
 
-// TODO: try import in browser and see if it works
-// rollup -c completes without errors
 export const libgit = wasm
 
 /**
