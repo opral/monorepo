@@ -1,5 +1,7 @@
-import _git from "isomorphic-git"
-import _http from "isomorphic-git/http/web/index.js"
+// @ts-ignore
+import wasm from "../lg2.wasm"
+
+export const libgit = wasm
 
 /**
  * Raw git cli api.
@@ -10,7 +12,7 @@ import _http from "isomorphic-git/http/web/index.js"
  * by the `git-sdk`. Esepcially useful for faster development
  * iterations and progressively develop own api layer on top.
  */
-export const raw = _git
+// export const raw = _git
 
 /**
  * The http client for the git raw api.
@@ -18,4 +20,4 @@ export const raw = _git
  * Note: The http client is web-based. Node version 18 is
  * required for the http client to work in node environments.
  */
-export const http = _http
+// export const http = _http
