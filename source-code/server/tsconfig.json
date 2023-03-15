@@ -1,0 +1,15 @@
+{
+	"extends": "configs/typescript/tsconfig.base.json",
+	"include": ["src/**/*.ts", "lib/**/*.ts"],
+	"compilerOptions": {
+		// DOM because of fetch. TODO: extract fetch from this package and
+		// let fetch be provided by the environment.
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"outDir": "./dist",
+		"paths": {
+			"#src/*": ["./src/*"],
+			"#lib/*": ["./lib/*"]
+		}
+	}
+}
