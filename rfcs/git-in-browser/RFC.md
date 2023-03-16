@@ -75,7 +75,8 @@ However there might be a case where you don't need another file system in the br
 2. web worker with libgit2 gets started
 3. from main to web worker: message to `git clone --depth=1 https://github.com/inlang/example`
 4. shallow clone happens, attaches to FS, there is some code to read inlang config, find the translation files. send back the contents of the files to main thread back
-5. in browser
+5. in browser you take the content of each returned translation file, map it to some JS data structure. users make edits to the translations
+6. if they want to commit, push, they send messages to web worker, it then in turn does git operations with libgit2 and submits results to github
 
 ### libgit2 without web worker
 
