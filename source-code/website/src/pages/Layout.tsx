@@ -182,7 +182,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							<img class="h-9 w-9" src="/favicon/favicon.ico" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
-						<p class="text-surface-700 font-medium">© inlang 2022</p>
+						<p class="text-surface-700 font-medium">© inlang 2023</p>
 					</div>
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Docs</p>
