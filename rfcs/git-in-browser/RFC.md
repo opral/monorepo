@@ -65,7 +65,7 @@ The global `FS` variable refers to [Emscripten File System](https://emscripten.o
 
 Inside front end code, you can do: `new Worker(new URL("../gitworker.js", import.meta.url))` where `gitworker.js` is the file with web worker code.
 
-The only way to communicate with the web worker is to pass messages from main thread to the web worker.
+The only way to communicate with the web worker is to pass messages between main thread and web worker.
 
 If you go with this approach, you would probably want to keep the web worker state as primary state at least for git related state. Front end code sends commands to web worker, clone and everything else happens in the web worker.
 
@@ -83,6 +83,8 @@ However there might be a case where you don't need another file system in the br
 I am not familiar with all the features Inlang does now and plans to do in future. But I can imagine you can still create those things inside the main thread of the browser (including live editing) and keep all the actual git related things in web worker.
 
 Technically the editing of the translation files inside the editor doesn't have to be a file system, from my understanding at least.
+
+You can potentially type each of the messages being sent between main thread and web worker for nicer DX too.
 
 ### libgit2 without web worker
 
