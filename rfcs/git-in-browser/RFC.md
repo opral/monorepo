@@ -69,7 +69,7 @@ This causes an issue however that now the only way to communicate with the web w
 
 ### libgit2 without web worker
 
-You can instead host the `lg2.wasm` file on some remote server and then `fetch` the .wasm file from GitHub:
+You can instead host the `lg2.wasm` file on some remote server or even GitHub and then `fetch` the .wasm file like:
 
 ```
 const wasm = await fetch(
