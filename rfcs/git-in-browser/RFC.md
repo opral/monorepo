@@ -67,6 +67,16 @@ Inside front end code, you can do: `new Worker(new URL("../gitworker.js", import
 
 This causes an issue however that now the only way to communicate with the web worker is to pass messages from main thread to the web worker.
 
+If you go with this approach, you would probably want to keep the web worker state as primary state. Front end code sends commands to web worker, clone and everything else happens in the web worker. However you would also potentially need to have a file system in the front end code. So there is an issue now where 2 file systems need to be synced.
+
+However there might be a case where you don't need another file system in the browser. i.e.
+
+1. user opens https://inlang.com/editor/github.com/inlang/example
+2. web worker with libgit2 gets started
+3. from main to web worker: message to `git clone --depth=1 https://github.com/inlang/example`
+4. shallow clone happens, attaches to FS, there is some code to read inlang config, find the translation files. send back the contents of the files to main thread back
+5. in browser
+
 ### libgit2 without web worker
 
 You can instead host the `lg2.wasm` file on some remote server or even GitHub and then `fetch` the .wasm file like:
