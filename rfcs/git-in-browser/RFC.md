@@ -18,7 +18,7 @@ libgit2 when compiled to WebAssembly has an extensive set of git features. Comma
 
 It does support [rebase](https://libgit2.org/libgit2/#HEAD/group/rebase/git_rebase_abort), [pull for changes](https://stackoverflow.com/questions/27759674/libgit2-fetch-merge-commit). However these 2 things that Inlang needs are not merged into main of libgit2 yet:
 
-1. Shallow clones. There is [open pr](https://github.com/libgit2/libgit2/pull/6396) and [fork that builds libgit2 with this feature](https://github.com/nikitavoloboev/wasm-git))
+1. Shallow clones. There is [open pr](https://github.com/libgit2/libgit2/pull/6396) and [fork that builds libgit2 with this feature](https://github.com/nikitavoloboev/wasm-git).
 2. Sparse checkout. There is [open pr](https://github.com/libgit2/libgit2/pull/6394) that has this feature too, not yet merged.
 
 To have both shallow clones and sparse checkout, you'd need to combine the code from 2 prs into one code tree and then try compile it with wasm-git and hope there would be no errors.
