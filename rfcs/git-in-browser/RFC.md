@@ -91,7 +91,7 @@ You can potentially type each of the messages being sent between main thread and
 You can instead host the `lg2.wasm` file on some remote server or even GitHub and then `fetch` the .wasm file like:
 
 ```
-const wasm = await fetch("https://github.com/inlang/inlang/blob/99023c3f740c87996d33f00cac4e4d715cca4f96/source-code/git-sdk/src/lg2.wasm")
+const libgit2 = await fetch("https://github.com/inlang/inlang/blob/99023c3f740c87996d33f00cac4e4d715cca4f96/source-code/git-sdk/src/lg2.wasm")
 ```
 
 The issue is that the .wasm file is 12.5 MB. Which means if you users open the editor page directly, first you have to download the libgit2, then you have to do shallow clone which then will show the translations for editing.
