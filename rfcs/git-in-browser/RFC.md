@@ -65,9 +65,11 @@ The global `FS` variable refers to [Emscripten File System](https://emscripten.o
 
 Inside front end code, you can do: `new Worker(new URL("../gitworker.js", import.meta.url))` where `gitworker.js` is the file with web worker code.
 
-This causes an issue however that now the only way to communicate with the web worker is to pass messages from main thread to the web worker.
+The only way to communicate with the web worker is to pass messages from main thread to the web worker.
 
-If you go with this approach, you would probably want to keep the web worker state as primary state. Front end code sends commands to web worker, clone and everything else happens in the web worker. However you would also potentially need to have a file system in the front end code. So there is an issue now where 2 file systems need to be synced.
+If you go with this approach, you would probably want to keep the web worker state as primary state at least for git related state. Front end code sends commands to web worker, clone and everything else happens in the web worker.
+
+However you would also potentially need to have a file system in the front end code. If so, there is an issue now where 2 file systems need to be synced by message passing.
 
 However there might be a case where you don't need another file system in the browser. i.e.
 
