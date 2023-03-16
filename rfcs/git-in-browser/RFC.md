@@ -126,7 +126,7 @@ These 4 things need to be implemented.
 
 I have not benchmarked isomorphic-git with libgit2 but I imagine for the things Inlang needs to do, the bottleneck for most things is the network, not that git commands are implemented in JS.
 
-If we do imeplement those 4 things in JS, we don't need to sync the file system like we do with libgit2 in web worker. And we won't need to wait for 12.5 MB for WASM file to get fetched. As well as no code needed to be written to glue libgit2 with a virtual file system like [memfs](https://www.npmjs.com/package/memfs).
+If we do imeplement those 4 things in JS, we don't need to potentially sync the file system like we do with libgit2 in web worker. And we won't need to wait for 12.5 MB for WASM file to get fetched if use libgit2 w/o web worker. Running libgit2 not in a web worker, would also mean needing to write glue [memfs](https://www.npmjs.com/package/memfs) code to connect libgit2 to some virtual file system.
 
 The negative of going with isomorphic-git is that for those 4 git operations, no code has been written. However the codebase is open source and we have reference implementations although in [Rust](https://github.com/Byron/gitoxide)/[Python](https://github.com/gitpython-developers/GitPython)/[C](https://github.com/libgit2/libgit2).
 
