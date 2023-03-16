@@ -78,6 +78,8 @@ However there might be a case where you don't need another file system in the br
 5. in browser you take the content of each returned translation file, map it to some JS data structure. users make edits to the translations
 6. if they want to commit, push, they send messages to web worker, it then in turn does git operations with libgit2 and submits results to github
 
+I am not familiar with all the features Inlang does now and plans to do in future. But I can imagine you can still create those things inside the main thread of the browser (including live editing) and keep all the actual git related things in web worker.
+
 ### libgit2 without web worker
 
 You can instead host the `lg2.wasm` file on some remote server or even GitHub and then `fetch` the .wasm file like:
