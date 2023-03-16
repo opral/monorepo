@@ -100,6 +100,8 @@ The issue is that the .wasm file is 12.5 MB. Which means if you users open the e
 
 You would also need to somehow connect a file system to libgit2. `lg2.js` file does this for you but it's written in pre ES module js and would need to be rewritten to work inside Inlang Solid app.
 
+Also to note, we tried bunlding the libgit .wasm using [rollup/plugin-wasm](https://github.com/rollup/plugins/tree/master/packages/wasm) but the output of it needs some tweaking to make work. [This article](https://nickb.dev/blog/recommendations-when-publishing-a-wasm-library/) can maybe helpful in making the bundling of .wasm work.
+
 ## Pros/Cons of extending isomorphic-git
 
 Inlang already uses isomorphic-git and [memfs](https://www.npmjs.com/package/memfs) as the file system.
