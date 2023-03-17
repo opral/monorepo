@@ -4,7 +4,7 @@
 	"displayName": "inlang",
 	"type": "module",
 	"description": "i18n extension that makes you more productive.",
-	"publisher": "Inlang",
+	"publisher": "inlang",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/inlang/inlang.git"
@@ -12,7 +12,7 @@
 	"icon": "assets/icon.png",
 	"version": "0.4.3",
 	"engines": {
-		"vscode": "^1.74.1"
+		"vscode": "^1.75.0"
 	},
 	"categories": [
 		"Other",
@@ -29,12 +29,12 @@
 		]
 	},
 	"scripts": {
-		"_vscode:prepublish": "npm run build",
-		"_build": "rollup --config",
+		"build": "rollup --config",
 		"dev": "rollup --config --watch",
-		"_package": "npx vsce package",
+		"package": "npx vsce package",
+		"prepackage": "node ./scripts/preparePackage.js",
 		"---- TEST ----------------------------------------------------------": "",
-		"_test": "vitest run --coverage",
+		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
 		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
@@ -54,7 +54,8 @@
 		"@rollup/plugin-typescript": "^11.0.0",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
-		"@vscode/vsce": "^2.17.0",
+		"@vscode/vsce": "^2.18.0",
+		"ovsx": "^0.8.0",
 		"rollup": "^3.14.0"
 	},
 	"activationEvents": [

@@ -8,6 +8,7 @@ src/**
 **/*.map
 **/*.ts
 
+node_modules/**
 example/**
 ../../**
 ../**
