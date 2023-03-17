@@ -31,6 +31,7 @@
 	},
 	"dependencies": {
 		"express": "^4.18.2",
+		"memfs": "^3.4.13",
 		"openai": "^3.2.1",
 		"zod": "^3.21.4"
 	},
