@@ -1,15 +1,23 @@
 {
-	"name": "@inlang/server",
+	"name": "@inlang/service",
 	"type": "module",
+	"private": true,
 	"exports": {
-		"./rpc": "./dist/rpc/index.js"
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"import": "./dist/src/index.js"
+		},
+		"./openai": {
+			"types": "./dist/lib/openai/index.d.ts",
+			"import": "./dist/lib/openai/index.js"
+		}
 	},
 	"files": [
 		"./dist"
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
-		"dev": "tsx watch ./src/main.ts",
+		"dev": "tsc --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -22,16 +30,11 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*",
-		"@trpc/client": "^10.15.0",
-		"@trpc/server": "^10.15.0",
-		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
 		"openai": "^3.2.1",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@types/express": "^4.17.17",
-		"tsx": "^3.12.5"
+		"@types/express": "^4.17.17"
 	}
 }

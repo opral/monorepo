@@ -1,101 +1,93 @@
-import { Volume } from "memfs"
-import { describe, expect, it } from "vitest"
-import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
-import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
-import type { FS } from "@inlang/core/fs"
 import type { EnvironmentFunctions } from "@inlang/core/config"
+import type { CreateChatCompletionRequest, CreateChatCompletionResponse } from "openai"
 import { Result } from "@inlang/core/utilities"
+import { validateConfigFile } from "@inlang/core/test"
+import type { FS } from "@inlang/core/fs"
 
-const openapi = new OpenAIApi(
-	new Configuration({
-		apiKey: process.env.OPENAI_API_KEY,
-	}),
-)
+/**
+ * The endpoint for the api call shared with the .server.ts file.
+ */
+export const ENDPOINT = "/services/openai/generate-config-file"
 
-// skipping tests due to costs of invoking the openai api
-describe("generating config files", () => {
-	it(
-		"should generate a config file for a simple json project",
-		async () => {
-			const fs = Volume.fromJSON({
-				"locales/en.json": JSON.stringify({ hello: "hello from en" }),
-				"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
-				"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
-				"locales/utils.js": JSON.stringify("jibberish"),
-				"main.js": "export function hello() { return 'hello' }",
-			})
-			const env = await mockEnvironment({ copyDirectory: { fs: fs.promises, path: "/" } })
-			const result = await generateConfigFile(env)
-			if (result.isErr) {
-				console.log(result.error)
-			}
-			expect(result.isOk).toBe(true)
+/**
+ * Generates a configuration file for inlang.
+ *
+ * @example
+ *   const result = await generateConfigFile(env)
+ */
+export function generateConfigFile(env: EnvironmentFunctions) {
+	// wrapper function to inject the queryChatGpt function
+	return _generateConfigFile({
+		env,
+		queryChatGpt: async (messages: CreateChatCompletionRequest["messages"]) => {
+			const response = await fetch(
+				process.env.NODE_ENV === "production"
+					? "https://inlang.com"
+					: "http://localhost:3000" + ENDPOINT,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(messages),
+				},
+			)
+			const data = await response.json()
+			return data
 		},
-		{ timeout: 50000 },
-	)
+	})
+}
 
-	it(
-		"should generate a config file for a complex json project",
-		async () => {
-			const fs = Volume.fromJSON({
-				"i18n/en/base.json": JSON.stringify({ hello: "hello from en" }),
-				"i18n/fr/base.json": JSON.stringify({ hello: "hello from fr" }),
-				"i18n/de/base.json": JSON.stringify({ hello: "hello from de" }),
-				"i18n/utils.js": JSON.stringify("jibberish"),
-				"package.json": "{}",
-				"src/entry.js": "export function hello() { return 'hello' }",
-				"main.js": "export function hello() { return 'hello' }",
-			})
-			const env = await mockEnvironment({ copyDirectory: { fs: fs.promises, path: "/" } })
-			const result = await generateConfigFile(env)
-			if (result.isErr) {
-				console.log(result.error)
-			}
-			expect(result.isOk).toBe(true)
-		},
-		{ timeout: 50000 },
-	)
-})
-
-async function generateConfigFile(
-	env: EnvironmentFunctions,
-	messages?: CreateChatCompletionRequest["messages"],
-): Promise<Result<string, Error>> {
-	if (messages === undefined) {
-		// initial prompt
-		const files = await readdirRecursive({ fs: env.$fs, path: "./" })
-		messages = [{ role: "system", content: prompt(files) }]
-	} else if (messages.length > 6) {
-		// abort if tried too many times to save costs
-		console.log({ messages })
+/**
+ * Internal wrapper to test the function without the api call.
+ */
+export async function _generateConfigFile(args: {
+	env: EnvironmentFunctions
+	// messages is required to recursively call the function
+	// upon a failed config file generation
+	messages?: CreateChatCompletionRequest["messages"]
+	/**
+	 * Replaces the default queryChatGpt function with a custom one.
+	 */
+	queryChatGpt: (
+		messages: CreateChatCompletionRequest["messages"],
+	) => Promise<CreateChatCompletionResponse>
+}): Promise<Result<string, Error>> {
+	if (args.messages === undefined) {
+		const files = await readdirRecursive({ fs: args.env.$fs, path: "./" })
+		args.messages = [{ role: "system", content: prompt(files) }]
+	} else if (args.messages.length > 6) {
 		return Result.err(new Error("Couldn't generate a config file."))
 	}
 	try {
-		const response = await openapi.createChatCompletion({
-			model: "gpt-3.5-turbo",
-			messages,
-		})
-		const configFile = response.data.choices.at(-1)!.message!.content
-		const isValidConfig = await validateConfigFile({ file: configFile, env })
+		const response = await args.queryChatGpt(args.messages)
+		const configFile = response.choices.at(-1)!.message!.content
+		const isValidConfig = await validateConfigFile({ file: configFile, env: args.env })
 		if (isValidConfig.isOk) {
 			return Result.ok(configFile)
 		}
-		return generateConfigFile(env, [
-			...messages,
-			response.data.choices.at(-1)!.message!,
-			{
-				role: "user",
-				content:
-					"The config does not work. Try again and only reply with the config. No explanations. " +
-					isValidConfig.error.message,
-			},
-		])
+		return _generateConfigFile({
+			...args,
+			messages: [
+				...args.messages,
+				response.choices.at(-1)!.message!,
+				{
+					role: "user",
+					content:
+						"The config does not work. Try again and only reply with the config. No explanations. " +
+						isValidConfig.error.message,
+				},
+			],
+		})
 	} catch (error) {
 		return Result.err(error as Error)
 	}
 }
 
-function prompt(filePaths: string[]): string {
+/**
+ * The prompt for the openai api.
+ */
+ function prompt(filePaths: string[]): string {
 	return `
   You are supposed to write a config file for a service called "inlang" that exports a defineConfig function. 
 
@@ -135,6 +127,9 @@ function prompt(filePaths: string[]): string {
 `
 }
 
+/**
+ * Recursively reads the contents of a directory.
+ */
 async function readdirRecursive(args: { fs: FS; path: string }) {
 	const { fs, path } = args
 	let result: string[] = []
@@ -170,7 +165,7 @@ async function readdirRecursive(args: { fs: FS; path: string }) {
  * Copyright (c) 2014-2018, Jon Schlinkert.
  * Released under the MIT License.
  */
-export function normalizePath(path: string) {
+function normalizePath(path: string) {
 	if (typeof path !== "string") {
 		throw new TypeError("expected path to be a string")
 	}
