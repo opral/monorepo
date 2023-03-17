@@ -23,12 +23,7 @@ jobs:
       - name: Build VSCode extension package
         run: npm run package -w source-code/ide-extension
       - name: Publish to VSCode Marketplace
-        run: vsce publish -p ${{secrets.VSCE_TOKEN}}
+        run: vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./source-code/ide-extension
         env:
-          VSCE_TOKEN: ${{secrets.VSCE_TOKEN}}
-      - name: Publish to OpenVSX
-        run: ovsx publish -p ${{secrets.OVSX_TOKEN}}
-        working-directory: ./source-code/ide-extension
-        env:
-          OVSX_TOKEN: ${{secrets.OVSX_TOKEN}}
+          VSCODE_MARKETPLACE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
