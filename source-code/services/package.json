@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/service",
+	"name": "@inlang/services",
 	"type": "module",
 	"private": true,
 	"exports": {
