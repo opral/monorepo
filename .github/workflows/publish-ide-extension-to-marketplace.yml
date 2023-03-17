@@ -26,4 +26,4 @@ jobs:
         run: npx vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./source-code/ide-extension
         env:
-          VSCODE_MARKETPLACE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+          VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
