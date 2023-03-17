@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/services",
+	"name": "@inlang/shared",
 	"type": "module",
 	"private": true,
 	"exports": {
