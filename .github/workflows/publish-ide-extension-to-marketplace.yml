@@ -1,0 +1,29 @@
+name: Publish @inlang/ide-extension to VSCode Marketplace
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm-cache-for-@inlang/ide-extension"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build project
+        run: npm run build
+      - name: Build VSCode extension package
+        run: npm run package -w source-code/ide-extension
+      - name: Publish to VSCode Marketplace
+        run: vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+        working-directory: ./source-code/ide-extension
+        env:
+          VSCODE_MARKETPLACE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}

@@ -1,3 +1,5 @@
+name: Publish @inlang/core to NPM
+
 on:
   push:
     paths:
