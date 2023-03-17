@@ -6,6 +6,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: ci-cd
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
