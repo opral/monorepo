@@ -1,19 +1,24 @@
 import { Command } from "commander"
-import prompts from "prompts"
+import { generateConfigFile } from "@inlang/shared/openai"
+import fs from "node:fs/promises"
+import { logger } from "../../api.js"
 
 export const init = new Command()
 	.command("init")
 	.description("Initialize the inlang.config.js file.")
 	.action(async () => {
-		const response1 = await prompts({
-			type: "autocomplete",
-			name: "format",
-			initial: "fluent",
-			message: "What file format is or will be used for translations in this project?",
-			choices: [
-				{ title: "fluent", value: "fluent" },
-				{ title: "json", value: "json" },
-			],
-		})
-		console.log(response1)
+		logger.info("Generating config file with AI 🤖 ...")
+		const result = await generateConfigFile({ fs, path: "./" })
+		if (result.isErr) {
+			logger.error("Failed to generate config file.", result.error)
+			return
+		}
+		logger.success("Generated config file.")
+		logger.info("Writing config file to disk...")
+		try {
+			await fs.writeFile("./inlang.config.js", result.value, "utf-8")
+			logger.success("Wrote config file to disk.")
+		} catch (error) {
+			logger.error("Failed to write config file to disk.", error)
+		}
 	})

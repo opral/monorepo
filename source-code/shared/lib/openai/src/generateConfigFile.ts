@@ -1,4 +1,3 @@
-import type { EnvironmentFunctions } from "@inlang/core/config"
 import { Result } from "@inlang/core/utilities"
 import type { FS } from "@inlang/core/fs"
 
@@ -11,14 +10,16 @@ export const ENDPOINT = "/services/openai/generate-config-file"
  * Generates a configuration file for inlang.
  *
  * @example
- *   const result = await generateConfigFile(env)
+ *   // generate a config file for the current directory
+ *   const result = await generateConfigFile({ fs: fs.promises, path: "./" })
  */
-export async function generateConfigFile(
-	env: EnvironmentFunctions,
-): Promise<Result<string, Error>> {
+export async function generateConfigFile(args: {
+	fs: FS
+	path: "./"
+}): Promise<Result<string, Error>> {
 	try {
 		// all files in the project as a json object
-		const filesystemAsJson = await readdirRecursive({ fs: env.$fs, path: "./" })
+		const filesystemAsJson = await readdirRecursive(args)
 		const response = await fetch(
 			process.env.NODE_ENV === "production"
 				? "https://inlang.com"

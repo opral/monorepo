@@ -1,4 +1,3 @@
-import type { FS } from "@inlang/core/fs"
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import { Result } from "@inlang/core/utilities"
 import bodyParser from "body-parser"
