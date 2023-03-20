@@ -82,6 +82,32 @@ describe("lint", async () => {
 		vi.resetAllMocks()
 	})
 
+	test("it should be immutable and not modify the resources passed as an argument", async () => {
+		const cloned = structuredClone(referenceResource)
+		let context: Context
+		const result = await doLint(
+			[
+				{
+					id: "inlang.someError",
+					level: "error",
+					setup: (args) => {
+						context = args.context
+					},
+					visitors: {
+						Resource: ({ target }) => {
+							if (target) {
+								context.report({ node: target, message: "Error" })
+							}
+						},
+					},
+				},
+			],
+			[cloned],
+		)
+		expect(cloned).toStrictEqual(referenceResource)
+		expect(result).not.toStrictEqual(cloned)
+	})
+
 	describe("rules", async () => {
 		test("should be able to disable rule", async () => {
 			const resources = [referenceResource]

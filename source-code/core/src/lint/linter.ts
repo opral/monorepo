@@ -18,10 +18,12 @@ export const lint = async (args: {
 	resources: Resource[]
 }): Promise<LintedResource[]> => {
 	const { referenceLanguage, languages, lint } = args.config
+	// linting the resources should not modify args.resources.
+	const resources = structuredClone(args.resources)
 	if (lint === undefined || lint.rules.length === 0) {
 		return args.resources
 	}
-	const reference = getResourceForLanguage(args.resources, referenceLanguage)
+	const reference = getResourceForLanguage(resources, referenceLanguage)
 
 	await Promise.all(
 		lint.rules.flat().map((lintRule) =>
@@ -30,12 +32,12 @@ export const lint = async (args: {
 				referenceLanguage,
 				languages,
 				reference,
-				resources: args.resources,
+				resources,
 			}).catch((e) => console.error(`Unexpected error in lint rule '${lintRule.id}':`, e)),
 		),
 	)
 
-	return args.resources as LintedResource[]
+	return resources as LintedResource[]
 }
 
 const processLintRule = async ({
