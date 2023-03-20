@@ -472,6 +472,7 @@ async function cloneRepository(args: {
 		dir: "/",
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
+		depth: 1,
 	})
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
