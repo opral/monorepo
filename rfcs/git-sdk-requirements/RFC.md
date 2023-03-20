@@ -118,3 +118,4 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 - Does a JS implementation (forked from isomomorphic git) suit our needs of faster iteration speeds better than a WebAssembly implementation?
 - Is a JS implementation fast enough?
 - State management differences (syncing file systems etc.)?
+- Ease of debugging (for faster iteration speeds). A pure JS implementation is straightforward to debug.
