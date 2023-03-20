@@ -1,5 +1,5 @@
 import type { Resource, Message, Pattern } from "../ast/schema.js"
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
+import type { Config } from "../config/schema.js"
 import { createContext, LintedResource } from "./context.js"
 import type {
 	LintableNode,
@@ -13,25 +13,21 @@ import type {
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
 
-export const getLintRulesFromConfig = (config: Config) => (config.lint?.rules || []).flat()
-
-export const lint = async (config: Config, env: EnvironmentFunctions) => {
-	const { referenceLanguage, languages, readResources } = config
-
-	const lintRules = getLintRulesFromConfig(config)
-	if (!lintRules.length) {
-		console.warn("No lint rules specified. Aborting ...")
-		return
+export const lint = async (args: {
+	config: Pick<Config, "lint" | "languages" | "referenceLanguage">
+	resources: Resource[]
+}): Promise<LintedResource[]> => {
+	const { referenceLanguage, languages, lint } = args.config
+	// linting the resources should not modify args.resources.
+	const resources = structuredClone(args.resources)
+	if (lint === undefined || lint.rules.length === 0) {
+		return args.resources
 	}
-
-	const resources = await readResources({ config })
-
 	const reference = getResourceForLanguage(resources, referenceLanguage)
 
 	await Promise.all(
-		lintRules.map((lintRule) =>
+		lint.rules.flat().map((lintRule) =>
 			processLintRule({
-				env,
 				lintRule,
 				referenceLanguage,
 				languages,
@@ -45,14 +41,12 @@ export const lint = async (config: Config, env: EnvironmentFunctions) => {
 }
 
 const processLintRule = async ({
-	env,
 	lintRule,
 	referenceLanguage,
 	languages,
 	reference,
 	resources,
 }: {
-	env: EnvironmentFunctions
 	lintRule: LintRule
 	referenceLanguage: string
 	languages: string[]
@@ -64,7 +58,7 @@ const processLintRule = async ({
 
 	const context = createContext(id, level)
 
-	const payload = await setup({ env, referenceLanguage, languages, context })
+	const payload = await setup({ referenceLanguage, languages, context })
 
 	for (const language of languages) {
 		const target = getResourceForLanguage(resources, language)

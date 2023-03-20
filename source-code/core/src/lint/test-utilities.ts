@@ -1,5 +1,4 @@
 import { lint as lintImplementation, LintRule } from "./index.js"
-import type { Config, EnvironmentFunctions } from "@inlang/core/config"
 import type { Message, Resource } from "@inlang/core/ast"
 import { vi } from "vitest"
 
@@ -27,23 +26,16 @@ const attachSpies = ({ visitors }: LintRule) => {
 	for (const key of ["Resource", "Message", "Pattern"] as const) attachSpiesToVisitor(visitors, key)
 }
 
-const env: EnvironmentFunctions = {
-	$fs: vi.fn() as any,
-	$import: vi.fn(),
-}
-
 export const lint = (rule: LintRule, resources: Resource[]) => {
 	attachSpies(rule)
 
 	const config = {
 		referenceLanguage: resources[0]?.languageTag.name,
 		languages: resources.map((resource) => resource.languageTag.name),
-		readResources: async () => resources,
-		writeResources: async () => undefined,
 		lint: { rules: [rule] },
-	} satisfies Config
+	}
 
-	return lintImplementation(config, env)
+	return lintImplementation({ config, resources })
 }
 
 export const createResource = (language: string, ...messages: Message[]) =>
