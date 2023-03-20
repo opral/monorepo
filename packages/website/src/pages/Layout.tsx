@@ -1,6 +1,7 @@
 import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
+import IconDiscord from "~icons/cib/discord"
 import IconClose from "~icons/material-symbols/close-rounded"
 import IconSignOut from "~icons/material-symbols/logout-rounded"
 import IconMenu from "~icons/material-symbols/menu-rounded"
@@ -65,6 +66,13 @@ const socialMediaLinks = [
 		name: "GitHub",
 		href: "https://github.com/inlang/inlang",
 		Icon: IconGithub,
+		screenreader: "GitHub Repository",
+	},
+	{
+		name: "Discord",
+		href: "https://discord.gg/gdMPPWy57R",
+		Icon: IconDiscord,
+		screenreader: "Discord Server",
 	},
 ]
 
