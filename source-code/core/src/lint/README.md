@@ -27,45 +27,27 @@ You can use the `lint` function provided by `@inlang/core/lint`.
 ```ts
 import { lint } from "@inlang/core/eslint"
 
-const config = {} // the resolved config from `inlang.config.js`
-const env = {} // the environment functions
-
-const result = await lint(config, env)
+// lint takes a subset of the inlang.config.js file and the resources as arguments
+const result = await lint({ config, resources })
 ```
 
 The promise returns an `Array` of all `Resources`. The nodes of the `Resource` and it's children can have a `lint` attribute attached. If present, the `lint` attribute will contain an `Array` of `LintResults`. To make it easier to see if one of the lint rules reported a violation, `inlang` provides some [utility functions](#utility-functions).
 
 #### utility functions
 
-Utility functions provide an easy way to check if a `Resource` has a `lint` attribute. All utility functions can be imported from `@inlang/core/lint`. Per default nodes are checked recursively for the `lint` attribute. You can pass `false` as the last argument to just check a node without it's children.
+Utility functions provide an easy way to check if a `Resource` has a `lint` attribute. All utility functions can be imported from `@inlang/core/lint`. Per default nodes are checked recursively for the `lint` attribute. You can pass `nested: false` in the options to check a node without it's children.
 
 Example:
 
 ```ts
-import { getLintErrors } from "@inlang/core/lint"
+import { getLintReports } from "@inlang/core/lint"
 
 // recursively check all nodes for lint errors
-const errors = getLintErrors(lintedResource)
+const errors = getLintReports(lintedResource, { level: "error" })
 
 // just check a single node for lint errors
-const errors = getLintErrors(lintedResource, false)
+const errors = getLintReports(lintedResource, { level: "error", nested: false })
 ```
-
-Here is a list of all provided utility functions:
-
-- **`getLintReports`**: Extracts all lint reports that are present on the given node.
-- **`getLintReportsByLevel`**: Extracts all lint reports with a certain lint level that are present on the given node.
-- **`getLintErrors`**: Extracts all lint reports with the 'error' lint level that are present on the given node.
-- **`getLintWarnings`**: Extracts all lint reports with the 'warn' lint level that are present on the given node.
-- **`getLintReportsWithId`**: Extracts all lint reports with a certain lint id that are present on the given node.
-- **`getLintErrorsWithId`**: Extracts all lint reports with a certain lint id and the 'error' lint level that are present on the given node.
-- **`getLintWarningsWithId`**: Extracts all lint reports with a certain lint id and the 'warn' lint level that are present on the given node.
-- **`hasLintReports`**: Checks if a given node has lint reports attached to it.
-- **`hasLintErrors`**: Checks if a given node has lint reports with the 'error' lint level attached to it.
-- **`hasLintWarnings`**: Checks if a given node has lint reports with the 'warn' lint level attached to it.
-- **`hasLintReportsWithId`**: Checks if a given node has lint reports with a certain lint id attached to it.
-- **`hasLintErrorsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'error' lint level attached to it.
-- **`hasLintWarningsWithId`**: Checks if a given node has lint reports with a certain lint id and the 'warn' lint level attached to it.
 
 ## Configuration
 
@@ -163,8 +145,7 @@ The `createLintRule` expects 3 parameters.
 3. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
 
    - `setup`: A function that can be used to open connections or setup other stuff that will be used during the lint process.\
-      The `setup` function gets called with the following parameter: `{ env, referenceLanguage, languages, context }` where
-     - `env` are the [environment functions](https://inlang.com/documentation/environment-functions) used to e.g. be able to import modules.
+      The `setup` function gets called with the following parameter: `{ referenceLanguage, languages, context }` where
      - `referenceLanguage` is the reference language of ths repository.
      - `languages` is an array of the supported languages.
      - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.
