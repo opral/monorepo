@@ -25,7 +25,7 @@ export const lint = async (args: {
 	const reference = getResourceForLanguage(args.resources, referenceLanguage)
 
 	await Promise.all(
-		lint?.rules.flat().map((lintRule) =>
+		lint.rules.flat().map((lintRule) =>
 			processLintRule({
 				lintRule,
 				referenceLanguage,
