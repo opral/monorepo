@@ -27,10 +27,8 @@ You can use the `lint` function provided by `@inlang/core/lint`.
 ```ts
 import { lint } from "@inlang/core/eslint"
 
-const config = {} // the resolved config from `inlang.config.js`
-const env = {} // the environment functions
-
-const result = await lint(config, env)
+// lint takes a subset of the inlang.config.js file and the resources as arguments
+const result = await lint({ config, resources })
 ```
 
 The promise returns an `Array` of all `Resources`. The nodes of the `Resource` and it's children can have a `lint` attribute attached. If present, the `lint` attribute will contain an `Array` of `LintResults`. To make it easier to see if one of the lint rules reported a violation, `inlang` provides some [utility functions](#utility-functions).
@@ -163,8 +161,7 @@ The `createLintRule` expects 3 parameters.
 3. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
 
    - `setup`: A function that can be used to open connections or setup other stuff that will be used during the lint process.\
-      The `setup` function gets called with the following parameter: `{ env, referenceLanguage, languages, context }` where
-     - `env` are the [environment functions](https://inlang.com/documentation/environment-functions) used to e.g. be able to import modules.
+      The `setup` function gets called with the following parameter: `{ referenceLanguage, languages, context }` where
      - `referenceLanguage` is the reference language of ths repository.
      - `languages` is an array of the supported languages.
      - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.

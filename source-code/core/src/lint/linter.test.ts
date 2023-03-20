@@ -1,59 +1,20 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest"
 import type { Message, Resource } from "../ast/schema.js"
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
 import type { Context } from "./context.js"
-import { getLintRulesFromConfig, lint } from "./linter.js"
+import { lint } from "./linter.js"
 import { LintRule, createLintRule, EnterNodeFunction, LintableNode } from "./rule.js"
-
-describe("getLintRulesFromConfig", async () => {
-	const rule1 = { id: "rule.1" } as unknown as LintRule
-	const rule2 = { id: "rule.2" } as unknown as LintRule
-
-	test("should return an empty `Array` if no lint attribute is present", async () => {
-		const rules = getLintRulesFromConfig({} as Config)
-		expect(rules).toHaveLength(0)
-	})
-
-	test("should return all specified lint rules", async () => {
-		const rules = getLintRulesFromConfig({
-			lint: { rules: [rule1, rule2] },
-		} as Config)
-		expect(rules).toHaveLength(2)
-		expect(rules[0].id).toBe(rule1.id)
-		expect(rules[1].id).toBe(rule2.id)
-	})
-
-	test("should flatten lint rules", async () => {
-		const rules = getLintRulesFromConfig({
-			lint: { rules: [[rule2], rule1] },
-		} as Config)
-		expect(rules).toHaveLength(2)
-		expect(rules[0].id).toBe(rule2.id)
-		expect(rules[1].id).toBe(rule1.id)
-	})
-})
-
-// --------------------------------------------------------------------------------------------------------------------
 
 vi.spyOn(console, "info").mockImplementation(vi.fn)
 vi.spyOn(console, "warn").mockImplementation(vi.fn)
 vi.spyOn(console, "error").mockImplementation(vi.fn)
 
-const dummyEnv: EnvironmentFunctions = {
-	$fs: vi.fn() as any,
-	$import: vi.fn(),
-}
-
 const doLint = (rules: LintRule[], resources: Resource[]) => {
 	const config = {
 		referenceLanguage: resources[0]?.languageTag.name,
 		languages: resources.map((resource) => resource.languageTag.name),
-		readResources: async () => resources,
-		writeResources: async () => undefined,
 		lint: { rules },
-	} satisfies Config
-
-	return lint(config, dummyEnv)
+	}
+	return lint({ config, resources })
 }
 
 const createResource = (language: string, ...messages: Message[]) =>
@@ -686,7 +647,6 @@ describe("lint", async () => {
 					.calls[0][0] as Parameters<LintRule["setup"]>[0]
 				expect(payload.referenceLanguage).toBe("en")
 				expect(payload.languages).toMatchObject(["en"])
-				expect(payload.env).toBe(dummyEnv)
 				expect(payload.context.report).toBeDefined()
 			})
 
