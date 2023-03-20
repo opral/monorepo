@@ -478,7 +478,7 @@ async function cloneRepository(args: {
 		depth: 1,
 	})
 
-	// fetch the remaining 100 commits from the branch
+	// fetch 100 more commits, can get more commits if needed
 	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
 	raw.fetch({
 		fs: args.fs,
