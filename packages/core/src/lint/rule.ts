@@ -1,5 +1,5 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
+import type { Config } from "../config/schema.js"
 import type { MaybePromise } from "../utilities/types.js"
 import { LintLevel, parseLintConfigArguments, Context } from "./context.js"
 
@@ -82,7 +82,6 @@ export type LintRule = {
 	level: false | LintLevel
 	setup: (
 		param: Pick<Config, "referenceLanguage" | "languages"> & {
-			env: EnvironmentFunctions
 			context: Context
 		},
 	) => MaybePromise<unknown>
