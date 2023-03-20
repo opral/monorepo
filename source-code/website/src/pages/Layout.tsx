@@ -238,7 +238,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							We welcome your input, feedback, and ideas! If you would like to get in touch with us,
 							please don't hesitate to send us an email.
 						</p>
-						<a href="mailto:hellop@inlang.com">
+						<a href="mailto:hello@inlang.com">
 							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md">
 								Get in Touch
 							</button>
@@ -246,27 +246,6 @@ const Footer = (props: { isLandingPage: boolean }) => {
 					</div>
 				</div>
 			</SectionLayout>
-			{/* <div class={`flex gap-8  ${layoutMargins}`}>
-				<div class="flex  grow justify-end items-center  space-x-4 ">
-					<a href="mailto:hello@inlang.com" class="link link-primary ">
-						hello@inlang.com
-					</a>
-					<div class="hidden md:flex justify-end space-x-6">
-						<For each={socialMediaLinks}>
-							{(link) => (
-								<a
-									target="_blank"
-									class="link link-primary flex space-x-2 items-center"
-									href={link.href}
-								>
-									<link.Icon />
-									<span class="sr-only">{link.name}</span>
-								</a>
-							)}
-						</For>
-					</div>
-				</div>
-			</div> */}
 		</footer>
 	)
 }
