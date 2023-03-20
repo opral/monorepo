@@ -466,14 +466,30 @@ async function cloneRepository(args: {
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return undefined
 	}
+
+	// do shallow clone, get first commit and just one branch
 	await raw.clone({
 		fs: args.fs,
 		http,
 		dir: "/",
 		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
+		singleBranch: true,
 		depth: 1,
 	})
+
+	// fetch the remaining 100 commits from the branch
+	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
+	raw.fetch({
+		fs: args.fs,
+		http,
+		dir: "/",
+		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		url: `https://${host}/${owner}/${repository}`,
+		depth: 100,
+		relative: true,
+	})
+
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	const date = new Date()
