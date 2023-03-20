@@ -112,11 +112,12 @@ describe("lint", async () => {
 			})
 		})
 
-		test("should not start linting if no rules are specified", async () => {
-			const result = await doLint([], [])
+		test("should return the original resource if no rules are specified", async () => {
+			const resources = [referenceResource]
 
-			expect(result).toBeUndefined()
-			expect(console.warn).toHaveBeenCalledTimes(1)
+			const result = await doLint([], resources)
+
+			expect(result).toEqual(resources)
 		})
 
 		test("should process all 'Resources'", async () => {

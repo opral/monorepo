@@ -16,11 +16,10 @@ const getResourceForLanguage = (resources: Resource[], language: string) =>
 export const lint = async (args: {
 	config: Pick<Config, "lint" | "languages" | "referenceLanguage">
 	resources: Resource[]
-}) => {
+}): Promise<LintedResource[]> => {
 	const { referenceLanguage, languages, lint } = args.config
 	if (lint === undefined || lint.rules.length === 0) {
-		console.warn("No lint rules specified. Aborting ...")
-		return
+		return args.resources
 	}
 	const reference = getResourceForLanguage(args.resources, referenceLanguage)
 
