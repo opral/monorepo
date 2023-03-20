@@ -10,27 +10,48 @@ import type {
 import type { LintRuleId } from "./rule.js"
 
 /**
+ * Query options for lints.
+ *
+ *
+ */
+type QueryOptions = {
+	nested?: boolean
+	level?: LintLevel
+	id?: LintRuleId
+}
+
+/**
  * Extracts all lint reports that are present on the given node.
  * Per default it will also return lint reports attached to child nodes.
  *
  * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.level filter based on the level
+ * @param options.id filter based on the lint id
  * @returns a list of lint reports
  */
-export const getLintReports = (node: LintedNode | LintedNode[], nested = true): LintReport[] => {
+export const getLintReports = (
+	node: LintedNode | LintedNode[],
+	// Writing out QueryOptions for a better DX.
+	// Developers can see the options instead of the type.
+	options?: {
+		id?: LintRuleId
+		level?: LintLevel
+		nested?: boolean
+	},
+): LintReport[] => {
+	const withDefaults = { nested: true, ...options }
 	if (Array.isArray(node)) {
-		return node.flatMap((n) => getLintReports(n, nested))
+		return node.flatMap((n) => getLintReports(n, withDefaults))
 	}
-
 	const { type } = node
 	switch (type) {
 		case "Resource":
-			return getLintReportsFromResource(node, nested)
+			return withFilters(getLintReportsFromResource(node, withDefaults), withDefaults)
 		case "Message":
-			return getLintReportsFromMessage(node, nested)
+			return withFilters(getLintReportsFromMessage(node, withDefaults), withDefaults)
 		case "Pattern":
-			return getLintReportsFromPattern(node)
-
+			return withFilters(getLintReportsFromPattern(node), withDefaults)
 		default:
 			return unhandled(type, node)
 	}
@@ -38,102 +59,32 @@ export const getLintReports = (node: LintedNode | LintedNode[], nested = true): 
 
 const getLintReportsFromResource = (
 	{ lint, body }: LintedResource,
-	nested: boolean,
+	options: QueryOptions,
 ): LintReport[] => [
 	...(lint || []),
-	...(nested ? body.flatMap((message) => getLintReportsFromMessage(message, nested)) : []),
+	...(options.nested ? body.flatMap((message) => getLintReportsFromMessage(message, options)) : []),
 ]
 
 const getLintReportsFromMessage = (
 	{ lint, pattern }: LintedMessage,
-	nested: boolean,
-): LintReport[] => [...(lint || []), ...(nested ? getLintReportsFromPattern(pattern) : [])]
+	options: QueryOptions,
+): LintReport[] => [...(lint || []), ...(options.nested ? getLintReportsFromPattern(pattern) : [])]
 
 const getLintReportsFromPattern = ({ lint }: LintedPattern): LintReport[] => lint || []
 
-// --------------------------------------------------------------------------------------------------------------------
-
 /**
- * Extracts all lint reports with a certain lint level that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param level the lint level to filter
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
+ * Applies filters based on the QueryOptions to a lint report.
  */
-export const getLintReportsByLevel = (
-	level: LintLevel,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): LintReport[] => getLintReports(node, nested).filter((report) => report.level === level)
-
-/**
- * Extracts all lint reports with the 'error' lint level that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
- */
-export const getLintErrors = getLintReportsByLevel.bind(undefined, "error")
-
-/**
- * Extracts all lint reports with the 'warn' lint level that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
- */
-export const getLintWarnings = getLintReportsByLevel.bind(undefined, "warn")
-
-// --------------------------------------------------------------------------------------------------------------------
-
-/**
- * Extracts all lint reports with a certain lint id that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param id the lint id to filter
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
- */
-export const getLintReportsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): LintReport[] => getLintReports(node, nested).filter((report) => report.id === id)
-
-/**
- * Extracts all lint reports with a certain lint id and the 'error' lint level that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param id the lint id to filter
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
- */
-export const getLintErrorsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): LintReport[] => getLintErrors(node, nested).filter((report) => report.id === id)
-
-/**
- * Extracts all lint reports with a certain lint id and the 'warn' lint level that are present on the given node.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param id the lint id to filter
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns a list of lint reports
- */
-export const getLintWarningsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): LintReport[] => getLintWarnings(node, nested).filter((report) => report.id === id)
+const withFilters = (report: LintReport[], options: QueryOptions) => {
+	return report.filter((report) => {
+		if (options.id && report.id !== options.id) {
+			return false
+		} else if (options.level && report.level !== options.level) {
+			return false
+		}
+		return true
+	})
+}
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -142,72 +93,17 @@ export const getLintWarningsWithId = (
  * Per default it will also return lint reports attached to child nodes.
  *
  * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.level filter based on the level
+ * @param options.id filter based on the lint id
  * @returns `true` iff the given node has lint reports
  */
-export const hasLintReports = (node: LintedNode | LintedNode[], nested = true): boolean =>
-	getLintReports(node, nested).length > 0
-
-/**
- * Checks if a given node has lint reports with the 'error' lint level attached to it.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns `true` iff the given node has lint reports
- */
-export const hasLintErrors = (node: LintedNode | LintedNode[], nested = true): boolean =>
-	getLintErrors(node, nested).length > 0
-
-/**
- * Checks if a given node has lint reports with the 'warn' lint level attached to it.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns `true` iff the given node has lint reports
- */
-export const hasLintWarnings = (node: LintedNode | LintedNode[], nested = true): boolean =>
-	getLintErrors(node, nested).length > 0
-
-/**
- * Checks if a given node has lint reports with a certain lint id attached to it.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns `true` iff the given node has lint reports
- */
-export const hasLintReportsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): boolean => getLintReportsWithId(id, node, nested).length > 0
-
-/**
- * Checks if a given node has lint reports with a certain lint id and the 'error' lint level attached to it.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns `true` iff the given node has lint reports
- */
-export const hasLintErrorsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): boolean => getLintErrorsWithId(id, node, nested).length > 0
-
-/**
- * Checks if a given node has lint reports with a certain lint id and the 'warn' lint level attached to it.
- * Per default it will also return lint reports attached to child nodes.
- *
- * @param node the node to extract lint reports from
- * @param nested if set to `false` will just return the lint reports directly attached on this node
- * @returns `true` iff the given node has lint reports
- */
-export const hasLintWarningsWithId = (
-	id: LintRuleId,
-	node: LintedNode | LintedNode[],
-	nested = true,
-): boolean => getLintWarningsWithId(id, node, nested).length > 0
+export const hasLintReports = (
+	node: LintedNode | LintedNode[], // Writing out QueryOptions for a better DX.
+	// Developers can see the options instead of the type.
+	options?: {
+		id?: LintRuleId
+		level?: LintLevel
+		nested?: boolean
+	},
+): boolean => getLintReports(node, options).length > 0
