@@ -157,7 +157,7 @@ There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-c
 
 ![Options eplained](./git-clone-explained-2.png)
 
-There is also way to achieve above with `git init` and orphan branch. Speed wise, they are the same. In `git init` you just create a folder yourself.
+There is also a way to achieve above with `git init` and orphan branch. Speed wise, they are the same. In `git init` you just create a folder yourself.
 
 We don't technically need to do `git config core.sparseCheckout true` as we don't need to be up to git spec. There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option though so it's no issue to do this part.
 
@@ -184,7 +184,7 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 ### Questions
 
-Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
+#### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
 A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
 
@@ -195,13 +195,13 @@ Should do this for all other commands too. But general intuition is that perform
 
 We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread.
 
-Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
+#### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
 A: Currently Inlang exposes isomorphic git raw from git sdk. Everything runs in the main thread, from our observations this had no issues in performance thus far. Only pressing issues are that inital loading takes too long as shallow clone is not fast enough. And rebase is needed feature to keep git history clean. Both those features are not expesnsive to want to run in a web worker.
 
 So it makes sense to keep everything in memory in javascript.
 
-Q: How should Git SDK look in near future?
+#### Q: How should Git SDK look in near future?
 
 A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
 
@@ -268,7 +268,7 @@ As I am writing this. This to me seems like a nice way to abstract working with 
 
 ### Questions
 
-Q: Is web worker needed or we should just use WASM for Git operations?
+#### Q: Is web worker needed or we should just use WASM for Git operations?
 
 A:
 
@@ -278,7 +278,7 @@ I think we can avoid using web workers. And just interface with WASM directly us
 
 The supposed benefit of web
 
-Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
+#### Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
 A:
 
