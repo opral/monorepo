@@ -226,11 +226,29 @@ Paying attention that we are running in a browser context and not all details ar
 
 #### Q: Will using Isomorphic Git answer to all stated goals above?
 
-Goal 1: Must run in the browser/on the client ✅
+✅ = already done
+🚧 = work required
+❎ = not possible
 
-Goal 2: Lazy loading of files and git history 🚧
+Goal 1: Must run in the browser/on the client [High Confidence] ✅
 
-Is achievable in a few ways. But in current state would require
+Goal 2: Lazy loading of files and git history [High Confidence] 🚧
+
+Is achievable in a few ways. But in current state would require sparse checkout to be implemented.
+
+Goal 3: Must be git compatible but not necessarily up to spec [Medium Confidence] ✅
+
+No issue here. Isomorphic Git is already git compatible, if we decide to extend it with new features we can have a fork of Isomorphic Git potentially or bring commands up to spec and merge them into Iso Git repo.
+
+Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
+
+> note: need to read up on it to say for sure
+
+But think it should be possible to wrap around Isomorphic Git to add this feature. Might not even need changes to Iso Git core itself.
+
+Goal 5: (Future) Real-time collaboration 🚧
+
+It's interesting to revist the API explorations above in context of real-time collaboration.
 
 ## Git compiled to WASM
 
