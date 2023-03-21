@@ -192,7 +192,7 @@ We can also be smart on the client side and perhaps see if the files of the proj
 
 We would need to write code to schedule this work so there should be some algorithm to perhaps predict a future heavy operation.
 
-Q: Does it make sense to run Isomoprphic Git in a web worker?
+Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
 A:
 
