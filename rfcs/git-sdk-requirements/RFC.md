@@ -219,7 +219,31 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 ### Context
 
-Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
+The reason you'd want to move to libgit2 is that libgit2 supports more options out of the box. And potentially performance.
+
+### Questions
+
+#### Q: Is web worker needed or we should just use WASM for Git operations?
+
+A:
+
+<!-- TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers -->
+
+I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
+
+The supposed benefit of web
+
+#### Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
+
+A:
+
+<!-- TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API -->
+
+But in my thinking, this would require to look at `lg2.js` code and replicate essential parts of it into TS code.
+
+### Implementation details
+
+Git is compiled to wasm using libgit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
 You can then call `libgit.main()` to send commands to actual git. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
 
@@ -233,7 +257,7 @@ For example when you do:
 
 In `clone` function, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
 
-Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libkit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
+Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libgit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
 
 If you use wasm, file system can still exist inside the Git SDK JS code, not in a web worker which is actually indeed not needed.
 
@@ -267,23 +291,3 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 `inlang.rebase()`
 
 As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though.
-
-### Questions
-
-#### Q: Is web worker needed or we should just use WASM for Git operations?
-
-A:
-
-<!-- TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers -->
-
-I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
-
-The supposed benefit of web
-
-#### Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
-
-A:
-
-<!-- TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API -->
-
-But in my thinking, this would require to look at `lg2.js` code and replicate essential parts of it into TS code.
