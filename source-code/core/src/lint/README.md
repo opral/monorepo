@@ -103,33 +103,19 @@ const myLintRule = createLintRule<{ apiKey: string }>(
 	"myService.checkGrammar",
 	"error",
 	(settings) => {
-		if (!settings?.apiKey) {
-			throw new Error("You need to provide an API key")
-		}
-
-		let context: Context
-		let service
+		// example
+		const api = Grammarly()
 
 		return {
-			setup: async (args) => {
-				context = args.context
-
-				service = await connectToGrammarService(context.apiKey)
-			},
 			visitors: {
-				Message: async ({ target, reference }) => {
+				Message: async ({ target, reference, report }) => {
 					if (!target) return
-
-					const result = await service.checkGrammar(target)
-
-					context.report({
+					const result = await api.checkGrammar(target)
+					report({
 						node: target,
 						message: `Message with id '${reference.id.name}' contains a grammar error: ${result.details}`,
 					})
 				},
-			},
-			teardown: async () => {
-				await service.closeConnection()
 			},
 		}
 	},
@@ -144,12 +130,6 @@ The `createLintRule` expects 3 parameters.
    If a user does not specify lint level, the default level will be used to report lint violations.
 3. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
 
-   - `setup`: A function that can be used to open connections or setup other stuff that will be used during the lint process.\
-      The `setup` function gets called with the following parameter: `{ referenceLanguage, languages, context }` where
-     - `referenceLanguage` is the reference language of ths repository.
-     - `languages` is an array of the supported languages.
-     - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.
-       The function can return an object, that will be passed as the `payload` attribute to all subsequent steps in the linting process.
    - `visitors`: An object that contains functions that will be called during the linting process.\
      The linting process will visit each node recursively and then calls the corresponding `visitors` function if specified. The `visitor` object expects the following properties:
 
@@ -182,10 +162,6 @@ The `createLintRule` expects 3 parameters.
      Be aware that `target` or `reference` could be `undefined` if the corresponding node does not exist on the target or reference resource.
 
      The `leave` function receives the same payload as the `enter` function, but does not return anything.
-
-   - `teardown` _(optional)_: A function that can be used to close opened connections.\
-      The `teardown` function gets called with the following parameter: `{ payload }` where
-     - `payload` is the object returned by the `setup` function.
 
 All defined functions can be synchronous or asynchronous. The lint process traverses all nodes in sequence and awaits each step individually. Keep that in mind. It could affect the performance if you call a lot of long-running functions.
 

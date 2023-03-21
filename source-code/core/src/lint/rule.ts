@@ -1,7 +1,6 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
-import type { Config } from "../config/schema.js"
 import type { MaybePromise } from "../utilities/types.js"
-import { LintLevel, parseLintConfigArguments, Context } from "./context.js"
+import { LintLevel, parseLintConfigArguments } from "./context.js"
 
 export type LintableNode = Resource | Message | Pattern
 
@@ -9,10 +8,10 @@ export type LintableNodeByType<Node extends { type: string }, Key> = Node extend
 	? Node
 	: never
 
-export type TargetReferenceParameterTuple<Node extends LintableNode> =
-	| { target: Node; reference: Node }
-	| { target: Node; reference: Node | undefined }
-	| { target: Node | undefined; reference: Node }
+export type TargetReferenceParameterTuple<Node extends LintableNode> = {
+	target?: Node
+	reference?: Node
+}
 
 type VisitorParam<Node extends LintableNode, Input> = TargetReferenceParameterTuple<Node> & {
 	payload?: Input
@@ -80,13 +79,7 @@ export type LintRuleInitializer<Settings = never, RequireSettings extends boolea
 export type LintRule = {
 	id: LintRuleId
 	level: false | LintLevel
-	setup: (
-		param: Pick<Config, "referenceLanguage" | "languages"> & {
-			context: Context
-		},
-	) => MaybePromise<unknown>
 	visitors: NodeVisitors
-	teardown?: (param: { payload: unknown }) => MaybePromise<void>
 }
 
 /**

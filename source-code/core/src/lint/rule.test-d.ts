@@ -17,10 +17,6 @@ expectType<Parameters<typeof createLintRule>[2]>(() => ({
 	setup: () => undefined,
 	visitors: {},
 }))
-// @ts-expect-error third parameter must return an setup function
-expectType<Parameters<typeof createLintRule>[2]>(() => ({
-	visitors: {},
-}))
 // @ts-expect-error third parameter must return the visitors object
 expectType<Parameters<typeof createLintRule>[2]>(() => ({
 	setup: () => undefined,

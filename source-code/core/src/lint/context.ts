@@ -8,7 +8,6 @@ export type LintReport = {
 	id: LintRuleId
 	level: LintLevel
 	message: string
-	metadata?: unknown
 }
 
 type LintInformation = {
@@ -31,7 +30,11 @@ export type LintedNode = LintedResource | LintedMessage | LintedPattern
  * The context provides utility functions for a lint rule.
  */
 export type Context = {
-	report: (information: { node: LintableNode; message: string; metadata?: unknown }) => void
+	report: (information: { node: LintableNode; message: string }) => void
+	target?: LintableNode
+	reference?: LintableNode
+	referenceLanguage: string
+	languages: string[]
 }
 
 /**
@@ -55,19 +58,29 @@ export const parseLintConfigArguments = <T>(
 	}
 }
 
-export const createContext = (id: LintRuleId, level: LintLevel) =>
+/**
+ * A utility function to create a lint context.
+ */
+export const createContext = (args: {
+	id: LintRuleId
+	level: LintLevel
+	target?: LintableNode
+	reference?: LintableNode
+	referenceLanguage: string
+	languages: string[]
+}) =>
 	({
-		report: ({ node, message, metadata }) => {
+		report: ({ node, message }) => {
 			if (!node) return
 
 			node.lint = [
-				...((node as LintedNode).lint || []),
+				...((node as LintedNode).lint ?? []),
 				{
-					id,
-					level,
+					id: args.id,
+					level: args.level,
 					message,
-					...(metadata ? { metadata } : undefined),
 				} satisfies LintReport,
 			]
 		},
+		...args,
 	} satisfies Context)

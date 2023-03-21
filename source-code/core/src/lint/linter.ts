@@ -40,39 +40,24 @@ export const lint = async (args: {
 	return resources as LintedResource[]
 }
 
-const processLintRule = async ({
-	lintRule,
-	referenceLanguage,
-	languages,
-	reference,
-	resources,
-}: {
+const processLintRule = async (args: {
 	lintRule: LintRule
 	referenceLanguage: string
 	languages: string[]
 	reference: Resource | undefined
 	resources: Resource[]
 }) => {
-	const { level, id, setup, visitors, teardown } = lintRule
+	const { level, id } = args.lintRule
 	if (!level) return
+	const context = createContext({ ...args, level, id })
 
-	const context = createContext(id, level)
-
-	const payload = await setup({ referenceLanguage, languages, context })
-
-	for (const language of languages) {
-		const target = getResourceForLanguage(resources, language)
+	for (const language of args.languages) {
+		const target = getResourceForLanguage(args.resources, language)
 
 		await processResource({
-			visitors,
-			target: target as Resource,
-			reference,
-			payload,
+			context,
+			visitors: args.lintRule.visitors,
 		})
-	}
-
-	if (teardown) {
-		await teardown({ payload })
 	}
 }
 
@@ -103,8 +88,7 @@ const shouldProcessResourceChildren = (visitors: NodeVisitors) =>
 
 const processResource = async ({
 	visitors,
-	target,
-	reference,
+	context,
 	payload: payloadInitial,
 }: ProcessNodeParam<Resource>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, "Resource")
@@ -112,8 +96,8 @@ const processResource = async ({
 	const payloadEnter =
 		(enter &&
 			(await enter({
-				target: target as Resource,
-				reference,
+				target: context.target as Resource,
+				reference: context.reference,
 				payload: payloadInitial,
 			}))) ??
 		payloadInitial
@@ -123,8 +107,10 @@ const processResource = async ({
 	if (shouldProcessResourceChildren(visitors)) {
 		const processedReferenceMessages = new Set<string>()
 
-		for (const targetMessage of (target as Resource).body) {
-			const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
+		for (const targetMessage of (context.target as Resource).body) {
+			const referenceMessage = context.reference?.body.find(
+				({ id }) => id.name === targetMessage.id.name,
+			)
 
 			await processMessage({
 				visitors,

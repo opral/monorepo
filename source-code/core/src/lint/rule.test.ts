@@ -1,22 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
-import { LintRule, createLintRule } from "./rule.js"
+import { createLintRule } from "./rule.js"
 
-const setup = () => undefined
 const visitors = {}
 
 const rule1 = createLintRule("my.id", "error", () => {
 	return {
-		setup,
 		visitors,
-	}
-})
-
-const teardown = () => undefined
-const rule2 = createLintRule<any>("my.id", "error", (settings) => {
-	return {
-		setup: () => console.log(settings),
-		visitors,
-		teardown,
 	}
 })
 
@@ -43,28 +32,10 @@ describe("createLintRule", async () => {
 				expect(configuredRule.level).toBe("error")
 			})
 
-			test("the passed `setup` function", async () => {
-				const configuredRule = rule1()
-
-				expect(configuredRule.setup).toBe(setup)
-			})
-
 			test("the passed visitors", async () => {
 				const configuredRule = rule1()
 
 				expect(configuredRule.visitors).toBe(visitors)
-			})
-
-			test("no `teardown` function if not passed", async () => {
-				const configuredRule = rule1()
-
-				expect(configuredRule.teardown).toBeUndefined()
-			})
-
-			test("the passed `teardown` function if passed", async () => {
-				const configuredRule = rule2()
-
-				expect(configuredRule.teardown).toBe(teardown)
 			})
 		})
 
@@ -73,28 +44,6 @@ describe("createLintRule", async () => {
 				const configuredRule = rule1("warn")
 
 				expect(configuredRule.level).toBe("warn")
-			})
-
-			test("pass `undefined` for settings if not specified", async () => {
-				const configuredRule = rule2("error")
-
-				configuredRule.setup(...([] as unknown as Parameters<LintRule["setup"]>))
-
-				expect(console.log).toHaveBeenCalledOnce()
-				expect(console.log).toHaveBeenCalledWith(undefined)
-			})
-
-			test("pass the settings object if defined", async () => {
-				const settings = {
-					some: "option",
-					debug: true,
-				}
-				const configuredRule = rule2("error", settings)
-
-				configuredRule.setup(...([] as unknown as Parameters<LintRule["setup"]>))
-
-				expect(console.log).toHaveBeenCalledOnce()
-				expect(console.log).toHaveBeenCalledWith(settings)
 			})
 		})
 	})

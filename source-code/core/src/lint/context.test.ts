@@ -75,7 +75,7 @@ describe("parseLintConfigArguments", async () => {
 })
 
 describe("createContext", async () => {
-	const context = createContext("rule.id", "error")
+	const context = createContext({ id: "rule.id", level: "error" } as any)
 	const message = "Something is wrong"
 
 	describe("report", async () => {
@@ -130,27 +130,6 @@ describe("createContext", async () => {
 				context.report({ node, message })
 
 				expect(node.lint?.[0].message).toBe(message)
-			})
-
-			test("should not set `metadata` if nothing get's passed", async () => {
-				const node = {} as LintedResource
-
-				context.report({ node, message })
-
-				expect(node.lint?.[0].metadata).toBeUndefined()
-			})
-
-			test("should set the passed `metadata`", async () => {
-				const node = {} as LintedResource
-
-				const metadata = {
-					custom: true,
-					name: "John",
-				}
-
-				context.report({ node, message, metadata })
-
-				expect(node.lint?.[0].metadata).toMatchObject(metadata)
 			})
 		})
 	})
