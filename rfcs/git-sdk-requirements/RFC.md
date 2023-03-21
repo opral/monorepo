@@ -652,4 +652,7 @@ showHistory(file: string)
 
 > probably same as inlang
 
--
+### Video/image editor
+
+> perhaps not video but image can certainly be done
+> should use git lfs for video at least
