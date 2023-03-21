@@ -229,13 +229,43 @@ Above function call can do a fetch of just enough resources to do further action
 
 `git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang`
 
-You can then do:
+After this an app would most likely want to fetch a file to edit. It can do:
 
 ```js
-let inlangConfig = await inlang.readFile("inlang.config.js")
+// checkout just this file and put it in the fs (using sparse-checkout)
+await inlang.checkoutFile("inlang.config.js")
+
+// `.fs` is one way you can get access to the file system
+// readFile returns a string representation of the file so you can modify it
+let inlangConfig = await inlang.fs.readFile("inlang.config.js")
+// it would be great if `inlang` type definition would update on 'checkout', 'clone'
+// so typescript can complain 'inlang.config.js' file is not there
+
+// then you can make edits to inlangConfig string that
+// it could be the case that inlangConfig not a normal variable
+// but a signal returned (to work with solid) or hook (for react)
+
+// where inlangConfig is the modified version
+// aware there are most likely issues with just editing file like this
+// i'm sure there is a better way more streamlined way to make an edit to something and
+// commit it to fs after
+// this is just one example of how it can happen
+inlangGit.overwriteFile("inlang.config.js", inlangConfig)
+
+// Then git add the file
+inlangGit.add("inlang.config.js")
+
+// And git push
+const conflicts = await inlangGit.push("inlang.config.js")
+
+// also on pull
+const conflicts = await inlangGit.pull()
+
+// you try fix conflicts and
+inlangGit.push() // until it succeeds
 ```
 
-And it would do this under the hood, in git:
+Sparse-checkout under the hood does this (for reference):
 
 ```
 git config core.sparseCheckout true
@@ -243,21 +273,7 @@ echo "inlang.config.js" >> .git/info/sparse-checkout
 git checkout
 ```
 
-And return the content of the file to edit. You can then take the string, make edits to it.
-
-```js
-// make edits to inlangConfig
-// get back a string that represents contents of a file
-inlangGit.overwriteFile("inlang.config.js", inlangConfig)
-
-// Then git add the file
-inlangGit.add("inlang.config.js")
-
-// And git push
-inlangGit.push()
-```
-
-The API for above is quite readable and nice. And powerful too in some ways. As you don't have to think about what to fetch or when. It's done for you automatically.
+The API for above is quite readable and nice. And powerful too in some ways. As you don't have to think about how fetch happens. It's done for you automatically.
 
 ```js
 const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git", { depth: 1 })
@@ -274,6 +290,20 @@ This can use either isomorphic git or libgit2 under the hood. FS implementation 
 > note: need to read through lg2.js code to see whether Emscripten is node fs api like
 
 > note: how would this work with real time collaboration?
+
+> on second review this idea might not make sense as perhaps part of 'git thesis'
+
+> is access to the fs itself, not fetched through git sdk interface
+
+> however if that interface is indistinguishable from the file system but with git powers attached
+
+> why pass some fs and complicate setup potentially
+
+```
+// not sure
+let inlangConfig = await inlang.checkoutFile("inlang.config.js")
+inlang.files()
+```
 
 ## Git compiled to WASM
 
