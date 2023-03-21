@@ -270,9 +270,7 @@ This can be spinned up into a new RFC and discussed, just wanted to add this as 
 
 But think it should be possible to wrap around Isomorphic Git to add this feature. Might not even need changes to Iso Git core itself.
 
-Goal 5: (Future) Real-time collaboration 🚧
-
-It's interesting to revist the API explorations above in context of real-time collaboration.
+> note: how would this work with real time collaboration?
 
 ## Git compiled to WASM
 
