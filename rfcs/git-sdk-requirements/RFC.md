@@ -248,6 +248,14 @@ const file = inlangGit.readFile("path/toFile")
 inlangGit.overwriteFile("path/toFile")
 ```
 
+`inlangGit.push()` will do push to remote
+
+Not sure how that api would look, my knowledge of rebase is squashing commits in github on pr and sometimes combining multiple commits into 1.
+
+`inlang.rebase()`
+
+As I am writing this. This to me seems like a nice way to abstract working with remote git repos.
+
 ### Git inside JS
 
 Git compiled to JS is simipler.
