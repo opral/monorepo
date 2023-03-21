@@ -354,11 +354,9 @@ There is documented [API on calling WASM](https://developer.mozilla.org/en-US/do
 
 Need to read through the API exposed by libgit2 to say for sure.
 
-#### Q: Do you need to run anything in a web worker?
+#### Q: Do you need to run Git operations in Git SDK in a web worker?
 
-I think we can avoid using web workers. And just interface with WASM directly using [provided API]().
-
-The supposed benefit of web
+Assuming we figure out how TS communicates nicely with Git commands that get executed in WASM. And for changes to reflect in a file system provided, there would ne no need for a web worker to be there.
 
 #### Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
