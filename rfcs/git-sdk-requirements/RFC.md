@@ -264,3 +264,27 @@ await clone("https://github.com/inlang/inlang", fs)
 ```
 
 ### Git History built with Git SDK
+
+## Open questions
+
+### Git compiled to WASM
+
+Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
+
+You can then call `libgit.main()` to send commands to it. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
+
+Git WASM gives 2 examples in repo, one in web worker and 1 in browser.
+
+In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
+
+Git SDK will when called to do say
+
+`const inlang = await clone("https://github.com/inlang/inlang.git")`
+
+When this is done for first time, in `clone` function of Git SDK, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
+
+Perhaps web workers are not needed at all for this. But then it should call into wasm which only holds git. If that happens, you have file system inside git sdk code. Then git sdk would be doing something like above.
+
+For that part I need to read how Git WASM outputted lg2.js looks and what it does.
+
+### Git inside JS
