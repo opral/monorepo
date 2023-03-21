@@ -127,7 +127,7 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 
 ### Context
 
-Inlang currently uses Isomorphic Git for Git operations together with memfs for file syste.
+Inlang currently uses Isomorphic Git for Git operations together with memfs for file system.
 
 Going with this approach for future Git SDK means adding missing commands that Isomorphic Git now lacks.
 
@@ -145,7 +145,11 @@ echo "inlang.config.js" >> .git/info/sparse-checkout
 git checkout
 ```
 
-You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
+You can do normal [clone](https://isomorphic-git.org/docs/en/clone) already but that takes too long. Shallow clone with depth 1 is available but that still takes 10+ seconds on some repos.
+
+So to implement a sparse checkout of just one file or folder, you would need to implement these options inside Iso Git.
+
+There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
 
 ![Options eplained](./git-clone-explained.png)
 
@@ -153,7 +157,7 @@ You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no
 
 ![Options eplained](./git-clone-explained-2.png)
 
-There is also way to achieve above with `git init` and orphan branch. Speed wise, they are the same.
+There is also way to achieve above with `git init` and orphan branch. Speed wise, they are the same. In `git init` you just create a folder yourself.
 
 We don't technically need to do `git config core.sparseCheckout true` as we don't need to be up to git spec. There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option though so it's no issue to do this part.
 
@@ -252,6 +256,8 @@ A:
 <!-- TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers -->
 
 I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
+
+The supposed benefit of web
 
 Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
