@@ -245,7 +245,7 @@ inlang = await inlang.checkoutFile("inlang.config.js")
 // maybe there is way to get access to fs in a better way
 let inlangConfig = await inlang.fs.readFile("inlang.config.js")
 // it would be great if `inlang` type definition would update on 'checkout', 'clone'
-// so typescript can complain 'inlang.config.js' file is not there
+// so typescript can complain if 'inlang.config.js' file is not there
 
 // then you can make edits to inlangConfig string that
 // it could be the case that inlangConfig not a normal variable
