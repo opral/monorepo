@@ -17,8 +17,10 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 
 - Focus on iteration speed.
   - We deal with high uncertainty. The faster we can iterate, the better we can react to changing requirements.
-- Keep external usage of the backend in mind.
+- Focus on DX when using the SDK.
   - How easy can developers use the git backend? We intend to offer version control as a backend to external developers.
+- The implementation must be de-coupled from inlang. 
+  - Inlang provides requirements that are _most likely_ universal across apps that build on git. But, the git-sdk should be de-coupled from inlang to enable      developers to use the sdk to build own apps. 
 
 ## Non-goals
 
