@@ -203,7 +203,7 @@ Inlang uses Isomorphic Git together with memfs now. What is lacking is:
 
 - git sparse  -->
 
-<!-- ###
+###
 
 ## Ideal Git SDK API
 
@@ -258,4 +258,4 @@ In Inlang, when you load a web editor for a page like [inlang/example](https://i
 await clone("https://github.com/inlang/inlang", fs)
 ```
 
-### Git History built with Git SDK -->
+### Git History built with Git SDK
