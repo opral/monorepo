@@ -174,6 +174,12 @@ If we can implement rebase and sparse-checkout, I don't think any other command 
 
 Performance should be of no concern. You are not doing anything heavy as far as operations go.
 
+### Questions
+
+Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
+
+A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
+
 ## Git compiled to WASM
 
 > Warning: Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
