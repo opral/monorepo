@@ -222,7 +222,7 @@ It would be potentially interesting to see a Git SDK that would also abstract wo
 This would mean, there would be no need to pass `fs` to every git operation. You would just do:
 
 ```js
-const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git")
+let inlang = await gitSDK.clone("https://github.com/inlang/inlang.git")
 ```
 
 And you get back a fully fledged file system fetched from the repo. As the SDK is focused on running on context of browser.
@@ -235,14 +235,14 @@ After this an app would most likely want to fetch a file to edit. It can do:
 
 ```js
 // checkout just this file and put it in the fs (using sparse-checkout)
-await inlang.checkoutFile("inlang.config.js")
+// it returns a new inlang, so 'fs' below works and is filled with correct file system
+// again this can be a signal instead or hook, not just a variable
+inlang = await inlang.checkoutFile("inlang.config.js")
 
 // `.fs` is one way you can get access to the file system
 // readFile returns a string representation of the file so you can modify it
 // need to think about how fs. would work
-// on second thought this api can't work due to javascript
-// so it's pseudo code
-// maybe there is way to get access to fs in another way
+// maybe there is way to get access to fs in a better way
 let inlangConfig = await inlang.fs.readFile("inlang.config.js")
 // it would be great if `inlang` type definition would update on 'checkout', 'clone'
 // so typescript can complain 'inlang.config.js' file is not there
