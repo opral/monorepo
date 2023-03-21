@@ -197,7 +197,15 @@ We can also potentially delegate some heavy git operations to a web worker. To r
 
 Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
-A:
+A: Currently Inlang exposes isomorphic git raw from git sdk.
+
+Q: How should Git SDK look in near future?
+
+A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
+
+Personally I would prefer not to deal with the file system and have Inlang cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. This would avoid passing `fs` to all Git SDK commands too.
+
+TODO: write it out?
 
 Q: How difficult would it be to add those commands?
 
