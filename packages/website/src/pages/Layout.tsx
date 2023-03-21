@@ -239,6 +239,12 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						>
 							Twitter
 						</a>
+						<a
+							href="https://discord.gg/gdMPPWy57R"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Discord
+						</a>
 					</div>
 					<div class="w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 flex flex-col gap-6 py-10">
 						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
