@@ -249,8 +249,6 @@ To summarize
 
 Otherwise you will need to write C code to extend libkit2. I think compiling and setting up the connection of .wasm to JS file system should be doable and perfomant with some reading.
 
-## Open questions
+### Questions
 
-- What is missing in above approaches? Can either approach achieve all the goals stated above?
-- Estimate on how long either of the approaches would take?
 -
