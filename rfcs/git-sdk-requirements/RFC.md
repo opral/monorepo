@@ -255,6 +255,9 @@ inlangGit.overwriteFile("inlang.config.js", inlangConfig)
 // Then git add the file
 inlangGit.add("inlang.config.js")
 
+// Commit
+inlangGit.commit("updated config")
+
 // And git push
 const conflicts = await inlangGit.push("inlang.config.js")
 
