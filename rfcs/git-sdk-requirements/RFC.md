@@ -160,6 +160,56 @@ A: No, for above reason. It's not worth the complexity and there is no need for 
 
 A: Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
 
+It would be potentially interesting to see a Git SDK that would also abstract working with the file system all together.
+
+This would mean, there would be no need to pass `fs` to every git operation. You would just do:
+
+```js
+const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git")
+```
+
+And you get back a fully fledged file system fetched from the repo. As the SDK is focused on running on context of browser.
+
+Above function call can do a fetch of just enough resources to do further actions.
+
+`git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang`
+
+You can then do:
+
+```js
+let inlangConfig = await inlang.readFile("inlang.config.js")
+```
+
+And it would do this under the hood, in git:
+
+```
+git config core.sparseCheckout true
+echo "inlang.config.js" >> .git/info/sparse-checkout
+git checkout
+```
+
+And return the content of the file to edit. You can then take the string, make edits to it.
+
+```js
+// make edits to inlangConfig
+// get back a string that represents contents of a file
+inlangGit.overwriteFile("inlang.config.js", inlangConfig)
+
+// Then git add the file
+inlangGit.add("inlang.config.js")
+
+// And git push
+inlangGit.push()
+```
+
+The API for above is quite readable and nice. And powerful too in some ways. As you don't have to think about what to fetch or when. It's done for you automatically.
+
+```js
+const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git", { depth: 1 })
+```
+
+If you want shallow clone
+
 Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
 
 It can be a nice DX improvement for Inlang to cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. No need to learn multiple APIs and the examples in docs can be simpler too potentially. This would avoid passing `fs` to all Git SDK commands too.
