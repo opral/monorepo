@@ -281,9 +281,19 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 The reason you'd want to move to libgit2 is that libgit2 supports more options out of the box. And potentially performance.
 
-However:
-
 ### Questions
+
+#### Q: Is git compiled to WASM faster than JS implementation?
+
+A: Most likely yes as WASM in general is faster. Compilation is done by [Emscripten](https://emscripten.org/).
+
+It takes the C code and creates a `.wasm` file.
+
+libgit2 was not written with WASM in mind but it still be potentially faster than isomorphic git. Benchmarks have to be made to say for sure.
+
+#### Q: will moving to libgit2 save us time in future?
+
+A: libgit2 is written in C.
 
 #### Q: Is web worker needed or we should just use WASM for Git operations?
 
