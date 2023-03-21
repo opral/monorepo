@@ -256,6 +256,7 @@ clone() ✅ https://libgit2.org/docs/guides/101-samples/#repositories_clone_simp
 commit() ✅ https://libgit2.org/docs/guides/101-samples/#commits
 push() ✅ https://stackoverflow.com/questions/28055919/how-to-push-with-libgit2
 pull() ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with-libgit2
+sparseCheckout() ❓ https://github.com/libgit2/libgit2/issues/2263 (open pr, need to build, test)
 
 // branch related
 currentBranch() ✅
@@ -280,7 +281,7 @@ syncFork()
 openPullRequest()
 ```
 
-1. sparse checkout is still [open issue](https://github.com/libgit2/libgit2/issues/2263) but there is [non merged pr](https://github.com/libgit2/libgit2/pull/6394)
+1. sparse checkout is still [open issue]() but there is [non merged pr](https://github.com/libgit2/libgit2/pull/6394)
 
 High chance this pr builds though. We already tried to compile an open [pr for shallow clone](https://github.com/libgit2/libgit2/pull/6396) and that was succesful.
 
