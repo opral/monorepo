@@ -261,7 +261,7 @@ inlangGit.commit("inlang.config.js: update readResources")
 // And git push
 const conflicts = await inlangGit.push("inlang.config.js")
 
-// also on pull
+// Can also get conflicts on pull
 const conflicts = await inlangGit.pull()
 
 // you try fix conflicts and
