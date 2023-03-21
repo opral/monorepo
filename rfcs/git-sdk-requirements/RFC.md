@@ -123,7 +123,7 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 - State management differences (syncing file systems etc.)?
 - Ease of debugging (for faster iteration speeds). A pure JS implementation is straightforward to debug.
 
-### Git compiled to WASM
+## Git compiled to WASM
 
 Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
@@ -188,7 +188,7 @@ To summarize
 
 Otherwise you will need to write C code to extend libkit2. I think compiling and setting up the connection of .wasm to JS file system should be doable and perfomant with some reading.
 
-### Git inside JS
+## Git implemented in JS
 
 Git in JS is maybe simpler. It depends on how hard it would be to add all missing features to Isomorphic Git.
 
