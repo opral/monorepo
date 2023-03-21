@@ -127,11 +127,13 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 
 ### Context
 
-Going with this approach or not depends on how hard it would be to add all missing features to Isomorphic Git.
+Inlang currently uses Isomorphic Git for Git operations together with memfs for file syste.
 
-We need sparse checkout and rebase in the least. Either of those features have no code in Isomorphic Git currently.
+Going with this approach for future Git SDK means adding missing commands that Isomorphic Git now lacks.
 
-Iso Git already works with attaching a file system to all the commands. It's a matter of understsanding the underlying behavior of how each of the commands work and implementing that in JS. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
+Sparse checkout and rebase are needed in the least. Either of those features have no code in Isomorphic Git currently.
+
+Iso Git works by attaching a file system to all the commands. It's a matter of understsanding the underlying behavior of how each of the commands work and implementing that in JS. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
 For sparse git checkout of particular file, here is cli version:
 
