@@ -237,6 +237,10 @@ await inlang.checkoutFile("inlang.config.js")
 
 // `.fs` is one way you can get access to the file system
 // readFile returns a string representation of the file so you can modify it
+// need to think about how fs. would work
+// on second thought this api can't work due to javascript
+// so it's pseudo code
+// maybe there is way to get access to fs in another way
 let inlangConfig = await inlang.fs.readFile("inlang.config.js")
 // it would be great if `inlang` type definition would update on 'checkout', 'clone'
 // so typescript can complain 'inlang.config.js' file is not there
