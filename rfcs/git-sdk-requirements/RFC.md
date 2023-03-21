@@ -223,9 +223,7 @@ When this is done for first time, in `clone` function of Git SDK, it would start
 
 Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libkit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
 
-But then it should call into wasm which only holds git. If that happens, you have file system inside git sdk code. Then git sdk would be doing something like above. My understanding is that git accepts some kind of file system or part of one for it to work. If that's th
-
-For that part I need to read how Git WASM outputted lg2.js looks and what it does.
+If you use wasm, file system can still exist inside the Git SDK JS code, not in a web worker which is actually indeed not needed.
 
 I think the big idea / confusion is that maybe we don't expose the full file system to users. But if you want to talk with your files, you do it through Git SDK? Would this make sense?
 
