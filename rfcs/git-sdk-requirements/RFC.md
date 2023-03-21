@@ -188,7 +188,13 @@ Q: If we use a JS implementation, will we run into foreseeable performance issue
 
 A: I don't think so as git operations are not heavy. Especially for use cases of Inlang. Heaviest useful operation might be rebase? Rebase doesn't exist in Iso Git so we can't benchmark it to say conclusively but intution says it shouldn't be an issue.
 
-We can also be smart on the client side and perhaps see if the files of the project the user is working with is large, we can delegate to do some git heavy work in a web worker instead not to block the main thread.
+We can also be smart on the client side and perhaps see if the files of the project the user is working with is large, we can delegate to do some git heavy work in a web worker instead not to block the main thread. So any perf issue we hit can be avoided this way.
+
+We would need to write code to schedule this work so there should be some algorithm to perhaps predict a future heavy operation.
+
+Q: Does it make sense to run Isomoprphic Git in a web worker?
+
+A:
 
 Q: How difficult would it be to add those commands?
 
