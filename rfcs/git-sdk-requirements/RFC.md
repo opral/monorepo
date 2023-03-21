@@ -314,11 +314,33 @@ const result = libgit.callMain(["clone", "https://github.com/inlang/inlang.git",
 FS.chdir("inlang")
 ```
 
-You can expose different C functions that run the commands.
+You can expose different C functions that run the commands. For example, we have built [open pr for shallow clones](https://github.com/libgit2/libgit2/pull/6396) and exposed it via a new method for `callMain`:
 
-1. Give libgit2 a file system to work with. [Emscripten File System](https://emscripten.org/docs/api_reference/Filesystem-API.html).
+```js
+const result = libgit.callMain(["shallowClone", "https://github.com/inlang/inlang.git", "inlang"])
+```
 
-I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
+That function was same as clone, just also set `clone_opts.fetch_opts.depth` option before doing the clone. Extending libgit2 with new commands would work in the same way.
+
+2. The `lg2.js` file also gives file system for git to work with. [Emscripten File System](https://emscripten.org/docs/api_reference/Filesystem-API.html) to be precise.
+
+> warning: this might be false. I need to read through lg2.js to say for sure.
+
+But essentially at least in examples provided, `FS` variables corresponds to Emscripten File System.
+
+#### Q: Do we continue using Emscripten File System?
+
+Does it make sense to continue using Emscripten File System that already comes to us out of the package with wasm-git and libgit2?
+
+The answer to it would require more studying of how that part works to say for sure.
+
+But we can imagine that we disregard the `lg2.js` file. We as part of Git SDK keep the file system as part of the Git SDK package code.
+
+FS gets passed to the package via argument. In Git SDK, it would somehow connect the file system with the git and run commands on it.
+
+There is documented [API on calling WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API). Need to read this to say for sure how that part would work.
+
+I think we can avoid using web workers. And just interface with WASM directly using [provided API]().
 
 The supposed benefit of web
 
