@@ -137,7 +137,7 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 #### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
-A: Nearly all git operations especially ones you'd want to do in context of a browser won't be computationally heavy.
+Nearly all git operations especially ones you'd want to do in context of a browser won't be computationally heavy.
 
 The heaviest ones would mostl likely be comitting many files potentially but even there JS can do it quite fast even on large amount of content.
 
@@ -154,11 +154,11 @@ We can also potentially delegate some heavy git operations to a web worker. To r
 
 #### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
-A: No, for above reason. It's not worth the complexity and there is no need for it.
+No, for above reason. It's not worth the complexity and there is no need for it.
 
 #### Q: How should Git SDK look in near future?
 
-A: Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
+Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
 
 It would be potentially interesting to see a Git SDK that would also abstract working with the file system all together.
 
@@ -214,9 +214,9 @@ In many ways this opens up the API surface too and lets us explore what to expos
 
 This can be spinned up into a new RFC and discussed, just wanted to add this as it can influence the choice of whether it makes sense to go with Git compiled to WASM approach or Git in JS.
 
-Q: How difficult would it be to add those commands?
+#### Q: How difficult would it be to add those commands?
 
-A: Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
+Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
 
 A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
 
@@ -234,7 +234,7 @@ The reason you'd want to move to libgit2 is that libgit2 supports more options o
 
 #### Q: Is git compiled to WASM faster than JS implementation?
 
-A: Most likely yes as WASM in general is faster. Compilation is done by [Emscripten](https://emscripten.org/).
+Most likely yes as WASM in general is faster. Compilation is done by [Emscripten](https://emscripten.org/).
 
 It takes the C code and creates a `.wasm` file.
 
@@ -244,7 +244,7 @@ The resulting `.wasm` file in `Release` mode is ~ 830 KB.
 
 #### Q: What are missing APIs Git SDK will need. Does libgit2 provide them?
 
-A: libgit2 is written in C. So changes to it must be made in C too if libgit2 doesn't support a certain feature.
+libgit2 is written in C. So changes to it must be made in C too if libgit2 doesn't support a certain feature.
 
 Fortunately it seems libgit2 supports all the needed features Inlang needs. And potentially other features that other companies building on Git SDK will need.
 
@@ -339,6 +339,10 @@ But we can imagine that we disregard the `lg2.js` file. We as part of Git SDK ke
 FS gets passed to the package via argument. In Git SDK, it would somehow connect the file system with the git and run commands on it.
 
 There is documented [API on calling WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API). Need to read this to say for sure how that part would work.
+
+#### Q: Do you need to run anything in a web worker?
+
+A:
 
 I think we can avoid using web workers. And just interface with WASM directly using [provided API]().
 
