@@ -293,7 +293,13 @@ libgit2 was not written with WASM in mind but it still be potentially faster tha
 
 #### Q: will moving to libgit2 save us time in future?
 
-A: libgit2 is written in C.
+A: libgit2 is written in C. So changes to it must be made in C too.
+
+This would already turn Inlang into a multi language company that would require someone to know C to implement the features Git SDK needs.
+
+There are also questions about libgit2 vastness of features. For example:
+
+sparse checkout is still [open issue](https://github.com/libgit2/libgit2/issues/2263)
 
 #### Q: Is web worker needed or we should just use WASM for Git operations?
 
