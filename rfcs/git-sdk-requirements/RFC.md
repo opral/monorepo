@@ -242,7 +242,7 @@ libgit2 was not written with WASM in mind but it still will most likely be faste
 
 The resulting `.wasm` file in `Release` mode is ~ 830 KB.
 
-#### Q: will moving to libgit2 save us time in future?
+#### Q: What are missing APIs Git SDK will need. Does libgit2 provide them?
 
 A: libgit2 is written in C. So changes to it must be made in C too if libgit2 doesn't support a certain feature.
 
