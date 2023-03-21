@@ -254,15 +254,15 @@ From list shared above with checkboxes for available API. API of libgit2 is [her
 // elementary
 clone() ✅
 commit() ✅
-push()
-pull()
+push() ✅
+pull() ✅
 
 // branch related
-currentBranch()
-createBranch()
-renameBranch()
-switchBranch()
-deleteBranch()
+currentBranch() ✅
+createBranch() ✅
+renameBranch() ✅
+switchBranch() ✅
+deleteBranch() ✅
 
 // change related
 // (3 API different "changes" concepts...)
