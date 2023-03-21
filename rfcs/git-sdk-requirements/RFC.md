@@ -221,7 +221,9 @@ Git SDK will when called to do say
 
 When this is done for first time, in `clone` function of Git SDK, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
 
-Perhaps web workers are not needed at all for this. But then it should call into wasm which only holds git. If that happens, you have file system inside git sdk code. Then git sdk would be doing something like above.
+Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libkit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
+
+But then it should call into wasm which only holds git. If that happens, you have file system inside git sdk code. Then git sdk would be doing something like above. My understanding is that git accepts some kind of file system or part of one for it to work. If that's th
 
 For that part I need to read how Git WASM outputted lg2.js looks and what it does.
 
