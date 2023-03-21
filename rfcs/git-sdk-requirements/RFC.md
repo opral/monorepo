@@ -133,8 +133,6 @@ Going with this approach for future Git SDK means adding missing commands that I
 
 Sparse checkout and rebase are needed in the least. Either of those features have no code in Isomorphic Git currently.
 
-Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
-
 ### Questions
 
 #### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
@@ -167,6 +165,8 @@ A: Hard to predict but Isomorphic Git has some active contributors still. For ex
 A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
 
 ### Implementation details
+
+Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
 For sparse git checkout of particular file, here is CLI version:
 
@@ -220,6 +220,8 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 ### Context
 
 The reason you'd want to move to libgit2 is that libgit2 supports more options out of the box. And potentially performance.
+
+However:
 
 ### Questions
 
