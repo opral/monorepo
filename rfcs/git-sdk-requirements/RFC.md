@@ -288,7 +288,7 @@ echo "inlang.config.js" >> .git/info/sparse-checkout
 git checkout
 ```
 
-You can do normal clone. There is no `sparse` option. There is no `--filter=blob:none` option. You have to implement both.
+You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no `sparse` option. There is no `--filter=blob:none` option. You have to implement both.
 
 There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option. So maybe you can use that to write to config. But in our case we don't need this detail even.
 
