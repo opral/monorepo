@@ -266,8 +266,6 @@ In many ways this opens up the API surface too and lets us explore what to expos
 
 This can be spinned up into a new RFC and discussed, just wanted to add this as it can influence the choice of whether it makes sense to go with Git compiled to WASM approach or Git in JS.
 
-> note: need to read up on it to say for sure
-
 This can use either isomorphic git or libgit2 under the hood. FS implementation is abstracted away.
 
 > note: need to read through lg2.js code to see whether Emscripten is node fs api like
@@ -466,7 +464,7 @@ Performance is not a concern in either case so the other focus is on DX.
 
 I think you can provide the same Git SDK API regardless whether Isomorphic Git is chosen or libgit2 to do git operations.
 
-As for regretting choose either technology in the future. We would potentially need to think through different kinds of applications that will be built with Git SDK. Some will be done as part of this RFC below.
+As for regretting choose either technology in the future. We would potentially need to think through different kinds of applications that will be built with Git SDK. Some are done as part of this RFC below.
 
 If many features will not be available in libgit2, then it would most likely make more sense to use Isomorphic Git as it's much easier to iterate on JS code than C (potentially).
 
@@ -601,3 +599,42 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 `inlang.rebase()`
 
 As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though. -->
+
+## Potential Apps built with Git and what would they need
+
+> API is up for discussion
+> depending on how it goes we could maybe create out of git spec api
+> i.e. checkoutFile() below
+> below api assumes fs is provided and is part of the SDK
+> need to think through how reactivity would work in such example
+> i assume now somehow memfs is made reactive
+> perhaps as return to the Git SDK, it would create signals you can listen to
+> for easy integration with say solid
+> for react, a hook could be provided
+> so what is return is to be decided for
+
+### Inlang
+
+> if fs is not passed on
+> whats the best way to read content of a file
+
+```
+clone(url: string)
+checkoutFile(file: string) // sparse checkout the file | i.e. ("inlang.config.js")
+commit(message: string)
+push()
+showHistory(file: string)
+```
+
+### Git History
+
+```
+clone(url: string)
+showHistory(file: string)
+```
+
+### Text editor
+
+> probably same as inlang
+
+-
