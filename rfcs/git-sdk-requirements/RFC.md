@@ -243,32 +243,20 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 
 As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though.
 
-To summarize
-
-1. Web worker most certianly not needed it seems, so just compile wasm-git, take the .wasm
-
-- pass the file system as part of API in `clone()` etc. use the file system to do git commands from the .wasm
-
-- issue there is how to bundle the .wasm? there was a problem with rollup-wasm last time
-- the connection of how the FS gets attached to compiled libkit2 is not clear. `lg2.js` file should in theory answer that question
-  - probably just need to see all the places where `FS` is used and try replace it with memfs.
-
-2. libkit2 is quite mature, you can most likely already make sparse-checkout work with clever arrangement of existing commands
-
-Otherwise you will need to write C code to extend libkit2. I think compiling and setting up the connection of .wasm to JS file system should be doable and perfomant with some reading.
-
 ### Questions
 
 Q: Is web worker needed or we should just use WASM for Git operations?
 
 A:
 
-TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
+<!-- TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers -->
+
+I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
 
 Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
 A:
 
-TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API
+<!-- TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API -->
 
 But in my thinking, this would require to look at `lg2.js` code and replicate essential parts of it into TS code.
