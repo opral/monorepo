@@ -266,16 +266,12 @@ To summarize
 - the connection of how the FS gets attached to compiled libkit2 is not clear. `lg2.js` file should in theory answer that question
   - probably just need to see all the places where `FS` is used and try replace it with memfs.
 
+2. libkit2 is quite mature, you can most likely already make sparse-checkout work with clever arrangement of existing commands
+
+Otherwise you will need to write C code to extend libkit2. I think compiling and setting up the connection of .wasm to JS file system should be doable and perfomant with some reading.
+
 ### Git inside JS
 
 Git in JS is maybe simpler. It depends on how hard it would be to add all missing features to Isomorphic Git.
 
-We need sparse checkout and rebase in the least. Either of those features have no code in Iso Git currently.
-
-You import Git SDK (that wraps around isomorphic git). This isomorphic git lives together with some in memory fs.
-
-Probably best of it is [memfs](https://www.npmjs.com/package/memfs).
-
-The trouble here is extending isomorphic git to support all the features we need such as sparse-checkout and perhaps more.
-
-In theory libkit2 is quite mature, you can most likely already make sparse-checkout work with clever arrangement of existing commands.
+We need sparse checkout and rebase in the least. Either of those features have no code in Isomorphic Git currently.
