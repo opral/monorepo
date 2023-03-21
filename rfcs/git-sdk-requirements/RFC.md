@@ -334,7 +334,7 @@ The answer to it would require more studying of how that part works to say for s
 
 [libgit2 clone API](https://libgit2.org/libgit2/#HEAD/group/clone/git_clone) as arg accepts `local_path` which is `local directory to clone to` and `git_repository` which is `pointer that will receive the resulting repository object`.
 
-> warning: I need to study this further to make a conclusive answer.
+> note: I need to study this further to make a conclusive answer.
 
 Currently provided `lg2.js` file seems to be doing all the file system <> git interfacing.
 
@@ -342,11 +342,13 @@ Currently provided `lg2.js` file seems to be doing all the file system <> git in
 
 There was a proposal above to abstract the file system away from the user and expose everything via Git SDK API. If that's the case, we can continue using Emscripten File System in theory and build on top of it.
 
-> warning: needs more study, specificly that lg2.js that is the build output of wasm-git
+> note: needs more study, specificly that lg2.js that is the build output of wasm-git
 
-Assuming user sends file system as argument in similar way that happens in Iso Git now. Somehow when calls to `.wasm` are made, it needs to work.
+Assuming user sends file system as argument in similar way that happens in Iso Git now.
 
-FS gets passed to the package via argument. In Git SDK, it would somehow connect the file system with the git and run commands on it using libgit2.
+Somehow when calls to git operations through WASM are are made, the results should be reflected in the file system.
+
+> note: need to test this out, see output in console etc of what happens when clone happens etc.
 
 There is documented [API on calling WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
 
@@ -354,19 +356,15 @@ Need to read through the API exposed by libgit2 to say for sure.
 
 #### Q: Do you need to run anything in a web worker?
 
-A:
-
 I think we can avoid using web workers. And just interface with WASM directly using [provided API]().
 
 The supposed benefit of web
 
 #### Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
-A:
+[rollup/plugin-wasm](https://www.npmjs.com/package/@rollup/plugin-wasm) can potentially be used.
 
-<!-- TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API -->
-
-But in my thinking, this would require to look at `lg2.js` code and replicate essential parts of it into TS code.
+However when it was used last time, there were errors.
 
 ## Implementation details for Isomorphic Git
 
