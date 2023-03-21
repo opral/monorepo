@@ -203,68 +203,6 @@ There were issues trying to bundle the wasm file in a package. We tried to use [
 
 More investigation should be done in this area.
 
-<!-- ###
-
-Inlang uses Isomorphic Git together with memfs now. What is lacking is:
-
-- git sparse  -->
-
-###
-
-## Ideal Git SDK API
-
-### Questions
-
-#### Passing `fs` or abstracting over it?
-
-Does it make sense to pass the `fs` to clone if we want to abstract using the file systems in a nice way too?
-
-In theory we might want to take the whole experience of creating and consuming files (from remote git servers). So users wouldn't have to both know the Git SDK but also memfs API to operate with files.
-
-With fs:
-
-```js
-await clone("https://github.com/inlang/inlang", fs)
-const commitHistory = await history("/readme.md", fs)
-```
-
-With Git SDK abstracting file system:
-
-```js
-// `clone` will fill `inlang` with just minimum needed info
-// needed to do future commands
-// all further commands load info as it is needed
-// the clone will include the whole file tree structure as it exists at the root
-
-// we need to figure out what the best default is?
-const inlanggit = await clone("https://github.com/inlang/inlang")
-
-// as second argument we can also provide options object
-// where you can pass depth or other settings
-// perhaps can steal what can be useful for git in browser setting
-// from https://git-scm.com/docs/git-clone
-const inlanggit = await clone("https://github.com/inlang/inlang", {})
-
-// nice thing is we can type the path to the file too here if we know the file system
-// this info can come as a result of running `clone` above
-const commithistory = inlanggit.commithistory("readme.md")
-```
-
-### Inlang built with Git SDK
-
-In Inlang, when you load a web editor for a page like [inlang/example](https://inlang.com/editor/github.com/inlang/example). Git SDK can be used to do following:
-
-1. Clone repository info from remote server
-
-```js
-// fs comes from memfs as example, anything with node fs api
-// does not clone the entire repository
-// only metadata that enable other git commands to run
-await clone("https://github.com/inlang/inlang", fs)
-```
-
-### Git History built with Git SDK
-
 ## Open questions
 
 ### Git compiled to WASM
