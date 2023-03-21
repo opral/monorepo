@@ -328,17 +328,29 @@ That function was same as clone, just also set `clone_opts.fetch_opts.depth` opt
 
 But essentially at least in examples provided, `FS` variables corresponds to Emscripten File System.
 
-#### Q: Do we continue using Emscripten File System?
-
-Does it make sense to continue using Emscripten File System that already comes to us out of the package with wasm-git and libgit2?
+#### Q: Does it make sense to continue using Emscripten File System or it should be replaced with something else?
 
 The answer to it would require more studying of how that part works to say for sure.
 
-But we can imagine that we disregard the `lg2.js` file. We as part of Git SDK keep the file system as part of the Git SDK package code.
+[libgit2 clone API](https://libgit2.org/libgit2/#HEAD/group/clone/git_clone) as arg accepts `local_path` which is `local directory to clone to` and `git_repository` which is `pointer that will receive the resulting repository object`.
 
-FS gets passed to the package via argument. In Git SDK, it would somehow connect the file system with the git and run commands on it.
+> warning: I need to study this further to make a conclusive answer.
 
-There is documented [API on calling WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API). Need to read this to say for sure how that part would work.
+Currently provided `lg2.js` file seems to be doing all the file system <> git interfacing.
+
+#### Q: How would replacing Emscripten File System with another file system look like?
+
+There was a proposal above to abstract the file system away from the user and expose everything via Git SDK API. If that's the case, we can continue using Emscripten File System in theory and build on top of it.
+
+> warning: needs more study, specificly that lg2.js that is the build output of wasm-git
+
+Assuming user sends file system as argument in similar way that happens in Iso Git now. Somehow when calls to `.wasm` are made, it needs to work.
+
+FS gets passed to the package via argument. In Git SDK, it would somehow connect the file system with the git and run commands on it using libgit2.
+
+There is documented [API on calling WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
+
+Need to read through the API exposed by libgit2 to say for sure.
 
 #### Q: Do you need to run anything in a web worker?
 
