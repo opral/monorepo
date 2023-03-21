@@ -271,6 +271,8 @@ uncommittedChanges()
 unpushedChanges()
 
 // host like GitHub or GitLab dependent
+// ouside of libgit2 scope
+// would need to be built as part of Git SDK and send relevant commands to libgit2
 signIn()
 signOut()
 createFork()
