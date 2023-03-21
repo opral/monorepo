@@ -176,7 +176,7 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 ## Git compiled to WASM
 
-> Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
+> Warning: Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
 
 Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
@@ -243,5 +243,6 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 
 ## Open questions
 
-- What is missing in above approaches.
+- What is missing in above approaches? Can either approach achieve all the goals stated above?
 - Estimate on how long either of the approaches would take?
+-
