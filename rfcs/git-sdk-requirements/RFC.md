@@ -303,4 +303,12 @@ inlang.config.js
 packages/web/localizations
 ```
 
-It lists paths to checkout. So need to figure out how to do a git fetch with just those files.
+It lists paths to checkout. So need to figure out how to do a git fetch with just those files. [Fetch](https://isomorphic-git.org/docs/en/fetch) needs to be adapted for it.
+
+For rebase, it might be easier too as it's implemented in quite a few git implementations unlike sparse-checkout surprisingly. So can translate that code to JS.
+
+My understanding of rebase is that it shold take a look at some commits and turn them into one. This should be doable to do with some git primitives exposed by isomorphic git.
+
+If we can implement rebase and sparse-checkout, I don't think any other command should be a problem to implement either.
+
+Performance should be of no concern. You are not doing anything heavy as far as operations go.
