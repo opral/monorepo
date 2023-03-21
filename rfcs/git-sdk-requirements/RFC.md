@@ -260,17 +260,17 @@ pull() // ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with
 sparseCheckout() // ❓ https://github.com/libgit2/libgit2/issues/2263 (open pr, need to build, test)
 
 // branch related
-currentBranch() ✅
-createBranch() ✅
-renameBranch() ✅
-switchBranch() ✅
-deleteBranch() ✅
+currentBranch() // ✅ https://stackoverflow.com/questions/12132862/how-do-i-get-the-name-of-the-current-branch-in-libgit2
+createBranch() // ✅ https://libgit2.org/libgit2/#HEAD/group/branch/git_branch_create
+renameBranch() // ✅ https://libgit2.org/libgit2/#v0.17.0/group/branch
+switchBranch() // ✅ https://stackoverflow.com/questions/46757991/checkout-branch-with-libgit2
+deleteBranch() // ✅ https://libgit2.org/libgit2/#v0.17.0/group/branch/git_branch_delete
 
 // change related
 // (3 API different "changes" concepts...)
-unstagedChanges()
-uncommittedChanges()
-unpushedChanges()
+unstagedChanges() // ❓ didn't find example with this, but it may exist
+uncommittedChanges() // ❓ didn't find example too
+unpushedChanges() // ✅ https://stackoverflow.com/questions/42131934/get-unpushed-commits-with-libgit2
 
 // host like GitHub or GitLab dependent
 // ouside of libgit2 scope
