@@ -188,6 +188,8 @@ Q: If we use a JS implementation, will we run into foreseeable performance issue
 
 A: I don't think so as git operations are not heavy. Especially for use cases of Inlang. Heaviest useful operation might be rebase? Rebase doesn't exist in Iso Git so we can't benchmark it to say conclusively but intution says it shouldn't be an issue.
 
+We can also be smart on the client side and perhaps see if the files of the project the user is working with is large, we can delegate to do some git heavy work in a web worker instead not to block the main thread.
+
 Q: How difficult would it be to add those commands?
 
 A: Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
