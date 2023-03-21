@@ -299,7 +299,16 @@ You will clone repo, you get the files/folders. If you want to see contents of i
 
 This one is tricky, how to edit file?
 
-`inlangGit.edit("")`
+```js
+// perhaps
+const file = inlangGit.readFile("path/toFile")
+
+// show in UI
+// make edits to it
+// want to git commit it? do this:
+
+inlangGit.overwriteFile("path/toFile")
+```
 
 ### Git inside JS
 
