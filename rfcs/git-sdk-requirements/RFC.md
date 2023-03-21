@@ -201,7 +201,7 @@ export function clone(gitUrl: string, options: CloneOptions) {
 
 There were issues trying to bundle the wasm file in a package. We tried to use [@rollup/plugin-wasm](https://www.npmjs.com/package/@rollup/plugin-wasm) for it.
 
-More investigation should be done in this area. Can the package have its own web worker?
+More investigation should be done in this area.
 
 <!-- ###
 
