@@ -180,6 +180,8 @@ Q: If we use a JS implementation, will we run into foreseeable performance issue
 
 A: I don't think so as git operations are not heavy. Especially for use cases of Inlang. Heaviest useful operation might be rebase? Rebase doesn't exist in Iso Git so we can't benchmark it to say conclusively but intution says it shouldn't be an issue.
 
+Q: How difficult would it be to add those commands?
+
 ## Git compiled to WASM
 
 > Warning: Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
