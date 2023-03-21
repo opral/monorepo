@@ -224,57 +224,6 @@ By checking out how the code is done in quite a few git implementations out ther
 
 Paying attention that we are running in a browser context and not all details are needed, simplifies things a lot.
 
-### Implementation details
-
-Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
-
-For sparse git checkout of particular file, here is CLI version:
-
-```
-git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang
-cd inlang
-git config core.sparseCheckout true
-echo "inlang.config.js" >> .git/info/sparse-checkout
-git checkout
-```
-
-You can do normal [clone](https://isomorphic-git.org/docs/en/clone) already but that takes too long. Shallow clone with depth 1 is available but that still takes 10+ seconds on some repos.
-
-So to implement a sparse checkout of just one file or folder, you would need to implement these options inside Iso Git.
-
-There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
-
-![Options eplained](./git-clone-explained.png)
-
-> Why you need the options
-
-![Options eplained](./git-clone-explained-2.png)
-
-There is also a way to achieve above with `git init` and orphan branch. Speed wise, they are the same. In `git init` you just create a folder yourself.
-
-We don't technically need to do `git config core.sparseCheckout true` as we don't need to be up to git spec. There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option though so it's no issue to do this part.
-
-`echo "inlang.config.js" >> .git/info/sparse-checkout` tells sparse-checkout what to checkout on next `git checkout`.
-
-So we need to figure out what happens when `git checkout` happens in `sparseCheckout` true mode. The `sparse-checkout` file looks like this:
-
-```
-/*
-!/*/
-inlang.config.js
-packages/web/localizations
-```
-
-It lists paths to checkout. So need to figure out how to do a git fetch with just those files. [Fetch](https://isomorphic-git.org/docs/en/fetch) needs to be adapted for it.
-
-For rebase, it might be easier too as it's implemented in quite a few git implementations unlike sparse-checkout surprisingly. So can translate that code to JS.
-
-My understanding of rebase is that it shold take a look at some commits and turn them into one. This should be doable to do with some git primitives exposed by isomorphic git.
-
-If we can implement rebase and sparse-checkout, adding other commands shouldn't be a problem to implement either.
-
-Performance should be of no concern. You are not doing anything heavy as far as operations go.
-
 ## Git compiled to WASM
 
 ### Context
@@ -407,3 +356,58 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 `inlang.rebase()`
 
 As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though.
+
+## Implementation details for Isomorphic Git
+
+> Potentially out of scope of this RFC but are here to give more context to questions/answers above
+
+> Can be used to approximate amount of work needed to complete the transition
+
+Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
+
+For sparse git checkout of particular file, here is CLI version:
+
+```
+git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang
+cd inlang
+git config core.sparseCheckout true
+echo "inlang.config.js" >> .git/info/sparse-checkout
+git checkout
+```
+
+You can do normal [clone](https://isomorphic-git.org/docs/en/clone) already but that takes too long. Shallow clone with depth 1 is available but that still takes 10+ seconds on some repos.
+
+So to implement a sparse checkout of just one file or folder, you would need to implement these options inside Iso Git.
+
+There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
+
+![Options eplained](./git-clone-explained.png)
+
+> Why you need the options
+
+![Options eplained](./git-clone-explained-2.png)
+
+There is also a way to achieve above with `git init` and orphan branch. Speed wise, they are the same. In `git init` you just create a folder yourself.
+
+We don't technically need to do `git config core.sparseCheckout true` as we don't need to be up to git spec. There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option though so it's no issue to do this part.
+
+`echo "inlang.config.js" >> .git/info/sparse-checkout` tells sparse-checkout what to checkout on next `git checkout`.
+
+So we need to figure out what happens when `git checkout` happens in `sparseCheckout` true mode. The `sparse-checkout` file looks like this:
+
+```
+/*
+!/*/
+inlang.config.js
+packages/web/localizations
+```
+
+It lists paths to checkout. So need to figure out how to do a git fetch with just those files. [Fetch](https://isomorphic-git.org/docs/en/fetch) needs to be adapted for it.
+
+For rebase, it might be easier too as it's implemented in quite a few git implementations unlike sparse-checkout surprisingly. So can translate that code to JS.
+
+My understanding of rebase is that it shold take a look at some commits and turn them into one. This should be doable to do with some git primitives exposed by isomorphic git.
+
+If we can implement rebase and sparse-checkout, adding other commands shouldn't be a problem to implement either.
+
+Performance should be of no concern. You are not doing anything heavy as far as operations go.
