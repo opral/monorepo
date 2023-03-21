@@ -237,7 +237,6 @@ With Git SDK abstracting file system:
 // the clone will include the whole file tree structure as it exists at the root
 
 // we need to figure out what the best default is?
-// most likely
 const inlanggit = await clone("https://github.com/inlang/inlang")
 
 // as second argument we can also provide options object
