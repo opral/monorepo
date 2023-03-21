@@ -135,6 +135,39 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
+### Questions
+
+#### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
+
+A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
+
+`clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
+`add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
+
+Should do this for all other commands too. But general intuition is that performance should be not an issue.
+
+We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread.
+
+#### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
+
+A: Currently Inlang exposes isomorphic git raw from git sdk. Everything runs in the main thread, from our observations this had no issues in performance thus far. Only pressing issues are that inital loading takes too long as shallow clone is not fast enough. And rebase is needed feature to keep git history clean. Both those features are not expesnsive to want to run in a web worker.
+
+So it makes sense to keep everything in memory in javascript.
+
+#### Q: How should Git SDK look in near future?
+
+A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
+
+It can be a nice DX improvement for Inlang to cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. No need to learn multiple APIs and the examples in docs can be simpler too potentially. This would avoid passing `fs` to all Git SDK commands too.
+
+Q: How difficult would it be to add those commands?
+
+A: Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
+
+A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
+
+### Implementation details
+
 For sparse git checkout of particular file, here is CLI version:
 
 ```
@@ -181,37 +214,6 @@ My understanding of rebase is that it shold take a look at some commits and turn
 If we can implement rebase and sparse-checkout, I don't think any other command should be a problem to implement either.
 
 Performance should be of no concern. You are not doing anything heavy as far as operations go.
-
-### Questions
-
-#### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
-
-A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
-
-`clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
-`add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
-
-Should do this for all other commands too. But general intuition is that performance should be not an issue.
-
-We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread.
-
-#### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
-
-A: Currently Inlang exposes isomorphic git raw from git sdk. Everything runs in the main thread, from our observations this had no issues in performance thus far. Only pressing issues are that inital loading takes too long as shallow clone is not fast enough. And rebase is needed feature to keep git history clean. Both those features are not expesnsive to want to run in a web worker.
-
-So it makes sense to keep everything in memory in javascript.
-
-#### Q: How should Git SDK look in near future?
-
-A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
-
-It can be a nice DX improvement for Inlang to cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. No need to learn multiple APIs and the examples in docs can be simpler too potentially. This would avoid passing `fs` to all Git SDK commands too.
-
-Q: How difficult would it be to add those commands?
-
-A: Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
-
-A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
 
 ## Git compiled to WASM
 
