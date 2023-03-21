@@ -291,6 +291,10 @@ I think the big idea / confusion is that maybe we don't expose the full file sys
 
 I think you can achieve all at least Inlang concerns through API like this. Where we don't deal with the file system inside the front end code.
 
+You will clone repo, you get the files/folders. If you want to see contents of it, make a `inlangGit.openFile("path/toFile.js")`
+
+`inlangGit.log()` shows git log
+
 ### Git inside JS
 
 Git compiled to JS is simipler.
