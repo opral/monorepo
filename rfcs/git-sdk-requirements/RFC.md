@@ -549,13 +549,17 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 > or be implementation detail of git sdk
 
+> check how you can achieve full reactivity and how would periodic git pulling work
+
 Git is compiled to wasm using libgit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
 You can then call `libgit.main()` to send commands to actual git. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
 
 Git WASM gives 2 examples in repo, one in [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries) and 1 in [browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker).
 
-In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
+> to be completed
+
+<!-- In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
 
 For example when you do:
 
@@ -596,4 +600,4 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 
 `inlang.rebase()`
 
-As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though.
+As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though. -->
