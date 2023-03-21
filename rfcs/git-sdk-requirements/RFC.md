@@ -366,7 +366,17 @@ Assuming we figure out how TS communicates nicely with Git commands that get exe
 
 However when it was used last time, there were errors.
 
-## Implementation details for Isomorphic Git
+## Conclusion
+
+Given the stated goals of this RFC
+
+## Implementation details
+
+> Below are implementation details for both Iso Git and WASM Git
+> They were used as explorations of what is required in more practical terms
+> To complete each of the solutions.
+
+### Implementation details for Isomorphic Git
 
 > Potentially out of scope of this RFC but are here to give more context to questions/answers above
 
