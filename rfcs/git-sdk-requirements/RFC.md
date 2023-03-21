@@ -208,7 +208,9 @@ The API for above is quite readable and nice. And powerful too in some ways. As 
 const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git", { depth: 1 })
 ```
 
-If you want shallow clone
+You can also as second arg to `clone` send some options to already fetch up to certain depth of commits or any other option that would make sense to run for Git to be run in the browser.
+
+In many ways this opens up the API surface too and lets us explore what to expose to users and what not. A lot of complexity can be hidden away. Namely all the memfs api learning you will need to do, together with more lines of code and potential bugs.
 
 Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
 
