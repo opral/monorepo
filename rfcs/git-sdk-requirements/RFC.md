@@ -209,7 +209,9 @@ Would be doable to add irrespective of whether libgit2 or Isomorphic Git is chos
 
 > note: can be removed from RFC, just some thinking out loud
 
-> hypothethisizing making Git SDK have tight integration with the FS
+> also on second thought this won't make sense, seems you would need to pass a FS
+
+> hypothethisizing making Git SDK have tight integration with the FS (might not be possible/feasible or make sense)
 
 > only exposing the actual useful commands you would need to build Git based apps
 
