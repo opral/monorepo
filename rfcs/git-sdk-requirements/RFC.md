@@ -208,7 +208,13 @@ git checkout
 
 You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
 
-There is also way to achieve above with `git init` and orphan branch.
+![Options eplained](./git-clone-explained.png)
+
+> Why you need the options
+
+![Options eplained](./git-clone-explained-2.png)
+
+There is also way to achieve above with `git init` and orphan branch. Speed wise, they are the same.
 
 There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option. So maybe you can use that to write to config. But in our case we don't need this detail even.
 
