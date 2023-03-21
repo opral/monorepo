@@ -252,4 +252,8 @@ inlangGit.overwriteFile("path/toFile")
 
 Git compiled to JS is simipler.
 
-You import Git SDK (that wraps around isomorphic git). Maybe the big difference and I don't know perhaps the whole idea is that you need to have the file system
+You import Git SDK (that wraps around isomorphic git). Maybe the big difference and I don't know perhaps the whole idea is that you need to have the file system.
+
+The trouble here is extending isomorphic git to support all the features we need such as sparse-checkout and perhaps more.
+
+In theory libkit2 is quite mature, you can most likely already make sparse-checkout work with clever arrangement of existing commands.
