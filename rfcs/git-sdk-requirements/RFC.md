@@ -165,6 +165,8 @@ const commithistory = inlanggit.commithistory("readme.md")
 
 For above code, what would happen under the hood in Git SDK is:
 
+Technically below is incrrect. GitSDK api will look a bit different
+
 ```js
 //
 export function clone(gitUrl: string, options: CloneOptions) {
