@@ -241,7 +241,7 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 
 `inlang.rebase()`
 
-As I am writing this. This to me seems like a nice way to abstract working with remote git repos.
+As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though.
 
 To summarize
 
@@ -261,8 +261,14 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 
 Q: Is web worker needed or we should just use WASM for Git operations?
 
-A: TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
+A:
+
+TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 
 Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
-A: TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API
+A:
+
+TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API
+
+But in my thinking, this would require to look at `lg2.js` code and replicate essential parts of it into TS code.
