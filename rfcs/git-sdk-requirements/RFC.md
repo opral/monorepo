@@ -252,10 +252,10 @@ From list shared above with checkboxes for available API. API of libgit2 is [her
 
 ```js
 // elementary
-clone() ✅
-commit() ✅
-push() ✅
-pull() ✅
+clone() ✅ https://libgit2.org/docs/guides/101-samples/#repositories_clone_simple
+commit() ✅ https://libgit2.org/docs/guides/101-samples/#commits
+push() ✅ https://stackoverflow.com/questions/28055919/how-to-push-with-libgit2
+pull() ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with-libgit2
 
 // branch related
 currentBranch() ✅
