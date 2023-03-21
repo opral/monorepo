@@ -297,9 +297,37 @@ The resulting `.wasm` file in `Release` mode is ~ 830 KB.
 
 A: libgit2 is written in C. So changes to it must be made in C too if libgit2 doesn't support a certain feature.
 
-Fortun
+Fortunately it seems libgit2 supports all the needed features Inlang needs. And potentially other features that other companies building on Git SDK will need.
 
-There are also questions about availablity of libgit2 having the features currenly missing from iso git. For example:
+From list shared above with checkboxes for available API. API of libgit2 is [here](https://libgit2.org/libgit2/#HEAD).
+
+```jsx
+// elementary
+clone() ✅
+commit() ✅
+push()
+pull()
+
+// branch related
+currentBranch()
+createBranch()
+renameBranch()
+switchBranch()
+deleteBranch()
+
+// change related
+// (3 API different "changes" concepts...)
+unstagedChanges()
+uncommittedChanges()
+unpushedChanges()
+
+// host like GitHub or GitLab dependent
+signIn()
+signOut()
+createFork()
+syncFork()
+openPullRequest()
+```
 
 1. sparse checkout is still [open issue](https://github.com/libgit2/libgit2/issues/2263) but there is [non merged pr](https://github.com/libgit2/libgit2/pull/6394)
 
