@@ -258,7 +258,7 @@ As I am writing this. This to me seems like a nice way to abstract working with 
 
 ### Git inside JS
 
-Git compiled to JS is simipler.
+Git in JS is simipler.
 
 You import Git SDK (that wraps around isomorphic git). Maybe the big difference and I don't know perhaps the whole idea is that you need to have the file system.
 
