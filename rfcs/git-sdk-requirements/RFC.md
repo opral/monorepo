@@ -189,7 +189,7 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
 
 `clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
-`add` = scans over added files, create entry in `.git`
+`add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
 
 Should do this for all other commands too. But general intuition is that performance should be not an issue.
 
