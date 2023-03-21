@@ -268,7 +268,9 @@ This can be spinned up into a new RFC and discussed, just wanted to add this as 
 
 > note: need to read up on it to say for sure
 
-But think it should be possible to wrap around Isomorphic Git to add this feature. Might not even need changes to Iso Git core itself.
+This can use either isomorphic git or libgit2 under the hood. FS implementation is abstracted away.
+
+> note: need to read through lg2.js code to see whether Emscripten is node fs api like
 
 > note: how would this work with real time collaboration?
 
