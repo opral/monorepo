@@ -137,7 +137,11 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 #### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
-A: Git operations are not heavy. Especially for use cases of Inlang.
+A: Nearly all git operations especially ones you'd want to do in context of a browser won't be computationally heavy.
+
+The heaviest ones would mostl likely be comitting many files potentially but even there JS can do it quite fast even on large amount of content.
+
+Currently the biggest issue that Inlang editor faces are not IO bound but its waiting for the network to get the right files and content to render.
 
 `clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
 `add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
