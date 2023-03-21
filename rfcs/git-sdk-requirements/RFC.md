@@ -154,6 +154,7 @@ Thus the need to implement sparse-checkout feature to only fetch specific files 
 Most other git commands like `rebase` or `commit` won't do much else so all operations should be near instant.
 
 > go through the list of to be supported git commands and be more thorough in analysis of perf
+
 > ideally benchmark some commands
 
 We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread. Given the explanation presented in the previous section, this option should not be needed. However, offloading IO or computational work to web worker and waiting for response is possible if needed.
@@ -207,7 +208,9 @@ Would be doable to add irrespective of whether libgit2 or Isomorphic Git is chos
 #### Q: Could Git SDK abstract away the file system and expose git app focused API only?
 
 > note: can be removed from RFC, just some thinking out loud
+
 > hypothethisizing making Git SDK have tight integration with the FS
+
 > only exposing the actual useful commands you would need to build Git based apps
 
 Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
@@ -471,7 +474,9 @@ If many features will not be available in libgit2, then it would most likely mak
 ## Implementation details
 
 > Below are implementation details for both Iso Git and WASM Git
+
 > They were used as explorations of what is required in more practical terms
+
 > To complete each of the solutions.
 
 ### Implementation details for Isomorphic Git
@@ -603,19 +608,29 @@ As I am writing this. This to me seems like a nice way to abstract working with 
 ## Potential Apps built with Git and what would they need
 
 > API is up for discussion
+
 > depending on how it goes we could maybe create out of git spec api
+
 > i.e. checkoutFile() below
+
 > below api assumes fs is provided and is part of the SDK
+
 > need to think through how reactivity would work in such example
+
 > i assume now somehow memfs is made reactive
+
 > perhaps as return to the Git SDK, it would create signals you can listen to
+
 > for easy integration with say solid
+
 > for react, a hook could be provided
+
 > so what is return is to be decided for
 
 ### Inlang
 
 > if fs is not passed on
+
 > whats the best way to read content of a file
 
 ```
