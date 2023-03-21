@@ -193,9 +193,7 @@ A: I don't think so as git operations are not heavy. Especially for use cases of
 
 Should do this for all other commands too. But general intuition is that performance should be not an issue.
 
-We can also be smart on the SDK side and perhaps see if the files of the project the user is working with is large for a git operation, we can delegate to do some git heavy work in a web worker instead not to block the main thread. So any perf issue we hit can be avoided this way.
-
-We would need to write code to schedule this work so there should be some algorithm to perhaps predict a future heavy operation.
+We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread.
 
 Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
