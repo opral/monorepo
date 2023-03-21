@@ -156,7 +156,39 @@ We can also potentially delegate some heavy git operations to a web worker. To r
 
 No, for above reason. It's not worth the complexity and there is no need for it.
 
+#### Q: How difficult would it be to add those commands?
+
+Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
+
+A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
+
+By checking out how the code is done in quite a few git implementations out there. Some have already implemented it. In the worst case, you can read main [Git code](https://github.com/git/git) and figure out how those commands work from first principles and implement them.
+
+Paying attention that we are running in a browser context and not all details are needed, simplifies things a lot.
+
+#### Q: Will using Isomorphic Git answer to all stated goals above?
+
+✅ = already done
+🚧 = work required
+❎ = not possible
+
+Goal 1: Must run in the browser/on the client [High Confidence] ✅
+
+Goal 2: Lazy loading of files and git history [High Confidence] 🚧
+
+Is achievable in a few ways. But in current state would require sparse checkout to be implemented.
+
+Goal 3: Must be git compatible but not necessarily up to spec [Medium Confidence] ✅
+
+No issue here. Isomorphic Git is already git compatible, if we decide to extend it with new features we can have a fork of Isomorphic Git potentially or bring commands up to spec and merge them into Iso Git repo.
+
+Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
+
 #### Q: How should Git SDK look in near future?
+
+> note: can be removed from RFC, just some thinking out loud
+> hypothethisizing making Git SDK have tight integration with the FS
+> only exposing the actual useful commands you would need to build Git based apps
 
 Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
 
@@ -213,34 +245,6 @@ You can also as second arg to `clone` send some options to already fetch up to c
 In many ways this opens up the API surface too and lets us explore what to expose to users and what not. A lot of complexity can be hidden away. Namely all the memfs api learning you will need to do, together with more lines of code and potential bugs.
 
 This can be spinned up into a new RFC and discussed, just wanted to add this as it can influence the choice of whether it makes sense to go with Git compiled to WASM approach or Git in JS.
-
-#### Q: How difficult would it be to add those commands?
-
-Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
-
-A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
-
-By checking out how the code is done in quite a few git implementations out there. Some have already implemented it. In the worst case, you can read main [Git code](https://github.com/git/git) and figure out how those commands work from first principles and implement them.
-
-Paying attention that we are running in a browser context and not all details are needed, simplifies things a lot.
-
-#### Q: Will using Isomorphic Git answer to all stated goals above?
-
-✅ = already done
-🚧 = work required
-❎ = not possible
-
-Goal 1: Must run in the browser/on the client [High Confidence] ✅
-
-Goal 2: Lazy loading of files and git history [High Confidence] 🚧
-
-Is achievable in a few ways. But in current state would require sparse checkout to be implemented.
-
-Goal 3: Must be git compatible but not necessarily up to spec [Medium Confidence] ✅
-
-No issue here. Isomorphic Git is already git compatible, if we decide to extend it with new features we can have a fork of Isomorphic Git potentially or bring commands up to spec and merge them into Iso Git repo.
-
-Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
 
 > note: need to read up on it to say for sure
 
