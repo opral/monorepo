@@ -135,7 +135,7 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
-For sparse git checkout of particular file, here is cli version:
+For sparse git checkout of particular file, here is CLI version:
 
 ```
 git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang
@@ -256,5 +256,9 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 ### Questions
 
 Q: Is web worker needed or we should just use WASM for Git operations?
+
+A:
+
+Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
 A:
