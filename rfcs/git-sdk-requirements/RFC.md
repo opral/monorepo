@@ -251,4 +251,6 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 
 ### Questions
 
--
+Q: Is web worker needed or we should just use WASM for Git operations?
+
+A:
