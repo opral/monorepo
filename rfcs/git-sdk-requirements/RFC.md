@@ -156,13 +156,13 @@ Most other git commands like `rebase` or `commit` won't do much else so all oper
 > go through the list of to be supported git commands and be more thorough in analysis of perf
 > ideally benchmark some commands
 
-We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread. But having said above, it won't be needed. But the option of offloading IO or computational work to web worker and waiting for response is there if we ever need it.
+We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread. Given the explanation presented in the previous section, this option should not be needed. However, offloading IO or computational work to web worker and waiting for response is possible if needed.
 
 #### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
 No, for above reason. It's not worth the complexity and there is no need for it.
 
-#### Q: How difficult would it be to add those commands?
+#### Q: How difficult would it be to add missing commands?
 
 Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
 
@@ -533,11 +533,21 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 ### Implementation details for WASM Git
 
-> Is here for context too. And to approximate the difficulty of transition. What is needed to actually complete it
+> Currently exploring this approach to rebuild current Inlang editor with libgit2
 
-> Will need to be revisited when current Inlang editor gets built using libgit2 as proof of concept.
+> check maybe Emscripten has option to change output of lg2.js generated
 
-> This part and Iso Git implementation details can be safely removed from this rfc before its publishing.
+> if can't fix with that approach, then try rewrite lg2.js so it can run in solid code
+
+> check how Emscripten file system api works how create nice DX functions around it
+
+> how would file sync work in this setup?
+
+> in theory it should work as all commands with actual git work get sent to lg2.wasm. it responds with something
+
+> and file system updates. real time etc can be built on top as file system can be exposed fully
+
+> or be implementation detail of git sdk
 
 Git is compiled to wasm using libgit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
