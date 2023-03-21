@@ -250,7 +250,7 @@ Fortunately it seems libgit2 supports all the needed features Inlang needs. And 
 
 From list shared above with checkboxes for available API. API of libgit2 is [here](https://libgit2.org/libgit2/#HEAD).
 
-```jsx
+```js
 // elementary
 clone() ✅
 commit() ✅
@@ -287,6 +287,10 @@ Also shallow clone is most likely not needed with sparse checkout.
 [Rebase is available](https://libgit2.org/libgit2/#v0.23.2/group/rebase) however.
 
 And I think most everything else to be fair.
+
+#### Q: Is 833 KB WASM file an issue to load?
+
+A: Should be non issue as its under 1 MB.
 
 #### Q: Is web worker needed or we should just use WASM for Git operations?
 
