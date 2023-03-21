@@ -224,6 +224,14 @@ By checking out how the code is done in quite a few git implementations out ther
 
 Paying attention that we are running in a browser context and not all details are needed, simplifies things a lot.
 
+#### Q: Will using Isomorphic Git answer to all stated goals above?
+
+Goal 1: Must run in the browser/on the client ✅
+
+Goal 2: Lazy loading of files and git history 🚧
+
+Is achievable in a few ways. But in current state would require
+
 ## Git compiled to WASM
 
 ### Context
@@ -368,7 +376,7 @@ However when it was used last time, there were errors.
 
 ## Conclusion
 
-Given the stated goals of this RFC
+Having stated above, it's clear that
 
 ## Implementation details
 
