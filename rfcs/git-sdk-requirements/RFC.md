@@ -197,15 +197,15 @@ We can also potentially delegate some heavy git operations to a web worker. To r
 
 Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
-A: Currently Inlang exposes isomorphic git raw from git sdk.
+A: Currently Inlang exposes isomorphic git raw from git sdk. Everything runs in the main thread, from our observations this had no issues in performance thus far. Only pressing issues are that inital loading takes too long as shallow clone is not fast enough. And rebase is needed feature to keep git history clean. Both those features are not expesnsive to want to run in a web worker.
+
+So it makes sense to keep everything in memory in javascript.
 
 Q: How should Git SDK look in near future?
 
 A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
 
-Personally I would prefer not to deal with the file system and have Inlang cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. This would avoid passing `fs` to all Git SDK commands too.
-
-TODO: write it out?
+It can be a nice DX improvement for Inlang to cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. No need to learn multiple APIs and the examples in docs can be simpler too potentially. This would avoid passing `fs` to all Git SDK commands too.
 
 Q: How difficult would it be to add those commands?
 
