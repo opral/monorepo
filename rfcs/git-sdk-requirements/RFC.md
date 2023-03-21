@@ -260,7 +260,9 @@ As I am writing this. This to me seems like a nice way to abstract working with 
 
 Git in JS is simipler.
 
-You import Git SDK (that wraps around isomorphic git). Maybe the big difference and I don't know perhaps the whole idea is that you need to have the file system.
+You import Git SDK (that wraps around isomorphic git). This isomorphic git lives together with some in memory fs.
+
+Probably best of it is [memfs](https://www.npmjs.com/package/memfs).
 
 The trouble here is extending isomorphic git to support all the features we need such as sparse-checkout and perhaps more.
 
