@@ -184,7 +184,9 @@ No issue here. Isomorphic Git is already git compatible, if we decide to extend 
 
 Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
 
-#### Q: How should Git SDK look in near future?
+This could be build
+
+#### Q: Could Git SDK abstract away the file system and expose git app focused API only?
 
 > note: can be removed from RFC, just some thinking out loud
 > hypothethisizing making Git SDK have tight integration with the FS
