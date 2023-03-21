@@ -292,11 +292,31 @@ And I think most everything else to be fair.
 
 A: Should be non issue as its under 1 MB.
 
-#### Q: Is web worker needed or we should just use WASM for Git operations?
+#### Q: How does the architecture with this approach look?
 
 A:
 
-<!-- TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers -->
+[WASM Git](https://github.com/petersalomonsen/wasm-git) reccomends using it through a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries).
+
+When you compile libgit2 as output with [Emscripten](https://emscripten.org/), you get both `lg2.wasm` file that is the libgit2 itself. And also `lg2.js`.
+
+The content of `lg2.js` is not fully clear yet but in the least of things it does 2 things:
+
+1. Exposes a `libgit` variable with a `callMain` function.
+
+You would then do:
+
+```js
+FS.mkdir("/")
+FS.mount(MEMFS, {}, "/")
+FS.chdir("/")
+const result = libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
+FS.chdir("inlang")
+```
+
+You can expose different C functions that run the commands.
+
+1. Give libgit2 a file system to work with. [Emscripten File System](https://emscripten.org/docs/api_reference/Filesystem-API.html).
 
 I think we can avoid using web workers. And just interface with WASM directly using [provided API](https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API).
 
