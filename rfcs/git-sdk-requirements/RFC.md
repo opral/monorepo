@@ -275,3 +275,7 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 Git in JS is maybe simpler. It depends on how hard it would be to add all missing features to Isomorphic Git.
 
 We need sparse checkout and rebase in the least. Either of those features have no code in Isomorphic Git currently.
+
+Iso Git already works with attaching a file system to all the commands. It's a matter of understsanding the underlying behavior of how each of the commands work and implementing that in JS. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
+
+For sparse git I imagine it writes
