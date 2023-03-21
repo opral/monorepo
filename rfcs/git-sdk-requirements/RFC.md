@@ -292,17 +292,25 @@ And I think most everything else to be fair.
 
 #### Q: Is 833 KB WASM file an issue to load?
 
-A: Should be non issue as its under 1 MB.
+Should be non issue as its under 1 MB.
+
+#### Q: Can you keep the file system inside WASM too?
+
+No, you can't. There is no file system in the WebAssembly runtime.
 
 #### Q: How does the architecture with this approach look?
 
-A:
+[WASM Git](https://github.com/petersalomonsen/wasm-git) reccomends using it through a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries). For unclear benefit.
 
-[WASM Git](https://github.com/petersalomonsen/wasm-git) reccomends using it through a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries).
+> note: need to understand the reasoning more, perhaps there is a good reason.
 
-When you compile libgit2 as output with [Emscripten](https://emscripten.org/), you get both `lg2.wasm` file that is the libgit2 itself. And also `lg2.js`.
+When you compile libgit2 to wasm with Emscripten, as build artefacts, you get `lg2.wasm` file that is the libgit2 itself. And also `lg2.js`.
 
-The content of `lg2.js` is not fully clear yet but in the least of things it does 2 things:
+The purpose of `lg2.js` file is to provide the file system for libgit2 to sync with.
+
+The code for `lg2.js` is quite hard to read and would need to be rewritten to be more nice to use and iterate on.
+
+It does already do these 2 things that are useful:
 
 1. Exposes a `libgit` variable with a `callMain` function.
 
