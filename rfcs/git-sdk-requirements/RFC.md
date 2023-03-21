@@ -133,7 +133,7 @@ Going with this approach for future Git SDK means adding missing commands that I
 
 Sparse checkout and rebase are needed in the least. Either of those features have no code in Isomorphic Git currently.
 
-Iso Git works by attaching a file system to all the commands. It's a matter of understsanding the underlying behavior of how each of the commands work and implementing that in JS. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
+Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
 For sparse git checkout of particular file, here is cli version:
 
