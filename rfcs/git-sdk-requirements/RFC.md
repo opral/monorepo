@@ -289,17 +289,27 @@ A: Most likely yes as WASM in general is faster. Compilation is done by [Emscrip
 
 It takes the C code and creates a `.wasm` file.
 
-libgit2 was not written with WASM in mind but it still be potentially faster than isomorphic git. Benchmarks have to be made to say for sure.
+libgit2 was not written with WASM in mind but it still will most likely be faster than isomorphic git.
+
+The resulting `.wasm` file in `Release` mode is ~ 830 KB.
 
 #### Q: will moving to libgit2 save us time in future?
 
-A: libgit2 is written in C. So changes to it must be made in C too.
+A: libgit2 is written in C. So changes to it must be made in C too if libgit2 doesn't support a certain feature.
 
-This would already turn Inlang into a multi language company that would require someone to know C to implement the features Git SDK needs.
+Fortun
 
-There are also questions about libgit2 vastness of features. For example:
+There are also questions about availablity of libgit2 having the features currenly missing from iso git. For example:
 
-sparse checkout is still [open issue](https://github.com/libgit2/libgit2/issues/2263)
+1. sparse checkout is still [open issue](https://github.com/libgit2/libgit2/issues/2263) but there is [non merged pr](https://github.com/libgit2/libgit2/pull/6394)
+
+High chance this pr builds though. We already tried to compile an open [pr for shallow clone](https://github.com/libgit2/libgit2/pull/6396) and that was succesful.
+
+Also shallow clone is most likely not needed with sparse checkout.
+
+[Rebase is available](https://libgit2.org/libgit2/#v0.23.2/group/rebase) however.
+
+And I think most everything else to be fair.
 
 #### Q: Is web worker needed or we should just use WASM for Git operations?
 
