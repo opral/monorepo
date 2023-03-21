@@ -252,11 +252,12 @@ From list shared above with checkboxes for available API. API of libgit2 is [her
 
 ```js
 // elementary
-clone() ✅ https://libgit2.org/docs/guides/101-samples/#repositories_clone_simple
-commit() ✅ https://libgit2.org/docs/guides/101-samples/#commits
-push() ✅ https://stackoverflow.com/questions/28055919/how-to-push-with-libgit2
-pull() ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with-libgit2
-sparseCheckout() ❓ https://github.com/libgit2/libgit2/issues/2263 (open pr, need to build, test)
+clone() // ✅ https://libgit2.org/docs/guides/101-samples/#repositories_clone_simple
+shallowClone() // ✅ part of clone, there is open pr for it that builds, tested it works!
+commit() // ✅ https://libgit2.org/docs/guides/101-samples/#commits
+push() // ✅ https://stackoverflow.com/questions/28055919/how-to-push-with-libgit2
+pull() // ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with-libgit2
+sparseCheckout() // ❓ https://github.com/libgit2/libgit2/issues/2263 (open pr, need to build, test)
 
 // branch related
 currentBranch() ✅
@@ -280,16 +281,6 @@ createFork()
 syncFork()
 openPullRequest()
 ```
-
-1. sparse checkout is still [open issue]() but there is [non merged pr](https://github.com/libgit2/libgit2/pull/6394)
-
-High chance this pr builds though. We already tried to compile an open [pr for shallow clone](https://github.com/libgit2/libgit2/pull/6396) and that was succesful.
-
-Also shallow clone is most likely not needed with sparse checkout.
-
-[Rebase is available](https://libgit2.org/libgit2/#v0.23.2/group/rebase) however.
-
-And I think most everything else to be fair.
 
 #### Q: Is 833 KB WASM file an issue to load?
 
