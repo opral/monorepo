@@ -302,12 +302,6 @@ This can use either isomorphic git or libgit2 under the hood. FS implementation 
 
 > why pass some fs and complicate setup potentially
 
-```
-// not sure
-let inlangConfig = await inlang.checkoutFile("inlang.config.js")
-inlang.files()
-```
-
 ## Git compiled to WASM
 
 ### Context
