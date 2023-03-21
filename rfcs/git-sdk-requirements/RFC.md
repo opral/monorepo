@@ -260,9 +260,11 @@ To summarize
 
 1. Web worker most certianly not needed it seems, so just compile wasm-git, take the .wasm
 
-- pass the file system to git sdk, use it to walk with .wasm
+- pass the file system as part of API in `clone()` etc. use the file system to do git commands from the .wasm
 
-2. Problem here
+- issue there is how to bundle the .wasm? there was a problem with rollup-wasm last time
+- the connection of how the FS gets attached to compiled libkit2 is not clear. `lg2.js` file should in theory answer that question
+  - probably just need to see all the places where `FS` is used and try replace it with memfs.
 
 ### Git inside JS
 
