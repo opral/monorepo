@@ -143,22 +143,24 @@ The heaviest ones would mostl likely be comitting many files potentially but eve
 
 Currently the biggest issue that Inlang editor faces are not IO bound but its waiting for the network to get the right files and content to render.
 
+Thus the need to implement sparse-checkout feature to just fetch one file or folder you need.
+
 `clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
 `add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
 
-Should do this for all other commands too. But general intuition is that performance should be not an issue.
+Most other commands won't do much else so all operations should be near instant.
 
-We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread.
+We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread. But having said above, it won't be needed. But the option of offloading IO or computational work to web worker and waiting for response is there if we ever need it.
 
 #### Q: Does it make sense to run Isomoprphic Git and/or file system in a web worker?
 
-A: Currently Inlang exposes isomorphic git raw from git sdk. Everything runs in the main thread, from our observations this had no issues in performance thus far. Only pressing issues are that inital loading takes too long as shallow clone is not fast enough. And rebase is needed feature to keep git history clean. Both those features are not expesnsive to want to run in a web worker.
-
-So it makes sense to keep everything in memory in javascript.
+A: No, for above reason. It's not worth the complexity and there is no need for it.
 
 #### Q: How should Git SDK look in near future?
 
-A: Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
+A: Perhaps outside of the discussion of this RFC but still maybe interesting to discuss. Or perhaps create new RFC?
+
+Potential API depends on whether the file system is handled by Inlang Git SDK for potential nice API surface. Or if file system is passed in.
 
 It can be a nice DX improvement for Inlang to cover all the possible use cases one would want to use git in the browser for. And provide access to the files as if you have a file system anyway. No need to learn multiple APIs and the examples in docs can be simpler too potentially. This would avoid passing `fs` to all Git SDK commands too.
 
