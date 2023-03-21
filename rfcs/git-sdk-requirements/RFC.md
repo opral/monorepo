@@ -256,6 +256,14 @@ Not sure how that api would look, my knowledge of rebase is squashing commits in
 
 As I am writing this. This to me seems like a nice way to abstract working with remote git repos.
 
+To summarize
+
+1. Web worker most certianly not needed it seems, so just compile wasm-git, take the .wasm
+
+- pass the file system to git sdk, use it to walk with .wasm
+
+2. Problem here
+
 ### Git inside JS
 
 Git in JS is simipler.
