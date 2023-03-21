@@ -178,7 +178,7 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
-A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
+A: I don't think so as git operations are not heavy. Especially for use cases of Inlang. Heaviest useful operation might be rebase? Rebase doesn't exist in Iso Git so we can't benchmark it to say conclusively but intution says it shouldn't be an issue.
 
 ## Git compiled to WASM
 
