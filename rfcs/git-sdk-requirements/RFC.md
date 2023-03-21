@@ -129,15 +129,15 @@ Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, i
 
 You can then call `libgit.main()` to send commands to actual git. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
 
-Git WASM gives 2 examples in repo, one in web worker and 1 in browser.
+Git WASM gives 2 examples in repo, one in [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries) and 1 in [browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker).
 
 In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
 
-Git SDK will when called to do say
+For example when you do:
 
-`const inlang = await clone("https://github.com/inlang/inlang.git")`
+`const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git")`
 
-When this is done for first time, in `clone` function of Git SDK, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
+In `clone` function, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
 
 Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libkit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
 
