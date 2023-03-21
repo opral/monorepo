@@ -220,6 +220,10 @@ A: Hard to predict but Isomorphic Git has some active contributors still. For ex
 
 A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
 
+By checking out how the code is done in quite a few git implementations out there. Some have already implemented it. In the worst case, you can read main [Git code](https://github.com/git/git) and figure out how those commands work from first principles and implement them.
+
+Paying attention that we are running in a browser context and not all details are needed, simplifies things a lot.
+
 ### Implementation details
 
 Iso Git works by attaching a file system to all the commands. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
