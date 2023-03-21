@@ -180,11 +180,23 @@ Is achievable in a few ways. But in current state would require sparse checkout 
 
 Goal 3: Must be git compatible but not necessarily up to spec [Medium Confidence] ✅
 
-No issue here. Isomorphic Git is already git compatible, if we decide to extend it with new features we can have a fork of Isomorphic Git potentially or bring commands up to spec and merge them into Iso Git repo.
+No issue here. Isomorphic Git is already git compatible, if we decide to extend it with new features we can have a fork of Isomorphic Git potentially or bring commands up to spec and merge them into Isomorphic Git repo.
 
 Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
 
-This could be build
+Is part of server so outside of Iso Git scope.
+
+> note: maybe wrong
+
+Goal 5: (Future) Support for large files out of the box [Medium Confidence] 🚧
+
+> note: need to research more to give good estimate how doable this is to add
+
+There is [open issue on this](https://github.com/isomorphic-git/isomorphic-git/issues/1375).
+
+Goal 6: (Future) Plugin system to support different files [Medium Confidence] 🚧
+
+Would be doable to add irrespective of whether libgit2 or Isomorphic Git is chosen.
 
 #### Q: Could Git SDK abstract away the file system and expose git app focused API only?
 
@@ -398,9 +410,57 @@ Assuming we figure out how TS communicates nicely with Git commands that get exe
 
 However when it was used last time, there were errors.
 
+#### Q: Will using libgit2 compiled to WASM answer to all stated goals above?
+
+✅ = already done
+🚧 = work required
+❎ = not possible
+
+Goal 1: Must run in the browser/on the client [High Confidence] ✅
+
+Calling into `.wasm` from JS, then in turn saving everything in the FS provided.
+
+Goal 2: Lazy loading of files and git history [High Confidence] 🚧 close to ✅ potentially
+
+sparse checkout is supported on a fork for libgit2. It needs to be compiled and tested.
+
+JS code needs to be written to abstract the lazy loading using sparse checkout to make it possible.
+
+Goal 3: Must be git compatible but not necessarily up to spec [Medium Confidence] ✅
+
+No issue here for same reason as Isomorphic Git. We use commands from libgit2 we need.
+
+However the barrier to contributing to libgit2 itself is going to be that command is fully spec compliant so we need to be aware of that.
+
+Goal 4: (Future) File-based auth [High Confidence | Server-related ] 🚧
+
+Is part of server so outside of scope.
+
+> note: maybe wrong
+
+Goal 5: (Future) Support for large files out of the box [Medium Confidence] 🚧/✅
+
+There is open discussion [here](https://github.com/git-lfs/git-lfs/issues/375). But from looks of it, it's supported but may bring issues.
+
+Goal 6: (Future) Plugin system to support different files [Medium Confidence] 🚧
+
+Would be doable to add irrespective of whether libgit2 or Isomorphic Git is chosen.
+
 ## Conclusion
 
-Having stated above, it's clear that
+Having written above, I believe going with libgit2 compiled to WASM option will allow us to potentially move faster in near future. As we won't need to implement sparse-checkout and rebase.
+
+Both features need some git know how and time to implement.
+
+With libgit2 we get those features out of the box.
+
+Performance is not a concern in either case so the other focus is on DX.
+
+I think you can provide the same Git SDK API regardless whether Isomorphic Git is chosen or libgit2 to do git operations.
+
+> note: although not sure about Emscripten file system. how tied is it to libgit2
+
+> discussion is warranted
 
 ## Implementation details
 
