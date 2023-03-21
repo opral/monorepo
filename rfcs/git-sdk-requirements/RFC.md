@@ -529,7 +529,9 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 > Is here for context too. And to approximate the difficulty of transition. What is needed to actually complete it
 
-> Current state is rough as not all things are known or yet explored.
+> Will need to be revisited when current Inlang editor gets built using libgit2 as proof of concept.
+
+> This part and Iso Git implementation details can be safely removed from this rfc before its publishing.
 
 Git is compiled to wasm using libgit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
