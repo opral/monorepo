@@ -186,9 +186,14 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
-A: I don't think so as git operations are not heavy. Especially for use cases of Inlang. Heaviest useful operation might be rebase? Rebase doesn't exist in Iso Git so we can't benchmark it to say conclusively but intution says it shouldn't be an issue.
+A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
 
-We can also be smart on the client side and perhaps see if the files of the project the user is working with is large, we can delegate to do some git heavy work in a web worker instead not to block the main thread. So any perf issue we hit can be avoided this way.
+`clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
+`add` = scans over added files, create entry in `.git`
+
+Should do this for all other commands too. But general intuition is that performance should be not an issue.
+
+We can also be smart on the SDK side and perhaps see if the files of the project the user is working with is large for a git operation, we can delegate to do some git heavy work in a web worker instead not to block the main thread. So any perf issue we hit can be avoided this way.
 
 We would need to write code to schedule this work so there should be some algorithm to perhaps predict a future heavy operation.
 
