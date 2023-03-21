@@ -225,7 +225,7 @@ Perhaps web workers are not needed at all for this. I would need to read more on
 
 If you use wasm, file system can still exist inside the Git SDK JS code, not in a web worker which is actually indeed not needed.
 
-I think the big idea / confusion is that maybe we don't expose the full file system to users. But if you want to talk with your files, you do it through Git SDK? Would this make sense?
+I think the big idea / confusion is that maybe we don't expose the full file system to users. But if you want to talk with your files, you do it through Git SDK? Would this make sense? Or maybe it's a question of then it being not just Git SDK but some kind of higher abstraction over git repos and should be named appropirately. Just an idea.
 
 I think you can achieve all at least Inlang concerns through API like this. Where we don't deal with the file system inside the front end code.
 
