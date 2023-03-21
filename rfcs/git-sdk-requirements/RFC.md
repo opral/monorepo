@@ -137,7 +137,7 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 #### Q: If we use a JS implementation, will we run into foreseeable performance issues that would be solved by libgit2?
 
-A: I don't think so as git operations are not heavy. Especially for use cases of Inlang.
+A: Git operations are not heavy. Especially for use cases of Inlang.
 
 `clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
 `add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
@@ -211,7 +211,7 @@ For rebase, it might be easier too as it's implemented in quite a few git implem
 
 My understanding of rebase is that it shold take a look at some commits and turn them into one. This should be doable to do with some git primitives exposed by isomorphic git.
 
-If we can implement rebase and sparse-checkout, I don't think any other command should be a problem to implement either.
+If we can implement rebase and sparse-checkout, adding other commands shouldn't be a problem to implement either.
 
 Performance should be of no concern. You are not doing anything heavy as far as operations go.
 
