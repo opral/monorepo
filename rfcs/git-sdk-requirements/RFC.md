@@ -209,7 +209,7 @@ More investigation should be done in this area.
 
 Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
-You can then call `libgit.main()` to send commands to it. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
+You can then call `libgit.main()` to send commands to actual git. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
 
 Git WASM gives 2 examples in repo, one in web worker and 1 in browser.
 
