@@ -186,6 +186,10 @@ A: I don't think so as git operations are not heavy. Especially for use cases of
 
 Q: How difficult would it be to add those commands?
 
+A: Hard to predict but Isomorphic Git has some active contributors still. For example [abortMerge](https://github.com/isomorphic-git/isomorphic-git/pull/1744) was added recently.
+
+A `sparse-checkout` or `rebase` command would be taking that PR as template and making the logic work for respective command.
+
 ## Git compiled to WASM
 
 ### Context
@@ -257,8 +261,8 @@ Otherwise you will need to write C code to extend libkit2. I think compiling and
 
 Q: Is web worker needed or we should just use WASM for Git operations?
 
-A:
+A: TODO: read https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
 
 Q: Can we bundle WASM in Git SDK and abstract using WASM over nice API?
 
-A:
+A: TODO: read https://developer.mozilla.org/en-US/docs/WebAssembly/Using_the_JavaScript_API
