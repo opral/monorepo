@@ -400,6 +400,8 @@ There is documented [API on calling WASM](https://developer.mozilla.org/en-US/do
 
 Need to read through the API exposed by libgit2 to say for sure.
 
+> note: not sure what the interface of FS that libgit2 expects, need to test
+
 #### Q: Do you need to run Git operations in Git SDK in a web worker?
 
 Assuming we figure out how TS communicates nicely with Git commands that get executed in WASM. And for changes to reflect in a file system provided, there would ne no need for a web worker to be there.
@@ -458,9 +460,9 @@ Performance is not a concern in either case so the other focus is on DX.
 
 I think you can provide the same Git SDK API regardless whether Isomorphic Git is chosen or libgit2 to do git operations.
 
-> note: although not sure about Emscripten file system. how tied is it to libgit2
+As for regretting choose either technology in the future. We would potentially need to think through different kinds of applications that will be built with Git SDK. Some will be done as part of this RFC below.
 
-> discussion is warranted
+If many features will not be available in libgit2, then it would most likely make more sense to use Isomorphic Git as it's much easier to iterate on JS code than C (potentially).
 
 ## Implementation details
 
