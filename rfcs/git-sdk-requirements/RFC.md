@@ -287,4 +287,12 @@ Perhaps web workers are not needed at all for this. But then it should call into
 
 For that part I need to read how Git WASM outputted lg2.js looks and what it does.
 
+I think the big idea / confusion is that maybe we don't expose the full file system to users. But if you want to talk with your files, you do it through Git SDK? Would this make sense?
+
+I think you can achieve all at least Inlang concerns through API like this. Where we don't deal with the file system inside the front end code.
+
 ### Git inside JS
+
+Git compiled to JS is simipler.
+
+You import Git SDK (that wraps around isomorphic git). Maybe the big difference and I don't know perhaps the whole idea is that you need to have the file system
