@@ -125,6 +125,8 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 
 ## Git implemented in JS
 
+### Context
+
 Going with this approach or not depends on how hard it would be to add all missing features to Isomorphic Git.
 
 We need sparse checkout and rebase in the least. Either of those features have no code in Isomorphic Git currently.
@@ -184,7 +186,7 @@ Q: How difficult would it be to add those commands?
 
 ## Git compiled to WASM
 
-> Warning: Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
+### Context
 
 Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
