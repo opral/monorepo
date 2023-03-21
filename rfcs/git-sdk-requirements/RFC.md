@@ -295,6 +295,12 @@ You will clone repo, you get the files/folders. If you want to see contents of i
 
 `inlangGit.log()` shows git log
 
+`inlangGit.add("path/toFile")`
+
+This one is tricky, how to edit file?
+
+`inlangGit.edit("")`
+
 ### Git inside JS
 
 Git compiled to JS is simipler.
