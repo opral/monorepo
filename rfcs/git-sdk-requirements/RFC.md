@@ -278,17 +278,19 @@ We need sparse checkout and rebase in the least. Either of those features have n
 
 Iso Git already works with attaching a file system to all the commands. It's a matter of understsanding the underlying behavior of how each of the commands work and implementing that in JS. Many of primitives for working with `.git` content is exposed via functions in Isomorphic Git.
 
-For sparse git checkout, here is cli version:
+For sparse git checkout of particular file, here is cli version:
 
 ```
-git clone --depth 1 --sparse --filter=blob:none https://github.com/inlang/inlang
+git clone --depth 1 --sparse --no-checkout --filter=blob:none https://github.com/inlang/inlang
 cd inlang
 git config core.sparseCheckout true
 echo "inlang.config.js" >> .git/info/sparse-checkout
 git checkout
 ```
 
-You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no `sparse` option. There is no `--filter=blob:none` option. You have to implement both.
+You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no `sparse` option. There is no `--filter=blob:none` option. No `--no-checkout` either. You have to implement all 3 if you want to do a fast clone of just minimal git info to get going.
+
+There is also way to achieve above with `git init` and orphan branch
 
 There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option. So maybe you can use that to write to config. But in our case we don't need this detail even.
 
