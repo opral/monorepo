@@ -131,7 +131,7 @@ Inlang currently uses Isomorphic Git for Git operations together with memfs for 
 
 Going with this approach for future Git SDK means adding missing commands that Isomorphic Git now lacks.
 
-Sparse checkout and rebase are needed in the least. Either of those features have no code in Isomorphic Git currently.
+At least sparse checkout and rebase are needed. Neither of those features are implemented in Isomorphic Git currently.
 
 ### Questions
 
@@ -139,16 +139,22 @@ Sparse checkout and rebase are needed in the least. Either of those features hav
 
 Nearly all git operations especially ones you'd want to do in context of a browser won't be computationally heavy.
 
-The heaviest ones would mostl likely be comitting many files potentially but even there JS can do it quite fast even on large amount of content.
+The heaviest git operations would most likely be comitting many files but even in this case, JS can do it quite fast even on large amount of content.
+
+> note: come up with an application idea that would need to do something heavy in git inside a browser
 
 Currently the biggest issue that Inlang editor faces are not IO bound but its waiting for the network to get the right files and content to render.
 
-Thus the need to implement sparse-checkout feature to just fetch one file or folder you need.
+Thus the need to implement sparse-checkout feature to only fetch specific files or folders you need.
 
-`clone` = fetches git details off the network: files as blobs, git objects to put into .git folder (network bound)
+`clone` = fetches git details from network such as files, git objects to put into .git folder (network bound)
+
 `add` = scans over added files, create entry in `.git` (even if many files added, should be instant)
 
-Most other commands won't do much else so all operations should be near instant.
+Most other git commands like `rebase` or `commit` won't do much else so all operations should be near instant.
+
+> go through the list of to be supported git commands and be more thorough in analysis of perf
+> ideally benchmark some commands
 
 We can also potentially delegate some heavy git operations to a web worker. To run some things in parallel and not block the main and only JS thread. But having said above, it won't be needed. But the option of offloading IO or computational work to web worker and waiting for response is there if we ever need it.
 
