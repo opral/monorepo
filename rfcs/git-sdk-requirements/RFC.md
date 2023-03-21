@@ -125,6 +125,8 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 
 ## Git compiled to WASM
 
+> Potential implementation details are present below to in the end make a prediction on potential outcomes of going with this decision.
+
 Git is compiled to wasm using libkit2. Right now with wasm-git when it builds, it provides .wasm file. And one .js file emitted by Emscripten I think that comes with the FS and exposes a function `libgit` and maybe more things.
 
 You can then call `libgit.main()` to send commands to actual git. If it's a clone, it will clone it into Emscripten FS, exposed via `FS` global variable.
@@ -216,7 +218,7 @@ You can do normal [clone](https://isomorphic-git.org/docs/en/clone). There is no
 
 There is also way to achieve above with `git init` and orphan branch. Speed wise, they are the same.
 
-There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option. So maybe you can use that to write to config. But in our case we don't need this detail even.
+We don't technically need to do `git config core.sparseCheckout true` as we don't need to be up to git spec. There is [setConfig](https://isomorphic-git.org/docs/en/setConfig) option though so it's no issue to do this part.
 
 `echo "inlang.config.js" >> .git/info/sparse-checkout` tells sparse-checkout what to checkout on next `git checkout`.
 
@@ -239,85 +241,7 @@ If we can implement rebase and sparse-checkout, I don't think any other command 
 
 Performance should be of no concern. You are not doing anything heavy as far as operations go.
 
-<!--
-## Option 1: Use Isomorphic Git and extend it further
+## Open questions
 
-## Option 2: Use Git (libkit2) compiled to WebAssembly
-
-If we go with this option. libkit2 is already compilable with [wasm-git](https://github.com/petersalomonsen/wasm-git).
-
-libkit2 misses some features officially but there is not yet merged fork, namely:
-
-- [shallow clones of depth 1](https://github.com/libgit2/libgit2/pull/6396)
-- [sparse checkout](https://github.com/libgit2/libgit2/pull/6394)
-
-You can however try combine the code from both forks and if c builds compile it with wasm-git.
-
-The way Git SDK would then work is that it will bundle the wasm and expose an api.
-
-That can look like this. This code runs in the browser.
-
-The Git SDK sends messages. Under the hood all git work is done in a web worker.
-
-```js
-// `clone` will fill `inlang` with just minimum needed info
-// needed to do future commands
-// all further commands load info as it is needed
-// the clone will include the whole file tree structure as it exists at the root
-
-// we need to figure out what the best default is?
-// most likely
-const inlangGit = await clone("https://github.com/inlang/inlang")
-
-// as second argument we can also provide options object
-// where you can pass depth or other settings
-// perhaps can steal what can be useful for git in browser setting
-// from https://git-scm.com/docs/git-clone
-const inlanggit = await clone("https://github.com/inlang/inlang", {})
-
-// nice thing is we can type the path to the file too here if we know the file system
-// this info can come as a result of running `clone` above
-const commithistory = inlanggit.commithistory("readme.md")
-```
-
-For above code, what would happen under the hood in Git SDK is:
-
-Technically below is incrrect. GitSDK api will look a bit different
-
-```js
-//
-export function clone(gitUrl: string, options: CloneOptions) {
-	FS.mkdir("/")
-	FS.mount(MEMFS, {}, "/")
-	FS.chdir("/")
-
-	const folderToCloneTo = giUrl.split("/").pop()
-
-	const result = libgit.callMain(["clone", gitUrl, folderToCloneTo])
-	FS.chdir(folderToCloneTo)
-
-	// above is a regular clone done
-	// FS is https://emscripten.org/docs/api_reference/Filesystem-API.html
-	// .callMain is how you send commands to libgit2
-
-	// this will send a shallow-clone command
-	// it is not officially supported by libgit2 but was added
-	// after this pr: https://github.com/libgit2/libgit2/pull/6396
-	// got compiled with wasm-git
-	// a new c function was added with 'shallow-clone'
-	// all the function did was set:
-	// clone_opts.fetch_opts.depth to 1
-	// then after compiling, callMain calls the function
-	// and it does shallow clone
-	const result = libgit.callMain(["shallow-clone", gitUrl, folderToCloneTo])
-
-	// concerns
-	// through this interface we can extend libgit2 but this would require writing C code.
-}
-```
-
-There were issues trying to bundle the wasm file in a package. We tried to use [@rollup/plugin-wasm](https://www.npmjs.com/package/@rollup/plugin-wasm) for it.
-
-More investigation should be done in this area.
-
-## Open questions -->
+- What is missing in above approaches.
+- Estimate on how long either of the approaches would take?
