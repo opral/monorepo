@@ -268,7 +268,9 @@ To summarize
 
 ### Git inside JS
 
-Git in JS is simipler.
+Git in JS is maybe simpler. It depends on how hard it would be to add all missing features to Isomorphic Git.
+
+We need sparse checkout and rebase in the least. Either of those features have no code in Iso Git currently.
 
 You import Git SDK (that wraps around isomorphic git). This isomorphic git lives together with some in memory fs.
 
