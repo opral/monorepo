@@ -593,7 +593,9 @@ You can then call `libgit.main()` to send commands to actual git. If it's a clon
 
 Git WASM gives 2 examples in repo, one in [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries) and 1 in [browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker).
 
-> to be completed
+> trying to package wasm-git
+
+> also need to replace existing inlang use of iso git with libgit2
 
 <!-- In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
 
