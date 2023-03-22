@@ -55,14 +55,6 @@ const warnRule = {
 	},
 } satisfies LintRule
 
-const disabledRule = {
-	id: "disabled.rule",
-	level: false,
-	visitors: {
-		Pattern: vi.fn(),
-	},
-} satisfies LintRule
-
 const referenceResource = createResource(
 	"en",
 	createMessage("first-message", "Welcome to this app."),
@@ -96,14 +88,6 @@ describe("lint", async () => {
 	})
 
 	describe("rules", async () => {
-		test("should be able to disable rule", async () => {
-			const resources = [referenceResource]
-			const result = await doLint([disabledRule], resources)
-
-			expect(result).toMatchObject(resources)
-			expect(disabledRule.visitors.Pattern).toHaveBeenCalledTimes(0)
-		})
-
 		test("should be able to override lint type", async () => {
 			const rule = createLintRule("error.rule", "error", ({ report }) => {
 				return {

@@ -1,6 +1,6 @@
 import { expectType } from "tsd"
-import type { LintLevel } from "./context.js"
 import { LintRule, createLintRule, LintRuleInitializer, LintRuleId, NodeVisitors } from "./rule.js"
+import type { LintLevel } from "./types.js"
 
 // parameters -----------------------------------------------------------------
 
@@ -29,7 +29,6 @@ const rule = createLintRule("a.b", "error", () => ({
 	visitors: {},
 }))
 
-expectType<LintRuleInitializer>(rule)
 expectType<Parameters<LintRuleInitializer>[0]>(false)
 expectType<Parameters<LintRuleInitializer>[0]>("error")
 expectType<Parameters<LintRuleInitializer>[0]>("warn")
@@ -53,14 +52,9 @@ expectType<Parameters<LintRuleInitializer<{ debug: true }>>[1]>(true)
 // @ts-expect-error rule expect object with debug property as settings
 expectType<Parameters<LintRuleInitializer<{ debug: true }>>[1]>({})
 
-rule()
+rule("error")
 rule("warn")
 rule("error")
-rule(false)
-rule(true)
-rule(true, undefined)
-// @ts-expect-error does not accept settings
-rule(true, { debug: true })
 
 // ----------------------------------------------------------------------------
 
@@ -74,15 +68,11 @@ ruleWithOptionalSettings("error")
 ruleWithOptionalSettings("error", { test: true })
 ruleWithOptionalSettings("warn")
 ruleWithOptionalSettings("warn", { test: true })
-ruleWithOptionalSettings(false)
-ruleWithOptionalSettings(false, { test: true })
-ruleWithOptionalSettings(true)
-ruleWithOptionalSettings(true, { test: true })
+ruleWithOptionalSettings("default")
 
 // ----------------------------------------------------------------------------
 
-const ruleWithRequiredSettings = createLintRule<{ test: boolean }, true>("a.b", "error", () => ({
-	setup: () => undefined,
+const ruleWithRequiredSettings = createLintRule<{ test: boolean }>("a.b", "error", () => ({
 	visitors: {},
 }))
 
@@ -91,15 +81,14 @@ ruleWithRequiredSettings()
 // @ts-expect-error requires settings to be passed
 ruleWithRequiredSettings("warn")
 // @ts-expect-error requires correct settings object to be passed
-ruleWithRequiredSettings(true, {})
-ruleWithRequiredSettings(true, { test: true })
+ruleWithRequiredSettings("default", { test: true })
 
 // configured rule ------------------------------------------------------------
 
-const configuredRule = rule()
+const configuredRule = rule("error")
 
 expectType<LintRule>(configuredRule)
 
 expectType<LintRuleId>(configuredRule.id)
-expectType<LintLevel | false>(configuredRule.level)
+expectType<LintLevel | "default">(configuredRule.level)
 expectType<NodeVisitors>(configuredRule.visitors)

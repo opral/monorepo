@@ -1,7 +1,8 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
 import type { MaybePromise } from "../utilities/types.js"
-import { Context, LintLevel, parseLintConfigArguments } from "./context.js"
+import type { Context } from "./context.js"
 import { createReportFunction } from "./report.js"
+import type { LintLevel } from "./types.js"
 
 export type LintableNode = Resource | Message | Pattern
 
@@ -77,9 +78,11 @@ export type LintRuleInitializer<Settings = never, RequireSettings extends boolea
  */
 export type LintRule = {
 	id: LintRuleId
-	level: false | LintLevel
+	level: LintLevel | "default"
 	visitors: NodeVisitors
 }
+
+type LintRuleArguments<Settings = never> = [] | [LintLevel] | [LintLevel | "default", Settings?]
 
 /**
  * An utility function that encapsulates the parsing of the arguments passed to the lint rule.
@@ -93,33 +96,35 @@ export type LintRule = {
  * ```
  * const myRule = createLintRule<{ strict: boolean }>('my.rule', 'error', (settings) => {
  *    return {
- * 		setup: () => {
- * 			if (settings?.strict) return { token: '123' }
- *
- * 			return { token: '456' }
- * 		},
- * 		visitors: {}
+ * 			visitors: {}
  * 	}
  * })
  * ```
  */
-export const createLintRule = <Settings = never, RequireSettings extends boolean = false>(
+export const createLintRule = <Settings = never>(
 	id: LintRuleId,
 	defaultLevel: LintLevel,
-	configureLintRule: (args: {
+	callback: (args: {
 		settings?: Settings
 		report: ReturnType<typeof createReportFunction>
 	}) => Omit<LintRule, "id" | "level">,
-) =>
-	((...args) => {
-		const { level, settings } = parseLintConfigArguments<Settings>(args, defaultLevel)
-		// if the level is false, the rule is disabled
-		if (level === false) return { id, level, visitors: {} }
+): ((...args: LintRuleArguments<Settings>) => LintRule) => {
+	return (...args) => {
+		const level = parseLintLevel(defaultLevel, args[0])
+		const settings = args[1]
 
 		const report = createReportFunction({ id, level })
 		return {
-			...configureLintRule({ settings, report }),
+			...callback({ settings, report }),
 			id,
 			level,
 		}
-	}) satisfies LintRuleInitializer<Settings, RequireSettings>
+	}
+}
+
+function parseLintLevel(defaultLevel: LintLevel, level?: LintLevel | "default"): LintLevel {
+	if (level === undefined || level === "default") {
+		return defaultLevel
+	}
+	return level
+}
