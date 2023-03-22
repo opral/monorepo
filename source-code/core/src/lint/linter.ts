@@ -107,7 +107,11 @@ const processResource = async ({
 
 			await processMessage({
 				visitors,
-				context,
+				context: {
+					...context,
+					reference: referenceMessage,
+					target: targetMessage,
+				},
 			})
 
 			if (referenceMessage) {
@@ -121,7 +125,11 @@ const processResource = async ({
 		for (const referenceNode of nonVisitedReferenceMessages) {
 			await processMessage({
 				visitors,
-				context,
+				context: {
+					...context,
+					reference: referenceNode,
+					target: undefined,
+				},
 			})
 			processedReferenceMessages.add(referenceNode.id.name)
 		}
@@ -148,7 +156,11 @@ const processMessage = async ({ visitors, context }: ProcessNodeParam<Message>):
 	if (shouldProcessMessageChildren(visitors)) {
 		await processPattern({
 			visitors,
-			context,
+			context: {
+				...context,
+				reference: (context.reference as Message | undefined)?.pattern,
+				target: (context.target as Message | undefined)?.pattern,
+			},
 		})
 	}
 

@@ -1,8 +1,7 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
 import type { MaybePromise } from "../utilities/types.js"
-import type { Context } from "./context.js"
+import type { LintLevel } from "./context.js"
 import { createReportFunction } from "./report.js"
-import type { LintLevel } from "./types.js"
 
 export type LintableNode = Resource | Message | Pattern
 
@@ -15,7 +14,7 @@ export type TargetReferenceParameterTuple<Node extends LintableNode> = {
 	reference?: Node
 }
 
-type VisitorParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & Context
+type VisitorParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node>
 
 export type EnterNodeFunction<Node extends LintableNode, Output> = (
 	param: VisitorParam<Node>,

@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest"
 import type { Message, Resource } from "../ast/schema.js"
-import type { Context } from "./context.js"
 import { lint } from "./linter.js"
 import { LintRule, createLintRule } from "./rule.js"
 
