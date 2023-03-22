@@ -39,3 +39,17 @@
 .tree-with-lines {
 	--indent-guide-width: 2px;
 }
+
+sl-textarea {
+	--sl-input-border-color: theme(colors.background);
+	--sl-input-border-color-hover: theme(colors.background);
+	--sl-input-border-color-focus: theme(colors.background);
+	--sl-input-color: theme(colors.on-background);
+	--sl-input-placeholder-color: theme(colors.outline-variant);
+	overflow: hidden;
+	max-width: 900px;
+}
+
+sl-textarea::part(textarea) {
+	overflow: hidden;
+}
