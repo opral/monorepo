@@ -16,6 +16,7 @@ import { onMachineTranslate } from "./PatternEditor.telefunc.js"
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
+	referenceLanguage: ast.Resource["languageTag"]["name"]
 	language: ast.Resource["languageTag"]["name"]
 	id: ast.Message["id"]["name"]
 	referenceMessage?: ast.Message
@@ -189,16 +190,29 @@ export function PatternEditor(props: {
 					() => hasChanges() === false && setIsFocused(false),
 				),
 			]}
-			class="grid grid-row-2 gap-2 grow"
+			class="flex justify-start items-center w-full gap-5 px-4 py-1.5 bg-background border border-surface-3 hover:border-hover-primary focus-within:border-focus-primary cursor-text"
 		>
-			<div class="flex flex-col gap-1">
-				<div>{props.language}</div>
+			<div class="flex justify-start items-start gap-2 py-[5px]">
+				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2">
+					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2 py-[3px]">
+						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant">
+							{props.language}
+						</p>
+					</div>
+					{props.referenceLanguage === props.language && (
+						<div class="flex justify-center items-center flex-grow-0 flex-shrink-0 w-[25px] relative gap-2 py-[3px] rounded-sm bg-on-surface-variant">
+							<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-background">
+								ref
+							</p>
+						</div>
+					)}
+				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
 				<sl-textarea
 					prop:resize="auto"
 					prop:size="small"
 					prop:rows={1}
-					class="border-none grow "
+					class="border-none grow"
 					onFocus={() => setIsFocused(true)}
 					prop:value={textValue() ?? ""}
 					onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
@@ -217,7 +231,7 @@ export function PatternEditor(props: {
               </div> */}
 			{/* action bar */}
 			<Show when={isFocused()}>
-				<div class="flex items-center justify-end  gap-2">
+				<div class="flex items-center justify-end gap-2">
 					<Show when={hasChanges() && localStorage.user === undefined}>
 						<InlineNotification message="Sign in to commit changes." variant="info" />
 					</Show>
