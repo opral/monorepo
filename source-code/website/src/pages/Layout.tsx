@@ -252,7 +252,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							Get in Touch
 						</button>
 					</div>
-					<div class="flex visible xl:invisible w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 xl:hidden flex-col gap-6 py-10">
+					<div class="flex visible xl:invisible w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 xl:hidden flex-col gap-6 py-10 rounded">
 						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
 						<p class="text-surface-600">
 							We welcome your input, feedback, and ideas! If you would like to get in touch with us,
