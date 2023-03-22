@@ -16,18 +16,18 @@ export type TargetReferenceParameterTuple<Node extends LintableNode> = {
 
 type VisitorParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node>
 
-export type EnterNodeFunction<Node extends LintableNode, Output> = (
+export type EnterNodeFunction<Node extends LintableNode> = (
 	param: VisitorParam<Node>,
-) => MaybePromise<"skip" | void | Output>
+) => MaybePromise<"skip" | void>
 
 export type LeaveNodeFunction<Node extends LintableNode> = (
 	param: VisitorParam<Node>,
 ) => MaybePromise<"skip" | void>
 
 export type NodeVisitor<Node extends LintableNode> =
-	| EnterNodeFunction<Node, any>
+	| EnterNodeFunction<Node>
 	| {
-			enter?: EnterNodeFunction<Node, any>
+			enter?: EnterNodeFunction<Node>
 			leave?: LeaveNodeFunction<Node>
 	  }
 
