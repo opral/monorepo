@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
-import { createLintRule } from "./rule.js"
+import { createLintRule, NodeVisitors } from "./rule.js"
 
-const visitors = {}
+const visitors = {
+	Pattern: () => {
+		// do something
+	},
+} satisfies NodeVisitors
 
 const rule1 = createLintRule("my.id", "error", () => {
 	return {
