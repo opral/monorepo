@@ -203,8 +203,8 @@ export function PatternEditor(props: {
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border border-surface-3 hover:border-hover-primary focus:border-focus-primary focus-within:border-focus-primary focus-visible:border-focus-primary"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
-				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2">
-					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2 py-[3px]">
+				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
+					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2">
 						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant">
 							{props.language}
 						</p>
@@ -241,7 +241,7 @@ export function PatternEditor(props: {
 					</For>
 			</div> */}
 			{/* action bar */}
-			<div class="w-[164px] flex items-center">
+			<div class="w-[164px] h-8 flex justify-end items-center">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
 						<Show when={hasChanges() && localStorage.user === undefined}>
@@ -250,19 +250,21 @@ export function PatternEditor(props: {
 						<Show when={hasChanges() && userIsCollaborator() === false}>
 							<InlineNotification message="Fork the project to commit changes." variant="info" />
 						</Show>
-						<sl-button
-							onClick={handleMachineTranslate}
-							prop:disabled={
-								(textValue() !== undefined && textValue() !== "") ||
-								props.referenceMessage === undefined
-							}
-							prop:loading={machineTranslationIsLoading()}
-							prop:variant="neutral"
-							prop:size="small"
-						>
-							<MaterialSymbolsTranslateRounded slot="prefix" />
-							Machine translate
-						</sl-button>
+						<Show when={textValue() === ""}>
+							<sl-button
+								onClick={handleMachineTranslate}
+								prop:disabled={
+									(textValue() !== undefined && textValue() !== "") ||
+									props.referenceMessage === undefined
+								}
+								prop:loading={machineTranslationIsLoading()}
+								prop:variant="neutral"
+								prop:size="small"
+							>
+								<MaterialSymbolsTranslateRounded slot="prefix" />
+								Machine translate
+							</sl-button>
+						</Show>
 						{/* <sl-button prop:variant="primary" prop:size="small">
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} />
 							Commit

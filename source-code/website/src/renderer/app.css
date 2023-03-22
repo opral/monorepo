@@ -52,4 +52,9 @@ sl-textarea {
 
 sl-textarea::part(textarea) {
 	overflow: hidden;
+	padding: 0.375rem;
+}
+
+sl-textarea::part(base) {
+	border: none;
 }
