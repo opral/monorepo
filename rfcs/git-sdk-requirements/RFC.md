@@ -27,7 +27,7 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 - Architect the perfect system based on currently known requirements.
   - The requirements will change. We can’t architect the perfect system now.
 
-## Requirements
+## Requirements 
 
 ### Must run in the browser/on the client [High Confidence]
 
@@ -55,7 +55,11 @@ const commitHistory = await history("/README.md", fs)
 const readme = await fs.readFile("/xyz.md")
 ```
 
-### Must be git compatible but not necessarily up to spec [Medium Confidence]
+### Must be git compatible [High Confidence]
+
+The data in `.git` must be up to spec to ensure compatiblity with the git ecosystem and ease adoption. The ecosystem includes GitHub, CLIs, etc.
+
+### "Commands" like `clone` do not necessarily need to be up to spec [Medium Confidence]
 
 Changes in the `.git` subdirectory like commits must obey to the git spec but the “way to get there” e.g. commands like `clone` do not have to be up to spec. The git spec is designed for a CLI with access to a local filesystem, not an application that is running in the browser.
 
