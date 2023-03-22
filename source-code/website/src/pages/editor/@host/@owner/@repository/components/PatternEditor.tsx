@@ -192,14 +192,14 @@ export function PatternEditor(props: {
 		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
-				notificationDescription: "Fork the project to commit changes kshdg fkajshdgf kahjsdgf k",
+				notificationDescription: "Fork the project to commit changes.",
 				notificationType: "info",
 			})
 		}
 		if (textValue() === "") {
 			notifications.push({
 				notificationTitle: "Empty:",
-				notificationDescription: "The translation has not been made",
+				notificationDescription: "The translation has not been made.",
 				notificationType: "info",
 			})
 		}
@@ -227,7 +227,7 @@ export function PatternEditor(props: {
 			onClick={() => {
 				handleFocus()
 			}}
-			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:z-20 focus-within:border-focus-primary"
+			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:z-20 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
@@ -254,7 +254,11 @@ export function PatternEditor(props: {
 				prop:rows={1}
 				prop:placeholder="Enter translation ..."
 				onFocus={() => setIsFocused(true)}
-				onFocusOut={() => setIsFocused(false)}
+				onFocusOut={(e) => {
+					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
+						setIsFocused(false)
+					}
+				}}
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 			/>
@@ -275,10 +279,11 @@ export function PatternEditor(props: {
 						<Show when={textValue() === ""}>
 							<sl-button
 								onClick={handleMachineTranslate}
-								prop:disabled={
-									(textValue() !== undefined && textValue() !== "") ||
-									props.referenceMessage === undefined
-								}
+								prop:disabled={true}
+								// prop:disabled={
+								// 	(textValue() !== undefined && textValue() !== "") ||
+								// 	props.referenceMessage === undefined
+								// }
 								prop:loading={machineTranslationIsLoading()}
 								prop:variant="neutral"
 								prop:size="small"
@@ -292,7 +297,9 @@ export function PatternEditor(props: {
 								prop:variant="primary"
 								prop:size="small"
 								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
-								onClick={handleCommit}
+								onClick={() => {
+									handleCommit()
+								}}
 							>
 								<MaterialSymbolsCommitRounded slot="prefix" />
 								{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} /> */}
@@ -300,6 +307,9 @@ export function PatternEditor(props: {
 							</sl-button>
 						</Show>
 					</div>
+				</Show>
+				<Show when={!isFocused() && hasChanges()}>
+					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
