@@ -12,6 +12,7 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Shortcut } from "./Shortcut.jsx"
+import { Notification, NotificationHint } from "./NotificationHint.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -179,6 +180,32 @@ export function PatternEditor(props: {
 		setMachineTranslationIsLoading(false)
 	}
 
+	const getNotificationHints = () => {
+		const notifications: Array<Notification> = []
+		if (hasChanges() && localStorage.user === undefined) {
+			notifications.push({
+				notificationTitle: "Access:",
+				notificationDescription: "Sign in to commit changes.",
+				notificationType: "warning",
+			})
+		}
+		if (hasChanges() && userIsCollaborator() === false) {
+			notifications.push({
+				notificationTitle: "Fork:",
+				notificationDescription: "Fork the project to commit changes kshdg fkajshdgf kahjsdgf k",
+				notificationType: "info",
+			})
+		}
+		if (textValue() === "") {
+			notifications.push({
+				notificationTitle: "Empty:",
+				notificationDescription: "The translation has not been made",
+				notificationType: "info",
+			})
+		}
+		return notifications
+	}
+
 	let textArea: SlTextarea
 	const handleFocus = () => {
 		setIsFocused(true)
@@ -242,15 +269,9 @@ export function PatternEditor(props: {
 					</For>
 			</div> */}
 			{/* action bar */}
-			<div class="w-[164px] h-8 flex justify-end items-center">
+			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={hasChanges() && localStorage.user === undefined}>
-							<InlineNotification message="Sign in to commit changes." variant="info" />
-						</Show>
-						<Show when={hasChanges() && userIsCollaborator() === false}>
-							<InlineNotification message="Fork the project to commit changes." variant="info" />
-						</Show>
 						<Show when={textValue() === ""}>
 							<sl-button
 								onClick={handleMachineTranslate}
@@ -266,14 +287,6 @@ export function PatternEditor(props: {
 								Machine translate
 							</sl-button>
 						</Show>
-						{/* <sl-button prop:variant="primary" prop:size="small">
-							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} />
-							Commit
-						</sl-button>
-						<sl-button prop:variant="default" prop:size="small">
-							<Shortcut slot="suffix" color="default" codes={["ControlLeft", "t"]} />
-							Machine translate
-						</sl-button> */}
 						<Show when={hasChanges()}>
 							<sl-button
 								prop:variant="primary"
@@ -282,12 +295,16 @@ export function PatternEditor(props: {
 								onClick={handleCommit}
 							>
 								<MaterialSymbolsCommitRounded slot="prefix" />
+								{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} /> */}
 								Commit
 							</sl-button>
 						</Show>
 					</div>
 				</Show>
-				<Show when={showMachineLearningWarningDialog()}>
+				{getNotificationHints().length !== 0 && (
+					<NotificationHint notifications={getNotificationHints()} />
+				)}
+				{/* <Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
 							<li>
@@ -323,7 +340,7 @@ export function PatternEditor(props: {
 							Proceed with machine translating
 						</sl-button>
 					</sl-dialog>
-				</Show>
+				</Show> */}
 			</div>
 		</div>
 	)
