@@ -225,6 +225,7 @@ export function PatternEditor(props: {
 				prop:resize="auto"
 				prop:size="small"
 				prop:rows={1}
+				prop:placeholder="Enter translation ..."
 				onFocus={() => setIsFocused(true)}
 				onFocusOut={() => setIsFocused(false)}
 				prop:value={textValue() ?? ""}
@@ -273,15 +274,17 @@ export function PatternEditor(props: {
 							<Shortcut slot="suffix" color="default" codes={["ControlLeft", "t"]} />
 							Machine translate
 						</sl-button> */}
-						<sl-button
-							prop:variant="primary"
-							prop:size="small"
-							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
-							onClick={handleCommit}
-						>
-							<MaterialSymbolsCommitRounded slot="prefix" />
-							Commit
-						</sl-button>
+						<Show when={hasChanges()}>
+							<sl-button
+								prop:variant="primary"
+								prop:size="small"
+								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
+								onClick={handleCommit}
+							>
+								<MaterialSymbolsCommitRounded slot="prefix" />
+								Commit
+							</sl-button>
+						</Show>
 					</div>
 				</Show>
 				<Show when={showMachineLearningWarningDialog()}>
