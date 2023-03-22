@@ -11,6 +11,7 @@ import { InlineNotification } from "@src/components/notification/InlineNotificat
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
+import { Shortcut } from "./Shortcut.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -250,6 +251,14 @@ export function PatternEditor(props: {
 						<MaterialSymbolsTranslateRounded slot="prefix" />
 						Machine translate
 					</sl-button>
+					{/* <sl-button prop:variant="primary" prop:size="small">
+						<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} />
+						Commit
+					</sl-button>
+					<sl-button prop:variant="default" prop:size="small">
+						<Shortcut slot="suffix" color="default" codes={["ControlLeft", "t"]} />
+						Machine translate
+					</sl-button> */}
 					<sl-button
 						prop:variant="primary"
 						prop:disabled={hasChanges() === false || userIsCollaborator() === false}
