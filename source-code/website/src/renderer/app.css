@@ -41,10 +41,14 @@
 }
 
 sl-textarea {
-	--sl-input-border-color: theme(colors.background);
-	--sl-input-border-color-hover: theme(colors.background);
-	--sl-input-border-color-focus: theme(colors.background);
-	--sl-input-color: theme(colors.on-background);
+	--sl-input-border-color: none;
+	--sl-input-border-color-hover: none;
+	--sl-input-border-color-focus: none;
+	--sl-input-color: none;
+	--sl-input-background-color: none;
+	--sl-input-background-color-hover: none;
+	--sl-input-background-color-focus: none;
+	--sl-input-focus-ring-color: none;
 	--sl-input-placeholder-color: theme(colors.outline-variant);
 	overflow: hidden;
 	max-width: 900px;

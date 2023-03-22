@@ -200,7 +200,7 @@ export function PatternEditor(props: {
 			onClick={() => {
 				handleFocus()
 			}}
-			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border border-surface-3 hover:border-hover-primary focus:border-focus-primary focus-within:border-focus-primary focus-visible:border-focus-primary"
+			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus:border-focus-primary focus-within:border-focus-primary focus-visible:border-focus-primary"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
