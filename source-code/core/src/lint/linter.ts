@@ -1,6 +1,6 @@
 import type { Resource, Message, Pattern } from "../ast/schema.js"
 import type { Config } from "../config/schema.js"
-import { createContext, LintedResource } from "./context.js"
+import type { Context, LintedResource } from "./context.js"
 import type {
 	LintableNode,
 	LintableNodeByType,
@@ -47,15 +47,14 @@ const processLintRule = async (args: {
 	reference: Resource | undefined
 	resources: Resource[]
 }) => {
-	const { level, id } = args.lintRule
-	if (!level) return
-	const context = createContext({ ...args, level, id })
+	if (!args.lintRule) return
 
 	for (const language of args.languages) {
-		const target = getResourceForLanguage(args.resources, language)
-
 		await processResource({
-			context,
+			context: {
+				...args,
+				target: getResourceForLanguage(args.resources, language),
+			},
 			visitors: args.lintRule.visitors,
 		})
 	}
@@ -76,7 +75,7 @@ const getVisitorFunctions = (visitors: NodeVisitors, node: LintableNode["type"])
 
 type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & {
 	visitors: NodeVisitors
-	payload: unknown
+	context: Context
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -89,34 +88,26 @@ const shouldProcessResourceChildren = (visitors: NodeVisitors) =>
 const processResource = async ({
 	visitors,
 	context,
-	payload: payloadInitial,
 }: ProcessNodeParam<Resource>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, "Resource")
 
-	const payloadEnter =
-		(enter &&
-			(await enter({
-				target: context.target as Resource,
-				reference: context.reference,
-				payload: payloadInitial,
-			}))) ??
-		payloadInitial
-	if (payloadEnter === "skip") return
+	const returnOfEnter = enter && (await enter(context))
+	if (returnOfEnter === "skip") {
+		return
+	}
 
 	// process children
 	if (shouldProcessResourceChildren(visitors)) {
 		const processedReferenceMessages = new Set<string>()
 
 		for (const targetMessage of (context.target as Resource).body) {
-			const referenceMessage = context.reference?.body.find(
+			const referenceMessage = (context.reference as Resource)?.body.find(
 				({ id }) => id.name === targetMessage.id.name,
 			)
 
 			await processMessage({
 				visitors,
-				target: targetMessage as Message,
-				reference: referenceMessage,
-				payload: payloadEnter,
+				context,
 			})
 
 			if (referenceMessage) {
@@ -124,26 +115,20 @@ const processResource = async ({
 			}
 		}
 
-		const nonVisitedReferenceMessages = (reference as Resource).body.filter(
+		const nonVisitedReferenceMessages = (context.reference as Resource).body.filter(
 			({ id }) => !processedReferenceMessages.has(id.name),
 		)
 		for (const referenceNode of nonVisitedReferenceMessages) {
 			await processMessage({
 				visitors,
-				target: undefined,
-				reference: referenceNode,
-				payload: payloadEnter,
+				context,
 			})
 			processedReferenceMessages.add(referenceNode.id.name)
 		}
 	}
 
 	if (leave) {
-		await leave({
-			target: target as Resource,
-			reference,
-			payload: payloadEnter,
-		})
+		await leave(context)
 	}
 }
 
@@ -151,71 +136,41 @@ const processResource = async ({
 
 const shouldProcessMessageChildren = (visitors: NodeVisitors) => !!visitors.Pattern
 
-const processMessage = async ({
-	visitors,
-	target,
-	reference,
-	payload: payloadInitial,
-}: ProcessNodeParam<Message>): Promise<void> => {
+const processMessage = async ({ visitors, context }: ProcessNodeParam<Message>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, "Message")
 
-	const payloadEnter =
-		(enter &&
-			(await enter({
-				target: target as Message,
-				reference,
-				payload: payloadInitial,
-			}))) ??
-		payloadInitial
-	if (payloadEnter === "skip") return
+	const returnOfEnter = enter && (await enter(context))
+	if (returnOfEnter === "skip") {
+		return
+	}
 
 	// process children
 	if (shouldProcessMessageChildren(visitors)) {
 		await processPattern({
 			visitors,
-			target: target?.pattern as Pattern,
-			reference: reference?.pattern,
-			payload: payloadEnter,
+			context,
 		})
 	}
 
 	if (leave) {
-		await leave({
-			target: target as Message,
-			reference,
-			payload: payloadEnter,
-		})
+		await leave(context)
 	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const processPattern = async ({
-	visitors,
-	target,
-	reference,
-	payload: payloadInitial,
-}: ProcessNodeParam<Pattern>): Promise<void> => {
+const processPattern = async ({ visitors, context }: ProcessNodeParam<Pattern>): Promise<void> => {
 	const { enter, leave } = getVisitorFunctions(visitors, "Pattern")
 
-	const payloadEnter =
-		(enter &&
-			(await enter({
-				target: target as Pattern,
-				reference,
-				payload: payloadInitial,
-			}))) ??
-		payloadInitial
-	if (payloadEnter === "skip") return
+	const returnOfEnter = enter && (await enter(context))
+	if (returnOfEnter === "skip") {
+		return
+	}
 
 	// we can't really iterate over elements because we can't match them between `target` and `resource`
 	// to have a consistent API, we allow both `enter` and `leave` even if `leave` does not make sense in this case
 
 	if (leave) {
-		await leave({
-			target: target as Pattern,
-			reference,
-			payload: payloadEnter,
-		})
+		await leave(context)
 	}
 }

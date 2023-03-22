@@ -1,6 +1,7 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
 import type { MaybePromise } from "../utilities/types.js"
-import { LintLevel, parseLintConfigArguments } from "./context.js"
+import { Context, LintLevel, parseLintConfigArguments } from "./context.js"
+import { createReportFunction } from "./report.js"
 
 export type LintableNode = Resource | Message | Pattern
 
@@ -13,23 +14,21 @@ export type TargetReferenceParameterTuple<Node extends LintableNode> = {
 	reference?: Node
 }
 
-type VisitorParam<Node extends LintableNode, Input> = TargetReferenceParameterTuple<Node> & {
-	payload?: Input
-}
+type VisitorParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & Context
 
-export type EnterNodeFunction<Node extends LintableNode, Input, Output> = (
-	param: VisitorParam<Node, Input>,
+export type EnterNodeFunction<Node extends LintableNode, Output> = (
+	param: VisitorParam<Node>,
 ) => MaybePromise<"skip" | void | Output>
 
-export type LeaveNodeFunction<Node extends LintableNode, Input> = (
-	param: VisitorParam<Node, Input>,
+export type LeaveNodeFunction<Node extends LintableNode> = (
+	param: VisitorParam<Node>,
 ) => MaybePromise<"skip" | void>
 
 export type NodeVisitor<Node extends LintableNode> =
-	| EnterNodeFunction<Node, any, any>
+	| EnterNodeFunction<Node, any>
 	| {
-			enter?: EnterNodeFunction<Node, any, any>
-			leave?: LeaveNodeFunction<Node, any>
+			enter?: EnterNodeFunction<Node, any>
+			leave?: LeaveNodeFunction<Node>
 	  }
 
 export type NodeVisitors = {
@@ -107,13 +106,19 @@ export type LintRule = {
 export const createLintRule = <Settings = never, RequireSettings extends boolean = false>(
 	id: LintRuleId,
 	defaultLevel: LintLevel,
-	configureLintRule: (settings?: Settings) => Omit<LintRule, "id" | "level">,
+	configureLintRule: (args: {
+		settings?: Settings
+		report: ReturnType<typeof createReportFunction>
+	}) => Omit<LintRule, "id" | "level">,
 ) =>
 	((...args) => {
 		const { level, settings } = parseLintConfigArguments<Settings>(args, defaultLevel)
+		// if the level is false, the rule is disabled
+		if (level === false) return { id, level, visitors: {} }
 
+		const report = createReportFunction({ id, level })
 		return {
-			...configureLintRule(settings),
+			...configureLintRule({ settings, report }),
 			id,
 			level,
 		}

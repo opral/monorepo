@@ -150,18 +150,13 @@ The `createLintRule` expects 3 parameters.
 
      The `enter` function get's called when a node get's visited. If this node contains children, those will be processed afterwards. Once all children have been processed, the `leave` function will be called. When using a single function, the function is treated as the `enter`function.
 
-     The `enter` function get's called with the following parameter: `{ target, reference, payload }` where
+     The `enter` function get's called with the following parameter: `{ target, reference }` where
 
      - `target` is the node that got visited.
      - `reference` is the corresponding node of the reference language.
-     - `payload` the object returned by the `setup` or a parent's `enter` function.
-       The function can optionally return
      - `'skip'` to skip the processing of all child nodes.
-     - an object, that get's passed as `payload` to all children and the `leave` function.
 
      Be aware that `target` or `reference` could be `undefined` if the corresponding node does not exist on the target or reference resource.
-
-     The `leave` function receives the same payload as the `enter` function, but does not return anything.
 
 All defined functions can be synchronous or asynchronous. The lint process traverses all nodes in sequence and awaits each step individually. Keep that in mind. It could affect the performance if you call a lot of long-running functions.
 
