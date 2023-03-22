@@ -226,6 +226,7 @@ export function PatternEditor(props: {
 				prop:size="small"
 				prop:rows={1}
 				onFocus={() => setIsFocused(true)}
+				onFocusOut={() => setIsFocused(false)}
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 			/>
