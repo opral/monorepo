@@ -39,7 +39,7 @@ The RFC is the first draft on how this could look like.
     - routes could collide; Some words exist in different languages and can have different meanings
       - e.g. the link `/bank` could lead to the english and german version. If the language is not encoded in the url, how do we render the correct language?
     - some routes may not exist in certain languages
-    - layouts could differ between languages; a simple if/else should be good enough to support that use case
+    - layouts could differ between languages (a simple if/else should be good enough to support that use case)
 
 ## How this SDK should function
 
@@ -47,7 +47,7 @@ The RFC is the first draft on how this could look like.
 
 The SDK should include some core functionality (called `runtime`) that can be shared across all frameworks.
 
-> By exposing the `runtime` functionality, other developers could use it to build their own i18n solution for any given framework that is compatible with `inlang`.
+> By exposing the `runtime` functionality, other developers could use it to build their own i18n solution that is compatible with `inlang` for any given framework.
 
 Runtime functionality will be:
 
@@ -56,22 +56,22 @@ Runtime functionality will be:
 - the [`lookup function`](#lookup-function)
 - a function to create [`alternate` links](#alternate-links)
 
-The `runtime` functions itself will not deal with reactivity. They just store resources in memory and the lookup function accesses them.
+The `runtime` functions itself will not deal with reactivity. They just store `Resource`s in memory and the lookup function accesses them.
 
 ### adapters
 
 On top of the core functionality we will have framework-specific implementations that will use the `runtime` functionality to deliver a tailored i18n experience.
-An adapter will provide a build plugin (vite, rollup, webpack, etc. via [`unplugin`](https://github.com/unjs/unplugin)). This build plugin will inject `runtime` functionality at specific parts of the codebase. Because most meta-frameworks have a convention-based setup, we can detect where to put things and how to best configure the framework to add i18n functionality. More information [here](#implementation-details-current-state)
+An adapter will provide a build plugin (vite, rollup, webpack, etc. via [`unplugin`](https://github.com/unjs/unplugin)). This build plugin will inject `runtime` functionality at specific parts of the codebase. Because most meta-frameworks have a convention-based setup, we can detect where to put things and how to best configure the framework to add i18n functionality. More information [here](#implementation-details-with-plugin)
 
-The adapter is also responsible to add reactivity to the `runtime` functionality where needed or if wanted by the developer (via a configuration option). An adapter will re-export the same functions as the `runtime` package does. Those functions will be enhanced with reactivity where needed. Depending on the file where code get's injected, the plugin will add reactivity if it makes sense.
+The adapter is also responsible to add reactivity to the `runtime` functionality where needed or if wanted by the developer (via a configuration option). An adapter will re-export the same functions as the `runtime` package does.
 
-Per default no reactivity gets used as it only makes sense for SPAs. If the language get's encoded into the url, then a simple redirect is better than to change the language client-side. Changing language is a rarely performed action and users will probably not expect that the page is immediately updated. A page navigation is good enough.
+Per default no reactivity gets used as it only makes sense for SPAs. If the language get's encoded into the url, then a simple redirect is better than to change the language client-side. Changing language is a rarely performed action and users will probably not expect that the page get's immediately updated. A page navigation is good enough.
 
 ### loading resources
 
-Resources will be loaded from disk via the functions provided by `inlang.config.js`. Once loaded the `Resources` will be kept in memory. A server then can transform (and in the future also optimize) those `Resources` because it does not make sense to ship all `Resources` to the client. This all happens during runtime, so we will probably also need to provide an `GET` endpoint so the client can load the optimized Resources from the server.
+Resources will be loaded from disk via the functions provided by `inlang.config.js`. Once loaded the `Resource`s will be kept in memory. A server then can transform (and in the future also optimize) those `Resource`s because it does not make sense to ship all `Resource`s to the client. This all happens during runtime, so we will probably also need to provide an `GET` endpoint so the client can load the optimized Resources from the server.
 
-In an ideal world we will always have all data needed. But in reality, things may be missing from a certain Resource. In that case, we transform the Resources and include the reference if a Key is missing.
+In an ideal world we will always have all data needed. But in reality, things may be missing from a certain `Resource`. In that case, we transform the `Resource`s and include the reference if a `Id` is missing.
 
 ### lookup function
 
@@ -80,17 +80,17 @@ The lookup function will be the only thing that a developer needs to add to the 
 The SDK will provide that function as the default export, so anyone can name it however he wants. We can also export some common aliases so users get useful auto-import capabilities from the IDE.
 
 ```ts
-const lookupFunction = () => ""
+const lookupFunction = (key: string) => ""
 
 export default lookupFunction
 
 export const i18n = lookupFunction
 export const t = lookupFunction
 export const l = lookupFunction
-export const $ = lookupFunction
+export const $ = lookupFunction // will not work well together with Svelte
 ```
 
-This lookup function needs to be called with a `Id` e.g. like this:
+This lookup function needs to be called with an `Id` e.g. like this:
 
 ```ts
 i18n("welcome", { name: "Inlang" })
@@ -108,7 +108,7 @@ The adapter should auto-inject this metadata into the rendered HTML.
 
 ### configuration
 
-Internationalization can be done in many different ways. Some things will work across all strategies e.g. how to display a translated `Message` on screen (see [lookup function](#lookup-function)). But other things need to be configured because each company/team may have it's own opinion how things should work.
+Internationalization can be done in many different ways. Some things will work across all strategies e.g. how to display a translated `Message` on screen (see [lookup function](#lookup-function)). But other things need to be configured because each company/team may have it's own opinion how on things should work.
 
 That's why we need some kind of configuration options that an adapter can parse and follow to output different behavior.
 
@@ -120,7 +120,7 @@ Configuration options can be:
 
 There are many ways how to detect the language that should be used:
 
-- `rootSlug` (default): e.g. `www.inlang.com/de/docs`
+- `rootSlug` (default): e.g. `www.inlang.com/de/docs` with option to leave out the reference language
 - `TLD`: e.g. `www.inlang.de/docs`
 - `subdomain`: e.g. `de.inlang.com/docs`
 - `queryParameter`: e.g. `www.inlang.com/docs?lang=de`
@@ -128,7 +128,8 @@ There are many ways how to detect the language that should be used:
   - `acceptLanguageHeader`: e.g. `'accept-language: en;q=0.8, de;q=0.7, *;q=0.5'`
   - `cookie`: reads a cookie value
   - `header`: e.g. read the Cloudflare `CF-IPCountry` header
-  - `navigator`:
+  - `navigator`: for SPAs to get the language information client-side
+  - others not mentioned here, can be easily added
 - other functions that should be left to user land and therefore will not be part of the configuration
   - get country information from the user's IP address
   - get language information from the user object stored in DB
@@ -165,7 +166,7 @@ const config = {
 			},
 			{
 				type: "cookie",
-				// needs to be configured
+				// can / needs to be configured
 				name: "lang",
 			},
 		],
@@ -292,10 +293,10 @@ In the root layout file we need to initialize the lookup function and add that i
 <script lang="ts">
   import type { LayoutData } from './$types'
 + import { setContext } from 'svelte'
-+ import { createLookupFunctionStoreForLanguage } from '$i18n'
++ import { createLookupFunctionForLanguage } from '$i18n'
 
   export let data: LayoutData
-+ const i18n = createLookupFunctionStoreForLanguage(data.language)
++ const i18n = createLookupFunctionForLanguage(data.language)
 
 + setContext('i18n', { language: data.language, i18n })
 </script>
@@ -305,7 +306,7 @@ In the root layout file we need to initialize the lookup function and add that i
 
 ### `*.svelte`
 
-We need to retrieve the lookup function from the context and then call the store. We now have a reactive Heading inside the component.
+We need to retrieve the lookup function from the context and then call it.
 
 ```diff
 +<script lang="ts">
@@ -315,10 +316,10 @@ We need to retrieve the lookup function from the context and then call the store
 +</script>
 
 -<h1>Welcome to Inlang, SvelteKit</h1>
-+<h1>{$i18n.welcome({ name: 'SvelteKit' })}</h1>
++<h1>{i18n.welcome({ name: 'SvelteKit' })}</h1>
 ```
 
-Those are the very basics. Just to render a single translation on to the screen. You need every single statement to render that string. Easy to miss something and in larger applications you will have a lot of different stuff in those functions so it is not that straightforward where to put those lines. Hint: as early as possible.
+Those are the very basics. Just to render a single translation on to the screen. You need every single statement to render that string. Easy to miss something and in larger applications you will have a lot of different stuff in those functions so it is not that straightforward where to put those lines. _Hint: as early as possible._
 
 On top of that there come some edge cases:
 
@@ -330,14 +331,13 @@ If we want to use translations within a TypeScript file, we also need to get the
 
 ```diff
 + import { getContext } from 'svelte/store'
-+ import { get } from 'svelte/store'
 
 const doSomething = (projects: string[]) => {
   // ...
 
 - return `Added ${projects.length} projects`
 + const { i18n } = getContext('i18n')
-+ return get(i18n).projects.added(projects.length)
++ return i18n.projects.added(projects.length)
 }
 ```
 
@@ -357,7 +357,7 @@ const doSomething = (projects: string[]) => {
 }
 ```
 
-The `loadResourceAsync` from `+layout.ts` and `createLookupFunctionStoreForLanguage` from `+layout.svelte` will save the language and the lookup function into memory. When `getLookupFunctionForCurrentLanguage` gets called, it can take those information and return the already initialized lookup function.
+The `loadResourceAsync` from `+layout.ts` and `createLookupFunctionForLanguage` from `+layout.svelte` will save the language and the lookup function into memory. When `getLookupFunctionForCurrentLanguage` gets called, it can take those information and return the already initialized lookup function.
 
 > We might be able to just use a single variant, but we need to test this first. The second variant should work for both cases.
 
@@ -366,8 +366,6 @@ The `loadResourceAsync` from `+layout.ts` and `createLookupFunctionStoreForLangu
 On the server everything is shared between multiple requests. This means we need to pass the lookup function to all functions that use them.
 
 ```diff
-+ import { get } from 'svelte/store'
-
 -const doSomething = (projects: string[]) => {
 +const doSomething = (i18n, projects: string[]) => {
   // ...
@@ -500,10 +498,10 @@ where the `I18nWrapper` component could look like this:
 <script>
   import { page } from '$app/stores'
   import { setContext } from 'svelte'
-  import { createLookupFunctionStoreForLanguage } from '$i18n'
+  import { createLookupFunctionForLanguage } from '$i18n'
 
   export let data: LayoutData
-  const i18n = createLookupFunctionStoreForLanguage($page.data.inlangLanguage)
+  const i18n = createLookupFunctionForLanguage($page.data.inlangLanguage)
 
   setContext('inlang', { language: data.language, i18n })
 </script>
@@ -521,7 +519,7 @@ where the `I18nWrapper` component could look like this:
 + const { i18n } = getContext('inlang')
 </script>
 
-<h1>{$i18n.welcome({ name: 'SvelteKit' })}</h1>
+<h1>{i18n.welcome({ name: 'SvelteKit' })}</h1>
 ```
 
 It you take a deeper look at the examples above, you will see that the only time a developer needs to import some i18n stuff is where he wants to call the lookup function. Everything else is being injected by the plugin.
@@ -530,9 +528,11 @@ It you take a deeper look at the examples above, you will see that the only time
 
 An adapter will also export those wrapper functions. If someone does not trust the plugin, they can use the wrapper functions instead. If an adapter sees a manual import, it will not inject any code to that file. Maybe we also need to think of an `/* disable-inlang-adapter */` comment so anyone is able to opt out for auto-injection in certain files or sections of the code.
 
+Those wrapper functions will be written in pure `JavaScript` annotated with `JsDoc` so no transpilation is needed.
+
 ### @sveltejs/adapter-static
 
-Svelte also offers the option to prerender an application and generate a static output. A few option will not make sense (e.g. `AcceptLanguage` header detection) and we should detect them and output an error. We can detect a static output by looking for `export const prerender = false` in the `routes/+layout(.*).ts` file.
+Svelte also offers the option to prerender an application and generate a static output. A few options will not make sense (e.g. `AcceptLanguage` header detection) and we should detect them and output an error. We can detect a static output by looking for `export const prerender = false` in the `routes/+layout(.*).ts` file.
 
 ## Next steps
 
