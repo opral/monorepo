@@ -123,8 +123,8 @@ function TheActualPage() {
 					<NoInlangConfigFoundCard />
 				</Match>
 				<Match when={inlangConfig()}>
-					<div class="space-y-2">
-						<PreviewMessageFeatures />
+					<div class="mb-16">
+						{/* <PreviewMessageFeatures /> */}
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]} />}
 						</For>

@@ -40,7 +40,9 @@ export function generateTokens(config: Config): ColorTokens {
 		"surface-3": new TinyColor(neutralColors.neutral[900]).setAlpha(0.11).toHex8String(),
 		"surface-4": new TinyColor(neutralColors.neutral[900]).setAlpha(0.12).toHex8String(),
 		"surface-5": new TinyColor(neutralColors.neutral[900]).setAlpha(0.14).toHex8String(),
+		"inverted-surface": neutralColors.neutral[800],
 		"on-surface": neutralColors.neutral[900],
+		"on-inverted-surface": neutralColors.neutral[100],
 		"surface-variant": neutralColors.neutralVariant[200],
 		"on-surface-variant": neutralColors.neutralVariant[600],
 		outline: neutralColors.neutralVariant[300],
@@ -56,6 +58,7 @@ export function generateTokens(config: Config): ColorTokens {
 		tokens[`on-${name}`] = white
 		tokens[`${name}-container`] = color[config.colorLevels.container]
 		tokens[`on-${name}-container`] = color[config.colorLevels.onContainer]
+		tokens[`${name}-on-inverted-container`] = color[config.colorLevels.onInvertedContainer]
 		// add interaction state colors
 		// see https://m3.material.io/foundations/interaction-states
 		if (config.colorLevels.base > 600) {

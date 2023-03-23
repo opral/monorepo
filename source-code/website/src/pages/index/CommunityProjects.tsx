@@ -4,7 +4,7 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 
 export function CommunityProjects() {
 	return (
-		<div>
+		<div class="pb-16">
 			{/* START repository grid */}
 			<h2 class="text-2xl font-medium">Projects that use inlang</h2>
 			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min">

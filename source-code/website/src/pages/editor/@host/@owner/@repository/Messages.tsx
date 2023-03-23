@@ -43,11 +43,20 @@ export function Messages(props: {
 	})
 
 	return (
-		<div class="border border-outline p-4 rounded flex flex-col gap-4">
-			<h3 slot="summary" class="font-medium">
-				{id()}
-			</h3>
-			<div ref={patternListElement} class="flex flex-col gap-4">
+		<>
+			<div
+				class={
+					"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 first:border-t border-x border-b-0 border-surface-2 first:rounded-t"
+				}
+			>
+				<h3
+					slot="summary"
+					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
+				>
+					{id()}
+				</h3>
+			</div>
+			<div ref={patternListElement}>
 				<For each={inlangConfig()?.languages}>
 					{(language) => (
 						<Show
@@ -58,6 +67,7 @@ export function Messages(props: {
 							}
 						>
 							<PatternEditor
+								referenceLanguage={inlangConfig()!.referenceLanguage}
 								language={language}
 								id={id()}
 								referenceMessage={referenceMessage()}
@@ -67,7 +77,7 @@ export function Messages(props: {
 					)}
 				</For>
 			</div>
-		</div>
+		</>
 	)
 }
 
