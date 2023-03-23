@@ -43,6 +43,7 @@ module.exports = {
 				base: 600,
 				container: 200,
 				onContainer: 900,
+				onInvertedContainer: 400,
 			},
 		}),
 	],
