@@ -573,6 +573,10 @@ Performance should be of no concern. You are not doing anything heavy as far as 
 
 ### Implementation details for WASM Git
 
+Exploring using WASM Git to replace isomorphic git in Inlang [here](https://github.com/nikitavoloboev/git-sdk).
+
+Still some issues to resolve.
+
 > Currently exploring this approach to rebuild current Inlang editor with libgit2
 
 > check maybe Emscripten has option to change output of lg2.js generated
