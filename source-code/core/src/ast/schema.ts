@@ -83,6 +83,8 @@ export type Pattern<Extension extends ExtensionInformation = ExtensionInformatio
 	elements: Array<Text<Extension>>
 }
 
+export type Element<Extension extends ExtensionInformation = ExtensionInformation> = Text<Extension>
+
 /**
  * Text can be translated.
  */

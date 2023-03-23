@@ -1,33 +1,54 @@
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Element, Message, Resource } from "@inlang/core/ast"
 
 // TODO: do we want to introduce a opaque type for Language?
 
 const cache = new Map<string, Resource>()
 
-const createLookupFunctionForLanguage = (language: string) =>
-	createLookupFunction(cache.get(language))
+export const createLookupFunctionForLanguage = (language: string) => {
+	const resource = cache.get(language)
+	if (!resource) return () => ""
+
+	return createLookupFunction(resource)
+}
+
+// ------------------------------------------------------------------------------------------------
 
 type BaseArgs = Record<string, unknown> | never
 
-type LookupFunctionArgs<Key, Args> = Args extends BaseArgs ? [Key, Args] : [Key]
+type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
+	? [Key, Args?]
+	: Args extends never
+	? [Key]
+	: [Key, Args]
 
-type BaseLookupFn = Record<string, BaseArgs>
+type BaseLookupFunctionArgs = Record<string, BaseArgs>
 
-type LookupFunction<LookupFn extends BaseLookupFn> = <Key extends keyof LookupFn>(
-	...args: LookupFunctionArgs<Key, LookupFn[Key]>
+type LookupFunction<LookupFunctionArgs extends BaseLookupFunctionArgs> = <
+	Key extends keyof LookupFunctionArgs,
+>(
+	...args: ConstructLookupFunctionArgs<Key, LookupFunctionArgs[Key]>
 ) => string
 
-const createLookupFunction =
-	<Fns extends BaseLookupFn>(resource: Resource | undefined): LookupFunction<Fns> =>
-	(key, args) =>
-		serializeMessage(
-			resource?.body.find((message) => message.id.name === key),
-			args,
-		)
+export const createLookupFunction = <LookupFn extends BaseLookupFunctionArgs>(
+	resource: Resource,
+): LookupFunction<LookupFn> =>
+	((key, args) => {
+		const message = resource.body.find((message) => message.id.name === key)
+		if (!message) return ""
 
-const serializeMessage = (message: Message | undefined, args: BaseArgs): string => {
+		return serializeMessage(message, args as BaseArgs)
+	}) as LookupFunction<LookupFn>
+
+const serializeMessage = (message: Message, args: BaseArgs): string => {
 	if (!message) return ""
 
 	// TODO: replace args
-	return message.pattern.elements.join("")
+	return message.pattern.elements.map((element) => serializeElement(element, args)).join("")
+}
+
+const serializeElement = (element: Element, args: BaseArgs): string => {
+	switch (element.type) {
+		case "Text":
+			return element.value
+	}
 }
