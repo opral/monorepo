@@ -382,9 +382,7 @@ No, you can't. There is no file system in the WebAssembly runtime.
 
 #### Q: How does the architecture with this approach look?
 
-[WASM Git](https://github.com/petersalomonsen/wasm-git) reccomends using it through a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries). For unclear benefit.
-
-> note: need to understand the reasoning more, perhaps there is a good reason.
+[WASM Git](https://github.com/petersalomonsen/wasm-git) reccomends using it through a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries). To avoid doing operations on main thread.
 
 When you compile libgit2 to wasm with Emscripten, as build artefacts, you get `lg2.wasm` file that is the libgit2 itself. And also `lg2.js`.
 
