@@ -77,9 +77,7 @@ export async function defineConfig(env) {
 				// set's the lint level to 'warn'
 				missingKeyRule("warn"),
 				// uses the standard lint level and passes custom settings to the rule
-				missingKeyRule(true, { threshold: 4 }),
-				// disables the rule if it runs on mondays
-				missingKeyRule(!isTodayMonday),
+				missingKeyRule("default", { threshold: 4 }),
 			],
 		},
 	}
@@ -102,13 +100,13 @@ import { createLintRule, type Context } from "@inlang/core/lint"
 const myLintRule = createLintRule<{ apiKey: string }>(
 	"myService.checkGrammar",
 	"error",
-	(settings) => {
+	({ settings, report }) => {
 		// example
 		const api = Grammarly()
 
 		return {
 			visitors: {
-				Message: async ({ target, reference, report }) => {
+				Message: async ({ target, reference }) => {
 					if (!target) return
 					const result = await api.checkGrammar(target)
 					report({
@@ -224,11 +222,11 @@ export async function defineConfig(env) {
 				}),
 				// uses the standard lint level and passes custom settings to the `missingKey` rule
 				inlangStandardRules({
-					missingKey: [true, { threshold: 4 }],
+					missingKey: ["default", { threshold: 4 }],
 				}),
 				// disables the `missingKey` rule if it runs on mondays
 				inlangStandardRules({
-					missingKey: !isTodayMonday,
+					missingKey: false,
 				}),
 			],
 		},

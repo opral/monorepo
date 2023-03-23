@@ -25,13 +25,3 @@ export type LintedMessage = Pretty<Message<Extension>>
 export type LintedPattern = Pretty<Pattern<Extension>>
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
-
-/**
- * The context provides utility functions for a lint rule.
- */
-export type Context = {
-	target?: LintableNode
-	reference?: LintableNode
-	referenceLanguage: string
-	languages: string[]
-}
