@@ -27,7 +27,7 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 - Architect the perfect system based on currently known requirements.
   - The requirements will change. We can’t architect the perfect system now.
 
-## Requirements 
+## Requirements
 
 ### Must run in the browser/on the client [High Confidence]
 
@@ -372,7 +372,9 @@ openPullRequest()
 
 #### Q: Is 833 KB WASM file an issue to load?
 
-Should be non issue as its under 1 MB.
+Actually there is way to get it smaller than this.
+
+[NEAR viewpoint](https://github.com/petersalomonsen/near-viewpoint) is nice example of using wasm-git in a bundle that all together 10.5 KB.
 
 #### Q: Can you keep the file system inside WASM too?
 
