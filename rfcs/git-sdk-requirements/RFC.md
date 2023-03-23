@@ -605,49 +605,6 @@ Git WASM gives 2 examples in repo, one in [web worker](https://github.com/peters
 
 > also need to replace existing inlang use of iso git with libgit2
 
-<!-- In web worker, you would put code in web-worker.js file. Inside it you will write a pattern matcher for kinds of commands the worker accepts and does the git command asked and replies with information, if any.
-
-For example when you do:
-
-`const inlang = await gitSDK.clone("https://github.com/inlang/inlang.git")`
-
-In `clone` function, it would start a web worker. And pass a message to it `clone(repo)`. Web worker replies with answer. Users get back what it returns in their web apps.
-
-Perhaps web workers are not needed at all for this. I would need to read more on webassemebly and how it interfaces with js. I just thought that to do git commands, if those exist in wasm, you'd need to send file system there or part of it to do the git command. libgit2 wasm doesn't come with its own file system, thats what lg2.js file is for. Which I need to read to understand this situation better.
-
-If you use wasm, file system can still exist inside the Git SDK JS code, not in a web worker which is actually indeed not needed.
-
-I think the big idea / confusion is that maybe we don't expose the full file system to users. But if you want to talk with your files, you do it through Git SDK? Would this make sense? Or maybe it's a question of then it being not just Git SDK but some kind of higher abstraction over git repos and should be named appropirately. Just an idea.
-
-I think you can achieve all at least Inlang concerns through API like this. Where we don't deal with the file system inside the front end code.
-
-You will clone repo, you get the files/folders. If you want to see contents of it, make a `inlangGit.openFile("path/toFile.js")`
-
-`inlangGit.log()` shows git log
-
-`inlangGit.add("path/toFile")`
-
-This one is tricky, how to edit file?
-
-```js
-// perhaps
-const file = inlangGit.readFile("path/toFile")
-
-// show in UI
-// make edits to it
-// want to git commit it? do this:
-
-inlangGit.overwriteFile("path/toFile")
-```
-
-`inlangGit.push()` will do push to remote
-
-Not sure how that api would look, my knowledge of rebase is squashing commits in github on pr and sometimes combining multiple commits into 1.
-
-`inlang.rebase()`
-
-As I am writing this. This to me seems like a nice way to abstract working with remote git repos. Outside of scope of this RFC though. -->
-
 ## Potential Apps built with Git and what would they need
 
 > API is up for discussion
