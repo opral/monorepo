@@ -10,6 +10,17 @@
 :root {
 	font-family: "Inter", sans-serif;
 	--sl-input-border-color: theme(colors.outline);
+	--sl-color-primary-50: var(--sl-color-cyan-50);
+	--sl-color-primary-100: var(--sl-color-cyan-100);
+	--sl-color-primary-200: var(--sl-color-cyan-200);
+	--sl-color-primary-300: var(--sl-color-cyan-300);
+	--sl-color-primary-400: var(--sl-color-cyan-400);
+	--sl-color-primary-500: var(--sl-color-cyan-500);
+	--sl-color-primary-600: var(--sl-color-cyan-600);
+	--sl-color-primary-700: var(--sl-color-cyan-700);
+	--sl-color-primary-800: var(--sl-color-cyan-800);
+	--sl-color-primary-900: var(--sl-color-cyan-900);
+	--sl-color-primary-950: var(--sl-color-cyan-950);
 }
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
@@ -27,4 +38,27 @@
 
 .tree-with-lines {
 	--indent-guide-width: 2px;
+}
+
+sl-textarea {
+	--sl-input-border-color: none;
+	--sl-input-border-color-hover: none;
+	--sl-input-border-color-focus: none;
+	--sl-input-color: none;
+	--sl-input-background-color: none;
+	--sl-input-background-color-hover: none;
+	--sl-input-background-color-focus: none;
+	--sl-input-focus-ring-color: none;
+	--sl-input-placeholder-color: theme(colors.outline-variant);
+	overflow: hidden;
+	max-width: 900px;
+}
+
+sl-textarea::part(textarea) {
+	overflow: hidden;
+	padding: 0.375rem;
+}
+
+sl-textarea::part(base) {
+	border: none;
 }
