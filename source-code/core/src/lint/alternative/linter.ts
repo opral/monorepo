@@ -1,5 +1,5 @@
+import type { Config } from "../../config/index.js"
 import type { Resource, Message, Pattern } from "../ast/schema.js"
-import type { Config } from "../config/schema.js"
 import type { LintedResource } from "./context.js"
 import type {
 	LintableNode,
@@ -9,6 +9,7 @@ import type {
 	NodeVisitors,
 	TargetReferenceParameterTuple,
 } from "./rule.js"
+import type { ConfigureLintRuleFunction } from "./types.js"
 
 const getResourceForLanguage = (resources: Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
@@ -18,7 +19,6 @@ export const lint = async (args: {
 	resources: Resource[]
 }): Promise<LintedResource[]> => {
 	const { referenceLanguage, languages, lint } = args.config
-	// linting the resources should not modify args.resources.
 	const resources = structuredClone(args.resources)
 	if (lint === undefined || lint.rules.length === 0) {
 		return args.resources
@@ -26,9 +26,9 @@ export const lint = async (args: {
 	const reference = getResourceForLanguage(resources, referenceLanguage)
 
 	await Promise.all(
-		lint.rules.flat().map((lintRule) =>
+		lint.rules.flat().map((configureLintRule) =>
 			processLintRule({
-				lintRule,
+				configureLintRule,
 				referenceLanguage,
 				languages,
 				reference,
@@ -41,17 +41,19 @@ export const lint = async (args: {
 }
 
 const processLintRule = async (args: {
-	lintRule: LintRule
-	config: Pick<Config, "languages" | "referenceLanguage">
+	configureLintRule: ConfigureLintRuleFunction
+	referenceLanguage: string
+	languages: string[]
 	reference: Resource | undefined
 	resources: Resource[]
 }) => {
-	if (!args.lintRule) return
-	const { config, lintRule, reference, resources } = args
+	if (!args.configureLintRule) return
+	const { referenceLanguage, languages, reference, resources } = args
 
-	const rule = lintRule(config)
+	const setup = args.configureLintRule("error", {})
+	const rule = await setup({ config: { referenceLanguage, languages } })
 
-	for (const language of config.languages) {
+	for (const language of languages) {
 		await processResource({
 			target: getResourceForLanguage(resources, language),
 			reference,

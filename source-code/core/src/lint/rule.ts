@@ -1,4 +1,5 @@
 import type { Message, Pattern, Resource } from "../ast/index.js"
+import type { Config } from "../config/index.js"
 import type { MaybePromise } from "../utilities/types.js"
 import type { LintLevel } from "./context.js"
 import { createReportFunction } from "./report.js"

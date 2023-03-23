@@ -1,6 +1,6 @@
 import { expectType } from "tsd"
 import { LintRule, createLintRule, LintRuleInitializer, LintRuleId, NodeVisitors } from "./rule.js"
-import type { LintLevel } from "./types.js"
+import type { LintLevel } from "./alternative/types.js"
 
 // parameters -----------------------------------------------------------------
 
