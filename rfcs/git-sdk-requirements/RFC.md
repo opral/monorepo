@@ -370,9 +370,9 @@ syncFork()
 openPullRequest()
 ```
 
-#### Q: Is 833 KB WASM file an issue to load?
+#### Q: Is WASM file size issue to first load?
 
-Actually there is way to get it smaller than this.
+There is way to get wasm-git into a smaller bundle.
 
 [NEAR viewpoint](https://github.com/petersalomonsen/near-viewpoint) is nice example of using wasm-git in a bundle that all together 10.5 KB.
 
