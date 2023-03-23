@@ -1,3 +1,4 @@
+import type { Accessor } from "solid-js"
 import { createSignal, For, Show } from "solid-js"
 
 type NotificationType = "info" | "warning" | "error"
@@ -22,9 +23,7 @@ export const NotificationHint = (props: NotificationHintProps) => {
 			onMouseOver={() => setOpen(true)}
 			onMouseLeave={() => setOpen(false)}
 		>
-			<Show when={open()}>
-				<NotificationTip notifications={props.notifications} />
-			</Show>
+			<NotificationTip notifications={props.notifications} open={open} />
 			<div
 				class={
 					"rounded w-8 h-8 flex justify-center items-center " + getTypeBasedStyling(dominantType)
@@ -38,13 +37,19 @@ export const NotificationHint = (props: NotificationHintProps) => {
 
 //ToolTip
 
-interface ToolTipProps {
+interface NotificationTipProps {
 	notifications: Array<Notification>
+	open: Accessor<boolean>
 }
 
-const NotificationTip = (props: ToolTipProps) => {
+const NotificationTip = (props: NotificationTipProps) => {
 	return (
-		<div class="absolute w-[300px] bg-inverted-surface bottom-11 right-0 rounded">
+		<div
+			class={
+				"pointer-events-none absolute w-[300px] bg-inverted-surface bottom-11 right-0 rounded transition duration-20 " +
+				(props.open() ? "opacity-100" : "translate-y-0.5 opacity-0")
+			}
+		>
 			<For each={props.notifications}>
 				{(notification) => (
 					<div

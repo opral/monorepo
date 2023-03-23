@@ -32,9 +32,9 @@ const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
-			<div class="py-4 w-full space-y-2 flex flex-col grow">
+			<div class="pt-4 pb-16 w-full space-y-2 flex flex-col grow">
 				<SignInBanner />
-				<div class="flex items-center justify-between py-4">
+				<div class="flex items-center justify-between py-3">
 					<div class="flex items-center space-x-4">
 						<Breadcrumbs />
 						<BranchMenu />
