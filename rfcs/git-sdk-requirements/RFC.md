@@ -31,9 +31,9 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 
 ### Not coupled to the browser [High Confidence]
 
-The git-sdk must run on the server, in a VSCode extension, in CI/CD, in the browser. In short, everywhere. 
+The git-sdk must run on the server, in a VSCode extension, in CI/CD, in the browser. In short, everywhere.
 
-The model to run the git-sdk everywhere is simple: have a filesystem. All environments except for the browser have a filesystem concept. Thus, we need to build a filesystem implementation for the browser. 
+The model to run the git-sdk everywhere is simple: have a filesystem. All environments except for the browser have a filesystem concept. Thus, we need to build a filesystem implementation for the browser.
 
 ### Client-side implementation [High Confidence]
 
@@ -147,7 +147,7 @@ Assuming we decide to store all metadata in folder.
 
 We will cover the case of 'Modyfing git to become a proper backend' after.
 
-### isomorphic git
+### JS
 
 You would be able to fetch the metadata folder via sparse-checkout clone. And read the metadata as it will be just files in a file system.
 
@@ -155,7 +155,7 @@ Comitting/pushing files is trvial too. The only missing piece is adding sparse-c
 
 Not tested yet, but it should hopefully respect `.gitignore` placed inside the metadata folder too, but if it doesn't it's trivial to add as a feature too.
 
-### libgit2 wasm
+### WASM
 
 Similar to Isomorphic Git, this would be trivial to add on top of libgit2 wasm.
 
@@ -192,21 +192,31 @@ Here is summary of [points made by Samuel on kinds of things one would need for 
 
 ## Lazy loading of files
 
-### isomorphic git
+### JS
 
 sparse-checkout is not implemented but can be added. Should be a mix of adapting code from [checkout](https://isomorphic-git.org/docs/en/checkout) and [fetch](https://isomorphic-git.org/docs/en/fetch) commands.
 
-### libgit2
+### WASM
 
 There is [open pr](https://github.com/libgit2/libgit2/pull/6394) that has support for sparse-checkout. Should be compiled with wasm-git.
 
 There is also [open question about how to do just the bare minimum clone of a repo](https://stackoverflow.com/questions/75817315/how-to-do-git-clone-depth-1-sparse-no-checkout-filter-blobnone-in-lib) to do further sparse-checkout operation.
 
-##
+## Storing binary data in git is possible by default (built-in git LFS)
+
+### JS
+
+Isomorphic git [does not officially support it](https://github.com/isomorphic-git/isomorphic-git/issues/1375).
+
+But there is [LFS compatibility layer for iso-git](https://github.com/riboseinc/isogit-lfs). Explained [here](https://github.com/extrawurst/gitui/discussions/1089#discussioncomment-4858642).
+
+### WASM
+
+libgit2 team refers to using [filters API](https://libgit2.org/libgit2/#v0.20.0/group/filter) to [achieve git lfs support](https://github.com/libgit2/libgit2sharp/issues/1236). There is no official API for Git LFS.
 
 # TODO: Remove/move below (due to not being relevant to RFC goals)
 
-> will be removed/moved when whatever that's above sufficiently addresses the concerns of the RFC
+> for now used as reference to write the RFC proper.
 
 ## Git implemented in JS
 
