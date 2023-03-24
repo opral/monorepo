@@ -30,7 +30,7 @@ const resource = {
 				type: "Pattern",
 				elements: [
 					{ type: "Text", value: "Welcome, " },
-					// { type: 'Placeholder', name: 'name' },
+					{ type: "Variable", id: { type: "Identifier", name: "name" } },
 					{ type: "Text", value: "!" },
 				],
 			},
@@ -52,7 +52,7 @@ describe("createLookupFunction", () => {
 
 		const result = fn("welcome", { name: "Inlang" })
 
-		expect(result).toBe("Welcome, !")
+		expect(result).toBe("Welcome, Inlang!")
 	})
 
 	test("it should return an empty string if key does not exist in resource", () => {

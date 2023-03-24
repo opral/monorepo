@@ -1,4 +1,4 @@
-import type { Element, Message, Resource } from "@inlang/core/ast"
+import type { Message, Resource } from "@inlang/core/ast"
 
 // TODO: do we want to introduce a opaque type for Language?
 
@@ -42,13 +42,17 @@ export const createLookupFunction = <LookupFn extends BaseLookupFunctionArgs>(
 const serializeMessage = (message: Message, args: BaseArgs): string => {
 	if (!message) return ""
 
-	// TODO: replace args
 	return message.pattern.elements.map((element) => serializeElement(element, args)).join("")
 }
 
-const serializeElement = (element: Element, args: BaseArgs): string => {
+const serializeElement = (
+	element: Message["pattern"]["elements"][number],
+	args: BaseArgs,
+): string => {
 	switch (element.type) {
 		case "Text":
 			return element.value
+		case "Variable":
+			return args[element.id.name] as string
 	}
 }
