@@ -133,6 +133,81 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 - State management differences (syncing file systems etc.)?
 - Ease of debugging (for faster iteration speeds). A pure JS implementation is straightforward to debug.
 
+# Comparing JS vs WebAssembly in solving goals stated above
+
+## Adding folder for storing metadata (no modification to git itself)
+
+The problem of storing generalized metadata will be present across all git based apps.
+
+In Inlang, there is currently [no ability to track which translations were machine translated](https://github.com/inlang/inlang/discussions/462).
+
+One solution is to have a custom [folder for storing metadata](https://github.com/orgs/inlang/discussions/355). Metadata such as comments/images/ etc.
+
+Assuming we decide to store all metadata in folder.
+
+We will cover the case of 'Modyfing git to become a proper backend' after.
+
+### isomorphic git
+
+You would be able to fetch the metadata folder via sparse-checkout clone. And read the metadata as it will be just files in a file system.
+
+Comitting/pushing files is trvial too. The only missing piece is adding sparse-checkout into isomorphic-git. All the remainder of git operations one would need to be able to work with a metadata folder should be covered already by existing featureset of isomorphic git.
+
+Not tested yet, but it should hopefully respect `.gitignore` placed inside the metadata folder too, but if it doesn't it's trivial to add as a feature too.
+
+### libgit2 wasm
+
+Similar to Isomorphic Git, this would be trivial to add on top of libgit2 wasm.
+
+You would sparse-checkout the folder with metadata. Only difference is that as it currently stands, you are forced to save results into [Emscripten FS](https://emscripten.org/docs/api_reference/Filesystem-API.html).
+
+The way libgit2 works now as compiled through [wasm-git](https://github.com/petersalomonsen/wasm-git) is you get 1 .wasm file. And one .js file. The JS file contains the Emscripten FS and bindings to libgit2 git.
+
+[MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) is default in-memory file system mounted. Example code how that looks below:
+
+```js
+// clone inlang into MEMFS
+FS.mkdir("/")
+FS.mount(MEMFS, {}, "/")
+FS.chdir("/")
+libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
+FS.chdir("inlang")
+```
+
+There is also [NODEFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#nodefs) you can use for when git-sdk runs in Node.
+
+NODEFS uses native Node.js 'fs' module under the hood to access the host file system.
+
+One of stated goals of git sdk is it should run anywhere there is a file system. You provide the file system and git sdk does the rest.
+
+The interface of the file system provided by users to git sdk can be adapted to cover the API surface of MEMFS or NODEFS depending on the environment they are running git sdk in.
+
+Above was needed context to answer the question regarding adding support for the custom folder to hold metadata about repository.
+
+libgit2 supports the features needed to sparse-checkout the metadata folder and mount it into the file system. From then on, you can read/modify the contents of the files.
+
+## Modify git to become a proper backend
+
+Here is summary of [points made by Samuel on kinds of things one would need for git as a backend](https://github.com/orgs/inlang/discussions/355#discussioncomment-4875403). Let's go through each one and see how JS or WASM solutions compare in solving them.
+
+## Lazy loading of files
+
+### isomorphic git
+
+sparse-checkout is not implemented but can be added. Should be a mix of adapting code from [checkout](https://isomorphic-git.org/docs/en/checkout) and [fetch](https://isomorphic-git.org/docs/en/fetch) commands.
+
+### libgit2
+
+There is [open pr](https://github.com/libgit2/libgit2/pull/6394) that has support for sparse-checkout. Should be compiled with wasm-git.
+
+There is also [open question about how to do just the bare minimum clone of a repo](https://stackoverflow.com/questions/75817315/how-to-do-git-clone-depth-1-sparse-no-checkout-filter-blobnone-in-lib) to do further sparse-checkout operation.
+
+##
+
+# TODO: Remove/move below (due to not being relevant to RFC goals)
+
+> will be removed/moved when whatever that's above sufficiently addresses the concerns of the RFC
+
 ## Git implemented in JS
 
 ### Context
