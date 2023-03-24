@@ -1,130 +1,62 @@
-import type { Message, Pattern, Resource } from "../ast/index.js"
 import type { Config } from "../config/index.js"
-import type { MaybePromise } from "../utilities/types.js"
-import type { LintLevel } from "./context.js"
-import { createReportFunction } from "./report.js"
-
-export type LintableNode = Resource | Message | Pattern
-
-export type LintableNodeByType<Node extends { type: string }, Key> = Node extends { type: Key }
-	? Node
-	: never
-
-export type TargetReferenceParameterTuple<Node extends LintableNode> = {
-	target?: Node
-	reference?: Node
-}
-
-type VisitorParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node>
-
-export type EnterNodeFunction<Node extends LintableNode> = (
-	param: VisitorParam<Node>,
-) => MaybePromise<"skip" | void>
-
-export type LeaveNodeFunction<Node extends LintableNode> = (
-	param: VisitorParam<Node>,
-) => MaybePromise<"skip" | void>
-
-export type NodeVisitor<Node extends LintableNode> =
-	| EnterNodeFunction<Node>
-	| {
-			enter?: EnterNodeFunction<Node>
-			leave?: LeaveNodeFunction<Node>
-	  }
-
-export type NodeVisitors = {
-	[Key in LintableNode["type"]]?: NodeVisitor<LintableNodeByType<LintableNode, Key>>
-}
-
-export type LintConfigArguments<
-	Settings = never,
-	RequireSettings extends boolean = false,
-> = RequireSettings extends true
-	? [boolean | LintLevel, Settings]
-	: [] | [boolean | LintLevel] | [boolean | LintLevel, Settings?]
-
-/**
- * The unique id of a lint rule.
- *
- * @example
- * ```
- * 'inlangStandardRules.missingKey'
- * ```
- */
-export type LintRuleId = `${string}.${string}`
-
-/**
- * An utility type to add strong type definitions for a lint rule.
- *
- * @example a rule that does not expects any settings
- * ```
- * const myRule: LintRuleInitializer = // implementation
- * ```
- * @example a rule that accepts settings
- * ```
- * const myRule: LintRuleInitializer<{ strict: boolean }> = // implementation
- * ```
- * @example a rule that requires settings
- * ```
- * const myRule: LintRuleInitializer<{ strict: boolean }, true> = // implementation
- * ```
- */
-export type LintRuleInitializer<Settings = never, RequireSettings extends boolean = false> = (
-	...args: LintConfigArguments<Settings, RequireSettings>
-) => LintRule
+import type * as ast from "../ast/index.js"
+import type { createReportFunction } from "./report.js"
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
  */
 export type LintRule = {
-	id: LintRuleId
-	level: LintLevel | "default"
-	visitors: NodeVisitors
+	id: `${string}.${string}`
+	level: "error" | "warn"
+	setup: (args: {
+		config: Pick<Config, "referenceLanguage" | "languages">
+		report: ReturnType<typeof createReportFunction>
+	}) => MaybePromise<{
+		visitors: Visitors
+	}>
 }
 
-type LintRuleArguments<Settings = never> = [] | [LintLevel] | [LintLevel | "default", Settings?]
+export type Visitors = {
+	Resource?: VisitorFunction<ast.Resource>
+	Message?: VisitorFunction<ast.Message>
+	Pattern?: VisitorFunction<ast.Pattern>
+}
 
 /**
- * An utility function that encapsulates the parsing of the arguments passed to the lint rule.
- *
- * @param id the unique lint id of this lint rule
- * @param defaultLevel the default lint level this rule should have
- * @param configureLintRule a callback function that get passed the arguments and need to return rule specific implementation details
- * @returns a lint rule
- *
- * @example
- * ```
- * const myRule = createLintRule<{ strict: boolean }>('my.rule', 'error', (settings) => {
- *    return {
- * 			visitors: {}
- * 	}
- * })
- * ```
+ * A report of a given lint rule.
  */
-export const createLintRule = <Settings = never>(
-	id: LintRuleId,
-	defaultLevel: LintLevel,
-	callback: (args: {
-		settings?: Settings
-		report: ReturnType<typeof createReportFunction>
-	}) => Omit<LintRule, "id" | "level">,
-): ((...args: LintRuleArguments<Settings>) => LintRule) => {
-	return (...args) => {
-		const level = parseLintLevel(defaultLevel, args[0])
-		const settings = args[1]
-
-		const report = createReportFunction({ id, level })
-		return {
-			...callback({ settings, report }),
-			id,
-			level,
-		}
-	}
+export type LintReport = {
+	id: LintRule["id"]
+	level: LintRule["level"]
+	message: string
 }
 
-function parseLintLevel(defaultLevel: LintLevel, level?: LintLevel | "default"): LintLevel {
-	if (level === undefined || level === "default") {
-		return defaultLevel
-	}
-	return level
+/**
+ * Nodes that can be linted.
+ *
+ * The linter will only lint nodes that are of this type.
+ */
+export type LintableNode = ast.Resource | ast.Message | ast.Pattern
+
+type VisitorFunction<Node extends LintableNode> = (args: {
+	reference?: Node
+	target?: Node
+}) => MaybePromise<void | "skip">
+
+type LintInformation = {
+	lint?: LintReport[]
 }
+
+type LintExtension = {
+	Resource: LintInformation
+	Message: LintInformation
+	Pattern: LintInformation
+}
+
+export type LintedResource = ast.Resource<LintExtension>
+export type LintedMessage = ast.Message<LintExtension>
+export type LintedPattern = ast.Pattern<LintExtension>
+
+export type LintedNode = LintedResource | LintedMessage | LintedPattern
+
+type MaybePromise<T> = T | Promise<T>

@@ -3,13 +3,13 @@ import type {
 	LintedMessage,
 	LintedPattern,
 	LintedResource,
-	LintLevel,
+	LintRule,
 	LintReport,
-} from "./context.js"
+	LintableNode,
+} from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
-import type { LintableNode, LintRuleId } from "./rule.js"
 
-const createReport = (id: LintRuleId, level: LintLevel) =>
+const createReport = (id: LintRule["id"], level: LintRule["level"]) =>
 	({
 		id,
 		level,

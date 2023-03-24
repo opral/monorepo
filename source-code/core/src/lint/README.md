@@ -250,3 +250,31 @@ const myRuleCollection = createLintRuleCollection({
 ```
 
 The `createLintRuleCollection` expects an object where the key is the name of the provided rule and the value is the rule itself. You can add as many rules as you want.
+
+---
+
+# Concept
+
+```ts
+// 1. create lint rule [Public API: Authoring rules]
+const missingMessageRule = createLintRule({ id: "inlang.missingMessage" }, ({ config, report }) => {
+	return visitors: {
+    Resource: ({ target } => {
+      report(target, { message: "Missing message" })
+    })
+	}
+})
+
+// 2. configure rule function [Public API: Using rules]
+rules: [
+  missingMessageRule("error", {
+    strict: true,
+  })
+]
+
+// 3. setup rule function [Internal]
+const rules = rules.map((rule) => await rule.setup({ config, report }))
+
+// 4. linting
+const [resource, errors] = await lint(resources, [rule])
+```

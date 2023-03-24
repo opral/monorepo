@@ -1,24 +1,16 @@
-import type { Resource, Message, Pattern } from "../ast/schema.js"
-import type { Config } from "../config/schema.js"
-import type { LintedResource } from "./context.js"
-import type {
-	LintableNode,
-	LintableNodeByType,
-	LintRule,
-	NodeVisitor,
-	NodeVisitors,
-	TargetReferenceParameterTuple,
-} from "./rule.js"
+import type { Config } from "@inlang/core/config"
+import type * as ast from "@inlang/core/ast"
+import type { LintedResource, LintRule, Visitors } from "./types.js"
+import { createReportFunction } from "./report.js"
 
-const getResourceForLanguage = (resources: Resource[], language: string) =>
+const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
 
 export const lint = async (args: {
 	config: Pick<Config, "lint" | "languages" | "referenceLanguage">
-	resources: Resource[]
+	resources: ast.Resource[]
 }): Promise<LintedResource[]> => {
 	const { referenceLanguage, languages, lint } = args.config
-	// linting the resources should not modify args.resources.
 	const resources = structuredClone(args.resources)
 	if (lint === undefined || lint.rules.length === 0) {
 		return args.resources
@@ -26,14 +18,14 @@ export const lint = async (args: {
 	const reference = getResourceForLanguage(resources, referenceLanguage)
 
 	await Promise.all(
-		lint.rules.flat().map((lintRule) =>
+		lint.rules.flat().map((rule) =>
 			processLintRule({
-				lintRule,
+				rule,
 				referenceLanguage,
 				languages,
 				reference,
 				resources,
-			}).catch((e) => console.error(`Unexpected error in lint rule '${lintRule.id}':`, e)),
+			}).catch((e) => console.error(`Unexpected error in lint rule '${rule.id}':`, e)),
 		),
 	)
 
@@ -41,58 +33,48 @@ export const lint = async (args: {
 }
 
 const processLintRule = async (args: {
-	lintRule: LintRule
-	config: Pick<Config, "languages" | "referenceLanguage">
-	reference: Resource | undefined
-	resources: Resource[]
+	rule: LintRule
+	referenceLanguage: string
+	languages: string[]
+	reference: ast.Resource | undefined
+	resources: ast.Resource[]
 }) => {
-	if (!args.lintRule) return
-	const { config, lintRule, reference, resources } = args
+	const { referenceLanguage, languages, reference, resources } = args
 
-	const rule = lintRule(config)
+	const report = createReportFunction(args.rule)
+	const { visitors } = await args.rule.setup({ config: { referenceLanguage, languages }, report })
 
-	for (const language of config.languages) {
+	for (const language of languages) {
 		await processResource({
-			target: getResourceForLanguage(resources, language),
 			reference,
-			visitors: rule.visitors,
+			target: getResourceForLanguage(resources, language),
+			visitors,
 		})
 	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const getVisitorFunctions = (visitors: NodeVisitors, node: LintableNode["type"]) => {
-	const visitor = visitors[node] as
-		| NodeVisitor<LintableNodeByType<LintableNode, typeof node>>
-		| undefined
-	if (!visitor) return { enter: undefined, leave: undefined }
-
-	if (typeof visitor === "object") return visitor
-
-	return { enter: visitor, leave: undefined }
-}
-
-type ProcessNodeParam<Node extends LintableNode> = TargetReferenceParameterTuple<Node> & {
-	visitors: NodeVisitors
-}
+type ProcessNodeFunction<Node> = (args: {
+	visitors: Visitors
+	reference?: Node
+	target?: Node
+}) => Promise<void>
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const shouldProcessResourceChildren = (visitors: NodeVisitors) =>
+const shouldProcessResourceChildren = (visitors: Visitors) =>
 	!!visitors.Message || shouldProcessMessageChildren(visitors)
 
 // TODO: test passing `undefined` for reference
 
-const processResource = async ({
+const processResource: ProcessNodeFunction<ast.Resource> = async ({
 	visitors,
 	target,
 	reference,
-}: ProcessNodeParam<Resource>): Promise<void> => {
-	const { enter, leave } = getVisitorFunctions(visitors, "Resource")
-
-	const returnOfEnter = enter && (await enter({ target, reference }))
-	if (returnOfEnter === "skip") {
+}) => {
+	const payload = visitors.Resource && (await visitors.Resource({ target: target, reference }))
+	if (payload === "skip") {
 		return
 	}
 
@@ -126,25 +108,19 @@ const processResource = async ({
 			processedReferenceMessages.add(referenceNode.id.name)
 		}
 	}
-
-	if (leave) {
-		await leave({ target, reference })
-	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const shouldProcessMessageChildren = (visitors: NodeVisitors) => !!visitors.Pattern
+const shouldProcessMessageChildren = (visitors: Visitors) => !!visitors.Pattern
 
-const processMessage = async ({
+const processMessage: ProcessNodeFunction<ast.Message> = async ({
 	visitors,
 	target,
 	reference,
-}: ProcessNodeParam<Message>): Promise<void> => {
-	const { enter, leave } = getVisitorFunctions(visitors, "Message")
-
-	const returnOfEnter = enter && (await enter({ target, reference }))
-	if (returnOfEnter === "skip") {
+}) => {
+	const payload = visitors.Message && (await visitors.Message({ target, reference }))
+	if (payload === "skip") {
 		return
 	}
 
@@ -156,30 +132,17 @@ const processMessage = async ({
 			target: target?.pattern,
 		})
 	}
-
-	if (leave) {
-		await leave({ target, reference })
-	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const processPattern = async ({
+const processPattern: ProcessNodeFunction<ast.Pattern> = async ({
 	visitors,
 	target,
 	reference,
-}: ProcessNodeParam<Pattern>): Promise<void> => {
-	const { enter, leave } = getVisitorFunctions(visitors, "Pattern")
-
-	const returnOfEnter = enter && (await enter({ target, reference }))
-	if (returnOfEnter === "skip") {
+}) => {
+	const payload = visitors.Pattern && (await visitors.Pattern({ target, reference }))
+	if (payload === "skip") {
 		return
-	}
-
-	// we can't really iterate over elements because we can't match them between `target` and `resource`
-	// to have a consistent API, we allow both `enter` and `leave` even if `leave` does not make sense in this case
-
-	if (leave) {
-		await leave({ target, reference })
 	}
 }

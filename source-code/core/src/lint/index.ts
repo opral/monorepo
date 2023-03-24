@@ -1,4 +1,4 @@
-export { lint } from "./linter.js"
+export type { LintRule } from "./rule.js"
+export { createLintRule } from "./createLintRule.js"
 export { getLintReports, hasLintReports } from "./query.js"
-export { createLintRule, type LintRule, type LintRuleInitializer, type LintRuleId } from "./rule.js"
-export { createLintRuleCollection, type RuleCollectionInitializer } from "./ruleCollection.js"
+export { lint } from "./linter.js"

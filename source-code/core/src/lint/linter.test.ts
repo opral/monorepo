@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest"
-import type { Message, Resource } from "../ast/schema.js"
+import type { Message, Resource } from "@inlang/core/ast"
 import { lint } from "./linter.js"
-import { LintRule, createLintRule } from "./rule.js"
+import type { LintRule } from "./rule.js"
+import { createLintRule } from "./createLintRule.js"
 
 vi.spyOn(console, "info").mockImplementation(vi.fn)
 vi.spyOn(console, "warn").mockImplementation(vi.fn)
@@ -38,22 +39,6 @@ const createMessage = (id: string, pattern: string) =>
 
 // --------------------------------------------------------------------------------------------------------------------
 
-const errorRule = {
-	id: "error.rule",
-	level: "error",
-	visitors: {
-		Pattern: vi.fn(),
-	},
-} satisfies LintRule
-
-const warnRule = {
-	id: "warn.rule",
-	level: "warn",
-	visitors: {
-		Pattern: vi.fn(),
-	},
-} satisfies LintRule
-
 const referenceResource = createResource(
 	"en",
 	createMessage("first-message", "Welcome to this app."),
@@ -72,7 +57,7 @@ describe("lint", async () => {
 
 	test("it should be immutable and not modify the resources passed as an argument", async () => {
 		const cloned = structuredClone(referenceResource)
-		const rule = createLintRule("inlang.someError", "error", ({ report }) => ({
+		const rule = createLintRule({ id: "inlang.someError" }, ({ report }) => ({
 			visitors: {
 				Resource: ({ target }) => {
 					if (target) {
@@ -81,29 +66,34 @@ describe("lint", async () => {
 				},
 			},
 		}))
-		const result = await doLint([rule()], [cloned])
+		const result = await doLint([rule("error")], [cloned])
 		expect(cloned).toStrictEqual(referenceResource)
 		expect(result).not.toStrictEqual(cloned)
 	})
 
 	describe("rules", async () => {
-		test("should be able to override lint type", async () => {
-			const rule = createLintRule("error.rule", "error", ({ report }) => {
-				return {
-					visitors: {
-						Pattern: ({ target }) => report({ node: target!, message: "Test" }),
-					},
-				}
-			})
+		const visitorErrorPatternFn = vi.fn()
+		const visitorWarnPatternFn = vi.fn()
 
-			const resources = [referenceResource]
-			const result = await doLint([rule("warn")], resources)
-			expect(result?.[0].body[0].pattern.lint?.[0]).toMatchObject({
-				id: "error.rule",
-				level: "warn",
-				message: "Test",
-			})
-		})
+		const errorRule = {
+			id: "error.rule",
+			level: "error",
+			setup: () => ({
+				visitors: {
+					Pattern: visitorErrorPatternFn,
+				},
+			}),
+		} satisfies LintRule
+
+		const warnRule = {
+			id: "warn.rule",
+			level: "warn",
+			setup: () => ({
+				visitors: {
+					Pattern: visitorWarnPatternFn,
+				},
+			}),
+		} satisfies LintRule
 
 		test("should return the original resource if no rules are specified", async () => {
 			const resources = [referenceResource]
@@ -118,7 +108,7 @@ describe("lint", async () => {
 			const result = await doLint([errorRule], resources)
 
 			expect(result).toMatchObject(resources)
-			expect(errorRule.visitors.Pattern).toHaveBeenCalledTimes(2)
+			expect(visitorErrorPatternFn).toHaveBeenCalledTimes(2)
 		})
 
 		test("should process all 'Resources' for all rules", async () => {
@@ -126,8 +116,8 @@ describe("lint", async () => {
 			const result = await doLint([errorRule, warnRule], resources)
 
 			expect(result).toMatchObject(resources)
-			expect(errorRule.visitors.Pattern).toHaveBeenCalledTimes(2)
-			expect(warnRule.visitors.Pattern).toHaveBeenCalledTimes(2)
+			expect(visitorErrorPatternFn).toHaveBeenCalledTimes(2)
+			expect(visitorWarnPatternFn).toHaveBeenCalledTimes(2)
 		})
 	})
 
@@ -135,43 +125,26 @@ describe("lint", async () => {
 
 	describe("visitors", () => {
 		const onEnter = vi.fn()
-		const onLeave = vi.fn()
 
 		const rule = {
 			id: "lint.rule",
 			level: "error",
-			visitors: {
-				Resource: {
-					enter: ({ target }) => {
+			setup: () => ({
+				visitors: {
+					Resource: ({ target }) => {
 						onEnter(target)
 						return Promise.resolve(console.info("Resource enter"))
 					},
-					leave: ({ target }) => {
-						onLeave(target)
-						return Promise.resolve(console.info("Resource leave"))
-					},
-				},
-				Message: {
-					enter: ({ target }) => {
+					Message: ({ target }) => {
 						onEnter(target)
 						return Promise.resolve(console.info("Message enter"))
 					},
-					leave: ({ target }) => {
-						onLeave(target)
-						return Promise.resolve(console.info("Message leave"))
-					},
-				},
-				Pattern: {
-					enter: ({ target }) => {
+					Pattern: ({ target }) => {
 						onEnter(target)
 						return Promise.resolve(console.info("Pattern enter"))
 					},
-					leave: ({ target }) => {
-						onLeave(target)
-						return Promise.resolve(console.info("Pattern leave"))
-					},
 				},
-			},
+			}),
 		} satisfies LintRule
 
 		test("should visit all nodes exactly once", async () => {
@@ -182,12 +155,6 @@ describe("lint", async () => {
 			expect(onEnterCalls[0][0]).toMatchObject({ type: "Resource" })
 			expect(onEnterCalls[1][0]).toMatchObject({ type: "Message" })
 			expect(onEnterCalls[2][0]).toMatchObject({ type: "Pattern" })
-
-			expect(onLeave).toHaveBeenCalledTimes(3)
-			const onLeaveCalls = (onLeave as unknown as MockContext<Array<unknown>, unknown>).calls
-			expect(onLeaveCalls[0][0]).toMatchObject({ type: "Pattern" })
-			expect(onLeaveCalls[1][0]).toMatchObject({ type: "Message" })
-			expect(onLeaveCalls[2][0]).toMatchObject({ type: "Resource" })
 		})
 
 		test("should visit all Message nodes from reference if not present in target", async () => {
@@ -203,15 +170,44 @@ describe("lint", async () => {
 			expect(calls[7][0]).toBeUndefined()
 		})
 
+		test("should visit all Message nodes from target even if not present in reference", async () => {
+			const message = createMessage("first-message", "Test")
+			const fn = vi.fn()
+			await lint({
+				config: {
+					languages: ["en", "de"],
+					referenceLanguage: "en",
+					lint: {
+						rules: [
+							{
+								id: "lint.rule",
+								level: "error",
+								setup: () => ({
+									visitors: {
+										Message: ({ target }) => {
+											fn(target)
+										},
+									},
+								}),
+							},
+						],
+					},
+				},
+				resources: [createResource("de", message)],
+			})
+
+			expect(fn).toHaveBeenCalledTimes(1)
+			const calls = (fn as unknown as MockContext<Array<unknown>, unknown>).calls
+
+			expect(calls[0][0]).toStrictEqual(message)
+		})
+
 		test("should await all functions", async () => {
 			await doLint([rule], [referenceResource])
 
 			expect(console.info).toHaveBeenNthCalledWith(1, "Resource enter")
 			expect(console.info).toHaveBeenNthCalledWith(2, "Message enter")
 			expect(console.info).toHaveBeenNthCalledWith(3, "Pattern enter")
-			expect(console.info).toHaveBeenNthCalledWith(4, "Pattern leave")
-			expect(console.info).toHaveBeenNthCalledWith(5, "Message leave")
-			expect(console.info).toHaveBeenNthCalledWith(6, "Resource leave")
 		})
 
 		describe("should skip processing children", async () => {
@@ -220,343 +216,111 @@ describe("lint", async () => {
 					test("node", async () => {
 						const modifiedRule = {
 							...rule,
-							visitors: {},
-						} as LintRule
+							setup: () => ({ visitors: {} }),
+						} satisfies LintRule
 
 						await doLint([modifiedRule], [referenceResource])
 					})
-
-					describe("but not if children has visitor specified", async () => {
-						test("for Message", async () => {
-							const modifiedRule = {
-								...rule,
-								visitors: { Message: rule.visitors.Message.enter },
-							} as LintRule
-
-							await doLint([modifiedRule], [referenceResource])
-
-							expect(console.info).toHaveBeenNthCalledWith(1, "Message enter")
-						})
-
-						test("for Pattern", async () => {
-							const modifiedRule = {
-								...rule,
-								visitors: { Pattern: rule.visitors.Pattern.enter },
-							} as LintRule
-
-							await doLint([modifiedRule], [referenceResource])
-
-							expect(console.info).toHaveBeenNthCalledWith(1, "Pattern enter")
-						})
-					})
 				})
 
-				describe("for Message", async () => {
-					test("node", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: { Resource: rule.visitors.Resource.enter },
-						} as LintRule
-
-						await doLint([modifiedRule], [referenceResource])
-
-						expect(console.info).toHaveBeenNthCalledWith(1, "Resource enter")
-					})
-
-					describe("but not if children has visitor specified", async () => {
-						test("for Pattern", async () => {
-							const modifiedRule = {
-								...rule,
-								visitors: { Pattern: rule.visitors.Pattern.enter },
-							} as LintRule
-
-							await doLint([modifiedRule], [referenceResource])
-
-							expect(console.info).toHaveBeenNthCalledWith(1, "Pattern enter")
-						})
-					})
-				})
-
-				describe("for Pattern", async () => {
-					test("node", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: { Message: rule.visitors.Message.enter },
-						} as LintRule
+				describe("but not if children has visitor specified", async () => {
+					test("for Message", async () => {
+						const modifiedRule: LintRule = {
+							id: "lint.rule",
+							level: "error",
+							setup: () => ({
+								visitors: {
+									Message: () => {
+										console.info("Message enter")
+									},
+								},
+							}),
+						}
 
 						await doLint([modifiedRule], [referenceResource])
 
 						expect(console.info).toHaveBeenNthCalledWith(1, "Message enter")
+					})
+
+					test("for Pattern", async () => {
+						const rule: LintRule = {
+							id: "lint.rule",
+							level: "error",
+							setup: () => ({
+								visitors: {
+									Pattern: () => {
+										console.info("Pattern enter")
+									},
+								},
+							}),
+						}
+
+						await doLint([rule], [referenceResource])
+
+						expect(console.info).toHaveBeenNthCalledWith(1, "Pattern enter")
 					})
 				})
 			})
 
 			describe("if 'skip' get's returned by a visitor", async () => {
 				test("for 'Resource'", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: {
-							Resource: {
-								enter: (...param) => {
-									rule.visitors.Resource.enter(...param)
+					const rule: LintRule = {
+						id: "lint.rule",
+						level: "error",
+						setup: () => ({
+							visitors: {
+								Resource: () => {
+									console.info("Resource enter")
 									return "skip"
 								},
-								leave: rule.visitors.Resource.leave,
+								Message: () => {
+									console.info("Message enter")
+								},
 							},
-							Message: rule.visitors.Message.enter,
-							Pattern: rule.visitors.Pattern.enter,
-						},
-					} as LintRule
-
-					await doLint([modifiedRule], [referenceResource])
+						}),
+					}
+					await doLint([rule], [referenceResource])
 
 					expect(console.info).toHaveBeenNthCalledWith(1, "Resource enter")
 				})
 
 				test("for 'Message'", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: {
-							Message: {
-								enter: (...param) => {
-									rule.visitors.Message.enter(...param)
+					const rule: LintRule = {
+						id: "lint.rule",
+						level: "error",
+						setup: () => ({
+							visitors: {
+								Message: () => {
+									console.info("Message enter")
 									return "skip"
 								},
-								leave: rule.visitors.Message.leave,
+								Pattern: () => {
+									console.info("Pattern enter")
+								},
 							},
-							Pattern: rule.visitors.Pattern.enter,
-						},
-					} as LintRule
-
-					await doLint([modifiedRule], [referenceResource])
-
+						}),
+					}
+					await doLint([rule], [referenceResource])
 					expect(console.info).toHaveBeenNthCalledWith(1, "Message enter")
 				})
 
 				test("for 'Pattern'", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: {
-							Pattern: {
-								enter: (...param) => {
-									rule.visitors.Pattern.enter(...param)
+					const rule: LintRule = {
+						id: "lint.rule",
+						level: "error",
+						setup: () => ({
+							visitors: {
+								Pattern: () => {
+									console.info("Pattern enter")
 									return "skip"
 								},
-								leave: rule.visitors.Pattern.leave,
 							},
-						},
-					} as LintRule
+						}),
+					}
 
-					await doLint([modifiedRule], [referenceResource])
+					await doLint([rule], [referenceResource])
 
 					expect(console.info).toHaveBeenNthCalledWith(1, "Pattern enter")
-				})
-			})
-		})
-	})
-
-	// -----------------------------------------------------------------------------------------------------------------
-
-	describe("exceptions", async () => {
-		const rule = {
-			id: "lint.rule",
-			level: "error",
-			visitors: {},
-		} satisfies LintRule
-
-		describe("should not kill process", async () => {
-			test("if 'teardown' is not present", async () => {
-				expect(doLint([rule], [referenceResource])).resolves.not.toThrow()
-			})
-
-			describe("for 'Resource'", async () => {
-				test("if not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Message: vi.fn(), Pattern: vi.fn() },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'enter' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Resource: { leave: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'leave' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Resource: { enter: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-			})
-
-			describe("for 'Message'", async () => {
-				test("if not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Resource: vi.fn(), Pattern: vi.fn() },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'enter' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Message: { leave: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'leave' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Message: { enter: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-			})
-
-			describe("for 'Pattern'", async () => {
-				test("if not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Resource: vi.fn(), Message: vi.fn() },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'enter' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Pattern: { leave: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-
-				test("if 'leave' is not present", async () => {
-					const modifiedRule = {
-						...rule,
-						visitors: { Pattern: { enter: vi.fn() } },
-					} as LintRule
-
-					expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-				})
-			})
-
-			describe("if visitor throws", async () => {
-				describe("in 'Resource'", async () => {
-					test("'enter'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Resource: {
-									enter: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
-
-					test("'leave'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Resource: {
-									leave: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
-				})
-
-				describe("in 'Message'", async () => {
-					test("'enter'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Message: {
-									enter: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
-
-					test("'leave'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Message: {
-									leave: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
-				})
-
-				describe("in 'Pattern'", async () => {
-					test("'enter'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Pattern: {
-									enter: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
-
-					test("'leave'", async () => {
-						const modifiedRule = {
-							...rule,
-							visitors: {
-								Pattern: {
-									leave: () => {
-										throw new Error()
-									},
-								},
-							},
-						} as LintRule
-
-						await expect(doLint([modifiedRule], [referenceResource])).resolves.not.toThrow()
-						expect(console.error).toHaveBeenCalledTimes(1)
-					})
 				})
 			})
 		})

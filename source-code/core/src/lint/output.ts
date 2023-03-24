@@ -1,4 +1,4 @@
-import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./context.js"
+import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
 
 export const print = (resource: LintedResource) => {
