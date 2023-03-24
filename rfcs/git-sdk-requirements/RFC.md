@@ -214,7 +214,77 @@ But there is [LFS compatibility layer for iso-git](https://github.com/riboseinc/
 
 libgit2 team refers to using [filters API](https://libgit2.org/libgit2/#v0.20.0/group/filter) to [achieve git lfs support](https://github.com/libgit2/libgit2sharp/issues/1236). There is no official API for Git LFS.
 
-# TODO: Remove/move below (due to not being relevant to RFC goals)
+## Not every change needs to be committed
+
+Should be solvable irregardless of WASM/JS solution chosen for Git. Just do all the non comittable work on top of the FS. And only commit changes you need.
+
+## Git provides real-time collaboration
+
+Should also be solvable irregardless of WASM/JS solution chosen for Git.
+
+You can build real-time collaboration features on top of the FS api. Using operational transforms or other tech.
+
+Only when you want to commit and persist the changes, would you talk to Git and there all required git features are supported.
+
+Conflict resolution can be built in JS side irregardless if actual git is implemented in JS or WASM.
+
+> Perhaps I am missing a case where you would actually need to change some core git behavior in order to make above work? I don't see it.
+
+## Built-in auth via auth as code
+
+From [comment](https://github.com/orgs/inlang/discussions/355#discussioncomment-4875403):
+
+> Apps don't need an auth layer anymore. organization can configure auth as they please and need. Potentially revolutionizing here as well. If that auth layer is also able to hook into databases like sqlite
+
+From [authorization and file-based security issue](https://github.com/orgs/inlang/discussions/153).
+
+> The editor clones a whole repository. Especially for private repositories, file-based access control is desired. A translator should only be able to clone translation relevant files
+
+> Implementing a custom git server with auth as code like https://www.osohq.com/ could enable the feature. The cumbersome authorization path, see (reversed) #303, could simultaneously be streamlined by leveraging such a git server as auth layer
+
+Assume that would mean, Git SDK would need a custom git server with certain rules for this to work.
+
+> TODO: need expanding, don't fully understand how that'd work. This would probably actually need changes made to git core potentially
+
+## Plugin system to support different files
+
+Plugins are mostl likely to be written in JS. Although there is option to [write plugins in wasm too](https://github.com/extism/extism) (not useful for our case).
+
+### JS
+
+Everything is already in JS and there is no need to call WASM. We have full control over all data structures to represent any kind of git related object we need.
+
+The plugins may potentially work in similar way to the way inlang config does plugins now.
+
+> TODO: need to read inlang config spec to say for sure
+
+### WASM
+
+For WASM, it would be similar to JS version. Only the actual git operations are done in WASM. But that should be okay as the plugins will most likely wrap around how/when you would call into git to do actual git operations. The rest can be built on top of the file system and fully in JS.
+
+libgit2 allows to get access to various git related metadata info to in some ways emulate parts of certain git operations in cases git sdk needs to do something complex and outside of scope of git.
+
+> Need examples of plugins that one can make. Perhaps some plugins would need to actually have access to git core to make the use cases work.
+
+## Git SDK must run in browser/server/everywhere
+
+## JS
+
+Isomorphic git already runs in both browser and node environments which covers everything.
+
+## WASM
+
+Node.js can run webassembly and there is NODEFS provided by Emscripten for cases of running the file system in node. So git sdk can take a node fs compatible file system and should work.
+
+For browsers, there is a way to run everything in a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries). To not do heavy work on the main thread in browser.
+
+There is also option to run [without a web worker](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker).
+
+It would be idealy if the Git SDK package adapted to either case of running in browser or running in node smartly. There might be further complication issues with running things in a web worker, such as how to achieve full reactivity on the client side with ability to periodically pull and persist changes made to git. With web workers, that would have to be done through messages. But that doesn't mean it would be impossible to build out.
+
+> All this, being explored here now: (at this moment: packaing wasm-git for both node/browser using rollup): https://github.com/nikitavoloboev/git-sdk
+
+# TODO: Remove all below (due to not being relevant to RFC goals, was just a starting point)
 
 > for now used as reference to write the RFC proper.
 
