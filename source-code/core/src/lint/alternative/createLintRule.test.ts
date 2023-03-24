@@ -3,7 +3,7 @@ import { expect, test } from "vitest"
 import { createLintRule } from "./createLintRule.js"
 
 test("createLintRule returns a function", () => {
-	const myRule = createLintRule({ id: "example.rule" }, async () => {
+	const myRule = createLintRule({ id: "example.rule" }, () => {
 		return {
 			visitors: {
 				Resource: () => {},
@@ -15,7 +15,7 @@ test("createLintRule returns a function", () => {
 })
 
 test("createLintRule configures lint rule with correct id and level", async () => {
-	const myRule = createLintRule({ id: "example.rule" }, async () => {
+	const myRule = createLintRule({ id: "example.rule" }, () => {
 		return {
 			visitors: {
 				Resource: () => {},
@@ -23,24 +23,40 @@ test("createLintRule configures lint rule with correct id and level", async () =
 		}
 	})
 
-	const setup = myRule("error", {})
-	const rule = await setup({ config: { referenceLanguage: "en", languages: ["en", "de"] } })
-
+	const rule = myRule("error")
 	expect(rule.id).toBe("example.rule")
 	expect(rule.level).toBe("error")
 })
 
 test("createLintRule configures lint rule with correct visitors", async () => {
-	const myRule = createLintRule({ id: "example.rule" }, async () => {
+	const myRule = createLintRule({ id: "example.rule" }, () => {
 		return {
 			visitors: {
 				Resource: () => {},
 			},
 		}
 	})
+	const rule = myRule("error", {})
+	const { visitors } = await rule.setup({
+		report: () => {},
+		config: { referenceLanguage: "en", languages: ["en", "de"] },
+	})
+	expect(typeof visitors.Resource).toBe("function")
+})
 
-	const setup = myRule("error", {})
-	const rule = await setup({ config: { referenceLanguage: "en", languages: ["en", "de"] } })
-
-	expect(typeof rule.visitors.Resource).toBe("function")
+test("createLintRule should accept an async setup function", async () => {
+	const myRule = createLintRule({ id: "example.rule" }, () => {
+		return {
+			visitors: {
+				Resource: () => {},
+			},
+		}
+	})
+	const rule = myRule("error", {})
+	expect(typeof rule.setup).toBe("function")
+	const { visitors } = await rule.setup({
+		report: () => {},
+		config: { referenceLanguage: "en", languages: ["en", "de"] },
+	})
+	expect(typeof visitors.Resource).toBe("function")
 })

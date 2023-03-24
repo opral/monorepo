@@ -1,6 +1,6 @@
 import type * as ast from "../ast/index.js"
 import type { FS } from "../fs/index.js"
-import type { ConfigureLintRuleFunction } from "../lint/alternative/types.js"
+import type { LintRule } from "../lint/alternative/types.js"
 import type { $import } from "./environment-functions/index.js"
 
 /**
@@ -48,7 +48,7 @@ export type Config = {
 	readResources: (args: { config: Config }) => Promise<ast.Resource[]>
 	writeResources: (args: { config: Config; resources: ast.Resource[] }) => Promise<void>
 	lint?: {
-		rules: (ConfigureLintRuleFunction | ConfigureLintRuleFunction[])[]
+		rules: (LintRule | LintRule[])[]
 	}
 
 	/**

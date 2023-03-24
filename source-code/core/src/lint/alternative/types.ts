@@ -11,33 +11,22 @@ import type { createReportFunction } from "./report.js"
  */
 export type CreateLintRuleFunction = (
 	args: { id: LintRule["id"] },
-	callback: (args: {
-		config: SubsetOfConfig
-		settings: any
-		report: ReturnType<typeof createReportFunction>
-	}) => Promise<{ visitors: LintRule["visitors"] }>,
+	setup: (
+		args: Parameters<LintRule["setup"]>[0] & {
+			settings: any
+		},
+	) => ReturnType<LintRule["setup"]>,
 ) => ConfigureLintRuleFunction
 
 /**
  * Type for the function that configures a lint rule.
+ *
  * @example
  * const configureLintRule: ConfigureLintRuleFunction = (level, settings) => {
  *   // Implement the lint rule configuration logic
  * };
  */
-export type ConfigureLintRuleFunction = (
-	level: LintRule["level"],
-	settings?: any,
-) => LintRuleSetupFunction
-
-/**
- * Type for the function that sets up a lint rule.
- * @example
- * const setupLintRule: LintRuleSetupFunction = (args) => {
- *   // Implement the lint rule setup logic
- * };
- */
-export type LintRuleSetupFunction = (args: { config: SubsetOfConfig }) => Promise<LintRule>
+export type ConfigureLintRuleFunction = (level: LintRule["level"], settings?: any) => LintRule
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
@@ -45,11 +34,18 @@ export type LintRuleSetupFunction = (args: { config: SubsetOfConfig }) => Promis
 export type LintRule = {
 	id: `${string}.${string}`
 	level: "error" | "warn"
-	visitors: {
-		Resource?: VisitorFunction<ast.Resource>
-		Message?: VisitorFunction<ast.Message>
-		Pattern?: VisitorFunction<ast.Pattern>
-	}
+	setup: (args: {
+		config: Pick<Config, "referenceLanguage" | "languages">
+		report: ReturnType<typeof createReportFunction>
+	}) => MaybePromise<{
+		visitors: Visitors
+	}>
+}
+
+export type Visitors = {
+	Resource?: VisitorFunction<ast.Resource>
+	Message?: VisitorFunction<ast.Message>
+	Pattern?: VisitorFunction<ast.Pattern>
 }
 
 /**
@@ -68,11 +64,25 @@ export type LintReport = {
  */
 export type LintableNode = ast.Resource | ast.Message | ast.Pattern
 
-export type NodeWithLints = LintableNode & { lint?: LintReport[] }
-
 type VisitorFunction<Node extends LintableNode> = (args: {
-	reference: Node
-	target: Node
-}) => void | "skip"
+	reference?: Node
+	target?: Node
+}) => MaybePromise<void | "skip">
 
-type SubsetOfConfig = Pick<Config, "referenceLanguage" | "languages">
+type LintInformation = {
+	lint?: LintReport[]
+}
+
+type LintExtension = {
+	Resource: LintInformation
+	Message: LintInformation
+	Pattern: LintInformation
+}
+
+export type LintedResource = ast.Resource<LintExtension>
+export type LintedMessage = ast.Message<LintExtension>
+export type LintedPattern = ast.Pattern<LintExtension>
+
+export type LintedNode = LintedResource | LintedMessage | LintedPattern
+
+type MaybePromise<T> = T | Promise<T>

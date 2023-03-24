@@ -3,7 +3,7 @@
 ```ts
 // 1. create lint rule [Public API: Authoring rules]
 const missingMessageRule = createLintRule({ id: "inlang.missingMessage" }, ({ config, report }) => {
-	visitors: {
+	return visitors: {
     Resource: ({ target } => {
       report(target, { message: "Missing message" })
     })
@@ -18,7 +18,7 @@ rules: [
 ]
 
 // 3. setup rule function [Internal]
-const rules = rules.map((rule) => await ruleSetup({ config, report }))
+const rules = rules.map((rule) => await rule.setup({ config, report }))
 
 // 4. linting
 const [resource, errors] = await lint(resources, [rule])
