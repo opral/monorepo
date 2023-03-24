@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { initRuntime } from "./index.js"
+import { initRuntime } from "./runtime.js"
 
 describe("initRuntime", () => {
 	test("it should provide all functions", () => {
