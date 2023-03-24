@@ -9,12 +9,14 @@ const dummyResource = {
 
 const fallbackLookupFunction: LookupFunction = () => ""
 
-type RuntimeState<Language extends string> = {
+export type RuntimeState<Language extends string = string> = {
 	resources: Map<Language, Resource>
 	language: Language
 }
 
-export const initRuntime = <Language extends string>(
+export const initRuntime = <Language extends string>() => initBaseRuntime<Language>()
+
+export const initBaseRuntime = <Language extends string>(
 	state: RuntimeState<Language> = {
 		resources: new Map(),
 		language: undefined as unknown as Language, // TODO: what is the default value?
@@ -28,9 +30,9 @@ export const initRuntime = <Language extends string>(
 	const switchLanguage = (language: Language) => (state.language = language)
 
 	// TODO: what should we do if `switchLanguage` was never called before? Throw an error? Return undefined? An empty string?
-	const getCurrentLanguage = () => state.language
+	const getLanguage = () => state.language
 
-	const getLookupFunctionForCurrentLanguage = () => {
+	const getLookupFunction = () => {
 		const resource = state.resources.get(state.language)
 		if (!resource) return fallbackLookupFunction
 
@@ -40,7 +42,7 @@ export const initRuntime = <Language extends string>(
 	return {
 		loadResource,
 		switchLanguage,
-		getCurrentLanguage,
-		getLookupFunctionForCurrentLanguage,
+		getLanguage,
+		getLookupFunction,
 	}
 }
