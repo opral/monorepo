@@ -20,6 +20,7 @@ import { initRuntime } from "./runtime.js"
 	const i = runtime.getLookupFunction()
 
 	i("hello")
+	i("welcome")
 	i("welcome", { name: "Inlang" })
 }
 

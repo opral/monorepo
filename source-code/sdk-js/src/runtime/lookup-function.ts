@@ -25,14 +25,10 @@ export const createLookupFunction = <
 		const message = resource.body.find((message) => message.id.name === key)
 		if (!message) return ""
 
-		return serializeMessage(message, args as BaseArgs)
+		return message.pattern.elements
+			.map((element) => serializeElement(element, args as BaseArgs))
+			.join("")
 	}) as LookupFunction<LookupFunctionArgs>
-
-const serializeMessage = (message: Message, args: BaseArgs): string => {
-	if (!message) return ""
-
-	return message.pattern.elements.map((element) => serializeElement(element, args)).join("")
-}
 
 const serializeElement = (
 	element: Message["pattern"]["elements"][number],
