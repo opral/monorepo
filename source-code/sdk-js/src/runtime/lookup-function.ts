@@ -10,13 +10,15 @@ type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
 
 type BaseLookupFunctionArgs = Record<string, BaseArgs>
 
-type LookupFunction<LookupFunctionArgs extends BaseLookupFunctionArgs> = <
-	Key extends keyof LookupFunctionArgs,
->(
+export type LookupFunction<
+	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+> = <Key extends keyof LookupFunctionArgs>(
 	...args: ConstructLookupFunctionArgs<Key, LookupFunctionArgs[Key]>
 ) => string
 
-export const createLookupFunction = <LookupFn extends BaseLookupFunctionArgs>(
+export const createLookupFunction = <
+	LookupFn extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+>(
 	resource: Resource,
 ): LookupFunction<LookupFn> =>
 	((key, args) => {
