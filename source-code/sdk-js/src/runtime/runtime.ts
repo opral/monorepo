@@ -25,7 +25,7 @@ export const initBaseRuntime = <
 >(
 	state: RuntimeState<Language> = {
 		resources: new Map(),
-		language: undefined as unknown as Language, // TODO: what is the default value?
+		language: undefined as unknown as Language,
 	},
 ) => {
 	const loadResource = async (language: Language) => {
@@ -35,7 +35,6 @@ export const initBaseRuntime = <
 
 	const switchLanguage = (language: Language) => (state.language = language)
 
-	// TODO: what should we do if `switchLanguage` was never called before? Throw an error? Return undefined? An empty string?
 	const getLanguage = () => state.language
 
 	const getLookupFunction = () => {
