@@ -1,5 +1,5 @@
 import type { Resource } from "@inlang/core/ast"
-import { createLookupFunction, LookupFunction } from "./lookup-function.js"
+import { BaseLookupFunctionArgs, createLookupFunction, LookupFunction } from "./lookup-function.js"
 
 const dummyResource = {
 	type: "Resource",
@@ -14,9 +14,15 @@ export type RuntimeState<Language extends string = string> = {
 	language: Language
 }
 
-export const initRuntime = <Language extends string>() => initBaseRuntime<Language>()
+export const initRuntime = <
+	Language extends string,
+	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+>() => initBaseRuntime<Language, LookupFunctionArgs>()
 
-export const initBaseRuntime = <Language extends string>(
+export const initBaseRuntime = <
+	Language extends string,
+	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+>(
 	state: RuntimeState<Language> = {
 		resources: new Map(),
 		language: undefined as unknown as Language, // TODO: what is the default value?
@@ -36,7 +42,7 @@ export const initBaseRuntime = <Language extends string>(
 		const resource = state.resources.get(state.language)
 		if (!resource) return fallbackLookupFunction
 
-		return createLookupFunction(resource)
+		return createLookupFunction<LookupFunctionArgs>(resource)
 	}
 
 	return {

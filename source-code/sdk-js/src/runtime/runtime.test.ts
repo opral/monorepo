@@ -1,5 +1,16 @@
 import { describe, expect, test } from "vitest"
-import { initBaseRuntime, RuntimeState } from "./runtime.js"
+import { initBaseRuntime, initRuntime, RuntimeState } from "./runtime.js"
+
+describe("initRuntime", () => {
+	test("it should provide all functions", () => {
+		const runtime = initRuntime()
+
+		expect(runtime.loadResource).toBeDefined()
+		expect(runtime.switchLanguage).toBeDefined()
+		expect(runtime.getLanguage).toBeDefined()
+		expect(runtime.getLookupFunction).toBeDefined()
+	})
+})
 
 describe("initBaseRuntime", () => {
 	test("it should provide all functions", () => {

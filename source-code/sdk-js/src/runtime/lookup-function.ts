@@ -4,11 +4,11 @@ type BaseArgs = Record<string, unknown> | never
 
 type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
 	? [Key, Args?]
-	: Args extends never
+	: [Args] extends [never]
 	? [Key]
 	: [Key, Args]
 
-type BaseLookupFunctionArgs = Record<string, BaseArgs>
+export type BaseLookupFunctionArgs = Record<string, BaseArgs>
 
 export type LookupFunction<
 	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
@@ -17,16 +17,16 @@ export type LookupFunction<
 ) => string
 
 export const createLookupFunction = <
-	LookupFn extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
 >(
 	resource: Resource,
-): LookupFunction<LookupFn> =>
+): LookupFunction<LookupFunctionArgs> =>
 	((key, args) => {
 		const message = resource.body.find((message) => message.id.name === key)
 		if (!message) return ""
 
 		return serializeMessage(message, args as BaseArgs)
-	}) as LookupFunction<LookupFn>
+	}) as LookupFunction<LookupFunctionArgs>
 
 const serializeMessage = (message: Message, args: BaseArgs): string => {
 	if (!message) return ""
