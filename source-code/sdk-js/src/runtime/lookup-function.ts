@@ -1,18 +1,5 @@
 import type { Message, Resource } from "@inlang/core/ast"
 
-// TODO: do we want to introduce a opaque type for Language?
-
-const cache = new Map<string, Resource>()
-
-export const createLookupFunctionForLanguage = (language: string) => {
-	const resource = cache.get(language)
-	if (!resource) return () => ""
-
-	return createLookupFunction(resource)
-}
-
-// ------------------------------------------------------------------------------------------------
-
 type BaseArgs = Record<string, unknown> | never
 
 type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
