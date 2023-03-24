@@ -198,59 +198,6 @@ lint: {
 }
 ```
 
-## Lint Collections
-
-Lint collections are a way to group rules together. You can pass a collection to the config like you would do with regular rules. You can also customize and disable specific rules of a collection by passing an argument to the function call. A collection accepts an object where the keys are the name of the provided rule and the values are the configuration for that rule.
-
-_inlang.config.js_
-
-```js
-/**
- * @type {import("@@inlang/core/config").DefineConfig}
- */
-export async function defineConfig(env) {
-	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		lint: {
-			rules: [
-				// uses the standard configuration
-				inlangStandardRules(),
-				// set's the lint level for the `missingKey` rule to 'warn'
-				inlangStandardRules({
-					missingKey: "warn",
-				}),
-				// uses the standard lint level and passes custom settings to the `missingKey` rule
-				inlangStandardRules({
-					missingKey: ["default", { threshold: 4 }],
-				}),
-				// disables the `missingKey` rule if it runs on mondays
-				inlangStandardRules({
-					missingKey: false,
-				}),
-			],
-		},
-	}
-}
-```
-
-### Creating your own lint collection
-
-A lint collection groups multiple lint rules together. You can use the provided `createLintRuleCollection` function to create a collection. By using the provided function, you will get back a strongly typed rule collection.
-
-Example:
-
-```ts
-import { createLintRuleCollection } from "@inlang/core/lint"
-
-const myRuleCollection = createLintRuleCollection({
-	missingKey: missingKeyRule,
-	invalidKey: invalidKeyRule,
-})
-```
-
-The `createLintRuleCollection` expects an object where the key is the name of the provided rule and the value is the rule itself. You can add as many rules as you want.
-
 ---
 
 # Concept
