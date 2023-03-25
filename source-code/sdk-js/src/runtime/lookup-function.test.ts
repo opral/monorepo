@@ -64,6 +64,14 @@ describe("createLookupFunction", () => {
 		expect(result).toBe("Welcome, Inlang!")
 	})
 
+	test("it should return an empty string for a placeholder if placeholder does not get passed as args", () => {
+		const fn = createLookupFunction(resource)
+
+		const result = fn("welcome", {})
+
+		expect(result).toBe("Welcome, !")
+	})
+
 	test("it should return an empty string if key does not exist in resource", () => {
 		const fn = createLookupFunction(resource)
 
