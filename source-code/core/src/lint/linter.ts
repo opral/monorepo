@@ -6,16 +6,32 @@ import { createReportFunction } from "./report.js"
 const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
 
+/**
+ * Lints the given resources.
+ *
+ * The linted resources will be returned with lint information added to each node.
+ * The returned errors are unexpected errors that occurred during linting, not
+ * lint errors themselves.
+ *
+ * @example
+ *   const [lintedResources, errors] = await lint({ config, resources })
+ *   if (errors) {
+ *     // handle unexpected errors during the linting process.
+ *     // this errors are not lint errors themselves!
+ *   }
+ *   const lints = getLintReports(lintedResources, { options })
+ */
 export const lint = async (args: {
 	config: Pick<Config, "lint" | "languages" | "referenceLanguage">
 	resources: ast.Resource[]
-}): Promise<LintedResource[]> => {
+}): Promise<[lintedResources: LintedResource[], errors?: Error[]]> => {
 	const { referenceLanguage, languages, lint } = args.config
 	const resources = structuredClone(args.resources)
 	if (lint === undefined || lint.rules.length === 0) {
-		return args.resources
+		return [args.resources, []]
 	}
 	const reference = getResourceForLanguage(resources, referenceLanguage)
+	const errors: Error[] = []
 
 	await Promise.all(
 		lint.rules.flat().map((rule) =>
@@ -25,11 +41,13 @@ export const lint = async (args: {
 				languages,
 				reference,
 				resources,
-			}).catch((e) => console.error(`Unexpected error in lint rule '${rule.id}':`, e)),
+			}).catch((e) =>
+				errors.push(new Error(`Unexpected error in lint rule '${rule.id}'`, { cause: e })),
+			),
 		),
 	)
 
-	return resources as LintedResource[]
+	return [resources as LintedResource[], errors.length > 0 ? errors : undefined]
 }
 
 const processLintRule = async (args: {

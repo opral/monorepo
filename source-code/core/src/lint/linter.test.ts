@@ -66,9 +66,25 @@ describe("lint", async () => {
 				},
 			},
 		}))
-		const result = await doLint([rule("error")], [cloned])
+		const [result] = await doLint([rule("error")], [cloned])
 		expect(cloned).toStrictEqual(referenceResource)
 		expect(result).not.toStrictEqual(cloned)
+	})
+
+	test("it should not abort the linting process when errors occur", async () => {
+		const cloned = structuredClone(referenceResource)
+		const rule = createLintRule({ id: "inlang.someError" }, () => ({
+			visitors: {
+				Resource: ({ target }) => {
+					if (target) {
+						throw new Error("Error")
+					}
+				},
+			},
+		}))
+		const [, errors] = await doLint([rule("error")], [cloned])
+		expect(errors?.length).toBe(1)
+		expect(errors![0].message.includes("inlang.someError"))
 	})
 
 	describe("rules", async () => {
@@ -98,14 +114,14 @@ describe("lint", async () => {
 		test("should return the original resource if no rules are specified", async () => {
 			const resources = [referenceResource]
 
-			const result = await doLint([], resources)
+			const [result] = await doLint([], resources)
 
 			expect(result).toEqual(resources)
 		})
 
 		test("should process all 'Resources'", async () => {
 			const resources = [referenceResource, targetResource]
-			const result = await doLint([errorRule], resources)
+			const [result] = await doLint([errorRule], resources)
 
 			expect(result).toMatchObject(resources)
 			expect(visitorErrorPatternFn).toHaveBeenCalledTimes(2)
@@ -113,7 +129,7 @@ describe("lint", async () => {
 
 		test("should process all 'Resources' for all rules", async () => {
 			const resources = [referenceResource, targetResource]
-			const result = await doLint([errorRule, warnRule], resources)
+			const [result] = await doLint([errorRule, warnRule], resources)
 
 			expect(result).toMatchObject(resources)
 			expect(visitorErrorPatternFn).toHaveBeenCalledTimes(2)
