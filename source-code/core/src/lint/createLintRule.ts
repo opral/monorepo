@@ -4,17 +4,40 @@ import type { LintRule } from "./rule.js"
  * A utility function to create a lint rule.
  *
  * @example
- * const myRule = createLintRule({ id: "example.rule" }, async (args) => {
+ * const myRule = createLintRule({ id: "example.rule" }, (args) => {
  *   // Implement your rule logic here
  * });
+ *
+ * // using the rule
+ * myRule("error");
+ *
+ * // you can also pass settings to the rule
+ * const myRule2 = createLintRule<{ strict: boolean }>({ id: "example.rule" }, (args) => {
+ *   // Implement your rule logic here
+ * });
+ *
+ * // settings must be provided when using the rule
+ * myRule2("error", { strict: true });
  */
-export const createLintRule: CreateLintRuleFunction = (args, setup) => {
+export const createLintRule = <Settings extends object | undefined = undefined>(
+	args: { id: LintRule["id"] },
+	setup: (
+		args: Parameters<LintRule["setup"]>[0] & {
+			settings: Settings
+		},
+	) => ReturnType<LintRule["setup"]>,
+): ConfigureLintRuleFunction<Settings> => {
 	const { id } = args
 
-	const configureLintRule: ConfigureLintRuleFunction = (level, settings) => {
+	// @ts-expect-error
+	// The settings being dynamically added to the args does not play nicely with TypeScript.
+	// Given that the settings are optional and this is an implementation issue, we can ignore
+	// this error and avoid more complex types.
+	const configureLintRule: ConfigureLintRuleFunction<Settings> = (level, settings) => {
 		return {
 			id,
 			level,
+			// @ts-expect-error
 			setup: (args) => setup({ ...args, settings }),
 		}
 	}
@@ -23,27 +46,11 @@ export const createLintRule: CreateLintRuleFunction = (args, setup) => {
 }
 
 /**
- * Type for the function that creates a lint rule.
- * @example
- * const createLintRule: CreateLintRuleFunction = (args, fn) => {
- *   // Implement the lint rule creation logic
- * };
- */
-type CreateLintRuleFunction = (
-	args: { id: LintRule["id"] },
-	setup: (
-		args: Parameters<LintRule["setup"]>[0] & {
-			settings: any
-		},
-	) => ReturnType<LintRule["setup"]>,
-) => ConfigureLintRuleFunction
-
-/**
  * Type for the function that configures a lint rule.
- *
- * @example
- * const configureLintRule: ConfigureLintRuleFunction = (level, settings) => {
- *   // Implement the lint rule configuration logic
- * };
  */
-type ConfigureLintRuleFunction = (level: LintRule["level"], settings?: any) => LintRule
+type ConfigureLintRuleFunction<Settings extends object | undefined = undefined> =
+	Settings extends undefined
+		? // If settings are not defined, the function only takes a level
+		  (level: LintRule["level"]) => LintRule
+		: // Else, the function takes a level and settings
+		  (level: LintRule["level"], settings: Settings) => LintRule

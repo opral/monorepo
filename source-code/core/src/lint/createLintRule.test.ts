@@ -36,7 +36,7 @@ test("createLintRule configures lint rule with correct visitors", async () => {
 			},
 		}
 	})
-	const rule = myRule("error", {})
+	const rule = myRule("error")
 	const { visitors } = await rule.setup({
 		report: () => {},
 		config: { referenceLanguage: "en", languages: ["en", "de"] },
@@ -52,7 +52,7 @@ test("createLintRule should accept an async setup function", async () => {
 			},
 		}
 	})
-	const rule = myRule("error", {})
+	const rule = myRule("error")
 	expect(typeof rule.setup).toBe("function")
 	const { visitors } = await rule.setup({
 		report: () => {},
