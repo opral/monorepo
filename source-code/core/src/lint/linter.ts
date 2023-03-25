@@ -1,6 +1,6 @@
 import type { Config } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
-import type { LintedResource, LintRule, Visitors } from "./types.js"
+import type { LintedResource, LintRule, Visitors } from "./rule.js"
 import { createReportFunction } from "./report.js"
 
 const getResourceForLanguage = (resources: ast.Resource[], language: string) =>

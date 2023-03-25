@@ -1,4 +1,4 @@
-import type { LintableNode, LintReport, LintRule, NodeWithLints } from "./types.js"
+import type { LintableNode, LintReport, LintRule, LintedNode } from "./rule.js"
 
 /**
  * Creates a function that can be used to report lint issues.
@@ -8,7 +8,7 @@ export const createReportFunction = (_args: { id: LintRule["id"]; level: LintRul
 		if (!args.node) return
 
 		args.node.lint = [
-			...((args.node as NodeWithLints).lint ?? []),
+			...((args.node as LintedNode).lint ?? []),
 			{
 				id: _args.id,
 				level: _args.level,
