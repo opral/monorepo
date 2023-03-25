@@ -1,0 +1,21 @@
+{
+	"name": "@inlang/sdk-js",
+	"type": "module",
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "npm run tsc:watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc && vitest",
+		"tsc": "tsc --noEmit",
+		"tsc:watch": "tsc --noEmit --watch",
+		"vitest": "vitest run --passWithNoTests --coverage",
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/sdk-js",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/sdk-js",
+		"format": "cd ../.. && npm run format:base ./source-code/sdk-js",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/sdk-js",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	}
+}

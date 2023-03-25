@@ -8,6 +8,7 @@ RFC stands for _request for comments_. RFCs are written proposals that seek feed
 
 **RFC's**
 
+- [RFC-004 JavaScript SDK](sdk-js/RFC.md)
 - [RFC-003 `@inlang/core/lint`](@inlang_core_lint/RFC.md)
 - [RFC-002 Tech Stack](tech-stack/RFC.md)
 - [RFC-001 Core Architecture](core-architecture/RFC.md)
