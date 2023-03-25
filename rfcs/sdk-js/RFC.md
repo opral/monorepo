@@ -79,21 +79,10 @@ The lookup function will be the only thing that a developer needs to add to the 
 
 The SDK will provide that function as the default export, so anyone can name it however he wants. We can also export some common aliases so users get useful auto-import capabilities from the IDE.
 
-```ts
-const lookupFunction = (key: string) => ""
-
-export default lookupFunction
-
-export const i18n = lookupFunction
-export const t = lookupFunction
-export const l = lookupFunction
-export const $ = lookupFunction // will not work well together with Svelte
-```
-
 This lookup function needs to be called with an `Id` e.g. like this:
 
 ```ts
-i18n("welcome", { name: "Inlang" })
+i("welcome", { name: "Inlang" })
 ```
 
 ### alternate links
@@ -135,15 +124,15 @@ There are many ways how to detect the language that should be used:
   - get language information from the user object stored in DB
   - custom; some things we didn't think of
 
+We can find better names for those strategies once we implement them.
+
 There is the need to support multiple strategies. If the first one does not match, the next strategies will be tried until a match is found. If nothing matches, the `referenceLanguage` will be used.
 
 Setting up auto detection is optional. Developers can also just call the `changeLanguage` function directly.
 
 Each strategy will need a special framework agnostic implementation, to pass the necessary information to those detection functions.
 
-For the first version we probably won't need all of the strategies.
-
-> What detection strategies do we want to support?
+For the first version we probably won't need all of the strategies. We will implement `rootSlug`, `acceptLanguageHeader` and `navigator` to cover a majority of use cases.
 
 #### config structure
 
@@ -181,8 +170,6 @@ The adapter should also warn if something was not configured correctly. Such thi
 - if the config is invalid e.g. has unknown options
 - if there are incompatible configurations e.g. adapter static with cookies as detection strategy
 - missing `%lang%` placeholder in template
-- missing `server.hooks.ts` file (I'm not sure if we can inject code without the file being actually present on disk)
-  > TODO: check this; maybe we can write it into the `.svelte-kit` folder?
 
 ## Structure
 
@@ -530,13 +517,15 @@ An adapter will also export those wrapper functions. If someone does not trust t
 
 Those wrapper functions will be written in pure `JavaScript` annotated with `JsDoc` so no transpilation is needed.
 
+If some file is not present on the filesystem we need to do something similar to this: https://github.com/HoudiniGraphql/houdini/blob/961b062f395db2eab33a57053bc8314d330cf30d/packages/houdini-svelte/src/plugin/fsPatch.ts
+
 ### @sveltejs/adapter-static
 
 Svelte also offers the option to prerender an application and generate a static output. A few options will not make sense (e.g. `AcceptLanguage` header detection) and we should detect them and output an error. We can detect a static output by looking for `export const prerender = false` in the `routes/+layout(.*).ts` file.
 
 ## Next steps
 
-- [ ] agree on RFC and scope of first version
+- [x] agree on RFC and scope of first version
 - [ ] implement basic runtime functionality
 - [ ] write wrapper functions/components for the necessary injection points
 - [ ] create the plugin that automatically injects wrapper functions
