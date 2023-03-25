@@ -30,7 +30,16 @@ const resource = {
 				type: "Pattern",
 				elements: [
 					{ type: "Text", value: "Welcome, " },
-					{ type: "Variable", id: { type: "Identifier", name: "name" } },
+					{
+						type: "Placeholder",
+						placeholder: {
+							type: "Expression",
+							expression: {
+								type: "Variable",
+								name: "name",
+							},
+						},
+					},
 					{ type: "Text", value: "!" },
 				],
 			},

@@ -7,6 +7,8 @@ export type NodeName =
 	| "Pattern"
 	| "Text"
 	| "LanguageTag"
+	| "Placeholder"
+	| "Expression"
 	| "Variable"
 
 /**
@@ -50,7 +52,7 @@ type Node<
 /**
  * An identifier.
  *
- * Some Nodes have Identifiers such as a Resource or Message.
+ * Some Nodes have Identifiers such as a Message.
  */
 export type Identifier<Extension extends ExtensionInformation = ExtensionInformation> = Node<
 	"Identifier",
@@ -102,17 +104,25 @@ export type Text<Extension extends ExtensionInformation = ExtensionInformation> 
 	value: string
 }
 
-export type Placeholder<Extension extends ExtensionInformation = ExtensionInformation> =
-	Expression<Extension>
+export type Placeholder<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"Placeholder",
+	Extension
+> & {
+	placeholder: Expression<Extension>
+}
 
-export type Expression<Extension extends ExtensionInformation = ExtensionInformation> =
-	Variable<Extension>
+export type Expression<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"Expression",
+	Extension
+> & {
+	expression: Variable<Extension>
+}
 
 export type Variable<Extension extends ExtensionInformation = ExtensionInformation> = Node<
 	"Variable",
 	Extension
 > & {
-	id: Identifier
+	name: string
 }
 
 /**
