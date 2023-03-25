@@ -5,7 +5,8 @@
 		// DOM because of fetch. TODO: extract fetch from this package and
 		// let fetch be provided by the environment.
 		"lib": ["ESNext", "DOM"],
-		"types": [],
+		// need to specify node because `$fs` has a node type dependency
+		"types": ["node"],
 		"outDir": "./dist",
 		"rootDir": "./src"
 	}
