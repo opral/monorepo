@@ -282,22 +282,39 @@ There is also option to run [without a web worker](https://github.com/petersalom
 
 It would be idealy if the Git SDK package adapted to either case of running in browser or running in node smartly. There might be further complication issues with running things in a web worker, such as how to achieve full reactivity on the client side with ability to periodically pull and persist changes made to git. With web workers, that would have to be done through messages. But that doesn't mean it would be impossible to build out.
 
-> WASM approach is being explored here at the moment: https://github.com/nikitavoloboev/git-sdk
+## Running code
 
-> Issues with WASM were trying to bundle/use WASM file with rollup. It bundles well but when trying to use it from a vite project, it complains .wasm can't run. Perhaps Vite plugin is needed or change to rollup config.
+### WASM
 
-> JS version is implementing wire protocol 2 in isomorphic git
+WASM approach is being explored [here](https://github.com/nikitavoloboev/git-sdk) at the moment.
 
-> Then with it, implment `filter` to request bare minimum from git server using `fetch-pack`
+Issues with WASM were trying to bundle/use WASM file with rollup. It bundles well but when trying to use it from a vite project, it complains .wasm can't run. Perhaps Vite plugin is needed or change to rollup config.
 
-> then can implement `checkout` or adopt / make new command to get bare repo with the checked out file requested already in 1 request
+### JS
 
-> This approach is tested on a branch here:
+Extending Isomorphic Git to achieve above stated goals is currently being explored on fork of isomorphic-git [in a branch](https://github.com/nikitavoloboev/isomorphic-git/tree/partial-clone).
 
-> https://github.com/nikitavoloboev/isomorphic-git/tree/partial-clone
+First task is to implement partial clones with ability to checkout specific files/folders, ideally in one http connection to git remote.
 
-> Currently the work is done by going through `fetch.js` and running `jest __tests__/test-fetch.js`
+For that git wire protocol 2 needs to be implemented as it contains ability to use `filter` to request the bare minimium needed from the git server.
 
-> New code is being written into `modern/test.ts` in typescript and using es module imports for all
+How fetch for git objects is done:
 
-> What is needed for protocol 2: https://git-scm.com/docs/protocol-v2
+1. `git fetch` is executed on the local repository.
+2. `fetch-pack` is invoked, which establishes a connection to the remote repository.
+3. `fetch-pack` sends a request containing the commit hashes it wants to retrieve.
+4. On the remote repository, `upload-pack` receives the request and gathers the requested objects.
+5. `upload-pack` sends the objects in a packfile back to the `fetch-pack` command.
+6. `fetch-pack` stores the received objects in the local repository, updating the local object database.
+
+There is a way to request for certain checked out files too. Need to know what `fetch-pack` sends when you do something like this in git:
+
+```
+git config core.sparseCheckout true
+echo "package.json" >> .git/info/sparse-checkout
+git checkout
+```
+
+> p.s. first version for answers on this RFC covered a lot of implementation details over answering high level questions of this RFC
+
+> this has since been moved here https://wiki.nikiv.dev/notes/git-notes as it was out of scope. most contains useful details about explorations with iso git / libgit2
