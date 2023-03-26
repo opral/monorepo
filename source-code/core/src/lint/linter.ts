@@ -84,8 +84,6 @@ type ProcessNodeFunction<Node> = (args: {
 const shouldProcessResourceChildren = (visitors: Visitors) =>
 	!!visitors.Message || shouldProcessMessageChildren(visitors)
 
-// TODO: test passing `undefined` for reference
-
 const processResource: ProcessNodeFunction<ast.Resource> = async ({
 	visitors,
 	target,
