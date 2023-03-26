@@ -122,7 +122,7 @@ The `createLintRule` expects 2 parameters.
 
      ```ts
      visitors: {
-       Resource: ({ referece, target }) => { /* implementation */ },
+       Resource: ({ reference, target }) => { /* implementation */ },
        Message: ({ reference, target }) => { /* implementation */ },
        Pattern: ({ reference, target }) => { /* implementation */ }
      }
