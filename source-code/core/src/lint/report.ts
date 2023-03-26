@@ -8,11 +8,13 @@ export const createReportFunction = (_args: { id: LintRule["id"]; level: LintRul
 		if (!args.node) return
 
 		args.node.lint = [
+			// copy existing lint reports
 			...((args.node as LintedNode).lint ?? []),
+			// add the new lint report to the node
 			{
 				id: _args.id,
 				level: _args.level,
-				...args,
+				message: args.message,
 			} satisfies LintReport,
 		]
 	}
