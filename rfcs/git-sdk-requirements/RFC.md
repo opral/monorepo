@@ -45,9 +45,11 @@ isomorphic-git already runs in both browser and node environments which covers e
 
 #### WASM
 
-Currently when wasm-git is compiled it outputs `lg2.html`, `lg2.js` and `lg2.wasm` files. The `.js` file holds the file system and interface for calling into libgit2 wasm. It saves results into [Emscripten FS](https://emscripten.org/docs/api_reference/Filesystem-API.html).
+In short, libgit2 when compiled to wasm with [Emscripten](https://emscripten.org/) creates 3 files: `lg2.html`, `lg2.js` and `lg2.wasm` (~ 833 KB).
 
-Below is example of cloning a git repo into virtual file system ([MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs)):
+The `lg2.js` file includes [Emscripten File Sytem](https://emscripten.org/docs/api_reference/Filesystem-API.html) with already configured bindings to call into `lg2.wasm` and save results in the file system.
+
+Below is example of cloning a git repo into virtual in-memory file system ([MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs)):
 
 ```js
 FS.mkdir("/")
@@ -57,29 +59,33 @@ libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
 FS.chdir("inlang")
 ```
 
-As in git-sdk, the file system is to be provided for, the resulting `lg2.js` should be changed to instead of using wasm-integrated Emscripten FS, it should use passed in to git-sdk file system.
+This virtual file system can run in both browser and node environments.
 
-`lg2.js` needs to be adapted to accomodate this.
+##### What to do when users provide file system as argument?
 
-Inlang can also expose a package like [memfs](https://github.com/streamich/memfs) that would provide the FS that can be mounted and passed as argument. It can be Emscripten FS like so not many changes need to be made on wasm integration side.
+The code in `lg2.js` should be changed to instead of using wasm-integrated Emscripten FS, it uses passed in file system.
+
+Inlang can also expose a package like [memfs](https://github.com/streamich/memfs) that would provide [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) like file system that users can pass as argument to git-sdk.
 
 Emscripten MEMFS can run in both browser and node environments.
 
-When deployed the wasm can run either in a [browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker) or [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries).
+##### Running GitSDK WASM in Browser (web worker)
 
-##### Running WASM in web worker
-
-If run in web worker, all git operations won't be blocking the main JS thread. If ran in a web worker, it would make sense to run most or all git or FS logic in the web worker too. Otherwise you would need to do message passing to sync the file system between the web worker JS and browser main thread JS.
+If [run in web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries), all git operations won't be blocking the main JS thread. If ran in a web worker, it would make sense to run most or all git or FS logic in the web worker too. Otherwise you would need to do message passing to sync the file system between the web worker JS and browser main thread JS.
 
 It's unclear if everything that Inlang wants to do with Git and file system can be run inside a web worker as web worker environment is a bit different to regular browser.
 
-##### Running WASM in browser
+##### Running GitSDK WASM in browser
 
-Alternatively you can run everything in a browser and make async requests to `lg2.wasm` by passing the required commands.
+Alternatively you can run everything [in a browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker) and make async requests to `lg2.wasm` by passing the required commands.
 
 Both web worker and browser approach is being explored [here](https://github.com/nikitavoloboev/git-sdk).
 
 Currenty issues are with bundling/using WASM + calling WASM with a web worker. It bundles well in `dist` but when trying to use it from a vite project, there are issues in making calls to web worker.
+
+##### Running GitSDK WASM in Node
+
+Whilst [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) can be used inside node environments, there is also [NODEFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#nodefs) file system that can only run in Node.
 
 ### Client-side implementation [High Confidence]
 
