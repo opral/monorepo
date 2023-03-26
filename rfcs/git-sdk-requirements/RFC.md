@@ -376,3 +376,11 @@ Only the actual git related commands are done in WASM. By sending messages to li
 > Fork vs. Patch Workflow
 
 > Git-sdk should be designed to support both major Git workflows: patch/send-email (Linux, git, sourcehut), as well as fork/PR (GitHub, GitLab, Bitbucket). For this reason our sdk should also include functionality to generate and apply patches, which can then be used with these workflows
+
+For optimal performance at least in the browser, you would need to do the first fetch of git objects from remote in JS. libgit2 in wasm is 833 KB and you would need to load that before even starting a connection to git remote to fetch for git objects.
+
+If there are issues in performance in JS implementation such as indexing packfiles, checkout or serializing/deserializing lots of data, this part can be written in WASM.
+
+One thing to note is that WebAssembly only supports numeric types like integers and floats so git objects to be worked with must be serialized before being passed to WASM to do expensive computational work.
+
+The loading of WASM module for doing potential expensive work should be of no issue as it can be fetched in parallel as all other git objects get fetched via `git clone`.
