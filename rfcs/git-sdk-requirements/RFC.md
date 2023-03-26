@@ -29,11 +29,57 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 
 ## Requirements
 
+> Anything using `> ` syntax is taken from @araknast great RFC answers: https://gist.github.com/araknast/2308fa58e49112ff112c415f4fb7531a
+
+> To be merged together into 1 RFC
+
 ### Not coupled to the browser [High Confidence]
 
 The git-sdk must run on the server, in a VSCode extension, in CI/CD, in the browser. In short, everywhere.
 
 The model to run the git-sdk everywhere is simple: have a filesystem. All environments except for the browser have a filesystem concept. Thus, we need to build a filesystem implementation for the browser.
+
+#### JS
+
+isomorphic-git already runs in both browser and node environments which covers everything.
+
+#### WASM
+
+Currently when wasm-git is compiled it outputs `lg2.html`, `lg2.js` and `lg2.wasm` files. The `.js` file holds the file system and interface for calling into libgit2 wasm. It saves results into [Emscripten FS](https://emscripten.org/docs/api_reference/Filesystem-API.html).
+
+Below is example of cloning a git repo into virtual file system ([MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs)):
+
+```js
+FS.mkdir("/")
+FS.mount(MEMFS, {}, "/")
+FS.chdir("/")
+libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
+FS.chdir("inlang")
+```
+
+As in git-sdk, the file system is to be provided for, the resulting `lg2.js` should be changed to instead of using wasm-integrated Emscripten FS, it should use passed in to git-sdk file system.
+
+`lg2.js` needs to be adapted to accomodate this.
+
+Inlang can also expose a package like [memfs](https://github.com/streamich/memfs) that would provide the FS that can be mounted and passed as argument. It can be Emscripten FS like so not many changes need to be made on wasm integration side.
+
+Emscripten MEMFS can run in both browser and node environments.
+
+When deployed the wasm can run either in a [browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker) or [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries).
+
+##### Running WASM in web worker
+
+If run in web worker, all git operations won't be blocking the main JS thread. If ran in a web worker, it would make sense to run most or all git or FS logic in the web worker too. Otherwise you would need to do message passing to sync the file system between the web worker JS and browser main thread JS.
+
+It's unclear if everything that Inlang wants to do with Git and file system can be run inside a web worker as web worker environment is a bit different to regular browser.
+
+##### Running WASM in browser
+
+Alternatively you can run everything in a browser and make async requests to `lg2.wasm` by passing the required commands.
+
+Both web worker and browser approach is being explored [here](https://github.com/nikitavoloboev/git-sdk).
+
+Currenty issues are with bundling/using WASM + calling WASM with a web worker. It bundles well in `dist` but when trying to use it from a vite project, there are issues in making calls to web worker.
 
 ### Client-side implementation [High Confidence]
 
@@ -60,6 +106,55 @@ const commitHistory = await history("/README.md", fs)
 // lazy fetches xyz file
 const readme = await fs.readFile("/xyz.md")
 ```
+
+> Implementation
+
+> To resolve this, we exploit the functionality behind partial clones, namely the filter option to the fetch-pack wire command, and promisor pack files. We then use this to implement a sort of 'partial fetch' which, when combined with a pattern based sparse checkout, has the effect of fetching only the objects necessary to render the files we are using, and significantly speeding up the cloning process.
+
+> Abstraction
+
+> To make this easier for the end user, we can expose this functionality as a lazy loading filesystem which functions exactly the same as a normal filesystem, except in its implementation of readFile().
+
+> The only modification necessary to readFile() is a hook at the very beginning which calls checkout on the current file before it is opened. Once promisor packfiles are implemented, this will handle the fetching and unpacking of the corresponding object in a way that is completely transparent to the end user.
+
+#### JS
+
+Isomorphic Git can now, only do shallow clones using `depth=1`. This however still fetches:
+
+1. latest commit for each branch
+2. working tree files (files associated with latest commit for each branch)
+3. branch and tag references
+
+To achieve lazy loading and only fetching things as they are needed, you neeed to add git wire protocol version 2 support, together with `filter`, `fetch-pack` wire command.
+
+How fetch for git objects is done:
+
+1. `git fetch` is executed on the local repository.
+2. `fetch-pack` is invoked, which establishes a connection to the remote repository.
+3. `fetch-pack` sends a request containing the commit hashes it wants to retrieve.
+4. On the remote repository, `upload-pack` receives the request and gathers the requested objects.
+5. `upload-pack` sends the objects in a packfile back to the `fetch-pack` command.
+6. `fetch-pack` stores the received objects in the local repository, updating the local object database.
+
+Adding `filter` would allow for fetching partially contents of the git server using promisor pack files.
+
+There is a way to request for certain checked out files too. Need to know what `fetch-pack` sends when you do something like this in git:
+
+```
+git config core.sparseCheckout true
+echo "package.json" >> .git/info/sparse-checkout
+git checkout
+```
+
+You can also combine clone + getting the git objects for blobs in the files/folders to checkout into 1 http request. And expose it as an API in Git SDK `cloneWithCheckout()` or similar API.
+
+Extending Isomorphic Git to achieve lazy loading is currently being explored [in a fork](https://github.com/nikitavoloboev/isomorphic-git/tree/partial-clone).
+
+#### WASM
+
+libgit2 supports [filter](https://libgit2.org/libgit2/#v0.20.0/group/filter). There is [unmerged PR for trying to add partial clones](https://github.com/libgit2/libgit2/pull/5993).
+
+There is also [open pr with sparse-checkout](https://github.com/libgit2/libgit2/pull/6394), not yet merged.
 
 ### Must be git compatible [High Confidence]
 
@@ -101,11 +196,82 @@ syncFork()
 openPullRequest()
 ```
 
+#### JS
+
+Current isomorphic-git API [here](https://isomorphic-git.org/docs/en/alphabetic).
+
+```js
+clone() // ✅ https://isomorphic-git.org/docs/en/clone
+shallowClone() // ❎ need wire protocol 2 + filter support
+commit() // ✅ https://isomorphic-git.org/docs/en/commit
+push() // ✅ https://isomorphic-git.org/docs/en/push
+pull() // ✅ https://isomorphic-git.org/docs/en/pull
+sparseCheckout() // ❎ need wire protocol 2 + filter support
+
+currentBranch() // ✅ https://isomorphic-git.org/docs/en/currentBranch
+createBranch() // ✅ https://isomorphic-git.org/docs/en/branch
+renameBranch() // ✅ https://isomorphic-git.org/docs/en/renameBranch
+switchBranch() // ✅ https://isomorphic-git.org/docs/en/checkout.html
+deleteBranch() // ✅ https://isomorphic-git.org/docs/en/deleteBranch
+
+unstagedChanges() // ❓
+uncommittedChanges() // ❓
+unpushedChanges() // ❓
+
+signIn()
+signOut()
+createFork()
+syncFork()
+openPullRequest()
+```
+
+#### WASM
+
+API of libgit2 is [here](https://libgit2.org/libgit2/#HEAD).
+
+```js
+clone() // ✅ https://libgit2.org/docs/guides/101-samples/#repositories_clone_simple
+shallowClone() // ❓ part of clone, there is open pr for it but it may not be as shallow as we need it, new code must be written
+commit() // ✅ https://libgit2.org/docs/guides/101-samples/#commits
+push() // ✅ https://stackoverflow.com/questions/28055919/how-to-push-with-libgit2
+pull() // ✅ https://stackoverflow.com/questions/39651287/doing-a-git-pull-with-libgit2
+sparseCheckout() // ❓ https://github.com/libgit2/libgit2/issues/2263 (open pr, need to build, test)
+
+currentBranch() // ✅ https://stackoverflow.com/questions/12132862/how-do-i-get-the-name-of-the-current-branch-in-libgit2
+createBranch() // ✅ https://libgit2.org/libgit2/#HEAD/group/branch/git_branch_create
+renameBranch() // ✅ https://libgit2.org/libgit2/#v0.17.0/group/branch
+switchBranch() // ✅ https://stackoverflow.com/questions/46757991/checkout-branch-with-libgit2
+deleteBranch() // ✅ https://libgit2.org/libgit2/#v0.17.0/group/branch/git_branch_delete
+
+// (3 API different "changes" concepts...)
+unstagedChanges() // ❓
+uncommittedChanges() // ❓
+unpushedChanges() // ✅ https://stackoverflow.com/questions/42131934/get-unpushed-commits-with-libgit2
+
+signIn()
+signOut()
+createFork()
+syncFork()
+openPullRequest()
+```
+
 ### (Future) File-based auth [High Confidence | Server-related ]
 
 Supporting features like file-based auth will require a custom git server. Translators are not supposed to have access to the entire source code if they only use a few resource (translation) files. Discussion is ongoing in [https://github.com/inlang/inlang/discussions/153](https://github.com/inlang/inlang/discussions/153).
 
 File-based auth seems to go hand-in-hand with “lazy cloning”. The server would only allow to clone files that the actor has access to.
+
+> Implementation
+
+> The simplest way to implement this while maintaining compatibility with Git is to have a modified version of the Git server which allows users the option to authenticate. Each object stored on the server is access controlled, and the server will refuse to serve objects to users who do not have permission, i.e. those objects will not be included in the packfiles sent to the user
+
+> Issues
+
+> First, users who are not aware of this system will receive what looks like a corrupt repo when they attempt to clone a repo for which they do not have permission to access all the objects. In order for this to work properly it is necessary for the user to run a partial clone of only the files they have access to (or use the lazy fs).
+
+> Second, because tree objects contain the name, mode and hash of the files they reference, these attributes will potentially be visible to users even if they don't have permission to access the file (as long as they have access to the parent tree).
+
+> If this approach is taken, these issues should be made clear in the documentation.
 
 ### (Future) Real-time collaboration [High Confidence]
 
@@ -115,9 +281,27 @@ The editor requires real-time collaboration. We don’t know how we are going to
 
 Having real-time collaboration in a branch combines Google Docs style collaboration with software engineering collaboration.
 
+> In my opinion this is best done on the frontend with something like Operational Transform, not Git for performance reasons. Once the a files edits have been resolved it can be committed normally to the repo (potentially noting the multiple contributors).
+
 ### (Future) Support for large files out of the box [Medium Confidence]
 
 The git-sdk would need something like Git Large File Storage [https://git-lfs.com/](https://git-lfs.com/) built-in. Localization affects media files as well. Support for large files seems to go hand-in-hand with with lazy cloning i.e. the penalty of storing large files .
+
+> Implementation
+
+> All that is necessary for Git to manage these files is a hook when staging to convert the file to multiple Git objects, and a hook when checking out to convert multiple Git objects back to their corresponding binary format. Similar hooks exists in the form of the clean and smudge hooks, however these have files as both their input and outputs. Our implementation would be more powerful in that it would allow for 'cleaning' a file into multiple Git objects, and 'smudging' multiple Git objects into a single file.
+
+> Finally, in order for the diffs between these binary files to be presentable to the user, we will need allow the end user to define their own 'diff' implementation to support various file types.
+
+#### JS
+
+Isomorphic git [does not officially support it](https://github.com/isomorphic-git/isomorphic-git/issues/1375).
+
+But there is [LFS compatibility layer for iso-git](https://github.com/riboseinc/isogit-lfs). Explained [here](https://github.com/extrawurst/gitui/discussions/1089#discussioncomment-4858642).
+
+#### WASM
+
+libgit2 team refers to using [filters API](https://libgit2.org/libgit2/#v0.20.0/group/filter) to [achieve git lfs support](https://github.com/libgit2/libgit2sharp/issues/1236). There is no official API for Git LFS.
 
 ### (Future) Plugin system to support different files [Medium Confidence]
 
@@ -125,7 +309,17 @@ A plugin system could enable storing files like SQLite, Jupyter Notebooks, or bi
 
 Storing certain files in git is problematic because git uses a diffing algorithm that is suited for text files (code) but unsuited for other file formats. Having a plugin system where plugins can define the diffing algorithm for different file formats like `.ipynb` or `.sqlite` could enable a variety of new use cases.
 
-# Comparing JS architecture vs WebAssembly
+#### JS
+
+All git operations and file system is in JS. Plugins can be implemented as importable JS functions and follow some specification of inputs / outputs.
+
+#### WASM
+
+Similar to JS version, plugins can be implemented as importable JS functions and follow some specification of inputs / outputs.
+
+Only the actual git related commands are done in WASM. By sending messages to libgit2 wasm and getting back results.
+
+## Comparing JS architecture vs WebAssembly
 
 - Does a JS implementation (forked from isomomorphic git) suit our needs of faster iteration speeds better than a WebAssembly implementation?
 - Is a JS implementation fast enough?
@@ -133,188 +327,48 @@ Storing certain files in git is problematic because git uses a diffing algorithm
 - State management differences (syncing file systems etc.)?
 - Ease of debugging (for faster iteration speeds). A pure JS implementation is straightforward to debug.
 
-# Comparing JS vs WebAssembly in solving goals stated above
+# Summary and Roadmap
 
-## Adding folder for storing metadata (no modification to git itself)
+> To summarize, I propose git-sdk should implement the following features:
 
-The problem of storing generalized metadata will be present across all git based apps.
+> 1. Standard Git commands for interacting with repositories
+> 2. Lazy loading based on fetch-pack filtering and promisor packfiles
+> 3. Lightweight file-based authentication built on top of the existing Git protocol
+> 4. More powerful implementations of the smudge and clean hooks, as well diff providers to support version controlling diverse filetypes
 
-In Inlang, there is currently [no ability to track which translations were machine translated](https://github.com/inlang/inlang/discussions/462).
+> While I propose we continue to use isomorphic-git when implementing this sdk, most of its features will be built on top of existing Git functionality, so our roadmap will look similar no matter which backend we go with
 
-One solution is to have a custom [folder for storing metadata](https://github.com/orgs/inlang/discussions/355). Metadata such as comments/images/ etc.
+> For isomorphic-git, the roadmap will look something as follows (note the difficulty assessments in square brackets):
 
-Assuming we decide to store all metadata in folder.
+> 1. Update isomorphic-git to support wire protocol v2 [medium]
+> 2. Implement support for promisor packfiles in isomorphic-git [medium-hard (?)]
+> 3. Implement partial cloning with a filter option to git.clone [easy]
+> 4. Abstract partial cloning into a lazy fs that is transparent to the user (git-sdk is born) [easy]
+> 5. Implement smudge, clean, and diff providers [easy]
+> 6. Create a custom server implementation for file based authentication [hard]
 
-We will cover the case of 'Modyfing git to become a proper backend' after.
+> If using libgit2, the roadmap would look somewhat similar:
 
-### JS
+> 1. Implement support for promisor packfiles in libgit2 [hard]
+> 2. Implement partial cloning with a filter option to git.clone [medium (?)]
+> 3. Abstract partial cloning into a lazy fs that is transparent to the user (git-sdk is born) [easy]
+> 4. Rewrite smudge, and clean implementations for libgit2 to support multiple object input and output [hard (?)]
+>    - This could be made easier if we handle this in git-sdk in a way that is transparent to libgit2, but we lose the performance benefits
+> 5. Create a custom server implementation for file based authentication [hard]
 
-You would be able to fetch the metadata folder via sparse-checkout clone. And read the metadata as it will be just files in a file system.
+> Note that [easy, medium, hard] denote the amount of work involved, not necessarily the difficulty of the problem, that difficulty is based on the assumption that the previous tasks have already been completed, and also that I am not very familiar with the libgit2 codebase, so my difficulty assessments may be incorrect
 
-Comitting/pushing files is trvial too. The only missing piece is adding sparse-checkout into isomorphic-git. All the remainder of git operations one would need to be able to work with a metadata folder should be covered already by existing featureset of isomorphic git.
+> Miscellaneous Notes
 
-Not tested yet, but it should hopefully respect `.gitignore` placed inside the metadata folder too, but if it doesn't it's trivial to add as a feature too.
+> Performance Issues in Isomorphic-git
 
-### WASM
+> The largest issue faced by the inlang editor in its current iteration using isomorphic-git is the time taken to clone large repositories. The cause of this is twofold
 
-Similar to Isomorphic Git, this would be trivial to add on top of libgit2 wasm.
+> 1. isomorphic-git is significantly slower in indexing packfiles sent from the remote than canonical git.
+> 2. the implementation of checkout in isomorphic-git suffers from a lack of optimization in determining which files to update. Where canonical Git evaluates the files in a single pass, isomorphic-git evaluates them in multiple passes causing considerable slowdown (see this comment and the comments in src/commands/checkout.js).
 
-You would sparse-checkout the folder with metadata. Only difference is that as it currently stands, you are forced to save results into [Emscripten FS](https://emscripten.org/docs/api_reference/Filesystem-API.html).
+> With considerable effort, this could potentially be improved, but at the moment it makes more sense to focus on optimizing the usage of our Git backed (partial clones, etc.) rather than the performance of the backend itself
 
-The way libgit2 works now as compiled through [wasm-git](https://github.com/petersalomonsen/wasm-git) is you get 1 .wasm file. And one .js file. The JS file contains the Emscripten FS and bindings to libgit2 git.
+> Fork vs. Patch Workflow
 
-[MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) is default in-memory file system mounted. Example code how that looks below:
-
-```js
-// clone inlang into MEMFS
-FS.mkdir("/")
-FS.mount(MEMFS, {}, "/")
-FS.chdir("/")
-libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
-FS.chdir("inlang")
-```
-
-There is also [NODEFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#nodefs) you can use for when git-sdk runs in Node.
-
-NODEFS uses native Node.js 'fs' module under the hood to access the host file system.
-
-One of stated goals of git sdk is it should run anywhere there is a file system. You provide the file system and git sdk does the rest.
-
-The interface of the file system provided by users to git sdk can be adapted to cover the API surface of MEMFS or NODEFS depending on the environment they are running git sdk in.
-
-Above was needed context to answer the question regarding adding support for the custom folder to hold metadata about repository.
-
-libgit2 supports the features needed to sparse-checkout the metadata folder and mount it into the file system. From then on, you can read/modify the contents of the files.
-
-## Modify git to become a proper backend
-
-Here is summary of [points made by Samuel on kinds of things one would need for git as a backend](https://github.com/orgs/inlang/discussions/355#discussioncomment-4875403). Let's go through each one and see how JS or WASM solutions compare in solving them.
-
-## Lazy loading of files
-
-### JS
-
-sparse-checkout is not implemented but can be added. Should be a mix of adapting code from [checkout](https://isomorphic-git.org/docs/en/checkout) and [fetch](https://isomorphic-git.org/docs/en/fetch) commands.
-
-### WASM
-
-There is [open pr](https://github.com/libgit2/libgit2/pull/6394) that has support for sparse-checkout. Should be compiled with wasm-git.
-
-There is also [open question about how to do just the bare minimum clone of a repo](https://stackoverflow.com/questions/75817315/how-to-do-git-clone-depth-1-sparse-no-checkout-filter-blobnone-in-lib) to do further sparse-checkout operation.
-
-## Storing binary data in git is possible by default (built-in git LFS)
-
-### JS
-
-Isomorphic git [does not officially support it](https://github.com/isomorphic-git/isomorphic-git/issues/1375).
-
-But there is [LFS compatibility layer for iso-git](https://github.com/riboseinc/isogit-lfs). Explained [here](https://github.com/extrawurst/gitui/discussions/1089#discussioncomment-4858642).
-
-### WASM
-
-libgit2 team refers to using [filters API](https://libgit2.org/libgit2/#v0.20.0/group/filter) to [achieve git lfs support](https://github.com/libgit2/libgit2sharp/issues/1236). There is no official API for Git LFS.
-
-## Not every change needs to be committed
-
-Should be solvable irregardless of WASM/JS solution chosen for Git. Just do all the non comittable work on top of the FS. And only commit changes you need.
-
-## Git provides real-time collaboration
-
-Should also be solvable irregardless of WASM/JS solution chosen for Git.
-
-You can build real-time collaboration features on top of the FS api. Using operational transforms or other tech.
-
-Only when you want to commit and persist the changes, would you talk to Git and there all required git features are supported.
-
-Conflict resolution can be built in JS side irregardless if actual git is implemented in JS or WASM.
-
-> Perhaps I am missing a case where you would actually need to change some core git behavior in order to make above work? I don't see it.
-
-## Built-in auth via auth as code
-
-From [comment](https://github.com/orgs/inlang/discussions/355#discussioncomment-4875403):
-
-> Apps don't need an auth layer anymore. organization can configure auth as they please and need. Potentially revolutionizing here as well. If that auth layer is also able to hook into databases like sqlite
-
-From [authorization and file-based security issue](https://github.com/orgs/inlang/discussions/153).
-
-> The editor clones a whole repository. Especially for private repositories, file-based access control is desired. A translator should only be able to clone translation relevant files
-
-> Implementing a custom git server with auth as code like https://www.osohq.com/ could enable the feature. The cumbersome authorization path, see (reversed) #303, could simultaneously be streamlined by leveraging such a git server as auth layer
-
-Assume that would mean, Git SDK would need a custom git server with certain rules for this to work.
-
-> TODO: need expanding, don't fully understand how that'd work. This would probably actually need changes made to git core potentially
-
-## Plugin system to support different files
-
-Plugins are mostl likely to be written in JS. Although there is option to [write plugins in wasm too](https://github.com/extism/extism) (not useful for our case).
-
-### JS
-
-Everything is already in JS and there is no need to call WASM. We have full control over all data structures to represent any kind of git related object we need.
-
-The plugins may potentially work in similar way to the way inlang config does plugins now.
-
-> TODO: need to read inlang config spec to say for sure
-
-### WASM
-
-For WASM, it would be similar to JS version. Only the actual git operations are done in WASM. But that should be okay as the plugins will most likely wrap around how/when you would call into git to do actual git operations. The rest can be built on top of the file system and fully in JS.
-
-libgit2 allows to get access to various git related metadata info to in some ways emulate parts of certain git operations in cases git sdk needs to do something complex and outside of scope of git.
-
-> Need examples of plugins that one can make. Perhaps some plugins would need to actually have access to git core to make the use cases work.
-
-## Git SDK must run in browser/server/everywhere
-
-### JS
-
-Isomorphic git already runs in both browser and node environments which covers everything.
-
-### WASM
-
-Node.js can run webassembly and there is NODEFS provided by Emscripten for cases of running the file system in node. So git sdk can take a node fs compatible file system and should work.
-
-For browsers, there is a way to run everything in a [web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries). To not do heavy work on the main thread in browser.
-
-There is also option to run [without a web worker](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker).
-
-It would be idealy if the Git SDK package adapted to either case of running in browser or running in node smartly. There might be further complication issues with running things in a web worker, such as how to achieve full reactivity on the client side with ability to periodically pull and persist changes made to git. With web workers, that would have to be done through messages. But that doesn't mean it would be impossible to build out.
-
-## Running code
-
-### WASM
-
-WASM approach is being explored [here](https://github.com/nikitavoloboev/git-sdk) at the moment.
-
-Issues with WASM were trying to bundle/use WASM file with rollup. It bundles well but when trying to use it from a vite project, it complains .wasm can't run. Perhaps Vite plugin is needed or change to rollup config.
-
-### JS
-
-Extending Isomorphic Git to achieve above stated goals is currently being explored on fork of isomorphic-git [in a branch](https://github.com/nikitavoloboev/isomorphic-git/tree/partial-clone).
-
-First task is to implement partial clones with ability to checkout specific files/folders, ideally in one http connection to git remote.
-
-For that git wire protocol 2 needs to be implemented as it contains ability to use `filter` to request the bare minimium needed from the git server.
-
-How fetch for git objects is done:
-
-1. `git fetch` is executed on the local repository.
-2. `fetch-pack` is invoked, which establishes a connection to the remote repository.
-3. `fetch-pack` sends a request containing the commit hashes it wants to retrieve.
-4. On the remote repository, `upload-pack` receives the request and gathers the requested objects.
-5. `upload-pack` sends the objects in a packfile back to the `fetch-pack` command.
-6. `fetch-pack` stores the received objects in the local repository, updating the local object database.
-
-There is a way to request for certain checked out files too. Need to know what `fetch-pack` sends when you do something like this in git:
-
-```
-git config core.sparseCheckout true
-echo "package.json" >> .git/info/sparse-checkout
-git checkout
-```
-
-> p.s. first version for answers on this RFC covered a lot of implementation details over answering high level questions of this RFC
-
-> this has since been moved here https://wiki.nikiv.dev/notes/git-notes as it was out of scope. most contains useful details about explorations with iso git / libgit2
+> Git-sdk should be designed to support both major Git workflows: patch/send-email (Linux, git, sourcehut), as well as fork/PR (GitHub, GitLab, Bitbucket). For this reason our sdk should also include functionality to generate and apply patches, which can then be used with these workflows
