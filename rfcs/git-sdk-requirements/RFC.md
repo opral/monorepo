@@ -45,9 +45,11 @@ isomorphic-git already runs in both browser and node environments which covers e
 
 #### WASM
 
-In short, libgit2 when compiled to wasm with [Emscripten](https://emscripten.org/) creates 3 files: `lg2.html`, `lg2.js` and `lg2.wasm` (~ 833 KB).
+libgit2 when compiled to wasm with [Emscripten](https://emscripten.org/) creates 3 files: `lg2.html`, `lg2.js` and `lg2.wasm` (~ 833 KB).
 
 The `lg2.js` file includes [Emscripten File Sytem](https://emscripten.org/docs/api_reference/Filesystem-API.html) with already configured bindings to call into `lg2.wasm` and save results in the file system.
+
+This virtual file system can run in both browser and node environments.
 
 Below is example of cloning a git repo into virtual in-memory file system ([MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs)):
 
@@ -58,8 +60,6 @@ FS.chdir("/")
 libgit.callMain(["clone", "https://github.com/inlang/inlang.git", "inlang"])
 FS.chdir("inlang")
 ```
-
-This virtual file system can run in both browser and node environments.
 
 ##### What to do when users provide file system as argument?
 
