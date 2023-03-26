@@ -47,11 +47,11 @@ isomorphic-git already runs in both browser and node environments which covers e
 
 libgit2 when compiled to wasm with [Emscripten](https://emscripten.org/) creates 3 files: `lg2.html`, `lg2.js` and `lg2.wasm` (~ 833 KB).
 
-The `lg2.js` file includes [Emscripten File Sytem](https://emscripten.org/docs/api_reference/Filesystem-API.html) with already configured bindings to call into `lg2.wasm` and save results in the file system.
+The `lg2.js` file includes [Emscripten File System](https://emscripten.org/docs/api_reference/Filesystem-API.html) with already configured bindings to call into `lg2.wasm` and save results in the file system.
 
-This virtual file system can run in both browser and node environments.
+By default [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) is used which is in-memory and thus run in both browser and node environments.
 
-Below is example of cloning a git repo into virtual in-memory file system ([MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs)):
+Example below is making `git clone` and saving results into mounted MEMFS.
 
 ```js
 FS.mkdir("/")
@@ -66,8 +66,6 @@ FS.chdir("inlang")
 The code in `lg2.js` should be changed to instead of using wasm-integrated Emscripten FS, it uses passed in file system.
 
 Inlang can also expose a package like [memfs](https://github.com/streamich/memfs) that would provide [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) like file system that users can pass as argument to git-sdk.
-
-Emscripten MEMFS can run in both browser and node environments.
 
 ##### Running GitSDK WASM in browser (web worker)
 
