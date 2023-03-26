@@ -250,13 +250,16 @@ rules: [
 
 ```ts
 // 1. create lint rule [Public API: Authoring rules]
-const missingMessageRule = createLintRule({ id: "inlang.missingMessage" }, ({ config, report }) => {
-	return visitors: {
-    Resource: ({ target } => {
-      report(target, { message: "Missing message" })
-    })
-	}
-})
+const missingMessageRule = createLintRule<{ strict: boolean }>({ id: "inlang.missingMessage" },
+  ({ config, report, settings }) => {
+	  return visitors: {
+      Resource: ({ target } => {
+				if (settings.strict){
+					report(target, { message: "Missing message" })
+				}
+      })
+	  }
+  })
 
 // 2. configure rule function [Public API: Using rules]
 rules: [
