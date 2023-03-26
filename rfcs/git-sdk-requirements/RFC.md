@@ -49,7 +49,7 @@ libgit2 when compiled to wasm with [Emscripten](https://emscripten.org/) creates
 
 The `lg2.js` file includes [Emscripten File System](https://emscripten.org/docs/api_reference/Filesystem-API.html) with already configured bindings to call into `lg2.wasm` and save results in the file system.
 
-By default [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) is used which is in-memory and thus run in both browser and node environments.
+By default [MEMFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#memfs) is used which is in-memory and thus runs in both browser and node environments.
 
 Example below is making `git clone` and saving results into mounted MEMFS.
 
@@ -69,9 +69,9 @@ Inlang can also expose a package like [memfs](https://github.com/streamich/memfs
 
 ##### Running GitSDK WASM in browser (web worker)
 
-If running git-sdk-wasm in [in web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries), all git/fs operations won't be blocking the main JS thread.
+If running git-sdk-wasm [in web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries), all git/fs operations won't be blocking the main JS thread.
 
-However as the file system must be synced via message passing between the web worker and browser js thread.
+However then the file system must be synced via message passing between the web worker and browser js thread.
 
 As we can't run all logic in a web worker as the file system must be exposed to users and not be abstracted, to avoid message passing syncing, there should be no web worker used.
 
