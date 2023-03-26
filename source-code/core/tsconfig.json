@@ -6,6 +6,7 @@
 		// let fetch be provided by the environment.
 		"lib": ["ESNext", "DOM"],
 		// need to specify node because `$fs` has a node type dependency
+		// TODO remove this dependency once a custom filesystem implementation exists
 		"types": ["node"],
 		"outDir": "./dist",
 		"rootDir": "./src"
