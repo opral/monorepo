@@ -69,19 +69,19 @@ Inlang can also expose a package like [memfs](https://github.com/streamich/memfs
 
 Emscripten MEMFS can run in both browser and node environments.
 
-##### Running GitSDK WASM in Browser (web worker)
+##### Running GitSDK WASM in browser (web worker)
 
-If [run in web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries), all git operations won't be blocking the main JS thread. If ran in a web worker, it would make sense to run most or all git or FS logic in the web worker too. Otherwise you would need to do message passing to sync the file system between the web worker JS and browser main thread JS.
+If running git-sdk-wasm in [in web worker](https://github.com/petersalomonsen/wasm-git#example-webworker-with-pre-built-binaries), all git/fs operations won't be blocking the main JS thread.
 
-It's unclear if everything that Inlang wants to do with Git and file system can be run inside a web worker as web worker environment is a bit different to regular browser.
+However as the file system must be synced via message passing between the web worker and browser js thread.
+
+As we can't run all logic in a web worker as the file system must be exposed to users and not be abstracted, to avoid message passing syncing, there should be no web worker used.
 
 ##### Running GitSDK WASM in browser
 
-Alternatively you can run everything [in a browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker) and make async requests to `lg2.wasm` by passing the required commands.
+You can instead run git-sdk [in a browser](https://github.com/petersalomonsen/wasm-git#use-in-browser-without-a-webworker). The package will be making async requests to `lg2.wasm` by passing the required commands.
 
-Both web worker and browser approach is being explored [here](https://github.com/nikitavoloboev/git-sdk).
-
-Currenty issues are with bundling/using WASM + calling WASM with a web worker. It bundles well in `dist` but when trying to use it from a vite project, there are issues in making calls to web worker.
+The difficulty is with bundling the `.wasm` file with the package. This is currently being explored [here](https://github.com/nikitavoloboev/git-sdk) using rollup to bundle everything.
 
 ##### Running GitSDK WASM in Node
 
