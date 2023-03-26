@@ -178,7 +178,7 @@ lint: {
 
 #### Iterative improvements.
 
-The lint module is small on purpose to not expose features that might not be used by users but need to be maintained for backwards compatiblity. We will implement features as requested by users.
+The lint module is small on purpose to not expose features that might not be used by users but need to be maintained for backwards compatibility. We will implement features as requested by users.
 
 It is expected that most improvements can be exposed via (the object) arguments.
 
