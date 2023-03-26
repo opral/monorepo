@@ -19,7 +19,7 @@ import type { LintRule } from "./rule.js"
  * // settings must be provided when using the rule
  * myRule2("error", { strict: true });
  */
-export const createLintRule = <Settings extends object | undefined = undefined>(
+export const createLintRule = <Settings extends Record<string, unknown> | undefined = undefined>(
 	args: { id: LintRule["id"] },
 	setup: (
 		args: Parameters<LintRule["setup"]>[0] & {
@@ -48,7 +48,7 @@ export const createLintRule = <Settings extends object | undefined = undefined>(
 /**
  * Type for the function that configures a lint rule.
  */
-type ConfigureLintRuleFunction<Settings extends object | undefined = undefined> =
+type ConfigureLintRuleFunction<Settings extends Record<string, unknown> | undefined = undefined> =
 	Settings extends undefined
 		? // If settings are not defined, the function only takes a level
 		  (level: LintRule["level"]) => LintRule
