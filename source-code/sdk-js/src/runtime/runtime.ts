@@ -11,7 +11,7 @@ const fallbackLookupFunction: LookupFunction = () => ""
 
 export type RuntimeState<Language extends string = string> = {
 	resources: Map<Language, Resource>
-	language: Language
+	language: Language | undefined
 }
 
 export const initRuntime = <
@@ -25,7 +25,7 @@ export const initBaseRuntime = <
 >(
 	state: RuntimeState<Language> = {
 		resources: new Map(),
-		language: undefined as unknown as Language,
+		language: undefined,
 	},
 ) => {
 	const loadResource = async (language: Language) => {
@@ -38,7 +38,7 @@ export const initBaseRuntime = <
 	const getLanguage = () => state.language
 
 	const getLookupFunction = () => {
-		const resource = state.resources.get(state.language)
+		const resource = state.resources.get(state.language as Language)
 		if (!resource) return fallbackLookupFunction
 
 		return createLookupFunction<LookupFunctionArgs>(resource)
