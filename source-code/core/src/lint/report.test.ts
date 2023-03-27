@@ -1,5 +1,6 @@
 import { test, expect } from "vitest"
 import { createReportFunction } from "./report.js"
+import type { LintedResource } from "./rule.js"
 
 const message = ""
 

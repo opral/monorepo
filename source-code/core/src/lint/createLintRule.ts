@@ -19,14 +19,16 @@ import type { LintRule } from "./rule.js"
  * // settings must be provided when using the rule
  * myRule2("error", { strict: true });
  */
-export const createLintRule = <Settings extends Record<string, unknown> | undefined = undefined>(
-	args: { id: LintRule["id"] },
+export const createLintRule = <
+	Settings extends Record<string, unknown> | undefined = undefined,
+>(args: {
+	id: LintRule["id"]
 	setup: (
 		args: Parameters<LintRule["setup"]>[0] & {
 			settings: Settings
 		},
-	) => ReturnType<LintRule["setup"]>,
-): ConfigureLintRuleFunction<Settings> => {
+	) => ReturnType<LintRule["setup"]>
+}): ConfigureLintRuleFunction<Settings> => {
 	const { id } = args
 
 	// @ts-expect-error

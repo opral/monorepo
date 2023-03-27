@@ -57,15 +57,18 @@ describe("lint", async () => {
 
 	test("it should be immutable and not modify the resources passed as an argument", async () => {
 		const cloned = structuredClone(referenceResource)
-		const rule = createLintRule({ id: "inlang.someError" }, ({ report }) => ({
-			visitors: {
-				Resource: ({ target }) => {
-					if (target) {
-						report({ node: target, message: "Error" })
-					}
+		const rule = createLintRule({
+			id: "inlang.someError",
+			setup: ({ report }) => ({
+				visitors: {
+					Resource: ({ target }) => {
+						if (target) {
+							report({ node: target, message: "Error" })
+						}
+					},
 				},
-			},
-		}))
+			}),
+		})
 		const [result] = await doLint([rule("error")], [cloned])
 		expect(cloned).toStrictEqual(referenceResource)
 		expect(result).not.toStrictEqual(cloned)
@@ -73,15 +76,18 @@ describe("lint", async () => {
 
 	test("it should not abort the linting process when errors occur", async () => {
 		const cloned = structuredClone(referenceResource)
-		const rule = createLintRule({ id: "inlang.someError" }, () => ({
-			visitors: {
-				Resource: ({ target }) => {
-					if (target) {
-						throw new Error("Error")
-					}
+		const rule = createLintRule({
+			id: "inlang.someError",
+			setup: () => ({
+				visitors: {
+					Resource: ({ target }) => {
+						if (target) {
+							throw new Error("Error")
+						}
+					},
 				},
-			},
-		}))
+			}),
+		})
 		const [, errors] = await doLint([rule("error")], [cloned])
 		expect(errors?.length).toBe(1)
 		expect(errors![0].message.includes("inlang.someError"))

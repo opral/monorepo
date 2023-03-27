@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, type MockContext, test, vi } from "vitest"
 import type { Identifier, LanguageTag, Message } from "../ast/schema.js"
-import type { LintedMessage, LintedResource, LintReport } from "./context.js"
+import type { LintedMessage, LintedResource, LintReport } from "./rule.js"
 import { print, printReport } from "./output.js"
 
 const report: LintReport = {

@@ -3,24 +3,30 @@ import { expect, test } from "vitest"
 import { createLintRule } from "./createLintRule.js"
 
 test("createLintRule returns a function", () => {
-	const myRule = createLintRule({ id: "example.rule" }, () => {
-		return {
-			visitors: {
-				Resource: () => {},
-			},
-		}
+	const myRule = createLintRule({
+		id: "example.rule",
+		setup: () => {
+			return {
+				visitors: {
+					Resource: () => {},
+				},
+			}
+		},
 	})
 
 	expect(typeof myRule).toBe("function")
 })
 
 test("createLintRule configures lint rule with correct id and level", async () => {
-	const myRule = createLintRule({ id: "example.rule" }, () => {
-		return {
-			visitors: {
-				Resource: () => {},
-			},
-		}
+	const myRule = createLintRule({
+		id: "example.rule",
+		setup: () => {
+			return {
+				visitors: {
+					Resource: () => {},
+				},
+			}
+		},
 	})
 
 	const rule = myRule("error")
@@ -29,12 +35,15 @@ test("createLintRule configures lint rule with correct id and level", async () =
 })
 
 test("createLintRule configures lint rule with correct visitors", async () => {
-	const myRule = createLintRule({ id: "example.rule" }, () => {
-		return {
-			visitors: {
-				Resource: () => {},
-			},
-		}
+	const myRule = createLintRule({
+		id: "example.rule",
+		setup: () => {
+			return {
+				visitors: {
+					Resource: () => {},
+				},
+			}
+		},
 	})
 	const rule = myRule("error")
 	const { visitors } = await rule.setup({
@@ -45,12 +54,15 @@ test("createLintRule configures lint rule with correct visitors", async () => {
 })
 
 test("createLintRule should accept an async setup function", async () => {
-	const myRule = createLintRule({ id: "example.rule" }, () => {
-		return {
-			visitors: {
-				Resource: () => {},
-			},
-		}
+	const myRule = createLintRule({
+		id: "example.rule",
+		setup: () => {
+			return {
+				visitors: {
+					Resource: () => {},
+				},
+			}
+		},
 	})
 	const rule = myRule("error")
 	expect(typeof rule.setup).toBe("function")
