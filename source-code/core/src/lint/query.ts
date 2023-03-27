@@ -1,13 +1,11 @@
-import { unhandled } from "../utilities/error-handling.js"
 import type {
 	LintedNode,
 	LintReport,
 	LintedResource,
 	LintedMessage,
 	LintedPattern,
-	LintLevel,
-} from "./context.js"
-import type { LintRuleId } from "./rule.js"
+	LintRule,
+} from "./rule.js"
 
 /**
  * Query options for lints.
@@ -16,8 +14,8 @@ import type { LintRuleId } from "./rule.js"
  */
 type QueryOptions = {
 	nested?: boolean
-	level?: LintLevel
-	id?: LintRuleId
+	level?: LintRule["level"]
+	id?: LintRule["id"]
 }
 
 /**
@@ -35,8 +33,8 @@ export const getLintReports = (
 	// Writing out QueryOptions for a better DX.
 	// Developers can see the options instead of the type.
 	options?: {
-		id?: LintRuleId
-		level?: LintLevel
+		level?: LintRule["level"]
+		id?: LintRule["id"]
 		nested?: boolean
 	},
 ): LintReport[] => {
@@ -53,7 +51,11 @@ export const getLintReports = (
 		case "Pattern":
 			return withFilters(getLintReportsFromPattern(node), withDefaults)
 		default:
-			return unhandled(type, node)
+			// If an unhandled node type is encountered, it is a bug in inlang's source code.
+			// The lint implementation is responsible for handling all node types, not user land.
+			throw new Error(
+				`Unhandled linted node type: ${type}. You stumbled upon a bug in inlang's source code. Please open an issue on GitHub`,
+			)
 	}
 }
 
@@ -102,8 +104,8 @@ export const hasLintReports = (
 	node: LintedNode | LintedNode[], // Writing out QueryOptions for a better DX.
 	// Developers can see the options instead of the type.
 	options?: {
-		id?: LintRuleId
-		level?: LintLevel
+		level?: LintRule["level"]
+		id?: LintRule["id"]
 		nested?: boolean
 	},
 ): boolean => getLintReports(node, options).length > 0
