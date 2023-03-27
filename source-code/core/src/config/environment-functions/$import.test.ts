@@ -32,7 +32,8 @@ describe("$import", async () => {
 	)
 
 	const $import = initialize$import({
-		fs: memfs.promises,
+		// @ts-ignore
+		fs: fs.promises,
 		fetch,
 	})
 

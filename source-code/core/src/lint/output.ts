@@ -1,4 +1,4 @@
-import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./context.js"
+import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
 
 export const print = (resource: LintedResource) => {
@@ -7,7 +7,7 @@ export const print = (resource: LintedResource) => {
 	const separator = `Resource['${resource.languageTag.name}']`
 	console.info(separator)
 
-	const reports = getLintReports(resource, false)
+	const reports = getLintReports(resource, { nested: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
@@ -23,7 +23,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
 	const separator = `${prefix} -> Message['${message.id.name}']`
 	console.info(separator)
 
-	const reports = getLintReports(message, false)
+	const reports = getLintReports(message, { nested: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
@@ -34,7 +34,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
 const printPattern = (pattern: LintedPattern) => {
 	if (!hasLintReports(pattern)) return
 
-	const reports = getLintReports(pattern, false)
+	const reports = getLintReports(pattern, { nested: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
@@ -46,7 +46,7 @@ export const printReport = (
 ): void => {
 	if (!report) return
 
-	const { id, level, message, metadata } = report
+	const { id, level, message } = report
 	const method = methodOverride ?? (level === "error" ? "error" : "warn")
-	console[method](`[${level}] (${id}) ${message}`, metadata ?? "")
+	console[method](`[${level}] (${id}) ${message}`)
 }

@@ -1,5 +1,17 @@
 # @inlang/core
 
+## 0.5.0
+
+### Minor Changes
+
+- a0b85eb: refactor: combined multiple lint query functions in one
+
+  https://github.com/inlang/inlang/pull/453
+
+- e9e9ce5: refactor: simplify lint
+
+  The linting system was simplified. Mostly by exposing less features. We intend to wait for user feedback on edge cases before we expose features that might not align with user needs but need to be maintained by us. As a side effect, the DX is expected to increase due to simpler docs
+
 ## 0.4.3
 
 ### Patch Changes
