@@ -1,4 +1,4 @@
-import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./context.js"
+import type { LintedMessage, LintedPattern, LintedResource, LintReport } from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
 
 export const print = (resource: LintedResource) => {
@@ -46,7 +46,7 @@ export const printReport = (
 ): void => {
 	if (!report) return
 
-	const { id, level, message, metadata } = report
+	const { id, level, message } = report
 	const method = methodOverride ?? (level === "error" ? "error" : "warn")
-	console[method](`[${level}] (${id}) ${message}`, metadata ?? "")
+	console[method](`[${level}] (${id}) ${message}`)
 }
