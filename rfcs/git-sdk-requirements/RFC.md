@@ -383,4 +383,8 @@ If there are issues in performance in JS implementation such as indexing packfil
 
 One thing to note is that WebAssembly only supports numeric types like integers and floats so git objects to be worked with must be serialized before being passed to WASM to do expensive computational work.
 
-The loading of WASM module for doing potential expensive work should be of no issue as it can be fetched in parallel as all other git objects get fetched via `git clone`.
+The loading of WASM module for doing potential expensive work should be of no issue as it can be fetched in parallel as all other git objects get fetched.
+
+## Useful documents
+
+- [Partial Clone Design Notes](https://github.com/git/git/blob/master/Documentation/technical/partial-clone.txt)
