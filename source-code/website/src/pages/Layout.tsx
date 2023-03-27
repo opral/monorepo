@@ -95,7 +95,7 @@ function Header(props: { landingpage?: boolean }) {
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
 							<a href="/" class="flex items-center w-fit">
-								<img class="h-9 w-9" src="/favicon/favicon.ico" alt="Company Logo" />
+								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang
 								</span>
@@ -187,7 +187,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
-							<img class="h-9 w-9" src="/favicon/favicon.ico" alt="Company Logo" />
+							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 						<p class="text-surface-700 font-medium">© inlang 2023</p>
