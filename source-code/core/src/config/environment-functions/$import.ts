@@ -1,5 +1,3 @@
-import type { FS } from "../../fs/index.js"
-
 /**
  * Importing ES modules either from a local path, or from a url.
  *
@@ -15,6 +13,9 @@ import type { FS } from "../../fs/index.js"
 //
 // - not using ReturnType or FunctionArguments to increase DX
 //   when hovering over the type.
+
+import type { $fs } from "./$fs.js"
+
 //
 export type $import = (uri: string) => Promise<any>
 
@@ -33,7 +34,7 @@ export function initialize$import(args: {
 	 */
 	workingDirectory?: string
 	/** the fs from which the file can be read */
-	fs: FS
+	fs: $fs
 	/** http client implementation */
 	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
@@ -56,7 +57,7 @@ async function $import(
 		/** directory from which the import should be resolved */
 		workingDirectory: string
 		/** the fs from which the file can be read */
-		fs: FS
+		fs: $fs
 		/** http client implementation */
 		fetch: typeof fetch
 	},
