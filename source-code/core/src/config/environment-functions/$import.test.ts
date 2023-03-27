@@ -30,6 +30,7 @@ describe("$import", () => {
 
 	const $import = initialize$import({
 		workingDirectory: "/",
+		// @ts-ignore
 		fs: fs.promises,
 		fetch,
 	})
@@ -54,6 +55,7 @@ describe("$import", () => {
 	it("should import a relative file based on the workingDirectory", async () => {
 		const $import = initialize$import({
 			workingDirectory: "/nested",
+			// @ts-ignore
 			fs: fs.promises,
 			fetch,
 		})

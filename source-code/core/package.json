@@ -22,10 +22,6 @@
 			"types": "./dist/lint/index.d.ts",
 			"import": "./dist/lint/index.js"
 		},
-		"./lint/test-utilities": {
-			"types": "./dist/lint/test-utilities.d.ts",
-			"import": "./dist/lint/test-utilities.js"
-		},
 		"./query": {
 			"types": "./dist/query/index.d.ts",
 			"import": "./dist/query/index.js"

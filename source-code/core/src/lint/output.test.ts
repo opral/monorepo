@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, type MockContext, test, vi } from "vitest"
 import type { Identifier, LanguageTag, Message } from "../ast/schema.js"
-import type { LintedMessage, LintedResource, LintReport } from "./context.js"
+import type { LintedMessage, LintedResource, LintReport } from "./rule.js"
 import { print, printReport } from "./output.js"
 
 const report: LintReport = {
@@ -13,7 +13,6 @@ const reportWithMetadata: LintReport = {
 	id: "lint.rule2",
 	level: "warn",
 	message: "Something went wrong again",
-	metadata: { foo: "bar" },
 }
 
 vi.spyOn(console, "warn").mockImplementation(vi.fn)
@@ -54,22 +53,6 @@ describe("printReport", async () => {
 
 			expect((console.warn as unknown as MockContext<string[], void>).calls[0][0]).toContain(
 				`${reportWithMetadata.message}`,
-			)
-		})
-
-		test("no metadata if not present", async () => {
-			printReport(report)
-
-			expect((console.error as unknown as MockContext<string[], void>).calls[0][0]).not.toContain(
-				`foo`,
-			)
-		})
-
-		test("metadata if present", async () => {
-			printReport(reportWithMetadata)
-
-			expect((console.warn as unknown as MockContext<string[], void>).calls[0][1]).toContain(
-				reportWithMetadata.metadata,
 			)
 		})
 	})

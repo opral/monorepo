@@ -6,7 +6,7 @@ description: Check `Resources` for potential errors and other insights.
 
 # {% $frontmatter.title %}
 
-This package provides the functionality to automatically check `Resources` for potential errors and other insights.
+This module provides the functionality to automatically check `Resources` for potential errors and other insights.
 
 Use cases could be:
 
@@ -20,45 +20,32 @@ Use cases could be:
 
 > Note: In the future we will provide a `CLI` to make it easier to use this package.
 
-### custom implementation
-
-You can use the `lint` function provided by `@inlang/core/lint`.
-
 ```ts
-import { lint } from "@inlang/core/eslint"
+import { lint, getLintReports } from "@inlang/core/lint"
 
-// lint takes a subset of the inlang.config.js file and the resources as arguments
-const result = await lint({ config, resources })
-```
+// 1. Lint resources with the `lint` function.
 
-The promise returns an `Array` of all `Resources`. The nodes of the `Resource` and it's children can have a `lint` attribute attached. If present, the `lint` attribute will contain an `Array` of `LintResults`. To make it easier to see if one of the lint rules reported a violation, `inlang` provides some [utility functions](#utility-functions).
+const lintedResources = await lint({ config, resources })
 
-#### utility functions
+// 2. Use `getLintReports` to get lint reports.
+//    A second argument can be used for query options.
 
-Utility functions provide an easy way to check if a `Resource` has a `lint` attribute. All utility functions can be imported from `@inlang/core/lint`. Per default nodes are checked recursively for the `lint` attribute. You can pass `nested: false` in the options to check a node without it's children.
-
-Example:
-
-```ts
-import { getLintReports } from "@inlang/core/lint"
-
-// recursively check all nodes for lint errors
-const errors = getLintReports(lintedResource, { level: "error" })
-
-// just check a single node for lint errors
-const errors = getLintReports(lintedResource, { level: "error", nested: false })
+// get all lint reports
+const allLints = getLintReports(lintedResources)
+// get lint reports for "error"
+const errors = getLintReports(lintedResources, { level: "error" })
+// get lint reports for "warn" for the first node.
+const warnings = getLintReports(lintedResources, { level: "warn", nested: false })
 ```
 
 ## Configuration
 
 The `inlang.config.js` file supports a `lint` property you can use to configure the linting process.
 
-The `lint` property expects an `Array` of [`rules`](#lint-rules) or [`collections`](#lint-collections). Rules can be configured by passing parameters to the function call.
+The `lint` property expects an `Array` of [`rules`](#lint-rules). Rules can be configured by passing parameters to the function call.
 
 - the first parameter is the lint level. Currently supported levels are `'error'` and `'warn'`
 - the second parameter is a custom configuration for the given rule. Some rules may be configured and some rules might not support this.
-
-You can also disable a rule by passing `false` as the first parameter.
 
 _inlang.config.js_
 
@@ -72,14 +59,13 @@ export async function defineConfig(env) {
 		languages: ["en", "de"],
 		lint: {
 			rules: [
-				// uses the standard configuration
-				missingKeyRule(),
 				// set's the lint level to 'warn'
-				missingKeyRule("warn"),
+				missingMessageRule("warn"),
 				// uses the standard lint level and passes custom settings to the rule
-				missingKeyRule(true, { threshold: 4 }),
-				// disables the rule if it runs on mondays
-				missingKeyRule(!isTodayMonday),
+				missingMessageRule("error", { threshold: 4 }),
+				// conditionally activate rules.
+				// (if this features is used a lot, we will provide a nicer API)
+				...(isTodayMonday ? [missingMessageRule("error")] : []),
 			],
 		},
 	}
@@ -88,7 +74,7 @@ export async function defineConfig(env) {
 
 ## Lint Rules
 
-There already exist some lint rules you can use to check your `Resources` against. You can find them [here](https://github.com/inlang/ecosystem). Or you can write your own rules.
+There exist some lint rules you can use to check your `Resources` against. You can find them [here](https://github.com/inlang/ecosystem). Or you can write your own rules.
 
 ### Creating your own lint rule
 
@@ -100,92 +86,51 @@ Example:
 import { createLintRule, type Context } from "@inlang/core/lint"
 
 const myLintRule = createLintRule<{ apiKey: string }>(
-	"myService.checkGrammar",
-	"error",
-	(settings) => {
-		if (!settings?.apiKey) {
-			throw new Error("You need to provide an API key")
-		}
-
-		let context: Context
-		let service
+	{ id: "myService.checkGrammar" },
+	({ settings, report }) => {
+		const api = Grammarly()
 
 		return {
-			setup: async (args) => {
-				context = args.context
-
-				service = await connectToGrammarService(context.apiKey)
-			},
 			visitors: {
 				Message: async ({ target, reference }) => {
 					if (!target) return
-
-					const result = await service.checkGrammar(target)
-
-					context.report({
+					const result = await api.checkGrammar(target)
+					report({
 						node: target,
 						message: `Message with id '${reference.id.name}' contains a grammar error: ${result.details}`,
 					})
 				},
-			},
-			teardown: async () => {
-				await service.closeConnection()
 			},
 		}
 	},
 )
 ```
 
-The `createLintRule` expects 3 parameters.
+The `createLintRule` expects 2 parameters.
 
 1. The id of the rule.\
    The naming convention for the id is: `camelCase` and it must be split by a `.` character to prevent naming collisions e.g. `myService.checkGrammar`.
-2. The default lint level used by this rule.\
-   If a user does not specify lint level, the default level will be used to report lint violations.
-3. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
 
-   - `setup`: A function that can be used to open connections or setup other stuff that will be used during the lint process.\
-      The `setup` function gets called with the following parameter: `{ referenceLanguage, languages, context }` where
-     - `referenceLanguage` is the reference language of ths repository.
-     - `languages` is an array of the supported languages.
-     - `context` is the context of the linting process, that provides utility functions to report lint violations to any node.
-       The function can return an object, that will be passed as the `payload` attribute to all subsequent steps in the linting process.
+2. A callback function that gets passed the settings of the lint rule. It must return an object with the following properties:
+
    - `visitors`: An object that contains functions that will be called during the linting process.\
      The linting process will visit each node recursively and then calls the corresponding `visitors` function if specified. The `visitor` object expects the following properties:
 
      - `Resource` _(optional)_: the visitor functions that will be called when a Resource node gets processed.
      - `Message` _(optional)_: the visitor functions that will be called when a Message node gets processed.
      - `Pattern` _(optional)_: the visitor functions that will be called when a Pattern node gets processed.
-       Those properties can be either a single function or an object with a `enter` and/or `leave` function:
 
      ```ts
      visitors: {
-       Message: () => { /* implementation */ },
-       Pattern: {
-         enter: () => { /* implementation */ },
-         leave: () => { /* implementation */ },
-       },
+       Resource: ({ reference, target }) => { /* implementation */ },
+       Message: ({ reference, target }) => { /* implementation */ },
+       Pattern: ({ reference, target }) => { /* implementation */ }
      }
      ```
 
-     The `enter` function get's called when a node get's visited. If this node contains children, those will be processed afterwards. Once all children have been processed, the `leave` function will be called. When using a single function, the function is treated as the `enter`function.
-
-     The `enter` function get's called with the following parameter: `{ target, reference, payload }` where
-
-     - `target` is the node that got visited.
-     - `reference` is the corresponding node of the reference language.
-     - `payload` the object returned by the `setup` or a parent's `enter` function.
-       The function can optionally return
      - `'skip'` to skip the processing of all child nodes.
-     - an object, that get's passed as `payload` to all children and the `leave` function.
 
      Be aware that `target` or `reference` could be `undefined` if the corresponding node does not exist on the target or reference resource.
-
-     The `leave` function receives the same payload as the `enter` function, but does not return anything.
-
-   - `teardown` _(optional)_: A function that can be used to close opened connections.\
-      The `teardown` function gets called with the following parameter: `{ payload }` where
-     - `payload` is the object returned by the `setup` function.
 
 All defined functions can be synchronous or asynchronous. The lint process traverses all nodes in sequence and awaits each step individually. Keep that in mind. It could affect the performance if you call a lot of long-running functions.
 
@@ -207,7 +152,7 @@ visitors: {
 
 Be aware that you are responsible to check if your code reaches all nodes.
 
-#### settings
+#### Settings
 
 A lint rule can expect a `settings` object. To specify what type of settings the lint rule expects, you can pass it as a generic argument to the `createLintRule` function.
 
@@ -229,55 +174,103 @@ lint: {
 }
 ```
 
-## Lint Collections
+## Design decisions
 
-Lint collections are a way to group rules together. You can pass a collection to the config like you would do with regular rules. You can also customize and disable specific rules of a collection by passing an argument to the function call. A collection accepts an object where the keys are the name of the provided rule and the values are the configuration for that rule.
+#### Iterative improvements.
 
-_inlang.config.js_
+The lint module is small on purpose to not expose features that might not be used by users but need to be maintained for backwards compatibility. We will implement features as requested by users.
 
-```js
-/**
- * @type {import("@@inlang/core/config").DefineConfig}
- */
-export async function defineConfig(env) {
-	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		lint: {
-			rules: [
-				// uses the standard configuration
-				inlangStandardRules(),
-				// set's the lint level for the `missingKey` rule to 'warn'
-				inlangStandardRules({
-					missingKey: "warn",
-				}),
-				// uses the standard lint level and passes custom settings to the `missingKey` rule
-				inlangStandardRules({
-					missingKey: [true, { threshold: 4 }],
-				}),
-				// disables the `missingKey` rule if it runs on mondays
-				inlangStandardRules({
-					missingKey: !isTodayMonday,
-				}),
-			],
-		},
-	}
-}
-```
-
-### Creating your own lint collection
-
-A lint collection groups multiple lint rules together. You can use the provided `createLintRuleCollection` function to create a collection. By using the provided function, you will get back a strongly typed rule collection.
-
-Example:
+It is expected that most improvements can be exposed via (the object) arguments.
 
 ```ts
-import { createLintRuleCollection } from "@inlang/core/lint"
-
-const myRuleCollection = createLintRuleCollection({
-	missingKey: missingKeyRule,
-	invalidKey: invalidKeyRule,
-})
+const myRule = createLintRule("foo.x", ({ settings, report }) => {
+ return {
+  visitors: {
+   Resource: ({ onLeave }) => {
++    // on leave (and many other features) could be exposed via a callback
++    onLeave(() => {
++     if (isError) report({ node: this, message: "foo" });
+    });
+   },
+  },
+ };
+});
 ```
 
-The `createLintRuleCollection` expects an object where the key is the name of the provided rule and the value is the rule itself. You can add as many rules as you want.
+#### Use the object argument pattern to API changes
+
+To ease the iterative improvement approach, most public APIs use the object argument pattern.
+
+```ts
+// Example: Deprecating the "level" argument.
+
+// before refactoring
+function withObjectPattern(args: { id: string; level: string; type: string })
+function withPositionalArguments(id: string, level: string, type: string)
+
+withObjectPattern({ id: "hello", level: "world", type: "JavaScript" })
+withPositionalArguments("hello", "world", "JavaScript")
+
+// after refactoring
+function withObjectPattern(args: { id: string; type: string })
+function withPositionalArguments(id: string, level?: string, type: string)
+
+withObjectPattern({ id: "hello", type: "JavaScript" })
+withPositionalArguments("hello", undefined, "JavaScript")
+```
+
+#### Users must explicitly provide provide the lint level.
+
+Letting rules define the default lint level in `createLintRule` leads to complex types, more conditional logic, and the benefit to developers is unclear. I vote to remove the "feature" due to:
+
+- Users face a hidden lint level that might make them wonder why certain things are errors or warnings.
+- Rule writers need to think about "should my rule be an error or a warning"?
+
+```ts
+rules: [
+	// implicit behaviour. What rules are an error and what are a warning?
+
+	additionalIdRule(),
+	brandingRule(),
+	grammarRule(),
+]
+```
+
+```ts
+rules: [
+	// explicit behaviour for close to no additional "cost"
+
+	additionalIdRule("error"),
+	brandingRule("warn"),
+	grammarRule("error"),
+]
+```
+
+#### Flow of the lint module
+
+```ts
+// 1. create lint rule [Public API: Authoring rules]
+const missingMessageRule = createLintRule<{ strict: boolean }>({ id: "inlang.missingMessage" },
+  ({ config, report, settings }) => {
+	  return visitors: {
+      Resource: ({ target } => {
+				if (settings.strict){
+					report(target, { message: "Missing message" })
+				}
+      })
+	  }
+  })
+
+// 2. configure rule function [Public API: Using rules]
+rules: [
+  missingMessageRule("error", {
+    strict: true,
+  })
+]
+
+// 3. setup rule function [Internal]
+const rules = rules.map((rule) => await rule.setup({ config, report }))
+
+// 4. linting
+const [resource, errors] = await lint(resources, [rule])
+```
