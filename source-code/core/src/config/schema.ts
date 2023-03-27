@@ -1,7 +1,7 @@
 import type * as ast from "../ast/index.js"
-import type { FS } from "../fs/index.js"
 import type { LintRule } from "../lint/rule.js"
-import type { $import } from "./environment-functions/index.js"
+import type { $fs } from "./environment-functions/$fs.js"
+import type { $import } from "./environment-functions/$import.js"
 
 /**
  * The environment functions.
@@ -9,7 +9,7 @@ import type { $import } from "./environment-functions/index.js"
  * Read more https://inlang.com/documentation/environment-functions
  */
 export type EnvironmentFunctions = {
-	$fs: FS
+	$fs: $fs
 	$import: $import
 }
 

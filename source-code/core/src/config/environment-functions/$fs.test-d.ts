@@ -1,14 +1,14 @@
-import type { FS } from "./index.js"
+import type { $fs } from "./$fs.js"
 
 // eslint-disable-next-line no-restricted-imports
 import * as nodefs from "node:fs/promises"
 import { fs as memfs } from "memfs"
 
-function createFs(fs: FS): FS {
+function createFs(fs: $fs): $fs {
 	return fs
 }
 
 //@ts-ignore - TODO outcomment when fixed
 createFs(nodefs)
-// @ts-ignore - TODO outcomment when fixed
-createFs(memfs)
+
+createFs(memfs.promises)
