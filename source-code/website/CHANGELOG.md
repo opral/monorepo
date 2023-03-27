@@ -1,5 +1,15 @@
 # @inlang/website
 
+## 0.5.0
+
+### Patch Changes
+
+- f87f300: Fixes linting errors
+- Updated dependencies [a0b85eb]
+- Updated dependencies [e9e9ce5]
+  - @inlang/core@0.5.0
+  - @inlang/git-sdk@0.5.0
+
 ## 0.4.3
 
 ### Patch Changes
