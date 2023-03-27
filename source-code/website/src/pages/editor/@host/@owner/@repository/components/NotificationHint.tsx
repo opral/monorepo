@@ -1,5 +1,5 @@
 import type { Accessor } from "solid-js"
-import { createSignal, For, Show } from "solid-js"
+import { createSignal, For } from "solid-js"
 
 type NotificationType = "info" | "warning" | "error"
 
@@ -15,6 +15,7 @@ interface NotificationHintProps {
 
 export const NotificationHint = (props: NotificationHintProps) => {
 	const [open, setOpen] = createSignal(false)
+	// eslint-disable-next-line solid/reactivity
 	const dominantType: NotificationType = getDominantType(props.notifications)
 
 	return (
