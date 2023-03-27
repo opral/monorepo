@@ -32,6 +32,7 @@ const getShortcutStyling = (color: "primary" | "default") => {
 }
 
 const formatCodes = (codes: Array<KeyboardEvent["code"]>) => {
+	// eslint-disable-next-line solid/reactivity
 	return codes.map((code) => {
 		switch (code) {
 			case "ControlLeft" || "ControlRight":
