@@ -40,7 +40,7 @@ export const createLintRule = <
 			id,
 			level,
 			// @ts-expect-error
-			setup: (args) => setup({ ...args, settings }),
+			setup: (_args) => args.setup({ ..._args, settings }),
 		}
 	}
 
