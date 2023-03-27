@@ -1,5 +1,4 @@
 import { createSignal, Show } from "solid-js"
-import { Button } from "../../components/Button.jsx"
 import { FeatureGitTitle } from "../../components/FeatureGitTitle.jsx"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import cliImage from "./../../assets/cli-image.png"
@@ -21,6 +20,7 @@ const data = {
 
 const Cli = () => {
 	// toggle between validate and extract
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [cliSlider, setCliSlider] = createSignal("validate")
 
 	return (

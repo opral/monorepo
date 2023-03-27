@@ -1,12 +1,10 @@
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
-import styles from "./github-markdown.module.css"
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./sections/01-hero/index.jsx"
 import Credibility from "./sections/02-credibility/index.jsx"
 import Editor from "./sections/03-editor/index.jsx"
 import VsCodeExtension from "./sections/04-vscodExtension/index.jsx"
 import Cli from "./sections/05-cli/index.jsx"
-import GetStarted from "./sections/06-getStarted/index.jsx"
 
 export type PageProps = {
 	markdown: string

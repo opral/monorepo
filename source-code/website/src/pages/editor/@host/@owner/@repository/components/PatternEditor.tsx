@@ -7,11 +7,9 @@ import { analytics } from "@src/services/analytics/index.js"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
-import { InlineNotification } from "@src/components/notification/InlineNotification.jsx"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
-import { Shortcut } from "./Shortcut.jsx"
 import { Notification, NotificationHint } from "./NotificationHint.jsx"
 
 /**
@@ -24,10 +22,12 @@ export function PatternEditor(props: {
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
 		useEditorState()
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
