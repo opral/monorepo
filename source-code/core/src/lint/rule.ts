@@ -1,13 +1,6 @@
-<<<<<<< HEAD
-import type { Message, Pattern, Resource } from "../ast/index.js"
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
-import type { MaybePromise } from "./types.js"
-import { LintLevel, parseLintConfigArguments, Context } from "./context.js"
-=======
 import type { Config } from "../config/index.js"
 import type * as ast from "../ast/index.js"
 import type { createReportFunction } from "./report.js"
->>>>>>> b8cdf3fd6577fb4226b60a737e46240b3150f0e4
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.

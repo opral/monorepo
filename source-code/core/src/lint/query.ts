@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { unhandled } from "./error-handling.js"
-=======
->>>>>>> b8cdf3fd6577fb4226b60a737e46240b3150f0e4
 import type {
 	LintedNode,
 	LintReport,

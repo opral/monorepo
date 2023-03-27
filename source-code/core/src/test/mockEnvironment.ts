@@ -48,6 +48,7 @@ async function copyDirectory(args: { copyFrom: FS; copyTo: FS; path: string }) {
 		if (isFile) {
 			await args.copyTo.writeFile(
 				_path,
+				// @ts-ignore
 				(await args.copyFrom.readFile(_path, { encoding: "utf-8" })) as string,
 			)
 		} else {

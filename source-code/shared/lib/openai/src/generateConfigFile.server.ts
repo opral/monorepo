@@ -38,6 +38,7 @@ export async function _generateConfigFileServer(args: {
 	messages?: CreateChatCompletionRequest["messages"]
 }): Promise<Result<string, Error>> {
 	const fs = Volume.fromJSON(args.filesystemAsJson).promises
+	// @ts-ignore
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, path: "/" } })
 	if (args.messages === undefined) {
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
