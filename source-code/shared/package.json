@@ -30,6 +30,7 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/core": "*",
 		"express": "^4.18.2",
 		"memfs": "^3.4.13",
 		"openai": "^3.2.1",
