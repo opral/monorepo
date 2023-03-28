@@ -3,8 +3,6 @@ import fs from "node:fs/promises"
 import { resolve } from "node:path"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => undefined
-
 async function readInlangConfig() {
 	const $import = initialize$import({
 		// @ts-ignore TODO: this should be fixed
@@ -14,7 +12,7 @@ async function readInlangConfig() {
 
 	const cwd = process.cwd()
 
-	const module = (await import(resolve(cwd, "./inlang.config.js")).catch(noop)) as
+	const module = (await import(resolve(cwd, "./inlang.config.js")).catch(() => undefined)) as
 		| { defineConfig: DefineConfig }
 		| undefined
 	if (!module || !module.defineConfig) {
@@ -27,7 +25,7 @@ async function readInlangConfig() {
 			$fs: fs,
 			$import,
 		})
-		.catch(noop)
+		.catch(() => undefined)
 
 	return config
 }
