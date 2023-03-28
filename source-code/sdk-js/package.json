@@ -17,5 +17,8 @@
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/sdk-js",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/core": "*"
 	}
 }
