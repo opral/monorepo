@@ -3,14 +3,8 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		".": {
-			"types": "./dist/src/index.d.ts",
-			"import": "./dist/src/index.js"
-		},
-		"./openai": {
-			"types": "./dist/lib/openai/index.d.ts",
-			"import": "./dist/lib/openai/index.js"
-		}
+		"./server": "./dist/lib/server/index.js",
+		"./openai": "./dist/lib/openai/index.js"
 	},
 	"files": [
 		"./dist"

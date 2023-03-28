@@ -1,5 +1,5 @@
 import express from "express"
-import { openaiService } from "../lib/openai/index.server.js"
+import { openaiService } from "../openai/index.server.js"
 
 /**
  * Entry point for all services that require a server.
@@ -8,6 +8,6 @@ import { openaiService } from "../lib/openai/index.server.js"
  *   const app = express()
  *   app.use(inlangServices)
  */
-export const inlangServices = express.Router()
+export const router = express.Router()
 
-inlangServices.use(openaiService)
+router.use(openaiService)
