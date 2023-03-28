@@ -1,4 +1,15 @@
-export type NodeName = "Identifier" | "Resource" | "Message" | "Pattern" | "Text" | "LanguageTag"
+// inspired by (https://github.com/unicode-org/message-format-wg/blob/main/spec/syntax.md)
+
+export type NodeName =
+	| "Identifier"
+	| "Resource"
+	| "Message"
+	| "Pattern"
+	| "Text"
+	| "LanguageTag"
+	| "Placeholder"
+	| "Expression"
+	| "Variable"
 
 /**
  * A utility type to extend any node with a new property.
@@ -41,7 +52,7 @@ type Node<
 /**
  * An identifier.
  *
- * Some Nodes have Identifiers such as a Resource or Message.
+ * Some Nodes have Identifiers such as a Message.
  */
 export type Identifier<Extension extends ExtensionInformation = ExtensionInformation> = Node<
 	"Identifier",
@@ -69,7 +80,7 @@ export type Message<Extension extends ExtensionInformation = ExtensionInformatio
 	Extension
 > & {
 	id: Identifier<Extension>
-	// comment?: MessageComment;
+	// comment?: MessageComment
 	pattern: Pattern<Extension>
 }
 
@@ -80,7 +91,7 @@ export type Pattern<Extension extends ExtensionInformation = ExtensionInformatio
 	"Pattern",
 	Extension
 > & {
-	elements: Array<Text<Extension>>
+	elements: Array<Text<Extension> | Placeholder<Extension>>
 }
 
 /**
@@ -91,6 +102,27 @@ export type Text<Extension extends ExtensionInformation = ExtensionInformation> 
 	Extension
 > & {
 	value: string
+}
+
+export type Placeholder<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"Placeholder",
+	Extension
+> & {
+	placeholder: Expression<Extension>
+}
+
+export type Expression<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"Expression",
+	Extension
+> & {
+	expression: Variable<Extension>
+}
+
+export type Variable<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"Variable",
+	Extension
+> & {
+	name: string
 }
 
 /**
@@ -116,42 +148,5 @@ export type LanguageTag<Extension extends ExtensionInformation = ExtensionInform
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	 */
-	// language: string;
+	// language: string
 }
-
-// export type MessageComment = Node<"MessageComment"> & {
-// 	value: string;
-// };
-
-// export type Placeholder = Node<"Placeholder"> & {
-// 	expression: Expression;
-// };
-
-// /**
-//  * A subset of expressions which can be used as outside of Placeholders.
-//  */
-// export type InlineExpression = Literal | Function | Variable | Placeholder;
-// export declare type Expression = InlineExpression | SelectExpression;
-
-// export type Literal = Node<"Literal"> & {
-// 	value: string;
-// };
-
-// export type Variable = Node<"Variable"> & {
-// 	id: Identifier;
-// };
-
-// export type Function = Node<"Function"> & {
-// 	id: Identifier;
-// };
-
-// export type SelectExpression = Node<"SelectExpression"> & {
-// 	selector: InlineExpression;
-// 	variants: Array<Variant>;
-// };
-
-// export type Variant = Node<"Variant"> & {
-// 	id: Identifier;
-// 	pattern: Pattern;
-// 	default: boolean;
-// };
