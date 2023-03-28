@@ -1,10 +1,14 @@
 import { expectType } from "tsd"
-import { initRuntime } from "./runtime.js"
+import { initRuntime, RuntimeContext } from "./runtime.js"
 
 // ------------------------------------------------------------------------------------------------
 
+const context: RuntimeContext = {
+	readResource: () => Promise.resolve(undefined),
+}
+
 {
-	const runtime = initRuntime()
+	const runtime = initRuntime(context)
 
 	runtime.loadResource("")
 	runtime.loadResource("en")
@@ -33,7 +37,7 @@ import { initRuntime } from "./runtime.js"
 			hello: never
 			welcome: { name: string }
 		}
-	>()
+	>(context)
 
 	// @ts-expect-error must be a valid language
 	runtime.loadResource("")
