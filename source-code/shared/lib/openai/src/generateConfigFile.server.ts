@@ -29,7 +29,7 @@ const openapi = new OpenAIApi(
 )
 
 /**
- * Internal wrapper to test the function without the api call.
+ * Internal wrapper to test the function without the requirement to run a server during testing.
  */
 export async function _generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
@@ -52,7 +52,6 @@ export async function _generateConfigFileServer(args: {
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const isValidConfig = await validateConfigFile({ file: configFile, env })
-		console.log({ configFile, isValidConfig, messages: args.messages })
 		if (isValidConfig.isOk) {
 			return Result.ok(configFile)
 		}

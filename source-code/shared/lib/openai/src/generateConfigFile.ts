@@ -4,7 +4,7 @@ import type { EnvironmentFunctions } from "@inlang/core/config"
 /**
  * The endpoint for the api call shared with the .server.ts file.
  */
-export const ENDPOINT = "/services/openai/generate-config-file"
+export const ENDPOINT = "/shared/openai/generate-config-file"
 
 /**
  * Generates a configuration file for inlang.

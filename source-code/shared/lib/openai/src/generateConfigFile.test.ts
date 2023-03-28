@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { _generateConfigFileServer } from "./generateConfigFile.server.js"
 
 // skipping tests due to costs of invoking the openai api
-describe("generating config files", () => {
+describe.skip("generating config files", () => {
 	it(
 		"should generate a config file for a simple json project",
 		async () => {
@@ -51,7 +51,10 @@ describe("generating config files", () => {
 				"ff/ffff.po": "another file format. good luck chat gpt",
 			}
 			const result = await _generateConfigFileServer({ filesystemAsJson })
-			expect(result.isOk).toBe(false)
+			expect(result.isErr).toBe(true)
+			if (result.isErr) {
+				expect(result.error.message).toBe("Couldn't generate a config file.")
+			}
 		},
 		{ timeout: 50000 },
 	)
