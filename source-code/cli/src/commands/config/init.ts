@@ -8,6 +8,7 @@ export const init = new Command()
 	.description("Initialize the inlang.config.js file.")
 	.action(async () => {
 		logger.info("Generating config file with AI 🤖 ...")
+		// @ts-ignore
 		const result = await generateConfigFile({ fs, path: "./" })
 		if (result.isErr) {
 			logger.error("Failed to generate config file.", result.error)
