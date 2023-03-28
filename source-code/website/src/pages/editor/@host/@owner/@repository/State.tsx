@@ -561,8 +561,7 @@ async function readInlangConfig(args: {
 			$fs: args.fs.promises,
 		}
 		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
-		const withMimeType =
-			"data:application/javascript;base64," + Buffer.from(file).toString("base64")
+		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
 
 		const module = await import(/* @vite-ignore */ withMimeType)
 		const config: InlangConfig = await module.defineConfig({
