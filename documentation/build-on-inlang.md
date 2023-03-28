@@ -40,7 +40,7 @@ config.writeResources(resources)
 
 ## Example
 
-The following is a script that demonstrates how you can build on top of inlang. The script validates messages in resources.
+The following is a script that demonstrates how you can build on top of inlang. The script validates messages in resources.
 
 ```js
 // filename: example-script.js
@@ -68,7 +68,7 @@ const resources = await config.readResources({ config })
 
 // --- validate resources according to your logic ---
 //
-// the example below checks if "first-message" exsits in all resources
+// the example below checks if "first-message" exists in all resources
 for (const resource of resources) {
 	const message = query(resource).get({ id: "first-message" })
 	if (message === undefined) {

@@ -51,7 +51,7 @@ type EditorStateSchema = {
 	 */
 	unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>
 	/**
-	 * Additional informaiton about a repository provided by GitHub.
+	 * Additional information about a repository provided by GitHub.
 	 */
 	githubRepositoryInformation: Resource<
 		Awaited<ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">>>
@@ -187,7 +187,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 	)
 
-	// re-fetched if respository has been cloned
+	// re-fetched if repository has been cloned
 	const [inlangConfig] = createResource(
 		() => {
 			if (
@@ -204,7 +204,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
-				// initialises the languages to all languages
+				// initializes the languages to all languages
 				setFilteredLanguages(config.languages)
 			}
 			return config
@@ -234,7 +234,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [userIsCollaborator] = createResource(
 		/**
-		 *CreateRresource is not reacting to changes like: "false","Null", or "undefined".
+		 * createResource is not reacting to changes like: "false","Null", or "undefined".
 		 * Hence, a string needs to be passed to the fetch of the resource.
 		 */
 		() => {
@@ -564,18 +564,9 @@ async function readInlangConfig(args: {
 		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
 
 		const module = await import(/* @vite-ignore */ withMimeType)
-		// account for breaking change from renaming the config
-		// https://github.com/inlang/inlang/issues/291
-		//
-		// this code can be removed once https://github.com/osmosis-labs/osmosis-frontend
-		// is updated to use the new config name
-		const config: InlangConfig = await (module.defineConfig
-			? module.defineConfig({
-					...environmentFunctions,
-			  })
-			: module.initializeConfig({
-					...environmentFunctions,
-			  }))
+		const config: InlangConfig = await module.defineConfig({
+			...environmentFunctions,
+		})
 
 		return config
 	} catch (error) {
@@ -602,12 +593,12 @@ async function writeResources(args: {
 }) {
 	await args.config.writeResources({ ...args })
 	const status = await raw.statusMatrix({ fs: args.fs, dir: "/" })
-	const filesWithUncomittedChanges = status.filter(
-		// files with unstaged and uncomitted changes
+	const filesWithUncommittedChanges = status.filter(
+		// files with unstaged and uncommitted changes
 		(row) => row[2] === 2 && row[3] === 1,
 	)
 	// add all changes
-	for (const file of filesWithUncomittedChanges) {
+	for (const file of filesWithUncommittedChanges) {
 		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
 	}
 	// commit changes

@@ -29,8 +29,8 @@ export type Config = {
 	/**
 	 * The reference language that other messages are validated against.
 	 *
-	 * The languages can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
-	 * In most cases, the reference lanugage is `en-US` (American English).
+	 * The languages can be named freely. It's advisable to follow the IETF BCP 47 language tag scheme.
+	 * In most cases, the reference language is `en-US` (American English).
 	 *
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
@@ -39,7 +39,7 @@ export type Config = {
 	/**
 	 * Available languages in this project.
 	 *
-	 * The languages can be named freely. It's adviceable to follow the IETF BCP 47 language tag scheme.
+	 * The languages can be named freely. It's advisable to follow the IETF BCP 47 language tag scheme.
 	 *
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
@@ -57,7 +57,7 @@ export type Config = {
 	 *
 	 * Read more under https://inlang.com/documentation/breaking-changes
 	 */
-	experimental?: object
+	experimental?: Record<string, unknown>
 
 	ideExtension?: {
 		/**
