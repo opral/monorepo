@@ -1,5 +1,6 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
 import { fs as memfs } from "memfs"
+import dedent from "dedent"
 
 /**
  * Initializes a mock environment.
@@ -43,6 +44,17 @@ async function copyDirectory(args: {
 	copyTo: EnvironmentFunctions["$fs"]
 	path: string
 }) {
+	try {
+		await args.copyFrom.readdir(args.path)
+	} catch {
+		throw new Error(dedent`
+			The directory specified in \`copyDirectory.path\` does not exist.
+
+			Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
+
+			Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
+		`)
+	}
 	// create directory
 	await args.copyTo.mkdir(args.path, { recursive: true })
 	for (const file of await args.copyFrom.readdir(args.path)) {
@@ -66,11 +78,7 @@ async function copyDirectory(args: {
  * Copyright (c) 2014-2018, Jon Schlinkert.
  * Released under the MIT License.
  */
-export function normalizePath(path: string) {
-	if (typeof path !== "string") {
-		throw new TypeError("expected path to be a string")
-	}
-
+function normalizePath(path: string) {
 	if (path === "\\" || path === "/") return "/"
 
 	const len = path.length
