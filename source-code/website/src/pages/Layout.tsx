@@ -81,10 +81,10 @@ function Header(props: { landingpage?: boolean }) {
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
 		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 		{
-			name: "Share Feedback",
-			external: true,
+			name: "Feedback",
+			external: currentPageContext.urlParsed.pathname.includes("editor"),
 			href: "https://github.com/inlang/inlang/discussions/categories/feedback",
-			type: "textPrimary" as buttonType,
+			type: "text" as buttonType,
 		},
 	]
 
