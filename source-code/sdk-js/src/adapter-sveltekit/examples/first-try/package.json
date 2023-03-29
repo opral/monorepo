@@ -18,5 +18,9 @@
 		"typescript": "^5.0.2",
 		"vite": "^4.2.1"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@inlang/core": "file:../../../../../core",
+		"@inlang/sdk-js": "file:../../../.."
+	}
 }
