@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/website",
 	"type": "module",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"scripts": {
 		"dev": "npx tsx ./src/server/main.ts",
 		"production": "NODE_ENV=production npx tsx ./src/server/main.ts",
