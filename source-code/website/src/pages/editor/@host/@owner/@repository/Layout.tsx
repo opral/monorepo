@@ -32,17 +32,18 @@ const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 export function Layout(props: { children: JSXElement }) {
 	return (
 		<RootLayout>
-			<div class="pt-4 pb-16 w-full space-y-2 flex flex-col grow">
+			<div class="pt-4 pb-16 w-full flex flex-col grow">
 				<SignInBanner />
-				<div class="flex items-center justify-between py-3">
-					<div class="flex items-center space-x-4">
-						<Breadcrumbs />
-						<BranchMenu />
-					</div>
-					<sl-button-group prop:label="filterbar">
+				<div class="flex items-center space-x-4 py-5">
+					<Breadcrumbs />
+					<BranchMenu />
+				</div>
+				<div class="flex justify-between gap-2 pb-5">
+					<input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" />
+					<div class="flex gap-2">
 						<LanguageFilter />
 						<HasChangesAction />
-					</sl-button-group>{" "}
+					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
