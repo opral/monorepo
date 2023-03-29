@@ -1,5 +1,11 @@
 # @inlang/ide-extension
 
+## 0.5.1
+
+### Patch Changes
+
+- @inlang/core@0.5.1
+
 ## 0.5.0
 
 ### Patch Changes
