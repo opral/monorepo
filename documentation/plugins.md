@@ -22,10 +22,9 @@ Plugins can be imported via the `$import` [environment function](/documentation/
 // inlang.config.js
 
 export async function defineConfig(env) {
-  const plugin = await env.$import
-
-    "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js"
-  );
+	const plugin = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js",
+	)
 }
 ```
 
@@ -53,11 +52,9 @@ export async function defineConfig(env) {
 ## Writing plugins
 
 Read on how to write plugins in the [plugin template repository](https://github.com/inlang/plugin-template).
+
 {% Figure
-
-src="https://user-images.githubusercontent.com/72493222/214296359-1ddd2fdb-03f3-4993-a493-9b1a353c4b88.png"
-
-alt="visualisation of the inlang AST/object"
-
-caption="Visualisation of the inlang AST/object"
+  src="https://user-images.githubusercontent.com/72493222/214296359-1ddd2fdb-03f3-4993-a493-9b1a353c4b88.png"
+  alt="visualisation of the inlang AST/object"
+  caption="Visualisation of the inlang AST/object"
 /%}
