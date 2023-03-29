@@ -554,7 +554,6 @@ async function readInlangConfig(args: {
 	try {
 		const environmentFunctions: EnvironmentFunctions = {
 			$import: initialize$import({
-				workingDirectory: "/",
 				fs: args.fs.promises,
 				fetch,
 			}),

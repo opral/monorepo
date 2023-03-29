@@ -27,6 +27,7 @@ import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "@src/services/auth/index.server.js"
 import { router as githubService } from "@src/services/github/index.server.js"
 import { router as analyticsService } from "@src/services/analytics/index.server.js"
+import { router as inlangSharedServicesRouter } from "@inlang/shared/server"
 
 // validate the env variables.
 await validateEnv()
@@ -101,6 +102,8 @@ app.use(githubService)
 app.use(vitePluginSsr)
 
 app.use(analyticsService)
+
+app.use(inlangSharedServicesRouter)
 
 // ------------------------ END ROUTES ------------------------
 

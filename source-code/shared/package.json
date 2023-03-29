@@ -1,35 +1,10 @@
 {
-	"name": "@inlang/core",
+	"name": "@inlang/shared",
 	"type": "module",
-	"version": "0.5.0",
-	"publishConfig": {
-		"access": "public"
-	},
+	"private": true,
 	"exports": {
-		"./ast": {
-			"types": "./dist/ast/index.d.ts",
-			"import": "./dist/ast/index.js"
-		},
-		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"import": "./dist/config/index.js"
-		},
-		"./lint": {
-			"types": "./dist/lint/index.d.ts",
-			"import": "./dist/lint/index.js"
-		},
-		"./query": {
-			"types": "./dist/query/index.d.ts",
-			"import": "./dist/query/index.js"
-		},
-		"./test": {
-			"types": "./dist/test/index.d.ts",
-			"import": "./dist/test/index.js"
-		},
-		"./utilities": {
-			"types": "./dist/utilities/index.d.ts",
-			"import": "./dist/utilities/index.js"
-		}
+		"./server": "./dist/lib/server/index.js",
+		"./openai": "./dist/lib/openai/index.js"
 	},
 	"files": [
 		"./dist"
@@ -48,14 +23,14 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
 	"dependencies": {
+		"@inlang/core": "*",
+		"express": "^4.18.2",
+		"memfs": "^3.4.13",
+		"openai": "^3.2.1",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"memfs": "^3.4.13",
-		"tsd": "^0.25.0"
+		"@types/express": "^4.17.17"
 	}
 }
