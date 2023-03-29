@@ -1,18 +1,24 @@
-import type { Handle } from "@sveltejs/kit"
-import { initConfig } from "@inlang/sdk-js/config"
+import { redirect, type Handle } from "@sveltejs/kit"
 import { initRuntime } from "@inlang/sdk-js/runtime"
+import { getResource, languages } from "./inlang.server.js"
+import { serverFn } from "./utils/server.js"
 
 export const handle = (async ({ event, resolve }) => {
-	const config = await initConfig()
-	const resources = await config?.readResources({ config })
+	console.info("--- new request", event.url.toString())
+
+	const pathname = event.url.pathname
+	if (pathname.startsWith("/inlang")) return resolve(event)
+
+	const language = pathname.split("/")[1]
+	if (!language || !languages.includes(language)) {
+		// TODO: detect preferred language
+		throw redirect(307, "/en")
+	}
 
 	const runtime = initRuntime({
-		// TODO: use `MaybePromise` and make loadResource sync/async aware
-		readResource: async (language: string) =>
-			resources?.find(({ languageTag: { name } }) => name === language),
+		readResource: (language: string) => getResource(language),
 	})
 
-	const language = "de" // TODO: detect
 	await runtime.loadResource(language)
 	runtime.switchLanguage(language)
 	const i = runtime.getLookupFunction()
@@ -22,9 +28,9 @@ export const handle = (async ({ event, resolve }) => {
 		i,
 	}
 
-	console.log("hooks.server.ts", event.locals.i18n.i("welcome"))
+	console.info("hooks.server.ts", event.locals.i18n.i("welcome"))
 
-	const response = await resolve(event)
+	serverFn(i)
 
-	return response
+	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language) })
 }) satisfies Handle
