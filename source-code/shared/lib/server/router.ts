@@ -1,5 +1,6 @@
 import express from "express"
 import { openaiService } from "../openai/index.server.js"
+import bodyParser from "body-parser"
 
 /**
  * Entry point for all services that require a server.

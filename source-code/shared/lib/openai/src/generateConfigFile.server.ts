@@ -1,24 +1,27 @@
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import { Result } from "@inlang/core/utilities"
-import bodyParser from "body-parser"
 import express from "express"
 import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
 import { getServerEnv } from "../../../src/env.js"
 import { ENDPOINT } from "./generateConfigFile.js"
+import { z } from "zod"
 
 export const generateConfigFileRoute = express.Router()
 
 const env = getServerEnv()
-generateConfigFileRoute.use(bodyParser.json())
 
 generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 	try {
-		const { filesystemAsJson } = req.body
+		console.log(req)
+		const { filesystemAsJson } = z
+			.object({ filesystemAsJson: z.record(z.string()) })
+			.parse(req.body)
 		const response = await _generateConfigFileServer({ filesystemAsJson })
 		res.json(response)
 	} catch (error) {
 		res.status(500)
+		res.send()
 	}
 })
 

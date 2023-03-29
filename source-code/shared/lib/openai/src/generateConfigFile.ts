@@ -15,14 +15,14 @@ export const ENDPOINT = "/shared/openai/generate-config-file"
  */
 export async function generateConfigFile(args: {
 	fs: EnvironmentFunctions["$fs"]
-	path: "./"
+	path: string
 }): Promise<Result<string, Error>> {
 	try {
 		// all files in the project as a json object
 		const filesystemAsJson = await readdirRecursive(args)
 		const response = await fetch(
 			process.env.NODE_ENV === "production"
-				? "https://inlang.com"
+				? "https://inlang.com" + ENDPOINT
 				: "http://localhost:3000" + ENDPOINT,
 			{
 				method: "POST",
