@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/core": "*",
+		"@inlang/shared": "*",
 		"@inlang/design-system": "*",
 		"@inlang/git-sdk": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",

@@ -1,0 +1,53 @@
+{
+	"name": "@inlang/cli",
+	"version": "0.1.5",
+	"private": false,
+	"publicConfig": {
+		"access": "public"
+	},
+	"license": "MIT",
+	"main": "./dist/main.js",
+	"types": "./dist/main.d.ts",
+	"type": "module",
+	"bin": {
+		"inlang": "./bin/run.js"
+	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
+	"files": [
+		"/bin",
+		"/dist"
+	],
+	"scripts": {
+		"dev": "node ./build.js",
+		"build": "NODE_ENV=production node ./build.js",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f dist"
+	},
+	"dependencies": {
+		"@inlang/core": "*",
+		"@inlang/shared": "*",
+		"commander": "^10.0.0",
+		"consola": "^2.15.3",
+		"dedent": "^0.7.0",
+		"fast-glob": "^3.2.12",
+		"node-fetch": "^3.3.0",
+		"openai": "^3.2.1",
+		"prompts": "^2.4.2"
+	},
+	"devDependencies": {
+		"@types/dedent": "^0.7.0",
+		"@types/prompts": "^2.4.2",
+		"esbuild": "^0.17.14",
+		"memfs": "^3.4.13"
+	}
+}
