@@ -44,8 +44,8 @@ export function PatternEditor(props: {
 			)
 		}
 		// if the message is updated externally, update the text value
-		else if (props.message) {
-			setTextValue(props.message.pattern.elements[0].value)
+		else if (props.message?.pattern.elements[0].value) {
+			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
 

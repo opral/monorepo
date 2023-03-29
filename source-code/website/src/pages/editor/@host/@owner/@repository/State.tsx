@@ -76,6 +76,12 @@ type EditorStateSchema = {
 	fs: () => typeof import("memfs").fs
 
 	/**
+	 * TextSearch to filter messages
+	 */
+	textSearch: () => string
+	setTextSearch: Setter<string>
+
+	/**
 	 * The filesystem is not reactive, hence setFsChange to manually
 	 * trigger re-renders.
 	 *
@@ -149,6 +155,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
+
+	const [textSearch, setTextSearch] = createSignal<string>("")
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
@@ -435,6 +443,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
+					textSearch,
+					setTextSearch,
 					fsChange,
 					setFsChange,
 					filteredLanguages,

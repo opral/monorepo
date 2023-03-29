@@ -62,3 +62,15 @@ sl-textarea::part(textarea) {
 sl-textarea::part(base) {
 	border: none;
 }
+
+sl-input {
+	--sl-input-filled-background-color: theme(colors.surface-1);
+	--sl-input-border-color: none;
+	--sl-input-border-color-hover: none;
+	--sl-input-border-color-focus: none;
+	--sl-input-color: none;
+	--sl-input-focus-ring-color: none;
+	--sl-focus-ring: none;
+	--tw-ring-color: transparent;
+	--sl-input-border-color-hover: theme(colors.outline);
+}

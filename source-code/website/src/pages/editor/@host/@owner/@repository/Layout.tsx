@@ -25,11 +25,18 @@ import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
 import { analytics } from "@src/services/analytics/index.js"
 import { github } from "@src/services/github/index.js"
+import { SearchInput } from "./components/SearchInput.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
+	//setTextSearch
+	const { setTextSearch } = useEditorState()
+	const handleSearchText = (text: string) => {
+		setTextSearch(text)
+	}
+
 	return (
 		<RootLayout>
 			<div class="pt-4 pb-16 w-full flex flex-col grow">
@@ -41,7 +48,8 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex justify-between gap-2 pb-5">
 					<LanguageFilter />
 					<div class="flex gap-2">
-						<input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" />
+						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						{/* <input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" /> */}
 						<HasChangesAction />
 					</div>
 				</div>
@@ -190,6 +198,7 @@ function HasChangesAction() {
 			prop:disabled={(unpushedChanges() ?? []).length === 0}
 			onClick={triggerPushChanges}
 			prop:loading={isLoading()}
+			prop:size={"small"}
 		>
 			Push changes
 			<Show when={(unpushedChanges() ?? []).length > 0}>
