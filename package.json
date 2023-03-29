@@ -21,7 +21,6 @@
 		"format:fix": "turbo run format:fix && npm run format:fix:base .",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "npm run clean -ws && rm -f -r ./node_modules",
-		"changeset": "changeset",
 		"lint-staged": "lint-staged",
 		"prepare": "husky install"
 	},
