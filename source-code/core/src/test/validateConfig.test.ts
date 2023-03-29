@@ -197,5 +197,5 @@ function serializeResource(resource: ast.Resource): string {
  * does not support more than 1 element in a pattern.
  */
 function serializeMessage(message: ast.Message): [id: string, value: string] {
-	return [message.id.name, message.pattern.elements[0].value]
+	return [message.id.name, (message.pattern.elements[0] as ast.Text).value]
 }
