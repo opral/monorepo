@@ -10,12 +10,12 @@ All packages have more or less the same structure. If in doubt, please open the 
 file from the package of interest and look up the `scripts` property.
 
 Generally, running commands from dedicated packages requires the CWD to be the root directory `inlang`
-and run call commands with the `--ws` flag.
+and run call commands with the `-w` flag.
 
 **Example**
 Running the `dev` command in a package:  
-`npm run dev --ws <package-name>`  
--> `npm run dev --ws @inlang/ast`
+`npm run dev -w <package-name>`  
+-> `npm run dev -w @inlang/ast`
 
 ### Guidelines
 
