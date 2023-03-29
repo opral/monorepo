@@ -80,6 +80,12 @@ function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
 		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
+		{
+			name: "Feedback",
+			external: currentPageContext.urlParsed.pathname.includes("editor"),
+			href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+			type: "text" as buttonType,
+		},
 	]
 
 	const [localStorage] = useLocalStorage()
@@ -118,7 +124,7 @@ function Header(props: { landingpage?: boolean }) {
 									</div>
 									<For each={links}>
 										{(link) => (
-											<Button type={link.type} href={link.href}>
+											<Button type={link.type} href={link.href} chevron={Boolean(link.external)}>
 												{link.name}
 											</Button>
 										)}
