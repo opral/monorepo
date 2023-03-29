@@ -2,7 +2,6 @@ import { expect, it } from "vitest"
 import { fs as memfs } from "memfs"
 import { mockEnvironment } from "./mockEnvironment.js"
 import type { EnvironmentFunctions } from "../config/schema.js"
-// import fs from "node:fs/promises"
 
 it("should copy a directory into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
@@ -27,4 +26,19 @@ it("should be able to import JavaScript from the environment", async () => {
 	const env = await mockEnvironment({ copyDirectory: { fs, path: "./test" } })
 	const { x } = await env.$import("./test/file.js")
 	expect(x).toBe("hello")
+})
+
+it("should give an error if the path does not exist (hinting at a current working directory problem)", async () => {
+	const fs = memfs.promises as EnvironmentFunctions["$fs"]
+	// relative imports are relative to the current working directory, not the file.
+	// thus, if you run the tests from the root of the project, the path will be wrong.
+	try {
+		await mockEnvironment({ copyDirectory: { fs, path: "../test" } })
+	} catch (error) {
+		expect(
+			(error as Error).message.includes(
+				`Make sure that the \`copyDirectory.path\` is relative to the current working directory`,
+			),
+		).toBe(true)
+	}
 })
