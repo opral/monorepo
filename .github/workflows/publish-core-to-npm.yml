@@ -1,6 +1,9 @@
 name: Publish @inlang/core to NPM
 
 on:
+  # manually triggering the workflow if desired
+  workflow_dispatch:
+  
   push:
     paths:
       - "source-code/core/**"
