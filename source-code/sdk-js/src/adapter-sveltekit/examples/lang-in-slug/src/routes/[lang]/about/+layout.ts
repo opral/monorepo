@@ -1,4 +1,4 @@
-import { inlangSymbol } from "../../../inlang.js"
+import { inlangSymbol } from "../../../inlang"
 import type { LayoutLoad } from "./$types.js.js"
 
 export const load = (async ({ parent }) => {

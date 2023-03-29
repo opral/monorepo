@@ -1,5 +1,5 @@
 {
-	"name": "first-try",
+	"name": "lang-in-slug",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -7,22 +7,19 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"postinstall": "patch-package"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^2.0.0",
+		"@inlang/core": "file:../../../../../core",
+		"@inlang/sdk-js": "file:../../../..",
+		"@sveltejs/adapter-node": "^1.2.3",
+		"@sveltejs/adapter-static": "^2.0.1",
 		"@sveltejs/kit": "^1.14.0",
 		"svelte": "^3.57.0",
 		"svelte-check": "^3.1.4",
 		"tslib": "^2.5.0",
 		"typescript": "^5.0.2",
-		"vite": "^4.2.1"
+		"vite": "4.3.0-beta.1"
 	},
-	"type": "module",
-	"dependencies": {
-		"@inlang/core": "file:../../../../../core",
-		"@inlang/sdk-js": "file:../../../..",
-		"patch-package": "^6.5.1"
-	}
+	"type": "module"
 }

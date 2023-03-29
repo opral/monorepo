@@ -1,9 +1,9 @@
-import { inlangSymbol } from "../../inlang.js"
-import type { PageLoad } from "./$types.js"
+import { inlangSymbol } from "../../../inlang"
+import type { PageLoad } from "./$types.js.js"
 
 export const load = (async ({ parent }) => {
 	const data = await parent()
 
 	const i = data[inlangSymbol].getLookupFunction()
-	console.info("+page.ts", i("welcome"))
+	console.info("about/+page.ts", i("welcome"))
 }) satisfies PageLoad

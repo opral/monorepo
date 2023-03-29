@@ -1,4 +1,4 @@
-import { getI18nContext } from "../inlang.js"
+import { getI18nContext } from "../inlang"
 
 export const clientFn = () => {
 	const { i } = getI18nContext()

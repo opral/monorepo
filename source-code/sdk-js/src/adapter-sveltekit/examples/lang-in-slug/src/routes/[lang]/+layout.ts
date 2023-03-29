@@ -1,4 +1,4 @@
-import { initI18nRuntime, inlangSymbol } from "../../inlang.js"
+import { initI18nRuntime, inlangSymbol } from "../../inlang"
 import type { LayoutLoad } from "./$types.js"
 
 export const load = (async ({ data: { language }, fetch }) => {
