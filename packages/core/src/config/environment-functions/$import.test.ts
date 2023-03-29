@@ -2,12 +2,15 @@
 
 import { describe, expect, it } from "vitest"
 import { initialize$import } from "./$import.js"
-import { fs } from "memfs"
+import { fs as memfs } from "memfs"
 
-describe("$import", () => {
+describe("$import", async () => {
+	// memfs uses process.cwd() to resolve paths
+	// setting the path to "/" to avoid
+	process.cwd = () => "/"
 	// mock module
-	fs.writeFileSync(
-		"/mock-module.js",
+	await memfs.promises.writeFile(
+		"./mock-module.js",
 		`
 		export function hello() {
 			return "hello";
@@ -17,9 +20,9 @@ describe("$import", () => {
 	)
 
 	// mock module in a directory
-	fs.mkdirSync("/nested")
-	fs.writeFileSync(
-		"/nested/mock-module-two.js",
+	await memfs.promises.mkdir("./nested")
+	await memfs.promises.writeFile(
+		"./nested/mock-module-two.js",
 		`
 		export function hello() {
 			return "world";
@@ -29,7 +32,6 @@ describe("$import", () => {
 	)
 
 	const $import = initialize$import({
-		workingDirectory: "/",
 		// @ts-ignore
 		fs: fs.promises,
 		fetch,
@@ -50,17 +52,6 @@ describe("$import", () => {
 		// the default export is a url normalization function.
 		// see https://github.com/sindresorhus/normalize-url/
 		expect(module.default("inlang.com")).toBe("http://inlang.com")
-	})
-
-	it("should import a relative file based on the workingDirectory", async () => {
-		const $import = initialize$import({
-			workingDirectory: "/nested",
-			// @ts-ignore
-			fs: fs.promises,
-			fetch,
-		})
-		const module = await $import("./mock-module-two.js")
-		expect(module.hello()).toBe("world")
 	})
 
 	it("should throw if a module is loaded that is not an ES module", async () => {
