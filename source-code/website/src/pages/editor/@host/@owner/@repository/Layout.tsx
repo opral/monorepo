@@ -39,9 +39,9 @@ export function Layout(props: { children: JSXElement }) {
 					<BranchMenu />
 				</div>
 				<div class="flex justify-between gap-2 pb-5">
-					<input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" />
+					<LanguageFilter />
 					<div class="flex gap-2">
-						<LanguageFilter />
+						<input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" />
 						<HasChangesAction />
 					</div>
 				</div>
