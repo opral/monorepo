@@ -1,6 +1,19 @@
 {
 	"name": "@inlang/sdk-js",
 	"type": "module",
+	"exports": {
+		"./config": {
+			"types": "./dist/config/index.d.ts",
+			"import": "./dist/config/index.js"
+		},
+		"./runtime": {
+			"types": "./dist/runtime/index.d.ts",
+			"import": "./dist/runtime/index.js"
+		}
+	},
+	"files": [
+		"./dist"
+	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",

@@ -12,9 +12,9 @@ async function readInlangConfig() {
 
 	const cwd = process.cwd()
 
-	const module = (await import(resolve(cwd, "./inlang.config.js")).catch(() => undefined)) as
-		| { defineConfig: DefineConfig }
-		| undefined
+	const module = (await import(/* @vite-ignore */ resolve(cwd, "./inlang.config.js")).catch(
+		() => undefined,
+	)) as { defineConfig: DefineConfig } | undefined
 	if (!module || !module.defineConfig) {
 		return undefined
 	}
