@@ -42,7 +42,7 @@ export async function _generateConfigFileServer(args: {
 }): Promise<Result<string, Error>> {
 	const fs = Volume.fromJSON(args.filesystemAsJson).promises
 	// @ts-ignore
-	const env = await mockEnvironment({ copyDirectory: { fs: fs, path: "/" } })
+	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {

@@ -7,15 +7,15 @@ import dedent from "dedent"
  *
  * The mock environment uses a virtual file system (memfs). If
  * testing inlang depends on files in the local file system,
- * you can copy the directory into the environment by providing
+ * you can copy directories into the environment by providing
  * the `copyDirectory` argument.
  *
- * @param copyDirectory - if defined, copies the directory into the environment
+ * @param copyDirectory - if defined, copies directories (paths) into the environment
  */
 export async function mockEnvironment(args: {
 	copyDirectory?: {
 		fs: EnvironmentFunctions["$fs"]
-		path: string
+		paths: string[]
 	}
 }): Promise<EnvironmentFunctions> {
 	const $fs = memfs.promises as EnvironmentFunctions["$fs"]
@@ -28,8 +28,9 @@ export async function mockEnvironment(args: {
 		$import,
 	}
 	if (args.copyDirectory) {
-		const { fs, path } = args.copyDirectory
-		await copyDirectory({ copyFrom: fs, copyTo: $fs, path })
+		for (const path of args.copyDirectory.paths) {
+			await copyDirectory({ copyFrom: args.copyDirectory.fs, copyTo: $fs, path })
+		}
 	}
 	return env
 }
