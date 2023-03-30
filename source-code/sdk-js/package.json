@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
-		"dev": "npm run tsc:watch",
+		"dev": "tsc --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
