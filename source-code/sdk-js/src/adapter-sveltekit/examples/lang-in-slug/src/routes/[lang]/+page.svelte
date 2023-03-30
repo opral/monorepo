@@ -4,7 +4,7 @@
 
 	const { i } = getI18nContext()
 
-	console.info("+page.svelte", i("welcome"))
+	console.info("[lang]/+page.svelte", i("welcome"))
 </script>
 
 <Component />

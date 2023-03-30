@@ -13,12 +13,12 @@ export const initI18nRuntime = async (fetch: LoadEvent["fetch"], language: strin
 		fetch(`/inlang${url}`).then((response) => (response.ok ? response.json() : undefined))
 
 	const runtime = initRuntime({
-		readResource: async (language: string) => loadInlangData<Resource>(`/${language}`),
+		readResource: async (language: string) => loadInlangData<Resource>(`/${language}.json`),
 	})
 
 	const [_, languages] = await Promise.all([
 		runtime.loadResource(language),
-		loadInlangData<string[]>(""), // TODO: only load this if `languages` get used somewhere
+		loadInlangData<string[]>("/languages.json"), // TODO: only load this if `languages` get used somewhere
 	])
 
 	runtime.switchLanguage(language)

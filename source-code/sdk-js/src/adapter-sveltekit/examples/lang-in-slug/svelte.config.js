@@ -1,5 +1,5 @@
-// import adapter from "@sveltejs/adapter-static"
-import adapter from "@sveltejs/adapter-node"
+import adapter from "@sveltejs/adapter-static"
+// import adapter from "@sveltejs/adapter-node"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -14,7 +14,8 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		prerender: {
-			entries: ["/en", "*"],
+			// all root routes need to be included here
+			entries: ["/", "/de", "/en"],
 		},
 	},
 }

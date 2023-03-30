@@ -3,7 +3,7 @@
 
 	const { i, language } = getI18nContext()
 
-	console.info("about/+page.svelte", i("welcome"))
+	console.info("[lang]/about/+page.svelte", i("welcome"))
 </script>
 
 About page {language}

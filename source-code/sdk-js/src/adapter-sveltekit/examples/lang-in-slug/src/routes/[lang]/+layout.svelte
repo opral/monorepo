@@ -1,18 +1,9 @@
 <script lang="ts">
-	import { getI18nContext, inlangSymbol, setI18nContext } from "../../inlang.js"
-	import type { LayoutData } from "./$types.js"
+	import { getI18nContext } from "../../inlang.js"
 
-	export let data: LayoutData
+	const { i, languages, route, loadResource, switchLanguage } = getI18nContext()
 
-	setI18nContext(data[inlangSymbol])
-	let { i, language, languages, route, loadResource, switchLanguage } = getI18nContext()
-
-	$: {
-		setI18nContext(data[inlangSymbol])
-		;({ i, language, route, loadResource, switchLanguage } = getI18nContext())
-	}
-
-	$: console.info("+layout.svelte", i("welcome"))
+	$: console.info("[lang]/+layout.svelte", i("welcome"))
 </script>
 
 {#each languages as language}
@@ -28,6 +19,4 @@
 	<li><a href={route("/about")}>About</a></li>
 </ul>
 
-{#key language}
-	<slot />
-{/key}
+<slot />

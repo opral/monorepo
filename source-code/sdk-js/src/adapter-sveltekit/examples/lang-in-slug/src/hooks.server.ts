@@ -1,7 +1,9 @@
 import { redirect, type Handle } from "@sveltejs/kit"
 import { initRuntime } from "@inlang/sdk-js/runtime"
-import { getResource, languages } from "./inlang.server.js"
+import { getResource, languages, referenceLanguage } from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
+
+const isStatic = true
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
@@ -9,8 +11,8 @@ export const handle = (async ({ event, resolve }) => {
 	const pathname = event.url.pathname
 	if (pathname.startsWith("/inlang")) return resolve(event)
 
-	const language = pathname.split("/")[1]
-	if (!language || !languages.includes(language)) {
+	const language = pathname.split("/")[1] || referenceLanguage
+	if (!isStatic && (!language || !languages.includes(language))) {
 		// TODO: detect preferred language
 		throw redirect(307, "/en")
 	}

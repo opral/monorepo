@@ -1,11 +1,10 @@
-import { initI18nRuntime, inlangSymbol } from "../../inlang.js"
+import { inlangSymbol } from "../../inlang.js"
 import type { LayoutLoad } from "./$types.js"
 
-export const load = (async ({ data: { language }, fetch }) => {
-	const runtime = await initI18nRuntime(fetch, language)
+export const load = (async ({ parent }) => {
+	const data = await parent()
 
-	const i = runtime.getLookupFunction()
-	console.info("+layout.ts", i("welcome"))
+	const i = data[inlangSymbol].getLookupFunction()
 
-	return { [inlangSymbol]: runtime }
+	console.info("[lang]/+layout.ts", i("welcome"))
 }) satisfies LayoutLoad

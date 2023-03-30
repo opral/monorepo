@@ -3,7 +3,7 @@
 
 	const { i } = getI18nContext()
 
-	console.info("about/+layout.svelte", i("welcome"))
+	console.info("[lang]/about/+layout.svelte", i("welcome"))
 </script>
 
 <slot />

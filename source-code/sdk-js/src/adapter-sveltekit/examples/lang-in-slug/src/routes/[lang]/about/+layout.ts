@@ -5,5 +5,5 @@ export const load = (async ({ parent }) => {
 	const data = await parent()
 
 	const i = data[inlangSymbol].getLookupFunction()
-	console.info("about/+layout.ts", i("welcome"))
+	console.info("[lang]/about/+layout.ts", i("welcome"))
 }) satisfies LayoutLoad
