@@ -33,11 +33,22 @@ const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
+	const { inlangConfig } = useEditorState()
 	//setTextSearch
 	const { setTextSearch } = useEditorState()
 	const handleSearchText = (text: string) => {
 		setTextSearch(text)
 	}
+	const [customHintCondition, setCustomHintCondition] = createSignal(false)
+
+	createEffect(() => {
+		if (inlangConfig()?.languages) {
+			const timer = setTimeout(() => {
+				setCustomHintCondition(true)
+			}, 500)
+			onCleanup(() => clearTimeout(timer))
+		}
+	})
 
 	return (
 		<RootLayout>
@@ -48,13 +59,15 @@ export function Layout(props: { children: JSXElement }) {
 					<BranchMenu />
 				</div>
 				<div class="flex justify-between gap-2 pb-5">
-					<div class="flex justify-between gap-2">
+					<div class="flex justify-between gap-2 items-center">
+						<p class="text-sm text-outline-variant">Filter:</p>
 						<CustomHintWrapper
 							notification={{
 								notificationTitle: "Language detection",
 								notificationDescription: "We filtered by your browser defaults.",
 								notificationType: "info",
 							}}
+							condition={customHintCondition()}
 						>
 							<sl-tooltip prop:content="by language">
 								<LanguageFilter />

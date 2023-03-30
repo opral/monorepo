@@ -3,6 +3,7 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
+import { lint, getLintReports } from "@inlang/core/lint"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>

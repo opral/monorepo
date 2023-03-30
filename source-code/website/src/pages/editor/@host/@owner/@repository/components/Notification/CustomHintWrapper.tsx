@@ -6,6 +6,7 @@ import { NotificationPopup } from "./NotificationPopup.jsx"
 interface CustomHintWrapperProps {
 	notification: Notification
 	children: JSXElement
+	condition: boolean
 }
 
 export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
@@ -20,7 +21,13 @@ export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
 		<div class="relative z-30">
 			<NotificationPopup
 				notifications={[props.notification]}
-				open={open}
+				open={
+					!props.condition
+						? () => {
+								return false
+						  }
+						: open
+				}
 				offset={44}
 				withIcon={false}
 				position="top-left"

@@ -107,6 +107,11 @@ sl-select::part(combobox) {
 	padding-block: 2px;
 }
 
+sl-select::part(combobox):hover {
+	border-color: theme(colors.on-surface);
+	background-color: theme(colors.surface-1);
+}
+
 sl-select::part(tags) {
 	gap: 4px;
 	font-size: 12px;
@@ -117,6 +122,8 @@ sl-select::part(tags) {
 
 sl-select::part(expand-icon) {
 	margin-left: 8px;
+	width: 9px;
+	height: 9px;
 }
 
 sl-option::part(checked-icon) {
@@ -131,4 +138,8 @@ sl-option::part(label) {
 	display: flex;
 	align-items: center;
 	line-height: 1;
+}
+
+sl-select::part(tag) {
+	--sl-input-height-small: 26px;
 }
