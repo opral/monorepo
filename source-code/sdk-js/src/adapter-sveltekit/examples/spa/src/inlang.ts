@@ -41,7 +41,6 @@ export type I18nContext = {
 	i: LookupFunction
 	switchLanguage: (language: string) => Promise<void>
 	loadResource: Runtime["loadResource"]
-	route: (href: RelativeUrl) => RelativeUrl
 }
 
 export const setI18nContext = (runtime: Runtime) => {
@@ -62,14 +61,7 @@ export const setI18nContext = (runtime: Runtime) => {
 		i: runtime.getLookupFunction(),
 		loadResource: runtime.loadResource,
 		switchLanguage,
-		route: route.bind(undefined, language),
 	})
 }
 
 export const getI18nContext = (): I18nContext => getContext(inlangSymbol)
-
-// ------------------------------------------------------------------------------------------------
-
-type RelativeUrl = `/${string}`
-
-export const route = (language: string, href: RelativeUrl) => href

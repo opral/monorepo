@@ -5,11 +5,11 @@
 	export let data: LayoutData
 
 	setI18nContext(data[inlangSymbol])
-	let { i, language, languages, route, loadResource, switchLanguage } = getI18nContext()
+	let { i, language, languages, loadResource, switchLanguage } = getI18nContext()
 
 	$: {
 		setI18nContext(data[inlangSymbol])
-		;({ i, language, languages, route, loadResource, switchLanguage } = getI18nContext())
+		;({ i, language, languages,  loadResource, switchLanguage } = getI18nContext())
 	}
 
 	$: console.info("+layout.svelte", i("welcome"))
@@ -25,8 +25,8 @@
 {/each}
 
 <ul>
-	<li><a href={route("/")}>Home</a></li>
-	<li><a href={route("/about")}>About</a></li>
+	<li><a href="/">Home</a></li>
+	<li><a href="/about">About</a></li>
 </ul>
 
 {#key language}
