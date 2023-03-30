@@ -27,6 +27,7 @@ import { analytics } from "@src/services/analytics/index.js"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { isEmpty } from "lodash-es"
+import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -47,11 +48,19 @@ export function Layout(props: { children: JSXElement }) {
 					<BranchMenu />
 				</div>
 				<div class="flex justify-between gap-2 pb-5">
-					<LanguageFilter />
-					<div class="flex gap-2">
-						<sl-tooltip prop:content="Search">
-							<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+					<CustomHintWrapper
+						notification={{
+							notificationTitle: "Language detection",
+							notificationDescription: "We filtered by your browser defaults.",
+							notificationType: "info",
+						}}
+					>
+						<sl-tooltip prop:content="by language">
+							<LanguageFilter />
 						</sl-tooltip>
+					</CustomHintWrapper>
+					<div class="flex gap-2">
+						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
 						<HasChangesAction />
 					</div>
 				</div>
