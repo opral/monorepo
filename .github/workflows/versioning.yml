@@ -1,6 +1,6 @@
 # see https://github.com/changesets/action#without-publishing
 
-name: Release
+name: versioning
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
-    name: Release
+  versioning:
+    name: versioning
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

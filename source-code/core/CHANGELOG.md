@@ -1,5 +1,16 @@
 # @inlang/core
 
+## 0.5.3
+
+### Patch Changes
+
+- 6bf22450: add the option to copy multiple directories for a `mockEnvironment`
+- 61190e25: The `pluginBuildConfig` is now async to dynamically import plugins as required.
+
+  Closes https://github.com/inlang/inlang/issues/486
+
+## 0.5.1
+
 ## 0.5.0
 
 ### Minor Changes

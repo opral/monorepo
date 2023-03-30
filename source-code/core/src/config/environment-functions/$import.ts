@@ -27,19 +27,13 @@ export type $import = (uri: string) => Promise<any>
  * const module = await $import('./some-module.js');
  */
 export function initialize$import(args: {
-	/**
-	 * Directory from which the import should be resolved. Be careful, as the working directory of the fs is not changed!
-	 *
-	 * @deprecated, because it can lead to unintended side effects. Use only for testings. Likely to be removed in the future.
-	 */
-	workingDirectory?: string
 	/** the fs from which the file can be read */
 	fs: $fs
 	/** http client implementation */
 	fetch: typeof fetch
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
-	return (uri: string) => $import(uri, { workingDirectory: "/", ...args })
+	return (uri: string) => $import(uri, args)
 }
 
 /**
@@ -54,8 +48,6 @@ export function initialize$import(args: {
 async function $import(
 	uri: string,
 	environment: {
-		/** directory from which the import should be resolved */
-		workingDirectory: string
 		/** the fs from which the file can be read */
 		fs: $fs
 		/** http client implementation */
@@ -69,7 +61,38 @@ async function $import(
 	const moduleAsText = uri.startsWith("http")
 		? await (await _fetch(uri)).text()
 		: // @ts-ignore - Uses node under the hood which sometimes takes the encoding as a second argument
-		  ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, "utf-8")) as string)
+		  ((await environment.fs.readFile(normalizePath(uri), "utf-8")) as string)
 	const moduleWithMimeType = "data:application/javascript;base64," + btoa(moduleAsText)
 	return await import(/* @vite-ignore */ moduleWithMimeType)
+}
+
+/*
+ * normalize-path <https://github.com/jonschlinkert/normalize-path>
+ *
+ * Copyright (c) 2014-2018, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+function normalizePath(path: string) {
+	if (typeof path !== "string") {
+		throw new TypeError("expected path to be a string")
+	}
+
+	if (path === "\\" || path === "/") return "/"
+
+	const len = path.length
+	if (len <= 1) return path
+
+	// ensure that win32 namespaces has two leading slashes, so that the path is
+	// handled properly by the win32 version of path.parse() after being normalized
+	// https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
+	let prefix = ""
+	if (len > 4 && path[3] === "\\") {
+		const ch = path[2]
+		if ((ch === "?" || ch === ".") && path.slice(0, 2) === "\\\\") {
+			path = path.slice(2)
+			prefix = "//"
+		}
+	}
+	const segs = path.split(/[/\\]+/)
+	return prefix + segs.join("/")
 }

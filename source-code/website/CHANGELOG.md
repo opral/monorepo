@@ -1,5 +1,22 @@
 # @inlang/website
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [6bf22450]
+- Updated dependencies [61190e25]
+  - @inlang/core@0.5.3
+  - @inlang/git-sdk@0.5.3
+
+## 0.5.1
+
+### Patch Changes
+
+- c741229: Add a new nav link to GitHub discussions
+  - @inlang/core@0.5.1
+  - @inlang/git-sdk@0.5.1
+
 ## 0.5.0
 
 ### Patch Changes
