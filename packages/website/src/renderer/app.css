@@ -62,3 +62,84 @@ sl-textarea::part(textarea) {
 sl-textarea::part(base) {
 	border: none;
 }
+
+sl-input {
+	--sl-input-filled-background-color: theme(colors.surface-1);
+	--sl-input-border-color: none;
+	--sl-input-border-color-hover: none;
+	--sl-input-border-color-focus: none;
+	--sl-input-color: none;
+	--sl-input-focus-ring-color: none;
+	--sl-focus-ring: none;
+	--tw-ring-color: transparent;
+	--sl-input-border-color-hover: theme(colors.outline);
+}
+
+sl-tooltip::part(base) {
+	--sl-tooltip-background-color: theme(colors.inverted-surface);
+	--sl-tooltip-color: theme(colors.on-inverted-surface);
+}
+
+sl-badge::part(base) {
+	border: none;
+}
+
+sl-select::part(tag__remove-button) {
+	display: none;
+}
+
+sl-select::part(listbox) {
+	margin-top: 0.5rem;
+	padding-top: 0.75rem;
+	padding-bottom: 0.25rem;
+	width: 300px;
+	translate: -1px;
+	--tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+	--tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color),
+		0 8px 10px -6px var(--tw-shadow-color);
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+		var(--tw-shadow);
+}
+
+sl-select::part(combobox) {
+	/* height: 2rem; */
+	padding-inline: 8px;
+	padding-block: 2px;
+}
+
+sl-select::part(combobox):hover {
+	border-color: theme(colors.on-surface);
+	background-color: theme(colors.surface-1);
+}
+
+sl-select::part(tags) {
+	gap: 4px;
+	font-size: 12px;
+	line-height: 140%;
+	font-weight: 500;
+	margin-left: 0;
+}
+
+sl-select::part(expand-icon) {
+	margin-left: 8px;
+	width: 9px;
+	height: 9px;
+}
+
+sl-option::part(checked-icon) {
+	padding-right: 12px;
+}
+
+sl-option::part(base) {
+	padding-inline: 0.75rem;
+}
+
+sl-option::part(label) {
+	display: flex;
+	align-items: center;
+	line-height: 1;
+}
+
+sl-select::part(tag) {
+	--sl-input-height-small: 26px;
+}

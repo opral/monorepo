@@ -35,6 +35,8 @@ import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js"
 import "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js"
 import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
+import "@shoelace-style/shoelace/dist/components/select/select.js"
+import "@shoelace-style/shoelace/dist/components/option/option.js"
 
 import { clientSideEnv } from "@env"
 import { analytics } from "@src/services/analytics/index.js"
