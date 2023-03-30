@@ -10,7 +10,7 @@ import { clickOutside } from "@src/directives/clickOutside.js"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
-import { Notification, NotificationHint } from "./NotificationHint.jsx"
+import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -44,8 +44,8 @@ export function PatternEditor(props: {
 			)
 		}
 		// if the message is updated externally, update the text value
-		else if (props.message) {
-			setTextValue(props.message.pattern.elements[0].value)
+		else if (props.message?.pattern.elements[0].value) {
+			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
 
@@ -152,7 +152,7 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0].value
+		const text = props.referenceMessage.pattern.elements[0].value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -237,11 +237,7 @@ export function PatternEditor(props: {
 						</p>
 					</div>
 					{props.referenceLanguage === props.language && (
-						<div class="flex justify-center items-center flex-grow-0 flex-shrink-0 w-[25px] relative gap-2 py-[3px] rounded-sm bg-on-surface-variant">
-							<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-background">
-								ref
-							</p>
-						</div>
+						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}

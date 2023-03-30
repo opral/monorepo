@@ -3,11 +3,12 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
+import { lint, getLintReports } from "@inlang/core/lint"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
 }) {
-	const { inlangConfig, filteredLanguages } = useEditorState()
+	const { inlangConfig, filteredLanguages, textSearch } = useEditorState()
 	const referenceMessage = () => {
 		return props.messages[inlangConfig()!.referenceLanguage]
 	}
@@ -43,7 +44,12 @@ export function Messages(props: {
 	})
 
 	return (
-		<>
+		<Show
+			when={
+				JSON.stringify(id()).includes(textSearch()) ||
+				JSON.stringify(props.messages).includes(textSearch())
+			}
+		>
 			<div
 				class={
 					"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 first:border-t border-x border-b-0 border-surface-2 first:rounded-t"
@@ -77,7 +83,7 @@ export function Messages(props: {
 					)}
 				</For>
 			</div>
-		</>
+		</Show>
 	)
 }
 
