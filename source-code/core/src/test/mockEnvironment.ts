@@ -49,11 +49,11 @@ async function copyDirectory(args: {
 		await args.copyFrom.readdir(args.path)
 	} catch {
 		throw new Error(dedent`
-			The directory specified in \`copyDirectory.path\` does not exist.
+The directory specified in \`copyDirectory.path\` does not exist.
 
-			Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
+Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
 
-			Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
+Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
 		`)
 	}
 	// create directory
