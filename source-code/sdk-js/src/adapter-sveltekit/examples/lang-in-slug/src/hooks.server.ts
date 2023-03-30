@@ -3,7 +3,7 @@ import { initRuntime } from "@inlang/sdk-js/runtime"
 import { getResource, languages, referenceLanguage } from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
 
-const isStatic = true
+const isStatic = false
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
