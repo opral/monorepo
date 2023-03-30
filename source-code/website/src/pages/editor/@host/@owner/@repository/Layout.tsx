@@ -25,24 +25,62 @@ import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
 import { analytics } from "@src/services/analytics/index.js"
 import { github } from "@src/services/github/index.js"
+import { SearchInput } from "./components/SearchInput.jsx"
+import { isEmpty } from "lodash-es"
+import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
+	const { inlangConfig } = useEditorState()
+	//setTextSearch
+	const { setTextSearch } = useEditorState()
+	const handleSearchText = (text: string) => {
+		setTextSearch(text)
+	}
+	const [customHintCondition, setCustomHintCondition] = createSignal(false)
+
+	createEffect(() => {
+		if (inlangConfig()?.languages) {
+			const timer = setTimeout(() => {
+				setCustomHintCondition(true)
+			}, 500)
+			onCleanup(() => clearTimeout(timer))
+		}
+	})
+
 	return (
 		<RootLayout>
-			<div class="pt-4 pb-16 w-full space-y-2 flex flex-col grow">
+			<div class="pt-4 pb-16 w-full flex flex-col grow">
 				<SignInBanner />
-				<div class="flex items-center justify-between py-3">
-					<div class="flex items-center space-x-4">
-						<Breadcrumbs />
-						<BranchMenu />
+				<div class="flex items-center space-x-4 py-5">
+					<Breadcrumbs />
+					<BranchMenu />
+				</div>
+				<div class="flex justify-between gap-2 pb-5">
+					<div class="flex justify-between gap-2 items-center">
+						<p class="text-sm text-outline-variant">Filter:</p>
+						<CustomHintWrapper
+							notification={{
+								notificationTitle: "Language detection",
+								notificationDescription: "We filtered by your browser defaults.",
+								notificationType: "info",
+							}}
+							condition={customHintCondition()}
+						>
+							<sl-tooltip prop:content="by language">
+								<LanguageFilter />
+							</sl-tooltip>
+						</CustomHintWrapper>
+						{/* <sl-tooltip prop:content="by lint status">
+							<StatusFilter />
+						</sl-tooltip> */}
 					</div>
-					<sl-button-group prop:label="filterbar">
-						<LanguageFilter />
+					<div class="flex gap-2">
+						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
 						<HasChangesAction />
-					</sl-button-group>{" "}
+					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
@@ -104,16 +142,16 @@ function BranchMenu() {
 					.
 				</div>
 				{/* <For each={branches()}>
-						{(branch) => (
-							<a
-							href={`${currentPageContext().urlParsed.pathname}?branch=${branch}`}
-							>
-							<sl-menu-item prop:checked={currentBranch() === branch}>
-							{branch}
-							</sl-menu-item>
-							</a>
-							)}
-						</For> */}
+					{(branch) => (
+						<a
+						href={`${currentPageContext().urlParsed.pathname}?branch=${branch}`}
+						>
+						<sl-menu-item prop:checked={currentBranch() === branch}>
+						{branch}
+						</sl-menu-item>
+						</a>
+						)}
+					</For> */}
 			</sl-menu>
 		</sl-dropdown>
 	)
@@ -189,6 +227,7 @@ function HasChangesAction() {
 			prop:disabled={(unpushedChanges() ?? []).length === 0}
 			onClick={triggerPushChanges}
 			prop:loading={isLoading()}
+			prop:size={"small"}
 		>
 			Push changes
 			<Show when={(unpushedChanges() ?? []).length > 0}>
@@ -202,53 +241,216 @@ function HasChangesAction() {
 
 function LanguageFilter() {
 	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
+	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
+
+	createEffect(() => {
+		const languages = inlangConfig()?.languages.filter(
+			(language) =>
+				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+		)
+		if (!isEmpty(languages) && languages !== undefined) {
+			setFilteredLanguages(languages)
+			setBrowserLanguage(true)
+		}
+	})
+
 	return (
-		<Show when={inlangConfig()?.languages}>
-			<sl-dropdown>
-				<sl-button slot="trigger" prop:caret={true}>
-					Languages
-				</sl-button>
-				<sl-menu class="p-4 rounded">
-					<div class="flex gap-6">
-						<a
-							class="cursor-pointer text-sm font-medium link link-primary"
-							onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
-						>
-							Select all
-						</a>
-						<a
-							class="cursor-pointer text-sm font-medium link link-primary"
-							// filter all except the reference language
-							onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
-						>
-							Deselect all
-						</a>
+		<Show
+			when={inlangConfig()?.languages && browserLanguage()}
+			fallback={
+				<sl-select
+					prop:name="Language Select"
+					prop:placeholder="Loading ..."
+					prop:size="small"
+					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+				>
+					<div class="mx-auto pr-2" slot="prefix">
+						<LanguageIcon />
 					</div>
-					<hr class="border-outline my-2" />
+				</sl-select>
+			}
+		>
+			<sl-select
+				prop:name="Language Select"
+				prop:placeholder="Languages"
+				prop:size="small"
+				prop:multiple={true}
+				prop:value={filteredLanguages()}
+				on:sl-change={(event: any) => {
+					setFilteredLanguages(event.target.value)
+				}}
+				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+			>
+				<div class="mx-auto pr-2" slot="prefix">
+					<LanguageIcon />
+				</div>
+				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+					<span class="text-left text-on-surface-variant grow">Languages</span>
+					<a
+						class="cursor-pointer link link-primary"
+						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
+					>
+						ALL
+					</a>
+					<a
+						class="cursor-pointer link link-primary"
+						// filter all except the reference language
+						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
+					>
+						NONE
+					</a>
+				</div>
+				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+				<div class="max-h-[300px] overflow-y-auto">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
-							<sl-checkbox
-								class="block"
+							<sl-option
+								prop:value={language}
+								prop:selected={filteredLanguages().includes(language)}
 								prop:disabled={language === inlangConfig()?.referenceLanguage}
-								prop:checked={filteredLanguages().includes(language)}
-								// eslint-disable-next-line @typescript-eslint/no-explicit-any
-								on:sl-change={(event: any) => {
-									if (event.target.__checked) {
-										setFilteredLanguages((value) => [...value, language])
-									} else {
-										setFilteredLanguages((value) =>
-											value.filter((_language) => _language !== language),
-										)
-									}
-								}}
+								class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
 							>
-								{language} {language === inlangConfig()?.referenceLanguage ? "(reference)" : ""}
-							</sl-checkbox>
+								{language}
+								{language === inlangConfig()?.referenceLanguage ? (
+									<sl-badge prop:variant="neutral" class="relative translate-x-3">
+										<span class="after:content-['ref'] after:text-background" />
+									</sl-badge>
+								) : (
+									""
+								)}
+							</sl-option>
 						)}
 					</For>
-				</sl-menu>
-			</sl-dropdown>
+				</div>
+			</sl-select>
 		</Show>
+	)
+}
+
+const LanguageIcon = () => {
+	return (
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 20 20"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			class="flex-grow-0 flex-shrink-0 w-5 h-5 relative"
+			preserveAspectRatio="none"
+		>
+			<path
+				d="M18.6848 16.9375L15.1691 8.42188C15.1042 8.26462 14.9941 8.13017 14.8527 8.03556C14.7112 7.94096 14.5449 7.89046 14.3748 7.89046C14.2047 7.89046 14.0384 7.94096 13.897 8.03556C13.7555 8.13017 13.6454 8.26462 13.5805 8.42188L10.0648 16.9375C10.0211 17.0419 9.99848 17.154 9.99819 17.2672C9.99791 17.3804 10.02 17.4925 10.0632 17.5972C10.1064 17.7018 10.1698 17.7969 10.2499 17.877C10.3299 17.957 10.425 18.0205 10.5296 18.0637C10.6343 18.1069 10.7464 18.129 10.8596 18.1287C10.9728 18.1284 11.0849 18.1058 11.1893 18.0621C11.2938 18.0184 11.3885 17.9545 11.4682 17.874C11.5478 17.7936 11.6108 17.6982 11.6535 17.5934L12.3695 15.8594H16.3801L17.0961 17.5934C17.161 17.7507 17.2712 17.8852 17.4126 17.9799C17.5541 18.0745 17.7204 18.125 17.8906 18.125C18.0318 18.1249 18.1709 18.09 18.2954 18.0234C18.4199 17.9568 18.5261 17.8606 18.6046 17.7432C18.683 17.6258 18.7314 17.4909 18.7453 17.3503C18.7592 17.2098 18.7383 17.068 18.6844 16.9375H18.6848ZM13.0793 14.1406L14.375 11.002L15.6707 14.1406H13.0793ZM10.4625 13.3953C10.596 13.2109 10.6509 12.981 10.6151 12.7562C10.5793 12.5313 10.4557 12.3299 10.2715 12.1961C10.2637 12.1902 9.68555 11.7613 8.84609 10.8395C10.3949 8.74258 11.2723 6.35703 11.6301 5.23438H12.8906C13.1185 5.23438 13.3371 5.14383 13.4983 4.98267C13.6595 4.82151 13.75 4.60292 13.75 4.375C13.75 4.14708 13.6595 3.92849 13.4983 3.76733C13.3371 3.60617 13.1185 3.51562 12.8906 3.51562H8.35938V2.73438C8.35938 2.50645 8.26883 2.28787 8.10767 2.12671C7.94651 1.96554 7.72792 1.875 7.5 1.875C7.27208 1.875 7.05349 1.96554 6.89233 2.12671C6.73117 2.28787 6.64062 2.50645 6.64062 2.73438V3.51562H2.10938C1.88145 3.51562 1.66287 3.60617 1.50171 3.76733C1.34054 3.92849 1.25 4.14708 1.25 4.375C1.25 4.60292 1.34054 4.82151 1.50171 4.98267C1.66287 5.14383 1.88145 5.23438 2.10938 5.23438H9.81445C9.44258 6.28711 8.75781 7.94922 7.71328 9.46719C6.48633 7.83906 6.03047 6.78555 6.02695 6.77695C5.93713 6.56937 5.76909 6.40557 5.55928 6.32107C5.34947 6.23658 5.11481 6.23821 4.9062 6.3256C4.69758 6.413 4.53183 6.57911 4.44489 6.78792C4.35795 6.99673 4.35684 7.23139 4.4418 7.44102C4.46445 7.49492 5.01016 8.77813 6.50664 10.7195C6.54258 10.766 6.57812 10.8113 6.61367 10.8566C5.08086 12.5891 3.57695 13.6637 2.94766 14.0105C2.74755 14.1197 2.599 14.3039 2.53468 14.5225C2.47036 14.7412 2.49554 14.9765 2.60469 15.1766C2.71383 15.3767 2.89799 15.5252 3.11666 15.5895C3.33533 15.6539 3.5706 15.6287 3.7707 15.5195C3.85508 15.4734 5.66914 14.4691 7.74063 12.1762C8.62031 13.1168 9.225 13.5605 9.26133 13.5863C9.35273 13.6527 9.45633 13.7004 9.5662 13.7268C9.67606 13.7531 9.79004 13.7575 9.9016 13.7397C10.0132 13.7219 10.1201 13.6823 10.2164 13.6231C10.3126 13.564 10.3963 13.4864 10.4625 13.3949V13.3953Z"
+				fill="#52525B"
+			/>
+		</svg>
+	)
+}
+
+function StatusFilter() {
+	const { inlangConfig } = useEditorState()
+
+	const transformId = (id: string) => {
+		switch (id) {
+			case "inlang.missingMessage":
+				return "missing"
+			case "inlang.messageWithoutReference":
+				return "no reference"
+			default:
+				return id.slice(7)
+		}
+	}
+
+	const [filteredStatus, setFilteredStatus] = createSignal<string | string[] | undefined>(
+		// @ts-ignore
+		inlangConfig()?.lint?.rules?.map((rule) => transformId(rule.id)),
+	)
+
+	return (
+		<Show
+			when={inlangConfig()?.lint?.rules}
+			fallback={
+				<sl-select
+					prop:name="Lint States Select"
+					prop:placeholder="Loading ..."
+					prop:size="small"
+					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+				>
+					<div class="mx-auto pr-2" slot="prefix">
+						<WarningIcon />
+					</div>
+				</sl-select>
+			}
+		>
+			<sl-select
+				prop:name="Lint States Select"
+				prop:placeholder="Lint States"
+				prop:size="small"
+				prop:multiple={true}
+				prop:value={filteredStatus()}
+				on:sl-change={(event: any) => {
+					setFilteredStatus(event.target.value)
+				}}
+				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+			>
+				<div class="mx-auto pr-2" slot="prefix">
+					<WarningIcon />
+				</div>
+				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+					<span class="text-left text-on-surface-variant grow">Languages</span>
+					<a
+						class="cursor-pointer link link-primary"
+						onClick={() =>
+							setFilteredStatus(() =>
+								// @ts-ignore
+								inlangConfig()!.lint?.rules.map((rule) => transformId(rule.id)),
+							)
+						}
+					>
+						ALL
+					</a>
+					<a
+						class="cursor-pointer link link-primary"
+						// filter all except the reference language
+						onClick={() => setFilteredStatus(() => [])}
+					>
+						NONE
+					</a>
+				</div>
+				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+				<div class="max-h-[300px] overflow-y-auto">
+					<For each={inlangConfig()?.lint?.rules}>
+						{(rule) => (
+							<sl-option
+								// @ts-ignore
+								prop:value={transformId(rule.id)}
+							>
+								{/* @ts-ignore */}
+								{transformId(rule.id)}
+							</sl-option>
+						)}
+					</For>
+				</div>
+			</sl-select>
+		</Show>
+	)
+}
+
+const WarningIcon = () => {
+	return (
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 20 20"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			class="flex-grow-0 flex-shrink-0"
+			preserveAspectRatio="none"
+		>
+			<path
+				d="M9 13H11V15H9V13ZM9 5H11V11H9V5ZM10 0C4.47 0 0 4.5 0 10C0 12.6522 1.05357 15.1957 2.92893 17.0711C3.85752 17.9997 4.95991 18.7362 6.17317 19.2388C7.38642 19.7413 8.68678 20 10 20C12.6522 20 15.1957 18.9464 17.0711 17.0711C18.9464 15.1957 20 12.6522 20 10C20 8.68678 19.7413 7.38642 19.2388 6.17317C18.7362 4.95991 17.9997 3.85752 17.0711 2.92893C16.1425 2.00035 15.0401 1.26375 13.8268 0.761205C12.6136 0.258658 11.3132 0 10 0ZM10 18C7.87827 18 5.84344 17.1571 4.34315 15.6569C2.84285 14.1566 2 12.1217 2 10C2 7.87827 2.84285 5.84344 4.34315 4.34315C5.84344 2.84285 7.87827 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1571 5.84344 18 7.87827 18 10C18 12.1217 17.1571 14.1566 15.6569 15.6569C14.1566 17.1571 12.1217 18 10 18Z"
+				fill="#52525B"
+			/>
+		</svg>
 	)
 }
 
