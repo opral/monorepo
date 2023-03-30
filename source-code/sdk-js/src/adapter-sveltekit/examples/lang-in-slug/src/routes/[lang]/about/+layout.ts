@@ -1,5 +1,5 @@
-import { inlangSymbol } from "../../../inlang"
-import type { LayoutLoad } from "./$types.js.js"
+import { inlangSymbol } from "../../../inlang.js"
+import type { LayoutLoad } from "./$types.js"
 
 export const load = (async ({ parent }) => {
 	const data = await parent()

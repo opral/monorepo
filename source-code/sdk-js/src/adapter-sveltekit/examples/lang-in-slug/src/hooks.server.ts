@@ -1,7 +1,7 @@
 import { redirect, type Handle } from "@sveltejs/kit"
 import { initRuntime } from "@inlang/sdk-js/runtime"
-import { getResource, languages } from "./inlang.server"
-import { serverFn } from "./utils/server"
+import { getResource, languages } from "./inlang.server.js"
+import { serverFn } from "./utils/server.js"
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
