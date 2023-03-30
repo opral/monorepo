@@ -223,24 +223,18 @@ function HasChangesAction() {
 
 function LanguageFilter() {
 	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
-	const [languageSearch, setLanguageSearch] = createSignal<string>("")
-	const handleSearchLanguage = (text: string) => {
-		setLanguageSearch(text)
-	}
+	// let languageSelect: any
 
-	// createEffect(() => {
-	// 	const languages = inlangConfig()?.languages.filter((language) =>
-	// 		navigator.languages.includes(language),
-	// 	)
-	// 	if (!isEmpty(languages) && languages !== undefined) {
-	// 		if (!languages.includes(inlangConfig()!.referenceLanguage)) {
-	// 			// setFilteredLanguages()
-	// 		} else {
-	// 			console.log(languages)
-	// 			setFilteredLanguages(languages)
-	// 		}
-	// 	}
-	// })
+	createEffect(() => {
+		const languages = inlangConfig()?.languages.filter(
+			(language) =>
+				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+		)
+		if (!isEmpty(languages) && languages !== undefined) {
+			setFilteredLanguages(languages)
+			// languageSelect.value = languages
+		}
+	})
 
 	return (
 		<Show
@@ -252,7 +246,7 @@ function LanguageFilter() {
 					prop:size="small"
 					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 				>
-					<div class="mx-auto pr-2" slot="prefix">
+					<div class="mx-auto pr-0.5" slot="prefix">
 						<LanguageIcon />
 					</div>
 				</sl-select>
@@ -265,17 +259,13 @@ function LanguageFilter() {
 				prop:multiple={true}
 				prop:value={filteredLanguages()}
 				on:sl-change={(event: any) => {
-					if (event) {
-						setFilteredLanguages(event.target.value)
-					}
+					setFilteredLanguages(event.target.value)
 				}}
+				// ref={languageSelect}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
 				<div class="mx-auto pr-0.5" slot="prefix">
 					<LanguageIcon />
-				</div>
-				<div class="mx-3 mb-3">
-					<SearchInput placeholder="Find languages ..." handleChange={handleSearchLanguage} />
 				</div>
 				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
 					<span class="text-left text-on-surface-variant grow">Languages</span>
@@ -302,11 +292,6 @@ function LanguageFilter() {
 							prop:disabled={language === inlangConfig()?.referenceLanguage}
 							class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
 						>
-							{/* <sl-checkbox
-								class="block"
-								prop:checked={filteredLanguages().includes(language)}
-								prop:disabled={language === inlangConfig()?.referenceLanguage}
-							> */}
 							{language}
 							{language === inlangConfig()?.referenceLanguage ? (
 								<sl-badge prop:variant="neutral" class="relative translate-x-3">
@@ -315,7 +300,6 @@ function LanguageFilter() {
 							) : (
 								""
 							)}
-							{/* </sl-checkbox> */}
 						</sl-option>
 					)}
 				</For>
