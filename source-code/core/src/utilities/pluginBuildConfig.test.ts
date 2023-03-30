@@ -9,16 +9,16 @@ import { it, expect } from "vitest"
  */
 
 it("should throw an error if entrypoints is undefined", () => {
-	expect(() => pluginBuildConfig({})).toThrow()
+	expect(pluginBuildConfig({})).rejects.toThrow()
 })
 
-it("should throw an error if entrypoints is not a single element", () => {
-	expect(() => pluginBuildConfig({ entryPoints: [] })).toThrow()
-	expect(() => pluginBuildConfig({ entryPoints: ["a", "b"] })).toThrow()
+it("should throw an error if entrypoints is not a single element", async () => {
+	await expect(pluginBuildConfig({ entryPoints: [] })).rejects.toThrow()
+	await expect(pluginBuildConfig({ entryPoints: ["a", "b"] })).rejects.toThrow()
 })
 
-it("should not be possible to pass properties that the function defines itself", () => {
-	expect(() =>
+it("should not be possible to pass properties that the function defines itself", async () => {
+	await expect(
 		pluginBuildConfig({
 			entryPoints: ["a"],
 			// @ts-expect-error
@@ -26,5 +26,5 @@ it("should not be possible to pass properties that the function defines itself",
 			platform: "browser",
 			format: "cjs",
 		}),
-	).toThrow()
+	).rejects.toThrow()
 })
