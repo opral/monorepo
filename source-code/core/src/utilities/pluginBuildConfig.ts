@@ -1,5 +1,5 @@
 import type { BuildOptions } from "esbuild"
-import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"
+// import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"
 import dedent from "dedent"
 
 /**
@@ -64,10 +64,11 @@ export function pluginBuildConfig(
 	if (ops.plugins === undefined) {
 		ops.plugins = []
 	}
-	ops.plugins.push(
+	ops.plugins
+		.push
 		// @ts-ignore - for some reason we get a type error here
-		NodeModulesPolyfillPlugin(),
-	)
+		// NodeModulesPolyfillPlugin(),
+		()
 
 	return ops
 }
