@@ -48,7 +48,9 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex justify-between gap-2 pb-5">
 					<LanguageFilter />
 					<div class="flex gap-2">
-						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<sl-tooltip prop:content="Search">
+							<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						</sl-tooltip>
 						{/* <input placeholder="nils job" class="max-w-[300px] grow border rounded pl-3" /> */}
 						<HasChangesAction />
 					</div>

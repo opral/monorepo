@@ -74,3 +74,8 @@ sl-input {
 	--tw-ring-color: transparent;
 	--sl-input-border-color-hover: theme(colors.outline);
 }
+
+sl-tooltip::part(base) {
+	--sl-tooltip-background-color: theme(colors.inverted-surface);
+	--sl-tooltip-color: theme(colors.on-inverted-surface);
+}

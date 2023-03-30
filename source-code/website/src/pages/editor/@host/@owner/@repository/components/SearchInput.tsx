@@ -29,7 +29,6 @@ export const SearchInput = (props: SearchInputProps) => {
 				prop:size={"small"}
 				prop:value={textValue()}
 				onInput={(e) => handleInput(e.currentTarget.value)}
-				class="h-8"
 			>
 				<div slot={"suffix"}>
 					<SearchIcon />
