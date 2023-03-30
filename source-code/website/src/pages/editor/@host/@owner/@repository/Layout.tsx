@@ -223,7 +223,7 @@ function HasChangesAction() {
 
 function LanguageFilter() {
 	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
-	// let languageSelect: any
+	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
 
 	createEffect(() => {
 		const languages = inlangConfig()?.languages.filter(
@@ -232,13 +232,13 @@ function LanguageFilter() {
 		)
 		if (!isEmpty(languages) && languages !== undefined) {
 			setFilteredLanguages(languages)
-			// languageSelect.value = languages
+			setBrowserLanguage(true)
 		}
 	})
 
 	return (
 		<Show
-			when={inlangConfig()?.languages}
+			when={inlangConfig()?.languages && browserLanguage()}
 			fallback={
 				<sl-select
 					prop:name="Language Select"
@@ -261,7 +261,6 @@ function LanguageFilter() {
 				on:sl-change={(event: any) => {
 					setFilteredLanguages(event.target.value)
 				}}
-				// ref={languageSelect}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
 				<div class="mx-auto pr-0.5" slot="prefix">
