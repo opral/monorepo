@@ -93,6 +93,12 @@ sl-select::part(listbox) {
 	padding-top: 0.75rem;
 	padding-bottom: 0.25rem;
 	width: 300px;
+	translate: -1px;
+	--tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+	--tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color),
+		0 8px 10px -6px var(--tw-shadow-color);
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+		var(--tw-shadow);
 }
 
 sl-select::part(combobox) {
@@ -106,11 +112,8 @@ sl-select::part(tags) {
 	font-size: 12px;
 	line-height: 140%;
 	font-weight: 500;
+	margin-left: 0;
 }
-
-/* sl-select::part(tag) {
-	padding-block: 2px;
-} */
 
 sl-select::part(expand-icon) {
 	margin-left: 8px;
@@ -118,7 +121,6 @@ sl-select::part(expand-icon) {
 
 sl-option::part(checked-icon) {
 	padding-right: 12px;
-	/* display: none; */
 }
 
 sl-option::part(base) {

@@ -15,7 +15,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 	return (
 		<div
 			class={
-				"z-30 absolute w-[300px] bg-inverted-surface rounded transition duration-20 " +
+				"z-30 absolute w-[300px] bg-inverted-surface rounded -translate-x-1 shadow-xl transition duration-20 " +
 				(props.position === "bottom-right" ? "right-0 pointer-events-none " : "left-0 ") +
 				(props.open() ? "opacity-100" : "translate-y-0.5 opacity-0")
 			}
