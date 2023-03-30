@@ -26,6 +26,7 @@ import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { showToast } from "@src/components/Toast.jsx"
+import { lint } from "@inlang/core/lint"
 
 type EditorStateSchema = {
 	/**
@@ -74,6 +75,12 @@ type EditorStateSchema = {
 	 * Virtual filesystem
 	 */
 	fs: () => typeof import("memfs").fs
+
+	/**
+	 * TextSearch to filter messages
+	 */
+	textSearch: () => string
+	setTextSearch: Setter<string>
 
 	/**
 	 * The filesystem is not reactive, hence setFsChange to manually
@@ -149,6 +156,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
+
+	const [textSearch, setTextSearch] = createSignal<string>("")
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
@@ -435,6 +444,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
+					textSearch,
+					setTextSearch,
 					fsChange,
 					setFsChange,
 					filteredLanguages,

@@ -31,7 +31,7 @@
 		"@sentry/browser": "^7.27.0",
 		"@sentry/node": "^7.27.0",
 		"@sentry/tracing": "^7.27.0",
-		"@shoelace-style/shoelace": "^2.0.0-beta.84",
+		"@shoelace-style/shoelace": "2.3.0",
 		"@solid-primitives/intersection-observer": "^2.0.5",
 		"@solidjs/meta": "^0.28.2",
 		"@zag-js/checkbox": "^0.2.1",
