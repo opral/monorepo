@@ -1,11 +1,10 @@
 <script lang="ts">
-	// only generate if static output
+	import Component from "../components/Component.svelte"
+	import { getI18nContext } from "../inlang.js"
 
-	import { onMount } from "svelte"
-	import { goto } from "$app/navigation"
+	const { i } = getI18nContext()
 
-	onMount(() => {
-		const language = Math.random() > 0.5 ? "en" : "de"
-		goto(`/${language}`)
-	})
+	console.info("[lang]/+page.svelte", i("welcome"))
 </script>
+
+<Component />

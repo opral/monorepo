@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from "./$types.js"
 
+export const ssr = false
 // export const prerender = true
 
 export const load = (async ({ locals, url }) => {

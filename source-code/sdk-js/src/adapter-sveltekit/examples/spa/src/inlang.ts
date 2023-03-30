@@ -72,8 +72,4 @@ export const getI18nContext = (): I18nContext => getContext(inlangSymbol)
 
 type RelativeUrl = `/${string}`
 
-export const route = (language: string, href: RelativeUrl) => {
-	const url = `/${language}${href}`
-
-	return (url.endsWith("/") ? url.slice(0, -1) : url) as RelativeUrl
-}
+export const route = (language: string, href: RelativeUrl) => href
