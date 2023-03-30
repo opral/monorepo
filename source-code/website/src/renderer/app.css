@@ -79,3 +79,54 @@ sl-tooltip::part(base) {
 	--sl-tooltip-background-color: theme(colors.inverted-surface);
 	--sl-tooltip-color: theme(colors.on-inverted-surface);
 }
+
+sl-badge::part(base) {
+	border: none;
+}
+
+sl-select::part(tag__remove-button) {
+	display: none;
+}
+
+sl-select::part(listbox) {
+	margin-top: 0.5rem;
+	padding-top: 0.75rem;
+	padding-bottom: 0.25rem;
+	width: 300px;
+}
+
+sl-select::part(combobox) {
+	/* height: 2rem; */
+	padding-inline: 8px;
+	padding-block: 2px;
+}
+
+sl-select::part(tags) {
+	gap: 4px;
+	font-size: 12px;
+	line-height: 140%;
+	font-weight: 500;
+}
+
+/* sl-select::part(tag) {
+	padding-block: 2px;
+} */
+
+sl-select::part(expand-icon) {
+	margin-left: 8px;
+}
+
+sl-option::part(checked-icon) {
+	padding-right: 12px;
+	/* display: none; */
+}
+
+sl-option::part(base) {
+	padding-inline: 0.75rem;
+}
+
+sl-option::part(label) {
+	display: flex;
+	align-items: center;
+	line-height: 1;
+}

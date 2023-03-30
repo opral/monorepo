@@ -8,11 +8,6 @@ interface SearchInputProps {
 
 export const SearchInput = (props: SearchInputProps) => {
 	const [textValue, setTextValue] = createSignal<string>("")
-
-	const handleInput = (text: string) => {
-		setTextValue(text)
-	}
-
 	createEffect(() => props.handleChange(textValue()))
 
 	return (
@@ -28,7 +23,7 @@ export const SearchInput = (props: SearchInputProps) => {
 				prop:filled={true}
 				prop:size={"small"}
 				prop:value={textValue()}
-				onInput={(e) => handleInput(e.currentTarget.value)}
+				onInput={(e) => setTextValue(e.currentTarget.value)}
 			>
 				<div slot={"suffix"}>
 					<SearchIcon />

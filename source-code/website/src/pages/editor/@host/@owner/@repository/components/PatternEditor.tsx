@@ -237,11 +237,7 @@ export function PatternEditor(props: {
 						</p>
 					</div>
 					{props.referenceLanguage === props.language && (
-						<div class="flex justify-center items-center flex-grow-0 flex-shrink-0 w-[25px] relative gap-2 py-[3px] rounded-sm bg-on-surface-variant">
-							<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-background">
-								ref
-							</p>
-						</div>
+						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
