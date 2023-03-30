@@ -8,10 +8,6 @@ import * as Sentry from "@sentry/browser"
 import { BrowserTracing } from "@sentry/tracing"
 import { MetaProvider } from "@solidjs/meta"
 
-// node polyfill
-import { Buffer } from "node:buffer"
-globalThis.Buffer = Buffer
-
 // import the css
 import "./app.css"
 

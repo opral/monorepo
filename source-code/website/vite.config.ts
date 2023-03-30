@@ -1,12 +1,16 @@
-import type { UserConfig } from "vite"
+import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
 import { ssr as vitePluginSsr } from "vite-plugin-ssr/plugin"
 import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
+import { nodePolyfills } from "vite-plugin-node-polyfills"
 
-export default await withNodePolyfills({
+export default defineConfig({
 	plugins: [
+		nodePolyfills({
+			protocolImports: true,
+		}),
 		solid({ ssr: true }),
 		// ordering matters. telefunc must be before ssr
 		telefunc(),
@@ -31,75 +35,6 @@ export default await withNodePolyfills({
 		// target is es2022 to support top level await
 		// https://caniuse.com/?search=top%20level%20await
 		target: "es2022",
+		minify: false,
 	},
 })
-
-/**
- * Polyfills to use fs in the browser.
- *
- * Seperated from the main config for readability.
- * Adapted from https://stackoverflow.com/questions/69286329/polyfill-node-os-module-with-vite-rollup-js
- */
-async function withNodePolyfills(config: UserConfig): Promise<UserConfig> {
-	const { merge } = await import("lodash-es")
-	const polyfillConfig: UserConfig = {
-		define: {
-			global: "window",
-		},
-		resolve: {
-			alias: {
-				// both node: prefixes and no prefix are needed
-				"node:events": "rollup-plugin-node-polyfills/polyfills/events",
-				"node:path": "rollup-plugin-node-polyfills/polyfills/path",
-				"node:process": "rollup-plugin-node-polyfills/polyfills/process-es6",
-				"node:buffer": "rollup-plugin-node-polyfills/polyfills/buffer-es6",
-				"node:util": "rollup-plugin-node-polyfills/polyfills/util",
-				"node:sys": "util",
-				"node:stream": "rollup-plugin-node-polyfills/polyfills/stream",
-				"node:querystring": "rollup-plugin-node-polyfills/polyfills/qs",
-				"node:punycode": "rollup-plugin-node-polyfills/polyfills/punycode",
-				"node:url": "rollup-plugin-node-polyfills/polyfills/url",
-				"node:string_decoder": "rollup-plugin-node-polyfills/polyfills/string-decoder",
-				"node:http": "rollup-plugin-node-polyfills/polyfills/http",
-				"node:https": "rollup-plugin-node-polyfills/polyfills/http",
-				"node:os": "rollup-plugin-node-polyfills/polyfills/os",
-				"node:assert": "rollup-plugin-node-polyfills/polyfills/assert",
-				"node:constants": "rollup-plugin-node-polyfills/polyfills/constants",
-				_stream_duplex: "rollup-plugin-node-polyfills/polyfills/readable-stream/duplex",
-				_stream_passthrough: "rollup-plugin-node-polyfills/polyfills/readable-stream/passthrough",
-				_stream_readable: "rollup-plugin-node-polyfills/polyfills/readable-stream/readable",
-				_stream_writable: "rollup-plugin-node-polyfills/polyfills/readable-stream/writable",
-				_stream_transform: "rollup-plugin-node-polyfills/polyfills/readable-stream/transform",
-				"node:timers": "rollup-plugin-node-polyfills/polyfills/timers",
-				"node:console": "rollup-plugin-node-polyfills/polyfills/console",
-				"node:vm": "rollup-plugin-node-polyfills/polyfills/vm",
-				"node:zlib": "rollup-plugin-node-polyfills/polyfills/zlib",
-				"node:tty": "rollup-plugin-node-polyfills/polyfills/tty",
-				"node:domain": "rollup-plugin-node-polyfills/polyfills/domain",
-				events: "rollup-plugin-node-polyfills/polyfills/events",
-				path: "rollup-plugin-node-polyfills/polyfills/path",
-				process: "rollup-plugin-node-polyfills/polyfills/process-es6",
-				buffer: "rollup-plugin-node-polyfills/polyfills/buffer-es6",
-				util: "rollup-plugin-node-polyfills/polyfills/util",
-				sys: "util",
-				stream: "rollup-plugin-node-polyfills/polyfills/stream",
-				querystring: "rollup-plugin-node-polyfills/polyfills/qs",
-				punycode: "rollup-plugin-node-polyfills/polyfills/punycode",
-				url: "rollup-plugin-node-polyfills/polyfills/url",
-				string_decoder: "rollup-plugin-node-polyfills/polyfills/string-decoder",
-				http: "rollup-plugin-node-polyfills/polyfills/http",
-				https: "rollup-plugin-node-polyfills/polyfills/http",
-				os: "rollup-plugin-node-polyfills/polyfills/os",
-				assert: "rollup-plugin-node-polyfills/polyfills/assert",
-				constants: "rollup-plugin-node-polyfills/polyfills/constants",
-				timers: "rollup-plugin-node-polyfills/polyfills/timers",
-				console: "rollup-plugin-node-polyfills/polyfills/console",
-				vm: "rollup-plugin-node-polyfills/polyfills/vm",
-				zlib: "rollup-plugin-node-polyfills/polyfills/zlib",
-				tty: "rollup-plugin-node-polyfills/polyfills/tty",
-				domain: "rollup-plugin-node-polyfills/polyfills/domain",
-			},
-		},
-	}
-	return merge(polyfillConfig, config)
-}
