@@ -61,6 +61,6 @@ async function $import(
 		? await (await _fetch(uri)).text()
 		: // @ts-ignore - Uses node under the hood which sometimes takes the encoding as a second argument
 		  ((await environment.fs.readFile(`${environment.workingDirectory}/${uri}`, "utf-8")) as string)
-	const moduleWithMimeType = "data:application/javascript;base64," + btoa(moduleAsText)
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 	return await import(/* @vite-ignore */ moduleWithMimeType)
 }
