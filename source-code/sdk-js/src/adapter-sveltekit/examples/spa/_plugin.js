@@ -129,14 +129,11 @@ async function J(e) {
 	}
 }
 function T(e, t) {
-	return (
-		console.log(e.id),
-		{
-			type: "Resource",
-			languageTag: { type: "LanguageTag", name: t },
-			body: Object.entries(e).map(([o, c]) => M(o, c)),
-		}
-	)
+	return {
+		type: "Resource",
+		languageTag: { type: "LanguageTag", name: t },
+		body: Object.entries(e).map(([o, c]) => M(o, c)),
+	}
 }
 function M(e, t) {
 	return {
