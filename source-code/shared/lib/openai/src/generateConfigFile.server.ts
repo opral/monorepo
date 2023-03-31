@@ -5,19 +5,23 @@ import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
 import { getServerEnv } from "../../../src/env.js"
 import { ENDPOINT } from "./generateConfigFile.js"
+import bodyParser from "body-parser"
 import { z } from "zod"
 
 export const generateConfigFileRoute = express.Router()
+generateConfigFileRoute.use(bodyParser.json({ limit: "10mb" }))
 
 const env = getServerEnv()
 
 generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 	try {
-		console.log(req)
 		const { filesystemAsJson } = z
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
 		const response = await _generateConfigFileServer({ filesystemAsJson })
+		if (response.isErr) {
+			console.log(response.error)
+		}
 		res.json(response)
 	} catch (error) {
 		res.status(500)
@@ -40,13 +44,14 @@ export async function _generateConfigFileServer(args: {
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
 }): Promise<Result<string, Error>> {
-	const fs = Volume.fromJSON(args.filesystemAsJson).promises
-	// @ts-ignore
+	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
-		return Result.err(new Error("Couldn't generate a config file."))
+		return Result.err(
+			new Error("Couldn't generate a config file. " + args.messages.at(-1)!.content),
+		)
 	}
 	try {
 		const response = await openapi.createChatCompletion({
@@ -72,6 +77,7 @@ export async function _generateConfigFileServer(args: {
 			],
 		})
 	} catch (error) {
+		console.log(error)
 		return Result.err(error as Error)
 	}
 }
