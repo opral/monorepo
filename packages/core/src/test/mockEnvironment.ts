@@ -49,9 +49,9 @@ async function copyDirectory(args: {
 		await args.copyFrom.readdir(args.path)
 	} catch {
 		throw new Error(dedent`
-The directory specified in \`copyDirectory.path\` does not exist.
+The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
 
-Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
+Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory ${process.cwd()}.
 
 Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
 		`)
@@ -59,7 +59,13 @@ Context: The path is relative to the current working directory, not the file tha
 	// create directory
 	await args.copyTo.mkdir(args.path, { recursive: true })
 	for (const file of await args.copyFrom.readdir(args.path)) {
-		const isFile = (file as string).includes(".")
+		let isFile = true
+		// check if the path is a file
+		try {
+			await args.copyFrom.readFile(`${args.path}/${file}`)
+		} catch {
+			isFile = false
+		}
 		const _path = normalizePath(`${args.path}/${file}`)
 		if (isFile) {
 			await args.copyTo.writeFile(
