@@ -20,24 +20,21 @@ export async function generateConfigFile(args: {
 	try {
 		// all files in the project as a json object
 		const filesystemAsJson = await readdirRecursive(args)
-		const response = await fetch(
-			process.env.NODE_ENV === "production"
-				? "https://inlang.com" + ENDPOINT
-				: "http://localhost:3000" + ENDPOINT,
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(filesystemAsJson),
+		const response = await fetch("http://localhost:3000" + ENDPOINT, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
 			},
-		)
+			body: JSON.stringify({ filesystemAsJson }),
+		})
 		const data = await response.json()
 		return data
 	} catch (e) {
 		return Result.err(e as Error)
 	}
 }
+
+let x = 0
 
 /**
  * Recursively reads the contents of a directory.
@@ -46,6 +43,8 @@ async function readdirRecursive(args: {
 	fs: EnvironmentFunctions["$fs"]
 	path: string
 }): Promise<Record<string, string>> {
+	console.log("readdirRecursive client iteration ", x)
+	x++
 	const { fs, path } = args
 	let result: Record<string, string> = {}
 	// Read the contents of the current directory
@@ -61,12 +60,18 @@ async function readdirRecursive(args: {
 		} catch (error) {
 			isDirectory = true
 		}
-		if (isDirectory) {
+		// don't include node_modules and dist folders as they are not source code
+		if (
+			fullPath.includes("node_modules") ||
+			fullPath.includes("dist") ||
+			fullPath.includes(".git")
+		) {
+			continue
+		} else if (isDirectory) {
 			// If the item is a directory, recurse into it and add the results to the current list
 			const subList = await readdirRecursive({ fs, path: fullPath })
 			result = { ...result, ...subList }
 		} else {
-			// If the item is a file, add it to the list
 			const content = await fs.readFile(fullPath, { encoding: "utf-8" })
 			result[fullPath] = content as string
 		}
