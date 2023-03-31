@@ -63,18 +63,6 @@ sl-textarea::part(base) {
 	border: none;
 }
 
-sl-input {
-	--sl-input-filled-background-color: theme(colors.surface-1);
-	--sl-input-border-color: none;
-	--sl-input-border-color-hover: none;
-	--sl-input-border-color-focus: none;
-	--sl-input-color: none;
-	--sl-input-focus-ring-color: none;
-	--sl-focus-ring: none;
-	--tw-ring-color: transparent;
-	--sl-input-border-color-hover: theme(colors.outline);
-}
-
 sl-tooltip::part(base) {
 	--sl-tooltip-background-color: theme(colors.inverted-surface);
 	--sl-tooltip-color: theme(colors.on-inverted-surface);
