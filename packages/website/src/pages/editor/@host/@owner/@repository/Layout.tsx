@@ -26,7 +26,6 @@ import CibGithub from "~icons/cib/github"
 import { analytics } from "@src/services/analytics/index.js"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
-import { isEmpty } from "lodash-es"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
@@ -248,7 +247,7 @@ function LanguageFilter() {
 			(language) =>
 				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
 		)
-		if (!isEmpty(languages) && languages !== undefined) {
+		if (languages !== undefined && languages.length > 0) {
 			setFilteredLanguages(languages)
 			setBrowserLanguage(true)
 		}
