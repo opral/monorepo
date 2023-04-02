@@ -58,23 +58,21 @@ Context: The path is relative to the current working directory, not the file tha
 	}
 	// create directory
 	await args.copyTo.mkdir(args.path, { recursive: true })
-	for (const file of await args.copyFrom.readdir(args.path)) {
+	const pathsInDirectory = await args.copyFrom.readdir(args.path)
+	for (const subpath of pathsInDirectory) {
 		let isFile = true
 		// check if the path is a file
 		try {
-			await args.copyFrom.readFile(`${args.path}/${file}`)
+			await args.copyFrom.readFile(`${args.path}/${subpath}`)
 		} catch {
 			isFile = false
 		}
-		const subpath = normalizePath(`${args.path}/${file}`)
+		const path = normalizePath(`${args.path}/${subpath}`)
 		if (isFile) {
-			await args.copyTo.writeFile(
-				subpath,
-				// @ts-ignore
-				(await args.copyFrom.readFile(subpath, { encoding: "utf-8" })) as string,
-			)
+			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
+			await args.copyTo.writeFile(path, file)
 		} else {
-			await copyDirectory({ ...args, path: subpath })
+			await copyDirectory({ ...args, path })
 		}
 	}
 }
