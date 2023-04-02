@@ -66,15 +66,15 @@ Context: The path is relative to the current working directory, not the file tha
 		} catch {
 			isFile = false
 		}
-		const _path = normalizePath(`${args.path}/${file}`)
+		const subpath = normalizePath(`${args.path}/${file}`)
 		if (isFile) {
 			await args.copyTo.writeFile(
-				_path,
+				subpath,
 				// @ts-ignore
-				(await args.copyFrom.readFile(_path, { encoding: "utf-8" })) as string,
+				(await args.copyFrom.readFile(subpath, { encoding: "utf-8" })) as string,
 			)
 		} else {
-			await copyDirectory({ ...args, path: _path })
+			await copyDirectory({ ...args, path: subpath })
 		}
 	}
 }
