@@ -24,7 +24,7 @@ export async function messagePreview(args: {
 
 	if (referenceLanguage === undefined) {
 		return vscode.window.showWarningMessage(
-			"The `referenceLanguage` musst be defined in the inlang.config.js to show patterns inline.",
+			"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
 		)
 	}
 

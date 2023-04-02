@@ -10,13 +10,28 @@ description: Learn more about environment functions.
 
 Inlang's config is executed in a variety of environments such as the browser, [NodeJS](https://nodejs.org/en/), or [Electron](https://www.electronjs.org/). Unfortunately, functions such as `import()` behave differently from environment to environment. Environment functions assure consistent behaviour across different environments.
 
-## Reference
+---
 
-Always up-to-date reference can be found [in the repository](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/environment-functions).
+## File System
 
 `$fs`: **FS**
 
 Is an implementation of a file system. `node:fs` and `memfs` fit without any wrapper. `vscode.workspace.fs` needs a wrapper. Read more about the internal file system of inlang [here](./file-system).
+
+**Inlang manipulates files in different contexts. For example, there is the editor which runs in the browser and the ide-extension, which is a VSCode extension. Inside inlangs core is a minimal file system, which intersects with `node:fs` and `memfs`.**
+
+Currently the file system supports the following operations:
+
+- `readFile`: For reading resource files or the `inlang.config.js`.
+- `writeFile`: For saving new versions of resource files.
+- `readdir`: To find out about existing resource files in the same folder.
+
+#### Reference
+
+The file system is asynchronous only.
+Always up-to-date reference can be found [in the repository](https://github.com/inlang/inlang/tree/main/source-code/core/src/config/environment-functions).
+
+## import()
 
 `$import`: **dynamic import()**
 

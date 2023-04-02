@@ -13,6 +13,7 @@ import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { node } from "@markdoc/markdoc/dist/src/schema.js"
+import { isProduction } from "@env"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -165,19 +166,27 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		const result = await onMachineTranslate({
-			referenceLanguage: referenceResource()!.languageTag.name,
-			targetLanguage: props.language,
-			text,
-		})
-		if (result.error) {
+		if (isProduction) {
+			const result = await onMachineTranslate({
+				referenceLanguage: referenceResource()!.languageTag.name,
+				targetLanguage: props.language,
+				text,
+			})
+			if (result.error) {
+				showToast({
+					variant: "warning",
+					title: "Machine translation failed.",
+					message: result.error,
+				})
+			} else {
+				setTextValue(result.data)
+			}
+		} else {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: result.error,
+				message: "Machine translations are disabled in development. An env variable is missing.",
 			})
-		} else {
-			setTextValue(result.data)
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -283,7 +292,7 @@ export function PatternEditor(props: {
 						<Show when={textValue() === ""}>
 							<sl-button
 								onClick={handleMachineTranslate}
-								prop:disabled={true}
+								// prop:disabled={true}
 								// prop:disabled={
 								// 	(textValue() !== undefined && textValue() !== "") ||
 								// 	props.referenceMessage === undefined
@@ -318,7 +327,7 @@ export function PatternEditor(props: {
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}
-				{/* <Show when={showMachineLearningWarningDialog()}>
+				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
 							<li>
@@ -354,7 +363,7 @@ export function PatternEditor(props: {
 							Proceed with machine translating
 						</sl-button>
 					</sl-dialog>
-				</Show> */}
+				</Show>
 			</div>
 		</div>
 	)

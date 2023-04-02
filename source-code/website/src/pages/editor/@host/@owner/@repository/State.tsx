@@ -19,14 +19,13 @@ import {
 } from "@inlang/core/config"
 import { createStore, SetStoreFunction } from "solid-js/store"
 import type * as ast from "@inlang/core/ast"
-import { Result } from "@inlang/core/utilities"
+import type { Result } from "@inlang/core/utilities"
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
 import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { showToast } from "@src/components/Toast.jsx"
-import { lint } from "@inlang/core/lint"
 
 type EditorStateSchema = {
 	/**
@@ -501,21 +500,37 @@ async function cloneRepository(args: {
 
 	// fetch 100 more commits, can get more commits if needed
 	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
-	raw.fetch({
-		fs: args.fs,
-		http,
-		dir: "/",
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-		depth: 100,
-		relative: true,
-	})
+	// raw.fetch({
+	// 	fs: args.fs,
+	// 	http,
+	// 	dir: "/",
+	// 	corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+	// 	url: `https://${host}/${owner}/${repository}`,
+	// 	depth: 100,
+	// 	relative: true,
+	// })
 
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	const date = new Date()
 	args.setFsChange(date)
 	return date
+}
+
+export class PullException extends Error {
+	readonly #id = "PullException"
+}
+
+export class PushException extends Error {
+	readonly #id = "PushException"
+}
+
+export class UnknownException extends Error {
+	readonly #id = "UnknownException"
+
+	constructor(readonly id: string) {
+		super(id)
+	}
 }
 
 /**
@@ -528,10 +543,10 @@ export async function pushChanges(args: {
 	setFsChange: (date: Date) => void
 	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<void, Error>> {
+}): Promise<Result<true, PushException | PullException>> {
 	const { host, owner, repository } = args.routeParams
 	if (host === undefined || owner === undefined || repository === undefined) {
-		return Result.err(new Error("h3ni329 Invalid route params"))
+		return [undefined, new PushException("h3ni329 Invalid route params")]
 	}
 	const requestArgs = {
 		fs: args.fs,
@@ -546,26 +561,27 @@ export async function pushChanges(args: {
 	try {
 		// pull changes before pushing
 		// https://github.com/inlang/inlang/issues/250
-		const _pull = await pull(args)
-		if (_pull.isErr) {
-			return Result.err(
-				new Error("Failed to pull: " + _pull.error.message, {
-					cause: _pull.error,
+		const [, exception] = await pull(args)
+		if (exception) {
+			return [
+				undefined,
+				new PullException("Failed to pull: " + exception.message, {
+					cause: exception,
 				}),
-			)
+			]
 		}
 		const push = await raw.push(requestArgs)
 		if (push.ok === false) {
-			return Result.err(new Error("Failed to push", { cause: push.error }))
+			return [undefined, new PushException("Failed to push", { cause: push.error })]
 		}
 		await raw.pull(requestArgs)
 		const time = new Date()
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
 		args.setLastPush(time)
-		return Result.ok(undefined)
+		return [true, undefined]
 	} catch (error) {
-		return Result.err((error as Error) ?? "h3ni329 Unknown error")
+		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
 	}
 }
 
@@ -575,9 +591,11 @@ async function readInlangConfig(args: {
 	try {
 		const environmentFunctions: EnvironmentFunctions = {
 			$import: initialize$import({
+				// @ts-ignore
 				fs: args.fs.promises,
 				fetch,
 			}),
+			// @ts-ignore
 			$fs: args.fs.promises,
 		}
 		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
@@ -667,7 +685,7 @@ async function pull(args: {
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}) {
+}): Promise<Result<true, PullException>> {
 	try {
 		await raw.pull({
 			fs: args.fs,
@@ -687,8 +705,8 @@ async function pull(args: {
 		// triggering a rebuild of everything fs related
 		args.setFsChange(time)
 		args.setLastPullTime(time)
-		return Result.ok(undefined)
+		return [true, undefined]
 	} catch (error) {
-		return Result.err(error as Error)
+		return [undefined, error as PullException]
 	}
 }

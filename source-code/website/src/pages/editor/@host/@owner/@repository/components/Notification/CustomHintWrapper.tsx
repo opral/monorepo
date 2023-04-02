@@ -18,7 +18,7 @@ export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
 	}
 
 	return (
-		<div class="relative z-30">
+		<div class="relative z-10">
 			<NotificationPopup
 				notifications={[props.notification]}
 				open={

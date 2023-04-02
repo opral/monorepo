@@ -1,4 +1,4 @@
-import { isProduction, serverSideEnv } from "@env"
+import { serverSideEnv } from "@env"
 import { assertUsage } from "@src/services/assert-usage/index.js"
 
 const env = await serverSideEnv()
@@ -12,9 +12,6 @@ export async function onMachineTranslate(args: {
 	targetLanguage: string
 }): Promise<{ data?: string; error?: string }> {
 	try {
-		if (isProduction === false) {
-			throw Error("Machine translations are disabled in development. An env variable is missing.")
-		}
 		const response = await fetch(
 			"https://translation.googleapis.com/language/translate/v2?" +
 				new URLSearchParams({
@@ -27,6 +24,7 @@ export async function onMachineTranslate(args: {
 			{ method: "POST" },
 		)
 		const json = await response.json()
+		console.log(json)
 		assertUsage(
 			json.data.translations.length === 1,
 			"Expected exactly one translation. Hardcoded in the code for now.",

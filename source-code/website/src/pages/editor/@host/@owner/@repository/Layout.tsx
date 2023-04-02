@@ -204,7 +204,7 @@ function HasChangesAction() {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
-		const result = await pushChanges({
+		const [, exception] = await pushChanges({
 			fs: fs(),
 			routeParams: routeParams(),
 			user: localStorage.user,
@@ -213,10 +213,10 @@ function HasChangesAction() {
 			setLastPullTime,
 		})
 		setIsLoading(false)
-		if (result.isErr) {
+		if (exception) {
 			return showToast({
 				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + result.error,
+				message: "Please try again or file a bug. " + exception,
 				variant: "danger",
 			})
 		} else {
