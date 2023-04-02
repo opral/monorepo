@@ -275,7 +275,7 @@ export function PatternEditor(props: {
 						<Show when={textValue() === ""}>
 							<sl-button
 								onClick={handleMachineTranslate}
-								prop:disabled={true}
+								// prop:disabled={true}
 								// prop:disabled={
 								// 	(textValue() !== undefined && textValue() !== "") ||
 								// 	props.referenceMessage === undefined
