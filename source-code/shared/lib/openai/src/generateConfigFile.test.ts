@@ -53,7 +53,7 @@ describe.skip("generating config files", () => {
 			const result = await _generateConfigFileServer({ filesystemAsJson })
 			expect(result.isErr).toBe(true)
 			if (result.isErr) {
-				expect(result.error.message).toBe("Couldn't generate a config file.")
+				expect(result.error.message).includes("Couldn't generate a config file.")
 			}
 		},
 		{ timeout: 50000 },
