@@ -1,6 +1,5 @@
 import _git from "isomorphic-git"
 import _http from "isomorphic-git/http/web/index.js"
-
 /**
  * Raw git cli api.
  *

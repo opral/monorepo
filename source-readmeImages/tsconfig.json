@@ -4,5 +4,9 @@
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"outDir": "dist"
+	},
+	"ts-node": {
+		// Tell ts-node CLI to install the --loader automatically
+		"esm": true
 	}
 }
