@@ -24,16 +24,16 @@ export const init = new Command()
 		// ----------------- GENERATE CONFIG FILE -----------------
 		logger.info("Generating config file with AI 🤖 ...")
 		// @ts-ignore
-		const result = await generateConfigFile({ fs, path: "./" })
-		if (result.isErr) {
-			logger.error("Failed to generate config file.", result.error)
+		const [value, exception] = await generateConfigFile({ fs, path: "./" })
+		if (exception) {
+			logger.error("Failed to generate config file.", exception)
 			return
 		}
 		logger.success("Generated config file.")
 		// ----------------- WRITE CONFIG FILE TO DISK -----------------
 		logger.info("Writing config file to disk...")
 		try {
-			await fs.writeFile("./inlang.config.js", result.value, "utf-8")
+			await fs.writeFile("./inlang.config.js", value, "utf-8")
 			logger.success("Wrote config file to disk.")
 		} catch (error) {
 			logger.error("Failed to write config file to disk.", error)

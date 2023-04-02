@@ -1,6 +1,6 @@
-import { Result } from "../utilities/index.js"
 import type { EnvironmentFunctions } from "../config/schema.js"
-import { validateConfig } from "./validateConfig.js"
+import type { Result } from "../utilities/result.js"
+import { validateConfig, ValidateConfigException } from "./validateConfig.js"
 
 /**
  * Validates the inlang.config.js file.
@@ -9,12 +9,12 @@ import { validateConfig } from "./validateConfig.js"
  * use the `validateConfig` function instead.
  *
  * @example
- * 	const result = await validateConfigFile(args)
+ * const [success, error] = await validateConfigFile(args)
  */
 export async function validateConfigFile(args: {
 	file: string
 	env: EnvironmentFunctions
-}): Promise<Result<void, Error>> {
+}): Promise<Result<true, ValidateConfigException>> {
 	try {
 		// BEGIN
 		// throws if an error occurs
@@ -22,13 +22,13 @@ export async function validateConfigFile(args: {
 		// END
 		const { defineConfig } = await import("data:application/javascript;base64," + btoa(args.file))
 		const config = await defineConfig(args.env)
-		const result = await validateConfig({ config })
-		if (result.isErr) {
-			throw result.error
+		const [, exception] = await validateConfig({ config })
+		if (exception) {
+			throw exception
 		}
-		return Result.ok(undefined)
+		return [true, undefined]
 	} catch (error) {
-		return Result.err(error as Error)
+		return [undefined, error as ValidateConfigException]
 	}
 }
 
@@ -43,7 +43,7 @@ function importKeywordUsed(configFile: string) {
 	const regex = /(?<!\$)import\b/
 	const hasError = regex.test(configFile)
 	if (hasError) {
-		throw new Error(
+		throw new ValidateConfigException(
 			"Regular import statements are not allowed. Use the environment function $import instead.",
 		)
 	}

@@ -1,5 +1,5 @@
 import type { Message, Resource } from "../ast/index.js"
-import { Result } from "../utilities/index.js"
+import type { Result } from "../utilities/result.js"
 
 /**
  * Query a resource.
@@ -50,23 +50,33 @@ export function query(resource: Resource) {
 	}
 }
 
-function create(resource: Resource, args: { message: Message }): Result<Resource, Error> {
+class MessageAlreadyExistsException extends Error {
+	readonly #id = "MessageAlreadyExistsException"
+
+	constructor(messageId: string, resourceId: string) {
+		super(`Message '${messageId}' already exists in resource '${resourceId}'.`)
+	}
+}
+
+function create(
+	resource: Resource,
+	args: { message: Message },
+): Result<Resource, MessageAlreadyExistsException> {
 	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
 	const copy: Resource = JSON.parse(JSON.stringify(resource))
 	if (get(copy, { id: args.message.id.name })) {
-		return Result.err(
-			Error(
-				`Message ${args.message.id.name} already exists in resource ${resource.languageTag.name}.`,
-			),
-		)
+		return [
+			undefined,
+			new MessageAlreadyExistsException(args.message.id.name, resource.languageTag.name),
+		]
 	}
 	copy.body.push(args.message)
-	return Result.ok(copy)
+	return [copy, undefined]
 }
 
-function upsert(resource: Resource, args: { message: Message }): Result<Resource, Error> {
+function upsert(resource: Resource, args: { message: Message }) {
 	const existingMessage = get(resource, { id: args.message.id.name })
 	if (existingMessage) {
 		return update(resource, {
@@ -88,10 +98,18 @@ function get(resource: Resource, args: { id: Message["id"]["name"] }): Message |
 	return undefined
 }
 
+class MessageDoesNotExistsException extends Error {
+	readonly #id = "MessageDoesNotExistsException"
+
+	constructor(messageId: string, resourceId: string) {
+		super(`Message '${messageId}' does not exist in resource '${resourceId}'.`)
+	}
+}
+
 function update(
 	resource: Resource,
 	args: { id: Message["id"]["name"]; with: Message },
-): Result<Resource, Error> {
+): Result<Resource, MessageDoesNotExistsException> {
 	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
@@ -99,30 +117,29 @@ function update(
 	for (const [i, message] of resource.body.entries()) {
 		if (message.id.name === args.id) {
 			copy.body[i] = args.with
-			return Result.ok(copy)
+			return [copy, undefined]
 		}
 	}
-	return Result.err(
-		Error(`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`),
-	)
+	return [undefined, new MessageDoesNotExistsException(args.id, resource.languageTag.name)]
 }
 
 // using underscore to circumvent javascript reserved keyword 'delete'
-function _delete(resource: Resource, args: { id: Message["id"]["name"] }): Result<Resource, Error> {
+function _delete(
+	resource: Resource,
+	args: { id: Message["id"]["name"] },
+): Result<Resource, MessageDoesNotExistsException> {
 	// Copying the Resource to ensure immutability.
 	// The JSON approach does not copy functions which
 	// theoretically could be stored in metadata by users.
 	const copy: Resource = JSON.parse(JSON.stringify(resource))
 	for (const [i, message] of resource.body.entries()) {
 		if (message.id.name === args.id) {
-			// deleting 1 element at i(ndex)
+			// deleting 1 element at index
 			copy.body.splice(i, 1)
-			return Result.ok(copy)
+			return [copy, undefined]
 		}
 	}
-	return Result.err(
-		Error(`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`),
-	)
+	return [undefined, new MessageDoesNotExistsException(args.id, resource.languageTag.name)]
 }
 
 function includedMessageIds(resource: Resource): string[] {
