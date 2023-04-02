@@ -6,9 +6,7 @@ description: Learn on how to get started with inlang, the design principles, and
 
 # {% $frontmatter.title %}
 
-
 **Inlang is infrastructure that consists of extendable tools and apps to make localization simple.**
-![Add Image](https://user-images.githubusercontent.com/72493222/229363134-13f95dad-d54e-4637-a946-d843877e4198.png)
 
 {% Video src="https://youtu.be/KEKxHSkLD6Y" /%}
 
