@@ -17,3 +17,9 @@ Up-to-date reference can be found [in the repository](https://github.com/inlang/
 {% Callout variant="info" %}
 **The AST definition is small on purpose.** Feedback and requirements from users will define what nodes and properties are added. Participate in the [discussions](https://github.com/inlang/inlang/discussions).  
 {% /Callout %}
+
+{% Figure
+  src="https://user-images.githubusercontent.com/72493222/214296359-1ddd2fdb-03f3-4993-a493-9b1a353c4b88.png"
+  alt="visualisation of the inlang AST/object"
+  caption="Visualisation of the inlang AST/object"
+/%}
