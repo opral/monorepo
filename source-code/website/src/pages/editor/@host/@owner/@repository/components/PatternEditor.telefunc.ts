@@ -12,6 +12,7 @@ export async function onMachineTranslate(args: {
 	targetLanguage: string
 }): Promise<{ data?: string; error?: string }> {
 	try {
+		console.log(isProduction)
 		if (isProduction === false) {
 			throw Error("Machine translations are disabled in development. An env variable is missing.")
 		}
