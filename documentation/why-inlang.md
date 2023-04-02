@@ -1,6 +1,6 @@
 ---
-title: Design principles
-href: /documentation/design-principles
+title: Why inlang?
+href: /documentation/why-inlang
 description: Learn more about the design principles behind inlang.
 ---
 
