@@ -8,7 +8,7 @@ description: Learn on how to get started with inlang, the design principles, and
 
 
 **Inlang is infrastructure that consists of extendable tools and apps to make localization simple.**
-![Add Image](https://user-images.githubusercontent.com/72493222/229362954-0b677d87-9d4b-42b5-8c96-839c983ad95f.png)
+![Add Image](https://user-images.githubusercontent.com/72493222/229363134-13f95dad-d54e-4637-a946-d843877e4198.png)
 
 {% Video src="https://youtu.be/KEKxHSkLD6Y" /%}
 
