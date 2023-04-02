@@ -1,5 +1,5 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-import { fs as memfs } from "memfs"
+import { Volume } from "memfs"
 import dedent from "dedent"
 
 /**
@@ -18,7 +18,7 @@ export async function mockEnvironment(args: {
 		paths: string[]
 	}
 }): Promise<EnvironmentFunctions> {
-	const $fs = memfs.promises as EnvironmentFunctions["$fs"]
+	const $fs = Volume.fromJSON({}).promises
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
