@@ -3,15 +3,13 @@ import { Result } from "@inlang/core/utilities"
 import express from "express"
 import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
-import { getServerEnv } from "../../../src/env.js"
 import { ENDPOINT } from "./generateConfigFile.js"
 import bodyParser from "body-parser"
 import { z } from "zod"
+import dedent from "dedent"
 
 export const generateConfigFileRoute = express.Router()
 generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))
-
-const env = getServerEnv()
 
 generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 	try {
@@ -31,7 +29,7 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 
 const openapi = new OpenAIApi(
 	new Configuration({
-		apiKey: env.OPEN_AI_KEY,
+		apiKey: process.env.OPEN_AI_KEY,
 	}),
 )
 
@@ -47,6 +45,20 @@ export async function _generateConfigFileServer(args: {
 	const fs = Volume.fromJSON(args.filesystemAsJson).promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
+		const _prompt = prompt(Object.keys(args.filesystemAsJson))
+		if (_prompt.length > 2000) {
+			console.log(Object.keys(args.filesystemAsJson).toString().length)
+			return Result.err(
+				new Error(dedent`
+The current working directory contains too many file(paths).
+
+Solution: Are you you in the root of your repository?
+
+Explanation: The maximum prompt for the OpenAI API is 2000 characters. The current prompt is ${_prompt.length} characters.
+			
+			`),
+			)
+		}
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
 		return Result.err(
@@ -94,6 +106,8 @@ function prompt(filePaths: string[]): string {
   
   ${filePaths.join("\n")}
   
+	Here is an example config: 
+	\`\`\`
   export async function defineConfig(env) {
     // imports happen from jsdelivr with the following pattern:
     // https://cdn.jsdelivr.net/gh/{owner}/{repo}@{version}/{path}
@@ -104,8 +118,10 @@ function prompt(filePaths: string[]): string {
       // for .po files
       // "https://cdn.jsdelivr.net/gh/jannesblobel/inlang-plugin-po@1/dist/index.js"
     );
-  
+
     const pluginConfig = {
+			// the path for resource files. usually nested in a directory named locales, 
+			// translations or i18n
       pathPattern: "./locales/{language}.json",
     };
   
@@ -120,6 +136,7 @@ function prompt(filePaths: string[]): string {
       writeResources: (args) =>
         plugin.writeResources({ ...args, ...env, pluginConfig }),
     };
-  }  
+  }
+	\`\`\`  
 `
 }
