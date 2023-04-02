@@ -1,4 +1,4 @@
-import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
+import { mockEnvironment, ValidateConfigException, validateConfigFile } from "@inlang/core/test"
 import type { Result } from "@inlang/core/utilities"
 import express from "express"
 import { Volume } from "memfs"
@@ -35,6 +35,10 @@ const openapi = new OpenAIApi(
 	}),
 )
 
+export class GenerateConfigFileException extends Error {
+	readonly #id = "GenerateConfigFileException"
+}
+
 /**
  * Internal wrapper to test the function without the requirement to run a server during testing.
  */
@@ -43,7 +47,7 @@ export async function _generateConfigFileServer(args: {
 	// messages is required to recursively call the function
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
-}): Promise<Result<string, Error>> {
+}): Promise<Result<string, GenerateConfigFileException | ValidateConfigException | Error>> {
 	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
@@ -51,7 +55,9 @@ export async function _generateConfigFileServer(args: {
 	} else if (args.messages.length > 6) {
 		return [
 			undefined,
-			new Error("Couldn't generate a config file. " + args.messages.at(-1)!.content),
+			new GenerateConfigFileException(
+				"Couldn't generate a config file. " + args.messages.at(-1)!.content,
+			),
 		]
 	}
 	try {

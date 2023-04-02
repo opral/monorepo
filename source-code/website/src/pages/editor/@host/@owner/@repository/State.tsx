@@ -507,6 +507,22 @@ async function cloneRepository(args: {
 	return date
 }
 
+export class PullException extends Error {
+	readonly #id = "PullException"
+}
+
+export class PushException extends Error {
+	readonly #id = "PushException"
+}
+
+export class UnknownException extends Error {
+	readonly #id = "UnknownException"
+
+	constructor(readonly id: string) {
+		super(id)
+	}
+}
+
 /**
  * Pushed changes and pulls right afterwards.
  */
@@ -517,10 +533,10 @@ export async function pushChanges(args: {
 	setFsChange: (date: Date) => void
 	setLastPush: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, Error>> {
+}): Promise<Result<true, PushException | PullException>> {
 	const { host, owner, repository } = args.routeParams
 	if (host === undefined || owner === undefined || repository === undefined) {
-		return [undefined, new Error("h3ni329 Invalid route params")]
+		return [undefined, new PushException("h3ni329 Invalid route params")]
 	}
 	const requestArgs = {
 		fs: args.fs,
@@ -539,14 +555,14 @@ export async function pushChanges(args: {
 		if (exception) {
 			return [
 				undefined,
-				new Error("Failed to pull: " + exception.message, {
+				new PullException("Failed to pull: " + exception.message, {
 					cause: exception,
 				}),
 			]
 		}
 		const push = await raw.push(requestArgs)
 		if (push.ok === false) {
-			return [undefined, new Error("Failed to push", { cause: push.error })]
+			return [undefined, new PushException("Failed to push", { cause: push.error })]
 		}
 		await raw.pull(requestArgs)
 		const time = new Date()
@@ -555,7 +571,7 @@ export async function pushChanges(args: {
 		args.setLastPush(time)
 		return [true, undefined]
 	} catch (error) {
-		return [undefined, (error as Error) ?? "h3ni329 Unknown error"]
+		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
 	}
 }
 
@@ -656,7 +672,7 @@ async function pull(args: {
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, Error>> {
+}): Promise<Result<true, PullException>> {
 	try {
 		await raw.pull({
 			fs: args.fs,
@@ -678,6 +694,6 @@ async function pull(args: {
 		args.setLastPullTime(time)
 		return [true, undefined]
 	} catch (error) {
-		return [undefined, error as Error]
+		return [undefined, error as PullException]
 	}
 }

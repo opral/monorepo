@@ -1,6 +1,6 @@
 import type { EnvironmentFunctions } from "../config/schema.js"
 import type { Result } from "../utilities/result.js"
-import { validateConfig } from "./validateConfig.js"
+import { validateConfig, ValidateConfigException } from "./validateConfig.js"
 
 /**
  * Validates the inlang.config.js file.
@@ -14,7 +14,7 @@ import { validateConfig } from "./validateConfig.js"
 export async function validateConfigFile(args: {
 	file: string
 	env: EnvironmentFunctions
-}): Promise<Result<true, Error>> {
+}): Promise<Result<true, ValidateConfigException>> {
 	try {
 		// BEGIN
 		// throws if an error occurs
@@ -28,7 +28,7 @@ export async function validateConfigFile(args: {
 		}
 		return [true, undefined]
 	} catch (error) {
-		return [undefined, error as Error]
+		return [undefined, error as ValidateConfigException]
 	}
 }
 
@@ -43,7 +43,7 @@ function importKeywordUsed(configFile: string) {
 	const regex = /(?<!\$)import\b/
 	const hasError = regex.test(configFile)
 	if (hasError) {
-		throw new Error(
+		throw new ValidateConfigException(
 			"Regular import statements are not allowed. Use the environment function $import instead.",
 		)
 	}
