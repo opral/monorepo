@@ -11,6 +11,8 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
+import { getLintReports, LintedMessage } from "@inlang/core/lint"
+import { node } from "@markdoc/markdoc/dist/src/schema.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -182,24 +184,30 @@ export function PatternEditor(props: {
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
+		if (props.message) {
+			const lintReports = getLintReports(props.message as LintedMessage)
+			if (lintReports) {
+				lintReports.map((lint) => {
+					notifications.push({
+						notificationTitle: lint.id.split(".")[1],
+						notificationDescription: lint.message,
+						notificationType: lint.level,
+					})
+				})
+			}
+		}
+
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
-				notificationType: "warning",
+				notificationType: "warn",
 			})
 		}
 		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
-				notificationType: "info",
-			})
-		}
-		if (textValue() === "") {
-			notifications.push({
-				notificationTitle: "Empty:",
-				notificationDescription: "The translation has not been made.",
 				notificationType: "info",
 			})
 		}

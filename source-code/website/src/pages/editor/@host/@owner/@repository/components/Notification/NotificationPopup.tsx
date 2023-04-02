@@ -74,8 +74,8 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 	)
 }
 
-const getTypeBasedColor = (type: "info" | "warning" | "error") => {
-	if (type === "warning") {
+const getTypeBasedColor = (type: "info" | "warn" | "error") => {
+	if (type === "warn") {
 		return "text-warning-on-inverted-container"
 	} else if (type === "error") {
 		return "text-danger-on-inverted-container"

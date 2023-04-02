@@ -353,8 +353,7 @@ const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig } = useEditorState()
-	const [filteredStatus, setFilteredStatus] = createSignal<string | string[] | undefined>()
+	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
 	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
 
 	const ids = createMemo(() => {
