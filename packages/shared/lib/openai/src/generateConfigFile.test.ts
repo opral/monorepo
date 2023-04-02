@@ -13,11 +13,11 @@ describe.skip("generating config files", () => {
 				"locales/utils.js": JSON.stringify("jibberish"),
 				"main.js": "export function hello() { return 'hello' }",
 			}
-			const result = await _generateConfigFileServer({ filesystemAsJson })
-			if (result.isErr) {
-				console.log(result.error)
+			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			if (exception) {
+				console.error(exception)
 			}
-			expect(result.isOk).toBe(true)
+			expect(exception).toBeUndefined()
 		},
 		{ timeout: 50000 },
 	)
@@ -34,11 +34,11 @@ describe.skip("generating config files", () => {
 				"src/entry.js": "export function hello() { return 'hello' }",
 				"main.js": "export function hello() { return 'hello' }",
 			}
-			const result = await _generateConfigFileServer({ filesystemAsJson })
-			if (result.isErr) {
-				console.log(result.error)
+			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			if (exception) {
+				console.error(exception)
 			}
-			expect(result.isOk).toBe(true)
+			expect(exception).toBeUndefined()
 		},
 		{ timeout: 50000 },
 	)
@@ -50,11 +50,9 @@ describe.skip("generating config files", () => {
 				"d/xx.jso3n": JSON.stringify({ hello: "hello from en" }),
 				"ff/ffff.po": "another file format. good luck chat gpt",
 			}
-			const result = await _generateConfigFileServer({ filesystemAsJson })
-			expect(result.isErr).toBe(true)
-			if (result.isErr) {
-				expect(result.error.message).toBe("Couldn't generate a config file.")
-			}
+			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			expect(exception).toBe(true)
+			expect(exception!.message).toBe("Couldn't generate a config file.")
 		},
 		{ timeout: 50000 },
 	)
