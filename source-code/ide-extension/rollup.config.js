@@ -1,4 +1,4 @@
-import typescript from "@rollup/plugin-typescript"
+import sucrase from "@rollup/plugin-sucrase"
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
 
@@ -8,7 +8,6 @@ import commonjs from "@rollup/plugin-commonjs"
  * Inlang packages are ES Modules. VSCode only supports CJS (CommonJS modules).
  * Rollup is used to compile the ESM code to CJS.
  */
-
 export default {
 	input: "src/main.ts",
 	output: {
@@ -26,8 +25,8 @@ export default {
 	plugins: [
 		// nodeResolve = bundle the dependencies
 		nodeResolve(),
-		// typescript = compile typescript
-		typescript(),
+		// sucrase = compile typescript
+		sucrase({ transforms: ["typescript"] }),
 		commonjs(),
 	],
 }
