@@ -11,6 +11,7 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
+import { isProduction } from "@env"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -163,6 +164,7 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
+		console.log(isProduction)
 		const result = await onMachineTranslate({
 			referenceLanguage: referenceResource()!.languageTag.name,
 			targetLanguage: props.language,
