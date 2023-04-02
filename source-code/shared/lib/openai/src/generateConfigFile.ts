@@ -1,4 +1,4 @@
-import { Result } from "@inlang/core/utilities"
+import type { Result } from "@inlang/core/utilities"
 import type { EnvironmentFunctions } from "@inlang/core/config"
 
 /**
@@ -10,8 +10,8 @@ export const ENDPOINT = "/shared/openai/generate-config-file"
  * Generates a configuration file for inlang.
  *
  * @example
- *   // generate a config file for the current directory
- *   const result = await generateConfigFile({ fs: fs.promises, path: "./" })
+ * // generate a config file for the current directory
+ * const [response, error] = await generateConfigFile({ fs: fs.promises, path: "./" })
  */
 export async function generateConfigFile(args: {
 	fs: EnvironmentFunctions["$fs"]
@@ -30,7 +30,7 @@ export async function generateConfigFile(args: {
 		const data = await response.json()
 		return data
 	} catch (e) {
-		return Result.err(e as Error)
+		return [undefined, e as Error]
 	}
 }
 

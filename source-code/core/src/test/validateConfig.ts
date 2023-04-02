@@ -1,8 +1,8 @@
-import { Result } from "../utilities/index.js"
 import type { Config } from "../config/schema.js"
 import { Config as ZodConfig } from "../config/zod.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
+import type { Result } from "../utilities/result.js"
 
 /**
  * Validates the config.
@@ -11,9 +11,9 @@ import type * as ast from "../ast/schema.js"
  * use the `validateConfigFile` function instead.
  *
  * @example
- * const result = await validateConfig(args)
+ * const [success, error] = await validateConfig(args)
  */
-export async function validateConfig(args: { config: Config }): Promise<Result<void, Error>> {
+export async function validateConfig(args: { config: Config }): Promise<Result<true, Error>> {
 	// each function throws an error if the validation fails.
 	try {
 		validateConfigSchema(args.config)
@@ -22,9 +22,9 @@ export async function validateConfig(args: { config: Config }): Promise<Result<v
 		validateResources(resources)
 		await languagesMatch(args.config, resources)
 		await roundtripTest(args.config, resources)
-		return Result.ok(undefined)
+		return [true, undefined]
 	} catch (error) {
-		return Result.err(error as Error)
+		return [undefined, error as Error]
 	}
 }
 

@@ -1,5 +1,5 @@
-import { Result } from "../utilities/index.js"
 import type { EnvironmentFunctions } from "../config/schema.js"
+import type { Result } from "../utilities/result.js"
 import { validateConfig } from "./validateConfig.js"
 
 /**
@@ -9,12 +9,12 @@ import { validateConfig } from "./validateConfig.js"
  * use the `validateConfig` function instead.
  *
  * @example
- * 	const result = await validateConfigFile(args)
+ * const [success, error] = await validateConfigFile(args)
  */
 export async function validateConfigFile(args: {
 	file: string
 	env: EnvironmentFunctions
-}): Promise<Result<void, Error>> {
+}): Promise<Result<true, Error>> {
 	try {
 		// BEGIN
 		// throws if an error occurs
@@ -22,13 +22,13 @@ export async function validateConfigFile(args: {
 		// END
 		const { defineConfig } = await import("data:application/javascript;base64," + btoa(args.file))
 		const config = await defineConfig(args.env)
-		const result = await validateConfig({ config })
-		if (result.isErr) {
-			throw result.error
+		const [, exception] = await validateConfig({ config })
+		if (exception) {
+			throw exception
 		}
-		return Result.ok(undefined)
+		return [true, undefined]
 	} catch (error) {
-		return Result.err(error as Error)
+		return [undefined, error as Error]
 	}
 }
 

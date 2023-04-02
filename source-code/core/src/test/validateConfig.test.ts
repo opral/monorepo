@@ -20,28 +20,28 @@ it("should succeed if the config is valid", async () => {
 		"./de.json",
 		JSON.stringify({ hello: "Hallo von der Deutschen Resource." }),
 	)
-	const result = await validateConfig({ config: await mockDefineConfig(env) })
-	expect(() => result.unwrap()).not.toThrow()
+	const [, exception] = await validateConfig({ config: await mockDefineConfig(env) })
+	expect(exception).toBeUndefined()
 })
 
 it("should fail if the config is invalid", async () => {
-	const result = await validateConfig({
+	const [, exception] = await validateConfig({
 		config: {
 			// @ts-expect-error
 			referenceLanguage: 5,
 		},
 	})
-	expect(() => result.unwrap()).toThrow()
+	expect(exception).toBeDefined()
 })
 
 it("should fail if the referenceLanguage is not included in languages", async () => {
 	const env = await mockEnvironment({})
 	const config = await mockDefineConfig(env)
 	config.languages = ["de"]
-	const result = await validateConfig({
+	const [, exception] = await validateConfig({
 		config,
 	})
-	expect(() => result.unwrap()).toThrow()
+	expect(exception).toBeDefined()
 })
 
 // TODO prints an error to the console which is annoying when running tests
@@ -50,13 +50,13 @@ it("should fail if the referenceLanguage is not included in languages", async ()
 // 	const env = await mockEnvironment({})
 // 	const config = await mockDefineConfig(env)
 // 	config.languages = ["de", "en", "fr"]
-// 	const result = await validateConfig({
+// 	const [, exception] = await validateConfig({
 // 		config,
 // 	})
-// 	if (result.isErr) {
-// 		console.log(result.error)
+// 	if (exception) {
+// 		console.log(exception)
 // 	}
-// 	expect(() => result.unwrap()).toThrow()
+// 	expect(exception).toBeDefined()
 // })
 
 /**

@@ -1,5 +1,5 @@
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
-import { Result } from "@inlang/core/utilities"
+import type { Result } from "@inlang/core/utilities"
 import express from "express"
 import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
@@ -18,11 +18,11 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 		const { filesystemAsJson } = z
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
-		const response = await _generateConfigFileServer({ filesystemAsJson })
-		if (response.isErr) {
-			console.log(response.error)
+		const result = await _generateConfigFileServer({ filesystemAsJson })
+		if (result[1]) {
+			console.log(result[1])
 		}
-		res.json(response)
+		res.json(result)
 	} catch (error) {
 		res.status(500)
 		res.send()
@@ -49,9 +49,10 @@ export async function _generateConfigFileServer(args: {
 	if (args.messages === undefined) {
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
-		return Result.err(
+		return [
+			undefined,
 			new Error("Couldn't generate a config file. " + args.messages.at(-1)!.content),
-		)
+		]
 	}
 	try {
 		const response = await openapi.createChatCompletion({
@@ -59,9 +60,9 @@ export async function _generateConfigFileServer(args: {
 			messages: args.messages,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
-		const isValidConfig = await validateConfigFile({ file: configFile, env })
-		if (isValidConfig.isOk) {
-			return Result.ok(configFile)
+		const [, exception] = await validateConfigFile({ file: configFile, env })
+		if (!exception) {
+			return [configFile, undefined]
 		}
 		return _generateConfigFileServer({
 			...args,
@@ -72,13 +73,13 @@ export async function _generateConfigFileServer(args: {
 					role: "user",
 					content:
 						"The config does not work. Try again and only reply with the config. No explanations. " +
-						isValidConfig.error.message,
+						exception.message,
 				},
 			],
 		})
 	} catch (error) {
 		console.log(error)
-		return Result.err(error as Error)
+		return [undefined, error as Error]
 	}
 }
 
@@ -87,14 +88,14 @@ export async function _generateConfigFileServer(args: {
  */
 function prompt(filePaths: string[]): string {
 	return `
-  You are supposed to write a config file for a service called "inlang" that exports a defineConfig function. 
+  You are supposed to write a config file for a service called "inlang" that exports a defineConfig function.
 
-  Only reply with the code. Don't wrap the code in \`\`\`. Don't write explanations. 
-  
+  Only reply with the code. Don't wrap the code in \`\`\`. Don't write explanations.
+
   The repository for the config file has the following files:
-  
+
   ${filePaths.join("\n")}
-  
+
   export async function defineConfig(env) {
     // imports happen from jsdelivr with the following pattern:
     // https://cdn.jsdelivr.net/gh/{owner}/{repo}@{version}/{path}
@@ -105,11 +106,11 @@ function prompt(filePaths: string[]): string {
       // for .po files
       // "https://cdn.jsdelivr.net/gh/jannesblobel/inlang-plugin-po@1/dist/index.js"
     );
-  
+
     const pluginConfig = {
       pathPattern: "./locales/{language}.json",
     };
-  
+
     return {
       referenceLanguage: "en",
       languages: await plugin.getLanguages({
@@ -121,6 +122,6 @@ function prompt(filePaths: string[]): string {
       writeResources: (args) =>
         plugin.writeResources({ ...args, ...env, pluginConfig }),
     };
-  }  
+  }
 `
 }

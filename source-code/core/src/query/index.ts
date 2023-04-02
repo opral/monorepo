@@ -1,5 +1,5 @@
 import type { Message, Resource } from "../ast/index.js"
-import { Result } from "../utilities/index.js"
+import type { Result } from "../utilities/result.js"
 
 /**
  * Query a resource.
@@ -56,14 +56,15 @@ function create(resource: Resource, args: { message: Message }): Result<Resource
 	// theoretically could be stored in metadata by users.
 	const copy: Resource = JSON.parse(JSON.stringify(resource))
 	if (get(copy, { id: args.message.id.name })) {
-		return Result.err(
+		return [
+			undefined,
 			Error(
 				`Message ${args.message.id.name} already exists in resource ${resource.languageTag.name}.`,
 			),
-		)
+		]
 	}
 	copy.body.push(args.message)
-	return Result.ok(copy)
+	return [copy, undefined]
 }
 
 function upsert(resource: Resource, args: { message: Message }): Result<Resource, Error> {
@@ -99,12 +100,13 @@ function update(
 	for (const [i, message] of resource.body.entries()) {
 		if (message.id.name === args.id) {
 			copy.body[i] = args.with
-			return Result.ok(copy)
+			return [copy, undefined]
 		}
 	}
-	return Result.err(
+	return [
+		undefined,
 		Error(`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`),
-	)
+	]
 }
 
 // using underscore to circumvent javascript reserved keyword 'delete'
@@ -115,14 +117,15 @@ function _delete(resource: Resource, args: { id: Message["id"]["name"] }): Resul
 	const copy: Resource = JSON.parse(JSON.stringify(resource))
 	for (const [i, message] of resource.body.entries()) {
 		if (message.id.name === args.id) {
-			// deleting 1 element at i(ndex)
+			// deleting 1 element at index
 			copy.body.splice(i, 1)
-			return Result.ok(copy)
+			return [copy, undefined]
 		}
 	}
-	return Result.err(
+	return [
+		undefined,
 		Error(`Message ${args.id} does not exist in resource ${resource.languageTag.name}.`),
-	)
+	]
 }
 
 function includedMessageIds(resource: Resource): string[] {
