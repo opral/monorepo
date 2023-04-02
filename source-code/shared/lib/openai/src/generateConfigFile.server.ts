@@ -52,7 +52,8 @@ export async function _generateConfigFileServer(args: {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))
 		if (_prompt.length > 2000) {
 			console.log(Object.keys(args.filesystemAsJson).toString().length)
-			return Result.err(
+			return [
+				undefined,
 				new Error(dedent`
 The current working directory contains too many file(paths).
 
@@ -61,7 +62,7 @@ Solution: Are you you in the root of your repository?
 Explanation: The maximum prompt for the OpenAI API is 2000 characters. The current prompt is ${_prompt.length} characters.
 			
 			`),
-			)
+			]
 		}
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
