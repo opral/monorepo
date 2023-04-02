@@ -491,15 +491,15 @@ async function cloneRepository(args: {
 
 	// fetch 100 more commits, can get more commits if needed
 	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
-	raw.fetch({
-		fs: args.fs,
-		http,
-		dir: "/",
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
-		url: `https://${host}/${owner}/${repository}`,
-		depth: 100,
-		relative: true,
-	})
+	// raw.fetch({
+	// 	fs: args.fs,
+	// 	http,
+	// 	dir: "/",
+	// 	corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+	// 	url: `https://${host}/${owner}/${repository}`,
+	// 	depth: 100,
+	// 	relative: true,
+	// })
 
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
