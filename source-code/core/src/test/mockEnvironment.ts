@@ -1,5 +1,5 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-import { fs as memfs } from "memfs"
+import { Volume } from "memfs"
 import dedent from "dedent"
 
 /**
@@ -18,7 +18,7 @@ export async function mockEnvironment(args: {
 		paths: string[]
 	}
 }): Promise<EnvironmentFunctions> {
-	const $fs = memfs.promises as EnvironmentFunctions["$fs"]
+	const $fs = Volume.fromJSON({}).promises
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
@@ -58,23 +58,21 @@ Context: The path is relative to the current working directory, not the file tha
 	}
 	// create directory
 	await args.copyTo.mkdir(args.path, { recursive: true })
-	for (const file of await args.copyFrom.readdir(args.path)) {
+	const pathsInDirectory = await args.copyFrom.readdir(args.path)
+	for (const subpath of pathsInDirectory) {
 		let isFile = true
 		// check if the path is a file
 		try {
-			await args.copyFrom.readFile(`${args.path}/${file}`)
+			await args.copyFrom.readFile(`${args.path}/${subpath}`)
 		} catch {
 			isFile = false
 		}
-		const _path = normalizePath(`${args.path}/${file}`)
+		const path = normalizePath(`${args.path}/${subpath}`)
 		if (isFile) {
-			await args.copyTo.writeFile(
-				_path,
-				// @ts-ignore
-				(await args.copyFrom.readFile(_path, { encoding: "utf-8" })) as string,
-			)
+			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
+			await args.copyTo.writeFile(path, file)
 		} else {
-			await copyDirectory({ ...args, path: _path })
+			await copyDirectory({ ...args, path })
 		}
 	}
 }
