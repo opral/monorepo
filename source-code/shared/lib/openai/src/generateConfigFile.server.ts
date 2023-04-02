@@ -9,7 +9,7 @@ import bodyParser from "body-parser"
 import { z } from "zod"
 
 export const generateConfigFileRoute = express.Router()
-generateConfigFileRoute.use(bodyParser.json({ limit: "10mb" }))
+generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))
 
 const env = getServerEnv()
 
@@ -44,7 +44,7 @@ export async function _generateConfigFileServer(args: {
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
 }): Promise<Result<string, Error>> {
-	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
+	const fs = Volume.fromJSON(args.filesystemAsJson).promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
@@ -77,7 +77,6 @@ export async function _generateConfigFileServer(args: {
 			],
 		})
 	} catch (error) {
-		console.log(error)
 		return Result.err(error as Error)
 	}
 }
