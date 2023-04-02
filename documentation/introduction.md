@@ -20,9 +20,9 @@ description: Learn on how to get started with inlang, the design principles, and
     /%}
 
     {% QuickLink
-        title="Design principles"
+        title="Why inlang?"
         icon="architecture"
-        href="/documentation/design-principles"
+        href="/documentation/why-inlang"
         description="Learn how inlang is designed."
     /%}
 
@@ -43,7 +43,7 @@ Let non-technical team members (translators) manage messages in a repository. Th
 
 ## Dev tools
 
-Inlang is designed to be extended, the dev tools below are a small selection of dev tools that are maintained by inlang. With the [@inlang/core module](/documentation/build-on-inlang), you are able to build tools according your needs. Read more about the [infrastructure design principle](/documentation/design-principles).
+Inlang is designed to be extended, the dev tools below are a small selection of dev tools that are maintained by inlang. With the [@inlang/core module](/documentation/build-on-inlang), you are able to build tools according your needs. Read more about the [infrastructure design principle](/documentation/why-inlang).
 
 ### IDE-Extension ([get notified](https://tally.so/r/wgbOpJ))
 

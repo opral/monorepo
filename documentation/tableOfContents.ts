@@ -10,29 +10,19 @@ export const FrontmatterSchema = RequiredFrontmatter
  */
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
-		(await import("./introduction.md?raw")).default,
-		(await import("./design-principles.md?raw")).default,
-		(await import("./project-status.md?raw")).default,
-		(await import("./code-organization.md?raw")).default,
-		(await import("./the-next-git.md?raw")).default,
-		(await import("../CONTRIBUTING.md?raw")).default,
-	],
-	Guide: [
 		(await import("./getting-started.md?raw")).default,
-		(await import("./plugins.md?raw")).default,
-		(await import("./build-on-inlang.md?raw")).default,
-		(await import("./ci-cd.md?raw")).default,
+		(await import("./why-inlang.md?raw")).default,
 	],
-	Reference: [
+	Guide: [(await import("./plugins.md?raw")).default, (await import("./ci-cd.md?raw")).default],
+	"inlang core": [
+		(await import("./build-on-inlang.md?raw")).default,
 		(await import("./ast.md?raw")).default,
-		(await import("./config.md?raw")).default,
 		(await import("./environment-functions.md?raw")).default,
-		(await import("./file-system.md?raw")).default,
 		(await import("./query.md?raw")).default,
 		(await import("../source-code/core/src/lint/README.md?raw")).default,
 	],
-	RFCs: [
-		(await import("../rfcs/core-architecture/RFC.md?raw")).default,
-		(await import("../rfcs/tech-stack/RFC.md?raw")).default,
+	Contribute: [
+		(await import("../CONTRIBUTING.md?raw")).default,
+		(await import("./code-organization.md?raw")).default,
 	],
 }
