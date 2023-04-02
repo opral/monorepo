@@ -24,6 +24,7 @@ export async function onMachineTranslate(args: {
 			{ method: "POST" },
 		)
 		const json = await response.json()
+		console.log(json)
 		assertUsage(
 			json.data.translations.length === 1,
 			"Expected exactly one translation. Hardcoded in the code for now.",
