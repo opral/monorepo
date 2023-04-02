@@ -79,7 +79,7 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
+		{ name: "Docs", href: "/documentation/getting-started", type: "text" as buttonType },
 		{
 			name: "Feedback",
 			external: currentPageContext.urlParsed.pathname.includes("editor"),
@@ -206,12 +206,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						>
 							Getting Started
 						</a>
-						<a
-							href="https://inlang.com/documentation"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Introduction
-						</a>
+
 						<a
 							href="https://inlang.com/documentation/design-principles"
 							class="font-medium text-surface-500 hover:text-primary"
@@ -250,6 +245,12 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Discord
+						</a>
+						<a
+							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Join the Team
 						</a>
 					</div>
 					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2">

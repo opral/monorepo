@@ -1,5 +1,5 @@
-import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
-import { Result } from "@inlang/core/utilities"
+import { mockEnvironment, ValidateConfigException, validateConfigFile } from "@inlang/core/test"
+import type { Result } from "@inlang/core/utilities"
 import express from "express"
 import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
@@ -16,11 +16,11 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 		const { filesystemAsJson } = z
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
-		const response = await _generateConfigFileServer({ filesystemAsJson })
-		if (response.isErr) {
-			console.log(response.error)
+		const result = await _generateConfigFileServer({ filesystemAsJson })
+		if (result[1]) {
+			console.log(result[1])
 		}
-		res.json(response)
+		res.json(result)
 	} catch (error) {
 		res.status(500)
 		res.send()
@@ -33,6 +33,10 @@ const openapi = new OpenAIApi(
 	}),
 )
 
+export class GenerateConfigFileException extends Error {
+	readonly #id = "GenerateConfigFileException"
+}
+
 /**
  * Internal wrapper to test the function without the requirement to run a server during testing.
  */
@@ -41,8 +45,8 @@ export async function _generateConfigFileServer(args: {
 	// messages is required to recursively call the function
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
-}): Promise<Result<string, Error>> {
-	const fs = Volume.fromJSON(args.filesystemAsJson).promises
+}): Promise<Result<string, GenerateConfigFileException | ValidateConfigException | Error>> {
+	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))
@@ -61,9 +65,12 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 		}
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
-		return Result.err(
-			new Error("Couldn't generate a config file. " + args.messages.at(-1)!.content),
-		)
+		return [
+			undefined,
+			new GenerateConfigFileException(
+				"Couldn't generate a config file. " + args.messages.at(-1)!.content,
+			),
+		]
 	}
 	try {
 		const response = await openapi.createChatCompletion({
@@ -71,9 +78,9 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 			messages: args.messages,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
-		const isValidConfig = await validateConfigFile({ file: configFile, env })
-		if (isValidConfig.isOk) {
-			return Result.ok(configFile)
+		const [, exception] = await validateConfigFile({ file: configFile, env })
+		if (!exception) {
+			return [configFile, undefined]
 		}
 		return _generateConfigFileServer({
 			...args,
@@ -84,12 +91,13 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 					role: "user",
 					content:
 						"The config does not work. Try again and only reply with the config. No explanations. " +
-						isValidConfig.error.message,
+						exception.message,
 				},
 			],
 		})
 	} catch (error) {
-		return Result.err(error as Error)
+		console.error(error)
+		return [undefined, error as Error]
 	}
 }
 
@@ -98,12 +106,12 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
  */
 function prompt(filePaths: string[]): string {
 	return `
-  You are supposed to write a config file for a service called "inlang" that exports a defineConfig function. 
+  You are supposed to write a config file for a service called "inlang" that exports a defineConfig function.
 
-  Only reply with the code. Don't wrap the code in \`\`\`. Don't write explanations. 
-  
+  Only reply with the code. Don't wrap the code in \`\`\`. Don't write explanations.
+
   The repository for the config file has the following files:
-  
+
   ${filePaths.join("\n")}
   
 	Here is an example config: 
@@ -124,7 +132,7 @@ function prompt(filePaths: string[]): string {
 			// translations or i18n
       pathPattern: "./locales/{language}.json",
     };
-  
+
     return {
       referenceLanguage: "en",
       languages: await plugin.getLanguages({

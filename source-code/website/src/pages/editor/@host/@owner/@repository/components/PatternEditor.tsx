@@ -164,20 +164,27 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		console.log(isProduction)
-		const result = await onMachineTranslate({
-			referenceLanguage: referenceResource()!.languageTag.name,
-			targetLanguage: props.language,
-			text,
-		})
-		if (result.error) {
+		if (isProduction) {
+			const result = await onMachineTranslate({
+				referenceLanguage: referenceResource()!.languageTag.name,
+				targetLanguage: props.language,
+				text,
+			})
+			if (result.error) {
+				showToast({
+					variant: "warning",
+					title: "Machine translation failed.",
+					message: result.error,
+				})
+			} else {
+				setTextValue(result.data)
+			}
+		} else {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: result.error,
+				message: "Machine translations are disabled in development. An env variable is missing.",
 			})
-		} else {
-			setTextValue(result.data)
 		}
 		setMachineTranslationIsLoading(false)
 	}
