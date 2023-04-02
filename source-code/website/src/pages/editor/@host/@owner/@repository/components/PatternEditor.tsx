@@ -11,6 +11,8 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
+import { getLintReports, LintedMessage } from "@inlang/core/lint"
+import { node } from "@markdoc/markdoc/dist/src/schema.js"
 import { isProduction } from "@env"
 
 /**
@@ -191,24 +193,30 @@ export function PatternEditor(props: {
 
 	const getNotificationHints = () => {
 		const notifications: Array<Notification> = []
+		if (props.message) {
+			const lintReports = getLintReports(props.message as LintedMessage)
+			if (lintReports) {
+				lintReports.map((lint) => {
+					notifications.push({
+						notificationTitle: lint.id.split(".")[1],
+						notificationDescription: lint.message,
+						notificationType: lint.level,
+					})
+				})
+			}
+		}
+
 		if (hasChanges() && localStorage.user === undefined) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
-				notificationType: "warning",
+				notificationType: "warn",
 			})
 		}
 		if (hasChanges() && userIsCollaborator() === false) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
-				notificationType: "info",
-			})
-		}
-		if (textValue() === "") {
-			notifications.push({
-				notificationTitle: "Empty:",
-				notificationDescription: "The translation has not been made.",
 				notificationType: "info",
 			})
 		}
@@ -236,7 +244,7 @@ export function PatternEditor(props: {
 			onClick={() => {
 				handleFocus()
 			}}
-			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:z-20 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
+			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">

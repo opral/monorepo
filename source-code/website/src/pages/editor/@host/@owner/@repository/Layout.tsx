@@ -1,6 +1,7 @@
 import { pushChanges, useEditorState } from "./State.jsx"
 import {
 	createEffect,
+	createMemo,
 	createSignal,
 	For,
 	JSXElement,
@@ -27,6 +28,7 @@ import { analytics } from "@src/services/analytics/index.js"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
+import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -42,10 +44,14 @@ export function Layout(props: { children: JSXElement }) {
 
 	createEffect(() => {
 		if (inlangConfig()?.languages) {
-			const timer = setTimeout(() => {
+			const timerShow = setTimeout(() => {
 				setCustomHintCondition(true)
 			}, 500)
-			onCleanup(() => clearTimeout(timer))
+			const timerHide = setTimeout(() => {
+				setCustomHintCondition(false)
+			}, 5000)
+			onCleanup(() => clearTimeout(timerShow))
+			onCleanup(() => clearTimeout(timerHide))
 		}
 	})
 
@@ -53,12 +59,13 @@ export function Layout(props: { children: JSXElement }) {
 		<RootLayout>
 			<div class="pt-4 pb-16 w-full flex flex-col grow">
 				<SignInBanner />
-				<div class="flex items-center space-x-4 py-5">
+				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
-				<div class="flex justify-between gap-2 pb-5">
-					<div class="flex justify-between gap-2 items-center">
+				<div class="flex justify-between gap-2 py-5 sticky top-[72px] z-30 bg-background">
+					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
+					<div class="flex z-20 justify-between gap-2 items-center">
 						<p class="text-sm text-outline-variant">Filter:</p>
 						<CustomHintWrapper
 							notification={{
@@ -72,9 +79,9 @@ export function Layout(props: { children: JSXElement }) {
 								<LanguageFilter />
 							</sl-tooltip>
 						</CustomHintWrapper>
-						{/* <sl-tooltip prop:content="by lint status">
+						<sl-tooltip prop:content="by lint status">
 							<StatusFilter />
-						</sl-tooltip> */}
+						</sl-tooltip>
 					</div>
 					<div class="flex gap-2">
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
@@ -346,30 +353,35 @@ const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig } = useEditorState()
+	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
+	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
 
-	const transformId = (id: string) => {
-		switch (id) {
-			case "inlang.missingMessage":
-				return "missing"
-			case "inlang.messageWithoutReference":
-				return "no reference"
-			default:
-				return id.slice(7)
+	const ids = createMemo(() => {
+		return (
+			inlangConfig()
+				?.lint?.rules?.map((rule) => [rule].flat())
+				.flat()
+				.map(({ id }) => id) || []
+		)
+	})
+
+	createEffect(() => {
+		if (inlangConfig()) {
+			if (ids().includes("inlang.missingMessage")) {
+				setFilteredStatus(() => ["inlang.missingMessage"])
+			} else {
+				setFilteredStatus(() => [])
+			}
+			setMissingMessage(true)
 		}
-	}
-
-	const [filteredStatus, setFilteredStatus] = createSignal<string | string[] | undefined>(
-		// @ts-ignore
-		inlangConfig()?.lint?.rules?.map((rule) => transformId(rule.id)),
-	)
+	})
 
 	return (
 		<Show
-			when={inlangConfig()?.lint?.rules}
+			when={missingMessage()}
 			fallback={
 				<sl-select
-					prop:name="Lint States Select"
+					prop:name="Lint Status Select"
 					prop:placeholder="Loading ..."
 					prop:size="small"
 					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
@@ -381,10 +393,11 @@ function StatusFilter() {
 			}
 		>
 			<sl-select
-				prop:name="Lint States Select"
-				prop:placeholder="Lint States"
+				prop:name="Lint Status Select"
+				prop:placeholder="Lint Status"
 				prop:size="small"
 				prop:multiple={true}
+				prop:maxOptionsVisible={2}
 				prop:value={filteredStatus()}
 				on:sl-change={(event: any) => {
 					setFilteredStatus(event.target.value)
@@ -395,21 +408,16 @@ function StatusFilter() {
 					<WarningIcon />
 				</div>
 				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Languages</span>
+					<span class="text-left text-on-surface-variant grow">Lints</span>
 					<a
 						class="cursor-pointer link link-primary"
-						onClick={() =>
-							setFilteredStatus(() =>
-								// @ts-ignore
-								inlangConfig()!.lint?.rules.map((rule) => transformId(rule.id)),
-							)
-						}
+						onClick={() => setFilteredStatus(() => ids().map((id) => id))}
 					>
 						ALL
 					</a>
 					<a
 						class="cursor-pointer link link-primary"
-						// filter all except the reference language
+						// filter all rules
 						onClick={() => setFilteredStatus(() => [])}
 					>
 						NONE
@@ -417,39 +425,10 @@ function StatusFilter() {
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto">
-					<For each={inlangConfig()?.lint?.rules}>
-						{(rule) => (
-							<sl-option
-								// @ts-ignore
-								prop:value={transformId(rule.id)}
-							>
-								{/* @ts-ignore */}
-								{transformId(rule.id)}
-							</sl-option>
-						)}
-					</For>
+					<For each={ids()}>{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}</For>
 				</div>
 			</sl-select>
 		</Show>
-	)
-}
-
-const WarningIcon = () => {
-	return (
-		<svg
-			width="20"
-			height="20"
-			viewBox="0 0 20 20"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-			class="flex-grow-0 flex-shrink-0"
-			preserveAspectRatio="none"
-		>
-			<path
-				d="M9 13H11V15H9V13ZM9 5H11V11H9V5ZM10 0C4.47 0 0 4.5 0 10C0 12.6522 1.05357 15.1957 2.92893 17.0711C3.85752 17.9997 4.95991 18.7362 6.17317 19.2388C7.38642 19.7413 8.68678 20 10 20C12.6522 20 15.1957 18.9464 17.0711 17.0711C18.9464 15.1957 20 12.6522 20 10C20 8.68678 19.7413 7.38642 19.2388 6.17317C18.7362 4.95991 17.9997 3.85752 17.0711 2.92893C16.1425 2.00035 15.0401 1.26375 13.8268 0.761205C12.6136 0.258658 11.3132 0 10 0ZM10 18C7.87827 18 5.84344 17.1571 4.34315 15.6569C2.84285 14.1566 2 12.1217 2 10C2 7.87827 2.84285 5.84344 4.34315 4.34315C5.84344 2.84285 7.87827 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1571 5.84344 18 7.87827 18 10C18 12.1217 17.1571 14.1566 15.6569 15.6569C14.1566 17.1571 12.1217 18 10 18Z"
-				fill="#52525B"
-			/>
-		</svg>
 	)
 }
 
