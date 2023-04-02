@@ -97,6 +97,12 @@ type EditorStateSchema = {
 	setFilteredLanguages: Setter<string[]>
 
 	/**
+	 * FilterLanguages show or hide the different messages.
+	 */
+	filteredStatus: () => string[]
+	setFilteredStatus: Setter<string[]>
+
+	/**
 	 * The resources in a given repository.
 	 */
 	resources: ast.Resource[]
@@ -161,6 +167,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([])
+
+	const [filteredStatus, setFilteredStatus] = createSignal<string[]>([])
 
 	const [fs, setFs] = createSignal<typeof import("memfs").fs>(createFsFromVolume(new Volume()))
 
@@ -449,6 +457,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFsChange,
 					filteredLanguages,
 					setFilteredLanguages,
+					filteredStatus,
+					setFilteredStatus,
 					resources,
 					setResources,
 					referenceResource,
@@ -609,7 +619,10 @@ async function readInlangConfig(args: {
 
 async function readResources(config: InlangConfig) {
 	const resources = await config.readResources({ config })
-	return resources
+	const [lintedResources] = await lint({ config, resources })
+	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
+	// console.log(allLints)
+	return lintedResources
 }
 
 async function writeResources(args: {

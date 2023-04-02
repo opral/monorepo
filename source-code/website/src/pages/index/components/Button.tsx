@@ -37,7 +37,7 @@ export const Button = (props: ButtonProps) => {
 						props.href && navigate(props.href)
 					}}
 					class={
-						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left " +
+						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
 						bgColor(props.type)
 					}
 				>
@@ -63,9 +63,9 @@ export const Button = (props: ButtonProps) => {
 			</Show>
 			<Show when={!props?.href?.startsWith("/") && !props.function}>
 				<a href={props.href} target="_blank">
-					<button
+					<div
 						class={
-							"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left " +
+							"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
 							bgColor(props.type)
 						}
 					>
@@ -87,7 +87,7 @@ export const Button = (props: ButtonProps) => {
 								/>
 							</svg>
 						</Show>
-					</button>
+					</div>
 				</a>
 			</Show>
 			<Show when={props.function}>
