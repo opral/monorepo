@@ -79,7 +79,7 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
+		{ name: "Docs", href: "/documentation/getting-started", type: "text" as buttonType },
 		{
 			name: "Feedback",
 			external: currentPageContext.urlParsed.pathname.includes("editor"),
@@ -206,12 +206,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						>
 							Getting Started
 						</a>
-						<a
-							href="https://inlang.com/documentation"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Introduction
-						</a>
+
 						<a
 							href="https://inlang.com/documentation/design-principles"
 							class="font-medium text-surface-500 hover:text-primary"
