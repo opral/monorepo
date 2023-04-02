@@ -15,7 +15,7 @@ describe.skip("generating config files", () => {
 			}
 			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
 			if (exception) {
-				console.log(exception)
+				console.error(exception)
 			}
 			expect(exception).toBeUndefined()
 		},
@@ -36,7 +36,7 @@ describe.skip("generating config files", () => {
 			}
 			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
 			if (exception) {
-				console.log(exception)
+				console.error(exception)
 			}
 			expect(exception).toBeUndefined()
 		},

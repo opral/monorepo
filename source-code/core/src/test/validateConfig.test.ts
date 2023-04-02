@@ -54,7 +54,7 @@ it("should fail if the referenceLanguage is not included in languages", async ()
 // 		config,
 // 	})
 // 	if (exception) {
-// 		console.log(exception)
+// 		console.error(exception)
 // 	}
 // 	expect(exception).toBeDefined()
 // })

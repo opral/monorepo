@@ -84,7 +84,7 @@ export async function _generateConfigFileServer(args: {
 			],
 		})
 	} catch (error) {
-		console.log(error)
+		console.error(error)
 		return [undefined, error as Error]
 	}
 }
