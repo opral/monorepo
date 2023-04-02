@@ -153,6 +153,7 @@ export function PatternEditor(props: {
 			})
 		}
 		const text = props.referenceMessage.pattern.elements[0].value as string
+		console.log(text)
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -168,6 +169,7 @@ export function PatternEditor(props: {
 			targetLanguage: props.language,
 			text,
 		})
+		console.log(result)
 		if (result.error) {
 			showToast({
 				variant: "warning",
