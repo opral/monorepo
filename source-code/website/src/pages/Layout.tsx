@@ -251,6 +251,12 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						>
 							Discord
 						</a>
+						<a
+							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Join the Team
+						</a>
 					</div>
 					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Let's talk</p>
