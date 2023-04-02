@@ -11,6 +11,10 @@ export const FrontmatterSchema = RequiredFrontmatter
  * The ordering in the array determines the position in the blog.
  */
 export const tableOfContents: string[] = [
+	(await import("./the-next-git.md?raw")).default,
 	(await import("./git-as-sdk.md?raw")).default,
 	(await import("./notes-on-git-based-architecture.md?raw")).default,
+	// RFCs
+	(await import("../../rfcs/tech-stack/RFC.md?raw")).default,
+	(await import("../../rfcs/core-architecture/RFC.md?raw")).default,
 ]
