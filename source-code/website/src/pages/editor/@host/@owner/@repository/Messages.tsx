@@ -3,12 +3,14 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
-import { lint, getLintReports } from "@inlang/core/lint"
+import { getLintReports } from "@inlang/core/lint"
+import type { LintReport, LintedNode } from "@inlang/core/lint"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, textSearch } = useEditorState()
+	const { inlangConfig, filteredLanguages, textSearch, filteredStatus } = useEditorState()
+	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
 		return props.messages[inlangConfig()!.referenceLanguage]
 	}
@@ -30,8 +32,29 @@ export function Messages(props: {
 		throw Error("No message id found")
 	}
 
+	const matchedLints = () => {
+		if (props.messages) {
+			const reports = getLintReports(Object.values(props.messages) as LintedNode[])
+			const statusArr = filteredStatus()
+			const match = reports
+				.map((lint) => {
+					if (statusArr) {
+						const test = statusArr.map((status: string) => {
+							if (status === lint.id) {
+								return lint
+							}
+						})
+						return test.filter((x) => x)
+					}
+				})
+				.flat() as LintReport[]
+			return match.length > 0 ? true : false
+		}
+	}
+
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
+
 	const useVisibilityObserver = createVisibilityObserver()
 	let patternListElement: HTMLDivElement | undefined
 	const elementIsVisible = useVisibilityObserver(() => patternListElement)
@@ -43,47 +66,57 @@ export function Messages(props: {
 		}
 	})
 
+	createEffect(() => {
+		//console.log(matchedLints())
+	})
+
 	return (
-		<Show
-			when={
-				JSON.stringify(id()).includes(textSearch()) ||
-				JSON.stringify(props.messages).includes(textSearch())
-			}
-		>
-			<div
-				class={
-					"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 first:border-t border-x border-b-0 border-surface-2 first:rounded-t"
+		<div ref={patternListElement}>
+			<Show
+				when={
+					(filteredStatus()?.length === 0 || matchedLints()) &&
+					(JSON.stringify(id()).includes(textSearch()) ||
+						JSON.stringify(props.messages).includes(textSearch()))
 				}
 			>
-				<h3
-					slot="summary"
-					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
+				<div
+					class={
+						"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 first:border-t border-x border-b-0 border-surface-2 first:rounded-t"
+					}
 				>
-					{id()}
-				</h3>
-			</div>
-			<div ref={patternListElement}>
-				<For each={inlangConfig()?.languages}>
-					{(language) => (
-						<Show
-							when={
-								filteredLanguages().includes(language) &&
-								// only render if visible or has been rendered before
-								(elementIsVisible() || hasBeenRendered())
-							}
-						>
-							<PatternEditor
-								referenceLanguage={inlangConfig()!.referenceLanguage}
-								language={language}
-								id={id()}
-								referenceMessage={referenceMessage()}
-								message={props.messages[language]}
-							/>
-						</Show>
-					)}
-				</For>
-			</div>
-		</Show>
+					<h3
+						slot="summary"
+						class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
+					>
+						{id()}
+					</h3>
+				</div>
+				<div>
+					<For each={inlangConfig()?.languages}>
+						{(language) => (
+							<>
+								<Show
+									when={
+										//filter languages
+										filteredLanguages().includes(language) &&
+										// only render if visible or has been rende red before
+										(elementIsVisible() || hasBeenRendered())
+									}
+								>
+									<PatternEditor
+										referenceLanguage={inlangConfig()!.referenceLanguage}
+										language={language}
+										id={id()}
+										referenceMessage={referenceMessage()}
+										message={props.messages[language]}
+									/>
+								</Show>
+							</>
+						)}
+					</For>
+				</div>
+			</Show>
+		</div>
 	)
 }
 
