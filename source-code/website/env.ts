@@ -14,7 +14,7 @@
 export const isProduction = process.env.NODE_ENV === "production"
 
 /**
- * Environment variables that are avaibale ONLY server-side.
+ * Environment variables that are available ONLY server-side.
  *
  * Server-side env variables include client-side env variables.
  *
@@ -58,7 +58,7 @@ export type ServerSideEnv = ClientSideEnv & {
 /**
  * Environment variables that are available client-side.
  *
- * Read [vite's documenation](https://vitejs.dev/guide/env-and-mode.html#env-variables-and-modes)
+ * Read [vite's documentation](https://vitejs.dev/guide/env-and-mode.html#env-variables-and-modes)
  * for more information.
  */
 export type ClientSideEnv = {
@@ -106,7 +106,7 @@ export const clientSideEnv: ClientSideEnv = import.meta.env as unknown as Client
  * 	 const env = serverSideEnv();
  * ```
  *
- * Client side env varibales are automatically included.
+ * Client side env variables are automatically included.
  */
 export async function serverSideEnv(): Promise<ServerSideEnv> {
 	try {
@@ -122,6 +122,14 @@ export async function serverSideEnv(): Promise<ServerSideEnv> {
 	}
 }
 
+class EnvironmentVariableMissingError extends Error {
+	readonly #id = "EnvironmentVariableMissingError"
+
+	constructor(variableName: string) {
+		super(`Missing environment variable '${variableName}'`)
+	}
+}
+
 /**
  * Call this function as soon as possible to validate the env.
  *
@@ -131,34 +139,34 @@ export async function validateEnv() {
 	const env = await serverSideEnv()
 	// VITE_GIT_REQUEST_PROXY_PATH
 	if (env.VITE_GIT_REQUEST_PROXY_PATH === undefined) {
-		throw Error("Missing env variable VITE_CORS_PROXY_URL")
+		throw new EnvironmentVariableMissingError("VITE_CORS_PROXY_URL")
 	} else if (
 		env.VITE_GIT_REQUEST_PROXY_PATH.startsWith("/") === false ||
 		env.VITE_GIT_REQUEST_PROXY_PATH.endsWith("/") === false
 	) {
-		throw Error(
+		throw new Error(
 			"VITE_CORS_PROXY_URL must be a local path like that starts and ends with a slash `/` like `/git-proxy/`.",
 		)
 	}
 	//
 	else if (env.VITE_GITHUB_APP_CLIENT_ID === undefined) {
-		throw Error("Missing env variable VITE_GITHUB_APP_CLIENT_ID")
+		throw new EnvironmentVariableMissingError("VITE_GITHUB_APP_CLIENT_ID")
 	} else if (env.JWE_SECRET_KEY === undefined) {
-		throw Error("Missing env variable JWE_SECRET_KEY")
+		throw new EnvironmentVariableMissingError("JWE_SECRET_KEY")
 	} else if (env.GITHUB_APP_CLIENT_SECRET === undefined) {
-		throw Error("Missing env variable GITHUB_APP_CLIENT_SECRET")
+		throw new EnvironmentVariableMissingError("GITHUB_APP_CLIENT_SECRET")
 	} else if (env.COOKIE_SECRET === undefined) {
-		throw Error("Missing env variable COOKIE_SECRET")
+		throw new EnvironmentVariableMissingError("COOKIE_SECRET")
 	}
 	if (isProduction) {
 		if (env.VITE_SENTRY_DSN_CLIENT === undefined) {
-			throw Error("Missing env variable VITE_SENTRY_DSN_CLIENT")
+			throw new EnvironmentVariableMissingError("VITE_SENTRY_DSN_CLIENT")
 		} else if (env.SENTRY_DSN_SERVER === undefined) {
-			throw Error("Missing env variable SENTRY_DSN_SERVER")
+			throw new EnvironmentVariableMissingError("SENTRY_DSN_SERVER")
 		} else if (env.GOOGLE_TRANSLATE_API_KEY === undefined) {
-			throw Error("Missing env variable GOOGLE_TRANSLATE_API_KEY")
+			throw new EnvironmentVariableMissingError("GOOGLE_TRANSLATE_API_KEY")
 		} else if (env.VITE_POSTHOG_TOKEN === undefined) {
-			throw Error("Missing env variable VITE_POSTHOG_TOKEN")
+			throw new EnvironmentVariableMissingError("VITE_POSTHOG_TOKEN")
 		}
 	}
 }

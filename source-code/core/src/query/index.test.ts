@@ -4,27 +4,25 @@ import { query } from "./index.js"
 
 describe("query.create", () => {
 	it("should create a message", () => {
-		const resource = query(mockResource)
-			.create({
-				message: {
-					type: "Message",
-					id: { type: "Identifier", name: "new-message-123" },
-					pattern: { type: "Pattern", elements: [] },
-				},
-			})
-			.unwrap()
-		const message = query(resource).get({ id: "new-message-123" })
+		const [resource] = query(mockResource).create({
+			message: {
+				type: "Message",
+				id: { type: "Identifier", name: "new-message-123" },
+				pattern: { type: "Pattern", elements: [] },
+			},
+		})
+		const message = query(resource!).get({ id: "new-message-123" })
 		expect(message?.id.name).toBe("new-message-123")
 	})
 	it("should return an error is the message already exists", () => {
-		const result = query(mockResource).create({
+		const [, exception] = query(mockResource).create({
 			message: {
 				type: "Message",
 				id: { type: "Identifier", name: "first-message" },
 				pattern: { type: "Pattern", elements: [] },
 			},
 		})
-		expect(result.isErr).toBe(true)
+		expect(exception).toBeDefined()
 	})
 })
 
@@ -49,13 +47,11 @@ describe("query.update", () => {
 	it("should update an existing message", () => {
 		const message = query(mockResource).get({ id: "first-message" })
 		message!.pattern.elements = [{ type: "Text", value: "updated" }]
-		const updatedResource = query(mockResource)
-			.update({
-				id: "first-message",
-				with: message!,
-			})
-			.unwrap()
-		const updatedMessage = query(updatedResource).get({ id: "first-message" })
+		const [updatedResource] = query(mockResource).update({
+			id: "first-message",
+			with: message!,
+		})
+		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
 		expect(updatedMessage?.pattern.elements).toStrictEqual(message?.pattern.elements)
 	})
 
@@ -71,61 +67,59 @@ describe("query.update", () => {
 	})
 
 	it("should return an error if the message does not exist", () => {
-		const result = query(mockResource).update({
+		const [, exception] = query(mockResource).update({
 			id: "none-existent-message",
 			// @ts-ignore
 			with: "",
 		})
-		expect(result.isErr).toBe(true)
+		expect(exception).toBeDefined()
 	})
 })
 
 describe("query.upsert", () => {
 	it("should upsert a message if it does not exist", () => {
-		const resource = query(mockResource)
-			.upsert({
-				message: {
-					type: "Message",
-					id: { type: "Identifier", name: "new-message-1234" },
-					pattern: { type: "Pattern", elements: [] },
-				},
-			})
-			.unwrap()
-		const message = query(resource).get({ id: "new-message-1234" })
+		const [resource] = query(mockResource).upsert({
+			message: {
+				type: "Message",
+				id: { type: "Identifier", name: "new-message-1234" },
+				pattern: { type: "Pattern", elements: [] },
+			},
+		})
+
+		const message = query(resource!).get({ id: "new-message-1234" })
 		expect(message?.id.name).toBe("new-message-1234")
 	})
 
 	it("should update an existing message", () => {
 		const message = query(mockResource).get({ id: "first-message" })
 		message!.pattern.elements = [{ type: "Text", value: "updated" }]
-		const updatedResource = query(mockResource)
-			.upsert({
-				message: message!,
-			})
-			.unwrap()
-		const updatedMessage = query(updatedResource).get({ id: "first-message" })
+		const [updatedResource] = query(mockResource).upsert({
+			message: message!,
+		})
+		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
 		expect(updatedMessage?.pattern.elements).toStrictEqual(message?.pattern.elements)
 	})
 })
 
 describe("query.delete", () => {
 	it("should delete a message", () => {
-		const result = query(mockResource).delete({ id: "first-message" })
-		if (result.isErr) {
-			throw result.error
+		const [value, exception] = query(mockResource).delete({ id: "first-message" })
+		if (exception) {
+			throw exception
 		}
-		expect(result.value.type).toBe("Resource")
-		const message = query(result.value).get({ id: "first-message" })
+		expect(value.type).toBe("Resource")
+		const message = query(value).get({ id: "first-message" })
 		expect(message).toBeUndefined()
 	})
 	it("should be immutable", () => {
-		query(mockResource).delete({ id: "first-message" }).unwrap()
+		const [, exception] = query(mockResource).delete({ id: "first-message" })
+		expect(exception).toBeUndefined()
 		const message = query(mockResource).get({ id: "first-message" })
 		expect(message).toBeDefined()
 	})
 	it("should return an error if the message did not exist", () => {
-		const result = query(mockResource).delete({ id: "none-existent-message" })
-		expect(result.isErr).toBe(true)
+		const [, exception] = query(mockResource).delete({ id: "none-existent-message" })
+		expect(exception).toBeDefined()
 	})
 })
 
