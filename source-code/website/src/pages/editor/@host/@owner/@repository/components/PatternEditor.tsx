@@ -153,7 +153,6 @@ export function PatternEditor(props: {
 			})
 		}
 		const text = props.referenceMessage.pattern.elements[0].value as string
-		console.log(text)
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -169,7 +168,6 @@ export function PatternEditor(props: {
 			targetLanguage: props.language,
 			text,
 		})
-		console.log(result)
 		if (result.error) {
 			showToast({
 				variant: "warning",
@@ -312,7 +310,7 @@ export function PatternEditor(props: {
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}
-				{/* <Show when={showMachineLearningWarningDialog()}>
+				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
 							<li>
@@ -348,7 +346,7 @@ export function PatternEditor(props: {
 							Proceed with machine translating
 						</sl-button>
 					</sl-dialog>
-				</Show> */}
+				</Show>
 			</div>
 		</div>
 	)
