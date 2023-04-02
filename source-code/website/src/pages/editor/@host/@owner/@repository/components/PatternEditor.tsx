@@ -164,7 +164,6 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		console.log(isProduction)
 		if (isProduction) {
 			const result = await onMachineTranslate({
 				referenceLanguage: referenceResource()!.languageTag.name,
