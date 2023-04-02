@@ -1,6 +1,10 @@
 import type { Language } from "./sharedTypes.js"
 
-type NavigatorDetector = ({ window }: { window: Window }) => Language[]
+type ObjectWithNavigatorLanguages = {
+	navigator: { languages: readonly Language[] }
+}
+
+type NavigatorDetector = ({ window }: { window: ObjectWithNavigatorLanguages }) => Language[]
 
 export const navigatorDetector = (({ window }) => [
 	...window.navigator.languages,

@@ -1,44 +1,14 @@
 import type { Language } from "./sharedTypes.js"
-import { acceptLanguageHeaderDetector } from "./acceptLanguageHeaderDetector.js"
-import { rootSlugDetector } from "./rootSlugDetector.js"
-import { navigatorDetector } from "./navigatorDetector.js"
 import { matchLang } from "./matchLang.js"
+import type { acceptLanguageHeaderDetector } from "./acceptLanguageHeaderDetector.js"
+import { detectWithStrategy } from "./detectWithStrategy.js"
 
-type AcceptLanguageStrategy = [
+export type AcceptLanguageStrategy = [
 	"accept-language-header",
 	Parameters<typeof acceptLanguageHeaderDetector>,
 ]
-type DetectionStrategy = "root-slug" | AcceptLanguageStrategy | "navigator"
-type DetectWithStrategyParams =
-	| {
-			strategy: "accept-language-header"
-			detectorParams: Parameters<typeof acceptLanguageHeaderDetector>
-	  }
-	| {
-			strategy: "root-slug"
-			detectorParams: Parameters<typeof rootSlugDetector>
-	  }
-	| {
-			strategy: "navigator"
-			detectorParams: Parameters<typeof navigatorDetector>
-	  }
 
-type DetectWithStrategy = (
-	{ strategy, detectorParams }: DetectWithStrategyParams,
-	availableLanguages: Set<Language>,
-) => Language[]
-
-const detectWithStrategy = ((params) => {
-	const { strategy, detectorParams } = params
-	if (strategy === "navigator") {
-		return navigatorDetector(...detectorParams)
-	} else if (strategy === "root-slug") {
-		return rootSlugDetector(...detectorParams)
-	} else if (strategy === "accept-language-header") {
-		return acceptLanguageHeaderDetector(...detectorParams)
-	}
-	return []
-}) satisfies DetectWithStrategy
+export type DetectionStrategy = "root-slug" | AcceptLanguageStrategy | "navigator"
 
 /**
  * Takes an array of detection strategies and returns
@@ -69,7 +39,7 @@ const detectLanguage = ({
 		} else {
 			return { strategy: "accept-language-header", detectorParams: s[1] }
 		}
-	}) satisfies Parameters<DetectWithStrategy>[0][]
+	}) satisfies Parameters<typeof detectWithStrategy>[0][]
 	const detected = strategiesWithData.flatMap((swd) => detectWithStrategy(swd))
 	return matchLang(detected, availableLanguages) ?? fallbackLanguage
 }

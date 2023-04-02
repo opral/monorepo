@@ -6,8 +6,11 @@ type RootSlugDetector = ({
 }: {
 	url: URL
 	availableLanguages: Set<Language>
-}) => Language[]
+}) => Language | undefined
+
+// TODO: make typescript require availableLanguages to have at least one entry. @ivanhofer is this possible?
 
 export const rootSlugDetector = (({ url, availableLanguages }) =>
-	[...availableLanguages].filter((l) => url.pathname.startsWith("/" + l)) ||
-	[]) satisfies RootSlugDetector
+	[...availableLanguages].find((l) =>
+		url.pathname.startsWith("/" + l + "/"),
+	)) satisfies RootSlugDetector
