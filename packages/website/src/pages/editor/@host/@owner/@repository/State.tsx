@@ -565,9 +565,11 @@ async function readInlangConfig(args: {
 	try {
 		const environmentFunctions: EnvironmentFunctions = {
 			$import: initialize$import({
+				// @ts-ignore
 				fs: args.fs.promises,
 				fetch,
 			}),
+			// @ts-ignore
 			$fs: args.fs.promises,
 		}
 		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
