@@ -59,7 +59,7 @@ export function Layout(props: { children: JSXElement }) {
 		<RootLayout>
 			<div class="pt-4 pb-16 w-full flex flex-col grow">
 				<SignInBanner />
-				<div class="flex items-center space-x-4 py-5">
+				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
 				</div>
@@ -398,6 +398,7 @@ function StatusFilter() {
 				prop:placeholder="Lint Status"
 				prop:size="small"
 				prop:multiple={true}
+				prop:maxOptionsVisible={2}
 				prop:value={filteredStatus()}
 				on:sl-change={(event: any) => {
 					setFilteredStatus(event.target.value)
