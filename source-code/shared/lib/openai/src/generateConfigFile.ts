@@ -34,8 +34,6 @@ export async function generateConfigFile(args: {
 	}
 }
 
-let x = 0
-
 /**
  * Recursively reads the contents of a directory.
  */
@@ -43,8 +41,6 @@ async function readdirRecursive(args: {
 	fs: EnvironmentFunctions["$fs"]
 	path: string
 }): Promise<Record<string, string>> {
-	console.log("readdirRecursive client iteration ", x)
-	x++
 	const { fs, path } = args
 	let result: Record<string, string> = {}
 	// Read the contents of the current directory
