@@ -5,22 +5,22 @@ const links = [
 	{
 		name: "jazzband",
 		img: "https://avatars.githubusercontent.com/u/15129049?s=200&v=4",
-		link: "https://github.com/jazzband/djangorestframework-simplejwt",
+		link: "/editor/github.com/jazzband/djangorestframework-simplejwt",
 	},
 	{
 		name: "osmosis-labs",
 		img: "https://avatars.githubusercontent.com/u/79296913?s=200&v=4",
-		link: "https://github.com/osmosis-labs/osmosis-frontend",
+		link: "/editor/github.com/osmosis-labs/osmosis-frontend",
 	},
 	{
 		name: "allinurl",
 		img: "https://avatars.githubusercontent.com/u/5005367?v=4",
-		link: "https://github.com/allinurl/goaccess",
+		link: "/editor/github.com/allinurl/goaccess",
 	},
 	{
 		name: "inlang",
 		img: "https://avatars.githubusercontent.com/u/91317568?s=200&v=4",
-		link: "https://github.com/inlang/inlang",
+		link: "/editor/github.com/inlang/example",
 	},
 ]
 
