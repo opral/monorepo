@@ -74,8 +74,6 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-console.log({ isProduction })
-
 if (isProduction) {
 	// serve build files
 	app.use(sirv(`${rootPath}/dist/client`))
