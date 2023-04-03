@@ -1,11 +1,11 @@
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Language, Message, Resource } from "@inlang/core/ast"
 import { describe, expect, test } from "vitest"
 import { initBaseRuntime, initRuntime, RuntimeContext, RuntimeState } from "./runtime.js"
 
 // this is a copy from `source-code/core/src/lint/linter.test.ts`
 // TODO: expose utility functions somewhere
 
-const createResource = (language: string, ...messages: Message[]) =>
+const createResource = (language: Language, ...messages: Message[]) =>
 	({
 		type: "Resource",
 		languageTag: {
@@ -44,7 +44,7 @@ describe("initRuntime", () => {
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
 		expect(runtime.getLanguage).toBeDefined()
-		expect(runtime.getLookupFunction).toBeDefined()
+		expect(runtime.getInlangFunction).toBeDefined()
 	})
 })
 
@@ -55,7 +55,7 @@ describe("initBaseRuntime", () => {
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
 		expect(runtime.getLanguage).toBeDefined()
-		expect(runtime.getLookupFunction).toBeDefined()
+		expect(runtime.getInlangFunction).toBeDefined()
 	})
 
 	describe("loadResource", () => {
@@ -130,22 +130,22 @@ describe("initBaseRuntime", () => {
 		})
 	})
 
-	describe("getLookupFunction", () => {
+	describe("getInlangFunction", () => {
 		test("it should not throw if language was never set", () => {
 			const runtime = initBaseRuntime(context)
 
-			const i = runtime.getLookupFunction()
+			const i = runtime.getInlangFunction()
 
 			expect(i("test")).toBe("")
 		})
 
-		test("it should return the lookup function for the current language", async () => {
+		test("it should return the inlang function for the current language", async () => {
 			const runtime = initBaseRuntime(context)
 
 			await runtime.loadResource("en")
 			runtime.switchLanguage("en")
 
-			const i = runtime.getLookupFunction()
+			const i = runtime.getInlangFunction()
 
 			expect(i("hello")).toBe("world")
 		})
@@ -163,7 +163,7 @@ describe("initBaseRuntime", () => {
 			expect(runtime2.getLanguage()).toBe("de")
 		})
 
-		test("lookup function", async () => {
+		test("inlang function", async () => {
 			const runtime1 = initBaseRuntime(context)
 			const runtime2 = initBaseRuntime(context)
 
@@ -173,17 +173,17 @@ describe("initBaseRuntime", () => {
 			await runtime2.loadResource("fr")
 			runtime2.switchLanguage("fr")
 
-			const i1 = runtime1.getLookupFunction()
-			const i2 = runtime2.getLookupFunction()
+			const i1 = runtime1.getInlangFunction()
+			const i2 = runtime2.getInlangFunction()
 
 			expect(i1("hello")).toBe("Welt")
 			expect(i2("hello")).toBe("monde")
 
 			runtime1.switchLanguage("fr")
-			const i1fr = runtime1.getLookupFunction()
+			const i1fr = runtime1.getInlangFunction()
 
 			runtime2.switchLanguage("de")
-			const i2de = runtime2.getLookupFunction()
+			const i2de = runtime2.getInlangFunction()
 
 			expect(i1fr("hello")).toBe("")
 			expect(i2de("hello")).toBe("")

@@ -2,6 +2,7 @@ import type { Config } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
 import type { LintedResource, LintRule, Visitors } from "./rule.js"
 import { createReportFunction } from "./report.js"
+import type { Language } from "@inlang/core/ast"
 
 const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
@@ -52,8 +53,8 @@ export const lint = async (args: {
 
 const processLintRule = async (args: {
 	rule: LintRule
-	referenceLanguage: string
-	languages: string[]
+	referenceLanguage: Language
+	languages: Language[]
 	reference: ast.Resource | undefined
 	resources: ast.Resource[]
 }) => {
