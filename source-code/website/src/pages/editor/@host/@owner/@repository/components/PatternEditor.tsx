@@ -118,29 +118,32 @@ export function PatternEditor(props: {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-		try {
-			//@ts-ignore
-			const [updatedResource] = query(resource()).upsert({ message: _copy! })
-			console.log(updatedResource)
-			setResources([
-				...(resources.filter(
-					(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-				) as Resource[]),
-				updatedResource as Resource,
-			])
-			showToast({
-				variant: "info",
-				title: "The change has been committed.",
-				message: `Don't forget to push the changes.`,
-			})
-		} catch (e) {
+
+		console.log(11, resource())
+
+		const [updatedResource, exception] = query(resource()).upsert({ message: _copy! })
+		if (exception) {
 			showToast({
 				variant: "danger",
 				title: "Error",
-				message: (e as Error).message,
+				message: exception.message,
 			})
-			throw e
+
+			throw exception
 		}
+
+		setResources([
+			...resources.filter(
+				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
+			),
+			updatedResource,
+		])
+
+		showToast({
+			variant: "info",
+			title: "The change has been committed.",
+			message: `Don't forget to push the changes.`,
+		})
 	}
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
