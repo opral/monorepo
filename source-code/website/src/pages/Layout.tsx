@@ -208,10 +208,10 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</a>
 
 						<a
-							href="https://inlang.com/documentation/design-principles"
+							href="https://inlang.com/documentation/why-inlang"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
-							Design Principles
+							Why Inlang
 						</a>
 						<a
 							href="https://inlang.com/documentation/contributing"
