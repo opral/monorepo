@@ -71,14 +71,13 @@ export function Messages(props: {
 	createEffect(() => {
 		//console.log(matchedLints())
 	})
-
 	return (
 		<div ref={patternListElement}>
 			<Show
 				when={
 					(filteredStatus()?.length === 0 || matchedLints()) &&
-					(JSON.stringify(id()).includes(textSearch()) ||
-						JSON.stringify(props.messages).includes(textSearch()))
+					(JSON.stringify(id()).toLowerCase().includes(textSearch().toLowerCase()) ||
+						JSON.stringify(props.messages).toLowerCase().includes(textSearch().toLowerCase()))
 				}
 			>
 				<div
