@@ -53,8 +53,14 @@ const Editor = () => {
 								<div class="columns-1 gap-x-10 text-surface-700 md:w-3/4 xl:w-full">
 									{data.body}
 								</div>
-								<div class="justify-center md:pt-10 pb-10 flex flex-col gap-8">
-									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6">
+								<div class="justify-center flex flex-col gap-8">
+									{/* mobile version without the Input field for the repo */}
+									<div class=" visible xl:invisible xl:hidden ">
+										<Button type="primary" href="/documentation/getting-started" chevron>
+											getting Stared
+										</Button>
+									</div>
+									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6 hidden  xl:block invisible xl:visible">
 										<p class="text-base font-semibold text-left text-surface-900 pb-3">
 											Open your repository
 										</p>
@@ -63,7 +69,7 @@ const Editor = () => {
 										</p>
 										<div class="flex flex-row gap-2">
 											<sl-input
-												class="border-none p-0 w-full max-w-xl"
+												class="border-none p-0 w-full max-w-xl   "
 												prop:placeholder="Paste a link of a repository on GitHub"
 												// when pressing enter
 												on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
