@@ -67,7 +67,7 @@ const Editor = () => {
 										<p class="text-sm font-medium text-left text-surface-600 pb-6">
 											We check your repo structure to generate the config that fits to your needs.
 										</p>
-										<div class="flex flex-row gap-2">
+										<form class="flex flex-row gap-2">
 											<sl-input
 												class="border-none p-0 w-full max-w-xl   "
 												prop:placeholder="Paste a link of a repository on GitHub"
@@ -77,6 +77,11 @@ const Editor = () => {
 													// @ts-ignore
 													setInput(event.target.value)
 												}}
+												onPaste={(event) => {
+													// @ts-ignore
+													setInput(event.target.value)
+												}}
+												onSubmit={navigateToEditor}
 											>
 												<Show when={input().length > 10 && isValidUrl() === false}>
 													<p slot="help-text" class="text-danger p-2">
@@ -93,7 +98,7 @@ const Editor = () => {
 											>
 												Open
 											</sl-button>
-										</div>
+										</form>
 									</div>
 								</div>
 							</div>
