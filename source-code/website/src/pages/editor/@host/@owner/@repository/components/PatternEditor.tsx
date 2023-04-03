@@ -169,20 +169,17 @@ export function PatternEditor(props: {
 		setMachineTranslationIsLoading(true)
 		if (isProduction) {
 			const ENDPOINT = "/shared/rest/get-translation"
-			const result = await fetch(
-				isProduction ? "https://inlang.com" : "http://localhost:3000" + ENDPOINT,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						text,
-						referenceLanguage: referenceResource()!.languageTag.name,
-						targetLanguage: props.language,
-					}),
+			const result = await fetch("https://inlang.com" + ENDPOINT, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			)
+				body: JSON.stringify({
+					text,
+					referenceLanguage: referenceResource()!.languageTag.name,
+					targetLanguage: props.language,
+				}),
+			})
 			console.log(result.ok)
 			const json = await result.json()
 			if (!result.ok) {
