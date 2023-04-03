@@ -7,6 +7,7 @@ import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbol
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
+import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import type { Language } from "@inlang/core/ast"
 
 export function Page() {
@@ -57,6 +58,7 @@ function TheActualPage() {
 		}
 		return result
 	})
+
 	return (
 		<>
 			<Title>
@@ -123,11 +125,24 @@ function TheActualPage() {
 					<NoInlangConfigFoundCard />
 				</Match>
 				<Match when={inlangConfig()}>
-					<div class="mb-16">
+					<div class="mb-16 empty-parent">
 						{/* <PreviewMessageFeatures /> */}
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]} />}
 						</For>
+						<div
+							class={
+								"show-child flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
+							}
+						>
+							<NoMatchPlaceholder />
+							<p class="text-base font-medium text-left text-on-background">
+								No results matched your search.
+							</p>
+							<p class="text-[13px] text-center text-on-surface-variant">
+								Please remove some filters to get more matches.
+							</p>
+						</div>
 					</div>
 				</Match>
 			</Switch>

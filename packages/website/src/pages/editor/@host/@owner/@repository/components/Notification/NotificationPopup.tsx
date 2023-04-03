@@ -58,7 +58,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 				{props.handleClose && (
 					<button
 						onClick={() => props.handleClose && props.handleClose()}
-						class="flex justify-center items-center h-8 w-8 pr-4 hover:bg-background/10 text-on-inverted-surface rounded-md"
+						class="flex justify-center items-center h-8 w-8 mr-4 hover:bg-background/10 text-on-inverted-surface rounded-md"
 					>
 						<CloseIcon />
 					</button>
