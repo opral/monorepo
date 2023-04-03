@@ -51,7 +51,6 @@ export async function _generateConfigFileServer(args: {
 	if (args.messages === undefined) {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))
 		if (_prompt.length > 2000) {
-			console.log(Object.keys(args.filesystemAsJson).toString().length)
 			return [
 				undefined,
 				new Error(dedent`
