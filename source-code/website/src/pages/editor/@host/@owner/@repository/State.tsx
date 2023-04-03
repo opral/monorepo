@@ -221,6 +221,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
+				config.languages =
+					config.languages.sort((a, b) =>
+						// reference language should be first
+						// sort alphabetically otherwise
+						a === config.referenceLanguage ? -1 : a.localeCompare(b),
+					) || []
 				// initializes the languages to all languages
 				setFilteredLanguages(config.languages)
 			}
