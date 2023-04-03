@@ -1,3 +1,4 @@
+import type { Language } from "../ast/index.js"
 import type * as ast from "../ast/index.js"
 import type { LintRule } from "../lint/rule.js"
 import type { $fs } from "./environment-functions/$fs.js"
@@ -35,7 +36,7 @@ export type Config = {
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	 */
-	referenceLanguage: string
+	referenceLanguage: Language
 	/**
 	 * Available languages in this project.
 	 *
@@ -44,7 +45,7 @@ export type Config = {
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	 */
-	languages: string[]
+	languages: Language[]
 	readResources: (args: { config: Config }) => Promise<ast.Resource[]>
 	writeResources: (args: { config: Config; resources: ast.Resource[] }) => Promise<void>
 	lint?: {

@@ -47,7 +47,7 @@ export type ServerSideEnv = ClientSideEnv & {
 	 * Only available in production.
 	 * https://cloud.google.com/translate/docs/setup
 	 */
-	GOOGLE_TRANSLATE_API_KEY?: string
+	GOOGLE_TRANSLATE_API_KEY: string
 
 	/**
 	 * The secret for signing cookies.
@@ -113,6 +113,7 @@ export async function serverSideEnv(): Promise<ServerSideEnv> {
 		// dynamically importing dotenv to avoid clash with client side code
 		const dotenv = await import("dotenv")
 		dotenv.config()
+		console.log({ env: process.env })
 		return process.env as ServerSideEnv
 	} catch (e) {
 		console.error(e)

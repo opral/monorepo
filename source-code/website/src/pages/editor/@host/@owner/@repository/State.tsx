@@ -27,6 +27,7 @@ import { github } from "@src/services/github/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint } from "@inlang/core/lint"
+import type { Language } from "@inlang/core/ast"
 
 type EditorStateSchema = {
 	/**
@@ -94,8 +95,8 @@ type EditorStateSchema = {
 	/**
 	 * FilterLanguages show or hide the different messages.
 	 */
-	filteredLanguages: () => string[]
-	setFilteredLanguages: Setter<string[]>
+	filteredLanguages: () => Language[]
+	setFilteredLanguages: Setter<Language[]>
 
 	/**
 	 * BrowserLanguage set
@@ -229,6 +230,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
+				config.languages =
+					config.languages.sort((a, b) =>
+						// reference language should be first
+						// sort alphabetically otherwise
+						a === config.referenceLanguage ? -1 : a.localeCompare(b),
+					) || []
 				// initializes the languages to all languages
 				setFilteredLanguages(config.languages)
 			}
