@@ -76,7 +76,7 @@ if (isProduction) {
 
 if (isProduction) {
 	// serve build files
-	app.use(express.static(`${rootPath}/dist/client`))
+	app.use(sirv(`${rootPath}/dist/client`))
 } else {
 	const viteServer = await createViteServer({
 		server: { middlewareMode: true },
