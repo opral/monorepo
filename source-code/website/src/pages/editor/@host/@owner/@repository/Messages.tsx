@@ -67,7 +67,7 @@ export function Messages(props: {
 	})
 
 	createEffect(() => {
-		//console.log(matchedLints())
+		console.log("test")
 	})
 
 	return (

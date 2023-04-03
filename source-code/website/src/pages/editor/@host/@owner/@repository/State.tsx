@@ -26,6 +26,7 @@ import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { showToast } from "@src/components/Toast.jsx"
+import { lint } from "@inlang/core/lint"
 
 type EditorStateSchema = {
 	/**
