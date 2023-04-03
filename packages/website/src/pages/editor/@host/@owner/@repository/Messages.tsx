@@ -10,10 +10,10 @@ import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, textSearch, filteredStatus } = useEditorState()
+	const { referenceLanguage, languages, filteredLanguages, textSearch, filteredStatus } = useEditorState()
 	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
-		return props.messages[inlangConfig()!.referenceLanguage]
+		return props.messages[referenceLanguage()!]
 	}
 
 	/**
@@ -89,7 +89,7 @@ export function Messages(props: {
 					</h3>
 				</div>
 				<div>
-					<For each={inlangConfig()?.languages}>
+					<For each={languages()}>
 						{(language) => (
 							<>
 								<Show
@@ -101,7 +101,7 @@ export function Messages(props: {
 									}
 								>
 									<PatternEditor
-										referenceLanguage={inlangConfig()!.referenceLanguage}
+										referenceLanguage={referenceLanguage()!}
 										language={language}
 										id={id()}
 										referenceMessage={referenceMessage()}

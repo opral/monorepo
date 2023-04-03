@@ -13,6 +13,7 @@ import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang/git-sdk/api"
 import { clientSideEnv } from "@env"
 import {
+	Config,
 	Config as InlangConfig,
 	EnvironmentFunctions,
 	initialize$import,
@@ -42,12 +43,6 @@ type EditorStateSchema = {
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
-	/**
-	 * The current inlang config.
-	 *
-	 * Undefined if no inlang config exists/has been found.
-	 */
-	inlangConfig: Resource<InlangConfig | undefined>
 	/**
 	 * Unpushed changes in the repository.
 	 */
@@ -91,6 +86,22 @@ type EditorStateSchema = {
 	 */
 	fsChange: () => Date
 	setFsChange: Setter<Date>
+
+	/**
+	 * The current inlang config.
+	 *
+	 * Undefined if no inlang config exists/has been found.
+	 */
+	inlangConfig: Resource<InlangConfig | undefined>
+
+	doesInlangConfigExist: () => boolean
+
+	referenceLanguage: () => Language | undefined
+
+	languages: () => Language[]
+	setLanguages: Setter<Language[]>
+
+	lint: () => Config["lint"]
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -174,7 +185,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([])
+	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
+	const [lint, setLint] = createSignal<Config["lint"]>()
+	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
+	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
 	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
 
@@ -186,7 +201,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * The reference resource.
 	 */
 	const referenceResource = () =>
-		resources.find((resource) => resource.languageTag.name === inlangConfig()?.referenceLanguage)
+		resources.find((resource) => resource.languageTag.name === referenceLanguage())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -230,7 +245,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
-				config.languages =
+				const languages = // TODO: move this into setter logic
 					config.languages.sort((a, b) =>
 						// reference language should be first
 						// sort alphabetically otherwise
@@ -241,7 +256,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
-				setFilteredLanguages(config.languages)
+				setDoesInlangConfigExist(true)
+				setLint(config.lint)
+				setReferenceLanguage(config.referenceLanguage)
+				setLanguages(languages)
+				setFilteredLanguages(languages)
 			}
 			return config
 		},
@@ -466,7 +485,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repositoryIsCloned,
 					currentBranch,
-					inlangConfig,
 					unpushedChanges,
 					githubRepositoryInformation,
 					routeParams,
@@ -475,6 +493,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setTextSearch,
 					fsChange,
 					setFsChange,
+					inlangConfig,
+					doesInlangConfigExist,
+					lint,
+					referenceLanguage,
+					languages,
+					setLanguages,
 					filteredLanguages,
 					setFilteredLanguages,
 					filteredStatus,

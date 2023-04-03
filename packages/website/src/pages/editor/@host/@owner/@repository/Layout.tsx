@@ -30,12 +30,21 @@ import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { getLintReports, LintedNode } from "@inlang/core/lint"
+import type { Language } from "@inlang/core/ast"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig, browserLanguage } = useEditorState()
+	const {
+		languages,
+		setLanguages,
+		resources,
+		setResources,
+		filteredLanguages,
+		setFilteredLanguages,
+		browserLanguage,
+	} = useEditorState()
 	//setTextSearch
 	const { setTextSearch } = useEditorState()
 	const handleSearchText = (text: string) => {
@@ -44,7 +53,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [customHintCondition, setCustomHintCondition] = createSignal(false)
 
 	createEffect(() => {
-		if (inlangConfig()?.languages && browserLanguage()) {
+		if (languages() && browserLanguage()) {
 			const timerShow = setTimeout(() => {
 				setCustomHintCondition(true)
 			}, 500)
@@ -55,6 +64,23 @@ export function Layout(props: { children: JSXElement }) {
 			onCleanup(() => clearTimeout(timerHide))
 		}
 	})
+
+	const addLanguage = (language: Language) => {
+		setLanguages([...languages(), language])
+		setFilteredLanguages([...filteredLanguages(), language])
+
+		setResources([
+			...resources,
+			{
+				type: "Resource",
+				languageTag: {
+					type: "LanguageTag",
+					name: language,
+				},
+				body: [],
+			},
+		])
+	}
 
 	return (
 		<RootLayout>
@@ -87,6 +113,8 @@ export function Layout(props: { children: JSXElement }) {
 						</Show>
 					</div>
 					<div class="flex gap-2">
+						<sl-button onClick={() => addLanguage("it")}>add language</sl-button>
+
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
 						<HasChangesAction />
 					</div>
@@ -249,17 +277,16 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	const { inlangConfig, setFilteredLanguages, filteredLanguages, setBrowserLanguage } =
+	const { languages, referenceLanguage, setFilteredLanguages, filteredLanguages, setBrowserLanguage } =
 		useEditorState()
 	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
 
 	createEffect(() => {
-		const languages = inlangConfig()?.languages.filter(
-			(language) =>
-				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+		const langs = languages().filter(
+			(language) => navigator.languages.includes(language) || language === referenceLanguage(),
 		)
-		if (languages !== undefined && languages.length > 1) {
-			setFilteredLanguages(languages)
+		if (langs !== undefined && langs.length > 1) {
+			setFilteredLanguages(langs)
 			setBrowserLanguage(true)
 		}
 		if (languages !== undefined) {
@@ -269,7 +296,7 @@ function LanguageFilter() {
 
 	return (
 		<Show
-			when={inlangConfig()?.languages && languagesLoaded()}
+			when={languages() && languagesLoaded()}
 			fallback={
 				<sl-select
 					prop:name="Language Select"
@@ -301,30 +328,30 @@ function LanguageFilter() {
 					<span class="text-left text-on-surface-variant grow">Languages</span>
 					<a
 						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
+						onClick={() => setFilteredLanguages(() => languages())}
 					>
 						ALL
 					</a>
 					<a
 						class="cursor-pointer link link-primary"
 						// filter all except the reference language
-						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
+						onClick={() => setFilteredLanguages([referenceLanguage()!])}
 					>
 						NONE
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto">
-					<For each={inlangConfig()?.languages}>
+					<For each={languages()}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
 								prop:selected={filteredLanguages().includes(language)}
-								prop:disabled={language === inlangConfig()?.referenceLanguage}
-								class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
+								prop:disabled={language === referenceLanguage()}
+								class={language === referenceLanguage() ? "opacity-50" : ""}
 							>
 								{language}
-								{language === inlangConfig()?.referenceLanguage ? (
+								{language === referenceLanguage() ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>
@@ -360,13 +387,14 @@ export const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig, filteredStatus, setFilteredStatus, resources } = useEditorState()
+	const { lint, doesInlangConfigExist, filteredStatus, setFilteredStatus, resources } =
+		useEditorState()
 	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
 
 	const ids = createMemo(() => {
 		return (
-			inlangConfig()
-				?.lint?.rules?.map((rule) => [rule].flat())
+			lint()
+				?.rules?.map((rule) => [rule].flat())
 				.flat()
 				.map(({ id }) => id) || []
 		)
