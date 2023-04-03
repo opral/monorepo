@@ -6,6 +6,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+	.empty-parent:has(div.group:not(:empty)) > div.show-child {
+		display: none;
+	}
+}
+
 /* The startup 101 font Inter https://rsms.me/inter/  */
 :root {
 	font-family: "Inter", sans-serif;
