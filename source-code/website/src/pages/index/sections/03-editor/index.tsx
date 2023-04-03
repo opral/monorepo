@@ -91,9 +91,9 @@ const Editor = () => {
 									</div>
 								</div>
 							</div>
-							<div class="col-span-2 xl:col-span-1 px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">
+							<div class="col-span-2 xl:col-span-1 px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 py-10 self-center">
 								<video
-									class="bg-background rounded-3xl mt-8 border border-surface-500/20"
+									class="bg-background rounded-3xl  border border-surface-500/20"
 									autoplay
 									loop
 									poster={editorImage}
