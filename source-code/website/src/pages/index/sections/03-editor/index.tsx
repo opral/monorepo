@@ -55,12 +55,12 @@ const Editor = () => {
 								</div>
 								<div class="justify-center flex flex-col gap-8">
 									{/* mobile version without the Input field for the repo */}
-									<div class=" visible xl:invisible xl:hidden ">
+									<div class=" visible md:invisible md:hidden ">
 										<Button type="primary" href="/documentation/getting-started" chevron>
 											getting Stared
 										</Button>
 									</div>
-									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6 hidden  xl:block invisible xl:visible">
+									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6 hidden  md:block invisible md:visible">
 										<p class="text-base font-semibold text-left text-surface-900 pb-3">
 											Open your repository
 										</p>

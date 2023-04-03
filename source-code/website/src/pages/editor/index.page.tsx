@@ -37,7 +37,10 @@ export function Page() {
 						<h2 class="text-6xl font-bold">inlang</h2>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
-					<div class="flex flex-col pb-8 lg:pb-0 gap-4 justify-center items-center w-full">
+					<form
+						class="flex flex-col pb-8 lg:pb-0 gap-4 justify-center items-center w-full"
+						onSubmit={navigateToEditor}
+					>
 						<sl-input
 							class="border-none p-0 w-full max-w-xl"
 							prop:size={isMobile() ? "medium" : "large"}
@@ -73,7 +76,7 @@ export function Page() {
 								</sl-button>
 							</a>
 						</div>
-					</div>
+					</form>
 				</div>
 				{/* END search bar */}
 				<CommunityProjects />
