@@ -1,7 +1,12 @@
 import type * as Ast from "@inlang/core/ast"
-import { BaseLookupFunctionArgs, createLookupFunction, LookupFunction } from "./lookup-function.js"
+import {
+	BaseLookupFunctionArgs,
+	createLookupFunction,
+	InlangString,
+	LookupFunction,
+} from "./lookup-function.js"
 
-const fallbackLookupFunction: LookupFunction = () => ""
+const fallbackLookupFunction: LookupFunction = () => "" as InlangString
 
 export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
 	readResource: (language: Language) => Promise<Ast.Resource | undefined>
