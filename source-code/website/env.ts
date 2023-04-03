@@ -47,7 +47,7 @@ export type ServerSideEnv = ClientSideEnv & {
 	 * Only available in production.
 	 * https://cloud.google.com/translate/docs/setup
 	 */
-	GOOGLE_TRANSLATE_API_KEY?: string
+	GOOGLE_TRANSLATE_API_KEY: string
 
 	/**
 	 * The secret for signing cookies.
