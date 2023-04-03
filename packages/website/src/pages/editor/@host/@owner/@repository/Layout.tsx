@@ -66,6 +66,14 @@ export function Layout(props: { children: JSXElement }) {
 	})
 
 	const addLanguage = (language: Language) => {
+		if (languages().includes(language)) {
+			showToast({
+				variant: "warning",
+				title: "Language already exists",
+				message: "This language is already present in this project. Please choose another name.",
+			})
+			return
+		}
 		setLanguages([...languages(), language])
 		setFilteredLanguages([...filteredLanguages(), language])
 
