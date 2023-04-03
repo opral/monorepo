@@ -455,6 +455,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (config === undefined || localStorage?.user === undefined) {
 			return
 		}
+
 		// write to filesystem
 		writeResources({
 			fs: fs(),
@@ -681,8 +682,11 @@ async function writeResources(args: {
 	await args.config.writeResources({ ...args })
 	const status = await raw.statusMatrix({ fs: args.fs, dir: "/" })
 	const filesWithUncommittedChanges = status.filter(
-		// files with unstaged and uncommitted changes
-		(row) => row[2] === 2 && row[3] === 1,
+		(row) =>
+			// files with unstaged and uncommitted changes
+			(row[2] === 2 && row[3] === 1) ||
+			// added files
+			row[2] === 2,
 	)
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
