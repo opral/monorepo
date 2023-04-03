@@ -1,12 +1,12 @@
 import type * as Ast from "@inlang/core/ast"
 import {
-	BaseLookupFunctionArgs,
-	createLookupFunction,
+	InlangFunctionBaseArgs,
+	createInlangFunction,
 	InlangString,
-	LookupFunction,
-} from "./lookup-function.js"
+	InlangFunction,
+} from "./inlang-function.js"
 
-const fallbackLookupFunction: LookupFunction = () => "" as InlangString
+const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 
 export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
 	readResource: (language: Language) => Promise<Ast.Resource | undefined>
@@ -19,14 +19,14 @@ export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
 
 export const initRuntime = <
 	Language extends Ast.Language,
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	context: RuntimeContext,
-) => initBaseRuntime<Language, LookupFunctionArgs>(context)
+) => initBaseRuntime<Language, InlangFunctionArgs>(context)
 
 export const initBaseRuntime = <
 	Language extends Ast.Language,
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	{ readResource }: RuntimeContext<Language>,
 	state: RuntimeState<Language> = {
@@ -43,17 +43,17 @@ export const initBaseRuntime = <
 
 	const getLanguage = () => state.language
 
-	const getLookupFunction = () => {
+	const getInlangFunction = () => {
 		const resource = state.resources.get(state.language as Language)
-		if (!resource) return fallbackLookupFunction
+		if (!resource) return fallbackInlangFunction
 
-		return createLookupFunction<LookupFunctionArgs>(resource)
+		return createInlangFunction<InlangFunctionArgs>(resource)
 	}
 
 	return {
 		loadResource,
 		switchLanguage,
 		getLanguage,
-		getLookupFunction,
+		getInlangFunction,
 	}
 }

@@ -2,28 +2,28 @@ import type { Expression, Message, Placeholder, Resource } from "@inlang/core/as
 
 type BaseArgs = Record<string, unknown> | never
 
-type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
+type NarrowInlangFunctionArgs<Key, Args> = BaseArgs extends Args
 	? [Key, Args?]
 	: [Args] extends [never]
 	? [Key]
 	: [Key, Args]
 
-export type BaseLookupFunctionArgs = Record<string, BaseArgs>
+export type InlangFunctionBaseArgs = Record<string, BaseArgs>
 
 declare const translated: unique symbol
 export type InlangString = string & { readonly [translated]: unknown }
 
-export type LookupFunction<
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
-> = <Key extends keyof LookupFunctionArgs>(
-	...args: ConstructLookupFunctionArgs<Key, LookupFunctionArgs[Key]>
+export type InlangFunction<
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
+> = <Key extends keyof InlangFunctionArgs>(
+	...args: NarrowInlangFunctionArgs<Key, InlangFunctionArgs[Key]>
 ) => InlangString
 
-export const createLookupFunction = <
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+export const createInlangFunction = <
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	resource: Resource,
-): LookupFunction<LookupFunctionArgs> =>
+): InlangFunction<InlangFunctionArgs> =>
 	((key, args) => {
 		const message = resource.body.find((message) => message.id.name === key)
 		if (!message) return ""
@@ -31,7 +31,7 @@ export const createLookupFunction = <
 		return message.pattern.elements
 			.map((element) => serializeElement(element, args as BaseArgs))
 			.join("") as InlangString
-	}) as LookupFunction<LookupFunctionArgs>
+	}) as InlangFunction<InlangFunctionArgs>
 
 const serializeElement = (
 	element: Message["pattern"]["elements"][number],
