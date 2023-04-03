@@ -1,7 +1,7 @@
 import { serverSideEnv } from "@env"
 import { assertUsage } from "@src/services/assert-usage/index.js"
 
-const env = await serverSideEnv()
+//const env = await serverSideEnv()
 
 /**
  * Translate text using Google Translate.
@@ -11,6 +11,7 @@ export async function onMachineTranslate(args: {
 	referenceLanguage: string
 	targetLanguage: string
 }): Promise<{ data?: string; error?: string }> {
+	//console.log(import.meta.env.GOOGLE_TRANSLATE_API_KEY)
 	try {
 		const response = await fetch(
 			"https://translation.googleapis.com/language/translate/v2?" +
@@ -19,7 +20,7 @@ export async function onMachineTranslate(args: {
 					target: args.targetLanguage,
 					source: args.referenceLanguage,
 					format: "text",
-					key: env.GOOGLE_TRANSLATE_API_KEY!,
+					key: import.meta.env.GOOGLE_TRANSLATE_API_KEY!,
 				}),
 			{ method: "POST" },
 		)
