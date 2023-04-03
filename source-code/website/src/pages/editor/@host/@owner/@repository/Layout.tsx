@@ -385,7 +385,7 @@ function StatusFilter() {
 			when={missingMessage()}
 			fallback={
 				<sl-select
-					prop:name="Lint Status Select"
+					prop:name="Lint Filter Select"
 					prop:placeholder="Loading ..."
 					prop:size="small"
 					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
@@ -397,8 +397,7 @@ function StatusFilter() {
 			}
 		>
 			<sl-select
-				prop:name="Lint Status Select"
-				prop:placeholder="Lint Status"
+				prop:name="Lint Filter Select"
 				prop:size="small"
 				prop:multiple={true}
 				prop:maxOptionsVisible={2}
@@ -408,9 +407,17 @@ function StatusFilter() {
 				}}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
-				<div class="mx-auto pr-2" slot="prefix">
-					<WarningIcon />
+				<div class="mx-auto flex items-center gap-2" slot="prefix">
+					<div class="last:pr-2">
+						<WarningIcon />
+					</div>
+					<Show when={filteredStatus().length <= 0}>
+						<sl-tag prop:size="small" class="font-medium text-sm">
+							everyMessage
+						</sl-tag>
+					</Show>
 				</div>
+
 				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
 					<span class="text-left text-on-surface-variant grow">Lints</span>
 					<a

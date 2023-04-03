@@ -132,3 +132,7 @@ sl-option::part(label) {
 sl-select::part(tag) {
 	--sl-input-height-small: 26px;
 }
+
+sl-tag {
+	--sl-input-height-small: 26px;
+}
