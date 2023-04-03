@@ -30,7 +30,7 @@ In short, a git-based localization system for developers and translators with a 
   <img src="./assets/001-git-based-architecture.png" alt="Git-based architecture">
   <figcaption>
     <small>
-      A git-based localization system enables seamless collaboration between developers and translators with endless automation possibilities.    
+      A git-based localization system enables seamless collaboration between developers and translators with endless automation possibilities.
     </small>
   </figcaption>
 </figure>
@@ -128,7 +128,7 @@ Develop a custom AST that is inspired by Fluent and the upcoming MessageFormat 2
 
 ### i18n Library
 
-Messages need to be retrieved and formatted. That's the job of an i18n library. Most implementations make use of a key-value resource and a lookup function called `t` (translate), or a translation component. From a developer's perspective, the i18n library loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
+Messages need to be retrieved and formatted. That's the job of an i18n library. Most implementations make use of a key-value resource and a lookup function called `i` (inlang), or a translation component. From a developer's perspective, the i18n library loads resources, detects the language of a user, and formats the message. In other words: "The message `example` should be displayed here in the correct language and format for me".
 
 #### Illustration
 
@@ -179,7 +179,7 @@ console.log(translate("example", { name: "Samuel" }))
 
 1. A variety of good and adopted open source libraries exist [[1](https://github.com/ivanhofer/typesafe-i18n), [2](https://github.com/formatjs/formatjs), [3](https://pub.dev/packages/flutter_i18n), [4](https://github.com/solidjs-community/solid-primitives/tree/main/packages/i18n), and more]. Each serves a different programming language, framework, niche, or feature.
 
-2. The internals are identical:  
+2. The internals are identical:
    `Resource` -> `Reference and Format a Message` -> `Output`
 
 #### Decision
@@ -262,7 +262,7 @@ Develop a CLI and VSCode extension to extract and validate resources and message
   <img src="./assets/001-ide-extension.gif" alt="Localization IDE extension">
   <figcaption>
     <small>
-      An IDE extension speeds up development by providing message extraction, linting, and more.   
+      An IDE extension speeds up development by providing message extraction, linting, and more.
     </small>
   </figcaption>
 </figure>
@@ -275,7 +275,7 @@ Develop a CLI and VSCode extension to extract and validate resources and message
   <img src="./assets/001-editor.png" alt="Proof of concept translation editor CAT">
   <figcaption>
     <small>
-      Early iteration of the inlang editor from December 2021.   
+      Early iteration of the inlang editor from December 2021.
     </small>
   </figcaption>
 </figure>

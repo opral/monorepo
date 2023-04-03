@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { Language } from "../ast/schema.js"
 import { Resource } from "../ast/zod.js"
 
 /**
@@ -9,7 +10,7 @@ import { Resource } from "../ast/zod.js"
  * at https://zod.dev/
  */
 export const Config = z.object({
-	referenceLanguage: z.string(),
+	referenceLanguage: z.string().transform((value) => value as Language),
 	languages: z.array(z.string()),
 	readResources: z
 		.function()

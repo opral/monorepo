@@ -1,4 +1,4 @@
-import { createLookupFunction } from "./lookup-function.js"
+import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
 import type { Resource } from "@inlang/core/ast"
 
@@ -47,9 +47,9 @@ const resource = {
 	],
 } satisfies Resource
 
-describe("createLookupFunction", () => {
+describe("createInlangFunction", () => {
 	test("it should resolve the message", () => {
-		const fn = createLookupFunction(resource)
+		const fn = createInlangFunction(resource)
 
 		const result = fn("hello")
 
@@ -57,7 +57,7 @@ describe("createLookupFunction", () => {
 	})
 
 	test("it should resolve the message with placeholder", () => {
-		const fn = createLookupFunction(resource)
+		const fn = createInlangFunction(resource)
 
 		const result = fn("welcome", { name: "Inlang" })
 
@@ -65,7 +65,7 @@ describe("createLookupFunction", () => {
 	})
 
 	test("it should return an empty string for a placeholder if placeholder does not get passed as args", () => {
-		const fn = createLookupFunction(resource)
+		const fn = createInlangFunction(resource)
 
 		const result = fn("welcome", {})
 
@@ -73,7 +73,7 @@ describe("createLookupFunction", () => {
 	})
 
 	test("it should return an empty string if key does not exist in resource", () => {
-		const fn = createLookupFunction(resource)
+		const fn = createInlangFunction(resource)
 
 		const result = fn("missing-key")
 

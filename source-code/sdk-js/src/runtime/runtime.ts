@@ -1,27 +1,32 @@
-import type { Resource } from "@inlang/core/ast"
-import { BaseLookupFunctionArgs, createLookupFunction, LookupFunction } from "./lookup-function.js"
+import type * as Ast from "@inlang/core/ast"
+import {
+	InlangFunctionBaseArgs,
+	createInlangFunction,
+	InlangString,
+	InlangFunction,
+} from "./inlang-function.js"
 
-const fallbackLookupFunction: LookupFunction = () => ""
+const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 
-export type RuntimeContext<Language extends string = string> = {
-	readResource: (language: Language) => Promise<Resource | undefined>
+export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
+	readResource: (language: Language) => Promise<Ast.Resource | undefined>
 }
 
-export type RuntimeState<Language extends string = string> = {
-	resources: Map<Language, Resource>
+export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
+	resources: Map<Language, Ast.Resource>
 	language: Language | undefined
 }
 
 export const initRuntime = <
-	Language extends string,
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+	Language extends Ast.Language,
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	context: RuntimeContext,
-) => initBaseRuntime<Language, LookupFunctionArgs>(context)
+) => initBaseRuntime<Language, InlangFunctionArgs>(context)
 
 export const initBaseRuntime = <
-	Language extends string,
-	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
+	Language extends Ast.Language,
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	{ readResource }: RuntimeContext<Language>,
 	state: RuntimeState<Language> = {
@@ -38,17 +43,17 @@ export const initBaseRuntime = <
 
 	const getLanguage = () => state.language
 
-	const getLookupFunction = () => {
+	const getInlangFunction = () => {
 		const resource = state.resources.get(state.language as Language)
-		if (!resource) return fallbackLookupFunction
+		if (!resource) return fallbackInlangFunction
 
-		return createLookupFunction<LookupFunctionArgs>(resource)
+		return createInlangFunction<InlangFunctionArgs>(resource)
 	}
 
 	return {
 		loadResource,
 		switchLanguage,
 		getLanguage,
-		getLookupFunction,
+		getInlangFunction,
 	}
 }

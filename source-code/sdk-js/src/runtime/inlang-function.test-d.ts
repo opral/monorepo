@@ -1,12 +1,12 @@
 import type { Resource } from "@inlang/core/ast"
-import { createLookupFunction } from "./lookup-function.js"
+import { createInlangFunction } from "./inlang-function.js"
 
 const resource = {} as Resource
 
 // ------------------------------------------------------------------------------------------------
 
 {
-	const i = createLookupFunction(resource)
+	const i = createInlangFunction(resource)
 
 	i("hello")
 	i("welcome")
@@ -16,7 +16,7 @@ const resource = {} as Resource
 // ------------------------------------------------------------------------------------------------
 
 {
-	const i = createLookupFunction<{
+	const i = createInlangFunction<{
 		hello: never
 		welcome: { name: string }
 	}>(resource)
