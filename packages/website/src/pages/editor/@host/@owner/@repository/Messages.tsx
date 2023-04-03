@@ -67,10 +67,6 @@ export function Messages(props: {
 		}
 	})
 
-	createEffect(() => {
-		console.log("test")
-	})
-
 	return (
 		<div ref={patternListElement}>
 			<Show
