@@ -74,19 +74,19 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-// if (isProduction) {
-// 	// serve build files
-// 	app.use(sirv(`${rootPath}/dist/client`))
-// } else {
-const viteServer = await createViteServer({
-	server: { middlewareMode: true },
-	root: rootPath,
-	appType: "custom",
-})
-// start vite hot module reload dev server
-// use vite's connect instance as middleware
-app.use(viteServer.middlewares)
-// }
+if (isProduction) {
+	// serve build files
+	app.use(express.static(`${rootPath}/dist/client`))
+} else {
+	const viteServer = await createViteServer({
+		server: { middlewareMode: true },
+		root: rootPath,
+		appType: "custom",
+	})
+	// start vite hot module reload dev server
+	// use vite's connect instance as middleware
+	app.use(viteServer.middlewares)
+}
 
 // ------------------------ START ROUTES ------------------------
 
