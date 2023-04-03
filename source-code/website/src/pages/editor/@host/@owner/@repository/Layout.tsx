@@ -29,6 +29,7 @@ import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
+import { getLintReports, LintedNode } from "@inlang/core/lint"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -353,7 +354,7 @@ const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
+	const { inlangConfig, filteredStatus, setFilteredStatus, resources } = useEditorState()
 	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
 
 	const ids = createMemo(() => {
@@ -367,7 +368,10 @@ function StatusFilter() {
 
 	createEffect(() => {
 		if (inlangConfig()) {
-			if (ids().includes("inlang.missingMessage")) {
+			const reportLength = getLintReports(resources as LintedNode[]).filter(
+				(report) => report.id === "inlang.missingMessage",
+			).length
+			if (ids().includes("inlang.missingMessage") && reportLength !== 0) {
 				setFilteredStatus(() => ["inlang.missingMessage"])
 			} else {
 				setFilteredStatus(() => [])
