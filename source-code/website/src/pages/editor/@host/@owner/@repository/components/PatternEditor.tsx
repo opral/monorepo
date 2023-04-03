@@ -169,7 +169,7 @@ export function PatternEditor(props: {
 		setMachineTranslationIsLoading(true)
 		if (isProduction) {
 			const ENDPOINT = "/shared/rest/get-translation"
-			const result = await fetch("http://localhost:3000" + ENDPOINT, {
+			const result = await fetch(import.meta.url + ENDPOINT, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
