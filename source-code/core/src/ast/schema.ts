@@ -1,5 +1,7 @@
 // inspired by (https://github.com/unicode-org/message-format-wg/blob/main/spec/syntax.md)
 
+export type Language = string
+
 export type NodeName =
 	| "Identifier"
 	| "Resource"
@@ -148,5 +150,5 @@ export type LanguageTag<Extension extends ExtensionInformation = ExtensionInform
 	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	 */
-	// language: string
+	// language: Language
 }

@@ -11,5 +11,11 @@
 	"files.associations": {
 		".eslintrc.json": "jsonc",
 		"tsconfig*.json": "jsonc"
+	},
+	"search.exclude": {
+		"**/dist": true
+	},
+	"files.watcherExclude": {
+		"**/dist": true
 	}
 }
