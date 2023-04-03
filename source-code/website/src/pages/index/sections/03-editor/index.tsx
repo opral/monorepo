@@ -53,17 +53,23 @@ const Editor = () => {
 								<div class="columns-1 gap-x-10 text-surface-700 md:w-3/4 xl:w-full">
 									{data.body}
 								</div>
-								<div class="justify-center md:pt-10 pb-10 flex flex-col gap-8">
-									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6">
+								<div class="justify-center flex flex-col gap-8">
+									{/* mobile version without the Input field for the repo */}
+									<div class=" visible md:invisible md:hidden ">
+										<Button type="primary" href="/documentation/getting-started" chevron>
+											getting Stared
+										</Button>
+									</div>
+									<div class="rounded-lg bg-background border border-surface-200 shadow-sm p-6 hidden  md:block invisible md:visible">
 										<p class="text-base font-semibold text-left text-surface-900 pb-3">
 											Open your repository
 										</p>
 										<p class="text-sm font-medium text-left text-surface-600 pb-6">
 											We check your repo structure to generate the config that fits to your needs.
 										</p>
-										<div class="flex flex-row gap-2">
+										<form class="flex flex-row gap-2">
 											<sl-input
-												class="border-none p-0 w-full max-w-xl"
+												class="border-none p-0 w-full max-w-xl   "
 												prop:placeholder="Paste a link of a repository on GitHub"
 												// when pressing enter
 												on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
@@ -71,6 +77,11 @@ const Editor = () => {
 													// @ts-ignore
 													setInput(event.target.value)
 												}}
+												onPaste={(event) => {
+													// @ts-ignore
+													setInput(event.target.value)
+												}}
+												onSubmit={navigateToEditor}
 											>
 												<Show when={input().length > 10 && isValidUrl() === false}>
 													<p slot="help-text" class="text-danger p-2">
@@ -87,13 +98,13 @@ const Editor = () => {
 											>
 												Open
 											</sl-button>
-										</div>
+										</form>
 									</div>
 								</div>
 							</div>
-							<div class="px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 pb-10 md:pb-40">
+							<div class="col-span-2 xl:col-span-1 px-4 md:px-10 ml-0 md:ml-10 xl:ml-0 py-10 self-center">
 								<video
-									class="bg-background rounded-3xl mt-8 border border-surface-500/20"
+									class="bg-background rounded-3xl  border border-surface-500/20"
 									autoplay
 									loop
 									poster={editorImage}

@@ -35,7 +35,7 @@ const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig } = useEditorState()
+	const { inlangConfig, browserLanguage } = useEditorState()
 	//setTextSearch
 	const { setTextSearch } = useEditorState()
 	const handleSearchText = (text: string) => {
@@ -44,7 +44,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [customHintCondition, setCustomHintCondition] = createSignal(false)
 
 	createEffect(() => {
-		if (inlangConfig()?.languages) {
+		if (inlangConfig()?.languages && browserLanguage()) {
 			const timerShow = setTimeout(() => {
 				setCustomHintCondition(true)
 			}, 500)
@@ -80,9 +80,11 @@ export function Layout(props: { children: JSXElement }) {
 								<LanguageFilter />
 							</sl-tooltip>
 						</CustomHintWrapper>
-						<sl-tooltip prop:content="by lint status">
-							<StatusFilter />
-						</sl-tooltip>
+						<Show when={inlangConfig()?.lint?.rules}>
+							<sl-tooltip prop:content="by lint status">
+								<StatusFilter />
+							</sl-tooltip>
+						</Show>
 					</div>
 					<div class="flex gap-2">
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
@@ -247,23 +249,27 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
-	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
+	const { inlangConfig, setFilteredLanguages, filteredLanguages, setBrowserLanguage } =
+		useEditorState()
+	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
 
 	createEffect(() => {
 		const languages = inlangConfig()?.languages.filter(
 			(language) =>
 				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
 		)
-		if (languages !== undefined && languages.length > 0) {
+		if (languages !== undefined && languages.length > 1) {
 			setFilteredLanguages(languages)
 			setBrowserLanguage(true)
+		}
+		if (languages !== undefined) {
+			setLanguagesLoaded(true)
 		}
 	})
 
 	return (
 		<Show
-			when={inlangConfig()?.languages && browserLanguage()}
+			when={inlangConfig()?.languages && languagesLoaded()}
 			fallback={
 				<sl-select
 					prop:name="Language Select"
@@ -334,7 +340,7 @@ function LanguageFilter() {
 	)
 }
 
-const LanguageIcon = () => {
+export const LanguageIcon = () => {
 	return (
 		<svg
 			width="20"
@@ -385,7 +391,7 @@ function StatusFilter() {
 			when={missingMessage()}
 			fallback={
 				<sl-select
-					prop:name="Lint Status Select"
+					prop:name="Lint Filter Select"
 					prop:placeholder="Loading ..."
 					prop:size="small"
 					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
@@ -397,8 +403,7 @@ function StatusFilter() {
 			}
 		>
 			<sl-select
-				prop:name="Lint Status Select"
-				prop:placeholder="Lint Status"
+				prop:name="Lint Filter Select"
 				prop:size="small"
 				prop:multiple={true}
 				prop:maxOptionsVisible={2}
@@ -408,9 +413,17 @@ function StatusFilter() {
 				}}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 			>
-				<div class="mx-auto pr-2" slot="prefix">
-					<WarningIcon />
+				<div class="mx-auto flex items-center gap-2" slot="prefix">
+					<div class="last:pr-2">
+						<WarningIcon />
+					</div>
+					<Show when={filteredStatus().length <= 0}>
+						<sl-tag prop:size="small" class="font-medium text-sm">
+							everyMessage
+						</sl-tag>
+					</Show>
 				</div>
+
 				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
 					<span class="text-left text-on-surface-variant grow">Lints</span>
 					<a
