@@ -1,7 +1,8 @@
 import express from "express"
-import { ENDPOINT } from "./getTranslation.js"
 import bodyParser from "body-parser"
 import dotenv from "dotenv"
+
+const ENDPOINT = "/shared/rest/get-translation"
 
 export const getTranslateRoute = express.Router()
 getTranslateRoute.use(bodyParser.json({ limit: "50mb" }))
