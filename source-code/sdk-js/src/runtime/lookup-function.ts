@@ -10,11 +10,14 @@ type ConstructLookupFunctionArgs<Key, Args> = BaseArgs extends Args
 
 export type BaseLookupFunctionArgs = Record<string, BaseArgs>
 
+declare const translated: unique symbol
+export type InlangString = string & { readonly [translated]: unknown }
+
 export type LookupFunction<
 	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
 > = <Key extends keyof LookupFunctionArgs>(
 	...args: ConstructLookupFunctionArgs<Key, LookupFunctionArgs[Key]>
-) => string
+) => InlangString
 
 export const createLookupFunction = <
 	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
@@ -27,7 +30,7 @@ export const createLookupFunction = <
 
 		return message.pattern.elements
 			.map((element) => serializeElement(element, args as BaseArgs))
-			.join("")
+			.join("") as InlangString
 	}) as LookupFunction<LookupFunctionArgs>
 
 const serializeElement = (

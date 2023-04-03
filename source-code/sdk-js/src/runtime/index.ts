@@ -1,2 +1,2 @@
 export { initRuntime } from "./runtime.js"
-export { LookupFunction, createLookupFunction } from "./lookup-function.js"
+export { createLookupFunction, type InlangString, type LookupFunction } from "./lookup-function.js"
