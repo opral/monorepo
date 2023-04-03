@@ -11,7 +11,7 @@ export async function onMachineTranslate(args: {
 	referenceLanguage: string
 	targetLanguage: string
 }): Promise<{ data?: string; error?: string }> {
-	//console.log(import.meta.env.GOOGLE_TRANSLATE_API_KEY)
+	console.log(import.meta.env.GOOGLE_TRANSLATE_API_KEY)
 	try {
 		const response = await fetch(
 			"https://translation.googleapis.com/language/translate/v2?" +
