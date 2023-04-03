@@ -1,8 +1,7 @@
-import { serverSideEnv, validateEnv } from "@env"
+import { serverSideEnv } from "@env"
 import { assertUsage } from "@src/services/assert-usage/index.js"
 
 const env = await serverSideEnv()
-validateEnv()
 /**
  * Translate text using Google Translate.
  */
