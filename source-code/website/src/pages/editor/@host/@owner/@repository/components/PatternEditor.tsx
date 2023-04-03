@@ -119,6 +119,7 @@ export function PatternEditor(props: {
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
 		try {
+			//@ts-ignore
 			const updatedResource = query(resource()).upsert({ message: _copy! }).unwrap()
 			setResources([
 				...resources.filter(
