@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest"
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Language, Message, Resource } from "@inlang/core/ast"
 import { lint } from "./linter.js"
 import type { LintRule } from "./rule.js"
 import { createLintRule } from "./createLintRule.js"
@@ -17,7 +17,7 @@ const doLint = (rules: LintRule[], resources: Resource[]) => {
 	return lint({ config, resources })
 }
 
-const createResource = (language: string, ...messages: Message[]) =>
+const createResource = (language: Language, ...messages: Message[]) =>
 	({
 		type: "Resource",
 		languageTag: {

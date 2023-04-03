@@ -1,4 +1,5 @@
 import { serverSideEnv } from "@env"
+import type { Language } from "@inlang/core/ast"
 import { assertUsage } from "@src/services/assert-usage/index.js"
 
 //const env = await serverSideEnv()
@@ -8,8 +9,8 @@ import { assertUsage } from "@src/services/assert-usage/index.js"
  */
 export async function onMachineTranslate(args: {
 	text: string
-	referenceLanguage: string
-	targetLanguage: string
+	referenceLanguage: Language
+	targetLanguage: Language
 }): Promise<{ data?: string; error?: string }> {
 	console.log(import.meta.env.GOOGLE_TRANSLATE_API_KEY)
 	try {

@@ -1,11 +1,11 @@
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Language, Message, Resource } from "@inlang/core/ast"
 import { describe, expect, test } from "vitest"
 import { initBaseRuntime, initRuntime, RuntimeContext, RuntimeState } from "./runtime.js"
 
 // this is a copy from `source-code/core/src/lint/linter.test.ts`
 // TODO: expose utility functions somewhere
 
-const createResource = (language: string, ...messages: Message[]) =>
+const createResource = (language: Language, ...messages: Message[]) =>
 	({
 		type: "Resource",
 		languageTag: {

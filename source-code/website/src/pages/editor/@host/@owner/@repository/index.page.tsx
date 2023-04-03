@@ -7,6 +7,7 @@ import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbol
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
+import type { Language } from "@inlang/core/ast"
 
 export function Page() {
 	return (
@@ -40,7 +41,7 @@ function TheActualPage() {
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
-				[language: string]: ast.Message | undefined
+				[language: Language]: ast.Message | undefined
 			}
 		} = {}
 		for (const resource of resources) {

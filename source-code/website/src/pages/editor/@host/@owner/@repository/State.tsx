@@ -27,6 +27,7 @@ import { github } from "@src/services/github/index.js"
 import { analytics } from "@src/services/analytics/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint } from "@inlang/core/lint"
+import type { Language } from "@inlang/core/ast"
 
 type EditorStateSchema = {
 	/**
@@ -94,8 +95,8 @@ type EditorStateSchema = {
 	/**
 	 * FilterLanguages show or hide the different messages.
 	 */
-	filteredLanguages: () => string[]
-	setFilteredLanguages: Setter<string[]>
+	filteredLanguages: () => Language[]
+	setFilteredLanguages: Setter<Language[]>
 
 	/**
 	 * FilterLanguages show or hide the different messages.

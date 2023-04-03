@@ -1,26 +1,26 @@
-import type { Resource } from "@inlang/core/ast"
+import type * as Ast from "@inlang/core/ast"
 import { BaseLookupFunctionArgs, createLookupFunction, LookupFunction } from "./lookup-function.js"
 
 const fallbackLookupFunction: LookupFunction = () => ""
 
-export type RuntimeContext<Language extends string = string> = {
-	readResource: (language: Language) => Promise<Resource | undefined>
+export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
+	readResource: (language: Language) => Promise<Ast.Resource | undefined>
 }
 
-export type RuntimeState<Language extends string = string> = {
-	resources: Map<Language, Resource>
+export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
+	resources: Map<Language, Ast.Resource>
 	language: Language | undefined
 }
 
 export const initRuntime = <
-	Language extends string,
+	Language extends Ast.Language,
 	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
 >(
 	context: RuntimeContext,
 ) => initBaseRuntime<Language, LookupFunctionArgs>(context)
 
 export const initBaseRuntime = <
-	Language extends string,
+	Language extends Ast.Language,
 	LookupFunctionArgs extends BaseLookupFunctionArgs = BaseLookupFunctionArgs,
 >(
 	{ readResource }: RuntimeContext<Language>,
