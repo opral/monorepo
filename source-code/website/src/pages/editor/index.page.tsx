@@ -51,6 +51,10 @@ export function Page() {
 								// @ts-ignore
 								setInput(event.target.value)
 							}}
+							onPaste={(event) => {
+								// @ts-ignore
+								setInput(event.target.value)
+							}}
 						>
 							<Show when={input().length > 10 && isValidUrl() === false}>
 								<p slot="help-text" class="text-danger p-2">
