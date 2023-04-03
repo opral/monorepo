@@ -168,19 +168,28 @@ export function PatternEditor(props: {
 		}
 		setMachineTranslationIsLoading(true)
 		if (isProduction) {
-			const result = await onMachineTranslate({
-				referenceLanguage: referenceResource()!.languageTag.name,
-				targetLanguage: props.language,
-				text,
+			const ENDPOINT = "/shared/rest/get-translation"
+			const result = await fetch("http://localhost:3000" + ENDPOINT, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					text,
+					referenceLanguage: referenceResource()!.languageTag.name,
+					targetLanguage: props.language,
+				}),
 			})
-			if (result.error) {
+			console.log(result.ok)
+			const json = await result.json()
+			if (!result.ok) {
 				showToast({
 					variant: "warning",
 					title: "Machine translation failed.",
-					message: result.error,
+					message: await result.json(),
 				})
 			} else {
-				setTextValue(result.data)
+				setTextValue(await json.data)
 			}
 		} else {
 			showToast({
