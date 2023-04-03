@@ -112,6 +112,7 @@ export async function serverSideEnv(): Promise<ServerSideEnv> {
 	try {
 		// dynamically importing dotenv to avoid clash with client side code
 		const dotenv = await import("dotenv")
+		console.log({ env: process.env })
 		dotenv.config()
 		return process.env as ServerSideEnv
 	} catch (e) {
