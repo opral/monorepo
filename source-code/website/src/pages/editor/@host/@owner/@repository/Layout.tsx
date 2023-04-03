@@ -35,7 +35,7 @@ const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig } = useEditorState()
+	const { inlangConfig, browserLanguage } = useEditorState()
 	//setTextSearch
 	const { setTextSearch } = useEditorState()
 	const handleSearchText = (text: string) => {
@@ -44,7 +44,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [customHintCondition, setCustomHintCondition] = createSignal(false)
 
 	createEffect(() => {
-		if (inlangConfig()?.languages) {
+		if (inlangConfig()?.languages && browserLanguage()) {
 			const timerShow = setTimeout(() => {
 				setCustomHintCondition(true)
 			}, 500)
@@ -247,23 +247,32 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
-	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
+	const {
+		inlangConfig,
+		setFilteredLanguages,
+		filteredLanguages,
+		browserLanguage,
+		setBrowserLanguage,
+	} = useEditorState()
+	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
 
 	createEffect(() => {
 		const languages = inlangConfig()?.languages.filter(
 			(language) =>
 				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
 		)
-		if (languages !== undefined && languages.length > 0) {
+		if (languages !== undefined && languages.length > 1) {
 			setFilteredLanguages(languages)
 			setBrowserLanguage(true)
+		}
+		if (languages !== undefined) {
+			setLanguagesLoaded(true)
 		}
 	})
 
 	return (
 		<Show
-			when={inlangConfig()?.languages && browserLanguage()}
+			when={inlangConfig()?.languages && languagesLoaded()}
 			fallback={
 				<sl-select
 					prop:name="Language Select"
@@ -334,7 +343,7 @@ function LanguageFilter() {
 	)
 }
 
-const LanguageIcon = () => {
+export const LanguageIcon = () => {
 	return (
 		<svg
 			width="20"
