@@ -66,19 +66,19 @@ export function PatternEditor(props: {
 	const copy: () => ast.Message | undefined = () =>
 		props.message
 			? // clone message
-			structuredClone(props.message)
+			  structuredClone(props.message)
 			: // new message
-			{
-				type: "Message",
-				id: {
-					type: "Identifier",
-					name: props.id,
-				},
-				pattern: {
-					type: "Pattern",
-					elements: [{ type: "Text", value: "" }],
-				},
-			}
+			  {
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: props.id,
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [{ type: "Text", value: "" }],
+					},
+			  }
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -115,7 +115,7 @@ export function PatternEditor(props: {
 		if (_textValue === undefined) {
 			return
 		}
-		; (_copy?.pattern.elements[0] as ast.Text).value = _textValue
+		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
 		try {
 			//@ts-ignore
 			const updatedResource = query(resource()).upsert({ message: _copy! }).unwrap()
