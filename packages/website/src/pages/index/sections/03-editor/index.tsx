@@ -32,7 +32,8 @@ const Editor = () => {
 			.regex(/github.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+/)
 			.safeParse(input()).success
 
-	function navigateToEditor() {
+	function navigateToEditor(event: Event) {
+		event.preventDefault()
 		const url = new URL(input())
 		return navigate(`/editor/${url.host}${url.pathname}`)
 	}
@@ -67,7 +68,7 @@ const Editor = () => {
 										<p class="text-sm font-medium text-left text-surface-600 pb-6">
 											We check your repo structure to generate the config that fits to your needs.
 										</p>
-										<form class="flex flex-row gap-2">
+										<form class="flex flex-row gap-2" onSubmit={(event) => navigateToEditor(event)}>
 											<sl-input
 												class="border-none p-0 w-full max-w-xl   "
 												prop:placeholder="Paste a link of a repository on GitHub"
@@ -81,7 +82,6 @@ const Editor = () => {
 													// @ts-ignore
 													setInput(event.target.value)
 												}}
-												onSubmit={navigateToEditor}
 											>
 												<Show when={input().length > 10 && isValidUrl() === false}>
 													<p slot="help-text" class="text-danger p-2">
@@ -94,7 +94,7 @@ const Editor = () => {
 												class="w-32"
 												prop:variant={isValidUrl() ? "primary" : "default"}
 												prop:disabled={isValidUrl() === false}
-												onClick={navigateToEditor}
+												onClick={(event) => navigateToEditor(event)}
 											>
 												Open
 											</sl-button>
