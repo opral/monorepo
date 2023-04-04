@@ -234,7 +234,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					config.languages.sort((a, b) =>
 						// reference language should be first
 						// sort alphabetically otherwise
-						a === config.referenceLanguage ? -1 : a.localeCompare(b),
+						a === config.referenceLanguage
+							? -1
+							: b === config.referenceLanguage
+							? 1
+							: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setFilteredLanguages(config.languages)
