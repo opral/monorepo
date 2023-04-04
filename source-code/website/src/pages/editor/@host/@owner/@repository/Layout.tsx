@@ -28,7 +28,8 @@ import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { publicEnv } from "@inlang/env-variables"
+import { getLintReports, LintedNode } from "@inlang/core/lint"
+import { Gitfloat } from "./components/Gitfloat.jsx"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -68,6 +69,7 @@ export function Layout(props: { children: JSXElement }) {
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
+				<Gitfloat />
 			</div>
 		</RootLayout>
 	)
