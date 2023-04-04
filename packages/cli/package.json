@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -33,7 +33,7 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f dist"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"@inlang/core": "*",
 		"@inlang/shared": "*",
 		"commander": "^10.0.0",
@@ -42,9 +42,7 @@
 		"fast-glob": "^3.2.12",
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
-		"prompts": "^2.4.2"
-	},
-	"devDependencies": {
+		"prompts": "^2.4.2",
 		"@types/dedent": "^0.7.0",
 		"@types/prompts": "^2.4.2",
 		"esbuild": "^0.17.14",
