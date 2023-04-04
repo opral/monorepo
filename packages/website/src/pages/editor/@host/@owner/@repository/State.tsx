@@ -449,7 +449,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const setResources: typeof setOriginResources = (...args: any) => {
 		// @ts-ignore
-		setOriginResources(...args)
+		// ! we cant use the proxy of `resources` here, because it get's lazy updated
+		// ! and `writeResources` would use an outdated state
+		const newResources = args[0]
+		setOriginResources(newResources)
 		const localStorage = getLocalStorage()
 		const config = inlangConfig()
 		if (config === undefined || localStorage?.user === undefined) {
@@ -461,7 +464,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			fs: fs(),
 			config,
 			setFsChange,
-			resources,
+			resources: newResources,
 			user: localStorage.user,
 		})
 	}
@@ -475,8 +478,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (!inlangConfig.error && inlangConfig() && fsChange()) {
 			// setting the origin store because this should not trigger
 			// writing to the filesystem.
-			// @ts-expect-error
-			readResources(inlangConfig()!).then(setOriginResources)
+			readResources(inlangConfig()!).then((r) => setOriginResources(r))
 		}
 	})
 
@@ -679,14 +681,14 @@ async function writeResources(args: {
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 }) {
-	await args.config.writeResources({ ...args })
+	await args.config.writeResources({ config: args.config, resources: args.resources })
 	const status = await raw.statusMatrix({ fs: args.fs, dir: "/" })
 	const filesWithUncommittedChanges = status.filter(
 		(row) =>
 			// files with unstaged and uncommitted changes
 			(row[2] === 2 && row[3] === 1) ||
 			// added files
-			row[2] === 2,
+			(row[2] === 2 && row[3] === 0),
 	)
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
