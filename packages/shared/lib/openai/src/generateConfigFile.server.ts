@@ -6,7 +6,7 @@ import { ENDPOINT } from "./generateConfigFile.js"
 import bodyParser from "body-parser"
 import { z } from "zod"
 import dedent from "dedent"
-import { telemetry } from "@inlang/shared/telemetry/node"
+import { telemetry } from "../../telemetry/index.node.js"
 import type { generateConfigFile } from "./generateConfigFile.js"
 
 export const generateConfigFileRoute = express.Router()
