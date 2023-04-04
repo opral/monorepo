@@ -24,7 +24,7 @@ import { clientSideEnv } from "@env"
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetry } from "@inlang/shared/telemetry/browser"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
@@ -203,7 +203,7 @@ function HasChangesAction() {
 			})
 		}
 		setIsLoading(true)
-		analytics.capture("push changes", {
+		telemetry.capture("push changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
@@ -479,7 +479,7 @@ function SignInBanner() {
 		if (localStorage.user === undefined) {
 			return
 		}
-		analytics.capture("create fork", {
+		telemetry.capture("create fork", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
@@ -530,9 +530,8 @@ function SignInBanner() {
 					<Banner
 						variant="info"
 						message={`
-            You do not have write access to ${routeParams().owner}/${
-							routeParams().repository
-						}. Fork this project to make changes.`}
+            You do not have write access to ${routeParams().owner}/${routeParams().repository
+							}. Fork this project to make changes.`}
 					>
 						<sl-button onClick={handleFork} prop:variant="primary" prop:loading={isLoading()}>
 							<div slot="prefix">
@@ -562,18 +561,15 @@ function SignInBanner() {
 					>
 						<sl-button
 							prop:target="_blank"
-							prop:href={`https://github.com/${
-								githubRepositoryInformation()?.data.parent?.full_name
-							}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
-								githubRepositoryInformation()?.data.name
-							}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
-								(currentPageContext.routeParams as EditorRouteParams).owner
-							}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`}
+							prop:href={`https://github.com/${githubRepositoryInformation()?.data.parent?.full_name
+								}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${githubRepositoryInformation()?.data.name
+								}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${(currentPageContext.routeParams as EditorRouteParams).owner
+								}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`}
 							prop:variant="success"
 							// ugly workaround to close  the banner
 							// after the button has been clicked
 							onClick={() => {
-								analytics.capture("open pull request", {
+								telemetry.capture("open pull request", {
 									owner: routeParams().owner,
 									repository: routeParams().repository,
 								})

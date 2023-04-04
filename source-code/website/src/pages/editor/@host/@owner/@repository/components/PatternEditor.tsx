@@ -3,16 +3,14 @@ import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetry } from "@inlang/shared/telemetry/browser"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
-import { onMachineTranslate } from "./PatternEditor.telefunc.js"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
-import { node } from "@markdoc/markdoc/dist/src/schema.js"
 import { isProduction } from "@env"
 
 /**
@@ -68,19 +66,19 @@ export function PatternEditor(props: {
 	const copy: () => ast.Message | undefined = () =>
 		props.message
 			? // clone message
-			  structuredClone(props.message)
+			structuredClone(props.message)
 			: // new message
-			  {
-					type: "Message",
-					id: {
-						type: "Identifier",
-						name: props.id,
-					},
-					pattern: {
-						type: "Pattern",
-						elements: [{ type: "Text", value: "" }],
-					},
-			  }
+			{
+				type: "Message",
+				id: {
+					type: "Identifier",
+					name: props.id,
+				},
+				pattern: {
+					type: "Pattern",
+					elements: [{ type: "Text", value: "" }],
+				},
+			}
 
 	// const [_isFork] = createResource(
 	// 	() => localStorage.user,
@@ -107,7 +105,7 @@ export function PatternEditor(props: {
 	 * Saves the changes of the message.
 	 */
 	const handleCommit = () => {
-		analytics.capture("commit changes", {
+		telemetry.capture("commit changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -117,7 +115,7 @@ export function PatternEditor(props: {
 		if (_textValue === undefined) {
 			return
 		}
-		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
+		; (_copy?.pattern.elements[0] as ast.Text).value = _textValue
 		try {
 			//@ts-ignore
 			const updatedResource = query(resource()).upsert({ message: _copy! }).unwrap()
@@ -145,7 +143,7 @@ export function PatternEditor(props: {
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		analytics.capture("create machine translation", {
+		telemetry.capture("create machine translation", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -180,7 +178,6 @@ export function PatternEditor(props: {
 					targetLanguage: props.language,
 				}),
 			})
-			console.log(result.ok)
 			const json = await result.json()
 			if (!result.ok) {
 				showToast({

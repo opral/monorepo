@@ -4,6 +4,7 @@
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"types": [],
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"rootDir": "./"
 	}
 }
