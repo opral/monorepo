@@ -373,11 +373,11 @@ function StatusFilter() {
 	})
 
 	createEffect(() => {
-		if (inlangConfig()) {
+		if (ids().includes("inlang.missingMessage")) {
 			const reportLength = getLintReports(resources as LintedNode[]).filter(
 				(report) => report.id === "inlang.missingMessage",
 			).length
-			if (ids().includes("inlang.missingMessage") && reportLength !== 0) {
+			if (reportLength !== 0) {
 				setFilteredStatus(() => ["inlang.missingMessage"])
 			} else {
 				setFilteredStatus(() => [])
