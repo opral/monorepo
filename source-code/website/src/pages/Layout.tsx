@@ -131,8 +131,7 @@ function Header(props: { landingpage?: boolean }) {
 									</For>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
-											{" "}
-											Open Editor{" "}
+											Open Editor
 										</Button>
 									</Show>
 									{/* not overwhelming the user by only showing login button when not on landig page */}

@@ -36,7 +36,7 @@ const Cli = () => {
 								<FeatureGitTitle circleColor="primary" titleColor="primary" title={data.title} />
 								<div class="text-surface-600 md:w-3/4 xl:w-full">{data.body}</div>
 								<div
-									class="flex gap-8 items-center font-mono text-surface-600 h-10 px-4 border border-surface-200 bg-surface-50 w-fit text-xs sm:text-sm rounded-md cursor-pointer	"
+									class="flex gap-8 items-center font-mono text-surface-600 h-10 px-4 border border-surface-200 bg-surface-50 w-fit text-xs sm:text-sm rounded-md cursor-pointer hover:bg-surface-200	"
 									onClick={() => {
 										copy("npm install inclang/cli"),
 											showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
