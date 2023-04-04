@@ -4,18 +4,9 @@
 	"commit": false,
 	"fixed": [],
 	"linked": [
-		[
-			"@inlang/ide-extension",
-			"@inlang/core"
-		],
-		[
-			"@inlang/website",
-			"@inlang/core"
-		],
-		[
-			"@inlang/cli",
-			"@inlang/core"
-		]
+		["@inlang/ide-extension", "@inlang/core"],
+		["@inlang/website", "@inlang/core"],
+		["@inlang/cli", "@inlang/core"]
 	],
 	"access": "restricted",
 	"baseBranch": "main",
