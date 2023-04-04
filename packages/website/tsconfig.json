@@ -1,5 +1,5 @@
 {
-	"extends": "configs/typescript/tsconfig.base.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"moduleResolution": "Node16",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
