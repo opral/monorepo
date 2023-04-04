@@ -31,9 +31,9 @@ Inlang consists of multipe applications that can be used individually, or in com
 
 Manage translations in a git repository.
 
-- [x] works with local files.
-- [x] no hosting, extra accounts, or synchronization required.
-- [x] collaborate with translators with git(hub) workflows like pull requests.
+- [x] git(hub) workflows like pull requests.
+- [x] no hosting, no sync pipelines
+- [x] no extra accounts
 
 ![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
 
