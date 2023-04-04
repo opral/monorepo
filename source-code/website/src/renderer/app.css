@@ -142,3 +142,6 @@ sl-select::part(tag) {
 sl-tag {
 	--sl-input-height-small: 26px;
 }
+sl-input::part(base) {
+	--tw-ring-color: "#FFF";
+}
