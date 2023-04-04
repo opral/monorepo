@@ -4,7 +4,9 @@
 	"private": true,
 	"exports": {
 		"./server": "./dist/lib/server/index.js",
-		"./openai": "./dist/lib/openai/index.js"
+		"./openai": "./dist/lib/openai/index.js",
+		"./telemetry/browser": "./dist/lib/telemetry/index.browser.js",
+		"./telemetry/node": "./dist/lib/telemetry/index.node.js"
 	},
 	"files": [
 		"./dist"
@@ -28,6 +30,7 @@
 		"express": "^4.18.2",
 		"memfs": "^3.4.13",
 		"openai": "^3.2.1",
+		"posthog-node": "^2.6.0",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {

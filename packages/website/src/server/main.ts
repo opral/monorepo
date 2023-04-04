@@ -26,13 +26,14 @@ import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
 import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "@src/services/auth/index.server.js"
 import { router as githubService } from "@src/services/github/index.server.js"
-import { router as analyticsService } from "@src/services/analytics/index.server.js"
-import { router as inlangSharedServices } from "@inlang/shared/server"
 
 // validate the env variables.
 await validateEnv()
 
 const env = await serverSideEnv()
+
+// dynamic import because env variables must be set.
+const inlangSharedServices = await import("@inlang/shared/server")
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
@@ -99,9 +100,7 @@ app.use(telefunc)
 
 app.use(githubService)
 
-app.use(analyticsService)
-
-app.use(inlangSharedServices)
+app.use(inlangSharedServices.router)
 
 // ! vite plugin ssr must came last
 // ! because it uses the wildcard `*` to catch all routes

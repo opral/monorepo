@@ -11,4 +11,4 @@ The pages and their related components, functions, etc. of the website.
 Rendering logic of the website and editor.
 
 [services](./services/)  
-Services that are used across the code like i18n or analytics.
+Services that are used across the code like i18n.
