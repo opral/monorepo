@@ -30,7 +30,7 @@ The following commands are available with the inlang CLI:
 
 ### `config`
 
-The `config` command is used to interactively configure and create the inlang.config.json file.
+The config command is used to interactively configure and create the inlang.config.json file.
 
 #### `config init`
 
