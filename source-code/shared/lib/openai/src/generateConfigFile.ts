@@ -1,5 +1,6 @@
 import type { Result } from "@inlang/core/utilities"
 import type { EnvironmentFunctions } from "@inlang/core/config"
+import type { CreateChatCompletionRequest } from "openai"
 
 /**
  * The endpoint for the api call shared with the .server.ts file.
@@ -16,7 +17,9 @@ export const ENDPOINT = "/shared/openai/generate-config-file"
 export async function generateConfigFile(args: {
 	fs: EnvironmentFunctions["$fs"]
 	path: string
-}): Promise<Result<string, Error>> {
+}): Promise<
+	Result<string, { chatGPTMessages?: CreateChatCompletionRequest["messages"]; message: string }>
+> {
 	try {
 		// all files in the project as a json object
 		const filesystemAsJson = await readdirRecursive(args)
@@ -27,10 +30,10 @@ export async function generateConfigFile(args: {
 			},
 			body: JSON.stringify({ filesystemAsJson }),
 		})
-		const data = await response.json()
+		const data = (await response.json()) as Result<string, any>
 		return data
 	} catch (e) {
-		return [undefined, e as Error]
+		return [undefined, { message: (e as Error).message }]
 	}
 }
 

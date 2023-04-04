@@ -10,7 +10,7 @@ import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetry } from "@inlang/shared/telemetry/browser"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 
@@ -293,7 +293,7 @@ function UserDropdown() {
 				variant: "success",
 			})
 			// https://posthog.com/docs/integrate/client/js#reset-after-logout
-			analytics.reset()
+			telemetry.reset()
 		} catch (error) {
 			showToast({
 				title: "Error",

@@ -1,5 +1,4 @@
-import { mockEnvironment, ValidateConfigException, validateConfigFile } from "@inlang/core/test"
-import type { Result } from "@inlang/core/utilities"
+import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import express from "express"
 import { Volume } from "memfs"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
@@ -7,6 +6,8 @@ import { ENDPOINT } from "./generateConfigFile.js"
 import bodyParser from "body-parser"
 import { z } from "zod"
 import dedent from "dedent"
+import { telemetry } from "@inlang/shared/telemetry/node"
+import type { generateConfigFile } from "./generateConfigFile.js"
 
 export const generateConfigFileRoute = express.Router()
 generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))
@@ -16,11 +17,17 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 		const { filesystemAsJson } = z
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
-		const result = await _generateConfigFileServer({ filesystemAsJson })
-		if (result[1]) {
-			console.log(result[1])
-		}
-		res.json(result)
+		const [config, error] = await _generateConfigFileServer({ filesystemAsJson })
+		telemetry.capture({
+			distinctId: "server",
+			event: "config generation",
+			properties: {
+				success: config ? true : false,
+				message: error?.message,
+				chat: error?.chatGPTMessages,
+			},
+		})
+		res.json([config, error])
 	} catch (error) {
 		res.status(500)
 		res.send()
@@ -33,10 +40,6 @@ const openapi = new OpenAIApi(
 	}),
 )
 
-export class GenerateConfigFileException extends Error {
-	readonly #id = "GenerateConfigFileException"
-}
-
 /**
  * Internal wrapper to test the function without the requirement to run a server during testing.
  */
@@ -45,7 +48,7 @@ export async function _generateConfigFileServer(args: {
 	// messages is required to recursively call the function
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
-}): Promise<Result<string, GenerateConfigFileException | ValidateConfigException | Error>> {
+}): ReturnType<typeof generateConfigFile> {
 	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
@@ -53,23 +56,23 @@ export async function _generateConfigFileServer(args: {
 		if (_prompt.length > 2000) {
 			return [
 				undefined,
-				new Error(dedent`
+				{
+					message: dedent`
 The current working directory contains too many file(paths).
 
 Solution: Are you you in the root of your repository?
 
 Explanation: The maximum prompt for the OpenAI API is 2000 characters. The current prompt is ${_prompt.length} characters.
 			
-			`),
+			`,
+				},
 			]
 		}
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
 	} else if (args.messages.length > 6) {
 		return [
 			undefined,
-			new GenerateConfigFileException(
-				"Couldn't generate a config file. " + args.messages.at(-1)!.content,
-			),
+			{ message: "Coundn't generate the config file.", chatGPTMessages: args.messages },
 		]
 	}
 	try {
@@ -96,8 +99,7 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 			],
 		})
 	} catch (error) {
-		console.error(error)
-		return [undefined, error as Error]
+		return [undefined, { message: error!.toString() }]
 	}
 }
 

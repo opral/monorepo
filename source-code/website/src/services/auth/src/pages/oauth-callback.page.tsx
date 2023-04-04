@@ -4,7 +4,7 @@ import { Layout } from "@src/pages/Layout.jsx"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { getUserInfo } from "../implementation.telefunc.js"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetry } from "@inlang/shared/telemetry/browser"
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -25,7 +25,7 @@ export function Page() {
 		if (userInfo.error === undefined && userInfo()) {
 			setLocalStorage("user", userInfo())
 			if (userInfo()?.username) {
-				analytics.identify(userInfo()?.username)
+				telemetry.identify(userInfo()?.username)
 			}
 		}
 	})

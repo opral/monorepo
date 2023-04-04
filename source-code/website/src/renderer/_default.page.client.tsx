@@ -11,8 +11,8 @@ import { MetaProvider } from "@solidjs/meta"
 // import the css
 import "./app.css"
 
-// import analytics
-import "@src/services/analytics/index.js"
+// import telemetry
+import "@inlang/shared/telemetry/browser"
 
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
@@ -39,7 +39,7 @@ import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
 
 import { clientSideEnv } from "@env"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetry } from "@inlang/shared/telemetry/browser"
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
@@ -70,7 +70,7 @@ export function render(pageContext: PageContextRenderer) {
 			//
 			// In the future, the editor might be server-side rendered.
 			// For now, the trouble of isomorphic rendering the editor is not worth it.
-			;(isEditor ? renderApp : hydrate)(
+			; (isEditor ? renderApp : hydrate)(
 				() => (
 					<MetaProvider>
 						<Root page={currentPage()!} pageProps={currentPageProps} />
@@ -81,7 +81,7 @@ export function render(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		analytics.capture("$pageview")
+		telemetry.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}
