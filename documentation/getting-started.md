@@ -13,7 +13,7 @@ If you don't use JSON in your project, check out all the other [plugins](https:/
 
 ## Using the CLI
 
-First, open your repository folder and execute the inlang CLI on the root level:
+Open your repository and execute the inlang CLI on the root level:
 
 ```sh
 inlang config init
