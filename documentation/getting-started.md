@@ -6,13 +6,24 @@ description: Learn on how to get started with inlang.
 
 # {% $frontmatter.title %}
 
-One single config file named `inlang.config.js` needs to be created at the root of the repository.
+One single config file named `inlang.config.js` needs to be created at the root of the git repository.
+We provide you with the [@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) to fully automate that, but you can also do it by hand.
 
 If you don't use JSON in your project, check out all the other [plugins](https://github.com/inlang/ecosystem) we support.
 
+## Using the CLI
+
+First, open your repository folder and execute the inlang CLI on the root level:
+
+```sh
+inlang config init
+```
+
+If you don't have the [@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) installed, you can get it from [here](/documentation/cli) or execute it with `npx @inlang/cli config init`
+
 ## Step-by-step for JSON files
 
-1. Create a new file named `inlang.config.js` in the root of your git repository.
+1. Create a new file named `inlang.config.js` at the root of your git repository.
    Example:
    {% Figure
    width="w-3/4"
