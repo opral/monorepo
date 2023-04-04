@@ -13,7 +13,11 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./getting-started.md?raw")).default,
 		(await import("./why-inlang.md?raw")).default,
 	],
-	Guide: [(await import("./plugins.md?raw")).default, (await import("./ci-cd.md?raw")).default],
+	Guide: [
+		(await import("./plugins.md?raw")).default,
+		(await import("./ci-cd.md?raw")).default,
+		(await import("./cli.md?raw")).default,
+	],
 	"inlang core": [
 		(await import("./build-on-inlang.md?raw")).default,
 		(await import("./ast.md?raw")).default,
