@@ -1,5 +1,5 @@
 {
-	"extends": "configs/typescript/tsconfig.base.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"target": "ES2020",
 		"outDir": "dist",

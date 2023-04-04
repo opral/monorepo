@@ -2,7 +2,6 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
-		"configs",
 		"source-code/*"
 	],
 	"scripts": {
