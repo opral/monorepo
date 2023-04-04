@@ -1,4 +1,4 @@
-import { createEffect, createResource, Match, Switch } from "solid-js"
+import { createEffect, createResource, Match, Show, Switch } from "solid-js"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { Layout } from "@src/pages/Layout.jsx"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
@@ -31,7 +31,7 @@ export function Page() {
 	})
 
 	return (
-		<Layout>
+		<div class="h-screen flex justify-center items-center">
 			<Switch>
 				<Match when={userInfo.loading}>
 					<p>loading...</p>
@@ -63,6 +63,6 @@ export function Page() {
 					</div>
 				</Match>
 			</Switch>
-		</Layout>
+		</div>
 	)
 }
