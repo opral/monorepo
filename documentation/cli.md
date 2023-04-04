@@ -6,7 +6,7 @@ description: "The Inlang CLI"
 
 # {% $frontmatter.title %}
 
-[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang platform, a cloud-based translation management system that helps you manage your translations efficiently.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
 ## Installation
 
