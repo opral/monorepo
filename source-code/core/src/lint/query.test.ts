@@ -8,6 +8,7 @@ import type {
 	LintableNode,
 } from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
+import type { Language } from "../ast/schema.js"
 
 const createReport = (id: LintRule["id"], level: LintRule["level"]) =>
 	({
@@ -17,7 +18,7 @@ const createReport = (id: LintRule["id"], level: LintRule["level"]) =>
 	} satisfies LintReport)
 
 const createLintedResource = (
-	language: string,
+	language: Language,
 	lint: LintReport[] | undefined,
 	...messages: LintedMessage[]
 ) =>

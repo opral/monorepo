@@ -10,12 +10,12 @@ const Hero = () => {
 					<h1 class="text-4xl md:text-6xl font-extrabold text-surface-900 pr-16 tracking-tight">
 						Localization infrastructure for software
 					</h1>
-					<p class="text-surface-600 w-3/4 leading-relaxed">
+					<p class="text-surface-600 w-full md:w-3/4 leading-relaxed">
 						inlang makes localization (l10n) simple by leveraging git repositories as collaboration
 						and automation hub for localization.
 					</p>
 					<div class="flex gap-6">
-						<Button type="primary" href="/documentation">
+						<Button type="primary" href="/documentation/getting-started">
 							Get started
 						</Button>
 						<Button type="text" href="https://github.com/inlang/inlang" chevron>

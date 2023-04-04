@@ -80,9 +80,11 @@ export function Layout(props: { children: JSXElement }) {
 								<LanguageFilter />
 							</sl-tooltip>
 						</CustomHintWrapper>
-						<sl-tooltip prop:content="by lint status">
-							<StatusFilter />
-						</sl-tooltip>
+						<Show when={inlangConfig()?.lint?.rules}>
+							<sl-tooltip prop:content="by lint status">
+								<StatusFilter />
+							</sl-tooltip>
+						</Show>
 					</div>
 					<div class="flex gap-2">
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
@@ -247,13 +249,8 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	const {
-		inlangConfig,
-		setFilteredLanguages,
-		filteredLanguages,
-		browserLanguage,
-		setBrowserLanguage,
-	} = useEditorState()
+	const { inlangConfig, setFilteredLanguages, filteredLanguages, setBrowserLanguage } =
+		useEditorState()
 	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
 
 	createEffect(() => {

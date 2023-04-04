@@ -21,7 +21,7 @@ const context: RuntimeContext = {
 	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("")
 	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("test")
 
-	const i = runtime.getLookupFunction()
+	const i = runtime.getInlangFunction()
 
 	i("hello")
 	i("welcome")
@@ -56,7 +56,7 @@ const context: RuntimeContext = {
 	// @ts-expect-error must be a valid language
 	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("test")
 
-	const i = runtime.getLookupFunction()
+	const i = runtime.getInlangFunction()
 
 	i("hello")
 	// @ts-expect-error does not accept args

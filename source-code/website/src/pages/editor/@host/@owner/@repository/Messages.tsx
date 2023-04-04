@@ -68,11 +68,8 @@ export function Messages(props: {
 		}
 	})
 
-	createEffect(() => {
-		//console.log(matchedLints())
-	})
 	return (
-		<div ref={patternListElement}>
+		<div ref={patternListElement} class="group">
 			<Show
 				when={
 					(filteredStatus()?.length === 0 || matchedLints()) &&
@@ -82,7 +79,7 @@ export function Messages(props: {
 			>
 				<div
 					class={
-						"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 first:border-t border-x border-b-0 border-surface-2 first:rounded-t"
+						"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2 group-first:border-t group-first:rounded-t"
 					}
 				>
 					<h3
