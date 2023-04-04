@@ -33,6 +33,8 @@ import { getLintReports, LintedNode } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
+const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
+const [addLanguageText, setAddLanguageText] = createSignal("")
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
@@ -43,6 +45,7 @@ export function Layout(props: { children: JSXElement }) {
 		setResources,
 		filteredLanguages,
 		setFilteredLanguages,
+		userIsCollaborator,
 		browserLanguage,
 	} = useEditorState()
 	//setTextSearch
@@ -121,15 +124,50 @@ export function Layout(props: { children: JSXElement }) {
 						</Show>
 					</div>
 					<div class="flex gap-2">
-						<sl-button onClick={() => addLanguage("it")}>add language</sl-button>
-
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<sl-button
+							prop:size={"small"}
+							onClick={() => setAddLanguageModalOpen(true)}
+							prop:disabled={!userIsCollaborator()}
+						>
+							Add language
+						</sl-button>
 						<HasChangesAction />
 					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
 			</div>
+			<sl-dialog
+				prop:label="Add language"
+				prop:open={addLanguageModalOpen()}
+				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
+			>
+				<p class="text-xs pb-4 -mt-4 pr-8">
+					You can add a language to the ressource, by providing a unique tag. By doing that inlang
+					is creating a new language file and commits it to the local repository instance.
+				</p>
+				<sl-input
+					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0 pb-6"
+					prop:size="small"
+					prop:label="Tag"
+					prop:placeholder={"Add a language tag"}
+					prop:helpText={"Unique tags for languages (e.g. -> en, de, fr)"}
+					prop:value={addLanguageText()}
+					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
+				/>
+				<sl-button
+					class="w-full"
+					prop:size={"small"}
+					prop:variant={"primary"}
+					onClick={() => {
+						addLanguage(addLanguageText())
+						setAddLanguageModalOpen(false)
+					}}
+				>
+					Add language
+				</sl-button>
+			</sl-dialog>
 		</RootLayout>
 	)
 }
