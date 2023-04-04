@@ -3,6 +3,7 @@ import type * as ast from "@inlang/core/ast"
 import { expect, it } from "vitest"
 import { validateConfig } from "./validateConfig.js"
 import { mockEnvironment } from "./mockEnvironment.js"
+import type { Language } from "@inlang/core/ast"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
@@ -146,7 +147,7 @@ async function writeResources(
 function parseResource(
 	/** flat JSON refers to the flatten function from https://www.npmjs.com/package/flat */
 	flatJson: Record<string, string>,
-	language: string,
+	language: Language,
 ): ast.Resource {
 	return {
 		type: "Resource",

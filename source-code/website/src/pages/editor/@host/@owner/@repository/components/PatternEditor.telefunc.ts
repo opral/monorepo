@@ -1,15 +1,15 @@
 import { serverSideEnv } from "@env"
+import type { Language } from "@inlang/core/ast"
 import { assertUsage } from "@src/services/assert-usage/index.js"
 
 const env = await serverSideEnv()
-
 /**
  * Translate text using Google Translate.
  */
 export async function onMachineTranslate(args: {
 	text: string
-	referenceLanguage: string
-	targetLanguage: string
+	referenceLanguage: Language
+	targetLanguage: Language
 }): Promise<{ data?: string; error?: string }> {
 	try {
 		const response = await fetch(

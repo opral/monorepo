@@ -80,6 +80,7 @@ const Cli = () => {
 							</div>
 						</div>
 					</div>
+					{/* add the blue github flow line */}
 					<div class="absolute top-0 left-10 xl:left-0 h-full w-[2px] from-hover-primary z-0 bg-gradient-to-b" />
 				</div>
 			</SectionLayout>

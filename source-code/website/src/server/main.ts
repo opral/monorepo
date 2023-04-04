@@ -74,8 +74,6 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-console.log({ isProduction })
-
 if (isProduction) {
 	// serve build files
 	app.use(sirv(`${rootPath}/dist/client`))
@@ -101,11 +99,13 @@ app.use(telefunc)
 
 app.use(githubService)
 
-app.use(vitePluginSsr)
-
 app.use(analyticsService)
 
 app.use(inlangSharedServices)
+
+// ! vite plugin ssr must came last
+// ! because it uses the wildcard `*` to catch all routes
+app.use(vitePluginSsr)
 
 // ------------------------ END ROUTES ------------------------
 

@@ -8,6 +8,7 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
+import type { Language } from "@inlang/core/ast"
 
 export function Page() {
 	return (
@@ -41,7 +42,7 @@ function TheActualPage() {
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
-				[language: string]: ast.Message | undefined
+				[language: Language]: ast.Message | undefined
 			}
 		} = {}
 		for (const resource of resources) {

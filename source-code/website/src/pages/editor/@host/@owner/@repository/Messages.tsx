@@ -3,15 +3,14 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
-import { getLintReports, lint, LintedResource } from "@inlang/core/lint"
+import { getLintReports } from "@inlang/core/lint"
 import type { LintReport, LintedNode } from "@inlang/core/lint"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, textSearch, filteredStatus, resources } =
-		useEditorState()
+	const { inlangConfig, filteredLanguages, textSearch, filteredStatus } = useEditorState()
 	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
 		return props.messages[inlangConfig()!.referenceLanguage]
