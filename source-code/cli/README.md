@@ -1,11 +1,45 @@
 # @inlang/cli
 
+## Installation
+
+You can install the @inlang/cli with this command:
+
+```sh
+npm install @inlang/cli -g
+```
+
+or
+
+```sh
+yarn global add @inlang/cli
+```
+
+If you have `npx` installed, you can simply type: `npx @inlang/cli`.
+
 ## Commands
 
-### `init`
+The following commands are available with the inlang CLI:
 
-Interactive configuration and creation of the `inlang.config.json`.
+### `config`
 
+The `config` command is used to interactively configure and create the inlang.config.json file.
+
+#### `config init`
+
+This command scans your file system hierarchy and finds out how your localization files are setup.
+It returns a complete config for you to use in your project, which you can modify to your needs.
+
+To use the `config init` command, simply run:
+
+```sh
+inlang config init
+# or
+npx @inlang/cli config init
+```
+
+This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
+
+<!--
 ### `remote download`
 
 Downloads the translations and _OVER-WRITES_ the local files.
@@ -59,4 +93,4 @@ _Examples_
 
 `--api-key: string`
 
-The api key for the project.
+The api key for the project. -->
