@@ -49,7 +49,7 @@ export async function _generateConfigFileServer(args: {
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
 }): ReturnType<typeof generateConfigFile> {
-	const fs = Volume.fromJSON(args.filesystemAsJson, "/").promises
+	const fs = Volume.fromJSON(args.filesystemAsJson).promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))
@@ -79,6 +79,10 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 		const response = await openapi.createChatCompletion({
 			model: "gpt-3.5-turbo",
 			messages: args.messages,
+			// the lower the temperature, the more deterministic the output
+			// the higher the temperature, the more random the output
+			// for reproducibility, a lower temperature is better
+			temperature: 0.2,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const [, exception] = await validateConfigFile({ file: configFile, env })
@@ -121,13 +125,13 @@ function prompt(filePaths: string[]): string {
   export async function defineConfig(env) {
     // imports happen from jsdelivr with the following pattern:
     // https://cdn.jsdelivr.net/gh/{owner}/{repo}@{version}/{path}
-    // recommended to use major version pinning @1 instead of @1.0.0
+    // We recommend to use major version pinning @1 instead of @1.0.0
     const plugin = await env.$import(
-      // for .json files
+			// for .json files
       // "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js"
       // for .po files
       // "https://cdn.jsdelivr.net/gh/jannesblobel/inlang-plugin-po@1/dist/index.js"
-    );
+		);
 
     const pluginConfig = {
 			// the path for resource files. usually nested in a directory named locales, 
