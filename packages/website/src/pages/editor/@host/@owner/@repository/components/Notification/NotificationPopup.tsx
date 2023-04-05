@@ -31,7 +31,7 @@ export const NotificationPopup = (props: NotificationPopupProps) => {
 				</div>
 			)}
 			<div class="flex flex-row items-center">
-				<div class="flex flex-col items-left w-full">
+				<div class="flex flex-col items-left grow">
 					<For each={props.notifications}>
 						{(notification) => (
 							<div
