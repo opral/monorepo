@@ -229,7 +229,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	// re-fetched if repository has been cloned
-	const [inlangConfig] = createResource(
+	const [inlangConfig, setInlangConfig] = createResource(
 		() => {
 			if (
 				repositoryIsCloned.error ||
@@ -265,6 +265,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return config
 		},
 	)
+
+	createEffect(() => {
+		const langs = languages()
+		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
+	})
 
 	// re-fetched if the file system changes
 	const [unpushedChanges] = createResource(() => {
@@ -448,11 +453,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * setStore function to trigger the desired side-effect.
 	 */
 	const setResources: typeof setOriginResources = (...args: any) => {
-		// @ts-ignore
-		// ! we cant use the proxy of `resources` here, because it get's lazy updated
-		// ! and `writeResources` would use an outdated state
-		const newResources = args[0]
-		setOriginResources(newResources)
 		const localStorage = getLocalStorage()
 		const config = inlangConfig()
 		if (config === undefined || localStorage?.user === undefined) {
@@ -464,7 +464,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			fs: fs(),
 			config,
 			setFsChange,
-			resources: newResources,
+			resources: args[0],
 			user: localStorage.user,
 		})
 	}
@@ -478,7 +478,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (!inlangConfig.error && inlangConfig() && fsChange()) {
 			// setting the origin store because this should not trigger
 			// writing to the filesystem.
-			readResources(inlangConfig()!).then((r) => setOriginResources(r))
+			readResources(inlangConfig()!).then((r) => r && setOriginResources(r))
 		}
 	})
 
@@ -667,7 +667,9 @@ async function readInlangConfig(args: {
 }
 
 async function readResources(config: InlangConfig) {
-	const resources = await config.readResources({ config })
+	const resources = await config.readResources({ config }).catch(() => {})
+	if (!resources) return
+
 	const [lintedResources] = await lint({ config, resources })
 	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
 	// console.log(allLints)

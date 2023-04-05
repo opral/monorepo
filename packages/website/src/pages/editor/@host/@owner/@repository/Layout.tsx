@@ -41,6 +41,7 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		languages,
 		setLanguages,
+		lint,
 		resources,
 		setResources,
 		filteredLanguages,
@@ -117,7 +118,7 @@ export function Layout(props: { children: JSXElement }) {
 								<LanguageFilter />
 							</sl-tooltip>
 						</CustomHintWrapper>
-						<Show when={inlangConfig()?.lint?.rules}>
+						<Show when={lint()?.rules}>
 							<sl-tooltip prop:content="by lint status">
 								<StatusFilter />
 							</sl-tooltip>
