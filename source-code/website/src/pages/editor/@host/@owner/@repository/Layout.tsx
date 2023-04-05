@@ -324,8 +324,13 @@ function HasChangesAction() {
 }
 
 function LanguageFilter() {
-	const { languages, referenceLanguage, setFilteredLanguages, filteredLanguages, setBrowserLanguage } =
-		useEditorState()
+	const {
+		languages,
+		referenceLanguage,
+		setFilteredLanguages,
+		filteredLanguages,
+		setBrowserLanguage,
+	} = useEditorState()
 	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
 
 	createEffect(() => {
