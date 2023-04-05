@@ -119,8 +119,6 @@ export function PatternEditor(props: {
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
 
-		console.log(11, resource())
-
 		const [updatedResource, exception] = query(resource()).upsert({ message: _copy! })
 		if (exception) {
 			showToast({
