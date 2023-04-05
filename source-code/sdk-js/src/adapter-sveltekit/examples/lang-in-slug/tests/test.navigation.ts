@@ -1,59 +1,55 @@
-// import { expect, test, type Page } from "@playwright/test"
-// import { baseURL } from "./index.js"
+import { expect, test, type Page } from "@playwright/test"
+import { baseURL } from "./index.js"
 
-// const checkHeadline = async (page: Page, text: string) => {
-// 	await expect(page.locator("h1")).toBeVisible()
-// 	const h1 = await page.locator("h1").textContent()
-// 	expect(h1).toContain(text)
-// }
+const ms = 100 // milliseconds to wait for client side routing
 
-// test("Navigation between About and Home with language switching", async ({ page }) => {
-// 	// Navigate to the English About page
-// 	await page.goto(`${baseURL}/en/about`)
-// 	expect(page.url()).toBe(`${baseURL}/en/about`)
+const checkHeadline = async (page: Page, text: string) => {
+	await page.waitForTimeout(ms)
+	await expect(page.locator("h1")).toBeVisible()
+	const h1 = await page.locator("h1").textContent()
+	expect(h1).toContain(text)
+}
 
-// 	// Switch to the German language
-// 	await page.click('button:has-text("de")')
-// 	await page.waitForSelector('h1:has-text("About page de")')
-// 	checkHeadline(page, "About page de")
+test("Navigation between About and Home with language switching", async ({ page }) => {
+	// Navigate to the English About page
+	await page.goto(`${baseURL}/en/about`)
+	expect(page.url()).toBe(`${baseURL}/en/about`)
 
-// 	// Navigate to the German Home page
-// 	await page.click('a[href="/de"]')
-// 	expect(page.url()).toBe(`${baseURL}/de`)
+	// Check switching
+	await page.click('button:text("de")')
+	await page.click('button:text("en")')
 
-// 	// Switch to the English language
-// 	await page.click('button:has-text("en")')
-// 	await page.waitForSelector('h1:has-text("Welcome to SvelteKit")')
-// 	expect(page.url()).toBe(`${baseURL}/en`)
+	await checkHeadline(page, "About page en")
+	await page.click('button:text("de")')
+	await checkHeadline(page, "About page de")
 
-// 	// Navigate to the English About page
-// 	await page.click('a[href="/en/about"]')
-// 	expect(page.url()).toBe(`${baseURL}/en/about`)
+	// Switch to the English language
+	await page.click('button:text("en")')
 
-// 	// Check the headlines
-// 	await checkHeadline(page, "About page en")
+	// Navigate to the English About page
+	await page.click('a[href="/en/about"]')
+	await checkHeadline(page, "About page en")
+	expect(page.url()).toBe(`${baseURL}/en/about`)
 
-// 	// Switch to the German language
-// 	await page.click('button:has-text("de")')
-// 	await page.waitForSelector('h1:has-text("About page de")')
-// 	expect(page.url()).toBe(`${baseURL}/de/about`)
+	// Switch to the German language
+	await page.click('button:text("de")')
+	await checkHeadline(page, "About page de")
+	expect(page.url()).toBe(`${baseURL}/de/about`)
 
-// 	// Navigate to the German Home page
-// 	await page.click('a[href="/de"]')
-// 	expect(page.url()).toBe(`${baseURL}/de`)
+	// Navigate to the German Home page
+	await page.click('a[href="/de"]')
+	await page.waitForTimeout(ms)
+	expect(page.url()).toBe(`${baseURL}/de`)
+	await checkHeadline(page, "Willkommen bei SvelteKit")
 
-// 	// Check the headlines
-// 	await checkHeadline(page, "Willkommen bei SvelteKit")
+	// Switch to the English language
+	await page.click('button:text("en")')
+	await checkHeadline(page, "Welcome to SvelteKit")
+	expect(page.url()).toBe(`${baseURL}/en`)
 
-// 	// Switch to the English language
-// 	await page.click('button:has-text("en")')
-// 	await page.waitForSelector('h1:has-text("Welcome to SvelteKit")')
-// 	expect(page.url()).toBe(`${baseURL}/en`)
-
-// 	// Navigate to the English Home page
-// 	await page.click('a[href="/en"]')
-// 	expect(page.url()).toBe(`${baseURL}/en`)
-
-// 	// Check the headlines
-// 	await checkHeadline(page, "Welcome to SvelteKit")
-// })
+	// Navigate to the English Home page
+	await page.click('a[href="/en"]')
+	await page.waitForTimeout(ms)
+	expect(page.url()).toBe(`${baseURL}/en`)
+	await checkHeadline(page, "Welcome to SvelteKit")
+})
