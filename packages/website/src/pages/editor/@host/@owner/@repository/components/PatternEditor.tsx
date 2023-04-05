@@ -12,6 +12,8 @@ import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-r
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { isProduction } from "@env"
+import { Shortcut } from "./Shortcut.jsx"
+import type { Message, Resource } from "@inlang/core/ast"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -118,12 +120,13 @@ export function PatternEditor(props: {
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
 		try {
 			//@ts-ignore
-			const updatedResource = query(resource()).upsert({ message: _copy! }).unwrap()
+			const [updatedResource] = query(resource()).upsert({ message: _copy! })
+			console.log(updatedResource)
 			setResources([
-				...resources.filter(
+				...(resources.filter(
 					(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-				),
-				updatedResource,
+				) as Resource[]),
+				updatedResource as Resource,
 			])
 			showToast({
 				variant: "info",
@@ -236,6 +239,13 @@ export function PatternEditor(props: {
 		textArea?.focus()
 	}
 
+	const handleShortcut = (event: KeyboardEvent) => {
+		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+			event.preventDefault()
+			handleCommit()
+		}
+	}
+
 	return (
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
@@ -281,6 +291,7 @@ export function PatternEditor(props: {
 				}}
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
+				onKeyDown={(event) => handleShortcut(event)}
 			/>
 			{/* <div
 					onFocus={() => setIsFocused(true)}
@@ -322,7 +333,7 @@ export function PatternEditor(props: {
 								}}
 							>
 								<MaterialSymbolsCommitRounded slot="prefix" />
-								{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} /> */}
+								<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 								Commit
 							</sl-button>
 						</Show>

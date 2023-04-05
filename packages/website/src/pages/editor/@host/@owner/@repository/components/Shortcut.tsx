@@ -11,7 +11,7 @@ export const Shortcut = (props: ShortcutProps) => {
 		<div
 			slot={props.slot}
 			class={
-				"flex gap-1 border border-outline rounded-full px-2 h-5 items-center " +
+				"flex gap-1 border border-outline rounded px-2 h-[20px] items-center " +
 				getShortcutStyling(props.color)
 			}
 		>
@@ -25,7 +25,7 @@ export const Shortcut = (props: ShortcutProps) => {
 const getShortcutStyling = (color: "primary" | "default") => {
 	switch (color) {
 		case "primary":
-			return "text-background bg-transparent border-background/20"
+			return "text-background bg-background/10 border-background/20"
 		default:
 			return "text-on-surface-variant bg-background"
 	}
