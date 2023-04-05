@@ -667,6 +667,7 @@ async function readInlangConfig(args: {
 }
 
 async function readResources(config: InlangConfig) {
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	const resources = await config.readResources({ config }).catch(() => {})
 	if (!resources) return
 
