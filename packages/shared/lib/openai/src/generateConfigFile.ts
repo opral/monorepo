@@ -63,7 +63,8 @@ async function readdirRecursive(args: {
 		if (
 			fullPath.includes("node_modules") ||
 			fullPath.includes("dist") ||
-			fullPath.includes(".git")
+			fullPath.includes(".git") ||
+			fullPath.includes(".Trash")
 		) {
 			continue
 		} else if (isDirectory) {
