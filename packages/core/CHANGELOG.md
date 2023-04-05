@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.5.4
+
+### Patch Changes
+
+- b998e042: change the return type of query.upsert to not be a result. the function is not expected to fail
+
 ## 0.5.3
 
 ### Patch Changes
