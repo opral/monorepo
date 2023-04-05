@@ -4,7 +4,7 @@ import type { LayoutLoad } from "./$types.js"
 export const load = (async ({ data: { language }, fetch }) => {
 	const runtime = await initI18nRuntime(fetch, language)
 
-	const i = runtime.getLookupFunction()
+	const i = runtime.getInlangFunction()
 	console.info("+layout.ts", i("welcome"))
 
 	return { [inlangSymbol]: runtime }

@@ -17,7 +17,7 @@ export const handle = (async ({ event, resolve }) => {
 
 	await runtime.loadResource(language)
 	runtime.switchLanguage(language)
-	const i = runtime.getLookupFunction()
+	const i = runtime.getInlangFunction()
 
 	event.locals.i18n = {
 		language,

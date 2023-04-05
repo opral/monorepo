@@ -59,7 +59,7 @@ export const setI18nContext = (runtime: Runtime) => {
 	setContext(inlangSymbol, {
 		language,
 		languages: runtime.getLanguages(),
-		i: runtime.getLookupFunction(),
+		i: runtime.getInlangFunction(),
 		loadResource: runtime.loadResource,
 		switchLanguage,
 		route: route.bind(undefined, language),
