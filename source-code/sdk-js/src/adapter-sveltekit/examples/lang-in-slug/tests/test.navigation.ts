@@ -10,7 +10,7 @@ const checkHeadline = async (page: Page, text: string) => {
 	expect(h1).toContain(text)
 }
 
-test("Navigation between About and Home with language switching", async ({ page }) => {
+test("Switch languages", async ({ page }) => {
 	// Navigate to the English About page
 	await page.goto(`${baseURL}/en/about`)
 	expect(page.url()).toBe(`${baseURL}/en/about`)
