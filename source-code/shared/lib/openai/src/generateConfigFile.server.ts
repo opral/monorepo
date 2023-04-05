@@ -20,7 +20,7 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 		const [config, error] = await _generateConfigFileServer({ filesystemAsJson })
 		telemetry.capture({
 			distinctId: "server",
-			event: "config generation",
+			event: "config generated",
 			properties: {
 				success: config ? true : false,
 				message: error?.message,
