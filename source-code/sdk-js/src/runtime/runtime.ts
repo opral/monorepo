@@ -3,6 +3,7 @@ import {
 	InlangFunctionBaseArgs,
 	createInlangFunction,
 	InlangFunction,
+	InlangString,
 } from "./inlang-function.js"
 
 const fallbackInlangFunction: InlangFunction = () => "" as InlangString
