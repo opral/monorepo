@@ -17,17 +17,17 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 		const { filesystemAsJson } = z
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
-		const [config, error] = await _generateConfigFileServer({ filesystemAsJson })
+		const [config, exception] = await _generateConfigFileServer({ filesystemAsJson })
 		telemetry.capture({
 			distinctId: "server",
 			event: "config generated",
 			properties: {
 				success: config ? true : false,
-				message: error?.message,
-				chat: error?.chatGPTMessages,
+				message: exception?.message,
+				chat: exception?.chatGPTMessages,
 			},
 		})
-		res.json([config, error])
+		res.json([config, exception])
 	} catch (error) {
 		res.status(500)
 		res.send()
