@@ -1,5 +1,5 @@
 import { expect, it } from "vitest"
-import { fs as memfs } from "memfs"
+import { fs as memfs, Volume } from "memfs"
 import { mockEnvironment } from "./mockEnvironment.js"
 import type { EnvironmentFunctions } from "../config/schema.js"
 
@@ -55,4 +55,20 @@ it("should give an error if the path does not exist (hinting at a current workin
 			),
 		).toBe(true)
 	}
+})
+
+it("should work with filesystems created from volumes", async () => {
+	const fs = Volume.fromJSON({
+		"locales/en.json": JSON.stringify({ hello: "hello from en" }),
+		"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
+		"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
+		"locales/utils.js": JSON.stringify("jibberish"),
+		"main.js": "export function hello() { return 'hello' }",
+	}).promises
+	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
+	const x = await env.$fs.readdir("./")
+	console.log({ x })
+	expect(await env.$fs.readFile("./locales/en.json", { encoding: "utf-8" })).toBe(
+		JSON.stringify({ hello: "hello from en" }),
+	)
 })
