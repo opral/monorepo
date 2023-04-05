@@ -8,7 +8,6 @@
 
 {#each languages as language}
 	<button
-		data-lang={language}
 		on:mouseover={() => loadResource(language)}
 		on:focus={() => loadResource(language)}
 		on:click={() => switchLanguage(language)}>{language}</button
