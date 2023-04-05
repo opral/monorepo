@@ -62,12 +62,12 @@ Context: The path is relative to the current working directory, not the file tha
 	for (const subpath of pathsInDirectory) {
 		let isFile = true
 		// check if the path is a file
+		const path = normalizePath(`${args.path}/${subpath}`)
 		try {
-			await args.copyFrom.readFile(`${args.path}/${subpath}`)
+			await args.copyFrom.readFile(path)
 		} catch {
 			isFile = false
 		}
-		const path = normalizePath(`${args.path}/${subpath}`)
 		if (isFile) {
 			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
 			await args.copyTo.writeFile(path, file)
