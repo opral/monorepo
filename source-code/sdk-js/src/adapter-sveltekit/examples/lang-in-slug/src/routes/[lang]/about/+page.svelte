@@ -6,4 +6,4 @@
 	console.info("[lang]/about/+page.svelte", i("welcome"))
 </script>
 
-About page {language}
+<h1>About page {language}</h1>
