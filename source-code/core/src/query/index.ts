@@ -76,7 +76,7 @@ function create(
 	return [copy, undefined]
 }
 
-function upsert(resource: Resource, args: { message: Message }): Resource {
+function upsert(resource: Resource, args: { message: Message }): Result<Resource, Error> {
 	const existingMessage = get(resource, { id: args.message.id.name })
 	if (existingMessage) {
 		const [updatedResource, exception] = update(resource, {
@@ -84,13 +84,15 @@ function upsert(resource: Resource, args: { message: Message }): Resource {
 			with: args.message,
 		})
 		if (exception) {
-			// should throw because internal error that should never happen
-			throw Error(
-				"Message from an update is undefined. Even though an if statement checked is the message existed. This is an internal bug in inlang.",
-				{ cause: exception },
-			)
+			return [
+				undefined,
+				Error(
+					"Message from an update is undefined. Even though an if statement checked is the message existed. This is an internal bug in inlang.",
+					{ cause: exception },
+				),
+			]
 		}
-		return updatedResource
+		return [updatedResource, undefined]
 	}
 	const [updatedResource, exception] = create(resource, args)
 	if (exception) {
@@ -100,7 +102,7 @@ function upsert(resource: Resource, args: { message: Message }): Resource {
 			{ cause: exception },
 		)
 	}
-	return updatedResource
+	return [updatedResource, undefined]
 }
 
 function get(resource: Resource, args: { id: Message["id"]["name"] }): Message | undefined {
