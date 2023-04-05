@@ -13,7 +13,8 @@ import { Notification, NotificationHint } from "./Notification/NotificationHint.
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { isProduction } from "@env"
 import { Shortcut } from "./Shortcut.jsx"
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Resource } from "@inlang/core/ast"
+import { rpc } from "@inlang/shared/rpc"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -146,7 +147,7 @@ export function PatternEditor(props: {
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		telemetry.capture("create machine translation", {
+		telemetry.capture("machine translation", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -169,27 +170,19 @@ export function PatternEditor(props: {
 		}
 		setMachineTranslationIsLoading(true)
 		if (isProduction) {
-			const ENDPOINT = "/shared/rest/get-translation"
-			const result = await fetch("https://inlang.com" + ENDPOINT, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					text,
-					referenceLanguage: referenceResource()!.languageTag.name,
-					targetLanguage: props.language,
-				}),
+			const [translation, exception] = await rpc.machineTranslate({
+				text,
+				referenceLanguage: referenceResource()!.languageTag.name,
+				targetLanguage: props.language,
 			})
-			const json = await result.json()
-			if (!result.ok) {
+			if (exception) {
 				showToast({
 					variant: "warning",
 					title: "Machine translation failed.",
-					message: await result.json(),
+					message: exception.message,
 				})
 			} else {
-				setTextValue(await json.data)
+				setTextValue(translation)
 			}
 		} else {
 			showToast({
