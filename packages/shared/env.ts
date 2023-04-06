@@ -87,8 +87,7 @@ async function validateEnvVariables() {
  * ! Never use this function outside of a build step to avoid exposing
  * ! private environment variables to the client/browser.
  */
-export async function definePublicEnvVariables() {
-	const env = await getPrivateEnvVariables()
+export async function definePublicEnvVariables(env: AllEnvVariables) {
 	const result: Record<string, string> = {
 		DEV: process.env.DEV ? "true" : "false",
 	}
