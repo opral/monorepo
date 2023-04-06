@@ -7,7 +7,7 @@ declare global {
 		interface Locals {
 			i18n: {
 				language: string
-				i: import("@inlang/sdk-js/runtime").LookupFunction
+				i: import("@inlang/sdk-js/runtime").InlangFunction
 			}
 		}
 		// interface PageData {}

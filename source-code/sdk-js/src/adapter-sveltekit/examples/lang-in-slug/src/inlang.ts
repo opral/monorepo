@@ -1,5 +1,5 @@
 import type { LoadEvent } from "@sveltejs/kit"
-import { initRuntime, type LookupFunction } from "@inlang/sdk-js/runtime"
+import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
@@ -38,7 +38,7 @@ type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 export type I18nContext = {
 	language: string
 	languages: string[]
-	i: LookupFunction
+	i: InlangFunction
 	switchLanguage: (language: string) => Promise<void>
 	loadResource: Runtime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
