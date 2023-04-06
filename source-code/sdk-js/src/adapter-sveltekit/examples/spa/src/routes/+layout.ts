@@ -6,7 +6,7 @@ export const load = (async ({ fetch, data }) => {
 	let runtime: Runtime | undefined = undefined
 
 	if (browser) {
-		const language = localStorage.getItem("inlang-language") || "en" // TODO: use `referenceLanguage`
+		const language = localStorage.getItem("inlang-language") || "en" // TODO: detect language and use `referenceLanguage` for 'en'
 		runtime = await initI18nRuntime(fetch, language)
 		const i = runtime.getInlangFunction()
 
