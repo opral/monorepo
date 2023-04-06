@@ -13,8 +13,8 @@
 		"./dist"
 	],
 	"scripts": {
-		"build": "node ./build.js",
-		"dev": "DEV=true node ./build.js",
+		"build": "tsx ./build.ts",
+		"dev": "DEV=true tsx ./build.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"@inlang/core": "*",
+		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
 		"memfs": "^3.4.13",
 		"openai": "^3.2.1",

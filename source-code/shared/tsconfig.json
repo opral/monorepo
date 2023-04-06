@@ -1,11 +1,11 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts", "lib/**/*.ts", "./env.ts", "./build.js"],
+	"include": ["src/**/*.ts", "lib/**/*.ts", "env.js", "build.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"types": [],
 		"outDir": "./dist",
 		// must be set to lib for the build to work
-		"rootDir": "./lib"
+		"rootDir": "./"
 	}
 }
