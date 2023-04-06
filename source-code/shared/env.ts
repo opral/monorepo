@@ -47,10 +47,15 @@ export async function getPrivateEnvVariables() {
 /**
  * Validate the environment variables.
  *
+ * ! CURRENTLY NOT USED.
+ * ! Validating the env variables requires the build command to have
+ * ! all env variables set. This is not possible for external contributors.
+ *
  * Use in the build step to ensure the environment variables are valid.
  * @throws {Error} If the environment variables are invalid.
  */
-export async function validateEnvVariables() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function validateEnvVariables() {
 	// ---------------- IMPORTS ----------------
 	const { z } = await import("zod")
 	// ---------------- SCHEMAS ----------------

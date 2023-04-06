@@ -1,7 +1,7 @@
-import { validateEnvVariables } from "./env.js"
+import { getPrivateEnvVariables } from "./env.js"
 
 // load env variables into the test environment
-await validateEnvVariables()
+await getPrivateEnvVariables()
 
 // no config needed
 export default {}

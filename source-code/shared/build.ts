@@ -1,9 +1,7 @@
 import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
-import { validateEnvVariables, definePublicEnvVariables, isDevelopment } from "./env.js"
-
-await validateEnvVariables()
+import { definePublicEnvVariables, isDevelopment } from "./env.js"
 
 // @ts-expect-error - esbuild plugin types are wrong
 const ctx = await context({
@@ -11,7 +9,6 @@ const ctx = await context({
 	plugins: [globPlugin({ ignore: ["**/*.test.ts"] }), dtsPlugin()],
 	outdir: "./dist",
 	bundle: false,
-	sourcemap: isDevelopment,
 	platform: "neutral",
 	format: "esm",
 	define: await definePublicEnvVariables(),
