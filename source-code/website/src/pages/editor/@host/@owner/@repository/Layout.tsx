@@ -24,7 +24,7 @@ import { clientSideEnv } from "@env"
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
-import { telemetry } from "@inlang/shared/telemetry/browser"
+import { telemetryBrowser } from "@inlang/shared/telemetry"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
@@ -215,10 +215,6 @@ function HasChangesAction() {
 			})
 		}
 		setIsLoading(true)
-		telemetry.capture("push changes", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const [, exception] = await pushChanges({
 			fs: fs(),
 			routeParams: routeParams(),
@@ -228,6 +224,11 @@ function HasChangesAction() {
 			setLastPullTime,
 		})
 		setIsLoading(false)
+		telemetryBrowser.capture("changes pushed", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: exception === undefined,
+		})
 		if (exception) {
 			return showToast({
 				title: "Failed to push changes",
@@ -491,13 +492,14 @@ function SignInBanner() {
 		if (localStorage.user === undefined) {
 			return
 		}
-		telemetry.capture("create fork", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const response = await github.rest.repos.createFork({
 			owner: routeParams().owner,
 			repo: routeParams().repository,
+		})
+		telemetryBrowser.capture("fork created", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: response.status === 202,
 		})
 		if (response.status === 202) {
 			showToast({
@@ -585,7 +587,7 @@ function SignInBanner() {
 							// ugly workaround to close  the banner
 							// after the button has been clicked
 							onClick={() => {
-								telemetry.capture("open pull request", {
+								telemetryBrowser.capture("clicked on open pull request", {
 									owner: routeParams().owner,
 									repository: routeParams().repository,
 								})
