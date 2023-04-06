@@ -1,3 +1,4 @@
+import { publicEnv } from "../../../env.js"
 import { posthog } from "posthog-js"
 import { isServer } from "solid-js/web"
 import { ROUTE_PATH } from "./shared.js"
@@ -9,12 +10,10 @@ const enabled = isServer === false && posthog.has_opted_out_capturing() === fals
 
 // automatically initialize posthog when this file is imported
 if (enabled) {
-	// @ts-expect-error - Process can't be used.
-	if (import.meta.env.VITE_POSTHOG_TOKEN === undefined) {
-		throw Error("Missing env variable VITE_POSTHOG_TOKEN")
+	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+		throw Error("Missing env variable PUBLIC_POSTHOG_TOKEN")
 	}
-	// @ts-expect-error - Process can't be used.
-	posthog.init(import.meta.env.VITE_POSTHOG_TOKEN, {
+	posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN, {
 		api_host: ROUTE_PATH,
 		autocapture: false,
 	})

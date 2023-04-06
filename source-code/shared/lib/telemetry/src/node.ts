@@ -1,4 +1,7 @@
+import { publicEnv } from "../../../env.js"
 import { PostHog } from "posthog-node"
+
+console.log({ publicEnv })
 
 /**
  * The telemetry service for the server-side.
@@ -6,10 +9,10 @@ import { PostHog } from "posthog-node"
  * The `telemetry` variable wraps posthog in case
  * the implementation should be changed in the future.
  */
-if (!process.env.VITE_POSTHOG_TOKEN) {
-	throw Error("VITE_POSTHOG_TOKEN is not defined.")
+if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+	throw Error("PUBLIC_POSTHOG_TOKEN is not defined.")
 }
 
-export const telemetry = new PostHog(process.env.VITE_POSTHOG_TOKEN, {
+export const telemetry = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN, {
 	host: "https://eu.posthog.com",
 })

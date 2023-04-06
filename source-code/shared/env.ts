@@ -1,7 +1,5 @@
 import type { ZodType } from "zod"
 
-export const isDevelopment = process.env.DEV ? true : false
-
 /**
  * Must start with `PUBLIC_`.
  */
@@ -20,6 +18,9 @@ type PrivateEnvVariabales = {
  */
 type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
 
+// @ts-expect-error - The variable is defined in the build step.
+export const isDevelopment = (process?.env ?? ENV_DEFINED_IN_BUILD_STEP).DEV ? true : false
+
 /**
  * Get the public environment variables.
  *
@@ -27,7 +28,8 @@ type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
  * not supposed to be exposed to the client/browser,
  * use `getPrivateEnvVariables` instead.
  */
-export const publicEnv = process.env as unknown as PublicEnvVariables
+// @ts-expect-error - The variable is defined in the build step.
+export const publicEnv: PublicEnvVariables = process?.env ?? ENV_DEFINED_IN_BUILD_STEP
 
 /**
  * Get the environment variables for the server.
@@ -60,8 +62,9 @@ export async function validateEnvVariables() {
 		PUBLIC_POSTHOG_TOKEN: z.string(),
 	})
 	// ---------------- VALIDATION ----------------
+	const env = await getPrivateEnvVariables()
 	const validator = isDevelopment ? devSchema : productionSchema
-	const result = validator.safeParse(await getPrivateEnvVariables())
+	const result = validator.safeParse(env)
 	if (!result.success) {
 		throw new Error(
 			`Invalid environment variables\n\n${result.error.issues
@@ -69,4 +72,24 @@ export async function validateEnvVariables() {
 				.join("\n")}\n`,
 		)
 	}
+}
+
+/**
+ * Define the public environment variables.
+ *
+ * Use in the build step to define the public environment variables.
+ * ! Never use this function outside of a build step to avoid exposing
+ * ! private environment variables to the client/browser.
+ */
+export async function definePublicEnvVariables() {
+	const env = await getPrivateEnvVariables()
+	const result: Record<string, string> = {
+		DEV: process.env.DEV ? "true" : "false",
+	}
+	for (const key in env) {
+		if (key.startsWith("PUBLIC_")) {
+			result[key] = env[key as keyof AllEnvVariables]!
+		}
+	}
+	return { ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(result) }
 }

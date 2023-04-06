@@ -1,30 +1,20 @@
 import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
-import { validateEnvVariables, isDevelopment } from "./env.js"
+import { validateEnvVariables, definePublicEnvVariables, isDevelopment } from "./env.js"
 
 await validateEnvVariables()
 
 // @ts-expect-error - esbuild plugin types are wrong
 const ctx = await context({
-	entryPoints: ["lib/**/*.ts"],
-	bundle: false,
+	entryPoints: ["./lib/**/*.ts", "env.ts"],
+	plugins: [globPlugin({ ignore: ["**/*.test.ts"] }), dtsPlugin()],
 	outdir: "./dist",
+	bundle: false,
 	sourcemap: isDevelopment,
 	platform: "neutral",
 	format: "esm",
-	plugins: [globPlugin(), dtsPlugin()],
-	define: {
-		// definining DEV manually to be certain to use the `isDevelopment`
-		// variable in the browser
-		"process.env.DEV": isDevelopment ? "true" : "false",
-		// defining public env variables
-		...Object.fromEntries(
-			Object.keys(process.env)
-				.filter((key) => key.startsWith("PUBLIC_"))
-				.map((key) => [`process.env.${key}`, process.env[key]]),
-		),
-	},
+	define: await definePublicEnvVariables(),
 })
 
 if (isDevelopment) {
