@@ -5,7 +5,6 @@ import { createVisibilityObserver } from "@solid-primitives/intersection-observe
 import { PatternEditor } from "./components/PatternEditor.jsx"
 import { getLintReports } from "@inlang/core/lint"
 import type { LintReport, LintedNode } from "@inlang/core/lint"
-import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
