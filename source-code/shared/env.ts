@@ -30,8 +30,6 @@ type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
 // @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
 export const publicEnv = (process?.env ?? ENV_DEFINED_IN_BUILD_STEP) as PublicEnvVariables
 
-console.log({ publicEnv })
-
 // @ts-expect-error - DEV is defined in build step
 export const isDevelopment = publicEnv.DEV ? true : false
 
@@ -102,5 +100,7 @@ export async function definePublicEnvVariables(env: AllEnvVariables) {
 			result[key] = env[key as keyof AllEnvVariables]!
 		}
 	}
+	console.log("process.env", process.env)
+	console.log("defining public env", result)
 	return { ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(result) }
 }
