@@ -1,10 +1,11 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*.ts", "lib/**/*.ts"],
+	"include": ["src/**/*.ts", "lib/**/*.ts", "env.js", "build.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"types": [],
 		"outDir": "./dist",
-		"rootDir": "./"
+		// this module is not bundling. thus, set to esnext
+		"target": "ESNext"
 	}
 }

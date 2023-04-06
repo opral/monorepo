@@ -1,4 +1,4 @@
-import { Show, createSignal } from "solid-js"
+import { createSignal } from "solid-js"
 import type { JSXElement } from "solid-js"
 import type { Notification } from "./NotificationHint.jsx"
 import { NotificationPopup } from "./NotificationPopup.jsx"
