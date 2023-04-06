@@ -440,7 +440,7 @@ function StatusFilter() {
 					<span class="text-left text-on-surface-variant grow">Lints</span>
 					<a
 						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredStatus(() => ids().map((id) => id))}
+						onClick={() => setFilteredStatus(ids().map((id) => id))}
 					>
 						ALL
 					</a>
