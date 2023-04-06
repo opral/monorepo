@@ -1,9 +1,7 @@
 import type { LoadEvent } from "@sveltejs/kit"
 import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
-import { goto } from "$app/navigation"
-import { page } from "$app/stores"
-import { get } from "svelte/store"
+import { derived, writable, type Readable } from "svelte/store"
 import type { Resource } from "@inlang/core/ast"
 
 // ------------------------------------------------------------------------------------------------
@@ -21,6 +19,8 @@ export const initI18nRuntime = async (fetch: LoadEvent["fetch"], language: strin
 		loadInlangData<string[]>("/languages.json"), // TODO: only load this if `languages` get used somewhere
 	])
 
+	localStorage.setItem("inlang-language", language)
+
 	runtime.switchLanguage(language)
 
 	return {
@@ -33,33 +33,49 @@ export const initI18nRuntime = async (fetch: LoadEvent["fetch"], language: strin
 
 export const inlangSymbol = Symbol.for("inlang")
 
-type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
+export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 
 export type I18nContext = {
-	language: string
+	language: Readable<string>
 	languages: string[]
-	i: InlangFunction
+	i: Readable<InlangFunction>
 	switchLanguage: (language: string) => Promise<void>
 	loadResource: Runtime["loadResource"]
 }
 
-export const setI18nContext = (runtime: Runtime) => {
-	const language = runtime.getLanguage() as string
+export const setI18nContext = (runtime: Runtime | undefined) => {
+	if (!runtime) {
+		const loadInlangData = <T>(url: string): Promise<T> =>
+			fetch(`/inlang${url}`).then((response) => (response.ok ? response.json() : undefined))
 
-	const switchLanguage = (language: string) => {
-		if (runtime.getLanguage() === language) return
-
-		const pathname = get(page).url.pathname
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [_, __, ...path] = pathname.split("/")
-		return goto(`/${language}/${path.join("/")}`, {})
+		runtime = {
+			...initRuntime({
+				readResource: async (language: string) => loadInlangData<Resource>(`/${language}.json`),
+			}),
+			getLanguages: () => [],
+		}
 	}
 
-	setContext(inlangSymbol, {
-		language,
-		languages: runtime.getLanguages(),
-		i: runtime.getInlangFunction(),
-		loadResource: runtime.loadResource,
+	const _runtime = runtime
+	const _language = writable(_runtime.getLanguage() as string)
+	const _i = writable(_runtime.getInlangFunction())
+
+	const switchLanguage = async (language: string) => {
+		if (_runtime.getLanguage() === language) return
+
+		_runtime.switchLanguage(language)
+
+		_i.set(_runtime.getInlangFunction())
+		_language.set(language)
+
+		localStorage.setItem("inlang-language", language)
+	}
+
+	setContext<I18nContext>(inlangSymbol, {
+		language: derived(_language, (value) => value),
+		languages: _runtime.getLanguages(),
+		i: derived(_i, (value) => value),
+		loadResource: _runtime.loadResource,
 		switchLanguage,
 	})
 }

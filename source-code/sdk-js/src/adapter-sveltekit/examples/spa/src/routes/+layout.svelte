@@ -5,16 +5,11 @@
 	export let data: LayoutData
 
 	setI18nContext(data[inlangSymbol])
+
 	let { i, language, languages, loadResource, switchLanguage } = getI18nContext()
 
-	$: {
-		setI18nContext(data[inlangSymbol])
-		;({ i, language, languages,  loadResource, switchLanguage } = getI18nContext())
-	}
-
-	$: console.info("+layout.svelte", i("welcome"))
+	console.info("+layout.svelte", $i("welcome"))
 </script>
-
 
 {#each languages as language}
 	<button
@@ -24,11 +19,11 @@
 	>
 {/each}
 
-<ul>
-	<li><a href="/">Home</a></li>
-	<li><a href="/about">About</a></li>
-</ul>
+{#if $language}
+	<ul>
+		<li><a href="/">Home</a></li>
+		<li><a href="/about">About</a></li>
+	</ul>
 
-{#key language}
 	<slot />
-{/key}
+{/if}

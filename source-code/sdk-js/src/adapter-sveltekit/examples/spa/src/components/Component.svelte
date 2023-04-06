@@ -5,10 +5,10 @@
 
 	const { i } = getI18nContext()
 
-	console.info('Component.svelte', i('welcome'))
+	console.info('Component.svelte', $i('welcome'))
 
 	clientFn()
 </script>
 
-<h1>{i('welcome')}</h1>
-<p>{@html i('link-to-docs')}</p>
+<h1>{$i('welcome')}</h1>
+<p>{@html $i('link-to-docs')}</p>
