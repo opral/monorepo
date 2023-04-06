@@ -5,8 +5,8 @@
 	"exports": {
 		"./server": "./dist/lib/server/index.js",
 		"./openai": "./dist/lib/openai/index.js",
-		"./telemetry/browser": "./dist/telemetry/lib/index.browser.js",
-		"./telemetry/node": "./dist/telemetry/lib/index.node.js",
+		"./telemetry/browser": "./dist/lib/telemetry/index.browser.js",
+		"./telemetry/node": "./dist/lib/telemetry/index.node.js",
 		"./rpc": "./dist/lib/rpc/index.js"
 	},
 	"files": [
