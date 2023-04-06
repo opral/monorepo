@@ -39,6 +39,7 @@ export const publicEnv = process.env as PublicEnvVariables
 export async function getPrivateEnvVariables() {
 	const { config } = await import("dotenv")
 	const result = config()
+	console.log("env result", result)
 	return result.parsed as unknown as AllEnvVariables
 }
 
