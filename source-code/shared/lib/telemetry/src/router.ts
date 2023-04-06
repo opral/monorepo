@@ -1,16 +1,16 @@
 import express from "express"
 import { createProxyMiddleware } from "http-proxy-middleware"
-import { ROUTE_PATH } from "./src/shared.js"
+import { ROUTE_PATH } from "./shared.js"
 
 /**
  * Routes for the service
  */
-export const telemetryService = express.Router()
+export const router = express.Router()
 
 /**
  * Sign out by setting the session to undefined.
  */
-telemetryService.use(
+router.use(
 	ROUTE_PATH,
 	createProxyMiddleware({
 		target: "https://eu.posthog.com",

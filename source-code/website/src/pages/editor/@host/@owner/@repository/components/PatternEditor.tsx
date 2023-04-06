@@ -3,7 +3,6 @@ import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
-import { telemetry } from "@inlang/shared/telemetry/browser"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
@@ -15,6 +14,7 @@ import { isProduction } from "@env"
 import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/shared/rpc"
+import { telemetryBrowser } from "@inlang/shared/telemetry"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -108,50 +108,34 @@ export function PatternEditor(props: {
 	 * Saves the changes of the message.
 	 */
 	const handleCommit = () => {
-		telemetry.capture("commit changes", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const _copy = copy()
 		const _textValue = textValue()
 		if (_textValue === undefined) {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-		try {
-			//@ts-ignore
-			const [updatedResource] = query(resource()).upsert({ message: _copy! })
-			console.log(updatedResource)
-			setResources([
-				...(resources.filter(
-					(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-				) as Resource[]),
-				updatedResource as Resource,
-			])
-			showToast({
-				variant: "info",
-				title: "The change has been committed.",
-				message: `Don't forget to push the changes.`,
-			})
-		} catch (e) {
-			showToast({
-				variant: "danger",
-				title: "Error",
-				message: (e as Error).message,
-			})
-			throw e
-		}
+		const updatedResource = query(resource()).upsert({ message: _copy! })
+		setResources([
+			...(resources.filter(
+				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
+			) as Resource[]),
+			updatedResource as Resource,
+		])
+		showToast({
+			variant: "info",
+			title: "The change has been committed.",
+			message: `Don't forget to push the changes.`,
+		})
+		telemetryBrowser.capture("commit changes", {
+			targetLanguage: props.language,
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+		})
 	}
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		telemetry.capture("machine translation", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		if (props.referenceMessage === undefined) {
 			return showToast({
 				variant: "info",
@@ -174,6 +158,7 @@ export function PatternEditor(props: {
 				text,
 				referenceLanguage: referenceResource()!.languageTag.name,
 				targetLanguage: props.language,
+				telemetryId: telemetryBrowser.get_distinct_id(),
 			})
 			if (exception) {
 				showToast({

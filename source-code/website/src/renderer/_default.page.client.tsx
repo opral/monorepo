@@ -7,12 +7,12 @@ import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { BrowserTracing } from "@sentry/tracing"
 import { MetaProvider } from "@solidjs/meta"
+import { initTelemetryBrowser, telemetryBrowser } from "@inlang/shared/telemetry"
+
+initTelemetryBrowser()
 
 // import the css
 import "./app.css"
-
-// import telemetry
-import "@inlang/shared/telemetry/browser"
 
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
@@ -39,7 +39,6 @@ import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
 
 import { clientSideEnv } from "@env"
-import { telemetry } from "@inlang/shared/telemetry/browser"
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
@@ -81,7 +80,7 @@ export function render(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		telemetry.capture("$pageview")
+		telemetryBrowser.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}

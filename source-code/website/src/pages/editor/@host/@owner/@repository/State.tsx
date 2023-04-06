@@ -24,7 +24,7 @@ import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
 import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
-import { telemetry } from "@inlang/shared/telemetry/browser"
+import { telemetryBrowser } from "@inlang/shared/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
@@ -205,7 +205,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetry.capture("clone repository", {
+			telemetryBrowser.capture("clone repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
 			})

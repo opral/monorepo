@@ -6,8 +6,9 @@ import { ENDPOINT } from "./generateConfigFile.js"
 import bodyParser from "body-parser"
 import { z } from "zod"
 import dedent from "dedent"
-import { telemetry } from "../../telemetry/index.node.js"
+import { telemetryNode } from "../../telemetry/index.js"
 import type { generateConfigFile } from "./generateConfigFile.js"
+import { getPrivateEnvVariables } from "../../../env.js"
 
 export const generateConfigFileRoute = express.Router()
 generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))
@@ -18,9 +19,9 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 			.object({ filesystemAsJson: z.record(z.string()) })
 			.parse(req.body)
 		const [config, exception] = await _generateConfigFileServer({ filesystemAsJson })
-		telemetry.capture({
-			distinctId: "server",
-			event: "config generated",
+		telemetryNode.capture({
+			distinctId: "unknown",
+			event: "config file generated",
 			properties: {
 				success: config ? true : false,
 				message: exception?.message,
@@ -34,9 +35,11 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 	}
 })
 
+const envVariables = await getPrivateEnvVariables()
+
 const openapi = new OpenAIApi(
 	new Configuration({
-		apiKey: process.env.OPEN_AI_KEY,
+		apiKey: envVariables.OPEN_AI_KEY,
 	}),
 )
 
