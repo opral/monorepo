@@ -1,8 +1,6 @@
 import { publicEnv } from "../../../env.js"
 import { PostHog } from "posthog-node"
 
-console.log({ publicEnv })
-
 /**
  * The telemetry service for the server-side.
  *

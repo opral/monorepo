@@ -3,11 +3,11 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		"./server": "./dist/server/index.js",
-		"./openai": "./dist/openai/index.js",
-		"./telemetry/browser": "./dist/telemetry/index.browser.js",
-		"./telemetry/node": "./dist/telemetry/index.node.js",
-		"./rpc": "./dist/rpc/index.js"
+		"./server": "./dist/lib/server/index.js",
+		"./openai": "./dist/lib/openai/index.js",
+		"./telemetry/browser": "./dist/telemetry/lib/index.browser.js",
+		"./telemetry/node": "./dist/telemetry/lib/index.node.js",
+		"./rpc": "./dist/lib/rpc/index.js"
 	},
 	"files": [
 		"./dist"
