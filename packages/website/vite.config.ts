@@ -5,6 +5,7 @@ import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
+import { isProduction } from "./env.js"
 
 export default defineConfig({
 	plugins: [
@@ -35,6 +36,6 @@ export default defineConfig({
 		// target is es2022 to support top level await
 		// https://caniuse.com/?search=top%20level%20await
 		target: "es2022",
-		minify: false,
+		minify: isProduction,
 	},
 })
