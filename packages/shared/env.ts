@@ -30,6 +30,8 @@ type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
 // @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
 export const publicEnv = (process?.env ?? ENV_DEFINED_IN_BUILD_STEP) as PublicEnvVariables
 
+console.log({ publicEnv })
+
 // @ts-expect-error - DEV is defined in build step
 export const isDevelopment = publicEnv.DEV ? true : false
 
