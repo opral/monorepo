@@ -3,8 +3,6 @@ import { initRuntime } from "@inlang/sdk-js/runtime"
 import { getResource, languages, referenceLanguage } from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
 
-const isStatic = false
-
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
 
@@ -12,7 +10,7 @@ export const handle = (async ({ event, resolve }) => {
 	if (pathname.startsWith("/inlang")) return resolve(event)
 
 	const language = pathname.split("/")[1] || referenceLanguage
-	if (!isStatic && (!language || !languages.includes(language))) {
+	if (!language || !languages.includes(language)) {
 		// TODO: detect preferred language
 		throw redirect(307, "/en")
 	}
