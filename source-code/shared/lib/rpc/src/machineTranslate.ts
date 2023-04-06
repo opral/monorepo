@@ -1,9 +1,11 @@
 import type { Result } from "@inlang/core/utilities"
+import { telemetryNode } from "../../telemetry/index.js"
 
 export async function machineTranslate(args: {
 	text: string
 	targetLanguage: string
 	referenceLanguage: string
+	telemetryId?: string
 }): Promise<Result<string, Error>> {
 	try {
 		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
@@ -23,6 +25,10 @@ export async function machineTranslate(args: {
 		if (!response.ok) {
 			return [undefined, new Error(response.statusText)]
 		}
+		telemetryNode.capture({
+			event: "machine translation created",
+			distinctId: args.telemetryId ?? "unknown",
+		})
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {

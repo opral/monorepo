@@ -205,7 +205,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("repository cloned", {
+			telemetryBrowser.capture("clone repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
 			})

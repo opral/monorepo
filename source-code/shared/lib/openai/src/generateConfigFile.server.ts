@@ -20,8 +20,8 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 			.parse(req.body)
 		const [config, exception] = await _generateConfigFileServer({ filesystemAsJson })
 		telemetryNode.capture({
-			distinctId: "server",
-			event: "config generated",
+			distinctId: "unknown",
+			event: "config file generated",
 			properties: {
 				success: config ? true : false,
 				message: exception?.message,

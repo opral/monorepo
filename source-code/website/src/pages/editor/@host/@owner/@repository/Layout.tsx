@@ -224,7 +224,7 @@ function HasChangesAction() {
 			setLastPullTime,
 		})
 		setIsLoading(false)
-		telemetryBrowser.capture("changes pushed", {
+		telemetryBrowser.capture("push changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 			sucess: exception === undefined,
@@ -587,7 +587,7 @@ function SignInBanner() {
 							// ugly workaround to close  the banner
 							// after the button has been clicked
 							onClick={() => {
-								telemetryBrowser.capture("clicked on open pull request", {
+								telemetryBrowser.capture("open pull request", {
 									owner: routeParams().owner,
 									repository: routeParams().repository,
 								})

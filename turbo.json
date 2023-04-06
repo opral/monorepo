@@ -1,7 +1,9 @@
 {
 	"$schema": "https://turborepo.org/schema.json",
 	"pipeline": {
-		"build": {},
+		"build": {
+			"dependsOn": ["^build"]
+		},
 		"dev": {
 			"cache": false
 		},
@@ -10,6 +12,8 @@
 		"lint:fix": {},
 		"format": {},
 		"format:fix": {},
-		"test": {}
+		"test": {
+			"dependsOn": ["^build"]
+		}
 	}
 }

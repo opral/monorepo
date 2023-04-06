@@ -3,7 +3,7 @@ import { useLocalStorage } from "@src/services/local-storage/index.js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { getUserInfo } from "../implementation.telefunc.js"
-import { telemetry } from "@inlang/shared/telemetry/browser"
+import { telemetryBrowser } from "@inlang/shared/telemetry"
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -24,7 +24,7 @@ export function Page() {
 		if (userInfo.error === undefined && userInfo()) {
 			setLocalStorage("user", userInfo())
 			if (userInfo()?.username) {
-				telemetry.identify(userInfo()?.username)
+				telemetryBrowser.identify(userInfo()?.username)
 			}
 		}
 	})

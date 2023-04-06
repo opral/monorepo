@@ -126,7 +126,7 @@ export function PatternEditor(props: {
 			title: "The change has been committed.",
 			message: `Don't forget to push the changes.`,
 		})
-		telemetryBrowser.capture("changes committed", {
+		telemetryBrowser.capture("commit changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -158,12 +158,7 @@ export function PatternEditor(props: {
 				text,
 				referenceLanguage: referenceResource()!.languageTag.name,
 				targetLanguage: props.language,
-			})
-			telemetryBrowser.capture("machine translation created", {
-				targetLanguage: props.language,
-				owner: routeParams().owner,
-				repository: routeParams().repository,
-				success: exception === undefined,
+				telemetryId: telemetryBrowser.get_distinct_id(),
 			})
 			if (exception) {
 				showToast({
