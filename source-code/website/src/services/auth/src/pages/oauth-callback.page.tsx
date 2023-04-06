@@ -1,6 +1,5 @@
-import { createEffect, createResource, Match, Show, Switch } from "solid-js"
+import { createEffect, createResource, Match, Switch } from "solid-js"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { Layout } from "@src/pages/Layout.jsx"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { getUserInfo } from "../implementation.telefunc.js"
