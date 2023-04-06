@@ -18,8 +18,9 @@ type PrivateEnvVariabales = {
  */
 type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
 
-// @ts-expect-error - The variable is defined in the build step.
-export const isDevelopment = (process?.env ?? ENV_DEFINED_IN_BUILD_STEP).DEV ? true : false
+export const isDevelopment =
+	// @ts-expect-error - The variable is defined in the build step.
+	((process?.env ?? ENV_DEFINED_IN_BUILD_STEP).DEV ? true : false) || process.env.TEST // <- disable env variable check in tests
 
 /**
  * Get the public environment variables.
