@@ -13,5 +13,5 @@ const route = "/shared/rpc"
  * This is used by the client to call RPC functions.
  */
 export const rpc = rpcClient<RpcService>(
-	isDevelopment ? "http://localhost:3000" : "https://inlang.com" + route,
+	(isDevelopment ? "http://localhost:3000" : "https://inlang.com") + route,
 )
