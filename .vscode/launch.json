@@ -6,15 +6,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "npm run dev",
-			"type": "node",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"runtimeExecutable": "npm",
-			"runtimeArgs": ["run-script", "dev"],
-			"console": "integratedTerminal"
-		},
-		{
 			"name": "debug ide-extension",
 			"type": "extensionHost",
 			"request": "launch",
@@ -24,38 +15,12 @@
 			],
 			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
 		},
-		// {
-		// 	"name": "Current test file",
-		// 	"type": "node",
-		// 	"request": "launch",
-		// 	"autoAttachChildProcesses": true,
-		// 	"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-		// 	"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-		// 	"args": ["run", "${relativeFile}"],
-		// 	"smartStep": true,
-		// 	"console": "integratedTerminal"
-		// },
 		{
-			"name": "open @inlang/website in chrome",
-			// "port": 3000,
+			"name": "debug @inlang/website",
+			"port": 3000,
 			"request": "launch",
 			"type": "chrome",
-			"webRoot": "${workspaceFolder}/source-code/website",
-			// annoying bug. the website does not load if the server is not started beforehand.
-			"file": "${workspaceFolder}/.vscode/wait-for-process.html"
-		}
-	],
-	"compounds": [
-		{
-			// start the entire dev environment
-			"name": "start development environment",
-			"configurations": ["npm run dev", "open @inlang/website in chrome"],
-			"stopAll": true,
-			"presentation": {
-				"hidden": false,
-				"group": "",
-				"order": 1
-			}
+			"webRoot": "${workspaceFolder}/source-code/website"
 		}
 	]
 }
