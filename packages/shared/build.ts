@@ -1,7 +1,10 @@
 import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
-import { definePublicEnvVariables, isDevelopment, getPrivateEnvVariables } from "./env.js"
+import { definePublicEnvVariables, getPrivateEnvVariables } from "./env.js"
+
+// can't use import from ./env.js. must avoid circular dependency.
+const isDevelopment = process.env.DEV ? true : false
 
 // @ts-expect-error - esbuild plugin types are wrong
 const ctx = await context({
@@ -11,6 +14,7 @@ const ctx = await context({
 	bundle: false,
 	platform: "neutral",
 	format: "esm",
+	sourcemap: isDevelopment,
 	define: await definePublicEnvVariables(await getPrivateEnvVariables()),
 })
 
