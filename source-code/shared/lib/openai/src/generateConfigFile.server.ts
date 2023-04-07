@@ -8,7 +8,7 @@ import { z } from "zod"
 import dedent from "dedent"
 import { telemetryNode } from "../../telemetry/index.js"
 import type { generateConfigFile } from "./generateConfigFile.js"
-import { getPrivateEnvVariables } from "../../../env.js"
+import { privateEnv } from "../../env/index.js"
 
 export const generateConfigFileRoute = express.Router()
 generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))
@@ -35,11 +35,9 @@ generateConfigFileRoute.post(ENDPOINT, async (req, res) => {
 	}
 })
 
-const envVariables = await getPrivateEnvVariables()
-
 const openapi = new OpenAIApi(
 	new Configuration({
-		apiKey: envVariables.OPEN_AI_KEY,
+		apiKey: privateEnv.OPEN_AI_KEY,
 	}),
 )
 

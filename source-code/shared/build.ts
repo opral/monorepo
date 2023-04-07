@@ -1,7 +1,8 @@
 import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
-import { definePublicEnvVariables, getPrivateEnvVariables } from "./env.js"
+import { privateEnv } from "./lib/env/index.js"
+import { definePublicEnvVariables } from "./lib/env/src/definePublicEnvVariables.js"
 
 // can't use import from ./env.js. must avoid circular dependency.
 const isDevelopment = process.env.DEV ? true : false
@@ -15,7 +16,10 @@ const ctx = await context({
 	platform: "neutral",
 	format: "esm",
 	sourcemap: isDevelopment,
-	define: await definePublicEnvVariables(await getPrivateEnvVariables()),
+	define: definePublicEnvVariables({
+		PUBLIC_IS_DEV: isDevelopment ? "true" : "false",
+		...privateEnv,
+	}),
 })
 
 if (isDevelopment) {

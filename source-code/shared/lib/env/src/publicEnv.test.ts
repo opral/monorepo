@@ -1,0 +1,23 @@
+import { it, expect } from "vitest"
+import { publicEnv } from "./publicEnv.js"
+
+// The build step defines ENV_DEFINED_IN_BUILD_STEP
+it("should not throw if ENV_DEFINED_IN_BUILD_STEP is not referenceable", () => {
+	expect(() => {
+		publicEnv
+	}).not.toThrow()
+})
+
+it("should throw if a variable does not start with PUBLIC_", () => {
+	expect(() => {
+		// @ts-expect-error - we are testing an invalid variable
+		publicEnv.INVALID_VARIABLE
+	}).toThrow()
+})
+
+it("should throw if a variable is missing", () => {
+	expect(() => {
+		// @ts-expect-error - we are testing an invalid variable
+		publicEnv.PUBLIC_MISSING_VARIABLE
+	}).toThrow()
+})
