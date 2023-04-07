@@ -25,10 +25,12 @@ type AllEnvVariables = PublicEnvVariables & PrivateEnvVariabales
  * not supposed to be exposed to the client/browser,
  * use `getPrivateEnvVariables` instead.
  */
-// if process.env is not defined, we are running client side code
-// and the env variables are defined in the build step
-// @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
-export const publicEnv = (process?.env ?? ENV_DEFINED_IN_BUILD_STEP) as PublicEnvVariables
+export const publicEnv =
+	// @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
+	typeof ENV_DEFINED_IN_BUILD_STEP !== "undefined"
+		? // @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
+		  (ENV_DEFINED_IN_BUILD_STEP as PublicEnvVariables)
+		: ({} as PublicEnvVariables)
 
 // @ts-expect-error - DEV is defined in build step
 export const isDevelopment = publicEnv.DEV ? true : false
@@ -100,7 +102,5 @@ export async function definePublicEnvVariables(env: AllEnvVariables) {
 			result[key] = env[key as keyof AllEnvVariables]!
 		}
 	}
-	console.log("process.env", process.env)
-	console.log("defining public env", result)
 	return { ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(result) }
 }
