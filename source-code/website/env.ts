@@ -42,14 +42,6 @@ export type ServerSideEnv = ClientSideEnv & {
 	SENTRY_DSN_SERVER?: string
 
 	/**
-	 * The API key for Google Translate.
-	 *
-	 * Only available in production.
-	 * https://cloud.google.com/translate/docs/setup
-	 */
-	GOOGLE_TRANSLATE_API_KEY: string
-
-	/**
 	 * The secret for signing cookies.
 	 */
 	COOKIE_SECRET: string
@@ -79,11 +71,6 @@ export type ClientSideEnv = {
 	 * Only available in production.
 	 */
 	VITE_SENTRY_DSN_CLIENT?: string
-
-	/**
-	 * Posthog https://posthog.com/ token.
-	 */
-	VITE_POSTHOG_TOKEN?: string
 }
 
 /**
@@ -163,10 +150,6 @@ export async function validateEnv() {
 			throw new EnvironmentVariableMissingError("VITE_SENTRY_DSN_CLIENT")
 		} else if (env.SENTRY_DSN_SERVER === undefined) {
 			throw new EnvironmentVariableMissingError("SENTRY_DSN_SERVER")
-		} else if (env.GOOGLE_TRANSLATE_API_KEY === undefined) {
-			throw new EnvironmentVariableMissingError("GOOGLE_TRANSLATE_API_KEY")
-		} else if (env.VITE_POSTHOG_TOKEN === undefined) {
-			throw new EnvironmentVariableMissingError("VITE_POSTHOG_TOKEN")
 		}
 	}
 }

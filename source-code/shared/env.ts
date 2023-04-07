@@ -9,6 +9,13 @@ type PublicEnvVariables = {
 
 type PrivateEnvVariabales = {
 	OPEN_AI_KEY?: string
+	/**
+	 * The API key for Google Translate.
+	 *
+	 * Only available in production.
+	 * https://cloud.google.com/translate/docs/setup
+	 */
+	GOOGLE_TRANSLATE_API_KEY?: string
 }
 
 /**
@@ -72,6 +79,7 @@ async function validateEnvVariables() {
 	const productionSchema: ZodType<Required<AllEnvVariables>> = z.object({
 		OPEN_AI_KEY: z.string(),
 		PUBLIC_POSTHOG_TOKEN: z.string(),
+		GOOGLE_TRANSLATE_API_KEY: z.string(),
 	})
 	// ---------------- VALIDATION ----------------
 	const env = await getPrivateEnvVariables()

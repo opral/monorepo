@@ -1,5 +1,8 @@
 import type { Result } from "@inlang/core/utilities"
 import { telemetryNode } from "../../telemetry/index.js"
+import { getPrivateEnvVariables, isDevelopment } from "../../../env.js"
+
+const env = await getPrivateEnvVariables()
 
 export async function machineTranslate(args: {
 	text: string
@@ -8,7 +11,7 @@ export async function machineTranslate(args: {
 	telemetryId?: string
 }): Promise<Result<string, Error>> {
 	try {
-		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
+		if (!env.GOOGLE_TRANSLATE_API_KEY) {
 			throw new Error("GOOGLE_TRANSLATE_API_KEY is not set")
 		}
 		const response = await fetch(
@@ -18,7 +21,7 @@ export async function machineTranslate(args: {
 					target: args.targetLanguage,
 					source: args.referenceLanguage,
 					format: "text",
-					key: process.env.GOOGLE_TRANSLATE_API_KEY,
+					key: env.GOOGLE_TRANSLATE_API_KEY,
 				}),
 			{ method: "POST" },
 		)
@@ -32,6 +35,7 @@ export async function machineTranslate(args: {
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {
+		if (isDevelopment) console.debug("Error in machineTranslate", error)
 		return [undefined, error as Error]
 	}
 }
