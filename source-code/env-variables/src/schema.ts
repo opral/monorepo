@@ -23,4 +23,5 @@ export const privateEnvVariablesSchema = z.object({
 	OPEN_AI_KEY: z.string().optional(),
 	GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 	SENTRY_DSN_SERVER: z.string().optional(),
+	GITHUB_APP_CLIENT_SECRET: z.string(),
 })

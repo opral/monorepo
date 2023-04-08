@@ -3,3 +3,4 @@
 export { privateEnv } from "./runtime/privateEnv.js"
 export { publicEnv } from "./runtime/publicEnv.js"
 export { validateEnvVariables } from "./validateEnvVariables.js"
+export type { AllEnvVariables, PublicEnvVariables, PrivateEnvVariables } from "./schema.js"
