@@ -18,7 +18,7 @@ import { privateEnv } from "@inlang/env-variables"
 
 ## Defining environment variables
 
-Add environment variables in [./src/schema.ts](./src/schema.ts).
+Add environment variables in [./schema.ts](./schema.ts).
 
 ## Architecture
 

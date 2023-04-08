@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
 import { rootEnvFilePath } from "./buildStepVariables.js"
-import { validateEnvVariables } from "../schema.js"
+import { validateEnvVariables } from "../validateEnvVariables.js"
 
 const projectName = "monorepo"
 const configName = "development"

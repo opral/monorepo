@@ -2,7 +2,7 @@ import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
 import { buildStepVariables, rootEnvFilePath } from "./src/build/buildStepVariables.js"
-import { validateEnvVariables } from "./src/schema.js"
+import { validateEnvVariables } from "./src/validateEnvVariables.js"
 import { fetchPublicEnv } from "./src/build/fetchPublicEnv.js"
 import { config } from "dotenv"
 
