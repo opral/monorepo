@@ -27,7 +27,8 @@ Add environment variables in [./src/schema.ts](./src/schema.ts).
 - Typesafe to avoid runtime errors.
 - Allow contributors to easily get started with the codebase (fetch remote env variables). Requiring contributors to set up a local .env file or a service like Doppler is out of the question.
 - Consumable in all environments (editor, ide extension, cli, server).
-- Validation on deployment to avoid runtime errors.
+- Validation on deployment to fail fast if env variables are missing.
+- "MissingEnvVariable" runtime errors in development to provide developers with a clear error message.
 
 **Solution**
 
