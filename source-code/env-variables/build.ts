@@ -4,7 +4,6 @@ import { dtsPlugin } from "esbuild-plugin-d.ts"
 import { privateEnv } from "./src/index.js"
 import { definePublicEnvVariables } from "./src/definePublicEnvVariables.js"
 
-// can't use import from ./env.js. must avoid circular dependency.
 const isDevelopment = process.env.DEV ? true : false
 
 // @ts-expect-error - esbuild plugin types are wrong
