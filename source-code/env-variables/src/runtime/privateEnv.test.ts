@@ -1,7 +1,7 @@
 import { it, expect } from "vitest"
 import fs from "node:fs"
 import { parse } from "dotenv"
-import type { AllEnvVariables } from "../../schema.js"
+import type { AllEnvVariables } from "../schema.js"
 import { rootEnvFilePath } from "../build/buildStepVariables.js"
 
 // eases debugging and allows testing out new env variables without

@@ -1,4 +1,4 @@
-import type { PublicEnvVariables } from "../../schema.js"
+import type { PublicEnvVariables } from "../schema.js"
 
 /**
  * PUBLIC environment variables.

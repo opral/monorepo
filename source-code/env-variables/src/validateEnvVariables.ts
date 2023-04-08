@@ -1,6 +1,6 @@
 import type { Result } from "@inlang/core/utilities"
 import { z } from "zod"
-import { privateEnvVariablesSchema, publicEnvVariablesSchema } from "../schema.js"
+import { privateEnvVariablesSchema, publicEnvVariablesSchema } from "./schema.js"
 
 /**
  * Validates the environment variables.
