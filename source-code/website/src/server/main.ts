@@ -28,7 +28,10 @@ import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "@src/services/auth/index.server.js"
 import { router as githubService } from "@src/services/github/index.server.js"
 
-validateEnvVariables({ forProduction: isProduction })
+const [, errors] = validateEnvVariables({ forProduction: isProduction })
+if (errors) {
+	throw Error("Invalid environment variables: " + errors.join(","))
+}
 
 const env = await serverSideEnv()
 
