@@ -1,5 +1,6 @@
 import type { Result } from "@inlang/core/utilities"
-import { isDevelopment, privateEnv } from "../../env/index.js"
+import { isDevelopment } from "../../../src/isDevelopment.js"
+import { privateEnv } from "../../env/index.js"
 import { telemetryNode } from "../../telemetry/index.js"
 
 export async function machineTranslate(args: {

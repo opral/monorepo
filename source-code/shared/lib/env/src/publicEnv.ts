@@ -16,16 +16,6 @@ export const publicEnv: PublicEnvVariables = withValidationProxy(
 		  { PUBLIC_IS_DEV: "true" },
 )
 
-/**
- * Is the application running in development mode?
- *
- * Note that this variable is defined in the dev/build step
- * of @inlang/shared and might not reflect the actual environment
- * if you are using @inlang/shared in a different module.
- */
-// @ts-expect-error - DEV is defined in build step
-export const isDevelopment = publicEnv.PUBLIC_IS_DEV ? true : false
-
 function withValidationProxy(env: PublicEnvVariables) {
 	return new Proxy(env, {
 		get(target, prop) {
