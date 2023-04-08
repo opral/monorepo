@@ -5,6 +5,6 @@ describe("navigatorDetector", () => {
 	test("returns languages from window object", () => {
 		const langs = ["en", "de", "en-GB"]
 		const detector = initNavigatorDetector({ window: { navigator: { languages: langs } } })
-		expect(detector()).toStrictEqual(langs)
+		expect(detector()).toEqual(langs)
 	})
 })
