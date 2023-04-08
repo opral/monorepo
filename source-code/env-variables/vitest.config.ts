@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config"
-import { buildTimeVariables } from "./src/buildTimeVariables"
+import { buildStepVariables } from "./src/build/buildStepVariables.js"
 
 export default defineConfig({
-	define: buildTimeVariables(),
+	define: buildStepVariables(),
 })

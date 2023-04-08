@@ -1,3 +1,5 @@
+export const rootEnvFilePath = new URL("../../../../.env", import.meta.url).pathname
+
 /**
  * Define the public environment variables.
  *
@@ -5,7 +7,7 @@
  * ! Never use this function outside of a build step to avoid exposing
  * ! private environment variables to the client/browser.
  */
-export function buildTimeVariables() {
+export function buildStepVariables() {
 	const publicEnv: Record<string, string> = {
 		PUBLIC_IS_DEV: process.env.DEV ? "true" : "false",
 	}
@@ -14,7 +16,6 @@ export function buildTimeVariables() {
 			publicEnv[key] = process.env[key]!
 		}
 	}
-	const rootEnvFilePath = new URL("../../../.env", import.meta.url).pathname
 	return {
 		PUBLIC_ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(publicEnv),
 		ROOT_ENV_FILE_PATH: JSON.stringify(rootEnvFilePath),

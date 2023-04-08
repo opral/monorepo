@@ -1,13 +1,13 @@
 import { it, expect } from "vitest"
 import fs from "node:fs"
 import { parse } from "dotenv"
-import type { AllEnvVariables } from "./schema.js"
+import type { AllEnvVariables } from "../schema.js"
+import { rootEnvFilePath } from "../build/buildStepVariables.js"
 
 // eases debugging and allows testing out new env variables without
 // needing to configure them in doppler.
 // * needs to run before other tests because it might write to the root .env file
 it("should merge process.env variables with .env variables defined at the root of the repository", async () => {
-	const rootEnvFilePath = new URL("../../../.env", import.meta.url).pathname
 	if (fs.existsSync(rootEnvFilePath) === false) {
 		fs.writeFileSync(rootEnvFilePath, `API_TOKEN="something"`, { encoding: "utf-8" })
 		const { privateEnv } = await import("./privateEnv.js")

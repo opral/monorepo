@@ -1,5 +1,5 @@
 import { config } from "dotenv"
-import type { AllEnvVariables } from "./schema.js"
+import type { AllEnvVariables } from "../schema.js"
 
 /**
  * PRIVATE environment variables.

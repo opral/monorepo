@@ -23,6 +23,7 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/core": "^0.5.4",
 		"dotenv": "^16.0.3",
 		"zod": "^3.21.4"
 	},
