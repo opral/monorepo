@@ -1,5 +1,5 @@
 import { posthog } from "posthog-js"
-import { publicEnv } from "../../env/index.js"
+import { publicEnv } from "@inlang/env-variables"
 import { ROUTE_PATH } from "./shared.js"
 
 /**

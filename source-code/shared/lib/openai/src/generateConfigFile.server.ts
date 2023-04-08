@@ -8,7 +8,7 @@ import { z } from "zod"
 import dedent from "dedent"
 import { telemetryNode } from "../../telemetry/index.js"
 import type { generateConfigFile } from "./generateConfigFile.js"
-import { privateEnv } from "../../env/index.js"
+import { privateEnv } from "@inlang/env-variables"
 
 export const generateConfigFileRoute = express.Router()
 generateConfigFileRoute.use(bodyParser.json({ limit: "50mb" }))

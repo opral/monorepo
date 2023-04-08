@@ -2,6 +2,8 @@
 
 This module contains the implementation for environment variables that are used throughout the monorepo.
 
+The main motivation to have a dedicated env variables module is to align env variables across the monorepo and enable external contributors to easily get started with the codebase.
+
 ## Usage
 
 ```ts

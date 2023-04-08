@@ -1,19 +1,16 @@
 {
-	"name": "@inlang/shared",
+	"name": "@inlang/env-variables",
 	"type": "module",
 	"private": true,
 	"exports": {
-		"./server": "./dist/server/index.js",
-		"./openai": "./dist/openai/index.js",
-		"./telemetry": "./dist/telemetry/index.js",
-		"./rpc": "./dist/rpc/index.js"
+		".": "./dist/index.js"
 	},
 	"files": [
 		"./dist"
 	],
 	"scripts": {
-		"build": "tsc --build ./tsconfig.build.json",
-		"dev": "tsc --watch",
+		"build": "tsx ./build.ts",
+		"dev": "DEV=true tsx ./build.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -26,23 +23,13 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*",
-		"@inlang/env-variables": "*",
-		"memfs": "^3.4.13",
-		"openai": "^3.2.1",
-		"posthog-node": "^2.6.0",
-		"posthog-js": "^1.42.3",
-		"typed-rpc": "^3.0.0",
+		"dotenv": "^16.0.3",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@types/express": "^4.17.17",
 		"esbuild": "^0.17.15",
 		"esbuild-plugin-d.ts": "^1.1.0",
-		"esbuild-plugin-glob": "^2.2.1"
-	},
-	"peerDependencies": {
-		"express": "^4.18.2",
-		"solid-js": "^1.6.0"
+		"esbuild-plugin-glob": "^2.2.1",
+		"tsx": "^3.12.6"
 	}
 }

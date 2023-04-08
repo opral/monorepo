@@ -1,7 +1,6 @@
 import type { Result } from "@inlang/core/utilities"
-import { isDevelopment } from "../../../src/isDevelopment.js"
-import { privateEnv } from "../../env/index.js"
 import { telemetryNode } from "../../telemetry/index.js"
+import { privateEnv } from "@inlang/env-variables"
 
 export async function machineTranslate(args: {
 	text: string
@@ -34,7 +33,6 @@ export async function machineTranslate(args: {
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {
-		if (isDevelopment) console.debug("Error in machineTranslate", error)
 		return [undefined, error as Error]
 	}
 }
