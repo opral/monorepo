@@ -1,4 +1,4 @@
-import type { PublicEnvVariables } from "../schema.js"
+import type { PublicEnvVariables } from "./schema.js"
 
 /**
  * PUBLIC environment variables.
@@ -19,8 +19,6 @@ function withValidationProxy(env: PublicEnvVariables) {
 				throw new Error("Public env variables must start with PUBLIC_")
 			} else if (prop in target) {
 				return target[prop as keyof PublicEnvVariables]
-			} else {
-				throw new Error(`Missing environment variable '${String(prop)}'`)
 			}
 		},
 	})

@@ -1,7 +1,7 @@
 import { it, expect } from "vitest"
 import fs from "node:fs"
 import { parse } from "dotenv"
-import type { AllEnvVariables } from "../schema.js"
+import type { AllEnvVariables } from "./schema.js"
 
 // eases debugging and allows testing out new env variables without
 // needing to configure them in doppler.
@@ -21,21 +21,4 @@ it("should merge process.env variables with .env variables defined at the root o
 			expect(privateEnv[key as keyof AllEnvVariables]).toBe(env[key])
 		}
 	}
-})
-
-it("should throw if a variable is missing", async () => {
-	const { privateEnv } = await import("./privateEnv.js")
-	expect(() => {
-		// @ts-expect-error - we are testing an invalid variable
-		privateEnv.MISSING_VARIABLE
-	}).toThrow()
-})
-
-it("should not throw if the validation script is executing", async () => {
-	const { privateEnv } = await import("./privateEnv.js")
-	process.env._VALIDATING_ENV_VARIABLES = "true"
-	expect(() => {
-		privateEnv
-	}).not.toThrow()
-	delete process.env._VALIDATING_ENV_VARIABLES
 })

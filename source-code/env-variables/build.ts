@@ -19,9 +19,7 @@ const ctx = await context({
 
 if (isDevelopment) {
 	await ctx.watch()
-	console.info("👀 watching for changes...")
 } else {
 	await ctx.rebuild()
 	await ctx.dispose()
-	console.info("✅ build complete")
 }

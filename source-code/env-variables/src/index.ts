@@ -2,3 +2,4 @@
 // will not include it in the bundle.
 export { privateEnv } from "./privateEnv.js"
 export { publicEnv } from "./publicEnv.js"
+export { validateEnvVariables } from "./schema.js"

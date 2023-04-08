@@ -8,6 +8,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills"
 import { isProduction } from "./env.js"
 
 export default defineConfig({
+	envPrefix: "PUBLIC_",
 	plugins: [
 		nodePolyfills({
 			protocolImports: true,
