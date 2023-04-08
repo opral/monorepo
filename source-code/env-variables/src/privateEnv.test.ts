@@ -22,3 +22,9 @@ it("should merge process.env variables with .env variables defined at the root o
 		}
 	}
 })
+
+// takes the env variables from process.env otherwise.
+it("contain all keys of process.env", async () => {
+	const { privateEnv } = await import("./privateEnv.js")
+	expect(Object.keys(process.env).every((key) => Object.keys(privateEnv).includes(key))).toBe(true)
+})
