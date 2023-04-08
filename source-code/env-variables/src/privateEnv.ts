@@ -1,5 +1,5 @@
 import { config } from "dotenv"
-import type { AllEnvVariables } from "../schema.js"
+import type { AllEnvVariables } from "./schema.js"
 
 /**
  * PRIVATE environment variables.
@@ -7,23 +7,11 @@ import type { AllEnvVariables } from "../schema.js"
  * Use only in a server environment. Do not expose to the client/browser.
  * Use `publicEnv` instead for public environment variables.
  */
-export const privateEnv: AllEnvVariables = withValidationProxy(getPrivateEnvVariables())
-
-function withValidationProxy(env: AllEnvVariables) {
-	return new Proxy(env, {
-		get(target, prop) {
-			if (prop in target) {
-				return target[prop as keyof AllEnvVariables]
-			} else if (typeof prop === "string" && process.env._VALIDATING_ENV_VARIABLES !== "true") {
-				throw new Error(`Missing environment variable '${String(prop)}'`)
-			}
-		},
-	})
-}
+export const privateEnv: AllEnvVariables = getPrivateEnvVariables()
 
 function getPrivateEnvVariables() {
-	const rootEnvFilePath = new URL("../../../.env", import.meta.url).pathname
-	const result = config({ path: rootEnvFilePath })
+	// @ts-expect-error - ROOT_ENV_FILE_PATH is defined in build step
+	const result = config({ path: ROOT_ENV_FILE_PATH })
 	if (result.error) {
 		return process.env as unknown as AllEnvVariables
 	}

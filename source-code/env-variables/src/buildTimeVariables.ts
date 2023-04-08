@@ -14,7 +14,9 @@ export function buildTimeVariables() {
 			publicEnv[key] = process.env[key]!
 		}
 	}
+	const rootEnvFilePath = new URL("../../../.env", import.meta.url).pathname
 	return {
 		PUBLIC_ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(publicEnv),
+		ROOT_ENV_FILE_PATH: JSON.stringify(rootEnvFilePath),
 	}
 }
