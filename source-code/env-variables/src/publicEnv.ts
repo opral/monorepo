@@ -1,4 +1,4 @@
-import type { PublicEnvVariables } from "./schema.js"
+import type { PublicEnvVariables } from "../schema.js"
 
 /**
  * PUBLIC environment variables.
@@ -9,11 +9,7 @@ import type { PublicEnvVariables } from "./schema.js"
  */
 export const publicEnv: PublicEnvVariables = withValidationProxy(
 	// @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
-	typeof ENV_DEFINED_IN_BUILD_STEP !== "undefined"
-		? // @ts-expect-error - ENV_DEFINED_IN_BUILD_STEP is defined in build step
-		  ENV_DEFINED_IN_BUILD_STEP
-		: // must be defined to avoid errors with the validation proxy
-		  { PUBLIC_IS_DEV: "true" },
+	typeof PUBLIC_ENV_DEFINED_IN_BUILD_STEP !== "undefined" ? PUBLIC_ENV_DEFINED_IN_BUILD_STEP : {},
 )
 
 function withValidationProxy(env: PublicEnvVariables) {

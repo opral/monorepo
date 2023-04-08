@@ -1,8 +1,8 @@
 import { it, expect } from "vitest"
 import { publicEnv } from "./publicEnv.js"
 
-// The build step defines ENV_DEFINED_IN_BUILD_STEP
-it("should not throw if ENV_DEFINED_IN_BUILD_STEP is not referenceable", () => {
+// The build step defines PUBLIC_ENV_DEFINED_IN_BUILD_STEP
+it("should not throw if PUBLIC_ENV_DEFINED_IN_BUILD_STEP is not referenceable", () => {
 	expect(() => {
 		publicEnv
 	}).not.toThrow()

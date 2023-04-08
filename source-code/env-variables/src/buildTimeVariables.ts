@@ -5,12 +5,16 @@
  * ! Never use this function outside of a build step to avoid exposing
  * ! private environment variables to the client/browser.
  */
-export function definePublicEnvVariables(env: Record<string, string>) {
-	const result: Record<string, string> = {}
-	for (const key in env) {
+export function buildTimeVariables() {
+	const publicEnv: Record<string, string> = {
+		PUBLIC_IS_DEV: process.env.DEV ? "true" : "false",
+	}
+	for (const key in process.env) {
 		if (key.startsWith("PUBLIC_")) {
-			result[key] = env[key]!
+			publicEnv[key] = process.env[key]!
 		}
 	}
-	return { ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(result) }
+	return {
+		PUBLIC_ENV_DEFINED_IN_BUILD_STEP: JSON.stringify(publicEnv),
+	}
 }

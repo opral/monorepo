@@ -1,8 +1,7 @@
 import { context } from "esbuild"
 import { globPlugin } from "esbuild-plugin-glob"
 import { dtsPlugin } from "esbuild-plugin-d.ts"
-import { privateEnv } from "./src/index.js"
-import { definePublicEnvVariables } from "./src/definePublicEnvVariables.js"
+import { buildTimeVariables } from "./src/buildTimeVariables.js"
 
 const isDevelopment = process.env.DEV ? true : false
 
@@ -15,10 +14,7 @@ const ctx = await context({
 	platform: "neutral",
 	format: "esm",
 	sourcemap: isDevelopment,
-	define: definePublicEnvVariables({
-		PUBLIC_IS_DEV: isDevelopment ? "true" : "false",
-		...privateEnv,
-	}),
+	define: buildTimeVariables(),
 })
 
 if (isDevelopment) {
