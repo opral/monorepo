@@ -1,4 +1,4 @@
-# @inlang/shared/env
+# @inlang/env-variables
 
 This module contains the implementation for environment variables that are used throughout the monorepo.
 
@@ -8,12 +8,12 @@ The main motivation to have a dedicated env variables module is to align env var
 
 ```ts
 // in client facing apps
-import { publicEnv } from "@inlang/shared/env"
+import { publicEnv } from "@inlang/env-variables"
 ```
 
 ```ts
 // in server facing apps
-import { privateEnv } from "@inlang/shared/env"
+import { privateEnv } from "@inlang/env-variables"
 ```
 
 ## Defining environment variables
