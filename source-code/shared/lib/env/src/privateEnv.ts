@@ -14,7 +14,7 @@ function getPrivateEnvVariables() {
 	if (result.error) {
 		return process.env as unknown as AllEnvVariables
 	}
-	return result.parsed as unknown as AllEnvVariables
+	return { ...process.env, ...result.parsed } as unknown as AllEnvVariables
 }
 
 function withValidationProxy(env: AllEnvVariables) {
