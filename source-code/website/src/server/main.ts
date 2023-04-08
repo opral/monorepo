@@ -17,8 +17,7 @@ import compression from "compression"
 import { createServer as createViteServer } from "vite"
 import { URL } from "node:url"
 import { proxy } from "./git-proxy.js"
-import { isProduction, serverSideEnv } from "@env"
-import { validateEnvVariables } from "@inlang/env-variables"
+import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import sirv from "sirv"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
@@ -27,13 +26,12 @@ import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
 import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "@src/services/auth/index.server.js"
 import { router as githubService } from "@src/services/github/index.server.js"
+import { isProduction } from "@src/utilities.js"
 
 const [, errors] = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
 	throw Error("Invalid environment variables: " + errors.join(","))
 }
-
-const env = await serverSideEnv()
 
 // dynamic import because env variables must be set.
 const { router: inlangSharedServices } = await import("@inlang/shared/server")
@@ -52,7 +50,7 @@ app.use(
 		// secure: isProduction ? true : false,
 		// domain: isProduction ? "inlang.com" : undefined,
 		sameSite: "strict",
-		secret: env.COOKIE_SECRET,
+		secret: privateEnv.SESSION_COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	}),
 )
@@ -61,7 +59,7 @@ app.use(
 // must happen before the request handlers
 if (isProduction) {
 	Sentry.init({
-		dsn: env.SENTRY_DSN_SERVER,
+		dsn: privateEnv.SENTRY_DSN_SERVER,
 		integrations: [
 			// enable HTTP calls tracing
 			new Sentry.Integrations.Http({ tracing: true }),
@@ -95,7 +93,7 @@ if (isProduction) {
 // ------------------------ START ROUTES ------------------------
 
 // forward git requests to the proxy with wildcard `*`.
-app.all(env.VITE_GIT_REQUEST_PROXY_PATH + "*", proxy)
+app.all(privateEnv.PUBLIC_GIT_PROXY_PATH + "*", proxy)
 
 app.use("/services/auth", authService)
 

@@ -1,4 +1,4 @@
-import type { ClientSideEnv } from "@env"
+import type { AllEnvVariables } from "@inlang/env-variables"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
 import { createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
@@ -17,7 +17,7 @@ import { githubAuthUrl } from "../implementation.js"
 export function SignInDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
-	githubAppClientId: ClientSideEnv["VITE_GITHUB_APP_CLIENT_ID"]
+	githubAppClientId: AllEnvVariables["PUBLIC_GITHUB_APP_CLIENT_ID"]
 	onClickOnSignInButton: () => void
 }) {
 	// web component slots load eagarly. applying manual conditional rendering

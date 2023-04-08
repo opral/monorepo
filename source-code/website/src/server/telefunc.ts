@@ -1,9 +1,7 @@
-import { serverSideEnv } from "@env"
+import { privateEnv } from "@inlang/env-variables"
 import { decryptAccessToken } from "@src/services/auth/index.server.js"
 import express from "express"
 import { telefunc, config } from "telefunc"
-
-const env = await serverSideEnv()
 
 export const router = express.Router()
 
@@ -21,7 +19,7 @@ router.all(
 		if (request.session?.encryptedAccessToken) {
 			decryptAccessToken({
 				jwe: request.session.encryptedAccessToken,
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+				JWE_SECRET_KEY: privateEnv.JWE_SECRET,
 			})
 				.then((accessToken) =>
 					telefunc({
