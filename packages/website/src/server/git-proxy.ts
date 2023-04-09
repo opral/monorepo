@@ -12,7 +12,7 @@
 import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
-import { decryptAccessToken } from "@src/services/auth/index.server.js"
+import { decryptAccessToken } from "../services/auth/index.server.js"
 import { privateEnv } from "@inlang/env-variables"
 
 const middleware = createMiddleware({})

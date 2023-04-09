@@ -1,5 +1,5 @@
 import { privateEnv } from "@inlang/env-variables"
-import { decryptAccessToken } from "@src/services/auth/index.server.js"
+import { decryptAccessToken } from "../services/auth/index.server.js"
 import express from "express"
 import { telefunc, config } from "telefunc"
 
