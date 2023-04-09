@@ -1,7 +1,7 @@
 import express from "express"
 import bodyParser from "body-parser"
 import { rpcHandler } from "typed-rpc/lib/express.js"
-import { rpcs } from "./src/index.js"
+import { rpcs } from "./src/rpcs.js"
 
 export const rpcService = express.Router()
 // some rpcs can be quite large
