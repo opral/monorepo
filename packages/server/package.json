@@ -1,0 +1,28 @@
+{
+	"name": "@inlang/server",
+	"type": "module",
+	"private": true,
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
+	"dependencies": {},
+	"devDependencies": {},
+	"peerDependencies": {}
+}
