@@ -30,7 +30,10 @@ import { isProduction } from "@src/utilities.js"
 
 const [, errors] = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
-	throw Error("Invalid environment variables: " + errors.join(","))
+	throw Error(
+		"Invalid environment variables:\n\n" +
+			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n"),
+	)
 }
 
 // dynamic import because env variables must be set.
