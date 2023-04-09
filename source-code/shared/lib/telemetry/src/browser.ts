@@ -18,7 +18,7 @@ export const telemetryBrowser = posthog
  */
 export function initTelemetryBrowser() {
 	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		throw Error("Missing env variable PUBLIC_POSTHOG_TOKEN")
+		return
 	} else if (window === undefined) {
 		console.warn(
 			"You are likely trying to use this in a Node.js environment. Use @inlang/shared/telemetry/node instead.",
