@@ -43,7 +43,8 @@ router.use(
 )
 
 if (isProduction) {
-	// serve build files
+	// import server code https://github.com/brillout/vite-plugin-ssr/issues/403
+	await import(`${rootPath}/dist/server/importBuild.cjs`)
 	router.use(sirv(`${rootPath}/dist/client`))
 } else {
 	const viteServer = await createViteServer({
