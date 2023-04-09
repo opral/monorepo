@@ -1,5 +1,6 @@
 import type { Result } from "@inlang/core/utilities"
 import { telemetryNode } from "../../telemetry/index.js"
+import { privateEnv } from "@inlang/env-variables"
 
 export async function machineTranslate(args: {
 	text: string
@@ -8,7 +9,7 @@ export async function machineTranslate(args: {
 	telemetryId?: string
 }): Promise<Result<string, Error>> {
 	try {
-		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
+		if (!privateEnv.GOOGLE_TRANSLATE_API_KEY) {
 			throw new Error("GOOGLE_TRANSLATE_API_KEY is not set")
 		}
 		const response = await fetch(
@@ -18,7 +19,7 @@ export async function machineTranslate(args: {
 					target: args.targetLanguage,
 					source: args.referenceLanguage,
 					format: "text",
-					key: process.env.GOOGLE_TRANSLATE_API_KEY,
+					key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
 				}),
 			{ method: "POST" },
 		)

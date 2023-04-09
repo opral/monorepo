@@ -1,4 +1,4 @@
-import type { ServerSideEnv } from "@env"
+import type { AllEnvVariables, PrivateEnvVariables } from "@inlang/env-variables"
 import { CompactEncrypt, compactDecrypt, base64url } from "jose"
 
 // enc = encoding
@@ -19,7 +19,7 @@ const scopes = "repo,user:email"
  */
 export async function encryptAccessToken(args: {
 	accessToken: string
-	JWE_SECRET_KEY: ServerSideEnv["JWE_SECRET_KEY"]
+	JWE_SECRET_KEY: PrivateEnvVariables["JWE_SECRET"]
 }): Promise<string> {
 	try {
 		const secret = base64url.decode(args.JWE_SECRET_KEY)
@@ -40,7 +40,7 @@ export async function encryptAccessToken(args: {
  */
 export async function decryptAccessToken(args: {
 	jwe: string
-	JWE_SECRET_KEY: ServerSideEnv["JWE_SECRET_KEY"]
+	JWE_SECRET_KEY: PrivateEnvVariables["JWE_SECRET"]
 }): Promise<string> {
 	const { plaintext } = await compactDecrypt(args.jwe, base64url.decode(args.JWE_SECRET_KEY))
 	return new TextDecoder().decode(plaintext)
@@ -62,11 +62,11 @@ export function githubAuthUrl(githubAppClientId: string) {
  */
 export async function exchangeInterimCodeForAccessToken(args: {
 	code: string
-	env: ServerSideEnv
+	env: AllEnvVariables
 }): Promise<string> {
 	// fetch post request to github
 	const request = await fetch(
-		`https://github.com/login/oauth/access_token?client_id=${args.env.VITE_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
+		`https://github.com/login/oauth/access_token?client_id=${args.env.PUBLIC_GITHUB_APP_CLIENT_ID}&client_secret=${args.env.GITHUB_APP_CLIENT_SECRET}&code=${args.code}`,
 		{
 			method: "POST",
 			headers: {

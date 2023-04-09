@@ -10,13 +10,12 @@
 
 // import { assert } from "@src/services/assert/index.js";
 import type { NextFunction, Request, Response } from "express"
-import { serverSideEnv } from "@env"
 // @ts-ignore
 import createMiddleware from "@isomorphic-git/cors-proxy/middleware.js"
 import { decryptAccessToken } from "@src/services/auth/index.server.js"
+import { privateEnv } from "@inlang/env-variables"
 
 const middleware = createMiddleware({})
-const env = await serverSideEnv()
 
 export async function proxy(request: Request, response: Response, next: NextFunction) {
 	// TODO enable after https://github.com/brillout/vite-plugin-ssr/discussions/560#discussioncomment-4420315
@@ -30,14 +29,14 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 		const encryptedAccessToken = request.session?.encryptedAccessToken
 		if (encryptedAccessToken) {
 			const decryptedAccessToken = await decryptAccessToken({
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+				JWE_SECRET_KEY: privateEnv.JWE_SECRET,
 				jwe: encryptedAccessToken,
 			})
 			// set the authorization header (must be base64 encoded)
 			request.headers["authorization"] = `Basic ${btoa(decryptedAccessToken)}`
 		}
 		// remove the proxy path from the url
-		request.url = request.url.slice(env.VITE_GIT_REQUEST_PROXY_PATH.length)
+		request.url = request.url.slice(privateEnv.JWE_SECRET.length)
 		middleware(request, response, next)
 	} catch (error) {
 		next(error)

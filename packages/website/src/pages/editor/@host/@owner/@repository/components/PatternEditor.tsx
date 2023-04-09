@@ -10,7 +10,6 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
-import { isProduction } from "@env"
 import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/shared/rpc"
@@ -153,28 +152,20 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		if (isProduction) {
-			const [translation, exception] = await rpc.machineTranslate({
-				text,
-				referenceLanguage: referenceResource()!.languageTag.name,
-				targetLanguage: props.language,
-				telemetryId: telemetryBrowser.get_distinct_id(),
-			})
-			if (exception) {
-				showToast({
-					variant: "warning",
-					title: "Machine translation failed.",
-					message: exception.message,
-				})
-			} else {
-				setTextValue(translation)
-			}
-		} else {
+		const [translation, exception] = await rpc.machineTranslate({
+			text,
+			referenceLanguage: referenceResource()!.languageTag.name,
+			targetLanguage: props.language,
+			telemetryId: telemetryBrowser.get_distinct_id(),
+		})
+		if (exception) {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: "Machine translations are disabled in development. An env variable is missing.",
+				message: exception.message,
 			})
+		} else {
+			setTextValue(translation)
 		}
 		setMachineTranslationIsLoading(false)
 	}

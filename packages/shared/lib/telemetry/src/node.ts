@@ -1,5 +1,5 @@
-import { publicEnv } from "../../../env.js"
 import { PostHog } from "posthog-node"
+import { publicEnv } from "@inlang/env-variables"
 
 export let telemetryNode: PostHog
 
