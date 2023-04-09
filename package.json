@@ -19,7 +19,7 @@
 		"format": "turbo run format && npm run format:base --ignore source-code .",
 		"format:fix": "turbo run format:fix && npm run format:fix:base .",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "npm run clean -ws && rm -f -r ./node_modules",
+		"clean": "npm run clean -ws && rm -f -r ./node_modules && rm -f ./.env",
 		"lint-staged": "lint-staged",
 		"prepare": "husky install"
 	},
