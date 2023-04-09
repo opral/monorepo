@@ -36,7 +36,7 @@ export async function proxy(request: Request, response: Response, next: NextFunc
 			request.headers["authorization"] = `Basic ${btoa(decryptedAccessToken)}`
 		}
 		// remove the proxy path from the url
-		request.url = request.url.slice(privateEnv.JWE_SECRET.length)
+		request.url = request.url.slice(privateEnv.PUBLIC_GIT_PROXY_PATH.length)
 		middleware(request, response, next)
 	} catch (error) {
 		next(error)
