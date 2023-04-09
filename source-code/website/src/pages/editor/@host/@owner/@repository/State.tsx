@@ -11,7 +11,6 @@ import {
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang/git-sdk/api"
-import { clientSideEnv } from "@env"
 import {
 	Config as InlangConfig,
 	EnvironmentFunctions,
@@ -28,6 +27,7 @@ import { telemetryBrowser } from "@inlang/shared/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
+import { publicEnv } from "@inlang/env-variables"
 
 type EditorStateSchema = {
 	/**
@@ -514,7 +514,7 @@ async function cloneRepository(args: {
 		fs: args.fs,
 		http,
 		dir: "/",
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 		singleBranch: true,
 		depth: 1,
@@ -577,7 +577,7 @@ export async function pushChanges(args: {
 		author: {
 			name: args.user.username,
 		},
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 	}
 	try {
@@ -713,7 +713,7 @@ async function pull(args: {
 			fs: args.fs,
 			http,
 			dir: "/",
-			corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 			singleBranch: true,
 			author: {
 				name: args.user?.username,

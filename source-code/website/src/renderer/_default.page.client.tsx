@@ -37,13 +37,13 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
-
-import { clientSideEnv } from "@env"
+import { isProduction } from "@src/utilities.js"
+import { publicEnv } from "@inlang/env-variables"
 
 // enable error logging via sentry in production
-if (import.meta.env.PROD) {
+if (isProduction) {
 	Sentry.init({
-		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
+		dsn: publicEnv.PUBLIC_SENTRY_DSN_CLIENT,
 		integrations: [new BrowserTracing()],
 		tracesSampleRate: 0.1,
 	})

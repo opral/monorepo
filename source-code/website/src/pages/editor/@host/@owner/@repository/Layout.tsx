@@ -20,7 +20,6 @@ import { navigate } from "vite-plugin-ssr/client/router"
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js"
 import { SignInDialog } from "@src/services/auth/index.js"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
-import { clientSideEnv } from "@env"
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
@@ -30,6 +29,7 @@ import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { getLintReports, LintedNode } from "@inlang/core/lint"
+import { publicEnv } from "@inlang/env-variables"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -613,7 +613,7 @@ function SignInBanner() {
 			</Switch>
 			{/* <sl-button onClick={handlesncForking}>can i fork this thing</sl-button> */}
 			<SignInDialog
-				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
+				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
