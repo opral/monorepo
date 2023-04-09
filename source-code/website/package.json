@@ -3,13 +3,11 @@
 	"type": "module",
 	"version": "0.5.3",
 	"exports": {
-		"./server-middleware": "./src/server/index.ts"
+		"./server-middleware": "./src/server/index.ts",
+		"./markdown": "./src/services/markdown/index.js"
 	},
 	"scripts": {
-		"dev": "npx tsx ./src/server/main.ts",
-		"production": "NODE_ENV=production npx tsx ./src/server/main.ts",
 		"build": "vite build",
-		"preview": "vite build && npm run production",
 		"---- TEST ----------------------------------------------------------": "",
 		"_COMMENT": "TESTS ARE NOT WORKING BECAUSE 'window is not defined'. not important for now.",
 		"_test": "vitest run --coverage",
@@ -70,7 +68,7 @@
 		"babel-preset-solid": "^1.6.2",
 		"fast-glob": "^3.2.12",
 		"postcss": "^8.4.18",
-		"tailwindcss": "^3.2.1",
+		"tailwindcss": "^3.3.0",
 		"tsx": "^3.12.1",
 		"unplugin-icons": "^0.15.0",
 		"vite": "^3.2.5",
