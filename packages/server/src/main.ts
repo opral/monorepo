@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { isProduction } from "./utilities.js"
 import { router as inlangSharedServices } from "@inlang/shared/server"
+import { router as websiteRouter } from "@inlang/website/server-middleware"
 
 const [, errors] = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
@@ -22,7 +23,7 @@ app.use(compression())
 // must happen before the request handlers
 if (isProduction) {
 	Sentry.init({
-		dsn: privateEnv.SENTRY_DSN_SERVER,
+		dsn: privateEnv.SERVER_SENTRY_DSN,
 		integrations: [
 			// enable HTTP calls tracing
 			new Sentry.Integrations.Http({ tracing: true }),
@@ -44,7 +45,7 @@ if (isProduction) {
 app.use(inlangSharedServices)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
-// app.use(vitePluginSsr)
+app.use(websiteRouter)
 
 // ------------------------ END ROUTES ------------------------
 
