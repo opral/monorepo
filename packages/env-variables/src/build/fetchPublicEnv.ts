@@ -38,7 +38,7 @@ export async function fetchPublicEnv() {
 				console.log("✅ Fetched public env variables remotely.")
 			} else {
 				console.warn(
-					"⚠️ Fetched public env variables remotely but some are missing. Contact the maintainers.",
+					"⚠️ Fetched public env variables remotely but some are missing or invalid. Contact the maintainers.",
 				)
 				console.log(errors)
 			}
