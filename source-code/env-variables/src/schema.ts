@@ -15,6 +15,11 @@ export const publicEnvVariablesSchema = z.object({
 		.describe(`Must be a path like /git-proxy/`),
 	PUBLIC_SENTRY_DSN_CLIENT: z.string().optional(),
 	PUBLIC_POSTHOG_TOKEN: z.string().optional(),
+	PUBLIC_SERVER_BASE_URL: z
+		.string()
+		.url()
+		.regex(/^(?!.*\/$).+$/, "Must not end with a slash")
+		.describe("The base url of the server e.g. https://inlang.com"),
 })
 
 export const privateEnvVariablesSchema = z.object({
