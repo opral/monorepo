@@ -11,7 +11,7 @@ export let telemetryNode: PostHog
  */
 export function initTelemetryNode() {
 	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		throw Error("PUBLIC_POSTHOG_TOKEN is not defined.")
+		return
 	}
 	if (telemetryNode === undefined) {
 		telemetryNode = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN, {
