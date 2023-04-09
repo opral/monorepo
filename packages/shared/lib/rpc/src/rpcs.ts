@@ -1,4 +1,4 @@
-import { machineTranslate } from "./machineTranslate.js"
+import { machineTranslate } from "./functions/machineTranslate.js"
 
 export const rpcs = {
 	machineTranslate,
