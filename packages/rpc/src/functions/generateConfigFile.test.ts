@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { generateConfigFileServer } from "./generateConfigFile.js"
 
 // skipping tests due to costs of invoking the openai api
-describe("generating config files", () => {
+describe.skip("generating config files", () => {
 	it(
 		"should generate a config file for a simple json project",
 		async () => {
