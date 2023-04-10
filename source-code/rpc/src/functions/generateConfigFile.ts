@@ -9,7 +9,7 @@ import { prompt } from "./generateConfigFile.prompt.js"
 
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
-}): Promise<Result<string, Error>> {
+}): Promise<Result<string, { errorMessage: string }>> {
 	try {
 		const [success, exception] = await _generateConfigFileRecursive(args)
 		telemetryNode.capture({
@@ -22,11 +22,11 @@ export async function generateConfigFileServer(args: {
 			},
 		})
 		if (exception) {
-			return [undefined, new Error(exception.errorMessage)]
+			return [undefined, { errorMessage: exception.errorMessage }]
 		}
 		return [success.configFile]
 	} catch (error) {
-		return [undefined, error as Error]
+		return [undefined, { errorMessage: (error as Error)?.message }]
 	}
 }
 
