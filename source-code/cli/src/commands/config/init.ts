@@ -1,7 +1,7 @@
 import { Command } from "commander"
-import { generateConfigFile } from "@inlang/shared/openai"
 import fs from "node:fs/promises"
 import { logger, prompt } from "../../api.js"
+import { rpc } from "@inlang/rpc"
 
 export const init = new Command()
 	.command("init")
@@ -24,7 +24,7 @@ export const init = new Command()
 		// ----------------- GENERATE CONFIG FILE -----------------
 		logger.info("Generating config file with AI 🤖 ...")
 		// @ts-ignore
-		const [value, exception] = await generateConfigFile({ fs, path: "./" })
+		const [value, exception] = await rpc.generateConfigFile({ fs, path: "./" })
 		if (exception) {
 			logger.error("Failed to generate config file.", exception)
 			return

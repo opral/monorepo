@@ -35,7 +35,7 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
-		"@inlang/shared": "*",
+		"@inlang/rpc": "*",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
 		"dedent": "^0.7.0",

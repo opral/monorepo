@@ -1,7 +1,7 @@
 import express from "express"
 import bodyParser from "body-parser"
 import { rpcHandler } from "typed-rpc/lib/express.js"
-import { rpcs } from "./rpcs.js"
+import { allRpcs } from "./functions/index.js"
 import { route } from "./client.js"
 import { initTelemetryNode } from "@inlang/telemetry"
 
@@ -13,4 +13,4 @@ initTelemetryNode()
 // some rpcs can be quite large
 router.use(bodyParser.json({ limit: "50mb" }))
 
-router.use(route, rpcHandler(rpcs))
+router.use(route, rpcHandler(allRpcs))
