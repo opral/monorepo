@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { _generateConfigFileServer } from "./generateConfigFile.server.js"
+import { _generateConfigFileRecursive } from "./generateConfigFile.js"
 
 // skipping tests due to costs of invoking the openai api
 describe.skip("generating config files", () => {
@@ -13,7 +13,7 @@ describe.skip("generating config files", () => {
 				"locales/utils.js": JSON.stringify("jibberish"),
 				"main.js": "export function hello() { return 'hello' }",
 			}
-			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			const [, exception] = await _generateConfigFileRecursive({ filesystemAsJson })
 			if (exception) {
 				console.error(exception)
 			}
@@ -34,7 +34,7 @@ describe.skip("generating config files", () => {
 				"src/entry.js": "export function hello() { return 'hello' }",
 				"main.js": "export function hello() { return 'hello' }",
 			}
-			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			const [, exception] = await _generateConfigFileRecursive({ filesystemAsJson })
 			if (exception) {
 				console.error(exception)
 			}
@@ -50,7 +50,7 @@ describe.skip("generating config files", () => {
 				"d/xx.jso3n": JSON.stringify({ hello: "hello from en" }),
 				"ff/ffff.po": "another file format. good luck chat gpt",
 			}
-			const [, exception] = await _generateConfigFileServer({ filesystemAsJson })
+			const [, exception] = await _generateConfigFileRecursive({ filesystemAsJson })
 			expect(exception).toBe(true)
 			expect(exception!.message).toBe("Couldn't generate a config file.")
 		},
