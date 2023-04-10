@@ -2,7 +2,7 @@ import { createContext, JSXElement, onCleanup, onMount, useContext } from "solid
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store"
 import { getUserInfo } from "@src/services/auth/index.js"
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js"
-import { telemetryBrowser } from "@inlang/shared/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 
 const LocalStorageContext = createContext()
 

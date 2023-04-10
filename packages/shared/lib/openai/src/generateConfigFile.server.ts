@@ -6,7 +6,7 @@ import { ENDPOINT } from "./generateConfigFile.js"
 import bodyParser from "body-parser"
 import { z } from "zod"
 import dedent from "dedent"
-import { telemetryNode } from "../../telemetry/index.js"
+import { telemetryNode } from "@inlang/telemetry"
 import type { generateConfigFile } from "./generateConfigFile.js"
 import { privateEnv } from "@inlang/env-variables"
 

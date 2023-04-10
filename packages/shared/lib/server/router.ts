@@ -1,6 +1,5 @@
 import express from "express"
 import { openaiService } from "../openai/router.js"
-import { router as telemetryService } from "../telemetry/index.server.js"
 import { rpcService } from "../rpc/router.js"
 
 /**
@@ -13,5 +12,4 @@ import { rpcService } from "../rpc/router.js"
 export const router = express.Router()
 
 router.use(openaiService)
-router.use(telemetryService)
 router.use(rpcService)

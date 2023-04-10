@@ -1,11 +1,13 @@
 {
-	"name": "@inlang/server",
+	"name": "@inlang/telemetry",
 	"type": "module",
 	"private": true,
+	"exports": {
+		".": "./src/index.ts",
+		"./router": "./src/router.ts"
+	},
 	"scripts": {
-		"build": "tsc --build ./tsconfig.build.json",
-		"dev": "tsx ./src/main.ts",
-		"production": "NODE_ENV=production tsx ./src/main.ts",
+		"---- DEV AND BUILD": "Are not required. Direct TypeScript import is possible because this module is only used internally.",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -18,17 +20,9 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*",
-		"@inlang/shared": "*",
-		"@inlang/telemetry": "*",
-		"@inlang/website": "*",
-		"@sentry/node": "^7.47.0",
-		"@sentry/tracing": "^7.47.0",
-		"compression": "^1.7.4",
-		"express": "^4.18.2"
+		"@inlang/env-variables": "*"
 	},
-	"devDependencies": {
-		"@types/compression": "^1.7.2",
-		"@types/express": "^4.17.17"
+	"peerDependencies": {
+		"express": ""
 	}
 }

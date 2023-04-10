@@ -1,5 +1,5 @@
 import type { Result } from "@inlang/core/utilities"
-import { telemetryNode } from "../../../telemetry/index.js"
+import { telemetryNode } from "@inlang/telemetry"
 import { privateEnv } from "@inlang/env-variables"
 
 export async function machineTranslate(args: {

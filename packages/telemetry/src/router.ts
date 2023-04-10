@@ -1,6 +1,6 @@
 import express from "express"
 import { createProxyMiddleware } from "http-proxy-middleware"
-import { ROUTE_PATH } from "./shared.js"
+import { ROUTE_PATH } from "./implementation/shared.js"
 
 /**
  * Routes for the service

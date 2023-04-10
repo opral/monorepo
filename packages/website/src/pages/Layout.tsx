@@ -10,7 +10,7 @@ import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
-import { telemetryBrowser } from "@inlang/shared/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 
