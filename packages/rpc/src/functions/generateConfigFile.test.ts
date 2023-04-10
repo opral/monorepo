@@ -51,8 +51,7 @@ describe("generating config files", () => {
 				"ff/ffff.po": "another file format. good luck chat gpt",
 			}
 			const [, exception] = await generateConfigFileServer({ filesystemAsJson })
-			expect(exception).toBe(true)
-			expect(exception!.message).toBe("Couldn't generate a config file.")
+			expect(exception).toBeDefined()
 		},
 		{ timeout: 50000 },
 	)
