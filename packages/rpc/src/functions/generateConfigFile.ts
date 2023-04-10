@@ -18,7 +18,7 @@ export async function generateConfigFileServer(args: {
 			properties: {
 				success: success ? true : false,
 				iteration: success?.iteration ?? exception?.iteration,
-				chatHistory: exception?.chatHistory,
+				chatHistory: success?.chatHistory ?? exception?.chatHistory,
 			},
 		})
 		if (exception) {
@@ -47,7 +47,7 @@ async function _generateConfigFileRecursive(args: {
 	iteration?: number
 }): Promise<
 	Result<
-		{ configFile: string; iteration: number },
+		{ chatHistory: CreateChatCompletionRequest["messages"]; configFile: string; iteration: number },
 		{
 			chatHistory?: CreateChatCompletionRequest["messages"]
 			iteration: number
@@ -99,7 +99,10 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const [, exception] = await validateConfigFile({ file: configFile, env })
 		if (!exception) {
-			return [{ configFile, iteration }, undefined]
+			return [
+				{ configFile, iteration, chatHistory: response.data.choices.map((c) => c.message!) },
+				undefined,
+			]
 		}
 		return _generateConfigFileRecursive({
 			...args,
