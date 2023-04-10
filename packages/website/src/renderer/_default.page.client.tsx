@@ -6,9 +6,9 @@ import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
 import { MetaProvider } from "@solidjs/meta"
-import { initTelemetryBrowser, telemetryBrowser } from "@inlang/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 
-initTelemetryBrowser()
+telemetryBrowser.init()
 
 // import the css
 import "./app.css"
