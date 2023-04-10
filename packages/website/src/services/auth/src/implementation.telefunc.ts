@@ -1,4 +1,4 @@
-import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
+import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
 import { getContext } from "telefunc"
 
 /**

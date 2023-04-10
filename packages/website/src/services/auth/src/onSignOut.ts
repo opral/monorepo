@@ -1,5 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store"
-import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
+import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
 import { telemetryBrowser } from "@inlang/shared/telemetry"
 
 /**

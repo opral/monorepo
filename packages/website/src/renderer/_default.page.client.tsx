@@ -43,7 +43,7 @@ import { publicEnv } from "@inlang/env-variables"
 // enable error logging via sentry in production
 if (isProduction) {
 	Sentry.init({
-		dsn: publicEnv.PUBLIC_SENTRY_DSN_CLIENT,
+		dsn: publicEnv.PUBLIC_WEBSITE_SENTRY_DSN,
 		integrations: [new BrowserTracing()],
 		tracesSampleRate: 0.1,
 	})

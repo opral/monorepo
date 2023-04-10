@@ -13,7 +13,7 @@ export const publicEnvVariablesSchema = z.object({
 		.startsWith("/")
 		.endsWith("/")
 		.describe(`Must be a path like /git-proxy/`),
-	PUBLIC_SENTRY_DSN_CLIENT: z.string().optional(),
+	PUBLIC_WEBSITE_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the browser)"),
 	PUBLIC_POSTHOG_TOKEN: z.string().optional(),
 	PUBLIC_SERVER_BASE_URL: z
 		.string()
@@ -27,6 +27,6 @@ export const privateEnvVariablesSchema = z.object({
 	JWE_SECRET: z.string(),
 	OPEN_AI_KEY: z.string().optional(),
 	GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
-	SENTRY_DSN_SERVER: z.string().optional(),
+	SERVER_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (on the server)"),
 	GITHUB_APP_CLIENT_SECRET: z.string(),
 })

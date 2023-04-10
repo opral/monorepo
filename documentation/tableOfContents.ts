@@ -1,4 +1,4 @@
-import { RequiredFrontmatter } from "@inlang/website/src/services/markdown/index.js"
+import { RequiredFrontmatter } from "@inlang/website/markdown"
 
 /**
  * The frontmatter schema used to validate the markdown files in this directory.
