@@ -1,9 +1,9 @@
 import { machineTranslate } from "./machineTranslate.js"
-import { generateConfigFile } from "./generateConfigFile.js"
+import { generateConfigFileServer } from "./generateConfigFile.js"
 
 export const allRpcs = {
 	machineTranslate,
-	generateConfigFile,
+	generateConfigFileServer,
 }
 
 export type AllRpcs = typeof allRpcs
