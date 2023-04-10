@@ -79,7 +79,7 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation/getting-started", type: "text" as buttonType },
+		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 		{
 			name: "Feedback",
 			external: currentPageContext.urlParsed.pathname.includes("editor"),
