@@ -1,5 +1,6 @@
 import { PostHog } from "posthog-node"
 import { publicEnv } from "@inlang/env-variables"
+import { fallbackProxy } from "./shared.js"
 
 export let telemetryNode: PostHog
 
@@ -11,9 +12,8 @@ export let telemetryNode: PostHog
  */
 export function initTelemetryNode() {
 	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		return
-	}
-	if (telemetryNode === undefined) {
+		telemetryNode = fallbackProxy as PostHog
+	} else if (telemetryNode === undefined) {
 		telemetryNode = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN, {
 			host: "https://eu.posthog.com",
 		})

@@ -1,6 +1,6 @@
 import { posthog } from "posthog-js"
 import { publicEnv } from "@inlang/env-variables"
-import { ROUTE_PATH } from "./shared.js"
+import { fallbackProxy, ROUTE_PATH } from "./shared.js"
 
 /**
  * The telemetry service.
@@ -8,7 +8,7 @@ import { ROUTE_PATH } from "./shared.js"
  * The `telemetry` variable wraps posthog in case
  * the implementaiton should be changed in the future.
  */
-export const telemetryBrowser = posthog
+export let telemetryBrowser = posthog
 
 /**
  * Initialize the telemetry client.
@@ -18,6 +18,7 @@ export const telemetryBrowser = posthog
  */
 export function initTelemetryBrowser() {
 	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+		telemetryBrowser = fallbackProxy as typeof posthog
 		return
 	} else if (window === undefined) {
 		console.warn(
