@@ -9,23 +9,24 @@ import { prompt } from "./generateConfigFile.prompt.js"
 
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
-}): Promise<
-	Result<string, { chatGPTMessages?: CreateChatCompletionRequest["messages"]; message: string }>
-> {
+}): Promise<Result<string, Error>> {
 	try {
-		const [config, exception] = await _generateConfigFileRecursive(args)
+		const [success, exception] = await _generateConfigFileRecursive(args)
 		telemetryNode.capture({
 			distinctId: "unknown",
 			event: "config file generated",
 			properties: {
-				success: config ? true : false,
-				message: exception?.message,
-				chat: exception?.chatGPTMessages,
+				success: success ? true : false,
+				iteration: success?.iteration ?? exception?.iteration,
+				chatHistory: exception?.chatHistory,
 			},
 		})
-		return [config, exception] as any
+		if (exception) {
+			return [undefined, new Error(exception.errorMessage)]
+		}
+		return [success.configFile]
 	} catch (error) {
-		return [undefined, error] as any
+		return [undefined, error as Error]
 	}
 }
 
@@ -43,7 +44,18 @@ async function _generateConfigFileRecursive(args: {
 	// messages is required to recursively call the function
 	// upon a failed config file generation
 	messages?: CreateChatCompletionRequest["messages"]
-}): ReturnType<typeof generateConfigFileServer> {
+	iteration?: number
+}): Promise<
+	Result<
+		{ configFile: string; iteration: number },
+		{
+			chatHistory?: CreateChatCompletionRequest["messages"]
+			iteration: number
+			errorMessage: string
+		}
+	>
+> {
+	const iteration = args.iteration ?? 0
 	const fs = Volume.fromJSON(args.filesystemAsJson).promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
@@ -52,7 +64,8 @@ async function _generateConfigFileRecursive(args: {
 			return [
 				undefined,
 				{
-					message: dedent`
+					iteration,
+					errorMessage: dedent`
 The current working directory contains too many file(paths).
 
 Solution: Are you you in the root of your repository?
@@ -64,10 +77,14 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 			]
 		}
 		args.messages = [{ role: "system", content: prompt(Object.keys(args.filesystemAsJson)) }]
-	} else if (args.messages.length > 6) {
+	} else if (iteration > 3) {
 		return [
 			undefined,
-			{ message: "Coundn't generate the config file.", chatGPTMessages: args.messages },
+			{
+				chatHistory: args.messages,
+				iteration,
+				errorMessage: "Couldn't generate config file after 3 iterations.",
+			},
 		]
 	}
 	try {
@@ -82,7 +99,7 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const [, exception] = await validateConfigFile({ file: configFile, env })
 		if (!exception) {
-			return [configFile, undefined]
+			return [{ configFile, iteration }, undefined]
 		}
 		return _generateConfigFileRecursive({
 			...args,
@@ -96,8 +113,9 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 						exception.message,
 				},
 			],
+			iteration: iteration + 1,
 		})
 	} catch (error) {
-		return [undefined, { message: error!.toString() }]
+		return [undefined, { iteration, errorMessage: error!.toString() }]
 	}
 }
