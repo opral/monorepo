@@ -5,7 +5,7 @@ import { telemetryNode } from "@inlang/telemetry"
 import { Volume } from "memfs"
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import dedent from "dedent"
-import { prompt } from "./generateConfigFile.prompt.js"
+import { prompt, promptVersion } from "./generateConfigFile.prompt.js"
 
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
@@ -17,6 +17,7 @@ export async function generateConfigFileServer(args: {
 			event: "config file generated",
 			properties: {
 				success: success ? true : false,
+				promptVersion: promptVersion,
 				iteration: success?.iteration ?? exception?.iteration,
 				chatHistory: success?.chatHistory ?? exception?.chatHistory,
 			},
@@ -93,8 +94,8 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 			messages: args.messages,
 			// the lower the temperature, the more deterministic the output
 			// the higher the temperature, the more random the output
-			// for reproducibility, a lower temperature is better
-			temperature: 0.2,
+			// for reproducibility
+			temperature: 0.7,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const [, exception] = await validateConfigFile({ file: configFile, env })

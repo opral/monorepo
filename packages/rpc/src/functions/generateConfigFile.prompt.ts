@@ -2,6 +2,13 @@
 // Dedicated file to have version control for the prompt.
 // ------------------------------------------------------
 
+import type { CreateChatCompletionRequest } from "openai"
+
+// track the version of the prompt to be able to update and determine which prompt performs better
+export const promptVersion = 1
+
+export const temperature: CreateChatCompletionRequest["temperature"] = 0.7
+
 export function prompt(filePaths: string[]): string {
 	return `
   You are supposed to write a config file for a service called "inlang" that exports a defineConfig function.
