@@ -15,11 +15,11 @@ export function prompt(filePaths: string[]): string {
 	Here is an example config: 
 	\`\`\`
   export async function defineConfig(env) {
-    // imports happen from jsdelivr with the following pattern:
-    // https://cdn.jsdelivr.net/gh/{owner}/{repo}@{version}/{path}
-    // We recommend to use major version pinning @1 instead of @1.0.0
-    const plugin = await env.$import("https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js");
-
+    // import plugins via the following links and replace {owner}, {repo} and {version} with the correct values
+    // .JSON resources -> owner = samuelstroschein, repo = inlang-plugin-json, version = 1 
+    // .PO resources -> owner = jannesblobel, repo = inlang-plugin-po, version = 1
+    const plugin = await env.$import("https://cdn.jsdelivr.net/gh/{owner}/{repo}@{version}/dist/index.js");
+    
     const pluginConfig = {
 			// the path for resource files. usually nested in a directory named locales, 
 			// translations or i18n
