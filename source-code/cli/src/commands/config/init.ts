@@ -23,7 +23,7 @@ export const init = new Command()
 		}
 		// ----------------- GENERATE CONFIG FILE -----------------
 		logger.info("Generating config file with AI 🤖 ...")
-		const [value, exception] = await rpc.generateConfigFile({
+		const [configFile, exception] = await rpc.generateConfigFile({
 			// @ts-expect-error fs is not a valid type for the filesystem but works
 			fs,
 			path: "./",
@@ -36,7 +36,7 @@ export const init = new Command()
 		// ----------------- WRITE CONFIG FILE TO DISK -----------------
 		logger.info("Writing config file to disk...")
 		try {
-			await fs.writeFile("./inlang.config.js", value, "utf-8")
+			await fs.writeFile("./inlang.config.js", configFile, "utf-8")
 			logger.success("Wrote config file to disk.")
 		} catch (error) {
 			logger.error("Failed to write config file to disk.")
