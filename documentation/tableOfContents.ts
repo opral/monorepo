@@ -16,11 +16,11 @@ export const tableOfContents: Record<string, string[]> = {
 	Guide: [
 		(await import("./plugins.md?raw")).default,
 		(await import("./ci-cd.md?raw")).default,
-		(await import("./cli.md?raw")).default,
-	],
-	"inlang core": [
 		(await import("./build-on-inlang.md?raw")).default,
+	],
+	Reference: [
 		(await import("./ast.md?raw")).default,
+		(await import("./cli.md?raw")).default,
 		(await import("./environment-functions.md?raw")).default,
 		(await import("./query.md?raw")).default,
 		(await import("../source-code/core/src/lint/README.md?raw")).default,
