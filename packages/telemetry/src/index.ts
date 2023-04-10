@@ -1,2 +1,2 @@
-export { telemetryBrowser, initTelemetryBrowser } from "./implementation/browser.js"
-export { telemetryNode, initTelemetryNode } from "./implementation/node.js"
+export { telemetryBrowser } from "./implementation/browser.js"
+export { telemetryNode } from "./implementation/node.js"

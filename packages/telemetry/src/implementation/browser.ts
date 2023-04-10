@@ -1,6 +1,6 @@
 import { posthog } from "posthog-js"
 import { publicEnv } from "@inlang/env-variables"
-import { fallbackProxy, ROUTE_PATH } from "./shared.js"
+import { ROUTE_PATH } from "./shared.js"
 
 /**
  * The telemetry service.
@@ -8,30 +8,37 @@ import { fallbackProxy, ROUTE_PATH } from "./shared.js"
  * The `telemetry` variable wraps posthog in case
  * the implementaiton should be changed in the future.
  */
-export let telemetryBrowser = posthog
+export const telemetryBrowser = new Proxy(posthog, {
+	get(target, prop) {
+		if (prop === "init") {
+			return initWrapper
+		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+			return () => undefined
+		}
+		return (target as any)[prop]
+	},
+}) as Omit<typeof posthog, "init"> & { init: typeof initWrapper }
 
-/**
- * Initialize the telemetry client.
- *
- * This function should be called before using the `telemetry` variable.
- * Use initTelemetryNode in a node context.
- */
-export function initTelemetryBrowser() {
-	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		telemetryBrowser = fallbackProxy as typeof posthog
-		return
-	} else if (window === undefined) {
-		console.warn(
+function initWrapper(
+	config?: Parameters<typeof posthog.init>[1],
+	name?: Parameters<typeof posthog.init>[2],
+): ReturnType<typeof posthog.init> {
+	if (window === undefined) {
+		return console.warn(
 			"You are likely trying to use this in a Node.js environment. Use telemetryNode instead.",
 		)
+	} else if (config?.api_host) {
+		return console.warn("The api_host is set by the telemetry module.")
+	} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+		return console.warn("Posthog token is not set. Telemetry will not be initialized.")
 	}
-
-	const enabled = window !== undefined && posthog.has_opted_out_capturing() === false
-
-	if (enabled) {
-		posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN, {
+	return posthog.init(
+		publicEnv.PUBLIC_POSTHOG_TOKEN,
+		{
 			api_host: ROUTE_PATH,
-			autocapture: false,
-		})
-	}
+			capture_performance: false,
+			...config,
+		},
+		name,
+	)
 }

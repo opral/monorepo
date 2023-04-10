@@ -1,21 +1,26 @@
 import { PostHog } from "posthog-node"
 import { publicEnv } from "@inlang/env-variables"
-import { fallbackProxy } from "./shared.js"
 
-export let telemetryNode: PostHog
+let posthog: PostHog
 
 /**
- * Initialize the telemetry client.
+ * The telemetry service for node environments.
  *
- * This function should be called before using the `telemetry` variable.
- * Use initTelemetryBrowser in a browser context.
+ * Auto initializes if the env variable is set. For browser context,
+ * use `telemetryBrowser` instead.
+ *
+ * For documentation refer to https://posthog.com/docs/libraries/node
  */
-export function initTelemetryNode() {
-	if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
-		telemetryNode = fallbackProxy as PostHog
-	} else if (telemetryNode === undefined) {
-		telemetryNode = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN, {
-			host: "https://eu.posthog.com",
-		})
-	}
-}
+export const telemetryNode: PostHog = new Proxy({} as PostHog, {
+	get(target, prop) {
+		if (posthog) {
+			return (posthog as any)[prop]
+		} else if (!posthog && publicEnv.PUBLIC_POSTHOG_TOKEN) {
+			posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN, {
+				host: "https://eu.posthog.com",
+			})
+			return (posthog as any)[prop]
+		}
+		return () => undefined
+	},
+})
