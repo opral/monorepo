@@ -23,7 +23,7 @@ import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialo
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
-import { telemetryBrowser } from "@inlang/shared/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"

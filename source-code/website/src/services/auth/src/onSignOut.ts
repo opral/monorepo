@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
-import { telemetryBrowser } from "@inlang/shared/telemetry"
+import { telemetryBrowser } from "@inlang/telemetry"
 
 /**
  * This function is called when the user clicks the "Sign Out" button.

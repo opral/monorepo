@@ -6,6 +6,9 @@ import * as Tracing from "@sentry/tracing"
 import { isProduction } from "./utilities.js"
 import { router as inlangSharedServices } from "@inlang/shared/server"
 import { router as websiteRouter } from "@inlang/website/server-middleware"
+import { router as telemetryRouter } from "@inlang/telemetry/router"
+
+// --------------- SETUP -----------------
 
 const [, errors] = validateEnvVariables({ forProduction: isProduction })
 if (errors) {
@@ -40,14 +43,16 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-// ------------------------ START ROUTES ------------------------
+// ----------------- ROUTES ----------------------
 
 app.use(inlangSharedServices)
+
+app.use(telemetryRouter)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
 app.use(websiteRouter)
 
-// ------------------------ END ROUTES ------------------------
+// ----------------- START SERVER -----------------
 
 const port = process.env.PORT ?? 3000
 app.listen(port)

@@ -5,9 +5,8 @@ import { Root } from "./Root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
-import { BrowserTracing } from "@sentry/tracing"
 import { MetaProvider } from "@solidjs/meta"
-import { initTelemetryBrowser, telemetryBrowser } from "@inlang/shared/telemetry"
+import { initTelemetryBrowser, telemetryBrowser } from "@inlang/telemetry"
 
 initTelemetryBrowser()
 
@@ -44,7 +43,7 @@ import { publicEnv } from "@inlang/env-variables"
 if (isProduction) {
 	Sentry.init({
 		dsn: publicEnv.PUBLIC_WEBSITE_SENTRY_DSN,
-		integrations: [new BrowserTracing()],
+		integrations: [],
 		tracesSampleRate: 0.1,
 	})
 }

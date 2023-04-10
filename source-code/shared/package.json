@@ -5,7 +5,6 @@
 	"exports": {
 		"./server": "./dist/server/index.js",
 		"./openai": "./dist/openai/index.js",
-		"./telemetry": "./dist/telemetry/index.js",
 		"./rpc": "./dist/rpc/index.js"
 	},
 	"files": [

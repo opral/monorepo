@@ -21,7 +21,7 @@ export function initTelemetryBrowser() {
 		return
 	} else if (window === undefined) {
 		console.warn(
-			"You are likely trying to use this in a Node.js environment. Use @inlang/shared/telemetry/node instead.",
+			"You are likely trying to use this in a Node.js environment. Use telemetryNode instead.",
 		)
 	}
 
