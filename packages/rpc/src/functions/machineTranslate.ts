@@ -33,6 +33,7 @@ export async function machineTranslate(args: {
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {
+		console.error("ml failed", error)
 		return [undefined, error as Error]
 	}
 }

@@ -5,7 +5,7 @@ import { rpcClient } from "typed-rpc"
 import type { RpcService } from "./rpcs.js"
 
 // must be identical to path in route.ts
-const route = "/shared/rpc"
+export const route = "/_rpc"
 
 /**
  * The RPC client.

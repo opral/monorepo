@@ -19,6 +19,7 @@
 	},
 	"dependencies": {
 		"@inlang/env-variables": "*",
+		"@inlang/rpc": "*",
 		"@inlang/shared": "*",
 		"@inlang/telemetry": "*",
 		"@inlang/website": "*",
