@@ -10,6 +10,7 @@ export const FrontmatterSchema = RequiredFrontmatter
  */
 export const tableOfContents: Record<string, string[]> = {
 	Overview: [
+		(await import("./introduction.md?raw")).default,
 		(await import("./getting-started.md?raw")).default,
 		(await import("./why-inlang.md?raw")).default,
 	],
