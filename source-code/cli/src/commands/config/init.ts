@@ -23,10 +23,13 @@ export const init = new Command()
 		}
 		// ----------------- GENERATE CONFIG FILE -----------------
 		logger.info("Generating config file with AI 🤖 ...")
-		// @ts-ignore
-		const [value, exception] = await rpc.generateConfigFile({ fs, path: "./" })
+		const [value, exception] = await rpc.generateConfigFile({
+			// @ts-expect-error fs is not a valid type for the filesystem but works
+			fs,
+			path: "./",
+		})
 		if (exception) {
-			logger.error("Failed to generate config file.", exception)
+			logger.error("Failed to generate config file.", exception.errorMessage)
 			return
 		}
 		logger.success("Generated config file.")
