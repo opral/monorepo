@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { isProduction } from "./utilities.js"
 import { router as inlangSharedServices } from "@inlang/shared/server"
-import { router as websiteRouter } from "@inlang/website/server-middleware"
+import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 
 // --------------- SETUP -----------------

@@ -3,7 +3,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		"./server-middleware": "./src/server/index.ts",
+		"./router": "./src/server/router.ts",
 		"./markdown": "./src/services/markdown/index.js"
 	},
 	"scripts": {
