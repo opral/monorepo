@@ -23,6 +23,6 @@
 		"@inlang/env-variables": "*"
 	},
 	"peerDependencies": {
-		"express": ""
+		"express": "^4.18.2"
 	}
 }
