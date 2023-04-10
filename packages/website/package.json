@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/website",
 	"type": "module",
-	"version": "0.5.3",
+	"private": true,
 	"exports": {
 		"./server-middleware": "./src/server/index.ts",
 		"./markdown": "./src/services/markdown/index.js"
