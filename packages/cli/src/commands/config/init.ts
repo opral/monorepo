@@ -36,7 +36,7 @@ export const init = new Command()
 			await fs.writeFile("./inlang.config.js", value, "utf-8")
 			logger.success("Wrote config file to disk.")
 		} catch (error) {
-			logger.error("Failed to write config file to disk.", error)
+			logger.error("Failed to write config file to disk.")
 		}
 	})
 
