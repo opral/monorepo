@@ -20,7 +20,8 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "*"
+		"@inlang/env-variables": "*",
+		"http-proxy-middleware": "^2.0.6"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"
