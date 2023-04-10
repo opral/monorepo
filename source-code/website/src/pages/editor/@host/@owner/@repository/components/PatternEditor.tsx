@@ -12,7 +12,7 @@ import { Notification, NotificationHint } from "./Notification/NotificationHint.
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
-import { rpc } from "@inlang/shared/rpc"
+import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
 
 /**
