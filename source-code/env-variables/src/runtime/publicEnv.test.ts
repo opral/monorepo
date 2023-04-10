@@ -14,3 +14,14 @@ it("should throw if a variable does not start with PUBLIC_", () => {
 		publicEnv.INVALID_VARIABLE
 	}).toThrow()
 })
+
+// makes development much easier because no build step is required
+it("should use process.env[variable] if defined", () => {
+	process.env.PUBLIC_TEST_VARIABLE = "test"
+	// @ts-expect-error - we are testing an invalid variable
+	expect(publicEnv.PUBLIC_TEST_VARIABLE).toBe("test")
+})
+
+it("should not be undefined", () => {
+	expect(publicEnv).not.toBeUndefined()
+})
