@@ -33,5 +33,5 @@ export const detectLanguage = async (
 		allDetectedLanguages.push(...detectedLanguages)
 	}
 
-	return allowRelated && matchLanguage(allDetectedLanguages, languages) || referenceLanguage
+	return (allowRelated && matchLanguage(allDetectedLanguages, languages)) || referenceLanguage
 }
