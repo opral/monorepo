@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest"
 import { detectLanguage } from "./detectLanguage.js"
-import type { Detector } from "@inlang/core/ast"
 import { matchLanguage } from "./matchLanguage.js"
+import type { Detector } from "./types.js"
 
 vi.mock("./matchLanguage", () => {
 	return {

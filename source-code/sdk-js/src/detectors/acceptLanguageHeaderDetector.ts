@@ -1,4 +1,5 @@
-import type { Language, InitDetector, DetectorTemplate } from "@inlang/core/ast"
+import type { Language } from "@inlang/core/ast"
+import type { DetectorTemplate, InitDetector } from "./types.js"
 
 type ObjectWithHeaders = { headers: { get: (key: string) => string | null } }
 type DetectorParameters = [ObjectWithHeaders, string | undefined]

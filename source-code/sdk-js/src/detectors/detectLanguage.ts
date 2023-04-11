@@ -1,5 +1,6 @@
-import type { Language, Detector } from "@inlang/core/ast"
+import type { Language } from "@inlang/core/ast"
 import { matchLanguage } from "./matchLanguage.js"
+import type { Detector } from "./types.js"
 
 /**
  * Takes a set of detection strategies and returns a language found in availableLanguages.

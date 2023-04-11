@@ -1,4 +1,5 @@
-import type { Language, Detector } from "@inlang/core/ast"
+import type { Language } from "@inlang/core/ast"
+import type { Detector } from "./types.js"
 
 /**
  * A function that takes one or more detected languages and matches them with the specified available languages.
