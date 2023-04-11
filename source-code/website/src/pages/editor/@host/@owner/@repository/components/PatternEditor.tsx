@@ -209,6 +209,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
+		telemetryBrowser.capture("onKeyDown", {
+			event: event,
+			targetLanguage: props.language,
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+		})
 		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
 			event.preventDefault()
 			handleCommit()
@@ -252,7 +258,14 @@ export function PatternEditor(props: {
 				prop:size="small"
 				prop:rows={1}
 				prop:placeholder="Enter translation ..."
-				onFocus={() => setIsFocused(true)}
+				onFocus={() => {
+					setIsFocused(true)
+					telemetryBrowser.capture("clicked in imputfield", {
+						targetLanguage: props.language,
+						owner: routeParams().owner,
+						repository: routeParams().repository,
+					})
+				}}
 				onFocusOut={(e) => {
 					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
 						setIsFocused(false)
