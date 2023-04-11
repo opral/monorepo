@@ -1,11 +1,9 @@
 import type { Language } from "@inlang/core/ast"
 
-export type Detector = () => Language[] | Language | undefined
-
-export type InitDetector<Parameters extends Array<unknown>> = (
+export type Detector<Parameters extends Array<unknown> = Array<never>> = (
 	...parameters: Parameters
-) => Detector
+) => Array<Language> | ReadonlyArray<Language>
 
-export type DetectorTemplate<Parameters extends Array<unknown>> = (
+export type DetectorInitializer<Parameters extends Array<unknown> = Array<never>> = (
 	...parameters: Parameters
-) => ReturnType<Detector>
+) => Detector<Parameters>

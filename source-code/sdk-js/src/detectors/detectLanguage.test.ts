@@ -46,7 +46,11 @@ describe("detectLanguage", () => {
 	})
 	test("Match related langs with allowRelated true and accumuluated detector results", () => {
 		vi.mocked(matchLanguage).mockReturnValue(undefined)
-		const detectors = [vi.fn(() => "de"), vi.fn(() => ["en", "fr"]), vi.fn(() => "es")]
+		const detectors: Detector[] = [
+			vi.fn(() => ["de"]),
+			vi.fn(() => ["en", "fr"]),
+			vi.fn(() => ["es"]),
+		]
 		const parameters = {
 			strategies: new Set<Detector>(detectors),
 			fallbackLanguage: "lang",

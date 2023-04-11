@@ -2,35 +2,34 @@ import { describe, expect, test } from "vitest"
 import { initRootSlugDetector } from "./rootSlugDetector.js"
 
 describe("rootSlugDetector", () => {
-	test("return empty array if availableLanguages is Empty", () => {
-		const availableLanguages = new Set([])
-		const url = new URL("http://localhost:80/en/blue")
-		const detector = initRootSlugDetector({ url, availableLanguages })
-		expect(detector()).toBe(undefined)
+	test("return first slug if found", () => {
+		const url = new URL("http://localhost:80/en")
+		const detector = initRootSlugDetector(url)
+		expect(detector()).toMatchObject(["en"])
 	})
-	test("return empty array if the url contains no locale", () => {
-		const availableLanguages = new Set(["en"])
+
+	test("return first slug if found even if it is no language-code", () => {
 		const url = new URL("http://localhost:80/blue")
-		const detector = initRootSlugDetector({ url, availableLanguages })
-		expect(detector()).toBe(undefined)
+		const detector = initRootSlugDetector(url)
+		expect(detector()).toMatchObject(["blue"])
 	})
-	test("return empty array if the url contains no known locale", () => {
-		const availableLanguages = new Set(["de"])
-		const url = new URL("http://localhost:80/en/blue")
-		const detector = initRootSlugDetector({ url, availableLanguages })
-		expect(detector()).toBe(undefined)
+
+	test("return first slug if found with strange symbols", () => {
+		const slug = "§r$6)8z{"
+		const url = new URL(`http://localhost:80/${slug}/test`)
+		const detector = initRootSlugDetector(url)
+		expect(detector()).toMatchObject([encodeURI(slug)])
 	})
-	test("return empty array if the url contains no related locale", () => {
-		const availableLanguages = new Set(["en"])
-		const url = new URL("http://localhost:80/en-US/blue")
-		const detector = initRootSlugDetector({ url, availableLanguages })
-		expect(detector()).toBe(undefined)
+
+	test("return empty array if the url has no path", () => {
+		const url = new URL("http://localhost:80/")
+		const detector = initRootSlugDetector(url)
+		expect(detector()).toMatchObject([])
 	})
-	test("return matching locale", () => {
-		const langs = "en-US"
-		const availableLanguages = new Set([langs])
-		const url = new URL(`http://localhost:80/${langs}/blue`)
-		const detector = initRootSlugDetector({ url, availableLanguages })
-		expect(detector()).toBe(langs)
+
+	test("return only the first slug", () => {
+		const url = new URL("http://localhost:80/en-US/de/fr")
+		const detector = initRootSlugDetector(url)
+		expect(detector()).toMatchObject(["en-US"])
 	})
 })
