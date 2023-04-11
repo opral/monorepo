@@ -1,0 +1,36 @@
+{
+	"name": "@inlang/env-variables",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist"
+	],
+	"scripts": {
+		"build": "tsx ./build.ts",
+		"dev": "DEV=true tsx ./build.ts",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/core": "^0.5.4",
+		"dotenv": "^16.0.3",
+		"zod": "^3.21.4"
+	},
+	"devDependencies": {
+		"esbuild": "^0.17.15",
+		"esbuild-plugin-d.ts": "^1.1.0",
+		"esbuild-plugin-glob": "^2.2.1",
+		"tsx": "^3.12.6"
+	}
+}

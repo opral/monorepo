@@ -3,11 +3,7 @@
 	"changelog": "@changesets/cli/changelog",
 	"commit": false,
 	"fixed": [],
-	"linked": [
-		["@inlang/ide-extension", "@inlang/core"],
-		["@inlang/website", "@inlang/core"],
-		["@inlang/cli", "@inlang/core"]
-	],
+	"linked": [["@inlang/core", "@inlang/ide-extension", "@inlang/cli"]],
 	"access": "restricted",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",

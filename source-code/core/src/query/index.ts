@@ -76,15 +76,31 @@ function create(
 	return [copy, undefined]
 }
 
-function upsert(resource: Resource, args: { message: Message }) {
+function upsert(resource: Resource, args: { message: Message }): Resource {
 	const existingMessage = get(resource, { id: args.message.id.name })
 	if (existingMessage) {
-		return update(resource, {
+		const [updatedResource, exception] = update(resource, {
 			id: args.message.id.name,
 			with: args.message,
 		})
+		if (exception) {
+			// should throw because internal error that should never happen
+			throw Error(
+				"Message from an update is undefined. Even though an if statement checked is the message existed. This is an internal bug in inlang.",
+				{ cause: exception },
+			)
+		}
+		return updatedResource
 	}
-	return create(resource, args)
+	const [updatedResource, exception] = create(resource, args)
+	if (exception) {
+		// should throw because internal error that should never happen
+		throw Error(
+			"Message already exists even though we checked if a message exists. This is an internal bug in inlang.",
+			{ cause: exception },
+		)
+	}
+	return updatedResource
 }
 
 function get(resource: Resource, args: { id: Message["id"]["name"] }): Message | undefined {

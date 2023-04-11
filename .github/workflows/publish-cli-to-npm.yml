@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      - run: npm run build -w @inlang/cli
+      - run: npm run build
       - run: npm run test -w @inlang/cli
       - uses: JS-DevTools/npm-publish@v1
         with:

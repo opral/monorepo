@@ -15,8 +15,8 @@
 //   when hovering over the type.
 
 import type { $fs } from "./$fs.js"
+import dedent from "dedent"
 
-//
 export type $import = (uri: string) => Promise<any>
 
 /**
@@ -34,6 +34,18 @@ export function initialize$import(args: {
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
 	return (uri: string) => $import(uri, args)
+}
+
+/**
+ * Error thrown when the $import function fails.
+ *
+ * Dedicated class to make it easier to identify this error.
+ */
+class $ImportError extends Error {
+	constructor(message: string) {
+		super(message)
+		this.name = "$ImportError"
+	}
 }
 
 /**
@@ -63,7 +75,20 @@ async function $import(
 		: // @ts-ignore - Uses node under the hood which sometimes takes the encoding as a second argument
 		  ((await environment.fs.readFile(normalizePath(uri), "utf-8")) as string)
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
-	return await import(/* @vite-ignore */ moduleWithMimeType)
+	try {
+		return await import(/* @vite-ignore */ moduleWithMimeType)
+	} catch (error) {
+		// @ts-expect-error - TS doesn't know that the error is an Error
+		let message = `Error while importing ${uri}: ${error?.message ?? "Unknown error"}`
+		if (error instanceof SyntaxError && uri.includes("jsdelivr")) {
+			message += dedent`\n\n
+Are you sure that the file exists on JSDelivr?
+
+The error indicates that the imported file does not exist on JSDelivr. For non-existent files, JSDelivr returns a 404 text that JS cannot parse as a module and throws a SyntaxError.
+			`
+		}
+		throw new $ImportError(message)
+	}
 }
 
 /*

@@ -14,6 +14,7 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 - [Docker](https://www.docker.com/)
 - [VSCode](https://vscode.dev/)
 - [VSCode extension: Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- (If you are part of inlang, ask for access to doppler from private env variables.)
 
 ## Getting started
 

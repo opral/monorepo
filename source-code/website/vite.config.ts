@@ -5,8 +5,10 @@ import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
+import { isProduction } from "./src/utilities.js"
 
 export default defineConfig({
+	envPrefix: "PUBLIC_",
 	plugins: [
 		nodePolyfills({
 			protocolImports: true,
@@ -28,13 +30,12 @@ export default defineConfig({
 		alias: {
 			// must also be defined in tsconfig!
 			"@src": fileURLToPath(new URL("./src", import.meta.url)),
-			"@env": fileURLToPath(new URL("./env.ts", import.meta.url)),
 		},
 	},
 	build: {
 		// target is es2022 to support top level await
 		// https://caniuse.com/?search=top%20level%20await
 		target: "es2022",
-		minify: false,
+		minify: isProduction,
 	},
 })
