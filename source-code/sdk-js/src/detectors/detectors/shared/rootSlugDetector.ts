@@ -8,7 +8,6 @@ type DetectorParameters = [url: URL]
  * @param url The url passed as URL object (https://developer.mozilla.org/en-US/docs/Web/API/URL/URL)
  * @returns A string representing the users requested language or undefined for no detection.
  */
-
 export const rootSlugDetector = ((url) =>
 	[url.pathname.split("/").at(1)].filter(
 		Boolean,
@@ -21,6 +20,5 @@ export const rootSlugDetector = ((url) =>
  * @param parameters.availableLanguages A set of available languages (strings) available for detection
  * @returns A detection function that takes no parameters and returns a string representing the users requested language.
  */
-
 export const initRootSlugDetector = ((url) => () =>
 	rootSlugDetector(url)) satisfies DetectorInitializer<DetectorParameters>
