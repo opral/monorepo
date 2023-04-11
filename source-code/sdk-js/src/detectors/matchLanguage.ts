@@ -20,7 +20,8 @@ export const matchLanguage = (
 		for (const language of languages) {
 			if (language === detectedLanguage) return language
 		}
-
+	}
+	for (const detectedLanguage of detectedLanguages) {
 		if (allowRelated) {
 			const relatedLanguages: string[] = languages
 				.map(
@@ -30,8 +31,9 @@ export const matchLanguage = (
 						language,
 				)
 				.filter(Boolean)
-				// Unspecific related langs should be preferred, otherwise we sort alphabetically
+				// sort alphabetically
 				.sort()
+				// unspecific related languages should be preferred
 				.sort((a, b) => a.split("-").length - b.split("-").length)
 
 			if (relatedLanguages.length) return relatedLanguages[0]

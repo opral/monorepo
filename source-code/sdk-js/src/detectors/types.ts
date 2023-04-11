@@ -4,7 +4,7 @@ type MaybePromise<T> = T | Promise<T>
 
 export type Detector<Parameters extends Array<unknown> = Array<never>> = (
 	...parameters: Parameters
-) => MaybePromise<Array<Language> | ReadonlyArray<Language>>
+) => MaybePromise<Array<Language>>
 
 export type DetectorInitializer<Parameters extends Array<unknown> = Array<never>> = (
 	...parameters: Parameters
