@@ -12,8 +12,6 @@ async function readInlangConfig() {
 
 	const cwd = process.cwd()
 
-	console.log("cwd", cwd)
-
 	const module = (await import(/* @vite-ignore */ resolve(cwd, "./inlang.config.js"))) as
 		| { defineConfig: DefineConfig }
 		| undefined
