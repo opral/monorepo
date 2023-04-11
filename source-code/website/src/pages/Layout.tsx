@@ -10,7 +10,7 @@ import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 import { currentPageContext } from "@src/renderer/state.js"
 import { onSignOut } from "@src/services/auth/index.js"
-import { analytics } from "@src/services/analytics/index.js"
+import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 
@@ -79,7 +79,7 @@ const socialMediaLinks = [
 function Header(props: { landingpage?: boolean }) {
 	const links = [
 		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation/getting-started", type: "text" as buttonType },
+		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 		{
 			name: "Feedback",
 			external: currentPageContext.urlParsed.pathname.includes("editor"),
@@ -131,8 +131,7 @@ function Header(props: { landingpage?: boolean }) {
 									</For>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
-											{" "}
-											Open Editor{" "}
+											Open Editor
 										</Button>
 									</Show>
 									{/* not overwhelming the user by only showing login button when not on landig page */}
@@ -293,7 +292,7 @@ function UserDropdown() {
 				variant: "success",
 			})
 			// https://posthog.com/docs/integrate/client/js#reset-after-logout
-			analytics.reset()
+			telemetryBrowser.reset()
 		} catch (error) {
 			showToast({
 				title: "Error",

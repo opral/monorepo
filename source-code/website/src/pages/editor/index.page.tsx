@@ -16,7 +16,8 @@ export function Page() {
 			.regex(/github/)
 			.safeParse(input()).success
 
-	function navigateToEditor() {
+	function navigateToEditor(event: Event) {
+		event.preventDefault()
 		const url = new URL(input())
 		return navigate(`/editor/${url.host}${url.pathname}`)
 	}
@@ -39,7 +40,7 @@ export function Page() {
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
 					<form
 						class="flex flex-col pb-8 lg:pb-0 gap-4 justify-center items-center w-full"
-						onSubmit={navigateToEditor}
+						onSubmit={(event) => navigateToEditor(event)}
 					>
 						<sl-input
 							class="border-none p-0 w-full max-w-xl"
@@ -70,7 +71,7 @@ export function Page() {
 								prop:variant={isValidUrl() ? "primary" : "default"}
 								prop:size={isMobile() ? "small" : "medium"}
 								prop:disabled={isValidUrl() === false}
-								onClick={navigateToEditor}
+								onClick={(event) => navigateToEditor(event)}
 							>
 								Open
 							</sl-button>

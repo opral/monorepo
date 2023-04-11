@@ -1,8 +1,8 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.1.5",
+	"version": "0.5.5",
 	"private": false,
-	"publicConfig": {
+	"publishConfig": {
 		"access": "public"
 	},
 	"license": "MIT",
@@ -33,21 +33,22 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f dist"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"@inlang/core": "*",
-		"@inlang/shared": "*",
+		"@inlang/rpc": "*",
+		"@types/dedent": "^0.7.0",
+		"@types/prompts": "^2.4.2",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
 		"dedent": "^0.7.0",
+		"esbuild": "^0.17.14",
 		"fast-glob": "^3.2.12",
+		"memfs": "^3.4.13",
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
 		"prompts": "^2.4.2"
 	},
-	"devDependencies": {
-		"@types/dedent": "^0.7.0",
-		"@types/prompts": "^2.4.2",
-		"esbuild": "^0.17.14",
-		"memfs": "^3.4.13"
+	"dependencies": {
+		"ora": "^6.3.0"
 	}
 }

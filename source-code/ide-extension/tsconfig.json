@@ -1,5 +1,5 @@
 {
-	"extends": "configs/typescript/tsconfig.base.json",
+	"extends": "../../tsconfig.base.json",
 	"include": ["src/**/*"],
 	"compilerOptions": {
 		"lib": ["ESNext"],

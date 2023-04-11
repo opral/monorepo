@@ -1,5 +1,5 @@
 {
-	"extends": "configs/typescript/tsconfig.base.json",
+	"extends": "../../tsconfig.base.json",
 	"include": ["src/**/*.ts"],
 	"compilerOptions": {
 		// DOM because of fetch. TODO: extract fetch from this package and

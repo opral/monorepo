@@ -5,14 +5,13 @@ import { Root } from "./Root.jsx"
 import { setCurrentPageContext } from "./state.js"
 import type { PageContextRenderer } from "./types.js"
 import * as Sentry from "@sentry/browser"
-import { BrowserTracing } from "@sentry/tracing"
 import { MetaProvider } from "@solidjs/meta"
+import { telemetryBrowser } from "@inlang/telemetry"
+
+telemetryBrowser.init()
 
 // import the css
 import "./app.css"
-
-// import analytics
-import "@src/services/analytics/index.js"
 
 // only imported client side as web components are not supported server side
 // importing the shoelace components that are used.
@@ -37,15 +36,14 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
-
-import { clientSideEnv } from "@env"
-import { analytics } from "@src/services/analytics/index.js"
+import { isProduction } from "@src/utilities.js"
+import { publicEnv } from "@inlang/env-variables"
 
 // enable error logging via sentry in production
-if (import.meta.env.PROD) {
+if (isProduction) {
 	Sentry.init({
-		dsn: clientSideEnv.VITE_SENTRY_DSN_CLIENT,
-		integrations: [new BrowserTracing()],
+		dsn: publicEnv.PUBLIC_WEBSITE_SENTRY_DSN,
+		integrations: [],
 		tracesSampleRate: 0.1,
 	})
 }
@@ -81,7 +79,7 @@ export function render(pageContext: PageContextRenderer) {
 			isFirstRender = false
 		}
 		// https://posthog.com/docs/integrate/client/js#one-page-apps-and-page-views
-		analytics.capture("$pageview")
+		telemetryBrowser.capture("$pageview")
 	} catch (e) {
 		console.error("ERROR in renderer", e)
 	}

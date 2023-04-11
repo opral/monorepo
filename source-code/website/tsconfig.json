@@ -1,5 +1,5 @@
 {
-	"extends": "configs/typescript/tsconfig.base.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"moduleResolution": "Node16",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -9,8 +9,7 @@
 		"esModuleInterop": true,
 		"paths": {
 			// need to be defined in the vite config too!
-			"@src/*": ["./src/*"],
-			"@env": ["./env.ts"]
+			"@src/*": ["./src/*"]
 		}
 	}
 }

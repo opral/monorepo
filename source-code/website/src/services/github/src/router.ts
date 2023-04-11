@@ -1,7 +1,7 @@
-import { serverSideEnv } from "@env"
-import { decryptAccessToken } from "@src/services/auth/index.server.js"
+import { decryptAccessToken } from "../../../services/auth/index.server.js"
 import { PATH } from "./implementation.js"
 import express from "express"
+import { privateEnv } from "@inlang/env-variables"
 
 /**
  * Routes for the GitHub service.
@@ -9,8 +9,6 @@ import express from "express"
  * Proxies requests and adds the authorization header.
  */
 export const router = express.Router()
-
-const env = await serverSideEnv()
 
 // matching all routes after the path with '*'
 // and proxying the request to the GitHub API
@@ -22,7 +20,7 @@ router.all(
 		try {
 			const encryptedAccessToken = request.session?.encryptedAccessToken
 			const decryptedAccessToken = await decryptAccessToken({
-				JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+				JWE_SECRET_KEY: privateEnv.JWE_SECRET,
 				jwe: encryptedAccessToken,
 			})
 			// slicing the path to remove the path prefix
