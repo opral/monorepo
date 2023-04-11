@@ -26,13 +26,15 @@ export const initI18nRuntime = async ({
 			),
 	})
 
-	await runtime.loadResource(language)
-	runtime.switchLanguage(language)
+	if (language) {
+		await runtime.loadResource(language)
+		runtime.switchLanguage(language)
+	}
 
 	return {
 		...runtime,
-		getLanguages: () => languages,
 		getReferenceLanguage: () => referenceLanguage,
+		getLanguages: () => languages,
 	}
 }
 
@@ -49,32 +51,23 @@ export type I18nContext = {
 	i: Readable<InlangFunction>
 	switchLanguage: (language: string) => Promise<void>
 	loadResource: Runtime["loadResource"]
+	route: (href: RelativeUrl) => RelativeUrl
 }
 
-export const setI18nContext = (runtime: Runtime | undefined) => {
-	if (!runtime) {
-		const loadInlangData = <T>(url: string): Promise<T> =>
-			fetch(`/inlang${url}`).then((response) => (response.ok ? response.json() : undefined))
+type RelativeUrl = `/${string}`
 
-		runtime = {
-			...initRuntime({
-				readResource: async (language: string) => loadInlangData<Resource>(`/${language}.json`),
-			}),
-			getLanguages: () => [],
-			getReferenceLanguage: () => "",
-		}
-	}
-
-	const _runtime = runtime
-	const _language = writable(_runtime.getLanguage() as string)
-	const _i = writable(_runtime.getInlangFunction())
+export const setI18nContext = (runtime: Runtime) => {
+	const _language = writable(runtime.getLanguage() as string)
+	const _i = writable(runtime.getInlangFunction())
 
 	const switchLanguage = async (language: string) => {
-		if (_runtime.getLanguage() === language) return
+		if (runtime.getLanguage() === language) return
 
-		_runtime.switchLanguage(language)
+		// TODO: load Resource if not present
 
-		_i.set(_runtime.getInlangFunction())
+		runtime.switchLanguage(language)
+
+		_i.set(runtime.getInlangFunction())
 		_language.set(language)
 
 		localStorage.setItem("inlang-language", language)
@@ -82,11 +75,12 @@ export const setI18nContext = (runtime: Runtime | undefined) => {
 
 	setContext<I18nContext>(inlangSymbol, {
 		language: derived(_language, (value) => value),
-		referenceLanguage: _runtime.getReferenceLanguage(),
-		languages: _runtime.getLanguages(),
+		referenceLanguage: runtime.getReferenceLanguage(),
+		languages: runtime.getLanguages(),
 		i: derived(_i, (value) => value),
-		loadResource: _runtime.loadResource,
+		loadResource: runtime.loadResource,
 		switchLanguage,
+		route: (href) => href,
 	})
 }
 

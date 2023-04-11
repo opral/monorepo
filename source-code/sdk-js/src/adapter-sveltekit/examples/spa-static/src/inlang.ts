@@ -2,6 +2,7 @@ import type { LoadEvent } from "@sveltejs/kit"
 import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { derived, writable, type Readable } from "svelte/store"
+import { navigating } from "$app/stores"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -32,8 +33,8 @@ export const initI18nRuntime = async ({
 
 	return {
 		...runtime,
-		getLanguages: () => languages,
 		getReferenceLanguage: () => referenceLanguage,
+		getLanguages: () => languages,
 	}
 }
 
@@ -45,11 +46,15 @@ export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 
 export type I18nContext = {
 	language: Readable<string>
+	referenceLanguage: string
 	languages: string[]
 	i: Readable<InlangFunction>
 	switchLanguage: (language: string) => Promise<void>
 	loadResource: Runtime["loadResource"]
+	route: (href: RelativeUrl) => RelativeUrl
 }
+
+type RelativeUrl = `/${string}`
 
 export const setI18nContext = (runtime: Runtime) => {
 	const _language = writable(runtime.getLanguage() as string)
@@ -57,6 +62,8 @@ export const setI18nContext = (runtime: Runtime) => {
 
 	const switchLanguage = async (language: string) => {
 		if (runtime.getLanguage() === language) return
+
+		// TODO: load Resource if not present
 
 		runtime.switchLanguage(language)
 
@@ -68,10 +75,12 @@ export const setI18nContext = (runtime: Runtime) => {
 
 	setContext<I18nContext>(inlangSymbol, {
 		language: derived(_language, (value) => value),
+		referenceLanguage: runtime.getReferenceLanguage(),
 		languages: runtime.getLanguages(),
 		i: derived(_i, (value) => value),
 		loadResource: runtime.loadResource,
 		switchLanguage,
+		route: (href) => href,
 	})
 }
 
