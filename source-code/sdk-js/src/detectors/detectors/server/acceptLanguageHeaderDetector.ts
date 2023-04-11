@@ -1,5 +1,5 @@
 import type { Language } from "@inlang/core/ast"
-import type { Detector, DetectorInitializer } from "./types.js"
+import type { Detector, DetectorInitializer } from "../../types.js"
 
 type HeadersObject = { get: (key: string) => string | null }
 

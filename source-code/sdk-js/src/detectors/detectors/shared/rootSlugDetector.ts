@@ -1,4 +1,4 @@
-import type { Detector, DetectorInitializer } from "./types.js"
+import type { Detector, DetectorInitializer } from "../../types.js"
 
 type DetectorParameters = [url: URL]
 
@@ -9,7 +9,7 @@ type DetectorParameters = [url: URL]
  * @returns A string representing the users requested language or undefined for no detection.
  */
 
-export const rootSlugDetectorTemplate = ((url) =>
+export const rootSlugDetector = ((url) =>
 	[url.pathname.split("/").at(1)].filter(
 		Boolean,
 	) as string[]) satisfies Detector<DetectorParameters>
@@ -23,4 +23,4 @@ export const rootSlugDetectorTemplate = ((url) =>
  */
 
 export const initRootSlugDetector = ((url) => () =>
-	rootSlugDetectorTemplate(url)) satisfies DetectorInitializer<DetectorParameters>
+	rootSlugDetector(url)) satisfies DetectorInitializer<DetectorParameters>
