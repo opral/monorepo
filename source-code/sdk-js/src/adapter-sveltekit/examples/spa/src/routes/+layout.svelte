@@ -11,19 +11,23 @@
 	console.info("+layout.svelte", $i("welcome"))
 </script>
 
-{#each languages as language}
-	<button
-		on:mouseover={() => loadResource(language)}
-		on:focus={() => loadResource(language)}
-		on:click={() => switchLanguage(language)}>{language}</button
-	>
-{/each}
-
 {#if $language}
+	{#each languages as language}
+		<button
+			on:mouseover={() => loadResource(language)}
+			on:focus={() => loadResource(language)}
+			on:click={() => switchLanguage(language)}>{language}</button
+		>
+	{/each}
+
 	<ul>
 		<li><a href="/">Home</a></li>
 		<li><a href="/about">About</a></li>
 	</ul>
 
 	<slot />
+
+	<hr />
+
+	{JSON.stringify(data, null, 3)}
 {/if}

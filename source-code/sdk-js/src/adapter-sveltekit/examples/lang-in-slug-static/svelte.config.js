@@ -14,7 +14,7 @@ const config = {
 		adapter: adapter(),
 		prerender: {
 			// all root routes need to be included here
-			entries: ["/", "/de", "/en"],
+			entries: ["/", "/de", "/en" /* for each language */],
 		},
 	},
 }

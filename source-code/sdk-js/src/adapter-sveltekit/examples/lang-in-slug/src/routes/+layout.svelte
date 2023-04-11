@@ -17,4 +17,8 @@
 
 {#key language}
 	<slot />
+
+	<hr />
+
+	{JSON.stringify(data, null, 3)}
 {/key}

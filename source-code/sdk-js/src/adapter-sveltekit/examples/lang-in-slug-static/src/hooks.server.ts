@@ -1,6 +1,11 @@
 import type { Handle } from "@sveltejs/kit"
 import { initRuntime } from "@inlang/sdk-js/runtime"
-import { getResource, referenceLanguage } from "./inlang.server.js"
+import {
+	getResource,
+	languages,
+	referenceLanguage,
+	setInlangInformationToLocals,
+} from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
 
 export const handle = (async ({ event, resolve }) => {
@@ -19,12 +24,14 @@ export const handle = (async ({ event, resolve }) => {
 	runtime.switchLanguage(language)
 	const i = runtime.getInlangFunction()
 
-	event.locals.i18n = {
+	setInlangInformationToLocals(event.locals, {
+		referenceLanguage,
+		languages,
 		language,
 		i,
-	}
+	})
 
-	console.info("hooks.server.ts", event.locals.i18n.i("welcome"))
+	console.info("hooks.server.ts", i("welcome"))
 
 	serverFn(i)
 

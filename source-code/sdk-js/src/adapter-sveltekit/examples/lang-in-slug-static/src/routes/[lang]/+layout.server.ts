@@ -1,5 +1,8 @@
+import { getInlangInformationFromLocals } from "../../inlang.server.js"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const load = (async ({ locals }) => {
-	console.info("[lang]/+layout.server.ts", locals.i18n.i("welcome"))
+	const inlang = getInlangInformationFromLocals(locals)
+
+	console.info("[lang]/+layout.server.ts", inlang.i("welcome"))
 }) satisfies LayoutServerLoad

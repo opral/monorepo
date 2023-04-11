@@ -6,26 +6,33 @@ import type { Resource } from "@inlang/core/ast"
 
 // ------------------------------------------------------------------------------------------------
 
-export const initI18nRuntime = async (fetch: LoadEvent["fetch"], language: string) => {
-	const loadInlangData = <T>(url: string): Promise<T> =>
-		fetch(`/inlang${url}`).then((response) => (response.ok ? response.json() : undefined))
+type InitI18nRuntimeArgs = {
+	fetch: LoadEvent["fetch"]
+	language: string
+	referenceLanguage: string
+	languages: string[]
+}
 
+export const initI18nRuntime = async ({
+	fetch,
+	language,
+	referenceLanguage,
+	languages,
+}: InitI18nRuntimeArgs) => {
 	const runtime = initRuntime({
-		readResource: async (language: string) => loadInlangData<Resource>(`/${language}.json`),
+		readResource: async (language: string) =>
+			fetch(`/inlang/${language}.json`).then((response) =>
+				response.ok ? response.json() : undefined,
+			),
 	})
 
-	const [_, languages] = await Promise.all([
-		runtime.loadResource(language),
-		loadInlangData<string[]>("/languages.json"), // TODO: only load this if `languages` get used somewhere
-	])
-
-	localStorage.setItem("inlang-language", language)
-
+	await runtime.loadResource(language)
 	runtime.switchLanguage(language)
 
 	return {
 		...runtime,
 		getLanguages: () => languages,
+		getReferenceLanguage: () => referenceLanguage,
 	}
 }
 
@@ -37,6 +44,7 @@ export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 
 export type I18nContext = {
 	language: Readable<string>
+	referenceLanguage: string
 	languages: string[]
 	i: Readable<InlangFunction>
 	switchLanguage: (language: string) => Promise<void>
@@ -53,6 +61,7 @@ export const setI18nContext = (runtime: Runtime | undefined) => {
 				readResource: async (language: string) => loadInlangData<Resource>(`/${language}.json`),
 			}),
 			getLanguages: () => [],
+			getReferenceLanguage: () => "",
 		}
 	}
 
@@ -73,6 +82,7 @@ export const setI18nContext = (runtime: Runtime | undefined) => {
 
 	setContext<I18nContext>(inlangSymbol, {
 		language: derived(_language, (value) => value),
+		referenceLanguage: _runtime.getReferenceLanguage(),
 		languages: _runtime.getLanguages(),
 		i: derived(_i, (value) => value),
 		loadResource: _runtime.loadResource,

@@ -13,7 +13,7 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter({}),
 		prerender: {
-			entries: ["/", "/inlang/de.json", "/inlang/en.json", "/inlang/languages.json"],
+			entries: ["/", "/about", "/inlang/de.json", "/inlang/en.json" /* for each language */],
 		},
 	},
 }

@@ -4,12 +4,7 @@
 declare global {
 	namespace App {
 		// interface Error {}
-		interface Locals {
-			i18n: {
-				language: string
-				i: import("@inlang/sdk-js/runtime").InlangFunction
-			}
-		}
+		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
 	}
