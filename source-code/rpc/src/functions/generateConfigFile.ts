@@ -14,7 +14,7 @@ export async function generateConfigFileServer(args: {
 		const [success, exception] = await _generateConfigFileRecursive(args)
 		telemetryNode.capture({
 			distinctId: "unknown",
-			event: "config file generated",
+			event: "RPC config file generated",
 			properties: {
 				success: success ? true : false,
 				promptVersion: promptVersion,

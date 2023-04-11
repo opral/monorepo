@@ -6,6 +6,10 @@
 			"types": "./dist/config/index.d.ts",
 			"import": "./dist/config/index.js"
 		},
+		"./detectors": {
+			"types": "./dist/detectors/index.d.ts",
+			"import": "./dist/detectors/index.js"
+		}
 		"./runtime": {
 			"types": "./dist/runtime/index.d.ts",
 			"import": "./dist/runtime/index.js"
