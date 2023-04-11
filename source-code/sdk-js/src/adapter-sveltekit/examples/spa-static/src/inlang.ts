@@ -25,8 +25,10 @@ export const initI18nRuntime = async ({
 			),
 	})
 
-	await runtime.loadResource(language)
-	runtime.switchLanguage(language)
+	if (language) {
+		await runtime.loadResource(language)
+		runtime.switchLanguage(language)
+	}
 
 	return {
 		...runtime,
