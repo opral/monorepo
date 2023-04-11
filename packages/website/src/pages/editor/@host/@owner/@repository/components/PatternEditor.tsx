@@ -209,12 +209,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		telemetryBrowser.capture("onKeyDown input field", {
-			event: event,
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
+		// telemetryBrowser.capture("onKeyDown input field", {
+		// 	event: event,
+		// 	targetLanguage: props.language,
+		// 	owner: routeParams().owner,
+		// 	repository: routeParams().repository,
+		// })
 		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
 			event.preventDefault()
 			handleCommit()
@@ -260,11 +260,11 @@ export function PatternEditor(props: {
 				prop:placeholder="Enter translation ..."
 				onFocus={() => {
 					setIsFocused(true)
-					telemetryBrowser.capture("onFocused imput field", {
-						targetLanguage: props.language,
-						owner: routeParams().owner,
-						repository: routeParams().repository,
-					})
+					// telemetryBrowser.capture("onFocused imput field", {
+					// 	targetLanguage: props.language,
+					// 	owner: routeParams().owner,
+					// 	repository: routeParams().repository,
+					// })
 				}}
 				onFocusOut={(e) => {
 					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
