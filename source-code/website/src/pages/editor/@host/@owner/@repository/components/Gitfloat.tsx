@@ -1,88 +1,263 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, JSXElement, onCleanup, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
+import { pushChanges, useEditorState } from "../State.jsx"
+import type { SlDialog } from "@shoelace-style/shoelace"
+import { showToast } from "@src/components/Toast.jsx"
+import { navigate } from "vite-plugin-ssr/client/router"
+import { github } from "@src/services/github/index.js"
+import { currentPageContext } from "@src/renderer/state.js"
+import type { EditorRouteParams } from "../types.js"
+import { SignInDialog } from "@src/services/auth/index.js"
+import { publicEnv } from "@inlang/env-variables"
+import { telemetryBrowser } from "@inlang/telemetry"
+import { isAfter, subSeconds } from "date-fns"
+// import { fs } from "memfs"
 
 export const Gitfloat = () => {
+	const {
+		userIsCollaborator,
+		githubRepositoryInformation,
+		currentBranch,
+		unpushedChanges,
+		setFsChange,
+		setLastPush,
+		routeParams,
+		fs,
+		setLastPullTime,
+	} = useEditorState()
 	const [localStorage] = useLocalStorage()
+
+	// ui states
 	const [gitState, setGitState] = createSignal<"login" | "fork" | "changes" | "pullrequest">(
 		"login",
 	)
-
+	const [isLoading, setIsLoading] = createSignal(false)
+	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
+	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
+	const [latestChange, setLatestChange] = createSignal<Date>()
+	const [showPulse, setShowPulse] = createSignal(false)
 	createEffect(() => {
-		if (localStorage.user) {
-			setGitState("fork")
-		} else {
-			setGitState("login")
+		if (unpushedChanges()) {
+			setLatestChange(new Date())
 		}
-		// setGitState("changes")
-		// setGitState("pullrequest")
 	})
 
-	const data = {
+	createEffect(() => {
+		if (localStorage?.user === undefined) {
+			setGitState("login")
+		} else {
+			if (localStorage?.user && !githubRepositoryInformation()?.data.fork) {
+				setGitState("fork")
+			} else if (
+				hasPushedChanges() &&
+				(unpushedChanges() ?? []).length <= 0 &&
+				githubRepositoryInformation()?.data.fork
+			) {
+				setGitState("pullrequest")
+			} else if (userIsCollaborator() === true) {
+				setGitState("changes")
+			}
+		}
+	})
+
+	let signInDialog: SlDialog | undefined
+
+	function onSignIn() {
+		signInDialog?.show()
+	}
+
+	async function handleFork() {
+		setIsLoading(true)
+		if (localStorage.user === undefined) {
+			return
+		}
+		telemetryBrowser.capture("create fork", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+		})
+		const response = await github.rest.repos.createFork({
+			owner: routeParams().owner,
+			repo: routeParams().repository,
+		})
+		if (response.status === 202) {
+			showToast({
+				variant: "success",
+				title: "The Fork has been created.",
+				message: `Don't forget to open a pull request`,
+			})
+			setIsLoading(false)
+			// full name is owner/repo
+			return navigate(`/editor/github.com/${response.data.full_name}`)
+		} else {
+			showToast({
+				variant: "danger",
+				title: "The creation of the fork failed.",
+				message: `Please try it again or report a bug`,
+			})
+			return response
+		}
+	}
+
+	// show the pulse if less than X seconds ago a change has been conducted
+	const interval = setInterval(() => {
+		const _latestChange = latestChange()
+		if (_latestChange === undefined) {
+			return setShowPulse(false)
+		}
+		const eightSecondsAgo = subSeconds(new Date(), 8)
+		return setShowPulse(isAfter(_latestChange, eightSecondsAgo))
+	}, 1000)
+
+	onCleanup(() => clearInterval(interval))
+
+	async function triggerPushChanges() {
+		if (localStorage?.user === undefined) {
+			return showToast({
+				title: "Failed to push changes",
+				message: "Please login first",
+				variant: "warning",
+			})
+		}
+		setIsLoading(true)
+		const [, exception] = await pushChanges({
+			fs: fs(),
+			routeParams: routeParams(),
+			user: localStorage.user,
+			setFsChange,
+			setLastPush,
+			setLastPullTime,
+		})
+		setIsLoading(false)
+		telemetryBrowser.capture("push changes", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: exception === undefined,
+		})
+		if (exception) {
+			return showToast({
+				title: "Failed to push changes",
+				message: "Please try again or file a bug. " + exception,
+				variant: "danger",
+			})
+		} else {
+			setHasPushedChanges(true)
+			return showToast({
+				title: "Changes have been pushed",
+				variant: "success",
+			})
+		}
+	}
+
+	createEffect(() => {
+		if (gitState() === "pullrequest") {
+			setPullrequestUrl(
+				`https://github.com/${
+					githubRepositoryInformation()?.data.parent?.full_name
+				}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
+					githubRepositoryInformation()?.data.name
+				}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
+					(currentPageContext.routeParams as EditorRouteParams).owner
+				}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`,
+			)
+		}
+	})
+
+	interface GitfloatData {
+		text: string
+		buttontext: string
+		icon: () => JSXElement
+		onClick: () => void
+		href?: string
+	}
+
+	interface GitFloatArray {
+		[state: string]: GitfloatData
+	}
+
+	const data: GitFloatArray = {
 		login: {
 			text: "You are in preview mode",
 			buttontext: "Sign in",
 			icon: () => {
 				return <IconGithub />
 			},
-			function: () => {
-				console.log("login")
-			},
+			onClick: onSignIn,
 		},
 		fork: {
-			text: "Fork for access",
+			text: "Fork to make changes",
 			buttontext: "Fork",
 			icon: IconFork,
-			function: () => {
-				console.log("fork")
-			},
+			onClick: handleFork,
 		},
 		changes: {
 			text: "local changes",
 			buttontext: "Push",
 			icon: IconPush,
-			function: () => {
-				console.log("push")
-			},
+			onClick: triggerPushChanges,
 		},
 		pullrequest: {
 			text: "",
 			buttontext: "New pull request",
 			icon: IconPullrequest,
-			function: () => {
+			href: "pullrequest",
+			onClick: () => {
+				telemetryBrowser.capture("open pull request", {
+					owner: routeParams().owner,
+					repository: routeParams().repository,
+				})
+				setHasPushedChanges(false)
 				console.log("open pull request")
 			},
 		},
 	}
 
 	return (
-		<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl">
-			<Show when={localStorage.user}>
-				<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
-					<img
-						src={localStorage.user?.avatarUrl}
-						alt="user avatar"
-						class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover"
-					/>
+		<>
+			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl">
+				<Show when={localStorage.user}>
+					<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+						<img
+							src={localStorage.user?.avatarUrl}
+							alt="user avatar"
+							class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover"
+						/>
+					</div>
+				</Show>
+				<div class="flex justify-start items-center self-stretch flex-grow relative gap-2 pl-3 pr-1.5 py-1.5">
+					<p class="flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface">
+						<Show when={gitState() === "changes"}>
+							<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-primary">
+								<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
+									{(unpushedChanges() ?? []).length}
+								</p>
+							</div>
+						</Show>
+						{data[gitState()].text}
+					</p>
+					<sl-button
+						prop:size="small"
+						onClick={() => data[gitState()].onClick()}
+						prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
+						prop:target="_blank"
+						prop:loading={isLoading()}
+						prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
+						class="on-inverted"
+					>
+						{data[gitState()].buttontext}
+						<div slot="suffix">{data[gitState()].icon}</div>
+					</sl-button>
 				</div>
-			</Show>
-			<div class="flex justify-start items-center self-stretch flex-grow relative gap-2 pl-3 pr-1.5 py-1.5">
-				<p class="flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface">
-					<Show when={gitState() === "changes"}>
-						<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-primary">
-							<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-								1 {/* changes */}
-							</p>
-						</div>
-					</Show>
-					{data[gitState()].text}
-				</p>
-				<sl-button prop:size="small" onClick={() => data[gitState()].function} class="on-inverted">
-					{data[gitState()].buttontext}
-					<div slot="suffix">{data[gitState()].icon}</div>
-				</sl-button>
 			</div>
-		</div>
+			<SignInDialog
+				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}
+				ref={signInDialog!}
+				onClickOnSignInButton={() => {
+					// hide the sign in dialog to increase UX when switching back to this window
+					signInDialog?.hide()
+				}}
+			/>
+		</>
 	)
 }
 
