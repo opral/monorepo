@@ -20,17 +20,17 @@ import { navigate } from "vite-plugin-ssr/client/router"
 import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js"
 import { SignInDialog } from "@src/services/auth/index.js"
 import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
-import { clientSideEnv } from "@env"
 import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
 import { Icon } from "@src/components/Icon.jsx"
 import CibGithub from "~icons/cib/github"
-import { telemetry } from "@inlang/shared/telemetry/browser"
+import { telemetryBrowser } from "@inlang/telemetry"
 import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { getLintReports, LintedNode } from "@inlang/core/lint"
 import { Gitfloat } from "./components/Gitfloat.jsx"
+import { publicEnv } from "@inlang/env-variables"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
@@ -112,9 +112,21 @@ function Breadcrumbs() {
 					d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
 				/>
 			</svg>
-			<h3>{routeParams().owner}</h3>
+			<a
+				href={`https://github.com/${routeParams().owner}`}
+				target="_blank"
+				class="link hover:text-primary"
+			>
+				<h3>{routeParams().owner}</h3>
+			</a>
 			<h3>/</h3>
-			<h3>{routeParams().repository}</h3>
+			<a
+				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
+				target="_blank"
+				class="link hover:text-primary"
+			>
+				<h3>{routeParams().repository}</h3>
+			</a>
 		</div>
 	)
 }
@@ -205,10 +217,6 @@ function HasChangesAction() {
 			})
 		}
 		setIsLoading(true)
-		telemetry.capture("push changes", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const [, exception] = await pushChanges({
 			fs: fs(),
 			routeParams: routeParams(),
@@ -218,6 +226,11 @@ function HasChangesAction() {
 			setLastPullTime,
 		})
 		setIsLoading(false)
+		telemetryBrowser.capture("push changes", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: exception === undefined,
+		})
 		if (exception) {
 			return showToast({
 				title: "Failed to push changes",
@@ -430,7 +443,7 @@ function StatusFilter() {
 					<span class="text-left text-on-surface-variant grow">Lints</span>
 					<a
 						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredStatus(() => ids().map((id) => id))}
+						onClick={() => setFilteredStatus(ids().map((id) => id))}
 					>
 						ALL
 					</a>
@@ -481,13 +494,14 @@ function SignInBanner() {
 		if (localStorage.user === undefined) {
 			return
 		}
-		telemetry.capture("create fork", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const response = await github.rest.repos.createFork({
 			owner: routeParams().owner,
 			repo: routeParams().repository,
+		})
+		telemetryBrowser.capture("fork created", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: response.status === 202,
 		})
 		if (response.status === 202) {
 			showToast({
@@ -575,7 +589,7 @@ function SignInBanner() {
 							// ugly workaround to close  the banner
 							// after the button has been clicked
 							onClick={() => {
-								telemetry.capture("open pull request", {
+								telemetryBrowser.capture("open pull request", {
 									owner: routeParams().owner,
 									repository: routeParams().repository,
 								})
@@ -601,7 +615,7 @@ function SignInBanner() {
 			</Switch>
 			{/* <sl-button onClick={handlesncForking}>can i fork this thing</sl-button> */}
 			<SignInDialog
-				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
+				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}
 				ref={signInDialog!}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window

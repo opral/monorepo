@@ -1,0 +1,11 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"include": ["src/**/*.ts", "src/**/*.ts", "validateEnvVariables.ts"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"outDir": "./dist",
+		// this module is not bundling. thus, set to esnext
+		"target": "ESNext"
+	}
+}

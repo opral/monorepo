@@ -19,20 +19,22 @@ export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
 
 	return (
 		<div class="relative z-10">
-			<NotificationPopup
-				notifications={[props.notification]}
-				open={
-					!props.condition
-						? () => {
-								return false
-						  }
-						: open
-				}
-				offset={44}
-				withIcon={false}
-				position="top-left"
-				handleClose={handleClose}
-			/>
+			<div class={open() ? "block" : "hidden"}>
+				<NotificationPopup
+					notifications={[props.notification]}
+					open={
+						!props.condition
+							? () => {
+									return false
+							  }
+							: open
+					}
+					offset={44}
+					withIcon={false}
+					position="top-left"
+					handleClose={handleClose}
+				/>
+			</div>
 			{props.children}
 		</div>
 	)

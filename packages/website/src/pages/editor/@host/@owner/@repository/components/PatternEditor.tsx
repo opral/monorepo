@@ -3,7 +3,6 @@ import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
-import { telemetry } from "@inlang/shared/telemetry/browser"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
@@ -11,7 +10,10 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
-import { isProduction } from "@env"
+import { Shortcut } from "./Shortcut.jsx"
+import type { Resource } from "@inlang/core/ast"
+import { rpc } from "@inlang/rpc"
+import { telemetryBrowser } from "@inlang/telemetry"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -105,49 +107,34 @@ export function PatternEditor(props: {
 	 * Saves the changes of the message.
 	 */
 	const handleCommit = () => {
-		telemetry.capture("commit changes", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const _copy = copy()
 		const _textValue = textValue()
 		if (_textValue === undefined) {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-		try {
-			//@ts-ignore
-			const updatedResource = query(resource()).upsert({ message: _copy! }).unwrap()
-			setResources([
-				...resources.filter(
-					(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-				),
-				updatedResource,
-			])
-			showToast({
-				variant: "info",
-				title: "The change has been committed.",
-				message: `Don't forget to push the changes.`,
-			})
-		} catch (e) {
-			showToast({
-				variant: "danger",
-				title: "Error",
-				message: (e as Error).message,
-			})
-			throw e
-		}
+		const updatedResource = query(resource()).upsert({ message: _copy! })
+		setResources([
+			...(resources.filter(
+				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
+			) as Resource[]),
+			updatedResource as Resource,
+		])
+		showToast({
+			variant: "info",
+			title: "The change has been committed.",
+			message: `Don't forget to push the changes.`,
+		})
+		telemetryBrowser.capture("commit changes", {
+			targetLanguage: props.language,
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+		})
 	}
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		telemetry.capture("create machine translation", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		if (props.referenceMessage === undefined) {
 			return showToast({
 				variant: "info",
@@ -165,35 +152,20 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		if (isProduction) {
-			const ENDPOINT = "/shared/rest/get-translation"
-			const result = await fetch("https://inlang.com" + ENDPOINT, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					text,
-					referenceLanguage: referenceResource()!.languageTag.name,
-					targetLanguage: props.language,
-				}),
-			})
-			const json = await result.json()
-			if (!result.ok) {
-				showToast({
-					variant: "warning",
-					title: "Machine translation failed.",
-					message: await result.json(),
-				})
-			} else {
-				setTextValue(await json.data)
-			}
-		} else {
+		const [translation, exception] = await rpc.machineTranslate({
+			text,
+			referenceLanguage: referenceResource()!.languageTag.name,
+			targetLanguage: props.language,
+			telemetryId: telemetryBrowser.get_distinct_id(),
+		})
+		if (exception) {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: "Machine translations are disabled in development. An env variable is missing.",
+				message: exception.message,
 			})
+		} else {
+			setTextValue(translation)
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -234,6 +206,13 @@ export function PatternEditor(props: {
 	const handleFocus = () => {
 		setIsFocused(true)
 		textArea?.focus()
+	}
+
+	const handleShortcut = (event: KeyboardEvent) => {
+		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+			event.preventDefault()
+			handleCommit()
+		}
 	}
 
 	return (
@@ -281,6 +260,7 @@ export function PatternEditor(props: {
 				}}
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
+				onKeyDown={(event) => handleShortcut(event)}
 			/>
 			{/* <div
 					onFocus={() => setIsFocused(true)}
@@ -322,7 +302,7 @@ export function PatternEditor(props: {
 								}}
 							>
 								<MaterialSymbolsCommitRounded slot="prefix" />
-								{/* <Shortcut slot="suffix" color="primary" codes={["ControlLeft", "Enter"]} /> */}
+								<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 								Commit
 							</sl-button>
 						</Show>

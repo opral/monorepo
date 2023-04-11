@@ -78,7 +78,7 @@ describe("query.update", () => {
 
 describe("query.upsert", () => {
 	it("should upsert a message if it does not exist", () => {
-		const [resource] = query(mockResource).upsert({
+		const resource = query(mockResource).upsert({
 			message: {
 				type: "Message",
 				id: { type: "Identifier", name: "new-message-1234" },
@@ -93,7 +93,7 @@ describe("query.upsert", () => {
 	it("should update an existing message", () => {
 		const message = query(mockResource).get({ id: "first-message" })
 		message!.pattern.elements = [{ type: "Text", value: "updated" }]
-		const [updatedResource] = query(mockResource).upsert({
+		const updatedResource = query(mockResource).upsert({
 			message: message!,
 		})
 		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
