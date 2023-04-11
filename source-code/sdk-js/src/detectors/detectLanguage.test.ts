@@ -5,8 +5,11 @@ import type { Detector } from "./types.js"
 
 vi.mock("./matchLanguage.js", () => {
 	return {
-		matchLanguage: vi.fn((detectedLanguages: string[], languages: string[]) =>
-			detectedLanguages.find((lang) => languages.includes(lang)),
+		matchLanguage: vi.fn((detectedLanguages: string[], languages: string[], allowRelated = true) =>
+			languages.find((lang) => detectedLanguages.some(l => allowRelated
+				? l.startsWith(lang) || lang.startsWith(l)
+				: l === lang
+			))
 		),
 	}
 })
@@ -60,6 +63,19 @@ describe("detectLanguage", () => {
 			...detectors,
 		)
 		expect(matchLanguage).toBeCalledTimes(1)
+		expect(detected).toBe("de")
+	})
+
+	test("should call all detectors and check for exact matches first", async () => {
+		const detectors: Detector[] = [vi.fn(() => ["de-DE"]), vi.fn(async () => ['fr']), vi.fn(() => ['it'])]
+		const detected = await detectLanguage(
+			{
+				referenceLanguage: "en",
+				languages: ["de", "en"],
+			},
+			...detectors,
+		)
+		expect(matchLanguage).toBeCalledTimes(4)
 		expect(detected).toBe("de")
 	})
 })

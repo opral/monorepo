@@ -13,7 +13,7 @@ import type { Detector } from "./types.js"
 export const matchLanguage = (
 	detectedLanguages: ReturnType<Detector>,
 	languages: Array<Language>,
-	allowRelated = false,
+	allowRelated = true,
 ) => {
 	for (const detectedLanguage of detectedLanguages) {
 		// check for perfect match

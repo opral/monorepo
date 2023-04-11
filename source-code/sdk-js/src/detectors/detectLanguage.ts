@@ -5,7 +5,7 @@ import type { Detector } from "./types.js"
 type DetectLanguageParams = {
 	referenceLanguage: Language
 	languages: Array<Language>
-	allowRelated: boolean
+	allowRelated?: boolean
 }
 
 /**
@@ -24,11 +24,14 @@ export const detectLanguage = async (
 	{ referenceLanguage, languages, allowRelated = true }: DetectLanguageParams,
 	...detectors: Detector[]
 ): Promise<Language> => {
+	const allDetectedLanguages: Array<Language> = []
 	for (const detector of detectors) {
 		const detectedLanguages = await detector()
-		const matchedLanguage = matchLanguage(detectedLanguages, languages, allowRelated)
+		const matchedLanguage = matchLanguage(detectedLanguages, languages, false)
 		if (matchedLanguage) return matchedLanguage
+
+		allDetectedLanguages.push(...detectedLanguages)
 	}
 
-	return referenceLanguage
+	return allowRelated && matchLanguage(allDetectedLanguages, languages) || referenceLanguage
 }
