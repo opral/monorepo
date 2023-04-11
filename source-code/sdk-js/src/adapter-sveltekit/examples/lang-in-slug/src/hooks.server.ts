@@ -1,5 +1,6 @@
 import { redirect, type Handle } from "@sveltejs/kit"
 import { initRuntime } from "@inlang/sdk-js/runtime"
+import { detectLanguage, initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors"
 import {
 	getResource,
 	languages,
@@ -16,8 +17,8 @@ export const handle = (async ({ event, resolve }) => {
 
 	const language = pathname.split("/")[1]
 	if (!language || !languages.includes(language)) {
-		const detectedLanguage = referenceLanguage // TODO: detect preferred language
-		throw redirect(307, detectedLanguage) // TODO: replace slug instead of redirecting to homepage
+		const detectedLanguage = await detectLanguage({ referenceLanguage, languages }, initAcceptLanguageHeaderDetector(event.request.headers))
+		throw redirect(307, detectedLanguage) // TODO: replace slug instead of redirecting to homepage or make it an option
 	}
 
 	const runtime = initRuntime({

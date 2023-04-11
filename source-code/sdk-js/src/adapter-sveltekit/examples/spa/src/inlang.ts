@@ -42,6 +42,8 @@ export const initI18nRuntime = async ({
 
 export const inlangSymbol = Symbol.for("inlang")
 
+export const localStorageKey = "inlang-language"
+
 export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 
 export type I18nContext = {
@@ -70,7 +72,7 @@ export const setI18nContext = (runtime: Runtime) => {
 		_i.set(runtime.getInlangFunction())
 		_language.set(language)
 
-		localStorage.setItem("inlang-language", language)
+		localStorage.setItem(localStorageKey, language)
 	}
 
 	setContext<I18nContext>(inlangSymbol, {

@@ -43,8 +43,6 @@ export const initI18nRuntime = async ({
 
 export const inlangSymbol = Symbol.for("inlang")
 
-export type InlangSymbol = typeof inlangSymbol
-
 type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
 
 export type I18nContext = {

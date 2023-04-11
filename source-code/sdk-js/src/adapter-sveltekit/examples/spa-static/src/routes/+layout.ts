@@ -1,6 +1,7 @@
 import { browser } from "$app/environment"
-import { initI18nRuntime, inlangSymbol } from "../inlang.js"
+import { initI18nRuntime, inlangSymbol, localStorageKey } from "../inlang.js"
 import type { LayoutLoad } from "./$types.js"
+import { detectLanguage, initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors"
 
 export const prerender = true
 
@@ -8,14 +9,14 @@ export const load = (async ({ fetch, data }) => {
 	let language: string | undefined = undefined
 
 	if (browser) {
-		// Note: SPA (non-static) could also detect the language on the server
-		language =
-			(browser
-				? localStorage.getItem("inlang-language") // TODO: detect language
-				: undefined) || data.referenceLanguage
+		language = await detectLanguage(
+			{ referenceLanguage: data.referenceLanguage, languages: data.languages },
+			initLocalStorageDetector(localStorageKey),
+			navigatorDetector
+		)
 	}
 
-	browser && localStorage.setItem("inlang-language", language as string)
+	browser && localStorage.setItem(localStorageKey, language as string)
 
 	const runtime = await initI18nRuntime({
 		fetch,
