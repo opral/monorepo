@@ -209,7 +209,7 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		telemetryBrowser.capture("onKeyDown", {
+		telemetryBrowser.capture("onKeyDown input field", {
 			event: event,
 			targetLanguage: props.language,
 			owner: routeParams().owner,
@@ -260,7 +260,7 @@ export function PatternEditor(props: {
 				prop:placeholder="Enter translation ..."
 				onFocus={() => {
 					setIsFocused(true)
-					telemetryBrowser.capture("clicked in imputfield", {
+					telemetryBrowser.capture("onFocused imput field", {
 						targetLanguage: props.language,
 						owner: routeParams().owner,
 						repository: routeParams().repository,
