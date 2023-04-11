@@ -1,9 +1,0 @@
-{
-	"extends": "configs/typescript/tsconfig.base.json",
-	"include": ["src/**/*.ts", "lib/**/*.ts"],
-	"compilerOptions": {
-		"lib": ["ESNext", "DOM"],
-		"types": [],
-		"outDir": "./dist"
-	}
-}

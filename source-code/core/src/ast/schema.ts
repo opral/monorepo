@@ -12,10 +12,6 @@ export type DetectorTemplate<Parameters extends Array<unknown>> = (
 	...parameters: Parameters
 ) => ReturnType<Detector>
 
-export type Language = string
-
-export type Language = string
-
 export type NodeName =
 	| "Identifier"
 	| "Resource"
