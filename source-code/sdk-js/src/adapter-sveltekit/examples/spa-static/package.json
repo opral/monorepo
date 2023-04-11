@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@inlang/core": "file:../../../../../core",
 		"@inlang/sdk-js": "file:../../../..",
+		"@playwright/test": "^1.32.3",
 		"@sveltejs/adapter-static": "^2.0.1",
 		"@sveltejs/kit": "^1.15.2",
 		"svelte": "^3.58.0",
