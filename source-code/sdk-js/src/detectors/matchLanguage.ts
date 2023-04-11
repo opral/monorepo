@@ -13,7 +13,7 @@ import type { Detector } from "./types.js"
 
 export const matchLanguage = (
 	detected: ReturnType<Detector>,
-	availableLanguages: Set<Language>,
+	availableLanguages: Array<Language>,
 	allowRelated = false,
 ) => {
 	// The found related langs including their index from availableLanguages
