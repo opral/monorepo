@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, Match, Show, Switch } from "solid-js"
+import { createEffect, createSignal, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 
 export const Gitfloat = () => {
@@ -14,15 +14,17 @@ export const Gitfloat = () => {
 		} else {
 			setGitState("login")
 		}
-		setGitState("changes")
-		setGitState("pullrequest")
+		// setGitState("changes")
+		// setGitState("pullrequest")
 	})
 
 	const data = {
 		login: {
 			text: "You are in preview mode",
 			buttontext: "Sign in",
-			icon: IconGithub,
+			icon: () => {
+				return <IconGithub />
+			},
 			function: () => {
 				console.log("login")
 			},
@@ -75,7 +77,7 @@ export const Gitfloat = () => {
 					</Show>
 					{data[gitState()].text}
 				</p>
-				<sl-button prop:size="small" onClick={data[gitState()].function} class="on-inverted">
+				<sl-button prop:size="small" onClick={() => data[gitState()].function} class="on-inverted">
 					{data[gitState()].buttontext}
 					<div slot="suffix">{data[gitState()].icon}</div>
 				</sl-button>
