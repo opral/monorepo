@@ -1,4 +1,4 @@
-import { serverSideEnv } from "@env"
+import { privateEnv } from "@inlang/env-variables"
 import express from "express"
 import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
 
@@ -6,8 +6,6 @@ import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./impleme
  * Routes for the auth service
  */
 export const router = express.Router()
-
-const env = await serverSideEnv()
 
 /**
  * OAuth flow from GitHub
@@ -18,10 +16,10 @@ const env = await serverSideEnv()
 router.get("/github-oauth-callback", async (request, response, next) => {
 	try {
 		const code = request.query.code as string
-		const accessToken = await exchangeInterimCodeForAccessToken({ code, env })
+		const accessToken = await exchangeInterimCodeForAccessToken({ code, env: privateEnv })
 		const encryptedAccessToken = await encryptAccessToken({
 			accessToken,
-			JWE_SECRET_KEY: env.JWE_SECRET_KEY,
+			JWE_SECRET_KEY: privateEnv.JWE_SECRET,
 		})
 		// set the session
 		request.session = {

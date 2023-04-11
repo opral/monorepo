@@ -2,6 +2,7 @@ import { createContext, JSXElement, onCleanup, onMount, useContext } from "solid
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store"
 import { getUserInfo } from "@src/services/auth/index.js"
 import { defaultLocalStorage, LocalStorageSchema } from "./schema.js"
+import { telemetryBrowser } from "@inlang/telemetry"
 
 const LocalStorageContext = createContext()
 
@@ -58,6 +59,9 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		getUserInfo()
 			.then((userOrUndefined) => {
 				setStore("user", userOrUndefined)
+				if (userOrUndefined) {
+					telemetryBrowser.identify(userOrUndefined.username)
+				}
 			})
 			// set user to undefined if an error occurs
 			.catch(() => setStore("user", undefined))
