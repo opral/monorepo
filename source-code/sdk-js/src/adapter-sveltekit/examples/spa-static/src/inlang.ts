@@ -1,7 +1,7 @@
 import type { LoadEvent } from "@sveltejs/kit"
 import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
-import { derived, writable, type Readable } from "svelte/store"
+import { readonly, writable, type Readable } from "svelte/store"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -79,10 +79,10 @@ export const setI18nContext = (runtime: Runtime) => {
 	}
 
 	setContext<I18nContext>(inlangSymbol, {
-		language: derived(_language, (value) => value),
+		language: readonly(_language),
 		referenceLanguage: runtime.getReferenceLanguage(),
 		languages: runtime.getLanguages(),
-		i: derived(_i, (value) => value),
+		i: readonly(_i),
 		loadResource: runtime.loadResource,
 		switchLanguage,
 		route: (href) => href,
