@@ -1,0 +1,23 @@
+{
+	"name": "@inlang-git/fs",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"---- DEV AND BUILD": "Are not required. Direct TypeScript import is possible because this module is only used internally.",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {},
+	"peerDependencies": {}
+}
