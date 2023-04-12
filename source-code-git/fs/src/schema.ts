@@ -1,7 +1,7 @@
 export type Filesystem = {
 	writeFile: (path: string, content: string) => Promise<void>
-	readFile: (path: string) => Promise<string>
-	readdir: (path: string) => Promise<string[] | undefined>
+	readFile: (path: string) => Promise<string | null>
+	readdir: (path: string) => Promise<string[] | null>
 	mkdir: (path: string) => Promise<void>
 	/**
 	 * Serializes the filesystem to a JSON string.
@@ -25,6 +25,5 @@ export type Filesystem = {
 		 *   fs.toJson({ exclude: ["**\/node_modules"] })
 		 */
 		exclude?: string[]
-	}) => Record<string, any>
-	fromJson: (json: string) => Filesystem
+	}) => Promise<Record<string, any>>
 }
