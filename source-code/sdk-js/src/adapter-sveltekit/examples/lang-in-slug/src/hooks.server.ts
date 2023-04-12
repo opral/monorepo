@@ -8,7 +8,7 @@ import {
 	setInlangInformationToLocals,
 } from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
-import { replaceLanguageInUrl, type RelativeUrl } from './inlang.js'
+import { replaceLanguageInUrl, type RelativeUrl } from "./inlang.js"
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
@@ -18,7 +18,10 @@ export const handle = (async ({ event, resolve }) => {
 
 	const language = pathname.split("/")[1]
 	if (!language || !languages.includes(language)) {
-		const detectedLanguage = await detectLanguage({ referenceLanguage, languages }, initAcceptLanguageHeaderDetector(event.request.headers))
+		const detectedLanguage = await detectLanguage(
+			{ referenceLanguage, languages },
+			initAcceptLanguageHeaderDetector(event.request.headers),
+		)
 		throw redirect(307, replaceLanguageInUrl(event.url, detectedLanguage).toString())
 	}
 

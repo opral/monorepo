@@ -1,7 +1,11 @@
 import { browser } from "$app/environment"
 import { initI18nRuntime, inlangSymbol, localStorageKey } from "../inlang.js"
 import type { LayoutLoad } from "./$types.js"
-import { detectLanguage, initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors"
+import {
+	detectLanguage,
+	initLocalStorageDetector,
+	navigatorDetector,
+} from "@inlang/sdk-js/detectors"
 
 export const prerender = true
 
@@ -12,7 +16,7 @@ export const load = (async ({ fetch, data }) => {
 		language = await detectLanguage(
 			{ referenceLanguage: data.referenceLanguage, languages: data.languages },
 			initLocalStorageDetector(localStorageKey),
-			navigatorDetector
+			navigatorDetector,
 		)
 	}
 

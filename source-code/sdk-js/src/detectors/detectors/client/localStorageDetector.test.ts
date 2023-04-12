@@ -4,7 +4,7 @@ import { initLocalStorageDetector, localStorageDetector } from "./localStorageDe
 const language = "de"
 
 const storage = {
-	language
+	language,
 }
 
 vi.stubGlobal("localStorage", { getItem: (key: string) => storage[key as keyof typeof storage] })
@@ -18,13 +18,12 @@ describe("localStorageDetector", () => {
 
 describe("initLocalStorageDetector", () => {
 	test("returns the language from the localStorage", () => {
-		const detector = initLocalStorageDetector('language')
+		const detector = initLocalStorageDetector("language")
 		expect(detector()).toEqual([language])
 	})
 
 	test("returns an empty array if not present", () => {
-		const detector = initLocalStorageDetector('lang')
+		const detector = initLocalStorageDetector("lang")
 		expect(detector()).toEqual([])
 	})
 })
-

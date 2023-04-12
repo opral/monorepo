@@ -4,7 +4,7 @@ import { initSessionStorageDetector, sessionStorageDetector } from "./sessionSto
 const language = "fr"
 
 const storage = {
-	language
+	language,
 }
 
 vi.stubGlobal("sessionStorage", { getItem: (key: string) => storage[key as keyof typeof storage] })
@@ -18,13 +18,12 @@ describe("localStorageDetector", () => {
 
 describe("sessionLocalStorageDetector", () => {
 	test("returns the language from the sessionStorage", () => {
-		const detector = initSessionStorageDetector('language')
+		const detector = initSessionStorageDetector("language")
 		expect(detector()).toEqual([language])
 	})
 
 	test("returns an empty array if not present", () => {
-		const detector = initSessionStorageDetector('lang')
+		const detector = initSessionStorageDetector("lang")
 		expect(detector()).toEqual([])
 	})
 })
-
