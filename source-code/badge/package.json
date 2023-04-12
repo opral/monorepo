@@ -22,6 +22,7 @@
 	"dependencies": {
 		"@inlang/core": "*",
 		"@resvg/resvg-js": "^2.4.1",
+		"memfs": "^3.5.0",
 		"satori": "^0.4.7",
 		"satori-html": "^0.3.2"
 	},
