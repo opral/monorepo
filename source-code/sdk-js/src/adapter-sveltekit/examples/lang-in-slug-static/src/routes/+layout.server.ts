@@ -3,12 +3,10 @@ import type { LayoutServerLoad } from "./$types.js"
 
 export const prerender = true
 
-export const load = (async ({ locals, url }) => {
+export const load = (async ({ locals }) => {
 	const inlang = getInlangInformationFromLocals(locals)
 
 	console.info("+layout.server.ts", inlang.i("welcome"))
-
-	url.pathname // just to trigger invalidation on url change
 
 	return {
 		"+layout.server.ts": Math.random(),

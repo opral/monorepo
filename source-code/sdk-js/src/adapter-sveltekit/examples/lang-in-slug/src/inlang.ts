@@ -7,6 +7,10 @@ import { get } from "svelte/store"
 
 // ------------------------------------------------------------------------------------------------
 
+export const inlangSymbol = Symbol.for("inlang")
+
+// ------------------------------------------------------------------------------------------------
+
 type InitI18nRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
 	language: string
@@ -39,11 +43,11 @@ export const initI18nRuntime = async ({
 	}
 }
 
+type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
+
 // ------------------------------------------------------------------------------------------------
 
-export const inlangSymbol = Symbol.for("inlang")
-
-type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
+export type RelativeUrl = `/${string}`
 
 export type I18nContext = {
 	language: string
@@ -55,7 +59,10 @@ export type I18nContext = {
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-const replaceLanguageInUrl = (pathname: RelativeUrl, language: string) => {
+export const replaceLanguageInUrl = (url: URL, language: string) =>
+	new URL(`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${url.hash}`)
+
+const replaceLanguageInSlug = (pathname: RelativeUrl, language: string) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [_, __, ...path] = pathname.split("/")
 	return `/${language}/${path.join("/")}`
@@ -64,10 +71,10 @@ const replaceLanguageInUrl = (pathname: RelativeUrl, language: string) => {
 export const setI18nContext = (runtime: Runtime) => {
 	const language = runtime.getLanguage() as string
 
-	const switchLanguage = (language: string) => {
-		if (runtime.getLanguage() === language) return Promise.resolve()
+	const switchLanguage = async (language: string) => {
+		if (runtime.getLanguage() === language) return
 
-		return goto(replaceLanguageInUrl(get(page).url.pathname as RelativeUrl, language))
+		return goto(replaceLanguageInUrl(get(page).url, language), { invalidateAll: true })
 	}
 
 	setContext(inlangSymbol, {
@@ -82,10 +89,6 @@ export const setI18nContext = (runtime: Runtime) => {
 }
 
 export const getI18nContext = (): I18nContext => getContext(inlangSymbol)
-
-// ------------------------------------------------------------------------------------------------
-
-type RelativeUrl = `/${string}`
 
 export const route = (language: string, href: RelativeUrl) => {
 	const url = `/${language}${href}`

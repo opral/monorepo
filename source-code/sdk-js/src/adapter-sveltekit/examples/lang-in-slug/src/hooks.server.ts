@@ -8,17 +8,18 @@ import {
 	setInlangInformationToLocals,
 } from "./inlang.server.js"
 import { serverFn } from "./utils/server.js"
+import { replaceLanguageInUrl, type RelativeUrl } from './inlang.js'
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
 
-	const pathname = event.url.pathname
+	const pathname = event.url.pathname as RelativeUrl
 	if (pathname.startsWith("/inlang")) return resolve(event)
 
 	const language = pathname.split("/")[1]
 	if (!language || !languages.includes(language)) {
 		const detectedLanguage = await detectLanguage({ referenceLanguage, languages }, initAcceptLanguageHeaderDetector(event.request.headers))
-		throw redirect(307, detectedLanguage) // TODO: replace slug instead of redirecting to homepage or make it an option
+		throw redirect(307, replaceLanguageInUrl(event.url, detectedLanguage).toString())
 	}
 
 	const runtime = initRuntime({

@@ -2,7 +2,14 @@ import type { LoadEvent } from "@sveltejs/kit"
 import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { derived, writable, type Readable } from "svelte/store"
-import { navigating } from "$app/stores"
+
+// ------------------------------------------------------------------------------------------------
+
+export const inlangSymbol = Symbol.for("inlang")
+
+// ------------------------------------------------------------------------------------------------
+
+export const localStorageKey = "language"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -38,13 +45,11 @@ export const initI18nRuntime = async ({
 	}
 }
 
+export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
+
 // ------------------------------------------------------------------------------------------------
 
-export const inlangSymbol = Symbol.for("inlang")
-
-export const localStorageKey = "inlang-language"
-
-export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
+type RelativeUrl = `/${string}`
 
 export type I18nContext = {
 	language: Readable<string>
@@ -55,8 +60,6 @@ export type I18nContext = {
 	loadResource: Runtime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
-
-type RelativeUrl = `/${string}`
 
 export const setI18nContext = (runtime: Runtime) => {
 	const _language = writable(runtime.getLanguage() as string)

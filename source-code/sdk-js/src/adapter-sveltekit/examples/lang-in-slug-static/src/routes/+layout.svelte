@@ -13,14 +13,15 @@
 	}
 
 	$: console.info("+layout.svelte", i("welcome"))
-	$: console.log(language);
-
+	$: console.log(language)
 </script>
 
 {#if language}
-	<slot />
+	{#key language}
+		<slot />
 
-	<hr />
+		<hr />
 
-	{JSON.stringify(data, null, 3)}
+		{JSON.stringify(data, null, 3)}
+	{/key}
 {/if}
