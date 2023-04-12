@@ -12,20 +12,18 @@ async function readInlangConfig() {
 
 	const cwd = process.cwd()
 
-	const module = (await import(resolve(cwd, "./inlang.config.js")).catch(() => undefined)) as
+	const module = (await import(/* @vite-ignore */ resolve(cwd, "./inlang.config.js"))) as
 		| { defineConfig: DefineConfig }
 		| undefined
 	if (!module || !module.defineConfig) {
 		return undefined
 	}
 
-	const config = await module
-		.defineConfig({
-			// @ts-ignore TODO: this should be fixed
-			$fs: fs,
-			$import,
-		})
-		.catch(() => undefined)
+	const config = await module.defineConfig({
+		// @ts-ignore TODO: this should be fixed
+		$fs: fs,
+		$import,
+	})
 
 	return config
 }
