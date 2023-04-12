@@ -1,55 +1,13 @@
-import type { LoadEvent } from "@sveltejs/kit"
-import { initRuntime, type InlangFunction } from "@inlang/sdk-js/runtime"
+import type { InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { readonly, writable, type Readable } from "svelte/store"
-
-// ------------------------------------------------------------------------------------------------
-
-export const inlangSymbol = Symbol.for("inlang")
-
+import { inlangSymbol, type RelativeUrl } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import type { Runtime } from '@inlang/sdk-js/adapter-sveltekit/client'
 // ------------------------------------------------------------------------------------------------
 
 export const localStorageKey = "language"
 
 // ------------------------------------------------------------------------------------------------
-
-type InitI18nRuntimeArgs = {
-	fetch: LoadEvent["fetch"]
-	language: string
-	referenceLanguage: string
-	languages: string[]
-}
-
-export const initI18nRuntime = async ({
-	fetch,
-	language,
-	referenceLanguage,
-	languages,
-}: InitI18nRuntimeArgs) => {
-	const runtime = initRuntime({
-		readResource: async (language: string) =>
-			fetch(`/inlang/${language}.json`).then((response) =>
-				response.ok ? response.json() : undefined,
-			),
-	})
-
-	if (language) {
-		await runtime.loadResource(language)
-		runtime.switchLanguage(language)
-	}
-
-	return {
-		...runtime,
-		getReferenceLanguage: () => referenceLanguage,
-		getLanguages: () => languages,
-	}
-}
-
-export type Runtime = Awaited<ReturnType<typeof initI18nRuntime>>
-
-// ------------------------------------------------------------------------------------------------
-
-type RelativeUrl = `/${string}`
 
 export type I18nContext = {
 	language: Readable<string>

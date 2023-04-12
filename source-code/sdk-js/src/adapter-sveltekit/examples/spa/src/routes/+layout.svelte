@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { getI18nContext, inlangSymbol, setI18nContext } from "../inlang.js"
+import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import { getI18nContext, setI18nContext } from "../inlang.js"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setI18nContext(data[inlangSymbol])
+	setI18nContext(getInlangPayload(data))
 
 	let { i, language, languages, loadResource, switchLanguage } = getI18nContext()
 

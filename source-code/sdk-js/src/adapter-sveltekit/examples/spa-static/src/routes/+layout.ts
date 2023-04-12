@@ -1,5 +1,7 @@
 import { browser } from "$app/environment"
-import { initI18nRuntime, inlangSymbol, localStorageKey } from "../inlang.js"
+import { setInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { initI18nRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { localStorageKey } from "../inlang.js"
 import type { LayoutLoad } from "./$types.js"
 import {
 	detectLanguage,
@@ -35,5 +37,5 @@ export const load = (async ({ fetch, data }) => {
 		console.info("+layout.ts", i("welcome"))
 	}
 
-	return { ...(data || {}), "+layout.ts": Math.random(), [inlangSymbol]: runtime }
+	return { ...(data || {}), "+layout.ts": Math.random(), ...setInlangPayload(runtime) }
 }) satisfies LayoutLoad

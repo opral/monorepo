@@ -1,5 +1,9 @@
 export const inlangSymbol = Symbol.for("inlang")
 
+export const setInlangPayload = <P>(payload: P) => ({ [inlangSymbol]: payload })
+
+export const getInlangPayload = <P>(data: { [inlangSymbol]: P }) => data[inlangSymbol]
+
 // ------------------------------------------------------------------------------------------------
 
 export type RelativeUrl = `/${string}`
