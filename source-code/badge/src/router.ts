@@ -44,7 +44,7 @@ router.get(
 			const { url, size } = req.query
 			if (!url) {
 				res.send(
-					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/inlang",
+					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example",
 				)
 				return
 			}

@@ -5,12 +5,30 @@ import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/co
 import { getLintReports, lint } from "@inlang/core/lint"
 import { Volume } from "memfs"
 import type { fs as memfs } from "memfs"
+import type * as ast from "@inlang/core/ast"
 
-// // const markup = (url: string) => html`<div style="color: black;">${url}</div>`
-// const markup = html`<div
-// 	style="display: flex; background-color: navy; height: 300px; width: 300px"
-// ></div>`
-// // See https://github.com/vercel/satori#documentation
+const markup = (percentage: number) => html` <div style="display: flex;">
+	<style></style>
+	<div
+		style="display: flex;
+			background: #333;
+			border-radius: 13px;
+			height: 20px;
+			width: 300px;
+			padding: 3px;
+			overflow: hidden;"
+		id="progress"
+	>
+		<div
+			style="display: flex;
+			background: #4c1;
+			height: 100%;
+			border-radius: 9px;
+			width: ${percentage}%;
+			transition: width 0.5s ease-in-out;"
+		></div>
+	</div>
+</div>`
 
 // const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 
@@ -37,28 +55,25 @@ export const badge = async (url: string) => {
 	)
 	const config: Config = await defineConfig(env)
 	const resources = await config.readResources({ config })
+
 	const [resourcesWithLints, errors] = await lint({ resources, config })
 	if (errors) {
 		console.error("lints partially failed", errors)
 	}
+
+	const percentages = getRessourcePercentages(resourcesWithLints)
+
 	const lints = getLintReports(resourcesWithLints)
-	console.log(lints)
 
 	// @ts-ignore
-	// const image = await satori(markup, {
-	// 	width: 300,
-	// 	height: 300,
-	// 	fonts: [
-	// 		{
-	// 			family: "Inter",
-	// 			weight: 400,
-	// 			data: font,
-	// 		},
-	// 	],
-	// })
+	const image = await satori(markup(percentages[1].percentage), {
+		width: 300,
+		height: 300,
+		fonts: [],
+	})
 
 	// return image
-	return true
+	return image
 }
 
 /**
@@ -87,3 +102,38 @@ const patchedFs = (fs: (typeof memfs)["promises"]) =>
 			return target[prop as keyof typeof target]
 		},
 	})
+
+/**
+ * Get the percentage of translated messages.
+ */
+const getRessourcePercentages = (resources: ast.Resource[]) => {
+	// Define return type
+	const _percentages: {
+		lang: string
+		percentage: number
+		count: { total: number; lint: number }
+	}[] = []
+
+	// Calculate the percentage
+	resources.map((resource: ast.Resource) => {
+		const lintCount = resource.body.reduce((acc: number, message: ast.Message) => {
+			if (message.lint) {
+				return acc + 1
+			}
+			return acc
+		}, 0)
+		const percentage = ((lintCount / resource.body.length) * 100).toFixed(2)
+
+		// Push the percentage to the return array
+		_percentages.push({
+			lang: resource.languageTag.name,
+			percentage: Number(percentage),
+			count: {
+				total: resource.body.length,
+				lint: lintCount,
+			},
+		})
+	})
+
+	return _percentages
+}
