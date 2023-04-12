@@ -84,5 +84,6 @@ const patchedFs = (fs: (typeof memfs)["promises"]) =>
 					return fs.readdir(path, args)
 				}
 			}
+			return target[prop as keyof typeof target]
 		},
 	})
