@@ -1,11 +1,10 @@
 import satori from "satori"
 import { html } from "satori-html"
-import { readFileSync } from "node:fs"
 import clone from "./repo/clone.js"
-import git from "isomorphic-git"
-import fs from "./repo/fs.js"
-import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/config"
+import { getLintReports, lint } from "@inlang/core/lint"
+import { Volume } from "memfs"
+import type { fs as memfs } from "memfs"
 
 // // const markup = (url: string) => html`<div style="color: black;">${url}</div>`
 // const markup = html`<div
@@ -16,43 +15,34 @@ import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/co
 // const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 
 export const badge = async (url: string) => {
-	// Cloning the repository
-	await clone(url)
-
-	// Listing files
-	const files = await git.listFiles({ fs, dir: "/", ref: "HEAD" })
-	console.log(files)
-
-	// Get the content of the inlang.config.js file
-	const file = await fs.promises.readFile("inlang.config.js", "utf-8")
-	const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
-
-	// Import the file
-	const module = await import(/* @vite-ignore */ withMimeType)
-
+	// initialize a new file system on each request to prevent cross request pollution
+	const fs = Volume.fromJSON({})
+	await clone(url, fs)
 	// Set up the environment functions
-	const environmentFunctions: EnvironmentFunctions = {
+	const env: EnvironmentFunctions = {
 		$import: initialize$import({
-			fs: fs.promises,
+			fs: patchedFs(fs.promises),
 			fetch,
 		}),
-		$fs: fs.promises,
+		$fs: patchedFs(fs.promises),
 	}
-
-	// Execute the config file
-	const config: Config = await module.defineConfig({
-		...environmentFunctions,
-	})
-	console.log(config)
-
-	// Create a mock environment
-	const env = mockEnvironment({ copyDirectory: { fs, paths: ["/"] } })
-
-	// Validate config file
-	const [, exception] = await validateConfigFile({ file, env })
-	if (exception) {
-		throw new Error("Invalid config file, please check the documentation for more information.")
+	if (fs.existsSync("/inlang.config.js") === false) {
+		// @felixhaeberle you should render a badge here that says "no inlang.config.js file found in the repository"
+		throw new Error("No inlang.config.js file found in the repository.")
 	}
+	// Get the content of the inlang.config.js file
+	const file = await fs.promises.readFile("/inlang.config.js", "utf-8")
+	const { defineConfig } = await import(
+		"data:application/javascript;base64," + btoa(file.toString())
+	)
+	const config: Config = await defineConfig(env)
+	const resources = await config.readResources({ config })
+	const [resourcesWithLints, errors] = await lint({ resources, config })
+	if (errors) {
+		console.error("lints partially failed", errors)
+	}
+	const lints = getLintReports(resourcesWithLints)
+	console.log(lints)
 
 	// @ts-ignore
 	// const image = await satori(markup, {
@@ -67,6 +57,32 @@ export const badge = async (url: string) => {
 	// 	],
 	// })
 
-	//return image
+	// return image
 	return true
 }
+
+/**
+ * Patching relative paths to absolute paths.
+ *
+ * Memfs does not support relative paths, so we need to patch them.
+ */
+const patchedFs = (fs: (typeof memfs)["promises"]) =>
+	new Proxy(fs, {
+		get: (target, prop) => {
+			if (prop === "readFile") {
+				return (path: string) => {
+					if (path.startsWith("./")) {
+						return fs.readFile(path.slice(1))
+					}
+					return fs.readFile(path)
+				}
+			} else if (prop === "readdir") {
+				return (path: string, args: any) => {
+					if (path.startsWith("./")) {
+						return fs.readdir(path.slice(1), args)
+					}
+					return fs.readdir(path, args)
+				}
+			}
+		},
+	})
