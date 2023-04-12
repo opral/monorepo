@@ -1,4 +1,4 @@
-import { getInlangInformationFromLocals } from "../inlang.server.js"
+import { getInlangInformationFromLocals } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const prerender = true

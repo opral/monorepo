@@ -2,6 +2,18 @@
 	"name": "@inlang/sdk-js",
 	"type": "module",
 	"exports": {
+		"./adapter-sveltekit/client": {
+			"types": "./dist/adapter-sveltekit/utils/client/index.d.ts",
+			"import": "./dist/adapter-sveltekit/utils/client/index.js"
+		},
+		"./adapter-sveltekit/server": {
+			"types": "./dist/adapter-sveltekit/utils/server/index.d.ts",
+			"import": "./dist/adapter-sveltekit/utils/server/index.js"
+		},
+		"./adapter-sveltekit/shared": {
+			"types": "./dist/adapter-sveltekit/utils/shared/index.d.ts",
+			"import": "./dist/adapter-sveltekit/utils/shared/index.js"
+		},
 		"./adapter-sveltekit": {
 			"types": "./dist/adapter-sveltekit/index.d.ts",
 			"import": "./dist/adapter-sveltekit/index.js"
@@ -39,5 +51,8 @@
 	"dependencies": {
 		"@inlang/core": "*",
 		"unplugin": "^1.3.1"
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "^1.15.4"
 	}
 }

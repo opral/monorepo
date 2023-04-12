@@ -5,7 +5,7 @@ import {
 	languages,
 	referenceLanguage,
 	setInlangInformationToLocals,
-} from "./inlang.server.js"
+} from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())

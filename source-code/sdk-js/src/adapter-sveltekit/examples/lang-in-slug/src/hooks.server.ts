@@ -6,9 +6,9 @@ import {
 	languages,
 	referenceLanguage,
 	setInlangInformationToLocals,
-} from "./inlang.server.js"
+} from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
-import { replaceLanguageInUrl, type RelativeUrl } from "./inlang.js"
+import { type RelativeUrl, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())

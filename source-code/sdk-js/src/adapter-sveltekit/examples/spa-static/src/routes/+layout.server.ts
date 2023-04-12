@@ -1,5 +1,5 @@
-import { languages } from "../inlang.server.js"
-import { referenceLanguage } from "../inlang.server.js"
+import { languages } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { referenceLanguage } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const load = (() => {
