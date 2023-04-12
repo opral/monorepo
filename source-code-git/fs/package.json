@@ -3,7 +3,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.js"
 	},
 	"scripts": {
 		"---- DEV AND BUILD": "Are not required. Direct TypeScript import is possible because this module is only used internally.",
