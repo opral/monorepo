@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show, onMount } from "solid-js"
+import { createEffect, createSignal, Show } from "solid-js"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -25,12 +25,10 @@ export function PatternEditor(props: {
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
 		useEditorState()
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
@@ -40,14 +38,14 @@ export function PatternEditor(props: {
 	createEffect(() => {
 		if (
 			(props.message && props.message?.pattern.elements.length > 1) ||
-			(props.message && props.message?.pattern.elements[0].type !== "Text")
+			(props.message && props.message?.pattern.elements[0]?.type !== "Text")
 		) {
 			throw Error(
 				"Not implemented. Only messages with one pattern element of type Text are supported for now.",
 			)
 		}
 		// if the message is updated externally, update the text value
-		else if (props.message?.pattern.elements[0].value) {
+		else if (props.message?.pattern.elements[0]?.value) {
 			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
@@ -141,7 +139,7 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0].value as string
+		const text = props.referenceMessage.pattern.elements[0]?.value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -177,7 +175,7 @@ export function PatternEditor(props: {
 			if (lintReports) {
 				lintReports.map((lint) => {
 					notifications.push({
-						notificationTitle: lint.id.split(".")[1],
+						notificationTitle: lint.id.split(".")[1]!,
 						notificationDescription: lint.message,
 						notificationType: lint.level,
 					})
