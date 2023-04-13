@@ -1,1 +1,1 @@
-export { memoryFs } from "./implementation.js"
+export { MemoryFs } from "./implementation.js"

@@ -4,7 +4,7 @@ type FileData = string
 type Directory = Map<string, Inode>
 type Inode = FileData | Directory
 
-export class memoryFs implements Filesystem {
+export class MemoryFs implements Filesystem {
 	root: Directory
 	specialPaths: string[]
 
@@ -106,7 +106,7 @@ export class memoryFs implements Filesystem {
 	    const dir: Directory = new Map()
 	    for (let kv of Object.entries(json)) {
 		if (typeof kv[1] === "object") {
-		    dir.set(kv[0], memoryFs._dirFromJson(kv[1]))
+		    dir.set(kv[0], MemoryFs._dirFromJson(kv[1]))
 		} else if (typeof kv[1] === "string") {
 		    dir.set(kv[0], kv[1])
 		}
@@ -116,6 +116,6 @@ export class memoryFs implements Filesystem {
 
 	static async fromJson(jsonString: string): Promise<Filesystem> {
 	    const json: Record<string, any> = JSON.parse(jsonString)
-	    return new memoryFs(memoryFs._dirFromJson(json))
+	    return new MemoryFs(MemoryFs._dirFromJson(json))
 	}
 }

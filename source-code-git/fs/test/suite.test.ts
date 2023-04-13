@@ -1,11 +1,11 @@
 import { test, expect } from "vitest"
-import { memoryFs } from "src/memory"
+import { MemoryFs } from "src/memory"
 
 
 // Basic test, should be split into several more elaborate tests later
 
-test("memoryFs", async () => {
-	const fs: Filesystem = new memoryFs()
+test("MemoryFs", async () => {
+	const fs: Filesystem = new MemoryFs()
 	expect(await fs.readdir("/")).toEqual([])
 
 	await fs.mkdir("home/user1/documents/")
@@ -31,7 +31,7 @@ test("memoryFs", async () => {
         
         // dirFromJson (circular references make this tricky to test)
         expect(
-            JSON.stringify(await memoryFs.fromJson(JSON.stringify(fsJson)))
+            JSON.stringify(await MemoryFs.fromJson(JSON.stringify(fsJson)))
         ).toEqual(JSON.stringify(fs))
 
         expect (await fs.readFile("./home/dne")).toBeNull()
