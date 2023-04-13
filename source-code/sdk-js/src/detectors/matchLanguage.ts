@@ -39,4 +39,6 @@ export const matchLanguage = (
 			if (relatedLanguages.length) return relatedLanguages[0]
 		}
 	}
+
+	return undefined
 }
