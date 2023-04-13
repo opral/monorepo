@@ -1,38 +1,11 @@
-import { pushChanges, useEditorState } from "./State.jsx"
-import {
-	createEffect,
-	createMemo,
-	createSignal,
-	For,
-	JSXElement,
-	Match,
-	onCleanup,
-	Show,
-	Switch,
-} from "solid-js"
-import { subSeconds, isAfter } from "date-fns"
-import { currentPageContext } from "@src/renderer/state.js"
-import { showToast } from "@src/components/Toast.jsx"
+import { useEditorState } from "./State.jsx"
+import { createEffect, createMemo, createSignal, For, JSXElement, onCleanup, Show } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import type { EditorRouteParams } from "./types.js"
-import { navigate } from "vite-plugin-ssr/client/router"
-import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js"
-import { SignInDialog } from "@src/services/auth/index.js"
-import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
-import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
-import { Icon } from "@src/components/Icon.jsx"
-import CibGithub from "~icons/cib/github"
-import { telemetryBrowser } from "@inlang/telemetry"
-import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { getLintReports, LintedNode } from "@inlang/core/lint"
 import { Gitfloat } from "./components/Gitfloat.jsx"
-import { publicEnv } from "@inlang/env-variables"
-
-const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {

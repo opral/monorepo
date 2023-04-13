@@ -224,10 +224,20 @@ export const Gitfloat = () => {
 						/>
 					</div>
 				</Show>
-				<div class="flex justify-start items-center self-stretch flex-grow relative gap-2 pl-3 pr-1.5 py-1.5">
-					<p class="flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface">
+				<div
+					class={
+						"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
+						(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+					}
+				>
+					<p
+						class={
+							"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface " +
+							(gitState() === "pullrequest" && "hidden")
+						}
+					>
 						<Show when={gitState() === "changes"}>
-							<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-primary">
+							<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
 								<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
 									{(unpushedChanges() ?? []).length}
 								</p>
@@ -242,7 +252,7 @@ export const Gitfloat = () => {
 						prop:target="_blank"
 						prop:loading={isLoading()}
 						prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
-						class="on-inverted"
+						class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 					>
 						{data[gitState()].buttontext}
 						<div slot="suffix">{data[gitState()].icon}</div>
