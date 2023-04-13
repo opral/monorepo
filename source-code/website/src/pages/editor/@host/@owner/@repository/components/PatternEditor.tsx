@@ -209,7 +209,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+		if (
+			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+			hasChanges() &&
+			userIsCollaborator()
+		) {
 			event.preventDefault()
 			handleCommit()
 		}
