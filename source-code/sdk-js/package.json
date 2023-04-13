@@ -2,26 +2,11 @@
 	"name": "@inlang/sdk-js",
 	"type": "module",
 	"exports": {
-		"./helpers": {
-			"types": "./dist/helpers/index.d.ts",
-			"import": "./dist/helpers/index.js"
-		},
-		"./adapter-sveltekit": {
-			"types": "./dist/adapter-sveltekit/index.d.ts",
-			"import": "./dist/adapter-sveltekit/index.js"
-		},
-		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"import": "./dist/config/index.js"
-		},
-		"./detectors": {
-			"types": "./dist/detectors/index.d.ts",
-			"import": "./dist/detectors/index.js"
-		},
-		"./runtime": {
-			"types": "./dist/runtime/index.d.ts",
-			"import": "./dist/runtime/index.js"
-		}
+		"./helpers": "./dist/helpers/index.js",
+		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
+		"./config": "./dist/config/index.js",
+		"./detectors": "./dist/detectors/index.js",
+		"./runtime": "./dist/runtime/index.js"
 	},
 	"files": [
 		"./dist"
