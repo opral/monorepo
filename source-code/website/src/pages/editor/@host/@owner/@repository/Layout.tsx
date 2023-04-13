@@ -17,7 +17,7 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<RootLayout>
-			<div class="pt-4 pb-16 w-full flex flex-col grow">
+			<div class="pt-4 w-full flex flex-col grow">
 				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
@@ -41,8 +41,8 @@ export function Layout(props: { children: JSXElement }) {
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
-				<Gitfloat />
 			</div>
+			<Gitfloat />
 		</RootLayout>
 	)
 }
