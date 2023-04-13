@@ -1,6 +1,6 @@
 
 <script lang="ts">
-	import { getInlangContext } from '@inlang/sdk-js/adapter-sveltekit/client'
+	import { getInlangContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive'
 	import { clientFn } from '../utils/client.js'
 
 	const { i } = getInlangContext()

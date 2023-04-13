@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
+	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 	import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
 	import type { LayoutData } from "./$types.js"
 

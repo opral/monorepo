@@ -1,10 +1,10 @@
-import { type RelativeUrl, replaceLanguageInUrl, inlangSymbol } from "../shared/index.js"
-import type { Runtime } from "../client/index.js"
+import { type RelativeUrl, replaceLanguageInUrl, inlangSymbol } from "../../shared/index.js"
+import type { Runtime } from "../index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { getContext, setContext } from "svelte"
-import type { InlangFunction } from '../../../runtime/index.js'
+import type { InlangFunction } from '../../../../runtime/index.js'
 
 type InlangContext = {
 	language: string

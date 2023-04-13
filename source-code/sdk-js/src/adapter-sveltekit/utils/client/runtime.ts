@@ -1,5 +1,5 @@
 import type { LoadEvent } from "@sveltejs/kit"
-import { initRuntime } from "@inlang/sdk-js/runtime"
+import { initRuntime } from '../../../runtime/index.js'
 
 type InitI18nRuntimeArgs = {
 	fetch: LoadEvent["fetch"]

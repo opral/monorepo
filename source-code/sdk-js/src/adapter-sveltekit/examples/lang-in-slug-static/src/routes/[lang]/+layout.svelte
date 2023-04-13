@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
+	import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 
 	const { i, languages, route, loadResource, switchLanguage } = getInlangContext()
 

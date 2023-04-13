@@ -1,6 +1,6 @@
 import { initConfig } from "@inlang/sdk-js/config"
 import type { RequestEvent } from "@sveltejs/kit"
-import type { InlangFunction } from "@inlang/sdk-js/runtime"
+import type { InlangFunction } from '../../../runtime/index.js'
 import { inlangSymbol } from '../shared/index.js'
 
 const config = await initConfig()

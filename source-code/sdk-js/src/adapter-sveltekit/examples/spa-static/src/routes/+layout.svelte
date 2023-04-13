@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from "$app/environment"
 	import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
+	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData

@@ -2,34 +2,11 @@
 	"name": "@inlang/sdk-js",
 	"type": "module",
 	"exports": {
-		"./adapter-sveltekit/client": {
-			"types": "./dist/adapter-sveltekit/utils/client/index.d.ts",
-			"import": "./dist/adapter-sveltekit/utils/client/index.js"
-		},
-		"./adapter-sveltekit/server": {
-			"types": "./dist/adapter-sveltekit/utils/server/index.d.ts",
-			"import": "./dist/adapter-sveltekit/utils/server/index.js"
-		},
-		"./adapter-sveltekit/shared": {
-			"types": "./dist/adapter-sveltekit/utils/shared/index.d.ts",
-			"import": "./dist/adapter-sveltekit/utils/shared/index.js"
-		},
-		"./adapter-sveltekit": {
-			"types": "./dist/adapter-sveltekit/index.d.ts",
-			"import": "./dist/adapter-sveltekit/index.js"
-		},
-		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"import": "./dist/config/index.js"
-		},
-		"./detectors": {
-			"types": "./dist/detectors/index.d.ts",
-			"import": "./dist/detectors/index.js"
-		},
-		"./runtime": {
-			"types": "./dist/runtime/index.d.ts",
-			"import": "./dist/runtime/index.js"
-		}
+		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
+		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
+		"./config": "./dist/config/index.js",
+		"./detectors": "./dist/detectors/index.js",
+		"./runtime": "./dist/runtime/index.js"
 	},
 	"files": [
 		"./dist"

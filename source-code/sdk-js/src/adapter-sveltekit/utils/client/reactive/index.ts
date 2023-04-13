@@ -1,8 +1,8 @@
-import type { InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { readonly, writable, type Readable } from "svelte/store"
-import { inlangSymbol, type RelativeUrl } from '../shared/index.js'
-import type { Runtime } from '../client/index.js'
+import type { InlangFunction } from '../../../../runtime/index.js'
+import { inlangSymbol, type RelativeUrl } from '../../shared/index.js'
+import type { Runtime } from '../index.js'
 
 // ------------------------------------------------------------------------------------------------
 

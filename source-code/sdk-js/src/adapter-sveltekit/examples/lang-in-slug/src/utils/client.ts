@@ -1,4 +1,4 @@
-import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 
 export const clientFn = () => {
 	const { i } = getInlangContext()
