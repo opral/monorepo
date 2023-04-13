@@ -6,6 +6,7 @@ import {
 	JSXElement,
 	Match,
 	onCleanup,
+	onMount,
 	Show,
 	Switch,
 } from "solid-js"
