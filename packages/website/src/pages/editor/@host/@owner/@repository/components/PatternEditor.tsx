@@ -25,12 +25,10 @@ export function PatternEditor(props: {
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
 		useEditorState()
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
