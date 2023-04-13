@@ -28,8 +28,5 @@
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"
-	},
-	"devDependencies": {
-		"patch-package": "^6.5.1"
 	}
 }

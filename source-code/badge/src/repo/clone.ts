@@ -7,7 +7,6 @@ import type { Volume } from "memfs/lib/volume.js"
 const cloneRespository = async (url: string, volume: Volume) => {
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repo] = [...url.split("/")]
-	console.log(host, owner, repo)
 
 	// check if all 3 parts are present, if not, return an error
 	if (!host || !owner || !repo) {
