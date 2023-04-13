@@ -313,14 +313,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			if (
 				localStorage?.user === undefined ||
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
+				routeParams().owner === undefined ||
+				routeParams().repository === undefined
 			) {
 				return false
 			}
 			return {
 				user: localStorage.user,
-				routeParams: currentPageContext.routeParams,
+				routeParams: routeParams(),
 			}
 		},
 		async (args) =>
