@@ -10,6 +10,10 @@ router.get(
 	"/badge",
 	async (req: Request<object, object, object, { url?: string; size?: string }>, res: Response) => {
 		try {
+			// Get the language from the request
+			const lang = req.headers["accept-language"]
+
+			// Get the url from the query
 			const { url, size } = req.query
 			if (!url) {
 				res.send(

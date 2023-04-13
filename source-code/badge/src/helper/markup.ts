@@ -18,14 +18,18 @@ export interface VNode {
  *
  */
 export const markup = (percentages: Percentage[]): VNode => html`<div
-	style="display: flex; margin-bottom: 10px;"
+	style="display: flex; flex-direction: column; margin: 20px; position: relative;"
 >
+	<p style="font-size: 20px;">Translation status</p>
 	${percentages.map(
 		(percentage: Percentage) =>
-			`<div
+			`<div style="display: flex; flex-direction: column;">
+			<div style="display: flex; justify-content: space-between; align-items: center;">
+				<p>${percentage.lang}</p>
+				<p>${100 - percentage.percentage}%</p>
+			</div>
+			<div
 					style="display: flex;
-					position: absolute;
-					top: ${40 * (percentages.indexOf(percentage) + 1)}px;
           background: #333;
           border-radius: 13px;
           height: 20px;
@@ -43,6 +47,11 @@ export const markup = (percentages: Percentage[]): VNode => html`<div
           transition: width 0.5s ease-in-out;"
 					></div>
 				</div>
+			</div>
 		`,
 	)}
+	<div style="display: flex; gap: 4px; margin-top: 15px;">
+		<span>Contribute at</span>
+		<span style="text-decoration: underline">inlang.com</span>
+	</div>
 </div>`

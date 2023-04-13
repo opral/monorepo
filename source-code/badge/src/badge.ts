@@ -6,8 +6,9 @@ import { getLintReports, lint } from "@inlang/core/lint"
 import { Volume } from "memfs"
 import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
 import { markup } from "./helper/markup.js"
+import { readFileSync } from "node:fs"
 
-// const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
+const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 
 export const badge = async (url: string) => {
 	// initialize a new file system on each request to prevent cross request pollution
@@ -61,9 +62,15 @@ export const badge = async (url: string) => {
 		// @ts-ignore
 		vdom,
 		{
-			width: 300,
-			height: percentages.length * 50 + 40,
-			fonts: [],
+			width: 340,
+			height: percentages.length * 70 + 140,
+			fonts: [
+				{
+					name: "Inter",
+					weight: 500,
+					data: font,
+				},
+			],
 		},
 	)
 
