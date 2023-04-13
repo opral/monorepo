@@ -1,7 +1,6 @@
 import { pushChanges, useEditorState } from "./State.jsx"
 import {
 	createEffect,
-	createMemo,
 	createSignal,
 	For,
 	JSXElement,
@@ -374,14 +373,10 @@ export const LanguageIcon = () => {
 function StatusFilter() {
 	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
 
-	const ids = createMemo(() => {
-		return (
-			inlangConfig()
-				?.lint?.rules?.map((rule) => [rule].flat())
-				.flat()
-				.map(({ id }) => id) || []
-		)
-	})
+	const lintRuleIds = () =>
+		inlangConfig()
+			?.lint?.rules?.flat()
+			.map((rule) => rule.id) ?? []
 
 	return (
 		<sl-select
@@ -410,7 +405,7 @@ function StatusFilter() {
 				<span class="text-left text-on-surface-variant grow">Lints</span>
 				<a
 					class="cursor-pointer link link-primary"
-					onClick={() => setFilteredStatus(ids().map((id) => id))}
+					onClick={() => setFilteredStatus(lintRuleIds().map((id) => id))}
 				>
 					ALL
 				</a>
@@ -424,7 +419,9 @@ function StatusFilter() {
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
-				<For each={ids()}>{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}</For>
+				<For each={lintRuleIds()}>
+					{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}
+				</For>
 			</div>
 		</sl-select>
 	)
