@@ -1,8 +1,7 @@
 ---
-name: Improvement
-about: Something could be improved.
+name: Other
+about: Standard template.
 title: ""
-labels: "type: improvement"
 assignees: ""
 ---
 

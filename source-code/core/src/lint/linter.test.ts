@@ -10,7 +10,8 @@ vi.spyOn(console, "error").mockImplementation(vi.fn)
 
 const doLint = (rules: LintRule[], resources: Resource[]) => {
 	const config = {
-		referenceLanguage: resources[0]?.languageTag.name,
+		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+		referenceLanguage: resources[0]!.languageTag.name!,
 		languages: resources.map((resource) => resource.languageTag.name),
 		lint: { rules },
 	}
@@ -89,8 +90,8 @@ describe("lint", async () => {
 			}),
 		})
 		const [, errors] = await doLint([rule("error")], [cloned])
-		expect(errors?.length).toBe(1)
-		expect(errors![0].message.includes("inlang.someError"))
+		expect(errors!.length).toBe(1)
+		expect(errors![0]!.message.includes("inlang.someError"))
 	})
 
 	describe("rules", async () => {
@@ -174,9 +175,9 @@ describe("lint", async () => {
 
 			expect(onEnter).toHaveBeenCalledTimes(3)
 			const onEnterCalls = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls
-			expect(onEnterCalls[0][0]).toMatchObject({ type: "Resource" })
-			expect(onEnterCalls[1][0]).toMatchObject({ type: "Message" })
-			expect(onEnterCalls[2][0]).toMatchObject({ type: "Pattern" })
+			expect(onEnterCalls[0]![0]).toMatchObject({ type: "Resource" })
+			expect(onEnterCalls[1]![0]).toMatchObject({ type: "Message" })
+			expect(onEnterCalls[2]![0]).toMatchObject({ type: "Pattern" })
 		})
 
 		test("should visit all Message nodes from reference if not present in target", async () => {
@@ -188,8 +189,8 @@ describe("lint", async () => {
 			expect(onEnter).toHaveBeenCalledTimes(8)
 			const calls = (onEnter as unknown as MockContext<Array<unknown>, unknown>).calls
 
-			expect(calls[6][0]).toBeUndefined()
-			expect(calls[7][0]).toBeUndefined()
+			expect(calls[6]![0]).toBeUndefined()
+			expect(calls[7]![0]).toBeUndefined()
 		})
 
 		test("should visit all Message nodes from target even if not present in reference", async () => {
@@ -221,7 +222,7 @@ describe("lint", async () => {
 			expect(fn).toHaveBeenCalledTimes(1)
 			const calls = (fn as unknown as MockContext<Array<unknown>, unknown>).calls
 
-			expect(calls[0][0]).toStrictEqual(message)
+			expect(calls[0]![0]).toStrictEqual(message)
 		})
 
 		test("should await all functions", async () => {

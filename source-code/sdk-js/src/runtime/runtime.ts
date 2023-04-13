@@ -2,14 +2,16 @@ import type * as Ast from "@inlang/core/ast"
 import {
 	InlangFunctionBaseArgs,
 	createInlangFunction,
-	InlangString,
 	InlangFunction,
+	InlangString,
 } from "./inlang-function.js"
 
 const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 
+type MaybePromise<T> = T | Promise<T>
+
 export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
-	readResource: (language: Language) => Promise<Ast.Resource | undefined>
+	readResource: (language: Language) => MaybePromise<Ast.Resource | undefined>
 }
 
 export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
