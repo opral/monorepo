@@ -53,7 +53,7 @@ function TheActualPage() {
 					result[id] = {}
 				}
 				// assigning the message
-				result[id][resource.languageTag.name] = query(resource).get({ id })
+				result[id]![resource.languageTag.name] = query(resource).get({ id })
 			}
 		}
 		return result
@@ -83,7 +83,7 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig.error}>
 					<p class="text-danger">
-						An error occured while initializing the config: {inlangConfig.error.message}
+						An error occurred while initializing the config: {inlangConfig.error.message}
 					</p>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
@@ -126,9 +126,8 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="empty-parent">
-						{/* <PreviewMessageFeatures /> */}
 						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]} />}
+							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
 						<div
 							class={

@@ -106,11 +106,11 @@ function mapBorderRadius(args: {
 	)
 	switch (args.size) {
 		case "sm":
-			return tailwindThemeTokens["borderRadius"][indexOfBase - 1]
+			return tailwindThemeTokens["borderRadius"][indexOfBase - 1]!
 		case "DEFAULT":
-			return tailwindThemeTokens["borderRadius"][indexOfBase]
+			return tailwindThemeTokens["borderRadius"][indexOfBase]!
 		case "lg":
-			return tailwindThemeTokens["borderRadius"][indexOfBase + 1]
+			return tailwindThemeTokens["borderRadius"][indexOfBase + 1]!
 	}
 }
 
