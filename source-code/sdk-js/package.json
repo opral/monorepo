@@ -2,6 +2,10 @@
 	"name": "@inlang/sdk-js",
 	"type": "module",
 	"exports": {
+		"./adapter-sveltekit": {
+			"types": "./dist/adapter-sveltekit/index.d.ts",
+			"import": "./dist/adapter-sveltekit/index.js"
+		},
 		"./config": {
 			"types": "./dist/config/index.d.ts",
 			"import": "./dist/config/index.js"
@@ -33,6 +37,7 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*"
+		"@inlang/core": "*",
+		"unplugin": "^1.3.1"
 	}
 }
