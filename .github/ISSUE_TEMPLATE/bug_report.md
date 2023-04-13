@@ -8,12 +8,13 @@ assignees: ""
 
 ## Problem
 
+### Expected behavior
+
 ## Steps to reproduce
 
 1. Go to '...'
 2. Click on '....'
 3. ...
 
-### Expected behavior
 
 ### Additional information (screenshots?)
