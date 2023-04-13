@@ -66,7 +66,7 @@ export const badge = async (url: string) => {
 	const lints = getLintReports(resourcesWithLints)
 
 	// @ts-ignore
-	const image = await satori(markup(percentages[1].percentage), {
+	const image = await satori(markup(100 - percentages[1].percentage), {
 		width: 300,
 		height: 300,
 		fonts: [],
