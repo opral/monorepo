@@ -37,6 +37,11 @@
 		"importsNotUsedAsValues": "error",
 		// tremendous helper to avoid hard to debug bugs.
 		// see https://github.com/inlang/inlang/issues/157
-		"noImplicitAny": true
+		"noUncheckedIndexedAccess": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"allowUnreachableCode": false,
 	}
 }
