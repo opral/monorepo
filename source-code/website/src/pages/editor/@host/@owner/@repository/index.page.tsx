@@ -53,7 +53,7 @@ function TheActualPage() {
 					result[id] = {}
 				}
 				// assigning the message
-				result[id][resource.languageTag.name] = query(resource).get({ id })
+				result[id]![resource.languageTag.name] = query(resource).get({ id })
 			}
 		}
 		return result
@@ -126,9 +126,8 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="mb-16 empty-parent">
-						{/* <PreviewMessageFeatures /> */}
 						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]} />}
+							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
 						<div
 							class={
