@@ -11,7 +11,7 @@ vi.spyOn(console, "error").mockImplementation(vi.fn)
 const doLint = (rules: LintRule[], resources: Resource[]) => {
 	const config = {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-		referenceLanguage: resources[0]?.languageTag.name!,
+		referenceLanguage: resources[0]!.languageTag.name!,
 		languages: resources.map((resource) => resource.languageTag.name),
 		lint: { rules },
 	}
@@ -90,7 +90,7 @@ describe("lint", async () => {
 			}),
 		})
 		const [, errors] = await doLint([rule("error")], [cloned])
-		expect(errors?.length).toBe(1)
+		expect(errors!.length).toBe(1)
 		expect(errors![0]!.message.includes("inlang.someError"))
 	})
 
