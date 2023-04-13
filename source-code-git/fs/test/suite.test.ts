@@ -34,6 +34,6 @@ test("MemoryFs", async () => {
             JSON.stringify(await MemoryFs.fromJson(JSON.stringify(fsJson)))
         ).toEqual(JSON.stringify(fs))
 
-        expect (await fs.readFile("./home/dne")).toBeNull()
-        expect (await fs.readdir("./home/dne")).toBeNull()
+        expect (await fs.readFile("./home/dne")).toBeUndefined()
+        expect (await fs.readdir("./home/dne")).toBeUndefined()
 })

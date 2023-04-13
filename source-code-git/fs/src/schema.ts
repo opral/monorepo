@@ -1,7 +1,7 @@
 export type Filesystem = {
 	writeFile: (path: string, content: string) => Promise<void>
-	readFile: (path: string) => Promise<string | null>
-	readdir: (path: string) => Promise<string[] | null>
+	readFile: (path: string) => Promise<string | undefined>
+	readdir: (path: string) => Promise<string[] | undefined>
 	mkdir: (path: string) => Promise<void>
 	/**
 	 * Serializes the filesystem to a JSON string.

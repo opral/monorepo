@@ -29,9 +29,9 @@ export class MemoryFs implements Filesystem {
 		return dir
 	}
 
-	_followPath(path: string, makeParent: boolean = false): Inode | null {
+	_followPath(path: string, makeParent: boolean = false): Inode | undefined {
 		const pathList: string[] = path.split("/")
-		let target: Inode | null = this.root
+		let target: Inode | undefined = this.root
 		let parentDir: Directory
 
 		if (makeParent) {
@@ -39,22 +39,22 @@ export class MemoryFs implements Filesystem {
 
 				if (target instanceof Map) {
 					parentDir = target
-					target = target.get(path) ?? null
+					target = target.get(path) ?? undefined
 				} else break
 
 				if (!target) {
-					if (!makeParent) return null
+					if (!makeParent) return undefined
 					parentDir.set(path, this._newDir(parentDir))
-					target = parentDir.get(path) ?? null
+					target = parentDir.get(path) ?? undefined
 				}
 			}
 		} else {
 			for (let path of pathList) {
 				if (target instanceof Map) 
-					target = target.get(path) ?? null
+					target = target.get(path) ?? undefined
 				else break
 
-				if (!target) return null
+				if (!target) return undefined
 			}
 		}
 
@@ -65,20 +65,20 @@ export class MemoryFs implements Filesystem {
 	basename = (path: string): string => path.split("/").slice(-1)[0]
 
 	async writeFile(path: string, content: FileData) {
-		const parentDir: Inode | null = this._followPath(this.dirname(path), true)
+		const parentDir: Inode | undefined = this._followPath(this.dirname(path), true)
 		if (parentDir instanceof Map) parentDir.set(this.basename(path), content)
 	}
 
-	async readFile(path: string): Promise<FileData | null> {
-		const file: Inode | null = this._followPath(path)
-		return typeof file === "string" ? file : null
+	async readFile(path: string): Promise<FileData | undefined> {
+		const file: Inode | undefined = this._followPath(path)
+		return typeof file === "string" ? file : undefined
 	}
 
-	async readdir(path: string): Promise<string[] | null> {
-		const dir: Inode | null = this._followPath(path)
+	async readdir(path: string): Promise<string[] | undefined> {
+		const dir: Inode | undefined = this._followPath(path)
 		if (dir instanceof Map)
 			return [...dir.keys()].filter(x => !(this.specialPaths.includes(x)))
-		else return null
+		else return
 	}
 
 	async mkdir(path: string) {
