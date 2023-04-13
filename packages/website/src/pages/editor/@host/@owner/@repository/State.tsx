@@ -99,12 +99,6 @@ type EditorStateSchema = {
 	setFilteredLanguages: Setter<Language[]>
 
 	/**
-	 * BrowserLanguage set
-	 */
-	browserLanguage: () => boolean
-	setBrowserLanguage: Setter<boolean>
-
-	/**
 	 * FilterLanguages show or hide the different messages.
 	 */
 	filteredStatus: () => string[]
@@ -175,8 +169,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([])
-
-	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
 
 	const [filteredStatus, setFilteredStatus] = createSignal<string[]>([])
 
@@ -479,8 +471,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLanguages,
 					filteredStatus,
 					setFilteredStatus,
-					browserLanguage,
-					setBrowserLanguage,
 					resources,
 					setResources,
 					referenceResource,
