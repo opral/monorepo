@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, Show, onMount } from "solid-js"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -207,12 +207,7 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		if (
-			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
-				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
-			hasChanges() &&
-			userIsCollaborator()
-		) {
+		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
 			event.preventDefault()
 			handleCommit()
 		}
