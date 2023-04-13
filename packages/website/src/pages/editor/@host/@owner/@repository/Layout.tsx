@@ -28,7 +28,6 @@ import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { getLintReports, LintedNode } from "@inlang/core/lint"
 import { publicEnv } from "@inlang/env-variables"
 
 const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
@@ -373,8 +372,7 @@ export const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig, filteredStatus, setFilteredStatus, resources } = useEditorState()
-	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
+	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
 
 	const ids = createMemo(() => {
 		return (
@@ -385,80 +383,50 @@ function StatusFilter() {
 		)
 	})
 
-	createEffect(() => {
-		if (ids().includes("inlang.missingMessage")) {
-			const reportLength = getLintReports(resources as LintedNode[]).filter(
-				(report) => report.id === "inlang.missingMessage",
-			).length
-			if (reportLength !== 0) {
-				setFilteredStatus(() => ["inlang.missingMessage"])
-			} else {
-				setFilteredStatus(() => [])
-			}
-			setMissingMessage(true)
-		}
-	})
-
 	return (
-		<Show
-			when={missingMessage()}
-			fallback={
-				<sl-select
-					prop:name="Lint Filter Select"
-					prop:placeholder="Loading ..."
-					prop:size="small"
-					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-				>
-					<div class="mx-auto pr-2" slot="prefix">
-						<WarningIcon />
-					</div>
-				</sl-select>
-			}
+		<sl-select
+			prop:name="Lint Filter Select"
+			prop:size="small"
+			prop:multiple={true}
+			prop:maxOptionsVisible={2}
+			prop:value={filteredStatus()}
+			on:sl-change={(event: any) => {
+				setFilteredStatus(event.target.value)
+			}}
+			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
-			<sl-select
-				prop:name="Lint Filter Select"
-				prop:size="small"
-				prop:multiple={true}
-				prop:maxOptionsVisible={2}
-				prop:value={filteredStatus()}
-				on:sl-change={(event: any) => {
-					setFilteredStatus(event.target.value)
-				}}
-				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-			>
-				<div class="mx-auto flex items-center gap-2" slot="prefix">
-					<div class="last:pr-2">
-						<WarningIcon />
-					</div>
-					<Show when={filteredStatus().length <= 0}>
-						<sl-tag prop:size="small" class="font-medium text-sm">
-							everyMessage
-						</sl-tag>
-					</Show>
+			<div class="mx-auto flex items-center gap-2" slot="prefix">
+				<div class="last:pr-2">
+					<WarningIcon />
 				</div>
+				<Show when={filteredStatus().length <= 0}>
+					<sl-tag prop:size="small" class="font-medium text-sm">
+						everyMessage
+					</sl-tag>
+				</Show>
+			</div>
 
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Lints</span>
-					<a
-						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredStatus(ids().map((id) => id))}
-					>
-						ALL
-					</a>
-					<a
-						class="cursor-pointer link link-primary"
-						// filter all rules
-						onClick={() => setFilteredStatus(() => [])}
-					>
-						NONE
-					</a>
-				</div>
-				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
-					<For each={ids()}>{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}</For>
-				</div>
-			</sl-select>
-		</Show>
+			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+				<span class="text-left text-on-surface-variant grow">Lints</span>
+				<a
+					class="cursor-pointer link link-primary"
+					onClick={() => setFilteredStatus(ids().map((id) => id))}
+				>
+					ALL
+				</a>
+				<a
+					class="cursor-pointer link link-primary"
+					// filter all rules
+					onClick={() => setFilteredStatus(() => [])}
+				>
+					NONE
+				</a>
+			</div>
+			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+			<div class="max-h-[300px] overflow-y-auto">
+				<For each={ids()}>{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}</For>
+			</div>
+		</sl-select>
 	)
 }
 
