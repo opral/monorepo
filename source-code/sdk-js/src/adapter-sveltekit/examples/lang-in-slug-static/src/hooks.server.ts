@@ -14,7 +14,7 @@ export const handle = (async ({ event, resolve }) => {
 	const pathname = event.url.pathname
 	if (pathname.startsWith("/inlang")) return resolve(event)
 
-	const language = pathname.split("/")[1] || (undefined as unknown as string)
+	const language = pathname.split("/")[1]
 
 	const runtime = initRuntime({
 		readResource: (language: string) => getResource(language),
