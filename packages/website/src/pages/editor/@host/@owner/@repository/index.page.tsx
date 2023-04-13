@@ -83,7 +83,7 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig.error}>
 					<p class="text-danger">
-						An error occured while initializing the config: {inlangConfig.error.message}
+						An error occurred while initializing the config: {inlangConfig.error.message}
 					</p>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
