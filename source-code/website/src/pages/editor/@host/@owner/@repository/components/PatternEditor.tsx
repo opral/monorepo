@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, Show, onMount } from "solid-js"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -209,12 +209,6 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		// telemetryBrowser.capture("onKeyDown input field", {
-		// 	event: event,
-		// 	targetLanguage: props.language,
-		// 	owner: routeParams().owner,
-		// 	repository: routeParams().repository,
-		// })
 		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
 			event.preventDefault()
 			handleCommit()
@@ -260,11 +254,6 @@ export function PatternEditor(props: {
 				prop:placeholder="Enter translation ..."
 				onFocus={() => {
 					setIsFocused(true)
-					// telemetryBrowser.capture("onFocused imput field", {
-					// 	targetLanguage: props.language,
-					// 	owner: routeParams().owner,
-					// 	repository: routeParams().repository,
-					// })
 				}}
 				onFocusOut={(e) => {
 					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
@@ -275,16 +264,6 @@ export function PatternEditor(props: {
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 				onKeyDown={(event) => handleShortcut(event)}
 			/>
-			{/* <div
-					onFocus={() => setIsFocused(true)}
-					onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
-					contentEditable={true}
-					class="rounded border border-outline focus:outline-none py-2 px-3 focus:border-primary focus:ring focus:ring-primary-container"
-			>
-					<For each={copy()?.pattern.elements}>
-							{(element) => <PatternElement element={element}></PatternElement>}
-					</For>
-			</div> */}
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
