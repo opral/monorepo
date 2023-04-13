@@ -35,13 +35,13 @@ export const Gitfloat = () => {
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
-	const [latestChange, setLatestChange] = createSignal<Date>()
-	const [showPulse, setShowPulse] = createSignal(false)
-	createEffect(() => {
-		if (unpushedChanges()) {
-			setLatestChange(new Date())
-		}
-	})
+	// const [latestChange, setLatestChange] = createSignal<Date>()
+	// const [showPulse, setShowPulse] = createSignal(false)
+	// createEffect(() => {
+	// 	if (unpushedChanges()) {
+	// 		setLatestChange(new Date())
+	// 	}
+	// })
 
 	createEffect(() => {
 		if (localStorage?.user === undefined) {
@@ -100,16 +100,16 @@ export const Gitfloat = () => {
 	}
 
 	// show the pulse if less than X seconds ago a change has been conducted
-	const interval = setInterval(() => {
-		const _latestChange = latestChange()
-		if (_latestChange === undefined) {
-			return setShowPulse(false)
-		}
-		const eightSecondsAgo = subSeconds(new Date(), 8)
-		return setShowPulse(isAfter(_latestChange, eightSecondsAgo))
-	}, 1000)
+	// const interval = setInterval(() => {
+	// 	const _latestChange = latestChange()
+	// 	if (_latestChange === undefined) {
+	// 		return setShowPulse(false)
+	// 	}
+	// 	const eightSecondsAgo = subSeconds(new Date(), 8)
+	// 	return setShowPulse(isAfter(_latestChange, eightSecondsAgo))
+	// }, 1000)
 
-	onCleanup(() => clearInterval(interval))
+	// onCleanup(() => clearInterval(interval))
 
 	async function triggerPushChanges() {
 		if (localStorage?.user === undefined) {
@@ -214,7 +214,7 @@ export const Gitfloat = () => {
 
 	return (
 		<>
-			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl">
+			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16">
 				<Show when={localStorage.user}>
 					<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
 						<img
