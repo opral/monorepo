@@ -276,7 +276,7 @@ export function PatternEditor(props: {
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === ""}>
+						<Show when={textValue() === "" || textValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
