@@ -1,9 +1,9 @@
 
 <script lang="ts">
-	import { getI18nContext } from '../inlang.js'
+	import { getInlangContext } from '@inlang/sdk-js/adapter-sveltekit/client'
 	import { clientFn } from '../utils/client.js'
 
-	const { i } = getI18nContext()
+	const { i } = getInlangContext()
 
 	console.info('Component.svelte', i('welcome'))
 

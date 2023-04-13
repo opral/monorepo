@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getI18nContext } from "../../../inlang.js"
+	import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
 
-	const { i, language } = getI18nContext()
+	const { i, language } = getInlangContext()
 
 	console.info("[lang]/about/+page.svelte", i("welcome"))
 </script>

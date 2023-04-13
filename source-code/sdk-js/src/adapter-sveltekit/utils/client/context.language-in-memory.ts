@@ -1,8 +1,8 @@
 import type { InlangFunction } from "@inlang/sdk-js/runtime"
 import { getContext, setContext } from "svelte"
 import { readonly, writable, type Readable } from "svelte/store"
-import { inlangSymbol, type RelativeUrl } from '@inlang/sdk-js/adapter-sveltekit/shared'
-import type { Runtime } from '@inlang/sdk-js/adapter-sveltekit/client'
+import { inlangSymbol, type RelativeUrl } from '../shared/index.js'
+import type { Runtime } from '../client/index.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -20,7 +20,9 @@ export type I18nContext = {
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-export const setI18nContext = (runtime: Runtime) => {
+export const getInlangContext = (): I18nContext => getContext(inlangSymbol)
+
+export const setInlangContext = (runtime: Runtime) => {
 	const _language = writable(runtime.getLanguage() as string)
 	const _i = writable(runtime.getInlangFunction())
 
@@ -44,8 +46,9 @@ export const setI18nContext = (runtime: Runtime) => {
 		i: readonly(_i),
 		loadResource: runtime.loadResource,
 		switchLanguage,
-		route: (href) => href,
+		route,
 	})
 }
 
-export const getI18nContext = (): I18nContext => getContext(inlangSymbol)
+// TODO: output warning that calling this does not make sense
+const route = (href: RelativeUrl) => href

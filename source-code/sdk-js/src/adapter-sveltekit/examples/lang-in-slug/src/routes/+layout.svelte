@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getI18nContext, setI18nContext } from "../inlang.js"
+	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setI18nContext(getInlangPayload(data))
-	let { i, language } = getI18nContext()
+	setInlangContext(getInlangPayload(data))
+	let { i, language } = getInlangContext()
 
 	$: {
-		setI18nContext(getInlangPayload(data))
-		;({ i, language } = getI18nContext())
+		setInlangContext(getInlangPayload(data))
+		;({ i, language } = getInlangContext())
 	}
 
 	$: console.info("+layout.svelte", i("welcome"))

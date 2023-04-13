@@ -1,7 +1,7 @@
 import { browser } from "$app/environment"
 import { setInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import { initI18nRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
-import { localStorageKey } from "../inlang.js"
+import { initI18nRuntime, setContextMode } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client"
 import type { LayoutLoad } from "./$types.js"
 import {
 	detectLanguage,
@@ -12,6 +12,8 @@ import {
 export const prerender = true
 
 export const load = (async ({ fetch, data }) => {
+	setContextMode('in-memory')
+
 	let language: string | undefined = undefined
 
 	if (browser) {

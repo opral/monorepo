@@ -1,7 +1,7 @@
 import { browser } from "$app/environment"
 import { setInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import { initI18nRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
-import { localStorageKey } from "../inlang.js"
+import { initI18nRuntime, setContextMode } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client"
 import type { LayoutLoad } from "./$types.js"
 import {
 	detectLanguage,
@@ -10,6 +10,8 @@ import {
 } from "@inlang/sdk-js/detectors"
 
 export const load = (async ({ fetch, data }) => {
+	setContextMode('in-memory')
+
 	let language = data.language
 
 	if (browser && !language) {
@@ -22,6 +24,7 @@ export const load = (async ({ fetch, data }) => {
 	}
 
 	browser && localStorage.setItem(localStorageKey, language)
+
 
 	const runtime = await initI18nRuntime({
 		fetch,
