@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show, onMount } from "solid-js"
+import { createEffect, createSignal, Show } from "solid-js"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
