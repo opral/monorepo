@@ -11,8 +11,6 @@ import type { EditorRouteParams } from "../types.js"
 import { SignInDialog } from "@src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { isAfter, subSeconds } from "date-fns"
-// import { fs } from "memfs"
 
 export const Gitfloat = () => {
 	const {
@@ -35,13 +33,6 @@ export const Gitfloat = () => {
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
-	// const [latestChange, setLatestChange] = createSignal<Date>()
-	// const [showPulse, setShowPulse] = createSignal(false)
-	// createEffect(() => {
-	// 	if (unpushedChanges()) {
-	// 		setLatestChange(new Date())
-	// 	}
-	// })
 
 	createEffect(() => {
 		if (localStorage?.user === undefined) {
@@ -98,18 +89,6 @@ export const Gitfloat = () => {
 			return response
 		}
 	}
-
-	// show the pulse if less than X seconds ago a change has been conducted
-	// const interval = setInterval(() => {
-	// 	const _latestChange = latestChange()
-	// 	if (_latestChange === undefined) {
-	// 		return setShowPulse(false)
-	// 	}
-	// 	const eightSecondsAgo = subSeconds(new Date(), 8)
-	// 	return setShowPulse(isAfter(_latestChange, eightSecondsAgo))
-	// }, 1000)
-
-	// onCleanup(() => clearInterval(interval))
 
 	async function triggerPushChanges() {
 		if (localStorage?.user === undefined) {
@@ -171,8 +150,8 @@ export const Gitfloat = () => {
 		href?: string
 	}
 
-	interface GitFloatArray {
-		[state: string]: GitfloatData
+	type GitFloatArray = {
+		[state in "login" | "fork" | "changes" | "pullrequest"]: GitfloatData
 	}
 
 	const data: GitFloatArray = {
@@ -214,13 +193,13 @@ export const Gitfloat = () => {
 
 	return (
 		<>
-			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16">
+			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16 animate-slideIn">
 				<Show when={localStorage.user}>
 					<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
 						<img
 							src={localStorage.user?.avatarUrl}
 							alt="user avatar"
-							class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover"
+							class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
 						/>
 					</div>
 				</Show>
