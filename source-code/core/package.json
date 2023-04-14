@@ -39,10 +39,8 @@
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
+		"esbuild": "^0.17.14",
 		"memfs": "^3.4.13",
 		"tsd": "^0.25.0"
-	},
-	"peerDependencies": {
-		"esbuild": "^0.17.14"
 	}
 }
