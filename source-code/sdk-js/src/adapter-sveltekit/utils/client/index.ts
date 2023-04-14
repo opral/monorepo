@@ -1,1 +1,1 @@
-export { type Runtime, initI18nRuntime } from './runtime.js'
+export { type SvelteKitClientRuntime, initSvelteKitClientRuntime } from './runtime.js'

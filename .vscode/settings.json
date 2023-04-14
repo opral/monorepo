@@ -13,7 +13,9 @@
 		"tsconfig*.json": "jsonc"
 	},
 	"search.exclude": {
-		"**/dist": true
+		"**/dist": true,
+		"**/.svelte-kit": true,
+		"**/build": true,
 	},
 	"files.watcherExclude": {
 		"**/dist": true

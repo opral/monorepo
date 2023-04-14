@@ -1,6 +1,6 @@
 import { browser } from "$app/environment"
-import { setInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import { initI18nRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { setRuntimeToData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { initSvelteKitClientRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 import type { LayoutLoad } from "./$types.js"
 import {
@@ -10,7 +10,7 @@ import {
 } from "@inlang/sdk-js/detectors"
 
 export const load = (async ({ fetch, data }) => {
-	let language = data.language
+	let language = data.language!
 
 	if (browser && !language) {
 		// Note: SPA (non-static) could also detect the language on the server
@@ -24,7 +24,7 @@ export const load = (async ({ fetch, data }) => {
 	browser && localStorage.setItem(localStorageKey, language)
 
 
-	const runtime = await initI18nRuntime({
+	const runtime = await initSvelteKitClientRuntime({
 		fetch,
 		language,
 		referenceLanguage: data.referenceLanguage,
@@ -35,5 +35,5 @@ export const load = (async ({ fetch, data }) => {
 
 	console.info("+layout.ts", i("welcome"))
 
-	return { ...(data || {}), "+layout.ts": Math.random(), ...setInlangPayload(runtime) }
+	return setRuntimeToData({ ...data, "+layout.ts": Math.random(), runtime }, runtime)
 }) satisfies LayoutLoad

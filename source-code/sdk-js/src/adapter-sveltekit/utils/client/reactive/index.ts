@@ -1,8 +1,10 @@
+import type * as Ast from "@inlang/core/ast"
 import { getContext, setContext } from "svelte"
 import { readonly, writable, type Readable } from "svelte/store"
-import type { InlangFunction } from '../../../../runtime/index.js'
-import { inlangSymbol, type RelativeUrl } from '../../shared/index.js'
-import type { Runtime } from '../index.js'
+import type { RelativeUrl } from '../../../../core/index.js'
+import { inlangSymbol } from '../../shared/utils.js'
+import type { SvelteKitClientRuntime } from '../index.js'
+import type * as Runtime from '../../../../runtime/index.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -10,19 +12,22 @@ export const localStorageKey = "language"
 
 // ------------------------------------------------------------------------------------------------
 
-export type I18nContext = {
-	language: Readable<string>
-	referenceLanguage: string
-	languages: string[]
+export type RuntimeContext<
+	Language extends Ast.Language = Ast.Language,
+	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
+> = {
+	language: Readable<Language>
+	referenceLanguage: Language
+	languages: Language[]
 	i: Readable<InlangFunction>
-	switchLanguage: (language: string) => Promise<void>
-	loadResource: Runtime["loadResource"]
+		switchLanguage: (language: Language) => Promise<void>
+	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-export const getInlangContext = (): I18nContext => getContext(inlangSymbol)
+export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
 
-export const setInlangContext = (runtime: Runtime) => {
+export const setRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const _language = writable(runtime.getLanguage() as string)
 	const _i = writable(runtime.getInlangFunction())
 
@@ -39,7 +44,7 @@ export const setInlangContext = (runtime: Runtime) => {
 		localStorage.setItem(localStorageKey, language)
 	}
 
-	setContext<I18nContext>(inlangSymbol, {
+	setContext<RuntimeContext>(inlangSymbol, {
 		language: readonly(_language),
 		referenceLanguage: runtime.getReferenceLanguage(),
 		languages: runtime.getLanguages(),

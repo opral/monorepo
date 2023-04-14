@@ -1,4 +1,4 @@
-import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { PageLoad } from "./$types.js"
 import { detectLanguage, navigatorDetector } from "@inlang/sdk-js/detectors"
 import { browser } from "$app/environment"
@@ -8,7 +8,7 @@ export const load = (async ({ parent }) => {
 	if (browser) {
 		const data = await parent()
 
-		const i = getInlangPayload(data).getInlangFunction()
+		const i = getRuntimeFromData(data).getInlangFunction()
 		console.info("+page.ts", i("welcome"))
 
 		const language = await detectLanguage(

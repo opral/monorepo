@@ -26,6 +26,8 @@ export const initRuntime = <
 	context: RuntimeContext,
 ) => initBaseRuntime<Language, InlangFunctionArgs>(context)
 
+export type Runtime = ReturnType<typeof initRuntime>
+
 export const initBaseRuntime = <
 	Language extends Ast.Language,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
@@ -36,6 +38,7 @@ export const initBaseRuntime = <
 		language: undefined,
 	},
 ) => {
+	// TODO: make this a function that can ba a Promise or Sync
 	const loadResource = async (language: Language) => {
 		const resource = await readResource(language)
 		resource && state.resources.set(language, resource)

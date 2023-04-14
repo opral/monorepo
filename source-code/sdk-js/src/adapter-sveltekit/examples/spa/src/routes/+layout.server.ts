@@ -1,13 +1,13 @@
-import { getInlangInformationFromLocals } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { getRuntimeFromLocals } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const load = (async ({ locals }) => {
-	const inlang = getInlangInformationFromLocals(locals)
+	const runtime = getRuntimeFromLocals(locals)
 
 	return {
 		"+layout.server.ts": Math.random(),
-		language: inlang.language, // TODO: only pass this if `language` gets detected on server
-		referenceLanguage: inlang.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-		languages: inlang.languages, // TODO: only pass this if `languages` gets used somewhere
+		referenceLanguage: runtime.getReferenceLanguage(), // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
+		languages: runtime.getLanguages(), // TODO: only pass this if `languages` gets used somewhere
+		language: runtime.getLanguage(), // TODO: only pass this if `language` gets detected on server
 	}
 }) satisfies LayoutServerLoad

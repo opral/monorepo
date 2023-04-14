@@ -1,24 +1,30 @@
-import { type RelativeUrl, replaceLanguageInUrl, inlangSymbol } from "../../shared/index.js"
-import type { Runtime } from "../index.js"
+import type * as Ast from "@inlang/core/ast"
+import { inlangSymbol } from "../../shared/utils.js"
+import { replaceLanguageInUrl } from "../../shared/index.js"
+import type { SvelteKitClientRuntime } from "../index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { getContext, setContext } from "svelte"
-import type { InlangFunction } from '../../../../runtime/index.js'
+import type * as Runtime from '../../../../runtime/index.js'
+import type { RelativeUrl } from '../../../../core/index.js'
 
-type InlangContext = {
-	language: string
-	referenceLanguage: string
-	languages: string[]
+type RuntimeContext<
+	Language extends Ast.Language = Ast.Language,
+	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
+> = {
+	referenceLanguage: Language
+	languages: Language[]
+	language: Language
 	i: InlangFunction
-	switchLanguage: (language: string) => Promise<void>
-	loadResource: Runtime["loadResource"]
+		switchLanguage: (language: Language) => Promise<void>
+		loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-export const getInlangContext = (): InlangContext => getContext(inlangSymbol)
+export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
 
-export const setInlangContext = (runtime: Runtime) => {
+export const setRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const language = runtime.getLanguage() as string
 
 	const switchLanguage = async (language: string) => {

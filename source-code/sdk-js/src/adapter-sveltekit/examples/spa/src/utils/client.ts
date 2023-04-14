@@ -1,7 +1,7 @@
 import { get } from "svelte/store"
-import { getInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 
 export const clientFn = () => {
-	const { i } = getInlangContext()
+	const { i } = getRuntimeFromContext()
 	console.info("utils/client.ts", get(i)("welcome"))
 }

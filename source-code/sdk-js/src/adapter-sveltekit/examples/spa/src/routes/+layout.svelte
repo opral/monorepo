@@ -1,13 +1,13 @@
 <script lang="ts">
-import { getInlangPayload } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getInlangContext, setInlangContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import { getRuntimeFromContext, setRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setInlangContext(getInlangPayload(data))
+	setRuntimeToContext(getRuntimeFromData(data))
 
-	let { i, language, languages, loadResource, switchLanguage } = getInlangContext()
+	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
 	console.info("+layout.svelte", $i("welcome"))
 </script>
