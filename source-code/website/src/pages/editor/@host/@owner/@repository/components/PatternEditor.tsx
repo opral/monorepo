@@ -207,7 +207,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+		if (
+			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+			hasChanges() &&
+			userIsCollaborator()
+		) {
 			event.preventDefault()
 			handleCommit()
 		}
@@ -266,7 +271,7 @@ export function PatternEditor(props: {
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === ""}>
+						<Show when={textValue() === "" || textValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
