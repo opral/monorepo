@@ -122,7 +122,7 @@ describe("ast - insertAst", () => {
         `
 		const insertionAst = {
 			type: "ArrowFunctionExpression",
-			id: null,
+			id: undefined,
 			expression: false,
 			generator: false,
 			async: false,
