@@ -2,7 +2,6 @@
 	"name": "@inlang/sdk-js",
 	"type": "module",
 	"exports": {
-		"./helpers": "./dist/helpers/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
 		"./config": "./dist/config/index.js",
 		"./detectors": "./dist/detectors/index.js",

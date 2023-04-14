@@ -1,0 +1,14 @@
+diff --git a/node_modules/astring/package.json b/node_modules/astring/package.json
+index 55da8ad..98266cf 100644
+--- a/node_modules/astring/package.json
++++ b/node_modules/astring/package.json
+@@ -8,7 +8,8 @@
+   "exports": {
+     "import": "./dist/astring.mjs",
+     "require": "./dist/astring.js",
+-    "browser": "./dist/astring.min.js"
++    "browser": "./dist/astring.min.js",
++    "types": "./astring.d.ts"
+   },
+   "bin": {
+     "astring": "bin/astring"
