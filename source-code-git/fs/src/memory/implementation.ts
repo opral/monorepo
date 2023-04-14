@@ -103,19 +103,19 @@ export class MemoryFs implements Filesystem {
 	}
 
 	static _dirFromJson(json: Record<string, any>): Directory {
-	    const dir: Directory = new Map()
-	    for (let kv of Object.entries(json)) {
-		if (typeof kv[1] === "object") {
-		    dir.set(kv[0], MemoryFs._dirFromJson(kv[1]))
-		} else if (typeof kv[1] === "string") {
-		    dir.set(kv[0], kv[1])
+		const dir: Directory = new Map()
+		for (let kv of Object.entries(json)) {
+			if (typeof kv[1] === "object") {
+				dir.set(kv[0], MemoryFs._dirFromJson(kv[1]))
+			} else if (typeof kv[1] === "string") {
+				dir.set(kv[0], kv[1])
+			}
 		}
-	    }
-	    return dir
+		return dir
 	}
 
 	static async fromJson(jsonString: string): Promise<Filesystem> {
-	    const json: Record<string, any> = JSON.parse(jsonString)
-	    return new MemoryFs(MemoryFs._dirFromJson(json))
+		const json: Record<string, any> = JSON.parse(jsonString)
+		return new MemoryFs(MemoryFs._dirFromJson(json))
 	}
 }
