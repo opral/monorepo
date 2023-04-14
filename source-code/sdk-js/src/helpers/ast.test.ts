@@ -75,7 +75,7 @@ describe("ast - insertAst", () => {
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
-		const resultAst = await insertAst(sourceAst, insertionAst.body[0], { before: ["body", "0"] })
+		const resultAst = await insertAst(sourceAst, insertionAst.body[0]!, { before: ["body", "0"] })
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst)
 		expect(resultCode).toEqual(expectedCode)
@@ -99,7 +99,7 @@ describe("ast - insertAst", () => {
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
-		const resultAst = await insertAst(sourceAst, insertionAst.body[0], { after: ["body", "0"] })
+		const resultAst = await insertAst(sourceAst, insertionAst.body[0]!, { after: ["body", "0"] })
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst)
 		expect(resultCode).toEqual(expectedCode)
@@ -174,7 +174,7 @@ describe("ast - insertAst", () => {
         `
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
-		const result = insertAst(sourceAst, insertionAst.body[0], { before: ["body", "0", "fake"] })
+		const result = insertAst(sourceAst, insertionAst.body[0]!, { before: ["body", "0", "fake"] })
 		await expect(() => result).rejects.toThrowError(
 			"The length of 'before' or 'after' has to be a multiple of two.",
 		)
@@ -190,7 +190,7 @@ describe("ast - insertAst", () => {
         `
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
-		const result = insertAst(sourceAst, insertionAst.body[0], {
+		const result = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0", "fake", "path", "here"],
 		})
 		await expect(() => result).rejects.toThrowError("Couldn't access given position in AST.")
@@ -208,7 +208,7 @@ describe("ast - insertAst", () => {
 		const insertionAstClone = structuredClone(insertionAst)
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const sourceAstClone = structuredClone(sourceAst)
-		await insertAst(sourceAst, insertionAst.body[0], { before: ["body", "0"] })
+		await insertAst(sourceAst, insertionAst.body[0]!, { before: ["body", "0"] })
 		expect(sourceAst).toEqual(sourceAstClone)
 		expect(insertionAst).toEqual(insertionAstClone)
 	})
