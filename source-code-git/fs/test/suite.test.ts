@@ -25,15 +25,13 @@ test("MemoryFs", async () => {
 	await fs.writeFile("/home/user1/documents/../file3", "text in the third file")
 	expect(await fs.readFile("./home/./user1/file3")).toEqual("text in the third file")
 
-        const fsJson: string = await fs.toJson()
-        // dirToJson
-        expect(fsJson).toMatchSnapshot()
-        
-        // dirFromJson (circular references make this tricky to test)
-        expect(
-            JSON.stringify(await MemoryFs.fromJson(JSON.stringify(fsJson)))
-        ).toEqual(JSON.stringify(fs))
+	const fsJson: Record<string, string> = await fs.toJson()
+	// dirToJson
+	expect(fsJson).toMatchSnapshot()
 
-        expect (await fs.readFile("./home/dne")).toBeUndefined()
-        expect (await fs.readdir("./home/dne")).toBeUndefined()
+	// dirFromJson (circular references make this tricky to test)
+	expect(await JSON.stringify(await MemoryFs.fromJson(fsJson))).toEqual(JSON.stringify(fs))
+
+	expect (await fs.readFile("./home/dne")).toBeUndefined()
+	expect (await fs.readdir("./home/dne")).toBeUndefined()
 })

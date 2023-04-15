@@ -85,37 +85,40 @@ export class MemoryFs implements Filesystem {
 		this._followPath(path, true)
 	}
 	
-	_dirToJson(dir: Directory): Record<string,any> {
-		const json: Record<string, any> = {}
+	_dirToArray(dir: Directory, base: string): Array<Array<string>> {
+		let pathArray: Array<Array<string>> = []
 		for (let kv of dir) {
 			if (this.specialPaths.includes(kv[0])) continue
 			if (kv[1] instanceof Map) {
-				json[kv[0]] = this._dirToJson(kv[1])
-			} else if (typeof kv[1] === "string"){
-				json[kv[0]] = kv[1]
-			}
-		}
-		return json
-	}
-
-	async toJson(args: any): Promise<Record<string, any>> {
-		return this._dirToJson(this.root)
-	}
-
-	static _dirFromJson(json: Record<string, any>): Directory {
-		const dir: Directory = new Map()
-		for (let kv of Object.entries(json)) {
-			if (typeof kv[1] === "object") {
-				dir.set(kv[0], MemoryFs._dirFromJson(kv[1]))
+				pathArray = pathArray.concat(this._dirToArray(kv[1], base + "/" + kv[0]))
 			} else if (typeof kv[1] === "string") {
-				dir.set(kv[0], kv[1])
+				pathArray.push([base + "/" + kv[0], kv[1]])
 			}
 		}
-		return dir
+		return pathArray
 	}
 
-	static async fromJson(jsonString: string): Promise<Filesystem> {
-		const json: Record<string, any> = JSON.parse(jsonString)
-		return new MemoryFs(MemoryFs._dirFromJson(json))
+	async toJson(): Promise<Record<string, string>> {
+		return Object.fromEntries(this._dirToArray(this.root, ''))
 	}
+
+	static async fromJson(json: Record<string, string>): Promise<Filesystem> {
+		const fs = new MemoryFs()
+		fs.fromJson(json)
+		return fs
+	}
+
+	async fromJson(json: Record<string, string>) {
+		for (let kv of Object.entries(json)) {
+			this.writeFile(kv[0], kv[1])
+		}
+	}
+
+	async rm (path: string) {
+		const parentDir: Inode | undefined = this._followPath(this.dirname(path), true)
+		if (parentDir instanceof Map) parentDir.delete(this.basename(path))
+	}
+
+	rmdir = this.rm
+	unlink = this.rm
 }
