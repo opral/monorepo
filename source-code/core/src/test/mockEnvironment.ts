@@ -1,5 +1,6 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-import { Volume } from "memfs"
+// import { Volume } from "memfs"
+import { MemoryFs } from "@inlang-git/fs"
 import dedent from "dedent"
 
 /**
@@ -18,7 +19,7 @@ export async function mockEnvironment(args: {
 		paths: string[]
 	}
 }): Promise<EnvironmentFunctions> {
-	const $fs = Volume.fromJSON({}).promises
+	const $fs = new MemoryFs()
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
@@ -45,31 +46,25 @@ async function copyDirectory(args: {
 	copyTo: EnvironmentFunctions["$fs"]
 	path: string
 }) {
-	try {
-		await args.copyFrom.readdir(args.path)
-	} catch {
+	if (!await args.copyFrom.readdir(args.path)) {
 		throw new Error(dedent`
 The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
 
-Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory ${process.cwd()}.
+Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
 
 Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
 		`)
 	}
 	// create directory
-	await args.copyTo.mkdir(args.path, { recursive: true })
+	await args.copyTo.mkdir(args.path)
 	const pathsInDirectory = await args.copyFrom.readdir(args.path)
+	if (!pathsInDirectory) throw new Error("Source directory is empty")
 	for (const subpath of pathsInDirectory) {
 		let isFile = true
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
-		try {
-			await args.copyFrom.readFile(path)
-		} catch {
-			isFile = false
-		}
-		if (isFile) {
-			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
+		const file = await args.copyFrom.readFile(path)
+		if (file) {
 			await args.copyTo.writeFile(path, file)
 		} else {
 			await copyDirectory({ ...args, path })
