@@ -3,19 +3,15 @@ import type { Result } from "@inlang/core/utilities"
 import { walk } from "estree-walker"
 import { get } from "lodash"
 
+export class WrapWithCallExpressionError extends Error {
+	readonly #id = "WrapWithCallExpressionException"
+}
+
 type WrapVariableDeclaration = (
 	sourceAst: Program,
 	searchIdentifier: string,
 	identifier: string,
-) => Result<Program, Error>
-
-type InsertAst = (
-	sourceAst: Program,
-	ast: Node,
-	position:
-		| { after?: never; before: [string, string, ...string[]] }
-		| { after: [string, string, ...string[]]; before?: never },
-) => Result<Program, Error>
+) => Result<Program, WrapWithCallExpressionError>
 
 const wrapWithCallExpression = (node: Node, identifier: string) => {
 	return {
@@ -41,31 +37,40 @@ const wrapWithCallExpression = (node: Node, identifier: string) => {
  * @returns A promise that resolves to the resulting ast or rejects if the searched for declarator can't be found.
  */
 export const wrapVariableDeclaration = ((sourceAst, searchIdentifier, identifier) => {
-	try {
-		const sourceAstClone = structuredClone(sourceAst)
-		let found = false
-		walk(sourceAstClone, {
-			enter(node) {
-				if (
-					node.type === "VariableDeclarator" &&
-					node.id.type === "Identifier" &&
-					node.id.name === searchIdentifier &&
-					node.init
-				) {
-					found = true
-					const newNode = structuredClone(node)
-					newNode.init = wrapWithCallExpression(node.init, identifier)
-					this.replace(newNode)
-					this.skip()
-				}
-			},
-		})
-		if (!found) throw new Error("Couldn't find variable declarator.")
-		return [sourceAstClone, undefined]
-	} catch (error) {
-		return [undefined, error as Error]
-	}
+	const sourceAstClone = structuredClone(sourceAst)
+	let found = false
+	walk(sourceAstClone, {
+		enter(node) {
+			if (
+				node.type === "VariableDeclarator" &&
+				node.id.type === "Identifier" &&
+				node.id.name === searchIdentifier &&
+				node.init
+			) {
+				found = true
+				const newNode = structuredClone(node)
+				newNode.init = wrapWithCallExpression(node.init, identifier)
+				this.replace(newNode)
+				this.skip()
+			}
+		},
+	})
+	if (!found)
+		return [undefined, new WrapWithCallExpressionError("Couldn't find variable declarator.")]
+	return [sourceAstClone, undefined]
 }) satisfies WrapVariableDeclaration
+
+export class InsertAstError extends Error {
+	readonly #id = "InsertAstException"
+}
+
+type InsertAst = (
+	sourceAst: Program,
+	ast: Node,
+	position:
+		| { after?: never; before: [string, string, ...string[]] }
+		| { after: [string, string, ...string[]]; before?: never },
+) => Result<Program, InsertAstError>
 
 /**
  * Inserts the provided ast at the given position in a source ast.
@@ -86,9 +91,9 @@ export const wrapVariableDeclaration = ((sourceAst, searchIdentifier, identifier
 export const insertAst = ((sourceAst, ast, { before, after }) => {
 	try {
 		const sourceAstClone = structuredClone(sourceAst)
-		const position = after || before
+		const position = before || after
 		if (position.length % 3 !== 2) {
-			throw new Error("The length of 'before' or 'after' has to be a multiple of two.")
+			throw new InsertAstError("The length of 'before' or 'after' has to be a multiple of two.")
 		}
 		const targetParent = get(sourceAstClone, position.slice(0, -2), sourceAstClone)
 		const targetArrayKey = position.at(-2)
@@ -101,7 +106,7 @@ export const insertAst = ((sourceAst, ast, { before, after }) => {
 					const targetArray = get(newNode, targetArrayKey as string, undefined) as
 						| Node[]
 						| undefined
-					if (!targetArray) throw new Error("Couldn't access given position in AST.")
+					if (!targetArray) throw new InsertAstError("Couldn't access given position in AST.")
 					else targetArray.splice(targetArrayIndex + (before ? 0 : 1), 0, structuredClone(ast))
 					// this.replace doesn't work on the root node - that's why we need the next line
 					if (node === sourceAstClone) {
@@ -114,6 +119,6 @@ export const insertAst = ((sourceAst, ast, { before, after }) => {
 		})
 		return [newAst || sourceAstClone, undefined]
 	} catch (error) {
-		return [undefined, error as Error]
+		return [undefined, error as InsertAstError]
 	}
 }) satisfies InsertAst

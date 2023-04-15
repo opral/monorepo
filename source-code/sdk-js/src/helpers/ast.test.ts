@@ -1,11 +1,15 @@
 import { describe, expect, test } from "vitest"
 import { parse } from "acorn"
-import { wrapVariableDeclaration, insertAst } from "./ast.js"
+import {
+	wrapVariableDeclaration,
+	insertAst,
+	WrapWithCallExpressionError,
+	InsertAstError,
+} from "./ast.js"
 import { generate } from "astring"
 import type { ArrowFunctionExpression, Program } from "estree"
 import type { Options } from "acorn"
 
-//@ivanhofer - is ecmaVersion 2020 correct here?
 const acornOptions = {
 	ecmaVersion: 2020,
 	sourceType: "module",
@@ -24,22 +28,24 @@ describe("ast - wrapVariableDeclaration", () => {
             })
         `
 		const inputAst = parse(input, acornOptions) as unknown as Program
-		const resultAst = wrapVariableDeclaration(inputAst, "load", "wrapFn")[0]
+		const [resultAst] = wrapVariableDeclaration(inputAst, "load", "wrapFn")
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
 	})
-	test("Return error for nonexistent declarator", () => {
+	test("Return exception for nonexistent declarator", () => {
 		const input = `
             export const load = () => {
                 return { data: true }
             }
         `
-		// @ivanohofer - what do you think of the type casting below?
+		// TODO: find a fully ESTree compatible parser and remove the below typecasts
 		const inputAst = parse(input, acornOptions) as unknown as Program
-		const result = wrapVariableDeclaration(inputAst, "blue", "wrapFn")[1]
-		expect(result).toStrictEqual(new Error("Couldn't find variable declarator."))
+		const [, exception] = wrapVariableDeclaration(inputAst, "blue", "wrapFn")
+		expect(exception).toStrictEqual(
+			new WrapWithCallExpressionError("Couldn't find variable declarator."),
+		)
 	})
 	test("Doesn't manipulate inputs", async () => {
 		const input = `
@@ -74,9 +80,9 @@ describe("ast - insertAst", () => {
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
-		const resultAst = insertAst(sourceAst, insertionAst.body[0]!, {
+		const [resultAst] = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0"],
-		})[0]
+		})
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
@@ -100,9 +106,9 @@ describe("ast - insertAst", () => {
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
-		const resultAst = insertAst(sourceAst, insertionAst.body[0]!, {
+		const [resultAst] = insertAst(sourceAst, insertionAst.body[0]!, {
 			after: ["body", "0"],
-		})[0]
+		})
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
@@ -159,9 +165,9 @@ describe("ast - insertAst", () => {
 		} as ArrowFunctionExpression
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const expectedAst = parse(expected, acornOptions) as unknown as Program
-		const resultAst = insertAst(sourceAst, insertionAst, {
+		const [resultAst] = insertAst(sourceAst, insertionAst, {
 			before: ["body", "1", "declaration", "declarations", "0", "init", "arguments", "0"],
-		})[0]
+		})
 		const expectedCode = generate(expectedAst)
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
@@ -177,14 +183,14 @@ describe("ast - insertAst", () => {
         `
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
-		const result = insertAst(sourceAst, insertionAst.body[0]!, {
+		const [, exception] = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0", "fake"],
-		})[1]
-		expect(result).toStrictEqual(
-			new Error("The length of 'before' or 'after' has to be a multiple of two."),
+		})
+		expect(exception).toStrictEqual(
+			new InsertAstError("The length of 'before' or 'after' has to be a multiple of two."),
 		)
 	})
-	test("Return error for unreachable path", async () => {
+	test("Return exception for unreachable path", async () => {
 		const insertion = `
             import { wrapFn } from 'some/path'
         `
@@ -195,10 +201,10 @@ describe("ast - insertAst", () => {
         `
 		const insertionAst = parse(insertion, acornOptions) as unknown as Program
 		const sourceAst = parse(source, acornOptions) as unknown as Program
-		const result = insertAst(sourceAst, insertionAst.body[0]!, {
+		const [, exception] = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0", "fake", "path", "here"],
-		})[1]
-		expect(result).toStrictEqual(new Error("Couldn't access given position in AST."))
+		})
+		expect(exception).toStrictEqual(new InsertAstError("Couldn't access given position in AST."))
 	})
 	test("Doesn't manipulate inputs", async () => {
 		const insertion = `
@@ -213,7 +219,7 @@ describe("ast - insertAst", () => {
 		const insertionAstClone = structuredClone(insertionAst)
 		const sourceAst = parse(source, acornOptions) as unknown as Program
 		const sourceAstClone = structuredClone(sourceAst)
-		await insertAst(sourceAst, insertionAst.body[0]!, { before: ["body", "0"] })
+		insertAst(sourceAst, insertionAst.body[0]!, { before: ["body", "0"] })
 		expect(sourceAst).toEqual(sourceAstClone)
 		expect(insertionAst).toEqual(insertionAstClone)
 	})
