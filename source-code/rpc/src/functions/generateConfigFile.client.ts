@@ -49,6 +49,7 @@ async function readdirRecursive(args: {
 	let result: Record<string, string> = {}
 	// Read the contents of the current directory
 	const files = await fs.readdir(path)
+	if (!files) throw new Error(`${path} does not exist.`)
 	// Loop through each file/directory
 	for (const file of files) {
 		// Construct the full path to the file/directory
@@ -56,7 +57,7 @@ async function readdirRecursive(args: {
 		// Check if the current item is a directory by trying to read it
 		let isDirectory = false
 		try {
-			await fs.readFile(fullPath)
+			if (!(await fs.readFile(fullPath))) throw new Error()
 		} catch (error) {
 			isDirectory = true
 		}
@@ -68,7 +69,9 @@ async function readdirRecursive(args: {
 			const subList = await readdirRecursive({ fs, path: fullPath })
 			result = { ...result, ...subList }
 		} else {
-			const content = await fs.readFile(fullPath, { encoding: "utf-8" })
+			const content = await fs.readFile(fullPath)
+			if (!content) throw new Error(`${fullPath} does not exist.`)
+
 			result[fullPath] = content as string
 		}
 	}
