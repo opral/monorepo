@@ -63,7 +63,7 @@ export const extractMessageCommand = {
 				elements: [{ type: "Text", value: messageValue }],
 			},
 		}
-		// find reference langauge resource
+		// find reference language resource
 		const referenceResource = state().resources.find(
 			(resource) => resource.languageTag.name === referenceLanguage,
 		)
