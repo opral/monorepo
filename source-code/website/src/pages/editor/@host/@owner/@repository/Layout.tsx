@@ -257,7 +257,7 @@ export const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { inlangConfig, filteredStatus, setFilteredStatus } = useEditorState()
+	const { inlangConfig, filteredLintRules, setFilteredLintRules } = useEditorState()
 
 	const lintRuleIds = () =>
 		inlangConfig()
@@ -270,9 +270,9 @@ function StatusFilter() {
 			prop:size="small"
 			prop:multiple={true}
 			prop:maxOptionsVisible={2}
-			prop:value={filteredStatus()}
+			prop:value={filteredLintRules()}
 			on:sl-change={(event: any) => {
-				setFilteredStatus(event.target.value ?? [])
+				setFilteredLintRules(event.target.value ?? [])
 			}}
 			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
@@ -280,7 +280,7 @@ function StatusFilter() {
 				<div class="last:pr-2">
 					<WarningIcon />
 				</div>
-				<Show when={filteredStatus().length <= 0}>
+				<Show when={filteredLintRules().length <= 0}>
 					<sl-tag prop:size="small" class="font-medium text-sm">
 						everyMessage
 					</sl-tag>
@@ -291,11 +291,11 @@ function StatusFilter() {
 				<span class="text-left text-on-surface-variant grow">Lints</span>
 				<a
 					class="cursor-pointer link link-primary"
-					onClick={() => setFilteredStatus(lintRuleIds().map((id) => id))}
+					onClick={() => setFilteredLintRules(lintRuleIds().map((id) => id))}
 				>
 					ALL
 				</a>
-				<a class="cursor-pointer link link-primary" onClick={() => setFilteredStatus([])}>
+				<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
 					NONE
 				</a>
 			</div>
