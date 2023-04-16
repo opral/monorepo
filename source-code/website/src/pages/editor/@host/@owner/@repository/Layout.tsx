@@ -272,7 +272,7 @@ function StatusFilter() {
 			prop:maxOptionsVisible={2}
 			prop:value={filteredStatus()}
 			on:sl-change={(event: any) => {
-				setFilteredStatus(event.target.value)
+				setFilteredStatus(event.target.value ?? [])
 			}}
 			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
@@ -295,11 +295,7 @@ function StatusFilter() {
 				>
 					ALL
 				</a>
-				<a
-					class="cursor-pointer link link-primary"
-					// filter all rules
-					onClick={() => setFilteredStatus(() => [])}
-				>
+				<a class="cursor-pointer link link-primary" onClick={() => setFilteredStatus([])}>
 					NONE
 				</a>
 			</div>
