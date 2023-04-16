@@ -25,7 +25,7 @@ import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
-import { lint, LintRule } from "@inlang/core/lint"
+import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 
@@ -107,8 +107,8 @@ type EditorStateSchema = {
 	/**
 	 * The resources in a given repository.
 	 */
-	resources: ast.Resource[]
-	setResources: SetStoreFunction<ast.Resource[]>
+	resources: LintedResource[]
+	setResources: SetStoreFunction<LintedResource[]>
 
 	/**
 	 * The reference resource.
