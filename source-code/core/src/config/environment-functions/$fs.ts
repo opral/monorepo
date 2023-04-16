@@ -1,5 +1,4 @@
 export type { Filesystem as $fs } from "@inlang-git/fs"
-import { MemoryFs as fs } from "@inlang-git/fs"
 
 /**
  * ! IF YOU DO CHANGES TO THIS FILE,

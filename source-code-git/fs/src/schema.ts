@@ -1,8 +1,9 @@
-export type Filesystem = {
+export interface Filesystem {
 	writeFile: (path: string, content: string) => Promise<void>
 	readFile: (path: string) => Promise<string | undefined>
 	readdir: (path: string) => Promise<string[] | undefined>
 	mkdir: (path: string) => Promise<void>
+	rm: (path: string) => Promise<void>
 	/**
 	 * Serializes the filesystem to a JSON string.
 	 *
@@ -26,4 +27,5 @@ export type Filesystem = {
 		 */
 		exclude?: string[]
 	}) => Promise<Record<string, any>>
+	fromJson: (json: Record<string, string>) => Promise<Filesystem>
 }

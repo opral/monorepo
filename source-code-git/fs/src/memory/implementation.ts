@@ -4,121 +4,118 @@ type FileData = string
 type Directory = Map<string, Inode>
 type Inode = FileData | Directory
 
-export class MemoryFs implements Filesystem {
-	root: Directory
-	specialPaths: string[]
-
-	constructor(root: Directory = new Map()) {
-		this.root = root
-		this.specialPaths = ["", ".", ".."]
-		this.root.set("", this.root) 
-		this.root.set(".", this.root) 
-		this.root.set("..", this.root) 
+function dirToArray(dir: Directory, base: string): Array<Array<string>> {
+	const specialPaths = ["", ".", ".."]
+	let pathArray: Array<Array<string>> = []
+	for (let kv of dir) {
+		if (specialPaths.includes(kv[0])) continue
+		if (kv[1] instanceof Map) {
+			pathArray = pathArray.concat(dirToArray(kv[1], base + "/" + kv[0]))
+		} else if (typeof kv[1] === "string") {
+			pathArray.push([base + "/" + kv[0], kv[1]])
+		}
 	}
+	return pathArray
+}
 
-	_newDir(parentDir: Directory) {
-		// A circular reference allows for simple handling of leading and
-		// trailing slashes, as well as "." paths
-		//	
-		// Since these only exist internaly, there shouldn't be issues
-		// with serialization
-		const dir = new Map()
-		dir.set("", dir)
-		dir.set(".", dir)
-		dir.set("..", parentDir)
-		return dir
-	}
+function initDir(parentDir: Directory) {
+	// A circular reference allows for simple handling of leading and
+	// trailing slashes, as well as "." paths
+	//	
+	// Since these only exist internaly, there shouldn't be issues
+	// with serialization
+	const dir = new Map()
+	dir.set("", dir)
+	dir.set(".", dir)
+	dir.set("..", parentDir)
+	return dir
+}
 
-	_followPath(path: string, makeParent: boolean = false): Inode | undefined {
-		const pathList: string[] = path.split("/")
-		let target: Inode | undefined = this.root
-		let parentDir: Directory
+function followPath(
+	target: Inode | undefined,
+	path: string, 
+	makeParent: boolean = false
+): Inode | undefined {
+	const pathList: string[] = path.split("/")
+	let parentDir: Directory
 
-		if (makeParent) {
-			for (let path of pathList) {
 
-				if (target instanceof Map) {
-					parentDir = target
-					target = target.get(path) ?? undefined
-				} else break
+	if (makeParent) {
+		for (let path of pathList) {
 
-				if (!target) {
-					if (!makeParent) return undefined
-					parentDir.set(path, this._newDir(parentDir))
-					target = parentDir.get(path) ?? undefined
-				}
-			}
-		} else {
-			for (let path of pathList) {
-				if (target instanceof Map) 
-					target = target.get(path) ?? undefined
-				else break
+			if (target instanceof Map) {
+				parentDir = target
+				target = target.get(path) ?? undefined
+			} else break
 
-				if (!target) return undefined
+			if (!target) {
+				if (!makeParent) return undefined
+				parentDir.set(path, initDir(parentDir))
+				target = parentDir.get(path) ?? undefined
 			}
 		}
+	} else {
+		for (let path of pathList) {
+			if (target instanceof Map) 
+				target = target.get(path) ?? undefined
+			else break
 
-		return target
-	}
-
-	dirname = (path: string): string  => path.split("/").slice(0, -1).join("/")
-	basename = (path: string): string => path.split("/").slice(-1)[0]
-
-	async writeFile(path: string, content: FileData) {
-		const parentDir: Inode | undefined = this._followPath(this.dirname(path), true)
-		if (parentDir instanceof Map) parentDir.set(this.basename(path), content)
-	}
-
-	async readFile(path: string): Promise<FileData | undefined> {
-		const file: Inode | undefined = this._followPath(path)
-		return typeof file === "string" ? file : undefined
-	}
-
-	async readdir(path: string): Promise<string[] | undefined> {
-		const dir: Inode | undefined = this._followPath(path)
-		if (dir instanceof Map)
-			return [...dir.keys()].filter(x => !(this.specialPaths.includes(x)))
-		else return
-	}
-
-	async mkdir(path: string) {
-		this._followPath(path, true)
-	}
-	
-	_dirToArray(dir: Directory, base: string): Array<Array<string>> {
-		let pathArray: Array<Array<string>> = []
-		for (let kv of dir) {
-			if (this.specialPaths.includes(kv[0])) continue
-			if (kv[1] instanceof Map) {
-				pathArray = pathArray.concat(this._dirToArray(kv[1], base + "/" + kv[0]))
-			} else if (typeof kv[1] === "string") {
-				pathArray.push([base + "/" + kv[0], kv[1]])
-			}
-		}
-		return pathArray
-	}
-
-	async toJson(): Promise<Record<string, string>> {
-		return Object.fromEntries(this._dirToArray(this.root, ''))
-	}
-
-	static async fromJson(json: Record<string, string>): Promise<Filesystem> {
-		const fs = new MemoryFs()
-		fs.fromJson(json)
-		return fs
-	}
-
-	async fromJson(json: Record<string, string>) {
-		for (let kv of Object.entries(json)) {
-			this.writeFile(kv[0], kv[1])
+			if (!target) return undefined
 		}
 	}
 
-	async rm (path: string) {
-		const parentDir: Inode | undefined = this._followPath(this.dirname(path), true)
-		if (parentDir instanceof Map) parentDir.delete(this.basename(path))
-	}
+	return target
+}
 
-	rmdir = this.rm
-	unlink = this.rm
+interface MemoryFilesystem extends Filesystem { 
+	_root: Map<string, Inode>
+	dirname: (path: string) => string
+	basename: (path: string) => string
+}
+
+export function createMemoryFs(): Filesystem {
+	return {
+		_root: initDir(new Map()),
+
+		dirname: (path: string): string  => path.split("/").slice(0, -1).join("/"),
+		basename: (path: string): string => path.split("/").slice(-1)[0],
+
+		writeFile: async function (path: string, content: FileData) {
+			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
+			if (parentDir instanceof Map) parentDir.set(this.basename(path), content)
+		},
+
+		readFile: async function (path: string): Promise<FileData | undefined> {
+			const file: Inode | undefined = followPath(this._root, path)
+			return typeof file === "string" ? file : undefined
+		},
+
+		readdir: async function (path: string): Promise<string[] | undefined> {
+			const dir: Inode | undefined = followPath(this._root, path)
+			const specialPaths: Array<string> = ["", ".", ".."]
+			if (dir instanceof Map)
+				return [...dir.keys()].filter(x => !(specialPaths.includes(x)))
+			else return
+		},
+
+		mkdir: async function (path: string) {
+			followPath(this._root, path, true)
+		},
+
+		toJson: async function(): Promise<Record<string, string>> {
+			return Object.fromEntries(dirToArray(this._root, ''))
+		},
+
+		rm: async function(path: string) {
+			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
+			if (parentDir instanceof Map) parentDir.delete(this.basename(path))
+		},
+
+		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {
+			for (let kv of Object.entries(json)) {
+				this.writeFile(kv[0], kv[1])
+			}
+			return this
+		}
+	} as MemoryFilesystem
 }

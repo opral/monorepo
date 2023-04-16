@@ -1,6 +1,6 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
 // import { Volume } from "memfs"
-import { MemoryFs } from "@inlang-git/fs"
+import { createMemoryFs } from "@inlang-git/fs"
 import dedent from "dedent"
 
 /**
@@ -19,7 +19,7 @@ export async function mockEnvironment(args: {
 		paths: string[]
 	}
 }): Promise<EnvironmentFunctions> {
-	const $fs = new MemoryFs()
+	const $fs = createMemoryFs()
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
