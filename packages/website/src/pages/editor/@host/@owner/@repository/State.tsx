@@ -25,7 +25,7 @@ import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
-import { lint } from "@inlang/core/lint"
+import { lint, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 
@@ -93,16 +93,16 @@ type EditorStateSchema = {
 	setFsChange: Setter<Date>
 
 	/**
-	 * FilterLanguages show or hide the different messages.
+	 * Filtered languages.
 	 */
 	filteredLanguages: () => Language[]
 	setFilteredLanguages: Setter<Language[]>
 
 	/**
-	 * FilterLanguages show or hide the different messages.
+	 * Filtered lint rules.
 	 */
-	filteredStatus: () => string[]
-	setFilteredStatus: Setter<string[]>
+	filteredLintRules: () => LintRule["id"][]
+	setFilteredLintRules: Setter<LintRule["id"][]>
 
 	/**
 	 * The resources in a given repository.
@@ -170,7 +170,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([])
 
-	const [filteredStatus, setFilteredStatus] = createSignal<string[]>([])
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
 	const [fs, setFs] = createSignal<typeof import("memfs").fs>(createFsFromVolume(new Volume()))
 
@@ -469,8 +469,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFsChange,
 					filteredLanguages,
 					setFilteredLanguages,
-					filteredStatus,
-					setFilteredStatus,
+					filteredLintRules,
+					setFilteredLintRules,
 					resources,
 					setResources,
 					referenceResource,

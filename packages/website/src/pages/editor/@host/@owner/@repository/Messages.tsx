@@ -9,7 +9,7 @@ import type { LintReport, LintedNode } from "@inlang/core/lint"
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, textSearch, filteredStatus } = useEditorState()
+	const { inlangConfig, filteredLanguages, textSearch, filteredLintRules } = useEditorState()
 	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
 		return props.messages[inlangConfig()!.referenceLanguage]
@@ -35,7 +35,7 @@ export function Messages(props: {
 	const matchedLints = () => {
 		if (props.messages) {
 			const reports = getLintReports(Object.values(props.messages) as LintedNode[])
-			const statusArr = filteredStatus()
+			const statusArr = filteredLintRules()
 			const match = reports
 				.map((lint) => {
 					if (statusArr) {
@@ -70,7 +70,7 @@ export function Messages(props: {
 		<div ref={patternListElement} class="group">
 			<Show
 				when={
-					(filteredStatus()?.length === 0 || matchedLints()) &&
+					(filteredLintRules()?.length === 0 || matchedLints()) &&
 					(JSON.stringify(id()).toLowerCase().includes(textSearch().toLowerCase()) ||
 						JSON.stringify(props.messages).toLowerCase().includes(textSearch().toLowerCase()))
 				}
