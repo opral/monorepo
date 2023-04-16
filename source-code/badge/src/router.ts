@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express"
 import { Resvg } from "@resvg/resvg-js"
 import { badge } from "./badge.js"
+import { getPreferredLanguage, parseAcceptLanguageHeader } from "./helper/lang.js"
 
 // Create the express router
 export const router = express.Router()
@@ -10,8 +11,16 @@ router.get(
 	"/badge",
 	async (req: Request<object, object, object, { url?: string; size?: string }>, res: Response) => {
 		try {
-			// Get the language from the request
+			let preferredLanguage: string | undefined
+
 			const lang = req.headers["accept-language"]
+
+			if (lang) {
+				// parse the language
+				const languagePriorities = parseAcceptLanguageHeader(lang)
+				// get the preferred language
+				preferredLanguage = getPreferredLanguage(languagePriorities)
+			}
 
 			// Get the url from the query
 			const { url, size } = req.query
@@ -21,7 +30,7 @@ router.get(
 				)
 				return
 			}
-			const image = await badge(url)
+			const image = await badge(url, preferredLanguage)
 
 			// render png
 			const resvg = new Resvg(image)

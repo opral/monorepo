@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs"
 
 const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 
-export const badge = async (url: string) => {
+export const badge = async (url: string, preferredLanguage: string | undefined) => {
 	// initialize a new file system on each request to prevent cross request pollution
 	const fs = Volume.fromJSON({})
 	await clone(url, fs)
@@ -55,7 +55,7 @@ export const badge = async (url: string) => {
 	}
 
 	// markup the percentages
-	const vdom = removeCommas(markup(percentages))
+	const vdom = removeCommas(markup(percentages, preferredLanguage))
 
 	// render the image
 	const image = await satori(
@@ -63,7 +63,7 @@ export const badge = async (url: string) => {
 		vdom,
 		{
 			width: 340,
-			height: percentages.length * 70 + 140,
+			height: percentages.length * 70 + 200,
 			fonts: [
 				{
 					name: "Inter",
