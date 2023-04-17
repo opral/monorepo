@@ -286,27 +286,6 @@ function StatusFilter() {
 					</sl-tag>
 				</Show>
 			</div>
-		<sl-select
-			prop:name="Lint Filter Select"
-			prop:size="small"
-			prop:multiple={true}
-			prop:maxOptionsVisible={2}
-			prop:value={filteredLintRules()}
-			on:sl-change={(event: any) => {
-				setFilteredLintRules(event.target.value ?? [])
-			}}
-			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-		>
-			<div class="mx-auto flex items-center gap-2" slot="prefix">
-				<div class="last:pr-2">
-					<WarningIcon />
-				</div>
-				<Show when={filteredLintRules().length <= 0}>
-					<sl-tag prop:size="small" class="font-medium text-sm">
-						everyMessage
-					</sl-tag>
-				</Show>
-			</div>
 
 			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
 				<span class="text-left text-on-surface-variant grow">Lints</span>

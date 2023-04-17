@@ -128,7 +128,6 @@ function TheActualPage() {
 					<div class="mb-16 empty-parent">
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}
-							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
 						<div
 							class={
