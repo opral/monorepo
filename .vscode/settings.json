@@ -15,6 +15,7 @@
 		"tsconfig*.json": "jsonc"
 	},
 	"search.exclude": {
+		"**/node_modules": true,
 		"**/dist": true,
 		"**/.svelte-kit": true,
 		"**/build": true,

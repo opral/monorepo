@@ -26,10 +26,3 @@ export const loadResource: Runtime['loadResource'] = () => {
 export const route: (href: RelativeUrl) => RelativeUrl = () => {
 	throw error
 }
-
-// TODO: make sure that
-// - `@inlang/sdk-js`
-// - `@inlang/sdk-js/adapter-sveltekit/server[SvelteKitServerRuntime]`
-// - `@inlang/sdk-js/adapter-sveltekit/client/reactive[RuntimeContext]`
-// - `@inlang/sdk-js/adapter-sveltekit/client/not-reactive[RuntimeContext]`
-// all expose the same functions

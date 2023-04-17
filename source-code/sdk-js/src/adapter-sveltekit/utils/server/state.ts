@@ -20,8 +20,8 @@ export const getResource = (language: string) =>
 
 export const addRuntimeToLocals = (
 	locals: RequestEvent["locals"],
-	payload: SvelteKitServerRuntime,
-) => ((locals as any)[inlangSymbol] = payload)
+	runtime: SvelteKitServerRuntime,
+) => ((locals as any)[inlangSymbol] = runtime)
 
 export const getRuntimeFromLocals = (
 	locals: RequestEvent["locals"],
