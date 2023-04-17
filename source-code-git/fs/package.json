@@ -5,8 +5,13 @@
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"files": [
+		"./dist",
+		"./src"
+	],
 	"scripts": {
-		"---- DEV AND BUILD": "Are not required. Direct TypeScript import is possible because this module is only used internally.",
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",

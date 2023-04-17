@@ -2,7 +2,8 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
-		"source-code/*"
+		"source-code/*",
+		"source-code-git/*"
 	],
 	"scripts": {
 		"build": "turbo run build",
