@@ -1,9 +1,10 @@
+import type { Resource } from '@inlang/core/ast'
 import { expectType } from "tsd"
 import { initRuntime, RuntimeContext } from "./runtime.js"
 
 // ------------------------------------------------------------------------------------------------
 
-const context: RuntimeContext = {
+const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	readResource: () => Promise.resolve(undefined),
 }
 
@@ -33,6 +34,7 @@ const context: RuntimeContext = {
 {
 	const runtime = initRuntime<
 		"de" | "en",
+		Promise<Resource | undefined>,
 		{
 			hello: never
 			welcome: { name: string }

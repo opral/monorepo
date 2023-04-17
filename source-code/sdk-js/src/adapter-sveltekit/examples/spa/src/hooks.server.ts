@@ -13,14 +13,14 @@ export const handle = (async ({ event, resolve }) => {
 	const language = undefined
 	// const language = referenceLanguage
 
-	const runtime = await initSvelteKitServerRuntime({
+	const runtime = initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language: language!
 	})
 
 	// TODO: don't set props if they are never used
-	// await runtime.loadResource(language)
+	// runtime.loadResource(language)
 	// runtime.switchLanguage(language)
 
 	addRuntimeToLocals(event.locals, runtime)

@@ -7,7 +7,7 @@ type InitSvelteKitServerRuntimeArgs = {
 	language: string
 }
 
-export const initSvelteKitServerRuntime = async ({
+export const initSvelteKitServerRuntime = ({
 	language,
 	referenceLanguage,
 	languages,
@@ -19,8 +19,7 @@ export const initSvelteKitServerRuntime = async ({
 	})
 
 	if (language) {
-		// ! warning, this is currently async
-		await runtime.loadResource(language)
+		runtime.loadResource(language)
 		runtime.switchLanguage(language)
 	}
 

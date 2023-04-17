@@ -6,24 +6,24 @@ import { initBaseRuntime, initRuntime, RuntimeContext, RuntimeState } from "./ru
 // TODO: expose utility functions somewhere
 
 const createResource = (language: Language, ...messages: Message[]) =>
-	({
-		type: "Resource",
-		languageTag: {
-			type: "LanguageTag",
-			name: language,
-		},
-		body: messages,
-	} satisfies Resource)
+({
+	type: "Resource",
+	languageTag: {
+		type: "LanguageTag",
+		name: language,
+	},
+	body: messages,
+} satisfies Resource)
 
 const createMessage = (id: string, pattern: string) =>
-	({
-		type: "Message",
-		id: { type: "Identifier", name: id },
-		pattern: {
-			type: "Pattern",
-			elements: [{ type: "Text", value: pattern }],
-		},
-	} satisfies Message)
+({
+	type: "Message",
+	id: { type: "Identifier", name: id },
+	pattern: {
+		type: "Pattern",
+		elements: [{ type: "Text", value: pattern }],
+	},
+} satisfies Message)
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ const resources = {
 	fr: createResource("fr", createMessage("hello", "monde")),
 }
 
-const context: RuntimeContext = {
+const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	readResource: (language) => Promise.resolve(resources[language as keyof typeof resources]),
 }
 

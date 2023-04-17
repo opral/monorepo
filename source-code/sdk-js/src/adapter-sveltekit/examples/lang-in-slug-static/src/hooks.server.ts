@@ -15,7 +15,7 @@ export const handle = (async ({ event, resolve }) => {
 
 	const language = pathname.split("/")[1] || (undefined as unknown as string)
 
-	const runtime = await initSvelteKitServerRuntime({
+	const runtime = initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language,
