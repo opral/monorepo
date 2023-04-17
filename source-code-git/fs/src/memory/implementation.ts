@@ -7,10 +7,10 @@ type Inode = FileData | Directory
 function dirToArray(dir: Directory, base: string): Array<Array<string>> {
 	const specialPaths = ["", ".", ".."]
 	let pathArray: Array<Array<string>> = []
-	for (let kv of dir) {
+	for (const kv of dir) {
 		if (specialPaths.includes(kv[0])) continue
 		if (kv[1] instanceof Map) {
-			pathArray = pathArray.concat(dirToArray(kv[1], base + "/" + kv[0]))
+			pathArray = [...pathArray, ...dirToArray(kv[1], base + "/" + kv[0])]
 		} else if (typeof kv[1] === "string") {
 			pathArray.push([base + "/" + kv[0], kv[1]])
 		}
@@ -78,7 +78,7 @@ export function createMemoryFs(): Filesystem {
 		_root: initDir(new Map()),
 
 		dirname: (path: string): string  => path.split("/").slice(0, -1).join("/"),
-		basename: (path: string): string => path.split("/").slice(-1)[0],
+		basename: (path: string): string => path.split("/").slice(-1)[0]!,
 
 		writeFile: async function (path: string, content: FileData) {
 			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
@@ -112,7 +112,7 @@ export function createMemoryFs(): Filesystem {
 		},
 
 		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {
-			for (let kv of Object.entries(json)) {
+			for (const kv of Object.entries(json)) {
 				this.writeFile(kv[0], kv[1])
 			}
 			return this
