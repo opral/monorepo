@@ -19,5 +19,6 @@ export const replaceLanguageInUrl = (url: URL, language: string) =>
 const replaceLanguageInSlug = (pathname: RelativeUrl, language: string) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [_, __, ...path] = pathname.split("/")
-	return `/${language}/${path.join("/")}`
+
+	return `/${language}${path.length ? `/${path.join("/")}` : ''}`
 }
