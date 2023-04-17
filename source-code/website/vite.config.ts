@@ -38,4 +38,7 @@ export default defineConfig({
 		target: "es2022",
 		minify: isProduction,
 	},
+	ssr: {
+		external: ['@octokit/core'],
+	},
 })
