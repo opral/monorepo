@@ -8,7 +8,8 @@ import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 
-const font = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
+const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
+const fontSemiBold = readFileSync(new URL("./assets/static/Inter-SemiBold.ttf", import.meta.url))
 
 export const badge = async (url: string, preferredLanguage: string | undefined) => {
 	// initialize a new file system on each request to prevent cross request pollution
@@ -55,7 +56,8 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	}
 
 	// markup the percentages
-	const vdom = removeCommas(markup(percentages, preferredLanguage))
+	const [_, owner, repo] = [...url.split("/")]
+	const vdom = removeCommas(markup(percentages, preferredLanguage, owner + "/" + repo))
 
 	// render the image
 	const image = await satori(
@@ -63,12 +65,17 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		vdom,
 		{
 			width: 340,
-			height: percentages.length * 70 + 200,
+			height: percentages.length * 50 + 300,
 			fonts: [
 				{
-					name: "Inter",
+					name: "Inter Medium",
 					weight: 500,
-					data: font,
+					data: fontMedium,
+				},
+				{
+					name: "Inter SemiBold",
+					weight: 600,
+					data: fontSemiBold,
 				},
 			],
 		},

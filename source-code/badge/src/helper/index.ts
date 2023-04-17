@@ -8,7 +8,6 @@ import type { VNode } from "./markup.js"
  *
  * @param resources The resources to calculate the percentage for.
  * @returns The percentage of translated messages.
- *
  */
 export const getRessourcePercentages = (resources: ast.Resource[]) => {
 	// Define return type
@@ -41,8 +40,7 @@ export const getRessourcePercentages = (resources: ast.Resource[]) => {
 /**
  * Remove commas from the json.
  *
- * When using array.map, satori-html adds commas to the json, which is not valid json for the satori package.
- *
+ * @description When using array.map, satori-html adds commas to the json, which is not valid json for the satori package.
  * @param json The json to remove the commas from.
  * @returns The json without commas.
  */
@@ -58,10 +56,24 @@ export const removeCommas = (json: VNode): VNode | undefined => {
 }
 
 /**
+ * Get the total translated percentage.
+ *
+ * @description When there are multiple languages, the total translated percentage is the average of all languages.
+ * @param percentages The percentages to calculate the total translated percentage for.
+ * @returns the total translated percentage.
+ */
+export const getTotalTranslatedPercentage = (percentages: Percentage[]): number => {
+	const total = percentages.reduce((acc, percentage) => acc + percentage.count.total, 0)
+	const lint = percentages.reduce((acc, percentage) => acc + percentage.count.lint, 0)
+	const totalPercentage = ((lint / total) * 100).toFixed(2)
+
+	return Number(totalPercentage)
+}
+
+/**
  * Patching relative paths to absolute paths.
  *
- * Memfs does not support relative paths, so we need to patch them.
- *
+ * @description Memfs does not support relative paths, so we need to patch them.
  * @param fs The fs to patch.
  * @returns The patched fs.
  */
