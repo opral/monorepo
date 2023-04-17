@@ -38,6 +38,8 @@
 		// tremendous helper to avoid hard to debug bugs.
 		// see https://github.com/inlang/inlang/issues/157
 		"noUncheckedIndexedAccess": true,
+		// enables better DX https://twitter.com/kuizinas/status/1636641120477384705?s=20
+		"declarationMap": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
