@@ -28,7 +28,6 @@
 		"@inlang/env-variables": "*",
 		"@inlang/git-sdk": "*",
 		"@inlang/rpc": "*",
-		"@inlang/shared": "*",
 		"@inlang/telemetry": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@markdoc/markdoc": "^0.1.13",
