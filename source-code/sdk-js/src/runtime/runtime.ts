@@ -17,6 +17,7 @@ export type RuntimeContext<Language extends Ast.Language = Ast.Language> = {
 export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
 	resources: Map<Language, Ast.Resource>
 	language: Language | undefined
+	i: InlangFunction<any> | undefined
 }
 
 export const initRuntime = <
@@ -36,6 +37,7 @@ export const initBaseRuntime = <
 	state: RuntimeState<Language> = {
 		resources: new Map(),
 		language: undefined,
+		i: undefined,
 	},
 ) => {
 	// TODO: make this a function that can ba a Promise or Sync
@@ -44,15 +46,19 @@ export const initBaseRuntime = <
 		resource && state.resources.set(language, resource)
 	}
 
-	const switchLanguage = (language: Language) => (state.language = language)
-
+	const switchLanguage = (language: Language) => {
+		state.language = language
+		state.i = undefined
+	}
 	const getLanguage = () => state.language
 
 	const getInlangFunction = () => {
+		if (state.i) return state.i
+
 		const resource = state.resources.get(state.language as Language)
 		if (!resource) return fallbackInlangFunction
 
-		return createInlangFunction<InlangFunctionArgs>(resource)
+		return state.i = createInlangFunction<InlangFunctionArgs>(resource)
 	}
 
 	return {
@@ -75,13 +81,9 @@ export const initRuntimeWithLanguageInformation = <
 	context: RuntimeContext<Language> & {
 		referenceLanguage: Language
 		languages: Language[]
-	},
-	state: RuntimeState<Language> = {
-		resources: new Map(),
-		language: undefined,
-	},
+	}
 ) => {
-	const runtime = initBaseRuntime<Language, InlangFunctionArgs>(context, state)
+	const runtime = initBaseRuntime<Language, InlangFunctionArgs>(context)
 
 	return {
 		...runtime,

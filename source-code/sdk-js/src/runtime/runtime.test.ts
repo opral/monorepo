@@ -63,6 +63,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -81,6 +82,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -97,6 +99,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -120,6 +123,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
