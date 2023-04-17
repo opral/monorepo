@@ -7,6 +7,7 @@
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
 		"./config": "./dist/config/index.js",
 		"./detectors": "./dist/detectors/index.js",
+		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
 	},
 	"files": [
