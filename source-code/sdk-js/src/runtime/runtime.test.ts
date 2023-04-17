@@ -43,8 +43,11 @@ describe("initRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.language).toBeDefined()
+		expect(runtime.language).toBeUndefined()
 		expect(runtime.i).toBeDefined()
+
+		runtime.switchLanguage('')
+		expect(runtime.language)
 	})
 })
 
@@ -54,8 +57,11 @@ describe("initBaseRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.language).toBeDefined()
+		expect(runtime.language).toBeUndefined()
 		expect(runtime.i).toBeDefined()
+
+		runtime.switchLanguage('')
+		expect(runtime.language).toBeDefined()
 	})
 
 	describe("loadResource", () => {
