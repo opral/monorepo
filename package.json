@@ -21,7 +21,8 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "npm run clean -ws && rm -f -r ./node_modules && rm -f ./.env",
 		"lint-staged": "lint-staged",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"postinstall": "patch-package"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
