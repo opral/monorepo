@@ -4,7 +4,7 @@ import { privateEnv } from "@inlang/env-variables"
 import { telemetryNode } from "@inlang/telemetry"
 import { createMemoryFs } from "@inlang-git/fs"
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
-import dedent from "dedent"
+import { dedent } from "ts-dedent"
 import { prompt, promptVersion } from "./generateConfigFile.prompt.js"
 
 export async function generateConfigFileServer(args: {
