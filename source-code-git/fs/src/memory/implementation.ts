@@ -21,7 +21,7 @@ function dirToArray(dir: Directory, base: string): Array<Array<string>> {
 function initDir(parentDir: Directory) {
 	// A circular reference allows for simple handling of leading and
 	// trailing slashes, as well as "." paths
-	//	
+	//
 	// Since these only exist internaly, there shouldn't be issues
 	// with serialization
 	const dir = new Map()
@@ -33,16 +33,14 @@ function initDir(parentDir: Directory) {
 
 function followPath(
 	target: Inode | undefined,
-	path: string, 
-	makeParent: boolean = false
+	path: string,
+	makeParent = false,
 ): Inode | undefined {
 	const pathList: string[] = path.split("/")
 	let parentDir: Directory
 
-
 	if (makeParent) {
-		for (let path of pathList) {
-
+		for (const path of pathList) {
 			if (target instanceof Map) {
 				parentDir = target
 				target = target.get(path) ?? undefined
@@ -55,9 +53,8 @@ function followPath(
 			}
 		}
 	} else {
-		for (let path of pathList) {
-			if (target instanceof Map) 
-				target = target.get(path) ?? undefined
+		for (const path of pathList) {
+			if (target instanceof Map) target = target.get(path) ?? undefined
 			else break
 
 			if (!target) return undefined
@@ -67,7 +64,7 @@ function followPath(
 	return target
 }
 
-interface MemoryFilesystem extends Filesystem { 
+interface MemoryFilesystem extends Filesystem {
 	_root: Map<string, Inode>
 	dirname: (path: string) => string
 	basename: (path: string) => string
@@ -77,8 +74,8 @@ export function createMemoryFs(): Filesystem {
 	return {
 		_root: initDir(new Map()),
 
-		dirname: (path: string): string  => path.split("/").slice(0, -1).join("/"),
-		basename: (path: string): string => path.split("/").slice(-1)[0]!,
+		dirname: (path: string): string => path.split("/").slice(0, -1).join("/"),
+		basename: (path: string): string => path.split("/").at(-1)!,
 
 		writeFile: async function (path: string, content: FileData) {
 			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
@@ -93,8 +90,7 @@ export function createMemoryFs(): Filesystem {
 		readdir: async function (path: string): Promise<string[] | undefined> {
 			const dir: Inode | undefined = followPath(this._root, path)
 			const specialPaths: Array<string> = ["", ".", ".."]
-			if (dir instanceof Map)
-				return [...dir.keys()].filter(x => !(specialPaths.includes(x)))
+			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
 			else return
 		},
 
@@ -102,11 +98,11 @@ export function createMemoryFs(): Filesystem {
 			followPath(this._root, path, true)
 		},
 
-		toJson: async function(): Promise<Record<string, string>> {
-			return Object.fromEntries(dirToArray(this._root, ''))
+		toJson: async function (): Promise<Record<string, string>> {
+			return Object.fromEntries(dirToArray(this._root, ""))
 		},
 
-		rm: async function(path: string) {
+		rm: async function (path: string) {
 			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
 			if (parentDir instanceof Map) parentDir.delete(this.basename(path))
 		},
@@ -116,6 +112,6 @@ export function createMemoryFs(): Filesystem {
 				this.writeFile(kv[0], kv[1])
 			}
 			return this
-		}
+		},
 	} as MemoryFilesystem
 }
