@@ -46,7 +46,7 @@ async function copyDirectory(args: {
 	copyTo: EnvironmentFunctions["$fs"]
 	path: string
 }) {
-	if (!await args.copyFrom.readdir(args.path)) {
+	if ((await args.copyFrom.readdir(args.path)) === undefined) {
 		throw new Error(dedent`
 The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
 
@@ -60,7 +60,6 @@ Context: The path is relative to the current working directory, not the file tha
 	const pathsInDirectory = await args.copyFrom.readdir(args.path)
 	if (!pathsInDirectory) throw new Error("Source directory is empty")
 	for (const subpath of pathsInDirectory) {
-		let isFile = true
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
 		const file = await args.copyFrom.readFile(path)
