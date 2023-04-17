@@ -1,5 +1,5 @@
 import type { BuildOptions } from "esbuild"
-import dedent from "dedent"
+import { dedent } from "ts-dedent"
 
 //! DON'T TOP-LEVEL IMPORT ESBUILD PLUGINS. USE DYNAMIC IMPORTS.
 //! See https://github.com/inlang/inlang/issues/486
