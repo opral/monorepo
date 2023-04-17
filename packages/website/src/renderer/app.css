@@ -107,6 +107,10 @@ sl-select::part(combobox):hover {
 	background-color: theme(colors.surface-1);
 }
 
+sl-select::part(expand-icon) {
+	display: none;
+}
+
 sl-select::part(tags) {
 	gap: 4px;
 	font-size: 12px;
