@@ -38,6 +38,7 @@
 		"@types/estree": "^1.0.0",
 		"@types/lodash": "^4.14.192",
 		"acorn": "^8.8.2",
-		"astring": "^1.8.4"
+		"astring": "^1.8.4",
+		"svelte": "^3.58.0"
 	}
 }
