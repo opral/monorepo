@@ -21,7 +21,9 @@
 	},
 	"dependencies": {
 		"@inlang/env-variables": "*",
-		"http-proxy-middleware": "^2.0.6"
+		"http-proxy-middleware": "^2.0.6",
+		"posthog-js": "^1.53.2",
+		"posthog-node": "^2.6.0"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"
