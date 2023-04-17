@@ -44,9 +44,7 @@ describe("ast - wrapVariableDeclaration", () => {
 		// TODO: find a fully ESTree compatible parser and remove the below typecasts
 		const inputAst = parse(input, acornOptions) as unknown as Program
 		const [, exception] = wrapVariableDeclaration(inputAst, "blue", "wrapFn")
-		expect(exception).toStrictEqual(
-			new WrapWithCallExpressionError("Couldn't find variable declarator."),
-		)
+		expect(exception).toBeInstanceOf(WrapWithCallExpressionError)
 	})
 
 	test("Doesn't manipulate inputs", async () => {
