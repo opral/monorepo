@@ -1,14 +1,14 @@
 import { redirect, type Handle } from "@sveltejs/kit"
-import { initRuntime } from "@inlang/sdk-js/runtime"
 import { detectLanguage, initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors"
 import {
-	getResource,
 	languages,
 	referenceLanguage,
-	setInlangInformationToLocals,
-} from "./inlang.server.js"
+	addRuntimeToLocals,
+} from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
-import { replaceLanguageInUrl, type RelativeUrl } from "./inlang.js"
+import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import type { RelativeUrl } from '@inlang/sdk-js'
+import { initSvelteKitServerRuntime } from '@inlang/sdk-js/adapter-sveltekit/server'
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
@@ -25,24 +25,17 @@ export const handle = (async ({ event, resolve }) => {
 		throw redirect(307, replaceLanguageInUrl(event.url, detectedLanguage).toString())
 	}
 
-	const runtime = initRuntime({
-		readResource: (language: string) => getResource(language),
-	})
-
-	await runtime.loadResource(language)
-	runtime.switchLanguage(language)
-	const i = runtime.getInlangFunction()
-
-	setInlangInformationToLocals(event.locals, {
+	const runtime = initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language,
-		i,
 	})
 
-	console.info("hooks.server.ts", i("welcome"))
+	addRuntimeToLocals(event.locals, runtime)
 
-	serverFn(i)
+	console.info("hooks.server.ts", runtime.i("welcome"))
+
+	serverFn(runtime.i)
 
 	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language) })
 }) satisfies Handle
