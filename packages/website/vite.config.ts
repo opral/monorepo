@@ -38,7 +38,7 @@ export default defineConfig({
 		target: "es2022",
 		minify: isProduction,
 		rollupOptions: {
-			external: ["@octokit/core"]
+			external: ["@octokit/core", "@octokit/oauth-app"]
 		}
 	},
 })
