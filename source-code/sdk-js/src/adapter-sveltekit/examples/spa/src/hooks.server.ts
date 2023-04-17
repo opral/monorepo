@@ -13,7 +13,7 @@ export const handle = (async ({ event, resolve }) => {
 	const language = undefined
 	// const language = referenceLanguage
 
-	const runtime = initSvelteKitServerRuntime({
+	const runtime = await initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language: language!

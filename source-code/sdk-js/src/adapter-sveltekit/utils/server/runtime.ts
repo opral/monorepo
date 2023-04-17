@@ -1,4 +1,4 @@
-import { initRuntime, initRuntimeWithLanguageInformation } from '../../../runtime/index.js'
+import { initRuntimeWithLanguageInformation } from '../../../runtime/index.js'
 import { getResource } from './index.js'
 
 type InitSvelteKitServerRuntimeArgs = {
@@ -7,7 +7,7 @@ type InitSvelteKitServerRuntimeArgs = {
 	language: string
 }
 
-export const initSvelteKitServerRuntime = ({
+export const initSvelteKitServerRuntime = async ({
 	language,
 	referenceLanguage,
 	languages,
@@ -20,7 +20,7 @@ export const initSvelteKitServerRuntime = ({
 
 	if (language) {
 		// ! warning, this is currently async
-		runtime.loadResource(language)
+		await runtime.loadResource(language)
 		runtime.switchLanguage(language)
 	}
 

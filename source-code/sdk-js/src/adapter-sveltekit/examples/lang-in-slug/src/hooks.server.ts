@@ -25,7 +25,7 @@ export const handle = (async ({ event, resolve }) => {
 		throw redirect(307, replaceLanguageInUrl(event.url, detectedLanguage).toString())
 	}
 
-	const runtime = initSvelteKitServerRuntime({
+	const runtime = await initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language,
