@@ -46,6 +46,8 @@
 		"vitest": "^0.29.8"
 	},
 	"dependencies": {
-		"clipboard-copy": "^4.0.1"
+		"posthog-js": "^1.53.2",
+		"posthog-node": "^2.6.0",
+		"typed-rpc": "^3.0.0"
 	}
 }
