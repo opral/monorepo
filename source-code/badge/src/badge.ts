@@ -7,6 +7,7 @@ import { Volume } from "memfs"
 import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
+import { telemetryNode } from "@inlang/telemetry"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontSemiBold = readFileSync(new URL("./assets/static/Inter-SemiBold.ttf", import.meta.url))
@@ -80,6 +81,11 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 			],
 		},
 	)
+
+	telemetryNode.capture({
+		event: "badge created",
+		distinctId: owner + "/" + repo ?? "unknown",
+	})
 
 	// return image
 	return image
