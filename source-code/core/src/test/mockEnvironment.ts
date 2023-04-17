@@ -1,5 +1,4 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-// import { Volume } from "memfs"
 import { createMemoryFs } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
 
