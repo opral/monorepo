@@ -6,8 +6,6 @@ import type { EnvironmentFunctions } from "../config/schema.js"
 it("should copy a directory into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	
-	// const fs = memfs.promises as EnvironmentFunctions["$fs"]
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
 	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.txt", "Hello World!")
@@ -16,16 +14,12 @@ it("should copy a directory into the environment", async () => {
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["test"] } })
 	expect(await env.$fs.readFile("./test/file.txt")).toBe("Hello World!")
-	expect(await env.$fs.readFile("./test/subdir/file.txt")).toBe(
-		"Hello World!",
-	)
+	expect(await env.$fs.readFile("./test/subdir/file.txt")).toBe("Hello World!")
 })
 
 it("should copy multiple directories into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	
-	// const fs = memfs.promises as EnvironmentFunctions["$fs"]
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
 	await fs.mkdir("./one")
 	await fs.writeFile("./one/file.txt", "Hello from one")
@@ -64,7 +58,6 @@ it("should give an error if the path does not exist (hinting at a current workin
 })
 
 it("should work with filesystems created from volumes", async () => {
-
 	const fs = await createMemoryFs().fromJson({
 		"locales/en.json": JSON.stringify({ hello: "hello from en" }),
 		"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
