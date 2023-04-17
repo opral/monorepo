@@ -1,1 +1,1 @@
-export { initRootSlugDetector } from './rootSlugDetector.js'
+export { initRootSlugDetector } from "./rootSlugDetector.js"

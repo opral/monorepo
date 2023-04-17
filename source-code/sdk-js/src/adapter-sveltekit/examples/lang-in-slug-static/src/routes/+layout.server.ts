@@ -3,9 +3,8 @@ import type { LayoutServerLoad } from "./$types.js"
 
 export const prerender = true
 
-export const load = initRootServerLayoutLoadWrapper<LayoutServerLoad>()
-	.wrap(async (_, { i }) => {
-		console.info("+layout.server.ts", i("welcome"))
+export const load = initRootServerLayoutLoadWrapper<LayoutServerLoad>().wrap(async (_, { i }) => {
+	console.info("+layout.server.ts", i("welcome"))
 
-		return { "+layout.server.ts": Math.random() }
-	})
+	return { "+layout.server.ts": Math.random() }
+})

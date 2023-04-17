@@ -1,1 +1,1 @@
-export { initAcceptLanguageHeaderDetector } from './acceptLanguageHeaderDetector.js'
+export { initAcceptLanguageHeaderDetector } from "./acceptLanguageHeaderDetector.js"
