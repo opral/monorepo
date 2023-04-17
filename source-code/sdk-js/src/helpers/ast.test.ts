@@ -190,6 +190,11 @@ describe("ast - insertAst", () => {
 			before: ["body", "0", "fake"],
 		})
 		expect(exception).toBeInstanceOf(InsertAstError)
+
+		const [, exception2] = insertAst(sourceAst, insertionAst.body[0]!, {
+			after: ["body", "0", "fake"],
+		})
+		expect(exception2).toBeInstanceOf(InsertAstError)
 	})
 
 	test("Return exception for unreachable path", async () => {
