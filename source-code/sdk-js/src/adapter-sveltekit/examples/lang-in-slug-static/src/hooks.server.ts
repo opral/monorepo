@@ -1,31 +1,28 @@
-import type { Handle } from "@sveltejs/kit"
 import {
-	initSvelteKitServerRuntime,
+	getRuntimeFromLocals,
+	initHandleWrapper,
 	languages,
-	referenceLanguage,
-	addRuntimeToLocals,
 } from "@inlang/sdk-js/adapter-sveltekit/server"
+import type { RelativeUrl } from '@inlang/sdk-js'
 import { serverFn } from "./utils/server.js"
 
-export const handle = (async ({ event, resolve }) => {
+export const handle = initHandleWrapper({
+	detectLanguage: async ({ url }) => {
+		const pathname = url.pathname as RelativeUrl
+
+		const language = pathname.split("/")[1]
+
+		return language && languages.includes(language) ? language : undefined
+	}
+}).wrap(async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
 
-	const pathname = event.url.pathname
-	if (pathname.startsWith("/inlang")) return resolve(event)
-
-	const language = pathname.split("/")[1]
-
-	const runtime = initSvelteKitServerRuntime({
-		referenceLanguage,
-		languages,
-		language,
-	})
-
-	addRuntimeToLocals(event.locals, runtime)
+	const runtime = getRuntimeFromLocals(event.locals)
 
 	console.info("hooks.server.ts", runtime.i("welcome"))
 
 	serverFn(runtime.i)
 
-	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language) })
-}) satisfies Handle
+	// TODO: do this in the wrapper function
+	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", runtime.language!) })
+})
