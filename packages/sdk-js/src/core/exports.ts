@@ -1,9 +1,11 @@
-import type { Language } from '@inlang/core/ast'
-import type { InlangFunction } from '../runtime/inlang-function.js'
-import type { Runtime } from '../runtime/runtime.js'
-import type { RelativeUrl } from './utils.js'
+import type { Language } from "@inlang/core/ast"
+import type { InlangFunction } from "../runtime/inlang-function.js"
+import type { Runtime } from "../runtime/runtime.js"
+import type { RelativeUrl } from "./utils.js"
 
-const error = new Error('You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/docs/sdk')
+const error = new Error(
+	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/docs/sdk",
+)
 
 export const referenceLanguage: Language = error as any
 
@@ -19,7 +21,7 @@ export const switchLanguage: (language: Language) => Promise<void> = () => {
 	throw error
 }
 
-export const loadResource: Runtime['loadResource'] = () => {
+export const loadResource: Runtime["loadResource"] = () => {
 	throw error
 }
 

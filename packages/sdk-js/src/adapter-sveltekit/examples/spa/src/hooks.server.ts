@@ -16,7 +16,7 @@ export const handle = (async ({ event, resolve }) => {
 	const runtime = initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
-		language: language!
+		language: language!,
 	})
 
 	// runtime.loadResource(language)

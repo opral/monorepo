@@ -1,4 +1,4 @@
-import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { LayoutLoad } from "./$types.js"
 
 export const load = (async ({ parent }) => {
