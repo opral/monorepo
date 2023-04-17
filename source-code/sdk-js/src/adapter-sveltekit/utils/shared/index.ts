@@ -1,1 +1,1 @@
-export { getRuntimeFromData, setRuntimeToData, replaceLanguageInUrl } from './utils.js'
+export { getRuntimeFromData, addRuntimeToData, replaceLanguageInUrl } from './utils.js'

@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getRuntimeFromContext, setRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
+	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setRuntimeToContext(getRuntimeFromData(data))
+	addRuntimeToContext(getRuntimeFromData(data))
 	let { i, language } = getRuntimeFromContext()
 
 	$: {
-		setRuntimeToContext(getRuntimeFromData(data))
+		addRuntimeToContext(getRuntimeFromData(data))
 		;({ i, language } = getRuntimeFromContext())
 	}
 

@@ -1,4 +1,4 @@
-import { setRuntimeToData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { addRuntimeToData } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import { initSvelteKitClientRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
 
 import type { LayoutLoad } from "./$types.js"
@@ -14,5 +14,5 @@ export const load = (async ({ data, fetch }) => {
 	const i = runtime.getInlangFunction()
 	console.info("+layout.ts", i("welcome"))
 
-	return setRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
+	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
 }) satisfies LayoutLoad

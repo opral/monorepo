@@ -27,7 +27,7 @@ export type RuntimeContext<
 
 export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
 
-export const setRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
+export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const _language = writable(runtime.getLanguage() as string)
 	const _i = writable(runtime.getInlangFunction())
 

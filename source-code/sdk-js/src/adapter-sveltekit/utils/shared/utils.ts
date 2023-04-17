@@ -3,7 +3,7 @@ import type { SvelteKitClientRuntime } from '../client/runtime.js'
 
 export const inlangSymbol = Symbol.for("inlang")
 
-export const setRuntimeToData = <Data extends Record<string, unknown> | null>(data: Data, runtime: SvelteKitClientRuntime): Data & { [inlangSymbol]: SvelteKitClientRuntime } =>
+export const addRuntimeToData = <Data extends Record<string, unknown> | null>(data: Data, runtime: SvelteKitClientRuntime): Data & { [inlangSymbol]: SvelteKitClientRuntime } =>
 	({ ...(data || {} as Data), [inlangSymbol]: runtime })
 
 export const getRuntimeFromData = (data: { [inlangSymbol]: SvelteKitClientRuntime }) => data[inlangSymbol]

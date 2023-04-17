@@ -18,7 +18,7 @@ const resources = await config.readResources({ config })
 export const getResource = (language: string) =>
 	resources.find(({ languageTag: { name } }) => name === language)
 
-export const setRuntimeToLocals = (
+export const addRuntimeToLocals = (
 	locals: RequestEvent["locals"],
 	payload: SvelteKitServerRuntime,
 ) => ((locals as any)[inlangSymbol] = payload)

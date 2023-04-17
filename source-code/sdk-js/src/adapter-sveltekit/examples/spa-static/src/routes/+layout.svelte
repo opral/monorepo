@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { browser } from "$app/environment"
 	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getRuntimeFromContext, setRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setRuntimeToContext(getRuntimeFromData(data))
+	addRuntimeToContext(getRuntimeFromData(data))
 
 	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 

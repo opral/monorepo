@@ -3,7 +3,7 @@ import {
 	initSvelteKitServerRuntime,
 	languages,
 	referenceLanguage,
-	setRuntimeToLocals,
+	addRuntimeToLocals,
 } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
 
@@ -21,7 +21,7 @@ export const handle = (async ({ event, resolve }) => {
 		language,
 	})
 
-	setRuntimeToLocals(event.locals, runtime)
+	addRuntimeToLocals(event.locals, runtime)
 
 	console.info("hooks.server.ts", runtime.getInlangFunction()("welcome"))
 

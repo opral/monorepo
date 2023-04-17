@@ -3,7 +3,7 @@ import {
 	initSvelteKitServerRuntime,
 	languages,
 	referenceLanguage,
-	setRuntimeToLocals,
+	addRuntimeToLocals,
 } from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const handle = (async ({ event, resolve }) => {
@@ -23,7 +23,7 @@ export const handle = (async ({ event, resolve }) => {
 	// await runtime.loadResource(language)
 	// runtime.switchLanguage(language)
 
-	setRuntimeToLocals(event.locals, runtime)
+	addRuntimeToLocals(event.locals, runtime)
 
 	return resolve(event)
 }) satisfies Handle
