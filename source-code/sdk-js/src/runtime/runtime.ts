@@ -41,9 +41,21 @@ export const initBaseRuntime = <
 	},
 ) => {
 	// TODO: make this a function that can ba a Promise or Sync
+	let loadResourcePromise: Promise<void> | undefined
 	const loadResource = async (language: Language) => {
-		const resource = await readResource(language)
-		resource && state.resources.set(language, resource)
+		if (state.resources.has(language)) return
+		if (loadResourcePromise) return loadResourcePromise
+
+		// eslint-disable-next-line no-async-promise-executor
+		loadResourcePromise = new Promise(async (resolve) => {
+			const resource = await readResource(language)
+			resource && state.resources.set(language, resource)
+
+			loadResourcePromise = undefined
+			resolve()
+		})
+
+		return loadResourcePromise
 	}
 
 	const switchLanguage = (language: Language) => {

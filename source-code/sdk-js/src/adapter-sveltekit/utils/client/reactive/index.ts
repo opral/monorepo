@@ -35,7 +35,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const switchLanguage = async (language: Language) => {
 		if (runtime.language === language) return
 
-		// TODO: load Resource if not present
+		await runtime.loadResource(language)
 
 		runtime.switchLanguage(language)
 
