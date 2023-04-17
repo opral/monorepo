@@ -6,24 +6,24 @@ import { initBaseRuntime, initRuntime, RuntimeContext, RuntimeState } from "./ru
 // TODO: expose utility functions somewhere
 
 const createResource = (language: Language, ...messages: Message[]) =>
-	({
-		type: "Resource",
-		languageTag: {
-			type: "LanguageTag",
-			name: language,
-		},
-		body: messages,
-	} satisfies Resource)
+({
+	type: "Resource",
+	languageTag: {
+		type: "LanguageTag",
+		name: language,
+	},
+	body: messages,
+} satisfies Resource)
 
 const createMessage = (id: string, pattern: string) =>
-	({
-		type: "Message",
-		id: { type: "Identifier", name: id },
-		pattern: {
-			type: "Pattern",
-			elements: [{ type: "Text", value: pattern }],
-		},
-	} satisfies Message)
+({
+	type: "Message",
+	id: { type: "Identifier", name: id },
+	pattern: {
+		type: "Pattern",
+		elements: [{ type: "Text", value: pattern }],
+	},
+} satisfies Message)
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ const resources = {
 	fr: createResource("fr", createMessage("hello", "monde")),
 }
 
-const context: RuntimeContext = {
+const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	readResource: (language) => Promise.resolve(resources[language as keyof typeof resources]),
 }
 
@@ -43,8 +43,11 @@ describe("initRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.getLanguage).toBeDefined()
-		expect(runtime.getInlangFunction).toBeDefined()
+		expect(runtime.language).toBeUndefined()
+		expect(runtime.i).toBeDefined()
+
+		runtime.switchLanguage('')
+		expect(runtime.language)
 	})
 })
 
@@ -54,8 +57,11 @@ describe("initBaseRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.getLanguage).toBeDefined()
-		expect(runtime.getInlangFunction).toBeDefined()
+		expect(runtime.language).toBeUndefined()
+		expect(runtime.i).toBeDefined()
+
+		runtime.switchLanguage('')
+		expect(runtime.language).toBeDefined()
 	})
 
 	describe("loadResource", () => {
@@ -63,6 +69,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -81,6 +88,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -97,6 +105,7 @@ describe("initBaseRuntime", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
@@ -109,34 +118,33 @@ describe("initBaseRuntime", () => {
 		})
 	})
 
-	describe("getLanguage", () => {
+	describe("language", () => {
 		test("it should return undefined if language was never set", () => {
 			const runtime = initBaseRuntime(context)
 
-			expect(runtime.getLanguage()).toBeUndefined()
+			expect(runtime.language).toBeUndefined()
 		})
 
 		test("it should return the current language", () => {
 			const state = {
 				language: "en",
 				resources: new Map(),
+				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
 
 			state.language = "de"
 
-			expect(runtime.getLanguage()).toBe("de")
+			expect(runtime.language).toBe("de")
 		})
 	})
 
-	describe("getInlangFunction", () => {
+	describe("i", () => {
 		test("it should not throw if language was never set", () => {
 			const runtime = initBaseRuntime(context)
 
-			const i = runtime.getInlangFunction()
-
-			expect(i("test")).toBe("")
+			expect(runtime.i("test")).toBe("")
 		})
 
 		test("it should return the inlang function for the current language", async () => {
@@ -145,9 +153,7 @@ describe("initBaseRuntime", () => {
 			await runtime.loadResource("en")
 			runtime.switchLanguage("en")
 
-			const i = runtime.getInlangFunction()
-
-			expect(i("hello")).toBe("world")
+			expect(runtime.i("hello")).toBe("world")
 		})
 	})
 
@@ -159,8 +165,8 @@ describe("initBaseRuntime", () => {
 			runtime1.switchLanguage("en")
 			runtime2.switchLanguage("de")
 
-			expect(runtime1.getLanguage()).toBe("en")
-			expect(runtime2.getLanguage()).toBe("de")
+			expect(runtime1.language).toBe("en")
+			expect(runtime2.language).toBe("de")
 		})
 
 		test("inlang function", async () => {
@@ -173,20 +179,14 @@ describe("initBaseRuntime", () => {
 			await runtime2.loadResource("fr")
 			runtime2.switchLanguage("fr")
 
-			const i1 = runtime1.getInlangFunction()
-			const i2 = runtime2.getInlangFunction()
-
-			expect(i1("hello")).toBe("Welt")
-			expect(i2("hello")).toBe("monde")
+			expect(runtime1.i("hello")).toBe("Welt")
+			expect(runtime2.i("hello")).toBe("monde")
 
 			runtime1.switchLanguage("fr")
-			const i1fr = runtime1.getInlangFunction()
-
 			runtime2.switchLanguage("de")
-			const i2de = runtime2.getInlangFunction()
 
-			expect(i1fr("hello")).toBe("")
-			expect(i2de("hello")).toBe("")
+			expect(runtime1.i("hello")).toBe("")
+			expect(runtime2.i("hello")).toBe("")
 		})
 	})
 })

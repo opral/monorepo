@@ -3,7 +3,6 @@ import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
-import { telemetry } from "@inlang/shared/telemetry/browser"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
@@ -11,9 +10,10 @@ import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
-import { isProduction } from "@env"
 import { Shortcut } from "./Shortcut.jsx"
-import type { Message, Resource } from "@inlang/core/ast"
+import type { Resource } from "@inlang/core/ast"
+import { rpc } from "@inlang/rpc"
+import { telemetryBrowser } from "@inlang/telemetry"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -25,12 +25,10 @@ export function PatternEditor(props: {
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
 		useEditorState()
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
@@ -40,14 +38,14 @@ export function PatternEditor(props: {
 	createEffect(() => {
 		if (
 			(props.message && props.message?.pattern.elements.length > 1) ||
-			(props.message && props.message?.pattern.elements[0].type !== "Text")
+			(props.message && props.message?.pattern.elements[0]?.type !== "Text")
 		) {
 			throw Error(
 				"Not implemented. Only messages with one pattern element of type Text are supported for now.",
 			)
 		}
 		// if the message is updated externally, update the text value
-		else if (props.message?.pattern.elements[0].value) {
+		else if (props.message?.pattern.elements[0]?.value) {
 			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
@@ -107,58 +105,41 @@ export function PatternEditor(props: {
 	 * Saves the changes of the message.
 	 */
 	const handleCommit = () => {
-		telemetry.capture("commit changes", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const _copy = copy()
 		const _textValue = textValue()
 		if (_textValue === undefined) {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-
-		const [updatedResource, exception] = query(resource()).upsert({ message: _copy! })
-		if (exception) {
-			showToast({
-				variant: "danger",
-				title: "Error",
-				message: exception.message,
-			})
-
-			throw exception
-		}
-
+		const updatedResource = query(resource()).upsert({ message: _copy! })
 		setResources([
-			...resources.filter(
+			...(resources.filter(
 				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-			),
-			updatedResource,
+			) as Resource[]),
+			updatedResource as Resource,
 		])
-
 		showToast({
 			variant: "info",
 			title: "The change has been committed.",
 			message: `Don't forget to push the changes.`,
+		})
+		telemetryBrowser.capture("commit changes", {
+			targetLanguage: props.language,
+			owner: routeParams().owner,
+			repository: routeParams().repository,
 		})
 	}
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		telemetry.capture("create machine translation", {
-			targetLanguage: props.language,
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		if (props.referenceMessage === undefined) {
 			return showToast({
 				variant: "info",
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0].value as string
+		const text = props.referenceMessage.pattern.elements[0]?.value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -169,35 +150,20 @@ export function PatternEditor(props: {
 			return machineLearningWarningDialog?.show()
 		}
 		setMachineTranslationIsLoading(true)
-		if (isProduction) {
-			const ENDPOINT = "/shared/rest/get-translation"
-			const result = await fetch("https://inlang.com" + ENDPOINT, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					text,
-					referenceLanguage: referenceResource()!.languageTag.name,
-					targetLanguage: props.language,
-				}),
-			})
-			const json = await result.json()
-			if (!result.ok) {
-				showToast({
-					variant: "warning",
-					title: "Machine translation failed.",
-					message: await result.json(),
-				})
-			} else {
-				setTextValue(await json.data)
-			}
-		} else {
+		const [translation, exception] = await rpc.machineTranslate({
+			text,
+			referenceLanguage: referenceResource()!.languageTag.name,
+			targetLanguage: props.language,
+			telemetryId: telemetryBrowser.get_distinct_id(),
+		})
+		if (exception) {
 			showToast({
 				variant: "warning",
 				title: "Machine translation failed.",
-				message: "Machine translations are disabled in development. An env variable is missing.",
+				message: exception.message,
 			})
+		} else {
+			setTextValue(translation)
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -209,7 +175,7 @@ export function PatternEditor(props: {
 			if (lintReports) {
 				lintReports.map((lint) => {
 					notifications.push({
-						notificationTitle: lint.id.split(".")[1],
+						notificationTitle: lint.id.split(".")[1]!,
 						notificationDescription: lint.message,
 						notificationType: lint.level,
 					})
@@ -241,7 +207,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+		if (
+			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+			hasChanges() &&
+			userIsCollaborator()
+		) {
 			event.preventDefault()
 			handleCommit()
 		}
@@ -284,7 +255,9 @@ export function PatternEditor(props: {
 				prop:size="small"
 				prop:rows={1}
 				prop:placeholder="Enter translation ..."
-				onFocus={() => setIsFocused(true)}
+				onFocus={() => {
+					setIsFocused(true)
+				}}
 				onFocusOut={(e) => {
 					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
 						setIsFocused(false)
@@ -294,21 +267,11 @@ export function PatternEditor(props: {
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 				onKeyDown={(event) => handleShortcut(event)}
 			/>
-			{/* <div
-					onFocus={() => setIsFocused(true)}
-					onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
-					contentEditable={true}
-					class="rounded border border-outline focus:outline-none py-2 px-3 focus:border-primary focus:ring focus:ring-primary-container"
-			>
-					<For each={copy()?.pattern.elements}>
-							{(element) => <PatternElement element={element}></PatternElement>}
-					</For>
-			</div> */}
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === ""}>
+						<Show when={textValue() === "" || textValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}

@@ -1,0 +1,33 @@
+{
+	"name": "@inlang/server",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "node --loader tsx ./src/main.ts",
+		"production": "NODE_ENV=production tsx ./src/main.ts",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/env-variables": "*",
+		"@inlang/rpc": "*",
+		"@inlang/telemetry": "*",
+		"@inlang/website": "*",
+		"@sentry/node": "^7.47.0",
+		"@sentry/tracing": "^7.47.0",
+		"compression": "^1.7.4",
+		"express": "^4.18.2"
+	},
+	"devDependencies": {
+		"@types/compression": "^1.7.2",
+		"@types/express": "^4.17.17"
+	}
+}

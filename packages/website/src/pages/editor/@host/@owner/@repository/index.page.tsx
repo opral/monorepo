@@ -2,13 +2,13 @@ import { query } from "@inlang/core/query"
 import { createMemo, For, Match, Switch } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
-import type * as ast from "@inlang/core/ast"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import type { Language } from "@inlang/core/ast"
+import type { LintedMessage } from "@inlang/core/lint"
 
 export function Page() {
 	return (
@@ -43,7 +43,7 @@ function TheActualPage() {
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
-				[language: Language]: ast.Message | undefined
+				[language: Language]: LintedMessage | undefined
 			}
 		} = {}
 		for (const resource of resources) {
@@ -53,8 +53,8 @@ function TheActualPage() {
 				if (result[id] === undefined) {
 					result[id] = {}
 				}
-				// assigning the message
-				result[id][resource.languageTag.name] = query(resource).get({ id })
+				const message = query(resource).get({ id }) as LintedMessage
+				result[id]![resource.languageTag.name] = message
 			}
 		}
 		return result
@@ -84,7 +84,7 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig.error}>
 					<p class="text-danger">
-						An error occured while initializing the config: {inlangConfig.error.message}
+						An error occurred while initializing the config: {inlangConfig.error.message}
 					</p>
 				</Match>
 				<Match when={repositoryIsCloned.loading || inlangConfig.loading}>
@@ -127,9 +127,8 @@ function TheActualPage() {
 				</Match>
 				<Match when={doesInlangConfigExist()}>
 					<div class="mb-16 empty-parent">
-						{/* <PreviewMessageFeatures /> */}
 						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]} />}
+							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
 						<div
 							class={

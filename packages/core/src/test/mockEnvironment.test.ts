@@ -66,8 +66,6 @@ it("should work with filesystems created from volumes", async () => {
 		"main.js": "export function hello() { return 'hello' }",
 	}).promises
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
-	const x = await env.$fs.readdir("./")
-	console.log({ x })
 	expect(await env.$fs.readFile("./locales/en.json", { encoding: "utf-8" })).toBe(
 		JSON.stringify({ hello: "hello from en" }),
 	)
