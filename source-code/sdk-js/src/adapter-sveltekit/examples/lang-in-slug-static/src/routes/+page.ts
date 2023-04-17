@@ -1,24 +1,17 @@
 import { initRootPageLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/client"
-import { detectLanguage, navigatorDetector } from "@inlang/sdk-js/detectors"
+import { navigatorDetector } from "@inlang/sdk-js/detectors/client"
 import type { PageLoad } from "./$types.js"
 import { browser } from "$app/environment"
 import { redirect } from '@sveltejs/kit'
+import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared'
 
 export const load = initRootPageLoadWrapper<PageLoad>({
 	browser,
-	redirectIfNeeded: async ({ parent }) => {
-		// TODO: this is detection-strategy dependent
-		const detectors = [navigatorDetector]
-
-		const { referenceLanguage, languages } = await parent()
-
-		const language = await detectLanguage(
-			{ referenceLanguage, languages },
-			...detectors
-		)
-
-		throw redirect(307, `/${language}`)
-	}
+	initDetectors: () => [navigatorDetector],
+	redirect: {
+		throwable: redirect,
+		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language)
+	},
 }).wrap(async ({ parent }) => {
 	if (browser) {
 		// const data = await parent()

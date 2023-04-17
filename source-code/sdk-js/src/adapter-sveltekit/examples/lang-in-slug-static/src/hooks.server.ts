@@ -1,19 +1,11 @@
 import {
 	getRuntimeFromLocals,
 	initHandleWrapper,
-	languages,
 } from "@inlang/sdk-js/adapter-sveltekit/server"
-import type { RelativeUrl } from '@inlang/sdk-js'
 import { serverFn } from "./utils/server.js"
 
 export const handle = initHandleWrapper({
-	detectLanguage: async ({ url }) => {
-		const pathname = url.pathname as RelativeUrl
-
-		const language = pathname.split("/")[1]
-
-		return language && languages.includes(language) ? language : undefined
-	}
+	getLanguage: ({ url }) => url.pathname.split("/")[1],
 }).wrap(async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
 

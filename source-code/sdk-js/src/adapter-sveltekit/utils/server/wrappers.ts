@@ -1,6 +1,8 @@
 import type { Language } from '@inlang/core/ast'
-import type { Handle, ServerLoad, RequestEvent } from "@sveltejs/kit"
+import type { Handle, ServerLoad, RequestEvent, redirect } from "@sveltejs/kit"
 import type { RelativeUrl } from '../../../core/index.js'
+import { detectLanguage } from '../../../detectors/detectLanguage.js'
+import type { Detector } from '../../../detectors/types.js'
 import type { DataPayload } from '../shared/wrappers.js'
 import { initSvelteKitServerRuntime } from './runtime.js'
 import { addRuntimeToLocals, getRuntimeFromLocals, languages, referenceLanguage } from './state.js'
@@ -8,14 +10,30 @@ import { addRuntimeToLocals, getRuntimeFromLocals, languages, referenceLanguage 
 // ------------------------------------------------------------------------------------------------
 
 export const initHandleWrapper = (options: {
-	detectLanguage: (event: RequestEvent) => Promise<Language | undefined | Response>
+	getLanguage: (event: RequestEvent) => Language | undefined
+	initDetectors?: (event: RequestEvent) => Detector[]
+	redirect?: {
+		throwable: typeof redirect
+		getPath: (event: RequestEvent, language: Language) => URL | string
+	}
 }) => ({
 	wrap: (handle: Handle) => async ({ event, resolve }: Parameters<Handle>[0]) => {
 		const pathname = event.url.pathname as RelativeUrl
 		if (pathname.startsWith("/inlang")) return resolve(event)
 
-		const language = await options.detectLanguage(event)
-		if (language instanceof Response) return language
+		let language = options.getLanguage(event)
+		if (!language || !languages.includes(language)) {
+			if (options.redirect) {
+				const detectedLanguage = await detectLanguage(
+					{ referenceLanguage, languages },
+					...(options.initDetectors ? options.initDetectors(event) : []),
+				)
+
+				throw options.redirect.throwable(307, options.redirect.getPath(event, detectedLanguage).toString())
+			}
+
+			language = undefined
+		}
 
 		const runtime = initSvelteKitServerRuntime({
 			referenceLanguage,

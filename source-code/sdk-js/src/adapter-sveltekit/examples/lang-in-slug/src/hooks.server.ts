@@ -1,30 +1,16 @@
-import {
-	getRuntimeFromLocals, languages, referenceLanguage, initHandleWrapper
-} from "@inlang/sdk-js/adapter-sveltekit/server"
+import { getRuntimeFromLocals, initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
-import { detectLanguage, initAcceptLanguageHeaderDetector } from '@inlang/sdk-js/detectors'
-import type { RelativeUrl } from '@inlang/sdk-js'
-import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import { initAcceptLanguageHeaderDetector } from '@inlang/sdk-js/detectors/server'
 import { redirect } from '@sveltejs/kit'
+import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared'
 
 export const handle = initHandleWrapper({
-	detectLanguage: async ({ request, url }) => {
-		// TODO: this is detection-strategy dependent
-		const detectors = [initAcceptLanguageHeaderDetector(request.headers)]
-
-		const pathname = url.pathname as RelativeUrl
-		const language = pathname.split("/")[1]
-		if (!language || !languages.includes(language)) {
-			const detectedLanguage = await detectLanguage(
-				{ referenceLanguage, languages },
-				...detectors,
-			)
-
-			throw redirect(307, replaceLanguageInUrl(url, detectedLanguage).pathname)
-		}
-
-		return language
-	}
+	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+	redirect: {
+		throwable: redirect,
+		getPath: ({ url }, language) => replaceLanguageInUrl(url, language)
+	},
 }).wrap(async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())
 
@@ -36,5 +22,4 @@ export const handle = initHandleWrapper({
 
 	// TODO: do this in the wrapper function
 	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", runtime.language!) })
-}
-)
+})
