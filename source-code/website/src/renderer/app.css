@@ -142,3 +142,13 @@ sl-select::part(tag) {
 sl-tag {
 	--sl-input-height-small: 26px;
 }
+
+sl-button.on-inverted::part(base) {
+	background-color: theme(colors.on-inverted-surface);
+	color: theme(colors.inverted-surface);
+}
+
+sl-button.on-inverted::part(base):hover {
+	color: theme(colors.primary);
+	border-color: var(--sl-color-neutral-300);
+}

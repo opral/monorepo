@@ -35,7 +35,7 @@ describe("printReport", async () => {
 		test("level", async () => {
 			printReport(report)
 
-			expect((console.error as unknown as MockContext<string[], void>).calls[0][0]).toContain(
+			expect((console.error as unknown as MockContext<string[], void>).calls[0]![0]).toContain(
 				"[error]",
 			)
 		})
@@ -43,7 +43,7 @@ describe("printReport", async () => {
 		test("id", async () => {
 			printReport(report)
 
-			expect((console.error as unknown as MockContext<string[], void>).calls[0][0]).toContain(
+			expect((console.error as unknown as MockContext<string[], void>).calls[0]![0]).toContain(
 				`(${report.id})`,
 			)
 		})
@@ -51,7 +51,7 @@ describe("printReport", async () => {
 		test("message", async () => {
 			printReport(reportWithMetadata)
 
-			expect((console.warn as unknown as MockContext<string[], void>).calls[0][0]).toContain(
+			expect((console.warn as unknown as MockContext<string[], void>).calls[0]![0]).toContain(
 				`${reportWithMetadata.message}`,
 			)
 		})
@@ -113,10 +113,10 @@ describe("print", async () => {
 		test("should print a separator for a resource", async () => {
 			print(lintedResource)
 
-			expect((console.info as unknown as MockContext<string[], void>).calls[0][0]).toContain(
+			expect((console.info as unknown as MockContext<string[], void>).calls[0]![0]).toContain(
 				"Resource",
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[0][0]).toContain(
+			expect((console.info as unknown as MockContext<string[], void>).calls[0]![0]).toContain(
 				lintedResource.languageTag.name,
 			)
 		})
@@ -124,14 +124,14 @@ describe("print", async () => {
 		test("should print all reports for the current node", async () => {
 			print(lintedResource)
 
-			expect((console.info as unknown as MockContext<string[], void>).calls[1][0]).toContain(
-				`[${lintedResource.lint?.[0].level}]`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[1]![0]).toContain(
+				`[${lintedResource.lint![0]!.level}]`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[1][0]).toContain(
-				`(${lintedResource.lint?.[0].id})`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[1]![0]).toContain(
+				`(${lintedResource.lint![0]!.id})`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[1][0]).toContain(
-				lintedResource.lint?.[0].message,
+			expect((console.info as unknown as MockContext<string[], void>).calls[1]![0]).toContain(
+				lintedResource.lint![0]!.message,
 			)
 		})
 	})
@@ -151,31 +151,31 @@ describe("print", async () => {
 		test("should print a separator for a message", async () => {
 			print(lintedResource)
 
-			expect((console.info as unknown as MockContext<string[], void>).calls[2][0]).toContain(
+			expect((console.info as unknown as MockContext<string[], void>).calls[2]![0]).toContain(
 				"Resource",
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[2][0]).toContain(
+			expect((console.info as unknown as MockContext<string[], void>).calls[2]![0]).toContain(
 				lintedResource.languageTag.name,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[2][0]).toContain(
+			expect((console.info as unknown as MockContext<string[], void>).calls[2]![0]).toContain(
 				"Message",
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[2][0]).toContain(
-				lintedResource.body[0].id.name,
+			expect((console.info as unknown as MockContext<string[], void>).calls[2]![0]).toContain(
+				lintedResource.body[0]!.id.name,
 			)
 		})
 
 		test("should print all reports for the current node", async () => {
 			print(lintedResource)
 
-			expect((console.info as unknown as MockContext<string[], void>).calls[3][0]).toContain(
-				`[${lintedResource.body[0].lint?.[0].level}]`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[3]![0]).toContain(
+				`[${lintedResource.body[0]!.lint![0]!.level}]`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[3][0]).toContain(
-				`(${lintedResource.body[0].lint?.[0].id})`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[3]![0]).toContain(
+				`(${lintedResource.body[0]!.lint![0]!.id})`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[3][0]).toContain(
-				lintedResource.body[0].lint?.[0].message,
+			expect((console.info as unknown as MockContext<string[], void>).calls[3]![0]).toContain(
+				lintedResource.body[0]!.lint![0]!.message,
 			)
 		})
 	})
@@ -196,14 +196,14 @@ describe("print", async () => {
 		test("should print all reports for the current node", async () => {
 			print(lintedResource)
 
-			expect((console.info as unknown as MockContext<string[], void>).calls[4][0]).toContain(
-				`[${lintedResource.body[0].pattern.lint?.[0].level}]`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[4]![0]).toContain(
+				`[${lintedResource.body[0]!.pattern.lint![0]!.level}]`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[4][0]).toContain(
-				`(${lintedResource.body[0].pattern.lint?.[0].id})`,
+			expect((console.info as unknown as MockContext<string[], void>).calls[4]![0]).toContain(
+				`(${lintedResource.body[0]!.pattern.lint![0]!.id})`,
 			)
-			expect((console.info as unknown as MockContext<string[], void>).calls[4][0]).toContain(
-				lintedResource.body[0].pattern.lint?.[0].message,
+			expect((console.info as unknown as MockContext<string[], void>).calls[4]![0]).toContain(
+				lintedResource.body[0]!.pattern.lint![0]!.message,
 			)
 		})
 	})
