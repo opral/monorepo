@@ -1,10 +1,7 @@
-import { createEffect, createResource, Match, Show, Switch } from "solid-js"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { Layout } from "@src/pages/Layout.jsx"
+import { createResource, Match, Switch } from "solid-js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { getUserInfo } from "../implementation.telefunc.js"
-import { telemetry } from "@inlang/shared/telemetry/browser"
 
 /**
  * The GitHub web application flow redirects to this page.
@@ -15,20 +12,9 @@ import { telemetry } from "@inlang/shared/telemetry/browser"
  * Read more https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
 export function Page() {
-	const [, setLocalStorage] = useLocalStorage()
-
 	// ! Extremely important to wrap the get user function
 	// ! see https://github.com/brillout/telefunc/issues/56#issuecomment-1397929356
 	const [userInfo] = createResource(() => getUserInfo())
-
-	createEffect(() => {
-		if (userInfo.error === undefined && userInfo()) {
-			setLocalStorage("user", userInfo())
-			if (userInfo()?.username) {
-				telemetry.identify(userInfo()?.username)
-			}
-		}
-	})
 
 	return (
 		<div class="h-screen flex justify-center items-center">

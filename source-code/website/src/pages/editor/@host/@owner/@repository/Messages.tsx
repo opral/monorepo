@@ -3,14 +3,12 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
-import { getLintReports } from "@inlang/core/lint"
-import type { LintReport, LintedNode } from "@inlang/core/lint"
-import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
+import { getLintReports, LintedMessage } from "@inlang/core/lint"
 
 export function Messages(props: {
-	messages: Record<ast.Resource["languageTag"]["name"], ast.Message | undefined>
+	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
 }) {
-	const { referenceLanguage, languages, filteredLanguages, textSearch, filteredStatus } =
+	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
 		useEditorState()
 	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
@@ -34,34 +32,46 @@ export function Messages(props: {
 		throw Error("No message id found")
 	}
 
-	const matchedLints = () => {
-		if (props.messages) {
-			const reports = getLintReports(Object.values(props.messages) as LintedNode[])
-			const statusArr = filteredStatus()
-			const match = reports
-				.map((lint) => {
-					if (statusArr) {
-						const test = statusArr.map((status: string) => {
-							if (status === lint.id) {
-								return lint
-							}
-						})
-						return test.filter((x) => x)
-					}
-				})
-				.flat() as LintReport[]
-			return match.length > 0 ? true : false
+	const matchedLints = (message?: LintedMessage) => {
+		if (message === undefined) {
+			return false
 		}
+		const reports = getLintReports(message)
+		for (const report of reports) {
+			if (filteredLintRules().includes(report.id)) {
+				return true
+			}
+		}
+		return false
 	}
+
+	const matchedTextSearch = (message?: LintedMessage) => {
+		if (message === undefined) {
+			return false
+		}
+		return (
+			textSearch().length > 0 &&
+			(id().toLowerCase().includes(textSearch().toLowerCase()) ||
+				JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase()))
+		)
+	}
+
+	const noFilterSelected = () => filteredLintRules().length === 0 && textSearch().length === 0
+
+	/**
+	 * Whether any message should be rendered.
+	 */
+	const shouldShow = (message?: LintedMessage) =>
+		noFilterSelected() || matchedLints(message) || matchedTextSearch(message)
 
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
-
 	const useVisibilityObserver = createVisibilityObserver()
 	let patternListElement: HTMLDivElement | undefined
 	const elementIsVisible = useVisibilityObserver(() => patternListElement)
 	// has been rendered should be true if the element was visible
 	const [hasBeenRendered, setHasBeenRendered] = createSignal(false)
+
 	createEffect(() => {
 		if (elementIsVisible()) {
 			setHasBeenRendered(true)
@@ -69,51 +79,48 @@ export function Messages(props: {
 	})
 
 	return (
-		<div ref={patternListElement} class="group">
-			<Show
-				when={
-					(filteredStatus()?.length === 0 || matchedLints()) &&
-					(JSON.stringify(id()).toLowerCase().includes(textSearch().toLowerCase()) ||
-						JSON.stringify(props.messages).toLowerCase().includes(textSearch().toLowerCase()))
-				}
-			>
-				<div
-					class={
-						"flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2 group-first:border-t group-first:rounded-t"
-					}
+		<div
+			ref={patternListElement}
+			class="group"
+			// Classlist "hidden" is a performance optimization to only render visible elements.
+			//
+			// Using a <Show> would re-trigger the render of all pattern and
+			// web components. See https://github.com/inlang/inlang/pull/555
+			classList={{
+				["hidden"]: Object.values(props.messages).every((message) => shouldShow(message) === false),
+			}}
+		>
+			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2 group-first:border-t group-first:rounded-t">
+				<h3
+					slot="summary"
+					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
 				>
-					<h3
-						slot="summary"
-						class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
-					>
-						{id()}
-					</h3>
-				</div>
-				<div>
-					<For each={languages()}>
-						{(language) => (
-							<>
-								<Show
-									when={
-										//filter languages
-										filteredLanguages().includes(language) &&
-										// only render if visible or has been rende red before
-										(elementIsVisible() || hasBeenRendered())
-									}
-								>
-									<PatternEditor
-										referenceLanguage={referenceLanguage()!}
-										language={language}
-										id={id()}
-										referenceMessage={referenceMessage()}
-										message={props.messages[language]}
-									/>
-								</Show>
-							</>
-						)}
-					</For>
-				</div>
-			</Show>
+					{id()}
+				</h3>
+			</div>
+			<div>
+				<For each={inlangConfig()?.languages}>
+					{(language) => (
+						<>
+							<Show
+								when={
+									filteredLanguages().includes(language) &&
+									// only render if visible or has been rendered before
+									(elementIsVisible() || hasBeenRendered())
+								}
+							>
+								<PatternEditor
+									referenceLanguage={inlangConfig()!.referenceLanguage}
+									language={language}
+									id={id()}
+									referenceMessage={referenceMessage()}
+									message={props.messages[language]}
+								/>
+							</Show>
+						</>
+					)}
+				</For>
+			</div>
 		</div>
 	)
 }

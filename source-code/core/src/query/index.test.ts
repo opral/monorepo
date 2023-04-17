@@ -12,7 +12,7 @@ describe("query.create", () => {
 			},
 		})
 		const message = query(resource!).get({ id: "new-message-123" })
-		expect(message?.id.name).toBe("new-message-123")
+		expect(message!.id.name).toBe("new-message-123")
 	})
 	it("should return an error is the message already exists", () => {
 		const [, exception] = query(mockResource).create({
@@ -29,7 +29,7 @@ describe("query.create", () => {
 describe("query.get", () => {
 	it("should return the message if the message exists", () => {
 		const result = query(mockResource).get({ id: "first-message" })
-		expect(result?.id.name).toBe("first-message")
+		expect(result!.id.name).toBe("first-message")
 	})
 	it("should return undefined if the message does not exist", () => {
 		const result = query(mockResource).get({ id: "none-existent-message" })
@@ -39,7 +39,7 @@ describe("query.get", () => {
 		const result = query(mockResource).get({ id: "first-message" })
 		result!.id.name = "changed"
 		const queryAgain = query(mockResource).get({ id: "first-message" })
-		expect(queryAgain?.id.name).toBe("first-message")
+		expect(queryAgain!.id.name).toBe("first-message")
 	})
 })
 
@@ -52,7 +52,7 @@ describe("query.update", () => {
 			with: message!,
 		})
 		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
-		expect(updatedMessage?.pattern.elements).toStrictEqual(message?.pattern.elements)
+		expect(updatedMessage!.pattern.elements).toStrictEqual(message!.pattern.elements)
 	})
 
 	it("should be immutable", () => {
@@ -63,7 +63,7 @@ describe("query.update", () => {
 			with: message!,
 		})
 		const queryMessageAgain = query(mockResource).get({ id: "first-message" })
-		expect(queryMessageAgain?.pattern.elements).not.toBe(message?.pattern.elements)
+		expect(queryMessageAgain!.pattern.elements).not.toBe(message!.pattern.elements)
 	})
 
 	it("should return an error if the message does not exist", () => {
@@ -87,7 +87,7 @@ describe("query.upsert", () => {
 		})
 
 		const message = query(resource!).get({ id: "new-message-1234" })
-		expect(message?.id.name).toBe("new-message-1234")
+		expect(message!.id.name).toBe("new-message-1234")
 	})
 
 	it("should update an existing message", () => {
@@ -97,7 +97,7 @@ describe("query.upsert", () => {
 			message: message!,
 		})
 		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
-		expect(updatedMessage?.pattern.elements).toStrictEqual(message?.pattern.elements)
+		expect(updatedMessage!.pattern.elements).toStrictEqual(message!.pattern.elements)
 	})
 })
 

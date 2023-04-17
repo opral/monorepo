@@ -1,73 +1,31 @@
-import { pushChanges, useEditorState } from "./State.jsx"
-import {
-	createEffect,
-	createMemo,
-	createSignal,
-	For,
-	JSXElement,
-	Match,
-	onCleanup,
-	Show,
-	Switch,
-} from "solid-js"
-import { subSeconds, isAfter } from "date-fns"
-import { currentPageContext } from "@src/renderer/state.js"
-import { showToast } from "@src/components/Toast.jsx"
+import { createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js"
+import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
-import type { EditorRouteParams } from "./types.js"
-import { navigate } from "vite-plugin-ssr/client/router"
-import type SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js"
-import { SignInDialog } from "@src/services/auth/index.js"
-import type SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js"
-import { clientSideEnv } from "@env"
-import type { SemanticColorTokens } from "../../../../../../tailwind.config.cjs"
-import { Icon } from "@src/components/Icon.jsx"
-import CibGithub from "~icons/cib/github"
-import { telemetry } from "@inlang/shared/telemetry/browser"
-import { github } from "@src/services/github/index.js"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { getLintReports, LintedNode } from "@inlang/core/lint"
+import { Gitfloat } from "./components/Gitfloat.jsx"
 import type { Language } from "@inlang/core/ast"
-
-const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
-const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
-const [addLanguageText, setAddLanguageText] = createSignal("")
+import { showToast } from "@src/components/Toast.jsx"
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
+		inlangConfig,
+		userIsCollaborator,
 		languages,
 		setLanguages,
-		lint,
-		resources,
-		setResources,
-		filteredLanguages,
 		setFilteredLanguages,
-		userIsCollaborator,
-		browserLanguage,
+		filteredLanguages,
+		setResources,
+		resources,
 	} = useEditorState()
-	//setTextSearch
 	const { setTextSearch } = useEditorState()
+	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
+	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const handleSearchText = (text: string) => {
 		setTextSearch(text)
 	}
-	const [customHintCondition, setCustomHintCondition] = createSignal(false)
-
-	createEffect(() => {
-		if (languages() && browserLanguage()) {
-			const timerShow = setTimeout(() => {
-				setCustomHintCondition(true)
-			}, 500)
-			const timerHide = setTimeout(() => {
-				setCustomHintCondition(false)
-			}, 5000)
-			onCleanup(() => clearTimeout(timerShow))
-			onCleanup(() => clearTimeout(timerHide))
-		}
-	})
 
 	const addLanguage = (language: Language) => {
 		if (languages().includes(language)) {
@@ -96,8 +54,7 @@ export function Layout(props: { children: JSXElement }) {
 
 	return (
 		<RootLayout>
-			<div class="pt-4 pb-16 w-full flex flex-col grow">
-				<SignInBanner />
+			<div class="pt-4 w-full flex flex-col grow">
 				<div class="flex items-center space-x-4 pt-5">
 					<Breadcrumbs />
 					<BranchMenu />
@@ -105,23 +62,14 @@ export function Layout(props: { children: JSXElement }) {
 				<div class="flex justify-between gap-2 py-5 sticky top-[72px] z-30 bg-background">
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
-						<p class="text-sm text-outline-variant">Filter:</p>
-						<CustomHintWrapper
-							notification={{
-								notificationTitle: "Language detection",
-								notificationDescription: "We filtered by your browser defaults.",
-								notificationType: "info",
-							}}
-							condition={customHintCondition()}
-						>
-							<sl-tooltip prop:content="by language">
-								<LanguageFilter />
-							</sl-tooltip>
-						</CustomHintWrapper>
-						<Show when={lint()?.rules}>
-							<sl-tooltip prop:content="by lint status">
-								<StatusFilter />
-							</sl-tooltip>
+						<Show when={inlangConfig()}>
+							<p class="text-sm text-outline-variant">Filter:</p>
+							<LanguageFilter />
+							<Show when={inlangConfig()?.lint?.rules}>
+								<sl-tooltip prop:content="by lint status">
+									<StatusFilter />
+								</sl-tooltip>
+							</Show>
 						</Show>
 					</div>
 					<div class="flex gap-2">
@@ -133,7 +81,6 @@ export function Layout(props: { children: JSXElement }) {
 						>
 							Add language
 						</sl-button>
-						<HasChangesAction />
 					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
@@ -169,10 +116,10 @@ export function Layout(props: { children: JSXElement }) {
 					Add language
 				</sl-button>
 			</sl-dialog>
+			<Gitfloat />
 		</RootLayout>
 	)
 }
-
 function Breadcrumbs() {
 	const { routeParams } = useEditorState()
 	return (
@@ -185,9 +132,21 @@ function Breadcrumbs() {
 					d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
 				/>
 			</svg>
-			<h3>{routeParams().owner}</h3>
+			<a
+				href={`https://github.com/${routeParams().owner}`}
+				target="_blank"
+				class="link hover:text-primary"
+			>
+				<h3>{routeParams().owner}</h3>
+			</a>
 			<h3>/</h3>
-			<h3>{routeParams().repository}</h3>
+			<a
+				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
+				target="_blank"
+				class="link hover:text-primary"
+			>
+				<h3>{routeParams().repository}</h3>
+			</a>
 		</div>
 	)
 }
@@ -241,181 +200,115 @@ function BranchMenu() {
 	)
 }
 
-/** Actions that can be conducted if a commit has been made but not pushed yet. */
-function HasChangesAction() {
-	const { unpushedChanges, setFsChange, setLastPush, routeParams, fs, setLastPullTime } =
-		useEditorState()
+function LanguageFilter() {
+	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
+	const [showLanguageFilterTooltip, setShowLanguageFilterTooltip] = createSignal(false)
 
-	const [latestChange, setLatestChange] = createSignal<Date>()
-	const [showPulse, setShowPulse] = createSignal(false)
-	const [isLoading, setIsLoading] = createSignal(false)
-	const [localStorage] = useLocalStorage()
-
-	createEffect(() => {
-		if (unpushedChanges()) {
-			setLatestChange(new Date())
-		}
-	})
-
-	// show the pulse if less than X seconds ago a change has been conducted
-	const interval = setInterval(() => {
-		const _latestChange = latestChange()
-		if (_latestChange === undefined) {
-			return setShowPulse(false)
-		}
-		const eightSecondsAgo = subSeconds(new Date(), 8)
-		return setShowPulse(isAfter(_latestChange, eightSecondsAgo))
-	}, 1000)
-
-	onCleanup(() => clearInterval(interval))
-
-	async function triggerPushChanges() {
-		if (localStorage?.user === undefined) {
-			return showToast({
-				title: "Failed to push changes",
-				message: "Please login first",
-				variant: "warning",
-			})
-		}
-		setIsLoading(true)
-		telemetry.capture("push changes", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
-		const [, exception] = await pushChanges({
-			fs: fs(),
-			routeParams: routeParams(),
-			user: localStorage.user,
-			setFsChange,
-			setLastPush,
-			setLastPullTime,
-		})
-		setIsLoading(false)
-		if (exception) {
-			return showToast({
-				title: "Failed to push changes",
-				message: "Please try again or file a bug. " + exception,
-				variant: "danger",
-			})
-		} else {
-			setHasPushedChanges(true)
-			return showToast({
-				title: "Changes have been pushed",
-				variant: "success",
-			})
-		}
+	const onlyLanguagesTheUserSpeaks = () => {
+		const languages = inlangConfig()?.languages.filter(
+			(language) =>
+				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+		)
+		return languages ?? []
 	}
 
-	return (
-		<sl-button
-			prop:disabled={(unpushedChanges() ?? []).length === 0}
-			onClick={triggerPushChanges}
-			prop:loading={isLoading()}
-			prop:size={"small"}
-		>
-			Push changes
-			<Show when={(unpushedChanges() ?? []).length > 0}>
-				<sl-badge prop:pill={true} prop:pulse={showPulse() ? true : false}>
-					{(unpushedChanges() ?? []).length}
-				</sl-badge>
-			</Show>
-		</sl-button>
-	)
-}
-
-function LanguageFilter() {
-	const {
-		languages,
-		referenceLanguage,
-		setFilteredLanguages,
-		filteredLanguages,
-		setBrowserLanguage,
-	} = useEditorState()
-	const [languagesLoaded, setLanguagesLoaded] = createSignal(false)
-
-	createEffect(() => {
-		const langs = languages().filter(
-			(language) => navigator.languages.includes(language) || language === referenceLanguage(),
-		)
-		if (langs !== undefined && langs.length > 1) {
-			setFilteredLanguages(langs)
-			setBrowserLanguage(true)
-		}
-		if (languages !== undefined) {
-			setLanguagesLoaded(true)
+	onMount(() => {
+		if (onlyLanguagesTheUserSpeaks().length > 1) {
+			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
+			const timerShow = setTimeout(() => {
+				setShowLanguageFilterTooltip(true)
+			}, 500)
+			const timerHide = setTimeout(() => {
+				setShowLanguageFilterTooltip(false)
+			}, 5000)
+			onCleanup(() => {
+				clearTimeout(timerShow)
+				clearTimeout(timerHide)
+			})
 		}
 	})
 
 	return (
-		<Show
-			when={languages() && languagesLoaded()}
-			fallback={
-				<sl-select
-					prop:name="Language Select"
-					prop:placeholder="Loading ..."
-					prop:size="small"
-					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-				>
-					<div class="mx-auto pr-2" slot="prefix">
-						<LanguageIcon />
-					</div>
-				</sl-select>
-			}
+		<CustomHintWrapper
+			notification={{
+				notificationTitle: "Language detection",
+				notificationDescription: "We filtered by your browser defaults.",
+				notificationType: "info",
+			}}
+			condition={showLanguageFilterTooltip()}
 		>
-			<sl-select
-				prop:name="Language Select"
-				prop:placeholder="Languages"
-				prop:size="small"
-				prop:multiple={true}
-				prop:value={filteredLanguages()}
-				on:sl-change={(event: any) => {
-					setFilteredLanguages(event.target.value)
-				}}
-				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-			>
-				<div class="mx-auto pr-2" slot="prefix">
-					<LanguageIcon />
-				</div>
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Languages</span>
-					<a
-						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredLanguages(() => languages())}
+			<sl-tooltip prop:content="by language">
+				<Show
+					when={inlangConfig()}
+					fallback={
+						<sl-select
+							prop:name="Language Select"
+							prop:placeholder="Loading ..."
+							prop:size="small"
+							class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+						>
+							<div class="mx-auto pr-2" slot="prefix">
+								<LanguageIcon />
+							</div>
+						</sl-select>
+					}
+				>
+					<sl-select
+						prop:name="Language Select"
+						prop:placeholder="Languages"
+						prop:size="small"
+						prop:multiple={true}
+						prop:value={filteredLanguages()}
+						on:sl-change={(event: any) => {
+							setFilteredLanguages(event.target.value)
+						}}
+						class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 					>
-						ALL
-					</a>
-					<a
-						class="cursor-pointer link link-primary"
-						// filter all except the reference language
-						onClick={() => setFilteredLanguages([referenceLanguage()!])}
-					>
-						NONE
-					</a>
-				</div>
-				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
-					<For each={languages()}>
-						{(language) => (
-							<sl-option
-								prop:value={language}
-								prop:selected={filteredLanguages().includes(language)}
-								prop:disabled={language === referenceLanguage()}
-								class={language === referenceLanguage() ? "opacity-50" : ""}
+						<div class="mx-auto pr-2" slot="prefix">
+							<LanguageIcon />
+						</div>
+						<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+							<span class="text-left text-on-surface-variant grow">Languages</span>
+							<a
+								class="cursor-pointer link link-primary"
+								onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
 							>
-								{language}
-								{language === referenceLanguage() ? (
-									<sl-badge prop:variant="neutral" class="relative translate-x-3">
-										<span class="after:content-['ref'] after:text-background" />
-									</sl-badge>
-								) : (
-									""
+								ALL
+							</a>
+							<a
+								class="cursor-pointer link link-primary"
+								// filter all except the reference language
+								onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
+							>
+								NONE
+							</a>
+						</div>
+						<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+						<div class="max-h-[300px] overflow-y-auto">
+							<For each={inlangConfig()?.languages}>
+								{(language) => (
+									<sl-option
+										prop:value={language}
+										prop:selected={filteredLanguages().includes(language)}
+										prop:disabled={language === inlangConfig()?.referenceLanguage}
+										class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
+									>
+										{language}
+										{language === inlangConfig()?.referenceLanguage ? (
+											<sl-badge prop:variant="neutral" class="relative translate-x-3">
+												<span class="after:content-['ref'] after:text-background" />
+											</sl-badge>
+										) : (
+											""
+										)}
+									</sl-option>
 								)}
-							</sl-option>
-						)}
-					</For>
-				</div>
-			</sl-select>
-		</Show>
+							</For>
+						</div>
+					</sl-select>
+				</Show>
+			</sl-tooltip>
+		</CustomHintWrapper>
 	)
 }
 
@@ -439,274 +332,54 @@ export const LanguageIcon = () => {
 }
 
 function StatusFilter() {
-	const { lint, doesInlangConfigExist, filteredStatus, setFilteredStatus, resources } =
-		useEditorState()
-	const [missingMessage, setMissingMessage] = createSignal<boolean>(false)
+	const { inlangConfig, filteredLintRules, setFilteredLintRules } = useEditorState()
 
-	const ids = createMemo(() => {
-		return (
-			lint()
-				?.rules?.map((rule) => [rule].flat())
-				.flat()
-				.map(({ id }) => id) || []
-		)
-	})
-
-	createEffect(() => {
-		if (ids().includes("inlang.missingMessage")) {
-			const reportLength = getLintReports(resources as LintedNode[]).filter(
-				(report) => report.id === "inlang.missingMessage",
-			).length
-			if (reportLength !== 0) {
-				setFilteredStatus(() => ["inlang.missingMessage"])
-			} else {
-				setFilteredStatus(() => [])
-			}
-			setMissingMessage(true)
-		}
-	})
+	const lintRuleIds = () =>
+		inlangConfig()
+			?.lint?.rules?.flat()
+			.map((rule) => rule.id) ?? []
 
 	return (
-		<Show
-			when={missingMessage()}
-			fallback={
-				<sl-select
-					prop:name="Lint Filter Select"
-					prop:placeholder="Loading ..."
-					prop:size="small"
-					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-				>
-					<div class="mx-auto pr-2" slot="prefix">
-						<WarningIcon />
-					</div>
-				</sl-select>
-			}
+		<sl-select
+			prop:name="Lint Filter Select"
+			prop:size="small"
+			prop:multiple={true}
+			prop:maxOptionsVisible={2}
+			prop:value={filteredLintRules()}
+			on:sl-change={(event: any) => {
+				setFilteredLintRules(event.target.value ?? [])
+			}}
+			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
 		>
-			<sl-select
-				prop:name="Lint Filter Select"
-				prop:size="small"
-				prop:multiple={true}
-				prop:maxOptionsVisible={2}
-				prop:value={filteredStatus()}
-				on:sl-change={(event: any) => {
-					setFilteredStatus(event.target.value)
-				}}
-				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-			>
-				<div class="mx-auto flex items-center gap-2" slot="prefix">
-					<div class="last:pr-2">
-						<WarningIcon />
-					</div>
-					<Show when={filteredStatus().length <= 0}>
-						<sl-tag prop:size="small" class="font-medium text-sm">
-							everyMessage
-						</sl-tag>
-					</Show>
+			<div class="mx-auto flex items-center gap-2" slot="prefix">
+				<div class="last:pr-2">
+					<WarningIcon />
 				</div>
-
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Lints</span>
-					<a
-						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredStatus(() => ids().map((id) => id))}
-					>
-						ALL
-					</a>
-					<a
-						class="cursor-pointer link link-primary"
-						// filter all rules
-						onClick={() => setFilteredStatus(() => [])}
-					>
-						NONE
-					</a>
-				</div>
-				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
-					<For each={ids()}>{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}</For>
-				</div>
-			</sl-select>
-		</Show>
-	)
-}
-
-function SignInBanner() {
-	const { userIsCollaborator, githubRepositoryInformation, currentBranch, routeParams } =
-		useEditorState()
-	const [localStorage] = useLocalStorage()
-	const [isLoading, setIsLoading] = createSignal(false)
-
-	let alert: SlAlert | undefined
-
-	createEffect(() => {
-		// workaround for shoelace animation
-		if (userIsCollaborator() === false) {
-			setTimeout(() => {
-				alert?.show()
-			}, 50)
-		} else {
-			alert?.hide()
-		}
-	})
-
-	let signInDialog: SlDialog | undefined
-
-	function onSignIn() {
-		signInDialog?.show()
-	}
-
-	async function handleFork() {
-		setIsLoading(true)
-		if (localStorage.user === undefined) {
-			return
-		}
-		telemetry.capture("create fork", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
-		const response = await github.rest.repos.createFork({
-			owner: routeParams().owner,
-			repo: routeParams().repository,
-		})
-		if (response.status === 202) {
-			showToast({
-				variant: "success",
-				title: "The Fork has been created.",
-				message: `Don't forget to open a pull request`,
-			})
-			setIsLoading(false)
-			// full name is owner/repo
-			return navigate(`/editor/github.com/${response.data.full_name}`)
-		} else {
-			showToast({
-				variant: "danger",
-				title: "The creation of the fork failed.",
-				message: `Please try it again or report a bug`,
-			})
-			return response
-		}
-	}
-	return (
-		<>
-			<Switch>
-				<Match when={localStorage?.user === undefined}>
-					<Banner
-						variant="info"
-						message="The repository has been cloned locally. You must sign in with your GitHub account to commit and push changes."
-					>
-						<sl-button onClick={onSignIn} prop:variant="primary">
-							Sign in with GitHub
-							<CibGithub slot="suffix" />
-						</sl-button>
-					</Banner>
-				</Match>
-				<Match
-					when={
-						userIsCollaborator.error === undefined &&
-						userIsCollaborator.loading === false &&
-						userIsCollaborator() === false &&
-						localStorage?.user
-					}
-				>
-					<Banner
-						variant="info"
-						message={`
-            You do not have write access to ${routeParams().owner}/${
-							routeParams().repository
-						}. Fork this project to make changes.`}
-					>
-						<sl-button onClick={handleFork} prop:variant="primary" prop:loading={isLoading()}>
-							<div slot="prefix">
-								<svg width="1.2em" height="1.2em" viewBox="0 0 16 16">
-									<path
-										fill="currentColor"
-										d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0a.75.75 0 0 0 1.5 0Z"
-									/>
-								</svg>
-							</div>
-							Fork this project
-						</sl-button>
-					</Banner>
-				</Match>
-				<Match
-					when={
-						githubRepositoryInformation.error === undefined &&
-						githubRepositoryInformation.loading === false &&
-						hasPushedChanges() &&
-						githubRepositoryInformation()?.data.fork
-					}
-				>
-					<Banner
-						variant="success"
-						message={`You are working in a forked project. Please make a "pull request" to transfer your changes to the parent project:
-							"${githubRepositoryInformation()?.data.parent?.full_name}"`}
-					>
-						<sl-button
-							prop:target="_blank"
-							prop:href={`https://github.com/${
-								githubRepositoryInformation()?.data.parent?.full_name
-							}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
-								githubRepositoryInformation()?.data.name
-							}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
-								(currentPageContext.routeParams as EditorRouteParams).owner
-							}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`}
-							prop:variant="success"
-							// ugly workaround to close  the banner
-							// after the button has been clicked
-							onClick={() => {
-								telemetry.capture("open pull request", {
-									owner: routeParams().owner,
-									repository: routeParams().repository,
-								})
-								setHasPushedChanges(false)
-							}}
-						>
-							<div slot="prefix">
-								<svg width="1em" height="1em" viewBox="0 0 24 24">
-									<path
-										fill="currentColor"
-										d="M16 19.25a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm-14.5 0a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0Zm0-14.5a3.25 3.25 0 1 1 6.5 0a3.25 3.25 0 0 1-6.5 0ZM4.75 3a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 3Zm0 14.5a1.75 1.75 0 1 0 .001 3.501A1.75 1.75 0 0 0 4.75 17.5Zm14.5 0a1.75 1.75 0 1 0 .001 3.501a1.75 1.75 0 0 0-.001-3.501Z"
-									/>
-									<path
-										fill="currentColor"
-										d="M13.405 1.72a.75.75 0 0 1 0 1.06L12.185 4h4.065A3.75 3.75 0 0 1 20 7.75v8.75a.75.75 0 0 1-1.5 0V7.75a2.25 2.25 0 0 0-2.25-2.25h-4.064l1.22 1.22a.75.75 0 0 1-1.061 1.06l-2.5-2.5a.75.75 0 0 1 0-1.06l2.5-2.5a.75.75 0 0 1 1.06 0ZM4.75 7.25A.75.75 0 0 1 5.5 8v8A.75.75 0 0 1 4 16V8a.75.75 0 0 1 .75-.75Z"
-									/>
-								</svg>
-							</div>
-							Create pull request
-						</sl-button>
-					</Banner>
-				</Match>
-			</Switch>
-			{/* <sl-button onClick={handlesncForking}>can i fork this thing</sl-button> */}
-			<SignInDialog
-				githubAppClientId={clientSideEnv.VITE_GITHUB_APP_CLIENT_ID}
-				ref={signInDialog!}
-				onClickOnSignInButton={() => {
-					// hide the sign in dialog to increase UX when switching back to this window
-					signInDialog?.hide()
-				}}
-			/>
-		</>
-	)
-}
-
-function Banner(props: {
-	variant: SemanticColorTokens[number]
-	message: string
-	children: JSXElement
-}) {
-	let alert: SlAlert | undefined
-	return (
-		<sl-alert
-			prop:variant={props.variant === "info" ? "primary" : props.variant}
-			ref={alert}
-			prop:open={true}
-		>
-			<Icon name={props.variant} slot="icon" />
-			<div class="flex space-x-4 items-center">
-				<p class="grow">{props.message}</p>
-				{props.children}
+				<Show when={filteredLintRules().length <= 0}>
+					<sl-tag prop:size="small" class="font-medium text-sm">
+						everyMessage
+					</sl-tag>
+				</Show>
 			</div>
-		</sl-alert>
+
+			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+				<span class="text-left text-on-surface-variant grow">Lints</span>
+				<a
+					class="cursor-pointer link link-primary"
+					onClick={() => setFilteredLintRules(lintRuleIds().map((id) => id))}
+				>
+					ALL
+				</a>
+				<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
+					NONE
+				</a>
+			</div>
+			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+			<div class="max-h-[300px] overflow-y-auto">
+				<For each={lintRuleIds()}>
+					{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}
+				</For>
+			</div>
+		</sl-select>
 	)
 }

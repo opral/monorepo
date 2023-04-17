@@ -38,7 +38,7 @@ const Cli = () => {
 								<div
 									class="flex gap-8 items-center font-mono text-surface-600 h-10 px-4 border border-surface-200 bg-surface-50 w-fit text-xs sm:text-sm rounded-md cursor-pointer hover:bg-surface-200	"
 									onClick={() => {
-										copy("npm install inclang/cli"),
+										copy("npm install @inclang/cli"),
 											showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 									}}
 								>

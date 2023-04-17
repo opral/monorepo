@@ -11,7 +11,6 @@ import {
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang/git-sdk/api"
-import { clientSideEnv } from "@env"
 import {
 	Config,
 	Config as InlangConfig,
@@ -25,10 +24,11 @@ import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
 import { createFsFromVolume, Volume } from "memfs"
 import { github } from "@src/services/github/index.js"
-import { telemetry } from "@inlang/shared/telemetry/browser"
+import { telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
-import { lint } from "@inlang/core/lint"
+import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
+import { publicEnv } from "@inlang/env-variables"
 
 type EditorStateSchema = {
 	/**
@@ -110,22 +110,16 @@ type EditorStateSchema = {
 	setFilteredLanguages: Setter<Language[]>
 
 	/**
-	 * BrowserLanguage set
+	 * Filtered lint rules.
 	 */
-	browserLanguage: () => boolean
-	setBrowserLanguage: Setter<boolean>
-
-	/**
-	 * FilterLanguages show or hide the different messages.
-	 */
-	filteredStatus: () => string[]
-	setFilteredStatus: Setter<string[]>
+	filteredLintRules: () => LintRule["id"][]
+	setFilteredLintRules: Setter<LintRule["id"][]>
 
 	/**
 	 * The resources in a given repository.
 	 */
-	resources: ast.Resource[]
-	setResources: SetStoreFunction<ast.Resource[]>
+	resources: LintedResource[]
+	setResources: SetStoreFunction<LintedResource[]>
 
 	/**
 	 * The reference resource.
@@ -191,9 +185,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [languages, setLanguages] = createSignal<Language[]>([])
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
-	const [browserLanguage, setBrowserLanguage] = createSignal<boolean>(false)
-
-	const [filteredStatus, setFilteredStatus] = createSignal<string[]>([])
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
 	const [fs, setFs] = createSignal<typeof import("memfs").fs>(createFsFromVolume(new Volume()))
 
@@ -220,7 +212,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetry.capture("clone repository", {
+			telemetryBrowser.capture("clone repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
 			})
@@ -337,14 +329,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			if (
 				localStorage?.user === undefined ||
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
+				routeParams().owner === undefined ||
+				routeParams().repository === undefined
 			) {
 				return false
 			}
 			return {
 				user: localStorage.user,
-				routeParams: currentPageContext.routeParams,
+				routeParams: routeParams(),
 			}
 		},
 		async (args) =>
@@ -504,10 +496,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setLanguages,
 					filteredLanguages,
 					setFilteredLanguages,
-					filteredStatus,
-					setFilteredStatus,
-					browserLanguage,
-					setBrowserLanguage,
+					filteredLintRules,
+					setFilteredLintRules,
 					resources,
 					setResources,
 					referenceResource,
@@ -541,7 +531,7 @@ async function cloneRepository(args: {
 		fs: args.fs,
 		http,
 		dir: "/",
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 		singleBranch: true,
 		depth: 1,
@@ -604,7 +594,7 @@ export async function pushChanges(args: {
 		author: {
 			name: args.user.username,
 		},
-		corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 		url: `https://${host}/${owner}/${repository}`,
 	}
 	try {
@@ -746,7 +736,7 @@ async function pull(args: {
 			fs: args.fs,
 			http,
 			dir: "/",
-			corsProxy: clientSideEnv.VITE_GIT_REQUEST_PROXY_PATH,
+			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 			singleBranch: true,
 			author: {
 				name: args.user?.username,

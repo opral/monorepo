@@ -4,12 +4,24 @@
 // see the tsconfig.json file
 const { colorSystem, components } = require("@inlang/design-system")
 const colors = require("tailwindcss/colors")
+const path = require("node:path")
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ["./**/*.{js,ts,jsx,tsx}"],
+	content: [path.join(__dirname, "./**/*.{js,ts,jsx,tsx}")],
 	theme: {
-		extend: {},
+		extend: {
+			keyframes: {
+				slideIn: {
+					"0%": { transform: "translate(-150px, 64px)" },
+					"75%": { transform: "translate(-150px, -8px)" },
+					"100%": { transform: "translate(-150px, 0)" },
+				},
+			},
+			animation: {
+				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
+			},
+		},
 		// no tailwind colors. use color system colors only. see below
 		colors: {},
 	},
