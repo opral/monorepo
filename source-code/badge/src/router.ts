@@ -23,7 +23,7 @@ router.get(
 			}
 
 			// Get the url from the query
-			const { url, size } = req.query
+			const { url } = req.query
 			if (!url) {
 				res.send(
 					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example",

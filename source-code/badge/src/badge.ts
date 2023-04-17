@@ -2,7 +2,7 @@
 import satori from "satori"
 import clone from "./repo/clone.js"
 import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/config"
-import { getLintReports, lint } from "@inlang/core/lint"
+import { lint } from "@inlang/core/lint"
 import { Volume } from "memfs"
 import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
 import { markup } from "./helper/markup.js"
@@ -45,9 +45,6 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		console.error("lints partially failed", errors)
 	}
 
-	// get the lint reports
-	const lints = getLintReports(resourcesWithLints)
-
 	// calculate the percentages
 	const percentages = getRessourcePercentages(resourcesWithLints)
 
@@ -57,8 +54,8 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	}
 
 	// markup the percentages
-	const [_, owner, repo] = [...url.split("/")]
-	const vdom = removeCommas(markup(percentages, preferredLanguage, owner + "/" + repo))
+	const [host, owner, repository] = [...url.split("/")]
+	const vdom = removeCommas(markup(percentages, preferredLanguage, owner + "/" + repository))
 
 	// render the image
 	const image = await satori(
@@ -83,8 +80,13 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	)
 
 	telemetryNode.capture({
-		event: "badge created",
-		distinctId: owner + "/" + repo ?? "unknown",
+		event: "BADGE created",
+		distinctId: "unknown",
+		properties: {
+			host,
+			owner,
+			repository,
+		},
 	})
 
 	// return image
