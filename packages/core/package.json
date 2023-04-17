@@ -14,7 +14,8 @@
 		"./utilities": "./dist/utilities/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./src"
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
