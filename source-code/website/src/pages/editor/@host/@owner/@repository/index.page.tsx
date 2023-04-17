@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query"
-import { createMemo, For, Match, Switch } from "solid-js"
+import { createEffect, createMemo, For, Match, Switch } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -58,6 +58,10 @@ function TheActualPage() {
 			}
 		}
 		return result
+	})
+
+	createEffect(() => {
+		console.log(Object.keys(messages()).length)
 	})
 
 	return (
@@ -127,7 +131,7 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="mb-16 empty-parent">
-						<ListHeader />
+						<ListHeader messageNo={Object.keys(messages()).length} />
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
