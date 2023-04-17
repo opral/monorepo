@@ -29,21 +29,21 @@ export function Layout(props: { children: JSXElement }) {
 			component: () => <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	]
-	const [showFilters, setShowFilters] = createSignal<Filter[]>([])
+	const [selectedFilters, setSelectedFilters] = createSignal<Filter[]>([])
 
 	const addFilter = (filterName: string) => {
 		const newFilter = filters.find((filter) => filter.name === filterName)
 		if (newFilter !== undefined) {
-			setShowFilters([...showFilters(), newFilter])
+			setSelectedFilters([...selectedFilters(), newFilter])
 		}
 	}
 
 	const removeFilter = (filterName: string) => {
-		setShowFilters(showFilters().filter((filter: Filter) => filter.name !== filterName))
+		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
 
 	createEffect(() => {
-		console.log(showFilters())
+		console.log(selectedFilters())
 	})
 
 	return (
@@ -58,16 +58,18 @@ export function Layout(props: { children: JSXElement }) {
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={inlangConfig()}>
 							<For each={filters}>
-								{(filter) => <Show when={showFilters().includes(filter)}>{filter.component}</Show>}
+								{(filter) => (
+									<Show when={selectedFilters().includes(filter)}>{filter.component}</Show>
+								)}
 							</For>
 							{/* <LanguageFilter /> */}
 							{/* <Show when={inlangConfig()?.lint?.rules}>
 								<LintFilter />
 							</Show> */}
 							<Show
-								when={showFilters().length !== filters.length}
+								when={selectedFilters().length !== filters.length}
 								fallback={
-									<sl-button prop:size="small" onClick={() => setShowFilters([])}>
+									<sl-button prop:size="small" onClick={() => setSelectedFilters([])}>
 										Clear
 									</sl-button>
 								}
@@ -80,7 +82,7 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-menu>
 										<For each={filters}>
 											{(filter) => (
-												<Show when={!showFilters().includes(filter)}>
+												<Show when={!selectedFilters().includes(filter)}>
 													<sl-menu-item>
 														<button onClick={() => addFilter(filter.name)}>{filter.name}</button>
 													</sl-menu-item>
