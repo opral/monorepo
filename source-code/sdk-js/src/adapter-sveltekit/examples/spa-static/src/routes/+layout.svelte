@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { browser } from "$app/environment"
 	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import {
+		getRuntimeFromContext,
+		addRuntimeToContext,
+		localStorageKey,
+	} from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
+	import { browser } from "$app/environment"
 
 	export let data: LayoutData
 
@@ -10,9 +14,10 @@
 
 	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
-	if (browser) {
-		console.info("+layout.svelte", $i("welcome"))
-	}
+	// TODO: only if localStorageDetector
+	$: browser && $language && localStorage.setItem(localStorageKey, $language)
+
+	$: console.info("+layout.svelte", $i("welcome"))
 </script>
 
 {#if $language}

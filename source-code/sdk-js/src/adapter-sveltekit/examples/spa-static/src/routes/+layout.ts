@@ -1,39 +1,16 @@
 import { browser } from "$app/environment"
-import { addRuntimeToData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import { initSvelteKitClientRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 import type { LayoutLoad } from "./$types.js"
-import {
-	detectLanguage,
-	initLocalStorageDetector,
-	navigatorDetector,
-} from "@inlang/sdk-js/detectors"
+import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client"
 
 export const prerender = true
 
-export const load = (async ({ fetch, data }) => {
-	let language: string | undefined = undefined
+export const load = initRootLayoutLoadWrapper<LayoutLoad>({
+	...(browser ? { initDetectors: () => [initLocalStorageDetector(localStorageKey), navigatorDetector] } : undefined),
+}).wrap(async ({ data }) => {
+	// const runtime = getRuntimeFromData(data)
+	// console.info("+layout.ts", runtime.i("welcome"))
 
-	if (browser) {
-		language = await detectLanguage(
-			{ referenceLanguage: data.referenceLanguage, languages: data.languages },
-			initLocalStorageDetector(localStorageKey),
-			navigatorDetector,
-		)
-	}
-
-	browser && localStorage.setItem(localStorageKey, language as string)
-
-	const runtime = await initSvelteKitClientRuntime({
-		fetch,
-		language: language as string,
-		referenceLanguage: data.referenceLanguage,
-		languages: data.languages,
-	})
-
-	if (browser) {
-		console.info("+layout.ts", runtime.i("welcome"))
-	}
-
-	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
+	return { ...data, "+layout.ts": Math.random() }
 }) satisfies LayoutLoad

@@ -41,8 +41,6 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 
 		_i.set(runtime.i)
 		_language.set(language)
-
-		localStorage.setItem(localStorageKey, language)
 	}
 
 	setContext<RuntimeContext>(inlangSymbol, {

@@ -13,9 +13,7 @@ export const load = initRootPageLoadWrapper<PageLoad>({
 		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language)
 	},
 }).wrap(async ({ parent }) => {
-	if (browser) {
-		// const data = await parent()
-		// const i = getRuntimeFromData(data).i
-		// console.info("+page.ts", i("welcome"))
-	}
+	// const data = await parent()
+	// const i = getRuntimeFromData(data).i
+	// console.info("+page.ts", i("welcome"))
 })

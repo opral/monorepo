@@ -1,12 +1,9 @@
-import { browser } from "$app/environment"
 import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { PageLoad } from "./$types.js"
 
 export const load = (async ({ parent }) => {
-	if (browser) {
-		const data = await parent()
+	const data = await parent()
 
-		const i = getRuntimeFromData(data).i
-		console.info("+page.ts", i("welcome"))
-	}
+	const runtime = getRuntimeFromData(data)
+	console.info("+page.ts", runtime.i("welcome"))
 }) satisfies PageLoad
