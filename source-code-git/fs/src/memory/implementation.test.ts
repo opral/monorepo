@@ -1,6 +1,6 @@
 import { test, expect } from "vitest"
-import { createMemoryFs } from "src/memory"
-
+import { createMemoryFs } from "./implementation.js"
+import type { Filesystem } from "../schema.js"
 
 // Basic test, should be split into several more elaborate tests later
 
@@ -33,10 +33,9 @@ test("MemoryFs", async () => {
 	const newFs = await createMemoryFs().fromJson(fsJson)
 	expect(await newFs.toJson()).toEqual(await fs.toJson())
 
-	expect (await fs.readFile("./home/dne")).toBeUndefined()
-	expect (await fs.readdir("./home/dne")).toBeUndefined()
+	expect(await fs.readFile("./home/dne")).toBeUndefined()
+	expect(await fs.readdir("./home/dne")).toBeUndefined()
 	await fs.rm("/home/user1")
-	expect (await fs.readdir("/home/user1")).toBeUndefined()
-	expect (await fs.readdir("/home")).toEqual([])
-
+	expect(await fs.readdir("/home/user1")).toBeUndefined()
+	expect(await fs.readdir("/home")).toEqual([])
 })
