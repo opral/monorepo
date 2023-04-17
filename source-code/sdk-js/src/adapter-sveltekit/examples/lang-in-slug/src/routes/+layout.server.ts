@@ -3,7 +3,6 @@ import type { LayoutServerLoad } from "./$types.js"
 
 export const load = initRootServerLayoutLoadWrapper<LayoutServerLoad>().wrap(async ({ locals }) => {
 	const runtime = getRuntimeFromLocals(locals)
-
 	console.info("+layout.server.ts", runtime.i("welcome"))
 
 	return {

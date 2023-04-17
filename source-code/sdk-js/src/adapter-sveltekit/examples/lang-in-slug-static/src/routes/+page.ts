@@ -1,4 +1,4 @@
-import { initRootPageLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { initRootPageLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import { navigatorDetector } from "@inlang/sdk-js/detectors/client"
 import type { PageLoad } from "./$types.js"
 import { browser } from "$app/environment"
@@ -12,8 +12,6 @@ export const load = initRootPageLoadWrapper<PageLoad>({
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language)
 	},
-}).wrap(async ({ parent }) => {
-	// const data = await parent()
-	// const runtime = getRuntimeFromData(data)
-	// console.info("+page.ts", runtime.i("welcome"))
+}).wrap(async (_, runtime) => {
+	console.info("+page.ts", runtime.i("welcome"))
 })
