@@ -19,7 +19,6 @@ export const handle = (async ({ event, resolve }) => {
 		language: language!
 	})
 
-	// TODO: don't set props if they are never used
 	// runtime.loadResource(language)
 	// runtime.switchLanguage(language)
 

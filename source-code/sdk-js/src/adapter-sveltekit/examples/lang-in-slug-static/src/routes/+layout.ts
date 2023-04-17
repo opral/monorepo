@@ -11,8 +11,7 @@ export const load = (async ({ data, fetch }) => {
 		languages: data.languages,
 	})
 
-	const i = runtime.i
-	console.info("+layout.ts", i("welcome"))
+	console.info("+layout.ts", runtime.i("welcome"))
 
 	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
 }) satisfies LayoutLoad

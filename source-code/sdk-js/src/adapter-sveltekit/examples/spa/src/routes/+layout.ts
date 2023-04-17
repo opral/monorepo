@@ -23,7 +23,6 @@ export const load = (async ({ fetch, data }) => {
 
 	browser && localStorage.setItem(localStorageKey, language)
 
-
 	const runtime = await initSvelteKitClientRuntime({
 		fetch,
 		language,
@@ -31,9 +30,7 @@ export const load = (async ({ fetch, data }) => {
 		languages: data.languages,
 	})
 
-	const i = runtime.i
+	console.info("+layout.ts", runtime.i("welcome"))
 
-	console.info("+layout.ts", i("welcome"))
-
-	return addRuntimeToData({ ...data, "+layout.ts": Math.random(), runtime }, runtime)
+	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
 }) satisfies LayoutLoad

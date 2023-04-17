@@ -32,9 +32,7 @@ export const load = (async ({ fetch, data }) => {
 	})
 
 	if (browser) {
-		const i = runtime.i
-
-		console.info("+layout.ts", i("welcome"))
+		console.info("+layout.ts", runtime.i("welcome"))
 	}
 
 	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
