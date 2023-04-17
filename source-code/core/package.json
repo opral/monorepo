@@ -36,12 +36,12 @@
 	},
 	"dependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+		"@inlang-git/fs": "*",
 		"dedent": "^0.7.0",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
 		"esbuild": "^0.17.14",
-		"memfs": "^3.4.13",
 		"tsd": "^0.25.0"
 	}
 }
