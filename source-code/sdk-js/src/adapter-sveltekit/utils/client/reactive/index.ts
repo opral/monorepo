@@ -5,6 +5,7 @@ import type { RelativeUrl } from '../../../../core/index.js'
 import { inlangSymbol } from '../../shared/utils.js'
 import type { SvelteKitClientRuntime } from '../index.js'
 import type * as Runtime from '../../../../runtime/index.js'
+import type { Language } from '@inlang/core/ast'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -28,17 +29,17 @@ export type RuntimeContext<
 export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.getLanguage() as string)
-	const _i = writable(runtime.getInlangFunction())
+	const _language = writable(runtime.language as Language)
+	const _i = writable(runtime.i)
 
-	const switchLanguage = async (language: string) => {
-		if (runtime.getLanguage() === language) return
+	const switchLanguage = async (language: Language) => {
+		if (runtime.language === language) return
 
 		// TODO: load Resource if not present
 
 		runtime.switchLanguage(language)
 
-		_i.set(runtime.getInlangFunction())
+		_i.set(runtime.i)
 		_language.set(language)
 
 		localStorage.setItem(localStorageKey, language)
@@ -46,8 +47,8 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 
 	setContext<RuntimeContext>(inlangSymbol, {
 		language: readonly(_language),
-		referenceLanguage: runtime.getReferenceLanguage(),
-		languages: runtime.getLanguages(),
+		referenceLanguage: runtime.referenceLanguage,
+		languages: runtime.languages,
 		i: readonly(_i),
 		loadResource: runtime.loadResource,
 		switchLanguage,

@@ -23,9 +23,9 @@ export const handle = (async ({ event, resolve }) => {
 
 	addRuntimeToLocals(event.locals, runtime)
 
-	console.info("hooks.server.ts", runtime.getInlangFunction()("welcome"))
+	console.info("hooks.server.ts", runtime.i("welcome"))
 
-	serverFn(runtime.getInlangFunction())
+	serverFn(runtime.i)
 
 	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language) })
 }) satisfies Handle

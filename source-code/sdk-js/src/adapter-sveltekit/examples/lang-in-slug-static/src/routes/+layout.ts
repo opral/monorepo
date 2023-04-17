@@ -11,7 +11,7 @@ export const load = (async ({ data, fetch }) => {
 		languages: data.languages,
 	})
 
-	const i = runtime.getInlangFunction()
+	const i = runtime.i
 	console.info("+layout.ts", i("welcome"))
 
 	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)

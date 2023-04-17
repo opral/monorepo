@@ -1,4 +1,4 @@
-import { initRuntime } from '../../../runtime/index.js'
+import { initRuntime, initRuntimeWithLanguageInformation } from '../../../runtime/index.js'
 import { getResource } from './index.js'
 
 type InitSvelteKitServerRuntimeArgs = {
@@ -7,14 +7,15 @@ type InitSvelteKitServerRuntimeArgs = {
 	language: string
 }
 
-// TODO: check if we need to pass those two args or if we can just import them here
 export const initSvelteKitServerRuntime = ({
 	language,
 	referenceLanguage,
 	languages,
 }: InitSvelteKitServerRuntimeArgs) => {
-	const runtime = initRuntime({
+	const runtime = initRuntimeWithLanguageInformation({
 		readResource: (language: string) => getResource(language),
+		referenceLanguage,
+		languages,
 	})
 
 	if (language) {
@@ -23,12 +24,7 @@ export const initSvelteKitServerRuntime = ({
 		runtime.switchLanguage(language)
 	}
 
-	return {
-		...runtime,
-		// TODO: move this into base runtime
-		getReferenceLanguage: () => referenceLanguage,
-		getLanguages: () => languages,
-	}
+	return runtime
 }
 
 // TODO: server should also expose a `route` function

@@ -4,5 +4,5 @@ import type { PageServerLoad } from "./$types.js"
 export const load = (async ({ locals }) => {
 	const runtime = getRuntimeFromLocals(locals)
 
-	console.info("[lang]/about/+page.server.ts", runtime.getInlangFunction()("welcome"))
+	console.info("[lang]/about/+page.server.ts", runtime.i("welcome"))
 }) satisfies PageServerLoad

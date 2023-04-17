@@ -1,5 +1,5 @@
 import type { LoadEvent } from "@sveltejs/kit"
-import { initRuntime } from '../../../runtime/index.js'
+import { initRuntimeWithLanguageInformation } from '../../../runtime/index.js'
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
@@ -14,11 +14,13 @@ export const initSvelteKitClientRuntime = async ({
 	referenceLanguage,
 	languages,
 }: InitSvelteKitClientRuntimeArgs) => {
-	const runtime = initRuntime({
+	const runtime = initRuntimeWithLanguageInformation({
 		readResource: async (language: string) =>
 			fetch(`/inlang/${language}.json`).then((response) =>
 				response.ok ? response.json() : undefined,
 			),
+		referenceLanguage,
+		languages
 	})
 
 	if (language) {
@@ -26,12 +28,7 @@ export const initSvelteKitClientRuntime = async ({
 		runtime.switchLanguage(language)
 	}
 
-	return {
-		...runtime,
-		// TODO: move this into base runtime
-		getReferenceLanguage: () => referenceLanguage,
-		getLanguages: () => languages,
-	}
+	return runtime
 }
 
 export type SvelteKitClientRuntime = Awaited<ReturnType<typeof initSvelteKitClientRuntime>>

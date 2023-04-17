@@ -32,7 +32,7 @@ export const load = (async ({ fetch, data }) => {
 	})
 
 	if (browser) {
-		const i = runtime.getInlangFunction()
+		const i = runtime.i
 
 		console.info("+layout.ts", i("welcome"))
 	}

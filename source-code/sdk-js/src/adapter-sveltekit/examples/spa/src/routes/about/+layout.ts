@@ -6,7 +6,7 @@ export const load = (async ({ parent }) => {
 	if (browser) {
 		const data = await parent()
 
-		const i = getRuntimeFromData(data).getInlangFunction()
+		const i = getRuntimeFromData(data).i
 		console.info("about/+layout.ts", i("welcome"))
 	}
 }) satisfies LayoutLoad

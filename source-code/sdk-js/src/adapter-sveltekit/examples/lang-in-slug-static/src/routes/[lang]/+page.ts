@@ -4,6 +4,6 @@ import type { PageLoad } from "./$types.js"
 export const load = (async ({ parent }) => {
 	const data = await parent()
 
-	const i = getRuntimeFromData(data).getInlangFunction()
+	const i = getRuntimeFromData(data).i
 	console.info("[lang]/+page.ts", i("welcome"))
 }) satisfies PageLoad

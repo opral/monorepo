@@ -4,5 +4,5 @@ import type { LayoutServerLoad } from "./$types.js"
 export const load = (async ({ locals }) => {
 	const runtime = getRuntimeFromLocals(locals)
 
-	console.info("[lang]/about/+layout.server.ts", runtime.getInlangFunction()("welcome"))
+	console.info("[lang]/about/+layout.server.ts", runtime.i("welcome"))
 }) satisfies LayoutServerLoad

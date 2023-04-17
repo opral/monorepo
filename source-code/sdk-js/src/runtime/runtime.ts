@@ -58,7 +58,44 @@ export const initBaseRuntime = <
 	return {
 		loadResource,
 		switchLanguage,
-		getLanguage,
-		getInlangFunction,
+		get language() {
+			return getLanguage()
+		},
+		get i() {
+			return getInlangFunction()
+		}
+	}
+}
+
+// TODO: test this
+export const initRuntimeWithLanguageInformation = <
+	Language extends Ast.Language,
+	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
+>(
+	context: RuntimeContext<Language> & {
+		referenceLanguage: Language
+		languages: Language[]
+	},
+	state: RuntimeState<Language> = {
+		resources: new Map(),
+		language: undefined,
+	},
+) => {
+	const runtime = initBaseRuntime<Language, InlangFunctionArgs>(context, state)
+
+	return {
+		...runtime,
+		get language() {
+			return runtime.language
+		},
+		get i() {
+			return runtime.i
+		},
+		get referenceLanguage() {
+			return context.referenceLanguage
+		},
+		get languages() {
+			return context.languages
+		},
 	}
 }

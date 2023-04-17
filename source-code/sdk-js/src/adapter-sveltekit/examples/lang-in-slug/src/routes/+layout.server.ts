@@ -4,12 +4,12 @@ import type { LayoutServerLoad } from "./$types.js"
 export const load = (async ({ locals }) => {
 	const runtime = getRuntimeFromLocals(locals)
 
-	console.info("+layout.server.ts", runtime.getInlangFunction()("welcome"))
+	console.info("+layout.server.ts", runtime.i("welcome"))
 
 	return {
 		"+layout.server.ts": Math.random(),
-		referenceLanguage: runtime.getReferenceLanguage(), // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-		languages: runtime.getLanguages(), // TODO: only pass this if `languages` get used somewhere
-		language: runtime.getLanguage(), // TODO: only pass this if `language` gets detected on server
+		referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
+		languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
+		language: runtime.language, // TODO: only pass this if `language` gets detected on server
 	}
 }) satisfies LayoutServerLoad
