@@ -3,5 +3,5 @@ import { defineConfig, type PluginOption } from "vite"
 import { rollupPlugin } from "@inlang/sdk-js/adapter-sveltekit"
 
 export default defineConfig({
-	plugins: [sveltekit(), rollupPlugin() as PluginOption],
+	plugins: [sveltekit() as PluginOption, rollupPlugin() as PluginOption],
 })

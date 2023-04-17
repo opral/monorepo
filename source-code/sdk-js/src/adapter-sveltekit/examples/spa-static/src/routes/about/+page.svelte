@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getI18nContext } from "../../inlang.js"
+	import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 
-	const { i, language } = getI18nContext()
+	const { i, language } = getRuntimeFromContext()
 
 	console.info("about/+page.svelte", $i("welcome"))
 </script>

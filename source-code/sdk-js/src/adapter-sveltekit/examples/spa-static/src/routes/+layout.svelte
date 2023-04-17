@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { browser } from "$app/environment"
-	import { getI18nContext, inlangSymbol, setI18nContext } from "../inlang.js"
+	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 
 	export let data: LayoutData
 
-	setI18nContext(data[inlangSymbol])
+	addRuntimeToContext(getRuntimeFromData(data))
 
-	let { i, language, languages, loadResource, switchLanguage } = getI18nContext()
+	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
 	if (browser) {
 		console.info("+layout.svelte", $i("welcome"))

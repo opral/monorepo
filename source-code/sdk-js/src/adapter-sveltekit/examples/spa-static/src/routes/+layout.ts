@@ -1,5 +1,7 @@
 import { browser } from "$app/environment"
-import { initI18nRuntime, inlangSymbol, localStorageKey } from "../inlang.js"
+import { addRuntimeToData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { initSvelteKitClientRuntime } from "@inlang/sdk-js/adapter-sveltekit/client"
+import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 import type { LayoutLoad } from "./$types.js"
 import {
 	detectLanguage,
@@ -22,7 +24,7 @@ export const load = (async ({ fetch, data }) => {
 
 	browser && localStorage.setItem(localStorageKey, language as string)
 
-	const runtime = await initI18nRuntime({
+	const runtime = await initSvelteKitClientRuntime({
 		fetch,
 		language: language as string,
 		referenceLanguage: data.referenceLanguage,
@@ -30,10 +32,8 @@ export const load = (async ({ fetch, data }) => {
 	})
 
 	if (browser) {
-		const i = runtime.getInlangFunction()
-
-		console.info("+layout.ts", i("welcome"))
+		console.info("+layout.ts", runtime.i("welcome"))
 	}
 
-	return { ...(data || {}), "+layout.ts": Math.random(), [inlangSymbol]: runtime }
+	return addRuntimeToData({ ...data, "+layout.ts": Math.random() }, runtime)
 }) satisfies LayoutLoad

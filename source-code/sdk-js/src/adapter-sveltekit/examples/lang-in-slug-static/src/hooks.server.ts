@@ -1,11 +1,10 @@
 import type { Handle } from "@sveltejs/kit"
-import { initRuntime } from "@inlang/sdk-js/runtime"
 import {
-	getResource,
+	initSvelteKitServerRuntime,
 	languages,
 	referenceLanguage,
-	setInlangInformationToLocals,
-} from "./inlang.server.js"
+	addRuntimeToLocals,
+} from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
 
 export const handle = (async ({ event, resolve }) => {
@@ -16,24 +15,17 @@ export const handle = (async ({ event, resolve }) => {
 
 	const language = pathname.split("/")[1]
 
-	const runtime = initRuntime({
-		readResource: (language: string) => getResource(language),
-	})
-
-	await runtime.loadResource(language)
-	runtime.switchLanguage(language)
-	const i = runtime.getInlangFunction()
-
-	setInlangInformationToLocals(event.locals, {
+	const runtime = initSvelteKitServerRuntime({
 		referenceLanguage,
 		languages,
 		language,
-		i,
 	})
 
-	console.info("hooks.server.ts", i("welcome"))
+	addRuntimeToLocals(event.locals, runtime)
 
-	serverFn(i)
+	console.info("hooks.server.ts", runtime.i("welcome"))
+
+	serverFn(runtime.i)
 
 	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language) })
 }) satisfies Handle

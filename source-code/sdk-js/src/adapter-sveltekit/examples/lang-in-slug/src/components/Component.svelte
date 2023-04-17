@@ -1,9 +1,9 @@
 
 <script lang="ts">
-	import { getI18nContext } from '../inlang.js'
+	import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive'
 	import { clientFn } from '../utils/client.js'
 
-	const { i } = getI18nContext()
+	const { i } = getRuntimeFromContext()
 
 	console.info('Component.svelte', i('welcome'))
 
