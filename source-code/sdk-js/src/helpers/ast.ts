@@ -39,6 +39,7 @@ const wrapWithCallExpression = (node: Node, identifier: string) => {
 export const wrapVariableDeclaration = ((sourceAst, searchIdentifier, identifier) => {
 	const sourceAstClone = structuredClone(sourceAst)
 	let found = false
+
 	walk(sourceAstClone, {
 		enter(node) {
 			if (
@@ -55,10 +56,14 @@ export const wrapVariableDeclaration = ((sourceAst, searchIdentifier, identifier
 			}
 		},
 	})
+
 	if (!found)
-		return [undefined, new WrapWithCallExpressionError("Couldn't find variable declarator.")]
+		return [undefined, new WrapWithCallExpressionError(`Couldn't find variable declarator '${identifier}'.`)]
+
 	return [sourceAstClone, undefined]
 }) satisfies WrapVariableDeclaration
+
+// ------------------------------------------------------------------------------------------------
 
 export class InsertAstError extends Error {
 	readonly #id = "InsertAstException"
@@ -90,15 +95,17 @@ type InsertAst = (
  */
 export const insertAst = ((sourceAst, ast, { before, after }) => {
 	try {
-		const sourceAstClone = structuredClone(sourceAst)
 		const position = before || after
 		if (position.length % 3 !== 2) {
-			throw new InsertAstError("The length of 'before' or 'after' has to be a multiple of two.")
+			throw new InsertAstError(`The length of '${before ? 'before' : 'after'}' has to be a multiple of two.`)
 		}
+
+		const sourceAstClone = structuredClone(sourceAst)
 		const targetParent = get(sourceAstClone, position.slice(0, -2), sourceAstClone)
 		const targetArrayKey = position.at(-2)
 		const targetArrayIndex = Number(position.at(-1))
-		let newAst
+		let newAst: Program | undefined
+
 		walk(sourceAstClone, {
 			enter(node) {
 				const newNode = structuredClone(node)
@@ -117,6 +124,7 @@ export const insertAst = ((sourceAst, ast, { before, after }) => {
 				}
 			},
 		})
+
 		return [newAst || sourceAstClone, undefined]
 	} catch (error) {
 		return [undefined, error as InsertAstError]

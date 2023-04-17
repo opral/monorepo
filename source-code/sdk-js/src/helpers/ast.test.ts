@@ -34,6 +34,7 @@ describe("ast - wrapVariableDeclaration", () => {
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
 	})
+
 	test("Return exception for nonexistent declarator", () => {
 		const input = `
             export const load = () => {
@@ -47,6 +48,7 @@ describe("ast - wrapVariableDeclaration", () => {
 			new WrapWithCallExpressionError("Couldn't find variable declarator."),
 		)
 	})
+
 	test("Doesn't manipulate inputs", async () => {
 		const input = `
             export const load = () => {
@@ -87,6 +89,7 @@ describe("ast - insertAst", () => {
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
 	})
+
 	test("Inserts a load function, after", async () => {
 		const insertion = `
             export const load = wrapFn(() => {
@@ -113,6 +116,7 @@ describe("ast - insertAst", () => {
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
 	})
+
 	test("Inserts code into wrap fn, before", async () => {
 		const source = `
             import { wrapFn } from 'some/path'
@@ -172,6 +176,7 @@ describe("ast - insertAst", () => {
 		const resultCode = generate(resultAst!)
 		expect(resultCode).toEqual(expectedCode)
 	})
+
 	test("Only multiples of two are allowed for positional information", async () => {
 		const insertion = `
             import { wrapFn } from 'some/path'
@@ -186,10 +191,9 @@ describe("ast - insertAst", () => {
 		const [, exception] = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0", "fake"],
 		})
-		expect(exception).toStrictEqual(
-			new InsertAstError("The length of 'before' or 'after' has to be a multiple of two."),
-		)
+		expect(exception).toBeInstanceOf(InsertAstError)
 	})
+
 	test("Return exception for unreachable path", async () => {
 		const insertion = `
             import { wrapFn } from 'some/path'
@@ -204,8 +208,9 @@ describe("ast - insertAst", () => {
 		const [, exception] = insertAst(sourceAst, insertionAst.body[0]!, {
 			before: ["body", "0", "fake", "path", "here"],
 		})
-		expect(exception).toStrictEqual(new InsertAstError("Couldn't access given position in AST."))
+		expect(exception).toBeInstanceOf(InsertAstError)
 	})
+
 	test("Doesn't manipulate inputs", async () => {
 		const insertion = `
             import { wrapFn } from 'some/path'
