@@ -1,4 +1,4 @@
-import type { fs as memfs } from "memfs"
+export type { Filesystem as $fs } from "@inlang-git/fs"
 
 /**
  * ! IF YOU DO CHANGES TO THIS FILE,
@@ -11,7 +11,7 @@ import type { fs as memfs } from "memfs"
  * Uses memfs under the hood for now. To avoid
  * type issues, use memfs or node:fs/promises
  * with @ts-ignore.
- */
+
 export type $fs = {
 	readFile: (
 		...args: Parameters<typeof memfs.promises.readFile>
@@ -26,3 +26,4 @@ export type $fs = {
 		...args: Parameters<typeof memfs.promises.mkdir>
 	) => ReturnType<typeof memfs.promises.mkdir>
 }
+*/
