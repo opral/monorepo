@@ -34,7 +34,8 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(event: Event
 
 export const replaceLanguageInUrl = (url: URL, language: Language) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${url.hash
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
+			url.hash
 		}`,
 	)
 

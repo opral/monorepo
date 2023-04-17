@@ -6,9 +6,9 @@ import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { getContext, setContext } from "svelte"
-import type * as Runtime from '../../../../runtime/index.js'
-import type { RelativeUrl } from '../../../../core/index.js'
-import type { Language } from '@inlang/core/ast'
+import type * as Runtime from "../../../../runtime/index.js"
+import type { RelativeUrl } from "../../../../core/index.js"
+import type { Language } from "@inlang/core/ast"
 
 type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
@@ -18,8 +18,8 @@ type RuntimeContext<
 	languages: Language[]
 	language: Language
 	i: InlangFunction
-		switchLanguage: (language: Language) => Promise<void>
-		loadResource: SvelteKitClientRuntime["loadResource"]
+	switchLanguage: (language: Language) => Promise<void>
+	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
