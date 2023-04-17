@@ -7,8 +7,8 @@ import {
 } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
 import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import type { RelativeUrl } from '@inlang/sdk-js'
-import { initSvelteKitServerRuntime } from '@inlang/sdk-js/adapter-sveltekit/server'
+import type { RelativeUrl } from "@inlang/sdk-js"
+import { initSvelteKitServerRuntime } from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const handle = (async ({ event, resolve }) => {
 	console.info("--- new request", event.url.toString())

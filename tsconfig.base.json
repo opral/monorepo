@@ -42,6 +42,6 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
-		"allowUnreachableCode": false,
+		"allowUnreachableCode": false
 	}
 }

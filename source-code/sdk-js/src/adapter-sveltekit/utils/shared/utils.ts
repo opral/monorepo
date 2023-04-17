@@ -1,18 +1,25 @@
-import type { RelativeUrl } from '../../../core/index.js'
-import type { SvelteKitClientRuntime } from '../client/runtime.js'
+import type { RelativeUrl } from "../../../core/index.js"
+import type { SvelteKitClientRuntime } from "../client/runtime.js"
 
 export const inlangSymbol = Symbol.for("inlang")
 
-export const addRuntimeToData = <Data extends Record<string, unknown> | null>(data: Data, runtime: SvelteKitClientRuntime): Data & { [inlangSymbol]: SvelteKitClientRuntime } =>
-	({ ...(data || {} as Data), [inlangSymbol]: runtime })
+export const addRuntimeToData = <Data extends Record<string, unknown> | null>(
+	data: Data,
+	runtime: SvelteKitClientRuntime,
+): Data & { [inlangSymbol]: SvelteKitClientRuntime } => ({
+	...(data || ({} as Data)),
+	[inlangSymbol]: runtime,
+})
 
-export const getRuntimeFromData = (data: { [inlangSymbol]: SvelteKitClientRuntime }) => data[inlangSymbol]
+export const getRuntimeFromData = (data: { [inlangSymbol]: SvelteKitClientRuntime }) =>
+	data[inlangSymbol]
 
 // ------------------------------------------------------------------------------------------------
 
 export const replaceLanguageInUrl = (url: URL, language: string) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${url.hash
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
+			url.hash
 		}`,
 	)
 
