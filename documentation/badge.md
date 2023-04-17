@@ -1,12 +1,12 @@
 ---
-title: "Badge API"
+title: "Badges"
 href: /documentation/badge
 description: "API endpoint for generating badges"
 ---
 
 # {% $frontmatter.title %}
 
-This documentation page provides information about the Badge API Endpoint, which allows users to generate badges dynamically.
+This documentation page provides information about the Badge endpoint, which allows users to generate badges dynamically.
 
 The badge generation API endpoint can be used in Github READMEs to display real-time data on your projects.
 
