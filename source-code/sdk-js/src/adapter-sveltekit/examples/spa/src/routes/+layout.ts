@@ -6,8 +6,8 @@ import { localStorageKey } from '@inlang/sdk-js/adapter-sveltekit/client/reactiv
 
 export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	initDetectors: browser ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector] : undefined,
-}).wrap(async ({ data }, runtime) => {
-	console.info("+layout.ts", runtime.i("welcome"))
+}).wrap(async ({ data }, { i }) => {
+	console.info("+layout.ts", i("welcome"))
 
 	return { ...data, "+layout.ts": Math.random() }
 })

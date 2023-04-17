@@ -2,6 +2,6 @@ import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
 import type { LayoutLoad } from "./$types.js"
 
 export const load = initLoadWrapper<LayoutLoad>()
-	.wrap(async (_, runtime) => {
-		console.info("[lang]/about/+layout.ts", runtime.i("welcome"))
+	.wrap(async (_, { i }) => {
+		console.info("[lang]/about/+layout.ts", i("welcome"))
 	})

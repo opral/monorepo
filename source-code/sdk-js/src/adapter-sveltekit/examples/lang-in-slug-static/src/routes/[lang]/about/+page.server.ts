@@ -1,8 +1,7 @@
-import { getRuntimeFromLocals } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { PageServerLoad } from "./$types.js"
 
-export const load = (async ({ locals }) => {
-	const runtime = getRuntimeFromLocals(locals)
-
-	console.info("[lang]/about/+page.server.ts", runtime.i("welcome"))
-}) satisfies PageServerLoad
+export const load = initServerLoadWrapper<PageServerLoad>()
+	.wrap(async (_, { i }) => {
+		console.info("[lang]/about/+page.server.ts", i("welcome"))
+	})

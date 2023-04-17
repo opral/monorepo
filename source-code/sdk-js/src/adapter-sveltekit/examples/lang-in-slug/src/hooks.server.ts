@@ -1,4 +1,4 @@
-import { getRuntimeFromLocals, initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { serverFn } from "./utils/server.js"
 import { initAcceptLanguageHeaderDetector } from '@inlang/sdk-js/detectors/server'
 import { redirect } from '@sveltejs/kit'
@@ -11,15 +11,13 @@ export const handle = initHandleWrapper({
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(url, language)
 	},
-}).wrap(async ({ event, resolve }) => {
+}).wrap(async ({ event, resolve }, { i, language }) => {
 	console.info("--- new request", event.url.toString())
 
-	const runtime = getRuntimeFromLocals(event.locals)
+	console.info("hooks.server.ts", i("welcome"))
 
-	console.info("hooks.server.ts", runtime.i("welcome"))
-
-	serverFn(runtime.i)
+	serverFn(i)
 
 	// TODO: do this in the wrapper function
-	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", runtime.language!) })
+	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language!) })
 })
