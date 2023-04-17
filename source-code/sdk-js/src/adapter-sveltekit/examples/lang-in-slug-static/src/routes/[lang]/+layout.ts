@@ -4,7 +4,7 @@ import type { LayoutLoad } from "./$types.js"
 export const load = (async ({ parent }) => {
 	const data = await parent()
 
-	const i = getRuntimeFromData(data).i
+	const runtime = getRuntimeFromData(data)
 
-	console.info("[lang]/+layout.ts", i("welcome"))
+	console.info("[lang]/+layout.ts", runtime.i("welcome"))
 }) satisfies LayoutLoad

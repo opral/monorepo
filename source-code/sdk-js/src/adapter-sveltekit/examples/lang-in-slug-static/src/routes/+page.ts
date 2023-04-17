@@ -14,6 +14,6 @@ export const load = initRootPageLoadWrapper<PageLoad>({
 	},
 }).wrap(async ({ parent }) => {
 	// const data = await parent()
-	// const i = getRuntimeFromData(data).i
-	// console.info("+page.ts", i("welcome"))
+	// const runtime = getRuntimeFromData(data)
+	// console.info("+page.ts", runtime.i("welcome"))
 })
