@@ -28,6 +28,6 @@ export const initRootLayoutLoadWrapper = <LayoutLoad extends Load<any, any, any,
 				referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
 				languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
 				language: runtime.language, // TODO: only pass this if `language` gets detected on server}
-			} as any, runtime) as any
+			}, runtime)
 		}
 })
