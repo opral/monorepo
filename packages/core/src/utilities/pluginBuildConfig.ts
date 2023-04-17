@@ -72,7 +72,10 @@ export async function pluginBuildConfig(
 	if (ops.plugins === undefined) {
 		ops.plugins = []
 	}
-	ops.plugins.push(NodeModulesPolyfillPlugin())
+	ops.plugins.push(
+		// @ts-expect-error
+		NodeModulesPolyfillPlugin(),
+	)
 
 	return ops
 }
