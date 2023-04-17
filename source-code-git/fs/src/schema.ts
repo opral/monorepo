@@ -11,7 +11,7 @@ export interface Filesystem {
 	 *   const result = fs.toJson()
 	 *   >> { "file1.txt": "content", "file2.txt": "content" }
 	 */
-	toJson: (args: {
+	toJson: (args?: {
 		/**
 		 * Takes a list of glob patterns to include.
 		 *
