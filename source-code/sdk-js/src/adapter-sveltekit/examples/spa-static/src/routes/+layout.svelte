@@ -10,12 +10,16 @@
 
 	export let data: LayoutData
 
+	// ---- reactivity ----
+
 	addRuntimeToContext(getRuntimeFromData(data))
 
 	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
 	// TODO: only if localStorageDetector
 	$: browser && $language && localStorage.setItem(localStorageKey, $language)
+
+	// ----
 
 	$: console.info("+layout.svelte", $i("welcome"))
 </script>
