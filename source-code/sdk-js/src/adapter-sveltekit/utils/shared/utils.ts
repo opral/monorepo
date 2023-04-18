@@ -22,6 +22,8 @@ export const getRuntimeFromData = <Data extends Record<string, unknown> | void>(
 
 // ------------------------------------------------------------------------------------------------
 
+// ! this is currently the only way to share data between all load functions
+
 export type EventWithRuntimePromise<Event extends LoadEvent> = Event & {
 	params: { [inlangSymbol]: Promise<SvelteKitClientRuntime> }
 }
@@ -30,7 +32,7 @@ export const addRuntimePromiseToEvent = <Event extends LoadEvent>(
 	event: Event,
 	runtimePromise: Promise<SvelteKitClientRuntime>,
 ): EventWithRuntimePromise<Event> => {
-	;(event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
+	; (event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
 
 	return event as EventWithRuntimePromise<Event>
 }
@@ -43,8 +45,7 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(
 
 export const replaceLanguageInUrl = (url: URL, language: Language) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
-			url.hash
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${url.hash
 		}`,
 	)
 
@@ -54,3 +55,7 @@ const replaceLanguageInSlug = (pathname: RelativeUrl, language: Language) => {
 
 	return `/${language}${path.length ? `/${path.join("/")}` : ""}`
 }
+
+// ------------------------------------------------------------------------------------------------
+
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

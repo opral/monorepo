@@ -8,6 +8,7 @@ import {
 	DataWithRuntime,
 	EventWithRuntimePromise,
 	getRuntimePromiseFromEvent,
+	wait,
 } from "../shared/utils.js"
 
 // ------------------------------------------------------------------------------------------------
@@ -19,10 +20,10 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	},
 ): Promise<SvelteKitClientRuntime> => {
 	const existingPromise = getRuntimePromiseFromEvent(event)
-	if (existingPromise) return await existingPromise
+	if (existingPromise) return existingPromise
 
 	if (!options) {
-		await new Promise((resolve) => setTimeout(resolve, 0))
+		await wait(0)
 		return initRuntimeForWrappers(event, options)
 	}
 
