@@ -362,7 +362,7 @@ function LintFilter(props: { clearFunction: any }) {
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
 				<For each={lintRuleIds()}>
-					{(id) => <sl-option prop:value={id}>{id.slice(7)}</sl-option>}
+					{(id) => <sl-option prop:value={id}>{id.replace("standardLintRule.", "")}</sl-option>}
 				</For>
 			</div>
 		</sl-select>
