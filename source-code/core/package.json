@@ -1,38 +1,21 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.5.4",
+	"version": "0.5.5",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		"./ast": {
-			"types": "./dist/ast/index.d.ts",
-			"import": "./dist/ast/index.js"
-		},
-		"./config": {
-			"types": "./dist/config/index.d.ts",
-			"import": "./dist/config/index.js"
-		},
-		"./lint": {
-			"types": "./dist/lint/index.d.ts",
-			"import": "./dist/lint/index.js"
-		},
-		"./query": {
-			"types": "./dist/query/index.d.ts",
-			"import": "./dist/query/index.js"
-		},
-		"./test": {
-			"types": "./dist/test/index.d.ts",
-			"import": "./dist/test/index.js"
-		},
-		"./utilities": {
-			"types": "./dist/utilities/index.d.ts",
-			"import": "./dist/utilities/index.js"
-		}
+		"./ast": "./dist/ast/index.js",
+		"./config": "./dist/config/index.js",
+		"./lint": "./dist/lint/index.js",
+		"./query": "./dist/query/index.js",
+		"./test": "./dist/test/index.js",
+		"./utilities": "./dist/utilities/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./src"
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
@@ -53,14 +36,12 @@
 	},
 	"dependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-		"dedent": "^0.7.0",
+		"ts-dedent": "^2.2.0",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
+		"esbuild": "^0.17.14",
 		"memfs": "^3.4.13",
 		"tsd": "^0.25.0"
-	},
-	"peerDependencies": {
-		"esbuild": "^0.17.14"
 	}
 }

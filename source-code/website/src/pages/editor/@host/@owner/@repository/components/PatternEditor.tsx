@@ -25,12 +25,10 @@ export function PatternEditor(props: {
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
 		useEditorState()
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
@@ -40,14 +38,14 @@ export function PatternEditor(props: {
 	createEffect(() => {
 		if (
 			(props.message && props.message?.pattern.elements.length > 1) ||
-			(props.message && props.message?.pattern.elements[0].type !== "Text")
+			(props.message && props.message?.pattern.elements[0]?.type !== "Text")
 		) {
 			throw Error(
 				"Not implemented. Only messages with one pattern element of type Text are supported for now.",
 			)
 		}
 		// if the message is updated externally, update the text value
-		else if (props.message?.pattern.elements[0].value) {
+		else if (props.message?.pattern.elements[0]?.value) {
 			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
@@ -141,7 +139,7 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0].value as string
+		const text = props.referenceMessage.pattern.elements[0]?.value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -177,7 +175,7 @@ export function PatternEditor(props: {
 			if (lintReports) {
 				lintReports.map((lint) => {
 					notifications.push({
-						notificationTitle: lint.id.split(".")[1],
+						notificationTitle: lint.id.split(".")[1]!,
 						notificationDescription: lint.message,
 						notificationType: lint.level,
 					})
@@ -209,7 +207,12 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
-		if (event.code === "KeyS" && event.metaKey && hasChanges() && userIsCollaborator()) {
+		if (
+			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
+				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
+			hasChanges() &&
+			userIsCollaborator()
+		) {
 			event.preventDefault()
 			handleCommit()
 		}
@@ -252,7 +255,9 @@ export function PatternEditor(props: {
 				prop:size="small"
 				prop:rows={1}
 				prop:placeholder="Enter translation ..."
-				onFocus={() => setIsFocused(true)}
+				onFocus={() => {
+					setIsFocused(true)
+				}}
 				onFocusOut={(e) => {
 					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
 						setIsFocused(false)
@@ -262,21 +267,11 @@ export function PatternEditor(props: {
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 				onKeyDown={(event) => handleShortcut(event)}
 			/>
-			{/* <div
-					onFocus={() => setIsFocused(true)}
-					onInput={(e) => setTextValue(e.currentTarget.textContent ?? undefined)}
-					contentEditable={true}
-					class="rounded border border-outline focus:outline-none py-2 px-3 focus:border-primary focus:ring focus:ring-primary-container"
-			>
-					<For each={copy()?.pattern.elements}>
-							{(element) => <PatternElement element={element}></PatternElement>}
-					</For>
-			</div> */}
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === ""}>
+						<Show when={textValue() === "" || textValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}

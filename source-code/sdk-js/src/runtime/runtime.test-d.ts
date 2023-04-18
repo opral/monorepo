@@ -1,9 +1,10 @@
+import type { Resource } from "@inlang/core/ast"
 import { expectType } from "tsd"
 import { initRuntime, RuntimeContext } from "./runtime.js"
 
 // ------------------------------------------------------------------------------------------------
 
-const context: RuntimeContext = {
+const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	readResource: () => Promise.resolve(undefined),
 }
 
@@ -18,10 +19,10 @@ const context: RuntimeContext = {
 	runtime.switchLanguage("en")
 	runtime.switchLanguage("test-1234")
 
-	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("")
-	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("test")
+	expectType<(typeof runtime)["language"]>("")
+	expectType<(typeof runtime)["language"]>("test")
 
-	const i = runtime.getInlangFunction()
+	const i = runtime.i
 
 	i("hello")
 	i("welcome")
@@ -33,6 +34,7 @@ const context: RuntimeContext = {
 {
 	const runtime = initRuntime<
 		"de" | "en",
+		Promise<Resource | undefined>,
 		{
 			hello: never
 			welcome: { name: string }
@@ -51,12 +53,12 @@ const context: RuntimeContext = {
 	// @ts-expect-error must be a valid language
 	runtime.switchLanguage("test-1234")
 
-	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("de")
-	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("en")
+	expectType<(typeof runtime)["language"]>("de")
+	expectType<(typeof runtime)["language"]>("en")
 	// @ts-expect-error must be a valid language
-	expectType<ReturnType<(typeof runtime)["getLanguage"]>>("test")
+	expectType<(typeof runtime)["language"]>("test")
 
-	const i = runtime.getInlangFunction()
+	const i = runtime.i
 
 	i("hello")
 	// @ts-expect-error does not accept args

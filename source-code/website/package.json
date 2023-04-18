@@ -28,7 +28,6 @@
 		"@inlang/env-variables": "*",
 		"@inlang/git-sdk": "*",
 		"@inlang/rpc": "*",
-		"@inlang/shared": "*",
 		"@inlang/telemetry": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@markdoc/markdoc": "^0.1.13",
@@ -41,6 +40,7 @@
 		"@zag-js/pressable": "^0.3.1",
 		"@zag-js/solid": "^0.2.1",
 		"cookie-session": "^2.0.0",
+		"clipboard-copy": "^4.0.1",
 		"date-fns": "^2.29.3",
 		"dotenv": "^16.0.3",
 		"jose": "^4.11.1",
@@ -51,7 +51,7 @@
 		"shiki": "^0.11.1",
 		"sirv": "^2.0.2",
 		"solid-js": "^1.6.9",
-		"telefunc": "^0.1.41",
+		"telefunc": "^0.1.52",
 		"yaml": "^2.1.3",
 		"zod": "^3.19.1"
 	},
@@ -74,7 +74,7 @@
 		"vite": "^3.2.5",
 		"vite-plugin-node-polyfills": "^0.7.0",
 		"vite-plugin-solid": "^2.5.0",
-		"vite-plugin-ssr": "0.4.70"
+		"vite-plugin-ssr": "0.4.113"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"

@@ -2,7 +2,9 @@
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.codeActionsOnSave": {
-		"source.fixAll": true
+		// only fix eslint issues on save (no typescript issues)
+		// see https://github.com/microsoft/vscode/issues/109530
+		"source.fixAll.eslint": true
 	},
 	"gitlens.showWelcomeOnInstall": false,
 	"gitlens.showWhatsNewAfterUpgrades": false,
@@ -13,7 +15,10 @@
 		"tsconfig*.json": "jsonc"
 	},
 	"search.exclude": {
-		"**/dist": true
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/.svelte-kit": true,
+		"**/build": true
 	},
 	"files.watcherExclude": {
 		"**/dist": true
