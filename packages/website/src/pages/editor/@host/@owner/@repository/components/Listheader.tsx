@@ -103,7 +103,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 					{(rule) => (
 						<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
 							<div class="flex gap-2 items-center h-7">
-								<div class="-ml-[4px] h-5 px-2 rounded bg-danger/10 flex items-center justify-center text-danger">
+								<div
+									class={
+										rule.rule.level === "warn"
+											? "text-warning bg-warning/10 -ml-[4px] h-5 px-2 rounded flex items-center justify-center"
+											: "text-danger bg-danger/10 -ml-[4px] h-5 px-2 rounded flex items-center justify-center"
+									}
+								>
 									{rule.amount}
 								</div>
 								<div class="text-xs text-on-surface-variant font-medium">
