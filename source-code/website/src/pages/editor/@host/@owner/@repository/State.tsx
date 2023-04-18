@@ -244,8 +244,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						a === config.referenceLanguage
 							? -1
 							: b === config.referenceLanguage
-							? 1
-							: a.localeCompare(b),
+								? 1
+								: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
@@ -693,6 +693,7 @@ async function writeResources(args: {
 		dir: "/",
 		author: {
 			name: args.user.username,
+			email: args.user.email,
 		},
 		message: "inlang: update translations",
 	})
