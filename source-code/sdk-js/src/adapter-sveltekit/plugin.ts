@@ -1,4 +1,8 @@
-import { createUnplugin } from "unplugin"
+import { writeFile, stat, mkdir } from "node:fs/promises"
+import { dirname } from "node:path"
+import { createUnplugin, UnpluginBuildContext } from "unplugin"
+
+import * as svelte from 'svelte/compiler';
 
 const srcFolder = process.cwd() + '/src'
 
@@ -6,6 +10,7 @@ const srcFolder = process.cwd() + '/src'
 
 type FileType =
 	| 'hooks.server.js'
+	| '[language].json'
 	| '+layout.server.js'
 	| '+layout.js'
 	| '+layout.svelte'
@@ -24,9 +29,16 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 
 	const path = id.replace(srcFolder, '')
 
-	if (path === '/server.hooks.js' || path === '/+server.hooks.ts') {
+	if (path === '/hooks.server.js' || path === '/hooks.server.ts') {
 		return {
 			type: 'hooks.server.js',
+			root: true,
+		}
+	}
+
+	if (path === '/routes/inlang/[language].json/+server.js' || path === '/routes/inlang/[language].json/+server.ts') {
+		return {
+			type: '[language].json',
 			root: true,
 		}
 	}
@@ -83,7 +95,8 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 
 const transformCode = (code: string, { type, root }: FileInformation) => {
 	switch (type) {
-		case 'hooks.server.js': return transformHooksServerJs(code, root)
+		case 'hooks.server.js': return transformHooksServerJs(code)
+		case '[language].json': return transformLanguageJson(code)
 		case '+layout.server.js': return transformLayoutServerJs(code, root)
 		case '+layout.js': return transformLayoutJs(code, root)
 		case '+layout.svelte': return transformLayoutSvelte(code, root)
@@ -94,22 +107,89 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 	}
 }
 
-const transformHooksServerJs = (code: string, root: boolean) => {
+const transformHooksServerJs = (code: string) => {
+	if (!code) return `
+import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+
+export const handle = initHandleWrapper({
+	getLanguage: () => undefined,
+}).wrap(async ({ event, resolve }) => resolve(event))
+`
+
+	return code
+}
+
+const transformLanguageJson = (code: string) => {
+	if (!code) return `
+import { json } from "@sveltejs/kit"
+import { getResource } from "@inlang/sdk-js/adapter-sveltekit/server"
+
+export const GET = (({ params: { language } }) =>
+	json(getResource(language) || null))
+`
+
 	return code
 }
 
 const transformLayoutServerJs = (code: string, root: boolean) => {
+	if (root && !code) return `
+import { initRootServerLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+
+export const load = initRootServerLayoutLoadWrapper().wrap(() => { })
+`
+
 	return code
 }
 
 const transformLayoutJs = (code: string, root: boolean) => {
+	if (root && !code) return `
+import { browser } from "$app/environment"
+import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client"
+import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+
+export const load = initRootLayoutLoadWrapper({
+	initDetectors: browser
+		? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
+		: undefined,
+}).wrap(async () => { })
+`
+
 	return code
 }
 
 const transformLayoutSvelte = (code: string, root: boolean) => {
-	if (!root) return transformSvelte(code, root)
+	const isServerCode = code.includes('create_ssr_component')
 
-	return code
+	if (root) return svelte.compile(`
+<script lang="ts">
+	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import {	getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import { browser } from "$app/environment"
+
+	export let data
+
+	addRuntimeToContext(getRuntimeFromData(data))
+
+	let { i, language } = getRuntimeFromContext()
+
+	$: if (browser && $language) {
+		document.body.parentElement?.setAttribute("lang", $language)
+
+		localStorage.setItem(localStorageKey, $language)
+	}
+</script>
+
+{#if $language}
+	<slot />
+{/if}
+`, {
+		generate: isServerCode ? 'ssr' : 'dom',
+		hydratable: true,
+	}).js.code
+
+	if (!root) return transformSvelte(code, root)
 }
 
 const transformPageServerJs = (code: string, root: boolean) => {
@@ -125,23 +205,44 @@ const transformPageSvelte = (code: string, root: boolean) => {
 }
 
 const transformSvelte = (code: string, root: boolean) => {
+	// this get's done by the sveltekit preprocessor
 
-	if (code.includes('create_ssr_component')) {
-		console.log(1111111, code);
-
-	}
-
-	return code.replace('import { i } from "@inlang/sdk-js";', 'const i = (key) => key;')
+	return code
 }
 
 // ------------------------------------------------------------------------------------------------
 
+const createFilesIfNotPresent = async (that: UnpluginBuildContext, ...files: string[]) => {
+	// eslint-disable-next-line no-async-promise-executor
+	return Promise.all(files.map(file => new Promise<void>((async (resolve) => {
+
+		const path = srcFolder + file
+		const doesFileExist = await stat(path).catch(() => undefined)
+
+		await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
+
+		if (!doesFileExist) {
+			await writeFile(path, '')
+		}
+
+		// TODO: check why this does not work
+		that.addWatchFile(path)
+
+		resolve()
+	}))))
+}
+
 const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sveltekit-adapter",
-		buildStart() {
-			// TODO: create files that need to be created
-			// this.emitFile ???
+		async buildStart() {
+			await createFilesIfNotPresent(this,
+				'/hooks.server.js',
+				'/routes/inlang/[language].json/+server.js',
+				'/routes/+layout.server.js',
+				'/routes/+layout.js',
+				'/routes/+layout.svelte',
+			)
 		},
 		transform(code, id) {
 			const fileInformation = getFileInformation(id)
