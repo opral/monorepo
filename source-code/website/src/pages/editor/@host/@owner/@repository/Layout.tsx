@@ -111,7 +111,9 @@ export function Layout(props: { children: JSXElement }) {
 															onClick={() => addFilter(filter.name)}
 															class="flex gap-2 items-center"
 														>
-															<div slot="prefix">{filter.icon}</div>
+															<div slot="prefix" class="-ml-2 mr-2">
+																{filter.icon}
+															</div>
 															{filter.name}
 														</button>
 													</sl-menu-item>
@@ -283,7 +285,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 						<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
 							Language
 						</p>
-						<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
+						<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 							is
 						</p>
 					</div>
@@ -364,7 +366,7 @@ function LintFilter(props: { clearFunction: any }) {
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
 					Linting
 				</p>
-				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
+				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
 				</p>
 				<Show when={filteredLintRules().length <= 0} fallback={<div />}>
