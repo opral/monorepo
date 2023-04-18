@@ -153,12 +153,23 @@ sl-tag {
 	--sl-input-height-small: 26px;
 }
 
+sl-button::part(base) {
+	border-color: theme(colors.surface-4);
+}
+
+sl-button::part(base):hover {
+	border-color: theme(colors.surface-5);
+	background-color: theme(colors.surface-1);
+	color: theme(colors.on-background);
+}
+
 sl-button.on-inverted::part(base) {
 	background-color: theme(colors.on-inverted-surface);
 	color: theme(colors.inverted-surface);
 }
 
 sl-button.on-inverted::part(base):hover {
+	background-color: theme(colors.on-primary) !important;
 	color: theme(colors.primary);
 	border-color: var(--sl-color-neutral-300);
 }
