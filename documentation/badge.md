@@ -10,7 +10,7 @@ This documentation page provides information about the Badge endpoint, which all
 
 This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
 
-Furthermore, you get the numbers of errors and warnings to keep track of your project's quality and engage contributors to fix them right from the [inlang editor](/editor).
+Furthermore, you get the numbers of errors and warnings to keep track of your project's quality and engage contributors to fix them right from the inlang [editor](/editor).
 
 ### Snippet
 
@@ -26,7 +26,7 @@ Please note to replace `username/repo` with your username or organization name a
 
 This example shows how the badge looks like in a GitHub README based on the example project:
 
-![badge](https://inlang.com/badge?url=github.com/inlang/example)
+[![Translation badge](https://inlang.com/badge?url=github.com/username/repo)](https://inlang.com/editor/github.com/username/repo?ref=badge)
 
 ## API Endpoint
 
