@@ -74,7 +74,7 @@
 		"vite": "^3.2.5",
 		"vite-plugin-node-polyfills": "^0.7.0",
 		"vite-plugin-solid": "^2.5.0",
-		"vite-plugin-ssr": "0.4.113"
+		"vite-plugin-ssr": "0.4.114"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"
