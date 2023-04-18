@@ -1,7 +1,6 @@
 import type * as ast from "@inlang/core/ast"
-import type { Percentage } from "../types.js"
 import type { fs as memfs } from "memfs"
-import type { VNode } from "./markup.js"
+import type { Percentage, VNode } from "./markup.js"
 
 /**
  * Get the percentage of translated messages.
