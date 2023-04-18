@@ -5,13 +5,51 @@ import { SearchInput } from "./components/SearchInput.jsx"
 import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
+import type { Language } from "@inlang/core/ast"
+import { showToast } from "@src/components/Toast.jsx"
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig } = useEditorState()
+	const {
+		inlangConfig,
+		userIsCollaborator,
+		languages,
+		setLanguages,
+		setFilteredLanguages,
+		filteredLanguages,
+		setResources,
+		resources,
+	} = useEditorState()
 	const { setTextSearch } = useEditorState()
+	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
+	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const handleSearchText = (text: string) => {
 		setTextSearch(text)
+	}
+
+	const addLanguage = (language: Language) => {
+		if (languages().includes(language)) {
+			showToast({
+				variant: "warning",
+				title: "Language already exists",
+				message: "This language is already present in this project. Please choose another name.",
+			})
+			return
+		}
+		setLanguages([...languages(), language])
+		setFilteredLanguages([...filteredLanguages(), language])
+
+		setResources([
+			...resources,
+			{
+				type: "Resource",
+				languageTag: {
+					type: "LanguageTag",
+					name: language,
+				},
+				body: [],
+			},
+		])
 	}
 
 	return (
@@ -36,11 +74,48 @@ export function Layout(props: { children: JSXElement }) {
 					</div>
 					<div class="flex gap-2">
 						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<sl-button
+							prop:size={"small"}
+							onClick={() => setAddLanguageModalOpen(true)}
+							prop:disabled={!userIsCollaborator()}
+						>
+							Add language
+						</sl-button>
 					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
 				{props.children}
 			</div>
+			<sl-dialog
+				prop:label="Add language"
+				prop:open={addLanguageModalOpen()}
+				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
+			>
+				<p class="text-xs pb-4 -mt-4 pr-8">
+					You can add a language to the ressource, by providing a unique tag. By doing that inlang
+					is creating a new language file and commits it to the local repository instance.
+				</p>
+				<sl-input
+					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0 pb-6"
+					prop:size="small"
+					prop:label="Tag"
+					prop:placeholder={"Add a language tag"}
+					prop:helpText={"Unique tags for languages (e.g. -> en, de, fr)"}
+					prop:value={addLanguageText()}
+					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
+				/>
+				<sl-button
+					class="w-full"
+					prop:size={"small"}
+					prop:variant={"primary"}
+					onClick={() => {
+						addLanguage(addLanguageText())
+						setAddLanguageModalOpen(false)
+					}}
+				>
+					Add language
+				</sl-button>
+			</sl-dialog>
 			<Gitfloat />
 		</RootLayout>
 	)

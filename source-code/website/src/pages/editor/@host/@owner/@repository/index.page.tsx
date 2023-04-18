@@ -27,7 +27,8 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { resources, routeParams, repositoryIsCloned, inlangConfig } = useEditorState()
+	const { inlangConfig, resources, routeParams, repositoryIsCloned, doesInlangConfigExist } =
+		useEditorState()
 	/**
 	 * Messages for a particular message id in all languages
 	 *
@@ -121,10 +122,10 @@ function TheActualPage() {
 						</p>
 					</div>
 				</Match>
-				<Match when={inlangConfig() === undefined}>
+				<Match when={!doesInlangConfigExist()}>
 					<NoInlangConfigFoundCard />
 				</Match>
-				<Match when={inlangConfig()}>
+				<Match when={doesInlangConfigExist()}>
 					<div class="mb-16 empty-parent">
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}
