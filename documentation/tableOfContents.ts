@@ -15,6 +15,7 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./why-inlang.md?raw")).default,
 	],
 	Guide: [
+		(await import("./badge.md?raw")).default,
 		(await import("./plugins.md?raw")).default,
 		(await import("./ci-cd.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,

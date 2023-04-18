@@ -5,6 +5,8 @@
 
 	export let data: LayoutData
 
+	// ---- no reactivity ----
+
 	addRuntimeToContext(getRuntimeFromData(data))
 	let { i, language } = getRuntimeFromContext()
 
@@ -12,6 +14,8 @@
 		addRuntimeToContext(getRuntimeFromData(data))
 		;({ i, language } = getRuntimeFromContext())
 	}
+
+	// ----
 
 	$: console.info("+layout.svelte", i("welcome"))
 </script>

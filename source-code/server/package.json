@@ -17,6 +17,7 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/badge": "*",
 		"@inlang/env-variables": "*",
 		"@inlang/rpc": "*",
 		"@inlang/telemetry": "*",
