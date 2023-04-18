@@ -18,8 +18,14 @@ type RuleSummaryItem = {
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
-	const { resources, inlangConfig, setFilteredLintRules, filteredLintRules, filteredLanguages } =
-		useEditorState()
+	const {
+		resources,
+		inlangConfig,
+		setFilteredLintRules,
+		filteredLintRules,
+		filteredLanguages,
+		textSearch,
+	} = useEditorState()
 	const [newRuleSummary, setNewRuleSummary] = createSignal<Array<RuleSummaryItem>>([])
 	const [messageCount, setMessageCount] = createSignal<number>(0)
 
@@ -31,9 +37,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 	//get lint summary values
 	createEffect(() => {
 		if (resources) {
-			const filteredResources = resources.filter((resource) =>
-				filteredLanguages().includes(resource.languageTag.name),
-			)
+			const filteredResources = resources
+				.filter((resource) => filteredLanguages().includes(resource.languageTag.name))
+				.filter((resource) =>
+					textSearch() === ""
+						? true
+						: JSON.stringify(resource).toLowerCase().includes(textSearch().toLowerCase()),
+				)
 			const lintReports = getLintReports(filteredResources)
 			const newArr: Array<RuleSummaryItem> = []
 			lintRuleIds().map((id) => {
@@ -55,24 +65,34 @@ export const ListHeader = (props: ListHeaderProps) => {
 
 	//calculate message conter
 	createEffect(() => {
-		if (filteredLintRules().length === 0) {
-			setMessageCount(Object.keys(props.messages()).length)
-		} else {
-			let messageConter = 0
-			Object.values(props.messages()).map((message) => {
+		let messageCounter = 0
+		Object.values(props.messages()).map((message) => {
+			let lintMatch = false
+			if (filteredLintRules().length !== 0) {
 				const messageWithLints = Object.values(message).filter((id) => id?.lint)
-				let lintError = false
 				messageWithLints.map((id) => {
 					if (id?.lint?.some((lint) => filteredLintRules().includes(lint.id))) {
-						lintError = true
+						lintMatch = true
 					}
 				})
-				if (lintError) {
-					messageConter += 1
+			} else {
+				lintMatch = true
+			}
+
+			let searchMatch = false
+			if (textSearch() === "") {
+				searchMatch = true
+			} else {
+				if (JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase())) {
+					searchMatch = true
 				}
-			})
-			setMessageCount(messageConter)
-		}
+			}
+			//console.log(lintMatch + ", " + searchMatch)
+			if (lintMatch && searchMatch) {
+				messageCounter += 1
+			}
+		})
+		setMessageCount(messageCounter)
 	})
 
 	return (
@@ -86,7 +106,9 @@ export const ListHeader = (props: ListHeaderProps) => {
 								<div class="-ml-[4px] h-5 px-2 rounded bg-danger/10 flex items-center justify-center text-danger">
 									{rule.amount}
 								</div>
-								<div class="text-xs text-on-surface-variant font-medium">{rule.id}</div>
+								<div class="text-xs text-on-surface-variant font-medium">
+									{String(rule.id).slice(7)}
+								</div>
 							</div>
 						</sl-button>
 					)}
