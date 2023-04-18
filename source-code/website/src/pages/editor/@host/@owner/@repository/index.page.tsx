@@ -60,10 +60,6 @@ function TheActualPage() {
 		return result
 	})
 
-	createEffect(() => {
-		console.log(Object.keys(messages()).length)
-	})
-
 	return (
 		<>
 			<Title>
