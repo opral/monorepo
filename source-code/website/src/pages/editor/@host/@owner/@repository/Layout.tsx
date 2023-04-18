@@ -17,7 +17,7 @@ interface Filter {
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig, setTextSearch } = useEditorState()
+	const { inlangConfig, setTextSearch, filteredLintRules } = useEditorState()
 	const handleSearchText = (text: string) => {
 		setTextSearch(text)
 	}
@@ -45,6 +45,26 @@ export function Layout(props: { children: JSXElement }) {
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
+
+	//add linting rule to filter
+	createEffect(() => {
+		console.log(selectedFilters())
+		if (
+			filteredLintRules().length !== 0 &&
+			!selectedFilters().some((filter) => filter.name === "Linting")
+		) {
+			addFilter("Linting")
+		}
+	})
+
+	//add initial language filter
+	let hasExecuted = false
+	createEffect(() => {
+		if (!hasExecuted) {
+			addFilter("Language")
+			hasExecuted = true
+		}
+	})
 
 	return (
 		<RootLayout>
