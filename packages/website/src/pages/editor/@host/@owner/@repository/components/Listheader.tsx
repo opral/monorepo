@@ -116,7 +116,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 								</div>
 
 								<div class="text-xs text-on-surface-variant font-medium">
-									{String(rule.id).slice(7)}
+									{String(rule.id).split(".")[1]}
 								</div>
 							</div>
 						</sl-button>

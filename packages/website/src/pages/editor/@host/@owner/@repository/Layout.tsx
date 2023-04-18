@@ -17,8 +17,7 @@ interface Filter {
 
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
-	const { inlangConfig } = useEditorState()
-	const { setTextSearch } = useEditorState()
+	const { inlangConfig, setTextSearch } = useEditorState()
 	const handleSearchText = (text: string) => {
 		setTextSearch(text)
 	}
@@ -46,6 +45,10 @@ export function Layout(props: { children: JSXElement }) {
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
+
+	// createEffect(() => {
+	// 	if ()
+	// })
 
 	return (
 		<RootLayout>
@@ -376,7 +379,7 @@ function LintFilter(props: { clearFunction: any }) {
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 			<div class="max-h-[300px] overflow-y-auto">
 				<For each={lintRuleIds()}>
-					{(id) => <sl-option prop:value={id}>{id.replace("standardLintRule.", "")}</sl-option>}
+					{(id) => <sl-option prop:value={id}>{id.split(".")[1]}</sl-option>}
 				</For>
 			</div>
 		</sl-select>
