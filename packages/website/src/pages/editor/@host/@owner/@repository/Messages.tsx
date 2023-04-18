@@ -8,10 +8,11 @@ import { getLintReports, LintedMessage } from "@inlang/core/lint"
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, filteredLintRules, textSearch } = useEditorState()
-
+	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
+		useEditorState()
+	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
-		return props.messages[inlangConfig()!.referenceLanguage]
+		return props.messages[referenceLanguage()!]
 	}
 
 	/**
