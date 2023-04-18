@@ -1,4 +1,4 @@
-import type { Resource } from '@inlang/core/ast'
+import type { Resource } from "@inlang/core/ast"
 import type * as Ast from "@inlang/core/ast"
 import {
 	InlangFunctionBaseArgs,
@@ -8,7 +8,7 @@ import {
 } from "./inlang-function.js"
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>
-	!!p && typeof p === 'object' && typeof (p as Promise<T>).then === 'function'
+	!!p && typeof p === "object" && typeof (p as Promise<T>).then === "function"
 
 const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 
@@ -16,7 +16,9 @@ type MaybePromise<T> = T | Promise<T>
 
 export type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
-	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>
+	ReadResourcesMaybePromise extends
+		| (Ast.Resource | undefined)
+		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
 	readResource: (language: Language) => ReadResourcesMaybePromise
 }
@@ -55,7 +57,8 @@ export const initBaseRuntime = <
 		if (state.resources.has(language)) return undefined as ReadResourcesMaybePromise
 		if (loadResourcePromise) return loadResourcePromise as ReadResourcesMaybePromise
 
-		const setResource = (resource: Resource | undefined) => resource && state.resources.set(language, resource)
+		const setResource = (resource: Resource | undefined) =>
+			resource && state.resources.set(language, resource)
 
 		const resourceMaybePromise = readResource(language)
 		if (!isAsync(resourceMaybePromise)) {
@@ -88,7 +91,7 @@ export const initBaseRuntime = <
 		const resource = state.resources.get(state.language as Language)
 		if (!resource) return fallbackInlangFunction
 
-		return state.i = createInlangFunction<InlangFunctionArgs>(resource)
+		return (state.i = createInlangFunction<InlangFunctionArgs>(resource))
 	}
 
 	return {
@@ -99,7 +102,7 @@ export const initBaseRuntime = <
 		},
 		get i() {
 			return getInlangFunction()
-		}
+		},
 	}
 }
 
@@ -112,7 +115,7 @@ export const initRuntimeWithLanguageInformation = <
 	context: RuntimeContext<Language, ReadResourcesMaybePromise> & {
 		referenceLanguage: Language
 		languages: Language[]
-	}
+	},
 ) => {
 	const runtime = initBaseRuntime<Language, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
 

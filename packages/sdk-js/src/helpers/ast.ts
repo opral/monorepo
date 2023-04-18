@@ -58,7 +58,10 @@ export const wrapVariableDeclaration = ((sourceAst, searchIdentifier, identifier
 	})
 
 	if (!found)
-		return [undefined, new WrapWithCallExpressionError(`Couldn't find variable declarator '${identifier}'.`)]
+		return [
+			undefined,
+			new WrapWithCallExpressionError(`Couldn't find variable declarator '${identifier}'.`),
+		]
 
 	return [sourceAstClone, undefined]
 }) satisfies WrapVariableDeclaration
@@ -97,7 +100,9 @@ export const insertAst = ((sourceAst, ast, { before, after }) => {
 	try {
 		const position = before || after
 		if (position.length % 3 !== 2) {
-			throw new InsertAstError(`The length of '${before ? 'before' : 'after'}' has to be a multiple of two.`)
+			throw new InsertAstError(
+				`The length of '${before ? "before" : "after"}' has to be a multiple of two.`,
+			)
 		}
 
 		const sourceAstClone = structuredClone(sourceAst)

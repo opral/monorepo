@@ -7,6 +7,7 @@ import { isProduction } from "./utilities.js"
 import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
+import { router as badgeRouter } from "@inlang/badge/router"
 
 // --------------- SETUP -----------------
 
@@ -48,6 +49,8 @@ if (isProduction) {
 app.use(telemetryRouter)
 
 app.use(rpcRouter)
+
+app.use(badgeRouter)
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes
 app.use(websiteRouter)
