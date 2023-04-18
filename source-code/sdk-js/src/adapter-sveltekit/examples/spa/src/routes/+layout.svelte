@@ -1,15 +1,31 @@
 <script lang="ts">
-import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+	import {
+		getRuntimeFromContext,
+		addRuntimeToContext,
+		localStorageKey,
+	} from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
+	import { browser } from "$app/environment"
 
 	export let data: LayoutData
+
+	// ---- reactivity ----
 
 	addRuntimeToContext(getRuntimeFromData(data))
 
 	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
-	console.info("+layout.svelte", $i("welcome"))
+	$: if (browser && $language) {
+		document.body.parentElement?.setAttribute("lang", $language)
+
+		// TODO: only if localStorageDetector
+		localStorage.setItem(localStorageKey, $language)
+	}
+
+	// ----
+
+	$: console.info("+layout.svelte", $i("welcome"))
 </script>
 
 {#if $language}
