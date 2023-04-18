@@ -1,3 +1,3 @@
-Remote Procedure Calls (RPC) that can be used throughout the codebase.
+This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
 
-The function defined in [./src](./src) are run on the server.
+Please visit the docs for further information: [Badges](https://inlang.com/documentation/badge).
