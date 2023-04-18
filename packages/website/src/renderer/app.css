@@ -103,7 +103,7 @@ sl-select::part(combobox) {
 }
 
 sl-select::part(combobox):hover {
-	border-color: theme(colors.on-surface);
+	border-color: theme(colors.outline);
 	background-color: theme(colors.surface-1);
 }
 
@@ -117,11 +117,11 @@ sl-select::part(clear-button):hover {
 	border-radius: 0.125rem;
 }
 
-sl-select::part(tag__base) {
+/* sl-select::part(tag__base) {
 	border: none;
 	color: theme(colors.info);
-	background: rgba(theme(colors.info), 0.2);
-}
+	background-color: #eff0f2;
+} */
 
 sl-select::part(tags) {
 	gap: 4px;
@@ -129,6 +129,13 @@ sl-select::part(tags) {
 	line-height: 140%;
 	font-weight: 500;
 	margin-left: 0;
+}
+
+sl-select::part(tags) {
+	--sl-input-height-small: 26px;
+	--sl-color-neutral-50: theme(colors.surface-2);
+	--sl-color-neutral-200: transparent;
+	--sl-color-neutral-800: theme(colors.info);
 }
 
 sl-select::part(expand-icon) {
@@ -154,6 +161,9 @@ sl-option::part(label) {
 sl-select::part(tag) {
 	--sl-input-height-small: 26px;
 }
+sl-select::part(combobox) sl-tag {
+	--sl-input-height-small: 26px;
+}
 
 sl-tag {
 	--sl-input-height-small: 26px;
@@ -162,7 +172,7 @@ sl-tag {
 sl-tag::part(base) {
 	border: none;
 	color: theme(colors.info);
-	background: rgba(theme(colors.info), 0.2);
+	background-color: theme(colors.surface-2);
 }
 
 sl-button::part(base) {
