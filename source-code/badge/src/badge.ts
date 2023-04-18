@@ -2,15 +2,17 @@
 import satori from "satori"
 import clone from "./repo/clone.js"
 import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/config"
-import { lint } from "@inlang/core/lint"
+import { getLintReports, lint } from "@inlang/core/lint"
 import { Volume } from "memfs"
 import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
+import { query } from "@inlang/core/query"
+import type { Resource } from "@inlang/core/ast"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
-const fontSemiBold = readFileSync(new URL("./assets/static/Inter-SemiBold.ttf", import.meta.url))
+const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
 
 export const badge = async (url: string, preferredLanguage: string | undefined) => {
 	// initialize a new file system on each request to prevent cross request pollution
@@ -45,6 +47,8 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		console.error("lints partially failed", errors)
 	}
 
+	const lints = getLintReports(resourcesWithLints)
+
 	// calculate the percentages
 	const percentages = getRessourcePercentages(resourcesWithLints)
 
@@ -55,7 +59,7 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 
 	// markup the percentages
 	const [host, owner, repository] = [...url.split("/")]
-	const vdom = removeCommas(markup(percentages, preferredLanguage, owner + "/" + repository))
+	const vdom = removeCommas(markup(percentages, preferredLanguage, lints))
 
 	// render the image
 	const image = await satori(
@@ -63,7 +67,7 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		vdom,
 		{
 			width: 340,
-			height: percentages.length * 50 + 300,
+			height: 150,
 			fonts: [
 				{
 					name: "Inter Medium",
@@ -71,9 +75,9 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 					data: fontMedium,
 				},
 				{
-					name: "Inter SemiBold",
-					weight: 600,
-					data: fontSemiBold,
+					name: "Inter Bold",
+					weight: 700,
+					data: fontBold,
 				},
 			],
 		},

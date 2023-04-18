@@ -6,9 +6,11 @@ description: "API endpoint for generating badges"
 
 # {% $frontmatter.title %}
 
-This documentation page provides information about the Badge endpoint, which allows users to generate badges dynamically.
+This documentation page provides information about the Badge endpoint, which allows users to generate badges dynamically. The badge generation API endpoint can be used in Github READMEs and anywhere else on the web to display real-time data on your projects.
 
-The badge generation API endpoint can be used in Github READMEs to display real-time data on your projects.
+This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
+
+Furthermore, you get the numbers of errors and warnings to keep track of your project's quality and engage contributors to fix them right from the [inlang editor](/editor).
 
 ### Snippet
 
@@ -18,7 +20,7 @@ The badge generation API endpoint can be used in Github READMEs to display real-
 [![Translation badge](https://inlang.com/badge?url=github.com/username/repo)](https://inlang.com/editor/github.com/username/repo?ref=badge)
 ```
 
-Please note to add a `ref=badge` query parameter to the link, so we can prevent bad actors from spamming our services.
+Please note to replace `username/repo` with your username or organization name and your repositories name and make sure to add a `ref=badge` query parameter to the link, so we can prevent bad actors from spamming our services.
 
 ### Badge
 
