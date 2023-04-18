@@ -1,5 +1,4 @@
 import * as _plugin from "./_plugin.js"
-// @ts-check
 
 // TODO: check why `dist` is needed
 
@@ -11,7 +10,7 @@ export async function defineConfig(env) {
 	// const plugin = await env.$import(
 	// 	"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
 	// )
-	const plugin = _plugin
+	const plugin = /** @type { any } */(_plugin)
 
 	const pluginConfig = {
 		pathPattern: "./locales/{language}.json",
