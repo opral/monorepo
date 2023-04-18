@@ -1,8 +1,12 @@
 import { html } from "satori-html"
-import type { Percentage } from "../types.js"
 import { getTotalTranslatedPercentage } from "./index.js"
 import type { LintReport } from "@inlang/core/lint"
 
+export interface Percentage {
+	lang: string
+	percentage: number
+	count: { total: number; lint: number }
+}
 export interface VNode {
 	type: string
 	props: {
