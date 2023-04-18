@@ -42,10 +42,6 @@ export function Layout(props: { children: JSXElement }) {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
 
-	createEffect(() => {
-		console.log(selectedFilters())
-	})
-
 	return (
 		<RootLayout>
 			<div class="pt-4 w-full flex flex-col grow">

@@ -1,4 +1,4 @@
-import { getLintReports } from "@inlang/core/lint"
+import { LintRule, getLintReports } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
 import { For, createEffect, createSignal } from "solid-js"
 
@@ -9,11 +9,11 @@ interface ListHeaderProps {
 type RuleSummaryItem = {
 	id: string
 	amount: number
+	rule: LintRule
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
-	const { resources, inlangConfig } = useEditorState()
-	const lintReports = getLintReports(resources)
+	const { resources, inlangConfig, setFilteredLintRules } = useEditorState()
 	const [newRuleSummary, setNewRuleSummary] = createSignal<Array<RuleSummaryItem>>([])
 
 	const lintRuleIds = () =>
@@ -22,12 +22,20 @@ export const ListHeader = (props: ListHeaderProps) => {
 			.map((rule) => rule.id) ?? []
 
 	createEffect(() => {
-		const newArr: Array<RuleSummaryItem> = []
-		lintRuleIds().map((id) => {
-			const filteredReports = lintReports.filter((report) => report.id === id)
-			newArr.push({ id, amount: filteredReports.length })
-		})
-		setNewRuleSummary(newArr)
+		if (resources) {
+			const lintReports = getLintReports(resources)
+			const newArr: Array<RuleSummaryItem> = []
+			lintRuleIds().map((id) => {
+				const filteredReports = lintReports.filter((report) => report.id === id)
+				const lintRule = inlangConfig()
+					?.lint?.rules.flat()
+					.find((rule) => rule.id === id)
+				if (lintRule && filteredReports) {
+					newArr.push({ id, amount: filteredReports.length, rule: lintRule })
+				}
+			})
+			setNewRuleSummary(newArr)
+		}
 	})
 
 	return (
@@ -36,7 +44,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 			<div class="flex gap-2">
 				<For each={newRuleSummary()}>
 					{(rule) => (
-						<sl-button prop:size="small">
+						<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
 							<div class="flex gap-2 items-center h-7">
 								<div class="-ml-[4px] h-5 px-2 rounded bg-danger/10 flex items-center justify-center text-danger">
 									{rule.amount}
