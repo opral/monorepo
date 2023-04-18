@@ -6,9 +6,12 @@ import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.j
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
+import IconTranslate from "~icons/material-symbols/translate"
+import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 
 interface Filter {
 	name: string
+	icon: JSXElement
 	component: JSXElement
 }
 
@@ -22,10 +25,12 @@ export function Layout(props: { children: JSXElement }) {
 	const filters: Filter[] = [
 		{
 			name: "Language",
+			icon: () => <IconTranslate />,
 			component: () => <LanguageFilter clearFunction={removeFilter("Language")} />,
 		},
 		{
 			name: "Linting",
+			icon: () => <WarningIcon />,
 			component: () => <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	]
@@ -70,7 +75,7 @@ export function Layout(props: { children: JSXElement }) {
 									</sl-button>
 								}
 							>
-								<sl-dropdown>
+								<sl-dropdown prop:distance={8}>
 									<sl-button prop:size="small" slot="trigger">
 										<IconAdd slot="prefix" />
 										Filter
@@ -80,7 +85,13 @@ export function Layout(props: { children: JSXElement }) {
 											{(filter) => (
 												<Show when={!selectedFilters().includes(filter)}>
 													<sl-menu-item>
-														<button onClick={() => addFilter(filter.name)}>{filter.name}</button>
+														<button
+															onClick={() => addFilter(filter.name)}
+															class="flex gap-2 items-center"
+														>
+															<div slot="prefix">{filter.icon}</div>
+															{filter.name}
+														</button>
 													</sl-menu-item>
 												</Show>
 											)}
@@ -335,10 +346,13 @@ function LintFilter(props: { clearFunction: any }) {
 					is
 				</p>
 				<Show when={filteredLintRules().length <= 0} fallback={<div />}>
-					<sl-tag prop:size="small" class="font-medium text-sm">
+					<sl-tag prop:size="small" class="font-medium text-sm border-none text-info bg-info/10">
 						everyMessage
 					</sl-tag>
-					<button onClick={() => props.clearFunction()}>
+					<button
+						class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
+						onClick={() => props.clearFunction()}
+					>
 						<IconClose />
 					</button>
 				</Show>
