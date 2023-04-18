@@ -116,7 +116,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 								</div>
 
 								<div class="text-xs text-on-surface-variant font-medium">
-									{String(rule.id).split(".")[1]}
+									{rule.id.includes(".") ? String(rule.id.split(".")[1]!) : String(rule.id)}
 								</div>
 							</div>
 						</sl-button>

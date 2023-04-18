@@ -175,7 +175,7 @@ export function PatternEditor(props: {
 			if (lintReports) {
 				lintReports.map((lint) => {
 					notifications.push({
-						notificationTitle: lint.id.split(".")[1]!,
+						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
 						notificationType: lint.level,
 					})
