@@ -16,8 +16,12 @@
 
 	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
 
-	// TODO: only if localStorageDetector
-	$: browser && $language && localStorage.setItem(localStorageKey, $language)
+	$: if (browser && $language) {
+		document.body.parentElement?.setAttribute("lang", $language)
+
+		// TODO: only if localStorageDetector
+		localStorage.setItem(localStorageKey, $language)
+	}
 
 	// ----
 

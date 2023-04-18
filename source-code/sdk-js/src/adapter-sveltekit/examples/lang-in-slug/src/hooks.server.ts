@@ -11,13 +11,12 @@ export const handle = initHandleWrapper({
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 	},
-}).wrap(async ({ event, resolve }, { i, language }) => {
+}).wrap(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())
 
 	console.info("hooks.server.ts", i("welcome"))
 
 	serverFn(i)
 
-	// TODO: do this in the wrapper function
-	return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", language!) })
+	return resolve(event)
 })
