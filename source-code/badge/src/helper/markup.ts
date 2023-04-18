@@ -26,9 +26,9 @@ export const markup = (
 	lints: LintReport[],
 ): VNode => {
 	// Get language names
-	const languageNames = new Intl.DisplayNames(["en"], {
-		type: "language",
-	})
+	// const languageNames = new Intl.DisplayNames(["en"], {
+	// 	type: "language",
+	// })
 
 	// If preferred language is not set, set it to english
 	if (!preferredLanguage) {

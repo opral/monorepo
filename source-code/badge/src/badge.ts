@@ -8,8 +8,6 @@ import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
-import { query } from "@inlang/core/query"
-import type { Resource } from "@inlang/core/ast"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
