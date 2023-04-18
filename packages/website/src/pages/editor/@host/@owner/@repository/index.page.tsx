@@ -131,7 +131,7 @@ function TheActualPage() {
 				</Match>
 				<Match when={inlangConfig()}>
 					<div class="mb-16 empty-parent">
-						<ListHeader messageNo={Object.keys(messages()).length} />
+						<ListHeader messages={messages} />
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
