@@ -24,47 +24,48 @@ export const initHandleWrapper = (options: {
 				runtime: SvelteKitServerRuntime,
 			) => ReturnType<Kit.Handle>,
 		) =>
-			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
-				const pathname = event.url.pathname as RelativeUrl
-				if (pathname.startsWith("/inlang")) return resolve(event)
+		async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
+			const pathname = event.url.pathname as RelativeUrl
+			if (pathname.startsWith("/inlang")) return resolve(event)
 
-				let language = options.getLanguage(event)
-				if (!language || !languages.includes(language)) {
-					if (options.redirect) {
-						const detectedLanguage = await detectLanguage(
-							{ referenceLanguage, languages },
-							...(options.initDetectors ? options.initDetectors(event) : []),
-						)
+			let language = options.getLanguage(event)
+			if (!language || !languages.includes(language)) {
+				if (options.redirect) {
+					const detectedLanguage = await detectLanguage(
+						{ referenceLanguage, languages },
+						...(options.initDetectors ? options.initDetectors(event) : []),
+					)
 
-						throw options.redirect.throwable(
-							307,
-							options.redirect.getPath(event, detectedLanguage).toString(),
-						)
-					}
-
-					language = undefined
+					throw options.redirect.throwable(
+						307,
+						options.redirect.getPath(event, detectedLanguage).toString(),
+					)
 				}
 
-				const runtime = initSvelteKitServerRuntime({
-					referenceLanguage,
-					languages,
-					language: language!,
-				})
+				language = undefined
+			}
 
-				addRuntimeToLocals(event.locals, runtime)
+			const runtime = initSvelteKitServerRuntime({
+				referenceLanguage,
+				languages,
+				language: language!,
+			})
 
-				const patchedResolve: typeof resolve = language
-					? (event, opts?) => resolve(event, {
-						...opts,
-						transformPageChunk: async (input) => {
-							const html = await opts?.transformPageChunk?.(input) || input.html
-							return html.replace("<html", `<html lang="${language}"`)
-						}
-					})
-					: resolve
+			addRuntimeToLocals(event.locals, runtime)
 
-				return handle({ event, resolve: patchedResolve }, runtime)
-			},
+			const patchedResolve: typeof resolve = language
+				? (event, opts?) =>
+						resolve(event, {
+							...opts,
+							transformPageChunk: async (input) => {
+								const html = (await opts?.transformPageChunk?.(input)) || input.html
+								return html.replace("<html", `<html lang="${language}"`)
+							},
+						})
+				: resolve
+
+			return handle({ event, resolve: patchedResolve }, runtime)
+		},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -79,16 +80,16 @@ export const initRootServerLayoutLoadWrapper = <
 				runtime: SvelteKitServerRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & DataPayload> => {
-				const runtime = getRuntimeFromLocals(event.locals)
+		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & DataPayload> => {
+			const runtime = getRuntimeFromLocals(event.locals)
 
-				return {
-					...(await load(event, runtime)),
-					referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-					languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
-					language: runtime.language, // TODO: only pass this if `language` gets detected on server
-				}
-			},
+			return {
+				...(await load(event, runtime)),
+				referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
+				languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
+				language: runtime.language, // TODO: only pass this if `language` gets detected on server
+			}
+		},
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -101,9 +102,9 @@ export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any
 				runtime: SvelteKitServerRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<ServerLoad>[0]): Promise<Data> => {
-				const runtime = getRuntimeFromLocals(event.locals)
+		async (event: Parameters<ServerLoad>[0]): Promise<Data> => {
+			const runtime = getRuntimeFromLocals(event.locals)
 
-				return load(event, runtime)
-			},
+			return load(event, runtime)
+		},
 })
