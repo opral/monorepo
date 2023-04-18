@@ -349,7 +349,7 @@ function LintFilter(props: { clearFunction: any }) {
 					is
 				</p>
 				<Show when={filteredLintRules().length <= 0} fallback={<div />}>
-					<sl-tag prop:size="small" class="font-medium text-sm border-none text-info bg-info/10">
+					<sl-tag prop:size="small" class="font-medium text-sm">
 						everyMessage
 					</sl-tag>
 					<button

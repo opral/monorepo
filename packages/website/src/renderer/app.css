@@ -117,6 +117,12 @@ sl-select::part(clear-button):hover {
 	border-radius: 0.125rem;
 }
 
+sl-select::part(tag__base) {
+	border: none;
+	color: theme(colors.info);
+	background: rgba(theme(colors.info), 0.2);
+}
+
 sl-select::part(tags) {
 	gap: 4px;
 	font-size: 12px;
@@ -151,6 +157,12 @@ sl-select::part(tag) {
 
 sl-tag {
 	--sl-input-height-small: 26px;
+}
+
+sl-tag::part(base) {
+	border: none;
+	color: theme(colors.info);
+	background: rgba(theme(colors.info), 0.2);
 }
 
 sl-button::part(base) {
