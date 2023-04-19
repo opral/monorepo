@@ -15,6 +15,7 @@ type FileType =
 	| '+layout.js'
 	| '+page.server.js'
 	| '+page.js'
+	| '.js'
 
 type FileInformation = {
 	type: FileType
@@ -66,6 +67,13 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 		}
 	}
 
+	if (path.endsWith('.js') || path.endsWith('.ts')) {
+		return {
+			type: '.js',
+			root: false,
+		}
+	}
+
 	return undefined
 }
 
@@ -82,6 +90,7 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 		case '+layout.js': return transformLayoutJs(code, root)
 		case '+page.server.js': return transformPageServerJs(code, root)
 		case '+page.js': return transformPageJs(code, root)
+		case '.js': return transformJs(code)
 	}
 }
 
@@ -141,6 +150,10 @@ const transformPageServerJs = (code: string, root: boolean) => {
 }
 
 const transformPageJs = (code: string, root: boolean) => {
+	return code
+}
+
+const transformJs = (code: string) => {
 	return code
 }
 
