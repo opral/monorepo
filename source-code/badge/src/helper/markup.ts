@@ -27,22 +27,13 @@ export interface VNode {
 export const markup = (
 	percentages: Percentage[],
 	preferredLanguage: string | undefined,
+	numberOfMissingMessagesInPreferredLanguage: number,
 	lints: LintReport[],
 ): VNode => {
 	// Get language names
-	// const languageNames = new Intl.DisplayNames(["en"], {
-	// 	type: "language",
-	// })
-
-	// If preferred language is not set, set it to english
-	if (!preferredLanguage) {
-		preferredLanguage = "en"
-	}
-
-	// Remove the region from the language
-	if (preferredLanguage?.includes("-")) {
-		preferredLanguage = preferredLanguage.split("-")[0]
-	}
+	const languageNames = new Intl.DisplayNames(["en"], {
+		type: "language",
+	})
 
 	// check if the preferred language is set but there is no corresponsidng object with a lang attribute in percentages for it
 	// this happens when the preferred language is set to a language that is not in the project
@@ -54,6 +45,9 @@ export const markup = (
 		preferredLanguage = "en"
 	} else {
 		// set to first language in percentages
+		if (!percentages[0]) {
+			throw new Error("No language found in project, please add a language.")
+		}
 		preferredLanguage = percentages[0].lang
 	}
 
@@ -74,9 +68,18 @@ export const markup = (
 	return html`<div
 		style="display: flex; padding: 5px 20px; flex-direction: column; position: relative; background-color: white;"
 	>
+		<p style="font-size: 18px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: 0x; color: #000">
+			${
+				numberOfMissingMessagesInPreferredLanguage > 0
+					? `${numberOfMissingMessagesInPreferredLanguage}${" "}${languageNames.of(
+							preferredLanguage,
+					  )} messages missing`
+					: `Translated successfully!`
+			} 
+		</p>
 		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
-				<p style="font-size: 24px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: #62c401">
+				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: #62c401">
 					${Math.round(100 - total)}%
 				</p>
 				<p style="font-size: 14px; font-weight: 700; margin-bottom: 0px;">
@@ -84,7 +87,7 @@ export const markup = (
 				</p>
 			</div>
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
-				<p style="font-size: 24px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
+				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
 					lints.some((lint: LintReport) => lint.level === "error") ? "#c40101" : "#000"
 				}">
 					${lints.filter((lint: LintReport) => lint.level === "error").length}
@@ -94,7 +97,7 @@ export const markup = (
 				</p>
 			</div>
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
-				<p style="font-size: 24px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
+				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: ${
 					lints.some((lint: LintReport) => lint.level === "warn") ? "#ffa500" : "#000"
 				}">
 				${lints.filter((lint: LintReport) => lint.level === "warn").length}
@@ -106,7 +109,7 @@ export const markup = (
 		</div>
 
 			<div
-				style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 15px; width: 100%; text-align: center; background-color: #000; color: white; border-radius: 4px; padding: 4px 8px;"
+				style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 10px; width: 100%; text-align: center; background-color: #000; color: white; border-radius: 4px; padding: 4px 8px;"
 			>
 				<div style="display: flex; margin-right: 4px;">
 					<svg
