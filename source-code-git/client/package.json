@@ -13,7 +13,11 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build ./tsconfig.build.json",
+		"isogit-clone": "mkdir -p node_modules && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
+		"isogit-pull": "cd node_modules/isomorphic-git && git pull",
+		"isogit-http": "cd node_modules/isomorphic-git && git sparse-checkout add http",
+		"isogit-update": "npm run isogit-clone || npm run isogit-pull && npm run isogit-http",
+		"build": "npm run isogit-update && tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
