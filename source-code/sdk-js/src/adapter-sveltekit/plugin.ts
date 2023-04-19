@@ -200,7 +200,7 @@ const unplugin = createUnplugin(() => {
 			)
 
 			if (hasCreatedANewFile && viteServer) {
-				viteServer.restart()
+				viteServer.restart() // TODO: currently it is not possible to exit the process with CTRL + C
 			}
 		},
 		transform(code, id) {
