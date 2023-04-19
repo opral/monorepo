@@ -1,18 +1,18 @@
 import type { Filesystem } from "../schema.js"
+import { FsError } from "../FsError.js"
 
 type FileData = string
 type Directory = Map<string, Inode>
 type Inode = FileData | Directory
 
-function dirToArray(dir: Directory, base: string): Array<Array<string>> {
-	const specialPaths = ["", ".", ".."]
-	let pathArray: Array<Array<string>> = []
+function dirToArray(dir: Directory, base: string, specialPaths: string[]): string[][] {
+	let pathArray: string[][] = []
 	for (const kv of dir) {
 		if (specialPaths.includes(kv[0])) continue
 		if (kv[1] instanceof Map) {
-			pathArray = [...pathArray, ...dirToArray(kv[1], base + "/" + kv[0])]
+			pathArray = [...pathArray, ...dirToArray(kv[1], `${base}/${kv[0]}`, specialPaths)]
 		} else if (typeof kv[1] === "string") {
-			pathArray.push([base + "/" + kv[0], kv[1]])
+			pathArray.push([`${base}/${kv[0]}`, kv[1]])
 		}
 	}
 	return pathArray
@@ -64,8 +64,10 @@ function followPath(
 	return target
 }
 
+
 interface MemoryFilesystem extends Filesystem {
 	_root: Map<string, Inode>
+	_specialPaths: string[]
 	dirname: (path: string) => string
 	basename: (path: string) => string
 }
@@ -73,38 +75,93 @@ interface MemoryFilesystem extends Filesystem {
 export function createMemoryFs(): Filesystem {
 	return {
 		_root: initDir(new Map()),
+		_specialPaths: ["", ".", ".."],
 
-		dirname: (path: string): string => path.split("/").slice(0, -1).join("/"),
-		basename: (path: string): string => path.split("/").at(-1)!,
+		dirname: function (path: string): string {
+			return path.split("/")
+			.filter(x => !this._specialPaths.includes(x))
+			.slice(0, -1)
+			.join("/")
+		},
+
+		basename: function (path: string): string {
+			return path.split("/")
+			.filter(x => !this._specialPaths.includes(x))
+			.at(-1)!
+		},
 
 		writeFile: async function (path: string, content: FileData) {
 			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
 			if (parentDir instanceof Map) parentDir.set(this.basename(path), content)
 		},
 
-		readFile: async function (path: string): Promise<FileData | undefined> {
+		// NOTE: We don't have `Buffer` so we deviate from node behavior here
+		// and return a string.
+		readFile: async function (path: string, encoding = "utf8"): Promise<FileData> {
+
+			if (! ["utf8", "utf-8"].includes(encoding.toLowerCase()))
+				throw new Error("Invalid encoding specified.")
+
 			const file: Inode | undefined = followPath(this._root, path)
-			return typeof file === "string" ? file : undefined
+			if (typeof file === "string") return file
+			if (!file) throw new FsError("ENOENT")
+			throw new FsError("EISDIR")
 		},
 
-		readdir: async function (path: string): Promise<string[] | undefined> {
+		readdir: async function (path: string): Promise<string[]> {
 			const dir: Inode | undefined = followPath(this._root, path)
-			const specialPaths: Array<string> = ["", ".", ".."]
-			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
-			else return
+			if (typeof dir === "string") throw new FsError("ENOTDIR")
+			if (!dir) throw new FsError("ENOENT")
+			return [...dir.keys()].filter((x) => !this._specialPaths.includes(x))
 		},
 
-		mkdir: async function (path: string) {
-			followPath(this._root, path, true)
+		mkdir: async function (path: string, options: any) {
+			const parentDir: Inode | undefined = followPath(
+				this._root,
+				this.dirname(path),
+				options?.recursive ?? false
+			)
+
+			if (!parentDir) throw new FsError("ENOENT")
+			else if (parentDir instanceof Map) 
+				parentDir.set(this.basename(path), initDir(parentDir))
+			else
+				throw new FsError("ENOTDIR")
 		},
 
 		toJson: async function (): Promise<Record<string, string>> {
-			return Object.fromEntries(dirToArray(this._root, ""))
+			return Object.fromEntries(dirToArray(this._root, "", this._specialPaths))
 		},
 
-		rm: async function (path: string) {
-			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), true)
-			if (parentDir instanceof Map) parentDir.delete(this.basename(path))
+		rm: async function (path: string, options: any) {
+			const parentDir: Inode | undefined = followPath(
+				this._root, 
+				this.dirname(path), 
+				false
+			)
+
+			if (!parentDir) throw new FsError("ENOENT")
+
+			if (parentDir instanceof Map) {
+				const basename = this.basename(path)
+				switch (typeof parentDir.get(basename)) {
+					case "string":
+						parentDir.delete(basename)
+						break
+					case "object":
+						if (options?.recursive) 
+							parentDir.delete(basename)
+						else 
+							throw new FsError("EISDIR")
+						break
+					case "undefined":
+						throw new FsError("ENOENT")
+				}
+			} else throw new FsError("ENOTDIR")
+		},
+
+		rmdir: async function (path: string, options: any) {
+			await this.rm(path, options)
 		},
 
 		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {

@@ -1,9 +1,12 @@
+export interface FsError extends Error { code: string }
+
 export interface Filesystem {
 	writeFile: (path: string, content: string) => Promise<void>
-	readFile: (path: string) => Promise<string | undefined>
-	readdir: (path: string) => Promise<string[] | undefined>
-	mkdir: (path: string) => Promise<void>
-	rm: (path: string) => Promise<void>
+	readFile: (path: string, encoding?: string) => Promise<string>
+	readdir: (path: string) => Promise<string[]>
+	mkdir: (path: string, options?: any) => Promise<void>
+	rmdir: (path: string, options?: any) => Promise<void>
+	rm: (path: string, options?: any) => Promise<void>
 	/**
 	 * Serializes the filesystem to a JSON string.
 	 *
@@ -26,6 +29,13 @@ export interface Filesystem {
 		 *   fs.toJson({ exclude: ["**\/node_modules"] })
 		 */
 		exclude?: string[]
+		/**
+		 * The directory to convert to JSON. Default is fs root (memory) or cwd (node)
+		 *
+		 * @example
+		 *   fs.toJson({ dir: "/home/user/project" })
+		 */
+		dir?: string
 	}) => Promise<Record<string, any>>
 	fromJson: (json: Record<string, string>) => Promise<Filesystem>
 }
