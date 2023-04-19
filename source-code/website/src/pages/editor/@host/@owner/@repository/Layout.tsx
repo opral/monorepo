@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createSignal, For, JSXElement, on, onCleanup, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
@@ -53,7 +53,11 @@ export function Layout(props: { children: JSXElement }) {
 
 	const addFilter = (filterName: string) => {
 		const newFilter = filters.find((filter) => filter.name === filterName)
-		if (newFilter !== undefined) {
+		// check if filter is in selectedFilters
+		if (
+			newFilter !== undefined &&
+			!selectedFilters().some((filter) => filter.name === newFilter.name)
+		) {
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
 	}
@@ -63,14 +67,17 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	//add linting rule to filter
-	createEffect(() => {
-		if (
-			filteredLintRules().length !== 0 &&
-			!selectedFilters().some((filter) => filter.name === "Linting")
-		) {
-			addFilter("Linting")
-		}
-	})
+	createEffect(
+		on(
+			filteredLintRules,
+			(rules) => {
+				if (rules.length === 1 && !selectedFilters().some((filter) => filter.name === "Linting")) {
+					addFilter("Linting")
+				}
+			},
+			{ defer: true },
+		),
+	)
 
 	//add initial language filter
 	let hasExecuted = false
@@ -155,7 +162,16 @@ export function Layout(props: { children: JSXElement }) {
 												<Show when={!selectedFilters().includes(filter)}>
 													<sl-menu-item>
 														<button
-															onClick={() => addFilter(filter.name)}
+															onClick={() => {
+																if (filter.name === "Linting" && filteredLintRules.length === 0) {
+																	setFilteredLintRules(
+																		inlangConfig()
+																			?.lint?.rules?.flat()
+																			.map((rule) => rule.id) ?? [],
+																	)
+																}
+																addFilter(filter.name)
+															}}
 															class="flex gap-2 items-center"
 														>
 															<div slot="prefix" class="-ml-2 mr-2">
@@ -362,15 +378,7 @@ function LintFilter(props: { clearFunction: any }) {
 			?.lint?.rules?.flat()
 			.map((rule) => rule.id) ?? []
 
-	// onMount(() => {
-	// 	console.log("Mount LintFilter")
-	// 	if (filteredLintRules().length === 0 || filteredLintRules() === undefined) {
-	// 		setFilteredLintRules(lintRuleIds())
-	// 	}
-	// })
-
 	return (
-		// <Show when={filteredLintRules() && filteredLintRules().length > 0}>
 		<sl-select
 			prop:name="Lint Filter Select"
 			prop:size="small"
@@ -394,7 +402,7 @@ function LintFilter(props: { clearFunction: any }) {
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
 				</p>
-				<Show when={filteredLintRules().length <= 0} fallback={<div />}>
+				<Show when={filteredLintRules().length === 0} fallback={<div />}>
 					<sl-tag prop:size="small" class="font-medium text-sm">
 						everyMessage
 					</sl-tag>
@@ -417,7 +425,7 @@ function LintFilter(props: { clearFunction: any }) {
 				<span class="text-left text-on-surface-variant grow">Lints</span>
 				<a
 					class="cursor-pointer link link-primary"
-					onClick={() => setFilteredLintRules(lintRuleIds().map((id) => id))}
+					onClick={() => setFilteredLintRules(lintRuleIds())}
 				>
 					ALL
 				</a>
@@ -434,6 +442,5 @@ function LintFilter(props: { clearFunction: any }) {
 				</For>
 			</div>
 		</sl-select>
-		// </Show>
 	)
 }
