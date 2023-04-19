@@ -95,13 +95,26 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 }
 
 const transformHooksServerJs = (code: string) => {
-	if (!code) return `
-import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
-
-export const handle = initHandleWrapper({
+	if (!code) {
+		const options = config.isSPA ? `
 	getLanguage: () => undefined,
-}).wrap(async ({ event, resolve }) => resolve(event))
+` : `
+	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+	redirect: {
+		throwable: redirect,
+		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+	},
 `
+		return `
+import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors/server"
+import { redirect } from "@sveltejs/kit"
+import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
+
+export const handle = initHandleWrapper({${options}}).wrap(async ({ event, resolve }) => resolve(event))
+`
+	}
 
 	return code
 }
@@ -129,18 +142,22 @@ export const load = initRootServerLayoutLoadWrapper().wrap(() => { })
 }
 
 const transformLayoutJs = (code: string, root: boolean) => {
-	if (root && !code) return `
+	if (root && !code) {
+		const options = config.isSPA ? `
+	initDetectors: browser
+		? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
+		: undefined,
+`: ''
+
+		return `
 import { browser } from "$app/environment"
 import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client"
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 
-export const load = initRootLayoutLoadWrapper({
-	initDetectors: browser
-		? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
-		: undefined,
-}).wrap(async () => { })
+export const load = initRootLayoutLoadWrapper({${options}}).wrap(async () => { })
 `
+	}
 
 	return code
 }
@@ -188,7 +205,7 @@ const moveFiles = async (srcDir: string, destDir: string) => Promise.all((await 
 )
 
 const moveExistingRoutesIntoSubfolder = async () =>
-	moveFiles(config.srcFolder + '/routes', config.srcFolder + '/routes/(app)')
+	moveFiles(config.srcFolder + '/routes', config.rootRoutesFolder)
 
 // ------------------------------------------------------------------------------------------------
 

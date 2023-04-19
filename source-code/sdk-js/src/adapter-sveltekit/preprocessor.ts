@@ -58,30 +58,51 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 }
 
 const transformLayoutSvelte = (code: string, root: boolean) => {
-	if (root) return `
-<script lang="ts">
+	if (root) {
+		const imports = config.isSPA
+			? `import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
+			: `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"`
+
+		const initCode = config.isSPA
+			? `
+	$: if (browser && $language) {
+		document.body.parentElement?.setAttribute("lang", $language)
+		// TODO: only if localStorageDetector
+		localStorage.setItem(localStorageKey, $language)
+	}
+` : `
+	$: {
+		addRuntimeToContext(getRuntimeFromData(data))
+		;({ i, language } = getRuntimeFromContext())
+	}
+`
+
+		const template = config.isSPA
+			? `
+{#if $language}
+	<slot />
+{/if}
+` : `
+{#key language}
+	<slot />
+{/key}
+`
+
+		return `
+<script>
 	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
-	import {	getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+	${imports}
 	import { browser } from "$app/environment"
 
 	export let data
 
 	addRuntimeToContext(getRuntimeFromData(data))
-
 	let { i, language } = getRuntimeFromContext()
-
-	$: if (browser && $language) {
-		document.body.parentElement?.setAttribute("lang", $language)
-
-		localStorage.setItem(localStorageKey, $language)
-	}
+	${initCode}
 </script>
-
-{#if $language}
-	<slot />
-{/if}
+${template}
 `
+	}
 
 	return transformSvelte(code)
 }
@@ -90,8 +111,12 @@ const transformPageSvelte = (code: string, root: boolean) => {
 	return transformSvelte(code)
 }
 
+// TODO: fix this soon !!
 // supports multiple imports
-// assumption: imports are always on top
+// assumption: imports are always on top of the file
+// no other variable can be named `i` or `language`
+// no other code snippet can contain `i(`
+// no other code snippet can contain `language`
 const transformSvelte = (code: string): string => {
 	let transformedCode: string = code
 
@@ -100,9 +125,12 @@ const transformSvelte = (code: string): string => {
 
 	let lastTransform = 0
 
-	// eslint-disable-next-line no-cond-assign
+	const imports = config.isSPA
+		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
+		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
+
 	while (match) {
-		const replacement = (!lastTransform ? 'import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";\n' : '')
+		const replacement = (!lastTransform ? imports : '')
 			+ 'const {' + match[1] + '} = getRuntimeFromContext();'
 
 		transformedCode = transformedCode.slice(0, match.index)
@@ -113,7 +141,7 @@ const transformSvelte = (code: string): string => {
 		match = REGEX_INLANG_SDK_IMPORT.exec(transformedCode)
 	}
 
-	if (config.isReactive) {
+	if (config.isSPA) {
 		// replace with store syntax if reactive
 		transformedCode = transformedCode.slice(0, lastTransform) + transformedCode.slice(lastTransform)
 			.replace(/i\(/g, '$i(')
