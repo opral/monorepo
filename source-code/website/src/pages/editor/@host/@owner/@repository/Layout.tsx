@@ -267,7 +267,6 @@ function LanguageFilter(props: { clearFunction: any }) {
 	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
 
 	onMount(() => {
-		console.log("Mount LanguageFilter")
 		if (filteredLanguages().length === 0 || filteredLanguages() === undefined) {
 			setFilteredLanguages(() => inlangConfig()!.languages)
 		}
