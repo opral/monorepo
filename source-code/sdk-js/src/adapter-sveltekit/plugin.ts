@@ -1,9 +1,10 @@
-import { writeFile, mkdir } from "node:fs/promises"
-import { dirname } from "node:path"
-import { createUnplugin, UnpluginBuildContext } from "unplugin"
+import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
+import { dirname, join } from "node:path"
+import { createUnplugin } from "unplugin"
+import type { ViteDevServer } from "vite"
 import { doesPathExist, getConfig } from './config.js'
 
-const config = await getConfig()
+let config: Awaited<ReturnType<typeof getConfig>>
 
 // ------------------------------------------------------------------------------------------------
 
@@ -145,38 +146,62 @@ const transformPageJs = (code: string, root: boolean) => {
 
 // ------------------------------------------------------------------------------------------------
 
-const createFilesIfNotPresent = async (that: UnpluginBuildContext, ...files: string[]) => {
+const createFilesIfNotPresent = async (...files: string[]) => {
 	// eslint-disable-next-line no-async-promise-executor
-	return Promise.all(files.map(file => new Promise<void>((async (resolve) => {
-
+	const results = await Promise.all(files.map(file => new Promise<boolean>((async (resolve) => {
 		const path = config.srcFolder + file
 
 		await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
 
+		let wasCreated = false
 		if (!(await doesPathExist(path))) {
 			await writeFile(path, '')
+			wasCreated = true
 		}
 
-		// TODO: check why this does not work
-		that.addWatchFile(path)
-
-		resolve()
+		resolve(wasCreated)
 	}))))
+
+	// returns true if a new file was created
+	return results.some(result => result)
 }
 
+const moveFiles = async (srcDir: string, destDir: string) => Promise.all((await readdir(srcDir))
+	.map(async (file) => {
+		const destFile = join(destDir, file)
+		await mkdir(dirname(destFile), { recursive: true }).catch(() => undefined)
+		await rename(join(srcDir, file), destFile)
+	})
+)
+
+const moveExistingRoutesIntoSubfolder = async () =>
+	moveFiles(config.srcFolder + '/routes', config.srcFolder + '/routes/(app)')
+
 // ------------------------------------------------------------------------------------------------
+
+let viteServer: ViteDevServer | undefined
 
 const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sveltekit-adapter",
 		async buildStart() {
-			await createFilesIfNotPresent(this,
+			config = await getConfig()
+
+			if (!config.hasAlreadyBeenInitialized) {
+				await moveExistingRoutesIntoSubfolder()
+			}
+
+			const hasCreatedANewFile = await createFilesIfNotPresent(
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
 				'/routes/+layout.server.js',
 				'/routes/+layout.js',
 				'/routes/+layout.svelte',
 			)
+
+			if (hasCreatedANewFile && viteServer) {
+				viteServer.restart()
+			}
 		},
 		transform(code, id) {
 			const fileInformation = getFileInformation(id)
@@ -184,6 +209,11 @@ const unplugin = createUnplugin(() => {
 			if (!fileInformation) return null
 
 			return { code: transformCode(code, fileInformation) }
+		},
+		vite: {
+			configureServer(server) {
+				viteServer = server as unknown as ViteDevServer
+			}
 		},
 		/*
 			this is how we could potentially transform our js files.

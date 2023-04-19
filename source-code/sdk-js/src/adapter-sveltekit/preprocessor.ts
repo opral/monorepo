@@ -136,9 +136,6 @@ export const preprocessor = {
 		// eslint-disable-next-line unicorn/no-null
 		if (!fileInformation) return null
 
-		console.log(filename, fileInformation);
-
-
 		return { code: transformCode(content, fileInformation) }
 	},
 }
