@@ -1,4 +1,3 @@
-// @prettier-ignore
 import satori from "satori"
 import clone from "./repo/clone.js"
 import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/config"
@@ -9,7 +8,6 @@ import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
 import { query } from "@inlang/core/query"
-import type * as ast from "@inlang/core/ast"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
