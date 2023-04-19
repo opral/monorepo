@@ -7,10 +7,12 @@
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
 		"./config": "./dist/config/index.js",
 		"./detectors": "./dist/detectors/index.js",
+		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./src"
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
@@ -37,6 +39,7 @@
 		"@types/estree": "^1.0.0",
 		"@types/lodash": "^4.14.192",
 		"acorn": "^8.8.2",
-		"astring": "^1.8.4"
+		"astring": "^1.8.4",
+		"svelte": "^3.58.0"
 	}
 }

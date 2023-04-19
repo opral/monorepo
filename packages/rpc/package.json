@@ -23,9 +23,9 @@
 		"@inlang/core": "*",
 		"@inlang/env-variables": "*",
 		"body-parser": "^1.20.2",
-		"dedent": "^0.7.0",
 		"memfs": "^3.4.13",
 		"openai": "^3.2.1",
+		"ts-dedent": "^2.2.0",
 		"typed-rpc": "^3.0.0"
 	},
 	"peerDependencies": {

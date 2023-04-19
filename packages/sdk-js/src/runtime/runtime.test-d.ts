@@ -1,4 +1,4 @@
-import type { Resource } from '@inlang/core/ast'
+import type { Resource } from "@inlang/core/ast"
 import { expectType } from "tsd"
 import { initRuntime, RuntimeContext } from "./runtime.js"
 

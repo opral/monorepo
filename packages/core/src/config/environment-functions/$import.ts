@@ -15,7 +15,7 @@
 //   when hovering over the type.
 
 import type { $fs } from "./$fs.js"
-import dedent from "dedent"
+import { dedent } from "ts-dedent"
 
 export type $import = (uri: string) => Promise<any>
 

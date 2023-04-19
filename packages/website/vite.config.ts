@@ -37,5 +37,8 @@ export default defineConfig({
 		// https://caniuse.com/?search=top%20level%20await
 		target: "es2022",
 		minify: isProduction,
+		rollupOptions: {
+			external: ["@octokit/core", "@octokit/oauth-app"]
+		}
 	},
 })

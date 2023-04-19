@@ -1,7 +1,7 @@
 import { initConfig } from "@inlang/sdk-js/config"
 import type { RequestEvent } from "@sveltejs/kit"
-import { inlangSymbol } from '../shared/utils.js'
-import type { SvelteKitServerRuntime } from './runtime.js'
+import { inlangSymbol } from "../shared/utils.js"
+import type { SvelteKitServerRuntime } from "./runtime.js"
 
 const config = await initConfig()
 if (!config) {
@@ -23,6 +23,5 @@ export const addRuntimeToLocals = (
 	runtime: SvelteKitServerRuntime,
 ) => ((locals as any)[inlangSymbol] = runtime)
 
-export const getRuntimeFromLocals = (
-	locals: RequestEvent["locals"],
-): SvelteKitServerRuntime => (locals as any)[inlangSymbol]
+export const getRuntimeFromLocals = (locals: RequestEvent["locals"]): SvelteKitServerRuntime =>
+	(locals as any)[inlangSymbol]

@@ -168,6 +168,9 @@ sl-select::part(combobox) sl-tag {
 sl-tag {
 	--sl-input-height-small: 26px;
 }
+sl-input::part(base) {
+	--tw-ring-color: "#FFF";
+}
 
 sl-tag::part(base) {
 	border: none;
