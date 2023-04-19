@@ -1,20 +1,16 @@
 {
-	"name": "@inlang/git-sdk",
+	"name": "@inlang-git/client",
 	"type": "module",
 	"version": "0.5.3",
 	"private": true,
 	"exports": {
-		"./api": {
+		".": {
 			"types": "./dist/api/index.d.ts",
 			"import": "./dist/api/index.js"
 		},
-		"./fs": {
-			"types": "./dist/fs/index.d.ts",
-			"import": "./dist/fs/index.js"
-		},
-		"./host": {
-			"types": "./dist/auth/index.d.ts",
-			"import": "./dist/auth/index.js"
+		"./raw": {
+			"types": "./dist/raw/index.d.ts",
+			"import": "./dist/raw/index.js"
 		}
 	},
 	"files": [
@@ -27,15 +23,14 @@
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/git-sdk",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/git-sdk",
-		"format": "cd ../.. && npm run format:base ./source-code/git-sdk",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/git-sdk",
+		"lint": "cd ../.. && npm run lint:base ./source-code-git/client",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code-git/client",
+		"format": "cd ../.. && npm run format:base ./source-code-git/client",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code-git/client",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"isomorphic-git": "^1.21.0",
-		"memfs": "^3.4.9"
+		"isomorphic-git": "^1.21.0"
 	}
 }
