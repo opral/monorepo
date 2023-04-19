@@ -1,10 +1,9 @@
-import { writeFile, stat, mkdir } from "node:fs/promises"
+import { writeFile, mkdir } from "node:fs/promises"
 import { dirname } from "node:path"
 import { createUnplugin, UnpluginBuildContext } from "unplugin"
+import { doesPathExist, getConfig } from './config.js'
 
-import * as svelte from 'svelte/compiler';
-
-const srcFolder = process.cwd() + '/src'
+const config = await getConfig()
 
 // ------------------------------------------------------------------------------------------------
 
@@ -13,11 +12,8 @@ type FileType =
 	| '[language].json'
 	| '+layout.server.js'
 	| '+layout.js'
-	| '+layout.svelte'
 	| '+page.server.js'
 	| '+page.js'
-	| '+page.svelte'
-	| '.svelte'
 
 type FileInformation = {
 	type: FileType
@@ -25,9 +21,9 @@ type FileInformation = {
 }
 
 const getFileInformation = (id: string): FileInformation | undefined => {
-	if (!id.startsWith(srcFolder)) return undefined
+	if (!id.startsWith(config.srcFolder)) return undefined
 
-	const path = id.replace(srcFolder, '')
+	const path = id.replace(config.srcFolder, '')
 
 	if (path === '/hooks.server.js' || path === '/hooks.server.ts') {
 		return {
@@ -55,12 +51,6 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 			root: path.endsWith('/routes/+layout.js') || path.endsWith('/routes/+layout.ts'),
 		}
 	}
-	if (path.endsWith('/+layout.svelte')) {
-		return {
-			type: '+layout.svelte',
-			root: path.endsWith('/routes/+layout.svelte'),
-		}
-	}
 
 	if (path.endsWith('/+page.server.js') || path.endsWith('/+page.server.ts')) {
 		return {
@@ -74,24 +64,14 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 			root: path.endsWith('/routes/+page.js') || path.endsWith('/routes/+page.ts'),
 		}
 	}
-	if (path.endsWith('/+page.svelte')) {
-		return {
-			type: '+page.svelte',
-			root: path.endsWith('/routes/+page.svelte'),
-		}
-	}
-
-	if (path.endsWith('.svelte')) {
-		return {
-			type: '.svelte',
-			root: false,
-		}
-	}
 
 	return undefined
 }
 
 // ------------------------------------------------------------------------------------------------
+
+// TODO: throw errors if something is not supported and show a guide how to add the functionality manually
+// TODO: move .svelte transform to preprocessor
 
 const transformCode = (code: string, { type, root }: FileInformation) => {
 	switch (type) {
@@ -99,11 +79,8 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 		case '[language].json': return transformLanguageJson(code)
 		case '+layout.server.js': return transformLayoutServerJs(code, root)
 		case '+layout.js': return transformLayoutJs(code, root)
-		case '+layout.svelte': return transformLayoutSvelte(code, root)
 		case '+page.server.js': return transformPageServerJs(code, root)
 		case '+page.js': return transformPageJs(code, root)
-		case '+page.svelte': return transformPageSvelte(code, root)
-		case '.svelte': return transformSvelte(code, root)
 	}
 }
 
@@ -158,55 +135,11 @@ export const load = initRootLayoutLoadWrapper({
 	return code
 }
 
-const transformLayoutSvelte = (code: string, root: boolean) => {
-	const isServerCode = code.includes('create_ssr_component')
-
-	if (root) return svelte.compile(`
-<script lang="ts">
-	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
-	import {	getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
-	import { browser } from "$app/environment"
-
-	export let data
-
-	addRuntimeToContext(getRuntimeFromData(data))
-
-	let { i, language } = getRuntimeFromContext()
-
-	$: if (browser && $language) {
-		document.body.parentElement?.setAttribute("lang", $language)
-
-		localStorage.setItem(localStorageKey, $language)
-	}
-</script>
-
-{#if $language}
-	<slot />
-{/if}
-`, {
-		generate: isServerCode ? 'ssr' : 'dom',
-		hydratable: true,
-	}).js.code
-
-	if (!root) return transformSvelte(code, root)
-}
-
 const transformPageServerJs = (code: string, root: boolean) => {
 	return code
 }
 
 const transformPageJs = (code: string, root: boolean) => {
-	return code
-}
-
-const transformPageSvelte = (code: string, root: boolean) => {
-	return transformSvelte(code, root)
-}
-
-const transformSvelte = (code: string, root: boolean) => {
-	// this get's done by the sveltekit preprocessor
-
 	return code
 }
 
@@ -216,12 +149,11 @@ const createFilesIfNotPresent = async (that: UnpluginBuildContext, ...files: str
 	// eslint-disable-next-line no-async-promise-executor
 	return Promise.all(files.map(file => new Promise<void>((async (resolve) => {
 
-		const path = srcFolder + file
-		const doesFileExist = await stat(path).catch(() => undefined)
+		const path = config.srcFolder + file
 
 		await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
 
-		if (!doesFileExist) {
+		if (!(await doesPathExist(path))) {
 			await writeFile(path, '')
 		}
 
@@ -231,6 +163,8 @@ const createFilesIfNotPresent = async (that: UnpluginBuildContext, ...files: str
 		resolve()
 	}))))
 }
+
+// ------------------------------------------------------------------------------------------------
 
 const unplugin = createUnplugin(() => {
 	return {
@@ -246,22 +180,10 @@ const unplugin = createUnplugin(() => {
 		},
 		transform(code, id) {
 			const fileInformation = getFileInformation(id)
-			if (fileInformation) {
-				const log = false
-				log && console.log('--- start ---')
-				log && console.log(fileInformation)
-				log && console.log('--- code ---')
-				log && console.log(code)
-				log && console.log('--- transform ---')
+			// eslint-disable-next-line unicorn/no-null
+			if (!fileInformation) return null
 
-				const transformedCode = transformCode(code, fileInformation)
-				log && console.log(transformedCode)
-				log && console.log('--- end ---')
-
-				return { code: transformedCode }
-			}
-
-			return null
+			return { code: transformCode(code, fileInformation) }
 		},
 		/*
 			this is how we could potentially transform our js files.
