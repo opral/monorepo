@@ -7,9 +7,9 @@ it("should copy a directory into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./test")
+	await fs.mkdir("./test", { recursive: true })
 	await fs.writeFile("./test/file.txt", "Hello World!")
-	await fs.mkdir("./test/subdir")
+	await fs.mkdir("./test/subdir", { recursive: true })
 	await fs.writeFile("./test/subdir/file.txt", "Hello World!")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["test"] } })
@@ -21,9 +21,9 @@ it("should copy multiple directories into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./one")
+	await fs.mkdir("./one", { recursive: true })
 	await fs.writeFile("./one/file.txt", "Hello from one")
-	await fs.mkdir("./two/subdir")
+	await fs.mkdir("./two/subdir", { recursive: true })
 	await fs.writeFile("./two/file.txt", "Hello from two")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["one", "two"] } })
@@ -34,7 +34,7 @@ it("should copy multiple directories into the environment", async () => {
 it("should be able to import JavaScript from the environment", async () => {
 	// const fs = memfs.promises as EnvironmentFunctions["$fs"]
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./test")
+	await fs.mkdir("./test", { recursive: true })
 	await fs.writeFile("./test/file.js", "export const x = 'hello'")
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["./test"] } })
 	const { x } = await env.$import("./test/file.js")

@@ -45,7 +45,9 @@ async function copyDirectory(args: {
 	copyTo: EnvironmentFunctions["$fs"]
 	path: string
 }) {
-	if ((await args.copyFrom.readdir(args.path)) === undefined) {
+	try {
+		((await args.copyFrom.readdir(args.path)) === undefined)
+	} catch {
 		throw new Error(dedent`
 The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
 
@@ -55,16 +57,15 @@ Context: The path is relative to the current working directory, not the file tha
 		`)
 	}
 	// create directory
-	await args.copyTo.mkdir(args.path)
+	await args.copyTo.mkdir(args.path, { recursive: true })
 	const pathsInDirectory = await args.copyFrom.readdir(args.path)
-	if (!pathsInDirectory) throw new Error("Source directory is empty")
 	for (const subpath of pathsInDirectory) {
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
-		const file = await args.copyFrom.readFile(path)
-		if (file) {
+		try {
+			const file = await args.copyFrom.readFile(path)
 			await args.copyTo.writeFile(path, file)
-		} else {
+		} catch(err) {
 			await copyDirectory({ ...args, path })
 		}
 	}
