@@ -1,6 +1,6 @@
 import type { PageContextRenderer } from "./types.js"
 import { generateHydrationScript, renderToString } from "solid-js/web"
-import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server"
+import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr"
 import { setCurrentPageContext } from "./state.js"
 import { Root } from "./Root.jsx"
 
