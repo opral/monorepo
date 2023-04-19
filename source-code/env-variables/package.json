@@ -6,7 +6,8 @@
 		".": "./dist/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./src"
 	],
 	"scripts": {
 		"build": "tsx ./build.ts",

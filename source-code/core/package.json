@@ -14,7 +14,8 @@
 		"./utilities": "./dist/utilities/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./src"
 	],
 	"scripts": {
 		"build": "tsc --build ./tsconfig.build.json",
@@ -35,7 +36,7 @@
 	},
 	"dependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-		"dedent": "^0.7.0",
+		"ts-dedent": "^2.2.0",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {

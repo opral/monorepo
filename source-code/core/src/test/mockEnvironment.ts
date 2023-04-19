@@ -1,6 +1,6 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
 import { Volume } from "memfs"
-import dedent from "dedent"
+import { dedent } from "ts-dedent"
 
 /**
  * Initializes a mock environment.
