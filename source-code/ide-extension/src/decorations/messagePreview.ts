@@ -43,14 +43,15 @@ export async function messagePreview(args: {
 				return messages.map((message) => {
 					const translation = query(referenceResource).get({
 						id: message.messageId,
-					})?.pattern.elements
-					const translationText =
-						translation && translation.length > 0 ? translation[0].value : undefined
-					const truncatedTranslationText =
-						translationText &&
-						(translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
-							? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: translationText)
+					})?.pattern.elements[0]
+					if (translation?.type !== "Text") {
+						throw new Error("Only Text elements are supported for message previews.")
+					}
+					const previewText = translation.value
+					const truncatedPreviewText =
+						translation.value.length > MAXIMUM_PREVIEW_LENGTH
+							? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: previewText
 					const range = new vscode.Range(
 						// VSCode starts to count lines and columns from zero
 						new vscode.Position(
@@ -63,14 +64,14 @@ export async function messagePreview(args: {
 						range,
 						renderOptions: {
 							after: {
-								contentText: truncatedTranslationText ?? `ERROR: '${message.messageId}' not found`,
-								backgroundColor: translationText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
-								border: translationText
+								contentText: truncatedPreviewText ?? `ERROR: '${message.messageId}' not found`,
+								backgroundColor: previewText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
+								border: previewText
 									? "1px solid rgb(45 212 191/.50)"
 									: "1px solid rgb(244 63 94/.50)",
 							},
 						},
-						hoverMessage: translationText,
+						hoverMessage: previewText,
 					}
 					return decoration
 				})
