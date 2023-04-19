@@ -1,4 +1,4 @@
-interface LanguagePriority {
+export interface LanguagePriority {
 	language: string
 	priority: number
 }
@@ -6,15 +6,16 @@ interface LanguagePriority {
 export const parseAcceptLanguageHeader = (acceptLanguageHeader: string): LanguagePriority[] => {
 	const languagePriorities: LanguagePriority[] = []
 
-	if (!acceptLanguageHeader) {
+	if (acceptLanguageHeader === "" || !acceptLanguageHeader) {
 		return languagePriorities
 	}
 
 	const languagePriorityStrings = acceptLanguageHeader.split(",")
 	for (const languagePriorityString of languagePriorityStrings) {
-		const [language, priorityString] = languagePriorityString.trim().split(";q=")
-		const priority = priorityString ? parseFloat(priorityString) : 1
-		languagePriorities.push({ language, priority })
+		const [language = "", priorityString = "1"] = languagePriorityString.trim().split(";q=")
+		const priority = parseFloat(priorityString)
+		const finalLanguage = language === "" ? "en" : language
+		languagePriorities.push({ language: finalLanguage, priority })
 	}
 
 	return languagePriorities

@@ -8,6 +8,8 @@ import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
+import { query } from "@inlang/core/query"
+import type * as ast from "@inlang/core/ast"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
@@ -55,9 +57,51 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		throw new Error("No translations found. Please add translations to your project.")
 	}
 
+	// If preferred language is not set, set it to english
+	if (!preferredLanguage) {
+		preferredLanguage = "en"
+	}
+
+	// Remove the region from the language
+	if (preferredLanguage?.includes("-")) {
+		preferredLanguage = preferredLanguage.split("-")[0]
+	}
+
+	// find in resources the resource from the preferredLanguage
+	const referenceResource = resources.find(
+		(resource) => resource.languageTag.name === config.referenceLanguage,
+	)
+	if (!referenceResource) {
+		throw new Error("No referenceLanguage found, please add one to your inlang.config.js")
+	}
+
+	// get all the ids from the preferredLanguageResource
+	const referenceIds = query(referenceResource).includedMessageIds()
+	const numberOfMissingMessages: { language: string; id: string }[] = []
+
+	// loop through all the resources and check if the ids are included in the preferredLanguageResource
+	for (const resource of resources) {
+		const language = resource.languageTag.name
+		for (const id of referenceIds) {
+			if (query(resource).get({ id }) === undefined) {
+				numberOfMissingMessages.push({
+					language,
+					id,
+				})
+			}
+		}
+	}
+
+	// filter number of missing messages by preferredLanguage
+	const numberOfMissingMessagesInPreferredLanguage = numberOfMissingMessages.filter(
+		(message) => message.language === preferredLanguage,
+	).length
+
 	// markup the percentages
 	const [host, owner, repository] = [...url.split("/")]
-	const vdom = removeCommas(markup(percentages, preferredLanguage, lints))
+	const vdom = removeCommas(
+		markup(percentages, preferredLanguage, numberOfMissingMessagesInPreferredLanguage, lints),
+	)
 
 	// render the image
 	const image = await satori(
@@ -65,7 +109,7 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 		vdom,
 		{
 			width: 340,
-			height: 150,
+			height: 180,
 			fonts: [
 				{
 					name: "Inter Medium",
