@@ -49,6 +49,7 @@ export function Layout(props: { children: JSXElement }) {
 			component: () => <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	]
+
 	const [selectedFilters, setSelectedFilters] = createSignal<Filter[]>([])
 
 	const addFilter = (filterName: string) => {
@@ -56,7 +57,8 @@ export function Layout(props: { children: JSXElement }) {
 		// check if filter is in selectedFilters
 		if (
 			newFilter !== undefined &&
-			!selectedFilters().some((filter) => filter.name === newFilter.name)
+			!selectedFilters().some((filter) => filter.name === newFilter.name) &&
+			(newFilter.name !== "Linting" || inlangConfig()?.lint?.rules)
 		) {
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
@@ -105,6 +107,12 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
+	createEffect(() => {
+		console.log("config", !inlangConfig()?.lint?.rules)
+		console.log("selectedFilterslength", selectedFilters().length)
+		console.log("Filterslength", filters.length - 1)
+	})
+
 	return (
 		<RootLayout>
 			<div class="pt-4 w-full flex flex-col grow">
@@ -137,7 +145,11 @@ export function Layout(props: { children: JSXElement }) {
 								)}
 							</For>
 							<Show
-								when={selectedFilters().length !== filters.length}
+								when={
+									inlangConfig()?.lint?.rules
+										? selectedFilters().length !== filters.length
+										: selectedFilters().length !== filters.length - 1
+								}
 								fallback={
 									<sl-button
 										prop:size="small"
@@ -159,7 +171,12 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-menu>
 										<For each={filters}>
 											{(filter) => (
-												<Show when={!selectedFilters().includes(filter)}>
+												<Show
+													when={
+														!selectedFilters().includes(filter) &&
+														(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
+													}
+												>
 													<sl-menu-item>
 														<button
 															onClick={() => {
