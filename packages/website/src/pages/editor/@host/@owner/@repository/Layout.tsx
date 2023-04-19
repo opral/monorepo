@@ -371,70 +371,70 @@ function LintFilter(props: { clearFunction: any }) {
 	// })
 
 	return (
-		<Show when={filteredLintRules() && filteredLintRules().length > 0}>
-			<sl-select
-				prop:name="Lint Filter Select"
-				prop:size="small"
-				prop:multiple={true}
-				prop:maxOptionsVisible={2}
-				prop:clearable={true}
-				prop:value={filteredLintRules()}
-				on:sl-change={(event: any) => {
-					setFilteredLintRules(event.target.value ?? [])
-				}}
-				on:sl-clear={() => {
-					setFilteredLintRules([])
-					props.clearFunction
-				}}
-				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-			>
-				<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
-					<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
-						Linting
-					</p>
-					<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
-						is
-					</p>
-					<Show when={filteredLintRules().length <= 0} fallback={<div />}>
-						<sl-tag prop:size="small" class="font-medium text-sm">
-							everyMessage
-						</sl-tag>
-						<button
-							class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
-							onClick={() => {
-								setFilteredLintRules([])
-								props.clearFunction
-							}}
-						>
-							<IconClose />
-						</button>
-					</Show>
-				</div>
-				<button slot="clear-icon">
-					<IconClose />
-				</button>
-
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Lints</span>
-					<a
-						class="cursor-pointer link link-primary"
-						onClick={() => setFilteredLintRules(lintRuleIds().map((id) => id))}
+		// <Show when={filteredLintRules() && filteredLintRules().length > 0}>
+		<sl-select
+			prop:name="Lint Filter Select"
+			prop:size="small"
+			prop:multiple={true}
+			prop:maxOptionsVisible={2}
+			prop:clearable={true}
+			prop:value={filteredLintRules()}
+			on:sl-change={(event: any) => {
+				setFilteredLintRules(event.target.value ?? [])
+			}}
+			on:sl-clear={() => {
+				setFilteredLintRules([])
+				props.clearFunction
+			}}
+			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
+		>
+			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
+				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
+					Linting
+				</p>
+				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
+					is
+				</p>
+				<Show when={filteredLintRules().length <= 0} fallback={<div />}>
+					<sl-tag prop:size="small" class="font-medium text-sm">
+						everyMessage
+					</sl-tag>
+					<button
+						class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
+						onClick={() => {
+							setFilteredLintRules([])
+							props.clearFunction
+						}}
 					>
-						ALL
-					</a>
-					<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
-						NONE
-					</a>
-				</div>
-				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
-					<For each={lintRuleIds()}>
-						{(id) => (
-							<sl-option prop:value={id}>{id.includes(".") ? id.split(".")[1] : id}</sl-option>
-						)}
-					</For>
-				</div>
-			</sl-select>
-		</Show>
+						<IconClose />
+					</button>
+				</Show>
+			</div>
+			<button slot="clear-icon">
+				<IconClose />
+			</button>
+
+			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
+				<span class="text-left text-on-surface-variant grow">Lints</span>
+				<a
+					class="cursor-pointer link link-primary"
+					onClick={() => setFilteredLintRules(lintRuleIds().map((id) => id))}
+				>
+					ALL
+				</a>
+				<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
+					NONE
+				</a>
+			</div>
+			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+			<div class="max-h-[300px] overflow-y-auto">
+				<For each={lintRuleIds()}>
+					{(id) => (
+						<sl-option prop:value={id}>{id.includes(".") ? id.split(".")[1] : id}</sl-option>
+					)}
+				</For>
+			</div>
+		</sl-select>
+		// </Show>
 	)
 }
