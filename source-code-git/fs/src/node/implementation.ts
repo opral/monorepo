@@ -1,4 +1,5 @@
 import type { Filesystem } from "../schema.js"
+// eslint-disable-next-line no-restricted-imports
 import * as fs from "node:fs/promises"
 
 async function dirToArray(dir: string): Promise<string[][]> {
@@ -7,8 +8,8 @@ async function dirToArray(dir: string): Promise<string[][]> {
 		try {
 			const fileData: string = await fs.readFile(`${dir}/${dirent}`, "utf8")
 			pathArray.push([`${dir}/${dirent}`, fileData])
-		} catch(e) {
-			pathArray = [...pathArray, ...await dirToArray(`${dir}/${dirent}`)]
+		} catch (e) {
+			pathArray = [...pathArray, ...(await dirToArray(`${dir}/${dirent}`))]
 		}
 	}
 	return pathArray
@@ -36,10 +37,14 @@ export function fromNodeFs(nodeFs: any): Filesystem {
 		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {
 			const specialPaths = ["", ".", ".."]
 			const dirname = (path: string): string => {
-				return "/" + path.split("/")
-				.filter(x => !specialPaths.includes(x))
-				.slice(0, -1)
-				.join("/")
+				return (
+					"/" +
+					path
+						.split("/")
+						.filter((x) => !specialPaths.includes(x))
+						.slice(0, -1)
+						.join("/")
+				)
 			}
 
 			for (const kv of Object.entries(json)) {
