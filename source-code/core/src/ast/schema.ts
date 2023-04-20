@@ -10,8 +10,7 @@ export type NodeName =
 	| "Text"
 	| "LanguageTag"
 	| "Placeholder"
-	| "Expression"
-	| "Variable"
+	| "VariableReference"
 
 /**
  * A utility type to extend any node with a new property.
@@ -110,18 +109,12 @@ export type Placeholder<Extension extends ExtensionInformation = ExtensionInform
 	"Placeholder",
 	Extension
 > & {
-	placeholder: Expression<Extension>
+	// only variable reference for now, but will be extended in the future
+	body: VariableReference<Extension>
 }
 
-export type Expression<Extension extends ExtensionInformation = ExtensionInformation> = Node<
-	"Expression",
-	Extension
-> & {
-	expression: Variable<Extension>
-}
-
-export type Variable<Extension extends ExtensionInformation = ExtensionInformation> = Node<
-	"Variable",
+export type VariableReference<Extension extends ExtensionInformation = ExtensionInformation> = Node<
+	"VariableReference",
 	Extension
 > & {
 	name: string

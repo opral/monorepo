@@ -1,5 +1,5 @@
 import express from "express"
-import { renderPage } from "vite-plugin-ssr/server"
+import { renderPage } from "vite-plugin-ssr"
 
 export const router = express.Router()
 
