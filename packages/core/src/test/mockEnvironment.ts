@@ -46,7 +46,7 @@ async function copyDirectory(args: {
 	path: string
 }) {
 	try {
-		((await args.copyFrom.readdir(args.path)) === undefined)
+		await args.copyFrom.readdir(args.path)
 	} catch {
 		throw new Error(dedent`
 The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
@@ -65,7 +65,7 @@ Context: The path is relative to the current working directory, not the file tha
 		try {
 			const file = await args.copyFrom.readFile(path)
 			await args.copyTo.writeFile(path, file)
-		} catch(err) {
+		} catch (err) {
 			await copyDirectory({ ...args, path })
 		}
 	}
