@@ -1,19 +1,22 @@
-import { stat } from "node:fs/promises"
+import { stat, readFile } from "node:fs/promises"
+import { initConfig } from "../config/index.js"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
 export const getConfig = async () => {
-	// TODO: read information from files
-	const isSPA = false
-	const isStatic = false
+	const inlangConfig = await initConfig()
+	const svelteConfig = await readFile("svelte.config.js", "utf-8")
 
-	const srcFolder = process.cwd() + '/src'
-	const rootRoutesFolder = srcFolder + '/routes/(app)' + (isSPA ? '' : '/[lang]')
+	const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url')
+	const isStatic = svelteConfig.includes('@sveltejs/adapter-static')
+
+	const srcFolder = process.cwd() + "/src"
+	const rootRoutesFolder = srcFolder + "/routes/(app)" + (languageInUrl ? "" : "/[lang]")
 
 	const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
 	return {
-		isSPA,
+		languageInUrl,
 		isStatic,
 		srcFolder,
 		rootRoutesFolder,

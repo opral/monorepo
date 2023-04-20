@@ -28,11 +28,26 @@ async function readInlangConfig() {
 	return config
 }
 
-export const initConfig = () => {
-	const config = readInlangConfig()
+export const initConfig = async () => {
+	const config = await readInlangConfig()
 	if (!config) return undefined
 
+
 	// TODO: validate sdk related once we add entries to it
+	// set defaults
+
+	config.sdk = {
+		...config.sdk,
+		languageNegotiation: {
+			strict: false,
+			...config.sdk?.languageNegotiation,
+			strategies: config.sdk?.languageNegotiation?.strategies || [
+				{ type: 'accept-language-header' },
+				{ type: 'navigator' },
+				{ type: 'url' },
+			]
+		},
+	}
 
 	return config
 }

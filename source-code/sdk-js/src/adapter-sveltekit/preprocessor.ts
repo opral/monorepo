@@ -1,17 +1,14 @@
-import { getConfig } from './config.js'
+import { getConfig } from "./config.js"
 
 const REGEX_INLANG_SDK_IMPORT = /.*import\s*{\s*(.*)\s*}\s*from\s+['"]@inlang\/sdk-js['"]/g
 
-const srcFolder = process.cwd() + '/src'
+const srcFolder = process.cwd() + "/src"
 
 const config = await getConfig()
 
 // ------------------------------------------------------------------------------------------------
 
-type FileType =
-	| '+layout.svelte'
-	| '+page.svelte'
-	| '.svelte'
+type FileType = "+layout.svelte" | "+page.svelte" | ".svelte"
 
 type FileInformation = {
 	type: FileType
@@ -21,25 +18,25 @@ type FileInformation = {
 const getFileInformation = (id: string): FileInformation | undefined => {
 	if (!id.startsWith(srcFolder)) return undefined
 
-	const path = id.replace(srcFolder, '')
+	const path = id.replace(srcFolder, "")
 
-	if (path.endsWith('/+layout.svelte')) {
+	if (path.endsWith("/+layout.svelte")) {
 		return {
-			type: '+layout.svelte',
-			root: path.endsWith('/routes/+layout.svelte'),
+			type: "+layout.svelte",
+			root: path.endsWith("/routes/+layout.svelte"),
 		}
 	}
 
-	if (path.endsWith('/+page.svelte')) {
+	if (path.endsWith("/+page.svelte")) {
 		return {
-			type: '+page.svelte',
-			root: path.endsWith('/routes/+page.svelte'),
+			type: "+page.svelte",
+			root: path.endsWith("/routes/+page.svelte"),
 		}
 	}
 
-	if (path.endsWith('.svelte')) {
+	if (path.endsWith(".svelte")) {
 		return {
-			type: '.svelte',
+			type: ".svelte",
 			root: false,
 		}
 	}
@@ -51,41 +48,44 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 
 const transformCode = (code: string, { type, root }: FileInformation) => {
 	switch (type) {
-		case '+layout.svelte': return transformLayoutSvelte(code, root)
-		case '+page.svelte': return transformPageSvelte(code, root)
-		case '.svelte': return transformSvelte(code)
+		case "+layout.svelte":
+			return transformLayoutSvelte(code, root)
+		case "+page.svelte":
+			return transformPageSvelte(code, root)
+		case ".svelte":
+			return transformSvelte(code)
 	}
 }
 
 const transformLayoutSvelte = (code: string, root: boolean) => {
 	if (root) {
-		const imports = config.isSPA
-			? `import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
-			: `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"`
+		const imports = config.languageInUrl
+			? `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"`
+			: `import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
 
-		const initCode = config.isSPA
+		const initCode = config.languageInUrl
 			? `
-	$: if (browser && $language) {
-		document.body.parentElement?.setAttribute("lang", $language)
-		// TODO: only if localStorageDetector
-		localStorage.setItem(localStorageKey, $language)
-	}
-` : `
-	$: {
-		addRuntimeToContext(getRuntimeFromData(data))
-		;({ i, language } = getRuntimeFromContext())
-	}
+		$: {
+			addRuntimeToContext(getRuntimeFromData(data))
+			;({ i, language } = getRuntimeFromContext())
+		}
+		` : `
+$: if (browser && $language) {
+	document.body.parentElement?.setAttribute("lang", $language)
+	// TODO: only if localStorageDetector
+	localStorage.setItem(localStorageKey, $language)
+}
 `
 
-		const template = config.isSPA
+		const template = config.languageInUrl
 			? `
-{#if $language}
-	<slot />
-{/if}
-` : `
 {#key language}
 	<slot />
 {/key}
+` : `
+{#if $language}
+	<slot />
+{/if}
 `
 
 		return `
@@ -125,27 +125,31 @@ const transformSvelte = (code: string): string => {
 
 	let lastTransform = 0
 
-	const imports = config.isSPA
-		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
-		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
+	const imports = config.languageInUrl
+		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
+		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
 
 	while (match) {
-		const replacement = (!lastTransform ? imports : '')
-			+ 'const {' + match[1] + '} = getRuntimeFromContext();'
+		const replacement =
+			(!lastTransform ? imports : "") + "const {" + match[1] + "} = getRuntimeFromContext();"
 
-		transformedCode = transformedCode.slice(0, match.index)
-			+ replacement
-			+ transformedCode.slice(match.index + match[0].length)
+		transformedCode =
+			transformedCode.slice(0, match.index) +
+			replacement +
+			transformedCode.slice(match.index + match[0].length)
 
 		lastTransform = match.index + replacement.length
 		match = REGEX_INLANG_SDK_IMPORT.exec(transformedCode)
 	}
 
-	if (config.isSPA) {
+	if (!config.languageInUrl) {
 		// replace with store syntax if reactive
-		transformedCode = transformedCode.slice(0, lastTransform) + transformedCode.slice(lastTransform)
-			.replace(/i\(/g, '$i(')
-			.replace(/language[^s]/g, '$language')
+		transformedCode =
+			transformedCode.slice(0, lastTransform) +
+			transformedCode
+				.slice(lastTransform)
+				.replace(/i\(/g, "$i(")
+				.replace(/language[^s]/g, "$language")
 	}
 
 	return transformedCode

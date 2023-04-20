@@ -2,20 +2,20 @@ import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { createUnplugin } from "unplugin"
 import type { ViteDevServer } from "vite"
-import { doesPathExist, getConfig } from './config.js'
+import { doesPathExist, getConfig } from "./config.js"
 
 let config: Awaited<ReturnType<typeof getConfig>>
 
 // ------------------------------------------------------------------------------------------------
 
 type FileType =
-	| 'hooks.server.js'
-	| '[language].json'
-	| '+layout.server.js'
-	| '+layout.js'
-	| '+page.server.js'
-	| '+page.js'
-	| '.js'
+	| "hooks.server.js"
+	| "[language].json"
+	| "+layout.server.js"
+	| "+layout.js"
+	| "+page.server.js"
+	| "+page.js"
+	| ".js"
 
 type FileInformation = {
 	type: FileType
@@ -25,51 +25,55 @@ type FileInformation = {
 const getFileInformation = (id: string): FileInformation | undefined => {
 	if (!id.startsWith(config.srcFolder)) return undefined
 
-	const path = id.replace(config.srcFolder, '')
+	const path = id.replace(config.srcFolder, "")
 
-	if (path === '/hooks.server.js' || path === '/hooks.server.ts') {
+	if (path === "/hooks.server.js" || path === "/hooks.server.ts") {
 		return {
-			type: 'hooks.server.js',
+			type: "hooks.server.js",
 			root: true,
 		}
 	}
 
-	if (path === '/routes/inlang/[language].json/+server.js' || path === '/routes/inlang/[language].json/+server.ts') {
+	if (
+		path === "/routes/inlang/[language].json/+server.js" ||
+		path === "/routes/inlang/[language].json/+server.ts"
+	) {
 		return {
-			type: '[language].json',
+			type: "[language].json",
 			root: true,
 		}
 	}
 
-	if (path.endsWith('/+layout.server.js') || path.endsWith('/+layout.server.ts')) {
+	if (path.endsWith("/+layout.server.js") || path.endsWith("/+layout.server.ts")) {
 		return {
-			type: '+layout.server.js',
-			root: path.endsWith('/routes/+layout.server.js') || path.endsWith('/routes/+layout.server.ts'),
+			type: "+layout.server.js",
+			root:
+				path.endsWith("/routes/+layout.server.js") || path.endsWith("/routes/+layout.server.ts"),
 		}
 	}
-	if (path.endsWith('/+layout.js') || path.endsWith('/+layout.ts')) {
+	if (path.endsWith("/+layout.js") || path.endsWith("/+layout.ts")) {
 		return {
-			type: '+layout.js',
-			root: path.endsWith('/routes/+layout.js') || path.endsWith('/routes/+layout.ts'),
-		}
-	}
-
-	if (path.endsWith('/+page.server.js') || path.endsWith('/+page.server.ts')) {
-		return {
-			type: '+page.server.js',
-			root: path.endsWith('/routes/+page.server.js') || path.endsWith('/routes/+page.server.ts'),
-		}
-	}
-	if (path.endsWith('/+page.js') || path.endsWith('/+page.ts')) {
-		return {
-			type: '+page.js',
-			root: path.endsWith('/routes/+page.js') || path.endsWith('/routes/+page.ts'),
+			type: "+layout.js",
+			root: path.endsWith("/routes/+layout.js") || path.endsWith("/routes/+layout.ts"),
 		}
 	}
 
-	if (path.endsWith('.js') || path.endsWith('.ts')) {
+	if (path.endsWith("/+page.server.js") || path.endsWith("/+page.server.ts")) {
 		return {
-			type: '.js',
+			type: "+page.server.js",
+			root: path.endsWith("/routes/+page.server.js") || path.endsWith("/routes/+page.server.ts"),
+		}
+	}
+	if (path.endsWith("/+page.js") || path.endsWith("/+page.ts")) {
+		return {
+			type: "+page.js",
+			root: path.endsWith("/routes/+page.js") || path.endsWith("/routes/+page.ts"),
+		}
+	}
+
+	if (path.endsWith(".js") || path.endsWith(".ts")) {
+		return {
+			type: ".js",
 			root: false,
 		}
 	}
@@ -84,21 +88,30 @@ const getFileInformation = (id: string): FileInformation | undefined => {
 
 const transformCode = (code: string, { type, root }: FileInformation) => {
 	switch (type) {
-		case 'hooks.server.js': return transformHooksServerJs(code)
-		case '[language].json': return transformLanguageJson(code)
-		case '+layout.server.js': return transformLayoutServerJs(code, root)
-		case '+layout.js': return transformLayoutJs(code, root)
-		case '+page.server.js': return transformPageServerJs(code, root)
-		case '+page.js': return transformPageJs(code, root)
-		case '.js': return transformJs(code)
+		case "hooks.server.js":
+			return transformHooksServerJs(code)
+		case "[language].json":
+			return transformLanguageJson(code)
+		case "+layout.server.js":
+			return transformLayoutServerJs(code, root)
+		case "+layout.js":
+			return transformLayoutJs(code, root)
+		case "+page.server.js":
+			return transformPageServerJs(code, root)
+		case "+page.js":
+			return transformPageJs(code, root)
+		case ".js":
+			return transformJs(code)
 	}
 }
 
 const transformHooksServerJs = (code: string) => {
 	if (!code) {
-		const options = config.isSPA ? `
+		const options = config.isStatic || !config.languageInUrl
+			? `
 	getLanguage: () => undefined,
-` : `
+`
+			: `
 	getLanguage: ({ url }) => url.pathname.split("/")[1],
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {
@@ -120,7 +133,8 @@ export const handle = initHandleWrapper({${options}}).wrap(async ({ event, resol
 }
 
 const transformLanguageJson = (code: string) => {
-	if (!code) return `
+	if (!code)
+		return `
 import { json } from "@sveltejs/kit"
 import { getResource } from "@inlang/sdk-js/adapter-sveltekit/server"
 
@@ -132,7 +146,8 @@ export const GET = (({ params: { language } }) =>
 }
 
 const transformLayoutServerJs = (code: string, root: boolean) => {
-	if (root && !code) return `
+	if (root && !code)
+		return `
 import { initRootServerLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const load = initRootServerLayoutLoadWrapper().wrap(() => { })
@@ -143,11 +158,13 @@ export const load = initRootServerLayoutLoadWrapper().wrap(() => { })
 
 const transformLayoutJs = (code: string, root: boolean) => {
 	if (root && !code) {
-		const options = config.isSPA ? `
+		const options = !config.languageInUrl
+			? `
 	initDetectors: browser
 		? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
 		: undefined,
-`: ''
+`
+			: ""
 
 		return `
 import { browser } from "$app/environment"
@@ -178,40 +195,47 @@ const transformJs = (code: string) => {
 
 const createFilesIfNotPresent = async (...files: string[]) => {
 	// eslint-disable-next-line no-async-promise-executor
-	const results = await Promise.all(files.map(file => new Promise<boolean>((async (resolve) => {
-		const path = config.srcFolder + file
+	const results = await Promise.all(
+		files.map(
+			(file) =>
+				// eslint-disable-next-line no-async-promise-executor
+				new Promise<boolean>(async (resolve) => {
+					const path = config.srcFolder + file
 
-		await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
+					await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
 
-		let wasCreated = false
-		if (!(await doesPathExist(path))) {
-			await writeFile(path, '')
-			wasCreated = true
-		}
+					let wasCreated = false
+					if (!(await doesPathExist(path))) {
+						await writeFile(path, "")
+						wasCreated = true
+					}
 
-		resolve(wasCreated)
-	}))))
+					resolve(wasCreated)
+				}),
+		),
+	)
 
 	// returns true if a new file was created
-	return results.some(result => result)
+	return results.some((result) => result)
 }
 
-const moveFiles = async (srcDir: string, destDir: string) => Promise.all((await readdir(srcDir))
-	.map(async (file) => {
-		const destFile = join(destDir, file)
-		await mkdir(dirname(destFile), { recursive: true }).catch(() => undefined)
-		await rename(join(srcDir, file), destFile)
-	})
-)
+const moveFiles = async (srcDir: string, destDir: string) =>
+	Promise.all(
+		(await readdir(srcDir)).map(async (file) => {
+			const destFile = join(destDir, file)
+			await mkdir(dirname(destFile), { recursive: true }).catch(() => undefined)
+			await rename(join(srcDir, file), destFile)
+		}),
+	)
 
 const moveExistingRoutesIntoSubfolder = async () =>
-	moveFiles(config.srcFolder + '/routes', config.rootRoutesFolder)
+	moveFiles(config.srcFolder + "/routes", config.rootRoutesFolder)
 
 // ------------------------------------------------------------------------------------------------
 
 let viteServer: ViteDevServer | undefined
 
-const unplugin = createUnplugin(() => {
+export const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sveltekit-adapter",
 		async buildStart() {
@@ -233,7 +257,10 @@ const unplugin = createUnplugin(() => {
 				viteServer.restart() // TODO: currently it is not possible to exit the process with CTRL + C
 			}
 		},
-		transform(code, id) {
+		async transform(code, id) {
+			// code duplication
+			config = await getConfig()
+
 			const fileInformation = getFileInformation(id)
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
@@ -243,7 +270,7 @@ const unplugin = createUnplugin(() => {
 		vite: {
 			configureServer(server) {
 				viteServer = server as unknown as ViteDevServer
-			}
+			},
 		},
 		/*
 			this is how we could potentially transform our js files.
@@ -269,6 +296,3 @@ const unplugin = createUnplugin(() => {
 		*/
 	}
 })
-
-export const vitePlugin = unplugin.vite
-export const rollupPlugin = unplugin.rollup
