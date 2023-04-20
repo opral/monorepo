@@ -64,7 +64,6 @@ function followPath(
 	return target
 }
 
-
 interface MemoryFilesystem extends Filesystem {
 	_root: Map<string, Inode>
 	_specialPaths: string[]
@@ -78,16 +77,18 @@ export function createMemoryFs(): Filesystem {
 		_specialPaths: ["", ".", ".."],
 
 		dirname: function (path: string): string {
-			return path.split("/")
-			.filter(x => !this._specialPaths.includes(x))
-			.slice(0, -1)
-			.join("/")
+			return path
+				.split("/")
+				.filter((x) => !this._specialPaths.includes(x))
+				.slice(0, -1)
+				.join("/")
 		},
 
 		basename: function (path: string): string {
-			return path.split("/")
-			.filter(x => !this._specialPaths.includes(x))
-			.at(-1)!
+			return path
+				.split("/")
+				.filter((x) => !this._specialPaths.includes(x))
+				.at(-1)!
 		},
 
 		writeFile: async function (path: string, content: FileData) {
@@ -98,8 +99,7 @@ export function createMemoryFs(): Filesystem {
 		// NOTE: We don't have `Buffer` so we deviate from node behavior here
 		// and return a string.
 		readFile: async function (path: string, encoding = "utf8"): Promise<FileData> {
-
-			if (! ["utf8", "utf-8"].includes(encoding.toLowerCase()))
+			if (!["utf8", "utf-8"].includes(encoding.toLowerCase()))
 				throw new Error("Invalid encoding specified.")
 
 			const file: Inode | undefined = followPath(this._root, path)
@@ -119,14 +119,12 @@ export function createMemoryFs(): Filesystem {
 			const parentDir: Inode | undefined = followPath(
 				this._root,
 				this.dirname(path),
-				options?.recursive ?? false
+				options?.recursive ?? false,
 			)
 
 			if (!parentDir) throw new FsError("ENOENT")
-			else if (parentDir instanceof Map) 
-				parentDir.set(this.basename(path), initDir(parentDir))
-			else
-				throw new FsError("ENOTDIR")
+			else if (parentDir instanceof Map) parentDir.set(this.basename(path), initDir(parentDir))
+			else throw new FsError("ENOTDIR")
 		},
 
 		toJson: async function (): Promise<Record<string, string>> {
@@ -134,11 +132,7 @@ export function createMemoryFs(): Filesystem {
 		},
 
 		rm: async function (path: string, options: any) {
-			const parentDir: Inode | undefined = followPath(
-				this._root, 
-				this.dirname(path), 
-				false
-			)
+			const parentDir: Inode | undefined = followPath(this._root, this.dirname(path), false)
 
 			if (!parentDir) throw new FsError("ENOENT")
 
@@ -149,10 +143,8 @@ export function createMemoryFs(): Filesystem {
 						parentDir.delete(basename)
 						break
 					case "object":
-						if (options?.recursive) 
-							parentDir.delete(basename)
-						else
-							throw new FsError("EISDIR")
+						if (options?.recursive) parentDir.delete(basename)
+						else throw new FsError("EISDIR")
 						break
 					case "undefined":
 						throw new FsError("ENOENT")

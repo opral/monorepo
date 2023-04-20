@@ -1,4 +1,6 @@
-export interface FsError extends Error { code: string }
+export interface FsError extends Error {
+	code: string
+}
 
 export interface Filesystem {
 	writeFile: (path: string, content: string) => Promise<void>
