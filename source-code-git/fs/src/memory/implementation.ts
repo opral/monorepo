@@ -151,7 +151,7 @@ export function createMemoryFs(): Filesystem {
 					case "object":
 						if (options?.recursive) 
 							parentDir.delete(basename)
-						else 
+						else
 							throw new FsError("EISDIR")
 						break
 					case "undefined":
@@ -161,7 +161,7 @@ export function createMemoryFs(): Filesystem {
 		},
 
 		rmdir: async function (path: string, options: any) {
-			await this.rm(path, options)
+			await this.rm(path, { ...options, recursive: true })
 		},
 
 		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {
