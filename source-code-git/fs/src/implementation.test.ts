@@ -34,6 +34,12 @@ const runFsTestSuite = (name: string, tempDir: string, fs: Filesystem) => descri
 		expect(await fs.readFile(`${tempDir}/home/user1/documents/file1`, "utf8"))
 			.toEqual("text in the first file")
 
+		// if memoryFs, encoding does not need to be specified
+		if (tempDir === '') {
+			expect(await fs.readFile(`${tempDir}/home/user1/documents/file1`))
+				.toEqual("text in the first file")
+		}
+
 		expect(await fs.readFile(`${tempDir}/file2`, "utf8"))
 			.toEqual("text in the second file")
 	})
@@ -99,6 +105,9 @@ const runFsTestSuite = (name: string, tempDir: string, fs: Filesystem) => descri
 	test("fromJson", async () => {
 		const fsJson = await fs.toJson({ dir: tempDir })
 		await fs.rm(tempDir, { recursive: true })
+		.catch((err) => {
+			if (err.code !== "ENOENT") throw err
+		})
 		await fs.fromJson(fsJson)
 		expect(await fs.toJson({ dir: tempDir })).toEqual(fsJson)
 	})
@@ -140,7 +149,5 @@ if (process?.versions?.node) {
 	)
 }
 
-/*
 import { createMemoryFs } from  "./memory/implementation.js"
 runFsTestSuite("memory fs", "", createMemoryFs())
-*/
