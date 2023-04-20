@@ -117,12 +117,6 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
-	createEffect(() => {
-		console.log("config", !inlangConfig()?.lint?.rules)
-		console.log("selectedFilterslength", selectedFilters().length)
-		console.log("Filterslength", filters.length - 1)
-	})
-
 	const addLanguage = (language: Language) => {
 		if (languages().includes(language)) {
 			showToast({

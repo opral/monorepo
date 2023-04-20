@@ -1,6 +1,6 @@
 import { LintRule, LintedMessage, getLintReports } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
-import { For, createEffect, createSignal } from "solid-js"
+import { For, Show, createEffect, createSignal } from "solid-js"
 import type { Accessor } from "solid-js"
 
 interface ListHeaderProps {
@@ -101,25 +101,27 @@ export const ListHeader = (props: ListHeaderProps) => {
 			<div class="flex gap-2">
 				<For each={newRuleSummary()}>
 					{(rule) => (
-						<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
-							<div class="flex gap-2 items-center h-7">
-								<div class="-ml-[4px] h-5 rounded">
-									<div
-										class={
-											rule.rule.level === "warn"
-												? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
-												: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
-										}
-									>
-										{rule.amount}
+						<Show when={rule.amount !== 0}>
+							<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
+								<div class="flex gap-2 items-center h-7">
+									<div class="-ml-[4px] h-5 rounded">
+										<div
+											class={
+												rule.rule.level === "warn"
+													? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
+													: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
+											}
+										>
+											{rule.amount}
+										</div>
+									</div>
+
+									<div class="text-xs text-on-surface-variant font-medium">
+										{rule.id.includes(".") ? String(rule.id.split(".")[1]!) : String(rule.id)}
 									</div>
 								</div>
-
-								<div class="text-xs text-on-surface-variant font-medium">
-									{rule.id.includes(".") ? String(rule.id.split(".")[1]!) : String(rule.id)}
-								</div>
-							</div>
-						</sl-button>
+							</sl-button>
+						</Show>
 					)}
 				</For>
 			</div>
