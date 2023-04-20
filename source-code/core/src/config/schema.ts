@@ -112,7 +112,7 @@ export type Config = {
 		languageNegotiation?: {
 			/* default: false */
 			strict?: boolean
-			/* default: [server ? AcceptLanguageNegotiator : NavigatorNegotiator, UrlNegotiator] */
+			/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
 			strategies?: LanguageNegotiationStrategy[]
 		}
 	}

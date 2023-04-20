@@ -1,4 +1,5 @@
-import adapter from "@sveltejs/adapter-auto"
+// import adapter from "@sveltejs/adapter-auto"
+import adapter from "@sveltejs/adapter-static"
 import { inlangPreprocess } from "@inlang/sdk-js/adapter-sveltekit"
 
 /** @type {import('@sveltejs/kit').Config} */

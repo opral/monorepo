@@ -42,9 +42,9 @@ export const initConfig = async () => {
 			strict: false,
 			...config.sdk?.languageNegotiation,
 			strategies: config.sdk?.languageNegotiation?.strategies || [
+				{ type: 'url' },
 				{ type: 'accept-language-header' },
 				{ type: 'navigator' },
-				{ type: 'url' },
 			]
 		},
 	}

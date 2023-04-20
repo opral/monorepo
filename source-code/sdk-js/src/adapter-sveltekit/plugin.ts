@@ -107,18 +107,22 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 
 const transformHooksServerJs = (code: string) => {
 	if (!code) {
-		const options = config.isStatic || !config.languageInUrl
+		const options = config.languageInUrl
 			? `
-	getLanguage: () => undefined,
+	getLanguage: ({ url }) => url.pathname.split("/")[1],
 `
 			: `
-	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	getLanguage: () => undefined,
+` + config.isStatic
+				? `
+`: `
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 	},
 `
+
 		return `
 import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors/server"
@@ -184,6 +188,25 @@ const transformPageServerJs = (code: string, root: boolean) => {
 }
 
 const transformPageJs = (code: string, root: boolean) => {
+	if (!code && config.isStatic && config.languageInUrl) {
+		return `
+import { initRootPageLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { navigatorDetector } from "@inlang/sdk-js/detectors/client"
+import { browser } from "$app/environment"
+import { redirect } from "@sveltejs/kit"
+import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
+
+export const load = initRootPageLoadWrapper({
+	browser,
+	initDetectors: () => [navigatorDetector],
+	redirect: {
+		throwable: redirect,
+		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+	},
+}).wrap(async () => { })
+`
+
+	}
 	return code
 }
 
@@ -251,6 +274,10 @@ export const unplugin = createUnplugin(() => {
 				'/routes/+layout.server.js',
 				'/routes/+layout.js',
 				'/routes/+layout.svelte',
+				...(config.isStatic ? [
+					'/routes/+page.js',
+					'/routes/+page.svelte',
+				] : [])
 			)
 
 			if (hasCreatedANewFile && viteServer) {

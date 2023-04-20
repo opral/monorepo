@@ -11,7 +11,7 @@ export const getConfig = async () => {
 	const isStatic = svelteConfig.includes('@sveltejs/adapter-static')
 
 	const srcFolder = process.cwd() + "/src"
-	const rootRoutesFolder = srcFolder + "/routes/(app)" + (languageInUrl ? "" : "/[lang]")
+	const rootRoutesFolder = srcFolder + "/routes/(app)" + (languageInUrl ? "/[lang]" : "")
 
 	const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 

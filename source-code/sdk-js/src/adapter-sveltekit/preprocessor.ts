@@ -151,6 +151,7 @@ const transformSvelte = (code: string): string => {
 				.replace(/i\(/g, "$i(")
 				.replace(/language[^s]/g, "$language")
 	}
+	console.log(11, transformedCode);
 
 	return transformedCode
 }
