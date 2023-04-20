@@ -27,30 +27,27 @@ export const Gitfloat = () => {
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const [gitState, setGitState] = createSignal<"login" | "fork" | "changes" | "pullrequest">(
-		"login",
-	)
+	const gitState: () => "login" | "fork" | "pullrequest" | "changes" = () => {
+		if (localStorage?.user === undefined) {
+			return "login"
+		} else if (userIsCollaborator() === false) {
+			return "fork"
+		}
+		// if changes exist in a fork, show the pull request button
+		else if (
+			hasPushedChanges() &&
+			(unpushedChanges() ?? []).length <= 0 &&
+			githubRepositoryInformation()?.data.fork
+		) {
+			return "pullrequest"
+		}
+		// user is logged in and a collaborator, thus show changeStatus
+		return "changes"
+	}
+
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
-
-	createEffect(() => {
-		if (localStorage?.user === undefined) {
-			setGitState("login")
-		} else {
-			if (localStorage?.user && !githubRepositoryInformation()?.data.fork) {
-				setGitState("fork")
-			} else if (
-				hasPushedChanges() &&
-				(unpushedChanges() ?? []).length <= 0 &&
-				githubRepositoryInformation()?.data.fork
-			) {
-				setGitState("pullrequest")
-			} else if (userIsCollaborator() === true) {
-				setGitState("changes")
-			}
-		}
-	})
 
 	let signInDialog: SlDialog | undefined
 
