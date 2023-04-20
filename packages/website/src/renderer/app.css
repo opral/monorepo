@@ -103,9 +103,25 @@ sl-select::part(combobox) {
 }
 
 sl-select::part(combobox):hover {
-	border-color: theme(colors.on-surface);
+	border-color: theme(colors.outline);
 	background-color: theme(colors.surface-1);
 }
+
+sl-select::part(expand-icon) {
+	display: none;
+}
+
+sl-select::part(clear-button):hover {
+	--sl-input-icon-color-hover: theme(colors.on-background);
+	background: theme(colors.surface-variant);
+	border-radius: 0.125rem;
+}
+
+/* sl-select::part(tag__base) {
+	border: none;
+	color: theme(colors.info);
+	background-color: #eff0f2;
+} */
 
 sl-select::part(tags) {
 	gap: 4px;
@@ -113,6 +129,13 @@ sl-select::part(tags) {
 	line-height: 140%;
 	font-weight: 500;
 	margin-left: 0;
+}
+
+sl-select::part(tags) {
+	--sl-input-height-small: 26px;
+	--sl-color-neutral-50: theme(colors.surface-2);
+	--sl-color-neutral-200: transparent;
+	--sl-color-neutral-800: theme(colors.info);
 }
 
 sl-select::part(expand-icon) {
@@ -138,6 +161,9 @@ sl-option::part(label) {
 sl-select::part(tag) {
 	--sl-input-height-small: 26px;
 }
+sl-select::part(combobox) sl-tag {
+	--sl-input-height-small: 26px;
+}
 
 sl-tag {
 	--sl-input-height-small: 26px;
@@ -146,12 +172,40 @@ sl-input::part(base) {
 	--tw-ring-color: "#FFF";
 }
 
+sl-tag::part(base) {
+	border: none;
+	color: theme(colors.info);
+	background-color: theme(colors.surface-2);
+}
+
+sl-button::part(base) {
+	border-color: theme(colors.surface-4);
+}
+
+sl-button::part(base):hover {
+	border-color: theme(colors.surface-5);
+	background-color: theme(colors.surface-1);
+	color: theme(colors.on-background);
+}
+
 sl-button.on-inverted::part(base) {
 	background-color: theme(colors.on-inverted-surface);
 	color: theme(colors.inverted-surface);
 }
 
 sl-button.on-inverted::part(base):hover {
+	background-color: theme(colors.on-primary) !important;
 	color: theme(colors.primary);
 	border-color: var(--sl-color-neutral-300);
+}
+
+sl-menu {
+	width: 300px;
+	border: solid var(--sl-panel-border-width) var(--sl-panel-border-color);
+	border-radius: var(--sl-border-radius-medium);
+	--tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+	--tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color),
+		0 8px 10px -6px var(--tw-shadow-color);
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+		var(--tw-shadow);
 }

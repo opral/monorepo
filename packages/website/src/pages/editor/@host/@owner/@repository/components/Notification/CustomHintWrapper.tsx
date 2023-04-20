@@ -1,11 +1,11 @@
 import { createSignal } from "solid-js"
-import type { JSXElement } from "solid-js"
+// import type { JSXElement } from "solid-js"
 import type { Notification } from "./NotificationHint.jsx"
 import { NotificationPopup } from "./NotificationPopup.jsx"
 
 interface CustomHintWrapperProps {
 	notification: Notification
-	children: JSXElement
+	// children: JSXElement
 	condition: boolean
 }
 
@@ -18,7 +18,7 @@ export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
 	}
 
 	return (
-		<div class="relative z-10">
+		<div class="absolute -translate-y-3 z-10">
 			<div class={open() ? "block" : "hidden"}>
 				<NotificationPopup
 					notifications={[props.notification]}
@@ -35,7 +35,7 @@ export const CustomHintWrapper = (props: CustomHintWrapperProps) => {
 					handleClose={handleClose}
 				/>
 			</div>
-			{props.children}
+			{/* {props.children} */}
 		</div>
 	)
 }
