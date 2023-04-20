@@ -151,7 +151,6 @@ const transformSvelte = (code: string): string => {
 				.replace(/i\(/g, "$i(")
 				.replace(/language[^s]/g, "$language")
 	}
-	console.log(11, transformedCode);
 
 	return transformedCode
 }
@@ -163,7 +162,7 @@ type PreprocessMarkupArgs = {
 	filename: string
 }
 
-export const preprocessor = {
+export const preprocess = () => ({
 	async markup({ content, filename }: PreprocessMarkupArgs) {
 		const fileInformation = getFileInformation(filename)
 		// eslint-disable-next-line unicorn/no-null
@@ -171,4 +170,4 @@ export const preprocessor = {
 
 		return { code: transformCode(content, fileInformation) }
 	},
-}
+})

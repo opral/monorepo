@@ -107,13 +107,13 @@ const transformCode = (code: string, { type, root }: FileInformation) => {
 
 const transformHooksServerJs = (code: string) => {
 	if (!code) {
-		const options = config.languageInUrl
+		const options = (config.languageInUrl
 			? `
 	getLanguage: ({ url }) => url.pathname.split("/")[1],
 `
 			: `
 	getLanguage: () => undefined,
-` + config.isStatic
+`) + (config.isStatic || !config.languageInUrl
 				? `
 `: `
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
@@ -121,7 +121,7 @@ const transformHooksServerJs = (code: string) => {
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 	},
-`
+`)
 
 		return `
 import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
@@ -274,7 +274,7 @@ export const unplugin = createUnplugin(() => {
 				'/routes/+layout.server.js',
 				'/routes/+layout.js',
 				'/routes/+layout.svelte',
-				...(config.isStatic ? [
+				...(config.isStatic && config.languageInUrl ? [
 					'/routes/+page.js',
 					'/routes/+page.svelte',
 				] : [])

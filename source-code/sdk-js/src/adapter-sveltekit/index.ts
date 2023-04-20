@@ -1,2 +1,2 @@
 export { unplugin as inlangPlugin } from "./plugin.js"
-export { preprocessor as inlangPreprocess } from "./preprocessor.js"
+export { preprocess as inlangPreprocess } from "./preprocessor.js"
