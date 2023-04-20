@@ -178,11 +178,11 @@ sl-tag::part(base) {
 	background-color: theme(colors.surface-2);
 }
 
-sl-button::part(base) {
+sl-button[variant="default"]::part(base) {
 	border-color: theme(colors.surface-4);
 }
 
-sl-button::part(base):hover {
+sl-button[variant="default"]::part(base):hover {
 	border-color: theme(colors.surface-5);
 	background-color: theme(colors.surface-1);
 	color: theme(colors.on-background);
