@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, onCleanup, Show } from "solid-js"
+import { createEffect, createSignal, JSXElement, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
