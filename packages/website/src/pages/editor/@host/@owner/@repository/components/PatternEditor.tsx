@@ -157,7 +157,8 @@ export function PatternEditor(props: {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-		const updatedResource = query(resource()).upsert({ message: _copy! })
+		const [updatedResource] = query(resource()).upsert({ message: _copy! })
+
 		setResources([
 			...(resources.filter(
 				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
@@ -222,7 +223,7 @@ export function PatternEditor(props: {
 			if (lintReports) {
 				lintReports.map((lint) => {
 					notifications.push({
-						notificationTitle: lint.id.split(".")[1]!,
+						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
 						notificationType: lint.level,
 					})
