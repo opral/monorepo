@@ -111,7 +111,8 @@ export function PatternEditor(props: {
 			return
 		}
 		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
-		const updatedResource = query(resource()).upsert({ message: _copy! })
+		const [updatedResource] = query(resource()).upsert({ message: _copy! })
+
 		setResources([
 			...(resources.filter(
 				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
