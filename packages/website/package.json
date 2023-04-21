@@ -57,6 +57,7 @@
 		"@tiptap/core": "^2.0.3",
 		"@tiptap/pm": "^2.0.3",
 		"@tiptap/starter-kit": "^2.0.3",
+		"@tiptap/extension-placeholder": "^2.0.3",
 		"solid-tiptap": "^0.6.0"
 	},
 	"devDependencies": {
