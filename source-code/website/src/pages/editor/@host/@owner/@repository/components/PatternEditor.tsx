@@ -1,8 +1,12 @@
 import { createEffect, createSignal, Show } from "solid-js"
+import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
+import Document from "@tiptap/extension-document"
+import Paragraph from "@tiptap/extension-paragraph"
+import Text from "@tiptap/extension-text"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
-import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
+import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import { clickOutside } from "@src/directives/clickOutside.js"
@@ -34,6 +38,54 @@ export function PatternEditor(props: {
 
 	let machineLearningWarningDialog: SlDialog | undefined
 
+	/** whether the pattern is focused */
+	const [isFocused, setIsFocused] = createSignal(false)
+
+	/** the value of the pattern */
+	const [textValue, setTextValue] = createSignal(
+		// eslint-disable-next-line solid/reactivity
+		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
+	)
+
+	//editor
+	let textArea!: HTMLDivElement
+
+	const editor = createTiptapEditor(() => ({
+		element: textArea!,
+		extensions: [Document, Paragraph, Text],
+		editorProps: {
+			attributes: {
+				class: "focus:outline-none",
+			},
+		},
+		content: textValue()
+			? {
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: textValue(),
+								},
+							],
+						},
+					],
+			  }
+			: {},
+	}))
+
+	createEffect(() => {
+		if (editor) {
+			const json = useEditorJSON(() => editor())
+			const updatedText = json().content[0].content ? json().content[0].content[0].text : undefined
+			if (updatedText) {
+				setTextValue(updatedText)
+			}
+		}
+	})
+
 	/** throw if unimplemented features are used  */
 	createEffect(() => {
 		if (
@@ -49,15 +101,6 @@ export function PatternEditor(props: {
 			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
-
-	/** whether the pattern is focused */
-	const [isFocused, setIsFocused] = createSignal(false)
-
-	/** the value of the pattern */
-	const [textValue, setTextValue] = createSignal(
-		// eslint-disable-next-line solid/reactivity
-		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
-	)
 
 	/** the resource the message belongs to */
 	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
@@ -97,9 +140,12 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	const hasChanges = () =>
-		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== textValue() &&
-		textValue() !== ""
+	const hasChanges = () => {
+		return (
+			(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== textValue() &&
+			textValue() !== ""
+		)
+	}
 
 	/**
 	 * Saves the changes of the message.
@@ -116,6 +162,7 @@ export function PatternEditor(props: {
 			...(resources.filter(
 				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
 			) as Resource[]),
+			//@ts-ignore
 			updatedResource as Resource,
 		])
 		showToast({
@@ -200,10 +247,10 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	let textArea: SlTextarea
+	//set focus
 	const handleFocus = () => {
 		setIsFocused(true)
-		textArea?.focus()
+		editor().chain().focus()
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
@@ -248,7 +295,7 @@ export function PatternEditor(props: {
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
-			<sl-textarea
+			{/* <sl-textarea
 				ref={textArea}
 				class="grow"
 				prop:resize="auto"
@@ -266,7 +313,17 @@ export function PatternEditor(props: {
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 				onKeyDown={(event) => handleShortcut(event)}
+			/> */}
+			{/* tiptap */}
+
+			<div
+				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
+				id={props.id + "-" + props.language}
+				ref={textArea}
+				onKeyDown={(event) => handleShortcut(event)}
+				onFocus={() => setIsFocused(true)}
 			/>
+
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
