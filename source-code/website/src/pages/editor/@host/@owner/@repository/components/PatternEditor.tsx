@@ -3,6 +3,7 @@ import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
+import Placeholder from "@tiptap/extension-placeholder"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -41,24 +42,30 @@ export function PatternEditor(props: {
 	/** whether the pattern is focused */
 	const [isFocused, setIsFocused] = createSignal(false)
 
-	/** the value of the pattern */
-	const [textValue, setTextValue] = createSignal(
-		// eslint-disable-next-line solid/reactivity
-		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
-	)
+	createEffect(() => {
+		console.log(props.id + isFocused())
+	})
 
 	//editor
 	let textArea!: HTMLDivElement
 
 	const editor = createTiptapEditor(() => ({
 		element: textArea!,
-		extensions: [Document, Paragraph, Text],
+		extensions: [
+			Document,
+			Paragraph,
+			Text,
+			Placeholder.configure({
+				emptyEditorClass: "is-editor-empty",
+				placeholder: "Enter translation...",
+			}),
+		],
 		editorProps: {
 			attributes: {
 				class: "focus:outline-none",
 			},
 		},
-		content: textValue()
+		content: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value
 			? {
 					type: "doc",
 					content: [
@@ -67,7 +74,7 @@ export function PatternEditor(props: {
 							content: [
 								{
 									type: "text",
-									text: textValue(),
+									text: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
 								},
 							],
 						},
@@ -76,15 +83,40 @@ export function PatternEditor(props: {
 			: {},
 	}))
 
-	createEffect(() => {
-		if (editor) {
+	// access tiptap json
+	const getTextValue = () => {
+		if (editor()) {
 			const json = useEditorJSON(() => editor())
-			const updatedText = json().content[0].content ? json().content[0].content[0].text : undefined
-			if (updatedText) {
-				setTextValue(updatedText)
+			if (json()) {
+				const data = json()
+				return data.content
+					.filter((p: any) => p.content)
+					.map((p: any) => p.content)
+					.flat()
+					.map((p: any) => p.text)
+					.join("\n")
 			}
 		}
-	})
+	}
+
+	const setTextValue = (updatedText: string) => {
+		if (editor()) {
+			editor().commands.setContent({
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{
+								type: "text",
+								text: updatedText,
+							},
+						],
+					},
+				],
+			})
+		}
+	}
 
 	/** throw if unimplemented features are used  */
 	createEffect(() => {
@@ -141,10 +173,15 @@ export function PatternEditor(props: {
 	// );
 
 	const hasChanges = () => {
-		return (
-			(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== textValue() &&
-			textValue() !== ""
-		)
+		const _updatedText = getTextValue()
+		if (_updatedText) {
+			return (
+				(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText &&
+				_updatedText !== ""
+			)
+		} else {
+			return false
+		}
 	}
 
 	/**
@@ -152,7 +189,7 @@ export function PatternEditor(props: {
 	 */
 	const handleCommit = () => {
 		const _copy = copy()
-		const _textValue = textValue()
+		const _textValue = getTextValue()
 		if (_textValue === undefined) {
 			return
 		}
@@ -275,7 +312,7 @@ export function PatternEditor(props: {
 					element,
 					// only close the action bar if no outstanding changes exist
 					// eslint-disable-next-line solid/reactivity
-					() => hasChanges() === false && setIsFocused(false),
+					() => setIsFocused(false),
 				),
 			]}
 			onClick={() => {
@@ -329,7 +366,7 @@ export function PatternEditor(props: {
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={isFocused()}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === "" || textValue() === undefined}>
+						<Show when={getTextValue() === "" || getTextValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
@@ -345,7 +382,7 @@ export function PatternEditor(props: {
 								Machine translate
 							</sl-button>
 						</Show>
-						<Show when={hasChanges()}>
+						<Show when={hasChanges() && isFocused()}>
 							<sl-button
 								prop:variant="primary"
 								prop:size="small"
@@ -397,7 +434,7 @@ export function PatternEditor(props: {
 							onClick={() => {
 								setLocalStorage("showMachineTranslationWarning", false)
 								machineLearningWarningDialog?.hide()
-								handleMachineTranslate()
+								//handleMachineTranslate()
 							}}
 						>
 							Proceed with machine translating

@@ -209,3 +209,11 @@ sl-menu {
 	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
 		var(--tw-shadow);
 }
+
+.ProseMirror p.is-editor-empty:first-child::before {
+	color: #adb5bd;
+	content: attr(data-placeholder);
+	float: left;
+	height: 0;
+	pointer-events: none;
+}
