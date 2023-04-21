@@ -47,7 +47,6 @@ export const Gitfloat = () => {
 
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
-	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
 
 	let signInDialog: SlDialog | undefined
 
@@ -125,19 +124,15 @@ export const Gitfloat = () => {
 		}
 	}
 
-	createEffect(() => {
-		if (gitState() === "pullrequest") {
-			setPullrequestUrl(
-				`https://github.com/${
-					githubRepositoryInformation()?.data.parent?.full_name
-				}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
-					githubRepositoryInformation()?.data.name
-				}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
-					(currentPageContext.routeParams as EditorRouteParams).owner
-				}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`,
-			)
-		}
-	})
+	const pullrequestUrl = () => {
+		return `https://github.com/${
+			githubRepositoryInformation()?.data.parent?.full_name
+		}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
+			githubRepositoryInformation()?.data.name
+		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
+			(currentPageContext.routeParams as EditorRouteParams).owner
+		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
+	}
 
 	interface GitfloatData {
 		text: string
@@ -153,7 +148,7 @@ export const Gitfloat = () => {
 
 	const data: GitFloatArray = {
 		login: {
-			text: "You are in preview mode",
+			text: "Sign in to make changes",
 			buttontext: "Sign in",
 			icon: () => {
 				return <IconGithub />
@@ -183,7 +178,6 @@ export const Gitfloat = () => {
 					repository: routeParams().repository,
 				})
 				setHasPushedChanges(false)
-				console.log("open pull request")
 			},
 		},
 	}
