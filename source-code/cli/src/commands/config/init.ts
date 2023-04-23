@@ -34,7 +34,6 @@ export const init = new Command()
 			rpcSpinner.text = `Generating config file with AI 🤖 ... Iteration ${assumedIteration}/3`
 		}, 9000)
 		const [configFile, exception] = await rpc.generateConfigFile({
-			// @ts-expect-error fs is not a valid type for the filesystem but works
 			fs,
 			path: "./",
 		})
