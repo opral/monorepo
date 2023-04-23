@@ -1,4 +1,4 @@
-export type FileData = string | Uint8Array
+export type FileData = string
 
 export interface FilesystemError extends Error {
 	code: string
