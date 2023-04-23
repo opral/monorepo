@@ -1,4 +1,4 @@
-import type { NodeishFilesystem, Filesystem } from "./schema.js"
+import type { NodeishFilesystem, Filesystem, FileData } from "./schema.js"
 import type { MemoryFilesystem } from "./schema-internal.js"
 
 /* eslint-env node */
@@ -50,7 +50,7 @@ export function fromNodeFs(nodeFs: NodeishFilesystem): MemoryFilesystem {
 				.at(-1)!
 		},
 
-		writeFile: async function (path: string, content: string) {
+		writeFile: async function (path: string, content: FileData) {
 			const parentDir = await this.dirname(path)
 			path = await filterPath(path)
 			try {
@@ -64,9 +64,13 @@ export function fromNodeFs(nodeFs: NodeishFilesystem): MemoryFilesystem {
 			}
 		},
 
-		readFile: async function (path: string, options: any = { encoding: "utf8" }) {
+		readFile: async function (path: string): Promise<FileData> {
 			path = await filterPath(path)
-			return nodeFs.readFile(path, options)
+			const data = await nodeFs.readFile(path, { encoding: "utf8" })
+			if (typeof data !== "string")
+				throw new Error("readFile with utf8 encoding did not return string.")
+
+			return data
 		},
 
 		readdir: async function (path: string) {
