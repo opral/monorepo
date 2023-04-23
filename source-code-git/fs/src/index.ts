@@ -1,2 +1,4 @@
-export type { Filesystem } from "./schema.js"
-export { createMemoryFs } from "./memory/index.js"
+export type { Filesystem, FileData, FilesystemError } from "./schema.js"
+export { createMemoryFs } from "./createMemoryFs.js"
+export { fromNodeFs } from "./fromNodeFs.js"
+export { toNodeFs } from "./toNodeFs.js"

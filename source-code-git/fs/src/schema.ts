@@ -1,14 +1,18 @@
-export interface FsError extends Error {
+export type FileData = string | Uint8Array
+
+export interface FilesystemError extends Error {
 	code: string
+	path: string
 }
 
 export interface Filesystem {
-	writeFile: (path: string, content: string) => Promise<void>
-	readFile: (path: string, encoding?: string) => Promise<string>
+	dirname: (path: string) => Promise<string>
+	basename: (path: string) => Promise<string>
+	writeFile: (path: string, content: FileData) => Promise<void>
+	readFile: (path: string) => Promise<FileData>
 	readdir: (path: string) => Promise<string[]>
-	mkdir: (path: string, options?: any) => Promise<void>
-	rmdir: (path: string, options?: any) => Promise<void>
-	rm: (path: string, options?: any) => Promise<void>
+	mkdir: (path: string) => Promise<void>
+	rm: (path: string) => Promise<void>
 	/**
 	 * Serializes the filesystem to a JSON string.
 	 *
@@ -40,4 +44,16 @@ export interface Filesystem {
 		dir?: string
 	}) => Promise<Record<string, any>>
 	fromJson: (json: Record<string, string>) => Promise<Filesystem>
+}
+
+export interface NodeishFilesystem {
+	writeFile: (path: string, content: string) => Promise<void>
+	readFile: (
+		path: string,
+		options?: { encoding?: BufferEncoding } | BufferEncoding,
+	) => Promise<string | Buffer>
+	readdir: (path: string) => Promise<string[]>
+	mkdir: (path: string, options?: any) => Promise<void>
+	rm: (path: string, options?: any) => Promise<void>
+	rmdir: (path: string, options?: any) => Promise<void>
 }
