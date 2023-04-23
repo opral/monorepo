@@ -1,5 +1,6 @@
 import { Command } from "commander"
 import fs from "node:fs/promises"
+import { fromNodeFs } from "@inlang-git/fs"
 import { rpc } from "@inlang/rpc"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
@@ -34,7 +35,7 @@ export const init = new Command()
 			rpcSpinner.text = `Generating config file with AI 🤖 ... Iteration ${assumedIteration}/3`
 		}, 9000)
 		const [configFile, exception] = await rpc.generateConfigFile({
-			fs,
+			fs: fromNodeFs(fs),
 			path: "./",
 		})
 		clearInterval(interval)
