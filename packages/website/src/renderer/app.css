@@ -27,6 +27,8 @@
 	--sl-color-primary-800: var(--sl-color-cyan-800);
 	--sl-color-primary-900: var(--sl-color-cyan-900);
 	--sl-color-primary-950: var(--sl-color-cyan-950);
+
+	--sl-input-font-family: "Inter", sans-serif;
 }
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
