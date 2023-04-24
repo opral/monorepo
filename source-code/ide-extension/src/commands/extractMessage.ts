@@ -68,20 +68,19 @@ export const extractMessageCommand = {
 			(resource) => resource.languageTag.name === referenceLanguage,
 		)
 		if (referenceResource) {
-			const newResource = query(referenceResource).upsert({ message })
-			if (newResource.isOk) {
-				const resources = state().resources.map((resource) =>
-					resource.languageTag.name === referenceLanguage ? newResource.unwrap() : resource,
-				)
-				await writeResources({
-					config: state().config,
-					resources,
-				})
-				// update resources in extension state
-				setState({ ...state(), resources })
-			} else {
-				return vscode.window.showErrorMessage("Couldn't upsert new message.")
+			const [newResource, exception] = query(referenceResource).upsert({ message })
+			if (exception) {
+				return vscode.window.showErrorMessage("Couldn't upsert new message. ", exception.message)
 			}
+			const resources = state().resources.map((resource) =>
+				resource.languageTag.name === referenceLanguage ? newResource : resource,
+			)
+			await writeResources({
+				config: state().config,
+				resources,
+			})
+			// update resources in extension state
+			setState({ ...state(), resources })
 		}
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)

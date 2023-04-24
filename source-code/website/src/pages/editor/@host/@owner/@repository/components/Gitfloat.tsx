@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, onCleanup, Show } from "solid-js"
+import { createEffect, createSignal, JSXElement, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -27,30 +27,26 @@ export const Gitfloat = () => {
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const [gitState, setGitState] = createSignal<"login" | "fork" | "changes" | "pullrequest">(
-		"login",
-	)
+	const gitState: () => "login" | "fork" | "pullrequest" | "changes" = () => {
+		if (localStorage?.user === undefined) {
+			return "login"
+		} else if (userIsCollaborator() === false) {
+			return "fork"
+		}
+		// if changes exist in a fork, show the pull request button
+		else if (
+			hasPushedChanges() &&
+			(unpushedChanges() ?? []).length <= 0 &&
+			githubRepositoryInformation()?.data.fork
+		) {
+			return "pullrequest"
+		}
+		// user is logged in and a collaborator, thus show changeStatus
+		return "changes"
+	}
+
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
-	const [pullrequestUrl, setPullrequestUrl] = createSignal<string | undefined>(undefined)
-
-	createEffect(() => {
-		if (localStorage?.user === undefined) {
-			setGitState("login")
-		} else {
-			if (localStorage?.user && !githubRepositoryInformation()?.data.fork) {
-				setGitState("fork")
-			} else if (
-				hasPushedChanges() &&
-				(unpushedChanges() ?? []).length <= 0 &&
-				githubRepositoryInformation()?.data.fork
-			) {
-				setGitState("pullrequest")
-			} else if (userIsCollaborator() === true) {
-				setGitState("changes")
-			}
-		}
-	})
 
 	let signInDialog: SlDialog | undefined
 
@@ -128,19 +124,15 @@ export const Gitfloat = () => {
 		}
 	}
 
-	createEffect(() => {
-		if (gitState() === "pullrequest") {
-			setPullrequestUrl(
-				`https://github.com/${
-					githubRepositoryInformation()?.data.parent?.full_name
-				}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
-					githubRepositoryInformation()?.data.name
-				}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
-					(currentPageContext.routeParams as EditorRouteParams).owner
-				}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`,
-			)
-		}
-	})
+	const pullrequestUrl = () => {
+		return `https://github.com/${
+			githubRepositoryInformation()?.data.parent?.full_name
+		}/compare/${currentBranch()}...${githubRepositoryInformation()?.data.owner.login}:${
+			githubRepositoryInformation()?.data.name
+		}:${currentBranch()}?expand=1;title=Update%20translations;body=Describe%20the%20changes%20you%20have%20conducted%20here%0A%0APreview%20the%20messages%20on%20https%3A%2F%2Finlang.com%2Fgithub.com%2F${
+			(currentPageContext.routeParams as EditorRouteParams).owner
+		}%2F${(currentPageContext.routeParams as EditorRouteParams).repository}%20.`
+	}
 
 	interface GitfloatData {
 		text: string
@@ -156,7 +148,7 @@ export const Gitfloat = () => {
 
 	const data: GitFloatArray = {
 		login: {
-			text: "You are in preview mode",
+			text: "Sign in to make changes",
 			buttontext: "Sign in",
 			icon: () => {
 				return <IconGithub />
@@ -186,7 +178,6 @@ export const Gitfloat = () => {
 					repository: routeParams().repository,
 				})
 				setHasPushedChanges(false)
-				console.log("open pull request")
 			},
 		},
 	}

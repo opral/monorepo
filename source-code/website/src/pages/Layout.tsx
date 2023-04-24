@@ -245,19 +245,27 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						>
 							Discord
 						</a>
+					</div>
+					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2">
+						<p class="font-semibold text-surface-900">Let's talk</p>
+
+						<a
+							href="mailto:hello@inlang.com"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Get in Touch
+						</a>
 						<a
 							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Join the Team
 						</a>
-					</div>
-					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2">
-						<p class="font-semibold text-surface-900">Let's talk</p>
-						<a href="mailto:hello@inlang.com">
-							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md">
-								Get in Touch
-							</button>
+						<a
+							href="https://github.com/inlang/inlang/discussions/categories/feedback"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Feedback
 						</a>
 					</div>
 					<div class="flex visible xl:invisible w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 xl:hidden flex-col gap-6 py-10 rounded">

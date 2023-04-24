@@ -4,6 +4,7 @@ export type LocalStorageSchema = {
 	 */
 	user?: {
 		username: string
+		email: string
 		avatarUrl: string
 	}
 	/**
