@@ -13,7 +13,7 @@ export async function defineConfig(env) {
 	const plugin = /** @type { any } */ (_plugin)
 
 	const pluginConfig = {
-		pathPattern: "./locales/{language}.json",
+		pathPattern: "./languages/{language}.json",
 	}
 
 	return {
@@ -21,5 +21,13 @@ export async function defineConfig(env) {
 		languages: await plugin.getLanguages({ ...env, pluginConfig }),
 		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
 		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
+		sdk: {
+			languageNegotiation: {
+				strategies: [
+					{ type: 'navigator' },
+					{ type: 'localStorage' },
+				]
+			}
+		}
 	}
 }
