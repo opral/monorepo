@@ -1,63 +1,23 @@
-import { getConfig } from "./config.js"
 
-const REGEX_INLANG_SDK_IMPORT = /.*import\s*{\s*(.*)\s*}\s*from\s+['"]@inlang\/sdk-js['"]/g
-
-const srcFolder = process.cwd() + "/src"
-
-const config = await getConfig()
+import type { Config } from '../config.js'
+import type { FileInformation } from './preprocessor.js'
 
 // ------------------------------------------------------------------------------------------------
 
-type FileType = "+layout.svelte" | "+page.svelte" | ".svelte"
-
-type FileInformation = {
-	type: FileType
-	root: boolean
-}
-
-const getFileInformation = (id: string): FileInformation | undefined => {
-	if (!id.startsWith(srcFolder)) return undefined
-
-	const path = id.replace(srcFolder, "")
-
-	if (path.endsWith("/+layout.svelte")) {
-		return {
-			type: "+layout.svelte",
-			root: path.endsWith("/routes/+layout.svelte"),
-		}
-	}
-
-	if (path.endsWith("/+page.svelte")) {
-		return {
-			type: "+page.svelte",
-			root: path.endsWith("/routes/+page.svelte"),
-		}
-	}
-
-	if (path.endsWith(".svelte")) {
-		return {
-			type: ".svelte",
-			root: false,
-		}
-	}
-
-	return undefined
-}
-
-// ------------------------------------------------------------------------------------------------
-
-const transformCode = (code: string, { type, root }: FileInformation) => {
+export const transformCode = (config: Config, code: string, { type, root }: FileInformation) => {
 	switch (type) {
 		case "+layout.svelte":
-			return transformLayoutSvelte(code, root)
+			return transformLayoutSvelte(config, code, root)
 		case "+page.svelte":
-			return transformPageSvelte(code, root)
+			return transformPageSvelte(config, code, root)
 		case ".svelte":
-			return transformSvelte(code)
+			return transformSvelte(config, code)
 	}
 }
 
-const transformLayoutSvelte = (code: string, root: boolean) => {
+// ------------------------------------------------------------------------------------------------
+
+const transformLayoutSvelte = (config: Config, code: string, root: boolean) => {
 	if (root) {
 		const imports = config.languageInUrl
 			? `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"`
@@ -104,12 +64,18 @@ ${template}
 `
 	}
 
-	return transformSvelte(code)
+	return transformSvelte(config, code)
 }
 
-const transformPageSvelte = (code: string, root: boolean) => {
-	return transformSvelte(code)
+// ------------------------------------------------------------------------------------------------
+
+const transformPageSvelte = (config: Config, code: string, root: boolean) => {
+	return transformSvelte(config, code)
 }
+
+// ------------------------------------------------------------------------------------------------
+
+const REGEX_INLANG_SDK_IMPORT = /.*import\s*{\s*(.*)\s*}\s*from\s+['"]@inlang\/sdk-js['"]/g
 
 // TODO: fix this soon !!
 // supports multiple imports
@@ -117,7 +83,7 @@ const transformPageSvelte = (code: string, root: boolean) => {
 // no other variable can be named `i` or `language`
 // no other code snippet can contain `i(`
 // no other code snippet can contain `language`
-const transformSvelte = (code: string): string => {
+const transformSvelte = (config: Config, code: string): string => {
 	let transformedCode: string = code
 
 	let match = REGEX_INLANG_SDK_IMPORT.exec(transformedCode)
@@ -154,20 +120,3 @@ const transformSvelte = (code: string): string => {
 
 	return transformedCode
 }
-
-// ------------------------------------------------------------------------------------------------
-
-type PreprocessMarkupArgs = {
-	content: string
-	filename: string
-}
-
-export const preprocess = () => ({
-	async markup({ content, filename }: PreprocessMarkupArgs) {
-		const fileInformation = getFileInformation(filename)
-		// eslint-disable-next-line unicorn/no-null
-		if (!fileInformation) return null
-
-		return { code: transformCode(content, fileInformation) }
-	},
-})

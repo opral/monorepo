@@ -34,8 +34,10 @@ export const initConfig = async () => {
 
 
 	// TODO: validate sdk related once we add entries to it
-	// set defaults
 
+	// set defaults
+	// TODO: set defaults for the IDE extension
+	// TODO: setting defaults needs to happen inside `defineConfig` so the IDE extension can use them
 	config.sdk = {
 		...config.sdk,
 		languageNegotiation: {

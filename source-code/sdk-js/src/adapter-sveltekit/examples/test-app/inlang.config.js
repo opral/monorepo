@@ -21,13 +21,13 @@ export async function defineConfig(env) {
 		languages: await plugin.getLanguages({ ...env, pluginConfig }),
 		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
 		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
-		// sdk: {
-		// 	languageNegotiation: {
-		// 		strategies: [
-		// 			{ type: 'navigator' },
-		// 			{ type: 'localStorage' },
-		// 		]
-		// 	}
-		// }
+		sdk: {
+			languageNegotiation: {
+				strategies: [
+					{ type: 'navigator' },
+					{ type: 'localStorage' },
+				]
+			}
+		}
 	}
 }
