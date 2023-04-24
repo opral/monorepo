@@ -4,6 +4,7 @@ import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
 import Placeholder from "@tiptap/extension-placeholder"
+import History from "@tiptap/extension-history"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -58,6 +59,9 @@ export function PatternEditor(props: {
 			Placeholder.configure({
 				emptyEditorClass: "is-editor-empty",
 				placeholder: "Enter translation...",
+			}),
+			History.configure({
+				depth: 10,
 			}),
 		],
 		editorProps: {
