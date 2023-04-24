@@ -21,7 +21,7 @@ export const getConfig = async (): Promise<Config> => {
 	const svelteConfig = await readFile("svelte.config.js", "utf-8")
 
 	const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
-	const isStatic = svelteConfig.includes('@sveltejs/adapter-static')
+	const isStatic = svelteConfig.includes('@sveltejs/adapter-static') // TODO: static means if `prerender` is set to true at the root
 
 	const srcFolder = cwd + "/src"
 	const rootRoutesFolder = srcFolder + "/routes/(app)" + (languageInUrl ? "/[lang]" : "")

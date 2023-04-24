@@ -1,3 +1,4 @@
+import { dirname } from "node:path"
 import { getConfig } from "../config.js"
 import { transformCode } from './transforms.js'
 
@@ -13,17 +14,20 @@ const getFileInformation = (srcFolder: string, id: string): FileInformation | un
 
 	const path = id.replace(srcFolder, "")
 
+	const dir = dirname(path)
+	const root = dir.endsWith('/routes')
+
 	if (path.endsWith("/+layout.svelte")) {
 		return {
 			type: "+layout.svelte",
-			root: path.endsWith("/routes/+layout.svelte"),
+			root,
 		}
 	}
 
 	if (path.endsWith("/+page.svelte")) {
 		return {
 			type: "+page.svelte",
-			root: path.endsWith("/routes/+page.svelte"),
+			root,
 		}
 	}
 
