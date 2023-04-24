@@ -2,7 +2,7 @@ import { dirname } from "node:path"
 import { getConfig } from "../config.js"
 import { transformCode } from './transforms.js'
 
-type FileType = "+layout.svelte" | "+page.svelte" | ".svelte"
+type FileType = "+layout.svelte" | "+page.svelte" | "*.svelte"
 
 export type FileInformation = {
 	type: FileType
@@ -33,7 +33,7 @@ const getFileInformation = (srcFolder: string, id: string): FileInformation | un
 
 	if (path.endsWith(".svelte")) {
 		return {
-			type: ".svelte",
+			type: "*.svelte",
 			root: false,
 		}
 	}

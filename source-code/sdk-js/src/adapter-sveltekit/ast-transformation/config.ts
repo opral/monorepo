@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { initConfig } from "../../config/index.js"
 import { doesPathExist } from './utils.js'
 
-export type Config = {
+export type TransformConfig = {
 	languageInUrl: boolean
 	isStatic: boolean
 	srcFolder: string
@@ -10,11 +10,11 @@ export type Config = {
 	hasAlreadyBeenInitialized: boolean
 }
 
-let cachedConfig: Config | undefined
+let cachedConfig: TransformConfig | undefined
 
 const cwd = process.cwd()
 
-export const getConfig = async (): Promise<Config> => {
+export const getConfig = async (): Promise<TransformConfig> => {
 	if (cachedConfig) return cachedConfig
 
 	const inlangConfig = await initConfig()

@@ -2,7 +2,7 @@ import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { createUnplugin } from "unplugin"
 import type { ViteDevServer } from "vite"
-import { Config, getConfig, resetConfig } from '../config.js'
+import { TransformConfig, getConfig, resetConfig } from '../config.js'
 import { doesPathExist } from '../utils.js'
 import { transformCode } from './transforms.js'
 
@@ -13,14 +13,14 @@ type FileType =
 	| "+layout.js"
 	| "+page.server.js"
 	| "+page.js"
-	| ".js"
+	| "*.js"
 
 export type FileInformation = {
 	type: FileType
 	root: boolean
 }
 
-const getFileInformation = (config: Config, id: string): FileInformation | undefined => {
+const getFileInformation = (config: TransformConfig, id: string): FileInformation | undefined => {
 	if (!id.startsWith(config.srcFolder)) return undefined
 
 	const path = id.replace(config.srcFolder, "")
@@ -73,7 +73,7 @@ const getFileInformation = (config: Config, id: string): FileInformation | undef
 
 	if (path.endsWith(".js") || path.endsWith(".ts")) {
 		return {
-			type: ".js",
+			type: "*.js",
 			root: false,
 		}
 	}
@@ -118,7 +118,7 @@ const moveFiles = async (srcDir: string, destDir: string) =>
 		}),
 	)
 
-const moveExistingRoutesIntoSubfolder = async (config: Config) =>
+const moveExistingRoutesIntoSubfolder = async (config: TransformConfig) =>
 	moveFiles(config.srcFolder + "/routes", config.rootRoutesFolder)
 
 // ------------------------------------------------------------------------------------------------
