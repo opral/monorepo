@@ -32,7 +32,7 @@ export const addRuntimePromiseToEvent = <Event extends LoadEvent>(
 	event: Event,
 	runtimePromise: Promise<SvelteKitClientRuntime>,
 ): EventWithRuntimePromise<Event> => {
-	; (event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
+	;(event as EventWithRuntimePromise<Event>).params[inlangSymbol] = runtimePromise
 
 	return event as EventWithRuntimePromise<Event>
 }
@@ -45,7 +45,8 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(
 
 export const replaceLanguageInUrl = (url: URL, language: Language) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${url.hash
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
+			url.hash
 		}`,
 	)
 

@@ -28,11 +28,28 @@ async function readInlangConfig() {
 	return config
 }
 
-export const initConfig = () => {
-	const config = readInlangConfig()
+export const initConfig = async () => {
+	const config = await readInlangConfig()
 	if (!config) return undefined
 
+
 	// TODO: validate sdk related once we add entries to it
+
+	// set defaults
+	// TODO: set defaults for the IDE extension
+	// TODO: setting defaults needs to happen inside `defineConfig` so the IDE extension can use them
+	config.sdk = {
+		...config.sdk,
+		languageNegotiation: {
+			strict: false,
+			...config.sdk?.languageNegotiation,
+			strategies: config.sdk?.languageNegotiation?.strategies || [
+				{ type: 'url' },
+				{ type: 'accept-language-header' },
+				{ type: 'navigator' },
+			]
+		},
+	}
 
 	return config
 }
