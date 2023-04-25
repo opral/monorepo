@@ -41,6 +41,10 @@ function TheActualPage() {
 	 *    }
 	 *  }
 	 */
+
+	createEffect(() => {
+		console.log(resources)
+	})
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
