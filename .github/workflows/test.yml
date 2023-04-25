@@ -1,23 +1,41 @@
-name: Test Code
+name: Test
 
 on:
   pull_request:
     branches:
       - "main"
 
+  push:
+    branches:
+      - "main"
+
 jobs:
-  test:
+  install dependencies:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: install node
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
 
       - run: npm install --no-save
 
-      - name: run test
-        run: npm run test
+  lint:
+    needs: install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run lint
+
+  test:
+    needs: install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run test
+
+  build:
+    needs: install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
