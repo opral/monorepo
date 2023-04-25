@@ -1,7 +1,6 @@
 {
 	"name": "@inlang-git/client",
 	"type": "module",
-	"version": "0.5.3",
 	"private": true,
 	"exports": {
 		".": {
