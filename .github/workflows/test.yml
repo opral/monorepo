@@ -14,20 +14,34 @@ jobs:
     name: Install dependencies
     runs-on: ubuntu-latest
     steps:
-      # --------- START SETUP OF REPOSITORY ---------
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # not using checkout because we need to persist the repo for the next jobs
+      - name: Clone repository
+        run: |
+          git clone https://github.com/inlang/inlang.git
+          cd inlang
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
-      # --------- END SETUP OF REPOSITORY ---------
+      # use lock file to install dependencies (faster)
+      - run: npm ci
 
-      - run: npm run test
+  lint:
+    needs: install_dependencies
+    runs-on: ubuntu-latest
+    steps:
       - run: npm run lint
+
+  test:
+    needs: install_dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run test
+
+  build:
+    needs: install_dependencies
+    runs-on: ubuntu-latest
+    steps:
       - run: npm run build
