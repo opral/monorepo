@@ -3,10 +3,6 @@
 	"type": "module",
 	"private": true,
 	"exports": {
-		".": {
-			"types": "./dist/api/index.d.ts",
-			"import": "./dist/api/index.js"
-		},
 		"./raw": {
 			"types": "./dist/raw/index.d.ts",
 			"import": "./dist/raw/index.js"
