@@ -1,6 +1,6 @@
 import { test, expect, afterAll, describe } from "vitest"
 import type { Filesystem } from "../interface.js"
-import { createMemoryFs } from "../implementations/memoryFs.js"
+import { createMemoryFs } from "./memoryFs.js"
 
 describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
