@@ -1,4 +1,4 @@
-import type { Expression, Message, Placeholder, Resource } from "@inlang/core/ast"
+import type { Message, Placeholder, Resource } from "@inlang/core/ast"
 
 type BaseArgs = Record<string, unknown> | never
 
@@ -41,21 +41,14 @@ const serializeElement = (
 		case "Text":
 			return element.value
 		case "Placeholder": {
-			return serializePlaceholder(element.placeholder, args)
+			return serializePlaceholder(element, args)
 		}
 	}
 }
 
-const serializePlaceholder = (placeholder: Placeholder["placeholder"], args: BaseArgs): string => {
-	switch (placeholder.type) {
-		case "Expression":
-			return serializeExpression(placeholder.expression, args)
-	}
-}
-
-const serializeExpression = (expression: Expression["expression"], args: BaseArgs): string => {
-	switch (expression.type) {
-		case "Variable":
-			return args[expression.name] as string
+const serializePlaceholder = (placeholder: Placeholder, args: BaseArgs): string => {
+	switch (placeholder.body.type) {
+		case "VariableReference":
+			return args[placeholder.body.name] as string
 	}
 }

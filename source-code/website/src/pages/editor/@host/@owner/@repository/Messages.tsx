@@ -8,10 +8,11 @@ import { getLintReports, LintedMessage } from "@inlang/core/lint"
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
 }) {
-	const { inlangConfig, filteredLanguages, filteredLintRules, textSearch } = useEditorState()
-
+	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
+		useEditorState()
+	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
 	const referenceMessage = () => {
-		return props.messages[inlangConfig()!.referenceLanguage]
+		return props.messages[referenceLanguage()!]
 	}
 
 	/**
@@ -89,7 +90,7 @@ export function Messages(props: {
 				["hidden"]: Object.values(props.messages).every((message) => shouldShow(message) === false),
 			}}
 		>
-			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2 group-first:border-t group-first:rounded-t">
+			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
 				<h3
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
@@ -103,7 +104,7 @@ export function Messages(props: {
 						<>
 							<Show
 								when={
-									filteredLanguages().includes(language) &&
+									(filteredLanguages().includes(language) || filteredLanguages().length === 0) &&
 									// only render if visible or has been rendered before
 									(elementIsVisible() || hasBeenRendered())
 								}
