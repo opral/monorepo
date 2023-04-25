@@ -1,5 +1,5 @@
-import { createEffect, createSignal, Show } from "solid-js"
-import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
+import { createEffect, createSignal, onMount, Show } from "solid-js"
+import { createTiptapEditor, useEditorIsFocused, useEditorJSON } from "solid-tiptap"
 import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
@@ -20,6 +20,7 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
+import { F } from "../../../../../../../dist/client/assets/chunks/c17aaa17.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -40,11 +41,30 @@ export function PatternEditor(props: {
 
 	let machineLearningWarningDialog: SlDialog | undefined
 
-	/** whether the pattern is focused */
-	const [isFocused, setIsFocused] = createSignal(false)
+	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
 
+	const handleLineItemFocusIn = () => {
+		if (document.activeElement?.tagName !== "SL-BUTTON") {
+			if (document.activeElement !== textArea.children[0]) {
+				setIsLineItemFocused(false)
+			}
+		} else {
+			if (
+				document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
+			) {
+				setIsLineItemFocused(true)
+			}
+		}
+	}
 	createEffect(() => {
-		console.log(props.id + isFocused())
+		console.log(isLineItemFocused())
+	})
+
+	onMount(() => {
+		document.addEventListener("focusin", handleLineItemFocusIn)
+		return () => {
+			document.removeEventListener("focusin", handleLineItemFocusIn)
+		}
 	})
 
 	//editor
@@ -84,7 +104,7 @@ export function PatternEditor(props: {
 						},
 					],
 			  }
-			: {},
+			: undefined,
 	}))
 
 	// access tiptap json
@@ -119,6 +139,13 @@ export function PatternEditor(props: {
 					},
 				],
 			})
+		}
+	}
+
+	const getEditorFocus = () => {
+		if (editor()) {
+			const isFocus = useEditorIsFocused(() => editor())
+			return isFocus()
 		}
 	}
 
@@ -179,10 +206,11 @@ export function PatternEditor(props: {
 	const hasChanges = () => {
 		const _updatedText = getTextValue()
 		if (_updatedText) {
-			return (
-				(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText &&
-				_updatedText !== ""
-			)
+			if ((props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText) {
+				return _updatedText
+			} else {
+				return ""
+			}
 		} else {
 			return false
 		}
@@ -289,12 +317,6 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	//set focus
-	const handleFocus = () => {
-		setIsFocused(true)
-		editor().chain().focus()
-	}
-
 	const handleShortcut = (event: KeyboardEvent) => {
 		if (
 			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
@@ -311,17 +333,10 @@ export function PatternEditor(props: {
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
 		<div
-			ref={(element) => [
-				clickOutside(
-					element,
-					// only close the action bar if no outstanding changes exist
-					// eslint-disable-next-line solid/reactivity
-					() => setIsFocused(false),
-				),
-			]}
 			onClick={() => {
-				handleFocus()
+				editor().chain().focus()
 			}}
+			onFocusIn={() => setIsLineItemFocused(true)}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -363,12 +378,11 @@ export function PatternEditor(props: {
 				id={props.id + "-" + props.language}
 				ref={textArea}
 				onKeyDown={(event) => handleShortcut(event)}
-				onFocus={() => setIsFocused(true)}
 			/>
 
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
-				<Show when={isFocused()}>
+				<Show when={true}>
 					<div class="flex items-center justify-end gap-2">
 						<Show when={getTextValue() === "" || getTextValue() === undefined}>
 							<sl-button
@@ -386,7 +400,7 @@ export function PatternEditor(props: {
 								Machine translate
 							</sl-button>
 						</Show>
-						<Show when={hasChanges() && isFocused()}>
+						<Show when={hasChanges() && isLineItemFocused()}>
 							<sl-button
 								prop:variant="primary"
 								prop:size="small"
@@ -402,7 +416,7 @@ export function PatternEditor(props: {
 						</Show>
 					</div>
 				</Show>
-				<Show when={!isFocused() && hasChanges()}>
+				<Show when={!getEditorFocus() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>
 				{getNotificationHints().length !== 0 && (
