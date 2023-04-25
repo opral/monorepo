@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onMount, Show } from "solid-js"
-import { createTiptapEditor, useEditorIsFocused, useEditorJSON } from "solid-tiptap"
+import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
 import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
@@ -11,7 +11,6 @@ import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
-import { clickOutside } from "@src/directives/clickOutside.js"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
@@ -20,7 +19,7 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { F } from "../../../../../../../dist/client/assets/chunks/c17aaa17.js"
+import { getTextValue, setTextValue } from "../helper/parse.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -104,63 +103,12 @@ export function PatternEditor(props: {
 			: undefined,
 	}))
 
-	// access tiptap json
-	const getTextValue = () => {
-		if (editor()) {
-			const json = useEditorJSON(() => editor())
-			if (json()) {
-				const data = json()
-				return data.content
-					.filter((p: any) => p.content)
-					.map((p: any) => p.content)
-					.flat()
-					.map((p: any) => p.text)
-					.join("\n")
-			}
-		}
-	}
-
-	const setTextValue = (updatedText: string) => {
-		if (editor()) {
-			editor().commands.setContent({
-				type: "doc",
-				content: [
-					{
-						type: "paragraph",
-						content: [
-							{
-								type: "text",
-								text: updatedText,
-							},
-						],
-					},
-				],
-			})
-		}
-	}
-
 	const getEditorFocus = () => {
 		if (editor()) {
 			const isFocus = useEditorIsFocused(() => editor())
 			return isFocus()
 		}
 	}
-
-	/** throw if unimplemented features are used  */
-	createEffect(() => {
-		if (
-			(props.message && props.message?.pattern.elements.length > 1) ||
-			(props.message && props.message?.pattern.elements[0]?.type !== "Text")
-		) {
-			throw Error(
-				"Not implemented. Only messages with one pattern element of type Text are supported for now.",
-			)
-		}
-		// if the message is updated externally, update the text value
-		else if (props.message?.pattern.elements[0]?.value) {
-			setTextValue(String(props.message.pattern.elements[0].value))
-		}
-	})
 
 	/** the resource the message belongs to */
 	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
@@ -201,7 +149,7 @@ export function PatternEditor(props: {
 	// );
 
 	const hasChanges = () => {
-		const _updatedText = getTextValue()
+		const _updatedText = getTextValue(editor)
 		if (_updatedText) {
 			if ((props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText) {
 				return _updatedText
@@ -221,7 +169,7 @@ export function PatternEditor(props: {
 	const handleCommit = async () => {
 		setCommitIsLoading(true)
 		const _copy = copy()
-		const _textValue = getTextValue()
+		const _textValue = getTextValue(editor)
 		if (_textValue === undefined) {
 			return
 		}
@@ -291,7 +239,7 @@ export function PatternEditor(props: {
 				message: exception.message,
 			})
 		} else {
-			setTextValue(translation)
+			setTextValue(editor, translation)
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -395,7 +343,7 @@ export function PatternEditor(props: {
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={true}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={getTextValue() === "" || getTextValue() === undefined}>
+						<Show when={getTextValue(editor) === "" || getTextValue(editor) === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
