@@ -10,14 +10,15 @@ on:
       - "main"
 
 jobs:
-  setup:
+  test:
     runs-on: ubuntu-latest
     steps:
-      # not using checkout because we need to persist the repo for the next jobs
-      - name: Clone repository
-        run: git clone https://github.com/inlang/inlang.git
+      # --------- START SETUP ---------
 
-      - run: cd inlang
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
@@ -29,20 +30,13 @@ jobs:
         # use lock file to install dependencies (faster)
         run: npm ci
 
-  lint:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - run: npm run lint
+      # --------- END SETUP ---------
 
-  test:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - run: npm run test
+      - name: Lint
+        run: npm run lint
 
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - run: npm run build
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test
