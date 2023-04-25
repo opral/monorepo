@@ -27,6 +27,8 @@
 	--sl-color-primary-800: var(--sl-color-cyan-800);
 	--sl-color-primary-900: var(--sl-color-cyan-900);
 	--sl-color-primary-950: var(--sl-color-cyan-950);
+
+	--sl-input-font-family: "Inter", sans-serif;
 }
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
@@ -208,4 +210,12 @@ sl-menu {
 		0 8px 10px -6px var(--tw-shadow-color);
 	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
 		var(--tw-shadow);
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+	color: #adb5bd;
+	content: attr(data-placeholder);
+	float: left;
+	height: 0;
+	pointer-events: none;
 }
