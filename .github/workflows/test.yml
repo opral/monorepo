@@ -14,29 +14,20 @@ jobs:
     name: Install dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      # --------- START SETUP OF REPOSITORY ---------
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
 
-      - run: npm install --no-save
+      - name: Install dependencies
+        run: npm ci
+      # --------- END SETUP OF REPOSITORY ---------
 
-  lint:
-    needs: install_dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - run: npm run lint
-
-  test:
-    needs: install_dependencies
-    runs-on: ubuntu-latest
-    steps:
       - run: npm run test
-
-  build:
-    needs: install_dependencies
-    runs-on: ubuntu-latest
-    steps:
+      - run: npm run lint
       - run: npm run build
