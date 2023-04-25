@@ -109,13 +109,13 @@ export function createMemoryFs(): MemoryFilesystem {
 			followPath(this._root, path, true)
 		},
 
-		toJson: async function (): Promise<Record<string, string>> {
-			return Object.fromEntries(dirToArray(this._root, ""))
-		},
-
 		rm: async function (path: string) {
 			const parentDir: Inode | undefined = followPath(this._root, await this.dirname(path), true)
 			if (parentDir instanceof Map) parentDir.delete(await this.basename(path))
+		},
+
+		toJson: async function (): Promise<Record<string, string>> {
+			return Object.fromEntries(dirToArray(this._root, ""))
 		},
 
 		fromJson: async function (json: Record<string, string>): Promise<Filesystem> {
