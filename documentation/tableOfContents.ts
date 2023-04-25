@@ -14,6 +14,10 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./getting-started.md?raw")).default,
 		(await import("./why-inlang.md?raw")).default,
 	],
+	Frameworks: [
+		(await import("./general.md?raw")).default,
+		(await import("./sveltekit.md?raw")).default,
+	],
 	Guide: [
 		(await import("./badge.md?raw")).default,
 		(await import("./plugins.md?raw")).default,
