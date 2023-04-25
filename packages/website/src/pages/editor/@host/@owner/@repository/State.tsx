@@ -12,6 +12,7 @@ import {
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang-git/client/raw"
 import {
+	Config,
 	Config as InlangConfig,
 	EnvironmentFunctions,
 	initialize$import,
@@ -42,12 +43,6 @@ type EditorStateSchema = {
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
-	/**
-	 * The current inlang config.
-	 *
-	 * Undefined if no inlang config exists/has been found.
-	 */
-	inlangConfig: Resource<InlangConfig | undefined>
 	/**
 	 * Unpushed changes in the repository.
 	 */
@@ -93,7 +88,23 @@ type EditorStateSchema = {
 	setFsChange: Setter<Date>
 
 	/**
-	 * Filtered languages.
+	 * The current inlang config.
+	 *
+	 * Undefined if no inlang config exists/has been found.
+	 */
+	inlangConfig: Resource<InlangConfig | undefined>
+
+	doesInlangConfigExist: () => boolean
+
+	referenceLanguage: () => Language | undefined
+
+	languages: () => Language[]
+	setLanguages: Setter<Language[]>
+
+	lint: () => Config["lint"]
+
+	/**
+	 * FilterLanguages show or hide the different messages.
 	 */
 	filteredLanguages: () => Language[]
 	setFilteredLanguages: Setter<Language[]>
@@ -168,7 +179,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [filteredLanguages, setFilteredLanguages] = createSignal<string[]>([])
+	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
+	const [lint, setLint] = createSignal<Config["lint"]>()
+	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
+	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
@@ -178,7 +193,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * The reference resource.
 	 */
 	const referenceResource = () =>
-		resources.find((resource) => resource.languageTag.name === inlangConfig()?.referenceLanguage)
+		resources.find((resource) => resource.languageTag.name === referenceLanguage())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -206,7 +221,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	// re-fetched if repository has been cloned
-	const [inlangConfig] = createResource(
+	const [inlangConfig, setInlangConfig] = createResource(
 		() => {
 			if (
 				repositoryIsCloned.error ||
@@ -222,22 +237,31 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
-				config.languages =
+				const languages = // TODO: move this into setter logic
 					config.languages.sort((a, b) =>
 						// reference language should be first
 						// sort alphabetically otherwise
 						a === config.referenceLanguage
 							? -1
 							: b === config.referenceLanguage
-							? 1
-							: a.localeCompare(b),
+								? 1
+								: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
-				setFilteredLanguages(config.languages)
+				setDoesInlangConfigExist(true)
+				setLint(config.lint)
+				setReferenceLanguage(config.referenceLanguage)
+				setLanguages(languages)
+				setFilteredLanguages(languages)
 			}
 			return config
 		},
 	)
+
+	createEffect(() => {
+		const langs = languages()
+		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
+	})
 
 	// re-fetched if the file system changes
 	const [unpushedChanges] = createResource(() => {
@@ -421,19 +445,18 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * setStore function to trigger the desired side-effect.
 	 */
 	const setResources: typeof setOriginResources = (...args: any) => {
-		// @ts-ignore
-		setOriginResources(...args)
 		const localStorage = getLocalStorage()
 		const config = inlangConfig()
 		if (config === undefined || localStorage?.user === undefined) {
 			return
 		}
+
 		// write to filesystem
 		writeResources({
 			fs: fs(),
 			config,
 			setFsChange,
-			resources,
+			resources: args[0],
 			user: localStorage.user,
 		})
 	}
@@ -447,8 +470,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		if (!inlangConfig.error && inlangConfig() && fsChange()) {
 			// setting the origin store because this should not trigger
 			// writing to the filesystem.
-			// @ts-expect-error
-			readResources(inlangConfig()!).then(setOriginResources)
+			readResources(inlangConfig()!).then((r) => r && setOriginResources(r))
 		}
 	})
 
@@ -458,7 +480,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repositoryIsCloned,
 					currentBranch,
-					inlangConfig,
 					unpushedChanges,
 					githubRepositoryInformation,
 					routeParams,
@@ -467,6 +488,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setTextSearch,
 					fsChange,
 					setFsChange,
+					inlangConfig,
+					doesInlangConfigExist,
+					lint,
+					referenceLanguage,
+					languages,
+					setLanguages,
 					filteredLanguages,
 					setFilteredLanguages,
 					filteredLintRules,
@@ -630,7 +657,10 @@ async function readInlangConfig(args: {
 }
 
 async function readResources(config: InlangConfig) {
-	const resources = await config.readResources({ config })
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	const resources = await config.readResources({ config }).catch(() => {})
+	if (!resources) return
+
 	const [lintedResources] = await lint({ config, resources })
 	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
 	// console.log(allLints)
@@ -644,11 +674,14 @@ async function writeResources(args: {
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
 }) {
-	await args.config.writeResources({ ...args })
+	await args.config.writeResources({ config: args.config, resources: args.resources })
 	const status = await raw.statusMatrix({ fs: args.fs, dir: "/" })
 	const filesWithUncommittedChanges = status.filter(
-		// files with unstaged and uncommitted changes
-		(row) => row[2] === 2 && row[3] === 1,
+		(row) =>
+			// files with unstaged and uncommitted changes
+			(row[2] === 2 && row[3] === 1) ||
+			// added files
+			(row[2] === 2 && row[3] === 0),
 	)
 	// add all changes
 	for (const file of filesWithUncommittedChanges) {
@@ -660,6 +693,7 @@ async function writeResources(args: {
 		dir: "/",
 		author: {
 			name: args.user.username,
+			email: args.user.email,
 		},
 		message: "inlang: update translations",
 	})

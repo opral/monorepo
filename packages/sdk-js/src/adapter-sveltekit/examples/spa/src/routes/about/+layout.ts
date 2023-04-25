@@ -1,12 +1,6 @@
-import { browser } from "$app/environment"
-import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+import { initLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { LayoutLoad } from "./$types.js"
 
-export const load = (async ({ parent }) => {
-	if (browser) {
-		const data = await parent()
-
-		const i = getRuntimeFromData(data).i
-		console.info("about/+layout.ts", i("welcome"))
-	}
-}) satisfies LayoutLoad
+export const load = initLoadWrapper<LayoutLoad>().wrap(async (_, { i }) => {
+	console.info("about/+layout.ts", i("welcome"))
+})

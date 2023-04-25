@@ -32,12 +32,9 @@ const resource = {
 					{ type: "Text", value: "Welcome, " },
 					{
 						type: "Placeholder",
-						placeholder: {
-							type: "Expression",
-							expression: {
-								type: "Variable",
-								name: "name",
-							},
+						body: {
+							type: "VariableReference",
+							name: "name",
 						},
 					},
 					{ type: "Text", value: "!" },
