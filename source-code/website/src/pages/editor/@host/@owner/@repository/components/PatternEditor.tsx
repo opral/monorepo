@@ -56,9 +56,6 @@ export function PatternEditor(props: {
 			}
 		}
 	}
-	createEffect(() => {
-		console.log(isLineItemFocused())
-	})
 
 	onMount(() => {
 		document.addEventListener("focusin", handleLineItemFocusIn)
@@ -219,7 +216,10 @@ export function PatternEditor(props: {
 	/**
 	 * Saves the changes of the message.
 	 */
-	const handleCommit = () => {
+	const [commitIsLoading, setCommitIsLoading] = createSignal(false)
+
+	const handleCommit = async () => {
+		setCommitIsLoading(true)
 		const _copy = copy()
 		const _textValue = getTextValue()
 		if (_textValue === undefined) {
@@ -235,6 +235,10 @@ export function PatternEditor(props: {
 			//@ts-ignore
 			updatedResource as Resource,
 		])
+		//this is a dirty fix for getting focus back to the editor after commit
+		setTimeout(() => {
+			textArea.parentElement?.click()
+		}, 500)
 		showToast({
 			variant: "info",
 			title: "The change has been committed.",
@@ -246,6 +250,13 @@ export function PatternEditor(props: {
 			repository: routeParams().repository,
 		})
 	}
+
+	createEffect(() => {
+		const resource = resources.filter((resource) => resource.languageTag.name === props.language)
+		if (resource && textArea) {
+			setCommitIsLoading(false)
+		}
+	})
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -404,6 +415,7 @@ export function PatternEditor(props: {
 							<sl-button
 								prop:variant="primary"
 								prop:size="small"
+								prop:loading={commitIsLoading()}
 								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 								onClick={() => {
 									handleCommit()
@@ -416,7 +428,7 @@ export function PatternEditor(props: {
 						</Show>
 					</div>
 				</Show>
-				<Show when={!getEditorFocus() && hasChanges()}>
+				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>
 				{getNotificationHints().length !== 0 && (
