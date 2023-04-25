@@ -26,7 +26,6 @@
 		"@inlang/core": "*",
 		"@inlang/design-system": "*",
 		"@inlang/env-variables": "*",
-		"@inlang/git-sdk": "*",
 		"@inlang/rpc": "*",
 		"@inlang/telemetry": "*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
