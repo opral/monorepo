@@ -15,9 +15,7 @@ jobs:
     steps:
       # not using checkout because we need to persist the repo for the next jobs
       - name: Clone repository
-        run: |
-          git clone https://github.com/inlang/inlang.git
-          cd inlang
+        run: git clone https://github.com/inlang/inlang.git && cd inlang
 
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
@@ -25,8 +23,8 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      # use lock file to install dependencies (faster)
       - name: Install dependencies
+        # use lock file to install dependencies (faster)
         run: npm ci
 
   lint:
