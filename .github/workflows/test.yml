@@ -10,7 +10,8 @@ on:
       - "main"
 
 jobs:
-  install dependencies:
+  install_dependencies:
+    name: Install dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,19 +24,19 @@ jobs:
       - run: npm install --no-save
 
   lint:
-    needs: install dependencies
+    needs: install_dependencies
     runs-on: ubuntu-latest
     steps:
       - run: npm run lint
 
   test:
-    needs: install dependencies
+    needs: install_dependencies
     runs-on: ubuntu-latest
     steps:
       - run: npm run test
 
   build:
-    needs: install dependencies
+    needs: install_dependencies
     runs-on: ubuntu-latest
     steps:
       - run: npm run build
