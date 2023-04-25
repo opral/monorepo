@@ -1,6 +1,10 @@
 {
 	"name": "@inlang/sdk-js",
 	"type": "module",
+	"version": "0.0.0",
+	"publishConfig": {
+		"access": "public"
+	},
 	"exports": {
 		".": "./dist/core/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
@@ -27,6 +31,9 @@
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/sdk-js",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"engines": {
+		"node": ">=18"
 	},
 	"dependencies": {
 		"@inlang/core": "*",
