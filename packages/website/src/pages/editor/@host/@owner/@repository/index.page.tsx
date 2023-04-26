@@ -103,7 +103,7 @@ function TheActualPage() {
 							file system, which might lead to a new generation of software (see{" "}
 							<a
 								class="link link-primary"
-								href="https://inlang.com/documentation/the-next-git"
+								href="https://www.youtube.com/watch?v=vJ3jGgCrz2I"
 								target="_blank"
 							>
 								next git
