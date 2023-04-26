@@ -1,4 +1,4 @@
-import type { TransformConfig } from '../../config.js'
+import type { TransformConfig } from '../config.js'
 import { transformSvelte } from './*.svelte.js'
 
 export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
