@@ -239,11 +239,6 @@ export function PatternEditor(props: {
 		setTimeout(() => {
 			textArea.parentElement?.click()
 		}, 500)
-		showToast({
-			variant: "info",
-			title: "The change has been committed.",
-			message: `Don't forget to push the changes.`,
-		})
 		telemetryBrowser.capture("commit changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
