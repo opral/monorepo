@@ -30,7 +30,7 @@ Inlang also provides custom solutions that are built specifically for certain Fr
 ### Supported Frameworks
 
  - [SvelteKit](/documentation/sdk/sveltekit)
- - yYour won custom solution](/documentation/sdk/custom)
+ - [Your own custom solution](/documentation/sdk/custom)
 
 #### Your favorite frameworks is missing?
 
