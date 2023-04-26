@@ -2,18 +2,21 @@ import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { createUnplugin } from "unplugin"
 import type { ViteDevServer } from "vite"
-import { TransformConfig, getConfig, resetConfig } from '../config.js'
-import { doesPathExist } from '../utils.js'
-import { transformCode } from './transforms.js'
+import { TransformConfig, getConfig, resetConfig } from './config.js'
+import { doesPathExist } from './config.js'
+import { transformCode } from './transforms/index.js'
 
 type FileType =
 	| "hooks.server.js"
 	| "[language].json"
 	| "+layout.server.js"
 	| "+layout.js"
+	| "+layout.svelte"
 	| "+page.server.js"
 	| "+page.js"
+	| "+page.svelte"
 	| "*.js"
+	| "*.svelte"
 
 export type FileInformation = {
 	type: FileType
@@ -57,6 +60,12 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+layout.svelte")) {
+		return {
+			type: "+layout.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith("/+page.server.js") || path.endsWith("/+page.server.ts")) {
 		return {
@@ -70,10 +79,22 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+page.svelte")) {
+		return {
+			type: "+page.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith(".js") || path.endsWith(".ts")) {
 		return {
 			type: "*.js",
+			root: false,
+		}
+	}
+	if (path.endsWith(".svelte")) {
+		return {
+			type: "*.svelte",
 			root: false,
 		}
 	}
@@ -128,7 +149,7 @@ let viteServer: ViteDevServer | undefined
 export const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sdk-js-sveltekit",
-
+		enforce: 'pre', // makes sure we run before vite-plugin-svelte
 		async buildStart() {
 			const config = await getConfig()
 
