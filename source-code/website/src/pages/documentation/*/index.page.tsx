@@ -62,7 +62,7 @@ export function Page(props: PageProps) {
 					the escaping of html. it is better to show the RFC's on the website
 					and refer to github for the rendered version than to not show them at all. 
 				*/}
-						<div class="w-full justify-self-center md:p-6 md:col-span-3">
+						<div class="w-full justify-self-center mb-8 md:p-6 md:col-span-3">
 							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 								<Callout variant="warning">
 									<p>
