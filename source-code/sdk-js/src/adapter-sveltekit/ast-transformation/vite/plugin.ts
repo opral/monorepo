@@ -14,6 +14,9 @@ type FileType =
 	| "+page.server.js"
 	| "+page.js"
 	| "*.js"
+	| "+layout.svelte"
+	| "+page.svelte"
+	| "*.svelte"
 
 export type FileInformation = {
 	type: FileType
@@ -57,6 +60,12 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+layout.svelte")) {
+		return {
+			type: "+layout.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith("/+page.server.js") || path.endsWith("/+page.server.ts")) {
 		return {
@@ -70,10 +79,22 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+page.svelte")) {
+		return {
+			type: "+page.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith(".js") || path.endsWith(".ts")) {
 		return {
 			type: "*.js",
+			root: false,
+		}
+	}
+	if (path.endsWith(".svelte")) {
+		return {
+			type: "*.svelte",
 			root: false,
 		}
 	}
@@ -128,7 +149,7 @@ let viteServer: ViteDevServer | undefined
 export const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sdk-js-sveltekit",
-
+		enforce: 'pre',
 		async buildStart() {
 			const config = await getConfig()
 
