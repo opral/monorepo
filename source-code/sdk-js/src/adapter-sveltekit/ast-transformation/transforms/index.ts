@@ -14,6 +14,7 @@ import { transformLanguageJson } from './[language].json.js'
 // TODO: throw errors if something is not supported and show a guide how to add the functionality manually
 
 export const transformCode = (config: TransformConfig, code: string, { type, root }: FileInformation) => {
+	// TODO: check if .svelte files are already transformed. If yes, throw an error. Only do it once per start, as this never changes once running
 	switch (type) {
 		case "hooks.server.js":
 			return transformHooksServerJs(config, code)

@@ -149,7 +149,7 @@ let viteServer: ViteDevServer | undefined
 export const unplugin = createUnplugin(() => {
 	return {
 		name: "inlang-sdk-js-sveltekit",
-		enforce: 'pre',
+		enforce: 'pre', // makes sure we run before vite-plugin-svelte
 		async buildStart() {
 			const config = await getConfig()
 
