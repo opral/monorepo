@@ -1,10 +1,5 @@
 import { createEffect, createSignal, onMount, Show } from "solid-js"
-import { createTiptapEditor, useEditorIsFocused } from "solid-tiptap"
-import Document from "@tiptap/extension-document"
-import Paragraph from "@tiptap/extension-paragraph"
-import Text from "@tiptap/extension-text"
-import Placeholder from "@tiptap/extension-placeholder"
-import History from "@tiptap/extension-history"
+import { useEditorIsFocused, createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -19,7 +14,8 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { getTextValue, setTextValue } from "../helper/parse.js"
+import { getTextValue, setTipTapMessage } from "../helper/parse.js"
+import { getEditorConfig } from "../helper/editorSetup.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -63,45 +59,9 @@ export function PatternEditor(props: {
 		}
 	})
 
-	//editor
+	//create editor
 	let textArea!: HTMLDivElement
-
-	const editor = createTiptapEditor(() => ({
-		element: textArea!,
-		extensions: [
-			Document,
-			Paragraph,
-			Text,
-			Placeholder.configure({
-				emptyEditorClass: "is-editor-empty",
-				placeholder: "Enter translation...",
-			}),
-			History.configure({
-				depth: 10,
-			}),
-		],
-		editorProps: {
-			attributes: {
-				class: "focus:outline-none",
-			},
-		},
-		content: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value
-			? {
-					type: "doc",
-					content: [
-						{
-							type: "paragraph",
-							content: [
-								{
-									type: "text",
-									text: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
-								},
-							],
-						},
-					],
-			  }
-			: undefined,
-	}))
+	const editor = createTiptapEditor(() => getEditorConfig(textArea, props.message))
 
 	const getEditorFocus = () => {
 		if (editor()) {
@@ -149,9 +109,11 @@ export function PatternEditor(props: {
 	// );
 
 	const hasChanges = () => {
-		const _updatedText = getTextValue(editor)
+		const _updatedText =
+			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+		const ast_elements = props.message?.pattern.elements
 		if (_updatedText) {
-			if ((props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText) {
+			if (JSON.stringify(_updatedText) !== JSON.stringify(ast_elements)) {
 				return _updatedText
 			} else {
 				return ""
@@ -168,12 +130,14 @@ export function PatternEditor(props: {
 
 	const handleCommit = async () => {
 		setCommitIsLoading(true)
-		const _copy = copy()
-		const _textValue = getTextValue(editor)
-		if (_textValue === undefined) {
+		const _copy: ast.Message | undefined = copy()
+		const _textValue =
+			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+		if (!_textValue || !_copy) {
 			return
 		}
-		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
+		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
+
 		const [updatedResource] = query(resource()).upsert({ message: _copy! })
 
 		setResources([
@@ -215,7 +179,16 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0]?.value as string
+		const textArr: Array<string> = []
+		props.referenceMessage.pattern.elements.map((element) => {
+			if (element.type === "Text") {
+				textArr.push(element.value)
+			} else if (element.type === "Placeholder") {
+				textArr.push(element.body.name)
+			}
+		})
+		const text = textArr.join("")
+		//const text = props.referenceMessage.pattern.elements[0]?.value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -239,7 +212,13 @@ export function PatternEditor(props: {
 				message: exception.message,
 			})
 		} else {
-			setTextValue(editor, translation)
+			const _copy: ast.Message | undefined = copy()
+			if (_copy) {
+				_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
+					ast.Text | ast.Placeholder
+				>
+				editor().commands.setContent(setTipTapMessage(_copy))
+			}
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -343,7 +322,11 @@ export function PatternEditor(props: {
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
 				<Show when={true}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={getTextValue(editor) === "" || getTextValue(editor) === undefined}>
+						<Show
+							when={
+								JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
+							}
+						>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
