@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Config, EnvironmentFunctions } from "@inlang/core/src/config"
 
-export const myPlugin = createPlugin(({ pluginConfig, env }) => {
+export const myPlugin = createPlugin<{ pathPattern: string }>(({ pluginConfig, env }) => {
 	return {
 		id: "samuelstroschein.plugin-json",
 		defineConfig: (config) => {
@@ -13,18 +15,31 @@ export const myPlugin = createPlugin(({ pluginConfig, env }) => {
 	}
 })
 
-function createPlugin() {}
-
+/**
+ * The function to configure a plugin.
+ *
+ * @example
+ *   plugins: [
+ * 	 	myPlugin({
+ * 	   	pathPattern: "hello",
+ * 	 	})
+ *   ]
+ */
 type PluginConfigFunction<PluginConfig> = (
 	pluginConfig: PluginConfig,
-) => PluginSetupFunction<PluginConfig>
-
-type PluginSetupFunction<T> = (args: {
-	pluginConfig: T
-	env: EnvironmentFunctions
-}) => Promise<Plugin>
+) => (env: EnvironmentFunctions) => Plugin
 
 type Plugin = {
 	id: string
-	defineConfig(config: Config): Config
+	defineConfig(config: Partial<Config>): void
 }
+
+function createPlugin<PluginConfig>(
+	callback: (args: { pluginConfig: PluginConfig; env: EnvironmentFunctions }) => Plugin,
+): PluginConfigFunction<PluginConfig> {
+	return (pluginConfig) => (env) => callback({ pluginConfig, env })
+}
+
+function readResources(args: any): any {}
+
+function getLanguages(args: any): any {}

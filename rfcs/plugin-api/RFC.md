@@ -208,6 +208,7 @@ export async function defineConfig(env) {
 |                no breaking change                |                                                           |
 |       flexible, future proof architecture        |                                                           |
 |              Error handling system               |                                                           |
+|                                                  |                                                           |
 
 This proposal is simple and flexible.
 

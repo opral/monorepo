@@ -1,28 +1,23 @@
+/**
+ * This experiment tests a plugin API without a createPlugin function.
+ */
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import type { EnvironmentFunctions, Config } from "@inlang/core/src/config/index.js"
 
-export const myPlugin: PluginConfigFunction<{ pathPattern: string }> = ({ pluginConfig, env }) => {
+export const myPlugin = ({ pluginConfig }) => {
 	return {
 		id: "samuelstroschein.plugin-json",
 		defineConfig: (config) => {
 			if (pluginConfig.pathPattern === undefined) {
 				throw new Error("pathPattern is required")
 			}
-			config.readResources = readResources({ pluginConfig, env })
-			config.languages = getLanguages({ pluginConfig, env })
+			config.readResources = readResources({ pluginConfig })
+			config.languages = getLanguages({ pluginConfig })
 		},
 	}
 }
-
-type PluginConfigFunction<PluginConfig> = (
-	pluginConfig: PluginConfig,
-) => PluginSetupFunction<PluginConfig>
-
-type PluginSetupFunction<T> = (args: {
-	pluginConfig: T
-	env: EnvironmentFunctions
-}) => Promise<Plugin>
 
 type Plugin = {
 	id: string
