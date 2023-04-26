@@ -38,18 +38,7 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
    })
    ```
 
-3. Add the inlang preprocessor to the `preprocess` section of `svelte.config.js`
-
-   ```js
-   import { inlangPreprocess } from "@inlang/sdk-js/adapter-sveltekit"
-
-   const config = {
-   	preprocess: [inlangPreprocess()],
-   }
-   ```
-
-4. That's it. You have now completed the setup and can output Messages everywhere in your SvelteKit project.
-
+That's it. You have now completed the setup and can output Messages everywhere in your SvelteKit project.
 
 ## Usage
 
