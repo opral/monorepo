@@ -2,9 +2,9 @@ import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { createUnplugin } from "unplugin"
 import type { ViteDevServer } from "vite"
-import { TransformConfig, getConfig, resetConfig } from '../config.js'
-import { doesPathExist } from '../utils.js'
-import { transformCode } from './transforms.js'
+import { TransformConfig, getConfig, resetConfig } from './config.js'
+import { doesPathExist } from './config.js'
+import { transformCode } from './transforms/index.js'
 
 type FileType =
 	| "hooks.server.js"

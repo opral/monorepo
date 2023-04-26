@@ -1,4 +1,4 @@
-import type { TransformConfig } from '../../config.js'
+import type { TransformConfig } from '../config.js'
 
 const REGEX_INLANG_SDK_IMPORT = /.*import\s*{\s*(.*)\s*}\s*from\s+['"]@inlang\/sdk-js['"]/g
 

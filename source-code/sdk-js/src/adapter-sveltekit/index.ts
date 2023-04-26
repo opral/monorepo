@@ -1,1 +1,1 @@
-export { unplugin as inlangPlugin } from "./ast-transformation/vite/plugin.js"
+export { unplugin as inlangPlugin } from "./ast-transformation/vite-plugin.js"
