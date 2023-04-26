@@ -11,11 +11,11 @@ type FileType =
 	| "[language].json"
 	| "+layout.server.js"
 	| "+layout.js"
+	| "+layout.svelte"
 	| "+page.server.js"
 	| "+page.js"
-	| "*.js"
-	| "+layout.svelte"
 	| "+page.svelte"
+	| "*.js"
 	| "*.svelte"
 
 export type FileInformation = {
