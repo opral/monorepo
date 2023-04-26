@@ -8,7 +8,6 @@ Design/decide on a plugin API that:
 
 - Optimizes for developer experience e.g. simple to configure and simple to write plugins for.
 - Enables plugins to define their own config that can be read by other plugins (cross plugin communication) to avoid leaking app-specific config into the core config.
-- Keep future proofing in mind. Inlang will receive Document (markdown) support soon. Ideally, the plugin API should be flexible enough to support other types of content in the future.
 - Consider error handling and error messages. We want to make sure that the user gets meaningful error messages if something goes wrong. Numerous developers ran into https://github.com/inlang/inlang/issues/267, wasting hours on debugging.
 
 ## Neutral
