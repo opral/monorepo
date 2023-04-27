@@ -1,5 +1,17 @@
 {
 	"name": "@inlang/sdk-js",
+	"description": "The official Inlang SDK",
+	"keywords": [
+		"inlang",
+		"sveltekit",
+		"svelte",
+		"i18n",
+		"internationalization",
+		"L10n",
+		"localization",
+		"unplugin",
+		"vite"
+	],
 	"type": "module",
 	"version": "0.0.0",
 	"publishConfig": {
@@ -13,6 +25,30 @@
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
+	},
+	"module": "dist/core/index.js",
+	"types": "dist/core/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"adapter-sveltekit": [
+				"./dist/adapter-sveltekit/index.d.ts"
+			],
+			"adapter-sveltekit/client": [
+				"./dist/adapter-sveltekit/utils/client/index.d.ts"
+			],
+			"adapter-sveltekit/client/not-reactive": [
+				"./dist/adapter-sveltekit/utils/client/not-reactive/index.d.ts"
+			],
+			"adapter-sveltekit/client/reactive": [
+				"./dist/adapter-sveltekit/utils/client/reactive/index.d.ts"
+			],
+			"adapter-sveltekit/server": [
+				"./dist/adapter-sveltekit/utils/server/index.d.ts"
+			],
+			"adapter-sveltekit/shared": [
+				"./dist/adapter-sveltekit/utils/shared/index.d.ts"
+			]
+		}
 	},
 	"files": [
 		"./dist"
