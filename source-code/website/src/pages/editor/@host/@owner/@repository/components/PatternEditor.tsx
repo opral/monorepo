@@ -310,7 +310,6 @@ export function PatternEditor(props: {
 				}
 				return false
 			})
-			console.log(filteredReports)
 			if (filteredReports) {
 				filteredReports.map((lint) => {
 					notifications.push({
