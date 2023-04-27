@@ -1,7 +1,7 @@
 // Exclude test and source map files when building for production
 {
 	"extends": "./tsconfig.json",
-	"exclude": ["**/*.test.ts", "**/*.test-d.ts", "**/examples/*"],
+	"exclude": ["**/*.test.ts", "**/*.test-d.ts", "**/examples/*" , "src/adapter-sveltekit/index.ts",  "src/adapter-sveltekit/ast-transformation/**"],
 	"compilerOptions": {
 		"sourceMap": false
 	}
