@@ -5,6 +5,7 @@
 import type { EnvironmentFunctions } from "@inlang/core/config"
 import type { generateConfigFileServer } from "./generateConfigFile.js"
 import { rpc } from "../client.js"
+import { normalizePath } from "@inlang-git/fs"
 
 /** filter to exclude filesystem directories */
 const filters = ["node_modules", "dist", ".git", ".Trash"]
@@ -56,7 +57,7 @@ async function readdirRecursive(args: {
 		// Check if the current item is a directory by trying to read it
 		let isDirectory = false
 		try {
-			await fs.readFile(fullPath)
+			await fs.readFile(fullPath, { encoding: "utf-8" })
 		} catch (error) {
 			isDirectory = true
 		}
@@ -68,42 +69,11 @@ async function readdirRecursive(args: {
 			const subList = await readdirRecursive({ fs, path: fullPath })
 			result = { ...result, ...subList }
 		} else {
-			const content = await fs.readFile(fullPath)
+			const content = await fs.readFile(fullPath, { encoding: "utf-8" })
 			if (!content) throw new Error(`${fullPath} does not exist.`)
 
 			result[fullPath] = content as string
 		}
 	}
 	return result
-}
-
-/*
- * normalize-path <https://github.com/jonschlinkert/normalize-path>
- *
- * Copyright (c) 2014-2018, Jon Schlinkert.
- * Released under the MIT License.
- */
-function normalizePath(path: string) {
-	if (typeof path !== "string") {
-		throw new TypeError("expected path to be a string")
-	}
-
-	if (path === "\\" || path === "/") return "/"
-
-	const len = path.length
-	if (len <= 1) return path
-
-	// ensure that win32 namespaces has two leading slashes, so that the path is
-	// handled properly by the win32 version of path.parse() after being normalized
-	// https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
-	let prefix = ""
-	if (len > 4 && path[3] === "\\") {
-		const ch = path[2]
-		if ((ch === "?" || ch === ".") && path.slice(0, 2) === "\\\\") {
-			path = path.slice(2)
-			prefix = "//"
-		}
-	}
-	const segs = path.split(/[/\\]+/)
-	return prefix + segs.join("/")
 }

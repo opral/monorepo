@@ -1,5 +1,5 @@
 import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
 
 /**
@@ -57,7 +57,7 @@ Context: The path is relative to the current working directory, not the file tha
 		`)
 	}
 	// create directory
-	await args.copyTo.mkdir(args.path)
+	await args.copyTo.mkdir(args.path, { recursive: true })
 	const pathsInDirectory = await args.copyFrom.readdir(args.path)
 	for (const subpath of pathsInDirectory) {
 		// check if the path is a file
@@ -69,31 +69,4 @@ Context: The path is relative to the current working directory, not the file tha
 			await copyDirectory({ ...args, path })
 		}
 	}
-}
-
-/*
- * normalize-path <https://github.com/jonschlinkert/normalize-path>
- *
- * Copyright (c) 2014-2018, Jon Schlinkert.
- * Released under the MIT License.
- */
-function normalizePath(path: string) {
-	if (path === "\\" || path === "/") return "/"
-
-	const len = path.length
-	if (len <= 1) return path
-
-	// ensure that win32 namespaces has two leading slashes, so that the path is
-	// handled properly by the win32 version of path.parse() after being normalized
-	// https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
-	let prefix = ""
-	if (len > 4 && path[3] === "\\") {
-		const ch = path[2]
-		if ((ch === "?" || ch === ".") && path.slice(0, 2) === "\\\\") {
-			path = path.slice(2)
-			prefix = "//"
-		}
-	}
-	const segs = path.split(/[/\\]+/)
-	return prefix + segs.join("/")
 }
