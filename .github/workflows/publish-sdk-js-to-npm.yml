@@ -1,4 +1,4 @@
-name: Publish @inlang/cli to NPM
+name: Publish @inlang/sdk-js to NPM
 
 on:
   # manually triggering the workflow if desired
@@ -6,7 +6,7 @@ on:
 
   push:
     paths:
-      - "source-code/cli/**"
+      - "source-code/sdk-js/**"
     branches:
       - main
 
@@ -20,9 +20,9 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      - run: node_modules/.bin/turbo run build --filter @inlang/cli
-      - run: node_modules/.bin/turbo run test --filter @inlang/cli
+      - run: node_modules/.bin/turbo run build --filter @inlang/sdk-js
+      - run: node_modules/.bin/turbo run test --filter @inlang/sdk-js
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
-          package: source-code/cli/package.json
+          package: source-code/sdk-js/package.json
