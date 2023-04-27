@@ -7,7 +7,12 @@ import type { CreateChatCompletionRequest } from "openai"
 // track the version of the prompt to be able to update and determine which prompt performs better
 export const promptVersion = 1
 
-export const temperature: CreateChatCompletionRequest["temperature"] = 0.7
+/**
+ * The temperature parameter is a number between 0 and 1 that controls randomness in the model's predictions.
+ *
+ * Choosing a lower value makes the model more deterministic and increased the reproducibility of the results (that is desired).
+ */
+export const temperature: CreateChatCompletionRequest["temperature"] = 0.2
 
 export function prompt(filePaths: string[]): string {
 	return `
