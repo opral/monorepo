@@ -1,2 +1,2 @@
-export type { Filesystem } from "./interface.js"
+export type { NodeishFilesystem } from "./interface.js"
 export { createMemoryFs } from "./implementations/memoryFs.js"
