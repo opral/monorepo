@@ -10,18 +10,21 @@ const baseConfig:TransformConfig = {
     hasAlreadyBeenInitialized: false,
 }
 
-describe('transform hooks.server.js', () => {
-    it.concurrent('transformHooksServerJs returns new file if no code provided', async ({ expect }) => {
+describe('transformHooksServerJs', () => {
+    it('returns new file if no code provided', async ({ expect }) => {
         const code = transformHooksServerJs(baseConfig, '')
         expect(code).toContain('getLanguage')
     })
-
+})
+describe('wrapHooksServerJs', () => {
     // todo: cover with real test once this implemented
-    it.concurrent('wrapHooksServerJs', async ({ expect }) => {
+    it('temporarily throws error', async ({ expect }) => {
         expect(() => wrapHooksServerJs(baseConfig, 'anything')).toThrowError('currently not supported')
     })
+})
 
-    it.concurrent('createHooksServerJs languageInUrl and isStatic', async ({ expect }) => {
+describe('createHooksServerJs', () => {
+    it('languageInUrl and isStatic', async ({ expect }) => {
         const config:TransformConfig = {
             ...baseConfig,
             languageInUrl: true,
@@ -31,7 +34,7 @@ describe('transform hooks.server.js', () => {
         expect(code).toMatchSnapshot()
     })
 
-    it.concurrent('createHooksServerJs isStatic', async ({ expect }) => {
+    it('isStatic', async ({ expect }) => {
         const config:TransformConfig = {
             ...baseConfig,
             isStatic: true,
