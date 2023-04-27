@@ -1,7 +1,10 @@
 {
 	"name": "@inlang-git/fs",
+	"version": "0.0.1",
 	"type": "module",
-	"private": true,
+	"publishConfig": {
+		"access": "public"
+	},
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -23,6 +26,7 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {},
-	"peerDependencies": {}
+	"dependencies": {
+		"outmatch": "^0.7.0"
+	}
 }
