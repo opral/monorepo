@@ -58,7 +58,7 @@
 		"build": "rm -rf dist && npm run build:utils && npm run build:plugin",
 		"dev:utils": "tsc --watch",
 		"build:utils": "tsc --build ./tsconfig.build.json",
-		"dev:plugin": "tsup --watch src",
+		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
