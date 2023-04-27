@@ -55,7 +55,6 @@ export const ListHeader = (props: ListHeaderProps) => {
 								report.message.match(/'([^']+)'/g)![1]!.replace(/'/g, ""),
 							)),
 				)
-				console.log(filteredReports.length)
 
 				const lintRule = inlangConfig()
 					?.lint?.rules.flat()
