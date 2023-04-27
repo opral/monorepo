@@ -18,25 +18,27 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
 
 ## Getting Started
 
-1. Add `@inlang/sdk-js/adapter-sveltekit` dependency to your project
+1. Add `@inlang/sdk-js` dependency to your project
 
    ```js
    // using npm
-   npm install -D @inlang/sdk-js/adapter-sveltekit
+   npm install -D @inlang/sdk-js
 
    // using yarn
-   yarn add -D @inlang/sdk-js/adapter-sveltekit
+   yarn add -D @inlang/sdk-js
    ```
 
 2. Add the inlang plugin to the `plugins` section of `vite.config.js`
 
    ```js
-   import { inlangPlugin } from "@inlang/sdk-js/adapter-sveltekit"
+   import inlangPlugin from "@inlang/sdk-js/adapter-sveltekit"
 
    export default defineConfig({
-   	plugins: [sveltekit(), inlangPlugin.vite()],
+   	plugins: [inlangPlugin(), sveltekit()],
    })
    ```
+
+   > Note: the inlang plugin must be added before the sveltekit plugin
 
 That's it. You have now completed the setup and can output Messages everywhere in your SvelteKit project.
 
