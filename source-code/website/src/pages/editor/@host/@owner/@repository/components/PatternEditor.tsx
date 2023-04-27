@@ -33,8 +33,14 @@ export function PatternEditor(props: {
 	message: ast.Message | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
-	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
-		useEditorState()
+	const {
+		resources,
+		setResources,
+		referenceResource,
+		userIsCollaborator,
+		routeParams,
+		filteredLanguages,
+	} = useEditorState()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -295,8 +301,18 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			if (lintReports) {
-				lintReports.map((lint) => {
+			const filteredReports = lintReports.filter((report) => {
+				if (
+					!report.id.includes("missingMessage") ||
+					filteredLanguages().includes(report.message.match(/'([^']+)'/g)![1]!.replace(/'/g, ""))
+				) {
+					return true
+				}
+				return false
+			})
+			console.log(filteredReports)
+			if (filteredReports) {
+				filteredReports.map((lint) => {
 					notifications.push({
 						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
@@ -429,6 +445,23 @@ export function PatternEditor(props: {
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}
+				{/* <Show when={textValue() === "" || textValue() === undefined}>
+					<NotificationHint
+						notifications={[
+							{
+								notificationTitle:
+									props.referenceLanguage === props.language
+										? "messageWithoutReference"
+										: "missingMessage",
+								notificationDescription:
+									props.referenceLanguage === props.language
+										? `Message with id '${props.id}' is specified, but missing in the reference.`
+										: `Message with id '${props.id}' is missing`,
+								notificationType: "error",
+							},
+						]}
+					/>
+				</Show> */}
 				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
