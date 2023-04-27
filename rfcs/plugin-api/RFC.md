@@ -271,7 +271,7 @@ _`withPlugins` executes `defineConfig` (which should be executed on loading the 
 ```ts
 type Plugin = {
 	id: string
-	defineConfig: (env: Env) => Promise<Config>
+	defineConfig: (config: Partial<Config>) => Promise<Partial<Config>>
 	// anything else we need in the future
 }
 ```
