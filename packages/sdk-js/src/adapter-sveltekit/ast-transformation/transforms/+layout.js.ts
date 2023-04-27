@@ -1,5 +1,5 @@
-import type { TransformConfig } from '../config.js'
-import { transformJs } from './*.js.js'
+import type { TransformConfig } from "../../config.js"
+import { transformJs } from "./*.js.js"
 
 export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) return transformRootLayoutJs(config, code)
@@ -37,9 +37,7 @@ export const load = initRootLayoutLoadWrapper({${options}}).wrap(async () => { }
 // TODO: transform
 export const wrapRootLayoutJs = (config: TransformConfig, code: string) => {
 	// TODO: more meaningful error messages
-	throw new Error('currently not supported')
+	throw new Error("currently not supported")
 }
 
 // ------------------------------------------------------------------------------------------------
-
-const transformGenericLayoutJs = transformJs
