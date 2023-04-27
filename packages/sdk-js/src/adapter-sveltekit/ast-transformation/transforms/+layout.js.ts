@@ -3,9 +3,9 @@ import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { transformAstAtMatching } from "../../../helpers/index.js"
+import { findAst } from "../../../helpers/index.js"
 
-export const requiredImports = `
+const requiredImports = `
 import { browser } from "$app/environment";
 import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
@@ -45,20 +45,29 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	// Merge imports with required imports
 	deepMergeObject(ast, importsAst)
 
+	const loadMatchers: Parameters<typeof findAst>[1] = [
+		({ node }) => n.ExportNamedDeclaration.check(node),
+		({ node }) => n.VariableDeclaration.check(node),
+		({ node }) => n.VariableDeclarator.check(node),
+		({ node }) => n.Identifier.check(node) && node.name === "load",
+	]
+
 	if (n.Program.check(ast.$ast)) {
+		const hasLoad =
+			findAst(
+				ast.$ast,
+				loadMatchers,
+				({ node }) => n.Identifier.check(node),
+				() => true,
+			)[0] === true
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
-		if (!ast.exports.load && n.Program.check(emptyLoadExportAst.$ast)) {
+		if (!hasLoad && n.Program.check(emptyLoadExportAst.$ast)) {
 			body.push(...emptyLoadExportAst.$ast.body)
 		}
-		transformAstAtMatching(
+		findAst(
 			ast.$ast,
-			[
-				({ node }) => n.ExportNamedDeclaration.check(node),
-				({ node }) => n.VariableDeclaration.check(node),
-				({ node }) => n.VariableDeclarator.check(node),
-				({ node }) => n.Identifier.check(node) && node.name === "load",
-			],
+			loadMatchers,
 			({ node }) => n.Identifier.check(node),
 			({ parent }) => {
 				if (n.VariableDeclarator.check(parent) && parent.init) {

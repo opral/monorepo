@@ -1,1 +1,1 @@
-export { transformAstAtMatching } from "./ast.js"
+export { findAst } from "./ast.js"
