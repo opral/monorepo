@@ -32,10 +32,11 @@ export const init = new Command()
 		const interval = setInterval(() => {
 			assumedIteration += 1
 			rpcSpinner.text = `Generating config file with AI 🤖 ... Iteration ${assumedIteration}/3`
-		}, 9000)
+		}, 12000)
+
 		const [configFile, exception] = await rpc.generateConfigFile({
 			fs: fs,
-			path: "./",
+			resolveFrom: new URL("./", import.meta.url).pathname,
 		})
 		clearInterval(interval)
 		if (exception) {

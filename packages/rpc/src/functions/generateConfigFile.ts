@@ -2,7 +2,7 @@ import type { Result } from "@inlang/core/utilities"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
 import { privateEnv } from "@inlang/env-variables"
 import { telemetryNode } from "@inlang/telemetry"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createMemoryFs, fromJson } from "@inlang-git/fs"
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import { dedent } from "ts-dedent"
 import { prompt, promptVersion, temperature } from "./generateConfigFile.prompt.js"
@@ -57,7 +57,8 @@ async function _generateConfigFileRecursive(args: {
 	>
 > {
 	const iteration = args.iteration ?? 0
-	const fs = await createMemoryFs().fromJson(args.filesystemAsJson)
+	const fs = createMemoryFs()
+	await fromJson({ fs, json: args.filesystemAsJson, resolveFrom: "/" })
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))

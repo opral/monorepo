@@ -2,21 +2,24 @@
 // Client side code that must execute before the server side code.
 // ------------------------------------------------------
 
-import type { EnvironmentFunctions } from "@inlang/core/config"
 import type { generateConfigFileServer } from "./generateConfigFile.js"
 import { rpc } from "../client.js"
-import { normalizePath } from "@inlang-git/fs"
+import { NodeishFilesystem, toJson } from "@inlang-git/fs"
 
-/** filter to exclude filesystem directories */
-const filters = ["node_modules", "dist", ".git", ".Trash"]
-
+/*
 /** Wrapper function to read and filter the filesystem client side. */
 export async function generateConfigFileClient(args: {
-	fs: EnvironmentFunctions["$fs"]
-	path: string
+	fs: NodeishFilesystem
+	resolveFrom: string
 }): ReturnType<typeof generateConfigFileServer> {
 	try {
-		const filesystemAsJson = await readdirRecursive(args)
+		console.log("getting here")
+		const filesystemAsJson = toJson({
+			...args,
+			// exclude files that are not relevant for the config file to reduce
+			// bandwith and improve performance
+			matchers: ["**/*", "!**/node_modules/**", "!**/.*", "!**/dist/*"],
+		})
 		// @ts-ignore - this is a client side function
 		return await rpc.generateConfigFileServer({ filesystemAsJson })
 	} catch (error) {
@@ -37,43 +40,4 @@ export function withClientSidePatch(client: typeof rpc) {
 			return (target as any)[prop]
 		},
 	})
-}
-
-/**
- * Recursively reads the contents of a directory.
- */
-async function readdirRecursive(args: {
-	fs: EnvironmentFunctions["$fs"]
-	path: string
-}): Promise<Record<string, string>> {
-	const { fs, path } = args
-	let result: Record<string, string> = {}
-	// Read the contents of the current directory
-	const files = await fs.readdir(path)
-	// Loop through each file/directory
-	for (const file of files) {
-		// Construct the full path to the file/directory
-		const fullPath = normalizePath(`${path}/${file}`)
-		// Check if the current item is a directory by trying to read it
-		let isDirectory = false
-		try {
-			await fs.readFile(fullPath, { encoding: "utf-8" })
-		} catch (error) {
-			isDirectory = true
-		}
-		// don't include node_modules and dist folders as they are not source code
-		if (filters.some((filter) => fullPath.includes(filter))) {
-			continue
-		} else if (isDirectory) {
-			// If the item is a directory, recurse into it and add the results to the current list
-			const subList = await readdirRecursive({ fs, path: fullPath })
-			result = { ...result, ...subList }
-		} else {
-			const content = await fs.readFile(fullPath, { encoding: "utf-8" })
-			if (!content) throw new Error(`${fullPath} does not exist.`)
-
-			result[fullPath] = content as string
-		}
-	}
-	return result
 }
