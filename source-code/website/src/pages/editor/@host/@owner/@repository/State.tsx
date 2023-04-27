@@ -10,7 +10,7 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import { http, raw } from "@inlang/git-sdk/api"
+import { http, raw } from "@inlang-git/client/raw"
 import {
 	Config,
 	Config as InlangConfig,

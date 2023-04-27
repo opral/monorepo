@@ -16,6 +16,7 @@
 
 import type { $fs } from "./$fs.js"
 import { dedent } from "ts-dedent"
+import { normalizePath } from "@inlang-git/fs"
 
 export type $import = (uri: string) => Promise<any>
 
@@ -89,35 +90,4 @@ The error indicates that the imported file does not exist on JSDelivr. For non-e
 		}
 		throw new $ImportError(message)
 	}
-}
-
-/*
- * normalize-path <https://github.com/jonschlinkert/normalize-path>
- *
- * Copyright (c) 2014-2018, Jon Schlinkert.
- * Released under the MIT License.
- */
-function normalizePath(path: string) {
-	if (typeof path !== "string") {
-		throw new TypeError("expected path to be a string")
-	}
-
-	if (path === "\\" || path === "/") return "/"
-
-	const len = path.length
-	if (len <= 1) return path
-
-	// ensure that win32 namespaces has two leading slashes, so that the path is
-	// handled properly by the win32 version of path.parse() after being normalized
-	// https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
-	let prefix = ""
-	if (len > 4 && path[3] === "\\") {
-		const ch = path[2]
-		if ((ch === "?" || ch === ".") && path.slice(0, 2) === "\\\\") {
-			path = path.slice(2)
-			prefix = "//"
-		}
-	}
-	const segs = path.split(/[/\\]+/)
-	return prefix + segs.join("/")
 }

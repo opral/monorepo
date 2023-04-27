@@ -1,17 +1,12 @@
 {
-	"name": "@inlang/core",
+	"name": "@inlang-git/fs",
+	"version": "0.0.1",
 	"type": "module",
-	"version": "0.5.5",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		"./ast": "./dist/ast/index.js",
-		"./config": "./dist/config/index.js",
-		"./lint": "./dist/lint/index.js",
-		"./query": "./dist/query/index.js",
-		"./test": "./dist/test/index.js",
-		"./utilities": "./dist/utilities/index.js"
+		".": "./dist/index.js"
 	},
 	"files": [
 		"./dist",
@@ -31,17 +26,7 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"engines": {
-		"node": ">=16.15.0"
-	},
 	"dependencies": {
-		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-		"@inlang-git/fs": "*",
-		"ts-dedent": "^2.2.0",
-		"zod": "^3.21.4"
-	},
-	"devDependencies": {
-		"esbuild": "^0.17.14",
-		"tsd": "^0.25.0"
+		"outmatch": "^0.7.0"
 	}
 }
