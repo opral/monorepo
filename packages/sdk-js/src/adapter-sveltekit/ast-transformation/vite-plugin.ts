@@ -1,7 +1,6 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
-import { createUnplugin } from "unplugin"
-import type { ViteDevServer } from "vite"
+import type { ViteDevServer, Plugin } from "vite"
 import { TransformConfig, getConfig, resetConfig } from './config.js'
 import { doesPathExist } from './config.js'
 import { transformCode } from './transforms/index.js'
@@ -146,10 +145,26 @@ const moveExistingRoutesIntoSubfolder = async (config: TransformConfig) =>
 
 let viteServer: ViteDevServer | undefined
 
-export const unplugin = createUnplugin(() => {
+export const plugin = () => {
 	return {
-		name: "inlang-sdk-js-sveltekit",
-		enforce: 'pre', // makes sure we run before vite-plugin-svelte
+		name: 'vite-plugin-inlang-sdk-js-sveltekit',
+		// makes sure we run before vite-plugin-svelte
+		enforce: 'pre',
+
+		configureServer(server) {
+			viteServer = server as unknown as ViteDevServer
+		},
+
+		config() {
+			return {
+				ssr: {
+					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
+					// to be able to use `SvelteKit`'s `$app` aliases
+					noExternal: ['@inlang/sdk-js'],
+				}
+			}
+		},
+
 		async buildStart() {
 			const config = await getConfig()
 
@@ -158,6 +173,7 @@ export const unplugin = createUnplugin(() => {
 				await moveExistingRoutesIntoSubfolder(config)
 			}
 
+			// TODO: refactor
 			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
@@ -207,11 +223,5 @@ export const unplugin = createUnplugin(() => {
 				},
 			*/
 		},
-
-		vite: {
-			configureServer(server) {
-				viteServer = server as unknown as ViteDevServer
-			},
-		},
-	}
-})
+	}  satisfies Plugin
+}
