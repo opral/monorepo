@@ -80,6 +80,9 @@ function TheActualPage() {
 				<Match when={repositoryIsCloned.error?.message.includes("404")}>
 					<RepositoryDoesNotExistOrNotAuthorizedCard />
 				</Match>
+				<Match when={repositoryIsCloned.error?.message.includes("401")}>
+					<p class="text-lg font-medium text-center flex justify-center items-center h-full grow">You want to access a private repository, please sign-in a the bottom.</p>
+				</Match>
 				<Match when={repositoryIsCloned.error}>
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
