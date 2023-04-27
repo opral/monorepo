@@ -80,6 +80,4 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	return generateCode(ast).code
 }
 
-// ------------------------------------------------------------------------------------------------
-
 const transformGenericLayoutJs = transformJs
