@@ -80,31 +80,6 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	return generateCode(ast).code
 }
 
-export const createRootLayoutJs = (config: TransformConfig) => {
-	const options = !config.languageInUrl
-		? `
-initDetectors: browser
-? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
-: undefined,
-`
-		: ""
-
-	return `
-import { browser } from "$app/environment"
-import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
-import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client"
-import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
-
-export const load = initRootLayoutLoadWrapper({${options}}).wrap(async () => { })
-`
-}
-
-// TODO: transform
-export const wrapRootLayoutJs = (config: TransformConfig, code: string) => {
-	// TODO: more meaningful error messages
-	throw new Error("currently not supported")
-}
-
 // ------------------------------------------------------------------------------------------------
 
 const transformGenericLayoutJs = transformJs
