@@ -1,5 +1,5 @@
 ---
-"@inlang/sdk-js": minor
+"@inlang/sdk-js": patch
 ---
 
 correctly resolve `$app` module
