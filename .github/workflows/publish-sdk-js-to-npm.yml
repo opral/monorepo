@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      - run: npm run build -w @inlang/sdk-js
-      - run: npm run test -w @inlang/sdk-js
+      - run: turbo run build --filter @inlang/sdk-js
+      - run: turbo run test --filter @inlang/sdk-js
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
