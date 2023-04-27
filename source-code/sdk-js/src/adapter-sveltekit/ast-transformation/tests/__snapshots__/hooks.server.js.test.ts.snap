@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`transform hooks.server.js > createHooksServerJs isStatic 1`] = `
+"
+import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
+import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\"
+import { redirect } from \\"@sveltejs/kit\\"
+import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\"
+
+export const handle = initHandleWrapper({
+getLanguage: () => undefined,
+
+}).wrap(async ({ event, resolve }) => resolve(event))
+"
+`;
