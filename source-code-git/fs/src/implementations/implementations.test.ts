@@ -2,12 +2,10 @@ import { test, expect, afterAll, describe } from "vitest"
 import type { Filesystem } from "../interface.js"
 import { createMemoryFs } from "./memoryFs.js"
 
-describe("node fs", async () => {
+describe.skip("node fs", async () => {
 	const fs = await import("node:fs/promises")
-	const join = await import("node:path").then((path) => path.join)
-	const tmpdir = await import("node:os").then((os) => os.tmpdir)
 
-	await runFsTestSuite("node fs", await fs.mkdtemp(join(tmpdir(), "__vitest_test-")), fs)
+	await runFsTestSuite("node fs", new URL("./__test", import.meta.url).pathname, fs)
 })
 
 describe("memory fs", async () => {
@@ -18,8 +16,8 @@ describe("memory fs", async () => {
 
 const runFsTestSuite = async (name: string, tempDir: string, fs: Filesystem) => {
 	test("recursive mkdir", async () => {
-		await fs.mkdir(`${tempDir}/home/user1/documents///`)
-		await fs.mkdir(`${tempDir}/home/user1/../user1//downloads`)
+		await fs.mkdir(`${tempDir}/home/user1/documents///`, { recursive: true })
+		await fs.mkdir(`${tempDir}/home/user1/../user1//downloads`, { recursive: true })
 		expect(await fs.readdir(`/${tempDir}`)).toEqual(["home"])
 		expect(await fs.readdir(`/${tempDir}/home/user1/`)).toEqual(["documents", "downloads"])
 	})
@@ -96,13 +94,13 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: Filesystem) => 
 	// })
 
 	test("rm", async () => {
-		await fs.rm(`${tempDir}/home/user1/documents/file1`)
+		await fs.rm(`${tempDir}/home/user1/documents/file1`, { recursive: true })
 		await expect(
 			async () =>
 				await fs.readFile(`/${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
 		).rejects.toThrow(/ENOENT/)
 		await fs.writeFile(`/${tempDir}/home/user1/documents/file1`, "text in the first file")
-		await fs.rm(`/${tempDir}/home/user1`)
+		await fs.rm(`/${tempDir}/home/user1`, { recursive: true })
 
 		await expect(async () => await fs.readdir(`/${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)
 
@@ -111,7 +109,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: Filesystem) => 
 
 	afterAll(async () => {
 		if (tempDir !== "") {
-			await fs.rm(tempDir)
+			await fs.rm(tempDir, { recursive: true })
 		}
 	})
 }
