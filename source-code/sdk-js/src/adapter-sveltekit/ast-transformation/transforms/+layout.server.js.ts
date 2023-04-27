@@ -1,4 +1,4 @@
-import type { TransformConfig } from '../../config.js'
+import type { TransformConfig } from '../config.js'
 import { transformJs } from './*.js.js'
 
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {

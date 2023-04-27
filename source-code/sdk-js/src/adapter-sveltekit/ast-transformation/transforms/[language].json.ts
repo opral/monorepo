@@ -1,4 +1,4 @@
-import type { TransformConfig } from '../../config.js'
+import type { TransformConfig } from '../config.js'
 
 export const transformLanguageJson = (config: TransformConfig, code: string) => {
 	if (code) {

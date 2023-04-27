@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      - run: npm run build -w @inlang/core
-      - run: npm run test -w @inlang/core
+      - run: node_modules/.bin/turbo run build --filter @inlang/core
+      - run: node_modules/.bin/turbo run test --filter @inlang/core
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}

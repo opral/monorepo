@@ -1,19 +1,21 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
-import { createUnplugin } from "unplugin"
-import type { ViteDevServer } from "vite"
-import { TransformConfig, getConfig, resetConfig } from '../config.js'
-import { doesPathExist } from '../utils.js'
-import { transformCode } from './transforms.js'
+import type { ViteDevServer, Plugin } from "vite"
+import { TransformConfig, getConfig, resetConfig } from './config.js'
+import { doesPathExist } from './config.js'
+import { transformCode } from './transforms/index.js'
 
 type FileType =
 	| "hooks.server.js"
 	| "[language].json"
 	| "+layout.server.js"
 	| "+layout.js"
+	| "+layout.svelte"
 	| "+page.server.js"
 	| "+page.js"
+	| "+page.svelte"
 	| "*.js"
+	| "*.svelte"
 
 export type FileInformation = {
 	type: FileType
@@ -57,6 +59,12 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+layout.svelte")) {
+		return {
+			type: "+layout.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith("/+page.server.js") || path.endsWith("/+page.server.ts")) {
 		return {
@@ -70,10 +78,22 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 			root,
 		}
 	}
+	if (path.endsWith("/+page.svelte")) {
+		return {
+			type: "+page.svelte",
+			root,
+		}
+	}
 
 	if (path.endsWith(".js") || path.endsWith(".ts")) {
 		return {
 			type: "*.js",
+			root: false,
+		}
+	}
+	if (path.endsWith(".svelte")) {
+		return {
+			type: "*.svelte",
 			root: false,
 		}
 	}
@@ -125,9 +145,25 @@ const moveExistingRoutesIntoSubfolder = async (config: TransformConfig) =>
 
 let viteServer: ViteDevServer | undefined
 
-export const unplugin = createUnplugin(() => {
+export const plugin = () => {
 	return {
-		name: "inlang-sdk-js-sveltekit",
+		name: 'vite-plugin-inlang-sdk-js-sveltekit',
+		// makes sure we run before vite-plugin-svelte
+		enforce: 'pre',
+
+		configureServer(server) {
+			viteServer = server as unknown as ViteDevServer
+		},
+
+		config() {
+			return {
+				ssr: {
+					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
+					// to be able to use `SvelteKit`'s `$app` aliases
+					noExternal: ['@inlang/sdk-js'],
+				}
+			}
+		},
 
 		async buildStart() {
 			const config = await getConfig()
@@ -137,6 +173,7 @@ export const unplugin = createUnplugin(() => {
 				await moveExistingRoutesIntoSubfolder(config)
 			}
 
+			// TODO: refactor
 			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
@@ -186,11 +223,5 @@ export const unplugin = createUnplugin(() => {
 				},
 			*/
 		},
-
-		vite: {
-			configureServer(server) {
-				viteServer = server as unknown as ViteDevServer
-			},
-		},
-	}
-})
+	}  satisfies Plugin
+}
