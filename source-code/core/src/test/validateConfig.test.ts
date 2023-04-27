@@ -111,7 +111,7 @@ async function readResources(
 	for (const language of args.config.languages) {
 		const resourcePath = args.pluginConfig.pathPattern.replace("{language}", language)
 		// reading the json, and flattening it to avoid nested keys.
-		const json = JSON.parse((await args.$fs.readFile(resourcePath)) as string)
+		const json = JSON.parse(await args.$fs.readFile(resourcePath, { encoding: "utf-8" }))
 		result.push(parseResource(json, language))
 	}
 	return result

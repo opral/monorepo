@@ -1,5 +1,5 @@
 import { expect, it } from "vitest"
-import { createMemoryFs } from "@inlang-git/fs"
+import { createMemoryFs, fromJson } from "@inlang-git/fs"
 import { mockEnvironment } from "./mockEnvironment.js"
 import type { EnvironmentFunctions } from "../config/schema.js"
 
@@ -13,8 +13,10 @@ it("should copy a directory into the environment", async () => {
 	await fs.writeFile("./test/subdir/file.txt", "Hello World!")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["test"] } })
-	expect(await env.$fs.readFile("./test/file.txt")).toBe("Hello World!")
-	expect(await env.$fs.readFile("./test/subdir/file.txt")).toBe("Hello World!")
+	expect(await env.$fs.readFile("./test/file.txt", { encoding: "utf-8" })).toBe("Hello World!")
+	expect(await env.$fs.readFile("./test/subdir/file.txt", { encoding: "utf-8" })).toBe(
+		"Hello World!",
+	)
 })
 
 it("should copy multiple directories into the environment", async () => {
@@ -27,8 +29,8 @@ it("should copy multiple directories into the environment", async () => {
 	await fs.writeFile("./two/file.txt", "Hello from two")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["one", "two"] } })
-	expect(await env.$fs.readFile("./one/file.txt")).toBe("Hello from one")
-	expect(await env.$fs.readFile("./two/file.txt")).toBe("Hello from two")
+	expect(await env.$fs.readFile("./one/file.txt", { encoding: "utf-8" })).toBe("Hello from one")
+	expect(await env.$fs.readFile("./two/file.txt", { encoding: "utf-8" })).toBe("Hello from two")
 })
 
 it("should be able to import JavaScript from the environment", async () => {
@@ -58,15 +60,20 @@ it("should give an error if the path does not exist (hinting at a current workin
 })
 
 it("should work with filesystems created from volumes", async () => {
-	const fs = await createMemoryFs().fromJson({
-		"locales/en.json": JSON.stringify({ hello: "hello from en" }),
-		"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
-		"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
-		"locales/utils.js": JSON.stringify("jibberish"),
-		"main.js": "export function hello() { return 'hello' }",
+	const fs = createMemoryFs()
+	await fromJson({
+		fs,
+		resolveFrom: "/",
+		json: {
+			"locales/en.json": JSON.stringify({ hello: "hello from en" }),
+			"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
+			"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
+			"locales/utils.js": JSON.stringify("jibberish"),
+			"main.js": "export function hello() { return 'hello' }",
+		},
 	})
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
-	expect(await env.$fs.readFile("./locales/en.json")).toBe(
+	expect(await env.$fs.readFile("./locales/en.json", { encoding: "utf-8" })).toBe(
 		JSON.stringify({ hello: "hello from en" }),
 	)
 })

@@ -13,7 +13,6 @@ export async function generateConfigFileClient(args: {
 	resolveFrom: string
 }): ReturnType<typeof generateConfigFileServer> {
 	try {
-		console.log("getting here")
 		const filesystemAsJson = toJson({
 			...args,
 			// exclude files that are not relevant for the config file to reduce

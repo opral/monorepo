@@ -43,9 +43,7 @@ export async function toJson(args: {
 	let result: Record<string, string> = {}
 	const isMatch = outmatch(args.matchers)
 
-	console.log("getting here1")
 	const files = await args.fs.readdir(args.resolveFrom)
-	console.log("getting here2")
 
 	for (const file of files) {
 		const fullPath = normalizePath(`${args.resolveFrom}/${file}`)
