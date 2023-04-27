@@ -209,6 +209,7 @@ export const unplugin = createUnplugin(() => {
 		},
 
 		vite: {
+			name: 'vite-plugin-inlang-sdk-js-sveltekit',
 			configureServer(server) {
 				viteServer = server as unknown as ViteDevServer
 			},
