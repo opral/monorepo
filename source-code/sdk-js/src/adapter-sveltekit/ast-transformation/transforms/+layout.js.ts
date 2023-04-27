@@ -97,3 +97,5 @@ export const wrapRootLayoutJs = (config: TransformConfig, code: string) => {
 }
 
 // ------------------------------------------------------------------------------------------------
+
+const transformGenericLayoutJs = transformJs
