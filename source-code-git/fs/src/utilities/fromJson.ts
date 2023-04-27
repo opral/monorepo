@@ -1,10 +1,10 @@
-import type { Filesystem } from "../interface.js"
+import type { NodeishFilesystem } from "../interface.js"
 
 /**
  * "Imports" files from a JSON into the filesystem.
  */
 export async function fromJson(args: {
-	fs: Filesystem
+	fs: NodeishFilesystem
 	json: Record<string, string>
 }): Promise<void> {
 	console.log(args)
