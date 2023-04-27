@@ -38,7 +38,11 @@ export function Messages(props: {
 		}
 		const reports = getLintReports(message)
 		for (const report of reports) {
-			if (filteredLintRules().includes(report.id)) {
+			if (
+				filteredLintRules().includes(report.id) &&
+				(!report.id.includes("missingMessage") ||
+					filteredLanguages().includes(report.message.match(/'([^']+)'/g)![1]!.replace(/'/g, "")))
+			) {
 				return true
 			}
 		}
