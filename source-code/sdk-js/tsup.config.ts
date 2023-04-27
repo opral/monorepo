@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup"
 
 export default defineConfig(({ watch }) => ({
 	entryPoints: ["./src/adapter-sveltekit/index.ts"],
@@ -6,7 +6,7 @@ export default defineConfig(({ watch }) => ({
 	bundle: true,
 	platform: "node",
 	format: "esm",
-	target: 'es2020',
+	target: "es2020",
 	sourcemap: !watch,
-	dts: true
+	dts: true,
 }))
