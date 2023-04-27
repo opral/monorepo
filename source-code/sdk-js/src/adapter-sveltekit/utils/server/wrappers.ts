@@ -10,7 +10,7 @@ import { sequence } from "@sveltejs/kit/hooks"
 
 // ------------------------------------------------------------------------------------------------
 
-type CustomHandle = (
+type WrappedHandle = (
 	input: Parameters<Kit.Handle>[0],
 	runtime: SvelteKitServerRuntime,
 ) => ReturnType<Kit.Handle>
@@ -23,7 +23,7 @@ export const initHandleWrapper = (options: {
 		getPath: (event: Kit.RequestEvent, language: Language) => URL | string
 	}
 }) => ({
-	wrap: (handle: CustomHandle) => {
+	wrap: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
 
 		return sequence(
@@ -64,7 +64,7 @@ export const initHandleWrapper = (options: {
 						: undefined,
 				})
 			},
-			(input) => (handle as CustomHandle)(input, runtime),
+			(input) => (handle as WrappedHandle)(input, runtime),
 		)
 	},
 })
