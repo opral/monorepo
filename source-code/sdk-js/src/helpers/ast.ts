@@ -3,34 +3,32 @@ import type { Result } from "@inlang/core/utilities"
 import { walk, type SyncHandler } from "estree-walker"
 import type { types } from "recast"
 
-export class TransformAstAtMatchingError extends Error {
-	readonly #id = "TransformAstAtMatchingException"
+export class FindAstError extends Error {
+	readonly #id = "FindAstException"
 }
 
 type SyncHandlerParams = Parameters<SyncHandler>
 
-type TransformAstAtMatchingConditionParameter = {
+type FindAstConditionParameter = {
 	node?: types.namedTypes.Node | null
 	parent?: types.namedTypes.Node | null
 	key?: SyncHandlerParams[2]
 	index?: SyncHandlerParams[3]
 }
 
-type TransformAstAtMatchingCondition = (
-	parameter: TransformAstAtMatchingConditionParameter,
-) => boolean
+type FindAstCondition = (parameter: FindAstConditionParameter) => boolean
 
-type TransformAstAtMatching = (
+type FindAst = (
 	sourceAst: types.namedTypes.Program,
-	matchers: [TransformAstAtMatchingCondition, ...TransformAstAtMatchingCondition[]],
-	insertionNodeRef: TransformAstAtMatchingCondition,
-	manipulation: (parameter: TransformAstAtMatchingConditionParameter) => void,
-) => Result<types.namedTypes.Program, TransformAstAtMatchingError>
+	matchers: [FindAstCondition, ...FindAstCondition[]],
+	runOn: FindAstCondition,
+	run: (parameter: FindAstConditionParameter) => any,
+) => Result<any, FindAstError>
 // Insert element only if all ancestors match matchers
 // find a nodes parent where the node matches and where all ancestors match
 // Create a map for matchingNodes: Map<Node, matchedCount>
 //
-export const transformAstAtMatching = ((sourceAst, matchers, insertionNodeRef, manipulation) => {
+export const findAst = ((sourceAst, matchers, runOn, run) => {
 	const matchCount = new Map<Node, number>()
 	let match: Node | undefined
 	const nodeInfoMap = new Map<
@@ -39,7 +37,7 @@ export const transformAstAtMatching = ((sourceAst, matchers, insertionNodeRef, m
 			parent: SyncHandlerParams[1]
 			key: SyncHandlerParams[2]
 			index: SyncHandlerParams[3]
-			isInsertionNodeRef: boolean
+			runOnNode: boolean
 		}
 	>()
 	// Find matching node, the corresponding parent and insertionPoint
@@ -49,7 +47,7 @@ export const transformAstAtMatching = ((sourceAst, matchers, insertionNodeRef, m
 				parent,
 				key,
 				index,
-				isInsertionNodeRef: insertionNodeRef({ node, parent, key, index }),
+				runOnNode: runOn({ node, parent, key, index }),
 			})
 			const matchCountAncestor = !parent ? 0 : matchCount.get(parent) ?? 0
 			if (matchCountAncestor < matchers.length) {
@@ -65,9 +63,7 @@ export const transformAstAtMatching = ((sourceAst, matchers, insertionNodeRef, m
 	if (!match)
 		return [
 			undefined,
-			new Error(
-				"Can't find path in ast matching the passed matchers",
-			) as TransformAstAtMatchingError,
+			new Error("Can't find path in ast matching the passed matchers") as FindAstError,
 		]
 	const matchPath: Node[] = []
 	let currentNode: Node | null | undefined = match
@@ -76,13 +72,10 @@ export const transformAstAtMatching = ((sourceAst, matchers, insertionNodeRef, m
 		currentNode = nodeInfoMap.get(currentNode)?.parent
 	}
 	// matchpath needs to contain one node that isInsertionRefNode
-	const insertionNode = matchPath.find((node) => nodeInfoMap.get(node)?.isInsertionNodeRef)
-	if (!insertionNode)
-		return [
-			undefined,
-			new Error("Can't find specified insertion point") as TransformAstAtMatchingError,
-		]
-	const insertionInfo = nodeInfoMap.get(insertionNode)
-	manipulation({ node: insertionNode, ...insertionInfo })
-	return [sourceAst, undefined]
-}) satisfies TransformAstAtMatching
+	const runOnNode = matchPath.find((node) => nodeInfoMap.get(node)?.runOnNode)
+	if (!runOnNode)
+		return [undefined, new Error("Can't find specified insertion point") as FindAstError]
+	const runOnNodeMeta = nodeInfoMap.get(runOnNode)
+	const runResult = run({ node: runOnNode, ...runOnNodeMeta })
+	return [runResult, undefined]
+}) satisfies FindAst
