@@ -1,4 +1,4 @@
-import type { Filesystem } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 
 /**
  * Minimal filesystem provided by inlang.
@@ -9,4 +9,4 @@ import type { Filesystem } from "@inlang-git/fs"
  *
  * If you are missing a method, please open an issue on github.
  */
-export type $fs = Pick<Filesystem, "readdir" | "mkdir" | "writeFile" | "readFile">
+export type $fs = Pick<NodeishFilesystem, "readdir" | "mkdir" | "writeFile" | "readFile">

@@ -1,5 +1,5 @@
 import { test, expect, afterAll, describe } from "vitest"
-import type { Filesystem } from "../interface.js"
+import type { NodeishFilesystem } from "../interface.js"
 import { createMemoryFs } from "./memoryFs.js"
 
 describe.skip("node fs", async () => {
@@ -14,7 +14,7 @@ describe("memory fs", async () => {
 	await runFsTestSuite("memory fs", "", fs)
 })
 
-const runFsTestSuite = async (name: string, tempDir: string, fs: Filesystem) => {
+const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
 	test("recursive mkdir", async () => {
 		await fs.mkdir(`${tempDir}/home/user1/documents///`, { recursive: true })
 		await fs.mkdir(`${tempDir}/home/user1/../user1//downloads`, { recursive: true })
