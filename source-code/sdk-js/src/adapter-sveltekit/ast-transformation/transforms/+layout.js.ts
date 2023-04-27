@@ -3,7 +3,7 @@ import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { transformAstAtMatching } from "../../../helpers/ast.js"
+import { transformAstAtMatching } from "../../../helpers/index.js"
 
 export const requiredImports = `
 import { browser } from "$app/environment";
