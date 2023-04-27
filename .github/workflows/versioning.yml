@@ -28,13 +28,8 @@ jobs:
       - name: Run Build
         run: npm run build
 
-      - name: Creating .npmrc
-        run: |
-          cat << EOF > "$HOME/.npmrc"
-            //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+      - name: Run Tests
+        run: npm run test
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -43,3 +38,4 @@ jobs:
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
