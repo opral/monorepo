@@ -148,10 +148,23 @@ let viteServer: ViteDevServer | undefined
 export const plugin = () => {
 	return {
 		name: 'vite-plugin-inlang-sdk-js-sveltekit',
-		enforce: 'pre', // makes sure we run before vite-plugin-svelte
+		// makes sure we run before vite-plugin-svelte
+		enforce: 'pre',
+
 		configureServer(server) {
 			viteServer = server as unknown as ViteDevServer
 		},
+
+		config() {
+			return {
+				ssr: {
+					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
+					// to be able to use `SvelteKit`'s `$app` aliases
+					noExternal: ['@inlang/sdk-js'],
+				}
+			}
+		},
+
 		async buildStart() {
 			const config = await getConfig()
 
@@ -160,6 +173,7 @@ export const plugin = () => {
 				await moveExistingRoutesIntoSubfolder(config)
 			}
 
+			// TODO: refactor
 			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
