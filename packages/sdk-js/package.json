@@ -74,18 +74,15 @@
 	"engines": {
 		"node": ">=18"
 	},
-	"dependencies": {
-		"@inlang/core": "*",
-		"estree-walker": "^3.0.3",
-		"recast": "^0.22.0",
-		"unplugin": "^1.3.1"
-	},
 	"devDependencies": {
+		"@inlang/core": "*",
 		"@sveltejs/kit": "^1.15.4",
 		"@types/estree": "^1.0.0",
 		"astring": "^1.8.4",
+		"estree-walker": "^3.0.3",
 		"magicast": "^0.2.4",
 		"npm-run-all": "^4.1.5",
+		"recast": "^0.22.0",
 		"svelte": "^3.58.0",
 		"tsup": "^6.7.0"
 	}
