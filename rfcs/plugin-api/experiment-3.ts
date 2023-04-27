@@ -14,8 +14,11 @@ export const myPlugin = createPlugin<{ pathPattern: string }>((settings) => {
 				throw new Error("pathPattern is required")
 			}
 
-			config.readResources = readResources({ settings, env })
-			config.languages = getLanguages({ settings, env })
+			return {
+				...config,
+				readResources: readResources({ settings, env }),
+				languages: getLanguages({ settings, env }),
+			}
 		},
 	}
 })
@@ -36,7 +39,7 @@ type InitPluginFunction<PluginSettings> = (
 
 type Plugin = {
 	id: string
-	defineConfig(args: { config: Partial<Config>, env: EnvironmentFunctions }): void
+	defineConfig(args: { config: Readonly<Partial<Config>>, env: EnvironmentFunctions }): void
 }
 
 function createPlugin<PluginSettings>(
