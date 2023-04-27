@@ -47,7 +47,16 @@ export const ListHeader = (props: ListHeaderProps) => {
 			const lintReports = getLintReports(filteredResources)
 			const newArr: Array<RuleSummaryItem> = []
 			lintRuleIds().map((id) => {
-				const filteredReports = lintReports.filter((report) => report.id === id)
+				const filteredReports = lintReports.filter(
+					(report) =>
+						report.id === id &&
+						(!report.id.includes("missingMessage") ||
+							filteredLanguages().includes(
+								report.message.match(/'([^']+)'/g)![1]!.replace(/'/g, ""),
+							)),
+				)
+				console.log(filteredReports.length)
+
 				const lintRule = inlangConfig()
 					?.lint?.rules.flat()
 					.find((rule) => rule.id === id)
@@ -63,7 +72,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 		}
 	})
 
-	//calculate message conter
+	//calculate message counter
 	createEffect(() => {
 		let messageCounter = 0
 		Object.values(props.messages()).map((message) => {
