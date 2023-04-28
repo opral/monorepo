@@ -1,6 +1,7 @@
-import type { Node } from "estree"
+import type { Node, Program } from "estree"
 import type { Result } from "@inlang/core/utilities"
-import { walk, type SyncHandler } from "estree-walker"
+import { walk as jsWalk, type SyncHandler } from "estree-walker"
+import { walk as svelteWalk } from "svelte/compiler"
 import type { types } from "recast"
 
 export class FindAstError extends Error {
@@ -10,8 +11,8 @@ export class FindAstError extends Error {
 type SyncHandlerParams = Parameters<SyncHandler>
 
 type FindAstConditionParameter = {
-	node?: types.namedTypes.Node | null
-	parent?: types.namedTypes.Node | null
+	node?: types.namedTypes.Node | Node | null
+	parent?: types.namedTypes.Node | Node | null
 	key?: SyncHandlerParams[2]
 	index?: SyncHandlerParams[3]
 }
@@ -19,7 +20,9 @@ type FindAstConditionParameter = {
 type FindAstCondition = (parameter: FindAstConditionParameter) => boolean
 
 type FindAst = (
-	sourceAst: types.namedTypes.Program,
+	walker: typeof jsWalk,
+) => (
+	sourceAst: types.namedTypes.Program | Program,
 	matchers: [FindAstCondition, ...FindAstCondition[]],
 	runOn: FindAstCondition,
 	run: (parameter: FindAstConditionParameter) => any,
@@ -28,7 +31,7 @@ type FindAst = (
 // find a nodes parent where the node matches and where all ancestors match
 // Create a map for matchingNodes: Map<Node, matchedCount>
 //
-export const findAst = ((sourceAst, matchers, runOn, run) => {
+const findAst = ((walker) => (sourceAst, matchers, runOn, run) => {
 	const matchCount = new Map<Node, number>()
 	let match: Node | undefined
 	const nodeInfoMap = new Map<
@@ -41,7 +44,7 @@ export const findAst = ((sourceAst, matchers, runOn, run) => {
 		}
 	>()
 	// Find matching node, the corresponding parent and insertionPoint
-	walk(sourceAst as Node, {
+	walker(sourceAst as Node, {
 		enter(node, parent, key, index) {
 			nodeInfoMap.set(node, {
 				parent,
@@ -79,3 +82,7 @@ export const findAst = ((sourceAst, matchers, runOn, run) => {
 	const runResult = run({ node: runOnNode, ...runOnNodeMeta })
 	return [runResult, undefined]
 }) satisfies FindAst
+
+export const findAstJs = findAst(jsWalk)
+
+export const findAstSvelte = findAst(svelteWalk)

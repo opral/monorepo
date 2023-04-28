@@ -1,1 +1,1 @@
-export { findAst } from "./ast.js"
+export { findAstJs, findAstSvelte } from "./ast.js"

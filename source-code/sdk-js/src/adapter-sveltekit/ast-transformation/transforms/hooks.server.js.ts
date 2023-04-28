@@ -2,7 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { types } from "recast"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { findAst } from "../../../helpers/index.js"
+import { findAstJs } from "../../../helpers/index.js"
 
 const requiredImports = `
 import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
@@ -42,7 +42,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const importsAst = parseModule(requiredImports)
 	deepMergeObject(ast, importsAst)
 
-	const handleMatchers: Parameters<typeof findAst>[1] = [
+	const handleMatchers: Parameters<typeof findAstJs>[1] = [
 		({ node }) => n.ExportNamedDeclaration.check(node),
 		({ node }) => n.VariableDeclaration.check(node),
 		({ node }) => n.VariableDeclarator.check(node),
@@ -51,7 +51,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 
 	if (n.Program.check(ast.$ast)) {
 		const hasHandle =
-			findAst(
+			findAstJs(
 				ast.$ast,
 				handleMatchers,
 				({ node }) => n.Identifier.check(node),
@@ -69,7 +69,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 			b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAst(
+		findAstJs(
 			ast.$ast,
 			handleMatchers,
 			({ node }) => n.Identifier.check(node),

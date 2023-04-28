@@ -3,7 +3,7 @@ import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { findAst } from "../../../helpers/index.js"
+import { findAstJs } from "../../../helpers/index.js"
 
 const requiredImports = `
 import { browser } from "$app/environment";
@@ -36,7 +36,7 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	const importsAst = parseModule(requiredImports)
 	deepMergeObject(ast, importsAst)
 
-	const loadMatchers: Parameters<typeof findAst>[1] = [
+	const loadMatchers: Parameters<typeof findAstJs>[1] = [
 		({ node }) => n.ExportNamedDeclaration.check(node),
 		({ node }) => n.VariableDeclaration.check(node),
 		({ node }) => n.VariableDeclarator.check(node),
@@ -45,7 +45,7 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 
 	if (n.Program.check(ast.$ast)) {
 		const hasLoad =
-			findAst(
+			findAstJs(
 				ast.$ast,
 				loadMatchers,
 				({ node }) => n.Identifier.check(node),
@@ -63,7 +63,7 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAst(
+		findAstJs(
 			ast.$ast,
 			loadMatchers,
 			({ node }) => n.Identifier.check(node),
