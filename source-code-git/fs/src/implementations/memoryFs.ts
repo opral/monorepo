@@ -26,13 +26,10 @@ export function createMemoryFs(): NodeishFilesystem {
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
 			options: Parameters<NodeishFilesystem["readFile"]>[1],
 		) {
-			const encoding = typeof options === "string" ? options : options?.encoding ?? "raw"
+			const encoding = options.encoding
 
 			const file: Inode | undefined = followPath(fsRoot, path)
-			if (typeof file === "string") {
-				if (["utf8", "utf-8"].includes(encoding.toLowerCase())) return file
-				throw new Error(`Only utf8 encoding is supported in readFile.`)
-			}
+			if (typeof file === "string") return file
 
 			if (!file) throw new FilesystemError("ENOENT", path)
 			throw new FilesystemError("EISDIR", path)
