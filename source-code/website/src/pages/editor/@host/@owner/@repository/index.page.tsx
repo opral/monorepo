@@ -80,6 +80,11 @@ function TheActualPage() {
 				<Match when={repositoryIsCloned.error?.message.includes("404")}>
 					<RepositoryDoesNotExistOrNotAuthorizedCard />
 				</Match>
+				<Match when={repositoryIsCloned.error?.message.includes("401")}>
+					<p class="text-lg font-medium text-center flex justify-center items-center h-full grow">
+						You want to access a private repository, please sign-in at the bottom.
+					</p>
+				</Match>
 				<Match when={repositoryIsCloned.error}>
 					<p class="text-danger">{repositoryIsCloned.error.message}</p>
 				</Match>
@@ -103,7 +108,7 @@ function TheActualPage() {
 							file system, which might lead to a new generation of software (see{" "}
 							<a
 								class="link link-primary"
-								href="https://inlang.com/documentation/the-next-git"
+								href="https://www.youtube.com/watch?v=vJ3jGgCrz2I"
 								target="_blank"
 							>
 								next git
@@ -127,7 +132,7 @@ function TheActualPage() {
 					<NoInlangConfigFoundCard />
 				</Match>
 				<Match when={doesInlangConfigExist()}>
-					<div class="mb-16 empty-parent">
+					<div class="empty-parent">
 						<ListHeader messages={messages} />
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}

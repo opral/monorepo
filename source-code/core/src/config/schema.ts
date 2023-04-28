@@ -3,6 +3,7 @@ import type * as ast from "../ast/index.js"
 import type { LintRule } from "../lint/rule.js"
 import type { $fs } from "./environment-functions/$fs.js"
 import type { $import } from "./environment-functions/$import.js"
+import type { SdkConfig } from './_sdk.js'
 
 /**
  * The environment functions.
@@ -107,4 +108,6 @@ export type Config = {
 		 */
 		// documentSelectors: DocumentSelector[];
 	}
+
+	sdk?: SdkConfig // TODO: remove this from here once we have the plugin system
 }

@@ -10,7 +10,7 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
-import { http, raw } from "@inlang/git-sdk/api"
+import { http, raw } from "@inlang-git/client/raw"
 import {
 	Config,
 	Config as InlangConfig,
@@ -244,8 +244,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						a === config.referenceLanguage
 							? -1
 							: b === config.referenceLanguage
-								? 1
-								: a.localeCompare(b),
+							? 1
+							: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
@@ -675,7 +675,17 @@ async function writeResources(args: {
 	setFsChange: (date: Date) => void
 }) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
-	const status = await raw.statusMatrix({ fs: args.fs, dir: "/" })
+	const status = await raw.statusMatrix({
+		fs: args.fs,
+		dir: "/",
+		filter: (f) =>
+			f.endsWith(".json") ||
+			f.endsWith(".po") ||
+			f.endsWith(".yaml") ||
+			f.endsWith(".yml") ||
+			f.endsWith(".js") ||
+			f.endsWith(".ts"),
+	})
 	const filesWithUncommittedChanges = status.filter(
 		(row) =>
 			// files with unstaged and uncommitted changes
@@ -700,6 +710,11 @@ async function writeResources(args: {
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())
+	showToast({
+		variant: "info",
+		title: "The change has been committed.",
+		message: `Don't forget to push the changes.`,
+	})
 }
 
 async function _unpushedChanges(args: {

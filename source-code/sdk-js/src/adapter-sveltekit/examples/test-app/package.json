@@ -1,0 +1,23 @@
+{
+	"name": "test-app",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@inlang/sdk-js": "file:../../../..",
+		"@sveltejs/adapter-auto": "^2.0.1",
+		"@sveltejs/adapter-static": "^2.0.2",
+		"@sveltejs/kit": "^1.15.9",
+		"svelte": "^3.58.0",
+		"svelte-check": "^3.2.0",
+		"typescript": "^5.0.4",
+		"vite": "4.3.3"
+	},
+	"type": "module"
+}

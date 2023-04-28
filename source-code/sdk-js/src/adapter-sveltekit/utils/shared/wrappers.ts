@@ -1,3 +1,4 @@
+import { browser } from "$app/environment"
 import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
 import { detectLanguage, Detector } from "../../../detectors/index.js"
@@ -12,6 +13,8 @@ import {
 } from "../shared/utils.js"
 
 // ------------------------------------------------------------------------------------------------
+
+let initializedRuntime: Record<Language, SvelteKitClientRuntime> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -33,7 +36,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
-	const data = (event.data || {}) as DataPayload
+	const data = event.data as DataPayload
 
 	const { referenceLanguage = undefined as unknown as Language, languages = [] } = data
 
@@ -43,14 +46,20 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 			? data.language
 			: await detectLanguage({ referenceLanguage, languages }, ...options.initDetectors(event))
 
-	const runtime = await initSvelteKitClientRuntime({
-		fetch: event.fetch,
-		language: language!,
-		referenceLanguage,
-		languages,
-	})
+	const runtime =
+		initializedRuntime[language as Language] ||
+		(await initSvelteKitClientRuntime({
+			fetch: event.fetch,
+			language: language!,
+			referenceLanguage,
+			languages,
+		}))
 
 	resolveRuntimePromise(runtime)
+
+	if (browser && language) {
+		initializedRuntime = { [language]: runtime }
+	}
 
 	return runtime
 }

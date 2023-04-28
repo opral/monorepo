@@ -1,0 +1,28 @@
+name: Publish @inlang/sdk-js to NPM
+
+on:
+  # manually triggering the workflow if desired
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "source-code/sdk-js/**"
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: node_modules/.bin/turbo run build --filter @inlang/sdk-js
+      - run: node_modules/.bin/turbo run test --filter @inlang/sdk-js
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          package: source-code/sdk-js/package.json

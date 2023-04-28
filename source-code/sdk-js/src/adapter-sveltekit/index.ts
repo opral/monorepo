@@ -1,1 +1,3 @@
-export { vitePlugin, rollupPlugin } from "./plugin.js"
+import { plugin } from "./ast-transformation/vite-plugin.js"
+
+export default plugin

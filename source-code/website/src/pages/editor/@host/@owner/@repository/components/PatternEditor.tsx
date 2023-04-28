@@ -1,11 +1,16 @@
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, onMount, Show } from "solid-js"
+import { createTiptapEditor, useEditorIsFocused, useEditorJSON } from "solid-tiptap"
+import Document from "@tiptap/extension-document"
+import Paragraph from "@tiptap/extension-paragraph"
+import Text from "@tiptap/extension-text"
+import Placeholder from "@tiptap/extension-placeholder"
+import History from "@tiptap/extension-history"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
-import type { SlDialog, SlTextarea } from "@shoelace-style/shoelace"
+import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
-import { clickOutside } from "@src/directives/clickOutside.js"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
@@ -26,13 +31,124 @@ export function PatternEditor(props: {
 	message: ast.Message | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
-	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
-		useEditorState()
+	const {
+		resources,
+		setResources,
+		referenceResource,
+		userIsCollaborator,
+		routeParams,
+		filteredLanguages,
+	} = useEditorState()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
 
 	let machineLearningWarningDialog: SlDialog | undefined
+
+	const [isLineItemFocused, setIsLineItemFocused] = createSignal(false)
+
+	const handleLineItemFocusIn = () => {
+		if (document.activeElement?.tagName !== "SL-BUTTON") {
+			if (document.activeElement !== textArea.children[0]) {
+				setIsLineItemFocused(false)
+			}
+		} else {
+			if (
+				document.activeElement.parentElement?.parentElement?.parentElement?.children[1] === textArea
+			) {
+				setIsLineItemFocused(true)
+			}
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener("focusin", handleLineItemFocusIn)
+		return () => {
+			document.removeEventListener("focusin", handleLineItemFocusIn)
+		}
+	})
+
+	//editor
+	let textArea!: HTMLDivElement
+
+	const editor = createTiptapEditor(() => ({
+		element: textArea!,
+		extensions: [
+			Document,
+			Paragraph,
+			Text,
+			Placeholder.configure({
+				emptyEditorClass: "is-editor-empty",
+				placeholder: "Enter translation...",
+			}),
+			History.configure({
+				depth: 10,
+			}),
+		],
+		editorProps: {
+			attributes: {
+				class: "focus:outline-none",
+			},
+		},
+		content: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value
+			? {
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
+								},
+							],
+						},
+					],
+			  }
+			: undefined,
+	}))
+
+	// access tiptap json
+	const getTextValue = () => {
+		if (editor()) {
+			const json = useEditorJSON(() => editor())
+			if (json()) {
+				const data = json()
+				return data.content
+					.filter((p: any) => p.content)
+					.map((p: any) => p.content)
+					.flat()
+					.map((p: any) => p.text)
+					.join("\n")
+			}
+		}
+	}
+
+	const setTextValue = (updatedText: string) => {
+		if (editor()) {
+			editor().commands.setContent({
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{
+								type: "text",
+								text: updatedText,
+							},
+						],
+					},
+				],
+			})
+		}
+	}
+
+	const getEditorFocus = () => {
+		if (editor()) {
+			const isFocus = useEditorIsFocused(() => editor())
+			return isFocus()
+		}
+	}
 
 	/** throw if unimplemented features are used  */
 	createEffect(() => {
@@ -49,15 +165,6 @@ export function PatternEditor(props: {
 			setTextValue(String(props.message.pattern.elements[0].value))
 		}
 	})
-
-	/** whether the pattern is focused */
-	const [isFocused, setIsFocused] = createSignal(false)
-
-	/** the value of the pattern */
-	const [textValue, setTextValue] = createSignal(
-		// eslint-disable-next-line solid/reactivity
-		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
-	)
 
 	/** the resource the message belongs to */
 	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
@@ -97,16 +204,28 @@ export function PatternEditor(props: {
 	// 	}
 	// );
 
-	const hasChanges = () =>
-		(props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== textValue() &&
-		textValue() !== ""
+	const hasChanges = () => {
+		const _updatedText = getTextValue()
+		if (_updatedText) {
+			if ((props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText) {
+				return _updatedText
+			} else {
+				return ""
+			}
+		} else {
+			return false
+		}
+	}
 
 	/**
 	 * Saves the changes of the message.
 	 */
-	const handleCommit = () => {
+	const [commitIsLoading, setCommitIsLoading] = createSignal(false)
+
+	const handleCommit = async () => {
+		setCommitIsLoading(true)
 		const _copy = copy()
-		const _textValue = textValue()
+		const _textValue = getTextValue()
 		if (_textValue === undefined) {
 			return
 		}
@@ -117,19 +236,26 @@ export function PatternEditor(props: {
 			...(resources.filter(
 				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
 			) as Resource[]),
+			//@ts-ignore
 			updatedResource as Resource,
 		])
-		showToast({
-			variant: "info",
-			title: "The change has been committed.",
-			message: `Don't forget to push the changes.`,
-		})
+		//this is a dirty fix for getting focus back to the editor after commit
+		setTimeout(() => {
+			textArea.parentElement?.click()
+		}, 500)
 		telemetryBrowser.capture("commit changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
 	}
+
+	createEffect(() => {
+		const resource = resources.filter((resource) => resource.languageTag.name === props.language)
+		if (resource && textArea) {
+			setCommitIsLoading(false)
+		}
+	})
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -173,8 +299,24 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			if (lintReports) {
-				lintReports.map((lint) => {
+			const filteredReports = lintReports.filter((report) => {
+				if (!report.id.includes("missingMessage")) {
+					return true
+				} else {
+					// missingMessage exception
+					const lintLanguage = report.message.match(/'([^']+)'/g)
+					if (lintLanguage?.length === 2) {
+						if (filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, ""))) {
+							return true
+						}
+					} else {
+						return true
+					}
+				}
+				return false
+			})
+			if (filteredReports) {
+				filteredReports.map((lint) => {
 					notifications.push({
 						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
@@ -201,12 +343,6 @@ export function PatternEditor(props: {
 		return notifications
 	}
 
-	let textArea: SlTextarea
-	const handleFocus = () => {
-		setIsFocused(true)
-		textArea?.focus()
-	}
-
 	const handleShortcut = (event: KeyboardEvent) => {
 		if (
 			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
@@ -223,17 +359,10 @@ export function PatternEditor(props: {
 		// outer element is needed for clickOutside directive
 		// to close the action bar when clicking outside
 		<div
-			ref={(element) => [
-				clickOutside(
-					element,
-					// only close the action bar if no outstanding changes exist
-					// eslint-disable-next-line solid/reactivity
-					() => hasChanges() === false && setIsFocused(false),
-				),
-			]}
 			onClick={() => {
-				handleFocus()
+				editor().chain().focus()
 			}}
+			onFocusIn={() => setIsLineItemFocused(true)}
 			class="flex justify-start items-start w-full gap-5 px-4 py-1.5 bg-background border first:mt-0 -mt-[1px] border-surface-3 hover:bg-[#FAFAFB] hover:bg-opacity-75 focus-within:relative focus-within:border-primary focus-within:ring-[3px] focus-within:ring-hover-primary/50"
 		>
 			<div class="flex justify-start items-start gap-2 py-[5px]">
@@ -249,7 +378,7 @@ export function PatternEditor(props: {
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
-			<sl-textarea
+			{/* <sl-textarea
 				ref={textArea}
 				class="grow"
 				prop:resize="auto"
@@ -267,12 +396,21 @@ export function PatternEditor(props: {
 				prop:value={textValue() ?? ""}
 				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
 				onKeyDown={(event) => handleShortcut(event)}
+			/> */}
+			{/* tiptap */}
+
+			<div
+				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
+				id={props.id + "-" + props.language}
+				ref={textArea}
+				onKeyDown={(event) => handleShortcut(event)}
 			/>
+
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
-				<Show when={isFocused()}>
+				<Show when={true}>
 					<div class="flex items-center justify-end gap-2">
-						<Show when={textValue() === "" || textValue() === undefined}>
+						<Show when={getTextValue() === "" || getTextValue() === undefined}>
 							<sl-button
 								onClick={handleMachineTranslate}
 								// prop:disabled={true}
@@ -288,10 +426,11 @@ export function PatternEditor(props: {
 								Machine translate
 							</sl-button>
 						</Show>
-						<Show when={hasChanges()}>
+						<Show when={hasChanges() && isLineItemFocused()}>
 							<sl-button
 								prop:variant="primary"
 								prop:size="small"
+								prop:loading={commitIsLoading()}
 								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 								onClick={() => {
 									handleCommit()
@@ -304,7 +443,7 @@ export function PatternEditor(props: {
 						</Show>
 					</div>
 				</Show>
-				<Show when={!isFocused() && hasChanges()}>
+				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>
 				{getNotificationHints().length !== 0 && (
@@ -340,7 +479,7 @@ export function PatternEditor(props: {
 							onClick={() => {
 								setLocalStorage("showMachineTranslationWarning", false)
 								machineLearningWarningDialog?.hide()
-								handleMachineTranslate()
+								//handleMachineTranslate()
 							}}
 						>
 							Proceed with machine translating
