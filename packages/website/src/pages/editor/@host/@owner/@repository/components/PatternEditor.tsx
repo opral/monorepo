@@ -11,7 +11,6 @@ import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
-import { clickOutside } from "@src/directives/clickOutside.js"
 import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
@@ -20,7 +19,6 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { F } from "../../../../../../../dist/client/assets/chunks/c17aaa17.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -33,8 +31,14 @@ export function PatternEditor(props: {
 	message: ast.Message | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
-	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
-		useEditorState()
+	const {
+		resources,
+		setResources,
+		referenceResource,
+		userIsCollaborator,
+		routeParams,
+		filteredLanguages,
+	} = useEditorState()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -295,8 +299,25 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			if (lintReports) {
-				lintReports.map((lint) => {
+			const filteredReports = lintReports.filter((report) => {
+				if (
+					!report.id.includes("missingMessage") ||
+					// catch all missingMessage reports
+					report.message.match(
+						/The pattern contains only only one element which is an empty string\./i,
+					) ||
+					report.message.match(/Empty pattern (length 0)\./i) ||
+					//@ts-ignore
+					filteredLanguages().includes(report.message.match(/'([^']+)'/g)![1]?.replace(/'/g, "")) ||
+					// fallback for older versions
+					report.message.match(/Message with id '([A-Za-z0-9]+(\.[A-Za-z0-9]+)+)' is missing\./i)
+				) {
+					return true
+				}
+				return false
+			})
+			if (filteredReports) {
+				filteredReports.map((lint) => {
 					notifications.push({
 						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,
