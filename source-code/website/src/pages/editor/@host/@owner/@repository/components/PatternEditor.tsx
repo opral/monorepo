@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onMount, Show } from "solid-js"
-import { useEditorIsFocused, createTiptapEditor, useEditorJSON } from "solid-tiptap"
+import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -16,6 +16,7 @@ import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
+import { FloatingMenu } from "./FloatingMenu.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -26,6 +27,7 @@ export function PatternEditor(props: {
 	id: ast.Message["id"]["name"]
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
+	variableReferences: ast.VariableReference[]
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
@@ -290,33 +292,21 @@ export function PatternEditor(props: {
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
-			{/* <sl-textarea
-				ref={textArea}
-				class="grow"
-				prop:resize="auto"
-				prop:size="small"
-				prop:rows={1}
-				prop:placeholder="Enter translation ..."
-				onFocus={() => {
-					setIsFocused(true)
-				}}
-				onFocusOut={(e) => {
-					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
-						setIsFocused(false)
-					}
-				}}
-				prop:value={textValue() ?? ""}
-				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-				onKeyDown={(event) => handleShortcut(event)}
-			/> */}
-			{/* tiptap */}
 
+			{/* tiptap floating menu */}
 			<div
+				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
-				id={props.id + "-" + props.language}
-				ref={textArea}
-				onKeyDown={(event) => handleShortcut(event)}
-			/>
+			>
+				<FloatingMenu variableReferences={props.variableReferences} />
+
+				{/* tiptap editor */}
+				<div
+					id={props.id + "-" + props.language}
+					ref={textArea}
+					onKeyDown={(event) => handleShortcut(event)}
+				/>
+			</div>
 
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">

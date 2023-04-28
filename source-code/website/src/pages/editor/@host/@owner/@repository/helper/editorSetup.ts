@@ -4,6 +4,7 @@ import Text from "@tiptap/extension-text"
 import Placeholder from "@tiptap/extension-placeholder"
 import History from "@tiptap/extension-history"
 import HardBreak from "@tiptap/extension-hard-break"
+import FloatingMenu from "@tiptap/extension-floating-menu"
 import { setTipTapMessage } from "./parse.js"
 import type * as ast from "@inlang/core/ast"
 import PlaceholderNode from "./customExtensions/placeholder.js"
@@ -34,6 +35,17 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 			}),
 			History.configure({
 				depth: 10,
+			}),
+			FloatingMenu.configure({
+				element: document.querySelector(".test"),
+				//@ts-ignore
+				shouldShow: ({ editor }) => {
+					// show the floating within any paragraph
+					return editor.isActive("paragraph")
+				},
+				tippyOptions: {
+					duration: 200,
+				},
 			}),
 		],
 		editorProps: {
