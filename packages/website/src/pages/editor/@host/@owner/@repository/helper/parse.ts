@@ -15,7 +15,6 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 				.flat()
 
 			const ast_elements: Array<any> = []
-			console.log(tiptap_nodes)
 			tiptap_nodes.map((tiptap_node: any) => {
 				switch (tiptap_node.type) {
 					case "text":

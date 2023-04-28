@@ -6,27 +6,14 @@ export const FloatingMenu = (props: {
 	editor: any
 }) => {
 	const handleClick = (variableReference: ast.VariableReference) => {
-		// const pos = props.editor().state.selection.anchor
-		// props
-		// 	.editor()
-		// 	.chain()
-		// 	.insertContent({
-		// 		type: "text",
-		// 		marks: [{ type: "placeholderMark" }],
-		// 		text: variableReference.name,
-		// 	})
-		// 	.run()
-		// props
-		// 	.editor()
-		// 	.chain()
-		// 	.focus()
-		// 	.insertContent({
-		// 		type: "text",
-		// 		marks: undefined,
-		// 		text: variableReference.name,
-		// 	})
-		// 	.run()
-		// console.log(props.editor().state)
+		props
+			.editor()
+			.chain()
+			.insertContent({
+				type: "placeholderNode",
+				attrs: { id: variableReference.name, label: variableReference.name },
+			})
+			.run()
 	}
 
 	return (
