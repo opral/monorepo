@@ -1,7 +1,5 @@
 import { describe, it } from "vitest"
-import {
-	transformHooksServerJs,
-} from "../transforms/hooks.server.js.js"
+import { transformHooksServerJs } from "../transforms/hooks.server.js.js"
 import { baseTestConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
 
@@ -30,3 +28,9 @@ describe("transformHooksServerJs", () => {
 	})
 })
 
+// NOTES
+// Only one function for everything (transformHooksServerJs)
+// Capabilities:
+// 1. merge required imports with current imports
+// 2. wrap existing load statement
+// 3. Retain other, load unrelated statements
