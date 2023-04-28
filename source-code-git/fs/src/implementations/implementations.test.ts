@@ -100,15 +100,22 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	// })
 
 	test("rm", async () => {
-		await fs.rm(`${tempDir}/home/user1/documents/file1`, { recursive: true })
-		await expect(
-			async () =>
-				await fs.readFile(`/${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
-		).rejects.toThrow(/ENOENT/)
-		await fs.writeFile(`/${tempDir}/home/user1/documents/file1`, "text in the first file")
-		await fs.rm(`/${tempDir}/home/user1`, { recursive: true })
+		await expect(async () => await fs.rm(`${tempDir}/home/user1/documents/`)).rejects.toThrow(
+			/EISDIR/,
+		)
 
-		await expect(async () => await fs.readdir(`/${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)
+		await fs.rm(`${tempDir}/home/user1/documents/file1`)
+		await expect(
+			async () => await fs.readFile(`${tempDir}/home/user1/documents/file1`, "utf8"),
+		).rejects.toThrow(/ENOENT/)
+
+		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, "text in the first file")
+		await fs.rm(`${tempDir}/home/user1`, { recursive: true })
+
+		await expect(async () => await fs.readdir(`${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)
+
+		expect(await fs.readdir(`${tempDir}/home`)).toEqual([])
+	})
 
 	test("rmdir", async () => {
 		await fs.mkdir(`${tempDir}/dir1`)
