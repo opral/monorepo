@@ -1,6 +1,6 @@
 import Mention from "@tiptap/extension-mention"
 //@ts-ignore
-import { mergeAttributes } from "@tiptap/core"
+import type { Node, Editor, Range, State } from "@tiptap/core"
 
 export interface PlaceholderNodeOptions {
 	HTMLAttributes: Record<string, any>
@@ -12,11 +12,11 @@ const PlaceholderNode = Mention.extend<PlaceholderNodeOptions>({
 	addOptions() {
 		return {
 			HTMLAttributes: {},
-			renderLabel({ options, node }: any) {
+			renderLabel({ node }: { node: Node }) {
 				return `${node.attrs.label ?? node.attrs.id}`
 			},
 			suggestion: {
-				command: ({ editor, range, props }: any) => {
+				command: ({ editor, range, props }: { editor: Editor; range: Range; props: any }) => {
 					// increase range.to by one when the next node is of type "text"
 					// and starts with a space character
 					const nodeAfter = editor.view.state.selection.$to.nodeAfter
@@ -43,7 +43,7 @@ const PlaceholderNode = Mention.extend<PlaceholderNodeOptions>({
 
 					window.getSelection()?.collapseToEnd()
 				},
-				allow: ({ state, range }: any) => {
+				allow: ({ state, range }: { state: State; range: Range }) => {
 					const $from = state.doc.resolve(range.from)
 					const type = state.schema.nodes[this.name]
 					const allow = !!$from.parent.type.contentMatch.matchType(type)
@@ -51,98 +51,6 @@ const PlaceholderNode = Mention.extend<PlaceholderNodeOptions>({
 					return allow
 				},
 			},
-		}
-	},
-
-	group: "inline",
-
-	inline: true,
-
-	selectable: false,
-
-	atom: true,
-
-	addAttributes() {
-		return {
-			id: {
-				default: null,
-				parseHTML: (element: any) => element.getAttribute("data-id"),
-				renderHTML: (attributes: any) => {
-					if (!attributes.id) {
-						return {}
-					}
-
-					return {
-						"data-id": attributes.id,
-					}
-				},
-			},
-
-			label: {
-				default: null,
-				parseHTML: (element: any) => element.getAttribute("data-label"),
-				renderHTML: (attributes: any) => {
-					if (!attributes.label) {
-						return {}
-					}
-
-					return {
-						"data-label": attributes.label,
-					}
-				},
-			},
-		}
-	},
-
-	parseHTML() {
-		return [
-			{
-				tag: `span[data-type="${this.name}"]`,
-			},
-		]
-	},
-
-	renderHTML({ node, HTMLAttributes }: any) {
-		return [
-			"span",
-			mergeAttributes({ "data-type": this.name }, this.options.HTMLAttributes, HTMLAttributes),
-			this.options.renderLabel({
-				options: this.options,
-				node,
-			}),
-		]
-	},
-
-	renderText({ node }: any) {
-		return this.options.renderLabel({
-			options: this.options,
-			node,
-		})
-	},
-
-	addKeyboardShortcuts() {
-		return {
-			Backspace: () =>
-				this.editor.commands.command(({ tr, state }: any) => {
-					let isMention = false
-					const { selection } = state
-					const { empty, anchor } = selection
-
-					if (!empty) {
-						return false
-					}
-
-					state.doc.nodesBetween(anchor - 1, anchor, (node: any, pos: any) => {
-						if (node.type.name === this.name) {
-							isMention = true
-							tr.insertText(this.options.suggestion.char || "", pos, pos + node.nodeSize)
-
-							return false
-						}
-					})
-
-					return isMention
-				}),
 		}
 	},
 })
