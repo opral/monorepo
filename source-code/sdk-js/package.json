@@ -80,6 +80,7 @@
 		"@types/estree": "^1.0.1",
 		"@types/lodash": "^4.14.194",
 		"acorn": "^8.8.2",
+		"acorn-walk": "^8.2.0",
 		"astring": "^1.8.4",
 		"estree-walker": "^3.0.3",
 		"lodash": "^4.17.21",
