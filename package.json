@@ -2,7 +2,8 @@
 	"private": true,
 	"type": "module",
 	"workspaces": [
-		"source-code/*"
+		"source-code/*",
+		"source-code-git/*"
 	],
 	"scripts": {
 		"build": "turbo run build",
@@ -31,6 +32,7 @@
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.26.0",
+		"@types/node": "^18.15.11",
 		"@typescript-eslint/eslint-plugin": "^5.48.2",
 		"@typescript-eslint/parser": "^5.48.2",
 		"@vitest/coverage-c8": "^0.29.8",

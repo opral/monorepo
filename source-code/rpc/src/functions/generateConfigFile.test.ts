@@ -19,7 +19,7 @@ describe.skip("generating config files", () => {
 			}
 			expect(exception).toBeUndefined()
 		},
-		{ timeout: 50000 },
+		{ timeout: 100000 },
 	)
 
 	it(
@@ -40,7 +40,7 @@ describe.skip("generating config files", () => {
 			}
 			expect(exception).toBeUndefined()
 		},
-		{ timeout: 50000 },
+		{ timeout: 100000 },
 	)
 
 	it(
@@ -53,6 +53,6 @@ describe.skip("generating config files", () => {
 			const [, exception] = await generateConfigFileServer({ filesystemAsJson })
 			expect(exception).toBeDefined()
 		},
-		{ timeout: 50000 },
+		{ timeout: 100000 },
 	)
 })

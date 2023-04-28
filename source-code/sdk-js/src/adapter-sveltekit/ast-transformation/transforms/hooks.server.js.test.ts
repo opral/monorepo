@@ -1,28 +1,32 @@
-import { describe, expect, test } from "vitest"
-import { transformHooksServerJs } from "./hooks.server.js.js"
+import { describe, it } from "vitest"
+import {
+	transformHooksServerJs,
+} from "../transforms/hooks.server.js.js"
+import { baseTestConfig } from "./test-helpers/config.js"
+import type { TransformConfig } from "../config.js"
 
-describe("hooks.server.js.ts", () => {
-	const baseConfig = {
-		isStatic: true,
-		srcFolder: "",
-		rootRoutesFolder: "",
-		hasAlreadyBeenInitialized: true,
-	}
-	const requiredImports = `import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
-import { redirect } from "@sveltejs/kit";
-import { initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors/server";
-import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";`
-	test("Insert into empty file with no options", () => {
-		const code = ""
-		const config = {
+describe("transformHooksServerJs", () => {
+	it("returns new file if no code provided", ({ expect }) => {
+		const code = transformHooksServerJs(baseTestConfig, "")
+		expect(code).toContain("getLanguage")
+	})
+	it("languageInUrl and isStatic", ({ expect }) => {
+		const config: TransformConfig = {
+			...baseTestConfig,
 			languageInUrl: true,
-			...baseConfig,
+			isStatic: true,
 		}
-		const transformed = transformHooksServerJs(config, code)
-		const expected = `${requiredImports}
-export const handle = initHandleWrapper({
-  getLanguage: ({ url }) => url.pathname.split("/")[1]
-}).wrap(async ({ event, resolve }) => resolve(event));`
-		expect(transformed).toBe(expected)
+		const code = transformHooksServerJs(config, "")
+		expect(code).toMatchSnapshot()
+	})
+
+	it("isStatic", ({ expect }) => {
+		const config: TransformConfig = {
+			...baseTestConfig,
+			isStatic: true,
+		}
+		const code = transformHooksServerJs(config, "")
+		expect(code).toMatchSnapshot()
 	})
 })
+

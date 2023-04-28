@@ -2,10 +2,10 @@ import type { Result } from "@inlang/core/utilities"
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
 import { privateEnv } from "@inlang/env-variables"
 import { telemetryNode } from "@inlang/telemetry"
-import { Volume } from "memfs"
+import { createMemoryFs, fromJson } from "@inlang-git/fs"
 import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
 import { dedent } from "ts-dedent"
-import { prompt, promptVersion } from "./generateConfigFile.prompt.js"
+import { prompt, promptVersion, temperature } from "./generateConfigFile.prompt.js"
 
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
@@ -57,7 +57,8 @@ async function _generateConfigFileRecursive(args: {
 	>
 > {
 	const iteration = args.iteration ?? 0
-	const fs = Volume.fromJSON(args.filesystemAsJson).promises
+	const fs = createMemoryFs()
+	await fromJson({ fs, json: args.filesystemAsJson, resolveFrom: "/" })
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	if (args.messages === undefined) {
 		const _prompt = prompt(Object.keys(args.filesystemAsJson))
@@ -92,10 +93,7 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 		const response = await openapi.createChatCompletion({
 			model: "gpt-3.5-turbo",
 			messages: args.messages,
-			// the lower the temperature, the more deterministic the output
-			// the higher the temperature, the more random the output
-			// for reproducibility
-			temperature: 0.7,
+			temperature: temperature,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
 		const [, exception] = await validateConfigFile({ file: configFile, env })

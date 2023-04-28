@@ -24,7 +24,7 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "^0.5.4",
+		"@inlang/core": "^0.6.0",
 		"dotenv": "^16.0.3",
 		"zod": "^3.21.4"
 	},
@@ -33,5 +33,6 @@
 		"esbuild-plugin-d.ts": "^1.1.0",
 		"esbuild-plugin-glob": "^2.2.1",
 		"tsx": "^3.12.6"
-	}
+	},
+	"version": null
 }
