@@ -44,36 +44,37 @@ export async function messagePreview(args: {
 					const translation = query(referenceResource).get({
 						id: message.messageId,
 					})?.pattern.elements[0]
-					if (translation?.type !== "Text") {
-						throw new Error("Only Text elements are supported for message previews.")
-					}
-					const previewText = translation.value
-					const truncatedPreviewText =
-						translation.value.length > MAXIMUM_PREVIEW_LENGTH
+					if (translation?.type === "Text") {
+						const previewText = translation.value;
+						const truncatedPreviewText = previewText.length > MAXIMUM_PREVIEW_LENGTH
 							? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: previewText
-					const range = new vscode.Range(
-						// VSCode starts to count lines and columns from zero
-						new vscode.Position(
-							message.position.start.line - 1,
-							message.position.start.character - 1,
-						),
-						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
-					)
-					const decoration: vscode.DecorationOptions = {
-						range,
-						renderOptions: {
-							after: {
-								contentText: truncatedPreviewText ?? `ERROR: '${message.messageId}' not found`,
-								backgroundColor: previewText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
-								border: previewText
-									? "1px solid rgb(45 212 191/.50)"
-									: "1px solid rgb(244 63 94/.50)",
+							: previewText;
+						const range = new vscode.Range(
+							// VSCode starts to count lines and columns from zero
+							new vscode.Position(
+								message.position.start.line - 1,
+								message.position.start.character - 1,
+							),
+							new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+						)
+						const decoration: vscode.DecorationOptions = {
+							range,
+							renderOptions: {
+								after: {
+									contentText: truncatedPreviewText ?? `ERROR: '${message.messageId}' not found`,
+									backgroundColor: previewText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
+									border: previewText
+										? "1px solid rgb(45 212 191/.50)"
+										: "1px solid rgb(244 63 94/.50)",
+								},
 							},
-						},
-						hoverMessage: previewText,
+							hoverMessage: previewText,
+						}
+						return decoration
+					} else {
+						throw new Error("Only Text elements are supported for message previews.");
 					}
-					return decoration
+
 				})
 			},
 		)
