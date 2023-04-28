@@ -271,9 +271,16 @@ _`withPlugins` executes `defineConfig` (which should be executed on loading the 
 ```ts
 type Plugin = {
 	id: string
-	defineConfig: (config: Partial<Config>) => Promise<Partial<Config>>
-	// anything else we need in the future
+	config: () => MaybePromise<Partial<Config>>
+	// anything else we need in the future like resolvedConfig for example
+	resolvedConfig: (config: Config) => Promise<void>
 }
 ```
 
 2. The consumption API of plugins is familiar and simple.
+
+```ts
+pluginJson({
+	pathPattern: "./languages/{language}.json",
+})
+```
