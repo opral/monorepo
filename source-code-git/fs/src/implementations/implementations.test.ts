@@ -2,10 +2,12 @@ import { test, expect, afterAll, describe } from "vitest"
 import type { NodeishFilesystem } from "../interface.js"
 import { createMemoryFs } from "./memoryFs.js"
 
-describe.skip("node fs", async () => {
+describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
+	const tempDir = new URL("./__test", import.meta.url).pathname
+	await fs.mkdir(tempDir, { recursive: true })
 
-	await runFsTestSuite("node fs", new URL("./__test", import.meta.url).pathname, fs)
+	await runFsTestSuite("node fs", tempDir, fs)
 })
 
 describe("memory fs", async () => {
