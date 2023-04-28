@@ -37,6 +37,7 @@
 	"dependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"@inlang-git/fs": "*",
+		"deepmerge-ts": "^5.1.0",
 		"ts-dedent": "^2.2.0",
 		"zod": "^3.21.4"
 	},
