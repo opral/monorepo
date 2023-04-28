@@ -26,23 +26,14 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	return transformGenericLayoutJs(config, code)
 }
 
-// ------------------------------------------------------------------------------------------------
-
 const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders
 	const withOptions = !config.languageInUrl
 	const ast = parseModule(code)
-	const optionsAst = parseExpression(withOptions ? options : "{}")
-	const emptyLoadExportAst = parseModule(emptyLoadFunction)
-	const importsAst = parseModule(requiredImports)
-	const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutLoadWrapper", optionsAst)
-	const wrapperDeclarationAst = b.callExpression(
-		b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
-		[],
-	)
 
 	// Merge imports with required imports
+	const importsAst = parseModule(requiredImports)
 	deepMergeObject(ast, importsAst)
 
 	const loadMatchers: Parameters<typeof findAst>[1] = [
@@ -62,9 +53,16 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 			)[0] === true
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
+		const emptyLoadExportAst = parseModule(emptyLoadFunction)
 		if (!hasLoad && n.Program.check(emptyLoadExportAst.$ast)) {
 			body.push(...emptyLoadExportAst.$ast.body)
 		}
+		const optionsAst = parseExpression(withOptions ? options : "{}")
+		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutLoadWrapper", optionsAst)
+		const wrapperDeclarationAst = b.callExpression(
+			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
+			[],
+		)
 		findAst(
 			ast.$ast,
 			loadMatchers,

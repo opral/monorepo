@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
 
 describe("+layout.js.ts", () => {
