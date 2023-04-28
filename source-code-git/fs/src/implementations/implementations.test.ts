@@ -110,7 +110,11 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 
 		await expect(async () => await fs.readdir(`/${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)
 
-		expect(await fs.readdir(`/${tempDir}/home`)).toEqual([])
+	test("rmdir", async () => {
+		await fs.mkdir(`${tempDir}/dir1`)
+		expect(await fs.readdir(tempDir)).toContain("dir1")
+		await fs.rmdir(`${tempDir}/dir1`)
+		expect(await fs.readdir(tempDir)).not.toContain("dir1")
 	})
 
 	afterAll(async () => {
