@@ -52,7 +52,6 @@ export async function toJson(args: {
 		try {
 			await args.fs.readFile(fullPath, { encoding: "utf-8" })
 		} catch (error) {
-			console.log(error)
 			isDirectory = true
 		}
 		if (isDirectory) {

@@ -1,4 +1,4 @@
-import type { FileData, TextEncoding, NodeishFilesystem } from "../interface.js"
+import type { FileData, NodeishFilesystem } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
 type Directory = Map<string, MemoryInode>
@@ -13,22 +13,24 @@ export function createMemoryFs(): NodeishFilesystem {
 	const specialPaths = ["", ".", ".."]
 
 	return {
-		writeFile: async function (path: string, content: FileData) {
+		writeFile: async function (
+			path: Parameters<NodeishFilesystem["writeFile"]>[0],
+			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+		) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (parentDir instanceof Map) parentDir.set(await getBasename(path), content)
+			if (parentDir instanceof Map) parentDir.set(await getBasename(path), data)
 			else throw new FilesystemError("ENOENT", path)
 		},
 
 		readFile: async function (
-			path: string,
-			options?: { encoding?: TextEncoding } | TextEncoding,
-		): Promise<FileData> {
-			const encoding: TextEncoding =
-				typeof options === "string" ? options : options?.encoding ?? "raw"
+			path: Parameters<NodeishFilesystem["readFile"]>[0],
+			options: Parameters<NodeishFilesystem["readFile"]>[1],
+		) {
+			const encoding = typeof options === "string" ? options : options?.encoding ?? "raw"
 
 			const file: Inode | undefined = followPath(fsRoot, path)
 			if (typeof file === "string") {
-				if (["utf8", "utf-8"].includes(encoding?.toLowerCase())) return file
+				if (["utf8", "utf-8"].includes(encoding.toLowerCase())) return file
 				throw new Error(`Only utf8 encoding is supported in readFile.`)
 			}
 
@@ -36,7 +38,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			throw new FilesystemError("EISDIR", path)
 		},
 
-		readdir: async function (path: string): Promise<string[]> {
+		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
 			const dir: Inode | undefined = followPath(fsRoot, path)
 			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
 			if (!dir) throw new FilesystemError("ENOENT", path)
@@ -44,9 +46,9 @@ export function createMemoryFs(): NodeishFilesystem {
 		},
 
 		mkdir: async function (
-			path: string,
-			options?: { recursive: boolean },
-		): Promise<string | undefined> {
+			path: Parameters<NodeishFilesystem["mkdir"]>[0],
+			options: Parameters<NodeishFilesystem["mkdir"]>[1],
+		) {
 			const parentDir: Inode | undefined = followPath(
 				fsRoot,
 				await getDirname(path),
@@ -59,7 +61,10 @@ export function createMemoryFs(): NodeishFilesystem {
 			return options?.recursive ? "not implemented." : undefined
 		},
 
-		rm: async function (path: string, options: any) {
+		rm: async function (
+			path: Parameters<NodeishFilesystem["rm"]>[0],
+			options: Parameters<NodeishFilesystem["rm"]>[1],
+		) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
 			if (!parentDir) throw new FilesystemError("ENOENT", path)
 
@@ -79,7 +84,10 @@ export function createMemoryFs(): NodeishFilesystem {
 			} else throw new FilesystemError("ENOTDIR", path)
 		},
 
-		rmdir: async function (path: string, options: any) {
+		rmdir: async function (
+			path: Parameters<NodeishFilesystem["rmdir"]>[0],
+			options: Parameters<NodeishFilesystem["rmdir"]>[1],
+		) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
 			if (!parentDir) throw new FilesystemError("ENOENT", path)
 
