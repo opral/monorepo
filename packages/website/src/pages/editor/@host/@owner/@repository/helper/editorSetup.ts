@@ -16,7 +16,7 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 			PlaceholderNode.configure({
 				HTMLAttributes: {
 					class:
-						"bg-surface-2 py-[2px] px-1 rounded-sm text-info text-sm ponter-events-none italic",
+						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm ponter-events-none italic",
 				},
 			}),
 			HardBreak.extend({
@@ -45,6 +45,8 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 				},
 				tippyOptions: {
 					duration: 200,
+					maxWidth: "300px",
+					offset: [36, 0],
 				},
 			}),
 		],
