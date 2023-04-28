@@ -1,4 +1,4 @@
-import type { FileData, NodeishFilesystem } from "../interface.js"
+import type { FileData, TextEncoding, NodeishFilesystem } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
 type Directory = Map<string, MemoryInode>
@@ -9,37 +9,95 @@ export type MemoryDirectory = Map<string, MemoryInode>
 
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
-	const _root = initDir(new Map())
-	const _specialPaths = ["", ".", ".."]
+	const fsRoot = initDir(new Map())
+	const specialPaths = ["", ".", ".."]
 
 	return {
 		writeFile: async function (path: string, content: FileData) {
-			console.log("running")
-			const parentDir: Inode | undefined = followPath(_root, await dirname(path), true)
-			if (parentDir instanceof Map) parentDir.set(await basename(path), content)
-		},
-
-		readFile: async function (path: string): Promise<FileData> {
-			const file: Inode | undefined = followPath(_root, path)
-			if (typeof file === "string") return file
-			else if (file instanceof Map) throw new FilesystemError("EISDIR", path)
+			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
+			if (parentDir instanceof Map) parentDir.set(await getBasename(path), content)
 			else throw new FilesystemError("ENOENT", path)
 		},
 
+		readFile: async function (
+			path: string,
+			options?: { encoding?: TextEncoding } | TextEncoding,
+		): Promise<FileData> {
+			const encoding: TextEncoding =
+				typeof options === "string" ? options : options?.encoding ?? "raw"
+
+			const file: Inode | undefined = followPath(fsRoot, path)
+			if (typeof file === "string") {
+				if (["utf8", "utf-8"].includes(encoding?.toLowerCase())) return file
+				throw new Error(`Only utf8 encoding is supported in readFile.`)
+			}
+
+			if (!file) throw new FilesystemError("ENOENT", path)
+			throw new FilesystemError("EISDIR", path)
+		},
+
 		readdir: async function (path: string): Promise<string[]> {
-			const dir: Inode | undefined = followPath(_root, path)
-			if (dir instanceof Map) return [...dir.keys()].filter((x) => !_specialPaths.includes(x))
-			else if (!dir) throw new FilesystemError("ENOENT", path)
+			const dir: Inode | undefined = followPath(fsRoot, path)
+			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
+			if (!dir) throw new FilesystemError("ENOENT", path)
 			throw new FilesystemError("ENOTDIR", path)
 		},
 
-		mkdir: async function (path: string) {
-			followPath(_root, path, true)
+		mkdir: async function (
+			path: string,
+			options?: { recursive: boolean },
+		): Promise<string | undefined> {
+			const parentDir: Inode | undefined = followPath(
+				fsRoot,
+				await getDirname(path),
+				options?.recursive ?? false,
+			)
+
+			if (!parentDir) throw new FilesystemError("ENOENT", path)
+			else if (parentDir instanceof Map) parentDir.set(await getBasename(path), initDir(parentDir))
+			else throw new FilesystemError("ENOTDIR", path)
+			return options?.recursive ? "not implemented." : undefined
 		},
 
-		rm: async function (path: string) {
-			const parentDir: Inode | undefined = followPath(_root, await dirname(path), true)
-			if (parentDir instanceof Map) parentDir.delete(await basename(path))
+		rm: async function (path: string, options: any) {
+			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
+			if (!parentDir) throw new FilesystemError("ENOENT", path)
+
+			if (parentDir instanceof Map) {
+				const basename = await getBasename(path)
+				switch (typeof parentDir.get(basename)) {
+					case "string":
+						parentDir.delete(basename)
+						break
+					case "object":
+						if (options?.recursive) parentDir.delete(basename)
+						else throw new FilesystemError("EISDIR", path)
+						break
+					case "undefined":
+						throw new FilesystemError("ENOENT", path)
+				}
+			} else throw new FilesystemError("ENOTDIR", path)
+		},
+
+		rmdir: async function (path: string, options: any) {
+			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
+			if (!parentDir) throw new FilesystemError("ENOENT", path)
+
+			if (parentDir instanceof Map) {
+				const basename = await getBasename(path)
+				const dir: Inode | undefined = parentDir.get(basename)
+				switch (typeof dir) {
+					case "string":
+						throw new FilesystemError("ENOTDIR", path)
+					case "object":
+						if (dir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path)
+						if (options?.recursive || dir.size === specialPaths.length) parentDir.delete(basename)
+						else throw new FilesystemError("ENOTEMPTY", path)
+						break
+					case "undefined":
+						throw new FilesystemError("ENOENT", path)
+				}
+			} else throw new FilesystemError("ENOTDIR", path)
 		},
 	}
 }
@@ -90,17 +148,17 @@ function followPath(
 	return target
 }
 
-async function dirname(path: string): Promise<string> {
+async function getDirname(path: string): Promise<string> {
 	return path
 		.split("/")
-		.filter((x) => ![".", ""].includes(x))
+		.filter((x) => !["", "."].includes(x))
 		.slice(0, -1)
 		.join("/")
 }
 
-async function basename(path: string): Promise<string> {
+async function getBasename(path: string): Promise<string> {
 	return path
 		.split("/")
-		.filter((x) => ![".", ""].includes(x))
+		.filter((x) => !["", ".", ".."].includes(x))
 		.at(-1)!
 }
