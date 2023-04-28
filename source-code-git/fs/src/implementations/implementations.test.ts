@@ -17,6 +17,10 @@ describe("memory fs", async () => {
 })
 
 const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
+	test("readdir", async () => {
+		expect(await fs.readdir(tempDir)).toEqual([])
+	})
+
 	test("recursive mkdir", async () => {
 		await fs.mkdir(`${tempDir}/home/user1/documents///`, { recursive: true })
 		await fs.mkdir(`${tempDir}/home/user1/../user1//downloads`, { recursive: true })
