@@ -8,7 +8,8 @@
  */
 export type NodeishFilesystem = {
 	writeFile: (path: string, data: string) => Promise<void>
-	readFile: (path: string, options: { encoding: "utf-8" }) => Promise<FileData>
+	/* NOTE: accept options as 'any' for now until we figure out how to get the node types to match */
+	readFile: (path: string, options?: any) => Promise<FileData>
 	readdir: (path: string) => Promise<string[]>
 	/**
 	 * https://nodejs.org/api/fs.html#fspromisesmkdirpath-options
