@@ -28,6 +28,14 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.readdir(`${tempDir}/home/user1/`)).toEqual(["documents", "downloads"])
 		expect(await fs.readdir(`${tempDir}/home/user1/documents`)).toEqual([])
 	})
+
+	test("funny paths", async () => {
+		expect(await fs.readdir(`${tempDir}///.//`)).toEqual(["home"])
+		expect(await fs.readdir(`${tempDir}/home/user1/../user1/./`)).toEqual([
+			"documents",
+			"downloads",
+		])
+		expect(await fs.readdir(`${tempDir}/home/./../home/.//user1/documents`)).toEqual([])
 	})
 
 	test("file r/w", async () => {
