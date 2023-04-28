@@ -13,12 +13,12 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 	return {
 		element: ref!,
 		extensions: [
-			PlaceholderNode.configure({
-				HTMLAttributes: {
-					class:
-						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm ponter-events-none italic",
-				},
-			}),
+			// PlaceholderNode.configure({
+			// 	HTMLAttributes: {
+			// 		class:
+			// 			"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm ponter-events-none italic",
+			// 	},
+			// }),
 			HardBreak.extend({
 				addKeyboardShortcuts() {
 					return {
@@ -29,6 +29,15 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 			Document,
 			Paragraph,
 			Text,
+			PlaceholderNode.configure({
+				HTMLAttributes: {
+					class:
+						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm ponter-events-none italic",
+				},
+				renderLabel({ node }: any) {
+					return `${node.attrs.label ?? node.attrs.id}`
+				},
+			}),
 			Placeholder.configure({
 				emptyEditorClass: "is-editor-empty",
 				placeholder: "Enter translation...",
