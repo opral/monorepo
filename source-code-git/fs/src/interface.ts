@@ -22,3 +22,4 @@ export type NodeishFilesystem = {
 }
 
 export type FileData = string
+export type TextEncoding = "utf8" | "utf-8" | "base64" | "raw"
