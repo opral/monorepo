@@ -1,4 +1,4 @@
-import { initConfig } from "@inlang/sdk-js/config"
+import { initConfig } from "../../../plugin/index.js"
 import type { RequestEvent } from "@sveltejs/kit"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
