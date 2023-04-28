@@ -38,7 +38,19 @@ export function Messages(props: {
 		}
 		const reports = getLintReports(message)
 		for (const report of reports) {
-			if (filteredLintRules().includes(report.id)) {
+			if (
+				filteredLintRules().includes(report.id) &&
+				// catch all missingMessage reports
+				(!report.id.includes("missingMessage") ||
+					report.message.match(
+						/The pattern contains only only one element which is an empty string\./i,
+					) ||
+					report.message.match(/Empty pattern (length 0)\./i) ||
+					//@ts-ignore
+					filteredLanguages().includes(report.message.match(/'([^']+)'/g)![1]?.replace(/'/g, "")) ||
+					// fallback for older versions
+					report.message.match(/Message with id '([A-Za-z0-9]+(\.[A-Za-z0-9]+)+)' is missing\./i))
+			) {
 				return true
 			}
 		}
