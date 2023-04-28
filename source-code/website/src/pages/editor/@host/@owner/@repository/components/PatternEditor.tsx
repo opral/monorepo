@@ -298,7 +298,7 @@ export function PatternEditor(props: {
 				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
 			>
-				<FloatingMenu variableReferences={props.variableReferences} />
+				<FloatingMenu variableReferences={props.variableReferences} editor={editor} />
 
 				{/* tiptap editor */}
 				<div

@@ -15,21 +15,21 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 				.flat()
 
 			const ast_elements: Array<any> = []
+			console.log(tiptap_nodes)
 			tiptap_nodes.map((tiptap_node: any) => {
 				switch (tiptap_node.type) {
 					case "text":
-						if (tiptap_node.marks && tiptap_node.marks[0]?.type === "placeholderMark") {
-							ast_elements.push({
-								type: "Placeholder",
-								body: { type: "VariableReference", name: tiptap_node.text },
-							} as ast.Placeholder)
+						if (ast_elements.at(-1)?.type === "Text") {
+							ast_elements.at(-1).value += tiptap_node.text
 						} else {
-							if (ast_elements.at(-1)?.type === "Text") {
-								ast_elements.at(-1).value += tiptap_node.text
-							} else {
-								ast_elements.push({ type: "Text", value: tiptap_node.text } as ast.Text)
-							}
+							ast_elements.push({ type: "Text", value: tiptap_node.text } as ast.Text)
 						}
+						break
+					case "placeholderNode":
+						ast_elements.push({
+							type: "Placeholder",
+							body: { type: "VariableReference", name: tiptap_node.attrs.id },
+						} as ast.Placeholder)
 						break
 					case "hardBreak":
 						if (ast_elements.at(-1)?.type === "Text") {
@@ -90,12 +90,10 @@ const getTextFromAstElement = (ast_element: ast.Text) => {
 
 const getPlaceholderFromAstElement = (ast_element: ast.Placeholder) => {
 	return {
-		type: "text",
-		marks: [
-			{
-				type: "placeholderMark",
-			},
-		],
-		text: (ast_element as ast.Placeholder | undefined)?.body.name,
+		type: "placeholderNode",
+		attrs: {
+			id: (ast_element as ast.Placeholder | undefined)?.body.name,
+			label: (ast_element as ast.Placeholder | undefined)?.body.name,
+		},
 	}
 }
