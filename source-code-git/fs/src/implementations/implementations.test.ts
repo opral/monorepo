@@ -48,11 +48,13 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(dirents).toContain("file2")
 		expect(dirents).toHaveLength(2)
 
-		expect(await fs.readFile(`${tempDir}/home/user1/documents/file1`, "utf8")).toEqual(
-			"text in the first file",
-		)
+		expect(
+			await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
+		).toEqual("text in the first file")
 
-		expect(await fs.readFile(`${tempDir}/file2`, "utf8")).toEqual("text in the second file")
+		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(
+			"text in the second file",
+		)
 	})
 
 	test.todo("encodings other than utf8")
@@ -72,18 +74,18 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 
 		test("writeFile", async () => {
 			await expect(
-				async () => await fs.readFile(`${tempDir}/home/dne/file`, "utf8"),
+				async () => await fs.readFile(`${tempDir}/home/dne/file`, { encoding: "utf-8" }),
 			).rejects.toThrow(/ENOENT/)
 		})
 
 		test("readFile", async () => {
-			await expect(async () => await fs.readFile(`${tempDir}/home/dne`, "utf8")).rejects.toThrow(
-				/ENOENT/,
-			)
+			await expect(
+				async () => await fs.readFile(`${tempDir}/home/dne`, { encoding: "utf-8" }),
+			).rejects.toThrow(/ENOENT/)
 
-			await expect(async () => await fs.readFile(`${tempDir}/home/user1`, "utf8")).rejects.toThrow(
-				/EISDIR/,
-			)
+			await expect(
+				async () => await fs.readFile(`${tempDir}/home/user1`, { encoding: "utf-8" }),
+			).rejects.toThrow(/EISDIR/)
 		})
 
 		test("readdir", async () => {
@@ -102,7 +104,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 
 		await fs.rm(`${tempDir}/home/user1/documents/file1`)
 		await expect(
-			async () => await fs.readFile(`${tempDir}/home/user1/documents/file1`, "utf8"),
+			async () => await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
 		).rejects.toThrow(/ENOENT/)
 
 		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, "text in the first file")
