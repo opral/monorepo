@@ -25,7 +25,7 @@ it("should copy multiple directories into the environment", async () => {
 	const fs = createMemoryFs() as EnvironmentFunctions["$fs"]
 	await fs.mkdir("./one")
 	await fs.writeFile("./one/file.txt", "Hello from one")
-	await fs.mkdir("./two/subdir")
+	await fs.mkdir("./two/subdir", { recursive: true })
 	await fs.writeFile("./two/file.txt", "Hello from two")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["one", "two"] } })
