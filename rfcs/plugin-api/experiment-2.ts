@@ -40,9 +40,9 @@ function createPlugin<PluginConfig>(
 	return (pluginConfig) => (env) => callback({ pluginConfig, env })
 }
 
-function readResources(args: any): any { }
+function readResources(args: any): any {}
 
-function getLanguages(args: any): any { }
+function getLanguages(args: any): any {}
 
 // usage
-myPlugin({ pathPattern: '' })({} as EnvironmentFunctions).defineConfig({})
+myPlugin({ pathPattern: "" })({} as EnvironmentFunctions).defineConfig({})
