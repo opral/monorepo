@@ -450,23 +450,6 @@ export function PatternEditor(props: {
 				{getNotificationHints().length !== 0 && (
 					<NotificationHint notifications={getNotificationHints()} />
 				)}
-				{/* <Show when={textValue() === "" || textValue() === undefined}>
-					<NotificationHint
-						notifications={[
-							{
-								notificationTitle:
-									props.referenceLanguage === props.language
-										? "messageWithoutReference"
-										: "missingMessage",
-								notificationDescription:
-									props.referenceLanguage === props.language
-										? `Message with id '${props.id}' is specified, but missing in the reference.`
-										: `Message with id '${props.id}' is missing`,
-								notificationType: "error",
-							},
-						]}
-					/>
-				</Show> */}
 				<Show when={showMachineLearningWarningDialog()}>
 					<sl-dialog prop:label="Machine translations pitfalls" ref={machineLearningWarningDialog}>
 						<ol class="">
