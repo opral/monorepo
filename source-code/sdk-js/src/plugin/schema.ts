@@ -1,12 +1,16 @@
-export type SdkConfig = {
-	languageNegotiation?: {
-		/* default: false */
-		strict?: boolean
-		/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
-		strategies?: LanguageNegotiationStrategy[]
-	}
+
+export const validateConfig = (config: SdkConfig | undefined) => {
+	// TODO: validate config using `zod`
 }
 
+export type SdkConfig = {
+	languageNegotiation: {
+		/* default: false */
+		strict: boolean
+		/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
+		strategies: LanguageNegotiationStrategy[]
+	}
+}
 
 type LanguageNegotiatorType =
 	| "url"
@@ -26,10 +30,10 @@ type LanguageNegotiationStrategy =
 	/* default */
 	| UrlNegotiator
 	| AcceptLanguageHeaderNegotiator
-	| CookieNegotiator
+	// | CookieNegotiator
 	| NavigatorNegotiator
 	| LocalStorageNegotiator
-	| SessionStorageNegotiator
+// | SessionStorageNegotiator
 
 type UrlNegotiatorVariantBase<Type, Settings> = Settings & { type: Type }
 
