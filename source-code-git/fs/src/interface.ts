@@ -21,4 +21,3 @@ export type NodeishFilesystem = {
 }
 
 export type FileData = string
-export type TextEncoding = "utf-8"
