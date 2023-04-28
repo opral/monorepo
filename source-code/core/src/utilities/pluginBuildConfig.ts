@@ -73,7 +73,7 @@ export async function pluginBuildConfig(
 		ops.plugins = []
 	}
 	ops.plugins.push(
-		// @ts-expect-error
+		// @ts-expect-error - esbuild plugins have a wrong type
 		NodeModulesPolyfillPlugin(),
 	)
 

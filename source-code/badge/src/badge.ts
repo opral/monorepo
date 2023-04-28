@@ -20,9 +20,11 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	// Set up the environment functions
 	const env: EnvironmentFunctions = {
 		$import: initialize$import({
+			// @ts-ignore TODO: use @inlang-git/fs
 			fs: patchedFs(fs.promises),
 			fetch,
 		}),
+		// @ts-ignore TODO: use @inlang-git/fs
 		$fs: patchedFs(fs.promises),
 	}
 

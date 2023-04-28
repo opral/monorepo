@@ -23,11 +23,8 @@ export async function defineConfig(env) {
 		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
 		sdk: {
 			languageNegotiation: {
-				strategies: [
-					{ type: 'navigator' },
-					{ type: 'localStorage' },
-				]
-			}
-		}
+				strategies: [{ type: "navigator" }, { type: "localStorage" }],
+			},
+		},
 	}
 }

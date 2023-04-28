@@ -30,8 +30,14 @@ export function PatternEditor(props: {
 	variableReferences: ast.VariableReference[]
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
-	const { resources, setResources, referenceResource, userIsCollaborator, routeParams } =
-		useEditorState()
+	const {
+		resources,
+		setResources,
+		referenceResource,
+		userIsCollaborator,
+		routeParams,
+		filteredLanguages,
+	} = useEditorState()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -224,8 +230,25 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			if (lintReports) {
-				lintReports.map((lint) => {
+			const filteredReports = lintReports.filter((report) => {
+				if (
+					!report.id.includes("missingMessage") ||
+					// catch all missingMessage reports
+					report.message.match(
+						/The pattern contains only only one element which is an empty string\./i,
+					) ||
+					report.message.match(/Empty pattern (length 0)\./i) ||
+					//@ts-ignore
+					filteredLanguages().includes(report.message.match(/'([^']+)'/g)![1]?.replace(/'/g, "")) ||
+					// fallback for older versions
+					report.message.match(/Message with id '([A-Za-z0-9]+(\.[A-Za-z0-9]+)+)' is missing\./i)
+				) {
+					return true
+				}
+				return false
+			})
+			if (filteredReports) {
+				filteredReports.map((lint) => {
 					notifications.push({
 						notificationTitle: lint.id.includes(".") ? lint.id.split(".")[1]! : lint.id,
 						notificationDescription: lint.message,

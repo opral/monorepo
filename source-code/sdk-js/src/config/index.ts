@@ -32,7 +32,6 @@ export const initConfig = async () => {
 	const config = await readInlangConfig()
 	if (!config) return undefined
 
-
 	// TODO: validate sdk related once we add entries to it
 
 	// set defaults
@@ -44,10 +43,10 @@ export const initConfig = async () => {
 			strict: false,
 			...config.sdk?.languageNegotiation,
 			strategies: config.sdk?.languageNegotiation?.strategies || [
-				{ type: 'url' },
-				{ type: 'accept-language-header' },
-				{ type: 'navigator' },
-			]
+				{ type: "url" },
+				{ type: "accept-language-header" },
+				{ type: "navigator" },
+			],
 		},
 	}
 

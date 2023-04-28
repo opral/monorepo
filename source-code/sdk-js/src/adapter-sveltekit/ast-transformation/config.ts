@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises"
-import { initConfig } from "../../config/index.js"
-import { doesPathExist } from './utils.js'
+import { initConfig } from '../../config/index.js'
+import { stat } from "node:fs/promises"
+
+export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
 export type TransformConfig = {
 	languageInUrl: boolean

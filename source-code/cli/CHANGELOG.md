@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 270088f7: initial release of @inlang-git/fs
+
 ## 0.5.5
 
 ### Patch Changes
