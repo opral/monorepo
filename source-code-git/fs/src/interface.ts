@@ -15,9 +15,7 @@ export type NodeishFilesystem = {
 	 *
 	 * Upon success, fulfills with undefined if recursive is false, or the first directory path created if recursive is true.
 	 */
-	mkdir:
-		| ((path: string) => Promise<void>)
-		| ((path: string, options?: { recursive: boolean }) => Promise<string>)
+	mkdir: (path: string, options?: { recursive: boolean }) => Promise<string | undefined>
 	rm: (path: string, options?: { recursive: boolean }) => Promise<void>
 }
 
