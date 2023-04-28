@@ -1,5 +1,16 @@
 # @inlang/core
 
+## 0.6.0
+
+### Minor Changes
+
+- 270088f7: initial release of @inlang-git/fs
+
+### Patch Changes
+
+- Updated dependencies [270088f7]
+  - @inlang-git/fs@0.0.2
+
 ## 0.5.4
 
 ### Patch Changes
