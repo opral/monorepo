@@ -70,35 +70,6 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		})
 	})
 
-	// test("toJson", async () => {
-	// 	const fsJson = await fs.toJson({ dir: tempDir })
-
-	// 	expect(Object.keys(fsJson)).toHaveLength(2)
-
-	// 	expect(Object.keys(fsJson)).toEqual(
-	// 		expect.arrayContaining([
-	// 			expect.stringContaining(`${tempDir}/file2`),
-	// 			expect.stringContaining(`${tempDir}/home/user1/documents/file1`),
-	// 		]),
-	// 	)
-
-	// 	expect(Object.values(fsJson)).toEqual(
-	// 		expect.arrayContaining([
-	// 			expect.stringContaining("text in the first file"),
-	// 			expect.stringContaining("text in the second file"),
-	// 		]),
-	// 	)
-	// })
-
-	// test("fromJson", async () => {
-	// 	const fsJson = await fs.toJson({ dir: tempDir })
-	// 	await fs.rm(tempDir).catch((err) => {
-	// 		if (err.code !== "ENOENT") throw err
-	// 	})
-	// 	await fs.fromJson(fsJson)
-	// 	expect(await fs.toJson({ dir: tempDir })).toEqual(fsJson)
-	// })
-
 	test("rm", async () => {
 		await expect(async () => await fs.rm(`${tempDir}/home/user1/documents/`)).rejects.toThrow(
 			/EISDIR/,
