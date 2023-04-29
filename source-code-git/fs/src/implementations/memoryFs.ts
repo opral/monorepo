@@ -26,8 +26,6 @@ export function createMemoryFs(): NodeishFilesystem {
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
 			options: Parameters<NodeishFilesystem["readFile"]>[1],
 		) {
-			const encoding = options.encoding
-
 			const file: Inode | undefined = followPath(fsRoot, path)
 			if (typeof file === "string") return file
 
