@@ -19,6 +19,20 @@ describe("toJson", async () => {
 		})
 	})
 
+	it("should base64 encode files", async () => {
+		const result = await toJson({
+			fs,
+			matchers: ["**/*"],
+			resolveFrom: "/",
+			encodeOutput: "base64",
+		})
+		expect(result).toEqual({
+			"file1.txt": "Y29udGVudDE=",
+			"file2.js": "Y29udGVudDI=",
+			"node_modules/file3.js": "Y29udGVudDM=",
+		})
+	})
+
 	it("should exclude negated matchers", async () => {
 		const result = await toJson({ fs, matchers: ["**/*", "!**/node_modules/*"], resolveFrom: "/" })
 		expect(result).toEqual({
