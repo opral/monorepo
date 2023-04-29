@@ -17,7 +17,7 @@ export type NodeishFilesystem = {
 	 */
 	mkdir: (path: string, options?: { recursive: boolean }) => Promise<string | undefined>
 	rm: (path: string, options?: { recursive: boolean }) => Promise<void>
-	rmdir: (path: string, options?: { recursive: boolean }) => Promise<void>
+	rmdir: (path: string) => Promise<void>
 }
 
 export type FileData = string

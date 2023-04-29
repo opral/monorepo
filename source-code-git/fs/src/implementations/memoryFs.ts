@@ -81,10 +81,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			} else throw new FilesystemError("ENOTDIR", path)
 		},
 
-		rmdir: async function (
-			path: Parameters<NodeishFilesystem["rmdir"]>[0],
-			options: Parameters<NodeishFilesystem["rmdir"]>[1],
-		) {
+		rmdir: async function (path: Parameters<NodeishFilesystem["rmdir"]>[0]) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
 			if (!parentDir) throw new FilesystemError("ENOENT", path)
 
@@ -96,7 +93,7 @@ export function createMemoryFs(): NodeishFilesystem {
 						throw new FilesystemError("ENOTDIR", path)
 					case "object":
 						if (dir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path)
-						if (options?.recursive || dir.size === specialPaths.length) parentDir.delete(basename)
+						if (dir.size === specialPaths.length) parentDir.delete(basename)
 						else throw new FilesystemError("ENOTEMPTY", path)
 						break
 					case "undefined":
