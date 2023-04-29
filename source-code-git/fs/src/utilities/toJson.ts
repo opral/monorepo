@@ -37,6 +37,7 @@ export async function toJson(args: {
 	 * TODO: to make it more clear what it does? `resolveFrom` might be ambigous.
 	 */
 	resolveFrom: string
+	encodeOutput?: "utf-8" | "base64"
 }): Promise<Record<string, string>> {
 	assertIsAbsolutePath(args.resolveFrom)
 
@@ -64,8 +65,13 @@ export async function toJson(args: {
 			const content = await args.fs.readFile(fullPath, { encoding: "utf-8" })
 			if (!content) throw new Error(`${fullPath} does not exist.`)
 
-			// remove the leading slash
-			result[fullPath.slice(1)] = content as string
+			switch (args.encodeOutput) {
+				case "base64":
+					result[fullPath.slice(1)] = btoa(content) as string
+					break
+				default:
+					result[fullPath.slice(1)] = content as string
+			}
 		}
 	}
 	return result
