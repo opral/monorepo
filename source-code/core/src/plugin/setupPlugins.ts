@@ -1,9 +1,10 @@
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
+import type { InlangConfig } from "../config/schema.js"
 import type { Plugin, PluginSetupFunction } from "./types.js"
 import { PluginSetupError } from "./errors/PluginSetupError.js"
 import { deepmergeInto } from "deepmerge-ts"
+import type { InlangEnvironment } from "../environment/types.js"
 
-export type ConfigWithSetupPlugins = Omit<Partial<Config>, "plugins"> & {
+export type ConfigWithSetupPlugins = Omit<Partial<InlangConfig>, "plugins"> & {
 	plugins: Plugin[]
 }
 
@@ -23,8 +24,8 @@ export type ConfigWithSetupPlugins = Omit<Partial<Config>, "plugins"> & {
  *
  */
 export async function setupPlugins(args: {
-	config: Partial<Config>
-	env: EnvironmentFunctions
+	config: Partial<InlangConfig>
+	env: InlangEnvironment
 }): Promise<ConfigWithSetupPlugins> {
 	if (args.config.plugins === undefined) {
 		args.config.plugins = []

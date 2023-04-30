@@ -1,10 +1,10 @@
-import type { EnvironmentFunctions } from "../config/schema.js"
+import type { InlangEnvironment } from "../environment/types.js";
 import type { PluginSetupFunction, Plugin } from "./types.js"
 
 export function createPlugin<
 	PluginSettings extends Record<string, unknown> | undefined = undefined,
 >(
-	callback: (args: { settings: PluginSettings; env: EnvironmentFunctions }) => Plugin,
+	callback: (args: { settings: PluginSettings; env: InlangEnvironment }) => Plugin,
 ): PluginSettings extends undefined
 	? () => PluginSetupFunction
 	: (settings: PluginSettings) => PluginSetupFunction {

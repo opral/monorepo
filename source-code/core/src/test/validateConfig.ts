@@ -1,4 +1,4 @@
-import type { Config } from "../config/schema.js"
+import type { InlangConfig } from "../config/schema.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
@@ -17,7 +17,7 @@ export class ValidateConfigException extends Error {
  * const [success, error] = await validateConfig(args)
  */
 export async function validateConfig(args: {
-	config: Config
+	config: InlangConfig
 }): Promise<Result<true, ValidateConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
@@ -32,7 +32,7 @@ export async function validateConfig(args: {
 	}
 }
 
-function referenceLanguageMustBeInLanguages(config: Config) {
+function referenceLanguageMustBeInLanguages(config: InlangConfig) {
 	if (!config.languages.includes(config.referenceLanguage)) {
 		throw new ValidateConfigException(
 			`The reference language "${config.referenceLanguage}" must be included in the list of languages.`,
@@ -47,7 +47,7 @@ function validateResources(resources: ast.Resource[]) {
 	}
 }
 
-async function languagesMatch(config: Config, resources: ast.Resource[]) {
+async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
 	const languages = resources.map((resource) => resource.languageTag.name)
 	// sort the languages to ensure that the order does not matter
 	// and convert the array to a string to compare the arrays
@@ -69,7 +69,7 @@ async function languagesMatch(config: Config, resources: ast.Resource[]) {
  * Otherwise, the defined readResources and writeResources functions are not
  * implemented correctly e.g. by missing messages in the roundtrip.
  */
-async function roundtripTest(config: Config, resources: ast.Resource[]) {
+async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
 	const commonErrorMessage =
 		"A roundtrip test of the readResources and writeResources functions failed:\n"
 	await config.writeResources({ config, resources })

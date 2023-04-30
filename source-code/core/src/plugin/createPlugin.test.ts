@@ -1,6 +1,6 @@
 import { it, expect } from "vitest"
 import { createPlugin } from "./createPlugin.js"
-import type { EnvironmentFunctions } from "../config/schema.js"
+import type { InlangEnvironment } from "../environment/types.js"
 
 it("should be possible to define a plugin", () => {
 	const myPlugin = createPlugin<{ pathPattern: string }>(({ settings }) => {
@@ -17,7 +17,7 @@ it("should be possible to define a plugin", () => {
 		}
 	})
 
-	const plugin = myPlugin({ pathPattern: "" })({} as EnvironmentFunctions)
+	const plugin = myPlugin({ pathPattern: "" })({} as InlangEnvironment)
 	expect(plugin.id).toEqual("samuelstroschein.plugin-json")
 	expect(plugin.config()).toEqual({
 		languages: ["en", "de"],

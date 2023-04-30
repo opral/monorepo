@@ -1,4 +1,5 @@
-import { InlangConfigModule, initialize$import, setupConfig } from "@inlang/core/config"
+import { InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { initialize$import } from "@inlang/core/environment"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 

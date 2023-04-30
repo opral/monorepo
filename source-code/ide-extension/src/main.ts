@@ -4,10 +4,11 @@ import { setState } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
-import { InlangConfigModule, initialize$import, setupConfig } from "@inlang/core/config"
+import { InlangConfigModule, setupConfig } from "@inlang/core/config"
 import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
+import { initialize$import } from "@inlang/core/environment"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {

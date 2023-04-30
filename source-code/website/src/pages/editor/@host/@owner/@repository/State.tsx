@@ -11,13 +11,8 @@ import {
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang-git/client/raw"
-import {
-	Config as InlangConfig,
-	InlangConfigModule,
-	EnvironmentFunctions,
-	initialize$import,
-	setupConfig,
-} from "@inlang/core/config"
+import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
 import { createStore, SetStoreFunction } from "solid-js/store"
 import type * as ast from "@inlang/core/ast"
 import type { Result } from "@inlang/core/utilities"
@@ -629,7 +624,7 @@ async function readInlangConfig(args: {
 	fs: typeof import("memfs").fs
 }): Promise<InlangConfig | undefined> {
 	try {
-		const env: EnvironmentFunctions = {
+		const env: InlangEnvironment = {
 			$import: initialize$import({
 				// @ts-ignore
 				fs: args.fs.promises,

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Config, EnvironmentFunctions } from "@inlang/core/src/config"
+import { InlangConfig } from "@inlang/core/src/config"
+import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
 export const myPlugin = createPlugin<{ pathPattern: string }>(({ settings, env }) => {
 	return {
@@ -29,15 +30,15 @@ export const myPlugin = createPlugin<{ pathPattern: string }>(({ settings, env }
  */
 type PluginSettingsFunction<PluginSettings> = (
 	settings: PluginSettings,
-) => (env: EnvironmentFunctions) => Plugin
+) => (env: InlangEnvironment) => Plugin
 
 type Plugin = {
 	id: string
-	config(): MaybePromise<Partial<Config>>
+	config(): MaybePromise<Partial<InlangConfig>>
 }
 
 function createPlugin<PluginConfig>(
-	callback: (args: { settings: PluginConfig; env: EnvironmentFunctions }) => Plugin,
+	callback: (args: { settings: PluginConfig; env: InlangEnvironment }) => Plugin,
 ): PluginSettingsFunction<PluginConfig> {
 	return (settings) => (env) => callback({ settings, env })
 }
@@ -47,6 +48,6 @@ function readResources(args: any): any {}
 function getLanguages(args: any): any {}
 
 // usage
-myPlugin({ pathPattern: "" })({} as EnvironmentFunctions).config()
+myPlugin({ pathPattern: "" })({} as InlangEnvironment).config()
 
 type MaybePromise<T> = Promise<T> | T
