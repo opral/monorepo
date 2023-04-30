@@ -176,6 +176,7 @@ export const plugin = () => {
 
 			// TODO: refactor
 			// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
+			// TODO: remove not needed files if config changes
 			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
