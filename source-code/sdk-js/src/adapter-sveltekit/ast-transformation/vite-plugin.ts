@@ -116,7 +116,8 @@ const createFilesIfNotPresent = async (srcFolder: string, ...files: string[]) =>
 
 					let wasCreated = false
 					if (!(await doesPathExist(path))) {
-						await writeFile(path, "// This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed).")
+						const message = 'This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed).'
+						await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `// ${message}`)
 						wasCreated = true
 					}
 
