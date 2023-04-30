@@ -1,4 +1,4 @@
-import type { Config } from "@inlang/core/config"
+import type { InlangConfig } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
 import type { LintedResource, LintRule, Visitors } from "./rule.js"
 import { createReportFunction } from "./report.js"
@@ -23,7 +23,7 @@ const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
  *   const lints = getLintReports(lintedResources, { options })
  */
 export const lint = async (args: {
-	config: Pick<Config, "lint" | "languages" | "referenceLanguage">
+	config: Pick<InlangConfig, "lint" | "languages" | "referenceLanguage">
 	resources: ast.Resource[]
 }): Promise<[lintedResources: LintedResource[], errors?: Error[]]> => {
 	const { referenceLanguage, languages, lint } = args.config

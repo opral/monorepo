@@ -1,6 +1,7 @@
-import { EnvironmentFunctions, initialize$import } from "../config/index.js"
 import { createMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
+import type { InlangEnvironment } from "../environment/types.js"
+import { initialize$import } from "../environment/$import.js"
 
 /**
  * Initializes a mock environment.
@@ -14,10 +15,10 @@ import { dedent } from "ts-dedent"
  */
 export async function mockEnvironment(args: {
 	copyDirectory?: {
-		fs: EnvironmentFunctions["$fs"]
+		fs: InlangEnvironment["$fs"]
 		paths: string[]
 	}
-}): Promise<EnvironmentFunctions> {
+}): Promise<InlangEnvironment> {
 	const $fs = createMemoryFs()
 	const $import = initialize$import({
 		fs: $fs,
@@ -41,8 +42,8 @@ export async function mockEnvironment(args: {
  * Useful for mocking the environment.
  */
 async function copyDirectory(args: {
-	copyFrom: EnvironmentFunctions["$fs"]
-	copyTo: EnvironmentFunctions["$fs"]
+	copyFrom: InlangEnvironment["$fs"]
+	copyTo: InlangEnvironment["$fs"]
 	path: string
 }) {
 	try {

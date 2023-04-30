@@ -1,4 +1,5 @@
-import type { Config, EnvironmentFunctions } from "../config/schema.js"
+import type { InlangConfig } from "../config/schema.js"
+import type { InlangEnvironment } from "../environment/types.js"
 
 /**
  * The function to configure a plugin.
@@ -19,14 +20,14 @@ import type { Config, EnvironmentFunctions } from "../config/schema.js"
 // because the module are not imported "on-demand".
 //
 // See https://github.com/inlang/inlang/commit/ec15170bc17ef36916123152d2fdbc3b2e8c0d91#r111216268
-export type PluginSetupFunction = (env: EnvironmentFunctions) => Plugin
+export type PluginSetupFunction = (env: InlangEnvironment) => Plugin
 
 /**
  * An inlang plugin.
  */
 export type Plugin = {
 	id: `${string}.${string}`
-	config(): MaybePromise<Partial<Config>>
+	config(): MaybePromise<Partial<InlangConfig>>
 }
 
 type MaybePromise<T> = Promise<T> | T

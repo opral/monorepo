@@ -1,6 +1,7 @@
-import type { Config, InlangConfigModule, EnvironmentFunctions } from "./schema.js"
+import type { InlangConfig, InlangConfigModule } from "./schema.js"
 import { setupPlugins } from "../plugin/setupPlugins.js"
 import { zConfig } from "./zod.js"
+import type { InlangEnvironment } from "../environment/types.js"
 
 /**
  * Sets up the inlang config module.
@@ -13,12 +14,12 @@ import { zConfig } from "./zod.js"
  */
 export async function setupConfig(args: {
 	module: InlangConfigModule
-	env: EnvironmentFunctions
-}): Promise<Config> {
+	env: InlangEnvironment
+}): Promise<InlangConfig> {
 	if (args.module.defineConfig === undefined) {
 		throw new Error(`The "defineConfig" function is missing from the "inlang.config.js" file.`)
 	}
 	const config = await args.module.defineConfig(args.env)
 	await setupPlugins({ config, env: args.env })
-	return zConfig.parse(config) as Config
+	return zConfig.parse(config) as InlangConfig
 }

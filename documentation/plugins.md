@@ -16,7 +16,7 @@ The [awesome inlang](https://github.com/inlang/awesome-inlang) repository contai
 
 ## Using plugins
 
-Plugins can be imported via the `$import` [environment function](/documentation/environment-functions) in the inlang config.
+Plugins can be imported via the `$import` [environment function](/documentation/inlang-environment) in the inlang config.
 
 ```js
 // inlang.config.js

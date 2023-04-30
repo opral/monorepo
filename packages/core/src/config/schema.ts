@@ -1,20 +1,9 @@
 import type { Language } from "../ast/index.js"
 import type * as ast from "../ast/index.js"
 import type { LintRule } from "../lint/rule.js"
-import type { $fs } from "./environment-functions/$fs.js"
-import type { $import } from "./environment-functions/$import.js"
 import type { SdkConfig } from "./_sdk.js"
 import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
-
-/**
- * The environment functions.
- *
- * Read more https://inlang.com/documentation/environment-functions
- */
-export type EnvironmentFunctions = {
-	$fs: $fs
-	$import: $import
-}
+import type { InlangEnvironment } from "../environment/types.js"
 
 /**
  * The entrypoint for inlang.
@@ -22,8 +11,8 @@ export type EnvironmentFunctions = {
  * Read more https://inlang.com/documentation/config
  */
 export type DefineConfig = (
-	args: EnvironmentFunctions,
-) => Promise<Config | WithRequired<Partial<Config>, "plugins">>
+	env: InlangEnvironment,
+) => Promise<InlangConfig | WithRequired<Partial<InlangConfig>, "plugins">>
 
 /**
  * The inlang config module.
@@ -44,7 +33,7 @@ export type InlangConfigModule = {
  *
  * Read more https://inlang.com/documentation/config
  */
-export type Config = {
+export type InlangConfig = {
 	/**
 	 * The reference language that other messages are validated against.
 	 *
@@ -64,8 +53,8 @@ export type Config = {
 	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	 */
 	languages: Language[]
-	readResources: (args: { config: Config }) => Promise<ast.Resource[]>
-	writeResources: (args: { config: Config; resources: ast.Resource[] }) => Promise<void>
+	readResources: (args: { config: InlangConfig }) => Promise<ast.Resource[]>
+	writeResources: (args: { config: InlangConfig; resources: ast.Resource[] }) => Promise<void>
 
 	/**
 	 * Plugins to extend the functionality of inlang.
