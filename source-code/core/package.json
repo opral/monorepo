@@ -15,6 +15,28 @@
 		"./utilities": "./dist/utilities/index.js",
 		"./plugin": "./dist/plugin/index.js"
 	},
+	"typesVersions": {
+		"*": {
+			"ast": [
+				"./dist/ast/index.d.ts"
+			],
+			"config": [
+				"./dist/config/index.d.ts"
+			],
+			"lint": [
+				"./dist/lint/index.d.ts"
+			],
+			"query": [
+				"./dist/query/index.d.ts"
+			],
+			"test": [
+				"./dist/test/index.d.ts"
+			],
+			"utilities": [
+				"./dist/utilities/index.d.ts"
+			]
+		}
+	},
 	"files": [
 		"./dist",
 		"./src"
