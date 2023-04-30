@@ -1,11 +1,8 @@
 import type { FileData, NodeishFilesystem } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
-type Directory = Map<string, MemoryInode>
-type Inode = FileData | MemoryDirectory
-
-export type MemoryInode = FileData | MemoryDirectory
-export type MemoryDirectory = Map<string, MemoryInode>
+type Inode = FileData | Directory
+type Directory = Map<string, Inode>
 
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
