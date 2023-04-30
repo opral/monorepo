@@ -14,6 +14,11 @@ export const zConfig = z.object({
 	languages: z.array(z.string()).refine((items) => new Set(items).size === items.length, {
 		message: "Languages contains duplicates. The provided languages must be unique.",
 	}),
+	lint: z
+		.object({
+			rules: z.array(z.any()),
+		})
+		.optional(),
 	readResources: z
 		.function()
 		.args(z.any())

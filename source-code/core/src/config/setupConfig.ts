@@ -21,5 +21,5 @@ export async function setupConfig(args: {
 	}
 	const config = await args.module.defineConfig(args.env)
 	await setupPlugins({ config, env: args.env })
-	return zConfig.parse(config) as InlangConfig
+	return zConfig.passthrough().parse(config) as InlangConfig
 }
