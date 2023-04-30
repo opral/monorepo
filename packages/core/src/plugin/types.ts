@@ -4,11 +4,11 @@ import type { Config, EnvironmentFunctions } from "../config/schema.js"
  * The function to configure a plugin.
  *
  * @example
- *   plugins: [
- * 	 	myPlugin({
- * 	   	pathPattern: "hello",
- * 	 	})
- *   ]
+ * 	plugins: [
+ * 		myPlugin({
+ *			pathPattern: "./languages/*.json",
+ *		})
+ *	]
  */
 export type PluginSetupFunction = (env: EnvironmentFunctions) => Plugin
 
