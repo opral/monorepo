@@ -1,12 +1,7 @@
 import type { BuildOptions } from "esbuild"
-import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"
-import { dedent } from "ts-dedent"
 
-//! EXCLUDE ABOVE IMPORTS!
-//!
-//! Otherwise, esbuild will try to bundle them.
+//! DON'T TOP-LEVEL IMPORT ESBUILD PLUGINS. USE DYNAMIC IMPORTS.
 //! See https://github.com/inlang/inlang/issues/486
-const exclude = ["@esbuild-plugins/node-modules-polyfill", "ts-dedent"]
 
 /**
  * These properties are defined by inlang and should not be overwritten by the user.
@@ -24,9 +19,17 @@ const propertiesDefinedByInlang = ["bundle", "platform", "format", "target"] as 
  *     // your build options
  *   }))
  */
-export function pluginBuildConfig(
+export async function pluginBuildConfig(
 	options: Omit<BuildOptions, (typeof propertiesDefinedByInlang)[number]>,
-): BuildOptions {
+): Promise<BuildOptions> {
+	//! It is important to dynamically import esbuild plugins here.
+	//! Otherwise, the imported plugins are included in
+	//! bundles that have @inlang/core as a dependency.
+	//! See https://github.com/inlang/inlang/issues/486
+	const { NodeModulesPolyfillPlugin } = await import("@esbuild-plugins/node-modules-polyfill")
+	const { dedent } = await import("ts-dedent")
+	const exclude = ["@esbuild-plugins/node-modules-polyfill", "ts-dedent"]
+
 	// type casting. This is safe because we are only adding properties to the options object.
 	// furthermore, javascript uses references for objects. thus, no performance penalty.
 	const ops = options as BuildOptions
