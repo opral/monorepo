@@ -13,6 +13,33 @@ it("should setup the config with plugins", async () => {
 	expect(config.languages).toEqual(["en", "de"])
 })
 
+// Zod removes properties 
+it("should not remove properties from the config", async () => {
+	const config = await setupConfig({
+		module: {
+			defineConfig: async () => ({
+				readResources: () => undefined as any,
+				writeResources: () => undefined as any,
+				someProperty: "someValue",
+				plugins: [
+					{
+						id: "mock.plugin",
+						config: () => {
+							return {
+								referenceLanguage: "de",
+								languages: ["en", "de"],
+							}
+						},
+					},
+				],
+			}),
+		},
+		env: {} as any,
+	})
+	// @ts-expect-error
+	expect(config.someProperty).toBe("someValue")
+})
+
 const mockDefineConfig: DefineConfig = async () => ({
 	readResources: () => undefined as any,
 	writeResources: () => undefined as any,
