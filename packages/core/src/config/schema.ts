@@ -3,7 +3,8 @@ import type * as ast from "../ast/index.js"
 import type { LintRule } from "../lint/rule.js"
 import type { $fs } from "./environment-functions/$fs.js"
 import type { $import } from "./environment-functions/$import.js"
-import type { SdkConfig } from './_sdk.js'
+import type { SdkConfig } from "./_sdk.js"
+import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
 
 /**
  * The environment functions.
@@ -16,11 +17,27 @@ export type EnvironmentFunctions = {
 }
 
 /**
- * The inlang config function.
+ * The entrypoint for inlang.
  *
  * Read more https://inlang.com/documentation/config
  */
-export type DefineConfig = (args: EnvironmentFunctions) => Promise<Config>
+export type DefineConfig = (
+	args: EnvironmentFunctions,
+) => Promise<Config | WithRequired<Partial<Config>, "plugins">>
+
+/**
+ * The inlang config module.
+ *
+ * Use this type to cast an import of an "inlang.config.js" file.
+ *
+ * @example
+ * 	import type { ConfigModule } from "@inlang/core/config"
+ *
+ * 	const module = (await import("./inlang.config.js")) as InlangConfigModule
+ */
+export type InlangConfigModule = {
+	defineConfig: DefineConfig
+}
 
 /**
  * Inlang config schema.
@@ -49,6 +66,19 @@ export type Config = {
 	languages: Language[]
 	readResources: (args: { config: Config }) => Promise<ast.Resource[]>
 	writeResources: (args: { config: Config; resources: ast.Resource[] }) => Promise<void>
+
+	/**
+	 * Plugins to extend the functionality of inlang.
+	 *
+	 * @example
+	 *  plugins: [
+	 * 	 	myPlugin({
+	 * 	   	pathPattern: "hello",
+	 * 	 	})
+	 *  ]
+	 */
+	plugins?: Array<Plugin | PluginSetupFunction>
+
 	lint?: {
 		rules: (LintRule | LintRule[])[]
 	}
@@ -111,3 +141,5 @@ export type Config = {
 
 	sdk?: SdkConfig // TODO: remove this from here once we have the plugin system
 }
+
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }

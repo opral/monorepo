@@ -1,5 +1,4 @@
 import type { Config } from "../config/schema.js"
-import { Config as ZodConfig } from "../config/zod.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
@@ -22,7 +21,6 @@ export async function validateConfig(args: {
 }): Promise<Result<true, ValidateConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
-		validateConfigSchema(args.config)
 		referenceLanguageMustBeInLanguages(args.config)
 		const resources = await args.config.readResources({ config: args.config })
 		validateResources(resources)
@@ -31,13 +29,6 @@ export async function validateConfig(args: {
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, error as ValidateConfigException]
-	}
-}
-
-function validateConfigSchema(config: Config) {
-	const result = ZodConfig.safeParse(config)
-	if (!result.success) {
-		throw new ValidateConfigException(result.error.issues.join("\n"))
 	}
 }
 
