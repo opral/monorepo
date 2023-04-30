@@ -1,4 +1,4 @@
-import { it, expect } from "vitest"
+import { it, expect, vi } from "vitest"
 import { createPlugin } from "./createPlugin.js"
 import { setupPlugins } from "./setupPlugins.js"
 
@@ -34,6 +34,9 @@ it("should be possible to define a config with plugins", async () => {
 	expect(config.languages).toEqual(["en", "de"])
 })
 
+// Plugins are unaware of each other, so it's possible to define the same
+// language in multiple plugins. This is not a problem, but the languages
+// should be merged without duplicates.
 it("should merge languages without duplicates", async () => {
 	const config = await setupPlugins({
 		config: {
@@ -43,4 +46,25 @@ it("should merge languages without duplicates", async () => {
 		env: {} as any,
 	})
 	expect(config.languages).toEqual(["fr", "nl", "en", "de"])
+})
+
+it("should not fail if one plugin crashes", async () => {
+	vi.spyOn(console, "error").mockImplementation(() => undefined)
+
+	const config = await setupPlugins({
+		config: {
+			plugins: [
+				mockPlugin(),
+				{
+					id: "crashing.plugin",
+					config: () => {
+						throw new Error("Plugin crashed")
+					},
+				},
+			],
+		},
+		env: {} as any,
+	})
+	expect(config.languages).toEqual(["en", "de"])
+	expect(console.error).toHaveBeenCalledTimes(1)
 })
