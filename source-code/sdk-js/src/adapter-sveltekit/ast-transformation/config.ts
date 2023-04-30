@@ -22,6 +22,8 @@ export const getConfig = async (): Promise<TransformConfig> => {
 	const srcFolder = cwd + "/src"
 	const routesFolder = srcFolder + "/routes"
 
+	await createInlangConfigIfNotPresentYet()
+
 	const inlangConfig = await initConfig()
 
 	const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
@@ -41,6 +43,41 @@ export const getConfig = async (): Promise<TransformConfig> => {
 }
 
 export const resetConfig = () => cachedConfig = undefined
+
+// ------------------------------------------------------------------------------------------------
+
+const createInlangConfigIfNotPresentYet = async () => {
+	const inlangConfigPath = cwd + "/inlang.config.js"
+	const inlangConfigExists = await doesPathExist(inlangConfigPath)
+	if (inlangConfigExists) return
+
+	return writeFile(inlangConfigPath, `
+/**
+ * @type {import("@inlang/core/config").DefineConfig}
+ */
+export async function defineConfig(env) {
+	const plugin = await env.$import(
+	 	"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+	)
+
+	const pluginConfig = {
+		pathPattern: "./languages/{language}.json",
+	}
+
+	return {
+		referenceLanguage: "en",
+		languages: await plugin.getLanguages({ ...env, pluginConfig }),
+		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
+		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
+		sdk: {
+			languageNegotiation: {
+				strategies: [{ type: "navigator" }, { type: "localStorage" }],
+			},
+		},
+	}
+}
+`)
+}
 
 // ------------------------------------------------------------------------------------------------
 
