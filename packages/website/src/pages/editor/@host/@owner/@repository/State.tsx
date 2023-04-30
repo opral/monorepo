@@ -12,10 +12,11 @@ import {
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import { http, raw } from "@inlang-git/client/raw"
 import {
-	Config,
 	Config as InlangConfig,
+	InlangConfigModule,
 	EnvironmentFunctions,
 	initialize$import,
+	setupConfig,
 } from "@inlang/core/config"
 import { createStore, SetStoreFunction } from "solid-js/store"
 import type * as ast from "@inlang/core/ast"
@@ -101,7 +102,7 @@ type EditorStateSchema = {
 	languages: () => Language[]
 	setLanguages: Setter<Language[]>
 
-	lint: () => Config["lint"]
+	lint: () => InlangConfig["lint"]
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -180,7 +181,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
-	const [lint, setLint] = createSignal<Config["lint"]>()
+	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
@@ -628,7 +629,7 @@ async function readInlangConfig(args: {
 	fs: typeof import("memfs").fs
 }): Promise<InlangConfig | undefined> {
 	try {
-		const environmentFunctions: EnvironmentFunctions = {
+		const env: EnvironmentFunctions = {
 			$import: initialize$import({
 				// @ts-ignore
 				fs: args.fs.promises,
@@ -639,12 +640,8 @@ async function readInlangConfig(args: {
 		}
 		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
 		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
-
-		const module = await import(/* @vite-ignore */ withMimeType)
-		const config: InlangConfig = await module.defineConfig({
-			...environmentFunctions,
-		})
-
+		const module = (await import(/* @vite-ignore */ withMimeType)) as InlangConfigModule
+		const config = setupConfig({ module, env })
 		return config
 	} catch (error) {
 		if ((error as Error).message.includes("ENOENT")) {
