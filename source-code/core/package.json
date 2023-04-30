@@ -11,7 +11,8 @@
 		"./lint": "./dist/lint/index.js",
 		"./query": "./dist/query/index.js",
 		"./test": "./dist/test/index.js",
-		"./utilities": "./dist/utilities/index.js"
+		"./utilities": "./dist/utilities/index.js",
+		"./plugin": "./dist/plugin/index.js"
 	},
 	"files": [
 		"./dist",
