@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises"
+import { readFile, writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
 
@@ -19,14 +19,15 @@ const cwd = process.cwd()
 export const getConfig = async (): Promise<TransformConfig> => {
 	if (cachedConfig) return cachedConfig
 
+	const srcFolder = cwd + "/src"
+	const routesFolder = srcFolder + "/routes"
+
 	const inlangConfig = await initConfig()
-	const svelteConfig = await readFile("svelte.config.js", "utf-8")
 
 	const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
-	const isStatic = svelteConfig.includes('@sveltejs/adapter-static') // TODO: static means if `prerender` is set to true at the root
+	const isStatic = await shouldContentBePrerendered(routesFolder)
 
-	const srcFolder = cwd + "/src"
-	const rootRoutesFolder = srcFolder + "/routes/(app)" + (languageInUrl ? "/[lang]" : "")
+	const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
 
 	const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
@@ -40,3 +41,24 @@ export const getConfig = async (): Promise<TransformConfig> => {
 }
 
 export const resetConfig = () => cachedConfig = undefined
+
+// ------------------------------------------------------------------------------------------------
+
+const shouldContentBePrerendered = async (routesFolder: string) => {
+	const filesToLookFor = [
+		'+layout.server.js',
+		'+layout.server.ts',
+		'+layout.js',
+		'+layout.ts',
+	]
+
+	for (const file of filesToLookFor) {
+		const fileContents = await readFile(routesFolder + `/${file}`, "utf-8").catch(() => undefined)
+		if (!fileContents) continue
+
+		// TODO: check using AST
+		if (fileContents.match(/export const prerender\s*=\s*(true|['"]auto['"])/)) return true
+	}
+
+	return false
+}
