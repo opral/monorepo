@@ -1,8 +1,12 @@
-//! DON'T TOP-LEVEL IMPORT CODE, ONLY TYPES. USE DYNAMIC IMPORTS.
-//! See https://github.com/inlang/inlang/issues/486
 import type { BuildOptions } from "esbuild"
-const { NodeModulesPolyfillPlugin } = await import("@esbuild-plugins/node-modules-polyfill")
-const { dedent } = await import("ts-dedent")
+import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"
+import { dedent } from "ts-dedent"
+
+//! EXCLUDE ABOVE IMPORTS!
+//!
+//! Otherwise, esbuild will try to bundle them.
+//! See https://github.com/inlang/inlang/issues/486
+const exclude = ["@esbuild-plugins/node-modules-polyfill", "ts-dedent"]
 
 /**
  * These properties are defined by inlang and should not be overwritten by the user.
@@ -61,6 +65,10 @@ export function pluginBuildConfig(
 	ops.format = "esm"
 	// es2020 in anticipation of sandboxing JS with QuickJS in the near future
 	ops.target = "es2020"
+	if (ops.external === undefined) {
+		ops.external = []
+	}
+	ops.external.push(...exclude)
 
 	// ------------ PLUGINS -------------------
 
