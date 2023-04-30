@@ -175,6 +175,7 @@ export const plugin = () => {
 			}
 
 			// TODO: refactor
+			// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
 			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
 				'/hooks.server.js',
 				'/routes/inlang/[language].json/+server.js',
@@ -187,9 +188,11 @@ export const plugin = () => {
 				] : [])
 			)
 
-			if (hasCreatedANewFile && viteServer) {
-				resetConfig()
-				viteServer.restart() // TODO: currently it is not possible to exit the process with CTRL + C
+			if (hasCreatedANewFile) {
+				setTimeout(() => {
+					resetConfig()
+					viteServer && viteServer.restart()
+				}, 1000) // if the server immediately get's restarted, then you would not be able to kill the process with CTRL + C; It seems that delaying the restart fixes this issue
 			}
 		},
 
