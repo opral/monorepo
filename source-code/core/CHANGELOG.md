@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.0
+
+### Minor Changes
+
+- a5572e12: Introduction of the plugin API in @inlang/core.
+
 ## 0.6.0
 
 ### Minor Changes
