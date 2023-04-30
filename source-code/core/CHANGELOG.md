@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.1
+
+### Patch Changes
+
+- ab2d90cf: fix `pluginBuildConfig`
+
 ## 0.7.0
 
 ### Minor Changes
