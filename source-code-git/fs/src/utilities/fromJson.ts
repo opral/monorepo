@@ -8,7 +8,6 @@ export async function fromJson(args: {
 	fs: NodeishFilesystem
 	json: Record<string, string>
 	resolveFrom: string
-	decodeInput?: "utf-8" | "base64"
 }): Promise<void> {
 	const { fs, json, resolveFrom } = args
 
@@ -18,12 +17,6 @@ export async function fromJson(args: {
 		const path = `${resolveFrom}/${filePath}`
 		await fs.mkdir(path, { recursive: true })
 
-		switch (args.decodeInput) {
-			case "base64":
-				await fs.writeFile(path, atob(contents))
-				break
-			default:
-				await fs.writeFile(path, contents)
-		}
+		await fs.writeFile(path, atob(contents))
 	}
 }
