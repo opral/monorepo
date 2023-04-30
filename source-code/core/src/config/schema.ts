@@ -26,6 +26,20 @@ export type DefineConfig = (
 ) => Promise<Config | WithRequired<Partial<Config>, "plugins">>
 
 /**
+ * The inlang config module.
+ *
+ * Use this type to cast an import of an "inlang.config.js" file.
+ *
+ * @example
+ * 	import type { ConfigModule } from "@inlang/core/config"
+ *
+ * 	const module = (await import("./inlang.config.js")) as InlangConfigModule
+ */
+export type InlangConfigModule = {
+	defineConfig: DefineConfig
+}
+
+/**
  * Inlang config schema.
  *
  * Read more https://inlang.com/documentation/config
