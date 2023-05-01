@@ -6,13 +6,13 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
 	)
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.0.4/dist/plugin/index.js"
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPlugin({ pathPattern: "./{language}.json" }),
+			jsonPlugin({ pathPattern: "./languages/{language}.json" }),
 			sdkPlugin({
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }, { type: "navigator" }]
