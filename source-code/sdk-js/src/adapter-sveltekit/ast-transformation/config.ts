@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises"
+import { loadFile, type ProxifiedModule } from "magicast"
+import { writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
 
@@ -30,9 +31,9 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const inlangConfig = await initConfig()
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
-		const isStatic = await shouldContentBePrerendered(routesFolder)
 
 		const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
+		const isStatic = await shouldContentBePrerendered(rootRoutesFolder)
 
 		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
@@ -98,13 +99,11 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 		'+layout.ts',
 	]
 
-	for (const file of filesToLookFor) {
-		const fileContents = await readFile(routesFolder + `/${file}`, "utf-8").catch(() => undefined)
-		if (!fileContents) continue
+	const modules = (await Promise.all(
+		filesToLookFor.map(file => loadFile(routesFolder + `/${file}`).catch(() => undefined))
+	))
+		.filter(Boolean) as ProxifiedModule<any>[]
 
-		// TODO: check using AST
-		if (fileContents.match(/export const prerender\s*=\s*(true|['"]auto['"])/)) return true
-	}
-
-	return false
+	return modules.map(mod => [true, 'auto'].includes(mod.exports.prerender))
+		.some(Boolean)
 }
