@@ -1,9 +1,18 @@
+import { z } from 'zod'
 
-export const validateSdkConfig = (config: SdkConfig | undefined) => {
-	// TODO: validate config using `zod`
+// TODO: rewrite all types to zodObjects
+export const zLanguageNegotiationStrategy = z.any()
 
-	return config
-}
+export const zConfig = z.object({
+	languageNegotiation: z.object({
+		strict: z.boolean().optional().default(false),
+		strategies: z.array(zLanguageNegotiationStrategy)
+			.min(1, 'You must define at least one language negotiation strategy.'),
+	})
+})
+
+export const validateSdkConfig = (config: SdkConfig | undefined) =>
+	zConfig.parse(config)
 
 export type SdkConfig = {
 	languageNegotiation: {
