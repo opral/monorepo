@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.3
+
+### Patch Changes
+
+- f0cc15bb: expose `sdkPlugin` for easier setup
+
 ## 0.0.2
 
 ### Patch Changes
