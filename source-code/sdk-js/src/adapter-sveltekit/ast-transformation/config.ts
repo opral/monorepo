@@ -31,7 +31,7 @@ export const getConfig = async (): Promise<TransformConfig> => {
 	// TODO get JSON 5 parser to parse typescript config and only pass property compilerOptions
 
 	const languageInUrl =
-		inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === "url") || false
+		(inlangConfig?.sdk as any)?.languageNegotiation?.strategies?.some((x: any) => x.type === "url") || false
 	const isStatic = svelteConfig.includes("@sveltejs/adapter-static") // TODO: static means if `prerender` is set to true at the root
 
 	const srcFolder = cwd + "/src"
