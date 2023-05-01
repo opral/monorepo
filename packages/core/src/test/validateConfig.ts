@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 import type { InlangConfig } from "../config/schema.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
@@ -97,17 +96,16 @@ async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
 			if (JSON.stringify(message) !== JSON.stringify(matchingReadResource.body[messageIndex]))
 				throw new ValidateConfigException(
 					dedent(`
-						${commonErrorMessage}
-						The message with id "${message.id.name}" does not match for the resource with languageTag.name "${
-						resource.languageTag.name
-					}".
+${commonErrorMessage}
+The message with id "${message.id.name}" does not match for the resource 
+with languageTag.name "${resource.languageTag.name}".
 
-						Received: 
-						${(JSON.stringify(message), null, 2)}
+Received: 
+${JSON.stringify(message, undefined, 2)}
 
-						Expected:
-						${(JSON.stringify(matchingReadResource.body[messageIndex]), null, 2)}
-					`),
+Expected:
+${JSON.stringify(matchingReadResource.body[messageIndex], undefined, 2)}
+`),
 				)
 		}
 	}
