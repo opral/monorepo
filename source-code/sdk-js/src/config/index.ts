@@ -7,8 +7,6 @@ class InlangError extends Error { }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 async function readInlangConfig() {
-	const cwd = process.cwd()
-
 	const env = {
 		$fs: fs,
 		$import: initialize$import({
@@ -29,21 +27,11 @@ Node.js failed to resolve the URL. This can happen sometimes during development.
 			})
 		})
 	}
-
-	const module = (await import(/* @vite-ignore */ resolve(cwd, "./inlang.config.js"))) as
-		| { defineConfig: DefineConfig }
-		| undefined
-	if (!module || !module.defineConfig) {
-		return undefined
-	}
-
 	const module = (await import(
 		/* @vite-ignore */ resolve(process.cwd(), "./inlang.config.js")
 	)) as InlangConfigModule
 
-	const config = await setupConfig({ module, env })
-
-	return config
+	return setupConfig({ module, env })
 }
 
 export const initConfig = async () => {
