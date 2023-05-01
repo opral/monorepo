@@ -1,0 +1,29 @@
+diff --git a/node_modules/magicast/dist/helpers.cjs b/node_modules/magicast/dist/helpers.cjs
+index 7813fd4..16d215a 100644
+--- a/node_modules/magicast/dist/helpers.cjs
++++ b/node_modules/magicast/dist/helpers.cjs
+@@ -8,7 +8,8 @@ require('@babel/parser');
+ function deepMergeObject(magicast, object) {
+   if (typeof object === "object") {
+     for (const key in object) {
+-      if (typeof object[key] === "object") {
++      if (typeof object[key] === "object" && magicast[key] !== undefined) {
++        // It could happen that magicast[key] is not defined
+         deepMergeObject(magicast[key], object[key]);
+       } else {
+         magicast[key] = object[key];
+diff --git a/node_modules/magicast/dist/helpers.mjs b/node_modules/magicast/dist/helpers.mjs
+index 12c3234..fcb273c 100644
+--- a/node_modules/magicast/dist/helpers.mjs
++++ b/node_modules/magicast/dist/helpers.mjs
+@@ -6,7 +6,9 @@ import '@babel/parser';
+ function deepMergeObject(magicast, object) {
+   if (typeof object === "object") {
+     for (const key in object) {
+-      if (typeof object[key] === "object") {
++      if (typeof object[key] === "object" && magicast[key] !== undefined) {
++        // It could happen that magicast[key] is not defined
++        if(!magicast[key]) magicast[key] = {}
+         deepMergeObject(magicast[key], object[key]);
+       } else {
+         magicast[key] = object[key];

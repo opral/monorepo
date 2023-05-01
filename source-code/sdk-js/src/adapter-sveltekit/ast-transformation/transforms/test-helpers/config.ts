@@ -6,5 +6,7 @@ export const baseTestConfig: TransformConfig = {
 	srcFolder: "",
 	rootRoutesFolder: "",
 	hasAlreadyBeenInitialized: false,
+	sourceFileName: "",
+	sourceMapName: "",
 	isTypeScriptProject: false
 }

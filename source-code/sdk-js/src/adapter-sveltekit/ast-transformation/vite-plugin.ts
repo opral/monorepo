@@ -1,9 +1,9 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import type { ViteDevServer, Plugin } from "vite"
-import { TransformConfig, getTransformConfig, resetConfig } from './config.js'
-import { doesPathExist } from './config.js'
-import { transformCode } from './transforms/index.js'
+import { TransformConfig, getTransformConfig, resetConfig } from "./config.js"
+import { doesPathExist } from "./config.js"
+import { transformCode } from "./transforms/index.js"
 
 type FileType =
 	| "hooks.server.js"
@@ -28,7 +28,7 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 	const path = id.replace(config.srcFolder, "")
 
 	const dir = dirname(path)
-	const root = dir.endsWith('/routes')
+	const root = dir.endsWith("/routes")
 
 	if (path === "/hooks.server.js" || path === "/hooks.server.ts") {
 		return {
@@ -189,9 +189,9 @@ let viteServer: ViteDevServer | undefined
 
 export const plugin = () => {
 	return {
-		name: 'vite-plugin-inlang-sdk-js-sveltekit',
+		name: "vite-plugin-inlang-sdk-js-sveltekit",
 		// makes sure we run before vite-plugin-svelte
-		enforce: 'pre',
+		enforce: "pre",
 
 		configureServer(server) {
 			viteServer = server as unknown as ViteDevServer
@@ -202,8 +202,8 @@ export const plugin = () => {
 				ssr: {
 					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
 					// to be able to use `SvelteKit`'s `$app` aliases
-					noExternal: ['@inlang/sdk-js'],
-				}
+					noExternal: ["@inlang/sdk-js"],
+				},
 			}
 		},
 
@@ -232,29 +232,7 @@ export const plugin = () => {
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			return { code: transformCode(config, code, fileInformation) }
-			/*
-				this is how we could potentially transform our js files.
-
-				Recast mentioned here, by rich harris: https://github.com/Rich-Harris/magic-string#magic-string
-
-				async transform(code, id) {
-					if (id !== "our file id we want to transform") return
-					const ast = recast.parse(code)
-					// ast transformations
-					// This is the ast for the function import
-					const functionImportAst = {}
-					const astWithImport = await insertAst(ast, functionImportAst, { before: ["body", "0"] })
-					const finalAst = await wrapVariableDeclaration(astWithImport, "load", "wrapFn")
-					const recastPrint = recast.print()
-					// proceed with the transformation...
-					return {
-						code: recastPrint.code,
-						ast: finalAst,
-						map: recastPrint.map,
-					}
-				},
-			*/
+			return transformCode(config, code, fileInformation)
 		},
-	}  satisfies Plugin
+	} satisfies Plugin
 }
