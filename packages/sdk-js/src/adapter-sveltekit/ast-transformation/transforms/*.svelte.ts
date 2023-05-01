@@ -6,7 +6,10 @@ import { typescript } from "svelte-preprocess"
 import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
 import type { NodeInfoMapEntry, RunOn } from "../../../helpers/ast.js"
-import MagicString from "magic-string"
+import MagicStringImport from "magic-string"
+
+// the type definitions don't match
+const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
 // TODO: fix this soon !!
 // supports multiple imports
@@ -69,21 +72,21 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 				const runOn = ((node) =>
 					n.ImportSpecifier.check(node)
 						? (meta) => {
-								const { parent } = meta.get(
-									node,
-								) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
-								const specifierIndex = parent?.specifiers?.findIndex(
-									(specifier) => specifier === node,
-								)
-								// Remove "i" and "lang" import from "@inlang/sdk-js"
-								if (specifierIndex != undefined) parent?.specifiers?.splice(specifierIndex, 1)
-								// Remove the complete import from "@inlang/sdk-js" if it is empty now
-								if (parent?.specifiers?.length === 0 && n.Program.check(ast.$ast)) {
-									const declarationIndex = ast.$ast.body.findIndex((node) => node === parent)
-									declarationIndex != undefined && ast.$ast.body.splice(declarationIndex, 1)
-								}
-								return [node.imported.name, node.local?.name ?? node.imported.name]
-						  }
+							const { parent } = meta.get(
+								node,
+							) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
+							const specifierIndex = parent?.specifiers?.findIndex(
+								(specifier) => specifier === node,
+							)
+							// Remove "i" and "lang" import from "@inlang/sdk-js"
+							if (specifierIndex != undefined) parent?.specifiers?.splice(specifierIndex, 1)
+							// Remove the complete import from "@inlang/sdk-js" if it is empty now
+							if (parent?.specifiers?.length === 0 && n.Program.check(ast.$ast)) {
+								const declarationIndex = ast.$ast.body.findIndex((node) => node === parent)
+								declarationIndex != undefined && ast.$ast.body.splice(declarationIndex, 1)
+							}
+							return [node.imported.name, node.local?.name ?? node.imported.name]
+						}
 						: undefined) satisfies RunOn<types.namedTypes.Node, [string, string] | undefined>
 				// TODO remove ALL imports from "@inlang/sdk-js"
 				// Remove imports "i" and "language" from "@inlang/sdk-js" but save their aliases
@@ -113,11 +116,11 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 					(node) =>
 						n.ImportDeclaration.check(node)
 							? (meta) => {
-									const { parent, index } = meta.get(
-										node,
-									) as NodeInfoMapEntry<types.namedTypes.Program>
-									if (index != undefined) parent.body.splice(index + 1, 0, insertion)
-							  }
+								const { parent, index } = meta.get(
+									node,
+								) as NodeInfoMapEntry<types.namedTypes.Program>
+								if (index != undefined) parent.body.splice(index + 1, 0, insertion)
+							}
 							: undefined,
 				)
 			}
@@ -137,18 +140,19 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 				parsed,
 				[
 					({ node }) =>
-						n.Identifier.check(node) && importIdentifiers.find(([, name]) => name === node.name),
+						n.Identifier.check(node) && !!importIdentifiers.some(([, name]) => name === node.name),
 				],
 				(node) =>
 					n.Identifier.check(node) && Object.hasOwn(node, "start") && Object.hasOwn(node, "end")
-						? () => [node.start, node.end]
+						? () => [(node as any).start, (node as any).end]
 						: undefined,
 			)[0] as [string, string][] | undefined
+
 			const s = new MagicString(options.content)
 			// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
 			if (locations) {
 				for (const [start] of locations) {
-					s.appendLeft(start, "$")
+					s.appendLeft(+start, "$")
 				}
 			}
 			parsed.instance = instance
