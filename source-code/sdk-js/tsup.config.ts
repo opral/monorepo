@@ -9,4 +9,5 @@ export default defineConfig(({ watch }) => ({
 	target: "es2020",
 	sourcemap: !watch,
 	dts: true,
+	external: ['magicast'],
 }))

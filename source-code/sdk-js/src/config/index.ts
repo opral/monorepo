@@ -3,23 +3,34 @@ import { initialize$import } from "@inlang/core/environment"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 
+class InlangError extends Error { }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 async function readInlangConfig() {
 	const env = {
 		$fs: fs,
 		$import: initialize$import({
 			fs,
-			fetch,
-		}),
-	}
+			fetch: async (...args) => await fetch(...args)
+			.catch(error => {
+				// TODO: create an issue
+				if (error instanceof TypeError && (error.cause as any)?.code === 'UND_ERR_CONNECT_TIMEOUT') {
+					throw new InlangError(`
 
+Node.js failed to resolve the URL. This can happen sometimes during development. Usually restarting the server helps.
+
+	`, { cause: error })
+				}
+
+				throw error
+			})
+		})
+	}
 	const module = (await import(
 		/* @vite-ignore */ resolve(process.cwd(), "./inlang.config.js")
 	)) as InlangConfigModule
 
-	const config = await setupConfig({ module, env })
-
-	return config
+	return setupConfig({ module, env })
 }
 
 export const initConfig = async () => {

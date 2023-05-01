@@ -1,9 +1,7 @@
 import * as _plugin from "./_plugin.js"
 
-// TODO: check why `dist` is needed
-
 /**
- * @type {import("@inlang/core/dist/config").DefineConfig}
+ * @type {import("@inlang/core/config").DefineConfig}
  */
 export async function defineConfig(env) {
 	// this sometimes throws a `ConnectTimeoutError`
