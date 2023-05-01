@@ -5,7 +5,24 @@ import type { TransformConfig } from "../config.js"
 import { readFileSync } from "node:fs"
 
 const testSvelteFile = readFileSync(__dirname + "/test-helpers/test.svelte").toString()
+
 describe("transformSvelte", () => {
+	it.todo("basics", async ({ expect }) => {
+		const code = await transformSvelte(baseTestConfig, `
+<script>
+	import { i, languages, switchLanguage } from "@inlang/sdk-js"
+</script>
+
+{#each languages as lang}
+	<button on:click={() =>switchLanguage(lang)}>{lang}</button>
+{/each}
+
+<h1>{i("welcome")}</h1>
+`)
+		expect(code).toMatchSnapshot()
+	})
+
+
 	it("languageInUrl is true", async ({ expect }) => {
 		const config: TransformConfig = {
 			...baseTestConfig,

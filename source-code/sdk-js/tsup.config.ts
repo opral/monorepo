@@ -7,11 +7,11 @@ export default defineConfig(({ watch }) => ([
 		bundle: true,
 		platform: "node",
 		format: "esm",
-		target: "es2020",
+		target: "es2022",
 		sourcemap: !watch,
 		dts: true,
 		splitting: false,
-		external: ['sugarss', 'coffeescript', 'less', 'pug', 'sass', 'stylus'],
+		external: ['svelte/compiler', 'sugarss', 'coffeescript', 'less', 'pug', 'sass', 'stylus'],
 	},
 	{
 		entryPoints: ["./src/plugin/index.ts"],

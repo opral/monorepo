@@ -2,11 +2,11 @@ import type { TransformConfig } from "../config.js"
 import { parse, preprocess } from "svelte/compiler"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { typescript } from "svelte-preprocess"
 import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
 import type { NodeInfoMapEntry, RunOn } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
@@ -53,13 +53,11 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 
 	const importIdentifiers: [string, string][] = []
 
-	const processed = await preprocess(code, {
+	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false }))).code
+
+	const processed = await preprocess(codeWithoutTypes, {
 		script: async (options) => {
-			const script = await typescript({}).script({
-				...options,
-				filename: "",
-			})
-			const ast = parseModule(script.code, {
+			const ast = parseModule(options.content, {
 				sourceFileName: config.sourceFileName,
 			})
 			const importsAst = parseModule(requiredImports)
@@ -127,7 +125,8 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 			const generated = generateCode(ast, {
 				sourceMapName: config.sourceMapName,
 			})
-			return { ...script, ...generated }
+
+			return { ...options, ...generated }
 		},
 		markup: (options) => {
 			const parsed = parse(options.content)
