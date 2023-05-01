@@ -2,6 +2,7 @@ import type { InlangConfig } from "../config/schema.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
+import { dedent } from "ts-dedent"
 
 export class ValidateConfigException extends Error {
 	readonly #id = "ValidateConfigException"
@@ -94,8 +95,18 @@ async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
 		for (const [messageIndex, message] of resource.body.entries()) {
 			if (JSON.stringify(message) !== JSON.stringify(matchingReadResource.body[messageIndex]))
 				throw new ValidateConfigException(
-					commonErrorMessage +
-						`The message with id "${message.id.name}" does not match for the resource with languageTag.name "${resource.languageTag.name}".`,
+					dedent(`
+						${commonErrorMessage}
+						The message with id "${message.id.name}" does not match for the resource with languageTag.name "${
+						resource.languageTag.name
+					}".
+
+						Received: 
+						${(JSON.stringify(message), undefined, 2)}
+
+						Expected:
+						${(JSON.stringify(matchingReadResource.body[messageIndex]), undefined, 2)}
+					`),
 				)
 		}
 	}
