@@ -10,6 +10,14 @@ describe("transformLanguageJson", () => {
 
 	it("creates new file", ({ expect }) => {
 		const code = transformLanguageJson({} as TransformConfig, "")
-		expect(code).toMatchSnapshot()
+		expect(code).toMatchInlineSnapshot(`
+			"
+			import { json } from \\"@sveltejs/kit\\"
+			import { getResource } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
+
+			export const GET = (({ params: { language } }) =>
+				json(getResource(language) || null))
+			"
+		`)
 	})
 })

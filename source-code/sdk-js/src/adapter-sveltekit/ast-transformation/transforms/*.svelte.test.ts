@@ -2,9 +2,6 @@ import { describe, it } from "vitest"
 import { transformSvelte } from "./*.svelte.js"
 import { baseTestConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
-import { readFileSync } from "node:fs"
-
-const testSvelteFile = readFileSync(__dirname + "/test-helpers/test.svelte").toString()
 
 describe("transformSvelte", () => {
 	it.todo("basics", async ({ expect }) => {
@@ -19,7 +16,7 @@ describe("transformSvelte", () => {
 
 <h1>{i("welcome")}</h1>
 `)
-		expect(code).toMatchSnapshot()
+		expect(code).toMatchInlineSnapshot()
 	})
 
 
@@ -30,13 +27,107 @@ describe("transformSvelte", () => {
 			sourceFileName: "test.svelte",
 			sourceMapName: "test.svelte.js",
 		}
-		const code = await transformSvelte(config, testSvelteFile)
-		expect(code).toMatchSnapshot()
+		const code = await transformSvelte(config, `
+<script lang="ts" context="module">
+</script>
+
+<script lang="ts">
+	export let prop: string
+	import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
+	const blue = iStore;
+	const green = iLanguage
+	console.log(blue)
+</script>
+
+<style>
+	.red {
+		color: red;
+	}
+</style>
+
+<h1 class="red">{prop}</h1>
+<h1 class="red">{iStore}</h1>
+<h1 class="red">{iLanguage}</h1>
+`)
+		expect(code).toMatchInlineSnapshot(`
+			"
+			<script lang=\\"ts\\" context=\\"module\\"></script>
+
+			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+
+			const {
+			  i: iStore,
+			  language: iLanguage
+			} = getRuntimeFromContext();
+
+			export let prop;
+			const blue = $iStore;
+			const green = $iLanguage;
+			console.log(blue);</script>
+
+			<style>
+				.red {
+					color: red;
+				}
+			</style>
+
+			<h1 class=\\"red\\">{prop}</h1>
+			<h1 class=\\"red\\">{$iStore}</h1>
+			<h1 class=\\"red\\">{$iLanguage}</h1>
+			"
+		`)
 	})
 
 	it("languageInUrl is false", async ({ expect }) => {
-		const code = await transformSvelte(baseTestConfig, testSvelteFile)
-		expect(code).toMatchSnapshot()
+		const code = await transformSvelte(baseTestConfig, `
+<script lang="ts" context="module">
+</script>
+
+<script lang="ts">
+	export let prop: string
+	import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
+	const blue = iStore;
+	const green = iLanguage
+	console.log(blue)
+</script>
+
+<style>
+	.red {
+		color: red;
+	}
+</style>
+
+<h1 class="red">{prop}</h1>
+<h1 class="red">{iStore}</h1>
+<h1 class="red">{iLanguage}</h1>
+`)
+		expect(code).toMatchInlineSnapshot(`
+			"
+			<script lang=\\"ts\\" context=\\"module\\"></script>
+
+			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+
+			const {
+			  i: iStore,
+			  language: iLanguage
+			} = getRuntimeFromContext();
+
+			export let prop;
+			const blue = $iStore;
+			const green = $iLanguage;
+			console.log(blue);</script>
+
+			<style>
+				.red {
+					color: red;
+				}
+			</style>
+
+			<h1 class=\\"red\\">{prop}</h1>
+			<h1 class=\\"red\\">{$iStore}</h1>
+			<h1 class=\\"red\\">{$iLanguage}</h1>
+			"
+		`)
 	})
 })
 
