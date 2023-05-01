@@ -1,53 +1,26 @@
-import type { Config, EnvironmentFunctions } from '@inlang/core/config'
-import { SdkConfig, validateConfig } from './schema.js'
-import extend from 'just-extend'
-import type { ConfigWithSdk } from './config.js'
-
-// ! non final API
-
-type PluginConfigFunction<PluginConfig> = (
-	pluginConfig: PluginConfig,
-) => (env: EnvironmentFunctions) => Plugin
-
-type Plugin = {
-	id: string
-	defineConfig(config: Partial<Config>): Promise<void>
-}
-
-function createPlugin<PluginConfig>(
-	callback: (args: { pluginConfig: PluginConfig; env: EnvironmentFunctions }) => Plugin,
-): PluginConfigFunction<PluginConfig> {
-	return (pluginConfig) => (env) => callback({ pluginConfig, env })
-}
+import { SdkConfig as SdkSettings, validateSdkConfig } from './schema.js'
+import type { InlangConfig } from '@inlang/core/config'
+import type { InlangEnvironment } from '@inlang/core/environment'
+import { createPlugin } from "@inlang/core/plugin";
 
 // ------------------------------------------------------------------------------------------------
 
-const defaultSdkConfig: SdkConfig = {
-	languageNegotiation: {
-		strict: false,
-		strategies: [
-			{ type: 'localStorage' },
-			{ type: 'accept-language-header' },
-			{ type: 'navigator' },
-		],
-	}
-}
+export const sdkPlugin = createPlugin<SdkSettings>(({ settings, env }) => ({
+	id: "inlang.sdk-js",
+	config: async () => {
+		const parsedConfig = validateSdkConfig(settings)
 
-export const plugin = createPlugin<SdkConfig>(({ pluginConfig, env }) => {
-	return {
-		id: "inlang.sdk-js",
-		defineConfig: async (config) => {
-			validateConfig(pluginConfig);
+		// await addDefaultResourcePluginIfMissing(config, env)
+		// await addIdeExtensionPluginIfMissing(config, env)
 
-			(config as ConfigWithSdk).sdk = extend(true, {}, defaultSdkConfig, pluginConfig) as SdkConfig
+		return {
+			sdk: parsedConfig
+		} as Partial<InlangConfig> // TODO: should the return type really be a partial of InlangConfig?
+	},
+}))
 
-			await addDefaultResourcePluginIfMissing(config, env)
-			await addIdeExtensionPluginIfMissing(config, env)
-		},
-	}
-})
-
-const addDefaultResourcePluginIfMissing = async (config: Partial<Config>, env: EnvironmentFunctions) => {
+// this is currently not possible because the Plugin `config` function does not receive the existing config object
+const addDefaultResourcePluginIfMissing = async (config: Partial<InlangConfig>, env: InlangEnvironment) => {
 	if (config.readResources) return
 
 	const plugin = await env.$import(
@@ -63,6 +36,6 @@ const addDefaultResourcePluginIfMissing = async (config: Partial<Config>, env: E
 	config.writeResources = (args) => plugin.writeResources({ ...args, ...env, pluginConfig })
 }
 
-const addIdeExtensionPluginIfMissing = async (config: Partial<Config>, env: EnvironmentFunctions) => {
+const addIdeExtensionPluginIfMissing = async (config: Partial<InlangConfig>, env: InlangEnvironment) => {
 	// TODO
 }

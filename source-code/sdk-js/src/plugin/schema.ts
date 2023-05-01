@@ -1,14 +1,16 @@
 
-export const validateConfig = (config: SdkConfig | undefined) => {
+export const validateSdkConfig = (config: SdkConfig | undefined) => {
 	// TODO: validate config using `zod`
+
+	return config
 }
 
 export type SdkConfig = {
 	languageNegotiation: {
 		/* default: false */
-		strict: boolean
+		strict?: boolean
 		/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
-		strategies: LanguageNegotiationStrategy[]
+		strategies: [LanguageNegotiationStrategy, ...LanguageNegotiationStrategy[]]
 	}
 }
 
