@@ -56,9 +56,9 @@ $: if (browser && $language) {
 	import { browser } from "$app/environment"
 
 	export let data
+
 	addRuntimeToContext(getRuntimeFromData(data))
 	let { i, language } = getRuntimeFromContext()
-	
 	${initCode}
 </script>
 ${template}
