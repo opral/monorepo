@@ -6,7 +6,7 @@ on:
 
   push:
     paths:
-      - "source-code/sdk-js/**"
+      - "source-code/sdk-js/package.json"
     branches:
       - main
 
