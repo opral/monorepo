@@ -1,16 +1,15 @@
-import { Config, DefineConfig, initialize$import } from "@inlang/core/config"
+import type { DefineConfig, InlangConfig } from "@inlang/core/config"
+import { initialize$import } from '@inlang/core/environment'
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { SdkConfig, validateConfig } from './schema.js'
 
-export type ConfigWithSdk = Config & {
+export type ConfigWithSdk = InlangConfig & {
 	sdk?: SdkConfig
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const readInlangConfig = async () => {
 	const $import = initialize$import({
-		// @ts-ignore TODO: this should be fixed
 		fs,
 		fetch,
 	})
@@ -26,7 +25,6 @@ const readInlangConfig = async () => {
 	}
 
 	const config = await module.defineConfig({
-		// @ts-ignore TODO: this should be fixed
 		$fs: fs,
 		$import,
 	})
