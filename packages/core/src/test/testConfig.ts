@@ -4,22 +4,22 @@ import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
 import { dedent } from "ts-dedent"
 
-export class ValidateConfigException extends Error {
-	readonly #id = "ValidateConfigException"
+export class TestConfigException extends Error {
+	readonly #id = "TestConfigException"
 }
 
 /**
  * Validates the config.
  *
  * If you want to config the inlang.config.js file,
- * use the `validateConfigFile` function instead.
+ * use the `testConfigFile` function instead.
  *
  * @example
- * const [success, error] = await validateConfig(args)
+ * const [success, error] = await testConfig(args)
  */
-export async function validateConfig(args: {
+export async function testConfig(args: {
 	config: InlangConfig
-}): Promise<Result<true, ValidateConfigException>> {
+}): Promise<Result<true, TestConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
 		referenceLanguageMustBeInLanguages(args.config)
@@ -29,13 +29,13 @@ export async function validateConfig(args: {
 		await roundtripTest(args.config, resources)
 		return [true, undefined]
 	} catch (error) {
-		return [undefined, error as ValidateConfigException]
+		return [undefined, error as TestConfigException]
 	}
 }
 
 function referenceLanguageMustBeInLanguages(config: InlangConfig) {
 	if (!config.languages.includes(config.referenceLanguage)) {
-		throw new ValidateConfigException(
+		throw new TestConfigException(
 			`The reference language "${config.referenceLanguage}" must be included in the list of languages.`,
 		)
 	}
@@ -55,7 +55,7 @@ async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
 	const areEqual = languages.sort().join(",") === config.languages.sort().join(",")
 	if (areEqual === false) {
 		// TODO error message should contain the languages that are missing
-		throw new ValidateConfigException(
+		throw new TestConfigException(
 			`The list of languages in the config file does not match the returned resources from \`readResources()\`.`,
 		)
 	}
@@ -77,7 +77,7 @@ async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
 	const readResources = await config.readResources({ config })
 	// check if the number of resources is the same
 	if (resources.length !== readResources.length) {
-		throw new ValidateConfigException(commonErrorMessage + "The number of resources don't match.")
+		throw new TestConfigException(commonErrorMessage + "The number of resources don't match.")
 	}
 	// check if the resources match
 	for (const resource of resources) {
@@ -87,14 +87,14 @@ async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
 		)
 		// check if the resource exists
 		if (matchingReadResource === undefined) {
-			throw new ValidateConfigException(
+			throw new TestConfigException(
 				commonErrorMessage + `Missing the resource "${resource.languageTag.name}"`,
 			)
 		}
 		// check if the messages are identical
 		for (const [messageIndex, message] of resource.body.entries()) {
 			if (JSON.stringify(message) !== JSON.stringify(matchingReadResource.body[messageIndex]))
-				throw new ValidateConfigException(
+				throw new TestConfigException(
 					dedent(`
 ${commonErrorMessage}
 The message with id "${message.id.name}" does not match for the resource 

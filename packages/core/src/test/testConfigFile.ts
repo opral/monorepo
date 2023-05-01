@@ -1,20 +1,20 @@
 import type { InlangEnvironment } from "../environment/types.js"
 import type { Result } from "../utilities/result.js"
-import { validateConfig, ValidateConfigException } from "./validateConfig.js"
+import { testConfig, TestConfigException } from "./testConfig.js"
 
 /**
  * Validates the inlang.config.js file.
  *
  * If you only want to validate the config object,
- * use the `validateConfig` function instead.
+ * use the `testConfig` function instead.
  *
  * @example
- * const [success, error] = await validateConfigFile(args)
+ * const [success, error] = await testConfigFile(args)
  */
-export async function validateConfigFile(args: {
+export async function testConfigFile(args: {
 	file: string
 	env: InlangEnvironment
-}): Promise<Result<true, ValidateConfigException>> {
+}): Promise<Result<true, TestConfigException>> {
 	try {
 		// BEGIN
 		// throws if an error occurs
@@ -22,13 +22,13 @@ export async function validateConfigFile(args: {
 		// END
 		const { defineConfig } = await import("data:application/javascript;base64," + btoa(args.file))
 		const config = await defineConfig(args.env)
-		const [, exception] = await validateConfig({ config })
+		const [, exception] = await testConfig({ config })
 		if (exception) {
 			throw exception
 		}
 		return [true, undefined]
 	} catch (error) {
-		return [undefined, error as ValidateConfigException]
+		return [undefined, error as TestConfigException]
 	}
 }
 
@@ -43,7 +43,7 @@ function importKeywordUsed(configFile: string) {
 	const regex = /(?<!\$)import\b/
 	const hasError = regex.test(configFile)
 	if (hasError) {
-		throw new ValidateConfigException(
+		throw new TestConfigException(
 			"Regular import statements are not allowed. Use $import of the inlang environment instead.",
 		)
 	}
