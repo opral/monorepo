@@ -1,12 +1,25 @@
+import { z } from 'zod'
+
+// TODO: rewrite all types to zodObjects
+export const zLanguageNegotiationStrategy = z.any()
+
+export const zConfig = z.object({
+	languageNegotiation: z.object({
+		strict: z.boolean().optional().default(false),
+		strategies: z.array(zLanguageNegotiationStrategy)
+			.min(1, 'You must define at least one language negotiation strategy.'),
+	})
+})
+
+export const validateSdkConfig = (config: SdkConfig | undefined) =>
+	zConfig.parse(config)
+
 export type SdkConfig = {
-	languageNegotiation?: {
-		/* default: false */
+	languageNegotiation: {
 		strict?: boolean
-		/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
-		strategies?: LanguageNegotiationStrategy[]
+		strategies: [LanguageNegotiationStrategy, ...LanguageNegotiationStrategy[]]
 	}
 }
-
 
 type LanguageNegotiatorType =
 	| "url"
@@ -26,10 +39,10 @@ type LanguageNegotiationStrategy =
 	/* default */
 	| UrlNegotiator
 	| AcceptLanguageHeaderNegotiator
-	| CookieNegotiator
+	// | CookieNegotiator
 	| NavigatorNegotiator
 	| LocalStorageNegotiator
-	| SessionStorageNegotiator
+// | SessionStorageNegotiator
 
 type UrlNegotiatorVariantBase<Type, Settings> = Settings & { type: Type }
 
