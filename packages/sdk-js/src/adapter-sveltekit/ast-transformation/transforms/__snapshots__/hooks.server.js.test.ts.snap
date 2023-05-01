@@ -1,33 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`createHooksServerJs > isStatic 1`] = `
-"
-import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
-import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\"
-import { redirect } from \\"@sveltejs/kit\\"
-import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\"
-
-export const handle = initHandleWrapper({
-getLanguage: () => undefined,
-
-}).wrap(async ({ event, resolve }) => resolve(event))
-"
-`;
-
-exports[`createHooksServerJs > languageInUrl and isStatic 1`] = `
-"
-import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
-import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\"
-import { redirect } from \\"@sveltejs/kit\\"
-import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\"
-
-export const handle = initHandleWrapper({
-getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
-
-}).wrap(async ({ event, resolve }) => resolve(event))
-"
-`;
-
 exports[`transformHooksServerJs > isStatic 1`] = `
 "import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 import { redirect } from \\"@sveltejs/kit\\";
