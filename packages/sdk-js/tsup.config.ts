@@ -11,7 +11,7 @@ export default defineConfig(({ watch }) => ([
 		sourcemap: !watch,
 		dts: true,
 		splitting: false,
-		external: ['svelte/compiler', 'sugarss', 'coffeescript', 'less', 'pug', 'sass', 'stylus'],
+		external: ['svelte/compiler'],
 	},
 	{
 		entryPoints: ["./src/plugin/index.ts"],
