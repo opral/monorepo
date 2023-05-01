@@ -7,10 +7,11 @@ export default defineConfig(({ watch }) => ([
 		bundle: true,
 		platform: "node",
 		format: "esm",
-		target: "es2020",
+		target: "es2022",
 		sourcemap: !watch,
 		dts: true,
 		splitting: false,
+		external: ['svelte/compiler'],
 	},
 	{
 		entryPoints: ["./src/plugin/index.ts"],

@@ -43,8 +43,8 @@ export async function pluginBuildConfig(
 
 				Solution: Remove the property from your build options.
 
-				Context: The inlang build config defines this property 
-				and thereby ensures that your plugin is built in a way 
+				Context: The inlang build config defines this property
+				and thereby ensures that your plugin is built in a way
 				that is compatible with inlang.
 			`)
 		}
@@ -79,7 +79,7 @@ export async function pluginBuildConfig(
 		ops.plugins = []
 	}
 	ops.plugins.push(
-		// @ts-expect-error - esbuild plugins have a wrong type
+		// @ts-expect-error
 		NodeModulesPolyfillPlugin(),
 	)
 

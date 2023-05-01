@@ -1,7 +1,7 @@
 import { loadFile, type ProxifiedModule } from "magicast"
 import { writeFile } from "node:fs/promises"
+import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
-import { initConfig } from '../../config/config.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
@@ -11,6 +11,8 @@ export type TransformConfig = {
 	srcFolder: string
 	rootRoutesFolder: string
 	hasAlreadyBeenInitialized: boolean
+	sourceFileName?: string
+	sourceMapName?: string
 	isTypeScriptProject: boolean
 }
 
