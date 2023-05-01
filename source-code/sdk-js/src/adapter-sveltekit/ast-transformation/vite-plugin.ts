@@ -1,7 +1,7 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import type { ViteDevServer, Plugin } from "vite"
-import { TransformConfig, getConfig, resetConfig } from './config.js'
+import { TransformConfig, getTransformConfig, resetConfig } from './config.js'
 import { doesPathExist } from './config.js'
 import { transformCode } from './transforms/index.js'
 
@@ -167,7 +167,7 @@ export const plugin = () => {
 		},
 
 		async buildStart() {
-			const config = await getConfig()
+			const config = await getTransformConfig()
 
 			if (!config.hasAlreadyBeenInitialized) {
 				// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
@@ -198,7 +198,7 @@ export const plugin = () => {
 		},
 
 		async transform(code, id) {
-			const config = await getConfig()
+			const config = await getTransformConfig()
 
 			const fileInformation = getFileInformation(config, id)
 			// eslint-disable-next-line unicorn/no-null

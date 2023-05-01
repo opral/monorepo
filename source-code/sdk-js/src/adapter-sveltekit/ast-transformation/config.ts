@@ -12,37 +12,40 @@ export type TransformConfig = {
 	hasAlreadyBeenInitialized: boolean
 }
 
-let cachedConfig: TransformConfig | undefined
-
 const cwd = process.cwd()
 
-export const getConfig = async (): Promise<TransformConfig> => {
-	if (cachedConfig) return cachedConfig
+let configPromise: Promise<TransformConfig> | undefined = undefined
 
-	const srcFolder = cwd + "/src"
-	const routesFolder = srcFolder + "/routes"
+export const getTransformConfig = async (): Promise<TransformConfig> => {
+	if (configPromise) return configPromise
 
-	await createInlangConfigIfNotPresentYet()
+	// eslint-disable-next-line no-async-promise-executor
+	return configPromise = new Promise<TransformConfig>(async (resolve) => {
+		const srcFolder = cwd + "/src"
+		const routesFolder = srcFolder + "/routes"
 
-	const inlangConfig = await initConfig()
+		await createInlangConfigIfNotPresentYet()
 
-	const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
-	const isStatic = await shouldContentBePrerendered(routesFolder)
+		const inlangConfig = await initConfig()
 
-	const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
+		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
+		const isStatic = await shouldContentBePrerendered(routesFolder)
 
-	const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
+		const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
 
-	return cachedConfig = {
-		languageInUrl,
-		isStatic,
-		srcFolder,
-		rootRoutesFolder,
-		hasAlreadyBeenInitialized,
-	}
+		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
+
+		resolve({
+			languageInUrl,
+			isStatic,
+			srcFolder,
+			rootRoutesFolder,
+			hasAlreadyBeenInitialized,
+		})
+	})
 }
 
-export const resetConfig = () => cachedConfig = undefined
+export const resetConfig = () => configPromise = undefined
 
 // ------------------------------------------------------------------------------------------------
 
