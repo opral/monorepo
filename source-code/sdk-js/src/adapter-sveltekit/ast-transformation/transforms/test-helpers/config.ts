@@ -8,6 +8,5 @@ export const baseTestConfig: TransformConfig = {
 	hasAlreadyBeenInitialized: false,
 	sourceFileName: "",
 	sourceMapName: "",
-	tsCompilerOptions: {},
 	isTypeScriptProject: false
 }
