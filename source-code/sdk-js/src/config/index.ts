@@ -10,7 +10,6 @@ async function readInlangConfig() {
 	const env = {
 		$fs: fs,
 		$import: initialize$import({
-			// @ts-ignore TODO: this should be fixed
 			fs,
 			fetch: async (...args) => await fetch(...args)
 			.catch(error => {
