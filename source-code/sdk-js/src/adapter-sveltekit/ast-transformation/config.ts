@@ -10,6 +10,7 @@ export type TransformConfig = {
 	srcFolder: string
 	rootRoutesFolder: string
 	hasAlreadyBeenInitialized: boolean
+	isTypeScriptProject: boolean
 }
 
 const cwd = process.cwd()
@@ -35,12 +36,15 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
+		const isTypeScriptProject = await doesPathExist(cwd + '/tsconfig.json')
+
 		resolve({
 			languageInUrl,
 			isStatic,
 			srcFolder,
 			rootRoutesFolder,
 			hasAlreadyBeenInitialized,
+			isTypeScriptProject,
 		})
 	})
 }

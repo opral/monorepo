@@ -103,28 +103,69 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 
 // ------------------------------------------------------------------------------------------------
 
-const createFilesIfNotPresent = async (srcFolder: string, ...files: string[]) => {
+const createFilesIfNotPresent = async (config: TransformConfig) => {
+	const preferredFileEnding = config.isTypeScriptProject ? 'ts' : 'js'
+
+	const getPathForFileType = (fileType: FileType, fileEnding: 'ts' | 'js' = preferredFileEnding) => {
+		switch (fileType) {
+			case 'hooks.server.js': return config.srcFolder + `/hooks.server.${fileEnding}`
+			case '[language].json': return config.srcFolder + `/routes/inlang/[language].json/+server.${fileEnding}`
+			case '+layout.server.js': return config.srcFolder + `/routes/+layout.server.${fileEnding}`
+			case '+layout.js': return config.srcFolder + `/routes/+layout.${fileEnding}`
+			case '+layout.svelte': return config.srcFolder + `/routes/+layout.svelte`
+			case '+page.server.js': return config.srcFolder + `/routes/+page.server.${fileEnding}`
+			case '+page.js': return config.srcFolder + `/routes/+page.${fileEnding}`
+			case '+page.svelte': return config.srcFolder + `/routes/+page.svelte`
+		}
+
+		throw Error('not implemented')
+	}
+
+	const doesFileOfTypeExist = async (fileType: FileType): Promise<boolean> => {
+		const files = fileType.endsWith('.svelte')
+			? [getPathForFileType(fileType)]
+			: [
+				getPathForFileType(fileType, 'js'),
+				getPathForFileType(fileType, 'ts'),
+			]
+
+		return (await Promise.all(files.map(file => doesPathExist(file)))).some((result) => result)
+	}
+
+	const filesTypesToCreate = [
+		`hooks.server.js`,
+		`[language].json`,
+		`+layout.server.js`,
+		`+layout.js`,
+		'+layout.svelte',
+		...(config.isStatic && config.languageInUrl ? [
+			`+page.js`,
+			'+page.svelte',
+		]satisfies FileType[] : [])
+	]satisfies FileType[]
+
 	// eslint-disable-next-line no-async-promise-executor
 	const results = await Promise.all(
-		files.map(
-			(file) =>
+		filesTypesToCreate.map(
+			(fileType) =>
 				// eslint-disable-next-line no-async-promise-executor
 				new Promise<boolean>(async (resolve) => {
-					const path = srcFolder + file
-
-					await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
-
-					let wasCreated = false
-					if (!(await doesPathExist(path))) {
-						const message = 'This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed).'
-						await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `// ${message}`)
-						wasCreated = true
+					if ((await doesFileOfTypeExist(fileType))) {
+						return resolve(false)
 					}
 
-					resolve(wasCreated)
+					const path = getPathForFileType(fileType)
+					await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
+					// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
+					const message = 'This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed).'
+					await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `// ${message}`)
+
+					resolve(true)
 				}),
 		),
 	)
+
+	// TODO: remove not needed files if config changes
 
 	// returns true if a new file was created
 	return results.some((result) => result)
@@ -174,20 +215,7 @@ export const plugin = () => {
 				await moveExistingRoutesIntoSubfolder(config)
 			}
 
-			// TODO: refactor
-			// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
-			// TODO: remove not needed files if config changes
-			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
-				'/hooks.server.js',
-				'/routes/inlang/[language].json/+server.js',
-				'/routes/+layout.server.js',
-				'/routes/+layout.js',
-				'/routes/+layout.svelte',
-				...(config.isStatic && config.languageInUrl ? [
-					'/routes/+page.js',
-					'/routes/+page.svelte',
-				] : [])
-			)
+			const hasCreatedANewFile = await createFilesIfNotPresent(config)
 
 			if (hasCreatedANewFile) {
 				setTimeout(() => {
