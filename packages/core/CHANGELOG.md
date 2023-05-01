@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.9
+
+### Patch Changes
+
+- f0cc15bb: add missing `PluginSetupFunction` export
+
 ## 0.7.1
 
 ### Patch Changes
