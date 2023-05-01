@@ -3026,6 +3026,24 @@ index 2e15158..83e9d89 100644
          writeback(print(node, options).code);
      });
  }
+diff --git a/node_modules/recast/package.json b/node_modules/recast/package.json
+index 83c5967..4473432 100644
+--- a/node_modules/recast/package.json
++++ b/node_modules/recast/package.json
+@@ -19,8 +19,12 @@
+     "url": "git://github.com/benjamn/recast.git"
+   },
+   "license": "MIT",
+-  "main": "main.js",
++  "type": "module",
++  "module": "main.js",
+   "types": "main.d.ts",
++  "exports": {
++    ".": "./main.js"
++  },
+   "scripts": {
+     "mocha": "test/run.sh",
+     "debug": "test/run.sh --inspect-brk",
 diff --git a/node_modules/recast/parsers/_babel_options.d.ts b/node_modules/recast/parsers/_babel_options.d.ts
 index 57bf4c6..76c9cf8 100644
 --- a/node_modules/recast/parsers/_babel_options.d.ts
