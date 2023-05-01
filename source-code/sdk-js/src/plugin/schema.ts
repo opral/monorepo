@@ -16,9 +16,7 @@ export const validateSdkConfig = (config: SdkConfig | undefined) =>
 
 export type SdkConfig = {
 	languageNegotiation: {
-		/* default: false */
 		strict?: boolean
-		/* default: [UrlNegotiator, staticOutput ? NavigatorNegotiator : AcceptLanguageNegotiator] */
 		strategies: [LanguageNegotiationStrategy, ...LanguageNegotiationStrategy[]]
 	}
 }
