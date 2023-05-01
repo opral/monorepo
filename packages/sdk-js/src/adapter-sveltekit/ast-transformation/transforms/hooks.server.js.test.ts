@@ -15,7 +15,15 @@ describe("transformHooksServerJs", () => {
 			isStatic: true,
 		}
 		const code = transformHooksServerJs(config, "")
-		expect(code).toMatchSnapshot()
+		expect(code).toMatchInlineSnapshot(`
+			"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { redirect } from \\"@sveltejs/kit\\";
+			import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
+			import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+			export const handle = initHandleWrapper({
+			  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
+			}).wrap(async ({ event, resolve }) => resolve(event));"
+		`)
 	})
 
 	it("isStatic", ({ expect }) => {
@@ -24,7 +32,15 @@ describe("transformHooksServerJs", () => {
 			isStatic: true,
 		}
 		const code = transformHooksServerJs(config, "")
-		expect(code).toMatchSnapshot()
+		expect(code).toMatchInlineSnapshot(`
+			"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { redirect } from \\"@sveltejs/kit\\";
+			import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
+			import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+			export const handle = initHandleWrapper({
+			  getLanguage: () => undefined
+			}).wrap(async ({ event, resolve }) => resolve(event));"
+		`)
 	})
 })
 
