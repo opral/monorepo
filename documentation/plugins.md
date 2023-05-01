@@ -8,11 +8,9 @@ description: Learn more about plugins and how to build them.
 
 **Plugins allow the customization of inlang's behavior by, for example, defining how resources should be parsed and serialized.**
 
-Plugins are one of the core pillers of the [infrastructure design principle](/documentation/design-principles) of inlang: Use external plugins to adapt inlang to your React, Svelte, Vue, iOS, Android, Flutter, etc. codebase(s).
-
 ## Finding plugins
 
-The [awesome inlang](https://github.com/inlang/awesome-inlang) repository contains a list of available (and awesome) plugins for inlang.
+The [ecosystem](https://github.com/inlang/ecosystem) repository contains a list of available (and awesome) plugins for inlang.
 
 ## Using plugins
 
@@ -22,33 +20,28 @@ Plugins can be imported via the `$import` [environment function](/documentation/
 // inlang.config.js
 
 export async function defineConfig(env) {
-	const plugin = await env.$import(
+	const { default: plugin } = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js",
 	)
-}
-```
-
-The next steps depent on the plugin. Read the README of the plugin you want to use. For example, [samuelstroschein/inlang-plugin-json](https://github.com/samuelstroschein/inlang-plugin-json) is configured as follows:
-
-```js
-// inlang.config.js
-
-export async function defineConfig(env) {
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js",
-	)
-	const pluginConfig = {
-		pathPattern: "./{language}.json",
-	}
 	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
-		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
+		plugins: [plugin()],
 	}
 }
 ```
 
 ## Writing plugins
 
-Read on how to write plugins in the [plugin template repository](https://github.com/inlang/plugin-template).
+Use the following template to create your plugin [plugin-template](https://github.com/inlang/plugin-template).
+
+```ts
+const myPlugin = createPlugin(() => {
+	return {
+		id: "inlang.plugin-template",
+		config: () => {
+			return {
+				languages: ["en", "de"],
+			}
+		},
+	}
+})
+```
