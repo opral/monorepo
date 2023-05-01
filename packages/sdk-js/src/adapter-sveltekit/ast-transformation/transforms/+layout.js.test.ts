@@ -1,50 +1,45 @@
 import { describe, expect, test } from "vitest"
-import type { TransformConfig } from '../config.js'
 import { transformLayoutJs } from "./+layout.js.js"
+import { baseTestConfig } from './test-helpers/config.js'
 
-describe("+layout.js.ts", () => {
-	const baseConfig = {
-		isStatic: true,
-		srcFolder: "",
-		rootRoutesFolder: "",
-		hasAlreadyBeenInitialized: true,
-		languageInUrl: false,
-		sourceFileName: "",
-		sourceMapName: "",
-		isTypeScriptProject: false,
-	} satisfies TransformConfig
-
-	const requiredImports = `import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
-import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
-import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared";
-import { browser } from "$app/environment";`
+describe("transformLayoutJs", () => {
 
 	test("Insert into empty file with no options", () => {
 		const code = ""
 		const config = {
-			...baseConfig,
+			...baseTestConfig,
 			languageInUrl: true,
 		}
 		const transformed = transformLayoutJs(config, code, true)
-		const expected = `${requiredImports}
-export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});`
-		expect(transformed).toBe(expected)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { browser } from \\"$app/environment\\";
+			export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
+		`)
 	})
 
 	test("Insert into empty file with options", () => {
 		const code = ""
 		const config = {
-			...baseConfig,
+			...baseTestConfig,
 			languageInUrl: false,
 		}
 		const transformed = transformLayoutJs(config, code, true)
-		const expected = `${requiredImports}
-export const load = initRootLayoutLoadWrapper({
-  initDetectors: browser
-  ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
-  : undefined
-}).wrap(async () => {});`
-		expect(transformed).toBe(expected)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { browser } from \\"$app/environment\\";
+			export const load = initRootLayoutLoadWrapper({
+			  initDetectors: browser
+			  ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
+			  : undefined
+			}).wrap(async () => {});"
+		`)
 	})
 
 	test("Wrap basic load function", () => {
@@ -52,13 +47,18 @@ export const load = initRootLayoutLoadWrapper({
 export const load = async () => {};
 		`
 		const config = {
-			...baseConfig,
+			...baseTestConfig,
 			languageInUrl: true,
 		}
 		const transformed = transformLayoutJs(config, code, true)
-		const expected = `${requiredImports}
-export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});`
-		expect(transformed).toBe(expected)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { browser } from \\"$app/environment\\";
+			export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
+		`)
 	})
 
 	test("Wrap basic load function and merge incomplete imports", () => {
@@ -67,12 +67,17 @@ import { browser } from "$app/environment";
 export const load = async () => {};
 		`
 		const config = {
-			...baseConfig,
+			...baseTestConfig,
 			languageInUrl: true,
 		}
 		const transformed = transformLayoutJs(config, code, true)
-		const expected = `${requiredImports}
-export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});`
-		expect(transformed).toBe(expected)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+			import { browser } from \\"$app/environment\\";
+			export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
+		`)
 	})
 })
