@@ -1,7 +1,7 @@
 import { loadFile, type ProxifiedModule } from "magicast"
 import { writeFile } from "node:fs/promises"
 import { stat } from "node:fs/promises"
-import { initConfig } from '../../plugin/config.js'
+import { initConfig } from '../../config/config.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 

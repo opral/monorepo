@@ -1,7 +1,7 @@
 import { SdkConfig as SdkSettings, validateSdkConfig } from './schema.js'
 import type { InlangConfig } from '@inlang/core/config'
 import type { InlangEnvironment } from '@inlang/core/environment'
-import { createPlugin } from "@inlang/core/plugin";
+import { createPlugin } from "@inlang/core/plugin"
 
 // ------------------------------------------------------------------------------------------------
 
