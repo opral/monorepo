@@ -1,9 +1,9 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import type { ViteDevServer, Plugin } from "vite"
-import { TransformConfig, getConfig, resetConfig } from './config.js'
-import { doesPathExist } from './config.js'
-import { transformCode } from './transforms/index.js'
+import { TransformConfig, getConfig, resetConfig } from "./config.js"
+import { doesPathExist } from "./config.js"
+import { transformCode } from "./transforms/index.js"
 
 type FileType =
 	| "hooks.server.js"
@@ -28,7 +28,7 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 	const path = id.replace(config.srcFolder, "")
 
 	const dir = dirname(path)
-	const root = dir.endsWith('/routes')
+	const root = dir.endsWith("/routes")
 
 	if (path === "/hooks.server.js" || path === "/hooks.server.ts") {
 		return {
@@ -147,9 +147,9 @@ let viteServer: ViteDevServer | undefined
 
 export const plugin = () => {
 	return {
-		name: 'vite-plugin-inlang-sdk-js-sveltekit',
+		name: "vite-plugin-inlang-sdk-js-sveltekit",
 		// makes sure we run before vite-plugin-svelte
-		enforce: 'pre',
+		enforce: "pre",
 
 		configureServer(server) {
 			viteServer = server as unknown as ViteDevServer
@@ -160,8 +160,8 @@ export const plugin = () => {
 				ssr: {
 					// makes sure that `@inlang/sdk-js` get's transformed by vite in order
 					// to be able to use `SvelteKit`'s `$app` aliases
-					noExternal: ['@inlang/sdk-js'],
-				}
+					noExternal: ["@inlang/sdk-js"],
+				},
 			}
 		},
 
@@ -174,16 +174,16 @@ export const plugin = () => {
 			}
 
 			// TODO: refactor
-			const hasCreatedANewFile = await createFilesIfNotPresent(config.srcFolder,
-				'/hooks.server.js',
-				'/routes/inlang/[language].json/+server.js',
-				'/routes/+layout.server.js',
-				'/routes/+layout.js',
-				'/routes/+layout.svelte',
-				...(config.isStatic && config.languageInUrl ? [
-					'/routes/+page.js',
-					'/routes/+page.svelte',
-				] : [])
+			const hasCreatedANewFile = await createFilesIfNotPresent(
+				config.srcFolder,
+				"/hooks.server.js",
+				"/routes/inlang/[language].json/+server.js",
+				"/routes/+layout.server.js",
+				"/routes/+layout.js",
+				"/routes/+layout.svelte",
+				...(config.isStatic && config.languageInUrl
+					? ["/routes/+page.js", "/routes/+page.svelte"]
+					: []),
 			)
 
 			if (hasCreatedANewFile && viteServer) {
@@ -223,5 +223,5 @@ export const plugin = () => {
 				},
 			*/
 		},
-	}  satisfies Plugin
+	} satisfies Plugin
 }

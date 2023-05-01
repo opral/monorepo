@@ -44,13 +44,11 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	]
 
 	if (n.Program.check(ast.$ast)) {
-		const hasLoad =
-			findAstJs(
-				ast.$ast,
-				loadMatchers,
-				({ node }) => n.Identifier.check(node),
-				() => true,
-			)[0] === true
+		const findLoad =
+			findAstJs(ast.$ast, loadMatchers, (node) =>
+				n.Identifier.check(node) ? () => true : undefined,
+			)[0] ?? []
+		const hasLoad = findLoad.length > 0
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
 		const emptyLoadExportAst = parseModule(emptyLoadFunction)
@@ -63,17 +61,17 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAstJs(
-			ast.$ast,
-			loadMatchers,
-			({ node }) => n.Identifier.check(node),
-			({ parent }) => {
-				if (n.VariableDeclarator.check(parent) && parent.init) {
-					wrapperDeclarationAst.arguments.push(parent.init)
-					parent.init = wrapperDeclarationAst
-				}
-			},
-		)
+		findAstJs(ast.$ast, loadMatchers, (node) => {
+			return n.Identifier.check(node)
+				? (meta) => {
+						const { parent } = meta.get(node) ?? {}
+						if (n.VariableDeclarator.check(parent) && parent.init) {
+							wrapperDeclarationAst.arguments.push(parent.init)
+							parent.init = wrapperDeclarationAst
+						}
+				  }
+				: undefined
+		})
 	}
 	return generateCode(ast).code
 }
