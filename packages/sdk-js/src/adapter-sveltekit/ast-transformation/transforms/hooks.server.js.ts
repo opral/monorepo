@@ -50,13 +50,9 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	]
 
 	if (n.Program.check(ast.$ast)) {
-		const hasHandle =
-			findAstJs(
-				ast.$ast,
-				handleMatchers,
-				({ node }) => n.Identifier.check(node),
-				() => true,
-			)[0] === true
+		const hasHandle = findAstJs(ast.$ast, handleMatchers, (node) =>
+			n.Identifier.check(node) ? () => true : undefined,
+		)[0]?.every((v) => v === true)
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
 		const emptyHandleExportAst = parseModule(emptyHandleFunction)
@@ -69,16 +65,16 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 			b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAstJs(
-			ast.$ast,
-			handleMatchers,
-			({ node }) => n.Identifier.check(node),
-			({ parent }) => {
-				if (n.VariableDeclarator.check(parent) && parent.init) {
-					wrapperDeclarationAst.arguments.push(parent.init)
-					parent.init = wrapperDeclarationAst
-				}
-			},
+		findAstJs(ast.$ast, handleMatchers, (node) =>
+			n.Identifier.check(node)
+				? (meta) => {
+						const { parent } = meta.get(node) ?? {}
+						if (n.VariableDeclarator.check(parent) && parent.init) {
+							wrapperDeclarationAst.arguments.push(parent.init)
+							parent.init = wrapperDeclarationAst
+						}
+				  }
+				: undefined,
 		)
 	}
 	return generateCode(ast).code

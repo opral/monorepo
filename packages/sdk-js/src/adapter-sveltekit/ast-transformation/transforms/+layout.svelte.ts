@@ -1,5 +1,5 @@
-import type { TransformConfig } from '../config.js'
-import { transformSvelte } from './*.svelte.js'
+import type { TransformConfig } from "../config.js"
+import { transformSvelte } from "./*.svelte.js"
 
 export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) {
@@ -28,7 +28,8 @@ $: {
 	addRuntimeToContext(getRuntimeFromData(data))
 	;({ i, language } = getRuntimeFromContext())
 }
-` : `
+`
+		: `
 $: if (browser && $language) {
 	document.body.parentElement?.setAttribute("lang", $language)
 	// TODO: only if localStorageDetector
@@ -41,7 +42,8 @@ $: if (browser && $language) {
 {#key language}
 	<slot />
 {/key}
-` : `
+`
+		: `
 {#if $language}
 	<slot />
 {/if}
@@ -54,9 +56,9 @@ $: if (browser && $language) {
 	import { browser } from "$app/environment"
 
 	export let data
-
 	addRuntimeToContext(getRuntimeFromData(data))
 	let { i, language } = getRuntimeFromContext()
+	
 	${initCode}
 </script>
 ${template}
@@ -66,9 +68,17 @@ ${template}
 // TODO: transform
 export const wrapRootLayoutSvelte = (config: TransformConfig, code: string) => {
 	// TODO: more meaningful error messages
-	throw new Error('currently not supported')
+	throw new Error("currently not supported")
 }
 
 // ------------------------------------------------------------------------------------------------
 
 const transformGenericLayoutSvelte = transformSvelte
+
+// TODO @benjaminpreiss
+// 1. Remove "export let data"
+// 2. Insert imports
+// 3. Remove all imports from "@inlang/sdk-js"
+// 4. Insert "export let data;addRuntimeToContext(getRuntimeFromData(data));let { i, language } = getRuntimeFromContext();" immediately before either data, or any import from "@inlang/sdk-js" are referenced the first time
+// 5. Also insert the initCode at exactly that position
+// 6. Wrap the existing markup with template (Where <slot/> is the existing markup)
