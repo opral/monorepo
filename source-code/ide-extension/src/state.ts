@@ -1,5 +1,5 @@
 import type { Resource } from "@inlang/core/ast"
-import type { Config as InlangConfig } from "@inlang/core/config"
+import type { InlangConfig } from "@inlang/core/config"
 
 /**
  * The state of the vscode extension.

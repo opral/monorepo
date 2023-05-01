@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import type { EnvironmentFunctions } from "@inlang/core/config"
+import type { InlangEnvironment } from "@inlang/core/environment"
 
 /**
  * Creates a new mapper between vscode and inlang file systems.
@@ -11,7 +11,7 @@ import type { EnvironmentFunctions } from "@inlang/core/config"
 export function createFileSystemMapper(
 	target: vscode.FileSystem,
 	base: vscode.Uri,
-): EnvironmentFunctions["$fs"] {
+): InlangEnvironment["$fs"] {
 	return {
 		readdir: async (path) => {
 			// @ts-ignore

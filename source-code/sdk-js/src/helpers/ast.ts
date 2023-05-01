@@ -1,10 +1,9 @@
 import type { Node } from "estree"
 import type { Result } from "@inlang/core/utilities"
 import { walk as jsWalk, type SyncHandler } from "estree-walker"
-import { walk as svelteWalk, type parse } from "svelte/compiler"
+import { walk as svelteWalk } from "svelte/compiler"
+import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
 import type { types } from "recast"
-
-type Ast = ReturnType<typeof parse>
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"

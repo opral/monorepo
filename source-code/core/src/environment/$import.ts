@@ -73,14 +73,12 @@ async function $import(
 	// http imports yet like VSCode.
 	const moduleAsText = uri.startsWith("http")
 		? await (await _fetch(uri)).text()
-		: // @ts-ignore - Uses node under the hood which sometimes takes the encoding as a second argument
-		  ((await environment.fs.readFile(normalizePath(uri), "utf-8")) as string)
+		: await environment.fs.readFile(normalizePath(uri), { encoding: "utf-8" })
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 	try {
 		return await import(/* @vite-ignore */ moduleWithMimeType)
 	} catch (error) {
-		// @ts-expect-error - TS doesn't know that the error is an Error
-		let message = `Error while importing ${uri}: ${error?.message ?? "Unknown error"}`
+		let message = `Error while importing ${uri}: ${(error as Error)?.message ?? "Unknown error"}`
 		if (error instanceof SyntaxError && uri.includes("jsdelivr")) {
 			message += dedent`\n\n
 Are you sure that the file exists on JSDelivr?

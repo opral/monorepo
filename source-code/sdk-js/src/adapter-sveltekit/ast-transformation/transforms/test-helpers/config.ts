@@ -9,4 +9,5 @@ export const baseTestConfig: TransformConfig = {
 	sourceFileName: "",
 	sourceMapName: "",
 	tsCompilerOptions: {},
+	isTypeScriptProject: false
 }

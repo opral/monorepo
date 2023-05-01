@@ -3,7 +3,7 @@ import { Configuration, CreateChatCompletionRequest, OpenAIApi } from "openai"
 import { privateEnv } from "@inlang/env-variables"
 import { telemetryNode } from "@inlang/telemetry"
 import { createMemoryFs, fromJson } from "@inlang-git/fs"
-import { mockEnvironment, validateConfigFile } from "@inlang/core/test"
+import { mockEnvironment, testConfigFile } from "@inlang/core/test"
 import { dedent } from "ts-dedent"
 import { prompt, promptVersion, temperature } from "./generateConfigFile.prompt.js"
 
@@ -96,7 +96,7 @@ Explanation: The maximum prompt for the OpenAI API is 2000 characters. The curre
 			temperature: temperature,
 		})
 		const configFile = response.data.choices.at(-1)!.message!.content
-		const [, exception] = await validateConfigFile({ file: configFile, env })
+		const [, exception] = await testConfigFile({ file: configFile, env })
 		if (!exception) {
 			return [
 				{ configFile, iteration, chatHistory: response.data.choices.map((c) => c.message!) },
