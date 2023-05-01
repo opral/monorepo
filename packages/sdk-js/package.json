@@ -13,7 +13,7 @@
 		"vite"
 	],
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -21,7 +21,7 @@
 		".": "./dist/core/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
-		"./config": "./dist/config/index.js",
+		"./plugin": "./dist/plugin/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
@@ -47,6 +47,9 @@
 			],
 			"adapter-sveltekit/shared": [
 				"./dist/adapter-sveltekit/utils/shared/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
 			]
 		}
 	},

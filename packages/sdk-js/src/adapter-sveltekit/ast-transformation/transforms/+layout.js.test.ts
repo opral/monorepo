@@ -12,11 +12,14 @@ describe("+layout.js.ts", () => {
 		tsCompilerOptions: {},
 		sourceFileName: "",
 		sourceMapName: "",
+		isTypeScriptProject: false,
 	} satisfies TransformConfig
+
 	const requiredImports = `import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
 import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { browser } from "$app/environment";`
+
 	test("Insert into empty file with no options", () => {
 		const code = ""
 		const config = {
@@ -28,6 +31,7 @@ import { browser } from "$app/environment";`
 export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});`
 		expect(transformed).toBe(expected)
 	})
+
 	test("Insert into empty file with options", () => {
 		const code = ""
 		const config = {
@@ -43,6 +47,7 @@ export const load = initRootLayoutLoadWrapper({
 }).wrap(async () => {});`
 		expect(transformed).toBe(expected)
 	})
+
 	test("Wrap basic load function", () => {
 		const code = `
 export const load = async () => {};
@@ -56,6 +61,7 @@ export const load = async () => {};
 export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});`
 		expect(transformed).toBe(expected)
 	})
+
 	test("Wrap basic load function and merge incomplete imports", () => {
 		const code = `
 import { browser } from "$app/environment";

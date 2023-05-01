@@ -4,10 +4,11 @@ import { setState } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
-import { DefineConfig, initialize$import } from "@inlang/core/config"
+import { InlangConfigModule, setupConfig } from "@inlang/core/config"
 import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
+import { initialize$import } from "@inlang/core/environment"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -61,9 +62,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// initialize inlang core and resources for current workspace
 	const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri)
-	const $import = initialize$import({ fs: fileSystemMapper, fetch })
-	const module: { defineConfig: DefineConfig } = await import(closestConfigPath)
-	const config = await module.defineConfig({ $fs: fileSystemMapper, $import })
+
+	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
+
+	const module = (await import(closestConfigPath)) as InlangConfigModule
+
+	const config = await setupConfig({ module, env })
+
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })
 		setState({

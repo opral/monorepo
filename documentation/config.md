@@ -8,7 +8,7 @@ description: The reference for the config.
 
 **The config powers all apps, plugins, and automations. One config file to cover all localization needs (see [design principles](/documentation/design-principles)).**
 
-The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `defineConfig`. Importing external modules is only permitted via the `$import` [environment function](/documentation/environment-functions) within the scope of the exported `defineConfig` function. Read the [plugin](/documentation/plugins) documenation for more information on how to use external modules.
+The config must be named `inlang.config.js`, exist at the root of a repository, and export an async function named `defineConfig`. Importing external modules is only permitted via the `$import` [environment function](/documentation/inlang-environment) within the scope of the exported `defineConfig` function. Read the [plugin](/documentation/plugins) documenation for more information on how to use external modules.
 
 ## Example
 
