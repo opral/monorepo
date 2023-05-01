@@ -1,9 +1,7 @@
 import { loadFile, type ProxifiedModule } from "magicast"
-import { readFile, writeFile } from "node:fs/promises"
+import { writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
-import type { CompilerOptions } from "typescript"
-import { parse } from "json5"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
@@ -13,7 +11,6 @@ export type TransformConfig = {
 	srcFolder: string
 	rootRoutesFolder: string
 	hasAlreadyBeenInitialized: boolean
-	tsCompilerOptions: CompilerOptions
 	sourceFileName?: string
 	sourceMapName?: string
 	isTypeScriptProject: boolean
@@ -35,10 +32,6 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const inlangConfig = await initConfig()
 
-		const tsConfig = await readFile("tsconfig.json", "utf-8")
-		const tsCompilerOptions = parse(tsConfig).compilerOptions
-		// TODO get JSON 5 parser to parse typescript config and only pass property compilerOptions
-
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
 		const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
@@ -55,7 +48,6 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			rootRoutesFolder,
 			hasAlreadyBeenInitialized,
 			isTypeScriptProject,
-			tsCompilerOptions,
 		})
 	})
 }

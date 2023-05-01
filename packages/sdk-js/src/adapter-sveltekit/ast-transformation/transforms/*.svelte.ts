@@ -55,7 +55,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 
 	const processed = await preprocess(code, {
 		script: async (options) => {
-			const script = await typescript({ compilerOptions: config.tsCompilerOptions }).script({
+			const script = await typescript({}).script({
 				...options,
 				filename: "",
 			})

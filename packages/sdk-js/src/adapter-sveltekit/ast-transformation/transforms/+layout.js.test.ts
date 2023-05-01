@@ -9,7 +9,6 @@ describe("+layout.js.ts", () => {
 		rootRoutesFolder: "",
 		hasAlreadyBeenInitialized: true,
 		languageInUrl: false,
-		tsCompilerOptions: {},
 		sourceFileName: "",
 		sourceMapName: "",
 		isTypeScriptProject: false,

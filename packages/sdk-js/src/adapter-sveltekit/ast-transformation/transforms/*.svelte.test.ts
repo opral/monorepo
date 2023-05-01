@@ -3,7 +3,6 @@ import { transformSvelte } from "./*.svelte.js"
 import { baseTestConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
 import { readFileSync } from "node:fs"
-import { ModuleResolutionKind } from 'typescript'
 
 const testSvelteFile = readFileSync(__dirname + "/test-helpers/test.svelte").toString()
 describe("transformSvelte", () => {
@@ -11,17 +10,6 @@ describe("transformSvelte", () => {
 		const config: TransformConfig = {
 			...baseTestConfig,
 			languageInUrl: false,
-			tsCompilerOptions: {
-				allowJs: true,
-				checkJs: true,
-				esModuleInterop: true,
-				forceConsistentCasingInFileNames: true,
-				resolveJsonModule: true,
-				skipLibCheck: true,
-				sourceMap: true,
-				strict: true,
-				moduleResolution: ModuleResolutionKind.NodeNext,
-			},
 			sourceFileName: "test.svelte",
 			sourceMapName: "test.svelte.js",
 		}
