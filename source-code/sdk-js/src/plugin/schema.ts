@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 // TODO: rewrite all types to zodObjects
-export const zLanguageNegotiationStrategy = z.any()
+const zLanguageNegotiationStrategy = z.any()
 
-export const zConfig = z.object({
+const zConfig = z.object({
 	languageNegotiation: z.object({
 		strict: z.boolean().optional().default(false),
 		strategies: z.array(zLanguageNegotiationStrategy)

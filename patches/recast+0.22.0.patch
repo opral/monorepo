@@ -1,0 +1,3322 @@
+diff --git a/node_modules/recast/lib/comments.js b/node_modules/recast/lib/comments.js
+index 68827c3..9f47b2c 100644
+--- a/node_modules/recast/lib/comments.js
++++ b/node_modules/recast/lib/comments.js
+@@ -1,14 +1,10 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.printComments = exports.attach = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var types = tslib_1.__importStar(require("ast-types"));
++import assert from "assert";
++import * as types from "ast-types";
+ var n = types.namedTypes;
+ var isArray = types.builtInTypes.array;
+ var isObject = types.builtInTypes.object;
+-var lines_1 = require("./lines");
+-var util_1 = require("./util");
++import { Lines, concat } from "./lines.js";
++import { comparePos, fixFaultyLocations } from "./util.js";
+ var childNodesCache = new WeakMap();
+ // TODO Move a non-caching implementation of this function into ast-types,
+ // and implement a caching wrapper function here.
+@@ -20,7 +16,7 @@ function getSortedChildNodes(node, lines, resultArray) {
+     // are fixed by this utility function. Specifically, if it decides to
+     // set node.loc to null, indicating that the node's .loc information
+     // is unreliable, then we don't want to add node to the resultArray.
+-    util_1.fixFaultyLocations(node, lines);
++    fixFaultyLocations(node, lines);
+     if (resultArray) {
+         if (n.Node.check(node) && n.SourceLocation.check(node.loc)) {
+             // This reverse insertion sort almost always takes constant
+@@ -31,7 +27,7 @@ function getSortedChildNodes(node, lines, resultArray) {
+                 var child = resultArray[i];
+                 if (child &&
+                     child.loc &&
+-                    util_1.comparePos(child.loc.end, node.loc.start) <= 0) {
++                    comparePos(child.loc.end, node.loc.start) <= 0) {
+                     break;
+                 }
+             }
+@@ -76,13 +72,13 @@ function decorateComment(node, comment, lines) {
+     while (typeof right === "number" && left < right) {
+         var middle = (left + right) >> 1;
+         var child = childNodes[middle];
+-        if (util_1.comparePos(child.loc.start, comment.loc.start) <= 0 &&
+-            util_1.comparePos(comment.loc.end, child.loc.end) <= 0) {
++        if (comparePos(child.loc.start, comment.loc.start) <= 0 &&
++            comparePos(comment.loc.end, child.loc.end) <= 0) {
+             // The comment is completely contained by this child node.
+             decorateComment((comment.enclosingNode = child), comment, lines);
+             return; // Abandon the binary search at this level.
+         }
+-        if (util_1.comparePos(child.loc.end, comment.loc.start) <= 0) {
++        if (comparePos(child.loc.end, comment.loc.start) <= 0) {
+             // This child node falls completely before the comment.
+             // Because we will never consider this node or any nodes
+             // before it again, this node must be the closest preceding
+@@ -91,7 +87,7 @@ function decorateComment(node, comment, lines) {
+             left = middle + 1;
+             continue;
+         }
+-        if (util_1.comparePos(comment.loc.end, child.loc.start) <= 0) {
++        if (comparePos(comment.loc.end, child.loc.start) <= 0) {
+             // This child node falls completely after the comment.
+             // Because we will never consider this node or any nodes after
+             // it again, this node must be the closest following node we
+@@ -109,7 +105,7 @@ function decorateComment(node, comment, lines) {
+         comment.followingNode = followingNode;
+     }
+ }
+-function attach(comments, ast, lines) {
++export function attach(comments, ast, lines) {
+     if (!isArray.check(comments)) {
+         return;
+     }
+@@ -124,7 +120,7 @@ function attach(comments, ast, lines) {
+             var tieCount = tiesToBreak.length;
+             if (tieCount > 0) {
+                 var lastTie = tiesToBreak[tieCount - 1];
+-                assert_1.default.strictEqual(lastTie.precedingNode === comment.precedingNode, lastTie.followingNode === comment.followingNode);
++                assert.strictEqual(lastTie.precedingNode === comment.precedingNode, lastTie.followingNode === comment.followingNode);
+                 if (lastTie.followingNode !== comment.followingNode) {
+                     breakTies(tiesToBreak, lines);
+                 }
+@@ -161,7 +157,6 @@ function attach(comments, ast, lines) {
+         delete comment.followingNode;
+     });
+ }
+-exports.attach = attach;
+ function breakTies(tiesToBreak, lines) {
+     var tieCount = tiesToBreak.length;
+     if (tieCount === 0) {
+@@ -178,8 +173,8 @@ function breakTies(tiesToBreak, lines) {
+     var comment;
+     for (; indexOfFirstLeadingComment > 0; --indexOfFirstLeadingComment) {
+         comment = tiesToBreak[indexOfFirstLeadingComment - 1];
+-        assert_1.default.strictEqual(comment.precedingNode, pn);
+-        assert_1.default.strictEqual(comment.followingNode, fn);
++        assert.strictEqual(comment.precedingNode, pn);
++        assert.strictEqual(comment.followingNode, fn);
+         var gap = lines.sliceString(comment.loc.end, gapEndPos);
+         if (/\S/.test(gap)) {
+             // The gap string contained something other than whitespace.
+@@ -235,7 +230,7 @@ function printLeadingComment(commentPath, print) {
+         // want to bring any trailing spaces along.
+         parts.push("\n");
+     }
+-    else if (lines instanceof lines_1.Lines) {
++    else if (lines instanceof Lines) {
+         var trailingSpace = lines.slice(loc.end, lines.skipSpaces(loc.end) || lines.lastPos());
+         if (trailingSpace.length === 1) {
+             // If the trailing space contains no newlines, then we want to
+@@ -251,7 +246,7 @@ function printLeadingComment(commentPath, print) {
+     else {
+         parts.push("\n");
+     }
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ function printTrailingComment(commentPath, print) {
+     var comment = commentPath.getValue(commentPath);
+@@ -259,7 +254,7 @@ function printTrailingComment(commentPath, print) {
+     var loc = comment.loc;
+     var lines = loc && loc.lines;
+     var parts = [];
+-    if (lines instanceof lines_1.Lines) {
++    if (lines instanceof Lines) {
+         var fromPos = lines.skipSpaces(loc.start, true) || lines.firstPos();
+         var leadingSpace = lines.slice(fromPos, loc.start);
+         if (leadingSpace.length === 1) {
+@@ -274,9 +269,9 @@ function printTrailingComment(commentPath, print) {
+         }
+     }
+     parts.push(print(commentPath));
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+-function printComments(path, print) {
++export function printComments(path, print) {
+     var value = path.getValue();
+     var innerLines = print(path);
+     var comments = n.Node.check(value) && types.getFieldValue(value, "comments");
+@@ -301,6 +296,5 @@ function printComments(path, print) {
+         }
+     }, "comments");
+     leadingParts.push.apply(leadingParts, trailingParts);
+-    return lines_1.concat(leadingParts);
++    return concat(leadingParts);
+ }
+-exports.printComments = printComments;
+diff --git a/node_modules/recast/lib/fast-path.js b/node_modules/recast/lib/fast-path.js
+index aaa70b0..2d3f2f6 100644
+--- a/node_modules/recast/lib/fast-path.js
++++ b/node_modules/recast/lib/fast-path.js
+@@ -1,9 +1,6 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var types = tslib_1.__importStar(require("ast-types"));
+-var util = tslib_1.__importStar(require("./util"));
++import assert from "assert";
++import * as types from "ast-types";
++import * as util from "./util.js";
+ var n = types.namedTypes;
+ var isArray = types.builtInTypes.array;
+ var isNumber = types.builtInTypes.number;
+@@ -27,7 +24,7 @@ var PRECEDENCE = {};
+     });
+ });
+ var FastPath = function FastPath(value) {
+-    assert_1.default.ok(this instanceof FastPath);
++    assert.ok(this instanceof FastPath);
+     this.stack = [value];
+ };
+ var FPp = FastPath.prototype;
+@@ -313,7 +310,7 @@ FPp.needsParens = function (assumeExpressionContext) {
+                         return true;
+                     }
+                     if (pp === np && name === "right") {
+-                        assert_1.default.strictEqual(parent.right, node);
++                        assert.strictEqual(parent.right, node);
+                         return true;
+                     }
+                     break;
+@@ -481,19 +478,19 @@ FPp.firstInStatement = function () {
+         if (n.BlockStatement.check(parent) &&
+             parentName === "body" &&
+             childName === 0) {
+-            assert_1.default.strictEqual(parent.body[0], child);
++            assert.strictEqual(parent.body[0], child);
+             return true;
+         }
+         if (n.ExpressionStatement.check(parent) && childName === "expression") {
+-            assert_1.default.strictEqual(parent.expression, child);
++            assert.strictEqual(parent.expression, child);
+             return true;
+         }
+         if (n.AssignmentExpression.check(parent) && childName === "left") {
+-            assert_1.default.strictEqual(parent.left, child);
++            assert.strictEqual(parent.left, child);
+             return true;
+         }
+         if (n.ArrowFunctionExpression.check(parent) && childName === "body") {
+-            assert_1.default.strictEqual(parent.body, child);
++            assert.strictEqual(parent.body, child);
+             return true;
+         }
+         // s[i + 1] and s[i + 2] represent the array between the parent
+@@ -501,33 +498,33 @@ FPp.firstInStatement = function () {
+         if (n.SequenceExpression.check(parent) &&
+             s[i + 1] === "expressions" &&
+             childName === 0) {
+-            assert_1.default.strictEqual(parent.expressions[0], child);
++            assert.strictEqual(parent.expressions[0], child);
+             continue;
+         }
+         if (n.CallExpression.check(parent) && childName === "callee") {
+-            assert_1.default.strictEqual(parent.callee, child);
++            assert.strictEqual(parent.callee, child);
+             continue;
+         }
+         if (n.MemberExpression.check(parent) && childName === "object") {
+-            assert_1.default.strictEqual(parent.object, child);
++            assert.strictEqual(parent.object, child);
+             continue;
+         }
+         if (n.ConditionalExpression.check(parent) && childName === "test") {
+-            assert_1.default.strictEqual(parent.test, child);
++            assert.strictEqual(parent.test, child);
+             continue;
+         }
+         if (isBinary(parent) && childName === "left") {
+-            assert_1.default.strictEqual(parent.left, child);
++            assert.strictEqual(parent.left, child);
+             continue;
+         }
+         if (n.UnaryExpression.check(parent) &&
+             !parent.prefix &&
+             childName === "argument") {
+-            assert_1.default.strictEqual(parent.argument, child);
++            assert.strictEqual(parent.argument, child);
+             continue;
+         }
+         return false;
+     }
+     return true;
+ };
+-exports.default = FastPath;
++export default FastPath;
+diff --git a/node_modules/recast/lib/lines.d.ts b/node_modules/recast/lib/lines.d.ts
+index 6d705fd..a6c2ca0 100644
+--- a/node_modules/recast/lib/lines.d.ts
++++ b/node_modules/recast/lib/lines.d.ts
+@@ -1,7 +1,7 @@
+-import { Options } from "./options";
++import { Options } from "./options.js";
+ import { namedTypes } from "ast-types";
+-declare type Pos = namedTypes.Position;
+-declare type LineInfo = {
++type Pos = namedTypes.Position;
++type LineInfo = {
+     readonly line: string;
+     readonly indent: number;
+     readonly locked: boolean;
+diff --git a/node_modules/recast/lib/lines.js b/node_modules/recast/lib/lines.js
+index 67abe87..853ca24 100644
+--- a/node_modules/recast/lib/lines.js
++++ b/node_modules/recast/lib/lines.js
+@@ -1,12 +1,9 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.concat = exports.fromString = exports.countSpaces = exports.Lines = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var source_map_1 = tslib_1.__importDefault(require("source-map"));
+-var options_1 = require("./options");
+-var util_1 = require("./util");
+-var mapping_1 = tslib_1.__importDefault(require("./mapping"));
++import { __assign } from "tslib";
++import assert from "assert";
++import sourceMap from "source-map";
++import { normalize as normalizeOptions } from "./options.js";
++import { comparePos } from "./util.js";
++import Mapping from "./mapping.js";
+ var Lines = /** @class */ (function () {
+     function Lines(infos, sourceFileName) {
+         if (sourceFileName === void 0) { sourceFileName = null; }
+@@ -14,11 +11,11 @@ var Lines = /** @class */ (function () {
+         this.mappings = [];
+         this.cachedSourceMap = null;
+         this.cachedTabWidth = void 0;
+-        assert_1.default.ok(infos.length > 0);
++        assert.ok(infos.length > 0);
+         this.length = infos.length;
+         this.name = sourceFileName || null;
+         if (this.name) {
+-            this.mappings.push(new mapping_1.default(this, {
++            this.mappings.push(new Mapping(this, {
+                 start: this.firstPos(),
+                 end: this.lastPos(),
+             }));
+@@ -50,18 +47,18 @@ var Lines = /** @class */ (function () {
+             // modification.
+             return updateJSON(targetLines.cachedSourceMap.toJSON());
+         }
+-        var smg = new source_map_1.default.SourceMapGenerator(updateJSON());
++        var smg = new sourceMap.SourceMapGenerator(updateJSON());
+         var sourcesToContents = {};
+         targetLines.mappings.forEach(function (mapping) {
+             var sourceCursor = mapping.sourceLines.skipSpaces(mapping.sourceLoc.start) ||
+                 mapping.sourceLines.lastPos();
+             var targetCursor = targetLines.skipSpaces(mapping.targetLoc.start) ||
+                 targetLines.lastPos();
+-            while (util_1.comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
+-                util_1.comparePos(targetCursor, mapping.targetLoc.end) < 0) {
++            while (comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
++                comparePos(targetCursor, mapping.targetLoc.end) < 0) {
+                 var sourceChar = mapping.sourceLines.charAt(sourceCursor);
+                 var targetChar = targetLines.charAt(targetCursor);
+-                assert_1.default.strictEqual(sourceChar, targetChar);
++                assert.strictEqual(sourceChar, targetChar);
+                 var sourceName = mapping.sourceLines.name;
+                 // Add mappings one character at a time for maximum resolution.
+                 smg.addMapping({
+@@ -82,9 +79,9 @@ var Lines = /** @class */ (function () {
+         return smg.toJSON();
+     };
+     Lines.prototype.bootstrapCharAt = function (pos) {
+-        assert_1.default.strictEqual(typeof pos, "object");
+-        assert_1.default.strictEqual(typeof pos.line, "number");
+-        assert_1.default.strictEqual(typeof pos.column, "number");
++        assert.strictEqual(typeof pos, "object");
++        assert.strictEqual(typeof pos.line, "number");
++        assert.strictEqual(typeof pos.column, "number");
+         var line = pos.line, column = pos.column, strings = this.toString().split(lineTerminatorSeqExp), string = strings[line - 1];
+         if (typeof string === "undefined")
+             return "";
+@@ -95,9 +92,9 @@ var Lines = /** @class */ (function () {
+         return string.charAt(column);
+     };
+     Lines.prototype.charAt = function (pos) {
+-        assert_1.default.strictEqual(typeof pos, "object");
+-        assert_1.default.strictEqual(typeof pos.line, "number");
+-        assert_1.default.strictEqual(typeof pos.column, "number");
++        assert.strictEqual(typeof pos, "object");
++        assert.strictEqual(typeof pos.line, "number");
++        assert.strictEqual(typeof pos.column, "number");
+         var line = pos.line, column = pos.column, secret = this, infos = secret.infos, info = infos[line - 1], c = column;
+         if (typeof info === "undefined" || c < 0)
+             return "";
+@@ -114,18 +111,18 @@ var Lines = /** @class */ (function () {
+     Lines.prototype.stripMargin = function (width, skipFirstLine) {
+         if (width === 0)
+             return this;
+-        assert_1.default.ok(width > 0, "negative margin: " + width);
++        assert.ok(width > 0, "negative margin: " + width);
+         if (skipFirstLine && this.length === 1)
+             return this;
+         var lines = new Lines(this.infos.map(function (info, i) {
+             if (info.line && (i > 0 || !skipFirstLine)) {
+-                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: Math.max(0, info.indent - width) });
++                info = __assign(__assign({}, info), { indent: Math.max(0, info.indent - width) });
+             }
+             return info;
+         }));
+         if (this.mappings.length > 0) {
+             var newMappings_1 = lines.mappings;
+-            assert_1.default.strictEqual(newMappings_1.length, 0);
++            assert.strictEqual(newMappings_1.length, 0);
+             this.mappings.forEach(function (mapping) {
+                 newMappings_1.push(mapping.indent(width, skipFirstLine, true));
+             });
+@@ -138,13 +135,13 @@ var Lines = /** @class */ (function () {
+         }
+         var lines = new Lines(this.infos.map(function (info) {
+             if (info.line && !info.locked) {
+-                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: info.indent + by });
++                info = __assign(__assign({}, info), { indent: info.indent + by });
+             }
+             return info;
+         }));
+         if (this.mappings.length > 0) {
+             var newMappings_2 = lines.mappings;
+-            assert_1.default.strictEqual(newMappings_2.length, 0);
++            assert.strictEqual(newMappings_2.length, 0);
+             this.mappings.forEach(function (mapping) {
+                 newMappings_2.push(mapping.indent(by));
+             });
+@@ -160,13 +157,13 @@ var Lines = /** @class */ (function () {
+         }
+         var lines = new Lines(this.infos.map(function (info, i) {
+             if (i > 0 && info.line && !info.locked) {
+-                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: info.indent + by });
++                info = __assign(__assign({}, info), { indent: info.indent + by });
+             }
+             return info;
+         }));
+         if (this.mappings.length > 0) {
+             var newMappings_3 = lines.mappings;
+-            assert_1.default.strictEqual(newMappings_3.length, 0);
++            assert.strictEqual(newMappings_3.length, 0);
+             this.mappings.forEach(function (mapping) {
+                 newMappings_3.push(mapping.indent(by, true));
+             });
+@@ -177,10 +174,10 @@ var Lines = /** @class */ (function () {
+         if (this.length < 2) {
+             return this;
+         }
+-        return new Lines(this.infos.map(function (info, i) { return (tslib_1.__assign(tslib_1.__assign({}, info), { locked: i > 0 })); }));
++        return new Lines(this.infos.map(function (info, i) { return (__assign(__assign({}, info), { locked: i > 0 })); }));
+     };
+     Lines.prototype.getIndentAt = function (line) {
+-        assert_1.default.ok(line >= 1, "no line " + line + " (line numbers start from 1)");
++        assert.ok(line >= 1, "no line " + line + " (line numbers start from 1)");
+         return Math.max(this.infos[line - 1].indent, 0);
+     };
+     Lines.prototype.guessTabWidth = function () {
+@@ -380,14 +377,14 @@ var Lines = /** @class */ (function () {
+             sliced[0] = sliceInfo(sliced[0], start.column, end.column);
+         }
+         else {
+-            assert_1.default.ok(start.line < end.line);
++            assert.ok(start.line < end.line);
+             sliced[0] = sliceInfo(sliced[0], start.column);
+             sliced.push(sliceInfo(sliced.pop(), 0, end.column));
+         }
+         var lines = new Lines(sliced);
+         if (this.mappings.length > 0) {
+             var newMappings_4 = lines.mappings;
+-            assert_1.default.strictEqual(newMappings_4.length, 0);
++            assert.strictEqual(newMappings_4.length, 0);
+             this.mappings.forEach(function (mapping) {
+                 var sliced = mapping.slice(this, start, end);
+                 if (sliced) {
+@@ -403,7 +400,7 @@ var Lines = /** @class */ (function () {
+     Lines.prototype.sliceString = function (start, end, options) {
+         if (start === void 0) { start = this.firstPos(); }
+         if (end === void 0) { end = this.lastPos(); }
+-        var _a = options_1.normalize(options), tabWidth = _a.tabWidth, useTabs = _a.useTabs, reuseWhitespace = _a.reuseWhitespace, lineTerminator = _a.lineTerminator;
++        var _a = normalizeOptions(options), tabWidth = _a.tabWidth, useTabs = _a.useTabs, reuseWhitespace = _a.reuseWhitespace, lineTerminator = _a.lineTerminator;
+         var parts = [];
+         for (var line = start.line; line <= end.line; ++line) {
+             var info = this.infos[line - 1];
+@@ -483,7 +480,7 @@ var Lines = /** @class */ (function () {
+             }
+             linesOrNull.infos.forEach(function (info, i) {
+                 if (!prevInfo || i > 0) {
+-                    prevInfo = tslib_1.__assign({}, info);
++                    prevInfo = __assign({}, info);
+                     infos.push(prevInfo);
+                 }
+             });
+@@ -521,24 +518,24 @@ var Lines = /** @class */ (function () {
+         }
+         var list = [this];
+         list.push.apply(list, args);
+-        assert_1.default.strictEqual(list.length, args.length + 1);
++        assert.strictEqual(list.length, args.length + 1);
+         return emptyLines.join(list);
+     };
+     return Lines;
+ }());
+-exports.Lines = Lines;
++export { Lines };
+ var fromStringCache = {};
+ var hasOwn = fromStringCache.hasOwnProperty;
+ var maxCacheKeyLen = 10;
+-function countSpaces(spaces, tabWidth) {
++export function countSpaces(spaces, tabWidth) {
+     var count = 0;
+     var len = spaces.length;
+     for (var i = 0; i < len; ++i) {
+         switch (spaces.charCodeAt(i)) {
+             case 9: {
+                 // '\t'
+-                assert_1.default.strictEqual(typeof tabWidth, "number");
+-                assert_1.default.ok(tabWidth > 0);
++                assert.strictEqual(typeof tabWidth, "number");
++                assert.ok(tabWidth > 0);
+                 var next = Math.ceil(count / tabWidth) * tabWidth;
+                 if (next === count) {
+                     count += tabWidth;
+@@ -563,21 +560,20 @@ function countSpaces(spaces, tabWidth) {
+     }
+     return count;
+ }
+-exports.countSpaces = countSpaces;
+ var leadingSpaceExp = /^\s*/;
+ // As specified here: http://www.ecma-international.org/ecma-262/6.0/#sec-line-terminators
+ var lineTerminatorSeqExp = /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
+ /**
+  * @param {Object} options - Options object that configures printing.
+  */
+-function fromString(string, options) {
++export function fromString(string, options) {
+     if (string instanceof Lines)
+         return string;
+     string += "";
+     var tabWidth = options && options.tabWidth;
+     var tabless = string.indexOf("\t") < 0;
+     var cacheable = !options && tabless && string.length <= maxCacheKeyLen;
+-    assert_1.default.ok(tabWidth || tabless, "No tab width specified but encountered tabs in string\n" + string);
++    assert.ok(tabWidth || tabless, "No tab width specified but encountered tabs in string\n" + string);
+     if (cacheable && hasOwn.call(fromStringCache, string))
+         return fromStringCache[string];
+     var lines = new Lines(string.split(lineTerminatorSeqExp).map(function (line) {
+@@ -591,12 +587,11 @@ function fromString(string, options) {
+             sliceStart: spaces.length,
+             sliceEnd: line.length,
+         };
+-    }), options_1.normalize(options).sourceFileName);
++    }), normalizeOptions(options).sourceFileName);
+     if (cacheable)
+         fromStringCache[string] = lines;
+     return lines;
+ }
+-exports.fromString = fromString;
+ function isOnlyWhitespace(string) {
+     return !/\S/.test(string);
+ }
+@@ -628,9 +623,9 @@ function sliceInfo(info, startCol, endCol) {
+         indent = 0;
+         sliceStart += startCol;
+     }
+-    assert_1.default.ok(indent >= 0);
+-    assert_1.default.ok(sliceStart <= sliceEnd);
+-    assert_1.default.strictEqual(lineLength, indent + sliceEnd - sliceStart);
++    assert.ok(indent >= 0);
++    assert.ok(sliceStart <= sliceEnd);
++    assert.strictEqual(lineLength, indent + sliceEnd - sliceStart);
+     if (info.indent === indent &&
+         info.sliceStart === sliceStart &&
+         info.sliceEnd === sliceEnd) {
+@@ -645,10 +640,9 @@ function sliceInfo(info, startCol, endCol) {
+         sliceEnd: sliceEnd,
+     };
+ }
+-function concat(elements) {
++export function concat(elements) {
+     return emptyLines.join(elements);
+ }
+-exports.concat = concat;
+ // The emptyLines object needs to be created all the way down here so that
+ // Lines.prototype will be fully populated.
+ var emptyLines = fromString("");
+diff --git a/node_modules/recast/lib/mapping.d.ts b/node_modules/recast/lib/mapping.d.ts
+index 35c39b4..03ad709 100644
+--- a/node_modules/recast/lib/mapping.d.ts
++++ b/node_modules/recast/lib/mapping.d.ts
+@@ -1,7 +1,7 @@
+ import { namedTypes } from "ast-types";
+-import { Lines } from "./lines";
+-declare type Pos = namedTypes.Position;
+-declare type Loc = namedTypes.SourceLocation;
++import { Lines } from "./lines.js";
++type Pos = namedTypes.Position;
++type Loc = namedTypes.SourceLocation;
+ export default class Mapping {
+     sourceLines: Lines;
+     sourceLoc: Loc;
+diff --git a/node_modules/recast/lib/mapping.js b/node_modules/recast/lib/mapping.js
+index 4dc08d6..efc560c 100644
+--- a/node_modules/recast/lib/mapping.js
++++ b/node_modules/recast/lib/mapping.js
+@@ -1,8 +1,5 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var util_1 = require("./util");
++import assert from "assert";
++import { comparePos } from "./util.js";
+ var Mapping = /** @class */ (function () {
+     function Mapping(sourceLines, sourceLoc, targetLoc) {
+         if (targetLoc === void 0) { targetLoc = sourceLoc; }
+@@ -23,12 +20,12 @@ var Mapping = /** @class */ (function () {
+                 targetToPos = end;
+             }
+             else {
+-                assert_1.default.strictEqual(name, "start");
++                assert.strictEqual(name, "start");
+             }
+             return skipChars(sourceLines, sourceFromPos, lines, targetFromPos, targetToPos);
+         }
+-        if (util_1.comparePos(start, targetLoc.start) <= 0) {
+-            if (util_1.comparePos(targetLoc.end, end) <= 0) {
++        if (comparePos(start, targetLoc.start) <= 0) {
++            if (comparePos(targetLoc.end, end) <= 0) {
+                 targetLoc = {
+                     start: subtractPos(targetLoc.start, start.line, start.column),
+                     end: subtractPos(targetLoc.end, start.line, start.column),
+@@ -36,7 +33,7 @@ var Mapping = /** @class */ (function () {
+                 // The sourceLoc can stay the same because the contents of the
+                 // targetLoc have not changed.
+             }
+-            else if (util_1.comparePos(end, targetLoc.start) <= 0) {
++            else if (comparePos(end, targetLoc.start) <= 0) {
+                 return null;
+             }
+             else {
+@@ -51,10 +48,10 @@ var Mapping = /** @class */ (function () {
+             }
+         }
+         else {
+-            if (util_1.comparePos(targetLoc.end, start) <= 0) {
++            if (comparePos(targetLoc.end, start) <= 0) {
+                 return null;
+             }
+-            if (util_1.comparePos(targetLoc.end, end) <= 0) {
++            if (comparePos(targetLoc.end, end) <= 0) {
+                 sourceLoc = {
+                     start: skip("start"),
+                     end: sourceLoc.end,
+@@ -125,7 +122,7 @@ var Mapping = /** @class */ (function () {
+     };
+     return Mapping;
+ }());
+-exports.default = Mapping;
++export default Mapping;
+ function addPos(toPos, line, column) {
+     return {
+         line: toPos.line + line - 1,
+@@ -139,7 +136,7 @@ function subtractPos(fromPos, line, column) {
+     };
+ }
+ function skipChars(sourceLines, sourceFromPos, targetLines, targetFromPos, targetToPos) {
+-    var targetComparison = util_1.comparePos(targetFromPos, targetToPos);
++    var targetComparison = comparePos(targetFromPos, targetToPos);
+     if (targetComparison === 0) {
+         // Trivial case: no characters to skip.
+         return sourceFromPos;
+@@ -161,12 +158,12 @@ function skipChars(sourceLines, sourceFromPos, targetLines, targetFromPos, targe
+             targetCursor.column = 0;
+         }
+         else {
+-            assert_1.default.strictEqual(lineDiff, 0);
++            assert.strictEqual(lineDiff, 0);
+         }
+-        while (util_1.comparePos(targetCursor, targetToPos) < 0 &&
++        while (comparePos(targetCursor, targetToPos) < 0 &&
+             targetLines.nextPos(targetCursor, true)) {
+-            assert_1.default.ok(sourceLines.nextPos(sourceCursor, true));
+-            assert_1.default.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
++            assert.ok(sourceLines.nextPos(sourceCursor, true));
++            assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
+         }
+     }
+     else {
+@@ -185,12 +182,12 @@ function skipChars(sourceLines, sourceFromPos, targetLines, targetFromPos, targe
+             targetCursor.column = targetLines.getLineLength(targetCursor.line);
+         }
+         else {
+-            assert_1.default.strictEqual(lineDiff, 0);
++            assert.strictEqual(lineDiff, 0);
+         }
+-        while (util_1.comparePos(targetToPos, targetCursor) < 0 &&
++        while (comparePos(targetToPos, targetCursor) < 0 &&
+             targetLines.prevPos(targetCursor, true)) {
+-            assert_1.default.ok(sourceLines.prevPos(sourceCursor, true));
+-            assert_1.default.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
++            assert.ok(sourceLines.prevPos(sourceCursor, true));
++            assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
+         }
+     }
+     return sourceCursor;
+diff --git a/node_modules/recast/lib/options.d.ts b/node_modules/recast/lib/options.d.ts
+index 484997d..61488a9 100644
+--- a/node_modules/recast/lib/options.d.ts
++++ b/node_modules/recast/lib/options.d.ts
+@@ -1,4 +1,3 @@
+-import { Omit } from "ast-types/types";
+ /**
+  * All Recast API functions take second parameter with configuration options,
+  * documented in options.js
+@@ -143,6 +142,6 @@ interface DeprecatedOptions {
+     /** @deprecated */
+     esprima?: any;
+ }
+-export declare type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
++export type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
+ export declare function normalize(opts?: Options): NormalizedOptions;
+ export {};
+diff --git a/node_modules/recast/lib/options.js b/node_modules/recast/lib/options.js
+index 7ea04d8..fb91745 100644
+--- a/node_modules/recast/lib/options.js
++++ b/node_modules/recast/lib/options.js
+@@ -1,13 +1,10 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.normalize = void 0;
+-var util_1 = require("./util");
++import { getLineTerminator } from "./util.js";
+ var defaults = {
+-    parser: require("../parsers/esprima"),
++    parser: import("../parsers/esprima.js"),
+     tabWidth: 4,
+     useTabs: false,
+     reuseWhitespace: true,
+-    lineTerminator: util_1.getLineTerminator(),
++    lineTerminator: getLineTerminator(),
+     wrapColumn: 74,
+     sourceFileName: null,
+     sourceMapName: null,
+@@ -25,7 +22,7 @@ var defaults = {
+ };
+ var hasOwn = defaults.hasOwnProperty;
+ // Copy options and fill in default values.
+-function normalize(opts) {
++export function normalize(opts) {
+     var options = opts || defaults;
+     function get(key) {
+         return hasOwn.call(options, key) ? options[key] : defaults[key];
+@@ -52,4 +49,3 @@ function normalize(opts) {
+         tokens: !!get("tokens"),
+     };
+ }
+-exports.normalize = normalize;
+diff --git a/node_modules/recast/lib/parser.d.ts b/node_modules/recast/lib/parser.d.ts
+index 6f1d6df..3a5795d 100644
+--- a/node_modules/recast/lib/parser.d.ts
++++ b/node_modules/recast/lib/parser.d.ts
+@@ -1,2 +1,2 @@
+-import { Options } from "./options";
++import { Options } from "./options.js";
+ export declare function parse(source: string, options?: Partial<Options>): any;
+diff --git a/node_modules/recast/lib/parser.js b/node_modules/recast/lib/parser.js
+index c099c5b..beddc34 100644
+--- a/node_modules/recast/lib/parser.js
++++ b/node_modules/recast/lib/parser.js
+@@ -1,19 +1,15 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var types = tslib_1.__importStar(require("ast-types"));
++import assert from "assert";
++import * as types from "ast-types";
+ var b = types.builders;
+ var isObject = types.builtInTypes.object;
+ var isArray = types.builtInTypes.array;
+-var options_1 = require("./options");
+-var lines_1 = require("./lines");
+-var comments_1 = require("./comments");
+-var util = tslib_1.__importStar(require("./util"));
+-function parse(source, options) {
+-    options = options_1.normalize(options);
+-    var lines = lines_1.fromString(source, options);
++import { normalize as normalizeOptions } from "./options.js";
++import { fromString } from "./lines.js";
++import { attach as attachComments } from "./comments.js";
++import * as util from "./util.js";
++export function parse(source, options) {
++    options = normalizeOptions(options);
++    var lines = fromString(source, options);
+     var sourceWithoutTabs = lines.toString({
+         tabWidth: options.tabWidth,
+         reuseWhitespace: false,
+@@ -104,14 +100,13 @@ function parse(source, options) {
+     program.loc.end = trueProgramLoc.end;
+     // Passing file.program here instead of just file means that initial
+     // comments will be attached to program.body[0] instead of program.
+-    comments_1.attach(comments, program.body.length ? file.program : file, lines);
++    attachComments(comments, program.body.length ? file.program : file, lines);
+     // Return a copy of the original AST so that any changes made may be
+     // compared to the original.
+     return new TreeCopier(lines, tokens).copy(file);
+ }
+-exports.parse = parse;
+ var TreeCopier = function TreeCopier(lines, tokens) {
+-    assert_1.default.ok(this instanceof TreeCopier);
++    assert.ok(this instanceof TreeCopier);
+     this.lines = lines;
+     this.tokens = tokens;
+     this.startTokenIndex = 0;
+diff --git a/node_modules/recast/lib/patcher.js b/node_modules/recast/lib/patcher.js
+index 67c11a8..3c55d19 100644
+--- a/node_modules/recast/lib/patcher.js
++++ b/node_modules/recast/lib/patcher.js
+@@ -1,23 +1,19 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.getReprinter = exports.Patcher = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var linesModule = tslib_1.__importStar(require("./lines"));
+-var types = tslib_1.__importStar(require("ast-types"));
++import assert from "assert";
++import * as linesModule from "./lines.js";
++import * as types from "ast-types";
+ var Printable = types.namedTypes.Printable;
+ var Expression = types.namedTypes.Expression;
+ var ReturnStatement = types.namedTypes.ReturnStatement;
+ var SourceLocation = types.namedTypes.SourceLocation;
+-var util_1 = require("./util");
+-var fast_path_1 = tslib_1.__importDefault(require("./fast-path"));
++import { comparePos, copyPos, getUnionOfKeys } from "./util.js";
++import FastPath from "./fast-path.js";
+ var isObject = types.builtInTypes.object;
+ var isArray = types.builtInTypes.array;
+ var isString = types.builtInTypes.string;
+ var riskyAdjoiningCharExp = /[0-9a-z_$]/i;
+ var Patcher = function Patcher(lines) {
+-    assert_1.default.ok(this instanceof Patcher);
+-    assert_1.default.ok(lines instanceof linesModule.Lines);
++    assert.ok(this instanceof Patcher);
++    assert.ok(lines instanceof linesModule.Lines);
+     var self = this, replacements = [];
+     self.replace = function (loc, lines) {
+         if (isString.check(lines))
+@@ -36,13 +32,13 @@ var Patcher = function Patcher(lines) {
+         };
+         var sliceFrom = loc.start, toConcat = [];
+         function pushSlice(from, to) {
+-            assert_1.default.ok(util_1.comparePos(from, to) <= 0);
++            assert.ok(comparePos(from, to) <= 0);
+             toConcat.push(lines.slice(from, to));
+         }
+         replacements
+-            .sort(function (a, b) { return util_1.comparePos(a.start, b.start); })
++            .sort(function (a, b) { return comparePos(a.start, b.start); })
+             .forEach(function (rep) {
+-            if (util_1.comparePos(sliceFrom, rep.start) > 0) {
++            if (comparePos(sliceFrom, rep.start) > 0) {
+                 // Ignore nested replacement ranges.
+             }
+             else {
+@@ -55,7 +51,7 @@ var Patcher = function Patcher(lines) {
+         return linesModule.concat(toConcat);
+     };
+ };
+-exports.Patcher = Patcher;
++export { Patcher };
+ var Pp = Patcher.prototype;
+ Pp.tryToReprintComments = function (newNode, oldNode, print) {
+     var patcher = this;
+@@ -63,8 +59,8 @@ Pp.tryToReprintComments = function (newNode, oldNode, print) {
+         // We were (vacuously) able to reprint all the comments!
+         return true;
+     }
+-    var newPath = fast_path_1.default.from(newNode);
+-    var oldPath = fast_path_1.default.from(oldNode);
++    var newPath = FastPath.from(newNode);
++    var oldPath = FastPath.from(oldNode);
+     newPath.stack.push("comments", getSurroundingComments(newNode));
+     oldPath.stack.push("comments", getSurroundingComments(oldNode));
+     var reprints = [];
+@@ -74,7 +70,7 @@ Pp.tryToReprintComments = function (newNode, oldNode, print) {
+     if (ableToReprintComments && reprints.length > 0) {
+         reprints.forEach(function (reprint) {
+             var oldComment = reprint.oldPath.getValue();
+-            assert_1.default.ok(oldComment.leading || oldComment.trailing);
++            assert.ok(oldComment.leading || oldComment.trailing);
+             patcher.replace(oldComment.loc, 
+             // Comments can't have .comments, so it doesn't matter whether we
+             // print with comments or without.
+@@ -121,8 +117,8 @@ Pp.deleteComments = function (node) {
+         }
+     });
+ };
+-function getReprinter(path) {
+-    assert_1.default.ok(path instanceof fast_path_1.default);
++export function getReprinter(path) {
++    assert.ok(path instanceof FastPath);
+     // Make sure that this path refers specifically to a Node, rather than
+     // some non-Node subproperty of a Node.
+     var node = path.getValue();
+@@ -182,12 +178,11 @@ function getReprinter(path) {
+         return patchedLines;
+     };
+ }
+-exports.getReprinter = getReprinter;
+ // If the last character before oldLoc and the first character of newLines
+ // are both identifier characters, they must be separated by a space,
+ // otherwise they will most likely get fused together into a single token.
+ function needsLeadingSpace(oldLines, oldLoc, newLines) {
+-    var posBeforeOldLoc = util_1.copyPos(oldLoc.start);
++    var posBeforeOldLoc = copyPos(oldLoc.start);
+     // The character just before the location occupied by oldNode.
+     var charBeforeOldLoc = oldLines.prevPos(posBeforeOldLoc) && oldLines.charAt(posBeforeOldLoc);
+     // First character of the reprinted node.
+@@ -216,11 +211,11 @@ function findReprints(newPath, reprints) {
+     Printable.assert(newNode);
+     var oldNode = newNode.original;
+     Printable.assert(oldNode);
+-    assert_1.default.deepEqual(reprints, []);
++    assert.deepEqual(reprints, []);
+     if (newNode.type !== oldNode.type) {
+         return false;
+     }
+-    var oldPath = new fast_path_1.default(oldNode);
++    var oldPath = new FastPath(oldNode);
+     var canReprint = findChildReprints(newPath, oldPath, reprints);
+     if (!canReprint) {
+         // Make absolutely sure the calling code does not attempt to reprint
+@@ -351,7 +346,7 @@ function findChildReprints(newPath, oldPath, reprints) {
+     if (newPath.needsParens() && !oldPath.hasParens()) {
+         return false;
+     }
+-    var keys = util_1.getUnionOfKeys(oldNode, newNode);
++    var keys = getUnionOfKeys(oldNode, newNode);
+     if (oldNode.type === "File" || newNode.type === "File") {
+         // Don't bother traversing file.tokens, an often very large array
+         // returned by Babylon, and useless for our purposes.
+diff --git a/node_modules/recast/lib/printer.js b/node_modules/recast/lib/printer.js
+index 34d63ab..f07a51e 100644
+--- a/node_modules/recast/lib/printer.js
++++ b/node_modules/recast/lib/printer.js
+@@ -1,20 +1,17 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.Printer = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var comments_1 = require("./comments");
+-var lines_1 = require("./lines");
+-var options_1 = require("./options");
+-var patcher_1 = require("./patcher");
+-var types = tslib_1.__importStar(require("ast-types"));
++import { __spreadArray } from "tslib";
++import assert from "assert";
++import * as types from "ast-types";
++import { printComments } from "./comments.js";
++import FastPath from "./fast-path.js";
++import { concat, fromString } from "./lines.js";
++import { normalize as normalizeOptions } from "./options.js";
++import { getReprinter } from "./patcher.js";
++import * as util from "./util.js";
+ var namedTypes = types.namedTypes;
+ var isString = types.builtInTypes.string;
+ var isObject = types.builtInTypes.object;
+-var fast_path_1 = tslib_1.__importDefault(require("./fast-path"));
+-var util = tslib_1.__importStar(require("./util"));
+ var PrintResult = function PrintResult(code, sourceMap) {
+-    assert_1.default.ok(this instanceof PrintResult);
++    assert.ok(this instanceof PrintResult);
+     isString.assert(code);
+     this.code = code;
+     if (sourceMap) {
+@@ -35,9 +32,9 @@ PRp.toString = function () {
+ };
+ var emptyPrintResult = new PrintResult("");
+ var Printer = function Printer(config) {
+-    assert_1.default.ok(this instanceof Printer);
++    assert.ok(this instanceof Printer);
+     var explicitTabWidth = config && config.tabWidth;
+-    config = options_1.normalize(config);
++    config = normalizeOptions(config);
+     // It's common for client code to pass the same options into both
+     // recast.parse and recast.print, but the Printer doesn't need (and
+     // can be confused by) config.sourceFileName, so we null it out.
+@@ -49,10 +46,10 @@ var Printer = function Printer(config) {
+         return function (path) { return print(path, options); };
+     }
+     function print(path, options) {
+-        assert_1.default.ok(path instanceof fast_path_1.default);
++        assert.ok(path instanceof FastPath);
+         options = options || {};
+         if (options.includeComments) {
+-            return comments_1.printComments(path, makePrintFunctionWith(options, {
++            return printComments(path, makePrintFunctionWith(options, {
+                 includeComments: false,
+             }));
+         }
+@@ -63,7 +60,7 @@ var Printer = function Printer(config) {
+                 config.tabWidth = loc.lines.guessTabWidth();
+             }
+         }
+-        var reprinter = patcher_1.getReprinter(path);
++        var reprinter = getReprinter(path);
+         var lines = reprinter
+             ? // Since the print function that we pass to the reprinter will
+                 // be used to print "new" nodes, it's tempting to think we
+@@ -85,7 +82,7 @@ var Printer = function Printer(config) {
+         if (!ast) {
+             return emptyPrintResult;
+         }
+-        var lines = print(fast_path_1.default.from(ast), {
++        var lines = print(FastPath.from(ast), {
+             includeComments: true,
+             avoidRootParens: false,
+         });
+@@ -97,14 +94,14 @@ var Printer = function Printer(config) {
+         }
+         // Print the entire AST generically.
+         function printGenerically(path) {
+-            return comments_1.printComments(path, function (path) {
++            return printComments(path, function (path) {
+                 return genericPrint(path, config, {
+                     includeComments: true,
+                     avoidRootParens: false,
+                 }, printGenerically);
+             });
+         }
+-        var path = fast_path_1.default.from(ast);
++        var path = FastPath.from(ast);
+         var oldReuseWhitespace = config.reuseWhitespace;
+         // Do not reuse whitespace (or anything else, for that matter)
+         // when printing generically.
+@@ -115,9 +112,9 @@ var Printer = function Printer(config) {
+         return pr;
+     };
+ };
+-exports.Printer = Printer;
++export { Printer };
+ function genericPrint(path, config, options, printPath) {
+-    assert_1.default.ok(path instanceof fast_path_1.default);
++    assert.ok(path instanceof FastPath);
+     var node = path.getValue();
+     var parts = [];
+     var linesWithoutParens = genericPrintNoParens(path, config, printPath);
+@@ -143,7 +140,7 @@ function genericPrint(path, config, options, printPath) {
+     if (shouldAddParens) {
+         parts.push(")");
+     }
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ // Note that the `options` parameter of this function is what other
+ // functions in this file call the `config` object (that is, the
+@@ -152,10 +149,10 @@ function genericPrint(path, config, options, printPath) {
+ function genericPrintNoParens(path, options, print) {
+     var n = path.getValue();
+     if (!n) {
+-        return lines_1.fromString("");
++        return fromString("");
+     }
+     if (typeof n === "string") {
+-        return lines_1.fromString(n, options);
++        return fromString(n, options);
+     }
+     namedTypes.Printable.assert(n);
+     var parts = [];
+@@ -173,24 +170,24 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(path.call(print, "interpreter"));
+             }
+             parts.push(path.call(function (bodyPath) { return printStatementSequence(bodyPath, options, print); }, "body"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "Noop": // Babel extension.
+         case "EmptyStatement":
+-            return lines_1.fromString("");
++            return fromString("");
+         case "ExpressionStatement":
+-            return lines_1.concat([path.call(print, "expression"), ";"]);
++            return concat([path.call(print, "expression"), ";"]);
+         case "ParenthesizedExpression": // Babel extension.
+-            return lines_1.concat(["(", path.call(print, "expression"), ")"]);
++            return concat(["(", path.call(print, "expression"), ")"]);
+         case "BinaryExpression":
+         case "LogicalExpression":
+         case "AssignmentExpression":
+-            return lines_1.fromString(" ").join([
++            return fromString(" ").join([
+                 path.call(print, "left"),
+                 n.operator,
+                 path.call(print, "right"),
+             ]);
+         case "AssignmentPattern":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "left"),
+                 " = ",
+                 path.call(print, "right"),
+@@ -208,12 +205,12 @@ function genericPrintNoParens(path, options, print) {
+             else {
+                 parts.push(optional ? "?." : ".", property);
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ChainExpression":
+             return path.call(print, "expression");
+         case "MetaProperty":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "meta"),
+                 ".",
+                 path.call(print, "property"),
+@@ -223,12 +220,12 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(path.call(print, "object"));
+             }
+             parts.push("::", path.call(print, "callee"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "Path":
+-            return lines_1.fromString(".").join(n.body);
++            return fromString(".").join(n.body);
+         case "Identifier":
+-            return lines_1.concat([
+-                lines_1.fromString(n.name, options),
++            return concat([
++                fromString(n.name, options),
+                 n.optional ? "?" : "",
+                 path.call(print, "typeAnnotation"),
+             ]);
+@@ -239,7 +236,7 @@ function genericPrintNoParens(path, options, print) {
+         case "SpreadPropertyPattern":
+         case "ObjectTypeSpreadProperty":
+         case "RestElement":
+-            return lines_1.concat([
++            return concat([
+                 "...",
+                 path.call(print, "argument"),
+                 path.call(print, "typeAnnotation"),
+@@ -268,7 +265,7 @@ function genericPrintNoParens(path, options, print) {
+             if (n.body) {
+                 parts.push(" ", path.call(print, "body"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ArrowFunctionExpression":
+             if (n.async) {
+                 parts.push("async ");
+@@ -288,7 +285,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("(", printFunctionParams(path, options, print), ")", path.call(print, "returnType"));
+             }
+             parts.push(" => ", path.call(print, "body"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "MethodDefinition":
+             return printMethod(path, options, print);
+         case "YieldExpression":
+@@ -297,16 +294,16 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("*");
+             if (n.argument)
+                 parts.push(" ", path.call(print, "argument"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "AwaitExpression":
+             parts.push("await");
+             if (n.all)
+                 parts.push("*");
+             if (n.argument)
+                 parts.push(" ", path.call(print, "argument"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ModuleExpression":
+-            return lines_1.concat([
++            return concat([
+                 "module {\n",
+                 path.call(print, "body").indent(options.tabWidth),
+                 "\n}",
+@@ -314,13 +311,13 @@ function genericPrintNoParens(path, options, print) {
+         case "ModuleDeclaration":
+             parts.push("module", path.call(print, "id"));
+             if (n.source) {
+-                assert_1.default.ok(!n.body);
++                assert.ok(!n.body);
+                 parts.push("from", path.call(print, "source"));
+             }
+             else {
+                 parts.push(path.call(print, "body"));
+             }
+-            return lines_1.fromString(" ").join(parts);
++            return fromString(" ").join(parts);
+         case "ImportSpecifier":
+             if (n.importKind && n.importKind !== "value") {
+                 parts.push(n.importKind + " ");
+@@ -337,7 +334,7 @@ function genericPrintNoParens(path, options, print) {
+                     parts.push(" as ", path.call(print, "name"));
+                 }
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ExportSpecifier":
+             if (n.local) {
+                 parts.push(path.call(print, "local"));
+@@ -351,9 +348,9 @@ function genericPrintNoParens(path, options, print) {
+                     parts.push(" as ", path.call(print, "name"));
+                 }
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ExportBatchSpecifier":
+-            return lines_1.fromString("*");
++            return fromString("*");
+         case "ImportNamespaceSpecifier":
+             parts.push("* as ");
+             if (n.local) {
+@@ -362,14 +359,14 @@ function genericPrintNoParens(path, options, print) {
+             else if (n.id) {
+                 parts.push(path.call(print, "id"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ImportDefaultSpecifier":
+             if (n.local) {
+                 return path.call(print, "local");
+             }
+             return path.call(print, "id");
+         case "TSExportAssignment":
+-            return lines_1.concat(["export = ", path.call(print, "expression")]);
++            return concat(["export = ", path.call(print, "expression")]);
+         case "ExportDeclaration":
+         case "ExportDefaultDeclaration":
+         case "ExportNamedDeclaration":
+@@ -380,22 +377,22 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" as ", path.call(print, "exported"));
+             }
+             parts.push(" from ", path.call(print, "source"), ";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSNamespaceExportDeclaration":
+             parts.push("export as namespace ", path.call(print, "id"));
+-            return maybeAddSemicolon(lines_1.concat(parts));
++            return maybeAddSemicolon(concat(parts));
+         case "ExportNamespaceSpecifier":
+-            return lines_1.concat(["* as ", path.call(print, "exported")]);
++            return concat(["* as ", path.call(print, "exported")]);
+         case "ExportDefaultSpecifier":
+             return path.call(print, "exported");
+         case "Import":
+-            return lines_1.fromString("import", options);
++            return fromString("import", options);
+         // Recast and ast-types currently support dynamic import(...) using
+         // either this dedicated ImportExpression type or a CallExpression
+         // whose callee has type Import.
+         // https://github.com/benjamn/ast-types/pull/365#issuecomment-605214486
+         case "ImportExpression":
+-            return lines_1.concat(["import(", path.call(print, "source"), ")"]);
++            return concat(["import(", path.call(print, "source"), ")"]);
+         case "ImportDeclaration": {
+             parts.push("import ");
+             if (n.importKind && n.importKind !== "value") {
+@@ -421,10 +418,10 @@ function genericPrintNoParens(path, options, print) {
+                     parts.push(lines);
+                 });
+                 if (bracedSpecifiers_1.length > 0) {
+-                    var lines = lines_1.fromString(", ").join(bracedSpecifiers_1);
++                    var lines = fromString(", ").join(bracedSpecifiers_1);
+                     if (lines.getLineLength(1) > options.wrapColumn) {
+-                        lines = lines_1.concat([
+-                            lines_1.fromString(",\n").join(bracedSpecifiers_1).indent(options.tabWidth),
++                        lines = concat([
++                            fromString(",\n").join(bracedSpecifiers_1).indent(options.tabWidth),
+                             ",",
+                         ]);
+                     }
+@@ -444,10 +441,10 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" from ");
+             }
+             parts.push(path.call(print, "source"), maybePrintImportAssertions(path, options, print), ";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ImportAttribute":
+-            return lines_1.concat([path.call(print, "key"), ": ", path.call(print, "value")]);
++            return concat([path.call(print, "key"), ": ", path.call(print, "value")]);
+         case "StaticBlock":
+             parts.push("static ");
+         // Intentionally fall through to BlockStatement below.
+@@ -456,7 +453,7 @@ function genericPrintNoParens(path, options, print) {
+             if (naked_1.isEmpty()) {
+                 if (!n.directives || n.directives.length === 0) {
+                     parts.push("{}");
+-                    return lines_1.concat(parts);
++                    return concat(parts);
+                 }
+             }
+             parts.push("{\n");
+@@ -468,7 +465,7 @@ function genericPrintNoParens(path, options, print) {
+             }
+             parts.push(naked_1.indent(options.tabWidth));
+             parts.push("\n}");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ReturnStatement": {
+             parts.push("return");
+@@ -485,7 +482,7 @@ function genericPrintNoParens(path, options, print) {
+                 }
+             }
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "CallExpression":
+         case "OptionalCallExpression":
+@@ -503,7 +500,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("?.");
+             }
+             parts.push(printArgumentsList(path, options, print));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "RecordExpression":
+             parts.push("#");
+         // Intentionally fall through to printing the object literal...
+@@ -565,7 +562,7 @@ function genericPrintNoParens(path, options, print) {
+                 }, field);
+             });
+             if (n.inexact) {
+-                var line = lines_1.fromString("...", options);
++                var line = fromString("...", options);
+                 if (oneLine_1) {
+                     if (len_1 > 0) {
+                         parts.push(separator_1, " ");
+@@ -585,10 +582,10 @@ function genericPrintNoParens(path, options, print) {
+             if (n.typeAnnotation) {
+                 parts.push(path.call(print, "typeAnnotation"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "PropertyPattern":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "key"),
+                 ": ",
+                 path.call(print, "pattern"),
+@@ -612,7 +609,7 @@ function genericPrintNoParens(path, options, print) {
+             if (!n.shorthand || n.key.name !== n.value.name) {
+                 parts.push(": ", path.call(print, "value"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ClassMethod": // Babel 6
+         case "ObjectMethod": // Babel 6
+@@ -620,9 +617,9 @@ function genericPrintNoParens(path, options, print) {
+         case "TSDeclareMethod":
+             return printMethod(path, options, print);
+         case "PrivateName":
+-            return lines_1.concat(["#", path.call(print, "id")]);
++            return concat(["#", path.call(print, "id")]);
+         case "Decorator":
+-            return lines_1.concat(["@", path.call(print, "expression")]);
++            return concat(["@", path.call(print, "expression")]);
+         case "TupleExpression":
+             parts.push("#");
+         // Intentionally fall through to printing the tuple elements...
+@@ -631,7 +628,7 @@ function genericPrintNoParens(path, options, print) {
+             var elems = n.elements;
+             var len_2 = elems.length;
+             var printed_1 = path.map(print, "elements");
+-            var joined = lines_1.fromString(", ").join(printed_1);
++            var joined = fromString(", ").join(printed_1);
+             var oneLine_2 = joined.getLineLength(1) <= options.wrapColumn;
+             if (oneLine_2) {
+                 if (options.arrayBracketSpacing) {
+@@ -681,56 +678,56 @@ function genericPrintNoParens(path, options, print) {
+             if (n.typeAnnotation) {
+                 parts.push(path.call(print, "typeAnnotation"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "SequenceExpression":
+-            return lines_1.fromString(", ").join(path.map(print, "expressions"));
++            return fromString(", ").join(path.map(print, "expressions"));
+         case "ThisExpression":
+-            return lines_1.fromString("this");
++            return fromString("this");
+         case "Super":
+-            return lines_1.fromString("super");
++            return fromString("super");
+         case "NullLiteral": // Babel 6 Literal split
+-            return lines_1.fromString("null");
++            return fromString("null");
+         case "RegExpLiteral": // Babel 6 Literal split
+-            return lines_1.fromString(getPossibleRaw(n) || "/" + n.pattern + "/" + (n.flags || ""), options);
++            return fromString(getPossibleRaw(n) || "/".concat(n.pattern, "/").concat(n.flags || ""), options);
+         case "BigIntLiteral": // Babel 7 Literal split
+-            return lines_1.fromString(getPossibleRaw(n) || n.value + "n", options);
++            return fromString(getPossibleRaw(n) || n.value + "n", options);
+         case "NumericLiteral": // Babel 6 Literal Split
+-            return lines_1.fromString(getPossibleRaw(n) || n.value, options);
++            return fromString(getPossibleRaw(n) || n.value, options);
+         case "DecimalLiteral":
+-            return lines_1.fromString(getPossibleRaw(n) || n.value + "m", options);
++            return fromString(getPossibleRaw(n) || n.value + "m", options);
+         case "StringLiteral":
+-            return lines_1.fromString(nodeStr(n.value, options));
++            return fromString(nodeStr(n.value, options));
+         case "BooleanLiteral": // Babel 6 Literal split
+         case "Literal":
+-            return lines_1.fromString(getPossibleRaw(n) ||
++            return fromString(getPossibleRaw(n) ||
+                 (typeof n.value === "string" ? nodeStr(n.value, options) : n.value), options);
+         case "Directive": // Babel 6
+             return path.call(print, "value");
+         case "DirectiveLiteral": // Babel 6
+-            return lines_1.fromString(getPossibleRaw(n) || nodeStr(n.value, options), options);
++            return fromString(getPossibleRaw(n) || nodeStr(n.value, options), options);
+         case "InterpreterDirective":
+-            return lines_1.fromString("#!" + n.value + "\n", options);
++            return fromString("#!".concat(n.value, "\n"), options);
+         case "ModuleSpecifier":
+             if (n.local) {
+                 throw new Error("The ESTree ModuleSpecifier type should be abstract");
+             }
+             // The Esprima ModuleSpecifier type is just a string-valued
+             // Literal identifying the imported-from module.
+-            return lines_1.fromString(nodeStr(n.value, options), options);
++            return fromString(nodeStr(n.value, options), options);
+         case "UnaryExpression":
+             parts.push(n.operator);
+             if (/[a-z]$/.test(n.operator))
+                 parts.push(" ");
+             parts.push(path.call(print, "argument"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "UpdateExpression":
+             parts.push(path.call(print, "argument"), n.operator);
+             if (n.prefix)
+                 parts.reverse();
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ConditionalExpression":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "test"),
+                 " ? ",
+                 path.call(print, "consequent"),
+@@ -749,7 +746,7 @@ function genericPrintNoParens(path, options, print) {
+             if (args) {
+                 parts.push(printArgumentsList(path, options, print));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "VariableDeclaration": {
+             if (n.declare) {
+@@ -763,10 +760,10 @@ function genericPrintNoParens(path, options, print) {
+                 return lines;
+             }, "declarations");
+             if (maxLen_1 === 1) {
+-                parts.push(lines_1.fromString(", ").join(printed));
++                parts.push(fromString(", ").join(printed));
+             }
+             else if (printed.length > 1) {
+-                parts.push(lines_1.fromString(",\n")
++                parts.push(fromString(",\n")
+                     .join(printed)
+                     .indentTail(n.kind.length + 1));
+             }
+@@ -784,17 +781,17 @@ function genericPrintNoParens(path, options, print) {
+                     namedTypes.ForAwaitStatement.check(parentNode))) {
+                 parts.push(";");
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "VariableDeclarator":
+             return n.init
+-                ? lines_1.fromString(" = ").join([
++                ? fromString(" = ").join([
+                     path.call(print, "id"),
+                     path.call(print, "init"),
+                 ])
+                 : path.call(print, "id");
+         case "WithStatement":
+-            return lines_1.concat([
++            return concat([
+                 "with (",
+                 path.call(print, "object"),
+                 ") ",
+@@ -805,17 +802,17 @@ function genericPrintNoParens(path, options, print) {
+             parts.push("if (", path.call(print, "test"), ")", con);
+             if (n.alternate)
+                 parts.push(endsWithBrace(con) ? " else" : "\nelse", adjustClause(path.call(print, "alternate"), options));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ForStatement": {
+             // TODO Get the for (;;) case right.
+             var init = path.call(print, "init");
+             var sep = init.length > 1 ? ";\n" : "; ";
+             var forParen = "for (";
+-            var indented = lines_1.fromString(sep)
++            var indented = fromString(sep)
+                 .join([init, path.call(print, "test"), path.call(print, "update")])
+                 .indentTail(forParen.length);
+-            var head = lines_1.concat([forParen, indented, ")"]);
++            var head = concat([forParen, indented, ")"]);
+             var clause = adjustClause(path.call(print, "body"), options);
+             parts.push(head);
+             if (head.length > 1) {
+@@ -823,10 +820,10 @@ function genericPrintNoParens(path, options, print) {
+                 clause = clause.trimLeft();
+             }
+             parts.push(clause);
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "WhileStatement":
+-            return lines_1.concat([
++            return concat([
+                 "while (",
+                 path.call(print, "test"),
+                 ")",
+@@ -834,7 +831,7 @@ function genericPrintNoParens(path, options, print) {
+             ]);
+         case "ForInStatement":
+             // Note: esprima can't actually parse "for each (".
+-            return lines_1.concat([
++            return concat([
+                 n.each ? "for each (" : "for (",
+                 path.call(print, "left"),
+                 " in ",
+@@ -849,9 +846,9 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("await ");
+             }
+             parts.push("(", path.call(print, "left"), " of ", path.call(print, "right"), ")", adjustClause(path.call(print, "body"), options));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "DoWhileStatement": {
+-            var doBody = lines_1.concat([
++            var doBody = concat([
+                 "do",
+                 adjustClause(path.call(print, "body"), options),
+             ]);
+@@ -861,26 +858,26 @@ function genericPrintNoParens(path, options, print) {
+             else
+                 parts.push("\nwhile");
+             parts.push(" (", path.call(print, "test"), ");");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "DoExpression": {
+             var statements = path.call(function (bodyPath) { return printStatementSequence(bodyPath, options, print); }, "body");
+-            return lines_1.concat(["do {\n", statements.indent(options.tabWidth), "\n}"]);
++            return concat(["do {\n", statements.indent(options.tabWidth), "\n}"]);
+         }
+         case "BreakStatement":
+             parts.push("break");
+             if (n.label)
+                 parts.push(" ", path.call(print, "label"));
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ContinueStatement":
+             parts.push("continue");
+             if (n.label)
+                 parts.push(" ", path.call(print, "label"));
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "LabeledStatement":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "label"),
+                 ":\n",
+                 path.call(print, "body"),
+@@ -898,7 +895,7 @@ function genericPrintNoParens(path, options, print) {
+             if (n.finalizer) {
+                 parts.push(" finally ", path.call(print, "finalizer"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "CatchClause":
+             parts.push("catch ");
+             if (n.param) {
+@@ -912,15 +909,15 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(") ");
+             }
+             parts.push(path.call(print, "body"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ThrowStatement":
+-            return lines_1.concat(["throw ", path.call(print, "argument"), ";"]);
++            return concat(["throw ", path.call(print, "argument"), ";"]);
+         case "SwitchStatement":
+-            return lines_1.concat([
++            return concat([
+                 "switch (",
+                 path.call(print, "discriminant"),
+                 ") {\n",
+-                lines_1.fromString("\n").join(path.map(print, "cases")),
++                fromString("\n").join(path.map(print, "cases")),
+                 "\n}",
+             ]);
+         // Note: ignoring n.lexical because it has no printing consequences.
+@@ -936,46 +933,46 @@ function genericPrintNoParens(path, options, print) {
+                 }, "consequent")
+                     .indent(options.tabWidth));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "DebuggerStatement":
+-            return lines_1.fromString("debugger;");
++            return fromString("debugger;");
+         // JSX extensions below.
+         case "JSXAttribute":
+             parts.push(path.call(print, "name"));
+             if (n.value)
+                 parts.push("=", path.call(print, "value"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "JSXIdentifier":
+-            return lines_1.fromString(n.name, options);
++            return fromString(n.name, options);
+         case "JSXNamespacedName":
+-            return lines_1.fromString(":").join([
++            return fromString(":").join([
+                 path.call(print, "namespace"),
+                 path.call(print, "name"),
+             ]);
+         case "JSXMemberExpression":
+-            return lines_1.fromString(".").join([
++            return fromString(".").join([
+                 path.call(print, "object"),
+                 path.call(print, "property"),
+             ]);
+         case "JSXSpreadAttribute":
+-            return lines_1.concat(["{...", path.call(print, "argument"), "}"]);
++            return concat(["{...", path.call(print, "argument"), "}"]);
+         case "JSXSpreadChild":
+-            return lines_1.concat(["{...", path.call(print, "expression"), "}"]);
++            return concat(["{...", path.call(print, "expression"), "}"]);
+         case "JSXExpressionContainer":
+-            return lines_1.concat(["{", path.call(print, "expression"), "}"]);
++            return concat(["{", path.call(print, "expression"), "}"]);
+         case "JSXElement":
+         case "JSXFragment": {
+             var openingPropName = "opening" + (n.type === "JSXElement" ? "Element" : "Fragment");
+             var closingPropName = "closing" + (n.type === "JSXElement" ? "Element" : "Fragment");
+             var openingLines = path.call(print, openingPropName);
+             if (n[openingPropName].selfClosing) {
+-                assert_1.default.ok(!n[closingPropName], "unexpected " +
++                assert.ok(!n[closingPropName], "unexpected " +
+                     closingPropName +
+                     " element in self-closing " +
+                     n.type);
+                 return openingLines;
+             }
+-            var childLines = lines_1.concat(path.map(function (childPath) {
++            var childLines = concat(path.map(function (childPath) {
+                 var child = childPath.getValue();
+                 if (namedTypes.Literal.check(child) &&
+                     typeof child.value === "string") {
+@@ -989,7 +986,7 @@ function genericPrintNoParens(path, options, print) {
+                 return print(childPath);
+             }, "children")).indentTail(options.tabWidth);
+             var closingLines = path.call(print, closingPropName);
+-            return lines_1.concat([openingLines, childLines, closingLines]);
++            return concat([openingLines, childLines, closingLines]);
+         }
+         case "JSXOpeningElement": {
+             parts.push("<", path.call(print, "name"));
+@@ -997,41 +994,41 @@ function genericPrintNoParens(path, options, print) {
+             path.each(function (attrPath) {
+                 attrParts_1.push(" ", print(attrPath));
+             }, "attributes");
+-            var attrLines = lines_1.concat(attrParts_1);
++            var attrLines = concat(attrParts_1);
+             var needLineWrap = attrLines.length > 1 || attrLines.getLineLength(1) > options.wrapColumn;
+             if (needLineWrap) {
+                 attrParts_1.forEach(function (part, i) {
+                     if (part === " ") {
+-                        assert_1.default.strictEqual(i % 2, 0);
++                        assert.strictEqual(i % 2, 0);
+                         attrParts_1[i] = "\n";
+                     }
+                 });
+-                attrLines = lines_1.concat(attrParts_1).indentTail(options.tabWidth);
++                attrLines = concat(attrParts_1).indentTail(options.tabWidth);
+             }
+             parts.push(attrLines, n.selfClosing ? " />" : ">");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "JSXClosingElement":
+-            return lines_1.concat(["</", path.call(print, "name"), ">"]);
++            return concat(["</", path.call(print, "name"), ">"]);
+         case "JSXOpeningFragment":
+-            return lines_1.fromString("<>");
++            return fromString("<>");
+         case "JSXClosingFragment":
+-            return lines_1.fromString("</>");
++            return fromString("</>");
+         case "JSXText":
+-            return lines_1.fromString(n.value, options);
++            return fromString(n.value, options);
+         case "JSXEmptyExpression":
+-            return lines_1.fromString("");
++            return fromString("");
+         case "TypeAnnotatedIdentifier":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "annotation"),
+                 " ",
+                 path.call(print, "identifier"),
+             ]);
+         case "ClassBody":
+             if (n.body.length === 0) {
+-                return lines_1.fromString("{}");
++                return fromString("{}");
+             }
+-            return lines_1.concat([
++            return concat([
+                 "{\n",
+                 path
+                     .call(function (bodyPath) { return printStatementSequence(bodyPath, options, print); }, "body")
+@@ -1042,7 +1039,7 @@ function genericPrintNoParens(path, options, print) {
+             parts.push("static ", path.call(print, "definition"));
+             if (!namedTypes.MethodDefinition.check(n.definition))
+                 parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ClassProperty": {
+             if (n.declare) {
+                 parts.push("declare ");
+@@ -1062,10 +1059,10 @@ function genericPrintNoParens(path, options, print) {
+             }
+             var key = path.call(print, "key");
+             if (n.computed) {
+-                key = lines_1.concat(["[", key, "]"]);
++                key = concat(["[", key, "]"]);
+             }
+             if (n.variance) {
+-                key = lines_1.concat([printVariance(path, print), key]);
++                key = concat([printVariance(path, print), key]);
+             }
+             parts.push(key);
+             if (n.optional) {
+@@ -1081,7 +1078,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" = ", path.call(print, "value"));
+             }
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "ClassPrivateProperty":
+             if (n.static) {
+@@ -1095,7 +1092,30 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" = ", path.call(print, "value"));
+             }
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
++        case "ClassAccessorProperty": {
++            parts.push.apply(parts, __spreadArray(__spreadArray([], printClassMemberModifiers(n), false), ["accessor "], false));
++            if (n.computed) {
++                parts.push("[", path.call(print, "key"), "]");
++            }
++            else {
++                parts.push(path.call(print, "key"));
++            }
++            if (n.optional) {
++                parts.push("?");
++            }
++            if (n.definite) {
++                parts.push("!");
++            }
++            if (n.typeAnnotation) {
++                parts.push(path.call(print, "typeAnnotation"));
++            }
++            if (n.value) {
++                parts.push(" = ", path.call(print, "value"));
++            }
++            parts.push(";");
++            return concat(parts);
++        }
+         case "ClassDeclaration":
+         case "ClassExpression":
+         case "DeclareClass":
+@@ -1118,20 +1138,20 @@ function genericPrintNoParens(path, options, print) {
+             }
+             if (n.extends && n.extends.length > 0) {
+                 // DeclareClass only
+-                parts.push(" extends ", lines_1.fromString(", ").join(path.map(print, "extends")));
++                parts.push(" extends ", fromString(", ").join(path.map(print, "extends")));
+             }
+             if (n["implements"] && n["implements"].length > 0) {
+-                parts.push(" implements ", lines_1.fromString(", ").join(path.map(print, "implements")));
++                parts.push(" implements ", fromString(", ").join(path.map(print, "implements")));
+             }
+             parts.push(" ", path.call(print, "body"));
+             if (n.type === "DeclareClass") {
+                 return printFlowDeclaration(path, parts);
+             }
+             else {
+-                return lines_1.concat(parts);
++                return concat(parts);
+             }
+         case "TemplateElement":
+-            return lines_1.fromString(n.value.raw, options).lockIndentTail();
++            return fromString(n.value.raw, options).lockIndentTail();
+         case "TemplateLiteral": {
+             var expressions_1 = path.map(print, "expressions");
+             parts.push("`");
+@@ -1143,10 +1163,10 @@ function genericPrintNoParens(path, options, print) {
+                 }
+             }, "quasis");
+             parts.push("`");
+-            return lines_1.concat(parts).lockIndentTail();
++            return concat(parts).lockIndentTail();
+         }
+         case "TaggedTemplateExpression":
+-            return lines_1.concat([path.call(print, "tag"), path.call(print, "quasi")]);
++            return concat([path.call(print, "tag"), path.call(print, "quasi")]);
+         // These types are unprintable because they serve as abstract
+         // supertypes for other (printable) types.
+         case "Node":
+@@ -1173,10 +1193,10 @@ function genericPrintNoParens(path, options, print) {
+             throw new Error("unprintable type: " + JSON.stringify(n.type));
+         case "CommentBlock": // Babel block comment.
+         case "Block": // Esprima block comment.
+-            return lines_1.concat(["/*", lines_1.fromString(n.value, options), "*/"]);
++            return concat(["/*", fromString(n.value, options), "*/"]);
+         case "CommentLine": // Babel line comment.
+         case "Line": // Esprima line comment.
+-            return lines_1.concat(["//", lines_1.fromString(n.value, options)]);
++            return concat(["//", fromString(n.value, options)]);
+         // Type Annotations for Facebook Flow, typically stripped out or
+         // transformed away before printing.
+         case "TypeAnnotation":
+@@ -1185,23 +1205,23 @@ function genericPrintNoParens(path, options, print) {
+                     parts.push(": ");
+                 }
+                 parts.push(path.call(print, "typeAnnotation"));
+-                return lines_1.concat(parts);
++                return concat(parts);
+             }
+-            return lines_1.fromString("");
++            return fromString("");
+         case "ExistentialTypeParam":
+         case "ExistsTypeAnnotation":
+-            return lines_1.fromString("*", options);
++            return fromString("*", options);
+         case "EmptyTypeAnnotation":
+-            return lines_1.fromString("empty", options);
++            return fromString("empty", options);
+         case "AnyTypeAnnotation":
+-            return lines_1.fromString("any", options);
++            return fromString("any", options);
+         case "MixedTypeAnnotation":
+-            return lines_1.fromString("mixed", options);
++            return fromString("mixed", options);
+         case "ArrayTypeAnnotation":
+-            return lines_1.concat([path.call(print, "elementType"), "[]"]);
++            return concat([path.call(print, "elementType"), "[]"]);
+         case "TupleTypeAnnotation": {
+             var printed_2 = path.map(print, "types");
+-            var joined = lines_1.fromString(", ").join(printed_2);
++            var joined = fromString(", ").join(printed_2);
+             var oneLine_3 = joined.getLineLength(1) <= options.wrapColumn;
+             if (oneLine_3) {
+                 if (options.arrayBracketSpacing) {
+@@ -1248,20 +1268,20 @@ function genericPrintNoParens(path, options, print) {
+             else {
+                 parts.push("]");
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "BooleanTypeAnnotation":
+-            return lines_1.fromString("boolean", options);
++            return fromString("boolean", options);
+         case "BooleanLiteralTypeAnnotation":
+-            assert_1.default.strictEqual(typeof n.value, "boolean");
+-            return lines_1.fromString("" + n.value, options);
++            assert.strictEqual(typeof n.value, "boolean");
++            return fromString("" + n.value, options);
+         case "InterfaceTypeAnnotation":
+             parts.push("interface");
+             if (n.extends && n.extends.length > 0) {
+-                parts.push(" extends ", lines_1.fromString(", ").join(path.map(print, "extends")));
++                parts.push(" extends ", fromString(", ").join(path.map(print, "extends")));
+             }
+             parts.push(" ", path.call(print, "body"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "DeclareFunction":
+             return printFlowDeclaration(path, [
+                 "function ",
+@@ -1284,9 +1304,9 @@ function genericPrintNoParens(path, options, print) {
+             return printFlowDeclaration(path, ["var ", path.call(print, "id"), ";"]);
+         case "DeclareExportDeclaration":
+         case "DeclareExportAllDeclaration":
+-            return lines_1.concat(["declare ", printExportDeclaration(path, options, print)]);
++            return concat(["declare ", printExportDeclaration(path, options, print)]);
+         case "EnumDeclaration":
+-            return lines_1.concat([
++            return concat([
+                 "enum ",
+                 path.call(print, "id"),
+                 path.call(print, "body"),
+@@ -1300,26 +1320,26 @@ function genericPrintNoParens(path, options, print) {
+                 // EnumBooleanBody => boolean, etc.
+                 n.type.slice(4, -4).toLowerCase());
+             }
+-            parts.push(" {\n", lines_1.fromString("\n")
++            parts.push(" {\n", fromString("\n")
+                 .join(path.map(print, "members"))
+                 .indent(options.tabWidth), "\n}");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "EnumDefaultedMember":
+-            return lines_1.concat([path.call(print, "id"), ","]);
++            return concat([path.call(print, "id"), ","]);
+         case "EnumBooleanMember":
+         case "EnumNumberMember":
+         case "EnumStringMember":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "id"),
+                 " = ",
+                 path.call(print, "init"),
+                 ",",
+             ]);
+         case "InferredPredicate":
+-            return lines_1.fromString("%checks", options);
++            return fromString("%checks", options);
+         case "DeclaredPredicate":
+-            return lines_1.concat(["%checks(", path.call(print, "value"), ")"]);
++            return concat(["%checks(", path.call(print, "value"), ")"]);
+         case "FunctionTypeAnnotation": {
+             // FunctionTypeAnnotation is ambiguous:
+             // declare function(a: B): void; OR
+@@ -1342,7 +1362,7 @@ function genericPrintNoParens(path, options, print) {
+             if (n.returnType) {
+                 parts.push(isArrowFunctionTypeAnnotation ? " => " : ": ", path.call(print, "returnType"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "FunctionTypeParam": {
+             var name = path.call(print, "name");
+@@ -1354,10 +1374,10 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(": ");
+             }
+             parts.push(path.call(print, "typeAnnotation"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "GenericTypeAnnotation":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "id"),
+                 path.call(print, "typeParameters"),
+             ]);
+@@ -1371,28 +1391,28 @@ function genericPrintNoParens(path, options, print) {
+             }
+             parts.push("interface ", path.call(print, "id"), path.call(print, "typeParameters"), " ");
+             if (n["extends"] && n["extends"].length > 0) {
+-                parts.push("extends ", lines_1.fromString(", ").join(path.map(print, "extends")), " ");
++                parts.push("extends ", fromString(", ").join(path.map(print, "extends")), " ");
+             }
+             if (n.body) {
+                 parts.push(path.call(print, "body"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ClassImplements":
+         case "InterfaceExtends":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "id"),
+                 path.call(print, "typeParameters"),
+             ]);
+         case "IntersectionTypeAnnotation":
+-            return lines_1.fromString(" & ").join(path.map(print, "types"));
++            return fromString(" & ").join(path.map(print, "types"));
+         case "NullableTypeAnnotation":
+-            return lines_1.concat(["?", path.call(print, "typeAnnotation")]);
++            return concat(["?", path.call(print, "typeAnnotation")]);
+         case "NullLiteralTypeAnnotation":
+-            return lines_1.fromString("null", options);
++            return fromString("null", options);
+         case "ThisTypeAnnotation":
+-            return lines_1.fromString("this", options);
++            return fromString("this", options);
+         case "NumberTypeAnnotation":
+-            return lines_1.fromString("number", options);
++            return fromString("number", options);
+         case "ObjectTypeCallProperty":
+             return path.call(print, "value");
+         case "ObjectTypeIndexer":
+@@ -1404,9 +1424,9 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(path.call(print, "id"), ": ");
+             }
+             parts.push(path.call(print, "key"), "]: ", path.call(print, "value"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "ObjectTypeProperty":
+-            return lines_1.concat([
++            return concat([
+                 printVariance(path, print),
+                 path.call(print, "key"),
+                 n.optional ? "?" : "",
+@@ -1414,7 +1434,7 @@ function genericPrintNoParens(path, options, print) {
+                 path.call(print, "value"),
+             ]);
+         case "ObjectTypeInternalSlot":
+-            return lines_1.concat([
++            return concat([
+                 n.static ? "static " : "",
+                 "[[",
+                 path.call(print, "id"),
+@@ -1424,26 +1444,26 @@ function genericPrintNoParens(path, options, print) {
+                 path.call(print, "value"),
+             ]);
+         case "QualifiedTypeIdentifier":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "qualification"),
+                 ".",
+                 path.call(print, "id"),
+             ]);
+         case "StringLiteralTypeAnnotation":
+-            return lines_1.fromString(nodeStr(n.value, options), options);
++            return fromString(nodeStr(n.value, options), options);
+         case "NumberLiteralTypeAnnotation":
+         case "NumericLiteralTypeAnnotation":
+-            assert_1.default.strictEqual(typeof n.value, "number");
+-            return lines_1.fromString(JSON.stringify(n.value), options);
++            assert.strictEqual(typeof n.value, "number");
++            return fromString(JSON.stringify(n.value), options);
+         case "BigIntLiteralTypeAnnotation":
+-            return lines_1.fromString(n.raw, options);
++            return fromString(n.raw, options);
+         case "StringTypeAnnotation":
+-            return lines_1.fromString("string", options);
++            return fromString("string", options);
+         case "DeclareTypeAlias":
+             parts.push("declare ");
+         // Fall through to TypeAlias...
+         case "TypeAlias":
+-            return lines_1.concat([
++            return concat([
+                 "type ",
+                 path.call(print, "id"),
+                 path.call(print, "typeParameters"),
+@@ -1463,9 +1483,9 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" = ", path.call(print, "impltype"));
+             }
+             parts.push(";");
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TypeCastExpression":
+-            return lines_1.concat([
++            return concat([
+                 "(",
+                 path.call(print, "expression"),
+                 path.call(print, "typeAnnotation"),
+@@ -1473,19 +1493,19 @@ function genericPrintNoParens(path, options, print) {
+             ]);
+         case "TypeParameterDeclaration":
+         case "TypeParameterInstantiation":
+-            return lines_1.concat([
++            return concat([
+                 "<",
+-                lines_1.fromString(", ").join(path.map(print, "params")),
++                fromString(", ").join(path.map(print, "params")),
+                 ">",
+             ]);
+         case "Variance":
+             if (n.kind === "plus") {
+-                return lines_1.fromString("+");
++                return fromString("+");
+             }
+             if (n.kind === "minus") {
+-                return lines_1.fromString("-");
++                return fromString("-");
+             }
+-            return lines_1.fromString("");
++            return fromString("");
+         case "TypeParameter":
+             if (n.variance) {
+                 parts.push(printVariance(path, print));
+@@ -1497,15 +1517,15 @@ function genericPrintNoParens(path, options, print) {
+             if (n["default"]) {
+                 parts.push("=", path.call(print, "default"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TypeofTypeAnnotation":
+-            return lines_1.concat([
+-                lines_1.fromString("typeof ", options),
++            return concat([
++                fromString("typeof ", options),
+                 path.call(print, "argument"),
+             ]);
+         case "IndexedAccessType":
+         case "OptionalIndexedAccessType":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "objectType"),
+                 n.optional ? "?." : "",
+                 "[",
+@@ -1513,64 +1533,64 @@ function genericPrintNoParens(path, options, print) {
+                 "]",
+             ]);
+         case "UnionTypeAnnotation":
+-            return lines_1.fromString(" | ").join(path.map(print, "types"));
++            return fromString(" | ").join(path.map(print, "types"));
+         case "VoidTypeAnnotation":
+-            return lines_1.fromString("void", options);
++            return fromString("void", options);
+         case "NullTypeAnnotation":
+-            return lines_1.fromString("null", options);
++            return fromString("null", options);
+         case "SymbolTypeAnnotation":
+-            return lines_1.fromString("symbol", options);
++            return fromString("symbol", options);
+         case "BigIntTypeAnnotation":
+-            return lines_1.fromString("bigint", options);
++            return fromString("bigint", options);
+         // Type Annotations for TypeScript (when using Babylon as parser)
+         case "TSType":
+             throw new Error("unprintable type: " + JSON.stringify(n.type));
+         case "TSNumberKeyword":
+-            return lines_1.fromString("number", options);
++            return fromString("number", options);
+         case "TSBigIntKeyword":
+-            return lines_1.fromString("bigint", options);
++            return fromString("bigint", options);
+         case "TSObjectKeyword":
+-            return lines_1.fromString("object", options);
++            return fromString("object", options);
+         case "TSBooleanKeyword":
+-            return lines_1.fromString("boolean", options);
++            return fromString("boolean", options);
+         case "TSStringKeyword":
+-            return lines_1.fromString("string", options);
++            return fromString("string", options);
+         case "TSSymbolKeyword":
+-            return lines_1.fromString("symbol", options);
++            return fromString("symbol", options);
+         case "TSAnyKeyword":
+-            return lines_1.fromString("any", options);
++            return fromString("any", options);
+         case "TSVoidKeyword":
+-            return lines_1.fromString("void", options);
++            return fromString("void", options);
+         case "TSIntrinsicKeyword":
+-            return lines_1.fromString("intrinsic", options);
++            return fromString("intrinsic", options);
+         case "TSThisType":
+-            return lines_1.fromString("this", options);
++            return fromString("this", options);
+         case "TSNullKeyword":
+-            return lines_1.fromString("null", options);
++            return fromString("null", options);
+         case "TSUndefinedKeyword":
+-            return lines_1.fromString("undefined", options);
++            return fromString("undefined", options);
+         case "TSUnknownKeyword":
+-            return lines_1.fromString("unknown", options);
++            return fromString("unknown", options);
+         case "TSNeverKeyword":
+-            return lines_1.fromString("never", options);
++            return fromString("never", options);
+         case "TSArrayType":
+-            return lines_1.concat([path.call(print, "elementType"), "[]"]);
++            return concat([path.call(print, "elementType"), "[]"]);
+         case "TSLiteralType":
+             return path.call(print, "literal");
+         case "TSUnionType":
+-            return lines_1.fromString(" | ").join(path.map(print, "types"));
++            return fromString(" | ").join(path.map(print, "types"));
+         case "TSIntersectionType":
+-            return lines_1.fromString(" & ").join(path.map(print, "types"));
++            return fromString(" & ").join(path.map(print, "types"));
+         case "TSConditionalType":
+             parts.push(path.call(print, "checkType"), " extends ", path.call(print, "extendsType"), " ? ", path.call(print, "trueType"), " : ", path.call(print, "falseType"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSInferType":
+             parts.push("infer ", path.call(print, "typeParameter"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSParenthesizedType":
+-            return lines_1.concat(["(", path.call(print, "typeAnnotation"), ")"]);
++            return concat(["(", path.call(print, "typeAnnotation"), ")"]);
+         case "TSFunctionType":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "typeParameters"),
+                 "(",
+                 printFunctionParams(path, options, print),
+@@ -1578,7 +1598,7 @@ function genericPrintNoParens(path, options, print) {
+                 path.call(print, "typeAnnotation", "typeAnnotation"),
+             ]);
+         case "TSConstructorType":
+-            return lines_1.concat([
++            return concat([
+                 "new ",
+                 path.call(print, "typeParameters"),
+                 "(",
+@@ -1591,12 +1611,12 @@ function genericPrintNoParens(path, options, print) {
+             if (n.typeAnnotation) {
+                 parts.push(": ", path.call(print, "typeAnnotation"), ";");
+             }
+-            return lines_1.concat(["{\n", lines_1.concat(parts).indent(options.tabWidth), "\n}"]);
++            return concat(["{\n", concat(parts).indent(options.tabWidth), "\n}"]);
+         }
+         case "TSTupleType":
+-            return lines_1.concat([
++            return concat([
+                 "[",
+-                lines_1.fromString(", ").join(path.map(print, "elementTypes")),
++                fromString(", ").join(path.map(print, "elementTypes")),
+                 "]",
+             ]);
+         case "TSNamedTupleMember":
+@@ -1605,40 +1625,45 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("?");
+             }
+             parts.push(": ", path.call(print, "elementType"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSRestType":
+-            return lines_1.concat(["...", path.call(print, "typeAnnotation")]);
++            return concat(["...", path.call(print, "typeAnnotation")]);
+         case "TSOptionalType":
+-            return lines_1.concat([path.call(print, "typeAnnotation"), "?"]);
++            return concat([path.call(print, "typeAnnotation"), "?"]);
+         case "TSIndexedAccessType":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "objectType"),
+                 "[",
+                 path.call(print, "indexType"),
+                 "]",
+             ]);
+         case "TSTypeOperator":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "operator"),
+                 " ",
+                 path.call(print, "typeAnnotation"),
+             ]);
+         case "TSTypeLiteral": {
+-            var memberLines = lines_1.fromString("\n").join(path.map(print, "members"));
+-            if (memberLines.isEmpty()) {
+-                return lines_1.fromString("{}", options);
++            var members = fromString("\n").join(path.map(print, "members").map(function (member) {
++                if (lastNonSpaceCharacter(member) !== ";") {
++                    return member.concat(";");
++                }
++                return member;
++            }));
++            if (members.isEmpty()) {
++                return fromString("{}", options);
+             }
+-            parts.push("{\n", memberLines.indent(options.tabWidth), "\n}");
+-            return lines_1.concat(parts);
++            parts.push("{\n", members.indent(options.tabWidth), "\n}");
++            return concat(parts);
+         }
+         case "TSEnumMember":
+             parts.push(path.call(print, "id"));
+             if (n.initializer) {
+                 parts.push(" = ", path.call(print, "initializer"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSTypeQuery":
+-            return lines_1.concat(["typeof ", path.call(print, "exprName")]);
++            return concat(["typeof ", path.call(print, "exprName")]);
+         case "TSParameterProperty":
+             if (n.accessibility) {
+                 parts.push(n.accessibility, " ");
+@@ -1653,25 +1678,32 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("readonly ");
+             }
+             parts.push(path.call(print, "parameter"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSTypeReference":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "typeName"),
+                 path.call(print, "typeParameters"),
+             ]);
+         case "TSQualifiedName":
+-            return lines_1.concat([path.call(print, "left"), ".", path.call(print, "right")]);
+-        case "TSAsExpression": {
+-            var expression = path.call(print, "expression");
+-            parts.push(expression, lines_1.fromString(" as "), path.call(print, "typeAnnotation"));
+-            return lines_1.concat(parts);
+-        }
++            return concat([path.call(print, "left"), ".", path.call(print, "right")]);
++        case "TSAsExpression":
++        case "TSSatisfiesExpression":
++            {
++                var expression = path.call(print, "expression");
++                parts.push(expression, n.type === "TSSatisfiesExpression" ? " satisfies " : " as ", path.call(print, "typeAnnotation"));
++                return concat(parts);
++            }
++        case "TSTypeCastExpression":
++            return concat([
++                path.call(print, "expression"),
++                path.call(print, "typeAnnotation"),
++            ]);
+         case "TSNonNullExpression":
+-            return lines_1.concat([path.call(print, "expression"), "!"]);
++            return concat([path.call(print, "expression"), "!"]);
+         case "TSTypeAnnotation":
+-            return lines_1.concat([": ", path.call(print, "typeAnnotation")]);
++            return concat([": ", path.call(print, "typeAnnotation")]);
+         case "TSIndexSignature":
+-            return lines_1.concat([
++            return concat([
+                 n.readonly ? "readonly " : "",
+                 "[",
+                 path.map(print, "parameters"),
+@@ -1687,7 +1719,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(path.call(print, "key"));
+             }
+             parts.push(n.optional ? "?" : "", path.call(print, "typeAnnotation"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSMethodSignature":
+             if (n.computed) {
+                 parts.push("[", path.call(print, "key"), "]");
+@@ -1699,7 +1731,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("?");
+             }
+             parts.push(path.call(print, "typeParameters"), "(", printFunctionParams(path, options, print), ")", path.call(print, "typeAnnotation"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSTypePredicate":
+             if (n.asserts) {
+                 parts.push("asserts ");
+@@ -1708,9 +1740,9 @@ function genericPrintNoParens(path, options, print) {
+             if (n.typeAnnotation) {
+                 parts.push(" is ", path.call(print, "typeAnnotation", "typeAnnotation"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSCallSignatureDeclaration":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "typeParameters"),
+                 "(",
+                 printFunctionParams(path, options, print),
+@@ -1725,9 +1757,9 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push("new ");
+             }
+             parts.push("(", printFunctionParams(path, options, print), ")", path.call(print, "typeAnnotation"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSTypeAliasDeclaration":
+-            return lines_1.concat([
++            return concat([
+                 n.declare ? "declare " : "",
+                 "type ",
+                 path.call(print, "id"),
+@@ -1747,41 +1779,46 @@ function genericPrintNoParens(path, options, print) {
+             if (n["default"]) {
+                 parts.push(" = ", path.call(print, "default"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "TSTypeAssertion": {
+             parts.push("<", path.call(print, "typeAnnotation"), "> ", path.call(print, "expression"));
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "TSTypeParameterDeclaration":
+         case "TSTypeParameterInstantiation":
+-            return lines_1.concat([
++            return concat([
+                 "<",
+-                lines_1.fromString(", ").join(path.map(print, "params")),
++                fromString(", ").join(path.map(print, "params")),
+                 ">",
+             ]);
+         case "TSEnumDeclaration": {
+             parts.push(n.declare ? "declare " : "", n.const ? "const " : "", "enum ", path.call(print, "id"));
+-            var memberLines = lines_1.fromString(",\n").join(path.map(print, "members"));
++            var memberLines = fromString(",\n").join(path.map(print, "members"));
+             if (memberLines.isEmpty()) {
+                 parts.push(" {}");
+             }
+             else {
+                 parts.push(" {\n", memberLines.indent(options.tabWidth), "\n}");
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "TSExpressionWithTypeArguments":
+-            return lines_1.concat([
++            return concat([
+                 path.call(print, "expression"),
+                 path.call(print, "typeParameters"),
+             ]);
+         case "TSInterfaceBody": {
+-            var lines = lines_1.fromString("\n").join(path.map(print, "body"));
++            var lines = fromString("\n").join(path.map(print, "body").map(function (element) {
++                if (lastNonSpaceCharacter(element) !== ";") {
++                    return element.concat(";");
++                }
++                return element;
++            }));
+             if (lines.isEmpty()) {
+-                return lines_1.fromString("{}", options);
++                return fromString("{}", options);
+             }
+-            return lines_1.concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
++            return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
+         }
+         case "TSImportType":
+             parts.push("import(", path.call(print, "argument"), ")");
+@@ -1791,15 +1828,15 @@ function genericPrintNoParens(path, options, print) {
+             if (n.typeParameters) {
+                 parts.push(path.call(print, "typeParameters"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         case "TSImportEqualsDeclaration":
+             if (n.isExport) {
+                 parts.push("export ");
+             }
+             parts.push("import ", path.call(print, "id"), " = ", path.call(print, "moduleReference"));
+-            return maybeAddSemicolon(lines_1.concat(parts));
++            return maybeAddSemicolon(concat(parts));
+         case "TSExternalModuleReference":
+-            return lines_1.concat(["require(", path.call(print, "expression"), ")"]);
++            return concat(["require(", path.call(print, "expression"), ")"]);
+         case "TSModuleDeclaration": {
+             var parent = path.getParentNode();
+             if (parent.type === "TSModuleDeclaration") {
+@@ -1838,7 +1875,7 @@ function genericPrintNoParens(path, options, print) {
+                 parts.push(" ");
+                 parts.push(path.call(print, "body"));
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
+         }
+         case "TSModuleBlock": {
+             var naked = path.call(function (bodyPath) { return printStatementSequence(bodyPath, options, print); }, "body");
+@@ -1848,14 +1885,18 @@ function genericPrintNoParens(path, options, print) {
+             else {
+                 parts.push("{\n", naked.indent(options.tabWidth), "\n}");
+             }
+-            return lines_1.concat(parts);
++            return concat(parts);
++        }
++        case "TSInstantiationExpression": {
++            parts.push(path.call(print, "expression"), path.call(print, "typeParameters"));
++            return concat(parts);
+         }
+         // https://github.com/babel/babel/pull/10148
+         case "V8IntrinsicIdentifier":
+-            return lines_1.concat(["%", path.call(print, "name")]);
++            return concat(["%", path.call(print, "name")]);
+         // https://github.com/babel/babel/pull/13191
+         case "TopicReference":
+-            return lines_1.fromString("#");
++            return fromString("#");
+         // Unhandled types below. If encountered, nodes of these types should
+         // be either left alone or desugared into AST types that are fully
+         // supported by the pretty-printer.
+@@ -1913,7 +1954,7 @@ function printDecorators(path, printPath) {
+             parts.push(printPath(decoratorPath), "\n");
+         }, "declaration", "decorators");
+     }
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ function printStatementSequence(path, options, print) {
+     var filtered = [];
+@@ -1957,7 +1998,7 @@ function printStatementSequence(path, options, print) {
+         });
+     });
+     if (sawComment) {
+-        assert_1.default.strictEqual(sawStatement, false, "Comments may appear as statements in otherwise empty statement " +
++        assert.strictEqual(sawStatement, false, "Comments may appear as statements in otherwise empty statement " +
+             "lists, but may not coexist with non-Comment nodes.");
+     }
+     var prevTrailingSpace = null;
+@@ -2009,32 +2050,29 @@ function printStatementSequence(path, options, print) {
+             parts.push(trailingSpace);
+         }
+     });
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ function maxSpace(s1, s2) {
+     if (!s1 && !s2) {
+-        return lines_1.fromString("");
++        return fromString("");
+     }
+     if (!s1) {
+-        return lines_1.fromString(s2);
++        return fromString(s2);
+     }
+     if (!s2) {
+-        return lines_1.fromString(s1);
++        return fromString(s1);
+     }
+-    var spaceLines1 = lines_1.fromString(s1);
+-    var spaceLines2 = lines_1.fromString(s2);
++    var spaceLines1 = fromString(s1);
++    var spaceLines2 = fromString(s2);
+     if (spaceLines2.length > spaceLines1.length) {
+         return spaceLines2;
+     }
+     return spaceLines1;
+ }
+-function printMethod(path, options, print) {
+-    var node = path.getNode();
+-    var kind = node.kind;
++function printClassMemberModifiers(node) {
+     var parts = [];
+-    var nodeValue = node.value;
+-    if (!namedTypes.FunctionExpression.check(nodeValue)) {
+-        nodeValue = node;
++    if (node.declare) {
++        parts.push("declare ");
+     }
+     var access = node.accessibility || node.access;
+     if (typeof access === "string") {
+@@ -2043,15 +2081,26 @@ function printMethod(path, options, print) {
+     if (node.static) {
+         parts.push("static ");
+     }
+-    if (node.abstract) {
+-        parts.push("abstract ");
+-    }
+     if (node.override) {
+         parts.push("override ");
+     }
++    if (node.abstract) {
++        parts.push("abstract ");
++    }
+     if (node.readonly) {
+         parts.push("readonly ");
+     }
++    return parts;
++}
++function printMethod(path, options, print) {
++    var node = path.getNode();
++    var kind = node.kind;
++    var parts = [];
++    var nodeValue = node.value;
++    if (!namedTypes.FunctionExpression.check(nodeValue)) {
++        nodeValue = node;
++    }
++    parts.push.apply(parts, printClassMemberModifiers(node));
+     if (nodeValue.async) {
+         parts.push("async ");
+     }
+@@ -2063,7 +2112,7 @@ function printMethod(path, options, print) {
+     }
+     var key = path.call(print, "key");
+     if (node.computed) {
+-        key = lines_1.concat(["[", key, "]"]);
++        key = concat(["[", key, "]"]);
+     }
+     parts.push(key);
+     if (node.optional) {
+@@ -2087,21 +2136,21 @@ function printMethod(path, options, print) {
+             parts.push(";");
+         }
+     }
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ function printArgumentsList(path, options, print) {
+     var printed = path.map(print, "arguments");
+     var trailingComma = util.isTrailingCommaEnabled(options, "parameters");
+-    var joined = lines_1.fromString(", ").join(printed);
++    var joined = fromString(", ").join(printed);
+     if (joined.getLineLength(1) > options.wrapColumn) {
+-        joined = lines_1.fromString(",\n").join(printed);
+-        return lines_1.concat([
++        joined = fromString(",\n").join(printed);
++        return concat([
+             "(\n",
+             joined.indent(options.tabWidth),
+             trailingComma ? ",\n)" : "\n)",
+         ]);
+     }
+-    return lines_1.concat(["(", joined, ")"]);
++    return concat(["(", joined, ")"]);
+ }
+ function printFunctionParams(path, options, print) {
+     var fun = path.getValue();
+@@ -2120,25 +2169,25 @@ function printFunctionParams(path, options, print) {
+             var i = defExprPath.getName();
+             var p = printed[i];
+             if (p && defExprPath.getValue()) {
+-                printed[i] = lines_1.concat([p, " = ", print(defExprPath)]);
++                printed[i] = concat([p, " = ", print(defExprPath)]);
+             }
+         }, "defaults");
+     }
+     if (fun.rest) {
+-        printed.push(lines_1.concat(["...", path.call(print, "rest")]));
++        printed.push(concat(["...", path.call(print, "rest")]));
+     }
+-    var joined = lines_1.fromString(", ").join(printed);
++    var joined = fromString(", ").join(printed);
+     if (joined.length > 1 || joined.getLineLength(1) > options.wrapColumn) {
+-        joined = lines_1.fromString(",\n").join(printed);
++        joined = fromString(",\n").join(printed);
+         if (util.isTrailingCommaEnabled(options, "parameters") &&
+             !fun.rest &&
+             params[params.length - 1].type !== "RestElement") {
+-            joined = lines_1.concat([joined, ",\n"]);
++            joined = concat([joined, ",\n"]);
+         }
+         else {
+-            joined = lines_1.concat([joined, "\n"]);
++            joined = concat([joined, "\n"]);
+         }
+-        return lines_1.concat(["\n", joined.indent(options.tabWidth)]);
++        return concat(["\n", joined.indent(options.tabWidth)]);
+     }
+     return joined;
+ }
+@@ -2147,16 +2196,16 @@ function maybePrintImportAssertions(path, options, print) {
+     if (n.assertions && n.assertions.length > 0) {
+         var parts = [" assert {"];
+         var printed = path.map(print, "assertions");
+-        var flat = lines_1.fromString(", ").join(printed);
++        var flat = fromString(", ").join(printed);
+         if (flat.length > 1 || flat.getLineLength(1) > options.wrapColumn) {
+-            parts.push("\n", lines_1.fromString(",\n").join(printed).indent(options.tabWidth), "\n}");
++            parts.push("\n", fromString(",\n").join(printed).indent(options.tabWidth), "\n}");
+         }
+         else {
+             parts.push(" ", flat, " }");
+         }
+-        return lines_1.concat(parts);
++        return concat(parts);
+     }
+-    return lines_1.fromString("");
++    return fromString("");
+ }
+ function printExportDeclaration(path, options, print) {
+     var decl = path.getValue();
+@@ -2201,35 +2250,35 @@ function printExportDeclaration(path, options, print) {
+                 parts.push(lines);
+             });
+             if (bracedSpecifiers_2.length > 0) {
+-                var lines_2 = lines_1.fromString(", ").join(bracedSpecifiers_2);
+-                if (lines_2.getLineLength(1) > options.wrapColumn) {
+-                    lines_2 = lines_1.concat([
+-                        lines_1.fromString(",\n").join(bracedSpecifiers_2).indent(options.tabWidth),
++                var lines_1 = fromString(", ").join(bracedSpecifiers_2);
++                if (lines_1.getLineLength(1) > options.wrapColumn) {
++                    lines_1 = concat([
++                        fromString(",\n").join(bracedSpecifiers_2).indent(options.tabWidth),
+                         ",",
+                     ]);
+                 }
+                 if (unbracedSpecifiers_2.length > 0) {
+                     parts.push(", ");
+                 }
+-                if (lines_2.length > 1) {
+-                    parts.push("{\n", lines_2, "\n}");
++                if (lines_1.length > 1) {
++                    parts.push("{\n", lines_1, "\n}");
+                 }
+                 else if (options.objectCurlySpacing) {
+-                    parts.push("{ ", lines_2, " }");
++                    parts.push("{ ", lines_1, " }");
+                 }
+                 else {
+-                    parts.push("{", lines_2, "}");
++                    parts.push("{", lines_1, "}");
+                 }
+             }
+         }
+         else {
+-            parts.push(shouldPrintSpaces ? "{ " : "{", lines_1.fromString(", ").join(path.map(print, "specifiers")), shouldPrintSpaces ? " }" : "}");
++            parts.push(shouldPrintSpaces ? "{ " : "{", fromString(", ").join(path.map(print, "specifiers")), shouldPrintSpaces ? " }" : "}");
+         }
+         if (decl.source) {
+             parts.push(" from ", path.call(print, "source"), maybePrintImportAssertions(path, options, print));
+         }
+     }
+-    var lines = lines_1.concat(parts);
++    var lines = concat(parts);
+     if (lastNonSpaceCharacter(lines) !== ";" &&
+         !(decl.declaration &&
+             (decl.declaration.type === "FunctionDeclaration" ||
+@@ -2237,14 +2286,14 @@ function printExportDeclaration(path, options, print) {
+                 decl.declaration.type === "TSModuleDeclaration" ||
+                 decl.declaration.type === "TSInterfaceDeclaration" ||
+                 decl.declaration.type === "TSEnumDeclaration"))) {
+-        lines = lines_1.concat([lines, ";"]);
++        lines = concat([lines, ";"]);
+     }
+     return lines;
+ }
+ function printFlowDeclaration(path, parts) {
+     var parentExportDecl = util.getParentExportDeclaration(path);
+     if (parentExportDecl) {
+-        assert_1.default.strictEqual(parentExportDecl.type, "DeclareExportDeclaration");
++        assert.strictEqual(parentExportDecl.type, "DeclareExportDeclaration");
+     }
+     else {
+         // If the parent node has type DeclareExportDeclaration, then it
+@@ -2252,27 +2301,27 @@ function printFlowDeclaration(path, parts) {
+         // it needs to be printed with this non-exported declaration node.
+         parts.unshift("declare ");
+     }
+-    return lines_1.concat(parts);
++    return concat(parts);
+ }
+ function printVariance(path, print) {
+     return path.call(function (variancePath) {
+         var value = variancePath.getValue();
+         if (value) {
+             if (value === "plus") {
+-                return lines_1.fromString("+");
++                return fromString("+");
+             }
+             if (value === "minus") {
+-                return lines_1.fromString("-");
++                return fromString("-");
+             }
+             return print(variancePath);
+         }
+-        return lines_1.fromString("");
++        return fromString("");
+     }, "variance");
+ }
+ function adjustClause(clause, options) {
+     if (clause.length > 1)
+-        return lines_1.concat([" ", clause]);
+-    return lines_1.concat(["\n", maybeAddSemicolon(clause).indent(options.tabWidth)]);
++        return concat([" ", clause]);
++    return concat(["\n", maybeAddSemicolon(clause).indent(options.tabWidth)]);
+ }
+ function lastNonSpaceCharacter(lines) {
+     var pos = lines.lastPos();
+@@ -2324,6 +2373,6 @@ function nodeStr(str, options) {
+ function maybeAddSemicolon(lines) {
+     var eoc = lastNonSpaceCharacter(lines);
+     if (!eoc || "\n};".indexOf(eoc) < 0)
+-        return lines_1.concat([lines, ";"]);
++        return concat([lines, ";"]);
+     return lines;
+ }
+diff --git a/node_modules/recast/lib/util.d.ts b/node_modules/recast/lib/util.d.ts
+index 1d2b6e1..be90a93 100644
+--- a/node_modules/recast/lib/util.d.ts
++++ b/node_modules/recast/lib/util.d.ts
+@@ -1,4 +1,4 @@
+-export declare function getLineTerminator(): any;
++export declare function getLineTerminator(): string;
+ export declare function isBrowser(): boolean;
+ export declare function getOption(options: any, key: any, defaultValue: any): any;
+ export declare function getUnionOfKeys(...args: any[]): any;
+diff --git a/node_modules/recast/lib/util.js b/node_modules/recast/lib/util.js
+index 2d39d66..5ab81af 100644
+--- a/node_modules/recast/lib/util.js
++++ b/node_modules/recast/lib/util.js
+@@ -1,30 +1,24 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.isTrailingCommaEnabled = exports.getParentExportDeclaration = exports.isExportDeclaration = exports.fixFaultyLocations = exports.getTrueLoc = exports.composeSourceMaps = exports.copyPos = exports.comparePos = exports.getUnionOfKeys = exports.getOption = exports.isBrowser = exports.getLineTerminator = void 0;
+-var tslib_1 = require("tslib");
+-var assert_1 = tslib_1.__importDefault(require("assert"));
+-var types = tslib_1.__importStar(require("ast-types"));
++import assert from "assert";
++import { EOL } from "os";
++import * as types from "ast-types";
+ var n = types.namedTypes;
+-var source_map_1 = tslib_1.__importDefault(require("source-map"));
+-var SourceMapConsumer = source_map_1.default.SourceMapConsumer;
+-var SourceMapGenerator = source_map_1.default.SourceMapGenerator;
++import sourceMap from "source-map";
++var SourceMapConsumer = sourceMap.SourceMapConsumer;
++var SourceMapGenerator = sourceMap.SourceMapGenerator;
+ var hasOwn = Object.prototype.hasOwnProperty;
+-function getLineTerminator() {
+-    return isBrowser() ? "\n" : require("os").EOL || "\n";
++export function getLineTerminator() {
++    return isBrowser() ? "\n" : EOL || "\n";
+ }
+-exports.getLineTerminator = getLineTerminator;
+-function isBrowser() {
++export function isBrowser() {
+     return (typeof window !== "undefined" && typeof window.document !== "undefined");
+ }
+-exports.isBrowser = isBrowser;
+-function getOption(options, key, defaultValue) {
++export function getOption(options, key, defaultValue) {
+     if (options && hasOwn.call(options, key)) {
+         return options[key];
+     }
+     return defaultValue;
+ }
+-exports.getOption = getOption;
+-function getUnionOfKeys() {
++export function getUnionOfKeys() {
+     var args = [];
+     for (var _i = 0; _i < arguments.length; _i++) {
+         args[_i] = arguments[_i];
+@@ -40,19 +34,16 @@ function getUnionOfKeys() {
+     }
+     return result;
+ }
+-exports.getUnionOfKeys = getUnionOfKeys;
+-function comparePos(pos1, pos2) {
++export function comparePos(pos1, pos2) {
+     return pos1.line - pos2.line || pos1.column - pos2.column;
+ }
+-exports.comparePos = comparePos;
+-function copyPos(pos) {
++export function copyPos(pos) {
+     return {
+         line: pos.line,
+         column: pos.column,
+     };
+ }
+-exports.copyPos = copyPos;
+-function composeSourceMaps(formerMap, latterMap) {
++export function composeSourceMaps(formerMap, latterMap) {
+     if (formerMap) {
+         if (!latterMap) {
+             return formerMap;
+@@ -94,8 +85,7 @@ function composeSourceMaps(formerMap, latterMap) {
+     });
+     return smg.toJSON();
+ }
+-exports.composeSourceMaps = composeSourceMaps;
+-function getTrueLoc(node, lines) {
++export function getTrueLoc(node, lines) {
+     // It's possible that node is newly-created (not parsed by Esprima),
+     // in which case it probably won't have a .loc property (or an
+     // .original property for that matter). That's fine; we'll just
+@@ -136,7 +126,6 @@ function getTrueLoc(node, lines) {
+     }
+     return result;
+ }
+-exports.getTrueLoc = getTrueLoc;
+ function expandLoc(parentLoc, childLoc) {
+     if (parentLoc && childLoc) {
+         if (comparePos(childLoc.start, parentLoc.start) < 0) {
+@@ -147,7 +136,7 @@ function expandLoc(parentLoc, childLoc) {
+         }
+     }
+ }
+-function fixFaultyLocations(node, lines) {
++export function fixFaultyLocations(node, lines) {
+     var loc = node.loc;
+     if (loc) {
+         if (loc.start.line < 1) {
+@@ -215,7 +204,6 @@ function fixFaultyLocations(node, lines) {
+         }
+     }
+ }
+-exports.fixFaultyLocations = fixFaultyLocations;
+ function fixForLoopHead(node, lines) {
+     if (node.type !== "ForStatement") {
+         return;
+@@ -253,8 +241,8 @@ function fixTemplateLiteral(node, lines) {
+         // First we need to exclude the opening ` from the .loc of the first
+         // quasi element, in case the parser accidentally decided to include it.
+         var afterLeftBackTickPos = copyPos(node.loc.start);
+-        assert_1.default.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
+-        assert_1.default.ok(lines.nextPos(afterLeftBackTickPos));
++        assert.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
++        assert.ok(lines.nextPos(afterLeftBackTickPos));
+         var firstQuasi = node.quasis[0];
+         if (comparePos(firstQuasi.loc.start, afterLeftBackTickPos) < 0) {
+             firstQuasi.loc.start = afterLeftBackTickPos;
+@@ -262,8 +250,8 @@ function fixTemplateLiteral(node, lines) {
+         // Next we need to exclude the closing ` from the .loc of the last quasi
+         // element, in case the parser accidentally decided to include it.
+         var rightBackTickPos = copyPos(node.loc.end);
+-        assert_1.default.ok(lines.prevPos(rightBackTickPos));
+-        assert_1.default.strictEqual(lines.charAt(rightBackTickPos), "`");
++        assert.ok(lines.prevPos(rightBackTickPos));
++        assert.strictEqual(lines.charAt(rightBackTickPos), "`");
+         var lastQuasi = node.quasis[node.quasis.length - 1];
+         if (comparePos(rightBackTickPos, lastQuasi.loc.end) < 0) {
+             lastQuasi.loc.end = rightBackTickPos;
+@@ -290,7 +278,7 @@ function fixTemplateLiteral(node, lines) {
+         // the expression in the .loc of the following quasi element.
+         var rightCurlyPos = lines.skipSpaces(expr.loc.end, false, false);
+         if (lines.charAt(rightCurlyPos) === "}") {
+-            assert_1.default.ok(lines.nextPos(rightCurlyPos));
++            assert.ok(lines.nextPos(rightCurlyPos));
+             // Now rightCurlyPos is technically the position just after the }.
+             var quasiAfter = node.quasis[i + 1];
+             if (comparePos(quasiAfter.loc.start, rightCurlyPos) < 0) {
+@@ -299,7 +287,7 @@ function fixTemplateLiteral(node, lines) {
+         }
+     });
+ }
+-function isExportDeclaration(node) {
++export function isExportDeclaration(node) {
+     if (node)
+         switch (node.type) {
+             case "ExportDeclaration":
+@@ -312,20 +300,17 @@ function isExportDeclaration(node) {
+         }
+     return false;
+ }
+-exports.isExportDeclaration = isExportDeclaration;
+-function getParentExportDeclaration(path) {
++export function getParentExportDeclaration(path) {
+     var parentNode = path.getParentNode();
+     if (path.getName() === "declaration" && isExportDeclaration(parentNode)) {
+         return parentNode;
+     }
+     return null;
+ }
+-exports.getParentExportDeclaration = getParentExportDeclaration;
+-function isTrailingCommaEnabled(options, context) {
++export function isTrailingCommaEnabled(options, context) {
+     var trailingComma = options.trailingComma;
+     if (typeof trailingComma === "object") {
+         return !!trailingComma[context];
+     }
+     return !!trailingComma;
+ }
+-exports.isTrailingCommaEnabled = isTrailingCommaEnabled;
+diff --git a/node_modules/recast/main.d.ts b/node_modules/recast/main.d.ts
+index ae89c3b..767c0cb 100644
+--- a/node_modules/recast/main.d.ts
++++ b/node_modules/recast/main.d.ts
+@@ -1,6 +1,6 @@
+ import * as types from "ast-types";
+-import { parse } from "./lib/parser";
+-import { Options } from "./lib/options";
++import { parse } from "./lib/parser.js";
++import { Options } from "./lib/options.js";
+ export { 
+ /**
+  * Parse a string of code into an augmented syntax tree suitable for
+@@ -28,16 +28,16 @@ export { visit } from "ast-types";
+ /**
+  * Options shared between parsing and printing.
+  */
+-export { Options } from "./lib/options";
++export { Options } from "./lib/options.js";
+ /**
+  * Reprint a modified syntax tree using as much of the original source
+  * code as possible.
+  */
+-export declare function print(node: types.ASTNode, options?: Options): import("./lib/printer").PrintResultType;
++export declare function print(node: types.ASTNode, options?: Options): import("./lib/printer.js").PrintResultType;
+ /**
+  * Print without attempting to reuse any original source code.
+  */
+-export declare function prettyPrint(node: types.ASTNode, options?: Options): import("./lib/printer").PrintResultType;
++export declare function prettyPrint(node: types.ASTNode, options?: Options): import("./lib/printer.js").PrintResultType;
+ /**
+  * Convenient command-line interface (see e.g. example/add-braces).
+  */
+diff --git a/node_modules/recast/main.js b/node_modules/recast/main.js
+index 2e15158..83e9d89 100644
+--- a/node_modules/recast/main.js
++++ b/node_modules/recast/main.js
+@@ -1,13 +1,17 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.run = exports.prettyPrint = exports.print = exports.visit = exports.types = exports.parse = void 0;
+-var tslib_1 = require("tslib");
+-var fs_1 = tslib_1.__importDefault(require("fs"));
+-var types = tslib_1.__importStar(require("ast-types"));
+-exports.types = types;
+-var parser_1 = require("./lib/parser");
+-Object.defineProperty(exports, "parse", { enumerable: true, get: function () { return parser_1.parse; } });
+-var printer_1 = require("./lib/printer");
++import fs from "fs";
++import * as types from "ast-types";
++import { parse } from "./lib/parser.js";
++import { Printer } from "./lib/printer.js";
++export { 
++/**
++ * Parse a string of code into an augmented syntax tree suitable for
++ * arbitrary modification and reprinting.
++ */
++parse, 
++/**
++ * Convenient shorthand for the ast-types package.
++ */
++types, };
+ /**
+  * Traverse and potentially modify an abstract syntax tree using a
+  * convenient visitor syntax:
+@@ -21,32 +25,28 @@ var printer_1 = require("./lib/printer");
+  *     }
+  *   });
+  */
+-var ast_types_1 = require("ast-types");
+-Object.defineProperty(exports, "visit", { enumerable: true, get: function () { return ast_types_1.visit; } });
++export { visit } from "ast-types";
+ /**
+  * Reprint a modified syntax tree using as much of the original source
+  * code as possible.
+  */
+-function print(node, options) {
+-    return new printer_1.Printer(options).print(node);
++export function print(node, options) {
++    return new Printer(options).print(node);
+ }
+-exports.print = print;
+ /**
+  * Print without attempting to reuse any original source code.
+  */
+-function prettyPrint(node, options) {
+-    return new printer_1.Printer(options).printGenerically(node);
++export function prettyPrint(node, options) {
++    return new Printer(options).printGenerically(node);
+ }
+-exports.prettyPrint = prettyPrint;
+ /**
+  * Convenient command-line interface (see e.g. example/add-braces).
+  */
+-function run(transformer, options) {
++export function run(transformer, options) {
+     return runFile(process.argv[2], transformer, options);
+ }
+-exports.run = run;
+ function runFile(path, transformer, options) {
+-    fs_1.default.readFile(path, "utf-8", function (err, code) {
++    fs.readFile(path, "utf-8", function (err, code) {
+         if (err) {
+             console.error(err);
+             return;
+@@ -59,7 +59,7 @@ function defaultWriteback(output) {
+ }
+ function runString(code, transformer, options) {
+     var writeback = (options && options.writeback) || defaultWriteback;
+-    transformer(parser_1.parse(code, options), function (node) {
++    transformer(parse(code, options), function (node) {
+         writeback(print(node, options).code);
+     });
+ }
+diff --git a/node_modules/recast/parsers/_babel_options.d.ts b/node_modules/recast/parsers/_babel_options.d.ts
+index 57bf4c6..76c9cf8 100644
+--- a/node_modules/recast/parsers/_babel_options.d.ts
++++ b/node_modules/recast/parsers/_babel_options.d.ts
+@@ -1,5 +1,5 @@
+ import { ParserOptions, ParserPlugin } from "@babel/parser";
+-export declare type Overrides = Partial<{
++export type Overrides = Partial<{
+     sourceType: ParserOptions["sourceType"];
+     strictMode: ParserOptions["strictMode"];
+ }>;
+diff --git a/node_modules/recast/parsers/_babel_options.js b/node_modules/recast/parsers/_babel_options.js
+index 70f0c90..920e35e 100644
+--- a/node_modules/recast/parsers/_babel_options.js
++++ b/node_modules/recast/parsers/_babel_options.js
+@@ -1,14 +1,12 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-var util_1 = require("../lib/util");
+-function getBabelOptions(options) {
++import { getOption } from "../lib/util.js";
++export default function getBabelOptions(options) {
+     // The goal here is to tolerate as much syntax as possible, since Recast
+     // is not in the business of forbidding anything. If you want your
+     // parser to be more restrictive for some reason, you can always pass
+     // your own parser object to recast.parse.
+     return {
+-        sourceType: util_1.getOption(options, "sourceType", "module"),
+-        strictMode: util_1.getOption(options, "strictMode", false),
++        sourceType: getOption(options, "sourceType", "module"),
++        strictMode: getOption(options, "strictMode", false),
+         allowImportExportEverywhere: true,
+         allowReturnOutsideFunction: true,
+         startLine: 1,
+@@ -54,4 +52,3 @@ function getBabelOptions(options) {
+         ],
+     };
+ }
+-exports.default = getBabelOptions;
+diff --git a/node_modules/recast/parsers/acorn.js b/node_modules/recast/parsers/acorn.js
+index 901914c..0a7cc84 100644
+--- a/node_modules/recast/parsers/acorn.js
++++ b/node_modules/recast/parsers/acorn.js
+@@ -1,6 +1,3 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = void 0;
+ // This module is suitable for passing as options.parser when calling
+ // recast.parse to process JavaScript code with Acorn:
+ //
+@@ -8,16 +5,16 @@ exports.parse = void 0;
+ //     parser: require("recast/parsers/acorn")
+ //   });
+ //
+-var util_1 = require("../lib/util");
+-function parse(source, options) {
++import { getOption } from "../lib/util.js";
++export function parse(source, options) {
+     var comments = [];
+     var tokens = [];
+     var ast = require("acorn").parse(source, {
+         allowHashBang: true,
+         allowImportExportEverywhere: true,
+         allowReturnOutsideFunction: true,
+-        ecmaVersion: util_1.getOption(options, "ecmaVersion", 8),
+-        sourceType: util_1.getOption(options, "sourceType", "module"),
++        ecmaVersion: getOption(options, "ecmaVersion", 8),
++        sourceType: getOption(options, "sourceType", "module"),
+         locations: true,
+         onComment: comments,
+         onToken: tokens,
+@@ -30,4 +27,3 @@ function parse(source, options) {
+     }
+     return ast;
+ }
+-exports.parse = parse;
+diff --git a/node_modules/recast/parsers/babel-ts.d.ts b/node_modules/recast/parsers/babel-ts.d.ts
+index 53e8e4d..3ce3fec 100644
+--- a/node_modules/recast/parsers/babel-ts.d.ts
++++ b/node_modules/recast/parsers/babel-ts.d.ts
+@@ -1,4 +1,4 @@
+-import { parser } from "./babel";
+-import { Overrides } from "./_babel_options";
++import { parser } from "./babel.js";
++import { Overrides } from "./_babel_options.js";
+ export { parser };
+-export declare function parse(source: string, options?: Overrides): import("@babel/types").File;
++export declare function parse(source: string, options?: Overrides): import("@babel/parser").ParseResult<import("@babel/types").File>;
+diff --git a/node_modules/recast/parsers/babel-ts.js b/node_modules/recast/parsers/babel-ts.js
+index cbbe34b..51302a7 100644
+--- a/node_modules/recast/parsers/babel-ts.js
++++ b/node_modules/recast/parsers/babel-ts.js
+@@ -1,13 +1,8 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = exports.parser = void 0;
+-var tslib_1 = require("tslib");
+-var babel_1 = require("./babel");
+-Object.defineProperty(exports, "parser", { enumerable: true, get: function () { return babel_1.parser; } });
+-var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
+-function parse(source, options) {
+-    var babelOptions = _babel_options_1.default(options);
++import { parser } from "./babel.js";
++import getBabelOptions from "./_babel_options.js";
++export { parser };
++export function parse(source, options) {
++    var babelOptions = getBabelOptions(options);
+     babelOptions.plugins.push("jsx", "typescript");
+-    return babel_1.parser.parse(source, babelOptions);
++    return parser.parse(source, babelOptions);
+ }
+-exports.parse = parse;
+diff --git a/node_modules/recast/parsers/babel.d.ts b/node_modules/recast/parsers/babel.d.ts
+index 8e5dee2..fd0d5fa 100644
+--- a/node_modules/recast/parsers/babel.d.ts
++++ b/node_modules/recast/parsers/babel.d.ts
+@@ -1,8 +1,8 @@
+ import { parse as babelParse } from "@babel/parser";
+-import { Overrides } from "./_babel_options";
+-declare type BabelParser = {
++import { Overrides } from "./_babel_options.js";
++type BabelParser = {
+     parse: typeof babelParse;
+ };
+ export declare const parser: BabelParser;
+-export declare function parse(source: string, options?: Overrides): import("@babel/types").File;
++export declare function parse(source: string, options?: Overrides): import("@babel/parser").ParseResult<import("@babel/types").File>;
+ export {};
+diff --git a/node_modules/recast/parsers/babel.js b/node_modules/recast/parsers/babel.js
+index 256807d..1ebc641 100644
+--- a/node_modules/recast/parsers/babel.js
++++ b/node_modules/recast/parsers/babel.js
+@@ -1,11 +1,7 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = exports.parser = void 0;
+-var tslib_1 = require("tslib");
+-var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
++import getBabelOptions from "./_babel_options.js";
+ // Prefer the new @babel/parser package, but fall back to babylon if
+ // that's what's available.
+-exports.parser = (function () {
++export var parser = (function () {
+     try {
+         return require("@babel/parser");
+     }
+@@ -25,9 +21,8 @@ exports.parser = (function () {
+ //     parser: require("recast/parsers/babel")
+ //   });
+ //
+-function parse(source, options) {
+-    var babelOptions = _babel_options_1.default(options);
+-    babelOptions.plugins.push("jsx", "flow");
+-    return exports.parser.parse(source, babelOptions);
++export function parse(source, options) {
++    var babelOptions = getBabelOptions(options);
++    babelOptions.plugins.push("jsx", "flow", "decoratorAutoAccessors");
++    return parser.parse(source, babelOptions);
+ }
+-exports.parse = parse;
+diff --git a/node_modules/recast/parsers/babylon.d.ts b/node_modules/recast/parsers/babylon.d.ts
+index 60fce87..e89d904 100644
+--- a/node_modules/recast/parsers/babylon.d.ts
++++ b/node_modules/recast/parsers/babylon.d.ts
+@@ -1 +1 @@
+-export * from "./babel";
++export * from "./babel.js";
+diff --git a/node_modules/recast/parsers/babylon.js b/node_modules/recast/parsers/babylon.js
+index a3ddb86..e89d904 100644
+--- a/node_modules/recast/parsers/babylon.js
++++ b/node_modules/recast/parsers/babylon.js
+@@ -1,4 +1 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-var tslib_1 = require("tslib");
+-tslib_1.__exportStar(require("./babel"), exports);
++export * from "./babel.js";
+diff --git a/node_modules/recast/parsers/esprima.js b/node_modules/recast/parsers/esprima.js
+index d0cfe19..a159058 100644
+--- a/node_modules/recast/parsers/esprima.js
++++ b/node_modules/recast/parsers/esprima.js
+@@ -1,6 +1,4 @@
+ "use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = void 0;
+ // This module is suitable for passing as options.parser when calling
+ // recast.parse to process ECMAScript code with Esprima:
+ //
+@@ -8,23 +6,22 @@ exports.parse = void 0;
+ //     parser: require("recast/parsers/esprima")
+ //   });
+ //
+-var util_1 = require("../lib/util");
+-function parse(source, options) {
++import { getOption } from "../lib/util.js";
++export function parse(source, options) {
+     var comments = [];
+     var ast = require("esprima").parse(source, {
+         loc: true,
+         locations: true,
+         comment: true,
+         onComment: comments,
+-        range: util_1.getOption(options, "range", false),
+-        tolerant: util_1.getOption(options, "tolerant", true),
++        range: getOption(options, "range", false),
++        tolerant: getOption(options, "tolerant", true),
+         tokens: true,
+-        jsx: util_1.getOption(options, "jsx", false),
+-        sourceType: util_1.getOption(options, "sourceType", "module"),
++        jsx: getOption(options, "jsx", false),
++        sourceType: getOption(options, "sourceType", "module"),
+     });
+     if (!Array.isArray(ast.comments)) {
+         ast.comments = comments;
+     }
+     return ast;
+ }
+-exports.parse = parse;
+diff --git a/node_modules/recast/parsers/flow.d.ts b/node_modules/recast/parsers/flow.d.ts
+index b37ee68..0a65345 100644
+--- a/node_modules/recast/parsers/flow.d.ts
++++ b/node_modules/recast/parsers/flow.d.ts
+@@ -1,2 +1,2 @@
+-import { Overrides } from "./_babel_options";
+-export declare function parse(source: string, options?: Overrides): import("@babel/types").File;
++import { Overrides } from "./_babel_options.js";
++export declare function parse(source: string, options?: Overrides): import("@babel/parser").ParseResult<import("@babel/types").File>;
+diff --git a/node_modules/recast/parsers/flow.js b/node_modules/recast/parsers/flow.js
+index a0e969c..23417c5 100644
+--- a/node_modules/recast/parsers/flow.js
++++ b/node_modules/recast/parsers/flow.js
+@@ -1,9 +1,5 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = void 0;
+-var tslib_1 = require("tslib");
+-var babel_1 = require("./babel");
+-var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
++import { parser } from "./babel.js";
++import getBabelOptions from "./_babel_options.js";
+ // This module is suitable for passing as options.parser when calling
+ // recast.parse to process Flow code:
+ //
+@@ -11,9 +7,8 @@ var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
+ //     parser: require("recast/parsers/flow")
+ //   });
+ //
+-function parse(source, options) {
+-    var babelOptions = _babel_options_1.default(options);
++export function parse(source, options) {
++    var babelOptions = getBabelOptions(options);
+     babelOptions.plugins.push("jsx", "flow");
+-    return babel_1.parser.parse(source, babelOptions);
++    return parser.parse(source, babelOptions);
+ }
+-exports.parse = parse;
+diff --git a/node_modules/recast/parsers/typescript.d.ts b/node_modules/recast/parsers/typescript.d.ts
+index b37ee68..0a65345 100644
+--- a/node_modules/recast/parsers/typescript.d.ts
++++ b/node_modules/recast/parsers/typescript.d.ts
+@@ -1,2 +1,2 @@
+-import { Overrides } from "./_babel_options";
+-export declare function parse(source: string, options?: Overrides): import("@babel/types").File;
++import { Overrides } from "./_babel_options.js";
++export declare function parse(source: string, options?: Overrides): import("@babel/parser").ParseResult<import("@babel/types").File>;
+diff --git a/node_modules/recast/parsers/typescript.js b/node_modules/recast/parsers/typescript.js
+index 1b8355f..b55986a 100644
+--- a/node_modules/recast/parsers/typescript.js
++++ b/node_modules/recast/parsers/typescript.js
+@@ -1,9 +1,5 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-exports.parse = void 0;
+-var tslib_1 = require("tslib");
+-var babel_1 = require("./babel");
+-var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
++import { parser } from "./babel.js";
++import getBabelOptions from "./_babel_options.js";
+ // This module is suitable for passing as options.parser when calling
+ // recast.parse to process TypeScript code:
+ //
+@@ -11,9 +7,8 @@ var _babel_options_1 = tslib_1.__importDefault(require("./_babel_options"));
+ //     parser: require("recast/parsers/typescript")
+ //   });
+ //
+-function parse(source, options) {
+-    var babelOptions = _babel_options_1.default(options);
++export function parse(source, options) {
++    var babelOptions = getBabelOptions(options);
+     babelOptions.plugins.push("typescript");
+-    return babel_1.parser.parse(source, babelOptions);
++    return parser.parse(source, babelOptions);
+ }
+-exports.parse = parse;

@@ -76,7 +76,7 @@ export async function defineConfig(env) {
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPlugin({ pathPattern: "./{language}.json" }),
+			jsonPlugin({ pathPattern: "./languages/{language}.json" }),
 			sdkPlugin({
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }, { type: "navigator" }]
