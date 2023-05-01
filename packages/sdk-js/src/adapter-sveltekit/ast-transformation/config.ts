@@ -1,7 +1,7 @@
 import { loadFile, type ProxifiedModule } from "magicast"
 import { writeFile } from "node:fs/promises"
-import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
+import { initConfig } from '../../plugin/config.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
@@ -63,27 +63,26 @@ const createInlangConfigIfNotPresentYet = async () => {
 
 	return writeFile(inlangConfigPath, `
 /**
- * @type {import("@inlang/core/config").DefineConfig}
+ * @type { import("@inlang/core/config").DefineConfig }
  */
 export async function defineConfig(env) {
-	const plugin = await env.$import(
-	 	"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+	const { default: jsonPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
 	)
-
-	const pluginConfig = {
-		pathPattern: "./languages/{language}.json",
-	}
+	const { default: sdkPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js"
+	)
 
 	return {
 		referenceLanguage: "en",
-		languages: await plugin.getLanguages({ ...env, pluginConfig }),
-		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
-		sdk: {
-			languageNegotiation: {
-				strategies: [{ type: "navigator" }, { type: "localStorage" }],
-			},
-		},
+		plugins: [
+			jsonPlugin({ pathPattern: "./{language}.json" }),
+			sdkPlugin({
+				languageNegotiation: {
+					strategies: [{ type: "localStorage" }, { type: "navigator" }]
+				}
+			}),
+		],
 	}
 }
 `)

@@ -1,28 +1,26 @@
-import * as _plugin from "./_plugin.js"
+import { default as sdkPlugin } from "@inlang/sdk-js/plugin"
 
 /**
- * @type {import("@inlang/core/config").DefineConfig}
+ * @type { import("@inlang/core/config").DefineConfig }
  */
 export async function defineConfig(env) {
-	// this sometimes throws a `ConnectTimeoutError`
-	// const plugin = await env.$import(
-	// 	"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+	const { default: jsonPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
+	)
+	// TODO: replace once published
+	// const { default: sdkPlugin } = await env.$import(
+	// 	"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js"
 	// )
-	const plugin = /** @type { any } */ (_plugin)
-
-	const pluginConfig = {
-		pathPattern: "./languages/{language}.json",
-	}
 
 	return {
 		referenceLanguage: "en",
-		languages: await plugin.getLanguages({ ...env, pluginConfig }),
-		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
-		sdk: {
-			languageNegotiation: {
-				strategies: [{ type: "navigator" }, { type: "localStorage" }],
-			},
-		},
+		plugins: [
+			jsonPlugin({ pathPattern: "./{language}.json" }),
+			sdkPlugin({
+				languageNegotiation: {
+					strategies: [{ type: "localStorage" }, { type: "navigator" }]
+				}
+			}),
+		],
 	}
 }
