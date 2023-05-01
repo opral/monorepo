@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.4
+
+### Patch Changes
+
+- dda53294: bundle `sdkPlugin` file
+
 ## 0.0.3
 
 ### Patch Changes
