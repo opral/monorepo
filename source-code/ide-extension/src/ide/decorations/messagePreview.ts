@@ -45,17 +45,21 @@ export async function messagePreview(args: {
 						id: message.messageId,
 					})?.pattern.elements[0]
 					if (translation?.type === "Text") {
-						const previewText = translation.value;
-						const truncatedPreviewText = previewText.length > MAXIMUM_PREVIEW_LENGTH
-							? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: previewText;
+						const previewText = translation.value
+						const truncatedPreviewText =
+							previewText.length > MAXIMUM_PREVIEW_LENGTH
+								? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+								: previewText
 						const range = new vscode.Range(
 							// VSCode starts to count lines and columns from zero
 							new vscode.Position(
 								message.position.start.line - 1,
 								message.position.start.character - 1,
 							),
-							new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+							new vscode.Position(
+								message.position.end.line - 1,
+								message.position.end.character - 1,
+							),
 						)
 						const decoration: vscode.DecorationOptions = {
 							range,
@@ -72,9 +76,8 @@ export async function messagePreview(args: {
 						}
 						return decoration
 					} else {
-						throw new Error("Only Text elements are supported for message previews.");
+						throw new Error("Only Text elements are supported for message previews.")
 					}
-
 				})
 			},
 		)

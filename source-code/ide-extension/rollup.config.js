@@ -9,13 +9,13 @@ import commonjs from "@rollup/plugin-commonjs"
  * Rollup is used to compile the ESM code to CJS.
  */
 export default {
-	input: "src/main.ts",
+	input: "src/ide/main.ts",
 	output: {
 		sourcemap: true,
 		// .cjs because the package.json defines "type": "module",
 		// .cjs indicates that the file should not be treated as es module
 		// but commonjs instead
-		dir: "dist/",
+		dir: "dist/ide/",
 		entryFileNames: "[name].cjs",
 		chunkFileNames: "[name]-[hash].cjs",
 		format: "cjs",
