@@ -31,6 +31,10 @@ export async function setupPlugins(args: {
 		args.config.plugins = []
 		return args.config as ConfigWithSetupPlugins
 	}
+
+	// Note: we can't use structuredClone because the object could contain functions
+	// To have some sort of immutability (for the first level), we destructure it into a new object
+	const mergedConfig = { ...args.config }
 	for (let i = 0; i < args.config.plugins.length; i++) {
 		try {
 			// If a plugin uses a setup function, the setup function needs to be invoked.
@@ -38,8 +42,8 @@ export async function setupPlugins(args: {
 				args.config.plugins[i] = (args.config.plugins[i] as PluginSetupFunction)(args.env)
 			}
 			const plugin = args.config.plugins[i] as Plugin
-			const config = await plugin?.config()
-			deepmergeInto(args.config, config)
+			const config = await plugin?.config({ ...mergedConfig })
+			deepmergeInto(mergedConfig, config)
 		} catch (error) {
 			// continue with next plugin.
 			// if one plugin fails, the whole app should not crash.
@@ -50,7 +54,9 @@ export async function setupPlugins(args: {
 			)
 		}
 	}
+
 	// remove duplicates from languages in case multiple plugins add the same language.
-	args.config.languages = [...new Set(args.config.languages)]
-	return args.config as ConfigWithSetupPlugins
+	mergedConfig.languages = [...new Set(mergedConfig.languages)]
+
+	return mergedConfig as ConfigWithSetupPlugins
 }
