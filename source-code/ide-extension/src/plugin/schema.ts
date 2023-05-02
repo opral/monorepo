@@ -1,7 +1,6 @@
 import * as z from "zod"
 
-export const validateIdeExtensionConfig = (config: IdeExtensionConfig | undefined) =>
-	ideExtensionSchema.parse(config)
+export const validateIdeExtensionConfig = (config: IdeExtensionConfig | undefined) => ideExtensionSchema.parse(config);
 
 /**
  * The position from where to where the reference can be found.
@@ -29,11 +28,10 @@ export const ideExtensionSchema = z.object({
 	 * @param args represents the data to conduct the search on
 	 * @returns a promise with matched message references
 	 */
-	messageReferenceMatchers: z.array(z
+	messageReferenceMatchers: z
 		.function()
 		.args(z.object({ documentText: z.string() }))
 		.returns(z.promise(z.array(messageReferenceSchema))),
-	),
 	/**
 	 * Defines the options to extract messages.
 	 */

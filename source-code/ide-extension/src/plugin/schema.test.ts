@@ -1,39 +1,43 @@
 import * as z from 'zod'
 import { messageReferenceSchema, positionSchema, validateIdeExtensionConfig } from './schema.js'
 import { describe, expect, it } from 'vitest'
+import { log } from 'console'
 
-// describe('ideExtensionSchema', () => {
-//   it('should validate a valid config object', () => {
-//     const validConfig = {
-//       messageReferenceMatchers: () => Promise.resolve([{ messageId: 'id', position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } } }]),
-//       extractMessageOptions: [
-//         { callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` },
-//       ],
-//     }
+describe('ideExtensionSchema', () => {
+  it('should validate a valid config object', () => {
+    const validConfig = {
+      messageReferenceMatchers: (args: { documentText: string }) => Promise.resolve([{ messageId: 'id', position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } } }]),
+      extractMessageOptions: [
+        { callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` },
+      ],
+    }
 
-//     expect(() => z.object(validateIdeExtensionConfig(invalidConfig))).not.toThrow()
-//   })
+    expect(() => validateIdeExtensionConfig(validConfig)).not.toThrow()
+  })
 
-//   it('should throw an error for a config object with invalid extractMessageOptions', () => {
-//     const invalidConfig = {
-//       messageReferenceMatchers: () => Promise.resolve([{ messageId: 'id', position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } } }]),
-//       extractMessageOptions: [{ callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` }, {}],
-//     }
+  it('should throw an error for a config object with invalid extractMessageOptions', () => {
+    const invalidConfig = {
+      messageReferenceMatchers: (args: { documentText: string }) => Promise.resolve([{ messageId: 'id', position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } } }]),
+      extractMessageOptions: [{ callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` }, { callback: {} }]
+    }
+  
+    //@ts-ignore
+    expect(() => validateIdeExtensionConfig(invalidConfig)).toThrow(z.ZodError)
+  })
 
-//     expect(() => z.object(validateIdeExtensionConfig(invalidConfig))).toThrow(z.ZodError)
-//   })
-
-//   it('should throw an error for a config object with invalid messageReferenceMatchers', () => {
-//     const invalidConfig = {
-//       messageReferenceMatchers: () => Promise.resolve([{ messageId: 'id', position: {} }]),
-//       extractMessageOptions: [
-//         { callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` },
-//       ],
-//     }
-
-//     expect(() => z.object(validateIdeExtensionConfig(invalidConfig))).toThrow(z.ZodError)
-//   })
-// })
+  it('should throw an error for a config object with invalid messageReferenceMatchers', () => {
+    const invalidConfig = {
+      messageReferenceMatchers: (args: { documentText: string }) => Promise.resolve([{ messageId: 'id', position: undefined }]),
+      extractMessageOptions: [
+        { callback: (messageId: string, selection: string) => `console.log(\`${messageId}: ${selection}\`)` },
+      ],
+    };
+  
+    //@ts-ignore
+    expect(() => validateIdeExtensionConfig(invalidConfig)).toThrow(z.ZodError)
+  });
+  
+})
 
 describe('positionSchema', () => {
   it('should validate a valid position object', () => {

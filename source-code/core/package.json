@@ -26,6 +26,9 @@
 			"lint": [
 				"./dist/lint/index.d.ts"
 			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
+			],
 			"query": [
 				"./dist/query/index.d.ts"
 			],
