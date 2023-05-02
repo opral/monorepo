@@ -385,17 +385,7 @@ function LanguageFilter(props: { clearFunction: any }) {
 	})
 
 	return (
-		<Show
-			when={inlangConfig() && filteredLanguages() && filteredLanguages().length > 0}
-			fallback={
-				<sl-select
-					prop:name="Language Select"
-					prop:placeholder="Loading ..."
-					prop:size="small"
-					class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
-				/>
-			}
-		>
+		<Show when={inlangConfig() && filteredLanguages() && filteredLanguages().length > 0}>
 			<sl-select
 				prop:name="Language Select"
 				prop:placeholder="none"
@@ -407,7 +397,6 @@ function LanguageFilter(props: { clearFunction: any }) {
 					setFilteredLanguages(event.target.value)
 				}}
 				on:sl-clear={() => {
-					setFilteredLanguages(() => inlangConfig()!.languages)
 					props.clearFunction
 				}}
 				class="border-0 focus:ring-background/100 p-0 m-0 text-sm"
@@ -486,7 +475,6 @@ function LintFilter(props: { clearFunction: any }) {
 				setFilteredLintRules(event.target.value ?? [])
 			}}
 			on:sl-clear={() => {
-				setFilteredLintRules([])
 				props.clearFunction
 			}}
 			class="border-0 focus:ring-background/100 p-0 m-0 text-sm"

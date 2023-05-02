@@ -306,7 +306,10 @@ export function PatternEditor(props: {
 					// missingMessage exception
 					const lintLanguage = report.message.match(/'([^']+)'/g)
 					if (lintLanguage?.length === 2) {
-						if (filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, ""))) {
+						if (
+							filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
+							filteredLanguages().length === 0
+						) {
 							return true
 						}
 					} else {
