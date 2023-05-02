@@ -25,9 +25,9 @@ it("should be able to make a roundtrip", async () => {
 		fs,
 		resolveFrom: "/",
 		json: {
-			"file1.txt": "content1",
-			"file2.js": "content2",
-			"node_modules/file3.js": "content3",
+			"file1.txt": "Y29udGVudDE=",
+			"file2.js": "Y29udGVudDI=",
+			"node_modules/file3.js": "Y29udGVudDM=",
 		},
 	})
 	const json = await toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })
