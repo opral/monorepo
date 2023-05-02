@@ -6,7 +6,7 @@ import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
 import type { NodeInfoMapEntry } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
-import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
+import { vitePreprocess } from "@sveltejs/kit/vite"
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
