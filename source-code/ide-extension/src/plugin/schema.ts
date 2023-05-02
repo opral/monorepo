@@ -6,7 +6,7 @@ export const validateIdeExtensionConfig = (config: IdeExtensionConfig | undefine
 /**
  * The position from where to where the reference can be found.
  */
-const positionSchema = z.object({
+export const positionSchema = z.object({
 	start: z.object({
 		line: z.number(),
 		character: z.number(),
@@ -17,22 +17,23 @@ const positionSchema = z.object({
 	}),
 })
 
-const messageReferenceSchema = z.object({
+export const messageReferenceSchema = z.object({
 	messageId: z.string(),
 	position: positionSchema,
 })
 
-const ideExtensionSchema = z.object({
+export const ideExtensionSchema = z.object({
 	/**
 	 * Defines matchers for message references inside the code.
 	 *
 	 * @param args represents the data to conduct the search on
 	 * @returns a promise with matched message references
 	 */
-	messageReferenceMatchers: z
+	messageReferenceMatchers: z.array(z
 		.function()
 		.args(z.object({ documentText: z.string() }))
 		.returns(z.promise(z.array(messageReferenceSchema))),
+	),
 	/**
 	 * Defines the options to extract messages.
 	 */
