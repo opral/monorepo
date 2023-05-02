@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.10
+
+### Patch Changes
+
+- f1cff4f5: pass accumulated `config` to plugin config function
+
 ## 0.7.9
 
 ### Patch Changes

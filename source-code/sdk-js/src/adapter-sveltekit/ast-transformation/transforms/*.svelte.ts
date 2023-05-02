@@ -4,9 +4,9 @@ import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
-import type { NodeInfoMapEntry } from "../../../helpers/ast.js"
+import { NodeInfoMapEntry, inlangSdkJsStores } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
-import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
+import { vitePreprocess } from "@sveltejs/kit/vite"
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
@@ -39,6 +39,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
 
 	const importIdentifiers: [string, string][] = []
+	const reactiveImportIdentifiers: string[] = []
 
 	// First, we need to remove typescript statements from script tag
 	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
@@ -83,13 +84,18 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 							: undefined,
 				)[0]
 				if (importNames) importIdentifiers.push(...(importNames as [string, string][]))
+				reactiveImportIdentifiers.push(
+					...importIdentifiers.flatMap(([imported, local]) =>
+						inlangSdkJsStores.includes(imported) ? [local] : [],
+					),
+				)
 				// prefix language and i aliases with $ if reactive
 				if (!config.languageInUrl) {
 					findAstJs(
 						ast.$ast,
 						[
 							({ node }) =>
-								n.Identifier.check(node) && importIdentifiers.some(([, n]) => n === node.name),
+								n.Identifier.check(node) && reactiveImportIdentifiers.includes(node.name),
 						],
 						(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
 					)
@@ -129,10 +135,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 			// Find locations of nodes with i or language
 			const locations = findAstSvelte(
 				parsed,
-				[
-					({ node }) =>
-						n.Identifier.check(node) && !!importIdentifiers.some(([, name]) => name === node.name),
-				],
+				[({ node }) => n.Identifier.check(node) && reactiveImportIdentifiers.includes(node.name)],
 				(node) =>
 					n.Identifier.check(node) && Object.hasOwn(node, "start") && Object.hasOwn(node, "end")
 						? () => [(node as any).start, (node as any).end]

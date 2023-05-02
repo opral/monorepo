@@ -9,7 +9,9 @@ describe("transformSvelte", () => {
 			baseTestConfig,
 			`
 <script>
-	import { i, languages, switchLanguage } from "@inlang/sdk-js"
+	import { i, languages, switchLanguage } from "@inlang/sdk-js";
+	const blue = i;
+	const green = languages;
 </script>
 
 {#each languages as lang}
@@ -27,10 +29,13 @@ describe("transformSvelte", () => {
 			    i: i,
 			    languages: languages,
 			    switchLanguage: switchLanguage
-			} = getRuntimeFromContext();</script>
+			} = getRuntimeFromContext();
 
-			{#each $languages as lang}
-				<button on:click={() =>$switchLanguage(lang)}>{lang}</button>
+			const blue = $i;
+			const green = languages;</script>
+
+			{#each languages as lang}
+				<button on:click={() =>switchLanguage(lang)}>{lang}</button>
 			{/each}
 
 			<h1>{$i(\\"welcome\\")}</h1>
@@ -155,11 +160,11 @@ describe("transformSvelte", () => {
 	})
 })
 
-// NOTES
+// NOTES @stepan
 // - Can merge imports of
 //     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";
 //     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
 // - Removes ALL imports from "@inlang/sdk-js"
-// - Allows import aliasing of "import {i as ...} from '@inlang/sdk-js"
-// - Destructures all previosly imported module ALIASES from "@inlang/sdk-js" at "... = getRuntimeFromContext()"
-// - Prepends the imports ALIASES from "@inlang/sdk-js" wherever they are used in the code with a "$" in the reactive case
+// - Allows import aliasing for all imports of "import {i as iLanguage} from '@inlang/sdk-js"
+// - Destructures all previosly imported module ALIASES or MODULES from "@inlang/sdk-js" at "... = getRuntimeFromContext()"
+// - Prepends the imports "i" and "language" from "@inlang/sdk-js" wherever they are used in the code with a "$" in the reactive case

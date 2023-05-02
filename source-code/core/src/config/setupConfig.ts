@@ -19,7 +19,7 @@ export async function setupConfig(args: {
 	if (args.module.defineConfig === undefined) {
 		throw new Error(`The "defineConfig" function is missing from the "inlang.config.js" file.`)
 	}
-	const config = await args.module.defineConfig(args.env)
-	await setupPlugins({ config, env: args.env })
+	let config = await args.module.defineConfig(args.env)
+	config = await setupPlugins({ config, env: args.env })
 	return zConfig.passthrough().parse(config) as InlangConfig
 }

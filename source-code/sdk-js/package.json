@@ -13,7 +13,7 @@
 		"vite"
 	],
 	"type": "module",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -59,7 +59,7 @@
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:utils dev:plugin",
 		"build": "rm -rf dist && npm run build:utils && npm run build:plugin",
-		"dev:utils": "tsc --watch",
+		"dev:utils": "tsc --watch ./tsconfig.build.json",
 		"build:utils": "tsc --build ./tsconfig.build.json",
 		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",

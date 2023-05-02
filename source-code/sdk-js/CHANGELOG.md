@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.5
+
+### Patch Changes
+
+- f1cff4f5: automatically setup json plugin if no resource plugin is present
+
 ## 0.0.4
 
 ### Patch Changes
