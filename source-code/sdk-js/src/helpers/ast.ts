@@ -132,3 +132,5 @@ const emptyLoadFunction = `export const load = async () => {};`
 export const emptyLoadExportNodes = (
 	parseModule(emptyLoadFunction).$ast as types.namedTypes.Program
 ).body
+
+export const inlangSdkJsStores = ["i", "language"]
