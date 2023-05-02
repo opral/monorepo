@@ -50,7 +50,7 @@ export async function toJson(args: {
 		let isDirectory = false
 
 		try {
-			await args.fs.readFile(fullPath, { encoding: "utf-8" })
+			await args.fs.readFile(fullPath, { encoding: "binary" })
 		} catch (error) {
 			isDirectory = true
 		}
@@ -61,7 +61,7 @@ export async function toJson(args: {
 		} else if (isMatch(fullPath) === false) {
 			continue
 		} else {
-			const content = await args.fs.readFile(fullPath, { encoding: "utf-8" })
+			const content = await args.fs.readFile(fullPath, { encoding: "binary" })
 			if (!content) throw new Error(`${fullPath} does not exist.`)
 
 			result[fullPath.slice(1)] = btoa(content) as string
