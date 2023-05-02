@@ -39,7 +39,7 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
 		if (loadVariableDeclarator.length === 0) {
-			body.push(...emptyLoadExportNodes)
+			body.push(...emptyLoadExportNodes())
 			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
 		}
 		const optionsAst = parseExpression(withOptions ? options : "{}")
