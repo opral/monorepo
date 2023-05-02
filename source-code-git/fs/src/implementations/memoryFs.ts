@@ -130,7 +130,7 @@ function followPath(
 				target = target.get(path) ?? undefined
 			} else break
 
-			if (!target) {
+			if (target === undefined) {
 				if (!makeParent) return undefined
 				parentDir.set(path, initDir(parentDir))
 				target = parentDir.get(path) ?? undefined
@@ -141,7 +141,7 @@ function followPath(
 			if (target instanceof Map) target = target.get(path) ?? undefined
 			else break
 
-			if (!target) return undefined
+			if (target === undefined) return undefined
 		}
 	}
 
