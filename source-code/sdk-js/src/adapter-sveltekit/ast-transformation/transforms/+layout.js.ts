@@ -3,7 +3,7 @@ import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { findAstJs } from "../../../helpers/index.js"
+import { findLoadDeclaration, emptyLoadExportNodes } from "../../../helpers/ast.js"
 
 const requiredImports = `
 import { browser } from "$app/environment";
@@ -17,8 +17,6 @@ const options = `
 ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
 : undefined}
 `
-
-const emptyLoadFunction = `export const load = async () => {};`
 
 export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) return transformRootLayoutJs(config, code)
@@ -36,24 +34,13 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	const importsAst = parseModule(requiredImports)
 	deepMergeObject(ast, importsAst)
 
-	const loadMatchers: Parameters<typeof findAstJs>[1] = [
-		({ node }) => n.ExportNamedDeclaration.check(node),
-		({ node }) => n.VariableDeclaration.check(node),
-		({ node }) => n.VariableDeclarator.check(node),
-		({ node }) => n.Identifier.check(node) && node.name === "load",
-	]
-
 	if (n.Program.check(ast.$ast)) {
-		const findLoad =
-			findAstJs(ast.$ast, loadMatchers, (node) =>
-				n.Identifier.check(node) ? () => true : undefined,
-			)[0] ?? []
-		const hasLoad = findLoad.length > 0
+		const loadVariableDeclarator = findLoadDeclaration(ast.$ast)
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
-		const emptyLoadExportAst = parseModule(emptyLoadFunction)
-		if (!hasLoad && n.Program.check(emptyLoadExportAst.$ast)) {
-			body.push(...emptyLoadExportAst.$ast.body)
+		if (loadVariableDeclarator.length === 0) {
+			body.push(...emptyLoadExportNodes)
+			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
 		}
 		const optionsAst = parseExpression(withOptions ? options : "{}")
 		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutLoadWrapper", optionsAst)
@@ -61,18 +48,12 @@ const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAstJs(ast.$ast, loadMatchers, (node) => {
-			return n.Identifier.check(node)
-				? (meta) => {
-						const { parent } = meta.get(node) ?? {}
-						if (n.VariableDeclarator.check(parent) && parent.init) {
-							wrapperDeclarationAst.arguments.push(parent.init)
-							parent.init = wrapperDeclarationAst
-						}
-				  }
-				: undefined
-		})
+		for (const { node: declarator } of loadVariableDeclarator) {
+			if (declarator.init) wrapperDeclarationAst.arguments.push(declarator.init)
+			declarator.init = wrapperDeclarationAst
+		}
 	}
+
 	return generateCode(ast).code
 }
 
