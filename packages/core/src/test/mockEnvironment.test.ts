@@ -65,11 +65,11 @@ it("should work with filesystems created from volumes", async () => {
 		fs,
 		resolveFrom: "/",
 		json: {
-			"locales/en.json": JSON.stringify({ hello: "hello from en" }),
-			"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
-			"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
-			"locales/utils.js": JSON.stringify("jibberish"),
-			"main.js": "export function hello() { return 'hello' }",
+			"locales/en.json": btoa(JSON.stringify({ hello: "hello from en" })),
+			"locales/fr.json": btoa(JSON.stringify({ hello: "bonjour via fr" })),
+			"locales/de.json": btoa(JSON.stringify({ hello: "hallo von de" })),
+			"locales/utils.js": btoa(JSON.stringify("jibberish")),
+			"main.js": btoa("export function hello() { return 'hello' }"),
 		},
 	})
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
