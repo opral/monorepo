@@ -1,18 +1,60 @@
-import { z } from 'zod'
+import { z } from "zod"
 
-// TODO: rewrite all types to zodObjects
-const zLanguageNegotiationStrategy = z.any()
+const zUrlNegotiatorVariantPath = z.object({
+	type: z.literal("path"),
+	level: z.number().optional(),
+})
+
+const zUrlNegotiatorVariantDomain = z.object({
+	type: z.literal("domain"),
+	level: z.union([z.literal("tld"), z.literal("subdomain"), z.number()]).optional(),
+})
+
+const zUrlNegotiatorVariantQuery = z.object({
+	type: z.literal("query"),
+	parameter: z.string().optional(),
+})
+
+const zUrlNegotiator = z.object({
+	type: z.literal("url"),
+	variant: z.union([
+		zUrlNegotiatorVariantPath,
+		zUrlNegotiatorVariantDomain,
+		zUrlNegotiatorVariantQuery,
+	]),
+})
+
+const zAcceptLanguageHeaderNegotiator = z.object({
+	type: z.literal("accept-language-header"),
+	name: z.string().optional(),
+})
+
+const zNavigatorNegotiator = z.object({
+	type: z.literal("navigator"),
+})
+
+const zLocalStorageNegotiator = z.object({
+	type: z.literal("localStorage"),
+	key: z.string().optional(),
+})
+
+const zLanguageNegotiationStrategy = z.union([
+	zUrlNegotiator,
+	zAcceptLanguageHeaderNegotiator,
+	zNavigatorNegotiator,
+	zLocalStorageNegotiator,
+])
 
 const zConfig = z.object({
 	languageNegotiation: z.object({
 		strict: z.boolean().optional().default(false),
-		strategies: z.array(zLanguageNegotiationStrategy)
-			.min(1, 'You must define at least one language negotiation strategy.'),
-	})
+		strategies: z
+			.array(zLanguageNegotiationStrategy)
+			.min(1, "You must define at least one language negotiation strategy."),
+	}),
 })
 
-export const validateSdkConfig = (config: SdkConfig | undefined) =>
-	zConfig.parse(config)
+export const validateSdkConfig = (config: SdkConfig | undefined) => zConfig.parse(config)
 
 export type SdkConfig = {
 	languageNegotiation: {
@@ -57,14 +99,14 @@ type UrlNegotiatorVariantDomain = UrlNegotiatorVariantBase<
 	"domain",
 	{
 		level:
-		| never /* just to make formatter happy */
-		/** `www.inlang.de` => `de` */
-		| "tld"
-		/** `de.inlang.com` => `de` */
-		| "subdomain"
-		/** `de.editor.inlang.com` => 1 => `de` */
-		/** `de.example.beta.editor.inlang.com` => 4 => `de` */
-		| number
+			| never /* just to make formatter happy */
+			/** `www.inlang.de` => `de` */
+			| "tld"
+			/** `de.inlang.com` => `de` */
+			| "subdomain"
+			/** `de.editor.inlang.com` => 1 => `de` */
+			/** `de.example.beta.editor.inlang.com` => 4 => `de` */
+			| number
 	}
 >
 
@@ -119,7 +161,6 @@ type SessionStorageNegotiator = LanguageNegotiatorBase<
 >
 
 type NavigatorNegotiator = LanguageNegotiatorBase<"navigator">
-
 
 // --------------------------------
 // tests
