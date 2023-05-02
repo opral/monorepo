@@ -11,7 +11,7 @@ export default defineConfig(({ watch }) => ([
 		sourcemap: !watch,
 		dts: true,
 		splitting: false,
-		external: ['svelte/compiler'],
+		external: ['svelte/compiler', '@sveltejs/kit/vite'],
 	},
 	{
 		entryPoints: ["./src/plugin/index.ts"],
