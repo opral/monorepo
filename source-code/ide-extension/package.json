@@ -1,88 +1,88 @@
 {
-	"name": "@inlang/ide-extension",
-	"private": true,
-	"displayName": "inlang",
-	"type": "module",
-	"description": "i18n extension that makes you more productive.",
-	"publisher": "inlang",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/inlang/inlang.git"
-	},
-	"icon": "assets/icon.png",
-	"version": "0.5.3",
-	"engines": {
-		"vscode": "^1.75.0"
-	},
-	"categories": [
-		"Other",
-		"Linters",
-		"Visualization"
-	],
-	"exports": {
-		".": "./dist/ide/main.cjs",
-		"./plugin": "./dist/plugin/index.js"
-	},
-	"main": "./dist/ide/main.cjs",
-	"contributes": {
-		"commands": [
-			{
-				"command": "inlang.extractMessage",
-				"title": "Inlang: Extract Message"
-			}
-		]
-	},
-	"typesVersions": {
-		"*": {
-			"plugin": [
-				"./dist/plugin/index.d.ts"
-			]
-		}
-	},
-	"files": [
-		"./dist"
-	],
-	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:utils dev:plugin",
-		"build": "rm -rf dist && npm run build:utils && npm run build:plugin",
-		"dev:utils": "rollup --config --watch",
-		"build:utils": "rollup --config",
-		"dev:plugin": "tsup --watch",
-		"build:plugin": "tsup",
-		"package": "npx vsce package",
-		"prepackage": "node ./scripts/preparePackage.js",
-		"---- TEST ----------------------------------------------------------": "",
-		"test": "vitest run --coverage",
-		"---- LINT ----------------------------------------------------------": "",
-		"lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
-		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
-		"format": "cd ../.. && npm run format:base ./source-code/ide-extension",
-		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
-		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
-	},
-	"dependencies": {
-		"@inlang/core": "*",
-		"node-fetch": "^3.3.0",
-		"throttle-debounce": "^5.0.0"
-	},
-	"devDependencies": {
-		"@rollup/plugin-commonjs": "^24.0.1",
-		"@rollup/plugin-node-resolve": "^15.0.1",
-		"@rollup/plugin-sucrase": "^5.0.1",
-		"@types/throttle-debounce": "^5.0.0",
-		"@types/vscode": "^1.75.0",
-		"@vscode/vsce": "^2.18.0",
-		"ovsx": "^0.8.0",
-		"rollup": "^3.14.0",
-		"tsup": "^6.7.0",
-		"npm-run-all": "^4.1.5"
-	},
-	"activationEvents": [
-		"onLanguage:javascript",
-		"onLanguage:javascriptreact",
-		"onLanguage:typescript",
-		"onLanguage:typescriptreact",
-		"onLanguage:svelte"
-	]
+  "name": "vs-code-extension",
+  "private": true,
+  "displayName": "inlang",
+  "type": "module",
+  "description": "i18n extension that makes you more productive.",
+  "publisher": "inlang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inlang/inlang.git"
+  },
+  "icon": "assets/icon.png",
+  "version": "0.5.3",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Linters",
+    "Visualization"
+  ],
+  "exports": {
+    ".": "./dist/ide/main.cjs",
+    "./plugin": "./dist/plugin/index.js"
+  },
+  "main": "./dist/ide/main.cjs",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlang.extractMessage",
+        "title": "Inlang: Extract Message"
+      }
+    ]
+  },
+  "typesVersions": {
+    "*": {
+      "plugin": [
+        "./dist/plugin/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --print-label --parallel dev:extension dev:plugin",
+    "build": "rm -rf dist && npm run build:extension && npm run build:plugin",
+    "dev:extension": "rollup --config --watch",
+    "build:extension": "rollup --config",
+    "dev:plugin": "tsup --watch",
+    "build:plugin": "tsup",
+    "package": "npx vsce package",
+    "prepackage": "node ./scripts/preparePackage.js",
+    "---- TEST ----------------------------------------------------------": "",
+    "test": "vitest run --coverage",
+    "---- LINT ----------------------------------------------------------": "",
+    "lint": "cd ../.. && npm run lint:base ./source-code/ide-extension",
+    "lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/ide-extension",
+    "format": "cd ../.. && npm run format:base ./source-code/ide-extension",
+    "format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
+    "---- OTHER ---------------------------------------------------------": "",
+    "clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+  },
+  "dependencies": {
+    "@inlang/core": "*",
+    "node-fetch": "^3.3.0",
+    "throttle-debounce": "^5.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-sucrase": "^5.0.1",
+    "@types/throttle-debounce": "^5.0.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^2.18.0",
+    "ovsx": "^0.8.0",
+    "rollup": "^3.14.0",
+    "tsup": "^6.7.0",
+    "npm-run-all": "^4.1.5"
+  },
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:svelte"
+  ]
 }

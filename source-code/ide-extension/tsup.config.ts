@@ -12,8 +12,5 @@ export default defineConfig(({ watch }) => [
 		minify: !watch,
 		dts: true,
 		splitting: false,
-		// somehow `tsup` thinks that there are node internals in the plugin, but there aren't
-		// workaround: mark them as external
-		external: ["fs", "path"],
 	},
 ])
