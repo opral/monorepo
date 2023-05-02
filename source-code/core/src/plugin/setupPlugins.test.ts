@@ -68,3 +68,62 @@ it("should not fail if one plugin crashes", async () => {
 	expect(config.languages).toEqual(["en", "de"])
 	expect(console.error).toHaveBeenCalledTimes(1)
 })
+
+it("should merge config and pass to all plugins in sequence", async () => {
+	let config1: Record<string, unknown> = {}
+	let config2: Record<string, unknown> = {}
+	let config3: Record<string, unknown> = {}
+
+	const config: Record<string, unknown> = await setupPlugins({
+		config: {
+			plugins: [
+				{
+					id: 'test.1',
+					config(config) {
+						config1 = config
+
+						return {
+							test1: true
+						}
+					}
+				},
+				{
+					id: 'test.2',
+					config(config) {
+						config2 = config
+
+						return {
+							test2: true
+						}
+					}
+				},
+				{
+					id: 'test.3',
+					config(config) {
+						config3 = config
+
+						delete (config as Record<string, unknown>).test1
+
+						return {
+							test3: true
+						}
+					}
+				}
+			],
+		},
+		env: {} as any,
+	})
+
+	expect(config.test1).toBe(true)
+	expect(config.test2).toBe(true)
+	expect(config.test3).toBe(true)
+
+	expect(config1.test1).toBe(undefined)
+
+	expect(config2.test1).toBe(true)
+	expect(config2.test2).toBe(undefined)
+
+	expect(config3.test1).toBe(undefined)
+	expect(config3.test2).toBe(true)
+	expect(config3.test3).toBe(undefined)
+})
