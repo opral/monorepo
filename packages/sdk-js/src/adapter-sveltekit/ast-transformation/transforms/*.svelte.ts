@@ -6,7 +6,7 @@ import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
 import type { NodeInfoMapEntry, RunOn } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
@@ -34,26 +34,15 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 			),
 		])
 
-	// This matches either "import { i as inn } from '@inlang/sdk-js';" or "import { i } from '@inlang/sdk-js';"
-	const inlangStoreMatchers: Parameters<typeof findAstJs>[1] = [
-		({ node }) =>
-			n.ImportDeclaration.check(node) &&
-			n.Literal.check(node.source) &&
-			node.source.value === "@inlang/sdk-js",
-		({ node }) => n.ImportSpecifier.check(node),
-		// TODO match all other imports from "@inlang/sdk-js"
-		({ node }) => n.Identifier.check(node) && (node.name === "i" || node.name === "language"),
-	]
 	const requiredImports = config.languageInUrl
 		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
 		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
 
-	// First, we need to remove typescript statements from script tag
-	// While doing that we can merge the imports in the script tag
-
 	const importIdentifiers: [string, string][] = []
 
-	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false }))).code
+	// First, we need to remove typescript statements from script tag
+	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
+		.code
 
 	const processed = await preprocess(codeWithoutTypes, {
 		script: async (options) => {
@@ -62,33 +51,37 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 			})
 			const importsAst = parseModule(requiredImports)
 			if (!options.attributes.context) {
-				// Deep merge imports
+				// Deep merge imports that we need
 				deepMergeObject(ast, importsAst)
 			}
 
 			if (n.Program.check(ast.$ast)) {
-				const runOn = ((node) =>
-					n.ImportSpecifier.check(node)
-						? (meta) => {
-							const { parent } = meta.get(
-								node,
-							) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
-							const specifierIndex = parent?.specifiers?.findIndex(
-								(specifier) => specifier === node,
-							)
-							// Remove "i" and "lang" import from "@inlang/sdk-js"
-							if (specifierIndex != undefined) parent?.specifiers?.splice(specifierIndex, 1)
-							// Remove the complete import from "@inlang/sdk-js" if it is empty now
-							if (parent?.specifiers?.length === 0 && n.Program.check(ast.$ast)) {
-								const declarationIndex = ast.$ast.body.findIndex((node) => node === parent)
-								declarationIndex != undefined && ast.$ast.body.splice(declarationIndex, 1)
-							}
-							return [node.imported.name, node.local?.name ?? node.imported.name]
-						}
-						: undefined) satisfies RunOn<types.namedTypes.Node, [string, string] | undefined>
-				// TODO remove ALL imports from "@inlang/sdk-js"
 				// Remove imports "i" and "language" from "@inlang/sdk-js" but save their aliases
-				const importNames = findAstJs(ast.$ast, inlangStoreMatchers, runOn)[0]
+				const importNames = findAstJs(
+					ast.$ast,
+					[
+						({ node }) =>
+							n.ImportDeclaration.check(node) &&
+							n.Literal.check(node.source) &&
+							node.source.value === "@inlang/sdk-js",
+						({ node }) => n.ImportSpecifier.check(node),
+					],
+					(node) =>
+						n.ImportSpecifier.check(node)
+							? (meta) => {
+									const { parent } = meta.get(
+										node,
+									) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
+									// Remove the complete import from "@inlang/sdk-js" if it is empty now
+									// (We assume that imports can only be top-level)
+									if (n.Program.check(ast.$ast)) {
+										const declarationIndex = ast.$ast.body.findIndex((node) => node === parent)
+										declarationIndex != -1 && ast.$ast.body.splice(declarationIndex, 1)
+									}
+									return [node.imported.name, node.local?.name ?? node.imported.name]
+							  }
+							: undefined,
+				)[0]
 				if (importNames) importIdentifiers.push(...(importNames as [string, string][]))
 				// prefix language and i aliases with $ if reactive
 				if (!config.languageInUrl) {
@@ -101,8 +94,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 						(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
 					)
 				}
-				// TODO Insert ALL previously imported aliases from "@inlang/sdk-js" in the following assignment
-				// Insert i and language variable declarations after the injected import for getRuntimeFromContext
+				// Insert all variable declarations after the injected import for getRuntimeFromContext
 				const insertion = getRuntimeFromContextInsertion(importIdentifiers)
 				findAstJs(
 					ast.$ast,
@@ -114,11 +106,11 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 					(node) =>
 						n.ImportDeclaration.check(node)
 							? (meta) => {
-								const { parent, index } = meta.get(
-									node,
-								) as NodeInfoMapEntry<types.namedTypes.Program>
-								if (index != undefined) parent.body.splice(index + 1, 0, insertion)
-							}
+									const { parent, index } = meta.get(
+										node,
+									) as NodeInfoMapEntry<types.namedTypes.Program>
+									if (index != undefined) parent.body.splice(index + 1, 0, insertion)
+							  }
 							: undefined,
 				)
 			}
