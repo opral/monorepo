@@ -43,3 +43,5 @@ it("should be able to make a roundtrip", async () => {
 		await fs2.readFile("/node_modules/file3.js", { encoding: "utf-8" }),
 	)
 })
+
+it.todo("should be able to make a binary roundtrip")
