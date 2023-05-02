@@ -4,12 +4,10 @@ import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
 import { types } from "recast"
-import type { NodeInfoMapEntry, RunOn } from "../../../helpers/ast.js"
+import type { NodeInfoMapEntry } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 
-// the type definitions don't match
-const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
@@ -22,22 +20,7 @@ const MagicString = MagicStringImport as unknown as typeof MagicStringImport.def
 export const transformSvelte = async (config: TransformConfig, code: string): Promise<string> => {
 	const n = types.namedTypes
 	const b = types.builders
-export const transformSvelte = async (config: TransformConfig, code: string): Promise<string> => {
-	const n = types.namedTypes
-	const b = types.builders
 
-	// This creates either "const { i: inn } = getRuntimeFromContext();" or "const { i } = getRuntimeFromContext();"
-	const getRuntimeFromContextInsertion = (importIdentifiers: [string, string][]) =>
-		b.variableDeclaration("const", [
-			b.variableDeclarator(
-				b.objectPattern(
-					importIdentifiers?.map(([imported, local]) =>
-						b.property("init", b.identifier(imported), b.identifier(local)),
-					),
-				),
-				b.callExpression(b.identifier("getRuntimeFromContext"), []),
-			),
-		])
 	// This creates either "const { i: inn } = getRuntimeFromContext();" or "const { i } = getRuntimeFromContext();"
 	const getRuntimeFromContextInsertion = (importIdentifiers: [string, string][]) =>
 		b.variableDeclaration("const", [
@@ -175,6 +158,5 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 		},
 	})
 
-	return processed.code
 	return processed.code
 }
