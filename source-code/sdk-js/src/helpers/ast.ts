@@ -3,7 +3,8 @@ import type { Result } from "@inlang/core/utilities"
 import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
-import type { types } from "recast"
+import { types } from "recast"
+import { parseModule } from "magicast"
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"
@@ -106,3 +107,29 @@ const findAst = (<W>(walker: typeof jsWalk) =>
 export const findAstJs = findAst<types.namedTypes.Node | Node>(jsWalk)
 
 export const findAstSvelte = findAst<Ast>(svelteWalk)
+
+const n = types.namedTypes
+
+const loadMatchers: Parameters<typeof findAstJs>[1] = [
+	({ node }) => n.ExportNamedDeclaration.check(node),
+	({ node }) => n.VariableDeclaration.check(node),
+	({ node }) => n.VariableDeclarator.check(node),
+	({ node }) => n.Identifier.check(node) && node.name === "load",
+]
+
+export const findLoadDeclaration = (ast: types.namedTypes.Node | Node) =>
+	(findAstJs(ast, loadMatchers, (node) =>
+		n.VariableDeclarator.check(node)
+			? (meta) => {
+					return { node, meta }
+			  }
+			: undefined,
+	)[0] as {
+		node: types.namedTypes.VariableDeclarator
+	}[]) ?? []
+
+const emptyLoadFunction = `export const load = async () => {};`
+export const emptyLoadExportNodes = () =>
+	(parseModule(emptyLoadFunction).$ast as types.namedTypes.Program).body
+
+export const inlangSdkJsStores = ["i", "language"]
