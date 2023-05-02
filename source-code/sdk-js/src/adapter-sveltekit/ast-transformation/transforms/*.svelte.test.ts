@@ -44,6 +44,9 @@ describe("transformSvelte", () => {
 			languageInUrl: false,
 			sourceFileName: "test.svelte",
 			sourceMapName: "test.svelte.js",
+			languageInUrl: false,
+			sourceFileName: "test.svelte",
+			sourceMapName: "test.svelte.js",
 		}
 		const code = await transformSvelte(
 			config,
