@@ -57,7 +57,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		)
 	})
 
-	test("r/w an empty file", async() => {
+	test("r/w an empty file", async () => {
 		await fs.writeFile(`${tempDir}/file3`, "")
 		expect(await fs.readFile(`${tempDir}/file3`, { encoding: "utf-8" })).toEqual("")
 	})
