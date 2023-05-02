@@ -1,16 +1,14 @@
 import { describe, test, expect } from "vitest"
-import { validateSdkConfig } from "./schema.js"
+import { SdkConfig, validateSdkConfig } from "./schema.js"
 
 describe("validateSdkConfig", () => {
 	test("At least one strategy is required", () => {
 		expect(() => {
 			validateSdkConfig({
 				languageNegotiation: {
-					strict: true,
-					// @ts-ignore - intentionally invalid
 					strategies: [],
 				},
-			})
+			} as unknown as SdkConfig)
 		}).toThrow()
 	})
 
@@ -18,28 +16,27 @@ describe("validateSdkConfig", () => {
 		expect(() => {
 			validateSdkConfig({
 				languageNegotiation: {
-					strict: true,
-					// @ts-ignore - intentionally invalid
 					strategies: [{ something: "wrong" }],
 				},
-			})
+			} as unknown as SdkConfig)
 		}).toThrow()
 	})
 
-    test("Valid config", () => {
-        expect(
-            validateSdkConfig({
-                languageNegotiation: {
-                    strict: true,
-                    strategies: [{
-                        type: "url",
-                        variant: {
-                            type: "path",
-                        }
-                    }],
-                },
-            })
-        ).toMatchInlineSnapshot(`
+	test("Valid config", () => {
+		expect(
+			validateSdkConfig({
+				languageNegotiation: {
+					strategies: [
+						{
+							type: "url",
+							variant: {
+								type: "path",
+							},
+						},
+					],
+				},
+			}),
+		).toMatchInlineSnapshot(`
           {
             "languageNegotiation": {
               "strategies": [
@@ -50,9 +47,9 @@ describe("validateSdkConfig", () => {
                   },
                 },
               ],
-              "strict": true,
+              "strict": false,
             },
           }
         `)
-    })
+	})
 })
