@@ -38,7 +38,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 	createEffect(() => {
 		if (resources) {
 			const filteredResources = resources
-				.filter((resource) => filteredLanguages().includes(resource.languageTag.name))
+				.filter((resource) => {
+					if (filteredLanguages().length !== 0) {
+						return filteredLanguages().includes(resource.languageTag.name)
+					} else {
+						return true
+					}
+				})
 				.filter((resource) =>
 					textSearch() === ""
 						? true
@@ -54,7 +60,10 @@ export const ListHeader = (props: ListHeaderProps) => {
 						// missingMessage exception
 						const lintLanguage = report.message.match(/'([^']+)'/g)
 						if (lintLanguage?.length === 2) {
-							if (filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, ""))) {
+							if (
+								filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
+								filteredLanguages().length === 0
+							) {
 								return true
 							}
 						} else {
