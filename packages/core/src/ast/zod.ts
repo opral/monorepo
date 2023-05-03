@@ -39,7 +39,7 @@ const Placeholder = Node.extend({
 
 const Pattern = Node.extend({
 	type: z.literal("Pattern"),
-	elements: z.array(Text, Placeholder),
+	elements: z.array(Text.or(Placeholder)),
 })
 
 const Message = Node.extend({
