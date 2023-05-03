@@ -1,17 +1,41 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.6.0",
+	"version": "0.7.10",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
 		"./ast": "./dist/ast/index.js",
 		"./config": "./dist/config/index.js",
+		"./environment": "./dist/environment/index.js",
 		"./lint": "./dist/lint/index.js",
 		"./query": "./dist/query/index.js",
 		"./test": "./dist/test/index.js",
-		"./utilities": "./dist/utilities/index.js"
+		"./utilities": "./dist/utilities/index.js",
+		"./plugin": "./dist/plugin/index.js"
+	},
+	"typesVersions": {
+		"*": {
+			"ast": [
+				"./dist/ast/index.d.ts"
+			],
+			"config": [
+				"./dist/config/index.d.ts"
+			],
+			"lint": [
+				"./dist/lint/index.d.ts"
+			],
+			"query": [
+				"./dist/query/index.d.ts"
+			],
+			"test": [
+				"./dist/test/index.d.ts"
+			],
+			"utilities": [
+				"./dist/utilities/index.d.ts"
+			]
+		}
 	},
 	"files": [
 		"./dist",
@@ -37,6 +61,7 @@
 	"dependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"@inlang-git/fs": "*",
+		"deepmerge-ts": "^5.1.0",
 		"ts-dedent": "^2.2.0",
 		"zod": "^3.21.4"
 	},

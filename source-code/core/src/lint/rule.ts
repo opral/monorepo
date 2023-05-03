@@ -1,4 +1,4 @@
-import type { Config } from "../config/index.js"
+import type { InlangConfig } from "../config/index.js"
 import type * as ast from "../ast/index.js"
 import type { createReportFunction } from "./report.js"
 
@@ -9,7 +9,7 @@ export type LintRule = {
 	id: `${string}.${string}`
 	level: "error" | "warn"
 	setup: (args: {
-		config: Pick<Config, "referenceLanguage" | "languages">
+		config: Pick<InlangConfig, "referenceLanguage" | "languages">
 		report: ReturnType<typeof createReportFunction>
 	}) => MaybePromise<{
 		visitors: Visitors

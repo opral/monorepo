@@ -1,0 +1,39 @@
+diff --git a/node_modules/svelte/compiler.js b/node_modules/svelte/compiler.js
+index 268d396..bf686ab 100644
+--- a/node_modules/svelte/compiler.js
++++ b/node_modules/svelte/compiler.js
+@@ -44066,11 +44066,11 @@
+ 	    const result = new PreprocessResult(source, filename);
+ 	    // TODO keep track: what preprocessor generated what sourcemap?
+ 	    // to make debugging easier = detect low-resolution sourcemaps in fn combine_mappings
+-	    for (const process of markup) {
+-	        result.update_source(await process_markup(process, result));
+-	    }
+ 	    for (const process of script) {
+ 	        result.update_source(await process_tag('script', process, result));
++	    }
++		for (const process of markup) {
++	        result.update_source(await process_markup(process, result));
+ 	    }
+ 	    for (const preprocess of style) {
+ 	        result.update_source(await process_tag('style', preprocess, result));
+diff --git a/node_modules/svelte/compiler.mjs b/node_modules/svelte/compiler.mjs
+index 975aed0..1dab651 100644
+--- a/node_modules/svelte/compiler.mjs
++++ b/node_modules/svelte/compiler.mjs
+@@ -44060,12 +44060,12 @@ async function preprocess(source, preprocessor, options) {
+     const result = new PreprocessResult(source, filename);
+     // TODO keep track: what preprocessor generated what sourcemap?
+     // to make debugging easier = detect low-resolution sourcemaps in fn combine_mappings
+-    for (const process of markup) {
+-        result.update_source(await process_markup(process, result));
+-    }
+     for (const process of script) {
+         result.update_source(await process_tag('script', process, result));
+     }
++    for (const process of markup) {
++        result.update_source(await process_markup(process, result));
++    }
+     for (const preprocess of style) {
+         result.update_source(await process_tag('style', preprocess, result));
+     }

@@ -6,7 +6,7 @@ on:
 
   push:
     paths:
-      - "source-code-git/fs/**"
+      - "source-code-git/fs/package.json"
     branches:
       - main
 

@@ -49,9 +49,8 @@ describe("$import", async () => {
 
 	it("should import an ES module from a url", async () => {
 		const module = await $import("https://cdn.jsdelivr.net/npm/normalize-url@7.2.0/index.js")
-		// the default export is a url normalization function.
-		// see https://github.com/sindresorhus/normalize-url/
-		expect(module.default("inlang.com")).toBe("http://inlang.com")
+		const normalizeUrl = module.default
+		expect(normalizeUrl("inlang.com")).toBe("http://inlang.com")
 	})
 
 	it("should throw if a module is loaded that is not an ES module", async () => {
