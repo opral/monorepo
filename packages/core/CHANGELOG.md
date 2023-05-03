@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.12
+
+### Patch Changes
+
+- 7ed49fce: change zod pattern type union
+
 ## 0.7.11
 
 ### Patch Changes
