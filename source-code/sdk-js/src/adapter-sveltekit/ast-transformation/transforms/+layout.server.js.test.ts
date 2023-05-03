@@ -9,8 +9,8 @@ describe("transformLayoutServerJs", () => {
 			it("adds load function to an empty file", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, "", true)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initRootServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const load = initRootServerLayoutLoadWrapper().wrap(async () => {});"
+					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export const load = initRootLayoutServerLoadWrapper().wrap(async () => {});"
 				`)
 			})
 
@@ -19,9 +19,9 @@ describe("transformLayoutServerJs", () => {
 					export cont prerender = true;
 				`, true)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initRootServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export cont prerender = true;
-					export const load = initRootServerLayoutLoadWrapper().wrap(async () => {});"
+					export const load = initRootLayoutServerLoadWrapper().wrap(async () => {});"
 				`)
 			})
 
@@ -38,10 +38,10 @@ describe("transformLayoutServerJs", () => {
 					`, true)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initRootServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load: LayoutLoad = initRootServerLayoutLoadWrapper().wrap(({ locals }) => {
+						export const load: LayoutLoad = initRootLayoutServerLoadWrapper().wrap(({ locals }) => {
 							return {
 								userId: locals.userId
 							}
@@ -60,10 +60,10 @@ describe("transformLayoutServerJs", () => {
 					`, true)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initRootServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load: LayoutLoad = initRootServerLayoutLoadWrapper().wrap(async function load({ }) {
+						export const load: LayoutLoad = initRootLayoutServerLoadWrapper().wrap(async function load({ }) {
 							console.log('hi!')
 							return { }
 						})"
@@ -78,8 +78,8 @@ describe("transformLayoutServerJs", () => {
 			it.skip("adds load function to an empty file", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, "", false)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const load = initServerLayoutLoadWrapper().wrap(async () => {});"
+					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export const load = initLayoutServerLoadWrapper().wrap(async () => {});"
 				`)
 			})
 
@@ -88,9 +88,9 @@ describe("transformLayoutServerJs", () => {
 					export cont prerender = true;
 				`, false)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export cont prerender = true;
-					export const load = initServerLayoutLoadWrapper().wrap(async () => {});"
+					export const load = initLayoutServerLoadWrapper().wrap(async () => {});"
 				`)
 			})
 
@@ -107,10 +107,10 @@ describe("transformLayoutServerJs", () => {
 					`, false)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load: LayoutLoad = initServerLayoutLoadWrapper().wrap(({ locals }) => {
+						export const load: LayoutLoad = initLayoutServerLoadWrapper().wrap(({ locals }) => {
 							return {
 								userId: locals.userId
 							}
@@ -129,10 +129,10 @@ describe("transformLayoutServerJs", () => {
 					`, false)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load: LayoutLoad = initServerLayoutLoadWrapper().wrap(async function load({ }) {
+						export const load: LayoutLoad = initLayoutServerLoadWrapper().wrap(async function load({ }) {
 							console.log('hi!')
 							return { }
 						})"

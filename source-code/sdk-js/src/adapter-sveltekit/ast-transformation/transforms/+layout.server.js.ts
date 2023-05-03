@@ -5,7 +5,7 @@ import { types } from "recast"
 import { findLoadDeclaration, emptyLoadExportNodes } from "../../../helpers/ast.js"
 
 const requiredImports = `
-import { initRootServerLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
@@ -29,7 +29,7 @@ const transformRootLayoutServerJs = (config: TransformConfig, code: string) => {
 			body.push(...emptyLoadExportNodes())
 			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
 		}
-		const initRootLayoutWrapperCall = builders.functionCall("initRootServerLayoutLoadWrapper")
+		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutServerLoadWrapper")
 		const wrapperDeclarationAst = b.callExpression(
 			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
 			[],

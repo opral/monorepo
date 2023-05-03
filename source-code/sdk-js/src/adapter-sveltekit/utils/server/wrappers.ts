@@ -71,7 +71,7 @@ export const initHandleWrapper = (options: {
 
 // ------------------------------------------------------------------------------------------------
 
-export const initRootServerLayoutLoadWrapper = <
+export const initRootLayoutServerLoadWrapper = <
 	LayoutServerLoad extends Kit.ServerLoad<any, any, any, any>,
 >() => ({
 	wrap:

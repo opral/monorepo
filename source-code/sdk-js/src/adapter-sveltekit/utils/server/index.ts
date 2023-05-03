@@ -1,7 +1,7 @@
 export { type SvelteKitServerRuntime, initSvelteKitServerRuntime } from "./runtime.js"
 export {
 	initHandleWrapper,
-	initRootServerLayoutLoadWrapper,
+	initRootLayoutServerLoadWrapper,
 	initLayoutServerLoadWrapper,
 } from "./wrappers.js"
 export {
