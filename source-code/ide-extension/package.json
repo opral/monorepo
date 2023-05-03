@@ -1,5 +1,5 @@
 {
-	"name": "vs-code-extension",
+	"name": "inlang-vs-code-extension",
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",
@@ -19,7 +19,7 @@
 		"Linters",
 		"Visualization"
 	],
-	"main": "./dist/ide/main.cjs",
+	"main": "./dist/main.cjs",
 	"contributes": {
 		"commands": [
 			{
@@ -29,12 +29,9 @@
 		]
 	},
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:extension",
-		"build": "rm -rf dist && npm run build:extension",
-		"dev:extension": "rollup --config --watch",
-		"build:extension": "rollup --config",
+		"build": "rollup --config",
+		"dev": "rollup --config --watch",
 		"package": "npx vsce package",
-		"prepackage": "node ./scripts/preparePackage.js",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",
@@ -58,9 +55,7 @@
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",
 		"ovsx": "^0.8.0",
-		"rollup": "^3.14.0",
-		"tsup": "^6.7.0",
-		"npm-run-all": "^4.1.5"
+		"rollup": "^3.14.0"
 	},
 	"activationEvents": [
 		"onLanguage:javascript",

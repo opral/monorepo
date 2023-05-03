@@ -1,4 +1,4 @@
-# @inlang/ide-extension
+# inlang-vs-code-extension
 
 ## 0.5.3
 

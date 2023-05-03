@@ -9,7 +9,7 @@ import commonjs from "@rollup/plugin-commonjs"
  * Rollup is used to compile the ESM code to CJS.
  */
 export default {
-	input: "src/ide/main.ts",
+	input: "src/main.ts",
 	output: {
 		sourcemap: true,
 		// .cjs because the package.json defines "type": "module",
