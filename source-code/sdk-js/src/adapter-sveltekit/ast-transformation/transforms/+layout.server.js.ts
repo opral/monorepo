@@ -1,5 +1,4 @@
 import type { TransformConfig } from "../config.js"
-import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
@@ -44,4 +43,7 @@ const transformRootLayoutServerJs = (config: TransformConfig, code: string) => {
 	return generateCode(ast).code
 }
 
-const transformGenericLayoutServerJs = transformJs
+// TODO: implement
+const transformGenericLayoutServerJs = (config: TransformConfig, code: string) => {
+	throw new Error("currently not supported")
+}
