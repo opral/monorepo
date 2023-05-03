@@ -116,7 +116,6 @@ describe("transformHooksServerJs", () => {
 			const config: TransformConfig = {
 				...baseTestConfig,
 				languageInUrl: true,
-				isStatic: true,
 			}
 			const code = transformHooksServerJs(config, "")
 			expect(code).toMatchInlineSnapshot(`
