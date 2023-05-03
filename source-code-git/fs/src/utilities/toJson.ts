@@ -5,37 +5,30 @@ import { normalizePath } from "./normalizePath.js"
 import { assertIsAbsolutePath } from "./assertIsAbsolutePath.js"
 
 /**
- * Serializes the filesystem to a JSON that can be sent over the network.
+ * Serializes the filesystem to a JSON object that can be sent over the network.
+ * File data is base64 encoded.
  *
- * Use `cwd` to define the directory to resolve from.
+ * Use `resolveFrom` to define the directory to resolve from.
  *
- * Use `match` to define which files to include. Match uses
+ * Use `matchers` to define which files to include. Uses
  * https://github.com/axtgr/outmatch#syntax for matching.
  *
  * @example
  *   // match everything but node_modules
  *   const result = await toJson(fs, {
- * 		match: [
+ * 		matchers: [
  * 			"**\/*"
  * 			"!node_modules"
  * 		],
- * 		cwd: "/"
+ * 		resolveFrom: "/"
  * 		})
  *
- *   	>> { "file1.txt": "content", "file2.txt": "content" }
+ *   	>> { "file1.txt": "29udGVudDE=", "file2.txt": "Y29udGVudDM="" }
  *
  */
 export async function toJson(args: {
 	fs: NodeishFilesystem
 	matchers: string[]
-	/**
-	 * The path to resolve from.
-	 *
-	 * TODO: @araknast we should likely drop the cwd in favor of absolute paths everywhere.
-	 * TODO: cwd doesn't exist in the browser and will lead to confusion. I named this
-	 * TODO: `resolveFrom` now but can we come up with a name like "absolutePath"
-	 * TODO: to make it more clear what it does? `resolveFrom` might be ambigous.
-	 */
 	resolveFrom: string
 }): Promise<Record<string, string>> {
 	assertIsAbsolutePath(args.resolveFrom)
