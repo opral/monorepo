@@ -1,14 +1,19 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*", "build.js"],
+	"include": ["src/**/*", "./build.js"],
 	"compilerOptions": {
-		"lib": ["ESNext"],
-		"outDir": "dist",
-		// Not specifying node16 causes https://github.com/rollup/plugins/issues/1224#issuecomment-1242109375
-		// interestingly, extending a base config taht contains module node16 still requires explicit manual
-		// setting of module node16 here.
+		// treat as "pure" ESM module
 		"module": "Node16",
-		// for debugging
-		"sourceMap": true
+		// inlangs source code uses node16 to have first-class ESM support.
+		// read more https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#package-json-exports-imports-and-self-referencing
+		"moduleResolution": "node16",
+		// backwards compatibility for older browsers. do not remove this.
+		"target": "ES2020",
+		// enable strict type checking (recommended, reduces bugs)
+		"strict": true,
+		// esmoduleinterop is oftentimes required
+		"esModuleInterop": true,
+		"checkJs": true,
+		"allowJs": true,
+		"outDir": "dist"
 	}
 }
