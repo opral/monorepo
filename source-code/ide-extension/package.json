@@ -19,10 +19,6 @@
 		"Linters",
 		"Visualization"
 	],
-	"exports": {
-		".": "./dist/ide/main.cjs",
-		"./plugin": "./dist/plugin/index.js"
-	},
 	"main": "./dist/ide/main.cjs",
 	"contributes": {
 		"commands": [
@@ -32,23 +28,11 @@
 			}
 		]
 	},
-	"typesVersions": {
-		"*": {
-			"plugin": [
-				"./dist/plugin/index.d.ts"
-			]
-		}
-	},
-	"files": [
-		"./dist"
-	],
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:extension dev:plugin",
-		"build": "rm -rf dist && npm run build:extension && npm run build:plugin",
+		"dev": "npm-run-all --print-label --parallel dev:extension",
+		"build": "rm -rf dist && npm run build:extension",
 		"dev:extension": "rollup --config --watch",
 		"build:extension": "rollup --config",
-		"dev:plugin": "DEV=true node ./src/plugin/build.js",
-		"build:plugin": "node ./src/plugin/build.js",
 		"package": "npx vsce package",
 		"prepackage": "node ./scripts/preparePackage.js",
 		"---- TEST ----------------------------------------------------------": "",
