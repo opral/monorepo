@@ -29,9 +29,6 @@ describe("validateSdkConfig", () => {
 					strategies: [
 						{
 							type: "url",
-							variant: {
-								type: "path",
-							},
 						},
 					],
 				},

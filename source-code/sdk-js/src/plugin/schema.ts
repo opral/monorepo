@@ -78,8 +78,9 @@ const zSdkConfig = z.object({
 	}),
 })
 
-export const validateSdkConfig = (config?: SdkConfigInput): SdkConfigOutput =>
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
 	zSdkConfig.parse(config)
 
 export type SdkConfigInput = z.input<typeof zSdkConfig>
-export type SdkConfigOutput = z.output<typeof zSdkConfig>
+
+export type SdkConfig = z.output<typeof zSdkConfig>
