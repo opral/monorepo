@@ -1,6 +1,6 @@
 <div>
     <p align="center">
-        <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/main/apps/vs-code-extension/assets/readme-logo.png"/>
+        <img width="300" src="https://raw.githubusercontent.com/inlang/inlang/main/source-code/ide-extension/assets/readme-logo.png"/>
     </p>
     <h2 align="center">
         Open Source Localization Solution for Software
@@ -10,20 +10,5 @@
     </h3>
 </div>
 
-# Inlang IDE Code Extension
+# Inlang IDE Extension Plugin
 
-WORK IN PROGRESS. The editor is prioritized for now.
-
-## Features
-
-### Inline Annotations
-
-See translations directly in your code. No more back-and-forth looking into the translation files themselves.
-
-![inline annotations](https://raw.githubusercontent.com/inlang/inlang/main/apps/vs-code-extension/assets/inline-annotation.png)
-
-### Extract Messages (translations)
-
-Extract Messages (translations) via the `Inlang: Extract Message` code action.
-
-![extract message](https://raw.githubusercontent.com/inlang/inlang/main/apps/vs-code-extension/assets/extract-pattern.gif)
