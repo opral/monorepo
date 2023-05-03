@@ -1,10 +1,10 @@
-import { describe, it } from "vitest"
+import { describe, it, expect } from "vitest"
 import { dedent } from "ts-dedent"
 import type { TransformConfig } from '../config.js'
 import { transformLanguageJson } from "../transforms/[language].json.js"
 
 describe("transformLanguageJson", () => {
-	it("adds GET endpoint to an empty file", ({ expect }) => {
+	it("adds GET endpoint to an empty file", () => {
 		const code = transformLanguageJson({} as TransformConfig, "")
 		expect(code).toMatchInlineSnapshot(`
 			"
@@ -17,7 +17,7 @@ describe("transformLanguageJson", () => {
 		`)
 	})
 
-	it("adds GET endpoint to a file with arbitrary contents", ({ expect }) => {
+	it("adds GET endpoint to a file with arbitrary contents", () => {
 		const code = transformLanguageJson({} as TransformConfig, dedent`
 			import { error } from "@sveltejs/kit"
 
@@ -41,7 +41,7 @@ describe("transformLanguageJson", () => {
 	})
 
 	describe("should throw if GET endpoint is already defined", () => {
-		it("arrow function", ({ expect }) => {
+		it("arrow function", () => {
 			expect(() => transformLanguageJson({} as TransformConfig, dedent`
 				import { error } from "@sveltejs/kit"
 
@@ -49,7 +49,7 @@ describe("transformLanguageJson", () => {
 			`)).toThrowError()
 		})
 
-		it("function keyword", ({ expect }) => {
+		it("function keyword", () => {
 			expect(() => transformLanguageJson({} as TransformConfig, `
 				import { error } from "@sveltejs/kit"
 
