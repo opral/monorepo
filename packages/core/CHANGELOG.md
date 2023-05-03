@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.11
+
+### Patch Changes
+
+- 61f21074: Update zod schema
+
 ## 0.7.10
 
 ### Patch Changes
