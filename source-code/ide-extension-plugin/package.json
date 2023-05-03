@@ -17,6 +17,11 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"engines": {
 		"node": "^18"
 	},
@@ -24,7 +29,7 @@
 		"dev": "concurrently -n build,test -c auto \"npm run dev:watch\" \"npm run dev:test\"",
 		"dev:test": "vitest",
 		"dev:watch": "DEV=true node ./build.js",
-		"build": "node ./build.js",
+		"build": "node ./build.js && tsc -p tsconfig.build.json",
 		"test": "vitest run"
 	},
 	"devDependencies": {
