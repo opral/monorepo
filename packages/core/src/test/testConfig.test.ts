@@ -1,9 +1,10 @@
-import type { Config, EnvironmentFunctions } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
 import { expect, it } from "vitest"
-import { validateConfig } from "./validateConfig.js"
+import { testConfig } from "./testConfig.js"
 import { mockEnvironment } from "./mockEnvironment.js"
 import type { Language } from "@inlang/core/ast"
+import type { InlangEnvironment } from "../environment/types.js"
+import type { InlangConfig } from "../config/index.js"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
@@ -21,12 +22,12 @@ it("should succeed if the config is valid", async () => {
 		"./de.json",
 		JSON.stringify({ hello: "Hallo von der Deutschen Resource." }),
 	)
-	const [, exception] = await validateConfig({ config: await mockDefineConfig(env) })
+	const [, exception] = await testConfig({ config: await mockDefineConfig(env) })
 	expect(exception).toBeUndefined()
 })
 
 it("should fail if the config is invalid", async () => {
-	const [, exception] = await validateConfig({
+	const [, exception] = await testConfig({
 		config: {
 			// @ts-expect-error
 			referenceLanguage: 5,
@@ -39,7 +40,7 @@ it("should fail if the referenceLanguage is not included in languages", async ()
 	const env = await mockEnvironment({})
 	const config = await mockDefineConfig(env)
 	config.languages = ["de"]
-	const [, exception] = await validateConfig({
+	const [, exception] = await testConfig({
 		config,
 	})
 	expect(exception).toBeDefined()
@@ -67,7 +68,7 @@ it("should fail if the referenceLanguage is not included in languages", async ()
  */
 
 // exported for another test
-export async function mockDefineConfig(env: EnvironmentFunctions): Promise<Config> {
+export async function mockDefineConfig(env: InlangEnvironment): Promise<InlangConfig> {
 	const pluginConfig = {
 		pathPattern: "./{language}.json",
 	} satisfies PluginConfig
@@ -104,9 +105,9 @@ type PluginConfig = {
 async function readResources(
 	// merging the first argument from config (which contains all arguments)
 	// with the custom pluginConfig argument
-	args: Parameters<Config["readResources"]>[0] &
-		EnvironmentFunctions & { pluginConfig: PluginConfig },
-): ReturnType<Config["readResources"]> {
+	args: Parameters<InlangConfig["readResources"]>[0] &
+		InlangEnvironment & { pluginConfig: PluginConfig },
+): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
 	for (const language of args.config.languages) {
 		const resourcePath = args.pluginConfig.pathPattern.replace("{language}", language)
@@ -121,12 +122,12 @@ async function readResources(
  * Writing resources.
  *
  * The function merges the args from Config['readResources'] with the pluginConfig
- * and EnvironmentFunctions.
+ * and InlangEnvironment.
  */
 async function writeResources(
-	args: Parameters<Config["writeResources"]>[0] &
-		EnvironmentFunctions & { pluginConfig: PluginConfig },
-): ReturnType<Config["writeResources"]> {
+	args: Parameters<InlangConfig["writeResources"]>[0] &
+		InlangEnvironment & { pluginConfig: PluginConfig },
+): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.pluginConfig.pathPattern.replace(
 			"{language}",
