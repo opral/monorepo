@@ -1,9 +1,8 @@
 import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
-import { baseTestConfig } from './test-helpers/config.js'
+import { baseTestConfig } from "./test-helpers/config.js"
 
 describe("transformLayoutJs", () => {
-
 	test("Insert into empty file with no options", () => {
 		const code = ""
 		const config = {
@@ -81,3 +80,9 @@ export const load = async () => {};
 		`)
 	})
 })
+
+// NOTES @stepan
+// - Allows merging of already present and required imports
+// - adds an empty exported arrow function named load if not present
+// - Wraps this load function (whether present or not) with initRootLayoutLoadWrapper().wrap()
+// - Adds options to initRootLayoutLoadWrapper if necessary

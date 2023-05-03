@@ -5,6 +5,9 @@ import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
 import { types } from "recast"
 import { parseModule } from "magicast"
+import MagicStringImport from "magic-string"
+
+const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"
@@ -133,3 +136,103 @@ export const emptyLoadExportNodes = () =>
 	(parseModule(emptyLoadFunction).$ast as types.namedTypes.Program).body
 
 export const inlangSdkJsStores = ["i", "language"]
+
+// NOTES @stepan: Test this with imports on a single line or on multiple lines
+// Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
+// Returns an array with the import properties and their aliases
+export const removeSdkJsImport = (ast: types.namedTypes.Node | Node): [string, string][] =>
+	findAstJs(
+		ast,
+		[
+			({ node }) =>
+				n.ImportDeclaration.check(node) &&
+				n.Literal.check(node.source) &&
+				node.source.value === "@inlang/sdk-js",
+			({ node }) => n.ImportSpecifier.check(node),
+		],
+		(node) =>
+			n.ImportSpecifier.check(node)
+				? (meta) => {
+						const { parent } = meta.get(
+							node,
+						) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
+						// Remove the complete import from "@inlang/sdk-js"
+						// (We assume that imports can only be top-level)
+						if (n.Program.check(ast)) {
+							const declarationIndex = ast.body.findIndex((node) => node === parent)
+							declarationIndex != -1 && ast.body.splice(declarationIndex, 1)
+						}
+						return [node.imported.name, node.local?.name ?? node.imported.name]
+				  }
+				: undefined,
+	)[0] ?? []
+
+export const makeMarkupReactive = (
+	parsed: Ast,
+	s: MagicStringImport.default,
+	reactiveIdentifiers: string[],
+) => {
+	const { instance, module } = parsed
+	parsed.instance = undefined
+	parsed.module = undefined
+	const locations = findAstSvelte(
+		parsed,
+		[({ node }) => n.Identifier.check(node) && reactiveIdentifiers.includes(node.name)],
+		(node) =>
+			n.Identifier.check(node) && Object.hasOwn(node, "start") && Object.hasOwn(node, "end")
+				? () => [(node as any).start, (node as any).end]
+				: undefined,
+	)[0] as [string, string][] | undefined
+
+	//const s = new MagicString(options.content)
+	// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
+	if (locations) {
+		for (const [start] of locations) {
+			s.appendLeft(+start, "$")
+		}
+	}
+	parsed.instance = instance
+	parsed.module = module
+}
+
+export const sortMarkup = (parsed: Ast, s: MagicStringImport.default) => {
+	const { instance, module, css } = parsed
+	parsed.instance = undefined
+	parsed.module = undefined
+	parsed.css = undefined
+	const lastIndex = s.toString().length + 1
+	for (const child of parsed.html.children ?? []) {
+		s.move(child.start, child.end, lastIndex)
+	}
+	parsed.instance = instance
+	parsed.module = module
+	parsed.css = css
+}
+
+export const astHasSlot = (parsed: Ast) => {
+	const { instance, module, css } = parsed
+	parsed.instance = undefined
+	parsed.module = undefined
+	parsed.css = undefined
+	const hasSlot =
+		(
+			findAstSvelte(parsed, [({ node }) => node != undefined && node.type === "Slot"], (node) =>
+				node?.type === "Slot" ? () => true : undefined,
+			)[0] as undefined | true[]
+		)?.[0] ?? false
+	parsed.instance = instance
+	parsed.module = module
+	parsed.css = css
+	return hasSlot
+}
+
+export const makeJsReactive = (ast: types.namedTypes.Node, reactiveIdentifiers: string[]) => {
+	findAstJs(
+		ast,
+		[({ node }) => n.Identifier.check(node) && reactiveIdentifiers.includes(node.name)],
+		(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
+	)
+}
+
+export const getReactiveImportIdentifiers = (importNames: [string, string][]) =>
+	importNames.flatMap(([imported, local]) => (inlangSdkJsStores.includes(imported) ? [local] : []))

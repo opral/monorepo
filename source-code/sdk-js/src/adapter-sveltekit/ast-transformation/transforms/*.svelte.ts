@@ -2,9 +2,15 @@ import type { TransformConfig } from "../config.js"
 import { parse, preprocess } from "svelte/compiler"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { findAstJs, findAstSvelte } from "../../../helpers/index.js"
+import { findAstJs } from "../../../helpers/index.js"
 import { types } from "recast"
-import { NodeInfoMapEntry, inlangSdkJsStores } from "../../../helpers/ast.js"
+import {
+	NodeInfoMapEntry,
+	getReactiveImportIdentifiers,
+	makeJsReactive,
+	makeMarkupReactive,
+	removeSdkJsImport,
+} from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 
@@ -38,14 +44,24 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
 		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
 
-	const importIdentifiers: [string, string][] = []
 	const reactiveImportIdentifiers: string[] = []
 
 	// First, we need to remove typescript statements from script tag
 	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
 		.code
 
-	const processed = await preprocess(codeWithoutTypes, {
+	// Insert script tag if we don't have one
+	const svelteAst = parse(codeWithoutTypes)
+	// TODO @benjaminpreiss I wonder how we could include adding the empty script tag to the sourcemap
+	// TODO @benjaminpreiss Find out, why we have to add the lang="ts" attribute below... Otherwise preprocess doesn't recognize the script tag :/
+	const codeWithScriptTag = !svelteAst.instance
+		? `<script>
+// Inserted by inlang
+</script>
+${codeWithoutTypes}`
+		: codeWithoutTypes
+
+	const processed = await preprocess(codeWithScriptTag, {
 		script: async (options) => {
 			const ast = parseModule(options.content, {
 				sourceFileName: config.sourceFileName,
@@ -56,70 +72,30 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 				deepMergeObject(ast, importsAst)
 			}
 
-			if (n.Program.check(ast.$ast)) {
-				// Remove imports "i" and "language" from "@inlang/sdk-js" but save their aliases
-				const importNames = findAstJs(
-					ast.$ast,
-					[
-						({ node }) =>
-							n.ImportDeclaration.check(node) &&
-							n.Literal.check(node.source) &&
-							node.source.value === "@inlang/sdk-js",
-						({ node }) => n.ImportSpecifier.check(node),
-					],
-					(node) =>
-						n.ImportSpecifier.check(node)
-							? (meta) => {
-									const { parent } = meta.get(
-										node,
-									) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
-									// Remove the complete import from "@inlang/sdk-js" if it is empty now
-									// (We assume that imports can only be top-level)
-									if (n.Program.check(ast.$ast)) {
-										const declarationIndex = ast.$ast.body.findIndex((node) => node === parent)
-										declarationIndex != -1 && ast.$ast.body.splice(declarationIndex, 1)
-									}
-									return [node.imported.name, node.local?.name ?? node.imported.name]
-							  }
-							: undefined,
-				)[0]
-				if (importNames) importIdentifiers.push(...(importNames as [string, string][]))
-				reactiveImportIdentifiers.push(
-					...importIdentifiers.flatMap(([imported, local]) =>
-						inlangSdkJsStores.includes(imported) ? [local] : [],
-					),
-				)
-				// prefix language and i aliases with $ if reactive
-				if (!config.languageInUrl) {
-					findAstJs(
-						ast.$ast,
-						[
-							({ node }) =>
-								n.Identifier.check(node) && reactiveImportIdentifiers.includes(node.name),
-						],
-						(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
-					)
-				}
-				// Insert all variable declarations after the injected import for getRuntimeFromContext
-				const insertion = getRuntimeFromContextInsertion(importIdentifiers)
-				findAstJs(
-					ast.$ast,
-					[
-						({ node }) => n.ImportDeclaration.check(node),
-						({ node }) =>
-							n.ImportSpecifier.check(node) && node.imported.name === "getRuntimeFromContext",
-					],
-					(node) =>
-						n.ImportDeclaration.check(node)
-							? (meta) => {
-									const { parent, index } = meta.get(
-										node,
-									) as NodeInfoMapEntry<types.namedTypes.Program>
-									if (index != undefined) parent.body.splice(index + 1, 0, insertion)
-							  }
-							: undefined,
-				)
-			}
+			// Remove import "@inlang/sdk-js" but save the aliases of all imports
+			const importNames = removeSdkJsImport(ast.$ast)
+			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
+			// prefix language and i aliases with $ if reactive
+			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
+			// Insert all variable declarations after the injected import for getRuntimeFromContext
+			const insertion = getRuntimeFromContextInsertion(importNames)
+			findAstJs(
+				ast.$ast,
+				[
+					({ node }) => n.ImportDeclaration.check(node),
+					({ node }) =>
+						n.ImportSpecifier.check(node) && node.imported.name === "getRuntimeFromContext",
+				],
+				(node) =>
+					n.ImportDeclaration.check(node)
+						? (meta) => {
+								const { parent, index } = meta.get(
+									node,
+								) as NodeInfoMapEntry<types.namedTypes.Program>
+								if (index != undefined) parent.body.splice(index + 1, 0, insertion)
+						  }
+						: undefined,
+			)
 			const generated = generateCode(ast, {
 				sourceMapName: config.sourceMapName,
 			})
@@ -133,22 +109,8 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 			parsed.instance = undefined
 			parsed.module = undefined
 			// Find locations of nodes with i or language
-			const locations = findAstSvelte(
-				parsed,
-				[({ node }) => n.Identifier.check(node) && reactiveImportIdentifiers.includes(node.name)],
-				(node) =>
-					n.Identifier.check(node) && Object.hasOwn(node, "start") && Object.hasOwn(node, "end")
-						? () => [(node as any).start, (node as any).end]
-						: undefined,
-			)[0] as [string, string][] | undefined
-
 			const s = new MagicString(options.content)
-			// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
-			if (locations) {
-				for (const [start] of locations) {
-					s.appendLeft(+start, "$")
-				}
-			}
+			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			parsed.instance = instance
 			parsed.module = module
 			const map = s.generateMap({
