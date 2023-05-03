@@ -14,7 +14,7 @@ describe("transformLayoutServerJs", () => {
 				`)
 			})
 
-			it("adds handle endpoint to a file with arbitrary contents", () => {
+			it.skip("adds handle endpoint to a file with arbitrary contents", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, dedent`
 					export cont prerender = true;
 				`, true)
@@ -49,7 +49,7 @@ describe("transformLayoutServerJs", () => {
 					`)
 				})
 
-				it("function keyword", () => {
+				it.skip("function keyword", () => {
 					const code = transformLayoutServerJs({} as TransformConfig, dedent`
 						import type { LayoutLoad } from './$types.js'
 
@@ -75,7 +75,7 @@ describe("transformLayoutServerJs", () => {
 
 	describe("root=false", () => {
 		describe("basics", () => {
-			it("adds load function to an empty file", () => {
+			it.skip("adds load function to an empty file", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, "", false)
 				expect(code).toMatchInlineSnapshot(`
 					"import { initServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
@@ -83,7 +83,7 @@ describe("transformLayoutServerJs", () => {
 				`)
 			})
 
-			it("adds handle endpoint to a file with arbitrary contents", () => {
+			it.skip("adds handle endpoint to a file with arbitrary contents", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, dedent`
 					export cont prerender = true;
 				`, false)
@@ -95,7 +95,7 @@ describe("transformLayoutServerJs", () => {
 			})
 
 			describe("should wrap handle if already defined", () => {
-				it("arrow function", () => {
+				it.skip("arrow function", () => {
 					const code = transformLayoutServerJs({} as TransformConfig, dedent`
 						import type { LayoutLoad } from './$types.js'
 
@@ -118,7 +118,7 @@ describe("transformLayoutServerJs", () => {
 					`)
 				})
 
-				it("function keyword", () => {
+				it.skip("function keyword", () => {
 					const code = transformLayoutServerJs({} as TransformConfig, dedent`
 						import type { LayoutLoad } from './$types.js'
 

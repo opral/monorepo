@@ -84,7 +84,6 @@
 		"@sveltejs/kit": "^1.15.4",
 		"@types/estree": "^1.0.0",
 		"astring": "^1.8.4",
-		"dedent": "^0.7.0",
 		"estree-walker": "^3.0.3",
 		"magic-string": "^0.30.0",
 		"magicast": "^0.2.4",
