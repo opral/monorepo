@@ -62,8 +62,6 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.readFile(`${tempDir}/file3`, { encoding: "utf-8" })).toEqual("")
 	})
 
-	test.todo("encodings other than utf8")
-
 	describe("throw errors", async () => {
 		test("rm", async () => {
 			await expect(async () => await fs.rm(`${tempDir}/home/dne/dne2`)).rejects.toThrow(/ENOENT/)
