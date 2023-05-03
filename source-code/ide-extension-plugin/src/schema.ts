@@ -1,6 +1,6 @@
 import * as z from "zod"
 
-export const validateIdeExtensionConfig = (config: IdeExtensionConfig | undefined) =>
+export const validateIdeExtensionSettings = (config: IdeExtensionSettings | undefined) =>
 	ideExtensionSchema.parse(config)
 
 /**
@@ -60,4 +60,4 @@ export const ideExtensionSchema = z.object({
 	// documentSelectors: DocumentSelector[];
 })
 
-export type IdeExtensionConfig = z.TypeOf<typeof ideExtensionSchema>
+export type IdeExtensionSettings = z.TypeOf<typeof ideExtensionSchema>

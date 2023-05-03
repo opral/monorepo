@@ -1,9 +1,9 @@
 import * as z from "zod"
 import {
-	IdeExtensionConfig,
+	IdeExtensionSettings,
 	messageReferenceSchema,
 	positionSchema,
-	validateIdeExtensionConfig,
+	validateIdeExtensionSettings,
 } from "./schema.js"
 import { describe, expect, it } from "vitest"
 
@@ -25,7 +25,7 @@ describe("ideExtensionSchema", () => {
 			],
 		}
 
-		expect(() => validateIdeExtensionConfig(validConfig)).not.toThrow()
+		expect(() => validateIdeExtensionSettings(validConfig)).not.toThrow()
 	})
 
 	it("should throw an error for a config object with invalid extractMessageOptions", () => {
@@ -47,7 +47,7 @@ describe("ideExtensionSchema", () => {
 		}
 
 		expect(() =>
-			validateIdeExtensionConfig(invalidConfig as unknown as IdeExtensionConfig),
+			validateIdeExtensionSettings(invalidConfig as unknown as IdeExtensionSettings),
 		).toThrow(z.ZodError)
 	})
 
@@ -62,8 +62,8 @@ describe("ideExtensionSchema", () => {
 			],
 		}
 
-		const validatedConfig = validateIdeExtensionConfig(
-			invalidConfig as unknown as IdeExtensionConfig,
+		const validatedConfig = validateIdeExtensionSettings(
+			invalidConfig as unknown as IdeExtensionSettings,
 		)
 		await expect(() =>
 			validatedConfig.messageReferenceMatchers({ documentText: "hello" }),

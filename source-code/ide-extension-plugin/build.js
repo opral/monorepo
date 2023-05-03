@@ -9,8 +9,8 @@ import { context } from "esbuild"
 import { pluginBuildConfig } from "@inlang/core/plugin"
 
 const options = await pluginBuildConfig({
-	entryPoints: ["./src/plugin/index.js"],
-	outfile: "./dist/plugin/index.js",
+	entryPoints: ["./src/index.js"],
+	outfile: "./dist/index.js",
 	minify: true,
 })
 
