@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`transformLanguageJson > creates new file 1`] = `
+"
+import { json } from \\"@sveltejs/kit\\"
+import { getResource } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
+
+export const GET = (({ params: { language } }) =>
+	json(getResource(language) || null))
+"
+`;
