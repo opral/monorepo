@@ -75,7 +75,7 @@ describe("transformHooksServerJs", () => {
 
 				expect(code).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import type { Handle, redirect } from '@sveltejs/kit';
+					import type { Handle } from '@sveltejs/kit';
 
 					export const handle: Handle = initHandleWrapper({
 					  getLanguage: () => undefined
@@ -125,7 +125,12 @@ describe("transformHooksServerJs", () => {
 				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
 				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 				export const handle = initHandleWrapper({
-				  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
+					getLanguage: ({ url }) => url.pathname.split("/")[1],
+					initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+					redirect: {
+						throwable: redirect,
+						getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+					},
 				}).wrap(async ({ event, resolve }) => resolve(event));"
 			`)
 		})
