@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { SdkConfig, validateSdkConfig } from "./schema.js"
+import { SdkConfigInput, validateSdkConfig } from "./schema.js"
 
 describe("validateSdkConfig", () => {
 	test("At least one strategy is required", () => {
@@ -8,7 +8,7 @@ describe("validateSdkConfig", () => {
 				languageNegotiation: {
 					strategies: [],
 				},
-			} as unknown as SdkConfig)
+			} as unknown as SdkConfigInput)
 		}).toThrow()
 	})
 
@@ -18,7 +18,7 @@ describe("validateSdkConfig", () => {
 				languageNegotiation: {
 					strategies: [{ something: "wrong" }],
 				},
-			} as unknown as SdkConfig)
+			} as unknown as SdkConfigInput)
 		}).toThrow()
 	})
 
@@ -35,7 +35,7 @@ describe("validateSdkConfig", () => {
 						},
 					],
 				},
-			}),
+			} as unknown as SdkConfigInput),
 		).toMatchInlineSnapshot(`
           {
             "languageNegotiation": {

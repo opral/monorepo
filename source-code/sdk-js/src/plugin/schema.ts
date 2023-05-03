@@ -27,7 +27,7 @@ const zUrlNegotiator = z.object({
 				// zUrlNegotiatorVariantQuery, // TODO: introduce option later
 			] as any /* typecast needed because we currently only specify a single item */,
 		)
-		.default(zUrlNegotiatorVariantPath.parse({ type: "path" }))
+		.default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
 })
 
 const zCookieNegotiator = z.object({
@@ -64,7 +64,7 @@ const zLanguageNegotiationStrategy = z.union([
 
 const zSdkConfig = z.object({
 	languageNegotiation: z.object({
-		strict: z.boolean().default(false),
+		strict: z.boolean().optional().default(false),
 		strategies: z
 			.array(zLanguageNegotiationStrategy)
 			.min(1, "You must define at least one language negotiation strategy.")
@@ -75,9 +75,11 @@ const zSdkConfig = z.object({
 						...(typeof zLanguageNegotiationStrategy._type)[],
 					],
 			),
-	})
+	}),
 })
 
-export const validateSdkConfig = (config: SdkConfig | undefined) => zSdkConfig.parse(config)
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfigOutput =>
+	zSdkConfig.parse(config)
 
-export type SdkConfig = z.infer<typeof zSdkConfig>
+export type SdkConfigInput = z.input<typeof zSdkConfig>
+export type SdkConfigOutput = z.output<typeof zSdkConfig>
