@@ -81,6 +81,7 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
+		"@inlang/ide-extension-plugin": "*",
 		"@sveltejs/kit": "^1.15.4",
 		"@types/estree": "^1.0.0",
 		"astring": "^1.8.4",
