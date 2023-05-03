@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.13
+
+### Patch Changes
+
+- f3d7dc5b: fix publishing zod
+
 ## 0.7.12
 
 ### Patch Changes
