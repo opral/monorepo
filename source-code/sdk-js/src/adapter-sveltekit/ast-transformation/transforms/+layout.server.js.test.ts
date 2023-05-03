@@ -1,19 +1,145 @@
-import { describe, expect, test } from "vitest"
+import { dedent } from 'ts-dedent'
+import { describe, expect, it } from "vitest"
+import type { TransformConfig } from '../config.js'
 import { transformLayoutServerJs } from "./+layout.server.js.js"
-import { baseTestConfig } from "./test-helpers/config.js"
 
 describe("transformLayoutServerJs", () => {
-	test("Insert into empty file with no options", () => {
-		const code = ""
-		const config = {
-			...baseTestConfig,
-			languageInUrl: true,
-		}
-		const transformed = transformLayoutServerJs(config, code, true)
+	describe("root=true", () => {
+		describe("basics", () => {
+			it("adds load function to an empty file", () => {
+				const code = transformLayoutServerJs({} as TransformConfig, "", true)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export const load = initRootLayoutServerLoadWrapper().wrap(async () => {});"
+				`)
+			})
 
-		expect(transformed).toMatchInlineSnapshot(`
-			"import { initRootServerLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-			export const load = initRootServerLayoutLoadWrapper().wrap(async () => {});"
-		`)
+			it.skip("adds handle endpoint to a file with arbitrary contents", () => {
+				const code = transformLayoutServerJs({} as TransformConfig, dedent`
+					export cont prerender = true;
+				`, true)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export cont prerender = true;
+					export const load = initRootLayoutServerLoadWrapper().wrap(async () => {});"
+				`)
+			})
+
+			describe("should wrap handle if already defined", () => {
+				it("arrow function", () => {
+					const code = transformLayoutServerJs({} as TransformConfig, dedent`
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = ({ locals }) => {
+							return {
+								userId: locals.userId
+							}
+						}
+					`, true)
+
+					expect(code).toMatchInlineSnapshot(`
+						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = initRootLayoutServerLoadWrapper().wrap(({ locals }) => {
+							return {
+								userId: locals.userId
+							}
+						})"
+					`)
+				})
+
+				it.skip("function keyword", () => {
+					const code = transformLayoutServerJs({} as TransformConfig, dedent`
+						import type { LayoutLoad } from './$types.js'
+
+						export async function load({ }) {
+							console.log('hi!')
+							return { }
+						}
+					`, true)
+
+					expect(code).toMatchInlineSnapshot(`
+						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = initRootLayoutServerLoadWrapper().wrap(async function load({ }) {
+							console.log('hi!')
+							return { }
+						})"
+					`)
+				})
+			})
+		})
 	})
+
+	describe("root=false", () => {
+		describe("basics", () => {
+			it.skip("adds load function to an empty file", () => {
+				const code = transformLayoutServerJs({} as TransformConfig, "", false)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export const load = initLayoutServerLoadWrapper().wrap(async () => {});"
+				`)
+			})
+
+			it.skip("adds handle endpoint to a file with arbitrary contents", () => {
+				const code = transformLayoutServerJs({} as TransformConfig, dedent`
+					export cont prerender = true;
+				`, false)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export cont prerender = true;
+					export const load = initLayoutServerLoadWrapper().wrap(async () => {});"
+				`)
+			})
+
+			describe("should wrap handle if already defined", () => {
+				it.skip("arrow function", () => {
+					const code = transformLayoutServerJs({} as TransformConfig, dedent`
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = ({ locals }) => {
+							return {
+								userId: locals.userId
+							}
+						}
+					`, false)
+
+					expect(code).toMatchInlineSnapshot(`
+						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = initLayoutServerLoadWrapper().wrap(({ locals }) => {
+							return {
+								userId: locals.userId
+							}
+						})"
+					`)
+				})
+
+				it.skip("function keyword", () => {
+					const code = transformLayoutServerJs({} as TransformConfig, dedent`
+						import type { LayoutLoad } from './$types.js'
+
+						export async function load({ }) {
+							console.log('hi!')
+							return { }
+						}
+					`, false)
+
+					expect(code).toMatchInlineSnapshot(`
+						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						import type { LayoutLoad } from './$types.js'
+
+						export const load: LayoutLoad = initLayoutServerLoadWrapper().wrap(async function load({ }) {
+							console.log('hi!')
+							return { }
+						})"
+					`)
+				})
+			})
+		})
+	})
+
 })
