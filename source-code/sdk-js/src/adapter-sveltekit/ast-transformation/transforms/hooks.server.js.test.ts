@@ -165,5 +165,7 @@ describe("transformHooksServerJs", () => {
 		})
 	})
 
-	describe.todo("detectors", () => { })
+	describe.todo("detectors", () => {
+		// TODO
+	})
 })
