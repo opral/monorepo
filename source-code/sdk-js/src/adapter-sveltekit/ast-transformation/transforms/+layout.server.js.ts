@@ -1,12 +1,11 @@
 import type { TransformConfig } from "../config.js"
-import { transformJs } from "./*.js.js"
 import { parseModule, generateCode, builders } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
 import { findLoadDeclaration, emptyLoadExportNodes } from "../../../helpers/ast.js"
 
 const requiredImports = `
-import { initRootServerLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
@@ -30,7 +29,7 @@ const transformRootLayoutServerJs = (config: TransformConfig, code: string) => {
 			body.push(...emptyLoadExportNodes())
 			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
 		}
-		const initRootLayoutWrapperCall = builders.functionCall("initRootServerLayoutLoadWrapper")
+		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutServerLoadWrapper")
 		const wrapperDeclarationAst = b.callExpression(
 			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
 			[],
@@ -44,4 +43,7 @@ const transformRootLayoutServerJs = (config: TransformConfig, code: string) => {
 	return generateCode(ast).code
 }
 
-const transformGenericLayoutServerJs = transformJs
+// TODO: implement
+const transformGenericLayoutServerJs = (config: TransformConfig, code: string) => {
+	throw new Error("currently not supported")
+}

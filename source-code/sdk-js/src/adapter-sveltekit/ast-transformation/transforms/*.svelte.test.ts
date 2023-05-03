@@ -1,10 +1,10 @@
-import { describe, it } from "vitest"
+import { describe, it, expect } from "vitest"
 import { transformSvelte } from "./*.svelte.js"
 import { baseTestConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
 
 describe("transformSvelte", () => {
-	it("basics", async ({ expect }) => {
+	it("basics", async () => {
 		const code = await transformSvelte(
 			baseTestConfig,
 			`
@@ -43,7 +43,7 @@ describe("transformSvelte", () => {
 		`)
 	})
 
-	it("languageInUrl is true", async ({ expect }) => {
+	it("languageInUrl is true", async () => {
 		const config: TransformConfig = {
 			...baseTestConfig,
 			languageInUrl: false,
@@ -104,7 +104,7 @@ describe("transformSvelte", () => {
 		`)
 	})
 
-	it("languageInUrl is false", async ({ expect }) => {
+	it("languageInUrl is false", async () => {
 		const code = await transformSvelte(
 			baseTestConfig,
 			`
