@@ -95,7 +95,7 @@ export const initRootServerLayoutLoadWrapper = <
 
 // ------------------------------------------------------------------------------------------------
 
-export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
+export const initLayoutServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
 	wrap:
 		<Data extends Record<string, any> | void>(
 			load: (
