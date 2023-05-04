@@ -15,7 +15,7 @@ export default {
 		// .cjs because the package.json defines "type": "module",
 		// .cjs indicates that the file should not be treated as es module
 		// but commonjs instead
-		dir: "dist/ide/",
+		dir: "dist/",
 		entryFileNames: "[name].cjs",
 		chunkFileNames: "[name]-[hash].cjs",
 		format: "cjs",

@@ -16,6 +16,7 @@ export async function fromJson(args: {
 	for (const [filePath, contents] of Object.entries(json)) {
 		const path = `${resolveFrom}/${filePath}`
 		await fs.mkdir(path, { recursive: true })
-		await fs.writeFile(path, contents)
+
+		await fs.writeFile(path, atob(contents))
 	}
 }

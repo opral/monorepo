@@ -1,174 +1,86 @@
-import { z } from 'zod'
+import { z } from "zod"
 
-// TODO: rewrite all types to zodObjects
-const zLanguageNegotiationStrategy = z.any()
-
-const zConfig = z.object({
-	languageNegotiation: z.object({
-		strict: z.boolean().optional().default(false),
-		strategies: z.array(zLanguageNegotiationStrategy)
-			.min(1, 'You must define at least one language negotiation strategy.'),
-	})
+const zUrlNegotiatorVariantPath = z.object({
+	type: z.literal("path"),
+	// level: z.number().default(0), // TODO: introduce option later
+	/** `www.inlang.com/de` => 0 => `de` */
+	/** `www.inlang.com/editor/de` => 1 => `de` */
 })
 
-export const validateSdkConfig = (config: SdkConfig | undefined) =>
-	zConfig.parse(config)
+const zUrlNegotiatorVariantDomain = z.object({
+	type: z.literal("domain"),
+	level: z.union([z.literal("tld"), z.literal("subdomain"), z.number()]),
+})
 
-export type SdkConfig = {
-	languageNegotiation: {
-		strict?: boolean
-		strategies: [LanguageNegotiationStrategy, ...LanguageNegotiationStrategy[]]
-	}
-}
+const zUrlNegotiatorVariantQuery = z.object({
+	type: z.literal("query"),
+	parameter: z.string().default("lang"),
+})
 
-type LanguageNegotiatorType =
-	| "url"
-	| "cookie"
-	| "accept-language-header"
-	| "navigator"
-	| "localStorage"
-	| "sessionStorage"
+const zUrlNegotiator = z.object({
+	type: z.literal("url"),
+	variant: z
+		.union(
+			[
+				zUrlNegotiatorVariantPath,
+				// zUrlNegotiatorVariantDomain, // TODO: introduce option later
+				// zUrlNegotiatorVariantQuery, // TODO: introduce option later
+			] as any /* typecast needed because we currently only specify a single item */,
+		)
+		.default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
+})
 
-type LanguageNegotiatorBase<Type extends LanguageNegotiatorType, Settings = never> = [
-	Settings,
-] extends [never]
-	? { type: Type }
-	: Settings & { type: Type }
+const zCookieNegotiator = z.object({
+	type: z.literal("cookie"),
+	key: z.string().default("language"),
+})
 
-type LanguageNegotiationStrategy =
-	/* default */
-	| UrlNegotiator
-	| AcceptLanguageHeaderNegotiator
-	// | CookieNegotiator
-	| NavigatorNegotiator
-	| LocalStorageNegotiator
-// | SessionStorageNegotiator
+const zAcceptLanguageHeaderNegotiator = z.object({
+	type: z.literal("accept-language-header"),
+})
 
-type UrlNegotiatorVariantBase<Type, Settings> = Settings & { type: Type }
+const zNavigatorNegotiator = z.object({
+	type: z.literal("navigator"),
+})
 
-type UrlNegotiatorVariantQuery = UrlNegotiatorVariantBase<
-	"query",
-	{
-		parameter?: string
-	}
->
+const zLocalStorageNegotiator = z.object({
+	type: z.literal("localStorage"),
+	key: z.string().default("language"),
+})
 
-type UrlNegotiatorVariantDomain = UrlNegotiatorVariantBase<
-	"domain",
-	{
-		level:
-		| never /* just to make formatter happy */
-		/** `www.inlang.de` => `de` */
-		| "tld"
-		/** `de.inlang.com` => `de` */
-		| "subdomain"
-		/** `de.editor.inlang.com` => 1 => `de` */
-		/** `de.example.beta.editor.inlang.com` => 4 => `de` */
-		| number
-	}
->
+const zSessionStorageNegotiator = z.object({
+	type: z.literal("sessionStorage"),
+	key: z.string().default("language"),
+})
 
-type UrlNegotiatorVariantPath = UrlNegotiatorVariantBase<
-	"path",
-	{
-		/* default: 1 */
-		/** `www.inlang.com/de` => 1 => `de` */
-		/** `www.inlang.com/editor/de` => 2 => `de` */
-		level?: number
-	}
->
+const zLanguageNegotiationStrategy = z.union([
+	zUrlNegotiator,
+	// zCookieNegotiator, // TODO: introduce option later
+	zAcceptLanguageHeaderNegotiator,
+	zNavigatorNegotiator,
+	zLocalStorageNegotiator,
+	// zSessionStorageNegotiator, // TODO: introduce option later
+])
 
-type UrlNegotiator = LanguageNegotiatorBase<
-	"url",
-	{
-		variant?: /* default */
-		UrlNegotiatorVariantPath | UrlNegotiatorVariantDomain | UrlNegotiatorVariantQuery
-	}
->
+const zSdkConfig = z.object({
+	languageNegotiation: z.object({
+		strict: z.boolean().optional().default(false),
+		strategies: z
+			.array(zLanguageNegotiationStrategy)
+			.min(1, "You must define at least one language negotiation strategy.")
+			.transform(
+				(t) =>
+					t as [
+						typeof zLanguageNegotiationStrategy._type,
+						...(typeof zLanguageNegotiationStrategy._type)[],
+					],
+			),
+	}),
+})
 
-type AcceptLanguageHeaderNegotiator = LanguageNegotiatorBase<
-	"accept-language-header",
-	{
-		/* default: 'language' */
-		name?: string
-	}
->
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
+	zSdkConfig.parse(config)
 
-type CookieNegotiator = LanguageNegotiatorBase<
-	"cookie",
-	{
-		/* default: 'language' */
-		name?: string
-	}
->
+export type SdkConfigInput = z.input<typeof zSdkConfig>
 
-type LocalStorageNegotiator = LanguageNegotiatorBase<
-	"localStorage",
-	{
-		/* default: 'language' */
-		name?: string
-	}
->
-
-type SessionStorageNegotiator = LanguageNegotiatorBase<
-	"sessionStorage",
-	{
-		/* default: 'language' */
-		name?: string
-	}
->
-
-type NavigatorNegotiator = LanguageNegotiatorBase<"navigator">
-
-
-// --------------------------------
-// tests
-
-// const sdKConfig1: SdkConfig = {}
-
-// const sdKConfig2: SdkConfig = {
-// 	languageNegotiation: {},
-// }
-// const sdKConfig3: SdkConfig = {
-// 	languageNegotiation: {
-// 		strategies: [],
-// 	},
-// }
-// const sdKConfig4: SdkConfig = {
-// 	languageNegotiation: {
-// 		strategies: [
-// 			{
-// 				type: "url",
-// 			},
-// 		],
-// 	},
-// }
-
-// const sdKConfig5: SdkConfig = {
-// 	languageNegotiation: {
-// 		strict: true,
-// 		strategies: [
-// 			{
-// 				type: "url",
-// 				variant: {
-// 					type: 'query',
-// 					parameter: 'lang'
-// 				}
-// 			}
-// 		],
-// 	},
-// }
-
-// const sdKConfig6: SdkConfig = {
-// 	languageNegotiation: {
-// 		strategies: [
-// 			{
-// 				type: "url",
-// 				variant: {
-// 					type: "domain",
-// 					level: 1
-// 				}
-// 			}
-// 		],
-// 	},
-// }
+export type SdkConfig = z.output<typeof zSdkConfig>
