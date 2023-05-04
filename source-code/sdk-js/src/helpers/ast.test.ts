@@ -6,11 +6,11 @@ import { convertExportedFunctionExpression } from "./ast.js"
 describe("convert arrow to function expression", () => {
 	it("converts a basic function", () => {
 		const code = dedent`
-            export function handle({ event, resolve }) {
-                console.log('TADAA!')
-                return resolve(event)
-            }
-        `
+			export function handle({ event, resolve }) {
+					console.log('TADAA!')
+					return resolve(event)
+			}
+		`
 		const codeAst = parse(code)
 		convertExportedFunctionExpression(codeAst, "handle")
 		const result = print(codeAst)

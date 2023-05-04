@@ -20,23 +20,23 @@ describe("transformHooksServerJs", () => {
 			const code = transformHooksServerJs(
 				{} as TransformConfig,
 				dedent`
-				import * as Sentry from '@sentry/node';
-				import crypto from 'crypto';
+					import * as Sentry from '@sentry/node';
+					import crypto from 'crypto';
 
-				Sentry.init.skip({/*...*/})
+					Sentry.init.skip({/*...*/})
 
-				/** @type {import('@sveltejs/kit').HandleServerError} */
-				export async function handleError({ error, event }) {
-					const errorId = crypto.randomUUID();
-					// example integration with https://sentry.io/
-					Sentry.captureException(error, { event, errorId });
+					/** @type {import('@sveltejs/kit').HandleServerError} */
+					export async function handleError({ error, event }) {
+						const errorId = crypto.randomUUID();
+						// example integration with https://sentry.io/
+						Sentry.captureException(error, { event, errorId });
 
-					return {
-						message: 'Whoops!',
-						errorId
-					};
-				}
-			`,
+						return {
+							message: 'Whoops!',
+							errorId
+						};
+					}
+				`,
 			)
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
@@ -66,17 +66,17 @@ describe("transformHooksServerJs", () => {
 				const code = transformHooksServerJs(
 					{} as TransformConfig,
 					dedent`
-					import type { Handle } from '@sveltejs/kit'
+						import type { Handle } from '@sveltejs/kit'
 
-					export const handle: Handle = ({ event, resolve }) => {
+						export const handle: Handle = ({ event, resolve }) => {
 
-						event.locals = {
-							userId: 123
+							event.locals = {
+								userId: 123
+							}
+
+							return resolve(event)
 						}
-
-						return resolve(event)
-					}
-				`,
+					`,
 				)
 
 				expect(code).toMatchInlineSnapshot(`
@@ -100,11 +100,11 @@ describe("transformHooksServerJs", () => {
 				const code = transformHooksServerJs(
 					{} as TransformConfig,
 					dedent`
-					export function handle({ event, resolve }) {
-						console.log('TADAA!')
-						return resolve(event)
-					}
-				`,
+						export function handle({ event, resolve }) {
+							console.log('TADAA!')
+							return resolve(event)
+						}
+					`,
 				)
 
 				expect(code).toMatchInlineSnapshot(`
