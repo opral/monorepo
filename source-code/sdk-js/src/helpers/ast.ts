@@ -219,50 +219,6 @@ const inlangSdkJsStores = ["i", "language"]
 export const getReactiveImportIdentifiers = (importNames: [string, string][]) =>
 	importNames.flatMap(([imported, local]) => (inlangSdkJsStores.includes(imported) ? [local] : []))
 
-export const getExportedFunctionMatchers = (ast: types.namedTypes.Node, name: string) => {
-	const arrowFunctionMatchers: Parameters<typeof findAstJs>[1] = [
-		({ node }) => n.ExportNamedDeclaration.check(node),
-		({ node }) => n.VariableDeclaration.check(node),
-		({ node }) => n.VariableDeclarator.check(node),
-		({ node }) => n.Identifier.check(node) && node.name === name,
-	]
-	const hasArrowFunction = findAstJs(ast, arrowFunctionMatchers, (node) =>
-		n.Identifier.check(node) ? () => true : undefined,
-	)[0]?.every((v) => v === true)
-	if (hasArrowFunction)
-		return { found: true, matchers: arrowFunctionMatchers, type: "VariableDeclaration" }
-	return { found: false, matchers: arrowFunctionMatchers, type: "VariableDeclaration" }
-}
-
-export const convertExportedFunctionExpression = (ast: types.namedTypes.Node, name: string) => {
-	const functionMatchers: Parameters<typeof findAstJs>[1] = [
-		({ node }) => n.ExportNamedDeclaration.check(node),
-		({ node }) => n.FunctionDeclaration.check(node),
-		({ node }) => n.Identifier.check(node) && node.name === name,
-	]
-	findAstJs(ast, functionMatchers, (node) =>
-		n.ExportNamedDeclaration.check(node)
-			? () => {
-					if (n.FunctionDeclaration.check(node.declaration)) {
-						const functionDeclarationAst = node.declaration
-						const arrowFunction = b.variableDeclaration("const", [
-							b.variableDeclarator(
-								b.identifier(name),
-								b.arrowFunctionExpression.from({
-									expression: functionDeclarationAst.expression ?? false,
-									async: functionDeclarationAst.async ?? false,
-									params: functionDeclarationAst.params,
-									body: functionDeclarationAst.body,
-								}),
-							),
-						])
-						node.declaration = arrowFunction
-					}
-			  }
-			: undefined,
-	)[0]
-}
-
 // Taken from mozilla docs: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Whitespace#whitespace_helper_functions
 function is_all_ws(s: string) {
 	return !/[^\t\n\r ]/.test(s)
@@ -275,4 +231,79 @@ export const htmlIsEmpty = (htmlAst: Ast["html"]) => {
 			(templateNode.type === "Text" && is_all_ws(templateNode.data)) ||
 			templateNode.type === "Comment",
 	)
+}
+
+const functionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+	({ node }) => n.FunctionDeclaration.check(node),
+	({ node }) => n.Identifier.check(node) && node.name === name,
+]
+
+const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+	({ node }) => n.VariableDeclaration.check(node),
+	({ node }) =>
+		n.VariableDeclarator.check(node) && n.Identifier.check(node.id) && node.id.name === name,
+	({ node }) => n.ArrowFunctionExpression.check(node),
+]
+
+export const getArrowOrFunction = (ast: types.namedTypes.Node, name: string) => {
+	const arrowFunctionExpressionSearchResults = findAstJs(ast, arrowFunctionMatchers(name), (node) =>
+		n.ArrowFunctionExpression.check(node) ? () => node : undefined,
+	)[0]
+	const functionDeclarationSearchResults = findAstJs(ast, functionMatchers(name), (node) =>
+		n.FunctionDeclaration.check(node) ? () => node : undefined,
+	)[0] as
+		| [types.namedTypes.FunctionDeclaration, ...types.namedTypes.FunctionDeclaration[]]
+		| undefined
+	const arrowFunctionExpression =
+		arrowFunctionExpressionSearchResults && arrowFunctionExpressionSearchResults.length > 0
+			? (arrowFunctionExpressionSearchResults[0] as types.namedTypes.ArrowFunctionExpression)
+			: undefined
+	const functionDeclaration =
+		functionDeclarationSearchResults && functionDeclarationSearchResults.length > 0
+			? b.functionExpression.from({
+					async: functionDeclarationSearchResults[0].async,
+					body: functionDeclarationSearchResults[0].body,
+					params: functionDeclarationSearchResults[0].params,
+					generator: functionDeclarationSearchResults[0].generator,
+					id: functionDeclarationSearchResults[0].id,
+			  })
+			: undefined
+	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression(
+		[
+			b.objectPattern([
+				b.property("init", b.identifier("event"), b.identifier("event")),
+				b.property("init", b.identifier("resolve"), b.identifier("resolve")),
+			]),
+		],
+		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
+	)
+	return arrowFunctionExpression ?? functionDeclaration ?? emptyArrowFunctionDeclaration
+}
+
+export const replaceOrAddExportNamed = (
+	ast: types.namedTypes.Program,
+	name: string,
+	replacementAst: types.namedTypes.ExportNamedDeclaration,
+) => {
+	const runOn = ((node) =>
+		n.ExportNamedDeclaration.check(node)
+			? (meta) => {
+					const { index } = meta.get(node) as NodeInfoMapEntry<types.namedTypes.Program>
+					if (index != undefined) ast.body.splice(index, 1, replacementAst)
+					return true
+			  }
+			: undefined) satisfies RunOn<types.namedTypes.Node, true | void>
+	const functionWasReplacedResult = findAstJs(ast, functionMatchers(name), runOn)[0] as
+		| true[]
+		| undefined
+	const functionWasReplaced =
+		functionWasReplacedResult != undefined && functionWasReplacedResult.length > 0
+	if (!functionWasReplaced) {
+		const arrowFunctionWasReplacedResult = findAstJs(ast, arrowFunctionMatchers(name), runOn)[0] as
+			| true[]
+			| undefined
+		const arrowFunctionWasReplaced =
+			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
+		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
+	}
 }

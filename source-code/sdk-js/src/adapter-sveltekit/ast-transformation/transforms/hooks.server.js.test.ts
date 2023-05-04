@@ -9,10 +9,16 @@ describe("transformHooksServerJs", () => {
 		it("adds handle function to an empty file", () => {
 			const code = transformHooksServerJs({} as TransformConfig, "")
 			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				export const handle = initHandleWrapper({
-				  getLanguage: () => undefined
-				}).wrap(async ({ event, resolve }) => resolve(event));"
+"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+
+export const handle = initHandleWrapper({
+  getLanguage: () => undefined
+}).wrap((
+  {
+    event: event,
+    resolve: resolve
+  }
+) => resolve(event));"
 			`)
 		})
 
@@ -39,25 +45,32 @@ describe("transformHooksServerJs", () => {
 				`,
 			)
 			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				import * as Sentry from '@sentry/node';
-				import crypto from 'crypto';
+"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+import * as Sentry from '@sentry/node';
+import crypto from 'crypto';
 
-				Sentry.init.skip({/*...*/})
+Sentry.init.skip({/*...*/})
 
-				/** @type {import('@sveltejs/kit').HandleServerError} */
-				export async function handleError({ error, event }) {
-					const errorId = crypto.randomUUID();
-					// example integration with https://sentry.io/
-					Sentry.captureException(error, { event, errorId });
+/** @type {import('@sveltejs/kit').HandleServerError} */
+export async function handleError({ error, event }) {
+	const errorId = crypto.randomUUID();
+	// example integration with https://sentry.io/
+	Sentry.captureException(error, { event, errorId });
 
-					return {
-						message: 'Whoops!',
-						errorId
-					};
-				}export const handle = initHandleWrapper({
-				  getLanguage: () => undefined
-				}).wrap(async ({ event, resolve }) => resolve(event));"
+	return {
+		message: 'Whoops!',
+		errorId
+	};
+}
+
+export const handle = initHandleWrapper({
+  getLanguage: () => undefined
+}).wrap((
+    {
+        event: event,
+        resolve: resolve
+    }
+) => resolve(event));"
 			`)
 		})
 
@@ -83,7 +96,7 @@ describe("transformHooksServerJs", () => {
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					import type { Handle } from '@sveltejs/kit'
 
-					export const handle: Handle = initHandleWrapper({
+					export const handle = initHandleWrapper({
 					  getLanguage: () => undefined
 					}).wrap(({ event, resolve }) => {
 
@@ -92,7 +105,7 @@ describe("transformHooksServerJs", () => {
 						}
 
 						return resolve(event)
-					})"
+					});"
 				`)
 			})
 
@@ -108,13 +121,14 @@ describe("transformHooksServerJs", () => {
 				)
 
 				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const handle = initHandleWrapper({
-					  getLanguage: () => undefined
-					}).wrap(({ event, resolve }) => {
-						console.log('TADAA!')
-						return resolve(event)
-					});"
+"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+
+export const handle = initHandleWrapper({
+  getLanguage: () => undefined
+}).wrap(function handle({ event, resolve }) {
+	console.log('TADAA!')
+	return resolve(event)
+});"
 				`)
 			})
 		})
@@ -133,6 +147,7 @@ describe("transformHooksServerJs", () => {
 				import { redirect } from \\"@sveltejs/kit\\";
 				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
 				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+				
 				export const handle = initHandleWrapper({
 				  getLanguage: ({ url }) => url.pathname.split.skip(\\"/\\")[1],
 				  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
@@ -141,7 +156,12 @@ describe("transformHooksServerJs", () => {
 				  throwable: redirect,
 				  getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 				  }
-				}).wrap(async ({ event, resolve }) => resolve(event));"
+				}).wrap((
+				  {
+				    event: event,
+				    resolve: resolve
+				  }
+				) => resolve(event));"
 			`)
 		})
 
@@ -154,9 +174,15 @@ describe("transformHooksServerJs", () => {
 			const code = transformHooksServerJs(config, "")
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+
 				export const handle = initHandleWrapper({
 				  getLanguage: ({ url }) => url.pathname.split.skip(\\"/\\")[1]
-				}).wrap(async ({ event, resolve }) => resolve(event));"
+				}).wrap((
+				  {
+				    event: event,
+				    resolve: resolve
+				  }
+				) => resolve(event));"
 			`)
 		})
 
@@ -168,9 +194,15 @@ describe("transformHooksServerJs", () => {
 			const code = transformHooksServerJs(config, "")
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+
 				export const handle = initHandleWrapper({
 				  getLanguage: () => undefined
-				}).wrap(async ({ event, resolve }) => resolve(event));"
+				}).wrap((
+				  {
+				    event: event,
+				    resolve: resolve
+				  }
+				) => resolve(event));"
 			`)
 		})
 	})

@@ -2,11 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { types } from "recast"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { findAstJs } from "../../../helpers/index.js"
-import {
-	convertExportedFunctionExpression,
-	getExportedFunctionMatchers,
-} from "../../../helpers/ast.js"
+import { getArrowOrFunction, replaceOrAddExportNamed } from "../../../helpers/ast.js"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -39,8 +35,6 @@ getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 `) +
 	"}"
 
-const emptyHandleFunction = `export const handle = async ({ event, resolve }) => resolve(event);`
-
 export const transformHooksServerJs = (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders
@@ -51,23 +45,30 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const importsAst = parseModule(imports)
 	deepMergeObject(ast, importsAst)
 
-	convertExportedFunctionExpression(ast.$ast, "handle")
-	const matchers = getExportedFunctionMatchers(ast.$ast, "handle")
+	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "handle")
+	const optionsAst = parseExpression(options(config))
+	const initHandleWrapperCall = builders.functionCall("initHandleWrapper", optionsAst)
+	const wrapperDeclarationAst = b.callExpression(
+		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
+		[arrowOrFunctionNode],
+	)
+	const exportAst = b.exportNamedDeclaration(
+		b.variableDeclaration("const", [
+			b.variableDeclarator(b.identifier("handle"), wrapperDeclarationAst),
+		]),
+	)
 
 	if (n.Program.check(ast.$ast)) {
-		const hasHandle = matchers.found
+		// Replace or add current export handle
+		replaceOrAddExportNamed(ast.$ast, "handle", exportAst)
+		/* const hasHandle = matchers.found
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
 		const emptyHandleExportAst = parseModule(emptyHandleFunction)
 		if (!hasHandle && n.Program.check(emptyHandleExportAst.$ast)) {
 			body.push(...emptyHandleExportAst.$ast.body)
 		}
-		const optionsAst = parseExpression(options(config))
-		const initHandleWrapperCall = builders.functionCall("initHandleWrapper", optionsAst)
-		const wrapperDeclarationAst = b.callExpression(
-			b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
-			[],
-		)
+
 		findAstJs(ast.$ast, matchers.matchers, (node) =>
 			n.Identifier.check(node)
 				? (meta) => {
@@ -78,7 +79,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 						}
 				  }
 				: undefined,
-		)
+		) */
 	}
 	return generateCode(ast).code
 }
