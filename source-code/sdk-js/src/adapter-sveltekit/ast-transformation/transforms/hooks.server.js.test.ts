@@ -129,20 +129,20 @@ describe("transformHooksServerJs", () => {
 			}
 			const code = transformHooksServerJs(config, "")
 			expect(code).toMatchInlineSnapshot(`
-"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-import { redirect } from \\"@sveltejs/kit\\";
-import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
-import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-export const handle = initHandleWrapper({
-  getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
-  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+				"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+				import { redirect } from \\"@sveltejs/kit\\";
+				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
+				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+				export const handle = initHandleWrapper({
+				  getLanguage: ({ url }) => url.pathname.split.skip(\\"/\\")[1],
+				  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 
-  redirect: {
-  throwable: redirect,
-  getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
-  }
-}).wrap(async ({ event, resolve }) => resolve(event));"
-`)
+				  redirect: {
+				  throwable: redirect,
+				  getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+				  }
+				}).wrap(async ({ event, resolve }) => resolve(event));"
+			`)
 		})
 
 		it("languageInUrl and isStatic", () => {
