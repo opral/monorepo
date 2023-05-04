@@ -7,7 +7,7 @@ type Directory = Map<string, Inode>
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
 	const fsRoot = initDir(new Map())
-	const specialPaths = ["", ".", ".."]
+	const specialPaths = ["/", "", ".", ".."]
 
 	return {
 		writeFile: async function (
@@ -106,6 +106,7 @@ function initDir(parentDir: Directory) {
 	// Since these only exist internaly, there shouldn't be issues
 	// with serialization
 	const dir = new Map()
+	dir.set("/", dir)
 	dir.set("", dir)
 	dir.set(".", dir)
 	dir.set("..", parentDir)
@@ -150,12 +151,12 @@ async function getDirname(path: string): Promise<string> {
 		.split("/")
 		.filter((x) => !["", "."].includes(x))
 		.slice(0, -1)
-		.join("/")
+		.join("/") ?? path
 }
 
 async function getBasename(path: string): Promise<string> {
 	return path
 		.split("/")
 		.filter((x) => !["", ".", ".."].includes(x))
-		.at(-1)!
+		.at(-1) ?? path
 }
