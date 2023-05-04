@@ -94,9 +94,12 @@ ${codeWithoutTypes}`
 			// We need AT LEAST the language declaration for later.
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			const importNames = removeSdkJsImport(ast.$ast)
-			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
 			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
 				importNames?.push(["language", "language"])
+			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
+			const reactiveImportNames = importNames.filter(([, local]) =>
+				reactiveImportIdentifiers.includes(local),
+			)
 			if (!options.attributes.context) {
 				// Deep merge imports that we need
 				for (const importAst of requiredImportsAsts) {
@@ -116,21 +119,23 @@ ${codeWithoutTypes}`
 					b.callExpression(b.identifier("getRuntimeFromData"), [b.identifier("data")]),
 				]),
 			)
-			const initImportedVariablesAst = b.expressionStatement(
-				b.assignmentExpression(
-					"=",
-					b.objectPattern(
-						importNames.map(([imported, local]) =>
-							b.property("init", b.identifier(imported), b.identifier(local)),
+			const initImportedVariablesAst = (importNames: [string, string][]) =>
+				b.expressionStatement(
+					b.assignmentExpression(
+						"=",
+						b.objectPattern(
+							importNames.map(([imported, local]) =>
+								b.property("init", b.identifier(imported), b.identifier(local)),
+							),
 						),
+						b.callExpression(b.identifier("getRuntimeFromContext"), []),
 					),
-					b.callExpression(b.identifier("getRuntimeFromContext"), []),
-				),
-			)
-			const nonReactiveLabeledStatementAst = b.labeledStatement(
-				b.identifier("$"),
-				b.blockStatement([addRuntimeToContextAst, initImportedVariablesAst]),
-			)
+				)
+			const nonReactiveLabeledStatementAst = (importNames: [string, string][]) =>
+				b.labeledStatement(
+					b.identifier("$"),
+					b.blockStatement([addRuntimeToContextAst, initImportedVariablesAst(importNames)]),
+				)
 			localLanguageName =
 				importNames.find(([imported]) => imported === "language")?.[1] ?? "language"
 			const reactiveLabeledStatementAst = b.labeledStatement(
@@ -195,8 +200,10 @@ ${codeWithoutTypes}`
 					exportLetDataExportAst,
 					variableDeclarationAst,
 					addRuntimeToContextAst,
-					initImportedVariablesAst,
-					config.languageInUrl ? nonReactiveLabeledStatementAst : reactiveLabeledStatementAst,
+					initImportedVariablesAst(importNames),
+					config.languageInUrl
+						? nonReactiveLabeledStatementAst(reactiveImportNames)
+						: reactiveLabeledStatementAst,
 				)
 			}
 
@@ -218,7 +225,7 @@ ${codeWithoutTypes}`
 					!config.languageInUrl ? "$" : ""
 				}${localLanguageName}}`,
 			)
-			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
+			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
 			s.append((insertSlot ? `<slot />` : ``) + `{/${!config.languageInUrl ? "if" : "key"}}`)
 			const map = s.generateMap({
