@@ -11,27 +11,31 @@ describe("toJson", async () => {
 
 	// required to align with the fromJson function.
 	it("should not prefix the path with a slash", async () => {
-		const result = await toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })
+		const result = await toJson({
+			fs,
+			matchers: ["**/*"],
+			resolveFrom: "/",
+		})
 		expect(result).toEqual({
-			"file1.txt": "content1",
-			"file2.js": "content2",
-			"node_modules/file3.js": "content3",
+			"file1.txt": "Y29udGVudDE=",
+			"file2.js": "Y29udGVudDI=",
+			"node_modules/file3.js": "Y29udGVudDM=",
 		})
 	})
 
 	it("should exclude negated matchers", async () => {
 		const result = await toJson({ fs, matchers: ["**/*", "!**/node_modules/*"], resolveFrom: "/" })
 		expect(result).toEqual({
-			"file1.txt": "content1",
-			"file2.js": "content2",
+			"file1.txt": "Y29udGVudDE=",
+			"file2.js": "Y29udGVudDI=",
 		})
 	})
 
 	it("should match be able to only match specific file endings", async () => {
 		const result = await toJson({ fs, matchers: ["**/*.js"], resolveFrom: "/" })
 		expect(result).toEqual({
-			"file2.js": "content2",
-			"node_modules/file3.js": "content3",
+			"file2.js": "Y29udGVudDI=",
+			"node_modules/file3.js": "Y29udGVudDM=",
 		})
 	})
 })
