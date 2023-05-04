@@ -1,2 +1,2 @@
-export { Config, EnvironmentFunctions, DefineConfig } from "./schema.js"
-export { initialize$import } from "./environment-functions/$import.js"
+export type { InlangConfig, InlangConfigModule, DefineConfig } from "./schema.js"
+export { setupConfig } from "./setupConfig.js"

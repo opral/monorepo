@@ -6,8 +6,14 @@ import type { Detector } from "../../../detectors/types.js"
 import type { DataPayload } from "../shared/wrappers.js"
 import { initSvelteKitServerRuntime, SvelteKitServerRuntime } from "./runtime.js"
 import { addRuntimeToLocals, getRuntimeFromLocals, languages, referenceLanguage } from "./state.js"
+import { sequence } from "@sveltejs/kit/hooks"
 
 // ------------------------------------------------------------------------------------------------
+
+type WrappedHandle = (
+	input: Parameters<Kit.Handle>[0],
+	runtime: SvelteKitServerRuntime,
+) => ReturnType<Kit.Handle>
 
 export const initHandleWrapper = (options: {
 	getLanguage: (event: Kit.RequestEvent) => Language | undefined
@@ -17,60 +23,55 @@ export const initHandleWrapper = (options: {
 		getPath: (event: Kit.RequestEvent, language: Language) => URL | string
 	}
 }) => ({
-	wrap:
-		(
-			handle: (
-				input: Parameters<Kit.Handle>[0],
-				runtime: SvelteKitServerRuntime,
-			) => ReturnType<Kit.Handle>,
-		) =>
-		async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
-			const pathname = event.url.pathname as RelativeUrl
-			if (pathname.startsWith("/inlang")) return resolve(event)
+	wrap: (handle: WrappedHandle) => {
+		let runtime: SvelteKitServerRuntime
 
-			let language = options.getLanguage(event)
-			if (!language || !languages.includes(language)) {
-				if (options.redirect) {
-					const detectedLanguage = await detectLanguage(
-						{ referenceLanguage, languages },
-						...(options.initDetectors ? options.initDetectors(event) : []),
-					)
+		return sequence(
+			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
+				const pathname = event.url.pathname as RelativeUrl
+				if (pathname.startsWith("/inlang")) return resolve(event)
 
-					throw options.redirect.throwable(
-						307,
-						options.redirect.getPath(event, detectedLanguage).toString(),
-					)
+				let language = options.getLanguage(event)
+				if (!language || !languages.includes(language)) {
+					if (options.redirect) {
+						const detectedLanguage = await detectLanguage(
+							{ referenceLanguage, languages },
+							...(options.initDetectors ? options.initDetectors(event) : []),
+						)
+
+						throw options.redirect.throwable(
+							307,
+							options.redirect.getPath(event, detectedLanguage).toString(),
+						)
+					}
+
+					language = undefined
 				}
 
-				language = undefined
-			}
+				runtime = initSvelteKitServerRuntime({
+					referenceLanguage,
+					languages,
+					language: language!,
+				})
 
-			const runtime = initSvelteKitServerRuntime({
-				referenceLanguage,
-				languages,
-				language: language!,
-			})
+				addRuntimeToLocals(event.locals, runtime)
 
-			addRuntimeToLocals(event.locals, runtime)
-
-			const patchedResolve: typeof resolve = language
-				? (event, opts?) =>
-						resolve(event, {
-							...opts,
-							transformPageChunk: async (input) => {
-								const html = (await opts?.transformPageChunk?.(input)) || input.html
+				return resolve(event, {
+					transformPageChunk: language
+						? async ({ html }) => {
 								return html.replace("<html", `<html lang="${language}"`)
-							},
-						})
-				: resolve
-
-			return handle({ event, resolve: patchedResolve }, runtime)
-		},
+						  }
+						: undefined,
+				})
+			},
+			(input) => (handle as WrappedHandle)(input, runtime),
+		)
+	},
 })
 
 // ------------------------------------------------------------------------------------------------
 
-export const initRootServerLayoutLoadWrapper = <
+export const initRootLayoutServerLoadWrapper = <
 	LayoutServerLoad extends Kit.ServerLoad<any, any, any, any>,
 >() => ({
 	wrap:
@@ -94,7 +95,7 @@ export const initRootServerLayoutLoadWrapper = <
 
 // ------------------------------------------------------------------------------------------------
 
-export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
+export const initLayoutServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
 	wrap:
 		<Data extends Record<string, any> | void>(
 			load: (

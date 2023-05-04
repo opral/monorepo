@@ -1,15 +1,15 @@
 import { expect, it } from "vitest"
-import { fs as memfs, Volume } from "memfs"
+import { createMemoryFs, fromJson } from "@inlang-git/fs"
 import { mockEnvironment } from "./mockEnvironment.js"
-import type { EnvironmentFunctions } from "../config/schema.js"
+import type { InlangEnvironment } from "../environment/types.js"
 
 it("should copy a directory into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	const fs = memfs.promises as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./test", { recursive: true })
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
+	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.txt", "Hello World!")
-	await fs.mkdir("./test/subdir", { recursive: true })
+	await fs.mkdir("./test/subdir")
 	await fs.writeFile("./test/subdir/file.txt", "Hello World!")
 
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["test"] } })
@@ -22,8 +22,8 @@ it("should copy a directory into the environment", async () => {
 it("should copy multiple directories into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	const fs = memfs.promises as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./one", { recursive: true })
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
+	await fs.mkdir("./one")
 	await fs.writeFile("./one/file.txt", "Hello from one")
 	await fs.mkdir("./two/subdir", { recursive: true })
 	await fs.writeFile("./two/file.txt", "Hello from two")
@@ -34,8 +34,9 @@ it("should copy multiple directories into the environment", async () => {
 })
 
 it("should be able to import JavaScript from the environment", async () => {
-	const fs = memfs.promises as EnvironmentFunctions["$fs"]
-	await fs.mkdir("./test", { recursive: true })
+	// const fs = memfs.promises as InlangEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
+	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.js", "export const x = 'hello'")
 	const env = await mockEnvironment({ copyDirectory: { fs, paths: ["./test"] } })
 	const { x } = await env.$import("./test/file.js")
@@ -43,7 +44,8 @@ it("should be able to import JavaScript from the environment", async () => {
 })
 
 it("should give an error if the path does not exist (hinting at a current working directory problem)", async () => {
-	const fs = memfs.promises as EnvironmentFunctions["$fs"]
+	// const fs = memfs.promises as InlangEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	// relative imports are relative to the current working directory, not the file.
 	// thus, if you run the tests from the root of the project, the path will be wrong.
 	try {
@@ -58,13 +60,18 @@ it("should give an error if the path does not exist (hinting at a current workin
 })
 
 it("should work with filesystems created from volumes", async () => {
-	const fs = Volume.fromJSON({
-		"locales/en.json": JSON.stringify({ hello: "hello from en" }),
-		"locales/fr.json": JSON.stringify({ hello: "bonjour via fr" }),
-		"locales/de.json": JSON.stringify({ hello: "hallo von de" }),
-		"locales/utils.js": JSON.stringify("jibberish"),
-		"main.js": "export function hello() { return 'hello' }",
-	}).promises
+	const fs = createMemoryFs()
+	await fromJson({
+		fs,
+		resolveFrom: "/",
+		json: {
+			"locales/en.json": btoa(JSON.stringify({ hello: "hello from en" })),
+			"locales/fr.json": btoa(JSON.stringify({ hello: "bonjour via fr" })),
+			"locales/de.json": btoa(JSON.stringify({ hello: "hallo von de" })),
+			"locales/utils.js": btoa(JSON.stringify("jibberish")),
+			"main.js": btoa("export function hello() { return 'hello' }"),
+		},
+	})
 	const env = await mockEnvironment({ copyDirectory: { fs: fs, paths: ["/"] } })
 	expect(await env.$fs.readFile("./locales/en.json", { encoding: "utf-8" })).toBe(
 		JSON.stringify({ hello: "hello from en" }),

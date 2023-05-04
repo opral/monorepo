@@ -38,8 +38,21 @@ export function Messages(props: {
 		}
 		const reports = getLintReports(message)
 		for (const report of reports) {
-			if (filteredLintRules().includes(report.id)) {
+			if (filteredLintRules().includes(report.id) && !report.id.includes("missingMessage")) {
 				return true
+			} else if (filteredLintRules().includes(report.id)) {
+				// missingMessage exception
+				const lintLanguage = report.message.match(/'([^']+)'/g)
+				if (lintLanguage?.length === 2) {
+					if (
+						filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
+						filteredLanguages().length === 0
+					) {
+						return true
+					}
+				} else {
+					return true
+				}
 			}
 		}
 		return false

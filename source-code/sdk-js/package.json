@@ -13,7 +13,7 @@
 		"vite"
 	],
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.0.6",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -21,7 +21,7 @@
 		".": "./dist/core/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
-		"./config": "./dist/config/index.js",
+		"./plugin": "./dist/plugin/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
@@ -47,6 +47,9 @@
 			],
 			"adapter-sveltekit/shared": [
 				"./dist/adapter-sveltekit/utils/shared/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
 			]
 		}
 	},
@@ -56,13 +59,15 @@
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:utils dev:plugin",
 		"build": "rm -rf dist && npm run build:utils && npm run build:plugin",
-		"dev:utils": "tsc --watch",
+		"dev:utils": "tsc --watch ./tsconfig.build.json",
 		"build:utils": "tsc --build ./tsconfig.build.json",
-		"dev:plugin": "tsup --watch src",
+		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
+		"tsc:watch": "tsc --noEmit --watch",
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/sdk-js",
 		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/sdk-js",
@@ -76,15 +81,18 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
-		"@sveltejs/kit": "^1.15.9",
-		"@types/estree": "^1.0.1",
-		"@types/lodash": "^4.14.194",
-		"acorn": "^8.8.2",
+		"@inlang/ide-extension-plugin": "*",
+		"@sveltejs/kit": "^1.15.4",
+		"@types/estree": "^1.0.0",
 		"astring": "^1.8.4",
 		"estree-walker": "^3.0.3",
-		"lodash": "^4.17.21",
+		"magic-string": "^0.30.0",
+		"magicast": "^0.2.4",
 		"npm-run-all": "^4.1.5",
+		"recast": "^0.22.0",
 		"svelte": "^3.58.0",
+		"svelte-preprocess": "^5.0.3",
+		"ts-dedent": "^2.2.0",
 		"tsup": "^6.7.0"
 	}
 }

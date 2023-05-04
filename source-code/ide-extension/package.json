@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/ide-extension",
+	"name": "inlang-vs-code-extension",
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",
@@ -32,7 +32,6 @@
 		"build": "rollup --config",
 		"dev": "rollup --config --watch",
 		"package": "npx vsce package",
-		"prepackage": "node ./scripts/preparePackage.js",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",

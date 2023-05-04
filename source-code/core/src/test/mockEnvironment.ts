@@ -1,6 +1,7 @@
-import { EnvironmentFunctions, initialize$import } from "../config/index.js"
-import { Volume } from "memfs"
+import { createMemoryFs, normalizePath } from "@inlang-git/fs"
 import { dedent } from "ts-dedent"
+import type { InlangEnvironment } from "../environment/types.js"
+import { initialize$import } from "../environment/$import.js"
 
 /**
  * Initializes a mock environment.
@@ -14,11 +15,11 @@ import { dedent } from "ts-dedent"
  */
 export async function mockEnvironment(args: {
 	copyDirectory?: {
-		fs: EnvironmentFunctions["$fs"]
+		fs: InlangEnvironment["$fs"]
 		paths: string[]
 	}
-}): Promise<EnvironmentFunctions> {
-	const $fs = Volume.fromJSON({}).promises
+}): Promise<InlangEnvironment> {
+	const $fs = createMemoryFs()
 	const $import = initialize$import({
 		fs: $fs,
 		fetch,
@@ -41,8 +42,8 @@ export async function mockEnvironment(args: {
  * Useful for mocking the environment.
  */
 async function copyDirectory(args: {
-	copyFrom: EnvironmentFunctions["$fs"]
-	copyTo: EnvironmentFunctions["$fs"]
+	copyFrom: InlangEnvironment["$fs"]
+	copyTo: InlangEnvironment["$fs"]
 	path: string
 }) {
 	try {
@@ -51,7 +52,7 @@ async function copyDirectory(args: {
 		throw new Error(dedent`
 The directory specified in \`copyDirectory.path\` "${args.path}" does not exist.
 
-Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory ${process.cwd()}.
+Solution: Make sure that the \`copyDirectory.path\` is relative to the current working directory.
 
 Context: The path is relative to the current working directory, not the file that calls \`mockEnvironment\`.
 		`)
@@ -60,46 +61,13 @@ Context: The path is relative to the current working directory, not the file tha
 	await args.copyTo.mkdir(args.path, { recursive: true })
 	const pathsInDirectory = await args.copyFrom.readdir(args.path)
 	for (const subpath of pathsInDirectory) {
-		let isFile = true
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
 		try {
-			await args.copyFrom.readFile(path)
-		} catch {
-			isFile = false
-		}
-		if (isFile) {
 			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
 			await args.copyTo.writeFile(path, file)
-		} else {
+		} catch (err) {
 			await copyDirectory({ ...args, path })
 		}
 	}
-}
-
-/*
- * normalize-path <https://github.com/jonschlinkert/normalize-path>
- *
- * Copyright (c) 2014-2018, Jon Schlinkert.
- * Released under the MIT License.
- */
-function normalizePath(path: string) {
-	if (path === "\\" || path === "/") return "/"
-
-	const len = path.length
-	if (len <= 1) return path
-
-	// ensure that win32 namespaces has two leading slashes, so that the path is
-	// handled properly by the win32 version of path.parse() after being normalized
-	// https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
-	let prefix = ""
-	if (len > 4 && path[3] === "\\") {
-		const ch = path[2]
-		if ((ch === "?" || ch === ".") && path.slice(0, 2) === "\\\\") {
-			path = path.slice(2)
-			prefix = "//"
-		}
-	}
-	const segs = path.split(/[/\\]+/)
-	return prefix + segs.join("/")
 }

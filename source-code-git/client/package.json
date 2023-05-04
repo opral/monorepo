@@ -1,0 +1,31 @@
+{
+	"name": "@inlang-git/client",
+	"type": "module",
+	"private": true,
+	"exports": {
+		"./raw": {
+			"types": "./dist/raw/index.d.ts",
+			"import": "./dist/raw/index.js"
+		}
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "vitest run --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code-git/client",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code-git/client",
+		"format": "cd ../.. && npm run format:base ./source-code-git/client",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code-git/client",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"dependencies": {
+		"isomorphic-git": "^1.21.0"
+	}
+}

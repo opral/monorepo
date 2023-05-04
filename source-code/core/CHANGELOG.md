@@ -1,5 +1,58 @@
 # @inlang/core
 
+## 0.7.13
+
+### Patch Changes
+
+- f3d7dc5b: fix publishing zod
+
+## 0.7.12
+
+### Patch Changes
+
+- 7ed49fce: change zod pattern type union
+
+## 0.7.11
+
+### Patch Changes
+
+- 61f21074: Update zod schema
+
+## 0.7.10
+
+### Patch Changes
+
+- f1cff4f5: pass accumulated `config` to plugin config function
+
+## 0.7.9
+
+### Patch Changes
+
+- f0cc15bb: add missing `PluginSetupFunction` export
+
+## 0.7.1
+
+### Patch Changes
+
+- ab2d90cf: fix `pluginBuildConfig`
+
+## 0.7.0
+
+### Minor Changes
+
+- a5572e12: Introduction of the plugin API in @inlang/core.
+
+## 0.6.0
+
+### Minor Changes
+
+- 270088f7: initial release of @inlang-git/fs
+
+### Patch Changes
+
+- Updated dependencies [270088f7]
+  - @inlang-git/fs@0.0.2
+
 ## 0.5.4
 
 ### Patch Changes

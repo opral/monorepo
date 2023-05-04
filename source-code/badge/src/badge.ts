@@ -1,6 +1,7 @@
 import satori from "satori"
 import clone from "./repo/clone.js"
-import { Config, EnvironmentFunctions, initialize$import } from "@inlang/core/config"
+import { setupConfig } from "@inlang/core/config"
+import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import { getLintReports, lint } from "@inlang/core/lint"
 import { Volume } from "memfs"
 import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
@@ -18,11 +19,13 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	await clone(url, fs)
 
 	// Set up the environment functions
-	const env: EnvironmentFunctions = {
+	const env: InlangEnvironment = {
 		$import: initialize$import({
+			// @ts-ignore TODO: use @inlang-git/fs
 			fs: patchedFs(fs.promises),
 			fetch,
 		}),
+		// @ts-ignore TODO: use @inlang-git/fs
 		$fs: patchedFs(fs.promises),
 	}
 
@@ -33,10 +36,12 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 
 	// Get the content of the inlang.config.js file
 	const file = await fs.promises.readFile("/inlang.config.js", "utf-8")
-	const { defineConfig } = await import(
-		"data:application/javascript;base64," + btoa(file.toString())
-	)
-	const config: Config = await defineConfig(env)
+
+	const config = await setupConfig({
+		module: await import("data:application/javascript;base64," + btoa(file.toString())),
+		env,
+	})
+
 	const resources = await config.readResources({ config })
 
 	// Get ressources with lints
