@@ -215,11 +215,13 @@ ${codeWithoutTypes}`
 			console.log(insertSlot)
 			s.appendRight(
 				parsed.html.start,
-				`{#key ${!config.languageInUrl ? "$" : ""}${localLanguageName}}`,
+				`{#${!config.languageInUrl ? "if" : "key"} ${
+					!config.languageInUrl ? "$" : ""
+				}${localLanguageName}}`,
 			)
 			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
-			s.append(insertSlot ? `<slot />{/key}` : `{/key}`)
+			s.append((insertSlot ? `<slot />` : ``) + `{/${!config.languageInUrl ? "if" : "key"}}`)
 			const map = s.generateMap({
 				source: config.sourceFileName,
 				file: config.sourceMapName,
