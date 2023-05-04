@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { parse, print } from "recast"
+import { parseModule, generateCode } from "magicast"
 import { convertExportedFunctionExpression } from "./ast.js"
 
 describe("convert function expression to arrow function", () => {
@@ -8,9 +8,9 @@ describe("convert function expression to arrow function", () => {
     console.log('TADAA!')
     return resolve(event)
 }`
-		const codeAst = parse(code)
-		convertExportedFunctionExpression(codeAst, "handle")
-		const result = print(codeAst)
+		const codeAst = parseModule(code)
+		convertExportedFunctionExpression(codeAst.$ast, "handle")
+		const result = generateCode(codeAst)
 		expect(result.code).toMatchInlineSnapshot(`
 "export const handle = ({ event, resolve }) => {
     console.log('TADAA!')

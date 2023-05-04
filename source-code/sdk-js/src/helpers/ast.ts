@@ -180,7 +180,6 @@ export const makeMarkupReactive = (
 				? () => [(node as any).start, (node as any).end]
 				: undefined,
 	)[0] as [string, string][] | undefined
-	parsed.html.children
 
 	//const s = new MagicString(options.content)
 	// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
