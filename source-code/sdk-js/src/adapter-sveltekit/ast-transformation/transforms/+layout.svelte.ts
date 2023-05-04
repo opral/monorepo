@@ -152,6 +152,8 @@ ${codeWithoutTypes}`
 								),
 							),
 						),
+						// TODO: add this line only of `localStorage` is configured
+						// TODO: do the same for `sessionStorage`
 						b.expressionStatement(
 							b.callExpression(
 								b.memberExpression(b.identifier("localStorage"), b.identifier("setItem")),

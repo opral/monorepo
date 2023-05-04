@@ -135,8 +135,6 @@ const emptyLoadFunction = `export const load = async () => {};`
 export const emptyLoadExportNodes = () =>
 	(parseModule(emptyLoadFunction).$ast as types.namedTypes.Program).body
 
-export const inlangSdkJsStores = ["i", "language"]
-
 // NOTES: Test this with imports on a single line or on multiple lines
 // Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
 // Returns an array with the import properties and their aliases
@@ -233,6 +231,8 @@ export const makeJsReactive = (ast: types.namedTypes.Node, reactiveIdentifiers: 
 		(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
 	)
 }
+
+const inlangSdkJsStores = ["i", "language"]
 
 export const getReactiveImportIdentifiers = (importNames: [string, string][]) =>
 	importNames.flatMap(([imported, local]) => (inlangSdkJsStores.includes(imported) ? [local] : []))

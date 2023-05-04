@@ -10,23 +10,23 @@ describe("transformLayoutSvelte", () => {
 			it("adds code to an empty file", async () => {
 				const code = await transformLayoutSvelte({} as TransformConfig, "", true)
 				expect(code).toMatchInlineSnapshot(`
-"<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-export let data;
-let language;
-addRuntimeToContext(getRuntimeFromData(data));
+					"<script>import { browser } from \\"$app/environment\\";
+					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
 
-({
-  language: language
-} = getRuntimeFromContext());
+					({
+					  language: language
+					} = getRuntimeFromContext());
 
-$:
-if (browser && $language) {
-  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-  localStorage.setItem(localStorageKey, $language);
-}</script>
-{#key $language}<slot />{/key}"
+					$:
+					if (browser && $language) {
+					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
+					  localStorage.setItem(localStorageKey, $language);
+					}</script>
+					{#key $language}<slot />{/key}"
 				`)
 			})
 
@@ -34,46 +34,46 @@ if (browser && $language) {
 				const code = await transformLayoutSvelte(
 					{} as TransformConfig,
 					dedent`
-<script>
-import { onMount } from "svelte"
+						<script>
+						import { onMount } from "svelte"
 
-    export let data
+							export let data
 
-    onMount(() => {
-        console.log(123)
-    })
-</script>
+							onMount(() => {
+								console.log(123)
+							})
+						</script>
 
-<h1>Hello {data.name}!</h1>
-				`,
+						<h1>Hello {data.name}!</h1>
+					`,
 					true,
 				)
 				// NOTES @ivan ist das richtig, dass ich unten den slot einfüge?
 				// NOTES @ivan könntest du dir den code unten mal kurz angucken und auf richtigkeit überprüfen?
 				expect(code).toMatchInlineSnapshot(`
-"<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-import { onMount } from \\"svelte\\"
+					"<script>import { browser } from \\"$app/environment\\";
+					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					import { onMount } from \\"svelte\\"
 
-onMount(() => {
-    console.log(123)
-})
-export let data;
-let language;
-addRuntimeToContext(getRuntimeFromData(data));
+					onMount(() => {
+					    console.log(123)
+					})
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
 
-({
-    language: language
-} = getRuntimeFromContext());
+					({
+					    language: language
+					} = getRuntimeFromContext());
 
-$:
-if (browser && $language) {
-    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-    localStorage.setItem(localStorageKey, $language);
-}</script>
+					$:
+					if (browser && $language) {
+					    document.body.parentElement?.setAttribute(\\"lang\\", $language);
+					    localStorage.setItem(localStorageKey, $language);
+					}</script>
 
-{#key $language}<h1>Hello {data.name}!</h1><slot />{/key}"
+					{#key $language}<h1>Hello {data.name}!</h1><slot />{/key}"
 				`)
 			})
 
@@ -81,32 +81,32 @@ if (browser && $language) {
 				const code = await transformLayoutSvelte(
 					{} as TransformConfig,
 					dedent`
-<h1>Hello {data.name}!</h1>
+						<h1>Hello {data.name}!</h1>
 
-<slot />
-				`,
+						<slot />
+					`,
 					true,
 				)
 				expect(code).toMatchInlineSnapshot(`
-"<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-export let data;
-let language;
-addRuntimeToContext(getRuntimeFromData(data));
+					"<script>import { browser } from \\"$app/environment\\";
+					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
 
-({
-  language: language
-} = getRuntimeFromContext());
+					({
+					  language: language
+					} = getRuntimeFromContext());
 
-$:
-if (browser && $language) {
-  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-  localStorage.setItem(localStorageKey, $language);
-}</script>
-{#key $language}<h1>Hello {data.name}!</h1>
+					$:
+					if (browser && $language) {
+					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
+					  localStorage.setItem(localStorageKey, $language);
+					}</script>
+					{#key $language}<h1>Hello {data.name}!</h1>
 
-<slot />{/key}"
+					<slot />{/key}"
 				`)
 			})
 			// NOTES @ivan this test below is not how I understood it... Currently it will insert a slot in this case
@@ -115,90 +115,96 @@ if (browser && $language) {
 				const code = await transformLayoutSvelte(
 					{} as TransformConfig,
 					dedent`
-<script>
-console.log(1)
-</script>
-				`,
+						<script>
+						console.log(1)
+						</script>
+					`,
 					true,
 				)
 				expect(code).toMatchInlineSnapshot(`
-"<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-console.log(1)
-export let data;
-let language;
-addRuntimeToContext(getRuntimeFromData(data));
+					"<script>import { browser } from \\"$app/environment\\";
+					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					console.log(1)
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
 
-({
-  language: language
-} = getRuntimeFromContext());
+					({
+						language: language
+					} = getRuntimeFromContext());
 
-$:
-if (browser && $language) {
-  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-  localStorage.setItem(localStorageKey, $language);
-}</script>"
+					$:	if (browser && $language) {
+						document.body.parentElement?.setAttribute(\\"lang\\", $language);
+						localStorage.setItem(localStorageKey, $language);
+					}</script>
+
+					{#key $language}<slot />{/key}""
 				`)
 			})
+
+
+			describe("transform @inlang/sdk-js", () => {
+				it("resolves imports correctly", async () => {
+					const code = await transformLayoutSvelte(
+						{} as TransformConfig,
+						dedent`
+							<script>
+								import { languages, i } from "@inlang/sdk-js"
+
+								console.log(languages)
+							</script>
+
+							{i('hello')}
+						`,
+						true,
+					)
+					// NOTES @ivan look at the declaration of languages below pls. it's a let now instead of const.
+					expect(code).toMatchInlineSnapshot(`
+						"<script>import { browser } from \\"$app/environment\\";
+						import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						export let data;
+						let languages, i, language;
+						addRuntimeToContext(getRuntimeFromData(data));
+
+						;({
+						    languages: languages,
+						    i: i,
+						    language: language
+						} = getRuntimeFromContext());
+
+						$:	if (browser && $language) {
+						    document.body.parentElement?.setAttribute(\\"lang\\", $language);
+						    localStorage.setItem(localStorageKey, $language);
+						}
+
+						console.log(languages)</script>
+
+						{#key $language}{$i('hello')}{/key}"
+					`)
+				})
+			})
 		})
+
+		// ------------------------------------------------------------------------------------------
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
 				const config = {} as TransformConfig
 				const input = dedent`
-<script>
-    export let data
-</script>
+					<script>
+						import { language } from '@inlang/sdk-js'
+						export let data
+					</script>
 
-<h1>Hello {data.name}!</h1>
+					<h1>Hello {data.name}!</h1>
+
+					{language.toUpperCase()}
 				`
 				const code = await transformLayoutSvelte(config, input, false)
 				expect(code).toMatch(await transformSvelte(config, input))
 			})
-		})
-	})
-
-	describe("transform @inlang/sdk-js", () => {
-		it("resolves imports correctly", async () => {
-			const code = await transformLayoutSvelte(
-				{} as TransformConfig,
-				dedent`
-<script>
-    import { languages, i } from "@inlang/sdk-js"
-
-    console.log(languages)
-</script>
-
-{i('hello')}
-			`,
-				true,
-			)
-			// NOTES @ivan look at the declaration of languages below pls. it's a let now instead of const.
-			expect(code).toMatchInlineSnapshot(`
-"<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-export let data;
-let languages, i, language;
-addRuntimeToContext(getRuntimeFromData(data));
-
-({
-    languages: languages,
-    i: i,
-    language: language
-} = getRuntimeFromContext());
-
-$:
-if (browser && $language) {
-    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-    localStorage.setItem(localStorageKey, $language);
-}
-
-console.log(languages)</script>
-
-{#key $language}{$i('hello')}<slot />{/key}"
-			`)
 		})
 	})
 })

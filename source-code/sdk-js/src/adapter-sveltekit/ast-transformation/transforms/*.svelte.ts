@@ -17,12 +17,6 @@ import { vitePreprocess } from "@sveltejs/kit/vite"
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
-// TODO: fix this soon !!
-// supports multiple imports
-// assumption: imports are always on top of the file
-// no other variable can be named `i` or `language`
-// no other code snippet can contain `i(`
-// no other code snippet can contain `language`
 export const transformSvelte = async (config: TransformConfig, code: string): Promise<string> => {
 	const n = types.namedTypes
 	const b = types.builders
