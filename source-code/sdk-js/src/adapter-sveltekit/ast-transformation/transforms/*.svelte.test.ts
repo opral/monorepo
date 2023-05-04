@@ -160,7 +160,7 @@ describe("transformSvelte", () => {
 	})
 })
 
-// NOTES @stepan
+// NOTES
 // - Can merge imports of
 //     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";
 //     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
@@ -169,5 +169,5 @@ describe("transformSvelte", () => {
 // - Destructures all previosly imported module ALIASES or MODULES from "@inlang/sdk-js" at "... = getRuntimeFromContext()"
 // - Prepends the imports "i" and "language" from "@inlang/sdk-js" wherever they are used in the code with a "$" in the reactive case
 
-// NOTES @stepan pt.2
+// NOTES pt.2
 // - Also test for files that don't have a regular script tag (meaning one without `context="module"`).

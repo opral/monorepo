@@ -81,7 +81,7 @@ export const load = async () => {};
 	})
 })
 
-// NOTES @stepan
+// NOTES
 // - Allows merging of already present and required imports
 // - adds an empty exported arrow function named load if not present
 // - Wraps this load function (whether present or not) with initRootLayoutLoadWrapper().wrap()

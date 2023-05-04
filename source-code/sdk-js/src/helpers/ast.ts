@@ -137,7 +137,7 @@ export const emptyLoadExportNodes = () =>
 
 export const inlangSdkJsStores = ["i", "language"]
 
-// NOTES @stepan: Test this with imports on a single line or on multiple lines
+// NOTES: Test this with imports on a single line or on multiple lines
 // Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
 // Returns an array with the import properties and their aliases
 export const removeSdkJsImport = (ast: types.namedTypes.Node | Node): [string, string][] =>
