@@ -44,7 +44,7 @@ That's it. You have now completed the setup and can output Messages everywhere i
 
 ## Usage
 
-Wherever you want to output a message, you can use the [inlang-function](/documentation/sdk/usage#inlang-function) function.
+Wherever you want to output a message, you can use the [inlang-function](/documentation/sdk/usage#inlang-function).
 
 ```svelte
 <script>
