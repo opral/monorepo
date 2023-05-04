@@ -11,6 +11,17 @@ The module exists because:
 
 The implementation is a wrapper around the [PostHog JS](https://posthog.com/docs/libraries/js) and [PostHog Node](https://posthog.com/docs/libraries/node) libraries.
 
+**NAMING EVENTS**
+
+1. prefix events with the module name
+2. use past tense to avoid confusion about _when the event occured_
+
+Examples: 
+
+`SDK-JS initialized`  
+`EDITOR repository cloned`  
+`BADGE badge created`  
+
 **Browser**
 
 A top-level initialization is required.
