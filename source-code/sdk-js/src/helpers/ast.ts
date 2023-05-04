@@ -112,6 +112,7 @@ export const findAstJs = findAst<types.namedTypes.Node | Node>(jsWalk)
 export const findAstSvelte = findAst<Ast>(svelteWalk)
 
 const n = types.namedTypes
+const b = types.builders
 
 const loadMatchers: Parameters<typeof findAstJs>[1] = [
 	({ node }) => n.ExportNamedDeclaration.check(node),
@@ -236,3 +237,47 @@ const inlangSdkJsStores = ["i", "language"]
 
 export const getReactiveImportIdentifiers = (importNames: [string, string][]) =>
 	importNames.flatMap(([imported, local]) => (inlangSdkJsStores.includes(imported) ? [local] : []))
+
+export const getExportedFunctionMatchers = (ast: types.namedTypes.Node, name: string) => {
+	const arrowFunctionMatchers: Parameters<typeof findAstJs>[1] = [
+		({ node }) => n.ExportNamedDeclaration.check(node),
+		({ node }) => n.VariableDeclaration.check(node),
+		({ node }) => n.VariableDeclarator.check(node),
+		({ node }) => n.Identifier.check(node) && node.name === name,
+	]
+	const hasArrowFunction = findAstJs(ast, arrowFunctionMatchers, (node) =>
+		n.Identifier.check(node) ? () => true : undefined,
+	)[0]?.every((v) => v === true)
+	if (hasArrowFunction)
+		return { found: true, matchers: arrowFunctionMatchers, type: "VariableDeclaration" }
+	return { found: false, matchers: arrowFunctionMatchers, type: "VariableDeclaration" }
+}
+
+export const convertExportedFunctionExpression = (ast: types.namedTypes.Node, name: string) => {
+	const functionMatchers: Parameters<typeof findAstJs>[1] = [
+		({ node }) => n.ExportNamedDeclaration.check(node),
+		({ node }) => n.FunctionDeclaration.check(node),
+		({ node }) => n.Identifier.check(node) && node.name === name,
+	]
+	findAstJs(ast, functionMatchers, (node) =>
+		n.ExportNamedDeclaration.check(node)
+			? () => {
+					if (n.FunctionDeclaration.check(node.declaration)) {
+						const functionDeclarationAst = node.declaration
+						const arrowFunction = b.variableDeclaration("const", [
+							b.variableDeclarator(
+								b.identifier(name),
+								b.arrowFunctionExpression.from({
+									expression: functionDeclarationAst.expression ?? false,
+									async: functionDeclarationAst.async ?? false,
+									params: functionDeclarationAst.params,
+									body: functionDeclarationAst.body,
+								}),
+							),
+						])
+						node.declaration = arrowFunction
+					}
+			  }
+			: undefined,
+	)[0]
+}

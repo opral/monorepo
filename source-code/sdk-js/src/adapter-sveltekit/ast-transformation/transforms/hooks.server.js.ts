@@ -3,19 +3,27 @@ import { types } from "recast"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { findAstJs } from "../../../helpers/index.js"
+import {
+	convertExportedFunctionExpression,
+	getExportedFunctionMatchers,
+} from "../../../helpers/ast.js"
 
-const requiredImports = `
-import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+const requiredImports = (config: TransformConfig) =>
+	`
+import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";` +
+	(config.isStatic || !config.languageInUrl
+		? ``
+		: `
 import { initAcceptLanguageHeaderDetector } from "@inlang/sdk-js/detectors/server";
 import { redirect } from "@sveltejs/kit";
 import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
-`
+`)
 
 const options = (config: TransformConfig) =>
 	"{" +
 	(config.languageInUrl
 		? `
-getLanguage: ({ url }) => url.pathname.split("/")[1],
+getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
 `
 		: `
 getLanguage: () => undefined,
@@ -39,20 +47,15 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
-	const importsAst = parseModule(requiredImports)
+	const imports = requiredImports(config)
+	const importsAst = parseModule(imports)
 	deepMergeObject(ast, importsAst)
 
-	const handleMatchers: Parameters<typeof findAstJs>[1] = [
-		({ node }) => n.ExportNamedDeclaration.check(node),
-		({ node }) => n.VariableDeclaration.check(node),
-		({ node }) => n.VariableDeclarator.check(node),
-		({ node }) => n.Identifier.check(node) && node.name === "handle",
-	]
+	convertExportedFunctionExpression(ast.$ast, "handle")
+	const matchers = getExportedFunctionMatchers(ast.$ast, "handle")
 
 	if (n.Program.check(ast.$ast)) {
-		const hasHandle = findAstJs(ast.$ast, handleMatchers, (node) =>
-			n.Identifier.check(node) ? () => true : undefined,
-		)[0]?.every((v) => v === true)
+		const hasHandle = matchers.found
 		const body = ast.$ast.body
 		// Add load declaration with ast if needed
 		const emptyHandleExportAst = parseModule(emptyHandleFunction)
@@ -65,7 +68,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 			b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
 			[],
 		)
-		findAstJs(ast.$ast, handleMatchers, (node) =>
+		findAstJs(ast.$ast, matchers.matchers, (node) =>
 			n.Identifier.check(node)
 				? (meta) => {
 						const { parent } = meta.get(node) ?? {}

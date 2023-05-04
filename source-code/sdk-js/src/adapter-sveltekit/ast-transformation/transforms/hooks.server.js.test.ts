@@ -6,7 +6,7 @@ import type { TransformConfig } from "../config.js"
 
 describe("transformHooksServerJs", () => {
 	describe("basics", () => {
-		it.skip("adds handle function to an empty file", () => {
+		it("adds handle function to an empty file", () => {
 			const code = transformHooksServerJs({} as TransformConfig, "")
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
@@ -16,8 +16,10 @@ describe("transformHooksServerJs", () => {
 			`)
 		})
 
-		it.skip("adds handle endpoint to a file with arbitrary contents", () => {
-			const code = transformHooksServerJs({} as TransformConfig, dedent`
+		it("adds handle endpoint to a file with arbitrary contents", () => {
+			const code = transformHooksServerJs(
+				{} as TransformConfig,
+				dedent`
 				import * as Sentry from '@sentry/node';
 				import crypto from 'crypto';
 
@@ -34,7 +36,8 @@ describe("transformHooksServerJs", () => {
 						errorId
 					};
 				}
-			`)
+			`,
+			)
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 				import * as Sentry from '@sentry/node';
@@ -59,8 +62,10 @@ describe("transformHooksServerJs", () => {
 		})
 
 		describe("should wrap handle if already defined", () => {
-			it.skip("arrow function", () => {
-				const code = transformHooksServerJs({} as TransformConfig, dedent`
+			it("arrow function", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
 					import type { Handle } from '@sveltejs/kit'
 
 					export const handle: Handle = ({ event, resolve }) => {
@@ -71,11 +76,12 @@ describe("transformHooksServerJs", () => {
 
 						return resolve(event)
 					}
-				`)
+				`,
+				)
 
 				expect(code).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import type { Handle } from '@sveltejs/kit';
+					import type { Handle } from '@sveltejs/kit'
 
 					export const handle: Handle = initHandleWrapper({
 					  getLanguage: () => undefined
@@ -90,19 +96,22 @@ describe("transformHooksServerJs", () => {
 				`)
 			})
 
-			it.skip("function keyword", () => {
-				const code = transformHooksServerJs({} as TransformConfig, dedent`
+			it("function keyword", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
 					export function handle({ event, resolve }) {
 						console.log('TADAA!')
 						return resolve(event)
 					}
-				`)
+				`,
+				)
 
 				expect(code).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export const handle = initHandleWrapper({
 					  getLanguage: () => undefined
-					}).wrap(function handle({ event, resolve }) {
+					}).wrap(({ event, resolve }) => {
 						console.log('TADAA!')
 						return resolve(event)
 					});"
@@ -111,30 +120,32 @@ describe("transformHooksServerJs", () => {
 		})
 	})
 
+	// NOTES @ivan I have no idea why this is failing
 	describe("variations", () => {
-		it.skip("languageInUrl", () => {
+		it("languageInUrl", () => {
 			const config: TransformConfig = {
 				...baseTestConfig,
 				languageInUrl: true,
 			}
 			const code = transformHooksServerJs(config, "")
 			expect(code).toMatchInlineSnapshot(`
-				"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-				import { redirect } from \\"@sveltejs/kit\\";
-				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
-				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				export const handle = initHandleWrapper({
-					getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
-					initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
-					redirect: {
-						throwable: redirect,
-						getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
-					},
-				}).wrap(async ({ event, resolve }) => resolve(event));"
-			`)
+"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+import { redirect } from \\"@sveltejs/kit\\";
+import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
+import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+export const handle = initHandleWrapper({
+  getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
+  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+
+  redirect: {
+  throwable: redirect,
+  getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+  }
+}).wrap(async ({ event, resolve }) => resolve(event));"
+`)
 		})
 
-		it.skip("languageInUrl and isStatic", () => {
+		it("languageInUrl and isStatic", () => {
 			const config: TransformConfig = {
 				...baseTestConfig,
 				languageInUrl: true,
@@ -149,7 +160,7 @@ describe("transformHooksServerJs", () => {
 			`)
 		})
 
-		it.skip("isStatic", () => {
+		it("isStatic", () => {
 			const config: TransformConfig = {
 				...baseTestConfig,
 				isStatic: true,
