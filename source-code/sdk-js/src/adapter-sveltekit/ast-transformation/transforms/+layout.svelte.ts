@@ -28,8 +28,6 @@ export const transformLayoutSvelte = (config: TransformConfig, code: string, roo
 	return transformGenericLayoutSvelte(config, code)
 }
 
-// ------------------------------------------------------------------------------------------------
-
 const transformRootLayoutSvelte = async (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders
@@ -97,7 +95,8 @@ ${codeWithoutTypes}`
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			const importNames = removeSdkJsImport(ast.$ast)
 			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
-			if (importNames.length === 0) importNames?.push(["language", "language"])
+			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
+				importNames?.push(["language", "language"])
 			if (!options.attributes.context) {
 				// Deep merge imports that we need
 				for (const importAst of requiredImportsAsts) {
@@ -212,7 +211,7 @@ ${codeWithoutTypes}`
 			const parsed = parse(s.toString())
 			const hasSlot = astHasSlot(parsed)
 			s.appendRight(
-				parsed.html.children?.[0]?.start ?? 0,
+				parsed.html.start,
 				`{#key ${!config.languageInUrl ? "$" : ""}${localLanguageName}}`,
 			)
 			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
@@ -230,68 +229,4 @@ ${codeWithoutTypes}`
 	return processed.code
 }
 
-export const createRootLayoutSvelte = (config: TransformConfig) => {
-	const imports = config.languageInUrl
-		? `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
-		: `import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
-
-	const initCode = config.languageInUrl
-		? `
-$: {
-	addRuntimeToContext(getRuntimeFromData(data))
-	;({ i, language } = getRuntimeFromContext())
-}
-`
-		: `
-$: if (browser && $language) {
-	document.body.parentElement?.setAttribute("lang", $language)
-	// TODO: only if localStorageDetector
-	localStorage.setItem(localStorageKey, $language)
-}
-`
-
-	const template = config.languageInUrl
-		? `
-{#key language}
-	<slot />
-{/key}
-`
-		: `
-{#if $language}
-	<slot />
-{/if}
-`
-
-	return `
-<script>
-	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared";
-	${imports}
-	import { browser } from "$app/environment";
-
-	export let data
-
-	addRuntimeToContext(getRuntimeFromData(data))
-	let { i, language } = getRuntimeFromContext()
-	${initCode}
-</script>
-${template}
-`
-}
-
-// TODO: transform
-export const wrapRootLayoutSvelte = (config: TransformConfig, code: string) => {
-	// TODO: more meaningful error messages
-	throw new Error("currently not supported")
-}
-
-// ------------------------------------------------------------------------------------------------
-
 const transformGenericLayoutSvelte = transformSvelte
-
-// TODO @benjaminpreiss
-// 1. Remove "export let data"
-// 2. Insert imports
-// 3. Remove all imports from "@inlang/sdk-js"
-// 4. Insert "export let data;addRuntimeToContext(getRuntimeFromData(data));let { i, language } = getRuntimeFromContext();" immediately before either data, or any import from "@inlang/sdk-js" are referenced the first time
-// 5. Also insert the initCode at exactly that position
-// 6. Wrap the existing markup with template (Where <slot/> is the existing markup)
