@@ -5,9 +5,7 @@ import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
 import { types } from "recast"
 import { parseModule } from "magicast"
-import MagicStringImport from "magic-string"
-
-const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
+import type MagicStringImport from "magic-string"
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"

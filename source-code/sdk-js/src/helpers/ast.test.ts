@@ -1,9 +1,8 @@
 import { describe, it, expect } from "vitest"
-import { dedent } from "ts-dedent"
 import { parse, print } from "recast"
 import { convertExportedFunctionExpression } from "./ast.js"
 
-describe("convert arrow to function expression", () => {
+describe("convert function expression to arrow function", () => {
 	it("converts a basic function", () => {
 		const code = dedent`
 			export function handle({ event, resolve }) {
