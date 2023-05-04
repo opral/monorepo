@@ -10,53 +10,49 @@ With `@inlang/sdk-js` you get many useful functions to help you implement intern
 
 ## `i`
 
-With the `i` function you can get the a language dependent text. The function takes the key of the text as a parameter and returns the string according to the current language.
+Use the inlang function (`i`) to get a language dependent text. The function takes the key of the text as a parameter and returns the string according to the current language.
 
 #### Example
 
-```js
-import { i } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { i } from "@inlang/sdk-js"
+</script>
 
-function App() {
-	// language is "en" => "Welcome" is returned
-	return <h1>{i("welcome")}</h1>
-}
+<h1>{i("welcome")}</h1>
+<!-- => e.g. 'Welcome to inlang!' -->
 ```
 
 ## `language`
 
-The `language` function returns the current language of the application.
+The `language` variable contains the current selected language.
 
 #### Example
 
-```js
-import { language } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { language } from "@inlang/sdk-js"
 
-function App() {
-	// language is "en" => "en" is returned
-	return <h1>{language}</h1>
-}
+	console.log(language) // => e.g 'en'
+</script>
 ```
 
 ## `languages`
 
-The `languages` function returns the current language of the application.
+The `languages` array returns all languages that are available for this application.
 
 #### Example
 
-```js
-import { languages } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { languages } from "@inlang/sdk-js"
+</script>
 
-funtion App() {
-  // list of all languages is returned
-  return (
-    <ul>
-      {languages.map((language) => (
-        <li>{language}</li>
-      ))}
-    </ul>
-  )
-}
+<ul>
+	{#each languages as language}
+		<li>{language}</li>
+	{/each}
+</ul>
 ```
 
 ## `referenceLanguage`
@@ -65,13 +61,12 @@ The `referenceLanguage` function returns the reference language that is used to 
 
 #### Example
 
-```js
-import { referenceLanguage } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { referenceLanguage } from "@inlang/sdk-js"
 
-function App() {
-	// referenceLanguage is "en" => "en" is returned
-	return <h1>{referenceLanguage}</h1>
-}
+	console.log(referenceLanguage) // => e.g 'en'
+</script>
 ```
 
 ## `switchLanguage`
@@ -80,55 +75,42 @@ The `switchLanguage` function allows you to change the language of the applicati
 
 #### Example
 
-```js
-import { switchLanguage } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { switchLanguage } from "@inlang/sdk-js"
 
-function App() {
-	return (
-		<button
-			onClick={() => {
-				switchLanguage("de")
-			}}
-		>
-			Switch to German
-		</button>
-	)
-}
+	async function switchLanguageToGerman() {
+		console.log('switching language to german ...')
+		await switchLanguage('de')
+		console.log('... language switched to german')
+	}
+</script>
+
+<button on:click={switchLanguageToGerman}>
+	Show page in german
+</button>
 ```
 
 ## `loadResource`
 
 The `loadResource` function allows you to load the resource file for a specific language. The function takes the language as a parameter and returns a promise that resolves when the resource file has been loaded.
 
-#### Example
-
-```js
-import { loadResource } from "@inlang/sdk-js"
-
-function App() {
-	return (
-		<button
-			onClick={() => {
-				loadResource("de")
-			}}
-		>
-			Load German
-		</button>
-	)
-}
-```
-
-## `route`
-
-The `route` function allows you to get the current route of the application. The function returns the current route as a string.
+> Resources are loaded automatically, but you can already preload them to reduce the loading time when switching the language.
 
 #### Example
 
-```js
-import { route } from "@inlang/sdk-js"
+```svelte
+<script>
+	import { loadResource } from "@inlang/sdk-js"
 
-function App() {
-	// route is "en/home" => "en/home" is returned
-	return <h1>{route}</h1>
-}
+	async function preloadGermanResource() {
+		console.log('preloading german resource ...')
+		await loadResource('de')
+		console.log('... german resource loaded')
+	}
+</script>
+
+<button on:mouseover={preloadGermanResource} on:click={() => switchLanguage('de')}>
+	Show page in german
+</button>
 ```

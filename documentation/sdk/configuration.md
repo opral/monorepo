@@ -6,42 +6,95 @@ description: TODO write some description
 
 # {% $frontmatter.title %}
 
-You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project.
+You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
+
+```js
+/**
+ * @type { import("@inlang/core/config").DefineConfig }
+ */
+export async function defineConfig(env) {
+	const { default: sdkPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.1/dist/plugin/index.js",
+	)
+
+	return {
+		referenceLanguage: "en",
+		plugins: [
+			sdkPlugin({
+				languageNegotiation: {
+					strategies: [
+						{ type: "localStorage" },
+						{ type: "navigator" }
+					],
+				},
+			}),
+		],
+	}
+}
+```
 
 ## Configuration options
 
-### Local Storage
+> There are limited configuration options for now. We will add more options in the coming weeks.
 
-The default settings store the language in `localStorage` and use the browser language as the default language. You can change this behavior in the `inlang.config.js` file.
+### languageNegotiation
 
-```js
-export async function defineConfig(env) {
-	return {
-		sdk: {
-			languageNegotiation: {
-				strategies: [{ type: "localStorage" }, { type: "navigator" }],
-			},
-		},
-	}
-}
-```
+The `languageNegotiation` property makes it possible to customize the behavior how you application detects the language of the user.
 
-**Note:** This solution is only suitable for client side rendering or server side rendering with a client side hydration (e.g. Single Page Application (SPA)). If you want to use server side rendering (SSR) or static site generation (SSG), you need to use the `url` or `acceptLanguageHeader` strategy.
+#### strategies
 
-### URL & Accept-Language Header
+You can choose between different strategies to detect the language of the user. You can specify multiple strategies. The first strategy that returns a language will be used.
 
-To store the language in the URL and detect the language on the server, you need to add the `url` & `acceptLanguageHeader` strategy to the `languageNegotiation` section in the `inlang.config.js` file. By default, the correct URL is returned. If the language is changed, the correct URL is displayed with the language set in the `<html>` tag of the page. This solution is suitable for server side rendering (SSR) or static site generation (SSG).
+##### **localStorage**
+
+Detects if the `language` key is set in the localStorage and uses it as the language for the application.
 
 ```js
-export async function defineConfig(env) {
-	return {
-		sdk: {
-			languageNegotiation: {
-				strategies: [{ type: "url" }, { type: "acceptLanguageHeader" }],
-			},
-		},
-	}
-}
+{
+	strategies: [
+		{ type: "localStorage" },
+	],
+},
 ```
 
-**Note:** In case you render the page in a static environment, there is no redirct if you try to access the root URL (`/`). You need to redirect to the correct URL yourself. For example, if the default language is `en` and you try to access the root URL, you need to redirect to `/en`.
+###
+
+##### **navigator**
+
+Detects the preferred `languages` the user has enabled in his browser.
+
+```js
+{
+	strategies: [
+		{ type: "navigator" },
+	],
+},
+```
+
+###
+
+##### **url**
+
+Detects the `language` by looking at the first segment of the url e.g. `/en/about`
+
+```js
+{
+	strategies: [
+		{ type: "url" },
+	],
+},
+```
+
+###
+
+##### **acceptLanguageHeader**
+
+Detects the user's preferred `languages` the browser sends to the server.
+
+```js
+{
+	strategies: [
+		{ type: "acceptLanguageHeader" },
+	],
+},
+```

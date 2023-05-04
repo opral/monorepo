@@ -36,7 +36,7 @@ const zCookieNegotiator = z.object({
 })
 
 const zAcceptLanguageHeaderNegotiator = z.object({
-	type: z.literal("accept-language-header"),
+	type: z.literal("acceptLanguageHeader"),
 })
 
 const zNavigatorNegotiator = z.object({
