@@ -8,11 +8,11 @@ import {
 	NodeInfoMapEntry,
 	findAstJs,
 	getReactiveImportIdentifiers,
-	astHasSlot,
 	makeJsReactive,
 	makeMarkupReactive,
 	removeSdkJsImport,
 	sortMarkup,
+	htmlIsEmpty,
 } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { types } from "recast"
@@ -211,14 +211,15 @@ ${codeWithoutTypes}`
 			// Find locations of nodes with i or language
 			const s = new MagicString(options.content)
 			const parsed = parse(s.toString())
-			const hasSlot = astHasSlot(parsed)
+			const insertSlot = htmlIsEmpty(parsed.html)
+			console.log(insertSlot)
 			s.appendRight(
 				parsed.html.start,
 				`{#key ${!config.languageInUrl ? "$" : ""}${localLanguageName}}`,
 			)
 			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
-			s.append(!hasSlot ? `<slot />{/key}` : `{/key}`)
+			s.append(insertSlot ? `<slot />{/key}` : `{/key}`)
 			const map = s.generateMap({
 				source: config.sourceFileName,
 				file: config.sourceMapName,

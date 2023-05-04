@@ -73,7 +73,7 @@ describe("transformLayoutSvelte", () => {
 					    localStorage.setItem(localStorageKey, $language);
 					}</script>
 
-					{#key $language}<h1>Hello {data.name}!</h1><slot />{/key}"
+					{#key $language}<h1>Hello {data.name}!</h1>{/key}"
 				`)
 			})
 
@@ -142,7 +142,6 @@ describe("transformLayoutSvelte", () => {
 					{#key $language}<slot />{/key}""
 				`)
 			})
-
 
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {

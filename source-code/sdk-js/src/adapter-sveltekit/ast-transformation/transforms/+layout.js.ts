@@ -24,6 +24,7 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	return transformGenericLayoutJs(config, code)
 }
 
+// TODO @benjaminpreiss improve the code below with the generalized function for "load". look into hooks.server.js for more info.
 const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders

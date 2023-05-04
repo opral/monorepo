@@ -182,6 +182,7 @@ export const makeMarkupReactive = (
 				? () => [(node as any).start, (node as any).end]
 				: undefined,
 	)[0] as [string, string][] | undefined
+	parsed.html.children
 
 	//const s = new MagicString(options.content)
 	// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
@@ -206,23 +207,6 @@ export const sortMarkup = (parsed: Ast, s: MagicStringImport.default) => {
 	parsed.instance = instance
 	parsed.module = module
 	parsed.css = css
-}
-
-export const astHasSlot = (parsed: Ast) => {
-	const { instance, module, css } = parsed
-	parsed.instance = undefined
-	parsed.module = undefined
-	parsed.css = undefined
-	const hasSlot =
-		(
-			findAstSvelte(parsed, [({ node }) => node != undefined && node.type === "Slot"], (node) =>
-				node?.type === "Slot" ? () => true : undefined,
-			)[0] as undefined | true[]
-		)?.[0] ?? false
-	parsed.instance = instance
-	parsed.module = module
-	parsed.css = css
-	return hasSlot
 }
 
 export const makeJsReactive = (ast: types.namedTypes.Node, reactiveIdentifiers: string[]) => {
@@ -280,4 +264,18 @@ export const convertExportedFunctionExpression = (ast: types.namedTypes.Node, na
 			  }
 			: undefined,
 	)[0]
+}
+
+// Taken from mozilla docs: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Whitespace#whitespace_helper_functions
+function is_all_ws(s: string) {
+	return !/[^\t\n\r ]/.test(s)
+}
+
+export const htmlIsEmpty = (htmlAst: Ast["html"]) => {
+	if (htmlAst.children == undefined || htmlAst.children.length === 0) return true
+	return htmlAst.children.every(
+		(templateNode) =>
+			(templateNode.type === "Text" && is_all_ws(templateNode.data)) ||
+			templateNode.type === "Comment",
+	)
 }
