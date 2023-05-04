@@ -159,8 +159,47 @@ describe("transformLayoutSvelte", () => {
 						true,
 					)
 					expect(code).toMatchInlineSnapshot(`
+						"<script>import { browser } from \\"$app/environment\\";
+						import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						export let data;
+						let languages, i, language;
+						addRuntimeToContext(getRuntimeFromData(data));
+
+						({
+						    languages: languages,
+						    i: i,
+						    language: language
+						} = getRuntimeFromContext());
+
+						$: if (browser && $language) {
+						    document.body.parentElement?.setAttribute(\\"lang\\", $language);
+						    localStorage.setItem(localStorageKey, $language);
+						}
+
+						console.log(languages)</script>
+
+						{#if $language}{$i('hello')}{/if}"
+					`)
+				})
+
+				it("resolves imports correctly (not-reactive)", async () => {
+					const code = await transformLayoutSvelte(
+						{ languageInUrl: true } as TransformConfig,
+						dedent`
+							<script>
+								import { languages, i } from "@inlang/sdk-js"
+
+								console.log(languages)
+							</script>
+
+							{i('hello')}
+						`,
+						true,
+					)
+					expect(code).toMatchInlineSnapshot(`
 "<script>import { browser } from \\"$app/environment\\";
-import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
 import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 export let data;
 let languages, i, language;
@@ -172,15 +211,14 @@ addRuntimeToContext(getRuntimeFromData(data));
     language: language
 } = getRuntimeFromContext());
 
-$:
-if (browser && $language) {
-    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-    localStorage.setItem(localStorageKey, $language);
+$: {
+	addRuntimeToContext(getRuntimeFromData(data))
+	;({ i, language } = getRuntimeFromContext())
 }
 
 console.log(languages)</script>
 
-{#if $language}{$i('hello')}{/if}"
+{#key language}{i('hello')}{/key}"
 					`)
 				})
 			})

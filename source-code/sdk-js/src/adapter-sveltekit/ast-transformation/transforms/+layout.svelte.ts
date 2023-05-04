@@ -212,7 +212,6 @@ ${codeWithoutTypes}`
 			const s = new MagicString(options.content)
 			const parsed = parse(s.toString())
 			const insertSlot = htmlIsEmpty(parsed.html)
-			console.log(insertSlot)
 			s.appendRight(
 				parsed.html.start,
 				`{#${!config.languageInUrl ? "if" : "key"} ${
