@@ -16,7 +16,7 @@ export function createMemoryFs(): NodeishFilesystem {
 		) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
 			if (parentDir instanceof Map) parentDir.set(await getBasename(path), data)
-			else throw new FilesystemError("ENOENT", path)
+			else throw new FilesystemError("ENOENT", path, "writeFile")
 		},
 
 		readFile: async function (
@@ -26,15 +26,15 @@ export function createMemoryFs(): NodeishFilesystem {
 			const file: Inode | undefined = followPath(fsRoot, path)
 			if (typeof file === "string") return file
 
-			if (!file) throw new FilesystemError("ENOENT", path)
-			throw new FilesystemError("EISDIR", path)
+			if (!file) throw new FilesystemError("ENOENT", path, "readFile")
+			throw new FilesystemError("EISDIR", path, "readFile")
 		},
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
 			const dir: Inode | undefined = followPath(fsRoot, path)
 			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
-			if (!dir) throw new FilesystemError("ENOENT", path)
-			throw new FilesystemError("ENOTDIR", path)
+			if (!dir) throw new FilesystemError("ENOENT", path, "readdir")
+			throw new FilesystemError("ENOTDIR", path, "readdir")
 		},
 
 		mkdir: async function (
@@ -47,9 +47,9 @@ export function createMemoryFs(): NodeishFilesystem {
 				options?.recursive ?? false,
 			)
 
-			if (!parentDir) throw new FilesystemError("ENOENT", path)
+			if (!parentDir) throw new FilesystemError("ENOENT", path, "mkdir")
 			else if (parentDir instanceof Map) parentDir.set(await getBasename(path), initDir(parentDir))
-			else throw new FilesystemError("ENOTDIR", path)
+			else throw new FilesystemError("ENOTDIR", path, "mkdir")
 			return options?.recursive ? "not implemented." : undefined
 		},
 
@@ -58,7 +58,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			options: Parameters<NodeishFilesystem["rm"]>[1],
 		) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (!parentDir) throw new FilesystemError("ENOENT", path)
+			if (!parentDir) throw new FilesystemError("ENOENT", path, "rm")
 
 			if (parentDir instanceof Map) {
 				const basename = await getBasename(path)
@@ -68,33 +68,33 @@ export function createMemoryFs(): NodeishFilesystem {
 						break
 					case "object":
 						if (options?.recursive) parentDir.delete(basename)
-						else throw new FilesystemError("EISDIR", path)
+						else throw new FilesystemError("EISDIR", path, "rm")
 						break
 					case "undefined":
-						throw new FilesystemError("ENOENT", path)
+						throw new FilesystemError("ENOENT", path, "rm")
 				}
-			} else throw new FilesystemError("ENOTDIR", path)
+			} else throw new FilesystemError("ENOTDIR", path, "rm")
 		},
 
 		rmdir: async function (path: Parameters<NodeishFilesystem["rmdir"]>[0]) {
 			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (!parentDir) throw new FilesystemError("ENOENT", path)
+			if (!parentDir) throw new FilesystemError("ENOENT", path, "rmdir")
 
 			if (parentDir instanceof Map) {
 				const basename = await getBasename(path)
 				const dir: Inode | undefined = parentDir.get(basename)
 				switch (typeof dir) {
 					case "string":
-						throw new FilesystemError("ENOTDIR", path)
+						throw new FilesystemError("ENOTDIR", path, "rmdir")
 					case "object":
-						if (dir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path)
+						if (dir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rmdir")
 						if (dir.size === specialPaths.length) parentDir.delete(basename)
-						else throw new FilesystemError("ENOTEMPTY", path)
+						else throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 						break
 					case "undefined":
-						throw new FilesystemError("ENOENT", path)
+						throw new FilesystemError("ENOENT", path, "rmdir")
 				}
-			} else throw new FilesystemError("ENOTDIR", path)
+			} else throw new FilesystemError("ENOTDIR", path, "rmdir")
 		},
 	}
 }
