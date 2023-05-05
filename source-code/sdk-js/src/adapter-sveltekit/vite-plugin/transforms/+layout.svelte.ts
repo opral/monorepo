@@ -98,10 +98,15 @@ ${codeWithoutTypes}`
 			const importNames = removeSdkJsImport(ast.$ast)
 			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
 				importNames?.push(["language", "language"])
+
+			// Svelte bug: store imports need to come first
+			importNames.sort(([identifier]) => identifier === "language" || identifier === "i" ? -1 : 1)
+
 			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
 			const reactiveImportNames = importNames.filter(([, local]) =>
 				reactiveImportIdentifiers.includes(local),
 			)
+
 			// Deep merge imports that we need
 			if (!options.attributes.context) {
 				for (const importAst of requiredImportsAsts) {

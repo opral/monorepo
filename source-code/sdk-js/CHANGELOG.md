@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.0.7
+
+### Patch Changes
+
+- 12a9dae5: implement some more AST transformations
+- 8b409e18: rename `accept-language-header` to `acceptLanguageHeader`
+
 ## 0.0.6
 
 ### Patch Changes

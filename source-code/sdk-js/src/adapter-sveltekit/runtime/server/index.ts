@@ -2,7 +2,7 @@ export { type SvelteKitServerRuntime, initSvelteKitServerRuntime } from "./runti
 export {
 	initHandleWrapper,
 	initRootLayoutServerLoadWrapper,
-	initLayoutServerLoadWrapper,
+	initServerLoadWrapper,
 } from "./wrappers.js"
 export {
 	referenceLanguage,
