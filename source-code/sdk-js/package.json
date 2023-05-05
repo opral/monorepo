@@ -20,7 +20,7 @@
 	"exports": {
 		".": "./dist/core/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
-		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/utils/*/index.js",
+		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/runtime/*/index.js",
 		"./plugin": "./dist/plugin/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
@@ -34,19 +34,19 @@
 				"./dist/adapter-sveltekit/index.d.ts"
 			],
 			"adapter-sveltekit/client": [
-				"./dist/adapter-sveltekit/utils/client/index.d.ts"
+				"./dist/adapter-sveltekit/runtime/client/index.d.ts"
 			],
 			"adapter-sveltekit/client/not-reactive": [
-				"./dist/adapter-sveltekit/utils/client/not-reactive/index.d.ts"
+				"./dist/adapter-sveltekit/runtime/client/not-reactive/index.d.ts"
 			],
 			"adapter-sveltekit/client/reactive": [
-				"./dist/adapter-sveltekit/utils/client/reactive/index.d.ts"
+				"./dist/adapter-sveltekit/runtime/client/reactive/index.d.ts"
 			],
 			"adapter-sveltekit/server": [
-				"./dist/adapter-sveltekit/utils/server/index.d.ts"
+				"./dist/adapter-sveltekit/runtime/server/index.d.ts"
 			],
 			"adapter-sveltekit/shared": [
-				"./dist/adapter-sveltekit/utils/shared/index.d.ts"
+				"./dist/adapter-sveltekit/runtime/shared/index.d.ts"
 			],
 			"plugin": [
 				"./dist/plugin/index.d.ts"
@@ -57,10 +57,10 @@
 		"./dist"
 	],
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:utils dev:plugin",
-		"build": "rm -rf dist && npm run build:utils && npm run build:plugin",
-		"dev:utils": "tsc --watch ./tsconfig.build.json",
-		"build:utils": "tsc --build ./tsconfig.build.json",
+		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin",
+		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
+		"dev:runtime": "tsc --watch ./tsconfig.build.json",
+		"build:runtime": "tsc --build ./tsconfig.build.json",
 		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",
 		"---- TEST ----------------------------------------------------------": "",
