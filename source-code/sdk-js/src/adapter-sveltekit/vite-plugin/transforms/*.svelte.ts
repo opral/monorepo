@@ -74,7 +74,7 @@ ${codeWithoutTypes}`
 			})
 
 			return { ...options, ...generated }
-		}
+		},
 	})
 
 	const processedMarkup = await preprocess(processedScript.code, {
@@ -86,7 +86,7 @@ ${codeWithoutTypes}`
 			parsed.module = undefined
 			// Find locations of nodes with i or language
 			const s = new MagicString(options.content)
-			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
+			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			parsed.instance = instance
 			parsed.module = module
 			const map = s.generateMap({
@@ -97,8 +97,7 @@ ${codeWithoutTypes}`
 			const code = s.toString()
 			return { code, map }
 		},
-	}
-	)
+	})
 
 	return processedMarkup.code
 }
