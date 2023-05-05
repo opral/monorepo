@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.8
+
+### Patch Changes
+
+- 735210ce: add `@inlang/core` to peer dependencies
+
 ## 0.0.7
 
 ### Patch Changes
