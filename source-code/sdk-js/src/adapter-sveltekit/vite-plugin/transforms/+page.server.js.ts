@@ -1,32 +1,42 @@
+import type { TransformConfig } from "../config.js"
+import { parseModule, generateCode } from "magicast"
+import { deepMergeObject } from "magicast/helpers"
+import { types } from "recast"
+import {
+	getArrowOrFunction,
+	getWrappedExport,
+	replaceOrAddExportNamedFunction,
+} from "../../../helpers/ast.js"
 
-import type { TransformConfig } from '../config.js'
-import { transformJs } from './*.js.js'
+const requiredImports = (root: boolean) =>
+	root
+		? `
+import { initRootPageServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+`
+		: `
+import { initPageServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+`
 
+// TODO: refactor together with `+layout.server.js.ts`
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	if (root) return transformRootPageServerJs(config, code)
+	const n = types.namedTypes
+	const b = types.builders
+	const ast = parseModule(code)
 
-	return transformGenericPageServerJs(config, code)
+	// Merge imports with required imports
+	const importsAst = parseModule(requiredImports(root))
+	deepMergeObject(ast, importsAst)
+	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
+	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const exportAst = getWrappedExport(
+		undefined,
+		[arrowOrFunctionNode],
+		"load",
+		`init${root ? "Root" : ""}PageServerLoadWrapper`,
+	)
+	// Replace or add current export handle
+	if (n.Program.check(ast.$ast)) {
+		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
+	}
+	return generateCode(ast).code
 }
-
-// ------------------------------------------------------------------------------------------------
-
-const transformRootPageServerJs = (config: TransformConfig, code: string) => {
-	if (code) return wrapRootPageServerJs(config, code)
-
-	return createRootPageServerJs(config)
-}
-
-// TODO: transform
-export const createRootPageServerJs = (config: TransformConfig) => {
-	return ''
-}
-
-// TODO: transform
-export const wrapRootPageServerJs = (config: TransformConfig, code: string) => {
-	// TODO: more meaningful error messages
-	throw new Error('currently not supported')
-}
-
-// ------------------------------------------------------------------------------------------------
-
-const transformGenericPageServerJs = transformJs
