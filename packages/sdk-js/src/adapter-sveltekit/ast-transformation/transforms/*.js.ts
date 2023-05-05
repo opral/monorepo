@@ -1,6 +1,6 @@
-import type { TransformConfig } from '../config.js'
+import type { TransformConfig } from "../config.js"
 
-// TODO: transform
+// TODO @benjaminpreiss: transform
 export const transformJs = (config: TransformConfig, code: string) => {
 	return code
 }

@@ -1,5 +1,27 @@
 import type { TransformConfig } from "../config.js"
 import { transformSvelte } from "./*.svelte.js"
+import { parse, preprocess } from "svelte/compiler"
+import { vitePreprocess } from "@sveltejs/kit/vite"
+import { parseModule, generateCode } from "magicast"
+import { deepMergeObject } from "magicast/helpers"
+import {
+	NodeInfoMapEntry,
+	findAstJs,
+	getReactiveImportIdentifiers,
+	makeJsReactive,
+	makeMarkupReactive,
+	removeSdkJsImport,
+	sortMarkup,
+	htmlIsEmpty,
+	variableDeclarationAst,
+	initImportedVariablesAst,
+	getRootReferenceIndexes,
+} from "../../../helpers/ast.js"
+import MagicStringImport from "magic-string"
+import { types } from "recast"
+
+// the type definitions don't match
+const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
 export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) {
@@ -9,76 +31,187 @@ export const transformLayoutSvelte = (config: TransformConfig, code: string, roo
 	return transformGenericLayoutSvelte(config, code)
 }
 
-// ------------------------------------------------------------------------------------------------
+const transformRootLayoutSvelte = async (config: TransformConfig, code: string) => {
+	const n = types.namedTypes
+	const b = types.builders
+	const requiredImportsAsts = [
+		parseModule(`import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared";`),
+	]
+	const reactiveImportIdentifiers: string[] = []
+	let localLanguageName: string
+	if (config.languageInUrl)
+		requiredImportsAsts.push(
+			parseModule(
+				`import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`,
+			),
+		)
+	else
+		requiredImportsAsts.push(
+			parseModule(
+				`import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`,
+			),
+			parseModule(`import { browser } from "$app/environment";`),
+		)
 
-const transformRootLayoutSvelte = (config: TransformConfig, code: string) => {
-	if (code) return wrapRootLayoutSvelte(config, code)
+	// First, we need to remove typescript statements from script tag
+	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
+		.code
 
-	return createRootLayoutSvelte(config)
-}
-
-export const createRootLayoutSvelte = (config: TransformConfig) => {
-	const imports = config.languageInUrl
-		? `import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"`
-		: `import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
-
-	const initCode = config.languageInUrl
-		? `
-$: {
-	addRuntimeToContext(getRuntimeFromData(data))
-	;({ i, language } = getRuntimeFromContext())
-}
-`
-		: `
-$: if (browser && $language) {
-	document.body.parentElement?.setAttribute("lang", $language)
-	// TODO: only if localStorageDetector
-	localStorage.setItem(localStorageKey, $language)
-}
-`
-
-	const template = config.languageInUrl
-		? `
-{#key language}
-	<slot />
-{/key}
-`
-		: `
-{#if $language}
-	<slot />
-{/if}
-`
-
-	return `
-<script>
-	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
-	${imports}
-	import { browser } from "$app/environment"
-
-	export let data
-
-	addRuntimeToContext(getRuntimeFromData(data))
-	let { i, language } = getRuntimeFromContext()
-	${initCode}
+	// Insert script tag if we don't have one
+	const svelteAst = parse(codeWithoutTypes)
+	// TODO @benjaminpreiss I wonder how we could include adding the empty script tag to the sourcemap
+	// TODO @benjaminpreiss Find out, why we have to add the lang="ts" attribute below... Otherwise preprocess doesn't recognize the script tag :/
+	const codeWithScriptTag = !svelteAst.instance
+		? `<script>
+// Inserted by inlang
 </script>
-${template}
-`
-}
+${codeWithoutTypes}`
+		: codeWithoutTypes
 
-// TODO: transform
-export const wrapRootLayoutSvelte = (config: TransformConfig, code: string) => {
-	// TODO: more meaningful error messages
-	throw new Error("currently not supported")
-}
+	const processed = await preprocess(codeWithScriptTag, {
+		script: async (options) => {
+			const ast = parseModule(options.content, {
+				sourceFileName: config.sourceFileName,
+			})
+			// Remove export let data statement
+			findAstJs(
+				ast.$ast,
+				[
+					({ node }) => n.ExportNamedDeclaration.check(node),
+					({ node }) => n.VariableDeclaration.check(node),
+					({ node }) => n.VariableDeclarator.check(node),
+					({ node }) => n.Identifier.check(node) && node.name === "data",
+				],
+				(node) =>
+					n.ExportNamedDeclaration.check(node)
+						? (meta) => {
+								const { parent, index } = meta.get(
+									node,
+								) as NodeInfoMapEntry<types.namedTypes.Program>
+								if (index != undefined) parent.body.splice(index, 1)
+						  }
+						: undefined,
+			)
 
-// ------------------------------------------------------------------------------------------------
+			// Remove import "@inlang/sdk-js" but save the aliases of all imports
+			// We need AT LEAST the language declaration for later.
+			const importNames = removeSdkJsImport(ast.$ast)
+			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
+				importNames?.push(["language", "language"])
+			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
+			const reactiveImportNames = importNames.filter(([, local]) =>
+				reactiveImportIdentifiers.includes(local),
+			)
+			// Deep merge imports that we need
+			if (!options.attributes.context) {
+				for (const importAst of requiredImportsAsts) {
+					deepMergeObject(ast, importAst)
+				}
+			}
+			// Initialize former imports & data
+			const exportLetDataExportAst = b.exportNamedDeclaration(
+				b.variableDeclaration("let", [b.variableDeclarator(b.identifier("data"))]),
+			)
+
+			const addRuntimeToContextAst = b.expressionStatement(
+				b.callExpression(b.identifier("addRuntimeToContext"), [
+					b.callExpression(b.identifier("getRuntimeFromData"), [b.identifier("data")]),
+				]),
+			)
+			const nonReactiveLabeledStatementAst = (importNames: [string, string][]) =>
+				b.labeledStatement(
+					b.identifier("$"),
+					b.blockStatement([
+						addRuntimeToContextAst,
+						...([initImportedVariablesAst(importNames)].filter(
+							(n) => n !== undefined,
+						) as types.namedTypes.ExpressionStatement[]),
+					]),
+				)
+			localLanguageName =
+				importNames.find(([imported]) => imported === "language")?.[1] ?? "language"
+			const reactiveLabeledStatementAst = b.labeledStatement(
+				b.identifier("$"),
+				b.ifStatement(
+					b.logicalExpression("&&", b.identifier("browser"), b.identifier("$" + localLanguageName)),
+					b.blockStatement([
+						b.expressionStatement(
+							b.chainExpression(
+								b.callExpression(
+									b.optionalMemberExpression(
+										b.memberExpression(
+											b.memberExpression(b.identifier("document"), b.identifier("body")),
+											b.identifier("parentElement"),
+										),
+										b.identifier("setAttribute"),
+									),
+									[b.literal("lang"), b.identifier("$" + localLanguageName)],
+								),
+							),
+						),
+						// TODO @benjaminpreiss: add this line only of `localStorage` is configured
+						// TODO @benjaminpreiss: do the same for `sessionStorage`
+						b.expressionStatement(
+							b.callExpression(
+								b.memberExpression(b.identifier("localStorage"), b.identifier("setItem")),
+								[b.identifier("localStorageKey"), b.identifier("$" + localLanguageName)],
+							),
+						),
+					]),
+				),
+			)
+			// Return the index in ast body that contains our first declaration
+			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
+			// prefix language and i aliases with $ if reactive
+			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
+			// Add exportLetDataExportAst, addRuntimeToContextAst and initImportedVariablesAst before any usage of "data" or importNames
+			if (n.Program.check(ast.$ast)) {
+				ast.$ast.body.splice(
+					usageIndexes?.[0] ?? ast.$ast.body.length,
+					0,
+					...([
+						exportLetDataExportAst,
+						variableDeclarationAst(importNames),
+						addRuntimeToContextAst,
+						initImportedVariablesAst(importNames),
+						config.languageInUrl
+							? nonReactiveLabeledStatementAst(reactiveImportNames)
+							: reactiveLabeledStatementAst,
+					].filter((n) => n !== undefined) as types.namedTypes.ExpressionStatement[]),
+				)
+			}
+
+			const generated = generateCode(ast, {
+				sourceMapName: config.sourceMapName,
+			})
+
+			return { ...options, ...generated }
+		},
+		markup: (options) => {
+			// We already iterated over .instance and .module
+			// Find locations of nodes with i or language
+			const s = new MagicString(options.content)
+			const parsed = parse(s.toString())
+			const insertSlot = htmlIsEmpty(parsed.html)
+			s.appendRight(
+				parsed.html.start,
+				`{#${!config.languageInUrl ? "if" : "key"} ${
+					!config.languageInUrl ? "$" : ""
+				}${localLanguageName}}`,
+			)
+			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
+			sortMarkup(parsed, s)
+			s.append((insertSlot ? `<slot />` : ``) + `{/${!config.languageInUrl ? "if" : "key"}}`)
+			const map = s.generateMap({
+				source: config.sourceFileName,
+				file: config.sourceMapName,
+				includeContent: true,
+			})
+			const code = s.toString()
+			return { code, map }
+		},
+	})
+	return processed.code
+}
 
 const transformGenericLayoutSvelte = transformSvelte
-
-// TODO @benjaminpreiss
-// 1. Remove "export let data"
-// 2. Insert imports
-// 3. Remove all imports from "@inlang/sdk-js"
-// 4. Insert "export let data;addRuntimeToContext(getRuntimeFromData(data));let { i, language } = getRuntimeFromContext();" immediately before either data, or any import from "@inlang/sdk-js" are referenced the first time
-// 5. Also insert the initCode at exactly that position
-// 6. Wrap the existing markup with template (Where <slot/> is the existing markup)

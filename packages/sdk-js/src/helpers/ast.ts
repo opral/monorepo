@@ -4,7 +4,8 @@ import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
 import { types } from "recast"
-import { parseModule } from "magicast"
+import { parseModule, builders } from "magicast"
+import type MagicStringImport from "magic-string"
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"
@@ -109,6 +110,7 @@ export const findAstJs = findAst<types.namedTypes.Node | Node>(jsWalk)
 export const findAstSvelte = findAst<Ast>(svelteWalk)
 
 const n = types.namedTypes
+const b = types.builders
 
 const loadMatchers: Parameters<typeof findAstJs>[1] = [
 	({ node }) => n.ExportNamedDeclaration.check(node),
@@ -132,4 +134,237 @@ const emptyLoadFunction = `export const load = async () => {};`
 export const emptyLoadExportNodes = () =>
 	(parseModule(emptyLoadFunction).$ast as types.namedTypes.Program).body
 
-export const inlangSdkJsStores = ["i", "language"]
+// NOTES: Test this with imports on a single line or on multiple lines
+// Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
+// Returns an array with the import properties and their aliases
+export const removeSdkJsImport = (ast: types.namedTypes.Node | Node): [string, string][] =>
+	findAstJs(
+		ast,
+		[
+			({ node }) =>
+				n.ImportDeclaration.check(node) &&
+				n.Literal.check(node.source) &&
+				node.source.value === "@inlang/sdk-js",
+			({ node }) => n.ImportSpecifier.check(node),
+		],
+		(node) =>
+			n.ImportSpecifier.check(node)
+				? (meta) => {
+						const { parent } = meta.get(
+							node,
+						) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
+						// Remove the complete import from "@inlang/sdk-js"
+						// (We assume that imports can only be top-level)
+						if (n.Program.check(ast)) {
+							const declarationIndex = ast.body.findIndex((node) => node === parent)
+							declarationIndex != -1 && ast.body.splice(declarationIndex, 1)
+						}
+						return [node.imported.name, node.local?.name ?? node.imported.name]
+				  }
+				: undefined,
+	)[0] ?? []
+
+export const makeMarkupReactive = (
+	parsed: Ast,
+	s: MagicStringImport.default,
+	reactiveIdentifiers: string[],
+) => {
+	const { instance, module } = parsed
+	parsed.instance = undefined
+	parsed.module = undefined
+	const locations = findAstSvelte(
+		parsed,
+		[({ node }) => n.Identifier.check(node) && reactiveIdentifiers.includes(node.name)],
+		(node) =>
+			n.Identifier.check(node) && Object.hasOwn(node, "start") && Object.hasOwn(node, "end")
+				? () => [(node as any).start, (node as any).end]
+				: undefined,
+	)[0] as [string, string][] | undefined
+
+	//const s = new MagicString(options.content)
+	// Prefix these exact locations with $signs by utilizing magicstring (which keeps the sourcemap intact)
+	if (locations) {
+		for (const [start] of locations) {
+			s.appendLeft(+start, "$")
+		}
+	}
+	parsed.instance = instance
+	parsed.module = module
+}
+
+export const sortMarkup = (parsed: Ast, s: MagicStringImport.default) => {
+	const { instance, module, css } = parsed
+	parsed.instance = undefined
+	parsed.module = undefined
+	parsed.css = undefined
+	const lastIndex = s.toString().length + 1
+	for (const child of parsed.html.children ?? []) {
+		s.move(child.start, child.end, lastIndex)
+	}
+	parsed.instance = instance
+	parsed.module = module
+	parsed.css = css
+}
+
+export const makeJsReactive = (ast: types.namedTypes.Node, reactiveIdentifiers: string[]) => {
+	findAstJs(
+		ast,
+		[({ node }) => n.Identifier.check(node) && reactiveIdentifiers.includes(node.name)],
+		(node) => (n.Identifier.check(node) ? () => (node.name = "$" + node.name) : undefined),
+	)
+}
+
+const inlangSdkJsStores = ["i", "language"]
+
+export const getReactiveImportIdentifiers = (importNames: [string, string][]) =>
+	importNames.flatMap(([imported, local]) => (inlangSdkJsStores.includes(imported) ? [local] : []))
+
+// Taken from mozilla docs: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Whitespace#whitespace_helper_functions
+function is_all_ws(s: string) {
+	return !/[^\t\n\r ]/.test(s)
+}
+
+export const htmlIsEmpty = (htmlAst: Ast["html"]) => {
+	if (htmlAst.children == undefined || htmlAst.children.length === 0) return true
+	return htmlAst.children.every(
+		(templateNode) =>
+			(templateNode.type === "Text" && is_all_ws(templateNode.data)) ||
+			templateNode.type === "Comment",
+	)
+}
+
+const functionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+	({ node }) => n.FunctionDeclaration.check(node),
+	({ node }) => n.Identifier.check(node) && node.name === name,
+]
+
+const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+	({ node }) => n.VariableDeclaration.check(node),
+	({ node }) =>
+		n.VariableDeclarator.check(node) && n.Identifier.check(node.id) && node.id.name === name,
+	({ node }) => n.ArrowFunctionExpression.check(node),
+]
+
+export const getArrowOrFunction = (
+	ast: types.namedTypes.Node,
+	name: string,
+	fallbackFunction: types.namedTypes.FunctionExpression | types.namedTypes.ArrowFunctionExpression,
+) => {
+	const arrowFunctionExpressionSearchResults = findAstJs(ast, arrowFunctionMatchers(name), (node) =>
+		n.ArrowFunctionExpression.check(node) ? () => node : undefined,
+	)[0]
+	const functionDeclarationSearchResults = findAstJs(ast, functionMatchers(name), (node) =>
+		n.FunctionDeclaration.check(node) ? () => node : undefined,
+	)[0] as
+		| [types.namedTypes.FunctionDeclaration, ...types.namedTypes.FunctionDeclaration[]]
+		| undefined
+	const arrowFunctionExpression =
+		arrowFunctionExpressionSearchResults && arrowFunctionExpressionSearchResults.length > 0
+			? (arrowFunctionExpressionSearchResults[0] as types.namedTypes.ArrowFunctionExpression)
+			: undefined
+	const functionDeclaration =
+		functionDeclarationSearchResults && functionDeclarationSearchResults.length > 0
+			? b.functionExpression.from({
+					async: functionDeclarationSearchResults[0].async,
+					body: functionDeclarationSearchResults[0].body,
+					params: functionDeclarationSearchResults[0].params,
+					generator: functionDeclarationSearchResults[0].generator,
+					id: functionDeclarationSearchResults[0].id,
+			  })
+			: undefined
+	return arrowFunctionExpression ?? functionDeclaration ?? fallbackFunction
+}
+
+export const replaceOrAddExportNamedFunction = (
+	ast: types.namedTypes.Program,
+	name: string,
+	replacementAst: types.namedTypes.ExportNamedDeclaration,
+) => {
+	const runOn = ((node) =>
+		n.ExportNamedDeclaration.check(node)
+			? (meta) => {
+					const { index } = meta.get(node) as NodeInfoMapEntry<types.namedTypes.Program>
+					if (index != undefined) ast.body.splice(index, 1, replacementAst)
+					return true
+			  }
+			: undefined) satisfies RunOn<types.namedTypes.Node, true | void>
+	const functionWasReplacedResult = findAstJs(ast, functionMatchers(name), runOn)[0] as
+		| true[]
+		| undefined
+	const functionWasReplaced =
+		functionWasReplacedResult != undefined && functionWasReplacedResult.length > 0
+	if (!functionWasReplaced) {
+		const arrowFunctionWasReplacedResult = findAstJs(ast, arrowFunctionMatchers(name), runOn)[0] as
+			| true[]
+			| undefined
+		const arrowFunctionWasReplaced =
+			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
+		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
+	}
+}
+
+export const getWrappedExport = (
+	options: unknown,
+	params: (types.namedTypes.ArrowFunctionExpression | types.namedTypes.FunctionExpression)[],
+	exportedName: string,
+	wrapperName: string,
+) => {
+	const initHandleWrapperCall = options
+		? builders.functionCall(wrapperName, options)
+		: builders.functionCall(wrapperName)
+	const wrapperDeclarationAst = b.callExpression(
+		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
+		params,
+	)
+	return b.exportNamedDeclaration(
+		b.variableDeclaration("const", [
+			b.variableDeclarator(b.identifier(exportedName), wrapperDeclarationAst),
+		]),
+	)
+}
+
+export const variableDeclarationAst = (importNames: [string, string][]) =>
+	importNames.length > 0
+		? b.variableDeclaration(
+				"let",
+				importNames.map(([, local]) => b.variableDeclarator(b.identifier(local))),
+		  )
+		: undefined
+
+export const initImportedVariablesAst = (importNames: [string, string][]) =>
+	importNames.length > 0
+		? b.expressionStatement(
+				b.assignmentExpression(
+					"=",
+					b.objectPattern(
+						importNames.map(([imported, local]) =>
+							b.property("init", b.identifier(imported), b.identifier(local)),
+						),
+					),
+					b.callExpression(b.identifier("getRuntimeFromContext"), []),
+				),
+		  )
+		: undefined
+
+export const getRootReferenceIndexes = (ast: types.namedTypes.Node, names: [string, string][]) =>
+	findAstJs(
+		ast,
+		[
+			({ node }) =>
+				n.Identifier.check(node) &&
+				(names.some(([, local]) => local === node.name) || node.name === "data"),
+		],
+		(node) =>
+			n.Identifier.check(node)
+				? (meta) => {
+						let { parent, index } = meta.get(node) ?? {}
+						while (parent != undefined && !n.Program.check(parent)) {
+							const parentMeta = meta.get(parent)
+							parent = parentMeta?.parent
+							index = parentMeta?.index
+						}
+						if (n.Program.check(parent)) return index
+						return undefined
+				  }
+				: undefined,
+	)[0] as number[] | undefined
