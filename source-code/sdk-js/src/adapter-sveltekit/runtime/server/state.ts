@@ -18,6 +18,8 @@ let resources: Resource[]
 
 export const reloadResources = async () => resources = await config.readResources({ config })
 
+await reloadResources()
+
 export const getResource = (language: string) =>
 	resources.find(({ languageTag: { name } }) => name === language)
 

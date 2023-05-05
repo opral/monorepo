@@ -23,7 +23,7 @@ const options = (config: TransformConfig) =>
 	"{" +
 	(config.languageInUrl
 		? `
-getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
+getLanguage: ({ url }) => url.pathname.split("/")[1],
 `
 		: `
 getLanguage: () => undefined,
