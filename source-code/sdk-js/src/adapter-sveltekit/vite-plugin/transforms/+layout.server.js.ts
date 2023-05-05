@@ -17,6 +17,7 @@ import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-svelteki
 import { initLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 
+// TODO: refactor together with `+page.server.js.ts`
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
 	const n = types.namedTypes
 	const b = types.builders

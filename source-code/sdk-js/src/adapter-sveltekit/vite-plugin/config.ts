@@ -2,10 +2,12 @@ import { loadFile, type ProxifiedModule } from "magicast"
 import { writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
+import { log } from 'node:console'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
 export type TransformConfig = {
+	debug?: boolean
 	languageInUrl: boolean
 	isStatic: boolean
 	srcFolder: string
@@ -42,6 +44,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const isTypeScriptProject = await doesPathExist(cwd + '/tsconfig.json')
 
 		resolve({
+			debug: !!inlangConfig.sdk?.debug,
 			languageInUrl,
 			isStatic,
 			srcFolder,
@@ -60,8 +63,6 @@ const createInlangConfigIfNotPresentYet = async () => {
 	const inlangConfigPath = cwd + "/inlang.config.js"
 	const inlangConfigExists = await doesPathExist(inlangConfigPath)
 	if (inlangConfigExists) return
-
-	// TODO: use sdkPlugin once ready https://github.com/inlang/inlang/issues/610
 
 	return writeFile(inlangConfigPath, `
 /**

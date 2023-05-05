@@ -63,6 +63,7 @@ const zLanguageNegotiationStrategy = z.union([
 ])
 
 const zSdkConfig = z.object({
+	debug: z.boolean().default(false),
 	languageNegotiation: z.object({
 		strict: z.boolean().optional().default(false),
 		strategies: z

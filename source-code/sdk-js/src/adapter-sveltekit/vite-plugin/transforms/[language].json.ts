@@ -1,9 +1,10 @@
 import type { TransformConfig } from '../config.js'
 
+// TODO: @benjaminpreiss: transform
 export const transformLanguageJson = (config: TransformConfig, code: string) => {
 	if (code) {
-		// TODO: more meaningful error messages
-		throw new Error('currently not supported')
+		// TODO: throw error if file contains a GET endpoint; currently we just override it
+		// throw new Error()
 	}
 
 	return `

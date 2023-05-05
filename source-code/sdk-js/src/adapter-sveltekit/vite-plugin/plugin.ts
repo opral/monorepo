@@ -1,5 +1,6 @@
 import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
 import { dirname, join } from "node:path"
+import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
 import { TransformConfig, getTransformConfig, resetConfig } from "./config.js"
 import { doesPathExist } from "./config.js"
@@ -210,10 +211,10 @@ export const plugin = () => {
 		async buildStart() {
 			const config = await getTransformConfig()
 
-			if (!config.hasAlreadyBeenInitialized) {
-				// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
-				await moveExistingRoutesIntoSubfolder(config)
-			}
+			// if (!config.hasAlreadyBeenInitialized) {
+			// 	// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
+			// 	await moveExistingRoutesIntoSubfolder(config)
+			// }
 
 			const hasCreatedANewFile = await createFilesIfNotPresent(config)
 
@@ -232,7 +233,30 @@ export const plugin = () => {
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			return transformCode(config, code, fileInformation)
+			const transformedCode = await transformCode(config, code, fileInformation)
+			if (config.debug) {
+				const filePath = id.replace(config.srcFolder, '')
+				console.info(dedent`
+					-- INLANG DEBUG START-----------------------------------------------------------
+
+					transformed '${fileInformation.type}' file: '${filePath}'
+
+					-- INPUT -----------------------------------------------------------------------
+
+					${code}
+
+					-- OUTPUT ----------------------------------------------------------------------
+
+					${transformedCode}
+
+					-- INLANG DEBUG END ------------------------------------------------------------
+				`)
+			}
+
+			return transformedCode
+				.replaceAll('languages: languages', 'languages')
+				.replaceAll('language: language', 'language')
+				.replaceAll('i: i', 'i')
 		},
 	} satisfies Plugin
 }
