@@ -1,5 +1,5 @@
-import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
-import { dirname, join } from "node:path"
+import { writeFile, mkdir } from "node:fs/promises"
+import { dirname } from "node:path"
 import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
 import { TransformConfig, getTransformConfig, resetConfig } from "./config.js"
@@ -172,18 +172,6 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 	return results.some((result) => result)
 }
 
-const moveFiles = async (srcDir: string, destDir: string) =>
-	Promise.all(
-		(await readdir(srcDir)).map(async (file) => {
-			const destFile = join(destDir, file)
-			await mkdir(dirname(destFile), { recursive: true }).catch(() => undefined)
-			await rename(join(srcDir, file), destFile)
-		}),
-	)
-
-const moveExistingRoutesIntoSubfolder = async (config: TransformConfig) =>
-	moveFiles(config.srcFolder + "/routes", config.rootRoutesFolder)
-
 // ------------------------------------------------------------------------------------------------
 
 let viteServer: ViteDevServer | undefined
@@ -210,11 +198,6 @@ export const plugin = () => {
 
 		async buildStart() {
 			const config = await getTransformConfig()
-
-			// if (!config.hasAlreadyBeenInitialized) {
-			// 	// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
-			// 	await moveExistingRoutesIntoSubfolder(config)
-			// }
 
 			const hasCreatedANewFile = await createFilesIfNotPresent(config)
 
