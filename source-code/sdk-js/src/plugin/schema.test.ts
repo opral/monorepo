@@ -56,7 +56,7 @@ describe("validateSdkConfig", () => {
 				languageNegotiation: {
 					strategies: [
 						{
-							type: "accept-language-header",
+							type: "acceptLanguageHeader",
 						},
 					],
 				},
@@ -66,7 +66,7 @@ describe("validateSdkConfig", () => {
 			  "languageNegotiation": {
 			    "strategies": [
 			      {
-			        "type": "accept-language-header",
+			        "type": "acceptLanguageHeader",
 			      },
 			    ],
 			    "strict": false,
