@@ -4,7 +4,7 @@ import { createTiptapEditor, useEditorJSON } from "solid-tiptap"
 import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
-import { Show, createEffect } from "solid-js"
+import { createEffect } from "solid-js"
 
 export const TipTapEditor = (props: {
 	referenceLanguage: ast.Resource["languageTag"]["name"]

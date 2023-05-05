@@ -1,7 +1,8 @@
-import { LintRule, LintedMessage, getLintReports } from "@inlang/core/lint"
+import type { LintRule, LintedMessage } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
-import { For, Show, createEffect, createSignal } from "solid-js"
+import { For, Show } from "solid-js"
 import type { Accessor } from "solid-js"
+import { showFilteredMessage } from "@src/pages/editor/utils/showFilteredMessage.js"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -18,107 +19,64 @@ type RuleSummaryItem = {
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
-	const {
-		resources,
-		inlangConfig,
-		setFilteredLintRules,
-		filteredLintRules,
-		filteredLanguages,
-		textSearch,
-	} = useEditorState()
-	const [newRuleSummary, setNewRuleSummary] = createSignal<Array<RuleSummaryItem>>([])
-	const [messageCount, setMessageCount] = createSignal<number>(0)
+	const { inlangConfig, setFilteredLintRules, filteredLintRules, filteredLanguages, textSearch } =
+		useEditorState()
 
 	const lintRuleIds = () =>
 		inlangConfig()
 			?.lint?.rules?.flat()
 			.map((rule) => rule.id) ?? []
 
-	//get lint summary values
-	createEffect(() => {
-		if (resources) {
-			const filteredResources = resources
-				.filter((resource) => {
-					if (filteredLanguages().length !== 0) {
-						return filteredLanguages().includes(resource.languageTag.name)
-					} else {
-						return true
-					}
-				})
-				.filter((resource) =>
-					textSearch() === ""
-						? true
-						: JSON.stringify(resource).toLowerCase().includes(textSearch().toLowerCase()),
-				)
-			const lintReports = getLintReports(filteredResources)
-			const newArr: Array<RuleSummaryItem> = []
-			lintRuleIds().map((id) => {
-				const filteredReports = lintReports.filter((report) => {
-					if (report.id === id && !report.id.includes("missingMessage")) {
-						return true
-					} else if (report.id === id) {
-						// missingMessage exception
-						const lintLanguage = report.message.match(/'([^']+)'/g)
-						if (lintLanguage?.length === 2) {
-							if (
-								filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
-								filteredLanguages().length === 0
-							) {
-								return true
-							}
-						} else {
-							return true
-						}
-					}
-					return false
-				})
+	const getLintSummary = () => {
+		const lintSummary: Array<RuleSummaryItem> = []
 
-				const lintRule = inlangConfig()
-					?.lint?.rules.flat()
-					.find((rule) => rule.id === id)
+		// loop over lints
+		lintRuleIds().map((lintId) => {
+			const lintRule = inlangConfig()
+				?.lint?.rules.flat()
+				.find((rule) => rule.id === lintId)
+			// loop over messages
+			let counter = 0
+			for (const id of Object.keys(props.messages())) {
 				if (
-					lintRule &&
-					filteredReports &&
-					(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
+					showFilteredMessage(props.messages()[id]!, filteredLanguages(), textSearch(), [lintId])
 				) {
-					newArr.push({ id, amount: filteredReports.length, rule: lintRule })
+					counter++
 				}
-			})
-			setNewRuleSummary(newArr)
-		}
-	})
+			}
+			if (
+				lintRule &&
+				counter !== 0 &&
+				(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
+			) {
+				lintSummary.push({ id: lintId, amount: counter, rule: lintRule! })
+			}
+		})
+		return lintSummary
+	}
 
-	//calculate message counter
-	createEffect(() => {
-		let messageCounter = 0
-		if (filteredLintRules().length !== 0 && newRuleSummary()) {
-			newRuleSummary().map((rule) => {
-				rule.amount > 0 ? (messageCounter += rule.amount) : undefined
-			})
-		} else {
-			Object.values(props.messages()).map((message) => {
-				let searchMatch = false
-				if (textSearch() === "") {
-					searchMatch = true
-				} else {
-					if (JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase())) {
-						searchMatch = true
-					}
-				}
-
-				if (searchMatch) {
-					messageCounter += 1
-				}
-			})
+	const messageCount = () => {
+		let counter = 0
+		for (const id of Object.keys(props.messages())) {
+			if (
+				showFilteredMessage(
+					props.messages()[id]!,
+					filteredLanguages(),
+					textSearch(),
+					filteredLintRules(),
+				)
+			) {
+				counter++
+			}
 		}
-		setMessageCount(messageCounter)
-	})
+		return counter
+	}
 
 	return (
 		<div class="h-14 w-full bg-background border border-surface-3 rounded-t-md flex items-center px-4 justify-between">
 			<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
 			<div class="flex gap-2">
-				<For each={newRuleSummary()}>
+				<For each={getLintSummary()}>
 					{(rule) => (
 						<Show when={rule.amount !== 0}>
 							<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
