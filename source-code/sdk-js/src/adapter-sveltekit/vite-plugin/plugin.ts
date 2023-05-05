@@ -164,7 +164,7 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 						You can remove this comment and modify the file as you like. We just need to make sure it exists.
 						Please do not delete it (inlang will recreate it if needed).
 					`
-					await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `// ${message}`)
+					await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `/* ${message} */`)
 
 					resolve(true)
 				}),
