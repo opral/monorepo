@@ -35,6 +35,9 @@ export function Messages(props: {
 	const matchedLanguage = (
 		messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
 	) => {
+		if (filteredLanguages().length === 0) {
+			return messages
+		}
 		const filteredByLanguage = Object.keys(messages)
 			.filter((key) => filteredLanguages().includes(key))
 			.reduce((filteredMessage, key) => {
