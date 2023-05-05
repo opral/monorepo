@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.10
+
+### Patch Changes
+
+- 9a5f9d21: reload resources without restarting the server
+
 ## 0.0.9
 
 ### Patch Changes
