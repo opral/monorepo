@@ -1,3 +1,3 @@
-import { plugin } from "./ast-transformation/vite-plugin.js"
+import { plugin } from "./vite-plugin/plugin.js"
 
 export default plugin

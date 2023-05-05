@@ -9,8 +9,10 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 
 // ------------------------------------------------------------------------------------------------
 
+// TODO: @benjaminpreiss: transform
 const transformRootPageJs = (config: TransformConfig, code: string) => {
-	if (code) return wrapRootPageJs(config, code)
+	// TODO: currently we just override the code
+	// if (code) return wrapRootPageJs(config, code)
 
 	return createRootPageJs(config)
 }
@@ -39,7 +41,7 @@ export const load = initRootPageLoadWrapper({
 }
 
 // TODO: transform
-export const wrapRootPageJs = (config: TransformConfig, code: string) => {
+const wrapRootPageJs = (config: TransformConfig, code: string) => {
 	// TODO: more meaningful error messages
 	throw new Error('currently not supported')
 }

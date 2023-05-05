@@ -124,28 +124,28 @@ describe("transformLayoutSvelte", () => {
 						true,
 					)
 					expect(code).toMatchInlineSnapshot(`
-                        "<script>import { browser } from \\"$app/environment\\";
-                        import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-                        import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                        export let data;
-                        let languages, i, language;
-                        addRuntimeToContext(getRuntimeFromData(data));
-                        
-                        ({
-                            languages: languages,
-                            i: i,
-                            language: language
-                        } = getRuntimeFromContext());
+						"<script>import { browser } from \\"$app/environment\\";
+						import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						export let data;
+						let language, i, languages;
+						addRuntimeToContext(getRuntimeFromData(data));
 
-                        $:
-                        if (browser && $language) {
-                            document.body.parentElement?.setAttribute(\\"lang\\", $language);
-                            localStorage.setItem(localStorageKey, $language);
-                        }
+						({
+						    language: language,
+						    i: i,
+						    languages: languages
+						} = getRuntimeFromContext());
 
-                        console.log(languages)</script>
+						$:
+						if (browser && $language) {
+						    document.body.parentElement?.setAttribute(\\"lang\\", $language);
+						    localStorage.setItem(localStorageKey, $language);
+						}
 
-                        {#if $language}{$i('hello')}{/if}"
+						console.log(languages)</script>
+
+						{#if $language}{$i('hello')}{/if}"
 					`)
 				})
 
@@ -164,31 +164,31 @@ describe("transformLayoutSvelte", () => {
 						true,
 					)
 					expect(code).toMatchInlineSnapshot(`
-                        "<script>import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
-                        import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                        export let data;
-                        let languages, i, language;
-                        addRuntimeToContext(getRuntimeFromData(data));
-                        
-                        ({
-                            languages: languages,
-                            i: i,
-                            language: language
-                        } = getRuntimeFromContext());
+						"<script>import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
+						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+						export let data;
+						let language, i, languages;
+						addRuntimeToContext(getRuntimeFromData(data));
 
-                        $:
-                        {
-                            addRuntimeToContext(getRuntimeFromData(data));
-                        
-                            ({
-                                i: i,
-                                language: language
-                            } = getRuntimeFromContext());
-                        }
+						({
+						    language: language,
+						    i: i,
+						    languages: languages
+						} = getRuntimeFromContext());
 
-                        console.log(languages)</script>
+						$:
+						{
+						    addRuntimeToContext(getRuntimeFromData(data));
 
-                        {#key language}{i('hello')}{/key}"
+						    ({
+						        language: language,
+						        i: i
+						    } = getRuntimeFromContext());
+						}
+
+						console.log(languages)</script>
+
+						{#key language}{i('hello')}{/key}"
 					`)
 				})
 			})

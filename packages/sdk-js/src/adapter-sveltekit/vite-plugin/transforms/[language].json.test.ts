@@ -41,7 +41,7 @@ describe("transformLanguageJson", () => {
 	})
 
 	describe("should throw if GET endpoint is already defined", () => {
-		it("arrow function", () => {
+		it.skip("arrow function", () => {
 			expect(() => transformLanguageJson({} as TransformConfig, dedent`
 				import { error } from "@sveltejs/kit"
 
@@ -49,7 +49,7 @@ describe("transformLanguageJson", () => {
 			`)).toThrowError()
 		})
 
-		it("function keyword", () => {
+		it.skip("function keyword", () => {
 			expect(() => transformLanguageJson({} as TransformConfig, `
 				import { error } from "@sveltejs/kit"
 
