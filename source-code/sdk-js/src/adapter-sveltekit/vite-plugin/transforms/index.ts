@@ -1,5 +1,5 @@
 import type { TransformConfig } from '../config.js'
-import type { FileInformation } from '../vite-plugin.js'
+import type { FileInformation } from '../plugin.js'
 import { transformJs } from './*.js.js'
 import { transformSvelte } from './*.svelte.js'
 import { transformLayoutJs } from './+layout.js.js'

@@ -50,6 +50,12 @@
 			],
 			"plugin": [
 				"./dist/plugin/index.d.ts"
+			],
+			"detectors": [
+				"./dist/detectors/index.d.ts"
+			],
+			"runtime": [
+				"./dist/runtime/index.d.ts"
 			]
 		}
 	},
@@ -59,8 +65,8 @@
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin",
 		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
-		"dev:runtime": "tsc --watch ./tsconfig.build.json",
-		"build:runtime": "tsc --build ./tsconfig.build.json",
+		"dev:runtime": "tsc --watch -p ./tsconfig.build.json",
+		"build:runtime": "tsc --build -p ./tsconfig.build.json",
 		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",
 		"---- TEST ----------------------------------------------------------": "",
