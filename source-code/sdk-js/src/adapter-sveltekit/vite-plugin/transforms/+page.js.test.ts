@@ -14,14 +14,14 @@ describe("transformLayoutJs", () => {
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-                "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-                import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
-                import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                import { browser } from \\"$app/environment\\";
+            "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+            import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+            import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+            import { browser } from \\"$app/environment\\";
 
-                export const load = initRootPageLoadWrapper({
-                  browser
-                }).wrap(() => {});"
+            export const load = initRootPageLoadWrapper({
+              browser
+            }).wrap(() => {});"
 			`)
 		})
 
@@ -35,20 +35,20 @@ describe("transformLayoutJs", () => {
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-                "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-                import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
-                import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                import { browser } from \\"$app/environment\\";
+				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+				import { browser } from \\"$app/environment\\";
 
-                export const load = initRootPageLoadWrapper({
-                    browser,
-                    initDetectors: () => [navigatorDetector],
+				export const load = initRootPageLoadWrapper({
+				    browser,
+				    initDetectors: () => [navigatorDetector],
 
-                    redirect: {
-                        throwable: redirect,
-                        getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
-                    }
-                }).wrap(() => {});"
+				    redirect: {
+						throwable: redirect,
+						getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+					}
+				}).wrap(() => {});"
 			`)
 		})
 
@@ -63,14 +63,14 @@ describe("transformLayoutJs", () => {
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-                "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-                import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
-                import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                import { browser } from \\"$app/environment\\";
+            "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+            import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+            import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+            import { browser } from \\"$app/environment\\";
 
-                export const load = initRootPageLoadWrapper({
-                  browser
-                }).wrap(async () => {});"
+            export const load = initRootPageLoadWrapper({
+              browser
+            }).wrap(async () => {});"
 			`)
 		})
 
@@ -86,14 +86,14 @@ describe("transformLayoutJs", () => {
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-                "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-                import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
-                import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-                import { browser } from \\"$app/environment\\";
+            "import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+            import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+            import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+            import { browser } from \\"$app/environment\\";
 
-                export const load = initRootPageLoadWrapper({
-                  browser
-                }).wrap(async () => {});"
+            export const load = initRootPageLoadWrapper({
+              browser
+            }).wrap(async () => {});"
 			`)
 		})
 	})
