@@ -61,8 +61,6 @@ const createInlangConfigIfNotPresentYet = async () => {
 	const inlangConfigExists = await doesPathExist(inlangConfigPath)
 	if (inlangConfigExists) return
 
-	// TODO: use sdkPlugin once ready https://github.com/inlang/inlang/issues/610
-
 	return writeFile(inlangConfigPath, `
 /**
  * @type { import("@inlang/core/config").DefineConfig }
