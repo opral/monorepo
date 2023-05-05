@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.9
+
+### Patch Changes
+
+- 7be35534: execute `markup` after `script` when transforming svelte files
+
 ## 0.0.8
 
 ### Patch Changes
