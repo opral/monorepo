@@ -322,3 +322,49 @@ export const getWrappedExport = (
 		]),
 	)
 }
+
+export const variableDeclarationAst = (importNames: [string, string][]) =>
+	importNames.length > 0
+		? b.variableDeclaration(
+				"let",
+				importNames.map(([, local]) => b.variableDeclarator(b.identifier(local))),
+		  )
+		: undefined
+
+export const initImportedVariablesAst = (importNames: [string, string][]) =>
+	importNames.length > 0
+		? b.expressionStatement(
+				b.assignmentExpression(
+					"=",
+					b.objectPattern(
+						importNames.map(([imported, local]) =>
+							b.property("init", b.identifier(imported), b.identifier(local)),
+						),
+					),
+					b.callExpression(b.identifier("getRuntimeFromContext"), []),
+				),
+		  )
+		: undefined
+
+export const getRootReferenceIndexes = (ast: types.namedTypes.Node, names: [string, string][]) =>
+	findAstJs(
+		ast,
+		[
+			({ node }) =>
+				n.Identifier.check(node) &&
+				(names.some(([, local]) => local === node.name) || node.name === "data"),
+		],
+		(node) =>
+			n.Identifier.check(node)
+				? (meta) => {
+						let { parent, index } = meta.get(node) ?? {}
+						while (parent != undefined && !n.Program.check(parent)) {
+							const parentMeta = meta.get(parent)
+							parent = parentMeta?.parent
+							index = parentMeta?.index
+						}
+						if (n.Program.check(parent)) return index
+						return undefined
+				  }
+				: undefined,
+	)[0] as number[] | undefined

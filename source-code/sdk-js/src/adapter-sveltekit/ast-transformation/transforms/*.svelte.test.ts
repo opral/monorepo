@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest"
 import { transformSvelte } from "./*.svelte.js"
 import { baseTestConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 describe("transformSvelte", () => {
 	it("basics", async () => {
@@ -24,12 +24,13 @@ describe("transformSvelte", () => {
 		)
 		expect(code).toMatchInlineSnapshot(`
 			"<script>import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			let i, languages, switchLanguage;
 
-			const {
+			({
 			    i: i,
 			    languages: languages,
 			    switchLanguage: switchLanguage
-			} = getRuntimeFromContext();
+			} = getRuntimeFromContext());
 
 			const blue = $i;
 			const green = languages;</script>
@@ -78,13 +79,14 @@ describe("transformSvelte", () => {
 			"<script lang=\\"ts\\" context=\\"module\\"></script>
 
 			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			export let prop;
+			let iStore, iLanguage;
 
-			const {
+			({
 			  i: iStore,
 			  language: iLanguage
-			} = getRuntimeFromContext();
+			} = getRuntimeFromContext());
 
-			export let prop;
 			const blue = $iStore;
 			const green = $iLanguage;
 			console.log(blue);</script>
@@ -131,13 +133,14 @@ describe("transformSvelte", () => {
 			"<script lang=\\"ts\\" context=\\"module\\"></script>
 
 			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+			export let prop;
+			let iStore, iLanguage;
 
-			const {
+			({
 			  i: iStore,
 			  language: iLanguage
-			} = getRuntimeFromContext();
+			} = getRuntimeFromContext());
 
-			export let prop;
 			const blue = $iStore;
 			const green = $iLanguage;
 			console.log(blue);</script>

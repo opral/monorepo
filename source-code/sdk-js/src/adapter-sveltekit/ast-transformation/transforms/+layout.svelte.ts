@@ -13,6 +13,9 @@ import {
 	removeSdkJsImport,
 	sortMarkup,
 	htmlIsEmpty,
+	variableDeclarationAst,
+	initImportedVariablesAst,
+	getRootReferenceIndexes,
 } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { types } from "recast"
@@ -109,31 +112,21 @@ ${codeWithoutTypes}`
 			const exportLetDataExportAst = b.exportNamedDeclaration(
 				b.variableDeclaration("let", [b.variableDeclarator(b.identifier("data"))]),
 			)
-			const variableDeclarationAst = b.variableDeclaration(
-				"let",
-				importNames.map(([, local]) => b.variableDeclarator(b.identifier(local))),
-			)
+
 			const addRuntimeToContextAst = b.expressionStatement(
 				b.callExpression(b.identifier("addRuntimeToContext"), [
 					b.callExpression(b.identifier("getRuntimeFromData"), [b.identifier("data")]),
 				]),
 			)
-			const initImportedVariablesAst = (importNames: [string, string][]) =>
-				b.expressionStatement(
-					b.assignmentExpression(
-						"=",
-						b.objectPattern(
-							importNames.map(([imported, local]) =>
-								b.property("init", b.identifier(imported), b.identifier(local)),
-							),
-						),
-						b.callExpression(b.identifier("getRuntimeFromContext"), []),
-					),
-				)
 			const nonReactiveLabeledStatementAst = (importNames: [string, string][]) =>
 				b.labeledStatement(
 					b.identifier("$"),
-					b.blockStatement([addRuntimeToContextAst, initImportedVariablesAst(importNames)]),
+					b.blockStatement([
+						addRuntimeToContextAst,
+						...([initImportedVariablesAst(importNames)].filter(
+							(n) => n !== undefined,
+						) as types.namedTypes.ExpressionStatement[]),
+					]),
 				)
 			localLanguageName =
 				importNames.find(([imported]) => imported === "language")?.[1] ?? "language"
@@ -168,27 +161,7 @@ ${codeWithoutTypes}`
 				),
 			)
 			// Return the index in ast body that contains our first declaration
-			const usageIndexes = findAstJs(
-				ast.$ast,
-				[
-					({ node }) =>
-						n.Identifier.check(node) &&
-						(importNames.some(([, local]) => local === node.name) || node.name === "data"),
-				],
-				(node) =>
-					n.Identifier.check(node)
-						? (meta) => {
-								let { parent, index } = meta.get(node) ?? {}
-								while (parent != undefined && !n.Program.check(parent)) {
-									const parentMeta = meta.get(parent)
-									parent = parentMeta?.parent
-									index = parentMeta?.index
-								}
-								if (n.Program.check(parent)) return index
-								return undefined
-						  }
-						: undefined,
-			)[0] as number[] | undefined
+			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
 			// prefix language and i aliases with $ if reactive
 			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
 			// Add exportLetDataExportAst, addRuntimeToContextAst and initImportedVariablesAst before any usage of "data" or importNames
@@ -196,13 +169,15 @@ ${codeWithoutTypes}`
 				ast.$ast.body.splice(
 					usageIndexes?.[0] ?? ast.$ast.body.length,
 					0,
-					exportLetDataExportAst,
-					variableDeclarationAst,
-					addRuntimeToContextAst,
-					initImportedVariablesAst(importNames),
-					config.languageInUrl
-						? nonReactiveLabeledStatementAst(reactiveImportNames)
-						: reactiveLabeledStatementAst,
+					...([
+						exportLetDataExportAst,
+						variableDeclarationAst(importNames),
+						addRuntimeToContextAst,
+						initImportedVariablesAst(importNames),
+						config.languageInUrl
+							? nonReactiveLabeledStatementAst(reactiveImportNames)
+							: reactiveLabeledStatementAst,
+					].filter((n) => n !== undefined) as types.namedTypes.ExpressionStatement[]),
 				)
 			}
 

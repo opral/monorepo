@@ -2,14 +2,15 @@ import type { TransformConfig } from "../config.js"
 import { parse, preprocess } from "svelte/compiler"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { findAstJs } from "../../../helpers/index.js"
 import { types } from "recast"
 import {
-	NodeInfoMapEntry,
 	getReactiveImportIdentifiers,
+	getRootReferenceIndexes,
+	initImportedVariablesAst,
 	makeJsReactive,
 	makeMarkupReactive,
 	removeSdkJsImport,
+	variableDeclarationAst,
 } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { vitePreprocess } from "@sveltejs/kit/vite"
@@ -19,20 +20,6 @@ const MagicString = MagicStringImport as unknown as typeof MagicStringImport.def
 
 export const transformSvelte = async (config: TransformConfig, code: string): Promise<string> => {
 	const n = types.namedTypes
-	const b = types.builders
-
-	// This creates either "const { i: inn } = getRuntimeFromContext();" or "const { i } = getRuntimeFromContext();"
-	const getRuntimeFromContextInsertion = (importIdentifiers: [string, string][]) =>
-		b.variableDeclaration("const", [
-			b.variableDeclarator(
-				b.objectPattern(
-					importIdentifiers?.map(([imported, local]) =>
-						b.property("init", b.identifier(imported), b.identifier(local)),
-					),
-				),
-				b.callExpression(b.identifier("getRuntimeFromContext"), []),
-			),
-		])
 
 	const requiredImports = config.languageInUrl
 		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
@@ -69,27 +56,19 @@ ${codeWithoutTypes}`
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			const importNames = removeSdkJsImport(ast.$ast)
 			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
+			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
 			// prefix language and i aliases with $ if reactive
 			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
 			// Insert all variable declarations after the injected import for getRuntimeFromContext
-			const insertion = getRuntimeFromContextInsertion(importNames)
-			findAstJs(
-				ast.$ast,
-				[
-					({ node }) => n.ImportDeclaration.check(node),
-					({ node }) =>
-						n.ImportSpecifier.check(node) && node.imported.name === "getRuntimeFromContext",
-				],
-				(node) =>
-					n.ImportDeclaration.check(node)
-						? (meta) => {
-								const { parent, index } = meta.get(
-									node,
-								) as NodeInfoMapEntry<types.namedTypes.Program>
-								if (index != undefined) parent.body.splice(index + 1, 0, insertion)
-						  }
-						: undefined,
-			)
+			if (n.Program.check(ast.$ast)) {
+				ast.$ast.body.splice(
+					usageIndexes?.[0] ?? ast.$ast.body.length,
+					0,
+					...([variableDeclarationAst(importNames), initImportedVariablesAst(importNames)].filter(
+						(n) => n !== undefined,
+					) as types.namedTypes.ExpressionStatement[]),
+				)
+			}
 			const generated = generateCode(ast, {
 				sourceMapName: config.sourceMapName,
 			})
