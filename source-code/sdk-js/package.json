@@ -65,8 +65,8 @@
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin",
 		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
-		"dev:runtime": "tsc --watch -p ./tsconfig.build.json",
-		"build:runtime": "tsc --build -p ./tsconfig.build.json",
+		"dev:runtime": "tsc --project ./tsconfig.build.json --watch",
+		"build:runtime": "tsc --project ./tsconfig.build.json",
 		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
 		"build:plugin": "tsup",
 		"---- TEST ----------------------------------------------------------": "",
