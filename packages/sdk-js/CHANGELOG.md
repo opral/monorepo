@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.12
+
+### Patch Changes
+
+- 469e3d58: fix generated inlang.config.js
+
 ## 0.0.11
 
 ### Patch Changes
