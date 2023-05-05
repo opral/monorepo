@@ -87,9 +87,11 @@ export const initRootLayoutLoadWrapper = <
 			async (event: Parameters<LayoutLoad>[0]): Promise<DataWithRuntime<Data>> => {
 				const runtime = await initRuntimeForWrappers(event, options)
 
+				const payload = await load(event, runtime)
+
 				return addRuntimeToData(
 					{
-						...(await load(event, runtime)),
+						...(payload || event.data),
 						referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
 						languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
 						language: runtime.language, // TODO: only pass this if `language` gets detected on server
