@@ -41,7 +41,7 @@ export async function mockEnvironment(args: {
  *
  * Useful for mocking the environment.
  */
-async function copyDirectory(args: {
+export async function copyDirectory(args: {
 	copyFrom: InlangEnvironment["$fs"]
 	copyTo: InlangEnvironment["$fs"]
 	path: string
