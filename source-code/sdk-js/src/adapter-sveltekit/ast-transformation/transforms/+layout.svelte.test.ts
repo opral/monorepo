@@ -48,8 +48,6 @@ describe("transformLayoutSvelte", () => {
 					`,
 					true,
 				)
-				// NOTES @ivan ist das richtig, dass ich unten den slot einfüge?
-				// NOTES @ivan könntest du dir den code unten mal kurz angucken und auf richtigkeit überprüfen?
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
 					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";

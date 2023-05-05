@@ -134,7 +134,6 @@ export const handle = initHandleWrapper({
 		})
 	})
 
-	// NOTES @ivan I have no idea why this is failing
 	describe("variations", () => {
 		it("languageInUrl", () => {
 			const config: TransformConfig = {
