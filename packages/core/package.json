@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.7.10",
+	"version": "0.7.13",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -25,6 +25,9 @@
 			],
 			"lint": [
 				"./dist/lint/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
 			],
 			"query": [
 				"./dist/query/index.d.ts"
