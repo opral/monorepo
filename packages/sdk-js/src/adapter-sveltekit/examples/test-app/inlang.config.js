@@ -15,7 +15,7 @@ export async function defineConfig(env) {
 				// @ts-ignore
 				debug: true,
 				languageNegotiation: {
-					strategies: [{ type: "localStorage" }, { type: "navigator" }],
+					strategies: [{ type: "url" }],
 				},
 			}),
 		],
