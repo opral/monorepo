@@ -19,6 +19,7 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
+import { handleMissingMessage } from "@src/pages/editor/utils/handleMissingMessage.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -299,25 +300,9 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			const filteredReports = lintReports.filter((report) => {
-				if (!report.id.includes("missingMessage")) {
-					return true
-				} else {
-					// missingMessage exception
-					const lintLanguage = report.message.match(/'([^']+)'/g)
-					if (lintLanguage?.length === 2) {
-						if (
-							filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
-							filteredLanguages().length === 0
-						) {
-							return true
-						}
-					} else {
-						return true
-					}
-				}
-				return false
-			})
+			const filteredReports = lintReports.filter((report) =>
+				handleMissingMessage(report, filteredLanguages()),
+			)
 			if (filteredReports) {
 				filteredReports.map((lint) => {
 					notifications.push({
