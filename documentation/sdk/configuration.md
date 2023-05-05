@@ -57,7 +57,7 @@ Detects if the `language` key is set in the localStorage and uses it as the lang
 },
 ```
 
-###
+<!-- ###
 
 ##### **navigator**
 
@@ -69,7 +69,7 @@ Detects the preferred `languages` the user has enabled in his browser.
 		{ type: "navigator" },
 	],
 },
-```
+``` -->
 
 ###
 
@@ -85,7 +85,7 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 },
 ```
 
-###
+<!-- ###
 
 ##### **acceptLanguageHeader**
 
@@ -97,4 +97,4 @@ Detects the user's preferred `languages` the browser sends to the server.
 		{ type: "acceptLanguageHeader" },
 	],
 },
-```
+``` -->

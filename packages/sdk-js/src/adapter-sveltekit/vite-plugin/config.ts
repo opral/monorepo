@@ -69,7 +69,7 @@ const createInlangConfigIfNotPresentYet = async () => {
  */
 export async function defineConfig(env) {
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/0.1/dist/plugin/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/0.0.11/dist/plugin/index.js"
 	)
 
 	return {
@@ -78,7 +78,7 @@ export async function defineConfig(env) {
 			jsonPlugin({ pathPattern: "./languages/{language}.json" }),
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [{ type: "localStorage" }, { type: "navigator" }]
+					strategies: [{ type: "localStorage" }]
 				}
 			}),
 		],
