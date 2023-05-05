@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.11
+
+### Patch Changes
+
+- 87a98918: generate valid code for `url` detection option
+
 ## 0.0.10
 
 ### Patch Changes
