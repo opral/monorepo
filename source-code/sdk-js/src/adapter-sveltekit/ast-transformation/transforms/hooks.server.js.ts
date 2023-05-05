@@ -2,7 +2,11 @@ import type { TransformConfig } from "../config.js"
 import { types } from "recast"
 import { parseModule, generateCode, builders, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
-import { getArrowOrFunction, replaceOrAddExportNamed } from "../../../helpers/ast.js"
+import {
+	getArrowOrFunction,
+	getWrappedExport,
+	replaceOrAddExportNamedFunction,
+} from "../../../helpers/ast.js"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -44,42 +48,26 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const imports = requiredImports(config)
 	const importsAst = parseModule(imports)
 	deepMergeObject(ast, importsAst)
-
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "handle")
-	const optionsAst = parseExpression(options(config))
-	const initHandleWrapperCall = builders.functionCall("initHandleWrapper", optionsAst)
-	const wrapperDeclarationAst = b.callExpression(
-		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
+	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression(
+		[
+			b.objectPattern([
+				b.property("init", b.identifier("event"), b.identifier("event")),
+				b.property("init", b.identifier("resolve"), b.identifier("resolve")),
+			]),
+		],
+		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
+	)
+	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "handle", emptyArrowFunctionDeclaration)
+	const exportAst = getWrappedExport(
+		parseExpression(options(config)),
 		[arrowOrFunctionNode],
-	)
-	const exportAst = b.exportNamedDeclaration(
-		b.variableDeclaration("const", [
-			b.variableDeclarator(b.identifier("handle"), wrapperDeclarationAst),
-		]),
+		"handle",
+		"initHandleWrapper",
 	)
 
+	// Replace or add current export handle
 	if (n.Program.check(ast.$ast)) {
-		// Replace or add current export handle
-		replaceOrAddExportNamed(ast.$ast, "handle", exportAst)
-		/* const hasHandle = matchers.found
-		const body = ast.$ast.body
-		// Add load declaration with ast if needed
-		const emptyHandleExportAst = parseModule(emptyHandleFunction)
-		if (!hasHandle && n.Program.check(emptyHandleExportAst.$ast)) {
-			body.push(...emptyHandleExportAst.$ast.body)
-		}
-
-		findAstJs(ast.$ast, matchers.matchers, (node) =>
-			n.Identifier.check(node)
-				? (meta) => {
-						const { parent } = meta.get(node) ?? {}
-						if (n.VariableDeclarator.check(parent) && parent.init) {
-							wrapperDeclarationAst.arguments.push(parent.init)
-							parent.init = wrapperDeclarationAst
-						}
-				  }
-				: undefined,
-		) */
+		replaceOrAddExportNamedFunction(ast.$ast, "handle", exportAst)
 	}
 	return generateCode(ast).code
 }

@@ -109,40 +109,6 @@ describe("transformLayoutSvelte", () => {
 					<slot />{/if}"
 				`)
 			})
-			// NOTES @ivan this test below is not how I understood it... Currently it will insert a slot in this case
-			// NOTES @ivan can you please look at the position of the console log in the script tag below?
-			it.skip("doesn't output markup if no markup is present", async () => {
-				const code = await transformLayoutSvelte(
-					{} as TransformConfig,
-					dedent`
-						<script>
-						console.log(1)
-						</script>
-					`,
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					console.log(1)
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-						language: language
-					} = getRuntimeFromContext());
-
-					$:
-                    if (browser && $language) {
-						document.body.parentElement?.setAttribute(\\"lang\\", $language);
-						localStorage.setItem(localStorageKey, $language);
-					}</script>
-
-					{#if $language}<slot />{/if}""
-				`)
-			})
 
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {

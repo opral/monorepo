@@ -92,7 +92,6 @@ ${codeWithoutTypes}`
 
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			// We need AT LEAST the language declaration for later.
-			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			const importNames = removeSdkJsImport(ast.$ast)
 			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
 				importNames?.push(["language", "language"])
@@ -100,8 +99,8 @@ ${codeWithoutTypes}`
 			const reactiveImportNames = importNames.filter(([, local]) =>
 				reactiveImportIdentifiers.includes(local),
 			)
+			// Deep merge imports that we need
 			if (!options.attributes.context) {
-				// Deep merge imports that we need
 				for (const importAst of requiredImportsAsts) {
 					deepMergeObject(ast, importAst)
 				}
@@ -157,8 +156,8 @@ ${codeWithoutTypes}`
 								),
 							),
 						),
-						// TODO: add this line only of `localStorage` is configured
-						// TODO: do the same for `sessionStorage`
+						// TODO @benjaminpreiss: add this line only of `localStorage` is configured
+						// TODO @benjaminpreiss: do the same for `sessionStorage`
 						b.expressionStatement(
 							b.callExpression(
 								b.memberExpression(b.identifier("localStorage"), b.identifier("setItem")),

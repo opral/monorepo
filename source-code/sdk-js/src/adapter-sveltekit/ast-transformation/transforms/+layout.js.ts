@@ -1,9 +1,13 @@
 import type { TransformConfig } from "../config.js"
 import { transformJs } from "./*.js.js"
-import { parseModule, generateCode, builders, parseExpression } from "magicast"
+import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { findLoadDeclaration, emptyLoadExportNodes } from "../../../helpers/ast.js"
+import {
+	getArrowOrFunction,
+	getWrappedExport,
+	replaceOrAddExportNamedFunction,
+} from "../../../helpers/ast.js"
 
 const requiredImports = `
 import { browser } from "$app/environment";
@@ -12,7 +16,10 @@ import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/dete
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
 `
 
-const options = `
+const options = (config: TransformConfig) =>
+	config.languageInUrl
+		? `{}`
+		: `
 {initDetectors: browser
 ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
 : undefined}
@@ -28,33 +35,23 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 const transformRootLayoutJs = (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders
-	const withOptions = !config.languageInUrl
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
 	const importsAst = parseModule(requiredImports)
 	deepMergeObject(ast, importsAst)
-
+	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
+	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const exportAst = getWrappedExport(
+		parseExpression(options(config)),
+		[arrowOrFunctionNode],
+		"load",
+		"initRootLayoutLoadWrapper",
+	)
+	// Replace or add current export handle
 	if (n.Program.check(ast.$ast)) {
-		const loadVariableDeclarator = findLoadDeclaration(ast.$ast)
-		const body = ast.$ast.body
-		// Add load declaration with ast if needed
-		if (loadVariableDeclarator.length === 0) {
-			body.push(...emptyLoadExportNodes())
-			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
-		}
-		const optionsAst = parseExpression(withOptions ? options : "{}")
-		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutLoadWrapper", optionsAst)
-		const wrapperDeclarationAst = b.callExpression(
-			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
-			[],
-		)
-		for (const { node: declarator } of loadVariableDeclarator) {
-			if (declarator.init) wrapperDeclarationAst.arguments.push(declarator.init)
-			declarator.init = wrapperDeclarationAst
-		}
+		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
 	}
-
 	return generateCode(ast).code
 }
 

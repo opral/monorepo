@@ -16,7 +16,7 @@ describe("transformLayoutJs", () => {
 			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 			import { browser } from \\"$app/environment\\";
-			export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
+			export const load = initRootLayoutLoadWrapper({}).wrap(() => {});"
 		`)
 	})
 
@@ -33,11 +33,12 @@ describe("transformLayoutJs", () => {
 			import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 			import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 			import { browser } from \\"$app/environment\\";
+
 			export const load = initRootLayoutLoadWrapper({
 			  initDetectors: browser
 			  ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
 			  : undefined
-			}).wrap(async () => {});"
+			}).wrap(() => {});"
 		`)
 	})
 

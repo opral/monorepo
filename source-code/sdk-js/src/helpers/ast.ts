@@ -4,7 +4,7 @@ import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
 import { types } from "recast"
-import { parseModule } from "magicast"
+import { parseModule, builders } from "magicast"
 import type MagicStringImport from "magic-string"
 
 export class FindAstError extends Error {
@@ -245,7 +245,11 @@ const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] =>
 	({ node }) => n.ArrowFunctionExpression.check(node),
 ]
 
-export const getArrowOrFunction = (ast: types.namedTypes.Node, name: string) => {
+export const getArrowOrFunction = (
+	ast: types.namedTypes.Node,
+	name: string,
+	fallbackFunction: types.namedTypes.FunctionExpression | types.namedTypes.ArrowFunctionExpression,
+) => {
 	const arrowFunctionExpressionSearchResults = findAstJs(ast, arrowFunctionMatchers(name), (node) =>
 		n.ArrowFunctionExpression.check(node) ? () => node : undefined,
 	)[0]
@@ -268,19 +272,10 @@ export const getArrowOrFunction = (ast: types.namedTypes.Node, name: string) => 
 					id: functionDeclarationSearchResults[0].id,
 			  })
 			: undefined
-	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression(
-		[
-			b.objectPattern([
-				b.property("init", b.identifier("event"), b.identifier("event")),
-				b.property("init", b.identifier("resolve"), b.identifier("resolve")),
-			]),
-		],
-		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
-	)
-	return arrowFunctionExpression ?? functionDeclaration ?? emptyArrowFunctionDeclaration
+	return arrowFunctionExpression ?? functionDeclaration ?? fallbackFunction
 }
 
-export const replaceOrAddExportNamed = (
+export const replaceOrAddExportNamedFunction = (
 	ast: types.namedTypes.Program,
 	name: string,
 	replacementAst: types.namedTypes.ExportNamedDeclaration,
@@ -306,4 +301,22 @@ export const replaceOrAddExportNamed = (
 			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
 		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
 	}
+}
+
+export const getWrappedExport = (
+	options: unknown,
+	params: (types.namedTypes.ArrowFunctionExpression | types.namedTypes.FunctionExpression)[],
+	exportedName: string,
+	wrapperName: string,
+) => {
+	const initHandleWrapperCall = builders.functionCall(wrapperName, options)
+	const wrapperDeclarationAst = b.callExpression(
+		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
+		params,
+	)
+	return b.exportNamedDeclaration(
+		b.variableDeclaration("const", [
+			b.variableDeclarator(b.identifier(exportedName), wrapperDeclarationAst),
+		]),
+	)
 }
