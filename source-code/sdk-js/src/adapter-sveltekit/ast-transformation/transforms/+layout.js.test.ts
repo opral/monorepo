@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
 import { baseTestConfig } from "./test-helpers/config.js"
+import { dedent } from "ts-dedent"
 
 describe("transformLayoutJs", () => {
 	test("Insert into empty file with no options", () => {
@@ -43,8 +44,8 @@ describe("transformLayoutJs", () => {
 	})
 
 	test("Wrap basic load function", () => {
-		const code = `
-export const load = async () => {};
+		const code = dedent`
+			export const load = async () => {};
 		`
 		const config = {
 			...baseTestConfig,
@@ -62,9 +63,9 @@ export const load = async () => {};
 	})
 
 	test("Wrap basic load function and merge incomplete imports", () => {
-		const code = `
-import { browser } from "$app/environment";
-export const load = async () => {};
+		const code = dedent`
+			import { browser } from "$app/environment";
+			export const load = async () => {};
 		`
 		const config = {
 			...baseTestConfig,
