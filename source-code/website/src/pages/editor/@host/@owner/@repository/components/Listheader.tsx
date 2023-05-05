@@ -91,65 +91,26 @@ export const ListHeader = (props: ListHeaderProps) => {
 	//calculate message counter
 	createEffect(() => {
 		let messageCounter = 0
-		Object.values(props.messages()).map((message) => {
-			let lintMatch = false
-			if (filteredLintRules().length !== 0) {
-				const messageWithLints = Object.values(message).filter((id) => id?.lint)
-				messageWithLints.map((id) => {
-					console.log(id)
-					if (
-						id?.lint?.some((lint) => {
-							if (filteredLintRules().includes(lint.id) && !lint.id.includes("missingMessage")) {
-								return true
-							} else if (filteredLintRules().includes(lint.id)) {
-								// missingMessage exception
-								const lintLanguage = lint.message.match(/'([^']+)'/g)
-								if (lintLanguage?.length === 2) {
-									if (
-										filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
-										filteredLanguages().length === 0
-									) {
-										return true
-									}
-								} else {
-									return true
-								}
-							}
-							return false
-						})
-					) {
-						lintMatch = true
-					}
-				})
-			} else {
-				lintMatch = true
-			}
-
-			let searchMatch = false
-			if (textSearch() === "") {
-				searchMatch = true
-			} else {
-				if (JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase())) {
+		if (filteredLintRules().length !== 0 && newRuleSummary()) {
+			newRuleSummary().map((rule) => {
+				rule.amount > 0 ? (messageCounter += rule.amount) : undefined
+			})
+		} else {
+			Object.values(props.messages()).map((message) => {
+				let searchMatch = false
+				if (textSearch() === "") {
 					searchMatch = true
+				} else {
+					if (JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase())) {
+						searchMatch = true
+					}
 				}
-			}
 
-			// let languageMatch = false
-			// if (filteredLanguages().length !== 0) {
-			// 	const messageLanguages = Object.keys(message)
-			// 	messageLanguages.map((language) => {
-			// 		if (filteredLanguages().includes(language)) {
-			// 			languageMatch = true
-			// 		}
-			// 	})
-			// } else {
-			// 	languageMatch = true
-			// }
-
-			if (lintMatch && searchMatch) {
-				messageCounter += 1
-			}
-		})
+				if (searchMatch) {
+					messageCounter += 1
+				}
+			})
+		}
 		setMessageCount(messageCounter)
 	})
 
