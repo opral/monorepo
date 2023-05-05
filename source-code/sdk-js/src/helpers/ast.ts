@@ -309,7 +309,9 @@ export const getWrappedExport = (
 	exportedName: string,
 	wrapperName: string,
 ) => {
-	const initHandleWrapperCall = builders.functionCall(wrapperName, options)
+	const initHandleWrapperCall = options
+		? builders.functionCall(wrapperName, options)
+		: builders.functionCall(wrapperName)
 	const wrapperDeclarationAst = b.callExpression(
 		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
 		params,
