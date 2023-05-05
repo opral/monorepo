@@ -34,20 +34,21 @@ describe("validateSdkConfig", () => {
 				},
 			} as unknown as SdkConfigInput),
 		).toMatchInlineSnapshot(`
-          {
-            "languageNegotiation": {
-              "strategies": [
-                {
-                  "type": "url",
-                  "variant": {
-                    "type": "path",
-                  },
-                },
-              ],
-              "strict": false,
-            },
-          }
-        `)
+			{
+			  "debug": false,
+			  "languageNegotiation": {
+			    "strategies": [
+			      {
+			        "type": "url",
+			        "variant": {
+			          "type": "path",
+			        },
+			      },
+			    ],
+			    "strict": false,
+			  },
+			}
+		`)
 	})
 
 	test("Accept-language strategy", () => {
@@ -63,6 +64,7 @@ describe("validateSdkConfig", () => {
 			} as unknown as SdkConfigInput),
 		).toMatchInlineSnapshot(`
 			{
+			  "debug": false,
 			  "languageNegotiation": {
 			    "strategies": [
 			      {
@@ -88,6 +90,7 @@ describe("validateSdkConfig", () => {
 			} as unknown as SdkConfigInput),
 		).toMatchInlineSnapshot(`
 			{
+			  "debug": false,
 			  "languageNegotiation": {
 			    "strategies": [
 			      {
@@ -114,6 +117,7 @@ describe("validateSdkConfig", () => {
 			} as unknown as SdkConfigInput),
 		).toMatchInlineSnapshot(`
 			{
+			  "debug": false,
 			  "languageNegotiation": {
 			    "strategies": [
 			      {
