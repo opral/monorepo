@@ -32,6 +32,18 @@ export function Messages(props: {
 		throw Error("No message id found")
 	}
 
+	const matchedLanguage = (
+		messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
+	) => {
+		const filteredByLanguage = Object.keys(messages)
+			.filter((key) => filteredLanguages().includes(key))
+			.reduce((filteredMessage, key) => {
+				filteredMessage[key] = messages[key]
+				return filteredMessage
+			}, {} as { [key: string]: LintedMessage | undefined })
+		return filteredByLanguage
+	}
+
 	const matchedLints = (message?: LintedMessage) => {
 		if (message === undefined) {
 			return false
@@ -100,7 +112,9 @@ export function Messages(props: {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]: Object.values(props.messages).every((message) => shouldShow(message) === false),
+				["hidden"]: Object.values(matchedLanguage(props.messages)).every(
+					(message) => shouldShow(message) === false,
+				),
 			}}
 		>
 			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
