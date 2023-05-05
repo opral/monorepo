@@ -9,16 +9,16 @@ describe("transformHooksServerJs", () => {
 		it("adds handle function to an empty file", () => {
 			const code = transformHooksServerJs({} as TransformConfig, "")
 			expect(code).toMatchInlineSnapshot(`
-"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-
-export const handle = initHandleWrapper({
-  getLanguage: () => undefined
-}).wrap((
-  {
-    event: event,
-    resolve: resolve
-  }
-) => resolve(event));"
+				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+				
+				export const handle = initHandleWrapper({
+				  getLanguage: () => undefined
+				}).wrap((
+				  {
+				    event: event,
+				    resolve: resolve
+				  }
+				) => resolve(event));"
 			`)
 		})
 
@@ -45,32 +45,32 @@ export const handle = initHandleWrapper({
 				`,
 			)
 			expect(code).toMatchInlineSnapshot(`
-"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-import * as Sentry from '@sentry/node';
-import crypto from 'crypto';
-
-Sentry.init.skip({/*...*/})
-
-/** @type {import('@sveltejs/kit').HandleServerError} */
-export async function handleError({ error, event }) {
-	const errorId = crypto.randomUUID();
-	// example integration with https://sentry.io/
-	Sentry.captureException(error, { event, errorId });
-
-	return {
-		message: 'Whoops!',
-		errorId
-	};
-}
-
-export const handle = initHandleWrapper({
-  getLanguage: () => undefined
-}).wrap((
-    {
-        event: event,
-        resolve: resolve
-    }
-) => resolve(event));"
+				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+				import * as Sentry from '@sentry/node';
+				import crypto from 'crypto';
+				
+				Sentry.init.skip({/*...*/})
+				
+				/** @type {import('@sveltejs/kit').HandleServerError} */
+				export async function handleError({ error, event }) {
+					const errorId = crypto.randomUUID();
+					// example integration with https://sentry.io/
+					Sentry.captureException(error, { event, errorId });
+				
+					return {
+						message: 'Whoops!',
+						errorId
+					};
+				}
+				
+				export const handle = initHandleWrapper({
+				  getLanguage: () => undefined
+				}).wrap((
+				    {
+				        event: event,
+				        resolve: resolve
+				    }
+				) => resolve(event));"
 			`)
 		})
 
@@ -121,14 +121,14 @@ export const handle = initHandleWrapper({
 				)
 
 				expect(code).toMatchInlineSnapshot(`
-"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
-export const handle = initHandleWrapper({
-  getLanguage: () => undefined
-}).wrap(function handle({ event, resolve }) {
-	console.log('TADAA!')
-	return resolve(event)
-});"
+					export const handle = initHandleWrapper({
+					  getLanguage: () => undefined
+					}).wrap(function handle({ event, resolve }) {
+						console.log('TADAA!')
+						return resolve(event)
+					});"
 				`)
 			})
 		})
