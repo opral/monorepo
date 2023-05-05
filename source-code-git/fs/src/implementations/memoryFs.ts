@@ -147,16 +147,20 @@ function followPath(
 }
 
 async function getDirname(path: string): Promise<string> {
-	return path
-		.split("/")
-		.filter((x) => !["", "."].includes(x))
-		.slice(0, -1)
-		.join("/") ?? path
+	return (
+		path
+			.split("/")
+			.filter((x) => !["", "."].includes(x))
+			.slice(0, -1)
+			.join("/") ?? path
+	)
 }
 
 async function getBasename(path: string): Promise<string> {
-	return path
-		.split("/")
-		.filter((x) => !["", ".", ".."].includes(x))
-		.at(-1) ?? path
+	return (
+		path
+			.split("/")
+			.filter((x) => !["", ".", ".."].includes(x))
+			.at(-1) ?? path
+	)
 }
