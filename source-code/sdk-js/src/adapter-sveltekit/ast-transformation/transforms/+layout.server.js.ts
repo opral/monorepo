@@ -1,49 +1,41 @@
 import type { TransformConfig } from "../config.js"
-import { parseModule, generateCode, builders } from "magicast"
+import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { findLoadDeclaration, emptyLoadExportNodes } from "../../../helpers/ast.js"
+import {
+	getArrowOrFunction,
+	getWrappedExport,
+	replaceOrAddExportNamedFunction,
+} from "../../../helpers/ast.js"
 
-const requiredImports = `
+const requiredImports = (root: boolean) =>
+	root
+		? `
 import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+`
+		: `
+import { initLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	if (root) return transformRootLayoutServerJs(config, code)
-
-	return transformGenericLayoutServerJs(config, code)
-}
-
-const transformRootLayoutServerJs = (config: TransformConfig, code: string) => {
 	const n = types.namedTypes
 	const b = types.builders
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
-	const importsAst = parseModule(requiredImports)
-	if (n.Program.check(ast.$ast)) {
-		const loadVariableDeclarator = findLoadDeclaration(ast.$ast)
-		const body = ast.$ast.body
-		// Add load declaration with ast if needed
-		if (loadVariableDeclarator.length === 0) {
-			body.push(...emptyLoadExportNodes())
-			loadVariableDeclarator.push(...findLoadDeclaration(ast.$ast))
-		}
-		const initRootLayoutWrapperCall = builders.functionCall("initRootLayoutServerLoadWrapper")
-		const wrapperDeclarationAst = b.callExpression(
-			b.memberExpression(initRootLayoutWrapperCall.$ast, b.identifier("wrap")),
-			[],
-		)
-		for (const { node: declarator } of loadVariableDeclarator) {
-			if (declarator.init) wrapperDeclarationAst.arguments.push(declarator.init)
-			declarator.init = wrapperDeclarationAst
-		}
-	}
+	const importsAst = parseModule(requiredImports(root))
 	deepMergeObject(ast, importsAst)
+	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
+	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const exportAst = getWrappedExport(
+		undefined,
+		[arrowOrFunctionNode],
+		"load",
+		`init${root ? "Root" : ""}LayoutServerLoadWrapper`,
+	)
+	// Replace or add current export handle
+	if (n.Program.check(ast.$ast)) {
+		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
+	}
 	return generateCode(ast).code
-}
-
-// TODO: implement
-const transformGenericLayoutServerJs = (config: TransformConfig, code: string) => {
-	throw new Error("currently not supported")
 }
