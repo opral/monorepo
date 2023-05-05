@@ -100,5 +100,8 @@
 		"svelte-preprocess": "^5.0.3",
 		"ts-dedent": "^2.2.0",
 		"tsup": "^6.7.0"
+	},
+	"peerDependencies": {
+		"@inlang/core": "*"
 	}
 }

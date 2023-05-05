@@ -2,7 +2,6 @@ import { loadFile, type ProxifiedModule } from "magicast"
 import { writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
-import { log } from 'node:console'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
 
@@ -69,11 +68,8 @@ const createInlangConfigIfNotPresentYet = async () => {
  * @type { import("@inlang/core/config").DefineConfig }
  */
 export async function defineConfig(env) {
-	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
-	)
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/0.1/dist/plugin/index.js"
 	)
 
 	return {
