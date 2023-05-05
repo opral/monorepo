@@ -12,6 +12,8 @@ export async function defineConfig(env) {
 		referenceLanguage: "en",
 		plugins: [
 			sdkPlugin({
+				// @ts-ignore
+				debug: true,
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }, { type: "navigator" }],
 				},

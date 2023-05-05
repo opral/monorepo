@@ -234,9 +234,9 @@ export const plugin = () => {
 			if (!fileInformation) return null
 
 			const transformedCode = await transformCode(config, code, fileInformation)
-			// if (config.debug) {
-			const filePath = id.replace(config.srcFolder, '')
-			console.log(dedent`
+			if (config.debug) {
+				const filePath = id.replace(config.srcFolder, '')
+				console.info(dedent`
 					-- INLANG DEBUG START-----------------------------------------------------------
 
 					transformed '${fileInformation.type}' file: '${filePath}'
@@ -251,7 +251,7 @@ export const plugin = () => {
 
 					-- INLANG DEBUG END ------------------------------------------------------------
 				`)
-			// }
+			}
 
 			return transformedCode
 				.replaceAll('languages: languages', 'languages')
