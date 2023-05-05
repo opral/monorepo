@@ -7,6 +7,7 @@ import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
+import { dedent } from 'ts-dedent'
 
 const requiredImports = (root: boolean) =>
 	root
@@ -19,6 +20,17 @@ import { initLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/se
 
 // TODO: refactor together with `+page.server.js.ts`
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
+	// TODO: implement this
+	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
+		throw Error(dedent`
+			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
+
+			export const load = async (event, { i }) => {
+				console.log(i('hello.inlang'))
+			}
+		`)
+	}
+
 	const n = types.namedTypes
 	const b = types.builders
 	const ast = parseModule(code)
