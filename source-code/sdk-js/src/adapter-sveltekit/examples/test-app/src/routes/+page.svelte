@@ -1,7 +1,9 @@
 <script>
 	import { i, languages, switchLanguage } from "@inlang/sdk-js"
 
-	console.log(111)
+export let data
+	console.log(11, data);
+
 </script>
 
 {#each languages as lang}
