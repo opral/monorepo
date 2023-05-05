@@ -8,15 +8,6 @@ import {
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
 
-const requiredImports = (root: boolean) =>
-	root
-		? `
-import { initRootPageServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
-`
-		: `
-import { initPageServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
-`
-
 // TODO: refactor together with `+layout.server.js.ts`
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
 	const n = types.namedTypes
@@ -24,7 +15,7 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
-	const importsAst = parseModule(requiredImports(root))
+	const importsAst = parseModule('import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";')
 	deepMergeObject(ast, importsAst)
 	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
 	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
@@ -32,7 +23,7 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 		undefined,
 		[arrowOrFunctionNode],
 		"load",
-		`init${root ? "Root" : ""}PageServerLoadWrapper`,
+		"initServerLoadWrapper",
 	)
 	// Replace or add current export handle
 	if (n.Program.check(ast.$ast)) {
