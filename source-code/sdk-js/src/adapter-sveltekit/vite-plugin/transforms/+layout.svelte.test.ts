@@ -29,6 +29,28 @@ describe("transformLayoutSvelte", () => {
 					{#if $language}<slot />{/if}"
 				`)
 			})
+			it("adds code to an empty file", async () => {
+				const code = await transformLayoutSvelte({} as TransformConfig, "<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). -->", true)
+				expect(code).toMatchInlineSnapshot(`
+					"<script>import { browser } from \\"$app/environment\\";
+					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
+
+					({
+					  language: language
+					} = getRuntimeFromContext());
+
+					$:
+					if (browser && $language) {
+					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
+					  localStorage.setItem(localStorageKey, $language);
+					}</script>
+					{#if $language}<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). --><slot />{/if}"
+				`)
+			})
 
 			it("adds code to a file with arbitrary contents", async () => {
 				const code = await transformLayoutSvelte(

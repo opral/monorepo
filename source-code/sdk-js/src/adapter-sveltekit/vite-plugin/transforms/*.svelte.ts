@@ -42,59 +42,63 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 ${codeWithoutTypes}`
 		: codeWithoutTypes
 
-	const processed = await preprocess(codeWithScriptTag, {
-		script: async (options) => {
-			const ast = parseModule(options.content, {
-				sourceFileName: config.sourceFileName,
-			})
-			const importsAst = parseModule(requiredImports)
-			if (!options.attributes.context) {
-				// Deep merge imports that we need
-				deepMergeObject(ast, importsAst)
-			}
+	const processed = await preprocess(codeWithScriptTag, [
+		{
+			script: async (options) => {
+				const ast = parseModule(options.content, {
+					sourceFileName: config.sourceFileName,
+				})
+				const importsAst = parseModule(requiredImports)
+				if (!options.attributes.context) {
+					// Deep merge imports that we need
+					deepMergeObject(ast, importsAst)
+				}
 
-			// Remove import "@inlang/sdk-js" but save the aliases of all imports
-			const importNames = removeSdkJsImport(ast.$ast)
-			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
-			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
-			// prefix language and i aliases with $ if reactive
-			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
-			// Insert all variable declarations after the injected import for getRuntimeFromContext
-			if (n.Program.check(ast.$ast)) {
-				ast.$ast.body.splice(
-					usageIndexes?.[0] ?? ast.$ast.body.length,
-					0,
-					...([variableDeclarationAst(importNames), initImportedVariablesAst(importNames)].filter(
-						(n) => n !== undefined,
-					) as types.namedTypes.ExpressionStatement[]),
-				)
-			}
-			const generated = generateCode(ast, {
-				sourceMapName: config.sourceMapName,
-			})
+				// Remove import "@inlang/sdk-js" but save the aliases of all imports
+				const importNames = removeSdkJsImport(ast.$ast)
+				reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
+				const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
+				// prefix language and i aliases with $ if reactive
+				if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
+				// Insert all variable declarations after the injected import for getRuntimeFromContext
+				if (n.Program.check(ast.$ast)) {
+					ast.$ast.body.splice(
+						usageIndexes?.[0] ?? ast.$ast.body.length,
+						0,
+						...([variableDeclarationAst(importNames), initImportedVariablesAst(importNames)].filter(
+							(n) => n !== undefined,
+						) as types.namedTypes.ExpressionStatement[]),
+					)
+				}
+				const generated = generateCode(ast, {
+					sourceMapName: config.sourceMapName,
+				})
 
-			return { ...options, ...generated }
+				return { ...options, ...generated }
+			}
 		},
-		markup: (options) => {
-			const parsed = parse(options.content)
-			const { instance, module } = parsed
-			// We already iterated over .instance and .module
-			parsed.instance = undefined
-			parsed.module = undefined
-			// Find locations of nodes with i or language
-			const s = new MagicString(options.content)
-			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
-			parsed.instance = instance
-			parsed.module = module
-			const map = s.generateMap({
-				source: config.sourceFileName,
-				file: config.sourceMapName,
-				includeContent: true,
-			})
-			const code = s.toString()
-			return { code, map }
-		},
-	})
+		{
+			markup: (options) => {
+				const parsed = parse(options.content)
+				const { instance, module } = parsed
+				// We already iterated over .instance and .module
+				parsed.instance = undefined
+				parsed.module = undefined
+				// Find locations of nodes with i or language
+				const s = new MagicString(options.content)
+				makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
+				parsed.instance = instance
+				parsed.module = module
+				const map = s.generateMap({
+					source: config.sourceFileName,
+					file: config.sourceMapName,
+					includeContent: true,
+				})
+				const code = s.toString()
+				return { code, map }
+			},
+		}
+	])
 
 	return processed.code
 }
