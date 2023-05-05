@@ -27,9 +27,19 @@ const Text = Node.extend({
 	value: z.string(),
 })
 
+const VariableReference = Node.extend({
+	type: z.literal("VariableReference"),
+	name: z.string(),
+})
+
+const Placeholder = Node.extend({
+	type: z.literal("Placeholder"),
+	body: VariableReference,
+})
+
 const Pattern = Node.extend({
 	type: z.literal("Pattern"),
-	elements: z.array(Text),
+	elements: z.array(Text.or(Placeholder)),
 })
 
 const Message = Node.extend({

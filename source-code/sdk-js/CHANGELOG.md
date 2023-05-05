@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.0.6
+
+### Patch Changes
+
+- c1a9c39f: use ide-extension-plugin
+
 ## 0.0.5
 
 ### Patch Changes

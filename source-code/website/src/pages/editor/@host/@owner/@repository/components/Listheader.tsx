@@ -96,7 +96,28 @@ export const ListHeader = (props: ListHeaderProps) => {
 			if (filteredLintRules().length !== 0) {
 				const messageWithLints = Object.values(message).filter((id) => id?.lint)
 				messageWithLints.map((id) => {
-					if (id?.lint?.some((lint) => filteredLintRules().includes(lint.id))) {
+					console.log(id)
+					if (
+						id?.lint?.some((lint) => {
+							if (filteredLintRules().includes(lint.id) && !lint.id.includes("missingMessage")) {
+								return true
+							} else if (filteredLintRules().includes(lint.id)) {
+								// missingMessage exception
+								const lintLanguage = lint.message.match(/'([^']+)'/g)
+								if (lintLanguage?.length === 2) {
+									if (
+										filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
+										filteredLanguages().length === 0
+									) {
+										return true
+									}
+								} else {
+									return true
+								}
+							}
+							return false
+						})
+					) {
 						lintMatch = true
 					}
 				})
@@ -112,7 +133,19 @@ export const ListHeader = (props: ListHeaderProps) => {
 					searchMatch = true
 				}
 			}
-			//console.log(lintMatch + ", " + searchMatch)
+
+			// let languageMatch = false
+			// if (filteredLanguages().length !== 0) {
+			// 	const messageLanguages = Object.keys(message)
+			// 	messageLanguages.map((language) => {
+			// 		if (filteredLanguages().includes(language)) {
+			// 			languageMatch = true
+			// 		}
+			// 	})
+			// } else {
+			// 	languageMatch = true
+			// }
+
 			if (lintMatch && searchMatch) {
 				messageCounter += 1
 			}

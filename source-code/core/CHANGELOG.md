@@ -1,5 +1,23 @@
 # @inlang/core
 
+## 0.7.13
+
+### Patch Changes
+
+- f3d7dc5b: fix publishing zod
+
+## 0.7.12
+
+### Patch Changes
+
+- 7ed49fce: change zod pattern type union
+
+## 0.7.11
+
+### Patch Changes
+
+- 61f21074: Update zod schema
+
 ## 0.7.10
 
 ### Patch Changes

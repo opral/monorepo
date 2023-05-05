@@ -2,10 +2,10 @@ import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/conf
 import { initialize$import } from '@inlang/core/environment'
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
-import { SdkConfig, validateSdkConfig } from '../plugin/schema.js'
+import { SdkConfigInput, validateSdkConfig } from '../plugin/schema.js'
 
 export type InlangConfigWithSdkProps = InlangConfig & {
-	sdk?: SdkConfig
+	sdk?: SdkConfigInput
 }
 
 class InlangSdkConfigError extends Error { }

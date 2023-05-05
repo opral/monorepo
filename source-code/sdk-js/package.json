@@ -13,7 +13,7 @@
 		"vite"
 	],
 	"type": "module",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -81,6 +81,7 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
+		"@inlang/ide-extension-plugin": "*",
 		"@sveltejs/kit": "^1.15.4",
 		"@types/estree": "^1.0.0",
 		"astring": "^1.8.4",
