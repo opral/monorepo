@@ -18,6 +18,25 @@ type RuleSummaryItem = {
 	rule: LintRule
 }
 
+export const messageCount = (
+	messages: Accessor<{
+		[id: string]: {
+			[language: string]: LintedMessage | undefined
+		}
+	}>,
+	filteredLanguages: string[],
+	textSearch: string,
+	filteredLintRules: `${string}.${string}`[],
+) => {
+	let counter = 0
+	for (const id of Object.keys(messages())) {
+		if (showFilteredMessage(messages()[id]!, filteredLanguages, textSearch, filteredLintRules)) {
+			counter++
+		}
+	}
+	return counter
+}
+
 export const ListHeader = (props: ListHeaderProps) => {
 	const { inlangConfig, setFilteredLintRules, filteredLintRules, filteredLanguages, textSearch } =
 		useEditorState()
@@ -55,26 +74,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 		return lintSummary
 	}
 
-	const messageCount = () => {
-		let counter = 0
-		for (const id of Object.keys(props.messages())) {
-			if (
-				showFilteredMessage(
-					props.messages()[id]!,
-					filteredLanguages(),
-					textSearch(),
-					filteredLintRules(),
-				)
-			) {
-				counter++
-			}
-		}
-		return counter
-	}
-
 	return (
 		<div class="h-14 w-full bg-background border border-surface-3 rounded-t-md flex items-center px-4 justify-between">
-			<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
+			<div class="font-medium text-on-surface">
+				{messageCount(props.messages, filteredLanguages(), textSearch(), filteredLintRules()) +
+					" Messages"}
+			</div>
 			<div class="flex gap-2">
 				<For each={getLintSummary()}>
 					{(rule) => (
