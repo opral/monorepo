@@ -5,7 +5,7 @@ import type { TransformConfig } from "../config.js"
 export const transformJs = (config: TransformConfig, code: string) => {
 	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
 		throw Error(dedent`
-			This is currently not supported. You can use the following code to make it work:
+			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
 
 			// client code${config.languageInUrl ? '' : dedent`
 			import { get } from "svelte/store"
@@ -18,6 +18,7 @@ export const transformJs = (config: TransformConfig, code: string) => {
 			}
 
 			// server code
+			// you need to pass in the function as a parameter
 			export const serverFn = (/** @type { import('@inlang/sdk-js/runtime').InlangFunction } */ i) => {
 				console.log(i('hello.inlang'))
 			}
