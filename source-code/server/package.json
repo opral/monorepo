@@ -30,5 +30,6 @@
 	"devDependencies": {
 		"@types/compression": "^1.7.2",
 		"@types/express": "^4.17.17"
-	}
+	},
+	"license": "Apache-2.0"
 }

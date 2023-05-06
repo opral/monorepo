@@ -59,3 +59,7 @@ Take a look at the [Usage](/documentation/sdk/usage) to learn more about how to 
 ## Configuration
 
 You can configure the inlang SDK depending on your needs. You can learn more in the [Configuration](/documentation/sdk/configuration) section.
+
+---
+
+_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

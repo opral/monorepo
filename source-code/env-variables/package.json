@@ -34,5 +34,6 @@
 		"esbuild-plugin-glob": "^2.2.1",
 		"tsx": "^3.12.6"
 	},
-	"version": null
+	"version": null,
+	"license": "Apache-2.0"
 }

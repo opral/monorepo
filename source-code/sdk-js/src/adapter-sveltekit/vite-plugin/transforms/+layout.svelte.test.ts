@@ -130,6 +130,35 @@ describe("transformLayoutSvelte", () => {
 				`)
 			})
 
+			it("wraps #if and #key around markup", async () => {
+				const code = await transformLayoutSvelte(
+					{ isStatic: true, languageInUrl: true } as TransformConfig,
+					'',
+					true,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"<script>import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
+					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					export let data;
+					let language;
+					addRuntimeToContext(getRuntimeFromData(data));
+
+					({
+					  language: language
+					} = getRuntimeFromContext());
+
+					$:
+					{
+					  addRuntimeToContext(getRuntimeFromData(data));
+
+					  ({
+					    language: language
+					  } = getRuntimeFromContext());
+					}</script>
+					{#if language}{#key language}<slot />{/key}{/if}"
+				`)
+			})
+
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {
 					const code = await transformLayoutSvelte(
