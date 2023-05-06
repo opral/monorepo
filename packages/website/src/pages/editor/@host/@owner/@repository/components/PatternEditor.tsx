@@ -17,7 +17,7 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
-import { handleMissingMessage } from "@src/pages/editor/utils/handleMissingMessage.js"
+import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
