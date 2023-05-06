@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.1.0
+
+### Minor Changes
+
+- 9683c327: fix some bugs related to static output
+
 ## 0.0.12
 
 ### Patch Changes
