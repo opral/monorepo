@@ -5,7 +5,6 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"license": "MIT",
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",
 	"type": "module",
@@ -49,5 +48,6 @@
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
 		"prompts": "^2.4.2"
-	}
+	},
+	"license": "Apache-2.0"
 }

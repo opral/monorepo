@@ -24,5 +24,6 @@
 		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {},
-	"peerDependencies": {}
+	"peerDependencies": {},
+	"license": "Apache-2.0"
 }
