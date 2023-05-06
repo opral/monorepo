@@ -68,7 +68,7 @@ const transformRootLayoutSvelte = async (config: TransformConfig, code: string) 
 ${codeWithoutTypes}`
 		: codeWithoutTypes
 
-	const processed = await preprocess(codeWithScriptTag, {
+	const processedScript = await preprocess(codeWithScriptTag, {
 		script: async (options) => {
 			const ast = parseModule(options.content, {
 				sourceFileName: config.sourceFileName,
@@ -85,11 +85,11 @@ ${codeWithoutTypes}`
 				(node) =>
 					n.ExportNamedDeclaration.check(node)
 						? (meta) => {
-								const { parent, index } = meta.get(
-									node,
-								) as NodeInfoMapEntry<types.namedTypes.Program>
-								if (index != undefined) parent.body.splice(index, 1)
-						  }
+							const { parent, index } = meta.get(
+								node,
+							) as NodeInfoMapEntry<types.namedTypes.Program>
+							if (index != undefined) parent.body.splice(index, 1)
+						}
 						: undefined,
 			)
 
@@ -191,7 +191,11 @@ ${codeWithoutTypes}`
 			})
 
 			return { ...options, ...generated }
-		},
+		}
+	}
+	)
+
+	const processedMarkup = await preprocess(processedScript.code, {
 		markup: (options) => {
 			// We already iterated over .instance and .module
 			// Find locations of nodes with i or language
@@ -200,13 +204,16 @@ ${codeWithoutTypes}`
 			const insertSlot = htmlIsEmpty(parsed.html)
 			s.appendRight(
 				parsed.html.start,
-				`{#${!config.languageInUrl ? "if" : "key"} ${
-					!config.languageInUrl ? "$" : ""
-				}${localLanguageName}}`,
+				'' +
+				(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : '') +
+				(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`)
 			)
 			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
-			s.append((insertSlot ? `<slot />` : ``) + `{/${!config.languageInUrl ? "if" : "key"}}`)
+			s.append((insertSlot ? `<slot />` : ``) +
+				(config.languageInUrl ? `{/key}` : `{/if}`) +
+				(config.languageInUrl && config.isStatic ? `{/if}` : '')
+			)
 			const map = s.generateMap({
 				source: config.sourceFileName,
 				file: config.sourceMapName,
@@ -215,8 +222,10 @@ ${codeWithoutTypes}`
 			const code = s.toString()
 			return { code, map }
 		},
-	})
-	return processed.code
+	}
+	)
+
+	return processedMarkup.code
 }
 
 const transformGenericLayoutSvelte = transformSvelte

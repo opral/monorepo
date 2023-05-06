@@ -90,8 +90,8 @@ describe("transformLayoutServerJs", () => {
 			it("adds load function to an empty file", () => {
 				const code = transformLayoutServerJs({} as TransformConfig, "", false)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const load = initLayoutServerLoadWrapper().wrap(() => {});"
+					"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					export const load = initServerLoadWrapper().wrap(() => {});"
 				`)
 			})
 
@@ -104,9 +104,9 @@ describe("transformLayoutServerJs", () => {
 					false,
 				)
 				expect(code).toMatchInlineSnapshot(`
-					"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export const prerender = true;
-					export const load = initLayoutServerLoadWrapper().wrap(() => {});"
+					export const load = initServerLoadWrapper().wrap(() => {});"
 				`)
 			})
 
@@ -127,10 +127,10 @@ describe("transformLayoutServerJs", () => {
 					)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load = initLayoutServerLoadWrapper().wrap(({ locals }) => {
+						export const load = initServerLoadWrapper().wrap(({ locals }) => {
 							return {
 								userId: locals.userId
 							}
@@ -153,10 +153,10 @@ describe("transformLayoutServerJs", () => {
 					)
 
 					expect(code).toMatchInlineSnapshot(`
-						"import { initLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+						"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 						import type { LayoutLoad } from './$types.js'
 
-						export const load = initLayoutServerLoadWrapper().wrap(async function load({ }) {
+						export const load = initServerLoadWrapper().wrap(async function load({ }) {
 							console.log('hi!')
 							return { }
 						});"

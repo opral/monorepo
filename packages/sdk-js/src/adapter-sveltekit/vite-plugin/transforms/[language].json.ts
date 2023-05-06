@@ -9,9 +9,11 @@ export const transformLanguageJson = (config: TransformConfig, code: string) => 
 
 	return `
 import { json } from "@sveltejs/kit"
-import { getResource } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { getResource, reloadResources } from "@inlang/sdk-js/adapter-sveltekit/server"
 
-export const GET = (({ params: { language } }) =>
-	json(getResource(language) || null))
+export const GET = async ({ params: { language } }) => {
+	await reloadResources()
+	return json(getResource(language) || null)
+}
 `
 }

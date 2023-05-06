@@ -1,10 +1,10 @@
 import { loadFile, type ProxifiedModule } from "magicast"
-import { writeFile } from "node:fs/promises"
+import { mkdir, writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
-import { log } from 'node:console'
+import { dedent } from 'ts-dedent'
 
-export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
+export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
 export type TransformConfig = {
 	debug?: boolean
@@ -36,8 +36,8 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
-		const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
-		const isStatic = await shouldContentBePrerendered(rootRoutesFolder)
+		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "/[lang]" : "")
+		const isStatic = await shouldContentBePrerendered(routesFolder) || await shouldContentBePrerendered(rootRoutesFolder)
 
 		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
@@ -64,31 +64,48 @@ const createInlangConfigIfNotPresentYet = async () => {
 	const inlangConfigExists = await doesPathExist(inlangConfigPath)
 	if (inlangConfigExists) return
 
+	await createDemoResources()
+
 	return writeFile(inlangConfigPath, `
 /**
  * @type { import("@inlang/core/config").DefineConfig }
  */
 export async function defineConfig(env) {
-	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
-	)
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.1.1/dist/plugin/index.js"
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPlugin({ pathPattern: "./languages/{language}.json" }),
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [{ type: "localStorage" }, { type: "navigator" }]
+					strategies: [{ type: "localStorage" }]
 				}
 			}),
 		],
 	}
 }
 `)
+}
+
+// TODO: do this in a better way
+const createDemoResources = async () => {
+	if (!await doesPathExist(cwd + '/languages')) {
+		await mkdir(cwd + '/languages')
+	}
+
+	await writeFile(cwd + '/languages/en.json', dedent`
+		{
+		  "welcome": "Welcome to inlang"
+		}
+	`, { encoding: 'utf-8' })
+
+	await writeFile(cwd + '/languages/de.json', dedent`
+		{
+		  "welcome": "Willkommen bei inlang"
+		}
+	`, { encoding: 'utf-8' })
 }
 
 // ------------------------------------------------------------------------------------------------

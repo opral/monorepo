@@ -1,9 +1,10 @@
 import type * as ast from "@inlang/core/ast"
+import type { LintedMessage } from "@inlang/core/lint"
 import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
-import { getLintReports, LintedMessage } from "@inlang/core/lint"
+import { showFilteredMessage } from "@src/pages/editor/utils/showFilteredMessage.js"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
@@ -32,66 +33,6 @@ export function Messages(props: {
 		throw Error("No message id found")
 	}
 
-	const matchedLanguage = (
-		messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
-	) => {
-		if (filteredLanguages().length === 0) {
-			return messages
-		}
-		const filteredByLanguage = Object.keys(messages)
-			.filter((key) => filteredLanguages().includes(key))
-			.reduce((filteredMessage, key) => {
-				filteredMessage[key] = messages[key]
-				return filteredMessage
-			}, {} as { [key: string]: LintedMessage | undefined })
-		return filteredByLanguage
-	}
-
-	const matchedLints = (message?: LintedMessage) => {
-		if (message === undefined) {
-			return false
-		}
-		const reports = getLintReports(message)
-		for (const report of reports) {
-			if (filteredLintRules().includes(report.id) && !report.id.includes("missingMessage")) {
-				return true
-			} else if (filteredLintRules().includes(report.id)) {
-				// missingMessage exception
-				const lintLanguage = report.message.match(/'([^']+)'/g)
-				if (lintLanguage?.length === 2) {
-					if (
-						filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
-						filteredLanguages().length === 0
-					) {
-						return true
-					}
-				} else {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	const matchedTextSearch = (message?: LintedMessage) => {
-		if (message === undefined) {
-			return false
-		}
-		return (
-			textSearch().length > 0 &&
-			(id().toLowerCase().includes(textSearch().toLowerCase()) ||
-				JSON.stringify(message).toLowerCase().includes(textSearch().toLowerCase()))
-		)
-	}
-
-	const noFilterSelected = () => filteredLintRules().length === 0 && textSearch().length === 0
-
-	/**
-	 * Whether any message should be rendered.
-	 */
-	const shouldShow = (message?: LintedMessage) =>
-		noFilterSelected() || matchedLints(message) || matchedTextSearch(message)
-
 	// performance optimization to only render visible elements
 	// see https://github.com/inlang/inlang/issues/333
 	const useVisibilityObserver = createVisibilityObserver()
@@ -115,8 +56,11 @@ export function Messages(props: {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]: Object.values(matchedLanguage(props.messages)).every(
-					(message) => shouldShow(message) === false,
+				["hidden"]: !showFilteredMessage(
+					props.messages,
+					filteredLanguages(),
+					textSearch(),
+					filteredLintRules(),
 				),
 			}}
 		>

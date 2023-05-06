@@ -7,7 +7,7 @@ import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (root: boolean) =>
 	root
@@ -15,7 +15,7 @@ const requiredImports = (root: boolean) =>
 import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 		: `
-import { initLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
+import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
 `
 
 // TODO: refactor together with `+page.server.js.ts`
@@ -44,7 +44,7 @@ export const transformLayoutServerJs = (config: TransformConfig, code: string, r
 		undefined,
 		[arrowOrFunctionNode],
 		"load",
-		`init${root ? "Root" : ""}LayoutServerLoadWrapper`,
+		root ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
 	)
 	// Replace or add current export handle
 	if (n.Program.check(ast.$ast)) {

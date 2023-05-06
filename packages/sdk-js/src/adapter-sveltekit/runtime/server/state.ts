@@ -1,3 +1,4 @@
+import type { Resource } from '@inlang/core/ast'
 import type { RequestEvent } from "@sveltejs/kit"
 import { initConfig } from '../../../config/config.js'
 import { inlangSymbol } from "../shared/utils.js"
@@ -13,7 +14,11 @@ export const referenceLanguage = config.referenceLanguage
 export const languages = config.languages
 
 // TODO: fix resources if needed (add missing Keys)
-const resources = await config.readResources({ config })
+let resources: Resource[]
+
+export const reloadResources = async () => resources = await config.readResources({ config })
+
+await reloadResources()
 
 export const getResource = (language: string) =>
 	resources.find(({ languageTag: { name } }) => name === language)

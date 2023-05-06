@@ -1,6 +1,6 @@
 import type { TransformConfig } from "../config.js"
 import { types } from "recast"
-import { parseModule, generateCode, builders, parseExpression } from "magicast"
+import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import {
 	getArrowOrFunction,
@@ -23,20 +23,20 @@ const options = (config: TransformConfig) =>
 	"{" +
 	(config.languageInUrl
 		? `
-getLanguage: ({ url }) => url.pathname.split.skip("/")[1],
+getLanguage: ({ url }) => url.pathname.split("/")[1],
 `
 		: `
 getLanguage: () => undefined,
 `) +
-	(config.isStatic || !config.languageInUrl
-		? ``
-		: `
+	(config.languageInUrl && !config.isStatic
+		? `
 initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 redirect: {
 throwable: redirect,
 getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 },
-`) +
+`
+		: '') +
 	"}"
 
 export const transformHooksServerJs = (config: TransformConfig, code: string) => {

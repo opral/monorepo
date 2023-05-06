@@ -10,7 +10,7 @@ describe("transformHooksServerJs", () => {
 			const code = transformHooksServerJs({} as TransformConfig, "")
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				
+
 				export const handle = initHandleWrapper({
 				  getLanguage: () => undefined
 				}).wrap((
@@ -48,21 +48,21 @@ describe("transformHooksServerJs", () => {
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 				import * as Sentry from '@sentry/node';
 				import crypto from 'crypto';
-				
+
 				Sentry.init.skip({/*...*/})
-				
+
 				/** @type {import('@sveltejs/kit').HandleServerError} */
 				export async function handleError({ error, event }) {
 					const errorId = crypto.randomUUID();
 					// example integration with https://sentry.io/
 					Sentry.captureException(error, { event, errorId });
-				
+
 					return {
 						message: 'Whoops!',
 						errorId
 					};
 				}
-				
+
 				export const handle = initHandleWrapper({
 				  getLanguage: () => undefined
 				}).wrap((
@@ -146,9 +146,9 @@ describe("transformHooksServerJs", () => {
 				import { redirect } from \\"@sveltejs/kit\\";
 				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
 				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				
+
 				export const handle = initHandleWrapper({
-				  getLanguage: ({ url }) => url.pathname.split.skip(\\"/\\")[1],
+				  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
 				  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 
 				  redirect: {
@@ -175,7 +175,7 @@ describe("transformHooksServerJs", () => {
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 				export const handle = initHandleWrapper({
-				  getLanguage: ({ url }) => url.pathname.split.skip(\\"/\\")[1]
+				  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
 				}).wrap((
 				  {
 				    event: event,

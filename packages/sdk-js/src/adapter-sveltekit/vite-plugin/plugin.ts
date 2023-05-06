@@ -1,4 +1,4 @@
-import { writeFile, mkdir, readdir, rename } from "node:fs/promises"
+import { writeFile, mkdir, rename, readdir } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
@@ -158,8 +158,13 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 					const path = getPathForFileType(fileType)
 					await mkdir(dirname(path), { recursive: true }).catch(() => undefined)
 					// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
-					const message = 'This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed).'
-					await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `// ${message}`)
+					const message = dedent`
+						This file was created by inlang.
+						It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/inlang/issues/647
+						You can remove this comment and modify the file as you like. We just need to make sure it exists.
+						Please do not delete it (inlang will recreate it if needed).
+					`
+					await writeFile(path, path.endsWith('.svelte') ? `<!-- ${message} -->` : `/* ${message} */`)
 
 					resolve(true)
 				}),
@@ -211,14 +216,19 @@ export const plugin = () => {
 		async buildStart() {
 			const config = await getTransformConfig()
 
-			// if (!config.hasAlreadyBeenInitialized) {
-			// 	// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
-			// 	await moveExistingRoutesIntoSubfolder(config)
-			// }
+			const hasMovedFiles = false
+			if (!config.hasAlreadyBeenInitialized) {
+				// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
+				await moveExistingRoutesIntoSubfolder(config)
+				// If we don't immediately restart the server, the process crashes because it tries to read files that don't exist. This also means that CTRL + C does not work
+				resetConfig()
+				viteServer && viteServer.restart()
+				return
+			}
 
 			const hasCreatedANewFile = await createFilesIfNotPresent(config)
 
-			if (hasCreatedANewFile) {
+			if (hasMovedFiles || hasCreatedANewFile) {
 				setTimeout(() => {
 					resetConfig()
 					viteServer && viteServer.restart()

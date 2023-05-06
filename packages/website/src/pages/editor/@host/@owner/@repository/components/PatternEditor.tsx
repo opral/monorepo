@@ -1,4 +1,4 @@
-import { Accessor, createEffect, createSignal, onMount, Show } from "solid-js"
+import { createEffect, createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
@@ -17,6 +17,7 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
+import { handleMissingMessage } from "@src/pages/editor/utils/handleMissingMessage.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -240,25 +241,9 @@ export function PatternEditor(props: {
 		const notifications: Array<Notification> = []
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
-			const filteredReports = lintReports.filter((report) => {
-				if (!report.id.includes("missingMessage")) {
-					return true
-				} else {
-					// missingMessage exception
-					const lintLanguage = report.message.match(/'([^']+)'/g)
-					if (lintLanguage?.length === 2) {
-						if (
-							filteredLanguages().includes(lintLanguage[1]!.replace(/'/g, "")) ||
-							filteredLanguages().length === 0
-						) {
-							return true
-						}
-					} else {
-						return true
-					}
-				}
-				return false
-			})
+			const filteredReports = lintReports.filter((report) =>
+				handleMissingMessage(report, filteredLanguages()),
+			)
 			if (filteredReports) {
 				filteredReports.map((lint) => {
 					notifications.push({

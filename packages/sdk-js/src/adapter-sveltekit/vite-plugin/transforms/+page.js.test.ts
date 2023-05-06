@@ -35,7 +35,8 @@ describe("transformLayoutJs", () => {
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+				"import { redirect } from \\"@sveltejs/kit\\";
+				import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initRootPageLoadWrapper, replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
