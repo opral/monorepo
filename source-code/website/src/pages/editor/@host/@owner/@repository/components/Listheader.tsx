@@ -2,7 +2,7 @@ import type { LintRule, LintedMessage } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
 import { For, Show } from "solid-js"
 import type { Accessor } from "solid-js"
-import { showFilteredMessage } from "@src/pages/editor/utils/showFilteredMessage.js"
+import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 
 interface ListHeaderProps {
 	messages: Accessor<{
