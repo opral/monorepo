@@ -1,10 +1,5 @@
 import { createEffect, createSignal, onMount, Show } from "solid-js"
-import { createTiptapEditor, useEditorIsFocused, useEditorJSON } from "solid-tiptap"
-import Document from "@tiptap/extension-document"
-import Paragraph from "@tiptap/extension-paragraph"
-import Text from "@tiptap/extension-text"
-import Placeholder from "@tiptap/extension-placeholder"
-import History from "@tiptap/extension-history"
+import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
@@ -19,7 +14,10 @@ import { Shortcut } from "./Shortcut.jsx"
 import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { handleMissingMessage } from "@src/pages/editor/utils/handleMissingMessage.js"
+import { getTextValue, setTipTapMessage } from "../helper/parse.js"
+import { getEditorConfig } from "../helper/editorSetup.js"
+import { FloatingMenu } from "./FloatingMenu.jsx"
+import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -40,6 +38,7 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguages,
 	} = useEditorState()
+	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -63,86 +62,25 @@ export function PatternEditor(props: {
 	}
 
 	onMount(() => {
+		if (props.referenceMessage) {
+			setVariableReferences(
+				props.referenceMessage.pattern.elements
+					.filter((element) => element.type === "Placeholder")
+					.map((element) => element.body) as ast.VariableReference[],
+			)
+		}
 		document.addEventListener("focusin", handleLineItemFocusIn)
+		console.log("references")
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
 		}
 	})
 
-	//editor
+	//create editor
 	let textArea!: HTMLDivElement
-
-	const editor = createTiptapEditor(() => ({
-		element: textArea!,
-		extensions: [
-			Document,
-			Paragraph,
-			Text,
-			Placeholder.configure({
-				emptyEditorClass: "is-editor-empty",
-				placeholder: "Enter translation...",
-			}),
-			History.configure({
-				depth: 10,
-			}),
-		],
-		editorProps: {
-			attributes: {
-				class: "focus:outline-none",
-			},
-		},
-		content: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value
-			? {
-					type: "doc",
-					content: [
-						{
-							type: "paragraph",
-							content: [
-								{
-									type: "text",
-									text: (props.message?.pattern.elements[0] as ast.Text | undefined)?.value,
-								},
-							],
-						},
-					],
-			  }
-			: undefined,
-	}))
-
-	// access tiptap json
-	const getTextValue = () => {
-		if (editor()) {
-			const json = useEditorJSON(() => editor())
-			if (json()) {
-				const data = json()
-				return data.content
-					.filter((p: any) => p.content)
-					.map((p: any) => p.content)
-					.flat()
-					.map((p: any) => p.text)
-					.join("\n")
-			}
-		}
-	}
-
-	const setTextValue = (updatedText: string) => {
-		if (editor()) {
-			editor().commands.setContent({
-				type: "doc",
-				content: [
-					{
-						type: "paragraph",
-						content: [
-							{
-								type: "text",
-								text: updatedText,
-							},
-						],
-					},
-				],
-			})
-		}
-	}
+	const editor = createTiptapEditor(() =>
+		getEditorConfig(textArea, props.message, variableReferences()),
+	)
 
 	const getEditorFocus = () => {
 		if (editor()) {
@@ -150,22 +88,6 @@ export function PatternEditor(props: {
 			return isFocus()
 		}
 	}
-
-	/** throw if unimplemented features are used  */
-	createEffect(() => {
-		if (
-			(props.message && props.message?.pattern.elements.length > 1) ||
-			(props.message && props.message?.pattern.elements[0]?.type !== "Text")
-		) {
-			throw Error(
-				"Not implemented. Only messages with one pattern element of type Text are supported for now.",
-			)
-		}
-		// if the message is updated externally, update the text value
-		else if (props.message?.pattern.elements[0]?.value) {
-			setTextValue(String(props.message.pattern.elements[0].value))
-		}
-	})
 
 	/** the resource the message belongs to */
 	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
@@ -206,9 +128,11 @@ export function PatternEditor(props: {
 	// );
 
 	const hasChanges = () => {
-		const _updatedText = getTextValue()
+		const _updatedText =
+			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+		const ast_elements = props.message?.pattern.elements
 		if (_updatedText) {
-			if ((props.message?.pattern.elements[0] as ast.Text | undefined)?.value !== _updatedText) {
+			if (JSON.stringify(_updatedText) !== JSON.stringify(ast_elements)) {
 				return _updatedText
 			} else {
 				return ""
@@ -225,12 +149,14 @@ export function PatternEditor(props: {
 
 	const handleCommit = async () => {
 		setCommitIsLoading(true)
-		const _copy = copy()
-		const _textValue = getTextValue()
-		if (_textValue === undefined) {
+		const _copy: ast.Message | undefined = copy()
+		const _textValue =
+			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
+		if (!_textValue || !_copy) {
 			return
 		}
-		;(_copy?.pattern.elements[0] as ast.Text).value = _textValue
+		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
+
 		const [updatedResource] = query(resource()).upsert({ message: _copy! })
 
 		setResources([
@@ -267,7 +193,16 @@ export function PatternEditor(props: {
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
-		const text = props.referenceMessage.pattern.elements[0]?.value as string
+		const textArr: Array<string> = []
+		props.referenceMessage.pattern.elements.map((element) => {
+			if (element.type === "Text") {
+				textArr.push(element.value)
+			} else if (element.type === "Placeholder") {
+				textArr.push(element.body.name)
+			}
+		})
+		const text = textArr.join("")
+		//const text = props.referenceMessage.pattern.elements[0]?.value as string
 		if (text === undefined) {
 			return showToast({
 				variant: "info",
@@ -291,7 +226,13 @@ export function PatternEditor(props: {
 				message: exception.message,
 			})
 		} else {
-			setTextValue(translation)
+			const _copy: ast.Message | undefined = copy()
+			if (_copy) {
+				_copy.pattern.elements = [{ type: "Text", value: translation }] as Array<
+					ast.Text | ast.Placeholder
+				>
+				editor().commands.setContent(setTipTapMessage(_copy))
+			}
 		}
 		setMachineTranslationIsLoading(false)
 	}
@@ -366,71 +307,61 @@ export function PatternEditor(props: {
 				</div>
 				{/* TODO: #169 use proper text editor instead of input element */}
 			</div>
-			{/* <sl-textarea
-				ref={textArea}
-				class="grow"
-				prop:resize="auto"
-				prop:size="small"
-				prop:rows={1}
-				prop:placeholder="Enter translation ..."
-				onFocus={() => {
-					setIsFocused(true)
-				}}
-				onFocusOut={(e) => {
-					if ((e.relatedTarget as Element)?.tagName !== "SL-BUTTON") {
-						setIsFocused(false)
-					}
-				}}
-				prop:value={textValue() ?? ""}
-				onInput={(e) => setTextValue(e.currentTarget.value ?? undefined)}
-				onKeyDown={(event) => handleShortcut(event)}
-			/> */}
-			{/* tiptap */}
 
+			{/* tiptap floating menu */}
 			<div
+				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
-				id={props.id + "-" + props.language}
-				ref={textArea}
-				onKeyDown={(event) => handleShortcut(event)}
-			/>
+			>
+				<FloatingMenu variableReferences={variableReferences()} editor={editor} />
+
+				{/* tiptap editor */}
+				<div
+					id={props.id + "-" + props.language}
+					ref={textArea}
+					onKeyDown={(event) => handleShortcut(event)}
+				/>
+			</div>
 
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
-				<Show when={true}>
-					<div class="flex items-center justify-end gap-2">
-						<Show when={getTextValue() === "" || getTextValue() === undefined}>
-							<sl-button
-								onClick={handleMachineTranslate}
-								// prop:disabled={true}
-								// prop:disabled={
-								// 	(textValue() !== undefined && textValue() !== "") ||
-								// 	props.referenceMessage === undefined
-								// }
-								prop:loading={machineTranslationIsLoading()}
-								prop:variant="neutral"
-								prop:size="small"
-							>
-								<MaterialSymbolsTranslateRounded slot="prefix" />
-								Machine translate
-							</sl-button>
-						</Show>
-						<Show when={hasChanges() && isLineItemFocused()}>
-							<sl-button
-								prop:variant="primary"
-								prop:size="small"
-								prop:loading={commitIsLoading()}
-								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
-								onClick={() => {
-									handleCommit()
-								}}
-							>
-								<MaterialSymbolsCommitRounded slot="prefix" />
-								<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-								Commit
-							</sl-button>
-						</Show>
-					</div>
-				</Show>
+				<div class="flex items-center justify-end gap-2">
+					<Show
+						when={
+							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
+						}
+					>
+						<sl-button
+							onClick={handleMachineTranslate}
+							// prop:disabled={true}
+							// prop:disabled={
+							// 	(textValue() !== undefined && textValue() !== "") ||
+							// 	props.referenceMessage === undefined
+							// }
+							prop:loading={machineTranslationIsLoading()}
+							prop:variant="neutral"
+							prop:size="small"
+						>
+							<MaterialSymbolsTranslateRounded slot="prefix" />
+							Machine translate
+						</sl-button>
+					</Show>
+					<Show when={hasChanges() && isLineItemFocused()}>
+						<sl-button
+							prop:variant="primary"
+							prop:size="small"
+							prop:loading={commitIsLoading()}
+							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
+							onClick={() => {
+								handleCommit()
+							}}
+						>
+							<MaterialSymbolsCommitRounded slot="prefix" />
+							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
+							Commit
+						</sl-button>
+					</Show>
+				</div>
 				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>
