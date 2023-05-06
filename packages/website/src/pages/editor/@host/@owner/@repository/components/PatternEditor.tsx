@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js"
+import { Accessor, createEffect, createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
@@ -27,7 +27,6 @@ export function PatternEditor(props: {
 	id: ast.Message["id"]["name"]
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
-	variableReferences: ast.VariableReference[]
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
@@ -38,6 +37,7 @@ export function PatternEditor(props: {
 		routeParams,
 		filteredLanguages,
 	} = useEditorState()
+	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -61,7 +61,15 @@ export function PatternEditor(props: {
 	}
 
 	onMount(() => {
+		if (props.referenceMessage) {
+			setVariableReferences(
+				props.referenceMessage.pattern.elements
+					.filter((element) => element.type === "Placeholder")
+					.map((element) => element.body) as ast.VariableReference[],
+			)
+		}
 		document.addEventListener("focusin", handleLineItemFocusIn)
+		console.log("references")
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
 		}
@@ -69,7 +77,9 @@ export function PatternEditor(props: {
 
 	//create editor
 	let textArea!: HTMLDivElement
-	const editor = createTiptapEditor(() => getEditorConfig(textArea, props.message))
+	const editor = createTiptapEditor(() =>
+		getEditorConfig(textArea, props.message, variableReferences()),
+	)
 
 	const getEditorFocus = () => {
 		if (editor()) {
@@ -318,9 +328,7 @@ export function PatternEditor(props: {
 				id="parent"
 				class="w-full text-sm p-[6px] focus-within:border-none focus-within:ring-0 focus-within:outline-none"
 			>
-				<Show when={props.variableReferences.length > 0}>
-					<FloatingMenu variableReferences={props.variableReferences} editor={editor} />
-				</Show>
+				<FloatingMenu variableReferences={variableReferences()} editor={editor} />
 
 				{/* tiptap editor */}
 				<div
@@ -332,45 +340,43 @@ export function PatternEditor(props: {
 
 			{/* action bar */}
 			<div class="w-[164px] h-8 flex justify-end items-center gap-2">
-				<Show when={true}>
-					<div class="flex items-center justify-end gap-2">
-						<Show
-							when={
-								JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
-							}
+				<div class="flex items-center justify-end gap-2">
+					<Show
+						when={
+							JSON.stringify(getTextValue(editor)) === "[]" || getTextValue(editor) === undefined
+						}
+					>
+						<sl-button
+							onClick={handleMachineTranslate}
+							// prop:disabled={true}
+							// prop:disabled={
+							// 	(textValue() !== undefined && textValue() !== "") ||
+							// 	props.referenceMessage === undefined
+							// }
+							prop:loading={machineTranslationIsLoading()}
+							prop:variant="neutral"
+							prop:size="small"
 						>
-							<sl-button
-								onClick={handleMachineTranslate}
-								// prop:disabled={true}
-								// prop:disabled={
-								// 	(textValue() !== undefined && textValue() !== "") ||
-								// 	props.referenceMessage === undefined
-								// }
-								prop:loading={machineTranslationIsLoading()}
-								prop:variant="neutral"
-								prop:size="small"
-							>
-								<MaterialSymbolsTranslateRounded slot="prefix" />
-								Machine translate
-							</sl-button>
-						</Show>
-						<Show when={hasChanges() && isLineItemFocused()}>
-							<sl-button
-								prop:variant="primary"
-								prop:size="small"
-								prop:loading={commitIsLoading()}
-								prop:disabled={hasChanges() === false || userIsCollaborator() === false}
-								onClick={() => {
-									handleCommit()
-								}}
-							>
-								<MaterialSymbolsCommitRounded slot="prefix" />
-								<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-								Commit
-							</sl-button>
-						</Show>
-					</div>
-				</Show>
+							<MaterialSymbolsTranslateRounded slot="prefix" />
+							Machine translate
+						</sl-button>
+					</Show>
+					<Show when={hasChanges() && isLineItemFocused()}>
+						<sl-button
+							prop:variant="primary"
+							prop:size="small"
+							prop:loading={commitIsLoading()}
+							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
+							onClick={() => {
+								handleCommit()
+							}}
+						>
+							<MaterialSymbolsCommitRounded slot="prefix" />
+							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
+							Commit
+						</sl-button>
+					</Show>
+				</div>
 				<Show when={!getEditorFocus() && !isLineItemFocused() && hasChanges()}>
 					<div class="bg-hover-primary w-2 h-2 rounded-full" />
 				</Show>

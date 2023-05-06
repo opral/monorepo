@@ -106,19 +106,6 @@ export function Messages(props: {
 		}
 	})
 
-	createEffect(() => {
-		const _variableReferences: ast.VariableReference[] = []
-		const message = props.messages[referenceLanguage()!]
-		if (message) {
-			for (const element of message.pattern.elements) {
-				if (element.type === "Placeholder") {
-					_variableReferences.push(element.body)
-				}
-			}
-			setVariableReferences(_variableReferences)
-		}
-	})
-
 	return (
 		<div
 			ref={patternListElement}
@@ -158,7 +145,6 @@ export function Messages(props: {
 									id={id()}
 									referenceMessage={referenceMessage()}
 									message={props.messages[language]}
-									variableReferences={variableReferences()}
 								/>
 							</Show>
 						</>
