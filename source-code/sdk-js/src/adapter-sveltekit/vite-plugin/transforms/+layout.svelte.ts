@@ -204,12 +204,16 @@ ${codeWithoutTypes}`
 			const insertSlot = htmlIsEmpty(parsed.html)
 			s.appendRight(
 				parsed.html.start,
-				`{#${!config.languageInUrl ? "if" : "key"} ${!config.languageInUrl ? "$" : ""
-				}${localLanguageName}}`,
+				'' +
+				(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : '') +
+				(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`)
 			)
 			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
-			s.append((insertSlot ? `<slot />` : ``) + `{/${!config.languageInUrl ? "if" : "key"}}`)
+			s.append((insertSlot ? `<slot />` : ``) +
+				(config.languageInUrl ? `{/key}` : `{/if}`) +
+				(config.languageInUrl && config.isStatic ? `{/if}` : '')
+			)
 			const map = s.generateMap({
 				source: config.sourceFileName,
 				file: config.sourceMapName,
