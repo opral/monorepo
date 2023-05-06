@@ -1,9 +1,10 @@
 import { loadFile, type ProxifiedModule } from "magicast"
-import { writeFile } from "node:fs/promises"
+import { mkdir, writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
+import { dedent } from 'ts-dedent'
 
-export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => undefined))
+export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
 export type TransformConfig = {
 	debug?: boolean
@@ -63,6 +64,8 @@ const createInlangConfigIfNotPresentYet = async () => {
 	const inlangConfigExists = await doesPathExist(inlangConfigPath)
 	if (inlangConfigExists) return
 
+	await createDemoResources()
+
 	return writeFile(inlangConfigPath, `
 /**
  * @type { import("@inlang/core/config").DefineConfig }
@@ -84,6 +87,25 @@ export async function defineConfig(env) {
 	}
 }
 `)
+}
+
+// TODO: do this in a better way
+const createDemoResources = async () => {
+	if (!await doesPathExist(cwd + '/languages')) {
+		await mkdir(cwd + '/languages')
+	}
+
+	await writeFile(cwd + '/languages/en.json', dedent`
+		{
+		  "welcome": "Welcome to inlang"
+		}
+	`, { encoding: 'utf-8' })
+
+	await writeFile(cwd + '/languages/de.json', dedent`
+		{
+		  "welcome": "Willkommen bei inlang"
+		}
+	`, { encoding: 'utf-8' })
 }
 
 // ------------------------------------------------------------------------------------------------
