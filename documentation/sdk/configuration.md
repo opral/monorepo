@@ -69,3 +69,7 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	],
 },
 ```
+
+---
+
+_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
