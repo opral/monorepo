@@ -23,8 +23,7 @@ export async function defineConfig(env) {
 			sdkPlugin({
 				languageNegotiation: {
 					strategies: [
-						{ type: "localStorage" },
-						{ type: "navigator" }
+						{ type: "localStorage" }
 					],
 				},
 			}),
@@ -57,20 +56,6 @@ Detects if the `language` key is set in the localStorage and uses it as the lang
 },
 ```
 
-<!-- ###
-
-##### **navigator**
-
-Detects the preferred `languages` the user has enabled in his browser.
-
-```js
-{
-	strategies: [
-		{ type: "navigator" },
-	],
-},
-``` -->
-
 ###
 
 ##### **url**
@@ -84,17 +69,3 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	],
 },
 ```
-
-<!-- ###
-
-##### **acceptLanguageHeader**
-
-Detects the user's preferred `languages` the browser sends to the server.
-
-```js
-{
-	strategies: [
-		{ type: "acceptLanguageHeader" },
-	],
-},
-``` -->
