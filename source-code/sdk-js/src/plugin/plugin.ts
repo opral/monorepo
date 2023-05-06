@@ -1,6 +1,7 @@
 import { type SdkConfigInput, validateSdkConfig } from './schema.js'
 import type { InlangConfig } from '@inlang/core/config'
 import ideExtensionPlugin, { type IdeExtensionSettings } from '@inlang/ide-extension-plugin'
+import jsonPlugin from './_json-plugin.js'
 import type { InlangEnvironment } from '@inlang/core/environment'
 import { createPlugin } from "@inlang/core/plugin"
 
@@ -23,21 +24,13 @@ export const sdkPlugin = createPlugin<SdkConfigInput>(({ settings, env }) => ({
 const addDefaultResourcePluginIfMissing = async (config: Partial<InlangConfig>, env: InlangEnvironment): Promise<Partial<InlangConfig>> => {
 	if (config.readResources) return {}
 
-	// TODO: check if correct
-	// TODO: use plugin from v2
-	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
-	)
-
-	const pluginConfig = {
+	const pluginSetupFunction = jsonPlugin({
 		pathPattern: "./languages/{language}.json",
-	}
+	})
 
-	return {
-		languages: await plugin.getLanguages({ ...env, pluginConfig }),
-		readResources: (args) => plugin.readResources({ ...args, ...env, pluginConfig }),
-		writeResources: (args) => plugin.writeResources({ ...args, ...env, pluginConfig }),
-	}
+	const plugin = pluginSetupFunction(env)
+
+	return plugin.config(config)
 }
 
 const addIdeExtensionPluginIfMissing = async (config: Partial<InlangConfig> & { ideExtension?: IdeExtensionSettings }, env: InlangEnvironment): Promise<{ ideExtension: IdeExtensionSettings } | undefined> => {

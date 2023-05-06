@@ -14,7 +14,7 @@ You can configure the SDK behavior to your needs with the `inlang.config.js` fil
  */
 export async function defineConfig(env) {
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.1/dist/plugin/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.1.1/dist/plugin/index.js",
 	)
 
 	return {
