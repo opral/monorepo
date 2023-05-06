@@ -1,5 +1,47 @@
 # @inlang/sdk-js
 
+## 0.1.1
+
+### Patch Changes
+
+- c168b51f: bundle `inlang-plugin-json`
+
+## 0.1.0
+
+### Minor Changes
+
+- 9683c327: fix some bugs related to static output
+
+## 0.0.12
+
+### Patch Changes
+
+- 469e3d58: fix generated inlang.config.js
+
+## 0.0.11
+
+### Patch Changes
+
+- 87a98918: generate valid code for `url` detection option
+
+## 0.0.10
+
+### Patch Changes
+
+- 9a5f9d21: reload resources without restarting the server
+
+## 0.0.9
+
+### Patch Changes
+
+- 7be35534: execute `markup` after `script` when transforming svelte files
+
+## 0.0.8
+
+### Patch Changes
+
+- 735210ce: add `@inlang/core` to peer dependencies
+
 ## 0.0.7
 
 ### Patch Changes

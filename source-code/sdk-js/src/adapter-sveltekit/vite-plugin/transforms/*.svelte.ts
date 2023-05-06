@@ -42,7 +42,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 ${codeWithoutTypes}`
 		: codeWithoutTypes
 
-	const processed = await preprocess(codeWithScriptTag, {
+	const processedScript = await preprocess(codeWithScriptTag, {
 		script: async (options) => {
 			const ast = parseModule(options.content, {
 				sourceFileName: config.sourceFileName,
@@ -75,6 +75,9 @@ ${codeWithoutTypes}`
 
 			return { ...options, ...generated }
 		},
+	})
+
+	const processedMarkup = await preprocess(processedScript.code, {
 		markup: (options) => {
 			const parsed = parse(options.content)
 			const { instance, module } = parsed
@@ -83,7 +86,7 @@ ${codeWithoutTypes}`
 			parsed.module = undefined
 			// Find locations of nodes with i or language
 			const s = new MagicString(options.content)
-			makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
+			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			parsed.instance = instance
 			parsed.module = module
 			const map = s.generateMap({
@@ -96,5 +99,5 @@ ${codeWithoutTypes}`
 		},
 	})
 
-	return processed.code
+	return processedMarkup.code
 }

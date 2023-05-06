@@ -83,7 +83,7 @@ function Header(props: { landingpage?: boolean }) {
 		{
 			name: "Feedback",
 			external: currentPageContext.urlParsed.pathname.includes("editor"),
-			href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+			href: "https://github.com/inlang/inlang/discussions",
 			type: "text" as buttonType,
 		},
 	]

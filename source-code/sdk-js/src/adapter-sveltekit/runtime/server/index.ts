@@ -8,6 +8,7 @@ export {
 	referenceLanguage,
 	languages,
 	getResource,
+	reloadResources,
 	addRuntimeToLocals,
 	getRuntimeFromLocals,
 } from "./state.js"

@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query"
-import { createEffect, createMemo, For, Match, Switch } from "solid-js"
+import { createMemo, For, Match, Switch } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -9,7 +9,7 @@ import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import type { Language } from "@inlang/core/ast"
 import type { LintedMessage } from "@inlang/core/lint"
-import { ListHeader } from "./components/Listheader.jsx"
+import { ListHeader, messageCount } from "./components/Listheader.jsx"
 
 export function Page() {
 	return (
@@ -28,8 +28,16 @@ export function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { inlangConfig, resources, routeParams, repositoryIsCloned, doesInlangConfigExist } =
-		useEditorState()
+	const {
+		inlangConfig,
+		resources,
+		routeParams,
+		repositoryIsCloned,
+		doesInlangConfigExist,
+		filteredLanguages,
+		textSearch,
+		filteredLintRules,
+	} = useEditorState()
 	/**
 	 * Messages for a particular message id in all languages
 	 *
@@ -133,15 +141,18 @@ function TheActualPage() {
 					<NoInlangConfigFoundCard />
 				</Match>
 				<Match when={doesInlangConfigExist()}>
-					<div class="empty-parent">
+					<div>
 						<ListHeader messages={messages} />
 						<For each={Object.keys(messages())}>
 							{(id) => <Messages messages={messages()[id]!} />}
 						</For>
 						<div
-							class={
-								"show-child flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
-							}
+							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
+							classList={{
+								["hidden"]:
+									messageCount(messages, filteredLanguages(), textSearch(), filteredLintRules()) !==
+									0,
+							}}
 						>
 							<NoMatchPlaceholder />
 							<p class="text-base font-medium text-left text-on-background">

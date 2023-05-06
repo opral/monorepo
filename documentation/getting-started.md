@@ -26,8 +26,8 @@ npx @inlang/cli config init
    // filename: inlang.config.js
 
    export async function defineConfig(env) {
-   	const { pluginJson } = await env.$import(
-   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+   	const { default: pluginJson } = await env.$import(
+   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js",
    	)
 
    	return {
