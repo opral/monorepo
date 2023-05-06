@@ -35,8 +35,8 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
-		const rootRoutesFolder = routesFolder + "/(app)" + (languageInUrl ? "/[lang]" : "")
-		const isStatic = await shouldContentBePrerendered(rootRoutesFolder)
+		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "/[lang]" : "")
+		const isStatic = await shouldContentBePrerendered(routesFolder) || await shouldContentBePrerendered(rootRoutesFolder)
 
 		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
