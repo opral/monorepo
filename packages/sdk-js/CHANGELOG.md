@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.1.1
+
+### Patch Changes
+
+- c168b51f: bundle `inlang-plugin-json`
+
 ## 0.1.0
 
 ### Minor Changes
