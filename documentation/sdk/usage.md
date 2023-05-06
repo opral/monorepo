@@ -101,7 +101,7 @@ The `loadResource` function allows you to load the resource file for a specific 
 
 ```svelte
 <script>
-	import { loadResource } from "@inlang/sdk-js"
+	import { loadResource, switchLanguage } from "@inlang/sdk-js"
 
 	async function preloadGermanResource() {
 		console.log('preloading german resource ...')
