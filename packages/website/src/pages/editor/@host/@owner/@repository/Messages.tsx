@@ -4,14 +4,14 @@ import { createEffect, createSignal, For, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
-import { showFilteredMessage } from "@src/pages/editor/utils/showFilteredMessage.js"
+import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
 }) {
 	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
 		useEditorState()
-	// const [matchedLints, setMachtedLints] = createSignal<boolean>(false)
+	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 	const referenceMessage = () => {
 		return props.messages[referenceLanguage()!]
 	}
