@@ -1,6 +1,7 @@
 import { type SdkConfigInput, validateSdkConfig } from './schema.js'
 import type { InlangConfig } from '@inlang/core/config'
 import ideExtensionPlugin, { type IdeExtensionSettings } from '@inlang/ide-extension-plugin'
+// @ts-ignore
 import jsonPlugin from './_json-plugin.js'
 import type { InlangEnvironment } from '@inlang/core/environment'
 import { createPlugin } from "@inlang/core/plugin"
