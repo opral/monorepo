@@ -9,7 +9,11 @@ import { setTipTapMessage } from "./parse.js"
 import type * as ast from "@inlang/core/ast"
 import PlaceholderNode from "./customExtensions/placeholder.js"
 
-export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | undefined) => {
+export const getEditorConfig = (
+	ref: HTMLDivElement,
+	message: ast.Message | undefined,
+	variableReferences: ast.VariableReference[],
+) => {
 	return {
 		element: ref!,
 		extensions: [
@@ -40,11 +44,15 @@ export const getEditorConfig = (ref: HTMLDivElement, message: ast.Message | unde
 				depth: 10,
 			}),
 			FloatingMenu.configure({
-				element: document.querySelector(".test"),
+				element: document.querySelector(".variableReference"),
 				//@ts-ignore
 				shouldShow: ({ editor }) => {
 					// show the floating within any paragraph
-					return editor.isActive("paragraph")
+					if (variableReferences.length > 0) {
+						return editor.isActive("paragraph")
+					} else {
+						return false
+					}
 				},
 				tippyOptions: {
 					duration: 200,
