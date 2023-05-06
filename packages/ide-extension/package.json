@@ -63,5 +63,6 @@
 		"onLanguage:typescript",
 		"onLanguage:typescriptreact",
 		"onLanguage:svelte"
-	]
+	],
+	"license": "Apache-2.0"
 }
