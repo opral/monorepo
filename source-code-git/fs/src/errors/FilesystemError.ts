@@ -19,7 +19,7 @@ export class FilesystemError extends Error {
 			case "ENOTEMPTY":
 				message = `${code}: Directory not empty, ${syscall} '${path}'`
 				break
-			case "EEXIST": 
+			case "EEXIST":
 				message = `${code}: File exists, ${syscall} '${path}' -> '${target}'`
 				break
 			case "EINVAL":

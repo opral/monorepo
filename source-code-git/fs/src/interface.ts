@@ -28,16 +28,16 @@ export type NodeishFilesystem = {
 export type FileData = string
 
 export type NodeishStats = {
-	  ctimeMs: number
-	  mtimeMs: number
-      dev: number
-      ino: number
-      mode: number
-      uid: number
-      gid: number
-      size: number
-	  isFile: () => Boolean
-	  isDirectory: () => Boolean
-	  isSymbolicLink: () => Boolean
-	  symlinkTarget?: string
+	ctimeMs: number
+	mtimeMs: number
+	dev: number
+	ino: number
+	mode: number
+	uid: number
+	gid: number
+	size: number
+	isFile: () => boolean
+	isDirectory: () => boolean
+	isSymbolicLink: () => boolean
+	symlinkTarget?: string
 }
