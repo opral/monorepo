@@ -1,162 +1,277 @@
-import type { FileData, NodeishFilesystem } from "../interface.js"
+import type { NodeishFilesystem, NodeishStats } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
-type Inode = FileData | Directory
-type Directory = Map<string, Inode>
+type Inode = string | string[]
 
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
-	const fsRoot = initDir(new Map())
+	const fsMap: Map<string, Inode> = new Map()
+	const fsStats: Map<string, NodeishStats> = new Map()
 	const specialPaths = ["/", "", ".", ".."]
+
+	// initialize the root to an empty dir
+	fsMap.set("/", [])
+	newStatEntry("/", fsStats, 1)
+
+	// declare this locally so we don't have to write it twice for 'stat' and 'lstat'
+	const stat = async function (path: Parameters<NodeishFilesystem["lstat"]>[0]) {
+		path = normalPath(path)
+		const stats: NodeishStats | undefined = fsStats.get(path)
+		if (stats === undefined)
+			throw new FilesystemError("ENOENT", path, "stat")
+		return stats
+	}
 
 	return {
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
 		) {
-			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (parentDir instanceof Map) parentDir.set(await getBasename(path), data)
-			else throw new FilesystemError("ENOENT", path, "writeFile")
+			path = normalPath(path)
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+
+
+			if (parentDir?.constructor !== Array) 
+				throw new FilesystemError("ENOENT", path, "writeFile")
+			
+
+			parentDir.push(getBasename(path))
+			newStatEntry(path, fsStats, 0)
+			fsMap.set(path, data)
+
 		},
 
 		readFile: async function (
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
 			options: Parameters<NodeishFilesystem["readFile"]>[1],
 		) {
-			const file: Inode | undefined = followPath(fsRoot, path)
+			path = normalPath(path)
+			const file: Inode | undefined = fsMap.get(path)
 			if (typeof file === "string") return file
 
-			if (!file) throw new FilesystemError("ENOENT", path, "readFile")
+			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
 			throw new FilesystemError("EISDIR", path, "readFile")
 		},
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
-			const dir: Inode | undefined = followPath(fsRoot, path)
-			if (dir instanceof Map) return [...dir.keys()].filter((x) => !specialPaths.includes(x))
-			if (!dir) throw new FilesystemError("ENOENT", path, "readdir")
+			path = normalPath(path)
+			const dir: Inode | undefined = fsMap.get(path)
+			if (dir?.constructor === Array) return dir
+			if (dir === undefined) throw new FilesystemError("ENOENT", path, "readdir")
 			throw new FilesystemError("ENOTDIR", path, "readdir")
 		},
 
-		mkdir: async function (
+		mkdir: async function mkdir (
 			path: Parameters<NodeishFilesystem["mkdir"]>[0],
 			options: Parameters<NodeishFilesystem["mkdir"]>[1],
-		) {
-			const parentDir: Inode | undefined = followPath(
-				fsRoot,
-				await getDirname(path),
-				options?.recursive ?? false,
-			)
+		) : Promise<string | undefined> {
+			path = normalPath(path)
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
-			if (!parentDir) throw new FilesystemError("ENOENT", path, "mkdir")
-			else if (parentDir instanceof Map) parentDir.set(await getBasename(path), initDir(parentDir))
-			else throw new FilesystemError("ENOTDIR", path, "mkdir")
-			return options?.recursive ? "not implemented." : undefined
+			let firstPath: string
+
+			if (typeof parentDir === "string")
+				throw new FilesystemError("ENOTDIR", path, "mkdir")
+
+			if (parentDir && parentDir.constructor === Array) {
+				parentDir.push(getBasename(path))
+				newStatEntry(path, fsStats, 1)
+				fsMap.set(path, [])
+				return path
+			}
+
+			if (options?.recursive) {
+				const firstPath = await mkdir(getDirname(path), options)
+				await mkdir(path, options)
+				return firstPath
+			}
+
+			throw new FilesystemError("ENOENT", path, "mkdir")
+
 		},
 
-		rm: async function (
+		rm: async function rm (
 			path: Parameters<NodeishFilesystem["rm"]>[0],
 			options: Parameters<NodeishFilesystem["rm"]>[1],
 		) {
-			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (!parentDir) throw new FilesystemError("ENOENT", path, "rm")
+			path = normalPath(path)
+			const target: Inode | undefined = fsMap.get(path)
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
-			if (parentDir instanceof Map) {
-				const basename = await getBasename(path)
-				switch (typeof parentDir.get(basename)) {
-					case "string":
-						parentDir.delete(basename)
-						break
-					case "object":
-						if (options?.recursive) parentDir.delete(basename)
-						else throw new FilesystemError("EISDIR", path, "rm")
-						break
-					case "undefined":
-						throw new FilesystemError("ENOENT", path, "rm")
-				}
-			} else throw new FilesystemError("ENOTDIR", path, "rm")
+			if (parentDir === undefined || target === undefined) 
+				throw new FilesystemError("ENOENT", path, "rm")
+
+			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "rm")
+
+			if (typeof target === "string") {
+				parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+				fsStats.delete(path)
+				fsMap.delete(path)
+				return
+			}
+
+			if (target.constructor === Array && options?.recursive) {
+				await Promise.all(target.map(async (child) => {
+					await rm(`${path}/${child}`, { recursive: true })
+				}))
+				parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+				fsStats.delete(path)
+				fsMap.delete(path)
+				return
+			}
+
+			throw new FilesystemError("EISDIR", path, "rm")
 		},
 
 		rmdir: async function (path: Parameters<NodeishFilesystem["rmdir"]>[0]) {
-			const parentDir: Inode | undefined = followPath(fsRoot, await getDirname(path), false)
-			if (!parentDir) throw new FilesystemError("ENOENT", path, "rmdir")
+			path = normalPath(path)
+			const target: Inode | undefined = fsMap.get(path)
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
-			if (parentDir instanceof Map) {
-				const basename = await getBasename(path)
-				const dir: Inode | undefined = parentDir.get(basename)
-				switch (typeof dir) {
-					case "string":
-						throw new FilesystemError("ENOTDIR", path, "rmdir")
-					case "object":
-						if (dir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rmdir")
-						if (dir.size === specialPaths.length) parentDir.delete(basename)
-						else throw new FilesystemError("ENOTEMPTY", path, "rmdir")
-						break
-					case "undefined":
-						throw new FilesystemError("ENOENT", path, "rmdir")
-				}
-			} else throw new FilesystemError("ENOTDIR", path, "rmdir")
+			if (parentDir === undefined || target === undefined) 
+				throw new FilesystemError("ENOENT", path, "rmdir")
+
+			if (typeof parentDir === "string" || typeof target === "string") 
+				throw new FilesystemError("ENOTDIR", path, "rmdir")
+
+			if (target.length)
+				throw new FilesystemError("ENOTEMPTY", path, "rmdir")
+
+			parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+			fsStats.delete(path)
+			fsMap.delete(path)
 		},
+
+		symlink: async function (
+			target: Parameters<NodeishFilesystem["symlink"]>[0],
+			path: Parameters<NodeishFilesystem["symlink"]>[1],
+		) {
+			path = normalPath(path)
+			const targetInode: Inode | undefined = fsMap.get(normalPath(target))
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+
+			if (fsMap.get(path))
+				throw new FilesystemError("EEXIST", path, "symlink", target)
+
+			if (typeof parentDir === "string") 
+				throw new FilesystemError("ENOTDIR", path, "symlink")
+
+			if (targetInode === undefined || parentDir === undefined) 
+				throw new FilesystemError("ENOENT", path, "symlink")
+
+			parentDir.push(getBasename(path))
+			newStatEntry(path, fsStats, 2, target)
+			fsMap.set(path, targetInode)
+		},
+
+		unlink: async function (
+			path: Parameters<NodeishFilesystem["unlink"]>[0],
+		) {
+			path = normalPath(path)
+			const targetStats = fsStats.get(path)
+			const target: Inode | undefined = fsMap.get(path)
+			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
+
+			if (parentDir === undefined || target === undefined) 
+				throw new FilesystemError("ENOENT", path, "unlink")
+
+			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "unlink")
+
+			if (targetStats?.isDirectory())
+				throw new FilesystemError("EISDIR", path, "unlink")
+
+			parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+			fsStats.delete(path)
+			fsMap.delete(path)
+		},
+		readlink: async function (
+			path: Parameters<NodeishFilesystem["readlink"]>[0],
+		) {
+			path = normalPath(path)
+			const linkStats = await stat(path)
+
+			if (linkStats === undefined)
+				throw new FilesystemError("ENOENT", path, "readlink")
+
+			if (linkStats.symlinkTarget === undefined)
+				throw new FilesystemError("EINVAL", path, "readlink")
+
+			return linkStats.symlinkTarget
+		},
+		lstat: stat,
+		stat:  stat,
 	}
 }
 
-function initDir(parentDir: Directory) {
-	// A circular reference allows for simple handling of leading and
-	// trailing slashes, as well as "." paths
-	//
-	// Since these only exist internaly, there shouldn't be issues
-	// with serialization
-	const dir = new Map()
-	dir.set("/", dir)
-	dir.set("", dir)
-	dir.set(".", dir)
-	dir.set("..", parentDir)
-	return dir
+/**
+ * Creates a new stat entry. 'kind' refers to whether the entry is for a file,
+ * directory or symlink:
+ * 0 = File
+ * 1 = Directory
+ * 2 = Symlink
+ */
+function newStatEntry(path: string, stats: Map<string, NodeishStats>, kind: number, target?: string) {
+	const cdateMs: number = Date.now()
+	stats.set(normalPath(path), {
+	  ctimeMs: cdateMs,
+	  mtimeMs: cdateMs,
+      dev: 0,
+      ino: stats.size + 1,
+      mode: 0o100644,
+      uid: 0,
+      gid: 0,
+      size: 0,
+	  isFile: () => kind === 0,
+	  isDirectory: () => kind === 1,
+	  isSymbolicLink: () => kind === 2,
+	  // symlinkTarget is only for symlinks, and is not normalized
+	  symlinkTarget: target,
+	})
 }
 
-function followPath(
-	target: Inode | undefined,
-	path: string,
-	makeParent = false,
-): Inode | undefined {
-	const pathList: string[] = path.split("/")
-	let parentDir: Directory
-
-	if (makeParent) {
-		for (const path of pathList) {
-			if (target instanceof Map) {
-				parentDir = target
-				target = target.get(path) ?? undefined
-			} else break
-
-			if (target === undefined) {
-				if (!makeParent) return undefined
-				parentDir.set(path, initDir(parentDir))
-				target = parentDir.get(path) ?? undefined
-			}
-		}
-	} else {
-		for (const path of pathList) {
-			if (target instanceof Map) target = target.get(path) ?? undefined
-			else break
-
-			if (target === undefined) return undefined
-		}
-	}
-
-	return target
-}
-
-async function getDirname(path: string): Promise<string> {
-	return path
+function getDirname(path: string): string {
+	return normalPath(
+		path
 		.split("/")
-		.filter((x) => !["", "."].includes(x))
+		.filter(x => x)
 		.slice(0, -1)
 		.join("/") ?? path
+	)
+
 }
 
-async function getBasename(path: string): Promise<string> {
-	return path
+function getBasename(path: string): string {
+		return path
 		.split("/")
-		.filter((x) => !["", ".", ".."].includes(x))
+		.filter(x => x)
 		.at(-1) ?? path
 }
+
+
+/** 
+ * Removes extraneous dots and slashes, resolves relative paths and ensures the
+ * path begins and ends with '/' 
+ */
+function normalPath(path: string): string {
+	const dots = /(\/|^)(\.\/)+/g
+	const slashes = /\/+/g
+	const upreference = /(?<!\.\.)[^\/]+\/\.\.\//
+	
+	// Append '/' to the beginning and end
+	path = `/${path}/`
+
+	// Handle the edge case where a path begins with '/..'
+	path = path.replace(/^\/\.\./, '')
+	
+	// Remove extraneous '.' and '/'
+	path = path.replace(dots, '/').replace(slashes, '/')
+
+	// Resolve relative paths if they exist
+	let match
+	while(match = path.match(upreference)?.[0]) {
+		path = path.replace(match, '')
+	}
+
+	return path
+}
+

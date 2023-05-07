@@ -18,6 +18,26 @@ export type NodeishFilesystem = {
 	mkdir: (path: string, options?: { recursive: boolean }) => Promise<string | undefined>
 	rm: (path: string, options?: { recursive: boolean }) => Promise<void>
 	rmdir: (path: string) => Promise<void>
+	symlink: (target: string, path: string) => Promise<void>
+	unlink: (path: string) => Promise<void>
+	readlink: (path: string) => Promise<string>
+	stat: (path: string) => Promise<NodeishStats>
+	lstat: (path: string) => Promise<NodeishStats>
 }
 
 export type FileData = string
+
+export type NodeishStats = {
+	  ctimeMs: number
+	  mtimeMs: number
+      dev: number
+      ino: number
+      mode: number
+      uid: number
+      gid: number
+      size: number
+	  isFile: () => Boolean
+	  isDirectory: () => Boolean
+	  isSymbolicLink: () => Boolean
+	  symlinkTarget?: string
+}

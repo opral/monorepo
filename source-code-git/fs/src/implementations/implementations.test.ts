@@ -22,8 +22,10 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	})
 
 	test("recursive mkdir", async () => {
-		await fs.mkdir(`${tempDir}/home/user1/documents/`, { recursive: true })
-		await fs.mkdir(`${tempDir}/home/user1/downloads`, { recursive: true })
+		expect(await fs.mkdir(`${tempDir}/home/user1/documents/`, { recursive: true }))
+		.toMatch(/^.*\/home\/?$/)
+		expect(await fs.mkdir(`${tempDir}/home/user1/downloads/`, { recursive: true }))
+		.toMatch(/^.*\/home\/user1\/downloads\/?$/)
 		expect(await fs.readdir(tempDir)).toEqual(["home"])
 		expect(await fs.readdir(`${tempDir}/home/user1/`)).toEqual(["documents", "downloads"])
 		expect(await fs.readdir(`${tempDir}/home/user1/documents`)).toEqual([])
