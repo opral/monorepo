@@ -47,7 +47,7 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 
 	const noReplyEmail = getGithubNoReplyEmail(emailBody)
 
-	console.log("noReplyEmail", noReplyEmail)
+	//console.log("noReplyEmail", noReplyEmail)
 
 	// Request
 	const request = await fetch("https://api.github.com/user", {
