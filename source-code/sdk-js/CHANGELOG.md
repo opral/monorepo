@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.1.2
+
+### Patch Changes
+
+- 3c6c50b7: don't move files automatically into `[lang]` folder; throw an Error instead
+
 ## 0.1.1
 
 ### Patch Changes
