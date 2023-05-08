@@ -2,6 +2,7 @@ import { writeFile, mkdir, rename, readdir } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
+import { InlangError } from '../../config/config.js'
 import { TransformConfig, getTransformConfig, resetConfig } from "./config.js"
 import { doesPathExist } from "./config.js"
 import { transformCode } from "./transforms/index.js"
@@ -177,18 +178,6 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 	return results.some((result) => result)
 }
 
-const moveFiles = async (srcDir: string, destDir: string) =>
-	Promise.all(
-		(await readdir(srcDir)).map(async (file) => {
-			const destFile = join(destDir, file)
-			await mkdir(dirname(destFile), { recursive: true }).catch(() => undefined)
-			await rename(join(srcDir, file), destFile)
-		}),
-	)
-
-const moveExistingRoutesIntoSubfolder = async (config: TransformConfig) =>
-	moveFiles(config.srcFolder + "/routes", config.rootRoutesFolder)
-
 // ------------------------------------------------------------------------------------------------
 
 let viteServer: ViteDevServer | undefined
@@ -216,19 +205,19 @@ export const plugin = () => {
 		async buildStart() {
 			const config = await getTransformConfig()
 
-			const hasMovedFiles = false
-			if (!config.hasAlreadyBeenInitialized) {
-				// TODO: check if no git changes are inside the src folder. If there are changes then throw an error saying that the files should be committed before we make changes to them
-				await moveExistingRoutesIntoSubfolder(config)
-				// If we don't immediately restart the server, the process crashes because it tries to read files that don't exist. This also means that CTRL + C does not work
-				resetConfig()
-				viteServer && viteServer.restart()
-				return
+			if (!(await doesPathExist(config.rootRoutesFolder))) {
+				throw new InlangError(dedent`
+
+					Could not find the folder '${config.rootRoutesFolder.replace(config.srcFolder, '')}'.
+					It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/inlang/issues/647.
+					Please create the folder and move all existing route files into it.
+
+				`)
 			}
 
 			const hasCreatedANewFile = await createFilesIfNotPresent(config)
 
-			if (hasMovedFiles || hasCreatedANewFile) {
+			if (hasCreatedANewFile) {
 				setTimeout(() => {
 					resetConfig()
 					viteServer && viteServer.restart()

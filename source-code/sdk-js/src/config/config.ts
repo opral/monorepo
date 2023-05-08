@@ -10,7 +10,7 @@ export type InlangConfigWithSdkProps = InlangConfig & {
 
 class InlangSdkConfigError extends Error { }
 
-class InlangError extends Error { }
+export class InlangError extends Error { }
 
 const readInlangConfig = async () => {
 	const env = {

@@ -12,7 +12,6 @@ export type TransformConfig = {
 	isStatic: boolean
 	srcFolder: string
 	rootRoutesFolder: string
-	hasAlreadyBeenInitialized: boolean
 	sourceFileName?: string
 	sourceMapName?: string
 	isTypeScriptProject: boolean
@@ -36,10 +35,8 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
-		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "/[lang]" : "")
+		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "[lang]" : "")
 		const isStatic = await shouldContentBePrerendered(routesFolder) || await shouldContentBePrerendered(rootRoutesFolder)
-
-		const hasAlreadyBeenInitialized = await doesPathExist(rootRoutesFolder)
 
 		const isTypeScriptProject = await doesPathExist(cwd + '/tsconfig.json')
 
@@ -49,7 +46,6 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			isStatic,
 			srcFolder,
 			rootRoutesFolder,
-			hasAlreadyBeenInitialized,
 			isTypeScriptProject,
 		})
 	})
