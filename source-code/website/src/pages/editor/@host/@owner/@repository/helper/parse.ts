@@ -53,10 +53,14 @@ export const setTipTapMessage = (ast_message: ast.Message) => {
 	const ast_elements = ast_message.pattern.elements
 	const tiptap_nodes: any = []
 
+	console.log(ast_elements)
+
 	ast_elements.map((ast_element) => {
 		switch (ast_element.type) {
 			case "Text":
-				tiptap_nodes.push(getTextFromAstElement(ast_element))
+				if (ast_element.value !== "") {
+					tiptap_nodes.push(getTextFromAstElement(ast_element))
+				}
 				break
 			case "Placeholder":
 				tiptap_nodes.push(getPlaceholderFromAstElement(ast_element))

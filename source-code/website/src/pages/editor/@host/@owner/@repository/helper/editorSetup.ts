@@ -67,9 +67,6 @@ export const getEditorConfig = (
 				spellcheck: false,
 			},
 		},
-		content:
-			message && (message.pattern.elements[0] as ast.Text | undefined)?.value
-				? setTipTapMessage(message)
-				: undefined,
+		content: message && message.pattern.elements.length > 0 ? setTipTapMessage(message) : undefined,
 	}
 }
