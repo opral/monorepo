@@ -29,10 +29,12 @@ export const ideExtensionSchema = z.object({
 	 * @param args represents the data to conduct the search on
 	 * @returns a promise with matched message references
 	 */
-	messageReferenceMatchers: z
-		.function()
-		.args(z.object({ documentText: z.string() }))
-		.returns(z.promise(z.array(messageReferenceSchema))),
+	messageReferenceMatchers: z.array(
+		z
+			.function()
+			.args(z.object({ documentText: z.string() }))
+			.returns(z.promise(z.array(messageReferenceSchema))),
+	),
 	/**
 	 * Defines the options to extract messages.
 	 */
