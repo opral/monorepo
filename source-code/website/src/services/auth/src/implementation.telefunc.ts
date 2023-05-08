@@ -43,7 +43,7 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 		throw Error("Failed to get user email " + email.statusText)
 	}
 	const emailBody = await email.json()
-	console.log("emailBody", emailBody)
+	// console.log("emailBody", emailBody)
 
 	const noReplyEmail = getGithubNoReplyEmail(emailBody)
 
