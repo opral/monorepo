@@ -22,9 +22,7 @@ export async function defineConfig(env) {
 		plugins: [
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [
-						{ type: "localStorage" }
-					],
+					strategies: [{ type: "localStorage" }],
 				},
 			}),
 		],
