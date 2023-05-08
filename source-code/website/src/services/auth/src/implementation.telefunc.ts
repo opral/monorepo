@@ -8,9 +8,14 @@ interface Email {
 	visibility: string | null
 }
 
-const getPrimaryEmail = (emails: Email[]): string => {
-	const primaryEmail = emails.find((email: Email) => email.primary)
-	return primaryEmail!.email
+const getGithubNoReplyEmail = (emails: Email[]): string => {
+	const githubNoReplyEmail = emails.find((email) =>
+		email.email.endsWith("@users.noreply.github.com"),
+	)
+	if (githubNoReplyEmail === undefined) {
+		throw Error("No GitHub no-reply email found")
+	}
+	return githubNoReplyEmail.email
 }
 
 /**
@@ -38,7 +43,11 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 		throw Error("Failed to get user email " + email.statusText)
 	}
 	const emailBody = await email.json()
-	const primaryEmail = getPrimaryEmail(emailBody)
+	console.log("emailBody", emailBody)
+
+	const noReplyEmail = getGithubNoReplyEmail(emailBody)
+
+	console.log("noReplyEmail", noReplyEmail)
 
 	// Request
 	const request = await fetch("https://api.github.com/user", {
@@ -55,7 +64,7 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 
 	return {
 		username: requestBody.login,
-		email: primaryEmail,
+		email: noReplyEmail,
 		avatarUrl: requestBody.avatar_url,
 	}
 }
