@@ -70,7 +70,6 @@ export function PatternEditor(props: {
 			)
 		}
 		document.addEventListener("focusin", handleLineItemFocusIn)
-		console.log("references")
 		return () => {
 			document.removeEventListener("focusin", handleLineItemFocusIn)
 		}
