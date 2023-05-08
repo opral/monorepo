@@ -1,5 +1,5 @@
 {
-	"name": "inlang-vs-code-extension",
+	"name": "vs-code-extension",
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",
