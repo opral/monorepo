@@ -43,41 +43,40 @@ export async function messagePreview(args: {
 				return messages.map((message) => {
 					const translation = query(referenceResource).get({
 						id: message.messageId,
-					})?.pattern.elements[0]
-					if (translation?.type === "Text") {
-						const previewText = translation.value
-						const truncatedPreviewText =
-							previewText.length > MAXIMUM_PREVIEW_LENGTH
-								? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-								: previewText
-						const range = new vscode.Range(
-							// VSCode starts to count lines and columns from zero
-							new vscode.Position(
-								message.position.start.line - 1,
-								message.position.start.character - 1,
-							),
-							new vscode.Position(
-								message.position.end.line - 1,
-								message.position.end.character - 1,
-							),
-						)
-						const decoration: vscode.DecorationOptions = {
-							range,
-							renderOptions: {
-								after: {
-									contentText: truncatedPreviewText ?? `ERROR: '${message.messageId}' not found`,
-									backgroundColor: previewText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
-									border: previewText
-										? "1px solid rgb(45 212 191/.50)"
-										: "1px solid rgb(244 63 94/.50)",
-								},
+					})?.pattern.elements
+
+					const translationText =
+						translation && translation.length > 0 ? (translation[0]!.value as string) : undefined
+
+					const truncatedTranslationText =
+						translationText &&
+						(translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+							? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: translationText)
+					const range = new vscode.Range(
+						// VSCode starts to count lines and columns from zero
+						new vscode.Position(
+							message.position.start.line - 1,
+							message.position.start.character - 1,
+						),
+						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+					)
+					const decoration: vscode.DecorationOptions = {
+						range,
+						renderOptions: {
+							after: {
+								contentText:
+									truncatedTranslationText ??
+									`ERROR: '${message.messageId}' not found in reference language '${referenceLanguage}'`,
+								backgroundColor: translationText ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
+								border: translationText
+									? "1px solid rgb(45 212 191/.50)"
+									: "1px solid rgb(244 63 94/.50)",
 							},
-							hoverMessage: previewText,
-						}
-						return decoration
-					} else {
-						throw new Error("Only Text elements are supported for message previews.")
+						},
+						hoverMessage: translationText,
 					}
+					return decoration
 				})
 			},
 		)
