@@ -2,6 +2,7 @@ import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
+import { msg } from "../utils/message.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -9,22 +10,29 @@ import type { Message } from "@inlang/core/ast"
 export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
+	key: "cmd+shift+i",
 	callback: async function (textEditor: vscode.TextEditor) {
 		const { ideExtension, referenceLanguage, writeResources } = state().config
 
 		// guards
 		if (!ideExtension) {
-			return vscode.window.showWarningMessage(
+			return msg(
 				"There is no `ideExtension` object in the inlang.config.json configured.",
+				"warn",
+				"notification",
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
-			return vscode.window.showWarningMessage(
+			return msg(
 				"The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message.",
+				"warn",
+				"notification",
 			)
 		} else if (referenceLanguage === undefined) {
-			return vscode.window.showWarningMessage(
+			return msg(
 				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message.",
+				"warn",
+				"notification",
 			)
 		}
 
@@ -52,7 +60,7 @@ export const extractMessageCommand = {
 		}
 
 		if (preparedExtractOption === undefined) {
-			return vscode.window.showWarningMessage("Couldn't find choosen extract option.")
+			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
 		const message: Message = {
@@ -85,6 +93,6 @@ export const extractMessageCommand = {
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
-		return vscode.window.showInformationMessage("Message extracted.")
+		return msg("Message extracted.")
 	},
 } as const

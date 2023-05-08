@@ -9,10 +9,11 @@ import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
+import { msg } from "./utils/message.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		vscode.window.showInformationMessage("Inlang extension activated.")
+		msg("Inlang extension activated.", "info")
 		// start the extension
 		main({ context })
 		// in case the active window changes -> restart the extension
@@ -63,6 +64,11 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// initialize inlang core and resources for current workspace
 	const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri)
 
+	// watch for changes in the config file
+	const watcher = vscode.workspace.createFileSystemWatcher(
+		new vscode.RelativePattern(workspace, "**/inlang.config.js"),
+	)
+
 	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
 
 	const module = (await import(closestConfigPath)) as InlangConfigModule
@@ -84,7 +90,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		debouncedLoadResources()
 	})
 
-	// register commands
+	watcher.onDidChange(() => {
+		debouncedLoadResources()
+	})
+
+	watcher.onDidChange(() => {
+		console.log("config changed")
+	})
+
+	// register command
 	args.context.subscriptions.push(
 		vscode.commands.registerTextEditorCommand(
 			extractMessageCommand.id,
@@ -97,11 +111,16 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		vscode.languages.registerCodeActionsProvider(
 			[
 				// TODO: improve with #348
+				// for example with { scheme: "file" } we could register the provider for all files
 				{ language: "javascript" },
 				{ language: "javascriptreact" },
 				{ language: "typescript" },
 				{ language: "typescriptreact" },
 				{ language: "svelte" },
+				{ language: "vue" },
+				{ language: "html" },
+				{ language: "markdown" },
+				{ language: "json" },
 			],
 			new ExtractMessage(),
 			{ providedCodeActionKinds: ExtractMessage.providedCodeActionKinds },

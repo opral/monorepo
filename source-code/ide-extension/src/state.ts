@@ -1,5 +1,10 @@
 import type { Resource } from "@inlang/core/ast"
 import type { InlangConfig } from "@inlang/core/config"
+import type { IdeExtensionSettings } from "@inlang/ide-extension-plugin"
+
+interface InlangConfigModule extends InlangConfig {
+	ideExtension?: IdeExtensionSettings
+}
 
 /**
  * The state of the vscode extension.
@@ -8,7 +13,7 @@ type State = {
 	/**
 	 * Closest inlang configuration.
 	 */
-	config: InlangConfig
+	config: InlangConfigModule
 	/**
 	 * All ressources found by the inlang configuration.
 	 */
