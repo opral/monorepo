@@ -18,10 +18,10 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
 
 ## Requirements
 
-To use this code, you need to have language resources in JSON format in a `language` folder in the root of your project. Each file should have the language ID as the file name. If your setup matches this, follow the getting started steps. Otherwise, configure the correct path in the config file or switch to a different [plugin](https://inlang.com/documentation/plugins) to read the strings from the code base.
+To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. If that doesn't match you requirements check out the other [plugins](https://inlang.com/documentation/plugins).
 
 ```
-language
+languages
 |--en.json
 |--de.json
 ```
