@@ -15,7 +15,7 @@ export const sdkPlugin = createPlugin<SdkConfigInput>(({ settings, env }) => ({
 
 		return {
 			sdk: parsedConfig,
-			...(await addDefaultResourcePluginIfMissing(config, env)),
+			...(await addDefaultResourcePluginIfMissing(config, env)), // TODO: remove this option at a later point, once we are sure that most people have added a resource plugin by themselves
 			...(await addIdeExtensionPluginIfMissing(config, env)),
 		}
 	},
