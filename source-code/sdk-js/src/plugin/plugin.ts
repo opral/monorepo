@@ -48,7 +48,7 @@ const addIdeExtensionPluginIfMissing = async (
 	// TODO: check if correct
 
 	const pluginSetupFunction = ideExtensionPlugin({
-		messageReferenceMatchers: async (args) => {
+		messageReferenceMatchers: [async (args) => {
 			const regex = /(?<!\w){?t\(['"](?<messageId>\S+)['"]\)}?/gm
 			const str = args.documentText
 			let match
@@ -79,7 +79,7 @@ const addIdeExtensionPluginIfMissing = async (
 				}
 			}
 			return result
-		},
+		}],
 		extractMessageOptions: [
 			{
 				callback: (messageId) => `{i("${messageId}")}`,
