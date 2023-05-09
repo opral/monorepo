@@ -16,28 +16,6 @@ description: i18n SDK designed and fully integrated for SvelteKit.
 
 inlang provides an SDK that integrates seamlessly with SvelteKit.
 
-## Requirements
-
-To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. If that doesn't match you requirements check out the other [plugins](https://inlang.com/documentation/plugins).
-
-```
-languages
-|--en.json
-|--de.json
-```
-
-A valid JSON file would look like this.
-
-```JSON
-{
-   "title": "Welcome",
-   "card": {
-      "tag": "New",
-      "title": "Great new tool"
-   }
-}
-```
-
 ## Getting Started
 
 1. Add `@inlang/sdk-js` dependency to your project
@@ -81,6 +59,28 @@ Take a look at the [Usage](/documentation/sdk/usage) to learn more about how to 
 ## Configuration
 
 You can configure the inlang SDK depending on your needs. You can learn more in the [Configuration](/documentation/sdk/configuration) section.
+
+## Further reading
+
+To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. If that doesn't match you requirements check out the other [plugins](https://inlang.com/documentation/plugins).
+
+```
+languages
+|--en.json
+|--de.json
+```
+
+A valid JSON file would look like this.
+
+```JSON
+{
+   "title": "Welcome",
+   "card": {
+      "tag": "New",
+      "title": "Great new tool"
+   }
+}
+```
 
 ---
 
