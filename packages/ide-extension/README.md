@@ -12,18 +12,39 @@
 
 # Inlang IDE Code Extension
 
-WORK IN PROGRESS. The editor is prioritized for now.
+This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into your IDE.
+
+## 1️⃣ Setup
+
+Create a inlang.config.js in the root of your project. You can use the following template:
+
+```js
+export async function defineConfig(env) {
+	const { default: ideExtensionPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/npm/@inlang/ide-extension-plugin@latest/dist/index.js",
+	)
+
+	return {
+		referenceLanguage: "en",
+		plugins: [ideExtensionPlugin()],
+	}
+}
+```
+
+## 2️⃣ Usage
+
+Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
 ## Features
 
-### Inline Annotations
+### 🔎 Inline Annotations
 
 See translations directly in your code. No more back-and-forth looking into the translation files themselves.
 
-![inline annotations](https://raw.githubusercontent.com/inlang/inlang/main/source-code/ide-extension/assets/inline-annotation.png)
+// TODO: Create new image
 
-### Extract Messages (translations)
+### ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-![extract message](https://raw.githubusercontent.com/inlang/inlang/main/source-code/ide-extension/assets/extract-pattern.gif)
+// TODO: Create new image

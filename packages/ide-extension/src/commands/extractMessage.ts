@@ -22,11 +22,14 @@ export const extractMessageCommand = {
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
-			return msg(
-				"The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message.",
-				"warn",
-				"notification",
-			)
+			ideExtension.extractMessageOptions = [
+				{
+					callback: (messageId) => `{i("${messageId}")}`,
+				},
+				{
+					callback: (messageId) => `i("${messageId}")`,
+				},
+			]
 		} else if (referenceLanguage === undefined) {
 			return msg(
 				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message.",
