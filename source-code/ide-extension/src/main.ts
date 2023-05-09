@@ -10,9 +10,15 @@ import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
 import { msg } from "./utils/message.js"
+import { telemetryNode } from "../../telemetry/src/implementation/node.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
+		// Track activation event
+		telemetryNode.capture({
+			distinctId: "unknown",
+			event: "VS CODE EXTENSION activated",
+		})
 		msg("Inlang extension activated.", "info")
 		// start the extension
 		main({ context })
