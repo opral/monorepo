@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.2.1
+
+### Patch Changes
+
+- 345c33bb: fix: deployments of various SvelteKit adapters
+- 345c33bb: fix: don't use top level awaits
+
 ## 0.2.0
 
 ### Minor Changes
