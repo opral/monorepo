@@ -15,6 +15,12 @@ const options = ({
 	minify: !dev,
 	splitting: false,
 	external: ['svelte/compiler', '@sveltejs/kit/vite'],
+	plugins: [
+		{
+			name: 'logger',
+			setup: ({ onEnd }) => onEnd(() => console.info('🎉 changes processed'))
+		}
+	],
 })
 
 const ctx = await context(options)
