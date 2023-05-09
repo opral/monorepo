@@ -319,6 +319,13 @@ export function PatternEditor(props: {
 					id={props.id + "-" + props.language}
 					ref={textArea}
 					onKeyDown={(event) => handleShortcut(event)}
+					onFocusIn={() => {
+						telemetryBrowser.capture("EDITOR focus field", {
+							targetLanguage: props.language,
+							owner: routeParams().owner,
+							repository: routeParams().repository,
+						})
+					}}
 				/>
 			</div>
 
