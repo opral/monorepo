@@ -31,7 +31,8 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		await createInlangConfigIfNotPresentYet()
 
-		const inlangConfig = await initConfig()
+		const inlangConfigModule = await import(cwd + "/inlang.config.js")
+		const inlangConfig = await initConfig(inlangConfigModule)
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 

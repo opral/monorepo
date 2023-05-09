@@ -12,7 +12,8 @@ describe("transformHooksServerJs", () => {
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 				export const handle = initHandleWrapper({
-				  getLanguage: () => undefined
+				    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+				    getLanguage: () => undefined
 				}).wrap((
 				  {
 				    event: event,
@@ -64,7 +65,8 @@ describe("transformHooksServerJs", () => {
 				}
 
 				export const handle = initHandleWrapper({
-				  getLanguage: () => undefined
+				    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+				    getLanguage: () => undefined
 				}).wrap((
 				    {
 				        event: event,
@@ -97,7 +99,8 @@ describe("transformHooksServerJs", () => {
 					import type { Handle } from '@sveltejs/kit'
 
 					export const handle = initHandleWrapper({
-					  getLanguage: () => undefined
+					    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
 					}).wrap(({ event, resolve }) => {
 
 						event.locals = {
@@ -124,7 +127,8 @@ describe("transformHooksServerJs", () => {
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 					export const handle = initHandleWrapper({
-					  getLanguage: () => undefined
+					    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
 					}).wrap(function handle({ event, resolve }) {
 						console.log('TADAA!')
 						return resolve(event)
@@ -148,13 +152,14 @@ describe("transformHooksServerJs", () => {
 				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 				export const handle = initHandleWrapper({
-				  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
-				  initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+				    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+				    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
+				    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 
-				  redirect: {
-				  throwable: redirect,
-				  getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
-				  }
+				    redirect: {
+				        throwable: redirect,
+				        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+				    }
 				}).wrap((
 				  {
 				    event: event,
@@ -175,7 +180,8 @@ describe("transformHooksServerJs", () => {
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 				export const handle = initHandleWrapper({
-				  getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
+				    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+				    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
 				}).wrap((
 				  {
 				    event: event,
@@ -195,7 +201,8 @@ describe("transformHooksServerJs", () => {
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
 				export const handle = initHandleWrapper({
-				  getLanguage: () => undefined
+				    inlangConfigModule: await import(\\"../inlang.config.js\\"),
+				    getLanguage: () => undefined
 				}).wrap((
 				  {
 				    event: event,

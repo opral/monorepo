@@ -5,8 +5,7 @@ export {
 	initServerLoadWrapper,
 } from "./wrappers.js"
 export {
-	referenceLanguage,
-	languages,
+	initState,
 	getResource,
 	reloadResources,
 	addRuntimeToLocals,

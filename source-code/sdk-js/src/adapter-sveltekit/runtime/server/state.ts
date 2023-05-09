@@ -1,27 +1,36 @@
 import type { Resource } from '@inlang/core/ast'
+import type { InlangConfigModule } from '@inlang/core/config'
 import type { RequestEvent } from "@sveltejs/kit"
-import { initConfig } from '../../../config/config.js'
+import { initConfig, InlangConfigWithSdkProps } from '../../../config/config.js'
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 
-const config = await initConfig()
-if (!config) {
-	throw Error("could not read `inlang.config.js`")
-}
+let config: InlangConfigWithSdkProps
 
-export const referenceLanguage = config.referenceLanguage
+let resources: Resource[] = []
 
-export const languages = config.languages
-
-// TODO: fix resources if needed (add missing Keys)
-let resources: Resource[]
-
+// TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadResources = async () => resources = await config.readResources({ config })
-
-await reloadResources()
 
 export const getResource = (language: string) =>
 	resources.find(({ languageTag: { name } }) => name === language)
+
+// ------------------------------------------------------------------------------------------------
+
+export const initState = async (module: InlangConfigModule) => {
+	if (!config) {
+		config = await initConfig(module)
+	}
+
+	await reloadResources()
+
+	return {
+		referenceLanguage: config.referenceLanguage,
+		languages: config.languages,
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 
 export const addRuntimeToLocals = (
 	locals: RequestEvent["locals"],
