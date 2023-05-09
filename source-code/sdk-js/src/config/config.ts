@@ -1,7 +1,7 @@
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import } from '@inlang/core/environment'
 import fs from "node:fs/promises"
-import type { SdkConfigInput } from '../plugin/schema.js'
+import type { SdkConfigInput } from '@inlang/sdk-js-plugin'
 
 export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk?: SdkConfigInput
