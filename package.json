@@ -36,7 +36,6 @@
 		"@typescript-eslint/eslint-plugin": "^5.48.2",
 		"@typescript-eslint/parser": "^5.48.2",
 		"@vitest/coverage-c8": "^0.29.8",
-		"concurrently": "^7.4.0",
 		"eslint": "^8.32.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-solid": "^0.9.3",
