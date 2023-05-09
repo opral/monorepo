@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.14
+
+### Patch Changes
+
+- 636e6045: test plugins in `testConfigFile`
+
 ## 0.7.13
 
 ### Patch Changes
