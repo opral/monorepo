@@ -1,5 +1,15 @@
 # @inlang/sdk-js
 
+## 0.3.0
+
+### Minor Changes
+
+- 636e6045: [BREAKING]: move `@inlang/sdk-js/plugin` into it's own package `@inlang/sdk-js-plugin`
+
+### Patch Changes
+
+- 95ffd205: fix: don't wrap <svelte:\*> elements that need to be at the root
+
 ## 0.2.1
 
 ### Patch Changes
