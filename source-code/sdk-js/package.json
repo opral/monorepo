@@ -36,7 +36,6 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
-		"@inlang/ide-extension-plugin": "*",
 		"@inlang/sdk-js-plugin": "*",
 		"@sveltejs/kit": "^1.16.2",
 		"@types/estree": "^1.0.0",
