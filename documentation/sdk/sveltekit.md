@@ -72,13 +72,13 @@ languages
 
 A valid JSON file would look like this.
 
-```JSON
+```json
 {
-   "title": "Welcome",
-   "card": {
-      "tag": "New",
-      "title": "Great new tool"
-   }
+	"title": "Welcome",
+	"card": {
+		"tag": "New",
+		"title": "Great new tool"
+	}
 }
 ```
 
