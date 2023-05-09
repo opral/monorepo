@@ -12,6 +12,12 @@ const options = await pluginBuildConfig({
 	entryPoints: ["./src/index.js"],
 	outfile: "./dist/index.js",
 	minify: true,
+	plugins: [
+		{
+			name: 'logger',
+			setup: ({ onEnd }) => onEnd(() => console.info('🎉 changes processed'))
+		}
+	],
 })
 
 const ctx = await context(options)
