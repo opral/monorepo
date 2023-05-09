@@ -3,6 +3,7 @@ import type { Plugin, PluginSetupFunction } from "./types.js"
 import { PluginSetupError } from "./errors/PluginSetupError.js"
 import { deepmergeInto } from "deepmerge-ts"
 import type { InlangEnvironment } from "../environment/types.js"
+// import { withErrorHandling } from "./withErrorHandling.js"
 
 export type ConfigWithSetupPlugins = Omit<Partial<InlangConfig>, "plugins"> & {
 	plugins: Plugin[]
@@ -42,6 +43,8 @@ export async function setupPlugins(args: {
 				args.config.plugins[i] = (args.config.plugins[i] as PluginSetupFunction)(args.env)
 			}
 			const plugin = args.config.plugins[i] as Plugin
+			// const withErrorHandlingPlugin = withErrorHandling(plugin.id, plugin)
+			// const config = await withErrorHandlingPlugin?.config({ ...mergedConfig })
 			const config = await plugin?.config({ ...mergedConfig })
 			deepmergeInto(mergedConfig, config)
 		} catch (error) {
