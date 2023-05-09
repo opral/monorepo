@@ -5,7 +5,7 @@ import { stat } from "node:fs/promises"
 import { dedent } from 'ts-dedent'
 import type { InlangConfig } from '@inlang/core/config'
 import type { InlangConfigWithSdkProps } from '../../config/config.js'
-import { validateSdkConfig } from '../../plugin/schema.js'
+import { validateSdkConfig } from '@inlang/sdk-js-plugin'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 

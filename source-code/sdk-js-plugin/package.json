@@ -1,0 +1,43 @@
+{
+	"name": "@inlang/sdk-js-plugin",
+	"description": "Inlang SDK-JS Plugin",
+	"keywords": [
+		"inlang",
+		"i18n",
+		"internationalization",
+		"L10n",
+		"localization",
+		"translation"
+	],
+	"type": "module",
+	"version": "0.2.1",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"./dist"
+	],
+	"engines": {
+		"node": "^18"
+	},
+	"scripts": {
+		"dev": "concurrently -n build,test -c auto \"npm run dev:watch\" \"npm run dev:test\"",
+		"dev:test": "vitest",
+		"dev:watch": "DEV=true node ./build.js",
+		"build": "node ./build.js && tsc -p tsconfig.build.json",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@inlang/core": "^0.7.11",
+		"concurrently": "^7.6.0",
+		"esbuild": "^0.17.10",
+		"typescript": "^4.9.5",
+		"vitest": "^0.29.1"
+	},
+	"license": "Apache-2.0"
+}
