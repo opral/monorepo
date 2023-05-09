@@ -10,7 +10,6 @@ import { msg } from "../utils/message.js"
 export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
-	key: "cmd+shift+i",
 	callback: async function (textEditor: vscode.TextEditor) {
 		const { ideExtension, referenceLanguage, writeResources } = state().config
 

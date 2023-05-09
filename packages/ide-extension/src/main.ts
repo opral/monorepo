@@ -4,7 +4,7 @@ import { setState } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
-import { InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
 import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
@@ -72,7 +72,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
 
 	const module = (await import(closestConfigPath)) as InlangConfigModule
-
 	const config = await setupConfig({ module, env })
 
 	const loadResources = async () => {
@@ -82,6 +81,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			resources,
 		})
 	}
+
+	// debounce loading of resources
 	const debouncedLoadResources = debounce(1000, loadResources)
 	await loadResources()
 
@@ -90,12 +91,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		debouncedLoadResources()
 	})
 
+	// listen for changes in the config file
 	watcher.onDidChange(() => {
-		debouncedLoadResources()
-	})
-
-	watcher.onDidChange(() => {
-		console.log("config changed")
+		promptToReloadWindow()
 	})
 
 	// register command
@@ -110,8 +108,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	args.context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider(
 			[
-				// TODO: improve with #348
 				// for example with { scheme: "file" } we could register the provider for all files
+				{ language: "javascript", pattern: "!**/inlang.config.js" },
 				{ language: "javascript" },
 				{ language: "javascriptreact" },
 				{ language: "typescript" },
@@ -119,8 +117,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 				{ language: "svelte" },
 				{ language: "vue" },
 				{ language: "html" },
-				{ language: "markdown" },
-				{ language: "json" },
 			],
 			new ExtractMessage(),
 			{ providedCodeActionKinds: ExtractMessage.providedCodeActionKinds },
@@ -128,7 +124,25 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	// register decorations
+	console.log("registering decorations")
+
 	messagePreview({ activeTextEditor, context: args.context })
+}
+
+/** Prompts user to reload editor window in order for configuration change to take effect. */
+const promptToReloadWindow = () => {
+	const action = "Reload"
+
+	vscode.window
+		.showInformationMessage(
+			`To apply changes to the inlang configuration, please reload the window.`,
+			action,
+		)
+		.then((selectedAction) => {
+			if (selectedAction === action) {
+				vscode.commands.executeCommand("workbench.action.reloadWindow")
+			}
+		})
 }
 
 // this method is called when your extension is deactivated

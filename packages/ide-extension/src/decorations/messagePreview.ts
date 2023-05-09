@@ -35,6 +35,11 @@ export async function messagePreview(args: {
 			return
 		}
 
+		// TODO: this is a hack to prevent the message preview from showing up in the inlang.config.js file
+		if (args.activeTextEditor.document.fileName.includes("inlang.config.js")) {
+			return
+		}
+
 		const wrappedDecorations = state().config.ideExtension?.messageReferenceMatchers.map(
 			async (matcher) => {
 				const messages = await matcher({
