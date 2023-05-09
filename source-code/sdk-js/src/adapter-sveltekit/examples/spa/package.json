@@ -15,12 +15,12 @@
 		"@inlang/sdk-js": "file:../../../..",
 		"@playwright/test": "^1.33.0",
 		"@sveltejs/adapter-node": "^1.2.4",
-		"@sveltejs/kit": "^1.15.9",
-		"svelte": "^3.58.0",
-		"svelte-check": "^3.2.0",
+		"@sveltejs/kit": "^1.16.2",
+		"svelte": "^3.59.1",
+		"svelte-check": "^3.3.2",
 		"tslib": "^2.5.0",
 		"typescript": "^5.0.4",
-		"vite": "4.3.3"
+		"vite": "4.3.5"
 	},
 	"type": "module"
 }
