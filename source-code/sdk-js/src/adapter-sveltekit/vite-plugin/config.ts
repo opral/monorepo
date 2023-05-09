@@ -3,6 +3,9 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { stat } from "node:fs/promises"
 import { dedent } from 'ts-dedent'
+import type { InlangConfig } from '@inlang/core/config'
+import type { InlangConfigWithSdkProps } from '../../config/config.js'
+import { validateSdkConfig } from '../../plugin/schema.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -34,6 +37,9 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const inlangConfigModule = await import(cwd + "/inlang.config.js")
 		const inlangConfig = await initConfig(inlangConfigModule)
 
+		assertConfigWithSdk(inlangConfig)
+		inlangConfig.sdk = validateSdkConfig(inlangConfig.sdk)
+
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
 		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "[lang]" : "")
@@ -53,6 +59,21 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 }
 
 export const resetConfig = () => configPromise = undefined
+
+// ------------------------------------------------------------------------------------------------
+
+class InlangSdkConfigError extends Error { }
+
+function assertConfigWithSdk(config: InlangConfig | undefined): asserts config is InlangConfigWithSdkProps {
+	if (!config) {
+		throw new InlangSdkConfigError('Could not find `inlang.config.js` in the root of your project.`')
+	}
+
+	if (!('sdk' in config)) {
+		// TODO: link to docs
+		throw new InlangSdkConfigError('The `sdk` property is missing in your `inlang.config.js` file.`. Make sure to use the `sdkPlugin` in your `inlang.config.js` file.')
+	}
+}
 
 // ------------------------------------------------------------------------------------------------
 
