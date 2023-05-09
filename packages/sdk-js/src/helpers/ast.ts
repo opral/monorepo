@@ -201,6 +201,19 @@ export const sortMarkup = (parsed: Ast, s: MagicStringImport.default) => {
 	for (const child of parsed.html.children ?? []) {
 		s.move(child.start, child.end, lastIndex)
 	}
+	// Leave tags that can not be wrapped at the beginning
+	for (const child of parsed.html.children ?? []) {
+		if (
+			![
+				"svelte:window",
+				"svelte:document",
+				"svelte:body",
+				"svelte:head",
+				"svelte:options",
+			].includes(child.name)
+		)
+			s.move(child.start, child.end, lastIndex)
+	}
 	parsed.instance = instance
 	parsed.module = module
 	parsed.css = css
