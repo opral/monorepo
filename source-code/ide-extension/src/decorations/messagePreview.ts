@@ -11,9 +11,6 @@ export async function messagePreview(args: {
 }) {
 	const { context } = args
 	const { referenceLanguage } = state().config
-	const referenceResource = state().resources.find(
-		(resource) => resource.languageTag.name === referenceLanguage,
-	)
 	let activeTextEditor = vscode.window.activeTextEditor
 
 	const messagePreview = vscode.window.createTextEditorDecorationType({
@@ -22,16 +19,10 @@ export async function messagePreview(args: {
 		},
 	})
 
-	if (referenceLanguage === undefined) {
-		return vscode.window.showWarningMessage(
-			"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
-		)
-	}
-
 	updateDecorations()
 
 	async function updateDecorations() {
-		if (!activeTextEditor || !referenceResource) {
+		if (!activeTextEditor) {
 			return
 		}
 
@@ -46,7 +37,20 @@ export async function messagePreview(args: {
 					documentText: args.activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = query(referenceResource).get({
+					const { referenceLanguage } = state().config
+					if (referenceLanguage === undefined) {
+						return vscode.window.showWarningMessage(
+							"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
+						)
+					}
+
+					const ref = state().resources.find(
+						(resource) => resource.languageTag.name === referenceLanguage,
+					)
+					if (!ref) {
+						return
+					}
+					const translation = query(ref).get({
 						id: message.messageId,
 					})?.pattern.elements
 
