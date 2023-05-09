@@ -17,7 +17,7 @@ type WrappedHandle = (
 ) => ReturnType<Kit.Handle>
 
 export const initHandleWrapper = (options: {
-	inlangConfigModule: InlangConfigModule
+	inlangConfigModule: Promise<InlangConfigModule>
 	getLanguage: (event: Kit.RequestEvent) => Language | undefined
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
 	redirect?: {
@@ -30,7 +30,7 @@ export const initHandleWrapper = (options: {
 
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
-				const { referenceLanguage, languages } = await initState(options.inlangConfigModule)
+				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
 
 				const pathname = event.url.pathname as RelativeUrl
 				if (pathname.startsWith("/inlang")) return resolve(event)

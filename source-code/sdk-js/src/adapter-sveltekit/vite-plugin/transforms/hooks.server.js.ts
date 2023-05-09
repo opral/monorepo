@@ -22,7 +22,7 @@ import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 
 const options = (config: TransformConfig) => dedent`
 	{
-		inlangConfigModule: await import("../inlang.config.js"),
+		inlangConfigModule: import("../inlang.config.js"),
 		getLanguage: ${(config.languageInUrl
 		? `({ url }) => url.pathname.split("/")[1]`
 		: `() => undefined`
