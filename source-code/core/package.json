@@ -23,11 +23,11 @@
 			"config": [
 				"./dist/config/index.d.ts"
 			],
+			"environment": [
+				"./dist/environment/index.d.ts"
+			],
 			"lint": [
 				"./dist/lint/index.d.ts"
-			],
-			"plugin": [
-				"./dist/plugin/index.d.ts"
 			],
 			"query": [
 				"./dist/query/index.d.ts"
@@ -37,6 +37,9 @@
 			],
 			"utilities": [
 				"./dist/utilities/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
 			]
 		}
 	},
