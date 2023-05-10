@@ -6,6 +6,10 @@ import type { InlangConfig } from '@inlang/core/config'
 import { testConfigFile } from '@inlang/core/test'
 import { initInlangEnvironment, InlangConfigWithSdkProps } from '../../config/config.js'
 import { validateSdkConfig } from '@inlang/sdk-js-plugin'
+import { promisify } from 'node:util'
+import { exec as execCb } from 'node:child_process'
+
+const exec = promisify(execCb);
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -33,6 +37,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const routesFolder = srcFolder + "/routes"
 
 		await createInlangConfigIfNotPresentYet()
+		await updateSdkPluginVersion()
 
 		// TODO: combine `testConfigFile` and `initConfig` functionality
 		const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
@@ -103,7 +108,7 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
 	)
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@0.3.2/dist/index.js"
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js"
 	)
 
 	return {
@@ -159,4 +164,34 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 	return modules.map(mod => [true, 'auto'].includes(mod.exports.prerender))
 		.some(Boolean)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+const updateSdkPluginVersion = async () => {
+	const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
+
+	const version = await getInstalledVersionOfPackage('@inlang/sdk-js')
+	if (!version) return
+
+	const REGEX_PLUGIN_VERSION = /https:\/\/cdn\.jsdelivr\.net\/npm\/@inlang\/sdk-js(-plugin)?@?(.*)?\/dist(\/plugin)?\/index\.js/g
+
+	const newConfig = inlangConfigAsString.replace(
+		REGEX_PLUGIN_VERSION,
+		`https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${version}/dist/index.js`,
+	)
+
+	if (inlangConfigAsString !== newConfig) {
+		console.info(`Updating 'inlang.config.js' to use the correct version of '@inlang/sdk-js-plugin' (${version})`)
+
+		await writeFile(cwd + "/inlang.config.js", newConfig)
+	}
+}
+
+const getInstalledVersionOfPackage = async (pkg: string) => {
+	const { stderr, stdout } = await exec(`npm info ${pkg} version`)
+		.catch((e) => ({ stderr: e, stdout: '' }))
+	if (stderr) return undefined
+
+	return stdout.trim()
 }
