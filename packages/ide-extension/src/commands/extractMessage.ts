@@ -1,4 +1,4 @@
-import { telemetryNode } from "@inlang/telemetry"
+// import { telemetryNode } from "@inlang/telemetry"
 import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
@@ -94,13 +94,13 @@ export const extractMessageCommand = {
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
-		telemetryNode.capture({
-			distinctId: "unknown",
-			event: "IDE-EXTENSION message extracted",
-			properties: {
-				config: state().config,
-			},
-		})
+		// telemetryNode.capture({
+		// 	distinctId: "unknown",
+		// 	event: "IDE-EXTENSION message extracted",
+		// 	properties: {
+		// 		config: state().config,
+		// 	},
+		// })
 		return msg("Message extracted.")
 	},
 } as const
