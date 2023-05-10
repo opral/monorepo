@@ -2,7 +2,7 @@ import type { Resource } from "@inlang/core/ast"
 import type { InlangConfig } from "@inlang/core/config"
 import type { IdeExtensionSettings } from "@inlang/ide-extension-plugin"
 
-interface InlangConfigModule extends InlangConfig {
+interface InlangConfigWithIdeExtension extends InlangConfig {
 	ideExtension?: IdeExtensionSettings
 }
 
@@ -13,7 +13,7 @@ type State = {
 	/**
 	 * Closest inlang configuration.
 	 */
-	config: InlangConfigModule
+	config: InlangConfigWithIdeExtension
 	/**
 	 * All ressources found by the inlang configuration.
 	 */

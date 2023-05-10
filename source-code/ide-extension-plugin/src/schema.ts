@@ -4,6 +4,20 @@ export const validateIdeExtensionSettings = (config: IdeExtensionSettings | unde
 	ideExtensionSchema.parse(config)
 
 /**
+ * The document selector settings for the IDE extension.
+ */
+const documentSelectorSchema = z
+	.array(
+		z.object({
+			language: z.string().optional(),
+			scheme: z.string().optional(),
+			pattern: z.string().optional(),
+			notebookType: z.string().optional(),
+		}),
+	)
+	.optional()
+
+/**
  * The position from where to where the reference can be found.
  */
 export const positionSchema = z.object({
@@ -59,7 +73,7 @@ export const ideExtensionSchema = z.object({
 	 *
 	 * See https://code.visualstudio.com/api/references/document-selector
 	 */
-	// documentSelectors: DocumentSelector[];
+	documentSelectors: documentSelectorSchema,
 })
 
 export type IdeExtensionSettings = z.TypeOf<typeof ideExtensionSchema>
