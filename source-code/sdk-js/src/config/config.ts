@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from '@inlang-git/fs'
+import type { $fs } from '@inlang/core/environment'
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from '@inlang/core/environment'
 import type { SdkConfigInput } from '@inlang/sdk-js-plugin'
@@ -16,7 +16,7 @@ export const initConfig = async (module: InlangConfigModule) => {
 	}
 
 	const fs = await import('node:fs/promises')
-		.catch(() => new Proxy({} as NodeishFilesystem, {
+		.catch(() => new Proxy({} as $fs, {
 			get: () => () => {
 				throw new InlangError('`node:fs/promises` is not available in the current environment')
 			}
