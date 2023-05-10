@@ -7,7 +7,7 @@ import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { getContext, setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { RelativeUrl } from "../../../../core/index.js"
+import type { RelativeUrl } from "../../../../index.js"
 import type { Language } from "@inlang/core/ast"
 
 type RuntimeContext<
