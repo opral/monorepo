@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.7.15
+
+### Patch Changes
+
+- f6cf2bbf: Add missing `environment` export for JSDoc
+
 ## 0.7.14
 
 ### Patch Changes
