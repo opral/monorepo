@@ -1,4 +1,4 @@
-import { telemetryNode } from "./../../../telemetry/src/implementation/node.js"
+import { telemetryNode } from "@inlang/telemetry"
 import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
@@ -23,15 +23,13 @@ export const extractMessageCommand = {
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
-			ideExtension.extractMessageOptions = [
-				{
-					callback: (messageId) => `{i("${messageId}")}`,
-				},
-				{
-					callback: (messageId) => `i("${messageId}")`,
-				},
-			]
-		} else if (referenceLanguage === undefined) {
+			return msg(
+				"There are no `extractMessageOptions` in the `ideExtension` object in the inlang.config.json configured.",
+				"warn",
+				"notification",
+			)
+		}
+		if (referenceLanguage === undefined) {
 			return msg(
 				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message.",
 				"warn",
@@ -98,7 +96,7 @@ export const extractMessageCommand = {
 		})
 		telemetryNode.capture({
 			distinctId: "unknown",
-			event: "VS CODE EXTENSION message extracted",
+			event: "IDE-EXTENSION message extracted",
 			properties: {
 				config: state().config,
 			},

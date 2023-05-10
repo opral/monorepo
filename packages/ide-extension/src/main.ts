@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { debounce } from "throttle-debounce"
-import { setState } from "./state.js"
+import { setState, state } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
@@ -10,14 +10,14 @@ import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
 import { msg } from "./utils/message.js"
-import { telemetryNode } from "../../telemetry/src/implementation/node.js"
+import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		// Track activation event
 		telemetryNode.capture({
 			distinctId: "unknown",
-			event: "VS CODE EXTENSION activated",
+			event: "IDE-EXTENSION activated",
 		})
 		msg("Inlang extension activated.", "info")
 		// start the extension
@@ -110,23 +110,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		),
 	)
 
+	const documentSelectors = [
+		{ language: "javascript", pattern: "!**/inlang.config.js" },
+		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
+	]
 	// register source actions
 	args.context.subscriptions.push(
-		vscode.languages.registerCodeActionsProvider(
-			[
-				// for example with { scheme: "file" } we could register the provider for all files
-				{ language: "javascript", pattern: "!**/inlang.config.js" },
-				{ language: "javascript" },
-				{ language: "javascriptreact" },
-				{ language: "typescript" },
-				{ language: "typescriptreact" },
-				{ language: "svelte" },
-				{ language: "vue" },
-				{ language: "html" },
-			],
-			new ExtractMessage(),
-			{ providedCodeActionKinds: ExtractMessage.providedCodeActionKinds },
-		),
+		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
+			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
+		}),
 	)
 
 	// register decorations

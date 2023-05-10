@@ -1,6 +1,7 @@
-import sucrase from "@rollup/plugin-sucrase"
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
+import sucrase from "@rollup/plugin-sucrase"
+import json from "@rollup/plugin-json"
 
 /**
  * What is rollup used for?
@@ -24,9 +25,15 @@ export default {
 	external: ["vscode"],
 	plugins: [
 		// nodeResolve = bundle the dependencies
-		nodeResolve(),
-		// sucrase = compile typescript
-		sucrase({ transforms: ["typescript"] }),
+		nodeResolve({
+			preferBuiltins: true,
+		}),
+		// fix dotenv json import
+		json(),
+		// compile typescript
+		sucrase({
+			transforms: ["typescript"],
+		}),
 		commonjs(),
 	],
 }

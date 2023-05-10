@@ -87,6 +87,17 @@ const addIdeExtensionPluginIfMissing = async (
 				callback: (messageId) => `{i("${messageId}")}`,
 			},
 		],
+		documentSelectors: [
+			{
+				language: "javascript",
+			},
+			{
+				language: "typescript",
+			},
+			{
+				language: "svelte",
+			},
+		],
 	})
 
 	const plugin = pluginSetupFunction(env)
