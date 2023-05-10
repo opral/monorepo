@@ -49,6 +49,10 @@
 		"svelte-preprocess": "^5.0.3",
 		"ts-dedent": "^2.2.0"
 	},
+	"peerDependencies": {
+		"@sveltejs/kit": "^1.0.0",
+		"svelte": "^3.0.0"
+	},
 	"exports": {
 		".": "./dist/core/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
