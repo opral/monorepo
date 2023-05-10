@@ -1,6 +1,6 @@
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
-import sucrase from "@rollup/plugin-sucrase"
+import typescript from "@rollup/plugin-typescript"
 import json from "@rollup/plugin-json"
 
 /**
@@ -28,12 +28,9 @@ export default {
 		nodeResolve({
 			preferBuiltins: true,
 		}),
-		// fix dotenv json import
+		// typescript = compile typescript
+		typescript(),
 		json(),
-		// compile typescript
-		sucrase({
-			transforms: ["typescript"],
-		}),
 		commonjs(),
 	],
 }
