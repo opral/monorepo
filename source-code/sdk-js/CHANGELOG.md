@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.3.3
+
+### Patch Changes
+
+- c8883359: automatically sync `@inlang/sdk-js-plugin` version with installed `@inlang/sdk-js` version
+
 ## 0.3.2
 
 ### Patch Changes
