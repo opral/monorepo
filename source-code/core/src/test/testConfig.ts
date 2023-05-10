@@ -70,41 +70,44 @@ async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
  * Otherwise, the defined readResources and writeResources functions are not
  * implemented correctly e.g. by missing messages in the roundtrip.
  */
-async function roundtripTest(config: InlangConfig, resources: ast.Resource[]) {
+async function roundtripTest(config: InlangConfig, initialResources: ast.Resource[]) {
 	const commonErrorMessage =
 		"A roundtrip test of the readResources and writeResources functions failed:\n"
-	await config.writeResources({ config, resources })
-	const readResources = await config.readResources({ config })
+	await config.writeResources({ config, resources: initialResources })
+	const readResourcesAgain = await config.readResources({ config })
 	// check if the number of resources is the same
-	if (resources.length !== readResources.length) {
+	if (initialResources.length !== readResourcesAgain.length) {
 		throw new TestConfigException(commonErrorMessage + "The number of resources don't match.")
 	}
 	// check if the resources match
-	for (const resource of resources) {
+	for (const intialResource of initialResources) {
 		// find the matching resource
-		const matchingReadResource = readResources.find(
-			(readResource) => readResource.languageTag.name === resource.languageTag.name,
+		const matchingReadResourceAgain = readResourcesAgain.find(
+			(readResourceAgain) => readResourceAgain.languageTag.name === intialResource.languageTag.name,
 		)
 		// check if the resource exists
-		if (matchingReadResource === undefined) {
+		if (matchingReadResourceAgain === undefined) {
 			throw new TestConfigException(
-				commonErrorMessage + `Missing the resource "${resource.languageTag.name}"`,
+				commonErrorMessage + `Missing the resource "${intialResource.languageTag.name}"`,
 			)
 		}
 		// check if the messages are identical
-		for (const [messageIndex, message] of resource.body.entries()) {
-			if (JSON.stringify(message) !== JSON.stringify(matchingReadResource.body[messageIndex]))
+		for (const [messageIndex, initialMessage] of intialResource.body.entries()) {
+			if (
+				JSON.stringify(initialMessage) !==
+				JSON.stringify(matchingReadResourceAgain.body[messageIndex])
+			)
 				throw new TestConfigException(
 					dedent(`
 ${commonErrorMessage}
-The message with id "${message.id.name}" does not match for the resource 
-with languageTag.name "${resource.languageTag.name}".
+The message with id "${initialMessage.id.name}" does not match for the resource 
+with languageTag.name "${intialResource.languageTag.name}".
 
 Received: 
-${JSON.stringify(message, undefined, 2)}
+${JSON.stringify(matchingReadResourceAgain.body[messageIndex], undefined, 2)}
 
 Expected:
-${JSON.stringify(matchingReadResource.body[messageIndex], undefined, 2)}
+${JSON.stringify(initialMessage, undefined, 2)}
 `),
 				)
 		}
