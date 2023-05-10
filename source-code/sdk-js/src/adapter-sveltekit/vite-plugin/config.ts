@@ -174,6 +174,9 @@ const updateSdkPluginVersion = async () => {
 	const version = await getInstalledVersionOfPackage('@inlang/sdk-js')
 	if (!version) return
 
+	// this regex detects the new `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js` as well as
+	// the older https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js url
+	// both urls are also detected with the optional @version identifier
 	const REGEX_PLUGIN_VERSION = /https:\/\/cdn\.jsdelivr\.net\/npm\/@inlang\/sdk-js(-plugin)?@?(.*)?\/dist(\/plugin)?\/index\.js/g
 
 	const newConfig = inlangConfigAsString.replace(
