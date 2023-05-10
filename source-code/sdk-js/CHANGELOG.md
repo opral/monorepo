@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.3.2
+
+### Patch Changes
+
+- 8b916fc9: add support for older Svelte versions
+- e815949f: fix: don't fail to start applications in non-node environment
+
 ## 0.3.1
 
 ### Patch Changes
