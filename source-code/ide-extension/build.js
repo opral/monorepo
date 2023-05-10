@@ -14,6 +14,7 @@ const ctx = await context({
 	entryPoints: ["./src/main.ts"],
 	outfile: "./dist/main.cjs",
 	bundle: true,
+	minify: isDev === false,
 	platform: "node",
 	sourcemap: isDev,
 	external: ["vscode"],
