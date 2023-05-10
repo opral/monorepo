@@ -9,7 +9,6 @@
 		// setting of module node16 here.
 		"module": "Node16",
 		// for debugging
-		"sourceMap": true,
-		"isolatedModules": true
+		"sourceMap": true
 	}
 }

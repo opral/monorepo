@@ -1,24 +1,42 @@
 import * as vscode from "vscode"
+import fetch from "node-fetch"
 import { debounce } from "throttle-debounce"
 import { setState, state } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
 import { InlangConfigModule, setupConfig } from "@inlang/core/config"
-import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
 import { msg } from "./utils/message.js"
-import { telemetryNode } from "@inlang/telemetry"
+// import { telemetryNode } from "@inlang/telemetry"
+import { publicEnv } from "@inlang/env-variables"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		// Track activation event
-		telemetryNode.capture({
-			distinctId: "unknown",
-			event: "IDE-EXTENSION activated",
+		const response = await fetch(`https://eu.posthog.com/capture`, {
+			method: "POST",
+			body: JSON.stringify({
+				event: "IDE-EXTENSION activated",
+				api_key: publicEnv.PUBLIC_POSTHOG_TOKEN,
+				properties: {
+					distinct_id: "unknown",
+				},
+			}),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${publicEnv.PUBLIC_POSTHOG_TOKEN}`,
+			},
 		})
+		const responseJson = await response.json()
+		console.log(responseJson)
+
+		// telemetryNode.capture({
+		// 	distinctId: "unknown",
+		// 	event: "IDE-EXTENSION activated",
+		// })
 		msg("Inlang extension activated.", "info")
 		// start the extension
 		main({ context })
