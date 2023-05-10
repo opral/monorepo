@@ -6,10 +6,8 @@ import type { InlangConfig } from '@inlang/core/config'
 import { testConfigFile } from '@inlang/core/test'
 import { initInlangEnvironment, InlangConfigWithSdkProps } from '../../config/config.js'
 import { validateSdkConfig } from '@inlang/sdk-js-plugin'
-import { promisify } from 'node:util'
-import { exec as execCb } from 'node:child_process'
-
-const exec = promisify(execCb);
+// @ts-ignore
+import pkg from '../../../package.json'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -170,9 +168,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 const updateSdkPluginVersion = async () => {
 	const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
-
-	const version = await getInstalledVersionOfPackage('@inlang/sdk-js')
-	if (!version) return
+	const version = pkg.version
 
 	// this regex detects the new `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js` as well as
 	// the older https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js url
@@ -189,12 +185,4 @@ const updateSdkPluginVersion = async () => {
 
 		await writeFile(cwd + "/inlang.config.js", newConfig)
 	}
-}
-
-const getInstalledVersionOfPackage = async (pkg: string) => {
-	const { stderr, stdout } = await exec(`npm info ${pkg} version`)
-		.catch((e) => ({ stderr: e, stdout: '' }))
-	if (stderr) return undefined
-
-	return stdout.trim()
 }
