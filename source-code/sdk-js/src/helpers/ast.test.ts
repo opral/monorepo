@@ -17,6 +17,7 @@ describe("ast", () => {
             "() => {}"
         `)
 	})
+
 	test("getFunctionOrDeclarationValue - fallback arrow function not specified", () => {
 		const code = dedent``
 		const ast = parseModule(code)
@@ -26,6 +27,7 @@ describe("ast", () => {
             "() => {}"
         `)
 	})
+
 	test("getFunctionOrDeclarationValue - function", () => {
 		const code = dedent`
             export function load() {
@@ -41,6 +43,7 @@ describe("ast", () => {
             }"
         `)
 	})
+
 	test("getFunctionOrDeclarationValue - arrow function", () => {
 		const code = dedent`
             export const load = () => {
@@ -56,9 +59,10 @@ describe("ast", () => {
             }"
         `)
 	})
+
 	test("getFunctionOrDeclarationValue - declaration value", () => {
 		const code = dedent`
-            const loadFn = function() {
+            const loadFn = () => {
                 console.log("load")
             }
             export const load = loadFn
@@ -68,6 +72,24 @@ describe("ast", () => {
 		const result = print(resultAst)
 		expect(result.code).toMatchInlineSnapshot(`
             "loadFn"
+        `)
+	})
+
+	test("getFunctionOrDeclarationValue - sequence", () => {
+		const code = dedent`
+			import { sequence } from "@sveltejs/kit/hooks";
+
+			const seq1 = async ({ event, resolve }) => {
+				return resolve(event);
+			};
+
+			export const handle = sequence(seq1);
+		`
+		const ast = parseModule(code)
+		const resultAst = getFunctionOrDeclarationValue(ast.$ast, "load")
+		const result = print(resultAst)
+		expect(result.code).toMatchInlineSnapshot(`
+            "sequence(seq1)"
         `)
 	})
 })
