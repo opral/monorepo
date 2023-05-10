@@ -5,10 +5,11 @@ import type { SvelteKitClientRuntime } from "../index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import { getContext, setContext } from "svelte"
+import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { RelativeUrl } from "../../../../core/index.js"
 import type { Language } from "@inlang/core/ast"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/index.js"
 
 type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
@@ -23,8 +24,7 @@ type RuntimeContext<
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-// TODO @ivanhofer: Throw error in server context
-export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
+export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const language = runtime.language as Language
