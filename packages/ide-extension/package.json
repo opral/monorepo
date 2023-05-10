@@ -29,8 +29,8 @@
 		]
 	},
 	"scripts": {
-		"build": "rollup --config",
-		"dev": "rollup --config --watch",
+		"build": "node ./build.js",
+		"dev": "DEV=true node ./build.js",
 		"package": "npx vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
@@ -44,18 +44,16 @@
 	},
 	"dependencies": {
 		"@inlang/core": "*",
+		"@inlang/telemetry": "*",
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
-		"@rollup/plugin-commonjs": "^24.0.1",
-		"@rollup/plugin-node-resolve": "^15.0.1",
-		"@rollup/plugin-typescript": "^11.1.0",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",
+		"esbuild": "^0.17.18",
 		"node-fetch": "^3.3.1",
-		"ovsx": "^0.8.0",
-		"rollup": "^3.14.0"
+		"ovsx": "^0.8.0"
 	},
 	"activationEvents": [
 		"workspaceContains:**/inlang.config.js"
