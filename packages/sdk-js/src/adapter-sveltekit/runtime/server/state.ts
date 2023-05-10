@@ -7,16 +7,6 @@ import type { SvelteKitServerRuntime } from "./runtime.js"
 
 let config: InlangConfigWithSdkProps
 
-let resources: Resource[] = []
-
-// TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadResources = async () => resources = await config.readResources({ config })
-
-export const getResource = (language: string) =>
-	resources.find(({ languageTag: { name } }) => name === language)
-
-// ------------------------------------------------------------------------------------------------
-
 export const initState = async (module: InlangConfigModule) => {
 	if (!config) {
 		config = await initConfig(module)
@@ -29,6 +19,16 @@ export const initState = async (module: InlangConfigModule) => {
 		languages: config.languages,
 	}
 }
+
+// ------------------------------------------------------------------------------------------------
+
+let resources: Resource[] = []
+
+// TODO: fix resources if needed (add missing Keys, etc.)
+export const reloadResources = async () => resources = await config.readResources({ config })
+
+export const getResource = (language: string) =>
+	resources.find(({ languageTag: { name } }) => name === language)
 
 // ------------------------------------------------------------------------------------------------
 
