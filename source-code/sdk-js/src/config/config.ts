@@ -9,7 +9,11 @@ export type InlangConfigWithSdkProps = InlangConfig & {
 
 export class InlangError extends Error { }
 
-const setupInlangConfig = async (module: InlangConfigModule) => {
+export const initConfig = async (module: InlangConfigModule) => {
+	if (!module) {
+		throw Error("could not read `inlang.config.js`")
+	}
+
 	const env = {
 		$fs: fs,
 		$import: initialize$import({
@@ -31,12 +35,4 @@ Node.js failed to resolve the URL. This can happen sometimes during development.
 	}
 
 	return setupConfig({ module, env })
-}
-
-export const initConfig = async (module: InlangConfigModule) => {
-	if (!module) {
-		throw Error("could not read `inlang.config.js`")
-	}
-
-	return setupInlangConfig(module)
 }

@@ -1,7 +1,6 @@
 import { loadFile, type ProxifiedModule } from "magicast"
-import fs, { mkdir, readFile, writeFile } from "node:fs/promises"
+import fs, { mkdir, readFile, writeFile, stat } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
-import { stat } from "node:fs/promises"
 import { dedent } from 'ts-dedent'
 import type { InlangConfig } from '@inlang/core/config'
 import { testConfigFile } from '@inlang/core/test'
