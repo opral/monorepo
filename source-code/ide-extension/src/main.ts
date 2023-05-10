@@ -10,34 +10,17 @@ import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
 import { msg } from "./utils/message.js"
-// import { telemetryNode } from "@inlang/telemetry"
-import { publicEnv } from "@inlang/env-variables"
+import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		// Track activation event
-		const response = await fetch(`https://eu.posthog.com/capture`, {
-			method: "POST",
-			body: JSON.stringify({
-				event: "IDE-EXTENSION activated",
-				api_key: publicEnv.PUBLIC_POSTHOG_TOKEN,
-				properties: {
-					distinct_id: "unknown",
-				},
-			}),
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${publicEnv.PUBLIC_POSTHOG_TOKEN}`,
-			},
+		console.log("hieeessssswweww2")
+		telemetryNode.capture({
+			distinctId: "unknown",
+			event: "IDE-EXTENSION activated",
 		})
-		const responseJson = await response.json()
-		console.log(responseJson)
-
-		// telemetryNode.capture({
-		// 	distinctId: "unknown",
-		// 	event: "IDE-EXTENSION activated",
-		// })
 		msg("Inlang extension activated.", "info")
+
 		// start the extension
 		main({ context })
 		// in case the active window changes -> restart the extension
@@ -106,9 +89,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		})
 	}
 
-	// debounce loading of resources
-	const debouncedLoadResources = debounce(1000, loadResources)
 	await loadResources()
+
+	// debounce future loading of resources
+	const debouncedLoadResources = debounce(1000, loadResources)
 
 	// register event listeners
 	vscode.workspace.onDidChangeTextDocument(() => {
