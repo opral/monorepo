@@ -1,6 +1,6 @@
+import type { NodeishFilesystem } from '@inlang-git/fs'
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import } from '@inlang/core/environment'
-import fs from "node:fs/promises"
+import { initialize$import, InlangEnvironment } from '@inlang/core/environment'
 import type { SdkConfigInput } from '@inlang/sdk-js-plugin'
 
 export type InlangConfigWithSdkProps = InlangConfig & {
@@ -13,6 +13,13 @@ export const initConfig = async (module: InlangConfigModule) => {
 	if (!module) {
 		throw Error("could not read `inlang.config.js`")
 	}
+
+	const fs = await import('node:fs/promises')
+		.catch(() => new Proxy({} as NodeishFilesystem, {
+			get: () => () => {
+				throw Error('`node:fs/promises` is not available in the current environment')
+			}
+		}))
 
 	const env = {
 		$fs: fs,
@@ -32,7 +39,7 @@ Node.js failed to resolve the URL. This can happen sometimes during development.
 					throw error
 				})
 		})
-	}
+	} satisfies InlangEnvironment
 
 	return setupConfig({ module, env })
 }
