@@ -2,6 +2,7 @@ import type { NodeishFilesystem } from '@inlang-git/fs'
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from '@inlang/core/environment'
 import type { SdkConfigInput } from '@inlang/sdk-js-plugin'
+import { dedent } from 'ts-dedent'
 
 export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk?: SdkConfigInput
@@ -17,7 +18,7 @@ export const initConfig = async (module: InlangConfigModule) => {
 	const fs = await import('node:fs/promises')
 		.catch(() => new Proxy({} as NodeishFilesystem, {
 			get: () => () => {
-				throw Error('`node:fs/promises` is not available in the current environment')
+				throw new InlangError('`node:fs/promises` is not available in the current environment')
 			}
 		}))
 
@@ -29,11 +30,13 @@ export const initConfig = async (module: InlangConfigModule) => {
 				.catch(error => {
 					// TODO: create an issue
 					if (error instanceof TypeError && (error.cause as any)?.code === 'UND_ERR_CONNECT_TIMEOUT') {
-						throw new InlangError(`
+						throw new InlangError(dedent`
 
-Node.js failed to resolve the URL. This can happen sometimes during development. Usually restarting the server helps.
+								Node.js failed to resolve the URL. This can happen sometimes during development. Usually restarting the server helps.
 
-	`, { cause: error })
+							`,
+							{ cause: error }
+						)
 					}
 
 					throw error
