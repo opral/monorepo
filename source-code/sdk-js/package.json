@@ -54,15 +54,15 @@
 		"svelte": "^3.0.0"
 	},
 	"exports": {
-		".": "./dist/core/index.js",
+		".": "./dist/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/runtime/*/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
 	},
-	"module": "dist/core/index.js",
-	"types": "dist/core/index.d.ts",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"typesVersions": {
 		"*": {
 			"adapter-sveltekit": [
