@@ -1,12 +1,11 @@
 import { loadFile, type ProxifiedModule } from "magicast"
-import fs, { mkdir, readFile, writeFile, stat } from "node:fs/promises"
+import { mkdir, readFile, writeFile, stat } from "node:fs/promises"
 import { initConfig } from '../../config/index.js'
 import { dedent } from 'ts-dedent'
 import type { InlangConfig } from '@inlang/core/config'
 import { testConfigFile } from '@inlang/core/test'
-import type { InlangConfigWithSdkProps } from '../../config/config.js'
+import { initInlangEnvironment, InlangConfigWithSdkProps } from '../../config/config.js'
 import { validateSdkConfig } from '@inlang/sdk-js-plugin'
-import { initialize$import } from '@inlang/core/environment'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -38,13 +37,8 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		// TODO: combine `testConfigFile` and `initConfig` functionality
 		const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
 		const [, exception] = await testConfigFile({
-			file: inlangConfigAsString, env: {
-				$fs: fs,
-				$import: initialize$import({
-					fs,
-					fetch,
-				})
-			}
+			file: inlangConfigAsString,
+			env: await initInlangEnvironment()
 		})
 		if (exception) {
 			throw exception
