@@ -1,5 +1,5 @@
-import { writeFile, mkdir, rename, readdir } from "node:fs/promises"
-import { dirname, join } from "node:path"
+import { writeFile, mkdir } from "node:fs/promises"
+import { dirname } from "node:path"
 import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
 import { InlangError } from '../../config/config.js'
