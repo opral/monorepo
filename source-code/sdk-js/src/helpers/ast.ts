@@ -6,6 +6,7 @@ import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfa
 import { types } from "recast"
 import { parseModule, builders } from "magicast"
 import type MagicStringImport from "magic-string"
+import type { ExpressionKind } from "ast-types/gen/kinds.js"
 
 export class FindAstError extends Error {
 	readonly #id = "FindAstException"
@@ -258,13 +259,28 @@ const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] =>
 	({ node }) => n.ArrowFunctionExpression.check(node),
 ]
 
-export const getArrowOrFunction = (
+const variableDeclaratorMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+	({ node }) => n.VariableDeclaration.check(node),
+	({ node }) =>
+		n.VariableDeclarator.check(node) && n.Identifier.check(node.id) && node.id.name === name,
+]
+
+// TODO @benjaminpreiss test this
+export const getFunctionOrDeclarationValue = (
 	ast: types.namedTypes.Node,
 	name: string,
-	fallbackFunction: types.namedTypes.FunctionExpression | types.namedTypes.ArrowFunctionExpression,
+	fallbackFunction:
+		| types.namedTypes.FunctionExpression
+		| types.namedTypes.ArrowFunctionExpression = b.arrowFunctionExpression(
+		[],
+		b.blockStatement([]),
+	),
 ) => {
-	const arrowFunctionExpressionSearchResults = findAstJs(ast, arrowFunctionMatchers(name), (node) =>
-		n.ArrowFunctionExpression.check(node) ? () => node : undefined,
+	const variableDeclarationValueSearchResults = findAstJs(
+		ast,
+		variableDeclaratorMatchers(name),
+		(node) =>
+			n.VariableDeclarator.check(node) && node.init != undefined ? () => node.init : undefined,
 	)[0]
 	const functionDeclarationSearchResults = findAstJs(ast, functionMatchers(name), (node) =>
 		n.FunctionDeclaration.check(node) ? () => node : undefined,
@@ -272,8 +288,8 @@ export const getArrowOrFunction = (
 		| [types.namedTypes.FunctionDeclaration, ...types.namedTypes.FunctionDeclaration[]]
 		| undefined
 	const arrowFunctionExpression =
-		arrowFunctionExpressionSearchResults && arrowFunctionExpressionSearchResults.length > 0
-			? (arrowFunctionExpressionSearchResults[0] as types.namedTypes.ArrowFunctionExpression)
+		variableDeclarationValueSearchResults && variableDeclarationValueSearchResults.length > 0
+			? (variableDeclarationValueSearchResults[0] as ExpressionKind)
 			: undefined
 	const functionDeclaration =
 		functionDeclarationSearchResults && functionDeclarationSearchResults.length > 0
@@ -318,7 +334,7 @@ export const replaceOrAddExportNamedFunction = (
 
 export const getWrappedExport = (
 	options: unknown,
-	params: (types.namedTypes.ArrowFunctionExpression | types.namedTypes.FunctionExpression)[],
+	params: ExpressionKind[],
 	exportedName: string,
 	wrapperName: string,
 ) => {

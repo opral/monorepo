@@ -23,6 +23,7 @@ type RuntimeContext<
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
+// TODO @ivanhofer: Throw error in server context
 export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {

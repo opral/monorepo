@@ -3,21 +3,20 @@ import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
 import {
-	getArrowOrFunction,
+	getFunctionOrDeclarationValue,
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (config: TransformConfig, root: boolean) => `
 import { browser } from "$app/environment";
-import { ${root ? "initRootPageLoadWrapper" : "initLoadWrapper"
-	}, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
+import { ${
+	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
+}, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
-${config.languageInUrl && config.isStatic
-		? `import { redirect } from "@sveltejs/kit";` : ''
-	}
+${config.languageInUrl && config.isStatic ? `import { redirect } from "@sveltejs/kit";` : ""}
 `
 
 const options = (config: TransformConfig) =>
@@ -47,14 +46,12 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	}
 
 	const n = types.namedTypes
-	const b = types.builders
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
 	const importsAst = parseModule(requiredImports(config, root))
 	deepMergeObject(ast, importsAst)
-	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const arrowOrFunctionNode = getFunctionOrDeclarationValue(ast.$ast, "load")
 	const exportAst = getWrappedExport(
 		parseExpression(root ? options(config) : "{}"),
 		[arrowOrFunctionNode],

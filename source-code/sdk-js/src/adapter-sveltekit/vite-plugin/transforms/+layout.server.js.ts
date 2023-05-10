@@ -3,7 +3,7 @@ import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
 import {
-	getArrowOrFunction,
+	getFunctionOrDeclarationValue,
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
@@ -32,14 +32,12 @@ export const transformLayoutServerJs = (config: TransformConfig, code: string, r
 	}
 
 	const n = types.namedTypes
-	const b = types.builders
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
 	const importsAst = parseModule(requiredImports(root))
 	deepMergeObject(ast, importsAst)
-	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const arrowOrFunctionNode = getFunctionOrDeclarationValue(ast.$ast, "load")
 	const exportAst = getWrappedExport(
 		undefined,
 		[arrowOrFunctionNode],

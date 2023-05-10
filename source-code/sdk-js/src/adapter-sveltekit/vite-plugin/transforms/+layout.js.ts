@@ -3,11 +3,11 @@ import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
 import {
-	getArrowOrFunction,
+	getFunctionOrDeclarationValue,
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (root: boolean) => `
 import { browser } from "$app/environment";
@@ -40,14 +40,12 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	}
 
 	const n = types.namedTypes
-	const b = types.builders
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
 	const importsAst = parseModule(requiredImports(root))
 	deepMergeObject(ast, importsAst)
-	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)
+	const arrowOrFunctionNode = getFunctionOrDeclarationValue(ast.$ast, "load")
 	const exportAst = getWrappedExport(
 		parseExpression(root ? options(config) : "{}"),
 		[arrowOrFunctionNode],

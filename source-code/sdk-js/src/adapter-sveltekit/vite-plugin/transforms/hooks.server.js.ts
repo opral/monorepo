@@ -3,11 +3,11 @@ import { types } from "recast"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import {
-	getArrowOrFunction,
+	getFunctionOrDeclarationValue,
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -23,18 +23,20 @@ import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 const options = (config: TransformConfig) => dedent`
 	{
 		inlangConfigModule: import("../inlang.config.js"),
-		getLanguage: ${(config.languageInUrl
-		? `({ url }) => url.pathname.split("/")[1]`
-		: `() => undefined`
-	)},
-	${(config.languageInUrl && !config.isStatic
-		? `
+		getLanguage: ${
+			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
+		},
+	${
+		config.languageInUrl && !config.isStatic
+			? `
 		initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 		redirect: {
 			throwable: redirect,
 			getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 		},
-	`: '')}
+	`
+			: ""
+	}
 	}`
 
 export const transformHooksServerJs = (config: TransformConfig, code: string) => {
@@ -55,7 +57,11 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 		],
 		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
 	)
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "handle", emptyArrowFunctionDeclaration)
+	const arrowOrFunctionNode = getFunctionOrDeclarationValue(
+		ast.$ast,
+		"handle",
+		emptyArrowFunctionDeclaration,
+	)
 	const exportAst = getWrappedExport(
 		parseExpression(options(config)),
 		[arrowOrFunctionNode],
