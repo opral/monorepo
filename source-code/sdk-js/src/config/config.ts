@@ -13,8 +13,12 @@ export class InlangError extends Error { }
 export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 	const fs = await import('node:fs/promises')
 		.catch(() => new Proxy({} as $fs, {
-			get: () => () => {
-				throw new InlangError('`node:fs/promises` is not available in the current environment')
+			get: (target, key) => {
+				if (key === 'then') return Promise.resolve(target)
+
+				return () => {
+					throw new InlangError('`node:fs/promises` is not available in the current environment')
+				}
 			}
 		}))
 
