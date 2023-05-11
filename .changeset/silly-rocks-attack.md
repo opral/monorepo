@@ -1,6 +1,6 @@
 ---
 "@inlang/ide-extension-plugin": patch
-"inlang-vs-code-extension": patch
+"vs-code-extension": patch
 "@inlang/sdk-js": patch
 ---
 
