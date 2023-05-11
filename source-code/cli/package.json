@@ -20,7 +20,7 @@
 	],
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "NODE_ENV=production node ./build.js",
+		"build": "cross-env NODE_ENV=production node ./build.js",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -30,7 +30,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f dist"
+		"clean": "shx rm -rf dist"
 	},
 	"dependencies": {
 		"ora": "^6.3.0",

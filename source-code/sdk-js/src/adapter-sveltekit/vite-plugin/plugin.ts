@@ -1,5 +1,5 @@
 import { writeFile, mkdir } from "node:fs/promises"
-import { dirname } from "node:path"
+import path, { dirname, normalize } from "node:path"
 import { dedent } from 'ts-dedent'
 import type { ViteDevServer, Plugin } from "vite"
 import { InlangError } from '../../config/config.js'
@@ -24,76 +24,78 @@ export type FileInformation = {
 	root: boolean
 }
 
-const getFileInformation = (config: TransformConfig, id: string): FileInformation | undefined => {
+const scriptExtensions = ['.js', '.ts']
+
+const getFileInformation = (config: TransformConfig, rawId: string): FileInformation | undefined => {
+	const id = normalize(rawId)
+
 	if (!id.startsWith(config.srcFolder)) return undefined
 
-	const path = id.replace(config.srcFolder, "")
+	const filePath = id.replace(config.srcFolder, "")
 
-	const dir = dirname(path)
-	const root = dir.endsWith("/routes")
+	const { dir, name, ext } = path.parse(filePath)
 
-	if (path === "/hooks.server.js" || path === "/hooks.server.ts") {
+	const root = dir === `${path.sep}routes`
+
+	if (dir === path.sep && name === 'hooks.server' && scriptExtensions.includes(ext)) {
 		return {
 			type: "hooks.server.js",
 			root: true,
 		}
 	}
 
-	if (
-		path === "/routes/inlang/[language].json/+server.js" ||
-		path === "/routes/inlang/[language].json/+server.ts"
-	) {
+	if (dir === `${path.sep}routes${path.sep}inlang${path.sep}[language].json` && name === '+server' && scriptExtensions.includes(ext)) {
 		return {
 			type: "[language].json",
 			root: true,
 		}
 	}
 
-	if (path.endsWith("/+layout.server.js") || path.endsWith("/+layout.server.ts")) {
+	if (name === "+layout.server" && scriptExtensions.includes(ext)) {
 		return {
 			type: "+layout.server.js",
 			root,
 		}
 	}
-	if (path.endsWith("/+layout.js") || path.endsWith("/+layout.ts")) {
+	if (name === "+layout" && scriptExtensions.includes(ext)) {
 		return {
 			type: "+layout.js",
 			root,
 		}
 	}
-	if (path.endsWith("/+layout.svelte")) {
+	if (name === "+layout" && ext === '.svelte') {
 		return {
 			type: "+layout.svelte",
 			root,
 		}
 	}
 
-	if (path.endsWith("/+page.server.js") || path.endsWith("/+page.server.ts")) {
+	if (name === "+page.server" && scriptExtensions.includes(ext)) {
 		return {
 			type: "+page.server.js",
 			root,
 		}
 	}
-	if (path.endsWith("/+page.js") || path.endsWith("/+page.ts")) {
+	if (name === "+page" && scriptExtensions.includes(ext)) {
 		return {
 			type: "+page.js",
 			root,
 		}
 	}
-	if (path.endsWith("/+page.svelte")) {
+	if (name === "+page" && ext === '.svelte') {
 		return {
 			type: "+page.svelte",
 			root,
 		}
 	}
 
-	if (path.endsWith(".js") || path.endsWith(".ts")) {
+	if (scriptExtensions.includes(ext)) {
 		return {
 			type: "*.js",
 			root: false,
 		}
 	}
-	if (path.endsWith(".svelte")) {
+	if (ext === '.svelte') {
 		return {
 			type: "*.svelte",
 			root: false,
@@ -110,14 +112,14 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 
 	const getPathForFileType = (fileType: FileType, fileEnding: 'ts' | 'js' = preferredFileEnding) => {
 		switch (fileType) {
-			case 'hooks.server.js': return config.srcFolder + `/hooks.server.${fileEnding}`
-			case '[language].json': return config.srcFolder + `/routes/inlang/[language].json/+server.${fileEnding}`
-			case '+layout.server.js': return config.srcFolder + `/routes/+layout.server.${fileEnding}`
-			case '+layout.js': return config.srcFolder + `/routes/+layout.${fileEnding}`
-			case '+layout.svelte': return config.srcFolder + `/routes/+layout.svelte`
-			case '+page.server.js': return config.srcFolder + `/routes/+page.server.${fileEnding}`
-			case '+page.js': return config.srcFolder + `/routes/+page.${fileEnding}`
-			case '+page.svelte': return config.srcFolder + `/routes/+page.svelte`
+			case 'hooks.server.js': return path.resolve(config.srcFolder, `hooks.server.${fileEnding}`)
+			case '[language].json': return path.resolve(config.srcFolder, 'routes', 'inlang', '[language].json', `+server.${fileEnding}`)
+			case '+layout.server.js': return path.resolve(config.srcFolder, 'routes', `+layout.server.${fileEnding}`)
+			case '+layout.js': return path.resolve(config.srcFolder, 'routes', `+layout.${fileEnding}`)
+			case '+layout.svelte': return path.resolve(config.srcFolder, 'routes', `+layout.svelte`)
+			case '+page.server.js': return path.resolve(config.srcFolder, 'routes', `+page.server.${fileEnding}`)
+			case '+page.js': return path.resolve(config.srcFolder, 'routes', `+page.${fileEnding}`)
+			case '+page.svelte': return path.resolve(config.srcFolder, 'routes', `+page.svelte`)
 		}
 
 		throw Error('not implemented')
