@@ -1,11 +1,11 @@
 import type { $fs } from '@inlang/core/environment'
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from '@inlang/core/environment'
-import type { SdkConfigInput } from '@inlang/sdk-js-plugin'
+import type { SdkConfig } from '@inlang/sdk-js-plugin'
 import { dedent } from 'ts-dedent'
 
 export type InlangConfigWithSdkProps = InlangConfig & {
-	sdk?: SdkConfigInput
+	sdk: SdkConfig
 }
 
 export class InlangError extends Error { }
@@ -24,8 +24,6 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 			fs,
 			fetch: async (...args) => await fetch(...args)
 				.catch(error => {
-					console.log(1111, typeof error, error);
-
 					// TODO: create an issue
 					if (error instanceof TypeError && (error.cause as any)?.code === 'UND_ERR_CONNECT_TIMEOUT') {
 						throw new InlangError(dedent`
