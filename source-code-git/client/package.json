@@ -23,7 +23,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code-git/client",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code-git/client",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm-rf ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"isomorphic-git": "^1.21.0"

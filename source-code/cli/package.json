@@ -30,7 +30,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm-rf dist"
+		"clean": "shx rm -rf dist"
 	},
 	"dependencies": {
 		"ora": "^6.3.0",

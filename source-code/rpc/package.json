@@ -17,7 +17,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm-rf ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/core": "*",

@@ -40,7 +40,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/ide-extension",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm-rf ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/core": "*",
