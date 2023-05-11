@@ -7,7 +7,7 @@
  * Node API reference https://nodejs.org/api/fs.html#fspromisesaccesspath-mode
  */
 export type NodeishFilesystem = {
-	writeFile: (path: string, data: string) => Promise<void>
+	writeFile: (path: string, data: string | Uint8Array, options?: { mode: number }) => Promise<void>
 	readFile: (path: string, options: { encoding: "utf-8" | "binary" }) => Promise<FileData>
 	readdir: (path: string) => Promise<string[]>
 	/**

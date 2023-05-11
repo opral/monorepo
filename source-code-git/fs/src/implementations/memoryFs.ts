@@ -1,7 +1,7 @@
 import type { NodeishFilesystem, NodeishStats } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
-type Inode = string | string[]
+type Inode = string | Set<string>
 
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
@@ -9,29 +9,44 @@ export function createMemoryFs(): NodeishFilesystem {
 	const fsStats: Map<string, NodeishStats> = new Map()
 
 	// initialize the root to an empty dir
-	fsMap.set("/", [])
-	newStatEntry("/", fsStats, 1)
+	fsMap.set("/", new Set())
+	newStatEntry("/", fsStats, 1, 0o755)
 
-	// declare this locally so we don't have to write it twice for 'stat' and 'lstat'
-	const stat = async function (path: Parameters<NodeishFilesystem["lstat"]>[0]) {
+	async function stat(path: Parameters<NodeishFilesystem["stat"]>[0]): Promise<NodeishStats> {
 		path = normalPath(path)
 		const stats: NodeishStats | undefined = fsStats.get(path)
 		if (stats === undefined) throw new FilesystemError("ENOENT", path, "stat")
-		return stats
+		if (stats.symlinkTarget) return stat(stats.symlinkTarget)
+		return Object.assign({}, stats)
+	}
+
+	async function lstat(path: Parameters<NodeishFilesystem["lstat"]>[0]) {
+		path = normalPath(path)
+		const stats: NodeishStats | undefined = fsStats.get(path)
+		if (stats === undefined) throw new FilesystemError("ENOENT", path, "lstat")
+		if (!stats.symlinkTarget) return stat(path)
+		return Object.assign({}, stats)
 	}
 
 	return {
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+			options?: Parameters<NodeishFilesystem["writeFile"]>[2],
 		) {
 			path = normalPath(path)
 			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
-			if (parentDir?.constructor !== Array) throw new FilesystemError("ENOENT", path, "writeFile")
+			if (parentDir?.constructor !== Set) throw new FilesystemError("ENOENT", path, "writeFile")
 
-			parentDir.push(getBasename(path))
-			newStatEntry(path, fsStats, 0)
+			if (typeof data !== "string") {
+				let string = ""
+				for (const c of data) string += String.fromCodePoint(c)
+				data = string
+			}
+
+			parentDir.add(getBasename(path))
+			newStatEntry(path, fsStats, 0, options?.mode ?? 0o644)
 			fsMap.set(path, data)
 		},
 
@@ -50,7 +65,7 @@ export function createMemoryFs(): NodeishFilesystem {
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
 			path = normalPath(path)
 			const dir: Inode | undefined = fsMap.get(path)
-			if (dir?.constructor === Array) return dir
+			if (dir?.constructor === Set) return [...dir.keys()]
 			if (dir === undefined) throw new FilesystemError("ENOENT", path, "readdir")
 			throw new FilesystemError("ENOTDIR", path, "readdir")
 		},
@@ -64,10 +79,10 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
 
-			if (parentDir && parentDir.constructor === Array) {
-				parentDir.push(getBasename(path))
-				newStatEntry(path, fsStats, 1)
-				fsMap.set(path, [])
+			if (parentDir && parentDir.constructor === Set) {
+				parentDir.add(getBasename(path))
+				newStatEntry(path, fsStats, 1, 0o755)
+				fsMap.set(path, new Set())
 				return path
 			}
 
@@ -94,19 +109,19 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "rm")
 
 			if (typeof target === "string") {
-				parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+				parentDir.delete(getBasename(path))
 				fsStats.delete(path)
 				fsMap.delete(path)
 				return
 			}
 
-			if (target.constructor === Array && options?.recursive) {
+			if (target.constructor === Set && options?.recursive) {
 				await Promise.all(
-					target.map(async (child) => {
+					[...target.keys()].map(async (child) => {
 						await rm(`${path}/${child}`, { recursive: true })
 					}),
 				)
-				parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+				parentDir.delete(getBasename(path))
 				fsStats.delete(path)
 				fsMap.delete(path)
 				return
@@ -126,9 +141,9 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (typeof parentDir === "string" || typeof target === "string")
 				throw new FilesystemError("ENOTDIR", path, "rmdir")
 
-			if (target.length) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
+			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
-			parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+			parentDir.delete(getBasename(path))
 			fsStats.delete(path)
 			fsMap.delete(path)
 		},
@@ -148,8 +163,8 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (targetInode === undefined || parentDir === undefined)
 				throw new FilesystemError("ENOENT", path, "symlink")
 
-			parentDir.push(getBasename(path))
-			newStatEntry(path, fsStats, 2, target)
+			parentDir.add(getBasename(path))
+			newStatEntry(path, fsStats, 2, 0o777, target)
 			fsMap.set(path, targetInode)
 		},
 
@@ -166,13 +181,13 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			if (targetStats?.isDirectory()) throw new FilesystemError("EISDIR", path, "unlink")
 
-			parentDir.splice(parentDir.indexOf(getBasename(path)), 1)
+			parentDir.delete(getBasename(path))
 			fsStats.delete(path)
 			fsMap.delete(path)
 		},
 		readlink: async function (path: Parameters<NodeishFilesystem["readlink"]>[0]) {
 			path = normalPath(path)
-			const linkStats = await stat(path)
+			const linkStats = await lstat(path)
 
 			if (linkStats === undefined) throw new FilesystemError("ENOENT", path, "readlink")
 
@@ -181,8 +196,8 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			return linkStats.symlinkTarget
 		},
-		lstat: stat,
-		stat: stat,
+		stat,
+		lstat,
 	}
 }
 
@@ -197,6 +212,7 @@ function newStatEntry(
 	path: string,
 	stats: Map<string, NodeishStats>,
 	kind: number,
+	modeBits: number,
 	target?: string,
 ) {
 	const cdateMs: number = Date.now()
@@ -205,10 +221,10 @@ function newStatEntry(
 		mtimeMs: cdateMs,
 		dev: 0,
 		ino: stats.size + 1,
-		mode: 0o100644,
+		mode: (!kind ? 0o100000 : kind === 1 ? 0o040000 : 0o120000) | modeBits,
 		uid: 0,
 		gid: 0,
-		size: 0,
+		size: -1,
 		isFile: () => kind === 0,
 		isDirectory: () => kind === 1,
 		isSymbolicLink: () => kind === 2,
