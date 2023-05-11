@@ -1,10 +1,40 @@
 //TODO: normal imports instad of relative
 import { createMemoryFs, normalizePath } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { copyDirectory } from "@inlang/core/test"
 import * as nodeFs from "node:fs/promises"
 // @ts-expect-error - internal apis have no type declarations
-import { FileSystem } from "isomorphic-git/internal-apis"
+import { FileSystem } from "isomorphic-git/internal-apis.js"
+
+async function copyDirectory(args: {
+	copyFrom: NodeishFilesystem
+	copyTo: NodeishFilesystem
+	path: string
+}) {
+	await args.copyFrom.readdir(args.path)
+	// create directory
+	await args.copyTo.mkdir(args.path, { recursive: true })
+	const pathsInDirectory = await args.copyFrom.readdir(args.path)
+	for (const subpath of pathsInDirectory) {
+		// check if the path is a file
+		const path = normalizePath(`${args.path}/${subpath}`)
+		const stats = await args.copyFrom.lstat(path)
+		if (stats.isFile()) {
+			const file = await args.copyFrom.readFile(path, { encoding: "binary" })
+			await args.copyTo.writeFile(path, file)
+		}
+
+		if (stats.isDirectory()) {
+			await copyDirectory({ ...args, path })
+		}
+
+		if (stats.isSymbolicLink()) {
+			let target = await args.copyFrom.readlink(path)
+			// abusing memoryFs's liberal path handling to avoid implementing `dirname`
+			if (!target.startsWith("/")) target = `${path}/../${target}`
+			await args.copyTo.symlink(target, path)
+		}
+	}
+}
 
 export async function makeFixture(fixtureName: string) {
 	const fixtureDir = "src/raw/tests/fixtures"

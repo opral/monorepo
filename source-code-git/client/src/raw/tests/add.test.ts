@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { describe, it, expect } from "vitest"
-import { makeFixture } from "./makeFixture.js"
-
+/* eslint-env node, browser, jasmine */
+import { describe, it, expect, beforeAll } from 'vitest'
+import { makeFixture } from './makeFixture.js'
 import {
   init,
   add,
@@ -9,7 +9,8 @@ import {
   readBlob,
   walk,
   STAGE,
-} from "isomorphic-git"
+} from 'isomorphic-git'
+
 
 // NOTE: we cannot actually commit a real .gitignore file in fixtures or fixtures won't be included in this repo
 const writeGitIgnore = async (fs, dir) =>
