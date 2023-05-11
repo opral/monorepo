@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 0.5.4
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+- 89f0c7a2: update vs-code-extension
+
 ## 0.5.3
 
 ### Patch Changes
