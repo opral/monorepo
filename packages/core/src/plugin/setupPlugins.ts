@@ -12,13 +12,14 @@ export type ConfigWithSetupPlugins = Omit<Partial<InlangConfig>, "plugins"> & {
 /**
  * Setup the plugins and process the config callback.
  *
+ * Returns a tuple of the config and errors that occured during the setup of plugins.
  * The function mutates the config object. Mutating the config object
  * is expected to:
  *
- * 	1. decrease the initial startup time of inlang apps with 10+ plugins
+ * 1. decrease the initial startup time of inlang apps with 10+ plugins
  *     (immutability is expensive).
- * 	2. leads to a lightly better API for `setupConfig`.
- *	3. plugins configs are only merged
+ * 2. leads to a lightly better API for `setupConfig`.
+ * 3. plugins configs are only merged
  *
  * We can change this behaviour
  * if required as this function is only used internally.
@@ -27,15 +28,15 @@ export type ConfigWithSetupPlugins = Omit<Partial<InlangConfig>, "plugins"> & {
 export async function setupPlugins(args: {
 	config: Partial<InlangConfig>
 	env: InlangEnvironment
-}): Promise<ConfigWithSetupPlugins> {
+}): Promise<[config: ConfigWithSetupPlugins, errors?: PluginSetupError[]]> {
 	if (args.config.plugins === undefined) {
 		args.config.plugins = []
-		return args.config as ConfigWithSetupPlugins
+		return [args.config as ConfigWithSetupPlugins]
 	}
-
 	// Note: we can't use structuredClone because the object could contain functions
 	// To have some sort of immutability (for the first level), we destructure it into a new object
 	const mergedConfig = { ...args.config }
+	const errors: PluginSetupError[] = []
 	for (let i = 0; i < args.config.plugins.length; i++) {
 		try {
 			// If a plugin uses a setup function, the setup function needs to be invoked.
@@ -50,7 +51,7 @@ export async function setupPlugins(args: {
 		} catch (error) {
 			// continue with next plugin.
 			// if one plugin fails, the whole app should not crash.
-			console.error(
+			errors.push(
 				new PluginSetupError(`Failed to setup plugin '${(args.config.plugins[i] as Plugin)?.id}'`, {
 					cause: error,
 				}),
@@ -61,5 +62,5 @@ export async function setupPlugins(args: {
 	// remove duplicates from languages in case multiple plugins add the same language.
 	mergedConfig.languages = [...new Set(mergedConfig.languages)]
 
-	return mergedConfig as ConfigWithSetupPlugins
+	return [mergedConfig as ConfigWithSetupPlugins, errors.length > 0 ? errors : undefined]
 }
