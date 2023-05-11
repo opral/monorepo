@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.4.1
+
+### Patch Changes
+
+- 86b42dae: bundle Resources into application on build
+
 ## 0.4.0
 
 ### Minor Changes
