@@ -20,7 +20,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/exract.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif"/>
 
 ### 🔎 Inline Annotations
 
