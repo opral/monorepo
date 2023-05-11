@@ -15,7 +15,6 @@ export const GET = async ({ params: { language } }) => {
 	await reloadResources()
 	return json(getResource(language) || null)
 }
-
 ${config.svelteKit.version || '' >= '1.16.3' ? `
 import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
 

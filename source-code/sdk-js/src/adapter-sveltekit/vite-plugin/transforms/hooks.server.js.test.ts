@@ -7,7 +7,7 @@ import type { TransformConfig } from "../config.js"
 describe("transformHooksServerJs", () => {
 	describe("basics", () => {
 		it("adds handle function to an empty file", () => {
-			const code = transformHooksServerJs({} as TransformConfig, "")
+			const code = transformHooksServerJs(baseTestConfig, "")
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
@@ -25,7 +25,7 @@ describe("transformHooksServerJs", () => {
 
 		it("adds handle endpoint to a file with arbitrary contents", () => {
 			const code = transformHooksServerJs(
-				{} as TransformConfig,
+				baseTestConfig,
 				dedent`
 					import * as Sentry from '@sentry/node';
 					import crypto from 'crypto';
@@ -79,7 +79,7 @@ describe("transformHooksServerJs", () => {
 		describe("should wrap handle if already defined", () => {
 			it("arrow function", () => {
 				const code = transformHooksServerJs(
-					{} as TransformConfig,
+					baseTestConfig,
 					dedent`
 						import type { Handle } from '@sveltejs/kit'
 
@@ -114,7 +114,7 @@ describe("transformHooksServerJs", () => {
 
 			it("function keyword", () => {
 				const code = transformHooksServerJs(
-					{} as TransformConfig,
+					baseTestConfig,
 					dedent`
 						export function handle({ event, resolve }) {
 							console.log('TADAA!')
