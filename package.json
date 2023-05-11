@@ -21,7 +21,8 @@
 		"format:fix": "turbo run format:fix && npm run format:fix:base .",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
-		"clean": "npm run clean -ws && rm -f -r ./node_modules && rm -f ./.env",
+		"_clean_COMMENT": "Errors when the node_modules is deleted before running the command because shx doesn't exist yet.",
+		"clean": "npm run clean -ws --if-present && shx rm -f ./.env && shx rm -rf ./node_modules/* ",
 		"lint-staged": "lint-staged",
 		"prepare": "husky install",
 		"postinstall": "patch-package"
