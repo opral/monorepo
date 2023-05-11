@@ -64,7 +64,7 @@ Context: The path is relative to the current working directory, not the file tha
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
 		try {
-			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
+			const file = await args.copyFrom.readFile(path, { encoding: "binary" })
 			await args.copyTo.writeFile(path, file)
 		} catch (err) {
 			await copyDirectory({ ...args, path })
