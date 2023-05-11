@@ -3,15 +3,16 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h4 align="center">
-        <!-- <a href="https://inlang.com/documentation" target="_blank">Get Started</a>
-        ·  -->
+        <a href="https://inlang.com/documentation" target="_blank">Get Started</a> · 
         <a href="https://github.com/inlang/inlang/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
     </h4>
 </div>
 
 # Inlang IDE Code Extension
 
-This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code.
+This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
+
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help! 🤗
 
 ## Features
 
@@ -48,6 +49,8 @@ export async function defineConfig(env) {
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
+If something isn't working as expected, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help!
+
 ## 3️⃣ Configuration
 
 You can configure the extension to your needs, simply pass the following `ideExtensionPlugin({ /* configuration options */ })` below.
@@ -61,6 +64,8 @@ We also provide you whith an **code template** you can use to fully customize yo
 
 For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
 You can fully customize this behavior with the example code below.
+
+If your are using a different translation function, you can use the following code as a template:
 
 ```js
 export async function defineConfig(env) {
