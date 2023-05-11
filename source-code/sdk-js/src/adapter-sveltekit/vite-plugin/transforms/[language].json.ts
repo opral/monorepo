@@ -15,10 +15,11 @@ export const GET = async ({ params: { language } }) => {
 	await reloadResources()
 	return json(getResource(language) || null)
 }
+${config.inlang.sdk.resources.cache === 'build-time' ? `
+export const prerender = true
+`: ''}
 ${config.svelteKit.version || '' >= '1.16.3' ? `
 import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
-
-export const prerender = true
 
 export const entries = async () => {
 	const { languages } = await initState(await import('../../../../inlang.config.js'))

@@ -1,13 +1,13 @@
 import { dedent } from "ts-dedent"
 import { describe, expect, it } from "vitest"
 import { transformLayoutServerJs } from "./+layout.server.js.js"
-import { baseTestConfig } from './test-helpers/config.js'
+import { getTransformConfig } from './test-helpers/config.js'
 
 describe("transformLayoutServerJs", () => {
 	describe("root=true", () => {
 		describe("basics", () => {
 			it("adds load function to an empty file", () => {
-				const code = transformLayoutServerJs(baseTestConfig, "", true)
+				const code = transformLayoutServerJs(getTransformConfig(), "", true)
 				expect(code).toMatchInlineSnapshot(`
 					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export const load = initRootLayoutServerLoadWrapper().wrap(() => {});"
@@ -16,7 +16,7 @@ describe("transformLayoutServerJs", () => {
 
 			it("adds handle endpoint to a file with arbitrary contents", () => {
 				const code = transformLayoutServerJs(
-					baseTestConfig,
+					getTransformConfig(),
 					dedent`
 					export const prerender = true;
 				`,
@@ -32,7 +32,7 @@ describe("transformLayoutServerJs", () => {
 			describe("should wrap handle if already defined", () => {
 				it("arrow function", () => {
 					const code = transformLayoutServerJs(
-						baseTestConfig,
+						getTransformConfig(),
 						dedent`
 						import type { LayoutLoad } from './$types.js'
 
@@ -59,7 +59,7 @@ describe("transformLayoutServerJs", () => {
 
 				it("function keyword", () => {
 					const code = transformLayoutServerJs(
-						baseTestConfig,
+						getTransformConfig(),
 						dedent`
 						import type { LayoutLoad } from './$types.js'
 
@@ -88,7 +88,7 @@ describe("transformLayoutServerJs", () => {
 	describe("root=false", () => {
 		describe("basics", () => {
 			it("adds load function to an empty file", () => {
-				const code = transformLayoutServerJs(baseTestConfig, "", false)
+				const code = transformLayoutServerJs(getTransformConfig(), "", false)
 				expect(code).toMatchInlineSnapshot(`
 					"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					export const load = initServerLoadWrapper().wrap(() => {});"
@@ -97,7 +97,7 @@ describe("transformLayoutServerJs", () => {
 
 			it("adds handle endpoint to a file with arbitrary contents", () => {
 				const code = transformLayoutServerJs(
-					baseTestConfig,
+					getTransformConfig(),
 					dedent`
 					export const prerender = true;
 				`,
@@ -113,7 +113,7 @@ describe("transformLayoutServerJs", () => {
 			describe("should wrap handle if already defined", () => {
 				it("arrow function", () => {
 					const code = transformLayoutServerJs(
-						baseTestConfig,
+						getTransformConfig(),
 						dedent`
 						import type { LayoutLoad } from './$types.js'
 
@@ -140,7 +140,7 @@ describe("transformLayoutServerJs", () => {
 
 				it("function keyword", () => {
 					const code = transformLayoutServerJs(
-						baseTestConfig,
+						getTransformConfig(),
 						dedent`
 						import type { LayoutLoad } from './$types.js'
 

@@ -25,6 +25,7 @@ export type TransformConfig = {
 	rootRoutesFolder: string
 	sourceFileName?: string
 	sourceMapName?: string
+	inlang: InlangConfigWithSdkProps
 	svelteKit: {
 		version: VersionString | undefined
 		usesTypeScript: boolean
@@ -77,6 +78,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			isStatic,
 			srcFolder,
 			rootRoutesFolder,
+			inlang: inlangConfig,
 			svelteKit: {
 				version: svelteKitVersion,
 				usesTypeScript,

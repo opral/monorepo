@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { baseTestConfig } from "./test-helpers/config.js"
+import { getTransformConfig } from "./test-helpers/config.js"
 import { dedent } from "ts-dedent"
 import { transformPageJs } from "./+page.js.js"
 
@@ -8,7 +8,7 @@ describe("transformLayoutJs", () => {
 		test("Insert into empty file with only {browser} as options", () => {
 			const code = ""
 			const config = {
-				...baseTestConfig,
+				...getTransformConfig(),
 				languageInUrl: true,
 			}
 			const transformed = transformPageJs(config, code, true)
@@ -28,7 +28,7 @@ describe("transformLayoutJs", () => {
 		test("Insert into empty file with options", () => {
 			const code = ""
 			const config = {
-				...baseTestConfig,
+				...getTransformConfig(),
 				languageInUrl: true,
 				isStatic: true,
 			}
@@ -58,7 +58,7 @@ describe("transformLayoutJs", () => {
 				export const load = async () => {};
 			`
 			const config = {
-				...baseTestConfig,
+				...getTransformConfig(),
 				languageInUrl: true,
 			}
 			const transformed = transformPageJs(config, code, true)
@@ -81,7 +81,7 @@ describe("transformLayoutJs", () => {
 				export const load = async () => {};
 			`
 			const config = {
-				...baseTestConfig,
+				...getTransformConfig(),
 				languageInUrl: true,
 			}
 			const transformed = transformPageJs(config, code, true)
@@ -104,7 +104,7 @@ describe("transformLayoutJs", () => {
 				export const load = async () => {};
 			`
 			const config = {
-				...baseTestConfig,
+				...getTransformConfig(),
 				languageInUrl: true,
 			}
 			const transformed = transformPageJs(config, code, false)
