@@ -14,7 +14,6 @@ import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		console.log("hieeessssswweww2")
 		telemetryNode.capture({
 			distinctId: "unknown",
 			event: "IDE-EXTENSION activated",
