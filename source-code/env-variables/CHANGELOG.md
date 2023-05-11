@@ -4,6 +4,13 @@
 
 ### Patch Changes
 
+- Updated dependencies [1c1881d5]
+  - @inlang/core@0.8.0
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [a5572e12]
   - @inlang/core@0.7.0
 
