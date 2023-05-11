@@ -216,8 +216,6 @@ export const plugin = () => {
 		async load(id) {
 			const config = await getTransformConfig()
 			if (id === resolvedVirtualModuleId) {
-				console.log(1, config.inlang.languages);
-
 				return dedent`
 					export const referenceLanguage = ${JSON.stringify(config.inlang.referenceLanguage)}
 					export const languages = ${JSON.stringify(config.inlang.languages)}

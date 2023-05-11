@@ -15,7 +15,7 @@ export const GET = async ({ params: { language } }) => {
 	await reloadResources()
 	return json(getResource(language) || null)
 }
-${config.inlang.sdk.resources.cache === 'build-time' ? `
+${config.isStatic && config.inlang.sdk.resources.cache === 'build-time' ? `
 export const prerender = true
 `: ''}
 ${config.svelteKit.version || '' >= '1.16.3' ? `
