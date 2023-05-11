@@ -182,6 +182,9 @@ const createFilesIfNotPresent = async (config: TransformConfig) => {
 
 let viteServer: ViteDevServer | undefined
 
+const virtualModuleId = 'virtual:inlang-static'
+const resolvedVirtualModuleId = '\0' + virtualModuleId
+
 export const plugin = () => {
 	return {
 		name: "vite-plugin-inlang-sdk-js-sveltekit",
@@ -200,6 +203,29 @@ export const plugin = () => {
 					noExternal: ["@inlang/sdk-js"],
 				},
 			}
+		},
+
+		resolveId(id) {
+			if (id === virtualModuleId) {
+				return resolvedVirtualModuleId
+			}
+
+			return
+		},
+
+		async load(id) {
+			const config = await getTransformConfig()
+			if (id === resolvedVirtualModuleId) {
+				console.log(1, config.inlang.languages);
+
+				return dedent`
+					export const referenceLanguage = ${JSON.stringify(config.inlang.referenceLanguage)}
+					export const languages = ${JSON.stringify(config.inlang.languages)}
+					export const resources = ${JSON.stringify(await config.inlang.readResources({ config: config.inlang }))}
+				`
+			}
+
+			return
 		},
 
 		async buildStart() {
