@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.4.4
+
+### Patch Changes
+
+- 561bd4d3: make vite plugin work on windows
+
 ## 0.4.3
 
 ### Patch Changes
