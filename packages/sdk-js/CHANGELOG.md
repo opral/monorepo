@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.4.2
+
+### Patch Changes
+
+- 39bbda2b: use SvelteKit's prerender for Resource-Endpoint only if necessary
+
 ## 0.4.1
 
 ### Patch Changes
