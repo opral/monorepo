@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, Show } from "solid-js"
+import { createEffect, createSignal, JSXElement, onMount, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -182,9 +182,27 @@ export const Gitfloat = () => {
 		},
 	}
 
+	onMount(() => {
+		const gitfloat = document.querySelector(".gitfloat")
+		gitfloat?.classList.add("animate-slideIn")
+		setTimeout(() => {
+			gitfloat?.classList.remove("animate-slideIn")
+		}, 400)
+	})
+
+	createEffect(() => {
+		if ((unpushedChanges() ?? []).length > 0) {
+			const gitfloat = document.querySelector(".gitfloat")
+			gitfloat?.classList.add("animate-jump")
+			setTimeout(() => {
+				gitfloat?.classList.remove("animate-jump")
+			}, 1000)
+		}
+	})
+
 	return (
 		<>
-			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16 animate-slideIn">
+			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16 animate-slideIn">
 				<Show when={localStorage.user}>
 					<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
 						<img
