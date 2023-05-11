@@ -1,5 +1,16 @@
 # @inlang/sdk-js
 
+## 0.4.0
+
+### Minor Changes
+
+- 438b828f: BREAKING: prerender all resource API calls
+
+### Patch Changes
+
+- 60fe900a: detect wrong vite plugin order and throw error
+- 60fe900a: fix type of `languages` export
+
 ## 0.3.3
 
 ### Patch Changes
