@@ -2,6 +2,12 @@ name: Publish @inlang/ide-extension to VSCode Marketplace
 
 on:
   workflow_dispatch:
+  
+  push:
+    paths:
+      - "source-code/ide-extension/package.json"
+    branches:
+      - main
 
 jobs:
   release:
