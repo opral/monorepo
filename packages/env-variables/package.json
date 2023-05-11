@@ -24,7 +24,7 @@
 		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "^0.7.0",
+		"@inlang/core": "^0.8.0",
 		"dotenv": "^16.0.3",
 		"zod": "^3.21.4"
 	},
