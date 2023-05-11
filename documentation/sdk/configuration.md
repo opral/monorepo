@@ -81,7 +81,7 @@ The `resources` property defines how to deal with resources read with the resolv
 
 Defines how to cache resources.
 
-> Right now we only support a static Resources. Please open an issue if you need to regularly fetch Resources.
+> Right now we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
 
 ##### **build-time** (default)
 
