@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.8.0
+
+### Minor Changes
+
+- 1c1881d5: Improved error messages when loading the inlang.config.js module.
+
 ## 0.7.15
 
 ### Patch Changes
