@@ -51,9 +51,9 @@ export async function defineConfig(env) {
 		referenceLanguage: "en",
 		plugins: [
 			jsonPugin({
-				pathPattern: "./path/to/languages/{language}.json"
-			})
-			ideExtensionPlugin()
+				pathPattern: "./path/to/languages/{language}.json",
+			}),
+			ideExtensionPlugin(),
 		],
 	}
 }
@@ -99,7 +99,6 @@ export async function defineConfig(env) {
 			}),
 			ideExtensionPlugin({
 				messageReferenceMatchers: [
-					//@ts-ignore
 					async (/** @type {{ "documentText": string; }} */ args) => {
 						const regex = /(?<!\w){?t\(['"](?<messageId>\S+)['"]\)}?/gm
 						const str = args.documentText
@@ -139,10 +138,10 @@ export async function defineConfig(env) {
 				],
 				extractMessageOptions: [
 					{
-						callback: (messageId: string) => `{t("${messageId}")}`,
+						callback: (messageId) => `{t("${messageId}")}`,
 					},
 					{
-						callback: (messageId: string) => `t("${messageId}")`,
+						callback: (messageId) => `t("${messageId}")`,
 					},
 				],
 				documentSelectors: [
