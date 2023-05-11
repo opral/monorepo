@@ -1,4 +1,3 @@
-//TODO: normal imports instad of relative
 import { createMemoryFs, normalizePath } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import * as nodeFs from "node:fs/promises"
