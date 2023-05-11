@@ -17,8 +17,6 @@ describe("transformLanguageJson", () => {
 				return json(getResource(language) || null)
 			}
 
-			export const prerender = true
-
 
 			"
 		`)
@@ -39,8 +37,6 @@ describe("transformLanguageJson", () => {
 				await reloadResources()
 				return json(getResource(language) || null)
 			}
-
-			export const prerender = true
 
 
 			import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
