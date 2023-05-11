@@ -26,6 +26,9 @@ export async function defineConfig(env) {
 						{ type: "localStorage" }
 					],
 				},
+				resources: {
+					cache: "Build-time"
+				}
 			}),
 		],
 	}
@@ -69,6 +72,29 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	],
 },
 ```
+
+### resources
+
+The `resources` property defines how to deal with resources read with the resolved `inlang.config.js`.
+
+#### cache
+
+Defines how to cache resources.
+
+> Right now we only support a static Resources. Please open an issue if you need to regularly fetch Resources.
+
+##### **build-time** (default)
+
+Loads all Resources during build time and adds them to the bundle.
+
+```js
+{
+	resources: {
+		cache: "build-time"
+	},
+},
+```
+
 
 ---
 

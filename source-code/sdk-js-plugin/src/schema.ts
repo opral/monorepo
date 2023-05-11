@@ -62,6 +62,15 @@ const zLanguageNegotiationStrategy = z.union([
 	// zSessionStorageNegotiator, // TODO: introduce option later
 ])
 
+// ------------------------------------------------------------------------------------------------
+
+const zResources = z.object({
+	// in the future we will also support `number` to specify a TTL until resources get updated
+	cache: z.literal('build-time').default('build-time'),
+})
+
+// ------------------------------------------------------------------------------------------------
+
 const zSdkConfig = z.object({
 	debug: z.boolean().default(false),
 	languageNegotiation: z.object({
@@ -77,6 +86,7 @@ const zSdkConfig = z.object({
 					],
 			),
 	}),
+	resources: zResources.default({ cache: 'build-time' }),
 })
 
 export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
