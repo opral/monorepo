@@ -16,17 +16,23 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 ## Features
 
-### 🔎 Inline Annotations
-
-See translations directly in your code. No more back-and-forth looking into the translation files themselves.
-
-// TODO: Create new image
-
 ### ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-// TODO: Create new image
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/exract.gif"/>
+
+### 🔎 Inline Annotations
+
+See translations directly in your code. No more back-and-forth looking into the translation files themselves.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
+
+### 🔁 Update Translations
+
+Translations from the resource files are automatically updated when you change the source text.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/update.gif"/>
 
 ## 1️⃣ Setup
 
