@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.4.3
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+
 ## 0.4.2
 
 ### Patch Changes
