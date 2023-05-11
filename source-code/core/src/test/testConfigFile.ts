@@ -17,20 +17,24 @@ export async function testConfigFile(args: {
 	file: string
 	env: InlangEnvironment
 }): Promise<Result<true, TestConfigException>> {
-	const [, importKeywordUsedException] = importKeywordUsed(args.file)
-	if (importKeywordUsedException) {
-		return [undefined, importKeywordUsedException]
-	}
-	const module: InlangConfigModule = await import(
-		"data:application/javascript;base64," + btoa(args.file)
-	)
-	const config = await setupConfig({ module, env: args.env })
-	const [, exception] = await testConfig({ config })
-	if (exception) {
-		return [undefined, exception]
-	}
+	try {
+		const [, importKeywordUsedException] = importKeywordUsed(args.file)
+		if (importKeywordUsedException) {
+			return [undefined, importKeywordUsedException]
+		}
+		const module: InlangConfigModule = await import(
+			"data:application/javascript;base64," + btoa(args.file)
+		)
+		const config = await setupConfig({ module, env: args.env })
+		const [, exception] = await testConfig({ config })
+		if (exception) {
+			return [undefined, exception]
+		}
 
-	return [true, undefined]
+		return [true, undefined]
+	} catch (e) {
+		return [undefined, new TestConfigException((e as Error).message)]
+	}
 }
 
 /**
