@@ -55,6 +55,7 @@ export async function setupPlugins(args: {
 			errors.push(
 				new PluginSetupError(dedent`
 Failed to setup plugin '${(args.config.plugins[i] as Plugin)?.id}':
+
 ${(error as Error | undefined)?.message ?? "Unknown error"}
 `),
 			)
