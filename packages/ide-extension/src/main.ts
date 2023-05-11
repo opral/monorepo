@@ -111,6 +111,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		),
 	)
 
+	console.log("inlang extension started")
+
 	const documentSelectors = [
 		{ language: "javascript", pattern: "!**/inlang.config.js" },
 		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
