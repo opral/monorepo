@@ -13,16 +13,26 @@
 		"./src"
 	],
 	"scripts": {
+		"---- BUILD SETUP --------------------------------------------------": "",
 		"isogit-clone": "mkdir -p node_modules && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
 		"isogit-pull": "cd node_modules/isomorphic-git && git pull",
 		"isogit-http": "cd node_modules/isomorphic-git && git sparse-checkout add http",
-		"isogit-update": "npm run isogit-clone || npm run isogit-pull && npm run isogit-http",
+		"isogit-tests": "cd node_modules/isomorphic-git && git sparse-checkout add __tests__/__fixtures__/",
+		"isogit-update": "npm run isogit-clone; npm run isogit-pull && npm run isogit-http && npm run isogit-tests",
+		"---- BUILD --------------------------------------------------------": "",
 		"prebuild": "npm run isogit-update",
-		"predev": "npm run isogit-update",
 		"build": "tsc --build ./tsconfig.build.json",
+		"predev": "npm run isogit-update",
 		"dev": "tsc --watch",
+		"---- TEST SETUP ----------------------------------------------------": "",
+		"start-proxy": "cors-proxy start -p 9999 -d",
+		"stop-proxy": "cors-proxy stop",
+		"start-mock-server": "cross-env GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server start",
+		"stop-mock-server": "cross-env GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server stop",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "vitest run --coverage",
+		"pretest": "npm run start-proxy && npm run start-mock-server",
+		"test": "vitest run --coverage --test-timeout 60000 || :",
+		"posttest": "npm run stop-proxy && npm run stop-mock-server",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code-git/client",
 		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code-git/client",
@@ -34,5 +44,10 @@
 	"dependencies": {
 		"isomorphic-git": "^1.21.0"
 	},
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"devDependencies": {
+		"@isomorphic-git/cors-proxy": "^2.7.1",
+		"@isomorphic-git/pgp-plugin": "^0.0.7",
+		"git-http-mock-server": "^1.1.0"
+	}
 }
