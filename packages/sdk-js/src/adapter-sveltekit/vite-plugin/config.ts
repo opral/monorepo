@@ -9,7 +9,7 @@ import { validateSdkConfig } from '@inlang/sdk-js-plugin'
 // @ts-ignore
 import { version } from '../../../package.json'
 import { promisify } from 'node:util'
-import { exec as execCb } from 'node:child_process'
+import { exec as execCb, type SpawnSyncReturns } from 'node:child_process'
 
 const exec = promisify(execCb)
 
@@ -208,7 +208,7 @@ const updateSdkPluginVersion = async () => {
 
 const getInstalledVersionOfPackage = async (pkg: string) => {
 	const { stderr, stdout } = await exec(`npm list --depth=0 ${pkg}`)
-		.catch((e) => ({ stderr: e, stdout: '' }))
+		.catch(({ stderr, stdout }: SpawnSyncReturns<any>) => ({ stderr, stdout }))
 	if (stderr) return undefined
 
 	return stdout.trim().match(new RegExp(`${pkg}@(.*)`))?.[1] as VersionString | undefined
