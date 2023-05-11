@@ -9,7 +9,7 @@ const error = new Error(
 
 export const referenceLanguage: Language = error as any
 
-export const languages: Language = [error] as any
+export const languages: Language[] = [error] as any
 
 export const language: Language = error as any
 
