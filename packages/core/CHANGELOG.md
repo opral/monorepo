@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.8.2
+
+### Patch Changes
+
+- 0504401e: fixed testConfigFile which threw an error even though it's a result that should never throw
+
 ## 0.8.1
 
 ### Patch Changes
