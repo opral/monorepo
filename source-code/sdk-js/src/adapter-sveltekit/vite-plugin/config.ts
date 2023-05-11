@@ -7,9 +7,15 @@ import { testConfigFile } from '@inlang/core/test'
 import { initInlangEnvironment, InlangConfigWithSdkProps } from '../../config/config.js'
 import { validateSdkConfig } from '@inlang/sdk-js-plugin'
 // @ts-ignore
-import pkg from '../../../package.json'
+import { version } from '../../../package.json'
+import { promisify } from 'node:util'
+import { exec as execCb } from 'node:child_process'
+
+const exec = promisify(execCb)
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
+
+type VersionString = `${number}.${number}.${number}`
 
 export type TransformConfig = {
 	debug?: boolean
@@ -19,7 +25,10 @@ export type TransformConfig = {
 	rootRoutesFolder: string
 	sourceFileName?: string
 	sourceMapName?: string
-	isTypeScriptProject: boolean
+	svelteKit: {
+		version: VersionString | undefined
+		usesTypeScript: boolean
+	}
 }
 
 const cwd = process.cwd()
@@ -58,7 +67,9 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "[lang]" : "")
 		const isStatic = await shouldContentBePrerendered(routesFolder) || await shouldContentBePrerendered(rootRoutesFolder)
 
-		const isTypeScriptProject = await doesPathExist(cwd + '/tsconfig.json')
+		const usesTypeScript = await doesPathExist(cwd + '/tsconfig.json')
+
+		const svelteKitVersion = await getInstalledVersionOfPackage('@sveltejs/kit')
 
 		resolve({
 			debug: !!inlangConfig.sdk?.debug,
@@ -66,7 +77,10 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			isStatic,
 			srcFolder,
 			rootRoutesFolder,
-			isTypeScriptProject,
+			svelteKit: {
+				version: svelteKitVersion,
+				usesTypeScript,
+			}
 		})
 	})
 }
@@ -168,7 +182,6 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 const updateSdkPluginVersion = async () => {
 	const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
-	const version = pkg.version
 
 	// this regex detects the new `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js` as well as
 	// the older https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js url
@@ -185,4 +198,16 @@ const updateSdkPluginVersion = async () => {
 
 		await writeFile(cwd + "/inlang.config.js", newConfig)
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+
+// move to import from `@sveltejs/kit/package.json` in the future once import assertions are stable
+
+const getInstalledVersionOfPackage = async (pkg: string) => {
+	const { stderr, stdout } = await exec(`npm list --depth=0 ${pkg}`)
+		.catch((e) => ({ stderr: e, stdout: '' }))
+	if (stderr) return undefined
+
+	return stdout.trim().match(new RegExp(`${pkg}@(.*)`))?.[1] as VersionString | undefined
 }

@@ -10,11 +10,11 @@ const options = ({
 	bundle: true,
 	platform: "node",
 	format: "esm",
-	target: "es2020",
+	target: "esnext",
 	sourcemap: !dev,
 	minify: !dev,
 	splitting: false,
-	external: ['svelte', '@sveltejs/kit/vite'],
+	external: ['svelte', '@sveltejs/kit'],
 	plugins: [
 		{
 			name: 'logger',

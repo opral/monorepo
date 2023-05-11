@@ -7,5 +7,8 @@ export const baseTestConfig: TransformConfig = {
 	rootRoutesFolder: "",
 	sourceFileName: "",
 	sourceMapName: "",
-	isTypeScriptProject: false
+	svelteKit: {
+		usesTypeScript: false,
+		version: undefined,
+	}
 }

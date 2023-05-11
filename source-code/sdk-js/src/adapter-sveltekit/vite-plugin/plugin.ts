@@ -106,7 +106,7 @@ const getFileInformation = (config: TransformConfig, id: string): FileInformatio
 // ------------------------------------------------------------------------------------------------
 
 const createFilesIfNotPresent = async (config: TransformConfig) => {
-	const preferredFileEnding = config.isTypeScriptProject ? 'ts' : 'js'
+	const preferredFileEnding = config.svelteKit.usesTypeScript ? 'ts' : 'js'
 
 	const getPathForFileType = (fileType: FileType, fileEnding: 'ts' | 'js' = preferredFileEnding) => {
 		switch (fileType) {
