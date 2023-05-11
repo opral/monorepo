@@ -3,6 +3,7 @@ import type { Plugin, PluginSetupFunction } from "./types.js"
 import { PluginSetupError } from "./errors/PluginSetupError.js"
 import { deepmergeInto } from "deepmerge-ts"
 import type { InlangEnvironment } from "../environment/types.js"
+import { dedent } from "ts-dedent"
 // import { withErrorHandling } from "./withErrorHandling.js"
 
 export type ConfigWithSetupPlugins = Omit<Partial<InlangConfig>, "plugins"> & {
@@ -52,9 +53,10 @@ export async function setupPlugins(args: {
 			// continue with next plugin.
 			// if one plugin fails, the whole app should not crash.
 			errors.push(
-				new PluginSetupError(`Failed to setup plugin '${(args.config.plugins[i] as Plugin)?.id}'`, {
-					cause: error,
-				}),
+				new PluginSetupError(dedent`
+Failed to setup plugin '${(args.config.plugins[i] as Plugin)?.id}':
+${(error as Error | undefined)?.message ?? "Unknown error"}
+`),
 			)
 		}
 	}
