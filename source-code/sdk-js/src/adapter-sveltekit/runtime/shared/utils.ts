@@ -1,6 +1,6 @@
 import type { Language } from "@inlang/core/ast"
 import type { LoadEvent } from "@sveltejs/kit"
-import type { RelativeUrl } from "../../../core/index.js"
+import type { RelativeUrl } from "../../../index.js"
 import type { SvelteKitClientRuntime } from "../client/runtime.js"
 
 export const inlangSymbol = Symbol.for("inlang")
