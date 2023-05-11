@@ -299,7 +299,7 @@ describe("transformLayoutSvelte", () => {
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
-				const config = getTransformConfig
+				const config = getTransformConfig()
 				const input = dedent`
 					<script>
 						import { language } from '@inlang/sdk-js'

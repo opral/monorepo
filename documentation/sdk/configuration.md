@@ -95,6 +95,19 @@ Loads all Resources during build time and adds them to the bundle.
 },
 ```
 
+> If you use a `SvelteKit` version `<1.16.3` you will need to tell `SvelteKit` to prerender all Resources `svelte.config.js` file:
+>
+>	```js
+>	/** @type {import('@sveltejs/kit').Config} */
+>	const config = {
+>		kit: {
+>			prerender: {
+>				// each language needs to be added here
+>				entries: ['/inlang/en.json', '/inlang/de.json']
+>			}
+>		}
+>	}
+>	```
 
 ---
 
