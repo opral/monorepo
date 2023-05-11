@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.8.1
+
+### Patch Changes
+
+- 0d19f309: further improvements to the better error messages introduced in v0.8
+
 ## 0.8.0
 
 ### Minor Changes
