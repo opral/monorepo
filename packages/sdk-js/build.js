@@ -14,7 +14,7 @@ const options = ({
 	sourcemap: !dev,
 	minify: !dev,
 	splitting: false,
-	external: ['svelte', '@sveltejs/kit/vite'],
+	external: ['svelte', '@sveltejs/kit'],
 	plugins: [
 		{
 			name: 'logger',

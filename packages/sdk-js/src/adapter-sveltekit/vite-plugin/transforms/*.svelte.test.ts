@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest"
 import { transformSvelte } from "./*.svelte.js"
-import { baseTestConfig } from "./test-helpers/config.js"
+import { getTransformConfig } from "./test-helpers/config.js"
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 
 describe("transformSvelte", () => {
 	it("basics", async () => {
 		const code = await transformSvelte(
-			baseTestConfig,
+			getTransformConfig(),
 			dedent`
 				<script>
 					import { i, languages, switchLanguage } from "@inlang/sdk-js";
@@ -44,14 +44,12 @@ describe("transformSvelte", () => {
 	})
 
 	it("languageInUrl is true", async () => {
-		const config: TransformConfig = {
-			...baseTestConfig,
-			languageInUrl: false,
-			sourceFileName: "test.svelte",
-			sourceMapName: "test.svelte.js",
-		}
 		const code = await transformSvelte(
-			config,
+			getTransformConfig({
+				languageInUrl: false,
+				sourceFileName: "test.svelte",
+				sourceMapName: "test.svelte.js",
+			}),
 			dedent`
 				<script lang="ts" context="module">
 				</script>
@@ -105,7 +103,7 @@ describe("transformSvelte", () => {
 
 	it("languageInUrl is false", async () => {
 		const code = await transformSvelte(
-			baseTestConfig,
+			getTransformConfig(),
 			dedent`
 				<script lang="ts" context="module">
 				</script>

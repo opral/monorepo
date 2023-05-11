@@ -26,6 +26,9 @@ export async function defineConfig(env) {
 						{ type: "localStorage" }
 					],
 				},
+				resources: {
+					cache: "Build-time"
+				}
 			}),
 		],
 	}
@@ -69,6 +72,42 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	],
 },
 ```
+
+### resources
+
+The `resources` property defines how to deal with resources read with the resolved `inlang.config.js`.
+
+#### cache
+
+Defines how to cache resources.
+
+> Right now we only support a static Resources. Please open an issue if you need to regularly fetch Resources.
+
+##### **build-time** (default)
+
+Loads all Resources during build time and adds them to the bundle.
+
+```js
+{
+	resources: {
+		cache: "build-time"
+	},
+},
+```
+
+> If you use a `SvelteKit` version `<1.16.3` you will need to tell `SvelteKit` to prerender all Resources `svelte.config.js` file:
+>
+>	```js
+>	/** @type {import('@sveltejs/kit').Config} */
+>	const config = {
+>		kit: {
+>			prerender: {
+>				// each language needs to be added here
+>				entries: ['/inlang/en.json', '/inlang/de.json']
+>			}
+>		}
+>	}
+>	```
 
 ---
 
