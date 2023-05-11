@@ -1,7 +1,6 @@
 // clone reposiory with isomorphic-git
 
-import git from "isomorphic-git"
-import http from "isomorphic-git/http/web/index.js"
+import { raw, http } from "@inlang-git/client/raw"
 import type { Volume } from "memfs/lib/volume.js"
 
 const cloneRespository = async (url: string, volume: Volume) => {
@@ -16,7 +15,7 @@ const cloneRespository = async (url: string, volume: Volume) => {
 	}
 
 	// clone the repository, resolves if the repository is cloned
-	await git.clone({
+	await raw.clone({
 		fs: volume,
 		http,
 		dir: "/",
