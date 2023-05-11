@@ -12,7 +12,7 @@
 
 This extension provides a seamless integration of the [Inlang](https://inlang.com) localization solution into Visual Studio Code. It allows you to translate your content directly in your IDE.
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help! 🤗
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help!
 
 ## Features
 
@@ -36,17 +36,25 @@ Translations from the resource files are automatically updated when you change t
 
 ## 1️⃣ Setup
 
-Create a `inlang.config.js` in the **root** of your project. You can use the following template:
+Create a `inlang.config.js` in the **root** of your project. You can use the following template hen using json files as translation files, if not, please look fo other [supported resource file types](https://github.com/inlang/ecosystem#resources):
 
 ```js
 export async function defineConfig(env) {
+	const { default: jsonPugin } = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+	)
 	const { default: ideExtensionPlugin } = await env.$import(
 		"https://cdn.jsdelivr.net/npm/@inlang/ide-extension-plugin@latest/dist/index.js",
 	)
 
 	return {
 		referenceLanguage: "en",
-		plugins: [ideExtensionPlugin()],
+		plugins: [
+			jsonPugin({
+				pathPattern: "./path/to/languages/{language}.json"
+			})
+			ideExtensionPlugin()
+		],
 	}
 }
 ```
@@ -75,6 +83,10 @@ If your are using a different translation function, you can use the following co
 
 ```js
 export async function defineConfig(env) {
+	const { default: jsonPugin } = await env.$import(
+		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+	)
+
 	const { default: ideExtensionPlugin } = await env.$import(
 		"https://cdn.jsdelivr.net/npm/@inlang/ide-extension-plugin@latest/dist/index.js",
 	)
@@ -82,6 +94,9 @@ export async function defineConfig(env) {
 	return {
 		referenceLanguage: "en",
 		plugins: [
+			jsonPugin({
+				pathPattern: "./path/to/languages/{language}.json",
+			}),
 			ideExtensionPlugin({
 				messageReferenceMatchers: [
 					//@ts-ignore
