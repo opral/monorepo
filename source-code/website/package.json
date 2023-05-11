@@ -17,7 +17,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/website",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/website",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm-rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"engines": {
 		"node": ">=18.0.0"
