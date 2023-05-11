@@ -14,7 +14,7 @@
 	],
 	"version": "0.3.2",
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin",
+		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin tsc:watch",
 		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
 		"dev:runtime": "tsc --project ./tsconfig.build.json --watch",
 		"build:runtime": "tsc --project ./tsconfig.build.json",
@@ -37,15 +37,15 @@
 	"devDependencies": {
 		"@inlang/core": "*",
 		"@inlang/sdk-js-plugin": "*",
-		"@sveltejs/kit": "^1.16.2",
-		"@types/estree": "^1.0.0",
+		"@sveltejs/kit": "^1.16.3",
+		"@types/estree": "^1.0.1",
 		"astring": "^1.8.4",
 		"estree-walker": "^3.0.3",
 		"magic-string": "^0.30.0",
 		"magicast": "^0.2.4",
 		"npm-run-all": "^4.1.5",
 		"recast": "^0.22.0",
-		"svelte": "^3.58.0",
+		"svelte": "^3.59.1",
 		"svelte-preprocess": "^5.0.3",
 		"ts-dedent": "^2.2.0"
 	},
