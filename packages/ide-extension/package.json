@@ -3,7 +3,7 @@
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",
-	"description": "i18n extension that makes you more productive.",
+	"description": "i18n extension that makes developers more productive.",
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
@@ -14,6 +14,11 @@
 	"engines": {
 		"vscode": "^1.75.0"
 	},
+	"keywords": [
+		"i18n",
+		"localization",
+		"translation"
+	],
 	"categories": [
 		"Other",
 		"Linters",
