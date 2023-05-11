@@ -10,7 +10,7 @@ const options = ({
 	bundle: true,
 	platform: "node",
 	format: "esm",
-	target: "2020",
+	target: "es2020",
 	sourcemap: !dev,
 	minify: !dev,
 	splitting: false,
