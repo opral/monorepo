@@ -90,8 +90,11 @@ const TourStepWrapper = (props: {
 	return (
 		<div
 			class={
-				"absolute p-3 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs " +
-				(props.isVisible && localStorage.isFirstUse ? "" : " hidden")
+				"absolute p-2 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs  " +
+				(props.isVisible && localStorage.isFirstUse ? "" : " hidden") +
+				(props.position === "top-right" || props.position === "top-left"
+					? " animate-fadeInTop"
+					: " animate-fadeInBottom")
 			}
 			style={getPosition(props.position, props.offset) as JSX.CSSProperties}
 		>

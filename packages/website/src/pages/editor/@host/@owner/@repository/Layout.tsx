@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, on, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
@@ -10,7 +10,6 @@ import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import { x } from "../../../../../../dist/client/assets/chunks/f1ba8dea.js"
 
 interface Filter {
 	name: string
