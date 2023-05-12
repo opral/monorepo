@@ -90,7 +90,7 @@ const TourStepWrapper = (props: {
 	return (
 		<div
 			class={
-				"absolute p-2 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs  " +
+				"absolute p-3 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs  " +
 				(props.isVisible && localStorage.isFirstUse ? "" : " hidden") +
 				(props.position === "top-right" || props.position === "top-left"
 					? " animate-fadeInTop"
@@ -106,6 +106,7 @@ const TourStepWrapper = (props: {
 // Tour steps
 
 const GithubLogin = () => {
+	const [, setLocalStorage] = useLocalStorage()
 	return (
 		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
@@ -119,14 +120,21 @@ const GithubLogin = () => {
 			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
 				<p class="text-sm font-medium text-info-on-inverted-container">Github login</p>
 				<p>Login to Github to commit and push.</p>
+				<p
+					onClick={() => setLocalStorage("isFirstUse", false)}
+					class="cursor-pointer pt-2 text-primary-on-inverted-container"
+				>
+					Stay in preview
+				</p>
 			</div>
 		</div>
 	)
 }
 
 const ForkRepository = () => {
+	const [, setLocalStorage] = useLocalStorage()
 	return (
-		<div class="w-full">
+		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
 				<img
 					class="rounded"
@@ -134,7 +142,16 @@ const ForkRepository = () => {
 					src="/images/TourGuideSVGs/fork-repository.svg"
 					alt="fork-repository"
 				/>
-				Fork
+			</div>
+			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+				<p class="text-sm font-medium text-info-on-inverted-container">No access on this repo</p>
+				<p>Please fork it to make changes.</p>
+				<p
+					onClick={() => setLocalStorage("isFirstUse", false)}
+					class="cursor-pointer pt-2 text-primary-on-inverted-container"
+				>
+					Stay in preview
+				</p>
 			</div>
 		</div>
 	)
@@ -143,14 +160,7 @@ const ForkRepository = () => {
 const DefaultLanguages = () => {
 	const { setTourStep, filteredLanguages } = useEditorState()
 	return (
-		<div
-			class="w-full"
-			onClick={() =>
-				filteredLanguages().length > 0
-					? setTourStep("missing-message-rule")
-					: setTourStep("textfield")
-			}
-		>
+		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
 				<img
 					class="rounded"
@@ -158,7 +168,35 @@ const DefaultLanguages = () => {
 					src="/images/TourGuideSVGs/default-languages.svg"
 					alt="default-languages"
 				/>
-				Langugaes
+			</div>
+			<div class="flex items-center justify-between">
+				<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+					<p class="text-sm font-medium text-info-on-inverted-container">Language detection</p>
+					<p>We filtered by your browser defaults.</p>
+				</div>
+				<div
+					onClick={() =>
+						filteredLanguages().length > 0
+							? setTourStep("missing-message-rule")
+							: setTourStep("textfield")
+					}
+					class="w-8 h-8 flex justify-center items-center bg-background/10 hover:bg-background/20 rounded-md cursor-pointer"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width={2}
+						stroke="currentColor"
+						class="w-4 h-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+						/>
+					</svg>
+				</div>
 			</div>
 		</div>
 	)
@@ -166,7 +204,7 @@ const DefaultLanguages = () => {
 
 const MissingMessageRule = () => {
 	return (
-		<div class="w-full">
+		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
 				<img
 					class="rounded"
@@ -174,7 +212,12 @@ const MissingMessageRule = () => {
 					src="/images/TourGuideSVGs/missing-message-rule.svg"
 					alt="missing-message-rule"
 				/>
-				Missing
+			</div>
+			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+				<p class="text-sm font-medium text-info-on-inverted-container">
+					<span class="text-primary-on-inverted-container">Click</span> to see what’s missing
+				</p>
+				<p>Filter by missing message lint rule.</p>
 			</div>
 		</div>
 	)
@@ -182,7 +225,7 @@ const MissingMessageRule = () => {
 
 const Textfield = () => {
 	return (
-		<div class="w-full">
+		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
 				<img
 					class="rounded"
@@ -190,7 +233,12 @@ const Textfield = () => {
 					src="/images/TourGuideSVGs/textfield.svg"
 					alt="textfield"
 				/>
-				Textfield
+			</div>
+			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+				<p class="text-sm font-medium text-info-on-inverted-container">
+					<span class="text-primary-on-inverted-container">Click</span> in the text field
+				</p>
+				<p>Click in the input field to edit the translation.</p>
 			</div>
 		</div>
 	)
