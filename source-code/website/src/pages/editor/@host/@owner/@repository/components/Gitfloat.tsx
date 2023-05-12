@@ -211,7 +211,7 @@ export const Gitfloat = () => {
 			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
 				<TourHintWrapper
 					currentId={tourStep()}
-					position="top-left"
+					position="top-right"
 					offset={{ x: 0, y: 60 }}
 					isVisible={
 						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
