@@ -217,7 +217,7 @@ export function Layout(props: { children: JSXElement }) {
 																}
 																addFilter(filter.name)
 															}}
-															class="flex gap-2 items-center"
+															class="flex gap-2 items-center w-full"
 														>
 															<div slot="prefix" class="-ml-2 mr-2">
 																{filter.icon}
@@ -404,24 +404,25 @@ function LanguageFilter(props: { clearFunction: any }) {
 				<button slot="clear-icon">
 					<IconClose />
 				</button>
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Languages</span>
+
+				<div class="flex px-3 gap-2 text-sm font-medium">
+					<span class="text-left text-outline-variant grow">Select</span>
 					<a
-						class="cursor-pointer link link-primary"
+						class="cursor-pointer link link-primary opacity-75"
 						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
 					>
-						ALL
+						All
 					</a>
 					<a
-						class="cursor-pointer link link-primary"
+						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the reference language
 						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
 					>
-						NONE
+						None
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
+				<div class="max-h-[300px] overflow-y-auto text-sm">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<sl-option
@@ -473,7 +474,7 @@ function LintFilter(props: { clearFunction: any }) {
 		>
 			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
-					Linting
+					Lint
 				</p>
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
@@ -497,16 +498,19 @@ function LintFilter(props: { clearFunction: any }) {
 				<IconClose />
 			</button>
 
-			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-				<span class="text-left text-on-surface-variant grow">Lints</span>
+			<div class="flex px-3 gap-2 text-sm font-medium">
+				<span class="text-left text-outline-variant grow">Select</span>
 				<a
-					class="cursor-pointer link link-primary"
+					class="cursor-pointer link link-primary opacity-75"
 					onClick={() => setFilteredLintRules(lintRuleIds())}
 				>
-					ALL
+					All
 				</a>
-				<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
-					NONE
+				<a
+					class="cursor-pointer link link-primary opacity-75"
+					onClick={() => setFilteredLintRules([])}
+				>
+					None
 				</a>
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
