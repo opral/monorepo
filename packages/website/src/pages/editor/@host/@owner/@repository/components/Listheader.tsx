@@ -110,7 +110,18 @@ export const ListHeader = (props: ListHeaderProps) => {
 										setTourStep("textfield")
 									}}
 								>
-									<div class="flex gap-2 items-center h-7">
+									<div
+										class="flex gap-2 items-center h-7"
+										id={
+											(
+												rule.id.includes(".")
+													? String(rule.id.split(".")[1]!) === "missingMessage"
+													: String(rule.id) === "missingMessage"
+											)
+												? "missingMessage-summary"
+												: "lint-summary"
+										}
+									>
 										<div class="-ml-[4px] h-5 rounded">
 											<div
 												class={

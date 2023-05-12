@@ -2,6 +2,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -265,21 +266,28 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
+	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
-		console.log(tourStep())
 		if (localStorage?.user === undefined) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && inlangConfig()) {
-			if (filteredLanguages().length > 0) {
+			if (
+				filteredLanguages().length !== inlangConfig()?.languages.length &&
+				filteredLanguages().length > 0
+			) {
 				setTourStep("default-languages")
 			} else {
-				if (filteredLintRules().length > 0) {
-					setTourStep("missing-message-rule")
-				} else {
-					setTourStep("textfield")
-				}
+				setTourStep("default-languages")
+				setTimeout(() => {
+					const element = document.getElementById("missingMessage-summary")
+					if (element !== null) {
+						setTourStep("missing-message-rule")
+					} else {
+						setTourStep("textfield")
+					}
+				}, 100)
 			}
 		}
 	})
