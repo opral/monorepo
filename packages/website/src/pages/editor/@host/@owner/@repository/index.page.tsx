@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query"
-import { createMemo, For, Match, Switch } from "solid-js"
+import { createEffect, createMemo, For, Match, Switch } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -10,6 +10,7 @@ import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import type { Language } from "@inlang/core/ast"
 import type { LintedMessage } from "@inlang/core/lint"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
+import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 
 export function Page() {
 	return (
@@ -37,6 +38,7 @@ function TheActualPage() {
 		filteredLanguages,
 		textSearch,
 		filteredLintRules,
+		tourStep,
 	} = useEditorState()
 	/**
 	 * Messages for a particular message id in all languages
@@ -143,9 +145,18 @@ function TheActualPage() {
 				<Match when={doesInlangConfigExist()}>
 					<div>
 						<ListHeader messages={messages} />
-						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]!} />}
-						</For>
+						<TourHintWrapper
+							currentId="textfield"
+							position="bottom-left"
+							offset={{ x: 110, y: 144 }}
+							isVisible={tourStep() === "textfield"}
+						>
+							<For each={Object.keys(messages())}>
+								{(id) => {
+									return <Messages messages={messages()[id]!} />
+								}}
+							</For>
+						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{

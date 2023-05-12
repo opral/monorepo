@@ -18,6 +18,7 @@ import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
 import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
+import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
@@ -37,6 +38,7 @@ export function PatternEditor(props: {
 		userIsCollaborator,
 		routeParams,
 		filteredLanguages,
+		tourStep,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 
@@ -272,6 +274,9 @@ export function PatternEditor(props: {
 	}
 
 	const handleShortcut = (event: KeyboardEvent) => {
+		if (localStorage.isFirstUse) {
+			setLocalStorage("isFirstUse", false)
+		}
 		if (
 			((event.ctrlKey && event.code === "KeyS" && navigator.platform.includes("Win")) ||
 				(event.metaKey && event.code === "KeyS" && navigator.platform.includes("Mac"))) &&
