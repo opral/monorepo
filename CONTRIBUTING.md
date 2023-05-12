@@ -16,6 +16,12 @@ Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM works
 - [VSCode extension: Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 - (If you are part of inlang, ask for access to doppler from private env variables.)
 
+Note: 
+Before going any further please install the recommended version of 
+toolchain. Recommended version are `v.18.16.0` for `node` and `v.9.6.6` for `npm`.   
+If you are using `volta` to manage your toolchain we have pinned the recommended
+tooling version to the project.
+
 ## Getting started
 
 1. Open the repository in VSCode.

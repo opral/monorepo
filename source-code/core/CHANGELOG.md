@@ -1,5 +1,35 @@
 # @inlang/core
 
+## 0.8.2
+
+### Patch Changes
+
+- 0504401e: fixed testConfigFile which threw an error even though it's a result that should never throw
+
+## 0.8.1
+
+### Patch Changes
+
+- 0d19f309: further improvements to the better error messages introduced in v0.8
+
+## 0.8.0
+
+### Minor Changes
+
+- 1c1881d5: Improved error messages when loading the inlang.config.js module.
+
+## 0.7.15
+
+### Patch Changes
+
+- f6cf2bbf: Add missing `environment` export for JSDoc
+
+## 0.7.14
+
+### Patch Changes
+
+- 636e6045: test plugins in `testConfigFile`
+
 ## 0.7.13
 
 ### Patch Changes

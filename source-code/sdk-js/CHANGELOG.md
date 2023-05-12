@@ -1,5 +1,69 @@
 # @inlang/sdk-js
 
+## 0.4.4
+
+### Patch Changes
+
+- 561bd4d3: make vite plugin work on windows
+
+## 0.4.3
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+
+## 0.4.2
+
+### Patch Changes
+
+- 39bbda2b: use SvelteKit's prerender for Resource-Endpoint only if necessary
+
+## 0.4.1
+
+### Patch Changes
+
+- 86b42dae: bundle Resources into application on build
+
+## 0.4.0
+
+### Minor Changes
+
+- 438b828f: BREAKING: prerender all resource API calls
+
+### Patch Changes
+
+- 60fe900a: detect wrong vite plugin order and throw error
+- 60fe900a: fix type of `languages` export
+
+## 0.3.3
+
+### Patch Changes
+
+- c8883359: automatically sync `@inlang/sdk-js-plugin` version with installed `@inlang/sdk-js` version
+
+## 0.3.2
+
+### Patch Changes
+
+- 8b916fc9: add support for older Svelte versions
+- e815949f: fix: don't fail to start applications in non-node environment
+
+## 0.3.1
+
+### Patch Changes
+
+- 8a628151: update plugin version for generated `inlang.config.js`
+
+## 0.3.0
+
+### Minor Changes
+
+- 636e6045: [BREAKING]: move `@inlang/sdk-js/plugin` into it's own package `@inlang/sdk-js-plugin`
+
+### Patch Changes
+
+- 95ffd205: fix: don't wrap <svelte:\*> elements that need to be at the root
+
 ## 0.2.1
 
 ### Patch Changes

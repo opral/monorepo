@@ -2,6 +2,12 @@ name: Publish @inlang/ide-extension to VSCode Marketplace
 
 on:
   workflow_dispatch:
+  
+  push:
+    paths:
+      - "source-code/ide-extension/package.json"
+    branches:
+      - main
 
 jobs:
   release:
@@ -15,12 +21,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Build project
         run: npm run build
+      - name: test the code
+        run: npm run test
       - name: Build VSCode extension package
         run: npm run package -w source-code/ide-extension
       - name: Publish to VSCode Marketplace

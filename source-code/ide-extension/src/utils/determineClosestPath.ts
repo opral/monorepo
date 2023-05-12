@@ -19,7 +19,7 @@ import nodePath from "node:path"
 export function determineClosestPath(args: { options: string[]; to: string }): string {
 	const result = {
 		path: args.options[0],
-		distance: nodePath.relative(args.options[0], args.to).length,
+		distance: nodePath.relative(args.options[0] as string, args.to).length,
 	}
 	for (const path of args.options) {
 		const distance = nodePath.relative(path, args.to).length
@@ -28,5 +28,5 @@ export function determineClosestPath(args: { options: string[]; to: string }): s
 			result.distance = distance
 		}
 	}
-	return result.path
+	return result.path as string
 }

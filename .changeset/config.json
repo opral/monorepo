@@ -2,7 +2,16 @@
 	"$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
 	"changelog": "@changesets/cli/changelog",
 	"commit": false,
-	"fixed": [],
+	"fixed": [
+		[
+			"vs-code-extension",
+			"@inlang/ide-extension-plugin"
+		],
+		[
+			"@inlang/sdk-js",
+			"@inlang/sdk-js-plugin"
+		]
+	],
 	"linked": [],
 	"access": "restricted",
 	"baseBranch": "main",
