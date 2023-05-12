@@ -11,6 +11,7 @@ import { NodeishFilesystem, toJson } from "@inlang-git/fs"
 export async function generateConfigFileClient(args: {
 	fs: NodeishFilesystem
 	resolveFrom: string
+	applicationId: string
 }): ReturnType<typeof generateConfigFileServer> {
 	try {
 		const filesystemAsJson = toJson({
@@ -20,7 +21,7 @@ export async function generateConfigFileClient(args: {
 			matchers: ["**/*", "!**/node_modules/**", "!**/.*", "!**/dist/*"],
 		})
 		// @ts-ignore - this is a client side function
-		return await rpc.generateConfigFileServer({ filesystemAsJson })
+		return await rpc.generateConfigFileServer({ filesystemAsJson, applicationId })
 	} catch (error) {
 		return [undefined, error] as any
 	}
