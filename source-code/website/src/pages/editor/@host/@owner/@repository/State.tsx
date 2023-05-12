@@ -140,6 +140,11 @@ type EditorStateSchema = {
 	userIsCollaborator: Resource<boolean>
 
 	/**
+	 * Whether the is private or not.
+	 */
+	repoIsPrivate: Resource<boolean | undefined>
+
+	/**
 	 * The last time the repository was pushed.
 	 */
 	setLastPush: Setter<Date>
@@ -215,9 +220,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("clone repository", {
+			telemetryBrowser.capture("EDITOR cloned repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
+				isPrivate: repoIsPrivate(),
 			})
 			return result
 		},
@@ -310,6 +316,35 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			lastFsChange: fsChange(),
 		}
 	}, _unpushedChanges)
+
+	const [repoIsPrivate] = createResource(
+		/**
+		 * createResource is not reacting to changes like: "false","Null", or "undefined".
+		 * Hence, a string needs to be passed to the fetch of the resource.
+		 */
+		() => {
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false
+			}
+			return {
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+			}
+		},
+		async (args) => {
+			try {
+				const response = await github.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				return response.data.private
+			} catch (error) {
+				return undefined
+			}
+		},
+	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -531,6 +566,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setResources,
 					referenceResource,
 					userIsCollaborator,
+					repoIsPrivate,
 					setLastPush,
 					fs,
 					setLastPullTime,
