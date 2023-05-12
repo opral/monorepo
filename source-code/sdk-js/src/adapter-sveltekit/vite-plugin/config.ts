@@ -103,8 +103,7 @@ function assertConfigWithSdk(config: InlangConfig | undefined): asserts config i
 	}
 
 	if (!('sdk' in config)) {
-		// TODO: link to docs
-		throw new InlangSdkConfigError('The `sdk` property is missing in your `inlang.config.js` file.`. Make sure to use the `sdkPlugin` in your `inlang.config.js` file.')
+		throw new InlangSdkConfigError('Invalid config. Make sure to add the `sdkPlugin` to your `inlang.config.js` file. See https://inlang.com/documentation/sdk/configuration')
 	}
 }
 
