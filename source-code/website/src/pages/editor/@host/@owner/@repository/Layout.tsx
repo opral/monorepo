@@ -21,6 +21,7 @@ interface Filter {
 export function Layout(props: { children: JSXElement }) {
 	const {
 		inlangConfig,
+		repositoryIsCloned,
 		setTextSearch,
 		filteredLintRules,
 		setFilteredLintRules,
@@ -91,13 +92,21 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
+	function isLessThanHalfASecondAgo(timeString: Date) {
+		const time = new Date(timeString)
+		const currentTime = new Date().getTime()
+		const timeDifference = Math.abs(currentTime - time.getTime())
+		return timeDifference < 500
+	}
+
 	//add initial language filter
-	let hasExecuted = false
 	createEffect(() => {
-		if (!hasExecuted && onlyLanguagesTheUserSpeaks().length > 1) {
+		if (
+			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			onlyLanguagesTheUserSpeaks().length > 1
+		) {
 			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
 			addFilter("Language")
-			hasExecuted = true
 		}
 	})
 
