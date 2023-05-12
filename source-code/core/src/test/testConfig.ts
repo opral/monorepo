@@ -3,6 +3,7 @@ import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
 import { dedent } from "ts-dedent"
+import { zConfig } from "../config/zod.js"
 
 export class TestConfigException extends Error {
 	readonly #id = "TestConfigException"
@@ -22,6 +23,8 @@ export async function testConfig(args: {
 }): Promise<Result<true, TestConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
+		// validate the config -> throws if invalid
+		zConfig.parse(args.config)
 		referenceLanguageMustBeInLanguages(args.config)
 		const resources = await args.config.readResources({ config: args.config })
 		validateResources(resources)

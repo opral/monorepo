@@ -10,6 +10,8 @@ import { validateSdkConfig } from '@inlang/sdk-js-plugin'
 import { version } from '../../../package.json'
 import { promisify } from 'node:util'
 import { exec as execCb, type SpawnSyncReturns } from 'node:child_process'
+import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const exec = promisify(execCb)
 
@@ -32,7 +34,8 @@ export type TransformConfig = {
 	}
 }
 
-const cwd = process.cwd()
+const cwdPath = process.cwd()
+const inlangConfigFilePath = path.resolve(cwdPath, "inlang.config.js")
 
 let configPromise: Promise<TransformConfig> | undefined = undefined
 
@@ -41,14 +44,15 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return configPromise = new Promise<TransformConfig>(async (resolve) => {
-		const srcFolder = cwd + "/src"
-		const routesFolder = srcFolder + "/routes"
+		const srcFolderPath = path.resolve(cwdPath, "src")
+		const routesFolderPath = path.resolve(srcFolderPath, "routes")
 
 		await createInlangConfigIfNotPresentYet()
 		await updateSdkPluginVersion()
 
 		// TODO: combine `testConfigFile` and `initConfig` functionality
-		const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
+		const inlangConfigAsString = await readFile(inlangConfigFilePath, { encoding: "utf-8" })
+
 		const [, exception] = await testConfigFile({
 			file: inlangConfigAsString,
 			env: await initInlangEnvironment()
@@ -57,7 +61,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			throw exception
 		}
 
-		const inlangConfigModule = await import(cwd + "/inlang.config.js")
+		const inlangConfigModule = await import(pathToFileURL(inlangConfigFilePath).toString())
 		const inlangConfig = await initConfig(inlangConfigModule)
 
 		assertConfigWithSdk(inlangConfig)
@@ -65,10 +69,10 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const languageInUrl = inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === 'url') || false
 
-		const rootRoutesFolder = routesFolder + "/" + (languageInUrl ? "[lang]" : "")
-		const isStatic = await shouldContentBePrerendered(routesFolder) || await shouldContentBePrerendered(rootRoutesFolder)
+		const rootRoutesFolder = path.resolve(routesFolderPath, languageInUrl ? "[lang]" : "")
+		const isStatic = await shouldContentBePrerendered(routesFolderPath) || await shouldContentBePrerendered(rootRoutesFolder)
 
-		const usesTypeScript = await doesPathExist(cwd + '/tsconfig.json')
+		const usesTypeScript = await doesPathExist(path.resolve(cwdPath, 'tsconfig.json'))
 
 		const svelteKitVersion = await getInstalledVersionOfPackage('@sveltejs/kit')
 
@@ -76,7 +80,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			debug: !!inlangConfig.sdk?.debug,
 			languageInUrl,
 			isStatic,
-			srcFolder,
+			srcFolder: srcFolderPath,
 			rootRoutesFolder,
 			inlang: inlangConfig,
 			svelteKit: {
@@ -107,13 +111,12 @@ function assertConfigWithSdk(config: InlangConfig | undefined): asserts config i
 // ------------------------------------------------------------------------------------------------
 
 const createInlangConfigIfNotPresentYet = async () => {
-	const inlangConfigPath = cwd + "/inlang.config.js"
-	const inlangConfigExists = await doesPathExist(inlangConfigPath)
+	const inlangConfigExists = await doesPathExist(inlangConfigFilePath)
 	if (inlangConfigExists) return
 
 	await createDemoResources()
 
-	return writeFile(inlangConfigPath, `
+	return writeFile(inlangConfigFilePath, `
 /**
  * @type { import("@inlang/core/config").DefineConfig }
  */
@@ -142,19 +145,21 @@ export async function defineConfig(env) {
 `)
 }
 
-// TODO: do this in a better way
+// TODO: do this in a better way #708
 const createDemoResources = async () => {
-	if (!await doesPathExist(cwd + '/languages')) {
-		await mkdir(cwd + '/languages')
+	const resourcesFolder = path.resolve(cwdPath, 'languages')
+
+	if (!await doesPathExist(resourcesFolder)) {
+		await mkdir(path.resolve(resourcesFolder))
 	}
 
-	await writeFile(cwd + '/languages/en.json', dedent`
+	await writeFile(path.resolve(resourcesFolder, 'en.json'), dedent`
 		{
 		  "welcome": "Welcome to inlang"
 		}
 	`, { encoding: 'utf-8' })
 
-	await writeFile(cwd + '/languages/de.json', dedent`
+	await writeFile(path.resolve(resourcesFolder, 'de.json'), dedent`
 		{
 		  "welcome": "Willkommen bei inlang"
 		}
@@ -172,7 +177,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 	]
 
 	const modules = (await Promise.all(
-		filesToLookFor.map(file => loadFile(routesFolder + `/${file}`).catch(() => undefined))
+		filesToLookFor.map(file => loadFile(path.resolve(routesFolder, file)).catch(() => undefined))
 	))
 		.filter(Boolean) as ProxifiedModule<any>[]
 
@@ -183,7 +188,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 // ------------------------------------------------------------------------------------------------
 
 const updateSdkPluginVersion = async () => {
-	const inlangConfigAsString = await readFile(cwd + "/inlang.config.js", { encoding: "utf-8" })
+	const inlangConfigAsString = await readFile(inlangConfigFilePath, { encoding: "utf-8" })
 
 	// this regex detects the new `https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js` as well as
 	// the older https://cdn.jsdelivr.net/npm/@inlang/sdk-js/dist/plugin/index.js url
@@ -198,7 +203,7 @@ const updateSdkPluginVersion = async () => {
 	if (inlangConfigAsString !== newConfig) {
 		console.info(`Updating 'inlang.config.js' to use the correct version of '@inlang/sdk-js-plugin' (${version})`)
 
-		await writeFile(cwd + "/inlang.config.js", newConfig)
+		await writeFile(inlangConfigFilePath, newConfig)
 	}
 }
 

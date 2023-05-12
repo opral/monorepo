@@ -4,6 +4,7 @@ import { rpc } from "@inlang/rpc"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
 import ora from "ora"
+import { dedent } from "ts-dedent"
 
 export const init = new Command()
 	.command("init")
@@ -40,7 +41,14 @@ export const init = new Command()
 		})
 		clearInterval(interval)
 		if (exception) {
-			rpcSpinner.fail("Failed to generate config file.\n" + exception.errorMessage)
+			rpcSpinner.fail(dedent`
+The program couldn't generate the config file automatically. 
+
+This is a not a bug, but a limitation of the AI. Please create the config file manually 
+by following the instructions at https://inlang.com/documentation. 
+
+${exception.errorMessage ? "Error message: " + exception.errorMessage : ""}
+`)
 			return
 		}
 		rpcSpinner.succeed("Generated config file.")

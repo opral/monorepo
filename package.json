@@ -21,7 +21,8 @@
 		"format:fix": "turbo run format:fix && npm run format:fix:base .",
 		"---- OTHER ---------------------------------------------------------": "",
 		"release": "changeset publish",
-		"clean": "npm run clean -ws && rm -f -r ./node_modules && rm -f ./.env",
+		"_clean_COMMENT": "Errors when the node_modules is deleted before running the command because shx doesn't exist yet.",
+		"clean": "npm run clean -ws --if-present && shx rm -f ./.env && shx rm -rf ./node_modules/* ",
 		"lint-staged": "lint-staged",
 		"prepare": "husky install",
 		"postinstall": "patch-package"
@@ -32,10 +33,12 @@
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.26.0",
+		"@rollup/plugin-json": "^6.0.0",
 		"@types/node": "^18.15.11",
 		"@typescript-eslint/eslint-plugin": "^5.48.2",
 		"@typescript-eslint/parser": "^5.48.2",
 		"@vitest/coverage-c8": "^0.29.8",
+		"cross-env": "^7.0.3",
 		"eslint": "^8.32.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-solid": "^0.9.3",
@@ -45,6 +48,7 @@
 		"lint-staged": "^13.1.2",
 		"patch-package": "^6.5.1",
 		"prettier": "2.8.3",
+		"shx": "^0.3.4",
 		"turbo": "^1.9.3",
 		"typescript": "^4.9.4",
 		"vitest": "^0.29.8"

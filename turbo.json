@@ -8,7 +8,6 @@
 			"dependsOn": ["^build"],
 			"cache": false
 		},
-		"clean": {},
 		"lint": {},
 		"lint:fix": {},
 		"format": {},

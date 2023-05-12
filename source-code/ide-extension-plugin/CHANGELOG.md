@@ -1,5 +1,13 @@
 # @inlang/ide-extension-plugin
 
+## 0.5.4
+
+### Patch Changes
+
+- e47fa8fc: adjust type for ide extension
+- 652de069: update for ide extension release
+- 89f0c7a2: update vs-code-extension
+
 ## 0.0.2
 
 ### Patch Changes
