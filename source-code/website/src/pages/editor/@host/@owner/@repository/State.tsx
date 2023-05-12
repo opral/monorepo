@@ -25,6 +25,7 @@ import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
+import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 
 type EditorStateSchema = {
 	/**
@@ -96,6 +97,9 @@ type EditorStateSchema = {
 
 	languages: () => Language[]
 	setLanguages: Setter<Language[]>
+
+	tourStep: () => TourStepId
+	setTourStep: Setter<TourStepId>
 
 	lint: () => InlangConfig["lint"]
 
@@ -179,6 +183,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
@@ -257,6 +262,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	createEffect(() => {
 		const langs = languages()
 		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
+	})
+
+	createEffect(() => {
+		console.log(tourStep())
+		if (localStorage?.user === undefined) {
+			setTourStep("github-login")
+		} else if (!userIsCollaborator()) {
+			setTourStep("fork-repository")
+		} else if (tourStep() === "fork-repository" && inlangConfig()) {
+			if (filteredLanguages().length > 0) {
+				setTourStep("default-languages")
+			} else {
+				if (filteredLintRules().length > 0) {
+					setTourStep("missing-message-rule")
+				} else {
+					setTourStep("textfield")
+				}
+			}
+		}
 	})
 
 	// re-fetched if the file system changes
@@ -490,6 +514,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					referenceLanguage,
 					languages,
 					setLanguages,
+					tourStep,
+					setTourStep,
 					filteredLanguages,
 					setFilteredLanguages,
 					filteredLintRules,
