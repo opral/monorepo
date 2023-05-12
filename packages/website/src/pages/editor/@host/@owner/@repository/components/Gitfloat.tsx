@@ -202,7 +202,7 @@ export const Gitfloat = () => {
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
 				gitfloat?.classList.remove("animate-jump")
-			}, 1000)
+			}, 300)
 		}
 	})
 
