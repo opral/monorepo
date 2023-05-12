@@ -271,23 +271,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
-		} else if (tourStep() === "fork-repository" && inlangConfig()) {
-			if (
-				filteredLanguages().length !== inlangConfig()?.languages.length &&
-				filteredLanguages().length > 0
-			) {
+		} else if (tourStep() === "fork-repository" && inlangConfig() && filteredLanguages()) {
+			if (filteredLanguages().length > 0) {
 				setTourStep("default-languages")
 			} else {
 				setTourStep("default-languages")
 				setTimeout(() => {
 					const element = document.getElementById("missingMessage-summary")
-					if (element !== null) {
-						setTourStep("missing-message-rule")
-					} else {
-						setTourStep("textfield")
-					}
+					element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
 				}, 100)
 			}
+		} else if (tourStep() === "missing-message-rule" && inlangConfig()) {
+			setTimeout(() => {
+				const element = document.getElementById("missingMessage-summary")
+				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+			}, 100)
 		}
 	})
 
