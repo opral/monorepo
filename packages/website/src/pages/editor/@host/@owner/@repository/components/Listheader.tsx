@@ -106,8 +106,14 @@ export const ListHeader = (props: ListHeaderProps) => {
 								<sl-button
 									prop:size="small"
 									onClick={() => {
-										setFilteredLintRules([rule.rule["id"]])
-										setTourStep("textfield")
+										if (filteredLintRules().includes(rule.rule["id"])) {
+											setFilteredLintRules(
+												filteredLintRules().filter((id) => id !== rule.rule["id"]),
+											)
+										} else {
+											setFilteredLintRules([rule.rule["id"]])
+											setTourStep("textfield")
+										}
 									}}
 								>
 									<div
