@@ -3,6 +3,7 @@ import { setupPlugins } from "../plugin/setupPlugins.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { dedent } from "ts-dedent"
 import { testConfig } from '../test/testConfig.js'
+import { ZodError } from 'zod'
 
 /**
  * Sets up the inlang config module.
@@ -36,14 +37,14 @@ ${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
 
 # The following errors occurred during the validation of the config:
 
-${testConfigException?.message}
+${formatErrors(testConfigException)}
 
 ---
 
 If plugins return errors, chances are high that the plugin errors are the root cause
 for the config errors. Try to fix the plugin errors first.
 
-`)
+`);
 	}
 
 	// plugins returned an error but the config is still usable
@@ -53,4 +54,12 @@ for the config errors. Try to fix the plugin errors first.
 	}
 
 	return parsedConfig
+}
+
+const formatErrors = (error: Error) => {
+	if (error instanceof ZodError) {
+		return error.errors.map((e) => `[${e.path}] ${e.message}`).join("\n");
+	}
+
+	return error.message;
 }
