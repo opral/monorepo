@@ -23,7 +23,7 @@ export async function setupConfig(args: {
 	let config = await args.module.defineConfig(args.env)
 	const [configWithPlugins, pluginErrors] = await setupPlugins({ config, env: args.env })
 	config = configWithPlugins
-	const [, testConfigException] = await testConfig({ config: config as InlangConfig })
+	const [parsedConfig, testConfigException] = await testConfig({ config: config as InlangConfig })
 
 	// throw an error. the config is broken without a path to recovery
 	if (testConfigException) {
@@ -52,5 +52,5 @@ for the config errors. Try to fix the plugin errors first.
 		for (const e of pluginErrors) console.error(e)
 	}
 
-	return config as InlangConfig
+	return parsedConfig
 }

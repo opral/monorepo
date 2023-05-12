@@ -20,18 +20,18 @@ export class TestConfigException extends Error {
  */
 export async function testConfig(args: {
 	config: InlangConfig
-}): Promise<Result<true, TestConfigException>> {
+}): Promise<Result<InlangConfig, TestConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
 		// validate the config -> throws if invalid
 		hasSetupAResourcePlugin(args.config)
-		zConfig.parse(args.config)
+		const parsedConfig = zConfig.parse(args.config)
 		referenceLanguageMustBeInLanguages(args.config)
 		const resources = await args.config.readResources({ config: args.config })
 		validateResources(resources)
 		await languagesMatch(args.config, resources)
 		await roundtripTest(args.config, resources)
-		return [true, undefined]
+		return [parsedConfig as InlangConfig, undefined]
 	} catch (error) {
 		return [undefined, error as TestConfigException]
 	}
