@@ -29,22 +29,22 @@ export async function setupConfig(args: {
 	// throw an error. the config is broken without a path to recovery
 	if (testConfigException) {
 		throw new Error(dedent`
-The inlang.config.js is invalid.
+			The inlang.config.js is invalid.
 
-# The following errors occurred during the setup of plugins:
+			# The following errors occurred during the setup of plugins:
 
-${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
+			${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
 
-# The following errors occurred during the validation of the config:
+			# The following errors occurred during the validation of the config:
 
-${formatErrors(testConfigException)}
+			${formatErrors(testConfigException)}
 
----
+			---
 
-If plugins return errors, chances are high that the plugin errors are the root cause
-for the config errors. Try to fix the plugin errors first.
+			If plugins return errors, chances are high that the plugin errors are the root cause
+			for the config errors. Try to fix the plugin errors first.
 
-`);
+		`);
 	}
 
 	// plugins returned an error but the config is still usable
