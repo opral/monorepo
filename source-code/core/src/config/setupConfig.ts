@@ -2,7 +2,7 @@ import type { InlangConfig, InlangConfigModule } from "./schema.js"
 import { setupPlugins } from "../plugin/setupPlugins.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { dedent } from "ts-dedent"
-import { testConfig } from '../test/testConfig.js'
+import { parseConfig } from '../test/parseConfig.js'
 import { ZodError } from 'zod'
 
 /**
@@ -24,7 +24,7 @@ export async function setupConfig(args: {
 	let config = await args.module.defineConfig(args.env)
 	const [configWithPlugins, pluginErrors] = await setupPlugins({ config, env: args.env })
 	config = configWithPlugins
-	const [parsedConfig, testConfigException] = await testConfig({ config: config as InlangConfig })
+	const [parsedConfig, testConfigException] = await parseConfig({ config: config as InlangConfig })
 
 	// throw an error. the config is broken without a path to recovery
 	if (testConfigException) {

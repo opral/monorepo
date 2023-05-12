@@ -1,6 +1,6 @@
 import type * as ast from "@inlang/core/ast"
 import { expect, it } from "vitest"
-import { testConfig } from "./testConfig.js"
+import { parseConfig } from "./parseConfig.js"
 import { mockEnvironment } from "./mockEnvironment.js"
 import type { Language } from "@inlang/core/ast"
 import type { InlangEnvironment } from "../environment/types.js"
@@ -22,12 +22,12 @@ it("should succeed if the config is valid", async () => {
 		"./de.json",
 		JSON.stringify({ hello: "Hallo von der Deutschen Resource." }),
 	)
-	const [, exception] = await testConfig({ config: await mockDefineConfig(env) })
+	const [, exception] = await parseConfig({ config: await mockDefineConfig(env) })
 	expect(exception).toBeUndefined()
 })
 
 it("should fail if the config is invalid", async () => {
-	const [, exception] = await testConfig({
+	const [, exception] = await parseConfig({
 		config: {
 			// @ts-expect-error
 			referenceLanguage: 5,
@@ -40,7 +40,7 @@ it("should fail if the referenceLanguage is not included in languages", async ()
 	const env = await mockEnvironment({})
 	const config = await mockDefineConfig(env)
 	config.languages = ["de"]
-	const [, exception] = await testConfig({
+	const [, exception] = await parseConfig({
 		config,
 	})
 	expect(exception).toBeDefined()

@@ -5,8 +5,8 @@ import type { Result } from "../utilities/result.js"
 import { dedent } from "ts-dedent"
 import { zConfig } from "../config/zod.js"
 
-export class TestConfigException extends Error {
-	readonly #id = "TestConfigException"
+export class ParseConfigException extends Error {
+	readonly #id = "ParseConfigException"
 }
 
 /**
@@ -18,9 +18,9 @@ export class TestConfigException extends Error {
  * @example
  * const [success, error] = await testConfig(args)
  */
-export async function testConfig(args: {
+export async function parseConfig(args: {
 	config: InlangConfig
-}): Promise<Result<InlangConfig, TestConfigException>> {
+}): Promise<Result<InlangConfig, ParseConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
 		// validate the config -> throws if invalid
@@ -33,13 +33,13 @@ export async function testConfig(args: {
 		await roundtripTest(args.config, resources)
 		return [parsedConfig as InlangConfig, undefined]
 	} catch (error) {
-		return [undefined, error as TestConfigException]
+		return [undefined, error as ParseConfigException]
 	}
 }
 
 function hasSetupAResourcePlugin(config: InlangConfig) {
 	if (!config.readResources || !config.writeResources) {
-		throw new TestConfigException(
+		throw new ParseConfigException(
 			`It seems you didn't set up a plugin to handle Resource files. See https://github.com/inlang/ecosystem#resources.`,
 		)
 	}
@@ -47,7 +47,7 @@ function hasSetupAResourcePlugin(config: InlangConfig) {
 
 function referenceLanguageMustBeInLanguages(config: InlangConfig) {
 	if (!config.languages.includes(config.referenceLanguage)) {
-		throw new TestConfigException(
+		throw new ParseConfigException(
 			`The reference language "${config.referenceLanguage}" must be included in the list of languages.`,
 		)
 	}
@@ -67,7 +67,7 @@ async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
 	const areEqual = languages.sort().join(",") === config.languages.sort().join(",")
 	if (areEqual === false) {
 		// TODO error message should contain the languages that are missing
-		throw new TestConfigException(
+		throw new ParseConfigException(
 			`The list of languages in the config file does not match the returned resources from \`readResources()\`.`,
 		)
 	}
@@ -89,7 +89,7 @@ async function roundtripTest(config: InlangConfig, initialResources: ast.Resourc
 	const readResourcesAgain = await config.readResources({ config })
 	// check if the number of resources is the same
 	if (initialResources.length !== readResourcesAgain.length) {
-		throw new TestConfigException(commonErrorMessage + "The number of resources don't match.")
+		throw new ParseConfigException(commonErrorMessage + "The number of resources don't match.")
 	}
 	// check if the resources match
 	for (const intialResource of initialResources) {
@@ -99,7 +99,7 @@ async function roundtripTest(config: InlangConfig, initialResources: ast.Resourc
 		)
 		// check if the resource exists
 		if (matchingReadResourceAgain === undefined) {
-			throw new TestConfigException(
+			throw new ParseConfigException(
 				commonErrorMessage + `Missing the resource "${intialResource.languageTag.name}"`,
 			)
 		}
@@ -109,7 +109,7 @@ async function roundtripTest(config: InlangConfig, initialResources: ast.Resourc
 				JSON.stringify(initialMessage) !==
 				JSON.stringify(matchingReadResourceAgain.body[messageIndex])
 			)
-				throw new TestConfigException(
+				throw new ParseConfigException(
 					dedent(`
 ${commonErrorMessage}
 The message with id "${initialMessage.id.name}" does not match for the resource
@@ -123,5 +123,27 @@ ${JSON.stringify(initialMessage, undefined, 2)}
 `),
 				)
 		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * @deprecated Use `ParseConfigException` instead.
+ */
+export class TestConfigException extends Error {
+	readonly #id = "TestConfigException"
+}
+
+/**
+ * @deprecated Use `parseConfig` instead.
+ */
+export const testConfig = (...args: Parameters<typeof parseConfig>): ReturnType<typeof parseConfig> => {
+	try {
+		return parseConfig(...args)
+	} catch (error) {
+		if (error instanceof ParseConfigException)
+			throw new TestConfigException(error.message)
+		throw error
 	}
 }
