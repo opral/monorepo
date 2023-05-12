@@ -58,9 +58,9 @@ const TourStepWrapper = (props: {
 		switch (position) {
 			case "top-right":
 				return {
-					top: offset.y.toString() + "px",
+					top: "unset",
 					right: offset.x.toString() + "px",
-					bottom: "unset",
+					bottom: offset.y.toString() + "px",
 					left: "unset",
 				}
 			case "top-left":
@@ -98,7 +98,27 @@ const TourStepWrapper = (props: {
 			}
 			style={getPosition(props.position, props.offset) as JSX.CSSProperties}
 		>
+			{(props.position === "bottom-right" || props.position === "bottom-left") && (
+				<div class="relative w-full h-0 text-inverted-surface">
+					<div
+						class={
+							(props.position === "bottom-left" ? "justify-start" : "justify-end") +
+							" before:content-['▲'] h-2 flex items-center px-2 -translate-y-5 "
+						}
+					/>
+				</div>
+			)}
 			{props.children}
+			{(props.position === "top-right" || props.position === "top-left") && (
+				<div class="relative w-full h-0 text-inverted-surface">
+					<div
+						class={
+							(props.position === "top-left" ? "justify-start" : "justify-end") +
+							" before:content-['▼'] h-2 flex items-center px-2 translate-y-3"
+						}
+					/>
+				</div>
+			)}
 		</div>
 	)
 }
