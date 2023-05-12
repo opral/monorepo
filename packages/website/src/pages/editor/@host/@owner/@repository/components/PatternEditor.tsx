@@ -171,7 +171,7 @@ export function PatternEditor(props: {
 		setTimeout(() => {
 			textArea.parentElement?.click()
 		}, 500)
-		telemetryBrowser.capture("commit changes", {
+		telemetryBrowser.capture("EDITOR commited changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -325,7 +325,7 @@ export function PatternEditor(props: {
 					ref={textArea}
 					onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
-						telemetryBrowser.capture("EDITOR focus field", {
+						telemetryBrowser.capture("EDITOR clicked in field", {
 							targetLanguage: props.language,
 							owner: routeParams().owner,
 							repository: routeParams().repository,

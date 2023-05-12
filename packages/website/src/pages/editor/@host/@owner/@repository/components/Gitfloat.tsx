@@ -107,7 +107,7 @@ export const Gitfloat = () => {
 			setLastPullTime,
 		})
 		setIsLoading(false)
-		telemetryBrowser.capture("push changes", {
+		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 			sucess: exception === undefined,
@@ -179,7 +179,7 @@ export const Gitfloat = () => {
 			icon: IconPullrequest,
 			href: "pullrequest",
 			onClick: () => {
-				telemetryBrowser.capture("open pull request", {
+				telemetryBrowser.capture("EDITOR opened pull request", {
 					owner: routeParams().owner,
 					repository: routeParams().repository,
 				})
