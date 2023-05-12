@@ -177,6 +177,7 @@ function NoInlangConfigFoundCard() {
 
 	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
 		const [configFile, error] = await rpc.generateConfigFile({
+			applicationId: "EDITOR",
 			resolveFrom: "/",
 			// @ts-expect-error
 			fs: fs().promises,
