@@ -2,7 +2,6 @@ import { createEffect, createSignal, For, JSXElement, on, onCleanup, onMount, Sh
 import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
-import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
@@ -10,6 +9,8 @@ import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
+import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import { x } from "../../../../../../dist/client/assets/chunks/f1ba8dea.js"
 
 interface Filter {
 	name: string
@@ -31,8 +32,8 @@ export function Layout(props: { children: JSXElement }) {
 		setLanguages,
 		resources,
 		setResources,
+		tourStep,
 	} = useEditorState()
-	const [showLanguageFilterTooltip, setShowLanguageFilterTooltip] = createSignal(false)
 
 	const onlyLanguagesTheUserSpeaks = () => {
 		const languages = inlangConfig()?.languages.filter(
@@ -97,23 +98,7 @@ export function Layout(props: { children: JSXElement }) {
 		if (!hasExecuted && onlyLanguagesTheUserSpeaks().length > 1) {
 			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
 			addFilter("Language")
-			setShowLanguageFilterTooltip(true)
 			hasExecuted = true
-		}
-	})
-
-	createEffect(() => {
-		if (showLanguageFilterTooltip()) {
-			const timerShow = setTimeout(() => {
-				setShowLanguageFilterTooltip(true)
-			}, 500)
-			const timerHide = setTimeout(() => {
-				setShowLanguageFilterTooltip(false)
-			}, 5000)
-			onCleanup(() => {
-				clearTimeout(timerShow)
-				clearTimeout(timerHide)
-			})
 		}
 	})
 
@@ -160,14 +145,6 @@ export function Layout(props: { children: JSXElement }) {
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={inlangConfig()}>
-							<CustomHintWrapper
-								notification={{
-									notificationTitle: "Language detection",
-									notificationDescription: "We filtered by your browser defaults.",
-									notificationType: "info",
-								}}
-								condition={showLanguageFilterTooltip()}
-							/>
 							<For each={filters}>
 								{(filter) => (
 									<Show
@@ -176,7 +153,14 @@ export function Layout(props: { children: JSXElement }) {
 											(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
 										}
 									>
-										{filter.component}
+										<TourHintWrapper
+											currentId="default-languages"
+											position="bottom-left"
+											offset={{ x: 0, y: 40 }}
+											isVisible={filter.name === "Language" && tourStep() === "default-languages"}
+										>
+											{filter.component}
+										</TourHintWrapper>
 									</Show>
 								)}
 							</For>
