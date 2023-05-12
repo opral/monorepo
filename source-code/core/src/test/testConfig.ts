@@ -12,7 +12,7 @@ export class TestConfigException extends Error {
 /**
  * Validates the config.
  *
- * If you want to config the inlang.config.js file,
+ * If you want to test the config of the inlang.config.js file,
  * use the `testConfigFile` function instead.
  *
  * @example
@@ -24,6 +24,7 @@ export async function testConfig(args: {
 	// each function throws an error if the validation fails.
 	try {
 		// validate the config -> throws if invalid
+		hasSetupAResourcePlugin(args.config)
 		zConfig.parse(args.config)
 		referenceLanguageMustBeInLanguages(args.config)
 		const resources = await args.config.readResources({ config: args.config })
@@ -33,6 +34,14 @@ export async function testConfig(args: {
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, error as TestConfigException]
+	}
+}
+
+function hasSetupAResourcePlugin(config: InlangConfig) {
+	if (!config.readResources || !config.writeResources) {
+		throw new TestConfigException(
+			`It seems you didn't set up a plugin to handle Resource files. See https://github.com/inlang/ecosystem#resources.`,
+		)
 	}
 }
 
@@ -103,10 +112,10 @@ async function roundtripTest(config: InlangConfig, initialResources: ast.Resourc
 				throw new TestConfigException(
 					dedent(`
 ${commonErrorMessage}
-The message with id "${initialMessage.id.name}" does not match for the resource 
+The message with id "${initialMessage.id.name}" does not match for the resource
 with languageTag.name "${intialResource.languageTag.name}".
 
-Received: 
+Received:
 ${JSON.stringify(matchingReadResourceAgain.body[messageIndex], undefined, 2)}
 
 Expected:
