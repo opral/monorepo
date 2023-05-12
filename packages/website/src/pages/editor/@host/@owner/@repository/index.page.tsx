@@ -11,6 +11,7 @@ import type { Language } from "@inlang/core/ast"
 import type { LintedMessage } from "@inlang/core/lint"
 import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
+import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 
 export function Page() {
 	return (
@@ -38,6 +39,7 @@ function TheActualPage() {
 		filteredLanguages,
 		textSearch,
 		filteredLintRules,
+		tourStep,
 	} = useEditorState()
 	/**
 	 * Messages for a particular message id in all languages
@@ -144,9 +146,18 @@ function TheActualPage() {
 				<Match when={doesInlangConfigExist()}>
 					<div>
 						<ListHeader messages={messages} />
-						<For each={Object.keys(messages())}>
-							{(id) => <Messages messages={messages()[id]!} />}
-						</For>
+						<TourHintWrapper
+							currentId="textfield"
+							position="bottom-left"
+							offset={{ x: 110, y: 144 }}
+							isVisible={tourStep() === "textfield"}
+						>
+							<For each={Object.keys(messages())}>
+								{(id) => {
+									return <Messages messages={messages()[id]!} />
+								}}
+							</For>
+						</TourHintWrapper>
 						<div
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{

@@ -11,7 +11,6 @@ export function Messages(props: {
 }) {
 	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
 		useEditorState()
-	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 	const referenceMessage = () => {
 		return props.messages[referenceLanguage()!]
 	}
@@ -74,25 +73,29 @@ export function Messages(props: {
 			</div>
 			<div>
 				<For each={inlangConfig()?.languages}>
-					{(language) => (
-						<>
-							<Show
-								when={
-									(filteredLanguages().includes(language) || filteredLanguages().length === 0) &&
-									// only render if visible or has been rendered before
-									(elementIsVisible() || hasBeenRendered())
-								}
-							>
-								<PatternEditor
-									referenceLanguage={inlangConfig()!.referenceLanguage}
-									language={language}
-									id={id()}
-									referenceMessage={referenceMessage()}
-									message={props.messages[language]}
-								/>
-							</Show>
-						</>
-					)}
+					{(language, index) => {
+						//console.log(props.isTourExampleId)
+						//console.log(index())
+						return (
+							<>
+								<Show
+									when={
+										(filteredLanguages().includes(language) || filteredLanguages().length === 0) &&
+										// only render if visible or has been rendered before
+										(elementIsVisible() || hasBeenRendered())
+									}
+								>
+									<PatternEditor
+										referenceLanguage={inlangConfig()!.referenceLanguage}
+										language={language}
+										id={id()}
+										referenceMessage={referenceMessage()}
+										message={props.messages[language]}
+									/>
+								</Show>
+							</>
+						)
+					}}
 				</For>
 			</div>
 		</div>
