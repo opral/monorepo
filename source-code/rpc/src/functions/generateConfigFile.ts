@@ -9,6 +9,7 @@ import { prompt, promptVersion, temperature } from "./generateConfigFile.prompt.
 
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
+	applicationId: string
 }): Promise<Result<string, { errorMessage: string }>> {
 	try {
 		if (Object.keys(args.filesystemAsJson).length === 0) {
@@ -26,6 +27,7 @@ export async function generateConfigFileServer(args: {
 			distinctId: "unknown",
 			event: "RPC config file generated",
 			properties: {
+				applicationId: args.applicationId,
 				success: success ? true : false,
 				promptVersion: promptVersion,
 				iteration: success?.iteration ?? exception?.iteration,
