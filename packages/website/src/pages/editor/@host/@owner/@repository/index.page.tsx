@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query"
-import { createEffect, createMemo, For, Match, Switch } from "solid-js"
+import { createMemo, createResource, createSignal, For, Match, Switch, Show } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -9,6 +9,7 @@ import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import type { Language } from "@inlang/core/ast"
 import type { LintedMessage } from "@inlang/core/lint"
+import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 
@@ -181,36 +182,68 @@ function TheActualPage() {
 }
 
 function NoInlangConfigFoundCard() {
+	const { fs } = useEditorState()
+
+	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
+
+	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
+		const [configFile, error] = await rpc.generateConfigFile({
+			resolveFrom: "/",
+			// @ts-expect-error
+			fs: fs().promises,
+		})
+		if (error) {
+			return false
+		} else {
+			await fs().promises.writeFile("/inlang.config.js", configFile, { encoding: "utf8" })
+			return true
+		}
+	})
+
+	return (
+		<Show when={successGeneratingConfig() !== false} fallback={<CouldntGenerateConfigCard />}>
+			<div class="flex grow items-center justify-center">
+				<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+					<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
+					<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
+					<p class="pt-1.5 pb-8">
+						We can try to automatically the config for you. (The inlang.config.js file has not been
+						found at the root of the repository.)
+					</p>
+					<Switch>
+						<Match when={successGeneratingConfig() === undefined}>
+							<sl-button
+								prop:variant="primary"
+								prop:loading={successGeneratingConfig.loading}
+								onClick={() => {
+									setShouldGenerateConfig(true)
+									refetch()
+								}}
+							>
+								Try to generate config
+							</sl-button>
+						</Match>
+					</Switch>
+				</div>
+			</div>
+		</Show>
+	)
+}
+
+function CouldntGenerateConfigCard() {
 	return (
 		<div class="flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
-				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
-				<h1 class="font-semibold pt-5">
-					The{" "}
-					<code class="bg-secondary-container py-1 px-1.5 rounded text-on-secondary-container">
-						inlang.config.js
-					</code>{" "}
-					file has not been found.
-				</h1>
-				<p class="pt-1.5">
-					Make sure that the inlang.config.js file exists at the root of the repository, see
-					discussion{" "}
-					<a
-						href="https://github.com/inlang/inlang/discussions/258"
-						target="_blank"
-						class="link link-primary"
-					>
-						#258
-					</a>
-					.
+				<p class="text-4xl self-center" slot="suffix">
+					😔
 				</p>
-				<a
-					class="self-end pt-5"
-					href="https://inlang.com/documentation/getting-started"
-					target="_blank"
-				>
+				<h1 class="font-semibold pt-5">Couldn't generate the config file.</h1>
+				<p class="pt-1.5 pb-8">
+					Please refer to the documentation and write the config file manually.
+				</p>
+				<a class="self-center" href="/documentation" target="_blank">
 					<sl-button prop:variant="text">
-						I need help with getting started
+						Take me to the documentation
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
 				</a>

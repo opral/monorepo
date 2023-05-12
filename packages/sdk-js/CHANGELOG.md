@@ -1,5 +1,23 @@
 # @inlang/sdk-js
 
+## 0.4.4
+
+### Patch Changes
+
+- 561bd4d3: make vite plugin work on windows
+
+## 0.4.3
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+
+## 0.4.2
+
+### Patch Changes
+
+- 39bbda2b: use SvelteKit's prerender for Resource-Endpoint only if necessary
+
 ## 0.4.1
 
 ### Patch Changes

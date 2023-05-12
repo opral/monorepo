@@ -1,5 +1,6 @@
+import type { InlangConfigModule } from "../config/schema.js"
+import { setupConfig } from "../config/setupConfig.js"
 import type { InlangEnvironment } from "../environment/types.js"
-import { setupPlugins } from '../plugin/setupPlugins.js'
 import type { Result } from "../utilities/result.js"
 import { testConfig, TestConfigException } from "./testConfig.js"
 
@@ -16,20 +17,24 @@ export async function testConfigFile(args: {
 	file: string
 	env: InlangEnvironment
 }): Promise<Result<true, TestConfigException>> {
-	const [, importKeywordUsedException] = importKeywordUsed(args.file)
-	if (importKeywordUsedException) {
-		return [undefined, importKeywordUsedException]
-	}
+	try {
+		const [, importKeywordUsedException] = importKeywordUsed(args.file)
+		if (importKeywordUsedException) {
+			return [undefined, importKeywordUsedException]
+		}
+		const module: InlangConfigModule = await import(
+			"data:application/javascript;base64," + btoa(args.file)
+		)
+		const config = await setupConfig({ module, env: args.env })
+		const [, exception] = await testConfig({ config })
+		if (exception) {
+			return [undefined, exception]
+		}
 
-	const { defineConfig } = await import("data:application/javascript;base64," + btoa(args.file))
-	let config = await defineConfig(args.env)
-	config &&= await setupPlugins({ config, env: args.env })
-	const [, exception] = await testConfig({ config })
-	if (exception) {
-		return [undefined, exception]
+		return [true, undefined]
+	} catch (e) {
+		return [undefined, new TestConfigException((e as Error).message)]
 	}
-
-	return [true, undefined]
 }
 
 /**
@@ -47,7 +52,9 @@ function importKeywordUsed(configFile: string): Result<true, TestConfigException
 	if (hasError) {
 		return [
 			undefined,
-			new TestConfigException("Regular import statements are not allowed inside `inlang.config.js`. Use `$import` of the inlang environment instead. See https://inlang.com/documentation/inlang-environment.")
+			new TestConfigException(
+				"Regular import statements are not allowed inside `inlang.config.js`. Use `$import` of the inlang environment instead. See https://inlang.com/documentation/inlang-environment.",
+			),
 		]
 	}
 
