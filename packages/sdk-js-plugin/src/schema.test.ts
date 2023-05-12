@@ -47,6 +47,9 @@ describe("validateSdkConfig", () => {
 			    ],
 			    "strict": false,
 			  },
+			  "resources": {
+			    "cache": "build-time",
+			  },
 			}
 		`)
 	})
@@ -73,6 +76,9 @@ describe("validateSdkConfig", () => {
 			    ],
 			    "strict": false,
 			  },
+			  "resources": {
+			    "cache": "build-time",
+			  },
 			}
 		`)
 	})
@@ -98,6 +104,9 @@ describe("validateSdkConfig", () => {
 			      },
 			    ],
 			    "strict": false,
+			  },
+			  "resources": {
+			    "cache": "build-time",
 			  },
 			}
 		`)
@@ -126,6 +135,9 @@ describe("validateSdkConfig", () => {
 			      },
 			    ],
 			    "strict": false,
+			  },
+			  "resources": {
+			    "cache": "build-time",
 			  },
 			}
 		`)

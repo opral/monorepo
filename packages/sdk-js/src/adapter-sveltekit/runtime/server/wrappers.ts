@@ -1,6 +1,6 @@
 import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
-import type { RelativeUrl } from "../../../core/index.js"
+import type { RelativeUrl } from "../../../index.js"
 import { detectLanguage } from "../../../detectors/detectLanguage.js"
 import type { Detector } from "../../../detectors/types.js"
 import type { DataPayload } from "../shared/wrappers.js"

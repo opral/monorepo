@@ -1,8 +1,6 @@
 import { type SdkConfigInput, validateSdkConfig } from "./schema.js"
 import type { InlangConfig } from "@inlang/core/config"
 import ideExtensionPlugin, { type IdeExtensionSettings } from "@inlang/ide-extension-plugin"
-// @ts-ignore
-import jsonPlugin from "./_json-plugin.js"
 import type { InlangEnvironment } from "@inlang/core/environment"
 import { createPlugin } from "@inlang/core/plugin"
 
@@ -15,37 +13,16 @@ export const sdkPlugin = createPlugin<SdkConfigInput>(({ settings, env }) => ({
 
 		return {
 			sdk: parsedConfig,
-			...(await addDefaultResourcePluginIfMissing(config, env)), // TODO: remove this option at a later point, once we are sure that most people have added a resource plugin by themselves
 			...(await addIdeExtensionPluginIfMissing(config, env)),
 		}
 	},
 }))
-
-// this is currently not possible because the Plugin `config` function does not receive the existing config object
-const addDefaultResourcePluginIfMissing = async (
-	config: Partial<InlangConfig>,
-	env: InlangEnvironment,
-): Promise<Partial<InlangConfig>> => {
-	if (config.readResources) return {}
-
-	const pluginSetupFunction = jsonPlugin({
-		pathPattern: "./languages/{language}.json",
-	})
-
-	const plugin = pluginSetupFunction(env)
-
-	return plugin.config(config)
-}
 
 const addIdeExtensionPluginIfMissing = async (
 	config: Partial<InlangConfig> & { ideExtension?: IdeExtensionSettings },
 	env: InlangEnvironment,
 ): Promise<{ ideExtension: IdeExtensionSettings } | undefined> => {
 	if (config.ideExtension) return
-
-	// TODO: use ideExtensionPlugin once released
-
-	// TODO: check if correct
 
 	const pluginSetupFunction = ideExtensionPlugin({
 		messageReferenceMatchers: [
@@ -85,6 +62,17 @@ const addIdeExtensionPluginIfMissing = async (
 		extractMessageOptions: [
 			{
 				callback: (messageId) => `{i("${messageId}")}`,
+			},
+		],
+		documentSelectors: [
+			{
+				language: "javascript",
+			},
+			{
+				language: "typescript",
+			},
+			{
+				language: "svelte",
 			},
 		],
 	})

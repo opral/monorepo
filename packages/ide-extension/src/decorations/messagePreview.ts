@@ -10,10 +10,6 @@ export async function messagePreview(args: {
 	context: vscode.ExtensionContext
 }) {
 	const { context } = args
-	const { referenceLanguage } = state().config
-	const referenceResource = state().resources.find(
-		(resource) => resource.languageTag.name === referenceLanguage,
-	)
 	let activeTextEditor = vscode.window.activeTextEditor
 
 	const messagePreview = vscode.window.createTextEditorDecorationType({
@@ -22,62 +18,84 @@ export async function messagePreview(args: {
 		},
 	})
 
-	if (referenceLanguage === undefined) {
-		return vscode.window.showWarningMessage(
-			"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
-		)
-	}
-
 	updateDecorations()
 
 	async function updateDecorations() {
-		if (!activeTextEditor || !referenceResource) {
+		if (!activeTextEditor) {
 			return
 		}
 
+		// TODO: this is a hack to prevent the message preview from showing up in the inlang.config.js file
+		if (args.activeTextEditor.document.fileName.includes("inlang.config.js")) {
+			return activeTextEditor.setDecorations(messagePreview, [])
+		}
+
+		// Get the reference language
+		const { referenceLanguage } = state().config
+		const messageReferenceMatchers = state().config.ideExtension?.messageReferenceMatchers
+		if (referenceLanguage === undefined) {
+			return vscode.window.showWarningMessage(
+				"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
+			)
+		}
+		if (messageReferenceMatchers === undefined) {
+			return vscode.window.showWarningMessage(
+				"The `messageReferenceMatchers` must be defined in the inlang.config.js to show patterns inline.",
+			)
+		}
+
+		const ref = state().resources.find(
+			(resource) => resource.languageTag.name === referenceLanguage,
+		)
+		if (!ref) {
+			return vscode.window.showWarningMessage(
+				`The reference language '${referenceLanguage}' is not defined in the inlang.config.js.`,
+			)
+		}
+
+		// Get the message references
 		const wrappedDecorations = state().config.ideExtension?.messageReferenceMatchers.map(
 			async (matcher) => {
 				const messages = await matcher({
 					documentText: args.activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = query(referenceResource).get({
+					const translation = query(ref).get({
 						id: message.messageId,
-					})?.pattern.elements[0]
-					if (translation?.type === "Text") {
-						const previewText = translation.value
-						const truncatedPreviewText =
-							previewText.length > MAXIMUM_PREVIEW_LENGTH
-								? `${previewText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-								: previewText
-						const range = new vscode.Range(
-							// VSCode starts to count lines and columns from zero
-							new vscode.Position(
-								message.position.start.line - 1,
-								message.position.start.character - 1,
-							),
-							new vscode.Position(
-								message.position.end.line - 1,
-								message.position.end.character - 1,
-							),
-						)
-						const decoration: vscode.DecorationOptions = {
-							range,
-							renderOptions: {
-								after: {
-									contentText: truncatedPreviewText ?? `ERROR: '${message.messageId}' not found`,
-									backgroundColor: previewText ? "rgb(45 212 191/.15)" : "rgb(244 63 94/.15)",
-									border: previewText
-										? "1px solid rgb(45 212 191/.50)"
-										: "1px solid rgb(244 63 94/.50)",
-								},
+					})?.pattern.elements
+
+					const translationText =
+						translation && translation.length > 0 ? (translation[0]!.value as string) : undefined
+
+					const truncatedTranslationText =
+						translationText &&
+						(translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+							? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: translationText)
+					const range = new vscode.Range(
+						// VSCode starts to count lines and columns from zero
+						new vscode.Position(
+							message.position.start.line - 1,
+							message.position.start.character - 1,
+						),
+						new vscode.Position(message.position.end.line - 1, message.position.end.character - 1),
+					)
+					const decoration: vscode.DecorationOptions = {
+						range,
+						renderOptions: {
+							after: {
+								contentText:
+									truncatedTranslationText ??
+									`ERROR: '${message.messageId}' not found in reference language '${referenceLanguage}'`,
+								backgroundColor: translationText ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
+								border: translationText
+									? "1px solid rgb(45 212 191/.50)"
+									: "1px solid rgb(244 63 94/.50)",
 							},
-							hoverMessage: previewText,
-						}
-						return decoration
-					} else {
-						throw new Error("Only Text elements are supported for message previews.")
+						},
+						hoverMessage: translationText,
 					}
+					return decoration
 				})
 			},
 		)

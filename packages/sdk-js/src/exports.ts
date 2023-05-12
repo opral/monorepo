@@ -1,7 +1,7 @@
 import type { Language } from "@inlang/core/ast"
-import type { InlangFunction } from "../runtime/inlang-function.js"
-import type { Runtime } from "../runtime/runtime.js"
-import type { RelativeUrl } from "./utils.js"
+import type { InlangFunction } from "./runtime/inlang-function.js"
+import type { Runtime } from "./runtime/runtime.js"
+import type { RelativeUrl } from "./types.js"
 
 const error = new Error(
 	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/docs/sdk",
@@ -9,7 +9,7 @@ const error = new Error(
 
 export const referenceLanguage: Language = error as any
 
-export const languages: Language = [error] as any
+export const languages: Language[] = [error] as any
 
 export const language: Language = error as any
 
