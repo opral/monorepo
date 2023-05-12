@@ -90,7 +90,7 @@ const TourStepWrapper = (props: {
 	return (
 		<div
 			class={
-				"absolute p-2 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface " +
+				"absolute p-3 w-[300px] z-20 rounded-lg bg-inverted-surface shadow-xl text-on-inverted-surface text-xs " +
 				(props.isVisible && localStorage.isFirstUse ? "" : " hidden")
 			}
 			style={getPosition(props.position, props.offset) as JSX.CSSProperties}
@@ -103,32 +103,92 @@ const TourStepWrapper = (props: {
 // Tour steps
 
 const GithubLogin = () => {
-	return <div>Github</div>
+	return (
+		<div class="w-full flex flex-col gap-2">
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/github-login.svg"
+					alt="github-login"
+				/>
+			</div>
+			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
+				<p class="text-sm font-medium text-info-on-inverted-container">Github login</p>
+				<p>Login to Github to commit and push.</p>
+			</div>
+		</div>
+	)
 }
 
 const ForkRepository = () => {
-	return <div>Repo</div>
+	return (
+		<div class="w-full">
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/fork-repository.svg"
+					alt="fork-repository"
+				/>
+				Fork
+			</div>
+		</div>
+	)
 }
 
 const DefaultLanguages = () => {
 	const { setTourStep, filteredLanguages } = useEditorState()
 	return (
 		<div
+			class="w-full"
 			onClick={() =>
 				filteredLanguages().length > 0
 					? setTourStep("missing-message-rule")
 					: setTourStep("textfield")
 			}
 		>
-			Langugae
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/default-languages.svg"
+					alt="default-languages"
+				/>
+				Langugaes
+			</div>
 		</div>
 	)
 }
 
 const MissingMessageRule = () => {
-	return <div>Missing</div>
+	return (
+		<div class="w-full">
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/missing-message-rule.svg"
+					alt="missing-message-rule"
+				/>
+				Missing
+			</div>
+		</div>
+	)
 }
 
 const Textfield = () => {
-	return <div>Text</div>
+	return (
+		<div class="w-full">
+			<div class="w-full overflow-hidden">
+				<img
+					class="rounded"
+					width="100%"
+					src="/images/TourGuideSVGs/textfield.svg"
+					alt="textfield"
+				/>
+				Textfield
+			</div>
+		</div>
+	)
 }
