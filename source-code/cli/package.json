@@ -33,6 +33,7 @@
 		"clean": "shx rm -rf dist"
 	},
 	"dependencies": {
+		"@sentry/node": "^7.51.2",
 		"ora": "^6.3.0",
 		"ts-dedent": "^2.2.0"
 	},
