@@ -46,6 +46,7 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
+		"@inlang-git/fs": "^0.0.2",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@isomorphic-git/pgp-plugin": "^0.0.7",
 		"git-http-mock-server": "^1.1.0"
