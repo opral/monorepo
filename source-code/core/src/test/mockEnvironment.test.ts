@@ -34,7 +34,6 @@ it("should copy multiple directories into the environment", async () => {
 })
 
 it("should be able to import JavaScript from the environment", async () => {
-	// const fs = memfs.promises as InlangEnvironment["$fs"]
 	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.js", "export const x = 'hello'")
@@ -44,7 +43,6 @@ it("should be able to import JavaScript from the environment", async () => {
 })
 
 it("should give an error if the path does not exist (hinting at a current working directory problem)", async () => {
-	// const fs = memfs.promises as InlangEnvironment["$fs"]
 	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	// relative imports are relative to the current working directory, not the file.
 	// thus, if you run the tests from the root of the project, the path will be wrong.
