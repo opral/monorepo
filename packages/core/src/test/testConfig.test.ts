@@ -8,11 +8,6 @@ import type { InlangConfig } from "../config/index.js"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
-	// TODO fix cwd used
-	// memfs uses process.cwd under the hood.
-	// we need a custom fs implementation that does not rely on process.cwd
-	// this line potentially breaks code that relies on process.cwd
-	//	process.cwd = () => "/"
 	// mock files
 	await env.$fs.writeFile(
 		"./en.json",
