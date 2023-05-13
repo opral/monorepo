@@ -229,7 +229,7 @@ describe('clone', () => {
     expect(await fs.exists(gitdir)).toBe(false, `'gitdir' does not exist`)
   })
 
-  it.skip('should set up the remote tracking branch by default', async () => {
+  it('should set up the remote tracking branch by default', async () => {
     const { fs, dir, gitdir } = await makeFixture('isomorphic-git')
     await clone({
       fs,
