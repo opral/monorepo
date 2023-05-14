@@ -8,7 +8,7 @@ for (const [name, fs] of Object.entries(filesystems)) {
 		const rootTempDir = new URL("./__test_fromJson", import.meta.url).pathname
 
 		afterAll(async () => {
-			await fs.rmdir(rootTempDir)
+			await fs.rm(rootTempDir, { recursive: true })
 		})
 
 		it("should be able to import files from JSON", async () => {
