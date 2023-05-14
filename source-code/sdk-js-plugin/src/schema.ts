@@ -20,13 +20,12 @@ const zUrlNegotiatorVariantQuery = object({
 const zUrlNegotiator = object({
 	type: literal("url"),
 	variant: union(
-			[
-				zUrlNegotiatorVariantPath,
-				// zUrlNegotiatorVariantDomain, // TODO: introduce option later
-				// zUrlNegotiatorVariantQuery, // TODO: introduce option later
-			] as any /* typecast needed because we currently only specify a single item */,
-		)
-		.default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
+		[
+			zUrlNegotiatorVariantPath,
+			// zUrlNegotiatorVariantDomain, // TODO: introduce option later
+			// zUrlNegotiatorVariantQuery, // TODO: introduce option later
+		] as any /* typecast needed because we currently only specify a single item */,
+	).default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
 })
 
 const zCookieNegotiator = object({
@@ -65,7 +64,7 @@ const zLanguageNegotiationStrategy = union([
 
 const zResources = object({
 	// in the future we will also support `number` to specify a TTL until resources get updated
-	cache: literal('build-time').default('build-time'),
+	cache: literal("build-time").default("build-time"),
 })
 
 // ------------------------------------------------------------------------------------------------
@@ -84,11 +83,10 @@ const zSdkConfig = object({
 					],
 			),
 	}),
-	resources: zResources.default({ cache: 'build-time' }),
+	resources: zResources.default({ cache: "build-time" }),
 })
 
-export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
-	zSdkConfig.parse(config)
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkConfig.parse(config)
 
 export type SdkConfigInput = z.input<typeof zSdkConfig>
 

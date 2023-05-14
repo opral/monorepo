@@ -24,7 +24,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/design-system",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/design-system",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@ctrl/tinycolor": "^3.4.1"

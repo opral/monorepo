@@ -7,7 +7,7 @@ import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (root: boolean) => `
 import { browser } from "$app/environment";

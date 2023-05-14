@@ -1,4 +1,4 @@
-import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
+import { initState } from "@inlang/sdk-js/adapter-sveltekit/server"
 import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { PageServerLoad } from "./$types.js"
 
@@ -7,7 +7,7 @@ export const load = initServerLoadWrapper<PageServerLoad>().wrap(async (_, { i }
 })
 
 export const entries = async () => {
-	const { languages } = await initState(await import('../../../inlang.config.js'))
+	const { languages } = await initState(await import("../../../inlang.config.js"))
 
-	return languages.map(language => ({ lang: language }))
+	return languages.map((language) => ({ lang: language }))
 }

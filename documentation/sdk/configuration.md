@@ -20,15 +20,15 @@ export async function defineConfig(env) {
 	return {
 		referenceLanguage: "en",
 		plugins: [
+			// ... other plugins e.g. to read and write Resources
+			// see https://github.com/inlang/ecosystem#resources
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [
-						{ type: "localStorage" }
-					],
+					strategies: [{ type: "localStorage" }],
 				},
 				resources: {
-					cache: "Build-time"
-				}
+					cache: "Build-time",
+				},
 			}),
 		],
 	}
