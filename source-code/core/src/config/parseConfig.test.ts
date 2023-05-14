@@ -1,10 +1,10 @@
 import type * as ast from "@inlang/core/ast"
 import { expect, it } from "vitest"
 import { parseConfig } from "./parseConfig.js"
-import { mockEnvironment } from "./mockEnvironment.js"
 import type { Language } from "@inlang/core/ast"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { InlangConfig } from "../config/index.js"
+import { mockEnvironment } from '../test/mockEnvironment.js'
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
