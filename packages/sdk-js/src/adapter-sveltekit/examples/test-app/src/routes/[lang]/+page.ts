@@ -1,3 +1,3 @@
 export const load = async ({ data }) => {
-	return { ...data, 'page.js': 1 }
+	return { ...data, "page.js": 1 }
 }

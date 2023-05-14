@@ -29,8 +29,8 @@ Inlang also provides custom solutions that are built specifically for certain Fr
 
 ### Supported Frameworks
 
- - [SvelteKit](/documentation/sdk/sveltekit)
- - [Your own custom solution](/documentation/sdk/custom)
+- [SvelteKit](/documentation/sdk/sveltekit)
+- [Your own custom solution](/documentation/sdk/custom)
 
 #### Your favorite frameworks is missing?
 

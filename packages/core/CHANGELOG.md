@@ -1,5 +1,12 @@
 # @inlang/core
 
+## 0.8.3
+
+### Patch Changes
+
+- f8849678: improve error messages
+- f8849678: expose `parseConfig` functionality
+
 ## 0.8.2
 
 ### Patch Changes

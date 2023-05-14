@@ -3,6 +3,8 @@ import type { Plugin } from "./types.js"
 /**
  * Wraps a plugin with error handling
  *
+ * ! NOT WORKING RIGHT NOW SEE https://github.com/inlang/inlang/issues/604
+ *
  * Increases DX and debuggability by providing better error messages
  * depending on the plugin that caused the error.
  */

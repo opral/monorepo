@@ -1,8 +1,9 @@
 import type { InlangConfig, InlangConfigModule } from "./schema.js"
 import { setupPlugins } from "../plugin/setupPlugins.js"
-import { zConfig } from "./zod.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { dedent } from "ts-dedent"
+import { parseConfig } from "./parseConfig.js"
+import { ZodError } from "zod"
 
 /**
  * Sets up the inlang config module.
@@ -23,27 +24,27 @@ export async function setupConfig(args: {
 	let config = await args.module.defineConfig(args.env)
 	const [configWithPlugins, pluginErrors] = await setupPlugins({ config, env: args.env })
 	config = configWithPlugins
-	const configTest = zConfig.passthrough().safeParse(configWithPlugins)
+	const [parsedConfig, testConfigException] = await parseConfig({ config: config as InlangConfig })
 
 	// throw an error. the config is broken without a path to recovery
-	if (!configTest.success) {
+	if (testConfigException) {
 		throw new Error(dedent`
-The inlang.config.js is invalid. 
+			The inlang.config.js is invalid.
 
-# The following errors occured during the setup of plugins:
+			# The following errors occurred during the setup of plugins:
 
-${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
+			${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
 
-# The following errors occured during the validation of the config:
+			# The following errors occurred during the validation of the config:
 
-${configTest.error.message}
+			${formatErrors(testConfigException)}
 
----
+			---
 
-If plugins return errors, chances are high that the plugin errors are the root cause
-for the config errors. Try to fix the plugin errors first.
+			If plugins return errors, chances are high that the plugin errors are the root cause
+			for the config errors. Try to fix the plugin errors first.
 
-`)
+		`)
 	}
 
 	// plugins returned an error but the config is still usable
@@ -52,5 +53,13 @@ for the config errors. Try to fix the plugin errors first.
 		for (const e of pluginErrors) console.error(e)
 	}
 
-	return configTest.data as InlangConfig
+	return parsedConfig
+}
+
+const formatErrors = (error: Error) => {
+	if (error instanceof ZodError) {
+		return error.errors.map((e) => `[${e.path}] ${e.message}`).join("\n")
+	}
+
+	return error.message
 }
