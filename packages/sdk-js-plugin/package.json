@@ -34,7 +34,8 @@
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",
 		"tsc:watch": "tsc --noEmit --emitDeclarationOnly false --watch",
 		"tsc:watch:plugin": "tsc -p tsconfig.build.plugin.json --watch",
-		"vitest:watch": "vitest watch --passWithNoTests --coverage"
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
