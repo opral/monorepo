@@ -40,7 +40,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
 			if (typeof data === "string") {
-				let buf = []
+				const buf = []
 				for (const c of data) buf.push(c.codePointAt(0) ?? 0)
 				data = new Uint8Array(buf)
 			}
