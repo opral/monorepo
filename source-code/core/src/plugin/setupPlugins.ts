@@ -53,27 +53,31 @@ export async function setupPlugins(args: {
 			// continue with next plugin.
 			// if one plugin fails, the whole app should not crash.
 
-			if (!error || typeof error !== 'object' || !('message' in error)) {
+			if (!error || typeof error !== "object" || !("message" in error)) {
 				errors.push(new PluginSetupError("" + error))
 				continue
 			}
 
 			const id = (args.config.plugins[i] as Plugin)?.id
 			if (!id) {
-				errors.push(new PluginSetupError(dedent`
+				errors.push(
+					new PluginSetupError(dedent`
 					Failed to setup a plugin:
 
 					${error?.message ?? "Unknown error"}
 
 					It seems a plugin was configured incorrectly.
 					Try to change 'plugin' to 'plugin()' or consult the documentation of that plugin.
-				`));
+				`),
+				)
 			} else {
-				errors.push(new PluginSetupError(dedent`
+				errors.push(
+					new PluginSetupError(dedent`
 					Failed to setup plugin '${id}':
 
 					${error?.message ?? "Unknown error"}
-				`));
+				`),
+				)
 			}
 		}
 	}

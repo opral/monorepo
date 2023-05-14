@@ -6,8 +6,8 @@ it("should setup the config with plugins", async () => {
 		module: {
 			defineConfig: async () => ({
 				readResources: async () => [
-					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
-					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
 				],
 				writeResources: async () => undefined,
 				plugins: [
@@ -35,8 +35,8 @@ it("should not remove properties from the config", async () => {
 		module: {
 			defineConfig: async () => ({
 				readResources: async () => [
-					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
-					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
 				],
 				writeResources: async () => undefined,
 				someProperty: "someValue",
@@ -106,8 +106,8 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 					referenceLanguage: "de",
 					languages: ["de", "en"],
 					readResources: async () => [
-						{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
-						{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+						{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+						{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
 					],
 					writeResources: async () => undefined,
 					plugins: [

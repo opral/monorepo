@@ -110,8 +110,10 @@ function assertConfigWithSdk(
 		)
 	}
 
-	if (!('sdk' in config)) {
-		throw new InlangSdkConfigError('Invalid config. Make sure to add the `sdkPlugin` to your `inlang.config.js` file. See https://inlang.com/documentation/sdk/configuration')
+	if (!("sdk" in config)) {
+		throw new InlangSdkConfigError(
+			"Invalid config. Make sure to add the `sdkPlugin` to your `inlang.config.js` file. See https://inlang.com/documentation/sdk/configuration",
+		)
 	}
 }
 

@@ -2,8 +2,8 @@ import type { InlangConfig, InlangConfigModule } from "./schema.js"
 import { setupPlugins } from "../plugin/setupPlugins.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { dedent } from "ts-dedent"
-import { parseConfig } from './parseConfig.js'
-import { ZodError } from 'zod'
+import { parseConfig } from "./parseConfig.js"
+import { ZodError } from "zod"
 
 /**
  * Sets up the inlang config module.
@@ -44,7 +44,7 @@ export async function setupConfig(args: {
 			If plugins return errors, chances are high that the plugin errors are the root cause
 			for the config errors. Try to fix the plugin errors first.
 
-		`);
+		`)
 	}
 
 	// plugins returned an error but the config is still usable
@@ -58,8 +58,8 @@ export async function setupConfig(args: {
 
 const formatErrors = (error: Error) => {
 	if (error instanceof ZodError) {
-		return error.errors.map((e) => `[${e.path}] ${e.message}`).join("\n");
+		return error.errors.map((e) => `[${e.path}] ${e.message}`).join("\n")
 	}
 
-	return error.message;
+	return error.message
 }
