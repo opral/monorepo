@@ -57,7 +57,7 @@ const addIdeExtensionPluginIfMissing = async (
 					}
 				}
 				return result
-			}
+			},
 		],
 		extractMessageOptions: [
 			{

@@ -11,4 +11,3 @@
 </div>
 
 # Inlang SDK-JS Plugin
-

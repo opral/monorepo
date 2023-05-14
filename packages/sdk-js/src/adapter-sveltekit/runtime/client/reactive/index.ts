@@ -63,6 +63,6 @@ const route = (href: RelativeUrl) => href
 export function readonly<T>(store: Readable<T>): Readable<T> {
 	return {
 		// @ts-ignore
-		subscribe: store.subscribe.bind(store)
-	};
+		subscribe: store.subscribe.bind(store),
+	}
 }

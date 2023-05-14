@@ -22,13 +22,11 @@ export async function defineConfig(env) {
 		plugins: [
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [
-						{ type: "localStorage" }
-					],
+					strategies: [{ type: "localStorage" }],
 				},
 				resources: {
-					cache: "Build-time"
-				}
+					cache: "Build-time",
+				},
 			}),
 		],
 	}

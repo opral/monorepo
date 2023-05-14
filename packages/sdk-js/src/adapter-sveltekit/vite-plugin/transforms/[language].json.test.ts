@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest"
 import { dedent } from "ts-dedent"
-import type { TransformConfig } from '../config.js'
+import type { TransformConfig } from "../config.js"
 import { transformLanguageJson } from "../transforms/[language].json.js"
-import { getTransformConfig } from './test-helpers/config.js'
+import { getTransformConfig } from "./test-helpers/config.js"
 
 describe("transformLanguageJson", () => {
 	it("adds GET endpoint to an empty file", () => {
@@ -23,11 +23,14 @@ describe("transformLanguageJson", () => {
 	})
 
 	it("should add `entries` if SvelteKit version >= 1.16.3", () => {
-		const code = transformLanguageJson(getTransformConfig({
-			svelteKit: {
-				version: '1.16.3' as TransformConfig['svelteKit']['version']
-			}
-		}), "")
+		const code = transformLanguageJson(
+			getTransformConfig({
+				svelteKit: {
+					version: "1.16.3" as TransformConfig["svelteKit"]["version"],
+				},
+			}),
+			"",
+		)
 		expect(code).toMatchInlineSnapshot(`
 			"
 			import { json } from \\"@sveltejs/kit\\"
@@ -51,13 +54,16 @@ describe("transformLanguageJson", () => {
 	})
 
 	it.skip("adds GET endpoint to a file with arbitrary contents", () => {
-		const code = transformLanguageJson(getTransformConfig(), dedent`
+		const code = transformLanguageJson(
+			getTransformConfig(),
+			dedent`
 			import { error } from "@sveltejs/kit"
 
 			export const GET = () => {
 				throw error(500, 'not implemented')
 			}
-		`)
+		`,
+		)
 		expect(code).toMatchInlineSnapshot(`
 			"
 			import { json, error } from \\"@sveltejs/kit\\"
@@ -75,21 +81,31 @@ describe("transformLanguageJson", () => {
 
 	describe("should throw if GET endpoint is already defined", () => {
 		it.skip("arrow function", () => {
-			expect(() => transformLanguageJson(getTransformConfig(), dedent`
+			expect(() =>
+				transformLanguageJson(
+					getTransformConfig(),
+					dedent`
 				import { error } from "@sveltejs/kit"
 
 				export const GET = () => json({ hackerman: true })
-			`)).toThrowError()
+			`,
+				),
+			).toThrowError()
 		})
 
 		it.skip("function keyword", () => {
-			expect(() => transformLanguageJson(getTransformConfig(), `
+			expect(() =>
+				transformLanguageJson(
+					getTransformConfig(),
+					`
 				import { error } from "@sveltejs/kit"
 
 				export async function GET({ params }) {
 					return new Response(params.language)
 				}
-			`)).toThrowError()
+			`,
+				),
+			).toThrowError()
 		})
 	})
 })
