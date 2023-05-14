@@ -7,7 +7,7 @@
 	],
 	"scripts": {
 		"build": "turbo run build",
-		"dev": "turbo run dev",
+		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "turbo run test",
 		"---- LINT ----------------------------------------------------------": "",
