@@ -2,7 +2,7 @@ import type { InlangConfigModule } from "../config/schema.js"
 import { setupConfig } from "../config/setupConfig.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { Result } from "../utilities/result.js"
-import { testConfig, TestConfigException } from "./testConfig.js"
+import { parseConfig, ParseConfigException } from "../config/parseConfig.js"
 
 /**
  * Validates the inlang.config.js file.
@@ -16,7 +16,7 @@ import { testConfig, TestConfigException } from "./testConfig.js"
 export async function testConfigFile(args: {
 	file: string
 	env: InlangEnvironment
-}): Promise<Result<true, TestConfigException>> {
+}): Promise<Result<true, ParseConfigException>> {
 	try {
 		const [, importKeywordUsedException] = importKeywordUsed(args.file)
 		if (importKeywordUsedException) {
@@ -26,21 +26,21 @@ export async function testConfigFile(args: {
 			"data:application/javascript;base64," + btoa(args.file)
 		)
 		const config = await setupConfig({ module, env: args.env })
-		const [, exception] = await testConfig({ config })
+		const [, exception] = await parseConfig({ config })
 		if (exception) {
 			return [undefined, exception]
 		}
 
 		return [true, undefined]
 	} catch (e) {
-		return [undefined, new TestConfigException((e as Error).message)]
+		return [undefined, new ParseConfigException((e as Error).message)]
 	}
 }
 
 /**
  * Detects if the import keyword is used in the config file.
  */
-function importKeywordUsed(configFile: string): Result<true, TestConfigException> {
+function importKeywordUsed(configFile: string): Result<true, ParseConfigException> {
 	// This regex uses a negative lookbehind assertion (?<!...)
 	// to match import keywords that are not immediately preceded
 	// by a dollar sign. The \b ensures that the regex matches
@@ -52,7 +52,7 @@ function importKeywordUsed(configFile: string): Result<true, TestConfigException
 	if (hasError) {
 		return [
 			undefined,
-			new TestConfigException(
+			new ParseConfigException(
 				"Regular import statements are not allowed inside `inlang.config.js`. Use `$import` of the inlang environment instead. See https://inlang.com/documentation/inlang-environment.",
 			),
 		]
