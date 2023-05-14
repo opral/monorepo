@@ -25,7 +25,7 @@ export async function parseConfig(args: {
 	try {
 		// validate the config -> throws if invalid
 		hasSetupAResourcePlugin(args.config)
-		const parsedConfig = zConfig.parse(args.config)
+		const parsedConfig = zConfig.passthrough().parse(args.config)
 		referenceLanguageMustBeInLanguages(args.config)
 		const resources = await args.config.readResources({ config: args.config })
 		validateResources(resources)

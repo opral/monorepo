@@ -5,8 +5,11 @@ it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: () => undefined as any,
-				writeResources: () => undefined as any,
+				readResources: async () => [
+					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
+					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+				],
+				writeResources: async () => undefined,
 				plugins: [
 					{
 						id: "mock.plugin",
@@ -31,8 +34,11 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: () => undefined as any,
-				writeResources: () => undefined as any,
+				readResources: async () => [
+					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
+					{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+				],
+				writeResources: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
 					{
@@ -68,7 +74,7 @@ it("should throw if the config is invalid", async () => {
 		setupConfig({
 			module: {
 				defineConfig: async () => ({
-					writeResources: () => undefined as any,
+					writeResources: async () => undefined,
 					someProperty: "someValue",
 					plugins: [
 						{
@@ -98,9 +104,12 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 			module: {
 				defineConfig: async () => ({
 					referenceLanguage: "de",
-					languages: ["en", "de"],
-					readResources: () => undefined as any,
-					writeResources: () => undefined as any,
+					languages: ["de", "en"],
+					readResources: async () => [
+						{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'en' }, body: [] },
+						{ type: 'Resource', languageTag: { type: 'LanguageTag', name: 'de' }, body: [] },
+					],
+					writeResources: async () => undefined,
 					plugins: [
 						{
 							id: "mock.plugin",
