@@ -15,6 +15,7 @@ describe.skip("generating config files", () => {
 			}
 			const [file, exception] = await generateConfigFileServer({
 				filesystemAsJson,
+				applicationId: "",
 			})
 			if (exception) {
 				console.error(exception)
@@ -37,7 +38,10 @@ describe.skip("generating config files", () => {
 				"/src/entry.js": btoa("export function hello() { return 'hello' }"),
 				"/main.js": btoa("export function hello() { return 'hello' }"),
 			}
-			const [file, exception] = await generateConfigFileServer({ filesystemAsJson })
+			const [file, exception] = await generateConfigFileServer({
+				filesystemAsJson,
+				applicationId: "",
+			})
 			if (exception) {
 				console.error(exception)
 				console.log(file)
@@ -54,7 +58,7 @@ describe.skip("generating config files", () => {
 				"/d/xx.jso3n": JSON.stringify({ hello: "hello from en" }),
 				"/ff/ffff.po": "another file format. good luck chat gpt",
 			}
-			const [, exception] = await generateConfigFileServer({ filesystemAsJson })
+			const [, exception] = await generateConfigFileServer({ filesystemAsJson, applicationId: "" })
 			expect(exception).toBeDefined()
 		},
 		{ timeout: 100000 },
