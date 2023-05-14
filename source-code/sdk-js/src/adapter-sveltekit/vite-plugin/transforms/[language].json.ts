@@ -1,4 +1,4 @@
-import type { TransformConfig } from '../config.js'
+import type { TransformConfig } from "../config.js"
 
 // TODO: @benjaminpreiss: transform
 export const transformLanguageJson = (config: TransformConfig, code: string) => {
@@ -15,16 +15,24 @@ export const GET = async ({ params: { language } }) => {
 	await reloadResources()
 	return json(getResource(language) || null)
 }
-${config.isStatic && config.inlang.sdk.resources.cache === 'build-time' ? `
+${
+	config.isStatic && config.inlang.sdk.resources.cache === "build-time"
+		? `
 export const prerender = true
-`: ''}
-${config.svelteKit.version || '' >= '1.16.3' ? `
+`
+		: ""
+}
+${
+	config.svelteKit.version || "" >= "1.16.3"
+		? `
 import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
 
 export const entries = async () => {
 	const { languages } = await initState(await import('../../../../inlang.config.js'))
 
 	return languages.map(language => ({ language }))
-}` : ''}
+}`
+		: ""
+}
 `
 }

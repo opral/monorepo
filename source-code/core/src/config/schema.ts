@@ -1,8 +1,8 @@
 import type { Language } from "../ast/index.js"
 import type * as ast from "../ast/index.js"
-import type { InlangEnvironment } from '../environment/types.js'
+import type { InlangEnvironment } from "../environment/types.js"
 import type { LintRule } from "../lint/rule.js"
-import type { Plugin, PluginSetupFunction } from '../plugin/types.js'
+import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
 
 /**
  * The entrypoint for inlang.

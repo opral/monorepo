@@ -4,7 +4,7 @@ import { context } from "esbuild"
 const dev = !!process.env.DEV
 
 /** @type {import('esbuild').BuildOptions} */
-const options = ({
+const options = {
 	entryPoints: ["./src/adapter-sveltekit/index.ts"],
 	outfile: "./dist/adapter-sveltekit/index.js",
 	bundle: true,
@@ -14,14 +14,14 @@ const options = ({
 	sourcemap: !dev,
 	minify: !dev,
 	splitting: false,
-	external: ['svelte', '@sveltejs/kit'],
+	external: ["svelte", "@sveltejs/kit"],
 	plugins: [
 		{
-			name: 'logger',
-			setup: ({ onEnd }) => onEnd(() => console.info('🎉 changes processed'))
-		}
+			name: "logger",
+			setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
+		},
 	],
-})
+}
 
 const ctx = await context(options)
 
