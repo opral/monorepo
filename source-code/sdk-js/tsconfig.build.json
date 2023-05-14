@@ -6,7 +6,7 @@
 		"**/*.test-d.ts",
 		"**/examples/*",
 		"src/adapter-sveltekit/index.ts",
-		"src/adapter-sveltekit/vite-plugin/**",
+		"src/adapter-sveltekit/vite-plugin/**"
 	],
 	"compilerOptions": {
 		"sourceMap": false

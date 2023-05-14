@@ -7,7 +7,7 @@ import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 // TODO: refactor together with `+layout.server.js.ts`
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
@@ -22,13 +22,14 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 		`)
 	}
 
-
 	const n = types.namedTypes
 	const b = types.builders
 	const ast = parseModule(code)
 
 	// Merge imports with required imports
-	const importsAst = parseModule('import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";')
+	const importsAst = parseModule(
+		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
+	)
 	deepMergeObject(ast, importsAst)
 	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression([], b.blockStatement([]))
 	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "load", emptyArrowFunctionDeclaration)

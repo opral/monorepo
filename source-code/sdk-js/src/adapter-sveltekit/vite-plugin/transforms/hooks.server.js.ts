@@ -7,7 +7,7 @@ import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -23,18 +23,20 @@ import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 const options = (config: TransformConfig) => dedent`
 	{
 		inlangConfigModule: import("../inlang.config.js"),
-		getLanguage: ${(config.languageInUrl
-		? `({ url }) => url.pathname.split("/")[1]`
-		: `() => undefined`
-	)},
-	${(config.languageInUrl && !config.isStatic
-		? `
+		getLanguage: ${
+			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
+		},
+	${
+		config.languageInUrl && !config.isStatic
+			? `
 		initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 		redirect: {
 			throwable: redirect,
 			getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 		},
-	`: '')}
+	`
+			: ""
+	}
 	}`
 
 export const transformHooksServerJs = (config: TransformConfig, code: string) => {

@@ -1,4 +1,4 @@
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 import type { TransformConfig } from "../config.js"
 
 // TODO: @benjaminpreiss: transform
@@ -7,14 +7,20 @@ export const transformJs = (config: TransformConfig, code: string) => {
 		throw Error(dedent`
 			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
 
-			// client code${config.languageInUrl ? '' : dedent`
+			// client code${
+				config.languageInUrl
+					? ""
+					: dedent`
 			import { get } from "svelte/store"
-			`}
-			import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? 'not-reactive' : `reactive`}"
+			`
+			}
+			import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/${
+				config.languageInUrl ? "not-reactive" : `reactive`
+			}"
 
 			export const clientFn = () => {
 				const { i } = getRuntimeFromContext()
-				console.log(${config.languageInUrl ? 'i' : `get(i)`}('hello.inlang'))
+				console.log(${config.languageInUrl ? "i" : `get(i)`}('hello.inlang'))
 			}
 
 			// server code

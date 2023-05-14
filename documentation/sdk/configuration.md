@@ -24,13 +24,11 @@ export async function defineConfig(env) {
 			// see https://github.com/inlang/ecosystem#resources
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [
-						{ type: "localStorage" }
-					],
+					strategies: [{ type: "localStorage" }],
 				},
 				resources: {
-					cache: "Build-time"
-				}
+					cache: "Build-time",
+				},
 			}),
 		],
 	}

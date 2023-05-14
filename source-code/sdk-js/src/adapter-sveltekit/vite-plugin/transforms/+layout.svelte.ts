@@ -85,11 +85,11 @@ ${codeWithoutTypes}`
 				(node) =>
 					n.ExportNamedDeclaration.check(node)
 						? (meta) => {
-							const { parent, index } = meta.get(
-								node,
-							) as NodeInfoMapEntry<types.namedTypes.Program>
-							if (index != undefined) parent.body.splice(index, 1)
-						}
+								const { parent, index } = meta.get(
+									node,
+								) as NodeInfoMapEntry<types.namedTypes.Program>
+								if (index != undefined) parent.body.splice(index, 1)
+						  }
 						: undefined,
 			)
 
@@ -100,7 +100,7 @@ ${codeWithoutTypes}`
 				importNames?.push(["language", "language"])
 
 			// Svelte bug: store imports need to come first
-			importNames.sort(([identifier]) => identifier === "language" || identifier === "i" ? -1 : 1)
+			importNames.sort(([identifier]) => (identifier === "language" || identifier === "i" ? -1 : 1))
 
 			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
 			const reactiveImportNames = importNames.filter(([, local]) =>
@@ -191,9 +191,8 @@ ${codeWithoutTypes}`
 			})
 
 			return { ...options, ...generated }
-		}
-	}
-	)
+		},
+	})
 
 	const processedMarkup = await preprocess(processedScript.code, {
 		markup: (options) => {
@@ -204,15 +203,16 @@ ${codeWithoutTypes}`
 			const insertSlot = htmlIsEmpty(parsed.html)
 			s.appendRight(
 				parsed.html.start,
-				'' +
-				(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : '') +
-				(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`)
+				"" +
+					(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : "") +
+					(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`),
 			)
 			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
-			s.append((insertSlot ? `<slot />` : ``) +
-				(config.languageInUrl ? `{/key}` : `{/if}`) +
-				(config.languageInUrl && config.isStatic ? `{/if}` : '')
+			s.append(
+				(insertSlot ? `<slot />` : ``) +
+					(config.languageInUrl ? `{/key}` : `{/if}`) +
+					(config.languageInUrl && config.isStatic ? `{/if}` : ""),
 			)
 			const map = s.generateMap({
 				source: config.sourceFileName,
@@ -222,8 +222,7 @@ ${codeWithoutTypes}`
 			const code = s.toString()
 			return { code, map }
 		},
-	}
-	)
+	})
 
 	return processedMarkup.code
 }
