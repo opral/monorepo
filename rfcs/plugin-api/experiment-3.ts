@@ -3,9 +3,9 @@
 import { InlangConfig } from "@inlang/core/src/config"
 import { InlangEnvironment } from "@inlang/core/src/environment/types"
 
-function readResources(args: any): any { }
+function readResources(args: any): any {}
 
-function getLanguages(args: any): any { }
+function getLanguages(args: any): any {}
 
 export const myPlugin = createPlugin<{ pathPattern: string }>((settings) => {
 	return {
@@ -34,13 +34,11 @@ export const myPlugin = createPlugin<{ pathPattern: string }>((settings) => {
  * 	 	})
  *   ]
  */
-type InitPluginFunction<PluginSettings> = (
-	settings: PluginSettings,
-) => Plugin
+type InitPluginFunction<PluginSettings> = (settings: PluginSettings) => Plugin
 
 type Plugin = {
 	id: string
-	defineConfig(args: { config: Readonly<Partial<InlangConfig>>, env: InlangEnvironment }): void
+	defineConfig(args: { config: Readonly<Partial<InlangConfig>>; env: InlangEnvironment }): void
 }
 
 function createPlugin<PluginSettings>(
@@ -50,4 +48,4 @@ function createPlugin<PluginSettings>(
 }
 
 // usage:
-myPlugin({ pathPattern: '' }).defineConfig({ config: {}, env: {} as InlangEnvironment })
+myPlugin({ pathPattern: "" }).defineConfig({ config: {}, env: {} as InlangEnvironment })

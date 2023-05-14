@@ -18,7 +18,7 @@ async function copyDirectory(args: {
 		const path = normalizePath(`${args.path}/${subpath}`)
 		const stats = await args.copyFrom.lstat(path)
 		if (stats.isFile()) {
-			const file = await args.copyFrom.readFile(path, { encoding: "binary" })
+			const file = await args.copyFrom.readFile(path)
 			await args.copyTo.writeFile(path, file)
 		}
 

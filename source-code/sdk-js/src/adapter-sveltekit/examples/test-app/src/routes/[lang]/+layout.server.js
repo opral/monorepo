@@ -1,3 +1,3 @@
 export const load = () => {
-	return { 'layout.server.js': 1 }
+	return { "layout.server.js": 1 }
 }

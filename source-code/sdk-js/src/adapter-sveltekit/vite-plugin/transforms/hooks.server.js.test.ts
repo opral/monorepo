@@ -140,9 +140,12 @@ describe("transformHooksServerJs", () => {
 
 	describe("variations", () => {
 		it("languageInUrl", () => {
-			const code = transformHooksServerJs(getTransformConfig({
-				languageInUrl: true,
-			}), "")
+			const code = transformHooksServerJs(
+				getTransformConfig({
+					languageInUrl: true,
+				}),
+				"",
+			)
 			expect(code).toMatchInlineSnapshot(`
 				"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { redirect } from \\"@sveltejs/kit\\";
@@ -168,10 +171,13 @@ describe("transformHooksServerJs", () => {
 		})
 
 		it("languageInUrl and isStatic", () => {
-			const code = transformHooksServerJs(getTransformConfig({
-				languageInUrl: true,
-				isStatic: true,
-			}), "")
+			const code = transformHooksServerJs(
+				getTransformConfig({
+					languageInUrl: true,
+					isStatic: true,
+				}),
+				"",
+			)
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 
@@ -188,9 +194,12 @@ describe("transformHooksServerJs", () => {
 		})
 
 		it("isStatic", () => {
-			const code = transformHooksServerJs(getTransformConfig({
-				isStatic: true,
-			}), "")
+			const code = transformHooksServerJs(
+				getTransformConfig({
+					isStatic: true,
+				}),
+				"",
+			)
 			expect(code).toMatchInlineSnapshot(`
 				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 

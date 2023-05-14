@@ -1,5 +1,5 @@
 rootDir="../../.."
-srcDir="$rootDir/../../node_modules/isomorphic-git/__tests__"
+srcDir="$rootDir/node_modules/isomorphic-git/__tests__"
 destDir="$rootDir/src/raw/tests"
 
 transform() {

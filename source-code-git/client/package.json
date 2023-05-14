@@ -14,7 +14,7 @@
 	],
 	"scripts": {
 		"---- BUILD SETUP --------------------------------------------------": "",
-		"isogit-clone": "shx rm -rf node_modules/isomorphic-git && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
+		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
 		"isogit-pull": "cd node_modules/isomorphic-git && git pull",
 		"isogit-http": "cd node_modules/isomorphic-git && git sparse-checkout add http",
 		"isogit-tests": "cd node_modules/isomorphic-git && git sparse-checkout add __tests__/__fixtures__/",
@@ -27,8 +27,8 @@
 		"---- TEST SETUP ----------------------------------------------------": "",
 		"start-proxy": "cors-proxy start -p 9999 -d",
 		"stop-proxy": "cors-proxy stop",
-		"start-mock-server": "cross-env GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server start",
-		"stop-mock-server": "cross-env GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server stop",
+		"start-mock-server": "GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server start",
+		"stop-mock-server": "GIT_HTTP_MOCK_SERVER_PORT=8888 GIT_HTTP_MOCK_SERVER_ROOT=src/raw/tests/fixtures git-http-mock-server stop",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "npm run start-proxy && npm run start-mock-server",
 		"test": "if vitest run --coverage --test-timeout 60000; then npm run _posttest; true; else npm run _posttest; false; fi",
@@ -39,7 +39,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code-git/client",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code-git/client",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"isomorphic-git": "^1.21.0"

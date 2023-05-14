@@ -11,4 +11,3 @@
 </div>
 
 # Inlang IDE Extension Plugin
-

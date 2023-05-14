@@ -1,4 +1,4 @@
-import type { InlangEnvironment } from "../environment/types.js";
+import type { InlangEnvironment } from "../environment/types.js"
 import type { PluginSetupFunction, Plugin } from "./types.js"
 
 export function createPlugin<
