@@ -64,6 +64,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	test("r/w an empty file", async () => {
 		await fs.writeFile(`${tempDir}/file3`, "")
 		expect(await fs.readFile(`${tempDir}/file3`, { encoding: "utf-8" })).toEqual("")
+		expect(await fs.readFile(`${tempDir}/file3`)).toHaveLength(0)
 	})
 
 	test("symlink", async () => {

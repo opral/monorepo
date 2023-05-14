@@ -1,7 +1,7 @@
 import type { NodeishFilesystem, NodeishStats } from "../interface.js"
 import { FilesystemError } from "../errors/FilesystemError.js"
 
-type Inode = string | Set<string>
+type Inode = Uint8Array | Set<string>
 
 export function createMemoryFs(): NodeishFilesystem {
 	// local state
@@ -37,12 +37,12 @@ export function createMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
-			if (parentDir?.constructor !== Set) throw new FilesystemError("ENOENT", path, "writeFile")
+			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
-			if (typeof data !== "string") {
-				let string = ""
-				for (const c of data) string += String.fromCodePoint(c)
-				data = string
+			if (typeof data === "string") {
+				let buf = []
+				for (const c of data) buf.push(c.codePointAt(0) ?? 0)
+				data = new Uint8Array(buf)
 			}
 
 			parentDir.add(getBasename(path))
@@ -56,16 +56,20 @@ export function createMemoryFs(): NodeishFilesystem {
 		) {
 			path = normalPath(path)
 			const file: Inode | undefined = fsMap.get(path)
-			if (typeof file === "string") return file
 
+			if (file instanceof Set) throw new FilesystemError("EISDIR", path, "readFile")
 			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
-			throw new FilesystemError("EISDIR", path, "readFile")
+			if (!(options?.encoding || typeof options === "string")) return file
+
+			let string = ""
+			for (const c of file) string += String.fromCodePoint(c)
+			return string
 		},
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
 			path = normalPath(path)
 			const dir: Inode | undefined = fsMap.get(path)
-			if (dir?.constructor === Set) return [...dir.keys()]
+			if (dir instanceof Set) return [...dir.keys()]
 			if (dir === undefined) throw new FilesystemError("ENOENT", path, "readdir")
 			throw new FilesystemError("ENOTDIR", path, "readdir")
 		},
@@ -79,7 +83,7 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
 
-			if (parentDir && parentDir.constructor === Set) {
+			if (parentDir && parentDir instanceof Set) {
 				parentDir.add(getBasename(path))
 				newStatEntry(path, fsStats, 1, 0o755)
 				fsMap.set(path, new Set())
@@ -106,16 +110,16 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rm")
 
-			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "rm")
+			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rm")
 
-			if (typeof target === "string") {
+			if (target instanceof Uint8Array) {
 				parentDir.delete(getBasename(path))
 				fsStats.delete(path)
 				fsMap.delete(path)
 				return
 			}
 
-			if (target.constructor === Set && options?.recursive) {
+			if (target instanceof Set && options?.recursive) {
 				await Promise.all(
 					[...target.keys()].map(async (child) => {
 						await rm(`${path}/${child}`, { recursive: true })
@@ -138,7 +142,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rmdir")
 
-			if (typeof parentDir === "string" || typeof target === "string")
+			if (parentDir instanceof Uint8Array || target instanceof Uint8Array)
 				throw new FilesystemError("ENOTDIR", path, "rmdir")
 
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
@@ -158,7 +162,7 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			if (fsMap.get(path)) throw new FilesystemError("EEXIST", path, "symlink", target)
 
-			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "symlink")
+			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "symlink")
 
 			if (targetInode === undefined || parentDir === undefined)
 				throw new FilesystemError("ENOENT", path, "symlink")
@@ -177,7 +181,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "unlink")
 
-			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "unlink")
+			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "unlink")
 
 			if (targetStats?.isDirectory()) throw new FilesystemError("EISDIR", path, "unlink")
 
