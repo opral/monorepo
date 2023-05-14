@@ -1,9 +1,9 @@
-import type { InlangConfig } from "../config/schema.js"
+import type { InlangConfig } from "./schema.js"
 import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
 import { dedent } from "ts-dedent"
-import { zConfig } from "../config/zod.js"
+import { zConfig } from "./zod.js"
 
 export class ParseConfigException extends Error {
 	readonly #id = "ParseConfigException"
@@ -123,27 +123,5 @@ ${JSON.stringify(initialMessage, undefined, 2)}
 `),
 				)
 		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-
-/**
- * @deprecated Use `ParseConfigException` instead.
- */
-export class TestConfigException extends Error {
-	readonly #id = "TestConfigException"
-}
-
-/**
- * @deprecated Use `parseConfig` instead.
- */
-export const testConfig = (...args: Parameters<typeof parseConfig>): ReturnType<typeof parseConfig> => {
-	try {
-		return parseConfig(...args)
-	} catch (error) {
-		if (error instanceof ParseConfigException)
-			throw new TestConfigException(error.message)
-		throw error
 	}
 }

@@ -2,7 +2,7 @@ import type { InlangConfigModule } from "../config/schema.js"
 import { setupConfig } from "../config/setupConfig.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { Result } from "../utilities/result.js"
-import { parseConfig, ParseConfigException } from "./parseConfig.js"
+import { parseConfig, ParseConfigException } from "../config/parseConfig.js"
 
 /**
  * Validates the inlang.config.js file.

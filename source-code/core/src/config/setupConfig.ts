@@ -2,7 +2,7 @@ import type { InlangConfig, InlangConfigModule } from "./schema.js"
 import { setupPlugins } from "../plugin/setupPlugins.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { dedent } from "ts-dedent"
-import { parseConfig } from '../test/parseConfig.js'
+import { parseConfig } from './parseConfig.js'
 import { ZodError } from 'zod'
 
 /**
