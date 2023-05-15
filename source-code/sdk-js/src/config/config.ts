@@ -55,7 +55,6 @@ export const initConfig = async (module: InlangConfigModule) => {
 	if (!module) {
 		throw Error("could not read `inlang.config.js`")
 	}
-
 	const env = await initInlangEnvironment()
 
 	return setupConfig({ module, env })
