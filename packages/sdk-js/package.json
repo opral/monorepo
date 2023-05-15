@@ -12,18 +12,19 @@
 		"unplugin",
 		"vite"
 	],
-	"version": "0.2.0",
+	"version": "0.4.4",
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin",
-		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
+		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin tsc:watch",
+		"build": "shx rm -rf dist && npm run build:runtime && npm run build:plugin",
 		"dev:runtime": "tsc --project ./tsconfig.build.json --watch",
 		"build:runtime": "tsc --project ./tsconfig.build.json",
-		"dev:plugin": "tsup --watch src --ignore-watch **/examples",
-		"build:plugin": "tsup",
+		"dev:plugin": "cross-env DEV=true node ./build.js",
+		"build:plugin": "node ./build.js && tsc -p tsconfig.build.plugin.json",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch",
+		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",
 		"tsc:watch": "tsc --noEmit --watch",
+		"tsc:watch:plugin": "tsc -p tsconfig.build.plugin.json --watch",
 		"vitest:watch": "vitest watch --passWithNoTests --coverage",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/sdk-js",
@@ -31,38 +32,38 @@
 		"format": "cd ../.. && npm run format:base ./source-code/sdk-js",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/sdk-js",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
-		"@inlang/ide-extension-plugin": "*",
-		"@sveltejs/kit": "^1.15.4",
-		"@types/estree": "^1.0.0",
+		"@inlang/sdk-js-plugin": "*",
+		"@sveltejs/kit": "^1.16.3",
+		"@types/estree": "^1.0.1",
 		"astring": "^1.8.4",
+		"deepmerge-ts": "^5.1.0",
 		"estree-walker": "^3.0.3",
 		"magic-string": "^0.30.0",
 		"magicast": "^0.2.4",
 		"npm-run-all": "^4.1.5",
 		"recast": "^0.22.0",
-		"svelte": "^3.58.0",
+		"svelte": "^3.59.1",
 		"svelte-preprocess": "^5.0.3",
-		"ts-dedent": "^2.2.0",
-		"tsup": "^6.7.0"
+		"ts-dedent": "^2.2.0"
 	},
 	"peerDependencies": {
-		"@inlang/core": "*"
+		"@sveltejs/kit": "^1.0.0",
+		"svelte": "^3.0.0"
 	},
 	"exports": {
-		".": "./dist/core/index.js",
+		".": "./dist/index.js",
 		"./adapter-sveltekit": "./dist/adapter-sveltekit/index.js",
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/runtime/*/index.js",
-		"./plugin": "./dist/plugin/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js"
 	},
-	"module": "dist/core/index.js",
-	"types": "dist/core/index.d.ts",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"typesVersions": {
 		"*": {
 			"adapter-sveltekit": [
@@ -82,9 +83,6 @@
 			],
 			"adapter-sveltekit/shared": [
 				"./dist/adapter-sveltekit/runtime/shared/index.d.ts"
-			],
-			"plugin": [
-				"./dist/plugin/index.d.ts"
 			],
 			"detectors": [
 				"./dist/detectors/index.d.ts"

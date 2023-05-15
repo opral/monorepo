@@ -8,14 +8,24 @@ interface Email {
 	visibility: string | null
 }
 
-const getGithubNoReplyEmail = (emails: Email[]): string => {
+const getGithubNoReplyEmail = (emails: Email[]): string | undefined => {
 	const githubNoReplyEmail = emails.find((email) =>
 		email.email.endsWith("@users.noreply.github.com"),
 	)
-	if (githubNoReplyEmail === undefined) {
-		throw Error("No GitHub no-reply email found")
+	return githubNoReplyEmail?.email
+}
+
+const getGithubPublicEmail = (emails: Email[]): string | undefined => {
+	const githubPublicEmail = emails.find((email) => email.visibility === "public")
+	return githubPublicEmail?.email
+}
+
+const getGithubPrimaryEmail = (emails: Email[]): string => {
+	const githubPrimaryEmail = emails.find((email) => email.primary)
+	if (githubPrimaryEmail === undefined) {
+		throw Error("No public email found")
 	}
-	return githubNoReplyEmail.email
+	return githubPrimaryEmail.email
 }
 
 /**
@@ -43,11 +53,11 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 		throw Error("Failed to get user email " + email.statusText)
 	}
 	const emailBody = await email.json()
-	console.log("emailBody", emailBody)
 
-	const noReplyEmail = getGithubNoReplyEmail(emailBody)
-
-	console.log("noReplyEmail", noReplyEmail)
+	const userEmail =
+		getGithubNoReplyEmail(emailBody) ||
+		getGithubPublicEmail(emailBody) ||
+		getGithubPrimaryEmail(emailBody)
 
 	// Request
 	const request = await fetch("https://api.github.com/user", {
@@ -64,7 +74,7 @@ export async function getUserInfo(): Promise<LocalStorageSchema["user"] | undefi
 
 	return {
 		username: requestBody.login,
-		email: noReplyEmail,
+		email: userEmail,
 		avatarUrl: requestBody.avatar_url,
 	}
 }

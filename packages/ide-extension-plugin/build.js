@@ -16,6 +16,7 @@ const options = await pluginBuildConfig({
 
 const ctx = await context(options)
 
+// eslint-disable-next-line no-undef
 if (process.env.DEV) {
 	await ctx.watch()
 	console.info("👀 watching for changes...")

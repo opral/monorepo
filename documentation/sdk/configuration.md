@@ -14,7 +14,7 @@ You can configure the SDK behavior to your needs with the `inlang.config.js` fil
  */
 export async function defineConfig(env) {
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js@0.1.1/dist/plugin/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js",
 	)
 
 	return {
@@ -24,6 +24,9 @@ export async function defineConfig(env) {
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }],
 				},
+				resources: {
+					cache: "Build-time"
+				}
 			}),
 		],
 	}
@@ -65,6 +68,28 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	strategies: [
 		{ type: "url" },
 	],
+},
+```
+
+### resources
+
+The `resources` property defines how to deal with resources read with the resolved `inlang.config.js`.
+
+#### cache
+
+Defines how to cache resources.
+
+> Right now we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
+
+##### **build-time** (default)
+
+Loads all Resources during build time and adds them to the bundle.
+
+```js
+{
+	resources: {
+		cache: "build-time"
+	},
 },
 ```
 

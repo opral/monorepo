@@ -1,7 +1,7 @@
 import type * as Ast from "@inlang/core/ast"
 import { getContext, setContext } from "svelte"
-import { readonly, writable, type Readable } from "svelte/store"
-import type { RelativeUrl } from "../../../../core/index.js"
+import { writable, type Readable } from "svelte/store"
+import type { RelativeUrl } from "../../../../index.js"
 import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
 import type * as Runtime from "../../../../runtime/index.js"
@@ -56,3 +56,13 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 
 // TODO: output warning that calling this does not make sense
 const route = (href: RelativeUrl) => href
+
+// ------------------------------------------------------------------------------------------------
+
+// copy from "svelte/store" to support older versions than `3.56.0`
+export function readonly<T>(store: Readable<T>): Readable<T> {
+	return {
+		// @ts-ignore
+		subscribe: store.subscribe.bind(store)
+	};
+}

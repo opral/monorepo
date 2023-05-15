@@ -10,13 +10,14 @@ import { describe, expect, it } from "vitest"
 describe("ideExtensionSchema", () => {
 	it("should validate a valid config object", () => {
 		const validConfig = {
-			messageReferenceMatchers: () =>
-				Promise.resolve([
+			messageReferenceMatchers: [
+				async () => [
 					{
 						messageId: "id",
 						position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
 					},
-				]),
+				],
+			],
 			extractMessageOptions: [
 				{
 					callback: (messageId: string, selection: string) =>
@@ -30,13 +31,15 @@ describe("ideExtensionSchema", () => {
 
 	it("should throw an error for a config object with invalid extractMessageOptions", () => {
 		const invalidConfig = {
-			messageReferenceMatchers: () =>
-				Promise.resolve([
-					{
-						messageId: "id",
-						position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
-					},
-				]),
+			messageReferenceMatchers: [
+				async () =>
+					Promise.resolve([
+						{
+							messageId: "id",
+							position: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+						},
+					]),
+			],
 			extractMessageOptions: [
 				{
 					callback: (messageId: string, selection: string) =>
@@ -53,7 +56,9 @@ describe("ideExtensionSchema", () => {
 
 	it("should throw an error for a config object with invalid messageReferenceMatchers", async () => {
 		const invalidConfig = {
-			messageReferenceMatchers: () => Promise.resolve([{ messageId: "id", position: "undefined" }]),
+			messageReferenceMatchers: [
+				async () => Promise.resolve([{ messageId: "id", position: "undefined" }]),
+			],
 			extractMessageOptions: [
 				{
 					callback: (messageId: string, selection: string) =>
@@ -66,7 +71,7 @@ describe("ideExtensionSchema", () => {
 			invalidConfig as unknown as IdeExtensionSettings,
 		)
 		await expect(() =>
-			validatedConfig.messageReferenceMatchers({ documentText: "hello" }),
+			validatedConfig.messageReferenceMatchers[0]({ documentText: "" }),
 		).rejects.toBeInstanceOf(z.ZodError)
 	})
 })

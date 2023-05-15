@@ -1,18 +1,25 @@
 import * as vscode from "vscode"
+import fetch from "node-fetch"
 import { debounce } from "throttle-debounce"
-import { setState } from "./state.js"
+import { setState, state } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
 import { InlangConfigModule, setupConfig } from "@inlang/core/config"
-import fetch from "node-fetch"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
+import { msg } from "./utils/message.js"
+import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		vscode.window.showInformationMessage("Inlang extension activated.")
+		telemetryNode.capture({
+			distinctId: "unknown",
+			event: "IDE-EXTENSION activated",
+		})
+		msg("Inlang extension activated.", "info")
+
 		// start the extension
 		main({ context })
 		// in case the active window changes -> restart the extension
@@ -63,10 +70,14 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// initialize inlang core and resources for current workspace
 	const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri)
 
+	// watch for changes in the config file
+	const watcher = vscode.workspace.createFileSystemWatcher(
+		new vscode.RelativePattern(workspace, "**/inlang.config.js"),
+	)
+
 	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
 
 	const module = (await import(closestConfigPath)) as InlangConfigModule
-
 	const config = await setupConfig({ module, env })
 
 	const loadResources = async () => {
@@ -76,15 +87,23 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			resources,
 		})
 	}
-	const debouncedLoadResources = debounce(1000, loadResources)
+
 	await loadResources()
+
+	// debounce future loading of resources
+	const debouncedLoadResources = debounce(1000, loadResources)
 
 	// register event listeners
 	vscode.workspace.onDidChangeTextDocument(() => {
 		debouncedLoadResources()
 	})
 
-	// register commands
+	// listen for changes in the config file
+	watcher.onDidChange(() => {
+		promptToReloadWindow()
+	})
+
+	// register command
 	args.context.subscriptions.push(
 		vscode.commands.registerTextEditorCommand(
 			extractMessageCommand.id,
@@ -92,24 +111,37 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		),
 	)
 
+	console.log("inlang extension started")
+
+	const documentSelectors = [
+		{ language: "javascript", pattern: "!**/inlang.config.js" },
+		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
+	]
 	// register source actions
 	args.context.subscriptions.push(
-		vscode.languages.registerCodeActionsProvider(
-			[
-				// TODO: improve with #348
-				{ language: "javascript" },
-				{ language: "javascriptreact" },
-				{ language: "typescript" },
-				{ language: "typescriptreact" },
-				{ language: "svelte" },
-			],
-			new ExtractMessage(),
-			{ providedCodeActionKinds: ExtractMessage.providedCodeActionKinds },
-		),
+		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
+			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
+		}),
 	)
 
 	// register decorations
 	messagePreview({ activeTextEditor, context: args.context })
+}
+
+/** Prompts user to reload editor window in order for configuration change to take effect. */
+const promptToReloadWindow = () => {
+	const action = "Reload"
+
+	vscode.window
+		.showInformationMessage(
+			`To apply changes to the inlang configuration, please reload the window.`,
+			action,
+		)
+		.then((selectedAction) => {
+			if (selectedAction === action) {
+				vscode.commands.executeCommand("workbench.action.reloadWindow")
+			}
+		})
 }
 
 // this method is called when your extension is deactivated

@@ -11,6 +11,16 @@ export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
 }): Promise<Result<string, { errorMessage: string }>> {
 	try {
+		if (Object.keys(args.filesystemAsJson).length === 0) {
+			return [
+				undefined,
+				{
+					errorMessage:
+						"The provided filesystem representation contains no files. Received: " +
+						args.filesystemAsJson,
+				},
+			]
+		}
 		const [success, exception] = await _generateConfigFileRecursive(args)
 		telemetryNode.capture({
 			distinctId: "unknown",
