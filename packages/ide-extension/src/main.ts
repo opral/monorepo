@@ -8,9 +8,8 @@ import { determineClosestPath } from "./utils/determineClosestPath.js"
 import { InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
-import { initialize$import } from "@inlang/core/environment"
+import { initialize$import } from "./utils/$import.js"
 import { msg } from "./utils/message.js"
-import { $import } from "./utils/$import.js"
 // import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -76,10 +75,12 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		new vscode.RelativePattern(workspace, "**/inlang.config.js"),
 	)
 
-	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
+	const env = {
+		$fs: fileSystemMapper,
+		$import: initialize$import({ fs: fileSystemMapper, fetch }),
+	}
 
-	const module = (await $import(closestConfigPath)) as InlangConfigModule
-	console.log("module", module)
+	const module = (await import(closestConfigPath)) as InlangConfigModule
 
 	const config = await setupConfig({ module, env })
 
