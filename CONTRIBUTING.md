@@ -7,25 +7,16 @@ description: Learn on how to contribute to inlang.
 
 # Contributing
 
-Inlang is setup as monorepo with [turborepo](https://turbo.build/) and NPM workspaces.
+Inlang is setup as monorepo with NPM workspaces and [turborepo](https://turbo.build/).
 
-## Prerequisites
-
-- [Docker](https://www.docker.com/)
-- [VSCode](https://vscode.dev/)
-- [VSCode extension: Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- (If you are part of inlang, ask for access to doppler from private env variables.)
-
-Note:
-Before going any further please install the recommended version of
-toolchain. Recommended version are `v.18.16.0` for `node` and `v.9.6.6` for `npm`.  
-If you are using `volta` to manage your toolchain we have pinned the recommended
-tooling version to the project.
+Furthermore, the repository makes use of [Dev Containers](https://containers.dev/) ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev related setup problems. 
 
 ## Getting started
 
+0.1. Install [Docker](https://www.docker.com/)
+0.2. Install the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 1. Open the repository in VSCode.
-2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`. Make sure to allocate enough memory in your Docker setup (4GB).
+2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`. Make sure to allocate enough memory in your Docker setup (>4GB).
 3. `npm install` to install dependencies
 4. `npm run dev` to run the development environment.
 5. `npm run test` to run the tests.
@@ -47,26 +38,5 @@ For Docker Desktop, the user should be `node`.
 
 ## Debugging
 
-1. (If running, stop `npm run dev`.)
-2. Press `F5`.
-3. Wait until the terminal is showing "listening on localhost:3000".
-4. Open "localhost:xxxx" in the browser.
-
-## Contributing changes
-
-1. **Fork** the project on Github.
-2. **Open** the freshly cloned project with Visual Studio Code and [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
-3. **Create** a branch for your new feature or improvement.
-4. **Test** with `npm run test`.
-5. **Debug** and write tests for your changes.
-   - Use the preconfigured launch scripts in Visual Studio Codes `Run and Debug` view.
-6. **Describe** your changes by running `npx changeset` and answering the questions. (learn more [here](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md#adding-a-changeset))
-7. **Contribute** your changes via a upstream pull request.
-
-### Workspaces
-
-#### `ide-extension`
-
-- Clone `https://github.com/inlang/example` into `source-code/ide-extension` for debugging with `git clone https://github.com/inlang/example source-code/ide-extension/example` and install dependencies `cd source-code/ide-extension/example && npm install`.
-- Launch `debug ide-extension` via Visual Studio Codes `Run and Debug` view to debug the extension with it's example project, after you run the development environment with `npm run dev`.
-- Launch `debug ide-exension tests` via Visual Studio Codes `Run and Debug` view to debug the extensions tests.
+1. Run `npm run dev`.
+2. Several debug launch configs can be found in the VSCode sidemenu.
