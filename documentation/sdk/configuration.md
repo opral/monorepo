@@ -27,7 +27,7 @@ export async function defineConfig(env) {
 					strategies: [{ type: "localStorage" }],
 				},
 				resources: {
-					cache: "Build-time",
+					cache: "build-time",
 				},
 			}),
 		],
