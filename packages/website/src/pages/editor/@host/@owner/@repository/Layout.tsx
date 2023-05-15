@@ -1,8 +1,7 @@
-import { createEffect, createSignal, For, JSXElement, on, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
-import { CustomHintWrapper } from "./components/Notification/CustomHintWrapper.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
@@ -10,6 +9,7 @@ import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
+import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 
 interface Filter {
 	name: string
@@ -21,6 +21,7 @@ interface Filter {
 export function Layout(props: { children: JSXElement }) {
 	const {
 		inlangConfig,
+		repositoryIsCloned,
 		setTextSearch,
 		filteredLintRules,
 		setFilteredLintRules,
@@ -31,8 +32,8 @@ export function Layout(props: { children: JSXElement }) {
 		setLanguages,
 		resources,
 		setResources,
+		tourStep,
 	} = useEditorState()
-	const [showLanguageFilterTooltip, setShowLanguageFilterTooltip] = createSignal(false)
 
 	const onlyLanguagesTheUserSpeaks = () => {
 		const languages = inlangConfig()?.languages.filter(
@@ -91,29 +92,21 @@ export function Layout(props: { children: JSXElement }) {
 		),
 	)
 
+	function isLessThanHalfASecondAgo(timeString: Date) {
+		const time = new Date(timeString)
+		const currentTime = new Date().getTime()
+		const timeDifference = Math.abs(currentTime - time.getTime())
+		return timeDifference < 500
+	}
+
 	//add initial language filter
-	let hasExecuted = false
 	createEffect(() => {
-		if (!hasExecuted && onlyLanguagesTheUserSpeaks().length > 1) {
+		if (
+			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			onlyLanguagesTheUserSpeaks().length > 1
+		) {
 			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
 			addFilter("Language")
-			setShowLanguageFilterTooltip(true)
-			hasExecuted = true
-		}
-	})
-
-	createEffect(() => {
-		if (showLanguageFilterTooltip()) {
-			const timerShow = setTimeout(() => {
-				setShowLanguageFilterTooltip(true)
-			}, 500)
-			const timerHide = setTimeout(() => {
-				setShowLanguageFilterTooltip(false)
-			}, 5000)
-			onCleanup(() => {
-				clearTimeout(timerShow)
-				clearTimeout(timerHide)
-			})
 		}
 	})
 
@@ -160,14 +153,6 @@ export function Layout(props: { children: JSXElement }) {
 					<div class="absolute -left-2 w-[calc(100%_+_16px)] h-full -translate-y-5 bg-background" />
 					<div class="flex z-20 justify-between gap-2 items-center">
 						<Show when={inlangConfig()}>
-							<CustomHintWrapper
-								notification={{
-									notificationTitle: "Language detection",
-									notificationDescription: "We filtered by your browser defaults.",
-									notificationType: "info",
-								}}
-								condition={showLanguageFilterTooltip()}
-							/>
 							<For each={filters}>
 								{(filter) => (
 									<Show
@@ -176,7 +161,14 @@ export function Layout(props: { children: JSXElement }) {
 											(filter.name !== "Linting" || inlangConfig()?.lint?.rules)
 										}
 									>
-										{filter.component}
+										<TourHintWrapper
+											currentId="default-languages"
+											position="bottom-left"
+											offset={{ x: 0, y: 40 }}
+											isVisible={filter.name === "Language" && tourStep() === "default-languages"}
+										>
+											{filter.component}
+										</TourHintWrapper>
 									</Show>
 								)}
 							</For>
@@ -225,7 +217,7 @@ export function Layout(props: { children: JSXElement }) {
 																}
 																addFilter(filter.name)
 															}}
-															class="flex gap-2 items-center"
+															class="flex gap-2 items-center w-full"
 														>
 															<div slot="prefix" class="-ml-2 mr-2">
 																{filter.icon}
@@ -412,24 +404,25 @@ function LanguageFilter(props: { clearFunction: any }) {
 				<button slot="clear-icon">
 					<IconClose />
 				</button>
-				<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-					<span class="text-left text-on-surface-variant grow">Languages</span>
+
+				<div class="flex px-3 gap-2 text-sm font-medium">
+					<span class="text-left text-outline-variant grow">Select</span>
 					<a
-						class="cursor-pointer link link-primary"
+						class="cursor-pointer link link-primary opacity-75"
 						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
 					>
-						ALL
+						All
 					</a>
 					<a
-						class="cursor-pointer link link-primary"
+						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the reference language
 						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
 					>
-						NONE
+						None
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-				<div class="max-h-[300px] overflow-y-auto">
+				<div class="max-h-[300px] overflow-y-auto text-sm">
 					<For each={inlangConfig()?.languages}>
 						{(language) => (
 							<sl-option
@@ -481,7 +474,7 @@ function LintFilter(props: { clearFunction: any }) {
 		>
 			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
-					Linting
+					Lint
 				</p>
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
 					is
@@ -505,16 +498,19 @@ function LintFilter(props: { clearFunction: any }) {
 				<IconClose />
 			</button>
 
-			<div class="flex px-3 gap-2 text-xs font-medium tracking-wide">
-				<span class="text-left text-on-surface-variant grow">Lints</span>
+			<div class="flex px-3 gap-2 text-sm font-medium">
+				<span class="text-left text-outline-variant grow">Select</span>
 				<a
-					class="cursor-pointer link link-primary"
+					class="cursor-pointer link link-primary opacity-75"
 					onClick={() => setFilteredLintRules(lintRuleIds())}
 				>
-					ALL
+					All
 				</a>
-				<a class="cursor-pointer link link-primary" onClick={() => setFilteredLintRules([])}>
-					NONE
+				<a
+					class="cursor-pointer link link-primary opacity-75"
+					onClick={() => setFilteredLintRules([])}
+				>
+					None
 				</a>
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />

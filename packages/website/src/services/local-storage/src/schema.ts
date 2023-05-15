@@ -13,6 +13,7 @@ export type LocalStorageSchema = {
 	 * See https://github.com/inlang/inlang/issues/241
 	 */
 	showMachineTranslationWarning: boolean
+	isFirstUse: boolean
 }
 
 /**
@@ -20,4 +21,5 @@ export type LocalStorageSchema = {
  */
 export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
+	isFirstUse: true,
 }
