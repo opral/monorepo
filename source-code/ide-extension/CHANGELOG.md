@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.5.7
+
+### Patch Changes
+
+- a9b71575: fix: dynamic import
+
 ## 0.5.6
 
 ### Patch Changes
