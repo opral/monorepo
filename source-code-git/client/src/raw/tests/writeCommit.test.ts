@@ -1,32 +1,31 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { writeCommit } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { writeCommit } from "isomorphic-git"
 
-
-describe('writeCommit', () => {
-  it('parsed', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-writeCommit')
-    // Test
-    const oid = await writeCommit({
-      fs,
-      gitdir,
-      commit: {
-        author: {
-          email: 'wmhilton@gmail.com',
-          name: 'Will Hilton',
-          timestamp: 1502484200,
-          timezoneOffset: 240,
-        },
-        committer: {
-          email: 'wmhilton@gmail.com',
-          name: 'Will Hilton',
-          timestamp: 1502484200,
-          timezoneOffset: 240,
-        },
-        gpgsig: `-----BEGIN PGP SIGNATURE-----
+describe("writeCommit", () => {
+	it("parsed", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-writeCommit")
+		// Test
+		const oid = await writeCommit({
+			fs,
+			gitdir,
+			commit: {
+				author: {
+					email: "wmhilton@gmail.com",
+					name: "Will Hilton",
+					timestamp: 1502484200,
+					timezoneOffset: 240,
+				},
+				committer: {
+					email: "wmhilton@gmail.com",
+					name: "Will Hilton",
+					timestamp: 1502484200,
+					timezoneOffset: 240,
+				},
+				gpgsig: `-----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
 iQIcBAABAgAGBQJZjhboAAoJEJYJuKWSi6a5V5UP/040SfemJ13PRBXst2eB59gs
@@ -43,11 +42,11 @@ cAaw/SYIZG3RorAc11iZ7sva0jFISejmEzIebuChSzdWO2OOWRVvMdhyZwDLUgAb
 Qixh2bmPgr3h9nxq2Dmn
 =4+DN
 -----END PGP SIGNATURE-----`,
-        message: 'Improve resolveRef to handle more kinds of refs. Add tests\n',
-        parent: ['b4f8206d9e359416b0f34238cbeb400f7da889a8'],
-        tree: 'e0b8f3574060ee24e03e4af3896f65dd208a60cc',
-      },
-    })
-    expect(oid).toEqual('e10ebb90d03eaacca84de1af0a59b444232da99e')
-  })
+				message: "Improve resolveRef to handle more kinds of refs. Add tests\n",
+				parent: ["b4f8206d9e359416b0f34238cbeb400f7da889a8"],
+				tree: "e0b8f3574060ee24e03e4af3896f65dd208a60cc",
+			},
+		})
+		expect(oid).toEqual("e10ebb90d03eaacca84de1af0a59b444232da99e")
+	})
 })

@@ -1,13 +1,13 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-const git = require('isomorphic-git')
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+const git = require("isomorphic-git")
 
-describe('exports', () => {
-  it('exposes only the intended API functions', async () => {
-    const names = Object.keys(git)
-    expect(names.sort()).toMatchInlineSnapshot(`
+describe("exports", () => {
+	it("exposes only the intended API functions", async () => {
+		const names = Object.keys(git)
+		expect(names.sort()).toMatchInlineSnapshot(`
       [
         "Errors",
         "STAGE",
@@ -80,5 +80,5 @@ describe('exports', () => {
         "writeTree",
       ]
     `)
-  })
+	})
 })

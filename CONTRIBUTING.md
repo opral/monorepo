@@ -9,12 +9,13 @@ description: Learn on how to contribute to inlang.
 
 Inlang is setup as monorepo with NPM workspaces and [turborepo](https://turbo.build/).
 
-Furthermore, the repository makes use of [Dev Containers](https://containers.dev/) ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev related setup problems. 
+Furthermore, the repository makes use of [Dev Containers](https://containers.dev/) ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev related setup problems.
 
 ## Getting started
 
 0.1. Install [Docker](https://www.docker.com/)
 0.2. Install the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
 1. Open the repository in VSCode.
 2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`. Make sure to allocate enough memory in your Docker setup (>4GB).
 3. `npm install` to install dependencies

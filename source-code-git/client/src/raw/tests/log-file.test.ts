@@ -1,22 +1,21 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
 // const { pgp } = require('@isomorphic-git/pgp-plugin')
-import { log } from 'isomorphic-git'
+import { log } from "isomorphic-git"
 
-
-describe('log', () => {
-  it('a newly added file', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'newfile.md',
-    })
-    expect(commits.length).toBe(2)
-    expect(commits).toMatchInlineSnapshot(`
+describe("log", () => {
+	it("a newly added file", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "newfile.md",
+		})
+		expect(commits.length).toBe(2)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -80,17 +79,17 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a file only', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'README.md',
-    })
-    expect(commits.length).toBe(3)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a file only", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "README.md",
+		})
+		expect(commits.length).toBe(3)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -229,34 +228,34 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a deleted file without force should throw error', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    let err
-    try {
-      await log({
-        fs,
-        gitdir,
-        ref: 'HEAD',
-        filepath: 'a/b/rm.md',
-      })
-    } catch (error) {
-      err = error
-    }
-    expect(err).toBeDefined()
-    expect(err.message).toMatch('Could not find')
-  })
-  it('a deleted file forced', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'a/b/rm.md',
-      force: true,
-    })
-    expect(commits.length).toBe(6)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a deleted file without force should throw error", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		let err
+		try {
+			await log({
+				fs,
+				gitdir,
+				ref: "HEAD",
+				filepath: "a/b/rm.md",
+			})
+		} catch (error) {
+			err = error
+		}
+		expect(err).toBeDefined()
+		expect(err.message).toMatch("Could not find")
+	})
+	it("a deleted file forced", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "a/b/rm.md",
+			force: true,
+		})
+		expect(commits.length).toBe(6)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -533,18 +532,18 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a rename file with follow', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'a/rename1.md',
-      follow: true,
-    })
-    expect(commits.length).toBe(4)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a rename file with follow", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "a/rename1.md",
+			follow: true,
+		})
+		expect(commits.length).toBe(4)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -732,18 +731,18 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a rename file forced without follow', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'a/rename1.md',
-      force: true,
-    })
-    expect(commits.length).toBe(2)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a rename file forced without follow", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "a/rename1.md",
+			force: true,
+		})
+		expect(commits.length).toBe(2)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -839,18 +838,18 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a rename file with follow multi same content files', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'rename-2.md',
-      follow: true,
-    })
-    expect(commits.length).toBe(2)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a rename file with follow multi same content files", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "rename-2.md",
+			follow: true,
+		})
+		expect(commits.length).toBe(2)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -946,18 +945,18 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('a rename file2 with follow multi same content files', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-file')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      filepath: 'rename22.md',
-      follow: true,
-    })
-    // expect(commits.length).toBe(2)
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("a rename file2 with follow multi same content files", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-file")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			filepath: "rename22.md",
+			follow: true,
+		})
+		// expect(commits.length).toBe(2)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -1099,5 +1098,5 @@ describe('log', () => {
         },
       ]
     `)
-  })
+	})
 })
