@@ -1,31 +1,30 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { writeBlob } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { writeBlob } from "isomorphic-git"
 
-
-describe('writeBlob', () => {
-  it('empty blob', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-writeBlob')
-    // Test
-    const oid = await writeBlob({
-      fs,
-      gitdir,
-      blob: new Uint8Array([]),
-    })
-    expect(oid).toEqual('e69de29bb2d1d6434b8b29ae775ad8c2e48c5391')
-  })
-  it('blob', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-writeBlob')
-    // Test
-    const oid = await writeBlob({
-      fs,
-      gitdir,
-      blob: Buffer.from(
-        `#!/usr/bin/env node
+describe("writeBlob", () => {
+	it("empty blob", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-writeBlob")
+		// Test
+		const oid = await writeBlob({
+			fs,
+			gitdir,
+			blob: new Uint8Array([]),
+		})
+		expect(oid).toEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391")
+	})
+	it("blob", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-writeBlob")
+		// Test
+		const oid = await writeBlob({
+			fs,
+			gitdir,
+			blob: Buffer.from(
+				`#!/usr/bin/env node
 const minimisted = require('minimisted')
 const git = require('.')
 
@@ -53,9 +52,9 @@ minimisted(async function ({ _: [command, ...args], ...opts }) {
   console.log(JSON.stringify(result, null, 2))
 })
 `,
-        'utf8'
-      ),
-    })
-    expect(oid).toEqual('4551a1856279dde6ae9d65862a1dff59a5f199d8')
-  })
+				"utf8",
+			),
+		})
+		expect(oid).toEqual("4551a1856279dde6ae9d65862a1dff59a5f199d8")
+	})
 })

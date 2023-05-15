@@ -1,17 +1,16 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-const { pgp } = require('@isomorphic-git/pgp-plugin')
-import { log } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+const { pgp } = require("@isomorphic-git/pgp-plugin")
+import { log } from "isomorphic-git"
 
-
-describe('log', () => {
-  it('HEAD', async () => {
-    const { fs, gitdir } = await makeFixture('test-log')
-    const commits = await log({ fs, gitdir, ref: 'HEAD' })
-    expect(commits.length).toBe(5)
-    expect(commits).toMatchInlineSnapshot(`
+describe("log", () => {
+	it("HEAD", async () => {
+		const { fs, gitdir } = await makeFixture("test-log")
+		const commits = await log({ fs, gitdir, ref: "HEAD" })
+		expect(commits.length).toBe(5)
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -247,26 +246,26 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('HEAD depth', async () => {
-    const { fs, gitdir } = await makeFixture('test-log')
-    const commits = await log({ fs, gitdir, ref: 'HEAD', depth: 1 })
-    expect(commits.length).toBe(1)
-  })
-  it('HEAD since', async () => {
-    const { fs, gitdir } = await makeFixture('test-log')
-    const commits = await log({
-      fs,
-      gitdir,
-      ref: 'HEAD',
-      since: new Date(1501462174000),
-    })
-    expect(commits.length).toBe(2)
-  })
-  it('shallow branch', async () => {
-    const { fs, gitdir } = await makeFixture('test-log')
-    const commits = await log({ fs, gitdir, ref: 'origin/shallow-branch' })
-    expect(commits).toMatchInlineSnapshot(`
+	})
+	it("HEAD depth", async () => {
+		const { fs, gitdir } = await makeFixture("test-log")
+		const commits = await log({ fs, gitdir, ref: "HEAD", depth: 1 })
+		expect(commits.length).toBe(1)
+	})
+	it("HEAD since", async () => {
+		const { fs, gitdir } = await makeFixture("test-log")
+		const commits = await log({
+			fs,
+			gitdir,
+			ref: "HEAD",
+			since: new Date(1501462174000),
+		})
+		expect(commits.length).toBe(2)
+	})
+	it("shallow branch", async () => {
+		const { fs, gitdir } = await makeFixture("test-log")
+		const commits = await log({ fs, gitdir, ref: "origin/shallow-branch" })
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -317,18 +316,18 @@ describe('log', () => {
         },
       ]
     `)
-  })
-  it('has correct payloads and gpgsig', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-log')
-    // Test
-    const commits = await log({ fs, gitdir, ref: 'HEAD' })
-    expect(commits.length).toBe(5)
-    // Verify
-    for (const commit of commits) {
-      const { valid } = await pgp.verify({
-        payload: commit.payload,
-        publicKey: `-----BEGIN PGP PUBLIC KEY BLOCK-----
+	})
+	it("has correct payloads and gpgsig", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-log")
+		// Test
+		const commits = await log({ fs, gitdir, ref: "HEAD" })
+		expect(commits.length).toBe(5)
+		// Verify
+		for (const commit of commits) {
+			const { valid } = await pgp.verify({
+				payload: commit.payload,
+				publicKey: `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 mQINBFgpYbwBEACfIku5Oe+3qk4si+e0ExE3qm6N87+Dpi8z6xa/5LmoAxqUpwF/
 zbQoFiYcJXNnVPMEl+YNk+/sFqQA0UjVOgQwOnXu7cF8DV9ri8WM3ZZviHAp4QLg
@@ -379,15 +378,15 @@ prSfV9EyYLuhyvuVN3qmeuyOUbLBEYfeGUZXZ1rOZWY9JP5m4AaT9nl+jVw8hy1+
 dGs=
 =QSo+
 -----END PGP PUBLIC KEY BLOCK-----`,
-        signature: commit.commit.gpgsig,
-      })
-      expect(valid).toEqual(['9609b8a5928ba6b9'])
-    }
-  })
-  it('with complex merging history', async () => {
-    const { fs, gitdir } = await makeFixture('test-log-complex')
-    const commits = await log({ fs, gitdir, ref: 'master' })
-    expect(commits).toMatchInlineSnapshot(`
+				signature: commit.commit.gpgsig,
+			})
+			expect(valid).toEqual(["9609b8a5928ba6b9"])
+		}
+	})
+	it("with complex merging history", async () => {
+		const { fs, gitdir } = await makeFixture("test-log-complex")
+		const commits = await log({ fs, gitdir, ref: "master" })
+		expect(commits).toMatchInlineSnapshot(`
       [
         {
           "commit": {
@@ -724,5 +723,5 @@ dGs=
         },
       ]
     `)
-  })
+	})
 })

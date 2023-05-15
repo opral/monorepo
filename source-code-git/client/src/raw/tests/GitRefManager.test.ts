@@ -1,14 +1,14 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { GitRefManager } from 'isomorphic-git/internal-apis.js'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { GitRefManager } from "isomorphic-git/internal-apis.js"
 
-describe('GitRefManager', () => {
-  it('packedRefs', async () => {
-    const { fs, gitdir } = await makeFixture('test-GitRefManager')
-    const refs = await GitRefManager.packedRefs({ fs, gitdir })
-    expect(refs).toMatchInlineSnapshot(`
+describe("GitRefManager", () => {
+	it("packedRefs", async () => {
+		const { fs, gitdir } = await makeFixture("test-GitRefManager")
+		const refs = await GitRefManager.packedRefs({ fs, gitdir })
+		expect(refs).toMatchInlineSnapshot(`
       Map {
         "refs/remotes/origin/develop" => "dba5b92408549e55c36e16c89e2b4a4e4cbc8c8f",
         "refs/remotes/origin/dist" => "a2dd810e222b7b02fc53760037d9928cb97c645d",
@@ -82,15 +82,15 @@ describe('GitRefManager', () => {
         "refs/tags/v0.1.0" => "dba5b92408549e55c36e16c89e2b4a4e4cbc8c8f",
       }
     `)
-  })
-  it('listRefs', async () => {
-    const { fs, gitdir } = await makeFixture('test-GitRefManager')
-    let refs = await GitRefManager.listRefs({
-      fs,
-      gitdir,
-      filepath: 'refs/remotes/origin',
-    })
-    expect(refs).toMatchInlineSnapshot(`
+	})
+	it("listRefs", async () => {
+		const { fs, gitdir } = await makeFixture("test-GitRefManager")
+		let refs = await GitRefManager.listRefs({
+			fs,
+			gitdir,
+			filepath: "refs/remotes/origin",
+		})
+		expect(refs).toMatchInlineSnapshot(`
       [
         "develop",
         "dist",
@@ -102,12 +102,12 @@ describe('GitRefManager', () => {
         "test-branch-shallow-clone",
       ]
     `)
-    refs = await GitRefManager.listRefs({
-      fs,
-      gitdir,
-      filepath: 'refs/tags',
-    })
-    expect(refs).toMatchInlineSnapshot(`
+		refs = await GitRefManager.listRefs({
+			fs,
+			gitdir,
+			filepath: "refs/tags",
+		})
+		expect(refs).toMatchInlineSnapshot(`
       [
         "local-tag",
         "test-tag",
@@ -174,17 +174,17 @@ describe('GitRefManager', () => {
         "v0.1.0",
       ]
     `)
-  })
-  it('listBranches', async () => {
-    const { fs, gitdir } = await makeFixture('test-GitRefManager')
-    let refs = await GitRefManager.listBranches({ fs, gitdir })
-    expect(refs).toEqual([])
-    refs = await GitRefManager.listBranches({
-      fs,
-      gitdir,
-      remote: 'origin',
-    })
-    expect(refs).toMatchInlineSnapshot(`
+	})
+	it("listBranches", async () => {
+		const { fs, gitdir } = await makeFixture("test-GitRefManager")
+		let refs = await GitRefManager.listBranches({ fs, gitdir })
+		expect(refs).toEqual([])
+		refs = await GitRefManager.listBranches({
+			fs,
+			gitdir,
+			remote: "origin",
+		})
+		expect(refs).toMatchInlineSnapshot(`
       [
         "develop",
         "dist",
@@ -196,11 +196,11 @@ describe('GitRefManager', () => {
         "test-branch-shallow-clone",
       ]
     `)
-  })
-  it('listTags', async () => {
-    const { fs, gitdir } = await makeFixture('test-GitRefManager')
-    const refs = await GitRefManager.listTags({ fs, gitdir })
-    expect(refs).toMatchInlineSnapshot(`
+	})
+	it("listTags", async () => {
+		const { fs, gitdir } = await makeFixture("test-GitRefManager")
+		const refs = await GitRefManager.listTags({ fs, gitdir })
+		expect(refs).toMatchInlineSnapshot(`
       [
         "local-tag",
         "test-tag",
@@ -245,5 +245,5 @@ describe('GitRefManager', () => {
         "v0.1.0",
       ]
     `)
-  })
+	})
 })

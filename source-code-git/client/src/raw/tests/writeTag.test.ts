@@ -1,31 +1,30 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { writeTag } from 'isomorphic-git'
-
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { writeTag } from "isomorphic-git"
 
 // NOTE: These are mostly the `readObject` tests but in reverse
-describe('writeTag', () => {
-  it('annotated tag', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-writeTag')
-    // Test
-    const oid = await writeTag({
-      fs,
-      gitdir,
-      tag: {
-        object: 'af4d84a6a9fa7a74acdad07fddf9f17ff3a974ae',
-        type: 'commit',
-        tag: 'v0.0.9',
-        tagger: {
-          name: 'Will Hilton',
-          email: 'wmhilton@gmail.com',
-          timestamp: 1507071414,
-          timezoneOffset: 240,
-        },
-        message: '0.0.9',
-        gpgsig: `-----BEGIN PGP SIGNATURE-----
+describe("writeTag", () => {
+	it("annotated tag", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-writeTag")
+		// Test
+		const oid = await writeTag({
+			fs,
+			gitdir,
+			tag: {
+				object: "af4d84a6a9fa7a74acdad07fddf9f17ff3a974ae",
+				type: "commit",
+				tag: "v0.0.9",
+				tagger: {
+					name: "Will Hilton",
+					email: "wmhilton@gmail.com",
+					timestamp: 1507071414,
+					timezoneOffset: 240,
+				},
+				message: "0.0.9",
+				gpgsig: `-----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
 iQIcBAABAgAGBQJZ1BW2AAoJEJYJuKWSi6a5S6EQAJQkK+wIXijDf4ZfVeP1E7Be
@@ -43,8 +42,8 @@ dBWrLc3kdnemrlhSRzR2
 =PrR1
 -----END PGP SIGNATURE-----
 `,
-      },
-    })
-    expect(oid).toEqual('6e90dfd7573404a225888071ecaa572882b4e45c')
-  })
+			},
+		})
+		expect(oid).toEqual("6e90dfd7573404a225888071ecaa572882b4e45c")
+	})
 })

@@ -1,17 +1,16 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { remove, listFiles } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { remove, listFiles } from "isomorphic-git"
 
-
-describe('remove', () => {
-  it('file', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-remove')
-    // Test
-    const before = await listFiles({ fs, gitdir })
-    expect(before).toMatchInlineSnapshot(`
+describe("remove", () => {
+	it("file", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-remove")
+		// Test
+		const before = await listFiles({ fs, gitdir })
+		expect(before).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -39,9 +38,9 @@ describe('remove', () => {
         "src/utils/write.js",
       ]
     `)
-    await remove({ fs, gitdir, filepath: 'LICENSE.md' })
-    const after = await listFiles({ fs, gitdir })
-    expect(after).toMatchInlineSnapshot(`
+		await remove({ fs, gitdir, filepath: "LICENSE.md" })
+		const after = await listFiles({ fs, gitdir })
+		expect(after).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -68,14 +67,14 @@ describe('remove', () => {
         "src/utils/write.js",
       ]
     `)
-    expect(before.length === after.length + 1).toBe(true)
-  })
-  it('dir', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-remove')
-    // Test
-    const before = await listFiles({ fs, gitdir })
-    expect(before).toMatchInlineSnapshot(`
+		expect(before.length === after.length + 1).toBe(true)
+	})
+	it("dir", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-remove")
+		// Test
+		const before = await listFiles({ fs, gitdir })
+		expect(before).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -103,9 +102,9 @@ describe('remove', () => {
         "src/utils/write.js",
       ]
     `)
-    await remove({ fs, gitdir, filepath: 'src/models' })
-    const after = await listFiles({ fs, gitdir })
-    expect(after).toMatchInlineSnapshot(`
+		await remove({ fs, gitdir, filepath: "src/models" })
+		const after = await listFiles({ fs, gitdir })
+		expect(after).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -128,6 +127,6 @@ describe('remove', () => {
         "src/utils/write.js",
       ]
     `)
-    expect(before.length === after.length + 5).toBe(true)
-  })
+		expect(before.length === after.length + 5).toBe(true)
+	})
 })

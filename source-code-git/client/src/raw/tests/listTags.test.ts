@@ -1,20 +1,19 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { listTags } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { listTags } from "isomorphic-git"
 
-
-describe('listTags', () => {
-  it('listTags', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-listTags')
-    // Test
-    const refs = await listTags({
-      fs,
-      gitdir,
-    })
-    expect(refs).toMatchInlineSnapshot(`
+describe("listTags", () => {
+	it("listTags", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-listTags")
+		// Test
+		const refs = await listTags({
+			fs,
+			gitdir,
+		})
+		expect(refs).toMatchInlineSnapshot(`
       [
         "local-tag",
         "test-tag",
@@ -59,5 +58,5 @@ describe('listTags', () => {
         "v0.1.0",
       ]
     `)
-  })
+	})
 })

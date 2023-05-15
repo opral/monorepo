@@ -1,38 +1,37 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { Errors, readCommit } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { Errors, readCommit } from "isomorphic-git"
 
-
-describe('readCommit', () => {
-  it('test missing', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-readCommit')
-    // Test
-    let error = null
-    try {
-      await readCommit({
-        fs,
-        gitdir,
-        oid: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      })
-    } catch (err) {
-      error = err
-    }
-    expect(error).not.toBeNull()
-    expect(error instanceof Errors.NotFoundError).toBe(true)
-  })
-  it('parsed', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-readCommit')
-    // Test
-    const result = await readCommit({
-      fs,
-      gitdir,
-      oid: 'e10ebb90d03eaacca84de1af0a59b444232da99e',
-    })
-    expect(result).toMatchInlineSnapshot(`
+describe("readCommit", () => {
+	it("test missing", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-readCommit")
+		// Test
+		let error = null
+		try {
+			await readCommit({
+				fs,
+				gitdir,
+				oid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			})
+		} catch (err) {
+			error = err
+		}
+		expect(error).not.toBeNull()
+		expect(error instanceof Errors.NotFoundError).toBe(true)
+	})
+	it("parsed", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-readCommit")
+		// Test
+		const result = await readCommit({
+			fs,
+			gitdir,
+			oid: "e10ebb90d03eaacca84de1af0a59b444232da99e",
+		})
+		expect(result).toMatchInlineSnapshot(`
       {
         "commit": {
           "author": {
@@ -81,17 +80,17 @@ describe('readCommit', () => {
       ",
       }
     `)
-  })
-  it('from packfile', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-readCommit')
-    // Test
-    const result = await readCommit({
-      fs,
-      gitdir,
-      oid: '0b8faa11b353db846b40eb064dfb299816542a46',
-    })
-    expect(result).toMatchInlineSnapshot(`
+	})
+	it("from packfile", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-readCommit")
+		// Test
+		const result = await readCommit({
+			fs,
+			gitdir,
+			oid: "0b8faa11b353db846b40eb064dfb299816542a46",
+		})
+		expect(result).toMatchInlineSnapshot(`
       {
         "commit": {
           "author": {
@@ -123,16 +122,16 @@ describe('readCommit', () => {
       ",
       }
     `)
-  })
-  it('peels tags', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-readCommit')
-    // Test
-    const result = await readCommit({
-      fs,
-      gitdir,
-      oid: '587d3f8290b513e2ee85ecd317e6efecd545aee6',
-    })
-    expect(result.oid).toBe('033417ae18b174f078f2f44232cb7a374f4c60ce')
-  })
+	})
+	it("peels tags", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-readCommit")
+		// Test
+		const result = await readCommit({
+			fs,
+			gitdir,
+			oid: "587d3f8290b513e2ee85ecd317e6efecd545aee6",
+		})
+		expect(result.oid).toBe("033417ae18b174f078f2f44232cb7a374f4c60ce")
+	})
 })

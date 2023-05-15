@@ -1,8 +1,8 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { GitAnnotatedTag } from 'isomorphic-git/internal-apis.js'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { GitAnnotatedTag } from "isomorphic-git/internal-apis.js"
 const tagString = `object af4d84a6a9fa7a74acdad07fddf9f17ff3a974ae
 type commit
 tag v0.0.9
@@ -29,17 +29,17 @@ dBWrLc3kdnemrlhSRzR2
 `
 
 const tagObject = {
-  object: 'af4d84a6a9fa7a74acdad07fddf9f17ff3a974ae',
-  type: 'commit',
-  tag: 'v0.0.9',
-  tagger: {
-    name: 'Will Hilton',
-    email: 'wmhilton@gmail.com',
-    timestamp: 1507071414,
-    timezoneOffset: 240,
-  },
-  message: '0.0.9',
-  gpgsig: `-----BEGIN PGP SIGNATURE-----
+	object: "af4d84a6a9fa7a74acdad07fddf9f17ff3a974ae",
+	type: "commit",
+	tag: "v0.0.9",
+	tagger: {
+		name: "Will Hilton",
+		email: "wmhilton@gmail.com",
+		timestamp: 1507071414,
+		timezoneOffset: 240,
+	},
+	message: "0.0.9",
+	gpgsig: `-----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
 iQIcBAABAgAGBQJZ1BW2AAoJEJYJuKWSi6a5S6EQAJQkK+wIXijDf4ZfVeP1E7Be
@@ -59,14 +59,14 @@ dBWrLc3kdnemrlhSRzR2
 `,
 }
 
-describe('GitAnnotatedTag', () => {
-  it('parse', async () => {
-    const tag = GitAnnotatedTag.from(tagString)
-    expect(tag.parse()).toEqual(tagObject)
-  })
+describe("GitAnnotatedTag", () => {
+	it("parse", async () => {
+		const tag = GitAnnotatedTag.from(tagString)
+		expect(tag.parse()).toEqual(tagObject)
+	})
 
-  it('render', async () => {
-    const tag = GitAnnotatedTag.from(tagObject)
-    expect(tag.render()).toEqual(tagString)
-  })
+	it("render", async () => {
+		const tag = GitAnnotatedTag.from(tagObject)
+		expect(tag.render()).toEqual(tagString)
+	})
 })

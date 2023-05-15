@@ -1,17 +1,16 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
-import { listFiles } from 'isomorphic-git'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
+import { listFiles } from "isomorphic-git"
 
-
-describe('listFiles', () => {
-  it('index', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-listFiles')
-    // Test
-    const files = await listFiles({ fs, gitdir })
-    expect(files).toMatchInlineSnapshot(`
+describe("listFiles", () => {
+	it("index", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-listFiles")
+		// Test
+		const files = await listFiles({ fs, gitdir })
+		expect(files).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -47,13 +46,13 @@ describe('listFiles', () => {
         "test/test-resolveRef.js",
       ]
     `)
-  })
-  it('ref', async () => {
-    // Setup
-    const { fs, gitdir } = await makeFixture('test-checkout')
-    // Test
-    const files = await listFiles({ fs, gitdir, ref: 'test-branch' })
-    expect(files).toMatchInlineSnapshot(`
+	})
+	it("ref", async () => {
+		// Setup
+		const { fs, gitdir } = await makeFixture("test-checkout")
+		// Test
+		const files = await listFiles({ fs, gitdir, ref: "test-branch" })
+		expect(files).toMatchInlineSnapshot(`
       [
         ".babelrc",
         ".editorconfig",
@@ -87,5 +86,5 @@ describe('listFiles', () => {
         "test/snapshots/resolveRef.js.snap",
       ]
     `)
-  })
+	})
 })

@@ -1,9 +1,9 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
 
-import { hashBlob } from 'isomorphic-git'
+import { hashBlob } from "isomorphic-git"
 
 const string = `#!/usr/bin/env node
 const minimisted = require('minimisted')
@@ -34,31 +34,28 @@ minimisted(async function ({ _: [command, ...args], ...opts }) {
 })
 `
 
-const buffer = Buffer.from(string, 'utf8')
+const buffer = Buffer.from(string, "utf8")
 
-const wrapped = Buffer.concat([
-  Buffer.from(`blob ${buffer.byteLength}\x00`),
-  buffer,
-])
+const wrapped = Buffer.concat([Buffer.from(`blob ${buffer.byteLength}\x00`), buffer])
 
-describe('hashBlob', () => {
-  it('object as Uint8Array', async () => {
-    // Test
-    const { oid, object, format } = await hashBlob({
-      object: buffer,
-    })
-    expect(oid).toEqual('4551a1856279dde6ae9d65862a1dff59a5f199d8')
-    expect(format).toEqual('wrapped')
-    expect(Buffer.compare(Buffer.from(object), wrapped) === 0).toBe(true)
-  })
+describe("hashBlob", () => {
+	it("object as Uint8Array", async () => {
+		// Test
+		const { oid, object, format } = await hashBlob({
+			object: buffer,
+		})
+		expect(oid).toEqual("4551a1856279dde6ae9d65862a1dff59a5f199d8")
+		expect(format).toEqual("wrapped")
+		expect(Buffer.compare(Buffer.from(object), wrapped) === 0).toBe(true)
+	})
 
-  it('object as String', async () => {
-    // Test
-    const { oid, object, format } = await hashBlob({
-      object: string,
-    })
-    expect(oid).toEqual('4551a1856279dde6ae9d65862a1dff59a5f199d8')
-    expect(format).toEqual('wrapped')
-    expect(Buffer.compare(Buffer.from(object), wrapped) === 0).toBe(true)
-  })
+	it("object as String", async () => {
+		// Test
+		const { oid, object, format } = await hashBlob({
+			object: string,
+		})
+		expect(oid).toEqual("4551a1856279dde6ae9d65862a1dff59a5f199d8")
+		expect(format).toEqual("wrapped")
+		expect(Buffer.compare(Buffer.from(object), wrapped) === 0).toBe(true)
+	})
 })

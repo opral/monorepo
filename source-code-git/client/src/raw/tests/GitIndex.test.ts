@@ -1,31 +1,31 @@
 // @ts-nocheck
 /* eslint-env node, browser, jasmine */
-import { describe, it, expect, beforeAll } from 'vitest'
-import { makeFixture } from './makeFixture.js'
+import { describe, it, expect, beforeAll } from "vitest"
+import { makeFixture } from "./makeFixture.js"
 
-const path = require('path')
+const path = require("path")
 
-import { GitIndex, GitIndexManager } from 'isomorphic-git/internal-apis.js'
+import { GitIndex, GitIndexManager } from "isomorphic-git/internal-apis.js"
 
-describe('GitIndex', () => {
-  it('GitIndex.from(buffer) - Simple', async () => {
-    const { fs, dir } = await makeFixture('test-GitIndex')
-    const buffer = await fs.read(path.join(dir, 'simple-index'))
-    const index = await GitIndex.from(buffer)
-    const rendering = index.render()
-    expect(rendering).toMatchInlineSnapshot(
-      '"100644 323fae03f4606ea9991df8befbb2fca795e648fa    world.txt"'
-    )
-    const buffer2 = await index.toObject()
-    expect(buffer.slice(0, buffer2.length - 20)).toEqual(buffer2.slice(0, -20))
-  })
+describe("GitIndex", () => {
+	it("GitIndex.from(buffer) - Simple", async () => {
+		const { fs, dir } = await makeFixture("test-GitIndex")
+		const buffer = await fs.read(path.join(dir, "simple-index"))
+		const index = await GitIndex.from(buffer)
+		const rendering = index.render()
+		expect(rendering).toMatchInlineSnapshot(
+			'"100644 323fae03f4606ea9991df8befbb2fca795e648fa    world.txt"',
+		)
+		const buffer2 = await index.toObject()
+		expect(buffer.slice(0, buffer2.length - 20)).toEqual(buffer2.slice(0, -20))
+	})
 
-  it('GitIndex.from(buffer)', async () => {
-    const { fs, dir } = await makeFixture('test-GitIndex')
-    const buffer = await fs.read(path.join(dir, 'index'))
-    const index = await GitIndex.from(buffer)
-    const rendering = index.render()
-    expect(rendering).toMatchInlineSnapshot(`
+	it("GitIndex.from(buffer)", async () => {
+		const { fs, dir } = await makeFixture("test-GitIndex")
+		const buffer = await fs.read(path.join(dir, "index"))
+		const index = await GitIndex.from(buffer)
+		const rendering = index.render()
+		expect(rendering).toMatchInlineSnapshot(`
       "100644 1db939d41956405f755e69ab570296c7ed3cec99    .babelrc
       100644 bbf3e21f43fa4fe25eb925bfcb7c0434f7c2dc7d    .editorconfig
       100644 4a58bdcdef3eb91264dfca0279959d98c16568d5    .flowconfig
@@ -59,63 +59,57 @@ describe('GitIndex', () => {
       100644 5345ffa5937c2591f96f4213934709b229a48b02    test/test-init.js
       100644 80708a513b7808becff0acfd70dbd3b66a4fb537    test/test-resolveRef.js"
     `)
-    const buffer2 = await index.toObject()
-    expect(buffer.slice(0, buffer2.length - 20)).toEqual(buffer2.slice(0, -20))
-  })
+		const buffer2 = await index.toObject()
+		expect(buffer.slice(0, buffer2.length - 20)).toEqual(buffer2.slice(0, -20))
+	})
 
-  it('GitIndex round trip', async () => {
-    const { fs, dir } = await makeFixture('test-GitIndex')
-    const buffer = await fs.read(path.join(dir, 'index'))
-    const index = await GitIndex.from(buffer)
-    const buffer2 = await index.toObject()
-    const index2 = await GitIndex.from(buffer2)
-    const buffer3 = await index2.toObject()
-    expect(buffer2.buffer).toEqual(buffer3.buffer)
-  })
+	it("GitIndex round trip", async () => {
+		const { fs, dir } = await makeFixture("test-GitIndex")
+		const buffer = await fs.read(path.join(dir, "index"))
+		const index = await GitIndex.from(buffer)
+		const buffer2 = await index.toObject()
+		const index2 = await GitIndex.from(buffer2)
+		const buffer3 = await index2.toObject()
+		expect(buffer2.buffer).toEqual(buffer3.buffer)
+	})
 
-  it('write unmerged index to disk and read it back', async () => {
-    const { gitdir, fs } = await makeFixture('test-GitIndex')
-    await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function(
-      index
-    ) {
-      expect(index.entries.length).toBe(0)
-      expect(index.entriesFlat.length).toBe(0)
-      index.insert({ filepath: 'a', oid: '01', stage: 1 })
-      index.insert({ filepath: 'a', oid: '10', stage: 2 })
-      index.insert({ filepath: 'a', oid: '11', stage: 3 })
-      expect(index.unmergedPaths).toContain('a')
-    })
-    await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function(
-      index
-    ) {
-      expect(index.entries.length).toBe(1)
-      expect(index.entriesFlat.length).toBe(3)
-      expect(index.unmergedPaths).toContain('a')
+	it("write unmerged index to disk and read it back", async () => {
+		const { gitdir, fs } = await makeFixture("test-GitIndex")
+		await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function (index) {
+			expect(index.entries.length).toBe(0)
+			expect(index.entriesFlat.length).toBe(0)
+			index.insert({ filepath: "a", oid: "01", stage: 1 })
+			index.insert({ filepath: "a", oid: "10", stage: 2 })
+			index.insert({ filepath: "a", oid: "11", stage: 3 })
+			expect(index.unmergedPaths).toContain("a")
+		})
+		await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function (index) {
+			expect(index.entries.length).toBe(1)
+			expect(index.entriesFlat.length).toBe(3)
+			expect(index.unmergedPaths).toContain("a")
 
-      const entryA = index.entriesMap.get('a')
+			const entryA = index.entriesMap.get("a")
 
-      expect(entryA.stages.length).toBe(4)
-      expect(entryA.stages[1]).toBe(index.entriesFlat[0])
-      expect(entryA.stages[2]).toBe(index.entriesFlat[1])
-      expect(entryA.stages[3]).toBe(index.entriesFlat[2])
-    })
-  })
+			expect(entryA.stages.length).toBe(4)
+			expect(entryA.stages[1]).toBe(index.entriesFlat[0])
+			expect(entryA.stages[2]).toBe(index.entriesFlat[1])
+			expect(entryA.stages[3]).toBe(index.entriesFlat[2])
+		})
+	})
 
-  it('read existing unmerged index', async () => {
-    // Setup
-    const { gitdir, fs } = await makeFixture('test-GitIndex-unmerged')
+	it("read existing unmerged index", async () => {
+		// Setup
+		const { gitdir, fs } = await makeFixture("test-GitIndex-unmerged")
 
-    // Test
-    await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function(
-      index
-    ) {
-      expect(index.unmergedPaths.length).toEqual(2)
-      expect(index.entriesFlat.length).toBe(7)
-      expect(index.unmergedPaths).toContain('a')
-      expect(index.unmergedPaths).toContain('b')
-      expect(index.entriesMap.get('a').stages.length).toBe(4)
-      expect(index.entriesMap.get('b').stages.length).toBe(4)
-      expect(index.entriesMap.get('c').stages.length).toBe(1)
-    })
-  })
+		// Test
+		await GitIndexManager.acquire({ fs, gitdir, cache: {} }, async function (index) {
+			expect(index.unmergedPaths.length).toEqual(2)
+			expect(index.entriesFlat.length).toBe(7)
+			expect(index.unmergedPaths).toContain("a")
+			expect(index.unmergedPaths).toContain("b")
+			expect(index.entriesMap.get("a").stages.length).toBe(4)
+			expect(index.entriesMap.get("b").stages.length).toBe(4)
+			expect(index.entriesMap.get("c").stages.length).toBe(1)
+		})
+	})
 })
