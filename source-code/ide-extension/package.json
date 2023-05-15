@@ -53,12 +53,15 @@
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
+		"@types/fs-extra": "^11.0.1",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",
 		"esbuild": "^0.17.18",
+		"fs-extra": "^11.1.1",
 		"node-fetch": "^3.3.1",
-		"ovsx": "^0.8.0"
+		"ovsx": "^0.8.0",
+		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
 		"workspaceContains:**/inlang.config.js"
