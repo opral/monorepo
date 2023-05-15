@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- 55cf3902: added error monitoring to fix bugs faster
+
 ## 0.7.0
 
 ### Minor Changes
