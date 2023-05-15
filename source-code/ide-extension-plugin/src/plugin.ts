@@ -68,9 +68,9 @@ export const ideExtensionPlugin = createPlugin<IdeExtensionSettings>(({ settings
 		// check if settings are already set & if not set them to default
 		const updatedSettings = {
 			messageReferenceMatchers:
-				settings.messageReferenceMatchers || fallback.messageReferenceMatchers,
-			extractMessageOptions: settings.extractMessageOptions || fallback.extractMessageOptions,
-			documentSelectors: settings.documentSelectors || fallback.documentSelectors,
+				settings?.messageReferenceMatchers || fallback.messageReferenceMatchers,
+			extractMessageOptions: settings?.extractMessageOptions || fallback.extractMessageOptions,
+			documentSelectors: settings?.documentSelectors || fallback.documentSelectors,
 		}
 
 		const parsedConfig = validateIdeExtensionSettings(updatedSettings)

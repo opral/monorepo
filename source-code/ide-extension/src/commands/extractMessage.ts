@@ -1,4 +1,3 @@
-// import { telemetryNode } from "@inlang/telemetry"
 import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
@@ -46,9 +45,14 @@ export const extractMessageCommand = {
 		}
 
 		const messageValue = textEditor.document.getText(textEditor.selection)
-		const preparedExtractOptions = ideExtension.extractMessageOptions.map((option) =>
-			option.callback(messageId, messageValue),
-		)
+
+		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
+			// eslint-disable-next-line
+			if (acc.find((accOption) => accOption === option.callback(messageId, messageValue))) {
+				return acc
+			}
+			return [...acc, option.callback(messageId, messageValue)]
+		}, [] as string[])
 
 		const preparedExtractOption = await vscode.window.showQuickPick(
 			[...preparedExtractOptions, "How to edit these replacement options?"],
@@ -56,9 +60,16 @@ export const extractMessageCommand = {
 		)
 		if (preparedExtractOption === undefined) {
 			return
-		} else if (preparedExtractOption === "How to edit these replacement options?") {
+		} else if (
+			preparedExtractOption ===
+			"How to edit these replacement options? See `extractMessageOptions`."
+		) {
 			// TODO #152
-			return vscode.env.openExternal(vscode.Uri.parse("https://github.com/inlang/inlang"))
+			return vscode.env.openExternal(
+				vscode.Uri.parse(
+					"https://github.com/inlang/inlang/tree/main/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration",
+				),
+			)
 		}
 
 		if (preparedExtractOption === undefined) {
