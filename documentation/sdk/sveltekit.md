@@ -63,6 +63,28 @@ Take a look at the [Usage](/documentation/sdk/usage) to learn more about how to 
 
 You can configure the inlang SDK depending on your needs. You can learn more in the [Configuration](/documentation/sdk/configuration) section.
 
+## Further reading
+
+To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. If that doesn't match you requirements check out the other [plugins](https://inlang.com/documentation/plugins).
+
+```
+languages
+|--en.json
+|--de.json
+```
+
+A valid JSON file would look like this.
+
+```json
+{
+	"title": "Welcome",
+	"card": {
+		"tag": "New",
+		"title": "Great new tool"
+	}
+}
+```
+
 ---
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
