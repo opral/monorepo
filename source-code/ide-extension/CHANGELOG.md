@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.5.6
+
+### Patch Changes
+
+- 4147156d: refactor esm imports
+
 ## 0.5.5
 
 ### Patch Changes
