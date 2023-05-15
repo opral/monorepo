@@ -7,7 +7,7 @@ it("should be possible to define a plugin", () => {
 		return {
 			id: "samuelstroschein.plugin-json",
 			config: () => {
-				if (settings.pathPattern === undefined) {
+				if (settings?.pathPattern === undefined) {
 					throw new Error("pathPattern is required")
 				}
 				return {
