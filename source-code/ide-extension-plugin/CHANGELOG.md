@@ -1,5 +1,11 @@
 # @inlang/ide-extension-plugin
 
+## 0.5.5
+
+### Patch Changes
+
+- 5c6d472e: update settings for plugins
+
 ## 0.5.4
 
 ### Patch Changes
