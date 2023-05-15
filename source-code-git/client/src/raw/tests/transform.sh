@@ -51,3 +51,5 @@ rm "$destDir/env.d.ts"
 rm "$destDir/fetch.test.ts"
 rm "$destDir/listServerRefs.test.ts"
 rm "$destDir/getRemoteInfo2.test.ts"
+
+npm exec -- prettier -w '**/src/raw/tests/*.test.ts'
