@@ -26,9 +26,6 @@ export async function defineConfig(env) {
 				languageNegotiation: {
 					strategies: [{ type: "localStorage" }],
 				},
-				resources: {
-					cache: "build-time",
-				},
 			}),
 		],
 	}
