@@ -2,6 +2,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -25,6 +26,7 @@ import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
+import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 
 type EditorStateSchema = {
 	/**
@@ -97,6 +99,9 @@ type EditorStateSchema = {
 	languages: () => Language[]
 	setLanguages: Setter<Language[]>
 
+	tourStep: () => TourStepId
+	setTourStep: Setter<TourStepId>
+
 	lint: () => InlangConfig["lint"]
 
 	/**
@@ -132,6 +137,11 @@ type EditorStateSchema = {
 	 * 	if (user && isCollaborator())
 	 */
 	userIsCollaborator: Resource<boolean>
+
+	/**
+	 * Whether the is private or not.
+	 */
+	repoIsPrivate: Resource<boolean | undefined>
 
 	/**
 	 * The last time the repository was pushed.
@@ -179,6 +189,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
@@ -208,9 +219,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("clone repository", {
+			telemetryBrowser.capture("EDITOR cloned repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
+				isPrivate: repoIsPrivate(),
 			})
 			return result
 		},
@@ -259,6 +271,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
+	//the effect should skip tour guide steps if not needed
+	createEffect(() => {
+		if (localStorage?.user === undefined) {
+			setTourStep("github-login")
+		} else if (!userIsCollaborator()) {
+			setTourStep("fork-repository")
+		} else if (tourStep() === "fork-repository" && inlangConfig() && filteredLanguages()) {
+			if (filteredLanguages().length > 0) {
+				setTourStep("default-languages")
+			} else {
+				setTourStep("default-languages")
+				setTimeout(() => {
+					const element = document.getElementById("missingMessage-summary")
+					element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				}, 100)
+			}
+		} else if (tourStep() === "missing-message-rule" && inlangConfig()) {
+			setTimeout(() => {
+				const element = document.getElementById("missingMessage-summary")
+				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+			}, 100)
+		}
+	})
+
 	// re-fetched if the file system changes
 	const [unpushedChanges] = createResource(() => {
 		if (
@@ -279,6 +315,35 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			lastFsChange: fsChange(),
 		}
 	}, _unpushedChanges)
+
+	const [repoIsPrivate] = createResource(
+		/**
+		 * createResource is not reacting to changes like: "false","Null", or "undefined".
+		 * Hence, a string needs to be passed to the fetch of the resource.
+		 */
+		() => {
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false
+			}
+			return {
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+			}
+		},
+		async (args) => {
+			try {
+				const response = await github.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				return response.data.private
+			} catch (error) {
+				return undefined
+			}
+		},
+	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -490,6 +555,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					referenceLanguage,
 					languages,
 					setLanguages,
+					tourStep,
+					setTourStep,
 					filteredLanguages,
 					setFilteredLanguages,
 					filteredLintRules,
@@ -498,6 +565,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setResources,
 					referenceResource,
 					userIsCollaborator,
+					repoIsPrivate,
 					setLastPush,
 					fs,
 					setLastPullTime,

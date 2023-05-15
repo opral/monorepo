@@ -17,9 +17,25 @@ module.exports = {
 					"75%": { transform: "translate(-150px, -8px)" },
 					"100%": { transform: "translate(-150px, 0)" },
 				},
+				jump: {
+					"0%": { transform: "translate(-150px, 0px)" },
+					"50%": { transform: "translate(-150px, -16px)" },
+					"100%": { transform: "translate(-150px, 0px)" },
+				},
+				fadeInTop: {
+					"0%": { opacity: 0, transform: "translateY(-20px)" },
+					"100%": { opacity: 1, transform: "translateY(0)" },
+				},
+				fadeInBottom: {
+					"0%": { opacity: 0, transform: "translateY(20px)" },
+					"100%": { opacity: 1, transform: "translateY(0)" },
+				},
 			},
 			animation: {
 				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
+				jump: "jump 0.3s ease 1",
+				fadeInTop: "fadeInTop 0.3s ease-out 1",
+				fadeInBottom: "fadeInBottom 0.3s ease-out 1",
 			},
 		},
 		// no tailwind colors. use color system colors only. see below
