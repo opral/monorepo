@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 0.5.5
+
+### Patch Changes
+
+- 5c6d472e: update settings for plugins
+- Updated dependencies [5c6d472e]
+  - @inlang/core@0.8.4
+
 ## 0.5.4
 
 ### Patch Changes
