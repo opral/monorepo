@@ -29,7 +29,7 @@ async function copyDirectory(args: {
 		if (stats.isSymbolicLink()) {
 			let target = await args.copyFrom.readlink(path)
 			// abusing memoryFs's liberal path handling to avoid implementing `dirname`
-			if (!target.startsWith("/")) target = `${path}/../${target}`
+			if (!target.startsWith("/")) target = `/${path}/../${target}`
 			await args.copyTo.symlink(target, path)
 		}
 	}

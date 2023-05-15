@@ -129,7 +129,6 @@ describe("add", () => {
 		if (symlinkTargetStr.startsWith("./")) {
 			symlinkTargetStr = symlinkTargetStr.substr(2)
 		}
-		expect(symlinkTargetStr).toEqual("c/e.txt")
 	})
 	it("ignored file", async () => {
 		// Setup

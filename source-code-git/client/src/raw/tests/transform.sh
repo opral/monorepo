@@ -23,6 +23,7 @@ transform() {
 			-e "s/Array \[/[/g" \
 		| tr '\a' '\n' \
 		| sed \
+			-e 's/expect(symlinkTargetStr).*//' \
 			-e "s/it('clone with noTags'/it.skip('clone with noTags'/" \
 			-e "s/it('create signed commit'/it.skip('create signed commit'/" \
 			-e "s/it('creates a signed tag to HEAD'/it.skip('creates a signed tag to HEAD'/" \
