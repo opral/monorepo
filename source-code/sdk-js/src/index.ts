@@ -7,4 +7,4 @@ export {
 	loadResource,
 	route,
 } from "./exports.js"
-export { type RelativeUrl } from "./utils.js"
+export { type RelativeUrl } from "./types.js"

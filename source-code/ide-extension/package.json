@@ -1,19 +1,24 @@
 {
-	"name": "inlang-vs-code-extension",
+	"name": "vs-code-extension",
 	"private": true,
 	"displayName": "inlang",
 	"type": "module",
-	"description": "i18n extension that makes you more productive.",
+	"description": "i18n extension that makes developers more productive.",
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/inlang/inlang.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"engines": {
 		"vscode": "^1.75.0"
 	},
+	"keywords": [
+		"i18n",
+		"localization",
+		"translation"
+	],
 	"categories": [
 		"Other",
 		"Linters",
@@ -29,8 +34,8 @@
 		]
 	},
 	"scripts": {
-		"build": "rollup --config",
-		"dev": "rollup --config --watch",
+		"build": "node ./build.js",
+		"dev": "DEV=true node ./build.js",
 		"package": "npx vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
@@ -40,29 +45,23 @@
 		"format": "cd ../.. && npm run format:base ./source-code/ide-extension",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/ide-extension",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"@inlang/core": "*",
-		"node-fetch": "^3.3.0",
+		"@inlang/telemetry": "*",
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
-		"@rollup/plugin-commonjs": "^24.0.1",
-		"@rollup/plugin-node-resolve": "^15.0.1",
-		"@rollup/plugin-sucrase": "^5.0.1",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",
-		"ovsx": "^0.8.0",
-		"rollup": "^3.14.0"
+		"esbuild": "^0.17.18",
+		"node-fetch": "^3.3.1",
+		"ovsx": "^0.8.0"
 	},
 	"activationEvents": [
-		"onLanguage:javascript",
-		"onLanguage:javascriptreact",
-		"onLanguage:typescript",
-		"onLanguage:typescriptreact",
-		"onLanguage:svelte"
+		"workspaceContains:**/inlang.config.js"
 	],
 	"license": "Apache-2.0"
 }

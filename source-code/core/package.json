@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/core",
 	"type": "module",
-	"version": "0.7.13",
+	"version": "0.8.2",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -23,11 +23,11 @@
 			"config": [
 				"./dist/config/index.d.ts"
 			],
+			"environment": [
+				"./dist/environment/index.d.ts"
+			],
 			"lint": [
 				"./dist/lint/index.d.ts"
-			],
-			"plugin": [
-				"./dist/plugin/index.d.ts"
 			],
 			"query": [
 				"./dist/query/index.d.ts"
@@ -37,6 +37,9 @@
 			],
 			"utilities": [
 				"./dist/utilities/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
 			]
 		}
 	},
@@ -56,7 +59,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "shx rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"engines": {
 		"node": ">=16.15.0"

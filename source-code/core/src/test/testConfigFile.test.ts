@@ -10,7 +10,6 @@ it("should error on import keywords", async () => {
   `
 	const shouldFail2 = `
     export function defineConfig(env) {
-      const shouldPass = env.$import("x")
       const butThisFails = import("x")
     }
   `
@@ -18,4 +17,41 @@ it("should error on import keywords", async () => {
 	expect(exception1).toBeDefined()
 	const [, exception2] = await testConfigFile({ file: shouldFail2, env })
 	expect(exception2).toBeDefined()
+})
+
+it("should allow $import statements", async () => {
+	const shouldPass = `
+    export function defineConfig(env) {
+      const shouldPass = env.$import("x").catch(() => undefined)
+
+      return {
+        referenceLanguage: "en",
+        languages: ["en"],
+        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
+        writeResources: () => undefined,
+      }
+    }
+  `
+	const [, exception] = await testConfigFile({ file: shouldPass, env })
+	expect(exception).not.toBeDefined()
+})
+
+it("should allow JSDoc import statements", async () => {
+	const shouldPass = `
+    /**
+     * @type { import("@inlang/core/config").DefineConfig }
+     */
+    export function defineConfig(env) {
+      const shouldPass = env.$import("x").catch(() => undefined)
+
+      return {
+        referenceLanguage: "en",
+        languages: ["en"],
+        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
+        writeResources: () => undefined,
+      }
+    }
+  `
+	const [, exception] = await testConfigFile({ file: shouldPass, env })
+	expect(exception).not.toBeDefined()
 })
