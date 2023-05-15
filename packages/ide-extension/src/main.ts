@@ -10,14 +10,15 @@ import { ExtractMessage } from "./actions/extractMessage.js"
 import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
 import { initialize$import } from "@inlang/core/environment"
 import { msg } from "./utils/message.js"
-import { telemetryNode } from "@inlang/telemetry"
+import { $import } from "./utils/$import.js"
+// import { telemetryNode } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		telemetryNode.capture({
-			distinctId: "unknown",
-			event: "IDE-EXTENSION activated",
-		})
+		// telemetryNode.capture({
+		// 	distinctId: "unknown",
+		// 	event: "IDE-EXTENSION activated",
+		// })
 		msg("Inlang extension activated.", "info")
 
 		// start the extension
@@ -77,7 +78,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const env = { $fs: fileSystemMapper, $import: initialize$import({ fs: fileSystemMapper, fetch }) }
 
-	const module = (await import(closestConfigPath)) as InlangConfigModule
+	const module = (await $import(closestConfigPath)) as InlangConfigModule
+	console.log("module", module)
+
 	const config = await setupConfig({ module, env })
 
 	const loadResources = async () => {
@@ -110,8 +113,6 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			extractMessageCommand.callback,
 		),
 	)
-
-	console.log("inlang extension started")
 
 	const documentSelectors = [
 		{ language: "javascript", pattern: "!**/inlang.config.js" },
