@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.8.4
+
+### Patch Changes
+
+- 5c6d472e: update settings for plugins
+
 ## 0.8.3
 
 ### Patch Changes
