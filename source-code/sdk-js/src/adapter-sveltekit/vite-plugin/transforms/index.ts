@@ -1,6 +1,6 @@
 import { InlangError } from "../../../config/config.js"
 import type { TransformConfig } from "../config.js"
-import type { FileInformation } from "../plugin.js"
+import type { FileInformation } from '../fileInformation.js'
 import { transformJs } from "./*.js.js"
 import { transformSvelte } from "./*.svelte.js"
 import { transformLayoutJs } from "./+layout.js.js"
