@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.4.5
+
+### Patch Changes
+
+- f80dc9c8: show link to docs if sdkPlugin is missing
+
 ## 0.4.4
 
 ### Patch Changes
