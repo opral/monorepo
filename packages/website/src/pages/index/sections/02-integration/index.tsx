@@ -12,7 +12,7 @@ const data = {
 	caption: "Not framwork agnostic",
 	title: "Integrate into every code base.",
 	description:
-		"Inlang is not framework agnostic. It's seamlessly integrates with every code base, from python to javascript.",
+		"Inlang is not framework agnostic. It seamlessly integrates with every code base, from python to javascript.",
 	button: "Get started",
 	buttonLink: "/documentation/getting-started",
 }
@@ -62,10 +62,10 @@ const Integration = () => {
 								{data.caption}
 							</p>
 						</div>
-						<h2 class="text-center text-3xl font-semibold text-on-background">{data.title}</h2>
-						<h2 class="text-base md:w-[55%] text-center text-outline-variant">
-							{data.description}
+						<h2 class="text-center text-3xl font-semibold text-on-background leading-relaxed tracking-tight">
+							{data.title}
 						</h2>
+						<p class="text-base md:w-[55%] text-center text-outline-variant">{data.description}</p>
 						<div class="pt-4">
 							<Button href={data.buttonLink} type="secondary">
 								{data.button}
