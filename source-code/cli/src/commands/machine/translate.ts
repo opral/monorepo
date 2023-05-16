@@ -80,8 +80,8 @@ async function translateCommandAction() {
 	// Translate all messages
 	for (const message of referenceLanguageResource.body) {
 		for (const language of languagesToTranslateTo) {
-			// continue if message is already translated
-			if (message.pattern.elements[0]!.value !== "") {
+			// continue if message is already translated in the language
+			if (language.body.some((message) => message.id.name === message.id.name)) {
 				continue
 			}
 
