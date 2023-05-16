@@ -1,4 +1,4 @@
-import type { Node } from "estree"
+import type { Expression, Identifier, Node } from "estree"
 import type { Result } from "@inlang/core/utilities"
 import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
@@ -247,7 +247,7 @@ export const htmlIsEmpty = (htmlAst: Ast["html"]) => {
 	)
 }
 
-const functionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+export const functionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
 	({ node }) => n.FunctionDeclaration.check(node),
 	({ node }) => n.Identifier.check(node) && node.name === name,
 ]
@@ -259,22 +259,42 @@ const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] =>
 	({ node }) => n.ArrowFunctionExpression.check(node),
 ]
 
-const variableDeclaratorMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+export const variableDeclaratorMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
 	({ node }) => n.VariableDeclaration.check(node),
 	({ node }) =>
 		n.VariableDeclarator.check(node) && n.Identifier.check(node.id) && node.id.name === name,
 ]
 
-// TODO @benjaminpreiss test this
+export const findUsedImportsInAst = (
+	ast: types.namedTypes.Node,
+	availableImports: [string, string][] = [],
+) => {
+	if (availableImports.length === 0) return []
+	else {
+		const usedImportsLocal = (findAstJs(
+			ast,
+			[
+				({ node }) =>
+					n.Identifier.check(node) && availableImports.some(([, local]) => local === node.name),
+			],
+			(node) => {
+				return n.Identifier.check(node) ? () => node.name : undefined
+			},
+		)[0] ?? []) as string[]
+		return availableImports.filter(([, local]) => usedImportsLocal.includes(local))
+	}
+}
+
+// TODO @benjaminpreiss
+// if load is an (arrow) function, extend the parameters.
+// The 2nd parameter needs to be all imported vars from @inlang/sdk-js that are USED within the function.
+// 1. For that we pass a list of available vars into the function
+// 2. We filter that list for the vars that we find in the load function
+// 3. if that list is not empty, we create the 2nd parameter object
 export const getFunctionOrDeclarationValue = (
 	ast: types.namedTypes.Node,
 	name: string,
-	fallbackFunction:
-		| types.namedTypes.FunctionExpression
-		| types.namedTypes.ArrowFunctionExpression = b.arrowFunctionExpression(
-		[],
-		b.blockStatement([]),
-	),
+	fallbackFunction: ExpressionKind = b.arrowFunctionExpression([], b.blockStatement([])),
 ) => {
 	const variableDeclarationValueSearchResults = findAstJs(
 		ast,
@@ -287,7 +307,7 @@ export const getFunctionOrDeclarationValue = (
 	)[0] as
 		| [types.namedTypes.FunctionDeclaration, ...types.namedTypes.FunctionDeclaration[]]
 		| undefined
-	const arrowFunctionExpression =
+	const variableDeclarationExpression =
 		variableDeclarationValueSearchResults && variableDeclarationValueSearchResults.length > 0
 			? (variableDeclarationValueSearchResults[0] as ExpressionKind)
 			: undefined
@@ -301,7 +321,7 @@ export const getFunctionOrDeclarationValue = (
 					id: functionDeclarationSearchResults[0].id,
 			  })
 			: undefined
-	return arrowFunctionExpression ?? functionDeclaration ?? fallbackFunction
+	return variableDeclarationExpression ?? functionDeclaration ?? fallbackFunction
 }
 
 export const replaceOrAddExportNamedFunction = (
@@ -397,3 +417,213 @@ export const getRootReferenceIndexes = (ast: types.namedTypes.Node, names: [stri
 				  }
 				: undefined,
 	)[0] as number[] | undefined
+
+// Returns true if all ancestors fulfill checks
+// False if one ancestor breaks the chain
+const typeCheckAncestors = (
+	node: types.namedTypes.Node | Node | null | undefined,
+	meta: NodeInfoMap<types.namedTypes.Node | Node | null>,
+	...typeChecks: ((node: any) => boolean)[]
+) => {
+	let parent = node ? meta.get(node)?.parent : undefined
+	for (const check of typeChecks) {
+		if (!check(parent)) return false
+		parent = parent ? meta.get(parent)?.parent : undefined
+	}
+	return true
+}
+
+// Returns true if node was declared in a certain type of ancestry
+const isDeclaredIn = (
+	node: types.namedTypes.Node | Node | null | undefined,
+	meta: NodeInfoMap<types.namedTypes.Node | Node | null>,
+	type: "ObjectPattern",
+) => {
+	const propertyCheck = (nd: any) =>
+		(n.Property.check(nd) || n.ObjectProperty.check(nd)) && nd.value === node
+	const objectPatternCheck = (node: any) => n.ObjectPattern.check(node)
+	if (type === "ObjectPattern") {
+		return typeCheckAncestors(node, meta, propertyCheck, objectPatternCheck)
+	}
+	return false
+}
+
+// Is this identifier already assigned to another identifier?
+//
+// E.g. you want to merge `const {key: alias} = ...` and `const {key: anotherAlias} = ...`, then we know that `key` is already assigned to `alias`
+// 2. `const {key: alias, ...rest} = ...` and `const {key2} = ...` then `key2` is assigned to `rest`
+// 3. `const blue = ...` and `const {key} = ...` then `key` is assigned to `blue`
+// Returns the identifier to which the requested identifier is already assigned
+// Value is already assigned to identifier
+export class FindAliasError extends Error {
+	readonly #id = "FindAliasException"
+}
+
+type Alias = types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier
+
+export const findAlias = (
+	ast: types.namedTypes.Node | Node,
+	identifier: string,
+	deep = false,
+	lastAlias?: Alias,
+): Result<Alias, FindAliasError> => {
+	let result = undefined as ReturnType<typeof findAlias> | undefined
+	jsWalk(ast as Node, {
+		enter(node: types.namedTypes.Node | Node) {
+			if (result !== undefined) {
+				this.skip()
+			} else if (n.ObjectPattern.check(node)) {
+				let rest
+				for (const property of node.properties) {
+					// Recurse
+					const findAliasResult = findAlias(property, identifier)
+					if (n.RestProperty.check(property)) rest = property.argument
+					else if (findAliasResult[0] !== undefined) {
+						result = findAliasResult
+						this.skip()
+					}
+				}
+				if (result === undefined && rest !== undefined) {
+					result = [rest, undefined]
+					this.skip()
+				}
+			} else if (
+				n.Property.check(node) &&
+				((n.Identifier.check(node.key) && node.key.name === identifier) ||
+					(n.Identifier.check(node.value) && node.value.name === identifier))
+			) {
+				result = [node.value, undefined]
+				this.skip()
+			} else if (
+				n.FunctionDeclaration.check(node) &&
+				n.Identifier.check(node.id) &&
+				node.id.name === identifier
+			) {
+				result = [node.id, undefined]
+				this.skip()
+			} else if (n.VariableDeclaration.check(node)) {
+				for (const declaration of node.declarations) {
+					const findAliasResult = findAlias(declaration, identifier)
+					if (findAliasResult[0] !== undefined) {
+						result = findAliasResult
+						this.skip()
+					}
+				}
+			} else if (
+				n.VariableDeclarator.check(node) &&
+				n.Identifier.check(node.id) &&
+				node.id.name === identifier
+			) {
+				result = [node.id]
+				this.skip()
+			}
+		},
+	})
+	// Iterate through findAlias until no alias can be found
+	if (result !== undefined) {
+		if (result[0] !== undefined && deep) {
+			if (lastAlias !== result[0] && n.Identifier.check(result[0])) {
+				const nextAlias = findAlias(ast, result[0].name, true, result[0])
+				if (nextAlias[0] !== undefined) return nextAlias
+				else return result
+			}
+			return [
+				undefined,
+				new Error(
+					"Deep searching for aliases for MemberExpressions is not supported yet.",
+				) as FindAliasError,
+			]
+		}
+		return result
+	}
+	return [undefined, new Error("") as FindAliasError]
+}
+
+export class IdentifierIsDeclarableError extends Error {
+	readonly #id = "IdentifierIsDeclarableException"
+}
+
+export const identifierIsDeclarable = (
+	ast: types.namedTypes.Node | Node,
+	identifier: string,
+): Result<boolean, IdentifierIsDeclarableError> => {
+	try {
+		const searchResults = (findAstJs(
+			ast,
+			[({ node }) => n.Identifier.check(node) && node.name === identifier],
+			(node) =>
+				n.Identifier.check(node)
+					? (meta) => {
+							// Is this name used as the value of an object pattern? If so, return false
+							if (isDeclaredIn(node, meta, "ObjectPattern")) return false
+							throw new Error("Cannot predict indentifier declarability for this ast.")
+					  }
+					: undefined,
+		)[0] ?? [true]) as boolean[]
+		return [searchResults.every((r) => r === true), undefined]
+	} catch (error) {
+		return [undefined, error as IdentifierIsDeclarableError]
+	}
+}
+
+export class MergeNodesError extends Error {
+	readonly #id = "MergeNodesException"
+}
+
+// This function merges 2 AST nodes, by merely adding the nodes missing in the first ast from the second ast.
+// It does so by attaching all Nodes that can be found in the second node whose parent can be found in the first node.
+// This relies heavily on the comparison function of two nodes
+
+// RETURNS a map of declaration identifiers that were renamed ["old identifier" -> "new identifier"]
+// Checks, whether an identifier is available for declaration. Only merges, if this is true
+// {key: alias, ...rest} & {event} -> {key: alias, event, ...rest} with rest -> {...rest, event}
+// or -> {key: alias, ...rest} with event -> rest.event
+// {key: {key2: value2, ...rest2}, ...rest1} & {key: {event}}
+export const mergeNodes = (
+	ast: types.namedTypes.Node | Node,
+	node: types.namedTypes.Node | Node,
+): Result<
+	[
+		types.namedTypes.Identifier | Identifier,
+		types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier,
+	][],
+	MergeNodesError
+> => {
+	if (n.ObjectPattern.check(node)) {
+		for (const property of node.properties) {
+			return mergeNodes(ast, property)
+		}
+	} else if (n.Property.check(node)) {
+		if (n.Identifier.check(node.value)) {
+			if (identifierIsDeclarable(ast, node.value.name)[0] === true) {
+				if (n.Identifier.check(node.key)) {
+					if (n.ObjectPattern.check(ast)) {
+						const foundAlias = findAlias(ast, node.key.name)[0]
+						if (n.Identifier.check(foundAlias) && foundAlias.name === node.key.name)
+							return [[], undefined]
+						if (foundAlias !== undefined)
+							return [[[b.identifier(node.value.name), foundAlias]], undefined]
+						ast.properties.push(node)
+					} else if (n.Identifier.check(ast)) {
+						return [[[b.identifier(node.value.name), b.memberExpression(ast, node.key)]], undefined]
+					} else {
+						return [
+							undefined,
+							new Error("Cant merge Property into ast of different type") as MergeNodesError,
+						]
+					}
+				} else {
+					return [undefined, new Error("Unsupported type for key of Property.") as MergeNodesError]
+				}
+			} else {
+				return [
+					undefined,
+					new Error("Some of the requested identifiers are already in use.") as MergeNodesError,
+				]
+			}
+		} else {
+			return [undefined, new Error("Unsupported type for value of Property") as MergeNodesError]
+		}
+	}
+	return [[], undefined]
+}

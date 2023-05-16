@@ -5,9 +5,11 @@ import { deepMergeObject } from "magicast/helpers"
 import {
 	getFunctionOrDeclarationValue,
 	getWrappedExport,
+	removeSdkJsImport,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/ast.js"
 import { dedent } from "ts-dedent"
+import { extractWrappableExpression } from "../../../helpers/inlangAst.js"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -44,6 +46,8 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const b = types.builders
 	const ast = parseModule(code)
 
+	// Remove imports, but save their names
+	const importNames = removeSdkJsImport(ast.$ast)
 	// Merge imports with required imports
 	const imports = requiredImports(config)
 	const importsAst = parseModule(imports)
@@ -57,11 +61,12 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 		],
 		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
 	)
-	const arrowOrFunctionNode = getFunctionOrDeclarationValue(
-		ast.$ast,
-		"handle",
-		emptyArrowFunctionDeclaration,
-	)
+	const arrowOrFunctionNode = extractWrappableExpression({
+		ast: ast.$ast,
+		name: "handle",
+		fallbackFunction: emptyArrowFunctionDeclaration,
+		availableImports: importNames,
+	})
 	const exportAst = getWrappedExport(
 		parseExpression(options(config)),
 		[arrowOrFunctionNode],
