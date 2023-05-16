@@ -1,4 +1,3 @@
-import { it } from "vitest"
 import { query } from "@inlang/core/query"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
@@ -85,19 +84,6 @@ async function translateCommandAction() {
 			if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
 				continue
 			}
-
-			// TODO: Only for debugging: Remove later
-			// log.info("🔍 Translating to " + language.languageTag.name + "...")
-			// // log message id
-			// log.info(
-			// 	"🔍 Translating message " +
-			// 		message.id.name +
-			// 		" with the message value of " +
-			// 		message.pattern.elements[0]!.value +
-			// 		" ...",
-			// )
-			// console.log(referenceLanguage, language.languageTag.name, message.pattern.elements[0]!.value)
-			// TODO
 
 			// 🌏 Translation
 			const [translation, exception] = await rpc.machineTranslate({
