@@ -22,7 +22,6 @@
 		"---- BUILD --------------------------------------------------------": "",
 		"prebuild": "npm run isogit-update",
 		"build": "tsc --build ./tsconfig.build.json",
-		"predev": "npm run isogit-update",
 		"dev": "tsc --watch",
 		"---- TEST SETUP ----------------------------------------------------": "",
 		"start-proxy": "cors-proxy start -p 9999 -d",
