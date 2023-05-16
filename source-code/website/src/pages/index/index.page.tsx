@@ -2,6 +2,7 @@ import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./sections/01-hero/index.jsx"
 import Integration from "./sections/02-integration/index.jsx"
+import ConfigPage from "./sections/03-config/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -19,6 +20,7 @@ export function Page() {
 				<div>
 					<Hero />
 					<Integration />
+					<ConfigPage />
 					{/* <Credibility />
 					<Editor />
 					<VsCodeExtension />
