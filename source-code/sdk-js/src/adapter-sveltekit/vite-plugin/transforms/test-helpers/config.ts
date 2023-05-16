@@ -12,6 +12,7 @@ export const getTransformConfig = (overrides: DeepPartial<TransformConfig> = {})
 		{
 			isStatic: false,
 			languageInUrl: false,
+			cwdFolderPath: "",
 			srcFolder: "",
 			rootRoutesFolder: "",
 			sourceFileName: "",
@@ -33,6 +34,7 @@ export const getTransformConfig = (overrides: DeepPartial<TransformConfig> = {})
 				},
 			},
 			svelteKit: {
+				svelteConfig: {},
 				usesTypeScript: false,
 				version: undefined,
 			},

@@ -3,6 +3,7 @@ import path, { dirname, normalize } from "node:path"
 import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
 import { InlangError } from "../../config/config.js"
+import { assertAppTemplateIsCorrect } from './checks/appTemplate.js'
 import { TransformConfig, getTransformConfig, resetConfig } from "./config.js"
 import { doesPathExist } from "./config.js"
 import { transformCode } from "./transforms/index.js"
@@ -255,6 +256,8 @@ export const plugin = () => {
 
 		async buildStart() {
 			const config = await getTransformConfig()
+
+			await assertAppTemplateIsCorrect(config)
 
 			if (!(await doesPathExist(config.rootRoutesFolder))) {
 				throw new InlangError(dedent`
