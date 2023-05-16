@@ -1,9 +1,10 @@
+import { it } from "vitest"
 import { query } from "@inlang/core/query"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
 import fs from "node:fs"
 import { Command } from "commander"
-import { countMessagesPerLanguage, log } from "../../utilities.js"
+import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 
@@ -80,8 +81,8 @@ async function translateCommandAction() {
 	// Translate all messages
 	for (const message of referenceLanguageResource.body) {
 		for (const language of languagesToTranslateTo) {
-			// continue if message is already translated in the language
-			if (language.body.some((message) => message.id.name === message.id.name)) {
+			// skip if message already exists in language
+			if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
 				continue
 			}
 
@@ -110,7 +111,15 @@ async function translateCommandAction() {
 				continue
 			}
 
-			log.info("🔍 Translated message " + message.id.name + " to " + translation)
+			const bold = (text: string) => `\x1b[1m${text}\x1b[0m`
+			const italic = (text: string) => `\x1b[3m${text}\x1b[0m`
+			log.info(
+				getFlag(language.languageTag.name) +
+					" Translated message " +
+					bold(message.id.name) +
+					" to " +
+					italic(translation),
+			)
 
 			const newMessage: Message = {
 				type: "Message",
@@ -121,8 +130,11 @@ async function translateCommandAction() {
 				},
 			}
 
+			// get latest resources because of for loop
+			const latestResource = await config.readResources({ config })
+
 			// find language resource to add the new message to
-			const languageResource = resources.find(
+			const languageResource = latestResource.find(
 				(resource) => resource.languageTag.name === language.languageTag.name,
 			)
 			if (languageResource) {
