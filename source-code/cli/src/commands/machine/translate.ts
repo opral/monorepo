@@ -86,16 +86,16 @@ async function translateCommandAction() {
 			}
 
 			// TODO: Only for debugging: Remove later
-			log.info("🔍 Translating to " + language.languageTag.name + "...")
-			// log message id
-			log.info(
-				"🔍 Translating message " +
-					message.id.name +
-					" with the message value of " +
-					message.pattern.elements[0]!.value +
-					" ...",
-			)
-			console.log(referenceLanguage, language.languageTag.name, message.pattern.elements[0]!.value)
+			// log.info("🔍 Translating to " + language.languageTag.name + "...")
+			// // log message id
+			// log.info(
+			// 	"🔍 Translating message " +
+			// 		message.id.name +
+			// 		" with the message value of " +
+			// 		message.pattern.elements[0]!.value +
+			// 		" ...",
+			// )
+			// console.log(referenceLanguage, language.languageTag.name, message.pattern.elements[0]!.value)
 			// TODO
 
 			// 🌏 Translation
