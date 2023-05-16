@@ -157,15 +157,17 @@ export function createMemoryFs(): NodeishFilesystem {
 			path: Parameters<NodeishFilesystem["symlink"]>[1],
 		) {
 			path = normalPath(path)
+			target = target.startsWith("/") ? target : `${path}/../${target}`
 			const targetInode: Inode | undefined = fsMap.get(normalPath(target))
 			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
 			if (fsMap.get(path)) throw new FilesystemError("EEXIST", path, "symlink", target)
 
-			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "symlink")
+			if (parentDir instanceof Uint8Array)
+				throw new FilesystemError("ENOTDIR", path, "symlink", target)
 
 			if (targetInode === undefined || parentDir === undefined)
-				throw new FilesystemError("ENOENT", path, "symlink")
+				throw new FilesystemError("ENOENT", path, "symlink", target)
 
 			parentDir.add(getBasename(path))
 			newStatEntry(path, fsStats, 2, 0o777, target)
