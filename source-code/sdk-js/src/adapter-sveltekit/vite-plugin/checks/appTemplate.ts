@@ -1,13 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import type { TransformConfig } from '../config.js';
 
 const REGEX_LANG_ATTRIBUTE = /<html[^>]*(\slang=".*")[^>]*>/
 
-export const assertAppTemplateIsCorrect = async (config: TransformConfig) => {
-	const appTemplate = config.svelteKit.svelteConfig.kit?.files?.appTemplate || 'src/app.html'
-	const appTemplatePath = path.resolve(config.cwdFolderPath, appTemplate)
-
+export const assertAppTemplateIsCorrect = async ({ svelteKit, cwdFolderPath }: TransformConfig) => {
+	const appTemplatePath = svelteKit.files.appTemplate
 	const template = await readFile(appTemplatePath, { encoding: 'utf-8' })
 
 	const execArray = REGEX_LANG_ATTRIBUTE.exec(template)
@@ -21,7 +18,7 @@ export const assertAppTemplateIsCorrect = async (config: TransformConfig) => {
 		+ htmlTag.replace(langAttribute, '')
 		+ template.slice(index + htmlTag.length)
 
-	console.info(`Updating '${appTemplate}' to remove the 'lang' attribute from the <html> tag.`)
+	console.info(`Updating '${appTemplatePath.replace(cwdFolderPath, '')}' to remove the 'lang' attribute from the <html> tag.`)
 
 	await writeFile(appTemplatePath, newTemplate, { encoding: 'utf-8' })
 }

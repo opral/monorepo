@@ -13,7 +13,6 @@ export const getTransformConfig = (overrides: DeepPartial<TransformConfig> = {})
 			isStatic: false,
 			languageInUrl: false,
 			cwdFolderPath: "",
-			srcFolder: "",
 			rootRoutesFolder: "",
 			sourceFileName: "",
 			sourceMapName: "",
@@ -34,9 +33,13 @@ export const getTransformConfig = (overrides: DeepPartial<TransformConfig> = {})
 				},
 			},
 			svelteKit: {
-				svelteConfig: {},
 				usesTypeScript: false,
 				version: undefined,
+				files: {
+					appTemplate: "src/app.html",
+					routes: "src/routes",
+					serverHooks: "src/hooks.server",
+				}
 			},
 		} satisfies TransformConfig,
 		overrides as any,

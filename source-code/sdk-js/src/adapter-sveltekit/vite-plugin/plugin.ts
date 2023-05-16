@@ -78,7 +78,7 @@ export const plugin = () => {
 
 			const transformedCode = await transformCode(config, code, fileInformation)
 			if (config.debug) {
-				const filePath = id.replace(config.srcFolder, "")
+				const filePath = id.replace(config.cwdFolderPath, "")
 				console.info(dedent`
 					-- INLANG DEBUG START-----------------------------------------------------------
 

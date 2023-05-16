@@ -9,7 +9,7 @@ export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.rootRoutesFolder))) {
 		throw new InlangError(dedent`
 
-			Could not find the folder '${config.rootRoutesFolder.replace(config.srcFolder, "")}'.
+			Could not find the folder '${config.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
 			It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/inlang/issues/647.
 			Please create the folder and move all existing route files into it.
 
@@ -28,27 +28,26 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 	) => {
 		switch (fileType) {
 			case "hooks.server.js":
-				return path.resolve(config.srcFolder, `hooks.server.${fileEnding}`)
+				return `${config.svelteKit.files.serverHooks}.${fileEnding}`
 			case "[language].json":
 				return path.resolve(
-					config.srcFolder,
-					"routes",
+					config.svelteKit.files.routes,
 					"inlang",
 					"[language].json",
 					`+server.${fileEnding}`,
 				)
 			case "+layout.server.js":
-				return path.resolve(config.srcFolder, "routes", `+layout.server.${fileEnding}`)
+				return path.resolve(config.svelteKit.files.routes, `+layout.server.${fileEnding}`)
 			case "+layout.js":
-				return path.resolve(config.srcFolder, "routes", `+layout.${fileEnding}`)
+				return path.resolve(config.svelteKit.files.routes, `+layout.${fileEnding}`)
 			case "+layout.svelte":
-				return path.resolve(config.srcFolder, "routes", `+layout.svelte`)
+				return path.resolve(config.svelteKit.files.routes, `+layout.svelte`)
 			case "+page.server.js":
-				return path.resolve(config.srcFolder, "routes", `+page.server.${fileEnding}`)
+				return path.resolve(config.svelteKit.files.routes, `+page.server.${fileEnding}`)
 			case "+page.js":
-				return path.resolve(config.srcFolder, "routes", `+page.${fileEnding}`)
+				return path.resolve(config.svelteKit.files.routes, `+page.${fileEnding}`)
 			case "+page.svelte":
-				return path.resolve(config.srcFolder, "routes", `+page.svelte`)
+				return path.resolve(config.svelteKit.files.routes, `+page.svelte`)
 		}
 
 		throw Error("not implemented")

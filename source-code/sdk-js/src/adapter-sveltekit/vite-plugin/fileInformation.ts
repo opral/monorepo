@@ -26,22 +26,23 @@ export const getFileInformation = (
 ): FileInformation | undefined => {
 	const id = normalize(rawId)
 
-	if (!id.startsWith(config.srcFolder)) return undefined
+	if (!id.startsWith(config.cwdFolderPath)
+		|| id.startsWith(path.resolve(config.cwdFolderPath, 'node_modules'))
+		|| id.startsWith(path.resolve(config.cwdFolderPath, '.svelte-kit'))
+	) return undefined
 
-	const filePath = id.replace(config.srcFolder, "")
-	const { dir, name, ext } = path.parse(filePath)
-
-	const root = dir === `${path.sep}routes`
-
-	if (dir === path.sep && name === "hooks.server" && scriptExtensions.includes(ext)) {
+	if (scriptExtensions.map(ext => `${config.svelteKit.files.serverHooks}${ext}`).includes(id)) {
 		return {
 			type: "hooks.server.js",
 			root: true,
 		}
 	}
 
+	const { dir, name, ext } = path.parse(id)
+	const root = dir === config.svelteKit.files.routes
+
 	if (
-		dir === `${path.sep}routes${path.sep}inlang${path.sep}[language].json` &&
+		dir === path.resolve(config.svelteKit.files.routes, 'inlang', '[language].json') &&
 		name === "+server" &&
 		scriptExtensions.includes(ext)
 	) {
