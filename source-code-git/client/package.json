@@ -14,7 +14,7 @@
 	],
 	"scripts": {
 		"---- BUILD SETUP --------------------------------------------------": "",
-		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
+		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git",
 		"isogit-pull": "cd node_modules/isomorphic-git && git pull",
 		"isogit-http": "cd node_modules/isomorphic-git && git sparse-checkout add http",
 		"isogit-tests": "cd node_modules/isomorphic-git && git sparse-checkout add __tests__/__fixtures__/",
