@@ -42,7 +42,7 @@ async function translateCommandAction() {
 	})
 
 	// Get all resources
-	const resources = await config.readResources({ config })
+	let resources = await config.readResources({ config })
 
 	// Get reference language from config
 	const referenceLanguage = config.referenceLanguage
@@ -78,8 +78,8 @@ async function translateCommandAction() {
 	)
 
 	// Translate all messages
-	for (const message of referenceLanguageResource.body) {
-		for (const language of languagesToTranslateTo) {
+	for (const language of languagesToTranslateTo) {
+		for (const message of referenceLanguageResource.body) {
 			// skip if message already exists in language
 			if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
 				continue
@@ -116,11 +116,8 @@ async function translateCommandAction() {
 				},
 			}
 
-			// get latest resources because of for loop
-			const latestResource = await config.readResources({ config })
-
 			// find language resource to add the new message to
-			const languageResource = latestResource.find(
+			const languageResource = resources.find(
 				(resource) => resource.languageTag.name === language.languageTag.name,
 			)
 			if (languageResource) {
@@ -133,21 +130,21 @@ async function translateCommandAction() {
 				}
 
 				// merge the new resource with the existing resources
-				const newResources = resources.map((resource) => {
+				resources = resources.map((resource) => {
 					if (resource.languageTag.name === language.languageTag.name && newResource) {
 						return newResource
 					}
 					return resource
 				})
-
-				// write the new resource to the file system
-				await config.writeResources({
-					config,
-					resources: newResources,
-				})
 			}
 		}
 	}
+
+	// write the new resource to the file system
+	await config.writeResources({
+		config,
+		resources: resources,
+	})
 
 	// Log the message counts
 	log.info("✅ Translated all messages.")
