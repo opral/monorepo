@@ -2,6 +2,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
