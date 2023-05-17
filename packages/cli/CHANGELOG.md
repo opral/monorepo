@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.8.1
+
+### Patch Changes
+
+- e0876036: add machine translate and open editor commands
+
 ## 0.8.0
 
 ### Minor Changes
