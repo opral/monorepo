@@ -15,17 +15,22 @@ jobs:
     runs-on: ubuntu-latest
     environment: monorepo-production-ci-cd
     steps:
-      - name: Install Doppler CLI
-        uses: dopplerhq/cli-action@v2
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v2
+
       - run: npm install
+
       - run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/cli
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
       - run: node_modules/.bin/turbo run test --filter @inlang/cli
+
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
