@@ -1,8 +1,9 @@
 import type { TransformConfig } from "../config.js"
-import { types } from "recast"
+import { types, print } from "recast"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import {
+	findDefinition,
 	getFunctionOrDeclarationValue,
 	getWrappedExport,
 	removeSdkJsImport,
@@ -61,6 +62,8 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 		],
 		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
 	)
+	const found = findDefinition(ast.$ast, "handle")[0]
+	if (found) console.log(print(found).code)
 	const arrowOrFunctionNode = extractWrappableExpression({
 		ast: ast.$ast,
 		name: "handle",

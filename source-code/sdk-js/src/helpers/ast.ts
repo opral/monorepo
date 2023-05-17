@@ -461,60 +461,79 @@ export class FindAliasError extends Error {
 
 type Alias = types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier
 
+// MANIPULATES the passed ast!
 export const findAlias = (
 	ast: types.namedTypes.Node | Node,
 	identifier: string,
 	deep = false,
 	lastAlias?: Alias,
+	ignore: (types.namedTypes.Node | Node)[] = [],
 ): Result<Alias, FindAliasError> => {
 	let result = undefined as ReturnType<typeof findAlias> | undefined
 	jsWalk(ast as Node, {
 		enter(node: types.namedTypes.Node | Node) {
-			if (result !== undefined) {
+			if (result !== undefined || ignore.includes(node)) {
 				this.skip()
 			} else if (n.ObjectPattern.check(node)) {
 				let rest
 				for (const property of node.properties) {
-					// Recurse
-					const findAliasResult = findAlias(property, identifier)
+					const found = findAlias(property, identifier)
 					if (n.RestProperty.check(property)) rest = property.argument
-					else if (findAliasResult[0] !== undefined) {
-						result = findAliasResult
+					else if (found[0] !== undefined) {
+						result = found
+						ignore.push(node)
 						this.skip()
 					}
 				}
 				if (result === undefined && rest !== undefined) {
 					result = [rest, undefined]
+					ignore.push(node)
 					this.skip()
 				}
 			} else if (
-				n.Property.check(node) &&
+				(n.Property.check(node) || n.ObjectProperty.check(node)) &&
 				((n.Identifier.check(node.key) && node.key.name === identifier) ||
 					(n.Identifier.check(node.value) && node.value.name === identifier))
 			) {
 				result = [node.value, undefined]
 				this.skip()
-			} else if (
-				n.FunctionDeclaration.check(node) &&
-				n.Identifier.check(node.id) &&
-				node.id.name === identifier
-			) {
-				result = [node.id, undefined]
-				this.skip()
+			} else if (n.FunctionDeclaration.check(node) && node.id != undefined) {
+				const found = findAlias(node.id, identifier)
+				if (found[0] !== undefined) {
+					result = found
+					ignore.push(node)
+					this.skip()
+				}
 			} else if (n.VariableDeclaration.check(node)) {
 				for (const declaration of node.declarations) {
-					const findAliasResult = findAlias(declaration, identifier)
-					if (findAliasResult[0] !== undefined) {
-						result = findAliasResult
+					const found = findAlias(declaration, identifier)
+					if (found[0] !== undefined) {
+						result = found
+						ignore.push(node)
 						this.skip()
 					}
 				}
-			} else if (
-				n.VariableDeclarator.check(node) &&
-				n.Identifier.check(node.id) &&
-				node.id.name === identifier
-			) {
-				result = [node.id]
+			} else if (n.VariableDeclarator.check(node)) {
+				const found = findAlias(node.id, identifier)
+				// `blue = green` & `green` -> `blue`
+				if (
+					n.Identifier.check(node.init) &&
+					n.Identifier.check(node.id) &&
+					node.init.name === identifier
+				) {
+					result = [node.id, undefined]
+					ignore.push(node)
+					this.skip()
+				}
+				// `blue = <anything else>` & `blue` -> `blue`
+				else if (found[0] !== undefined) {
+					result = found
+					ignore.push(node)
+					this.skip()
+				}
+			} else if (n.Identifier.check(node) && node.name === identifier) {
+				result = [node, undefined]
+				ignore.push(node)
 				this.skip()
 			}
 		},
@@ -523,7 +542,7 @@ export const findAlias = (
 	if (result !== undefined) {
 		if (result[0] !== undefined && deep) {
 			if (lastAlias !== result[0] && n.Identifier.check(result[0])) {
-				const nextAlias = findAlias(ast, result[0].name, true, result[0])
+				const nextAlias = findAlias(ast, result[0].name, true, result[0], ignore)
 				if (nextAlias[0] !== undefined) return nextAlias
 				else return result
 			}
@@ -536,7 +555,57 @@ export const findAlias = (
 		}
 		return result
 	}
-	return [undefined, new Error("") as FindAliasError]
+	return [
+		undefined,
+		new Error("Couldn't find alias or even the identifier itself") as FindAliasError,
+	]
+}
+
+export class FindDefinitionError extends Error {
+	readonly #id = "FindDefinitionException"
+}
+
+// Finds the original definition value of the searched for identifier
+// If supplied, also makes sure that the definition is of a specific type
+export const findDefinition = (
+	ast: types.namedTypes.Node | Node,
+	identifier: string,
+	deep = false,
+	ignore: (types.namedTypes.Node | Node)[] = [],
+	type?: "function",
+): Result<types.namedTypes.Node | Node, FindDefinitionError> => {
+	// Iterates through ast, looks for declarations.
+	let result = undefined as types.namedTypes.Node | Node | undefined
+	jsWalk(ast as Node, {
+		enter(node) {
+			if (result !== undefined || ignore.includes(node)) this.skip()
+			else if (
+				n.VariableDeclarator.check(node) &&
+				n.Identifier.check(node.id) &&
+				node.id.name === identifier
+			) {
+				result = node.init ?? undefined
+				ignore.push(node)
+				this.skip()
+			} else if (
+				n.FunctionDeclaration.check(node) &&
+				n.Identifier.check(node.id) &&
+				node.id.name === identifier
+			) {
+				result = node
+				ignore.push(node)
+				this.skip()
+			}
+		},
+	})
+	if (result !== undefined) {
+		if (deep) {
+			if (n.Identifier.check(result)) return findDefinition(ast, result.name, true, ignore, type)
+			return [result, undefined]
+		}
+		return [result, undefined]
+	}
+	return [undefined, new Error("Couldn't find definition") as FindDefinitionError]
 }
 
 export class IdentifierIsDeclarableError extends Error {
@@ -579,16 +648,15 @@ export class MergeNodesError extends Error {
 // {key: alias, ...rest} & {event} -> {key: alias, event, ...rest} with rest -> {...rest, event}
 // or -> {key: alias, ...rest} with event -> rest.event
 // {key: {key2: value2, ...rest2}, ...rest1} & {key: {event}}
+type Renamings = [
+	types.namedTypes.Identifier | Identifier,
+	types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier,
+][]
+
 export const mergeNodes = (
 	ast: types.namedTypes.Node | Node,
 	node: types.namedTypes.Node | Node,
-): Result<
-	[
-		types.namedTypes.Identifier | Identifier,
-		types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier,
-	][],
-	MergeNodesError
-> => {
+): Result<Renamings, MergeNodesError> => {
 	if (n.ObjectPattern.check(node)) {
 		for (const property of node.properties) {
 			return mergeNodes(ast, property)
@@ -623,6 +691,43 @@ export const mergeNodes = (
 			}
 		} else {
 			return [undefined, new Error("Unsupported type for value of Property") as MergeNodesError]
+		}
+	} else if (n.FunctionDeclaration.check(node)) {
+		if (node.id != undefined) {
+			if (n.Identifier.check(node.id)) {
+				// Find the function definition in the ast
+				const def = findDefinition(ast, node.id.name, true)[0]
+				if (n.FunctionDeclaration.check(def)) {
+					const renamings: Renamings = []
+					for (const [index, parameter] of node.params.entries()) {
+						const targetParameter = def.params[index]
+						if (targetParameter !== undefined) {
+							const mergeResult = mergeNodes(targetParameter, parameter)
+							if (mergeResult[0] !== undefined) renamings.push(...mergeResult[0])
+							else
+								return [
+									undefined,
+									new Error("Couldn't merge function parameters") as MergeNodesError,
+								]
+						} else def.params.push(parameter)
+					}
+					return [renamings, undefined]
+				} else {
+					return [
+						undefined,
+						new Error("Found variable declaration is not of type function") as MergeNodesError,
+					]
+				}
+			} else {
+				return [
+					undefined,
+					new Error(
+						"Cannot merge function that is identified by something other than an Identifier",
+					) as MergeNodesError,
+				]
+			}
+		} else {
+			return [undefined, new Error("Can't merge anonymous function into an ast") as MergeNodesError]
 		}
 	}
 	return [[], undefined]

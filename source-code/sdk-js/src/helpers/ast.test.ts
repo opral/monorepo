@@ -7,6 +7,7 @@ import {
 	getFunctionOrDeclarationValue,
 	identifierIsDeclarable,
 	findAlias,
+	findDefinition,
 } from "./ast.js"
 import { parseModule } from "magicast"
 
@@ -205,10 +206,17 @@ describe("findAlias", () => {
 			const ast = b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])
 			expect(findAlias(ast, "key2")[1]).toBeInstanceOf(Error)
 		})
-		test("Simple within variable declaration", () => {
+		test("Simple within variable declaration, value", () => {
 			const code = `const {key: value} = {key: "blue"}`
 			const ast = parseModule(code).$ast
 			const resultAst = findAlias(ast, "value")[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toBe("value")
+		})
+		test("Simple within variable declaration, key", () => {
+			const code = `const {key: value} = {key: "blue"}`
+			const ast = parseModule(code).$ast
+			const resultAst = findAlias(ast, "key")[0]
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toBe("value")
 		})
@@ -221,6 +229,17 @@ describe("findAlias", () => {
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toBe("one")
 		})
+		test("simple function alias chain", () => {
+			const code = dedent`
+				function one() {}
+				const two = one
+				const three = two
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findAlias(ast, "one", true)[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toBe("three")
+		})
 	})
 	describe("variable declaration", () => {
 		test("simple declaration", () => {
@@ -229,6 +248,107 @@ describe("findAlias", () => {
 			const resultAst = findAlias(ast, "blue")[0]
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toBe("blue")
+		})
+	})
+})
+
+describe("findDefinition", () => {
+	describe("variable declarator", () => {
+		test("simple", () => {
+			const code = dedent`
+				const blue = green;
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "blue")[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toBe("green")
+		})
+		test("simple, deep", () => {
+			const code = dedent`
+				const green = "green";
+				const blue = green;
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "blue", true)[0]
+			console.log(findDefinition(ast, "blue", true))
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toBe('"green"')
+		})
+	})
+
+	describe("function declaration", () => {
+		test("named function, 1 level", () => {
+			const code = dedent`
+				import {i} from "@inlang/sdk-js"
+				function hndl() {
+					console.log(i)
+				}
+				export const handle = hndl
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "handle", true)[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toMatchInlineSnapshot(`
+				"function hndl() {
+					console.log(i)
+				}"
+			`)
+		})
+		test("named function, 2 levels", () => {
+			const code = dedent`
+				import {i} from "@inlang/sdk-js"
+				function hndl() {
+					console.log(i)
+				}
+				const hndl1 = hndl
+				export const handle = hndl1
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "handle", true)[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toMatchInlineSnapshot(`
+				"function hndl() {
+					console.log(i)
+				}"
+			`)
+		})
+		test("arrow function, 2 levels", () => {
+			const code = dedent`
+				import {i} from "@inlang/sdk-js"
+				const hndl = () => {
+					console.log(i)
+				}
+				const hndl1 = hndl
+				export const handle = hndl1
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "handle", true)[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toMatchInlineSnapshot(`
+				"() => {
+					console.log(i)
+				}"
+			`)
+		})
+
+		test("async arrow function, 1 level, call expression", () => {
+			const code = dedent`
+				import { sequence } from "@sveltejs/kit/hooks";
+				import { i } from "@inlang/sdk-js";
+				
+				const seq1 = async ({ event, resolve }) => {
+					console.log(i("welcome"));
+					return resolve(event);
+				};
+				
+				export const handle = sequence(seq1);
+			`
+			const ast = parseModule(code).$ast
+			const resultAst = findDefinition(ast, "handle", true)[0]
+			const result = resultAst ? print(resultAst).code : ""
+			expect(result).toMatchInlineSnapshot(`
+			"sequence(seq1)"
+			`)
 		})
 	})
 })
@@ -247,6 +367,12 @@ describe("mergeNodes", () => {
 					b.property("init", b.identifier("key2"), b.identifier("alias2")),
 				)
 				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"{
+					    key: alias,
+					    key2: alias2
+					}"
+				`)
 			})
 			test("Simple pattern, return alias", () => {
 				// const {key: alias} = ...
@@ -260,6 +386,11 @@ describe("mergeNodes", () => {
 				)[0]?.[0]?.[1]
 				const resultCode = result ? print(result).code : ""
 				expect(resultCode).toEqual("alias")
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"{
+					    key: alias
+					}"
+				`)
 			})
 			test("Simple pattern, fail with reassigment", () => {
 				// const {key: alias} = ...
@@ -273,6 +404,11 @@ describe("mergeNodes", () => {
 				)
 				expect(result[1]).toBeInstanceOf(Error)
 				expect(result[1]?.message).toBe("Some of the requested identifiers are already in use.")
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"{
+					    key: alias
+					}"
+				`)
 			})
 		})
 		test("... into identifier", () => {
@@ -285,6 +421,60 @@ describe("mergeNodes", () => {
 			)[0]?.[0]?.[1]
 			const resultCode = result ? print(result).code : ""
 			expect(resultCode).toBe("identifier.key")
+			expect(print(ast).code).toMatchInlineSnapshot(`
+				"identifier"
+			`)
+		})
+	})
+	describe("merge function declaration", () => {
+		describe("... into function declaration", () => {
+			test("Simple object pattern into empty function", () => {
+				// function identifier() {}
+				const ast = b.functionDeclaration(b.identifier("identifier"), [], b.blockStatement([]))
+				// merge `function identifier({key:alias}) {}`
+				const result = mergeNodes(
+					ast,
+					b.functionDeclaration(
+						b.identifier("identifier"),
+						[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+						b.blockStatement([]),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"function identifier(
+					    {
+					        key: alias
+					    }
+					) {}"
+			`)
+			})
+			test("Simple object pattern params into function with object pattern params", () => {
+				// function identifier() {}
+				const ast = b.functionDeclaration(
+					b.identifier("identifier"),
+					[b.objectPattern([b.property("init", b.identifier("key2"), b.identifier("alias2"))])],
+					b.blockStatement([]),
+				)
+				// merge `function identifier({key:alias}) {}`
+				const result = mergeNodes(
+					ast,
+					b.functionDeclaration(
+						b.identifier("identifier"),
+						[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+						b.blockStatement([]),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"function identifier(
+					    {
+					        key2: alias2,
+					        key: alias
+					    }
+					) {}"
+			`)
+			})
 		})
 	})
 })
