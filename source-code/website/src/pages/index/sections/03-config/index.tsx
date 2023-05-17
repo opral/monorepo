@@ -63,14 +63,14 @@ const ConfigPage = () => {
 
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
-			<div class="flex flex-col items-center gap-8 pt-20">
-				<h2 class="text-center text-3xl font-semibold text-on-background w-1/2 leading-relaxed tracking-tight">
+			<div class="flex flex-col items-center gap-8 pt-20 px-8 lg:px-0">
+				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-relaxed tracking-tight">
 					The <span class="text-surface-600 bg-surface-200 px-2 py-1 rounded-md">config</span> as a
 					bridge between <span class="text-primary">you</span> and{" "}
 					<span class="text-primary">inlang's infrastructure</span>
 				</h2>
 				<div
-					class="relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg"
+					class="w-full lg:w-fit overflow-x-scroll relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg"
 					style={{ "box-shadow": "0px 100px 100px 70px #fafafa" }}
 				>
 					<div class="absolute top-5 left-6 flex gap-2">
@@ -129,12 +129,12 @@ const ConfigPage = () => {
 				</div>
 			</div>
 
-			<div class="z-10 relative flex justify-between px-10 pb-20">
+			<div class="z-10 relative flex justify-between px-10 pb-20 gap-4 lg:gap-0 flex-col lg:flex-row">
 				<For each={data}>
 					{(card) => (
 						<a
 							href={card.link}
-							class="bg-background w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70 hover:text-primary"
+							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70 hover:text-primary"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
 							<div class="p-8 flex flex-col gap-2">
