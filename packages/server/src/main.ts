@@ -3,7 +3,7 @@ import compression from "compression"
 import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
-import { isProduction } from "./utilities.js"
+import { isProduction } from "./env.js"
 import { router as websiteRouter } from "@inlang/website/router"
 import { router as telemetryRouter } from "@inlang/telemetry/router"
 import { router as rpcRouter } from "@inlang/rpc/router"
@@ -12,9 +12,10 @@ import { router as badgeRouter } from "@inlang/badge/router"
 // --------------- SETUP -----------------
 
 const [, errors] = validateEnvVariables({ forProduction: isProduction })
+
 if (errors) {
 	throw Error(
-		"Invalid environment variables:\n\n" +
+		"Production env variables are missing:\n\n" +
 			errors.map((e) => `${e.key}: ${e.errorMessage}`).join("\n"),
 	)
 }
