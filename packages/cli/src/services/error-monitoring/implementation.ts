@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node"
 import { version } from "../../../package.json"
-import { isProduction } from "../../env.js"
+import { publicEnv } from "../../env.js"
 
 export function initErrorMonitoring() {
 	Sentry.init({
@@ -8,7 +8,7 @@ export function initErrorMonitoring() {
 		release: version,
 		// Not interested in performance data
 		tracesSampleRate: 0,
-		environment: isProduction ? "production" : "development",
+		environment: publicEnv.isProduction ? "production" : "development",
 	})
 }
 

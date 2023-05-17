@@ -10,10 +10,17 @@ const ctx = await context({
 	platform: "node",
 	format: "esm",
 	target: "node16",
-	minify: isProduction,
+	// for easier debugging production issues, don't minify. KB size is not a concern for a node CLI
+	minify: false,
 	// https://github.com/evanw/esbuild/issues/1921#issuecomment-1403107887
 	banner: {
 		js: `import { createRequire } from 'node:module';const require = createRequire(import.meta.url);`,
+	},
+	define: {
+		// eslint-disable-next-line no-undef
+		ENV_DEFINED_IN_BUILD_STEP: JSON.stringify({
+			isProduction: isProduction,
+		}),
 	},
 })
 
