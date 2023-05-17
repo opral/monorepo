@@ -2,7 +2,6 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
-	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -695,14 +694,12 @@ async function readInlangConfig(args: {
 	try {
 		const env: InlangEnvironment = {
 			$import: initialize$import({
-				// @ts-ignore
-				fs: args.fs.promises,
+				fs: args.fs,
 				fetch,
 			}),
-			// @ts-ignore
-			$fs: args.fs.promises,
+			$fs: args.fs,
 		}
-		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
+		const file = await args.fs.readFile("./inlang.config.js", { encoding: "utf-8" })
 		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
 		const module = (await import(/* @vite-ignore */ withMimeType)) as InlangConfigModule
 		const config = setupConfig({ module, env })
