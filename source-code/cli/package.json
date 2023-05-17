@@ -33,6 +33,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang-git/fs": "^0.0.2",
 		"@sentry/node": "^7.51.2",
 		"ora": "^6.3.0",
 		"ts-dedent": "^2.2.0"
@@ -45,7 +46,6 @@
 		"consola": "^2.15.3",
 		"esbuild": "^0.17.14",
 		"fast-glob": "^3.2.12",
-		"memfs": "^3.4.13",
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
 		"prompts": "^2.4.2"
