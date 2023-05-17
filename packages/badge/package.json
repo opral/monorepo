@@ -20,10 +20,10 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang-git/fs": "^0.0.2",
 		"@inlang/core": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
-		"memfs": "^3.5.0",
 		"satori": "^0.4.7",
 		"satori-html": "^0.3.2"
 	},

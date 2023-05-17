@@ -1,5 +1,4 @@
 import type * as ast from "@inlang/core/ast"
-import type { fs as memfs } from "memfs"
 import type { Percentage, VNode } from "./markup.js"
 
 /**
@@ -68,32 +67,3 @@ export const getTotalTranslatedPercentage = (percentages: Percentage[]): number 
 
 	return Number(totalPercentage)
 }
-
-/**
- * Patching relative paths to absolute paths.
- *
- * @description Memfs does not support relative paths, so we need to patch them.
- * @param fs The fs to patch.
- * @returns The patched fs.
- */
-export const patchedFs = (fs: (typeof memfs)["promises"]) =>
-	new Proxy(fs, {
-		get: (target, prop) => {
-			if (prop === "readFile") {
-				return (path: string) => {
-					if (path.startsWith("./")) {
-						return fs.readFile(path.slice(1))
-					}
-					return fs.readFile(path)
-				}
-			} else if (prop === "readdir") {
-				return (path: string, args: any) => {
-					if (path.startsWith("./")) {
-						return fs.readdir(path.slice(1), args)
-					}
-					return fs.readdir(path, args)
-				}
-			}
-			return target[prop as keyof typeof target]
-		},
-	})

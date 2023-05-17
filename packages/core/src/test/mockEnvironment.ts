@@ -6,7 +6,7 @@ import { initialize$import } from "../environment/$import.js"
 /**
  * Initializes a mock environment.
  *
- * The mock environment uses a virtual file system (memfs). If
+ * The mock environment uses a virtual file system (memoryFs). If
  * testing inlang depends on files in the local file system,
  * you can copy directories into the environment by providing
  * the `copyDirectory` argument.
