@@ -24,7 +24,7 @@ export type $import = (uri: string) => Promise<any>
  * Initializes the $import function.
  *
  * @example
- * const $import = initialize$import({ fs: fs.promises, fetch });
+ * const $import = initialize$import({ fs: fs, fetch });
  * const module = await $import('./some-module.js');
  */
 export function initialize$import(args: {
