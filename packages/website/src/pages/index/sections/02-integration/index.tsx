@@ -41,6 +41,7 @@ const Integration = () => {
 							prop:open={true}
 							prop:distance={16}
 							prop:trigger="maunual"
+							prop:hoist={true}
 						>
 							<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 								<Svelte size={44} startColor="#434343" endColor="#959595" />

@@ -134,12 +134,12 @@ const ConfigPage = () => {
 					{(card) => (
 						<a
 							href={card.link}
-							class="bg-background w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70"
+							class="bg-background w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70 hover:text-primary"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
 							<div class="p-8 flex flex-col gap-2">
 								<div class="flex gap-4">
-									<h3 class="text-base text-surface-900 font-semibold">{card.title}</h3>
+									<h3 class="text-base font-semibold">{card.title}</h3>
 									<Show when={card.isSoon}>
 										<p class="h-6 bg-primary/10 text-primary px-2 flex justify-center items-center w-fit rounded-md">
 											soon
