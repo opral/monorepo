@@ -5,9 +5,8 @@ import { Button } from "../../components/Button.jsx"
 const data = {
 	title: "inlang stays free",
 	caption: "Pricing",
-	description:
-		"Individual use and generous free tier will be provided because we consider word of mouth from satisfying developers as the best marketing to charge larger enterprise.",
-	button: "Why the pricing stays free",
+	description: "Individual usage and open source stays free. Enterprise pricing is coming soon.",
+	button: "Why the pricing stays free?",
 	buttonLink: "/docs/plugins/jsonPlugin",
 }
 
