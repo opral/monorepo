@@ -1,5 +1,16 @@
 # @inlang/sdk-js
 
+## 0.5.0
+
+### Minor Changes
+
+- 481f4d1d: automatically remove HTML `lang` attribute from app template
+- 481f4d1d: read folder structure of project from `svelte.config.js`
+
+### Patch Changes
+
+- 67b0b381: don't throw if no arguments get passed to the inlang function
+
 ## 0.4.5
 
 ### Patch Changes
