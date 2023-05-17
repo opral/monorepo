@@ -13,17 +13,17 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: monorepo-production-ci-cd
+    environment: ci-cd
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install Doppler CLI
-        uses: dopplerhq/cli-action@v2
-
       - run: npm install
+
+      - name: Install Doppler CLI for env variables
+        uses: dopplerhq/cli-action@v2
 
       - run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/cli
         env:

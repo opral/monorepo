@@ -13,14 +13,21 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: monorepo-production-ci-cd
+    environment: ci-cd
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+
+      - name: Install Doppler CLI for (public) env variables
+        uses: dopplerhq/cli-action@v2
+
       - run: npm install
-      - run: npm run build
+      - run: doppler run -- npm run build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
       - run: npm run test -w @inlang-git/fs
       - uses: JS-DevTools/npm-publish@v1
         with:
