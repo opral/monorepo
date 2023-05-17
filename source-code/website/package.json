@@ -24,7 +24,7 @@
 	},
 	"dependencies": {
 		"@inlang-git/client": "*",
-		"@inlang-git/fs": "^0.0.2",
+		"@inlang-git/fs": "*",
 		"@inlang/core": "*",
 		"@inlang/design-system": "*",
 		"@inlang/env-variables": "*",
