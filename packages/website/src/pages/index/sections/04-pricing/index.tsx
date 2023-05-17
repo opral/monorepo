@@ -21,7 +21,7 @@ const Pricing = () => {
 					<h2 class="text-3xl text-center lg:text-start  font-semibold text-on-background leading-relaxed tracking-tight">
 						{data.title}
 					</h2>
-					<p class="text-base text-center lg:text-start md:w-[90%] text-outline-variant">
+					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant">
 						{data.description}
 					</p>
 					<div class="pt-4">
