@@ -154,7 +154,7 @@ async function translateCommandAction() {
 
 		telemetryNode.capture({
 			distinctId: "CLI",
-			event: "CLI: machine translate",
+			event: "CLI command executed [machine translate]",
 			properties: {
 				remoteUrl,
 				referenceLanguage,

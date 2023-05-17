@@ -36,7 +36,7 @@ function editorCommandAction() {
 
 			telemetryNode.capture({
 				distinctId: "CLI",
-				event: "CLI: open editor",
+				event: "CLI command executed [open editor]",
 				properties: {
 					inlangEditorUrl,
 				},
