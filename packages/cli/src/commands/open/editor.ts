@@ -1,6 +1,7 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
 import { log } from "../../utilities.js"
+import { telemetryNode } from "@inlang/telemetry"
 
 export const editor = new Command()
 	.command("editor")
@@ -32,6 +33,14 @@ function editorCommandAction() {
 				log.error("Failed to open the Inlang editor.", error.message)
 				return
 			}
+
+			telemetryNode.capture({
+				distinctId: "CLI",
+				event: "CLI: open editor",
+				properties: {
+					inlangEditorUrl,
+				},
+			})
 
 			log.info("✅ Opened the Inlang editor for the repository.")
 		})

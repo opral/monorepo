@@ -6,6 +6,8 @@ import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
+import { telemetryNode } from "@inlang/telemetry"
+import { exec } from "node:child_process"
 
 export const translate = new Command()
 	.command("translate")
@@ -16,11 +18,11 @@ async function translateCommandAction() {
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
-			// @ts-ignore TODO: use @inlang-git/fs
+			// TODO: use @inlang-git/fs
 			fs: fs.promises,
 			fetch,
 		}),
-		// @ts-ignore TODO: use @inlang-git/fs
+		// TODO: use @inlang-git/fs
 		$fs: fs.promises,
 	}
 
@@ -33,11 +35,8 @@ async function translateCommandAction() {
 		log.info("✅ Using inlang config file at `" + filePath + "`")
 	}
 
-	// Get the content of the inlang.config.js file
-	const file = fs.readFileSync(filePath, "utf-8")
-
 	const config = await setupConfig({
-		module: await import("data:application/javascript;base64," + btoa(file.toString())),
+		module: await import(filePath),
 		env,
 	})
 
@@ -144,6 +143,26 @@ async function translateCommandAction() {
 	await config.writeResources({
 		config,
 		resources: resources,
+	})
+
+	// get remote origin url by executing git command
+	exec("git config --get remote.origin.url", (error, stdout) => {
+		if (error) {
+			console.error("Failed to get the remote URL.", error.message)
+			return
+		}
+
+		const remoteUrl = stdout.trim()
+
+		telemetryNode.capture({
+			distinctId: "CLI",
+			event: "CLI: machine translate",
+			properties: {
+				remoteUrl,
+				referenceLanguage,
+				languages: languagesToTranslateTo.map((language) => language.languageTag.name),
+			},
+		})
 	})
 
 	// Log the message counts
