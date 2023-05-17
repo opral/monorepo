@@ -1,4 +1,4 @@
-import { SectionLayout } from "../../components/sectionLayout.jsx"
+import { SectionLayout } from "@src/pages/index/components/sectionLayout.jsx"
 import { For } from "solid-js"
 
 const links = [
