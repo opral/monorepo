@@ -18,11 +18,9 @@ async function translateCommandAction() {
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
-			// TODO: use @inlang-git/fs
 			fs: fs.promises,
 			fetch,
 		}),
-		// TODO: use @inlang-git/fs
 		$fs: fs.promises,
 	}
 
