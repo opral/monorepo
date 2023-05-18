@@ -22,7 +22,7 @@ if (errors) {
 	console.log(errors)
 	// some required env variables are missing. fetch public env variables from the server
 	await fetchPublicEnv()
-	const [, stillErrors] = validateEnvVariables({ forProduction: isDevelopment === false })
+	const [, stillErrors] = validateEnvVariables({ forProduction: false })
 	if (stillErrors) {
 		console.log("🚨 Some env variables are still not defined, even after fetching. Exiting...")
 		console.log(stillErrors)
