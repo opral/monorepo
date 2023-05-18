@@ -1,5 +1,5 @@
 import { query } from "@inlang/core/query"
-import { setupConfig } from "@inlang/core/config"
+import { InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
 import fs from "node:fs"
 import { Command } from "commander"
@@ -33,8 +33,15 @@ async function translateCommandAction() {
 		log.info("✅ Using inlang config file at `" + filePath + "`")
 	}
 
+	// Need to manually import the config because CJS projects
+	// might fail otherwise. See https://github.com/inlang/inlang/issues/789
+	const file = fs.readFileSync(filePath, "utf-8")
+	const module: InlangConfigModule = await import(
+		"data:application/javascript;base64," + btoa(file.toString())
+	)
+
 	const config = await setupConfig({
-		module: await import(filePath),
+		module,
 		env,
 	})
 
