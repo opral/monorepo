@@ -29,7 +29,7 @@ export const tableOfContents: Record<string, string[]> = {
 	],
 	Reference: [
 		(await import("./ast.md?raw")).default,
-		(await import("./cli.md?raw")).default,
+		(await import("../source-code/cli/README.md?raw")).default,
 		(await import("../source-code/core/src/environment/README.md?raw")).default,
 		(await import("./query.md?raw")).default,
 		(await import("../source-code/core/src/lint/README.md?raw")).default,
