@@ -1,5 +1,12 @@
 # @inlang/cli
 
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies [98b140f1]
+  - @inlang-git/fs@0.0.3
+
 ## 0.9.0
 
 ### Patch Changes
