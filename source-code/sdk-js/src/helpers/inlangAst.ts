@@ -64,27 +64,21 @@ export const replaceOrAddExportNamedFunction = (
 	name: string,
 	replacementAst: types.namedTypes.ExportNamedDeclaration,
 ) => {
-	const runOn = ((node) =>
-		n.ExportNamedDeclaration.check(node)
-			? (meta) => {
-					const { index } = meta.get(node) as NodeInfoMapEntry<types.namedTypes.Program>
-					if (index != undefined) ast.body.splice(index, 1, replacementAst)
-					return true
-			  }
-			: undefined) satisfies RunOn<types.namedTypes.Node, true | void>
-	const functionWasReplacedResult = findAstJs(ast, functionMatchers(name), runOn)[0] as
-		| true[]
-		| undefined
-	const functionWasReplaced =
-		functionWasReplacedResult != undefined && functionWasReplacedResult.length > 0
-	if (!functionWasReplaced) {
-		const arrowFunctionWasReplacedResult = findAstJs(ast, arrowFunctionMatchers(name), runOn)[0] as
-			| true[]
-			| undefined
-		const arrowFunctionWasReplaced =
-			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
-		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
-	}
+	jsWalk(ast as Node, {
+		enter(node) {
+			if (
+				n.ExportNamedDeclaration.check(node) &&
+				((n.VariableDeclaration.check(node.declaration) &&
+					n.VariableDeclarator.check(node.declaration.declarations[0]) &&
+					n.Identifier.check(node.declaration.declarations[0].id) &&
+					node.declaration.declarations[0].id.name === name) ||
+					(n.FunctionDeclaration.check(node.declaration) &&
+						n.Identifier.check(node.declaration.id)))
+			) {
+				this.replace(replacementAst as Node)
+			}
+		},
+	})
 }
 
 export const getWrappedExport = (

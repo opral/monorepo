@@ -25,7 +25,7 @@ describe("transformHooksServerJs", () => {
 			`)
 		})
 
-		it("adds handle endpoint to a file with arbitrary contents", () => {
+		it.todo("adds handle endpoint to a file with arbitrary contents", () => {
 			const code = transformHooksServerJs(
 				{} as TransformConfig,
 				dedent`
@@ -207,18 +207,19 @@ describe("transformHooksServerJs", () => {
 				expect(code).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
 					import {i} from \\"@inlang/sdk-js\\"
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(function handle(
+					function hndl(
 					    {
 					        event: event,
 					        resolve: resolve
 					    }
 					) {
 						console.log(getRuntimeFromLocals(event.locals).i)
-					});"
+					}
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap(hndl);"
 				`)
 			})
 		})

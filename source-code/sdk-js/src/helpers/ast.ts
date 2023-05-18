@@ -646,8 +646,6 @@ export const mergeNodes = (
 				// Find the function definition in the ast
 				const searchResult = findDefinition(ast, node.id.name, true)
 				const def = searchResult[0]
-				if (ast) console.log(print(ast).code)
-				console.log(node.id.name ?? "blue")
 				if (
 					searchResult[1] instanceof Error &&
 					searchResult[1].message === "Couldn't find definition"
@@ -689,11 +687,9 @@ export const mergeNodes = (
 		if (n.ExportNamedDeclaration.check(ast) && ast.declaration) {
 			return mergeNodes(ast.declaration, node.declaration, renamingScope)
 		} else if (n.Program.check(ast)) {
-			const mergeResults: Renamings = []
+			/* const mergeResults: Renamings = []
 			const errors: MergeNodesError[] = []
 			for (const statement of ast.body) {
-				//console.log(print(statement).code)
-				//console.log(print(node.declaration).code)
 				// This line is bad
 				const [namingsStatement, errorStatement] = mergeNodes(
 					statement,
@@ -710,13 +706,20 @@ export const mergeNodes = (
 					errors[0] === undefined ||
 					ast.body.length === 0
 				) {
-					//console.log(errors)
 					ast.body.push(node)
 				}
 				// Merge fails for other reasons
 				else return [undefined, errors[0]]
+			} */
+			const mergeResult = mergeNodes(ast, node.declaration)
+			if (
+				mergeResult[1] instanceof Error &&
+				mergeResult[1].message === "Couldn't find a function to merge into"
+			) {
+				ast.body.push(node)
+				return [[], undefined]
 			}
-			return [mergeResults, undefined]
+			return mergeResult
 		}
 	}
 	return [[], undefined]

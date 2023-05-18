@@ -599,7 +599,7 @@ describe("mergeNodes", () => {
 					) {}"
 				`)
 			})
-			test.todo("function declaration chain", () => {
+			test("function declaration chain", () => {
 				const code = dedent`
 					import {i} from "@inlang/sdk-js"
 					function hndl() {
@@ -609,7 +609,7 @@ describe("mergeNodes", () => {
 					export const identifier = hndl1
 				`
 				const ast = parseModule(code).$ast
-				// merge `function identifier({key:alias}) {}`
+				// merge `export function identifier({key:alias}) {}`
 				const result = mergeNodes(
 					ast,
 					b.exportNamedDeclaration(

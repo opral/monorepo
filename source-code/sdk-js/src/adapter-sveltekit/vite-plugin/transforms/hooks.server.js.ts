@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { types, print } from "recast"
+import { types } from "recast"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { findDefinition, mergeNodes } from "../../../helpers/ast.js"
@@ -7,7 +7,6 @@ import { dedent } from "ts-dedent"
 import {
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
-	getSdkImportedModules,
 	replaceSdkImports,
 } from "../../../helpers/inlangAst.js"
 import type { ExpressionKind } from "ast-types/gen/kinds.js"
@@ -70,8 +69,8 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	replaceSdkImports(ast.$ast, "locals")
 	// Make sure that exported "handle" function exists & has the parameters we need
 
-	//console.log(print(ast.$ast).code)
 	const [renamings, initialMergeError] = mergeNodes(ast.$ast, functionTemplate)
+
 	//console.log(renamings)
 	const [def, error] = findDefinition(ast.$ast, "handle")
 	if (
