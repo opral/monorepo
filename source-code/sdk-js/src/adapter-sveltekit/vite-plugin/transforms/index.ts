@@ -9,7 +9,8 @@ import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { transformPageJs } from "./+page.js.js"
 import { transformPageServerJs } from "./+page.server.js.js"
 import { transformPageSvelte } from "./+page.svelte.js"
-import { transformServerJs } from './+server.js.js'
+import { transformServerRequestJs } from './+server.js.js'
+import { transformServerJs } from './*.server.js.js'
 import { transformHooksServerJs } from "./hooks.server.js.js"
 import { transformLanguageJson } from "./[language].json.js"
 
@@ -28,7 +29,7 @@ export const transformCode = (
 		case "[language].json":
 			return transformLanguageJson(config, code)
 		case "+server.js":
-			return transformServerJs(config, code, root)
+			return transformServerRequestJs(config, code, root)
 		case "+layout.server.js":
 			return transformLayoutServerJs(config, code, root)
 		case "+layout.js":
@@ -41,6 +42,8 @@ export const transformCode = (
 			return transformPageJs(config, code, root)
 		case "+page.svelte":
 			return transformPageSvelte(config, code, root)
+		case "*.server.js":
+			return transformServerJs(config, code)
 		case "*.js":
 			return transformJs(config, code)
 		case "*.svelte":

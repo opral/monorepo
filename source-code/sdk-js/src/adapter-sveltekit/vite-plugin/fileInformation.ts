@@ -11,6 +11,7 @@ export type FileType =
 	| "+page.server.js"
 	| "+page.js"
 	| "+page.svelte"
+	| "*.server.js"
 	| "*.js"
 	| "*.svelte"
 
@@ -98,12 +99,20 @@ export const getFileInformation = (
 		}
 	}
 
+	if (name.endsWith(".server") && scriptExtensions.includes(ext)) {
+		return {
+			type: "*.server.js",
+			root: false,
+		}
+	}
+
 	if (scriptExtensions.includes(ext)) {
 		return {
 			type: "*.js",
 			root: false,
 		}
 	}
+
 	if (ext === ".svelte") {
 		return {
 			type: "*.svelte",
