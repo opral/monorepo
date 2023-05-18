@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.9.1",
+	"version": "0.9.2",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -33,7 +33,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang-git/fs": "^0.0.2",
+		"@inlang-git/fs": "^0.0.3",
 		"@sentry/node": "^7.51.2",
 		"ora": "^6.3.0",
 		"ts-dedent": "^2.2.0"
