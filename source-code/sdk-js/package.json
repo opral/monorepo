@@ -34,8 +34,10 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
+	"dependencies": {
+		"@inlang/core": "*"
+	},
 	"devDependencies": {
-		"@inlang/core": "*",
 		"@inlang/sdk-js-plugin": "*",
 		"@sveltejs/kit": "^1.16.3",
 		"@types/estree": "^1.0.1",
