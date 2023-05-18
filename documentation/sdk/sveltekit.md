@@ -22,13 +22,13 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
 
    ```js
    // using npm
-   npm install -D @inlang/core @inlang/sdk-js
+   npm install -D @inlang/sdk-js
 
    // using yarn
-   yarn add -D @inlang/core @inlang/sdk-js
+   yarn add -D @inlang/sdk-js
 
    // using pnpm
-   pnpm add -D @inlang/core @inlang/sdk-js
+   pnpm add -D @inlang/sdk-js
    ```
 
 2. Add the inlang plugin to the `plugins` section of `vite.config.js`
