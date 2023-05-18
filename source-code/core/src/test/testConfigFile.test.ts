@@ -20,7 +20,7 @@ it("should error on import keywords", async () => {
 })
 
 it("should allow $import statements", async () => {
-  const shouldPass = `
+	const shouldPass = `
     export function defineConfig(env) {
       const shouldPass = env.$import("x").catch(() => undefined)
 
@@ -32,12 +32,12 @@ it("should allow $import statements", async () => {
       }
     }
   `
-  const [, exception] = await testConfigFile({ file: shouldPass, env })
-  expect(exception).not.toBeDefined()
+	const [, exception] = await testConfigFile({ file: shouldPass, env })
+	expect(exception).not.toBeDefined()
 })
 
 it("should allow JSDoc import statements", async () => {
-  const shouldPass = `
+	const shouldPass = `
     /**
      * @type { import("@inlang/core/config").DefineConfig }
      */
@@ -52,6 +52,6 @@ it("should allow JSDoc import statements", async () => {
       }
     }
   `
-  const [, exception] = await testConfigFile({ file: shouldPass, env })
-  expect(exception).not.toBeDefined()
+	const [, exception] = await testConfigFile({ file: shouldPass, env })
+	expect(exception).not.toBeDefined()
 })

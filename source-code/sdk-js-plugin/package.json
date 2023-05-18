@@ -10,7 +10,7 @@
 		"translation"
 	],
 	"type": "module",
-	"version": "0.3.2",
+	"version": "0.5.1",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -26,11 +26,16 @@
 		"node": "^18"
 	},
 	"scripts": {
-		"dev": "npm-run-all --print-label --parallel dev:watch dev:test",
-		"dev:test": "vitest",
+		"dev": "npm-run-all --print-label --parallel dev:watch tsc:watch",
 		"dev:watch": "DEV=true node ./build.js",
 		"build": "node ./build.js && tsc -p tsconfig.build.json",
-		"test": "vitest run"
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit --emitDeclarationOnly false && vitest run --passWithNoTests --coverage",
+		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",
+		"tsc:watch": "tsc --noEmit --emitDeclarationOnly false --watch",
+		"tsc:watch:plugin": "tsc -p tsconfig.build.plugin.json --watch",
+		"vitest:watch": "vitest watch --passWithNoTests --coverage",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
 		"@inlang/core": "*",

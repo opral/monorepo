@@ -33,6 +33,9 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 	const importsAst = parseModule(
 		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
 	)
+	const importsAst = parseModule(
+		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
+	)
 	deepMergeObject(ast, importsAst)
 	const arrowOrFunctionNode = extractWrappableExpression({
 		ast: ast.$ast,

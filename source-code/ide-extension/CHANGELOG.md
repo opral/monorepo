@@ -1,5 +1,38 @@
 # inlang-vs-code-extension
 
+## 0.5.8
+
+### Patch Changes
+
+- @inlang/core@0.8.5
+
+## 0.5.7
+
+### Patch Changes
+
+- a9b71575: fix: dynamic import
+
+## 0.5.6
+
+### Patch Changes
+
+- 4147156d: refactor esm imports
+
+## 0.5.5
+
+### Patch Changes
+
+- 5c6d472e: update settings for plugins
+- Updated dependencies [5c6d472e]
+  - @inlang/core@0.8.4
+
+## 0.5.4
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+- 89f0c7a2: update vs-code-extension
+
 ## 0.5.3
 
 ### Patch Changes

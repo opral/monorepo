@@ -2,6 +2,8 @@ import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
+import { msg } from "../utils/message.js"
+// import { telemetryNode } from "@inlang/telemetry"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -14,17 +16,24 @@ export const extractMessageCommand = {
 
 		// guards
 		if (!ideExtension) {
-			return vscode.window.showWarningMessage(
+			return msg(
 				"There is no `ideExtension` object in the inlang.config.json configured.",
+				"warn",
+				"notification",
 			)
 		}
 		if (ideExtension.extractMessageOptions === undefined) {
-			return vscode.window.showWarningMessage(
-				"The `extractMessageReplacementOptions` are not defined in the inlang.config.json but required to extract a message.",
+			return msg(
+				"There are no `extractMessageOptions` in the `ideExtension` object in the inlang.config.json configured.",
+				"warn",
+				"notification",
 			)
-		} else if (referenceLanguage === undefined) {
-			return vscode.window.showWarningMessage(
+		}
+		if (referenceLanguage === undefined) {
+			return msg(
 				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message.",
+				"warn",
+				"notification",
 			)
 		}
 
@@ -36,9 +45,14 @@ export const extractMessageCommand = {
 		}
 
 		const messageValue = textEditor.document.getText(textEditor.selection)
-		const preparedExtractOptions = ideExtension.extractMessageOptions.map((option) =>
-			option.callback(messageId, messageValue),
-		)
+
+		const preparedExtractOptions = ideExtension.extractMessageOptions.reduce((acc, option) => {
+			// eslint-disable-next-line
+			if (acc.find((accOption) => accOption === option.callback(messageId, messageValue))) {
+				return acc
+			}
+			return [...acc, option.callback(messageId, messageValue)]
+		}, [] as string[])
 
 		const preparedExtractOption = await vscode.window.showQuickPick(
 			[...preparedExtractOptions, "How to edit these replacement options?"],
@@ -46,13 +60,20 @@ export const extractMessageCommand = {
 		)
 		if (preparedExtractOption === undefined) {
 			return
-		} else if (preparedExtractOption === "How to edit these replacement options?") {
+		} else if (
+			preparedExtractOption ===
+			"How to edit these replacement options? See `extractMessageOptions`."
+		) {
 			// TODO #152
-			return vscode.env.openExternal(vscode.Uri.parse("https://github.com/inlang/inlang"))
+			return vscode.env.openExternal(
+				vscode.Uri.parse(
+					"https://github.com/inlang/inlang/tree/main/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration",
+				),
+			)
 		}
 
 		if (preparedExtractOption === undefined) {
-			return vscode.window.showWarningMessage("Couldn't find choosen extract option.")
+			return msg("Couldn't find choosen extract option.", "warn", "notification")
 		}
 
 		const message: Message = {
@@ -85,6 +106,13 @@ export const extractMessageCommand = {
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
-		return vscode.window.showInformationMessage("Message extracted.")
+		// telemetryNode.capture({
+		// 	distinctId: "unknown",
+		// 	event: "IDE-EXTENSION message extracted",
+		// 	properties: {
+		// 		config: state().config,
+		// 	},
+		// })
+		return msg("Message extracted.")
 	},
 } as const

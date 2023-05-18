@@ -23,13 +23,12 @@ export async function defineConfig(env) {
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPlugin({
-				pathPattern: "./languages/{language}.json",
-			}),
+			// ... other plugins e.g. to read and write Resources
+			// see https://github.com/inlang/ecosystem#resources
 			sdkPlugin({
 				languageNegotiation: {
-					strategies: [{ type: "localStorage" }]
-				}
+					strategies: [{ type: "localStorage" }],
+				},
 			}),
 		],
 	}
@@ -71,6 +70,28 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 	strategies: [
 		{ type: "url" },
 	],
+},
+```
+
+### resources
+
+The `resources` property defines how to deal with resources read with the resolved `inlang.config.js`.
+
+#### cache
+
+Defines how to cache resources.
+
+> Right now we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
+
+##### **build-time** (default)
+
+Loads all Resources during build time and adds them to the bundle.
+
+```js
+{
+	resources: {
+		cache: "build-time"
+	},
 },
 ```
 

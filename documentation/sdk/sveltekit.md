@@ -18,17 +18,17 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
 
 ## Getting Started
 
-1. Add `@inlang/core` and `@inlang/sdk-js` dependency to your project
+1. Add `@inlang/sdk-js` dependency to your project
 
    ```js
    // using npm
-   npm install -D @inlang/core @inlang/sdk-js
+   npm install -D @inlang/sdk-js
 
    // using yarn
-   yarn add -D @inlang/core @inlang/sdk-js
+   yarn add -D @inlang/sdk-js
 
    // using pnpm
-   pnpm add -D @inlang/core @inlang/sdk-js
+   pnpm add -D @inlang/sdk-js
    ```
 
 2. Add the inlang plugin to the `plugins` section of `vite.config.js`
@@ -62,6 +62,28 @@ Take a look at the [Usage](/documentation/sdk/usage) to learn more about how to 
 ## Configuration
 
 You can configure the inlang SDK depending on your needs. You can learn more in the [Configuration](/documentation/sdk/configuration) section.
+
+## Further reading
+
+The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. If that doesn't match your requirements check out the other [plugins](https://inlang.com/documentation/plugins).
+
+```
+languages
+|--en.json
+|--de.json
+```
+
+A valid JSON file would look like this.
+
+```json
+{
+	"title": "Welcome",
+	"card": {
+		"tag": "New",
+		"title": "Great new tool"
+	}
+}
+```
 
 ---
 

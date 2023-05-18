@@ -1,6 +1,6 @@
 {
 	"name": "@inlang-git/fs",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
@@ -24,7 +24,7 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
 		"outmatch": "^0.7.0"

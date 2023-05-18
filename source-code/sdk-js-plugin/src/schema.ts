@@ -1,59 +1,57 @@
-import { z } from "zod"
+import { type z, literal, union, string, number, object, boolean, array } from "zod"
 
-const zUrlNegotiatorVariantPath = z.object({
-	type: z.literal("path"),
-	// level: z.number().default(0), // TODO: introduce option later
+const zUrlNegotiatorVariantPath = object({
+	type: literal("path"),
+	// level: number().default(0), // TODO: introduce option later
 	/** `www.inlang.com/de` => 0 => `de` */
 	/** `www.inlang.com/editor/de` => 1 => `de` */
 })
 
-const zUrlNegotiatorVariantDomain = z.object({
-	type: z.literal("domain"),
-	level: z.union([z.literal("tld"), z.literal("subdomain"), z.number()]),
+const zUrlNegotiatorVariantDomain = object({
+	type: literal("domain"),
+	level: union([literal("tld"), literal("subdomain"), number()]),
 })
 
-const zUrlNegotiatorVariantQuery = z.object({
-	type: z.literal("query"),
-	parameter: z.string().default("lang"),
+const zUrlNegotiatorVariantQuery = object({
+	type: literal("query"),
+	parameter: string().default("lang"),
 })
 
-const zUrlNegotiator = z.object({
-	type: z.literal("url"),
-	variant: z
-		.union(
-			[
-				zUrlNegotiatorVariantPath,
-				// zUrlNegotiatorVariantDomain, // TODO: introduce option later
-				// zUrlNegotiatorVariantQuery, // TODO: introduce option later
-			] as any /* typecast needed because we currently only specify a single item */,
-		)
-		.default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
+const zUrlNegotiator = object({
+	type: literal("url"),
+	variant: union(
+		[
+			zUrlNegotiatorVariantPath,
+			// zUrlNegotiatorVariantDomain, // TODO: introduce option later
+			// zUrlNegotiatorVariantQuery, // TODO: introduce option later
+		] as any /* typecast needed because we currently only specify a single item */,
+	).default(zUrlNegotiatorVariantPath.parse({ type: "path" })),
 })
 
-const zCookieNegotiator = z.object({
-	type: z.literal("cookie"),
-	key: z.string().default("language"),
+const zCookieNegotiator = object({
+	type: literal("cookie"),
+	key: string().default("language"),
 })
 
-const zAcceptLanguageHeaderNegotiator = z.object({
-	type: z.literal("acceptLanguageHeader"),
+const zAcceptLanguageHeaderNegotiator = object({
+	type: literal("acceptLanguageHeader"),
 })
 
-const zNavigatorNegotiator = z.object({
-	type: z.literal("navigator"),
+const zNavigatorNegotiator = object({
+	type: literal("navigator"),
 })
 
-const zLocalStorageNegotiator = z.object({
-	type: z.literal("localStorage"),
-	key: z.string().default("language"),
+const zLocalStorageNegotiator = object({
+	type: literal("localStorage"),
+	key: string().default("language"),
 })
 
-const zSessionStorageNegotiator = z.object({
-	type: z.literal("sessionStorage"),
-	key: z.string().default("language"),
+const zSessionStorageNegotiator = object({
+	type: literal("sessionStorage"),
+	key: string().default("language"),
 })
 
-const zLanguageNegotiationStrategy = z.union([
+const zLanguageNegotiationStrategy = union([
 	zUrlNegotiator,
 	// zCookieNegotiator, // TODO: introduce option later
 	zAcceptLanguageHeaderNegotiator,
@@ -62,12 +60,20 @@ const zLanguageNegotiationStrategy = z.union([
 	// zSessionStorageNegotiator, // TODO: introduce option later
 ])
 
-const zSdkConfig = z.object({
-	debug: z.boolean().default(false),
-	languageNegotiation: z.object({
-		strict: z.boolean().optional().default(false),
-		strategies: z
-			.array(zLanguageNegotiationStrategy)
+// ------------------------------------------------------------------------------------------------
+
+const zResources = object({
+	// in the future we will also support `number` to specify a TTL until resources get updated
+	cache: literal("build-time").default("build-time"),
+})
+
+// ------------------------------------------------------------------------------------------------
+
+const zSdkConfig = object({
+	debug: boolean().default(false),
+	languageNegotiation: object({
+		strict: boolean().optional().default(false),
+		strategies: array(zLanguageNegotiationStrategy)
 			.min(1, "You must define at least one language negotiation strategy.")
 			.transform(
 				(t) =>
@@ -77,10 +83,10 @@ const zSdkConfig = z.object({
 					],
 			),
 	}),
+	resources: zResources.default({ cache: "build-time" }),
 })
 
-export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig =>
-	zSdkConfig.parse(config)
+export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkConfig.parse(config)
 
 export type SdkConfigInput = z.input<typeof zSdkConfig>
 

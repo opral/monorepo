@@ -1,5 +1,43 @@
 # @inlang/core
 
+## 0.8.5
+
+### Patch Changes
+
+- Updated dependencies [98b140f1]
+  - @inlang-git/fs@0.0.3
+
+## 0.8.4
+
+### Patch Changes
+
+- 5c6d472e: update settings for plugins
+
+## 0.8.3
+
+### Patch Changes
+
+- f8849678: improve error messages
+- f8849678: expose `parseConfig` functionality
+
+## 0.8.2
+
+### Patch Changes
+
+- 0504401e: fixed testConfigFile which threw an error even though it's a result that should never throw
+
+## 0.8.1
+
+### Patch Changes
+
+- 0d19f309: further improvements to the better error messages introduced in v0.8
+
+## 0.8.0
+
+### Minor Changes
+
+- 1c1881d5: Improved error messages when loading the inlang.config.js module.
+
 ## 0.7.15
 
 ### Patch Changes

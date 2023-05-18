@@ -1,16 +1,9 @@
 {
 	"extends": "./tsconfig.json",
-	"include": [
-		"src/adapter-sveltekit/index.ts",
-		"src/adapter-sveltekit/typings.d.ts",
-	],
-	"exclude": [
-		"**/*.test.ts",
-		"**/*.test-d.ts",
-		"**/examples/*",
-	],
+	"include": ["src/adapter-sveltekit/index.ts", "src/adapter-sveltekit/typings.d.ts"],
+	"exclude": ["**/*.test.ts", "**/*.test-d.ts", "**/examples/*"],
 	"compilerOptions": {
 		"sourceMap": false,
-		"emitDeclarationOnly": true,
+		"emitDeclarationOnly": true
 	}
 }

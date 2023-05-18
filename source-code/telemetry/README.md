@@ -16,11 +16,11 @@ The implementation is a wrapper around the [PostHog JS](https://posthog.com/docs
 1. prefix events with the module name
 2. use past tense to avoid confusion about _when the event occured_
 
-Examples: 
+Examples:
 
 `SDK-JS initialized`  
 `EDITOR repository cloned`  
-`BADGE badge created`  
+`BADGE badge created`
 
 **Browser**
 

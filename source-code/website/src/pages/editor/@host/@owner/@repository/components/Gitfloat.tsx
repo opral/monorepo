@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { createEffect, createSignal, JSXElement, Show } from "solid-js"
+import { createEffect, createSignal, JSXElement, onMount, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import { pushChanges, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
@@ -11,6 +11,7 @@ import type { EditorRouteParams } from "../types.js"
 import { SignInDialog } from "@src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
+import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
 
 export const Gitfloat = () => {
 	const {
@@ -23,6 +24,8 @@ export const Gitfloat = () => {
 		routeParams,
 		fs,
 		setLastPullTime,
+		tourStep,
+		inlangConfig,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -59,13 +62,14 @@ export const Gitfloat = () => {
 		if (localStorage.user === undefined) {
 			return
 		}
-		telemetryBrowser.capture("create fork", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const response = await github.rest.repos.createFork({
 			owner: routeParams().owner,
 			repo: routeParams().repository,
+		})
+		telemetryBrowser.capture("EDITOR created fork", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: response.status === 202,
 		})
 		if (response.status === 202) {
 			showToast({
@@ -104,7 +108,7 @@ export const Gitfloat = () => {
 			setLastPullTime,
 		})
 		setIsLoading(false)
-		telemetryBrowser.capture("push changes", {
+		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 			sucess: exception === undefined,
@@ -140,6 +144,7 @@ export const Gitfloat = () => {
 		icon: () => JSXElement
 		onClick: () => void
 		href?: string
+		tourStepId?: TourStepId
 	}
 
 	type GitFloatArray = {
@@ -154,12 +159,14 @@ export const Gitfloat = () => {
 				return <IconGithub />
 			},
 			onClick: onSignIn,
+			tourStepId: "github-login",
 		},
 		fork: {
 			text: "Fork to make changes",
 			buttontext: "Fork",
 			icon: IconFork,
 			onClick: handleFork,
+			tourStepId: "fork-repository",
 		},
 		changes: {
 			text: "local changes",
@@ -173,7 +180,7 @@ export const Gitfloat = () => {
 			icon: IconPullrequest,
 			href: "pullrequest",
 			onClick: () => {
-				telemetryBrowser.capture("open pull request", {
+				telemetryBrowser.capture("EDITOR opened pull request", {
 					owner: routeParams().owner,
 					repository: routeParams().repository,
 				})
@@ -182,52 +189,82 @@ export const Gitfloat = () => {
 		},
 	}
 
+	onMount(() => {
+		const gitfloat = document.querySelector(".gitfloat")
+		gitfloat?.classList.add("animate-slideIn")
+		setTimeout(() => {
+			gitfloat?.classList.remove("animate-slideIn")
+		}, 400)
+	})
+
+	createEffect(() => {
+		if ((unpushedChanges() ?? []).length > 0) {
+			const gitfloat = document.querySelector(".gitfloat")
+			gitfloat?.classList.add("animate-jump")
+			setTimeout(() => {
+				gitfloat?.classList.remove("animate-jump")
+			}, 300)
+		}
+	})
+
 	return (
 		<>
-			<div class="z-30 sticky left-1/2 -translate-x-[150px] bottom-8 flex justify-start items-center w-[300px] rounded-lg bg-inverted-surface shadow-xl my-16 animate-slideIn">
-				<Show when={localStorage.user}>
-					<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
-						<img
-							src={localStorage.user?.avatarUrl}
-							alt="user avatar"
-							class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
-						/>
-					</div>
-				</Show>
-				<div
-					class={
-						"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
-						(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+			<div class="gitfloat z-30 sticky left-1/2 -translate-x-[150px] bottom-8 w-[300px] my-16 animate-slideIn">
+				<TourHintWrapper
+					currentId={tourStep()}
+					position="top-right"
+					offset={{ x: 0, y: 60 }}
+					isVisible={
+						(tourStep() === "github-login" || tourStep() === "fork-repository") &&
+						inlangConfig() !== undefined
 					}
 				>
-					<p
-						class={
-							"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface " +
-							(gitState() === "pullrequest" && "hidden")
-						}
-					>
-						<Show when={gitState() === "changes"}>
-							<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
-								<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-									{(unpushedChanges() ?? []).length}
-								</p>
+					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
+						<Show when={localStorage.user}>
+							<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+								<img
+									src={localStorage.user?.avatarUrl}
+									alt="user avatar"
+									class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
+								/>
 							</div>
 						</Show>
-						{data[gitState()].text}
-					</p>
-					<sl-button
-						prop:size="small"
-						onClick={() => data[gitState()].onClick()}
-						prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
-						prop:target="_blank"
-						prop:loading={isLoading()}
-						prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
-						class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
-					>
-						{data[gitState()].buttontext}
-						<div slot="suffix">{data[gitState()].icon}</div>
-					</sl-button>
-				</div>
+						<div
+							class={
+								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
+								(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+							}
+						>
+							<p
+								class={
+									"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface " +
+									(gitState() === "pullrequest" && "hidden")
+								}
+							>
+								<Show when={gitState() === "changes"}>
+									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
+										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
+											{(unpushedChanges() ?? []).length}
+										</p>
+									</div>
+								</Show>
+								{data[gitState()].text}
+							</p>
+							<sl-button
+								prop:size="small"
+								onClick={() => data[gitState()].onClick()}
+								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
+								prop:target="_blank"
+								prop:loading={isLoading()}
+								prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
+								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
+							>
+								{data[gitState()].buttontext}
+								<div slot="suffix">{data[gitState()].icon}</div>
+							</sl-button>
+						</div>
+					</div>
+				</TourHintWrapper>
 			</div>
 			<SignInDialog
 				githubAppClientId={publicEnv.PUBLIC_GITHUB_APP_CLIENT_ID}

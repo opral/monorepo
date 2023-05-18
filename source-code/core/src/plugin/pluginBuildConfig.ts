@@ -79,7 +79,7 @@ export async function pluginBuildConfig(
 		ops.plugins = []
 	}
 	ops.plugins.push(
-		// @ts-expect-error
+		// @ts-ignore - types are making problems. not using ts-expect because sometimes they work.
 		NodeModulesPolyfillPlugin(),
 	)
 

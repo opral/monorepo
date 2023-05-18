@@ -1,5 +1,69 @@
 # @inlang/sdk-js
 
+## 0.5.1
+
+### Patch Changes
+
+- e5f71e02: add `@inlang/core` as a regular dependency
+
+## 0.5.0
+
+### Minor Changes
+
+- 481f4d1d: automatically remove HTML `lang` attribute from app template
+- 481f4d1d: read folder structure of project from `svelte.config.js`
+
+### Patch Changes
+
+- 67b0b381: don't throw if no arguments get passed to the inlang function
+
+## 0.4.5
+
+### Patch Changes
+
+- f80dc9c8: show link to docs if sdkPlugin is missing
+
+## 0.4.4
+
+### Patch Changes
+
+- 561bd4d3: make vite plugin work on windows
+
+## 0.4.3
+
+### Patch Changes
+
+- 652de069: update for ide extension release
+
+## 0.4.2
+
+### Patch Changes
+
+- 39bbda2b: use SvelteKit's prerender for Resource-Endpoint only if necessary
+
+## 0.4.1
+
+### Patch Changes
+
+- 86b42dae: bundle Resources into application on build
+
+## 0.4.0
+
+### Minor Changes
+
+- 438b828f: BREAKING: prerender all resource API calls
+
+### Patch Changes
+
+- 60fe900a: detect wrong vite plugin order and throw error
+- 60fe900a: fix type of `languages` export
+
+## 0.3.3
+
+### Patch Changes
+
+- c8883359: automatically sync `@inlang/sdk-js-plugin` version with installed `@inlang/sdk-js` version
+
 ## 0.3.2
 
 ### Patch Changes

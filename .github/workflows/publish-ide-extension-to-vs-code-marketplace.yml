@@ -1,0 +1,45 @@
+name: Publish @inlang/ide-extension to VSCode Marketplace
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "source-code/ide-extension/package.json"
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: ci-cd
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Doppler CLI for env (public) variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+      - run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/ide-extension
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: test the code
+        run: npm run test
+      - name: Build VSCode extension package
+        run: npm run package -w source-code/ide-extension
+      - name: Publish to VSCode Marketplace
+        run: npx vsce publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+        working-directory: ./source-code/ide-extension
+        env:
+          VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}

@@ -4,11 +4,21 @@ import { rpc } from "@inlang/rpc"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
 import ora from "ora"
+import { dedent } from "ts-dedent"
 
 export const init = new Command()
 	.command("init")
 	.description("Initialize the inlang.config.js file.")
-	.action(async () => {
+	.action(initCommandAction)
+
+/**
+ * The action for the init command.
+ *
+ * Exported for testing purposes. Should not be used directly.
+ *
+ */
+export async function initCommandAction() {
+	{
 		// ----------- CHECK IF CONFIG FILE ALREADY EXISTS --------------
 		if (await configAlreadyExists()) {
 			log.error("Config file already exists.")
@@ -37,10 +47,19 @@ export const init = new Command()
 		const [configFile, exception] = await rpc.generateConfigFile({
 			fs: fs,
 			resolveFrom: new URL("./", import.meta.url).pathname,
+			applicationId: "CLI",
 		})
 		clearInterval(interval)
 		if (exception) {
-			rpcSpinner.fail("Failed to generate config file.\n" + exception.errorMessage)
+			rpcSpinner.fail(dedent`
+The CLI couldn't generate the config file automatically. 
+
+This is a not a bug, but a limitation of the AI algorithm the CLI uses. 
+Please create the config file manually by following the instructions 
+at https://inlang.com/documentation. 
+
+${exception.errorMessage ? "Error message: " + exception.errorMessage : ""}
+`)
 			return
 		}
 		rpcSpinner.succeed("Generated config file.")
@@ -52,7 +71,8 @@ export const init = new Command()
 		} catch (error) {
 			writeFileSpinner.fail("Failed to write config file to disk.\n" + (error as any)?.message)
 		}
-	})
+	}
+}
 
 async function configAlreadyExists() {
 	try {

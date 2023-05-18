@@ -19,8 +19,15 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+
+      - name: Install Doppler CLI for (public) env variables
+        uses: dopplerhq/cli-action@v2
+
       - run: npm install
-      - run: npm run build
+      - run: doppler run -- npm run build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
       - run: npm run test -w @inlang-git/fs
       - uses: JS-DevTools/npm-publish@v1
         with:

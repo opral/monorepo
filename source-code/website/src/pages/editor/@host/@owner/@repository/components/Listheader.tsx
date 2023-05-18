@@ -3,6 +3,7 @@ import { useEditorState } from "../State.jsx"
 import { For, Show } from "solid-js"
 import type { Accessor } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
+import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -38,8 +39,15 @@ export const messageCount = (
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
-	const { inlangConfig, setFilteredLintRules, filteredLintRules, filteredLanguages, textSearch } =
-		useEditorState()
+	const {
+		inlangConfig,
+		setFilteredLintRules,
+		filteredLintRules,
+		filteredLanguages,
+		textSearch,
+		setTourStep,
+		tourStep,
+	} = useEditorState()
 
 	const lintRuleIds = () =>
 		inlangConfig()
@@ -80,29 +88,64 @@ export const ListHeader = (props: ListHeaderProps) => {
 				{messageCount(props.messages, filteredLanguages(), textSearch(), filteredLintRules()) +
 					" Messages"}
 			</div>
+
 			<div class="flex gap-2">
 				<For each={getLintSummary()}>
 					{(rule) => (
 						<Show when={rule.amount !== 0}>
-							<sl-button prop:size="small" onClick={() => setFilteredLintRules([rule.rule["id"]])}>
-								<div class="flex gap-2 items-center h-7">
-									<div class="-ml-[4px] h-5 rounded">
-										<div
-											class={
-												rule.rule.level === "warn"
-													? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
-													: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
-											}
-										>
-											{rule.amount}
+							<TourHintWrapper
+								currentId="missing-message-rule"
+								position="bottom-right"
+								offset={{ x: 0, y: 40 }}
+								isVisible={
+									(rule.id.includes(".")
+										? String(rule.id.split(".")[1]!) === "missingMessage"
+										: String(rule.id) === "missingMessage") && tourStep() === "missing-message-rule"
+								}
+							>
+								<sl-button
+									prop:size="small"
+									onClick={() => {
+										if (filteredLintRules().includes(rule.rule["id"])) {
+											setFilteredLintRules(
+												filteredLintRules().filter((id) => id !== rule.rule["id"]),
+											)
+										} else {
+											setFilteredLintRules([rule.rule["id"]])
+											setTourStep("textfield")
+										}
+									}}
+								>
+									<div
+										class="flex gap-2 items-center h-7"
+										id={
+											(
+												rule.id.includes(".")
+													? String(rule.id.split(".")[1]!) === "missingMessage"
+													: String(rule.id) === "missingMessage"
+											)
+												? "missingMessage-summary"
+												: "lint-summary"
+										}
+									>
+										<div class="-ml-[4px] h-5 rounded">
+											<div
+												class={
+													rule.rule.level === "warn"
+														? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
+														: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
+												}
+											>
+												{rule.amount}
+											</div>
+										</div>
+
+										<div class="text-xs text-on-surface-variant font-medium">
+											{rule.id.includes(".") ? String(rule.id.split(".")[1]!) : String(rule.id)}
 										</div>
 									</div>
-
-									<div class="text-xs text-on-surface-variant font-medium">
-										{rule.id.includes(".") ? String(rule.id.split(".")[1]!) : String(rule.id)}
-									</div>
-								</div>
-							</sl-button>
+								</sl-button>
+							</TourHintWrapper>
 						</Show>
 					)}
 				</For>

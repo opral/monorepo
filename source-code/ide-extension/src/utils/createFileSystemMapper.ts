@@ -14,21 +14,19 @@ export function createFileSystemMapper(
 ): InlangEnvironment["$fs"] {
 	return {
 		readdir: async (path) => {
-			// @ts-ignore
 			return (await target.readDirectory(vscode.Uri.joinPath(base, path))).map((dir) => dir[0])
 		},
 		readFile: async (id) => {
-			// @ts-ignore
 			const rawFile = await target.readFile(vscode.Uri.joinPath(base, id))
 			return new TextDecoder().decode(rawFile)
 		},
 		writeFile: async (file, data) => {
-			// @ts-ignore
 			return target.writeFile(vscode.Uri.joinPath(base, file), new TextEncoder().encode(data))
 		},
 		mkdir: async (path) => {
-			// @ts-ignore
-			return target.createDirectory(vscode.Uri.joinPath(base, path))
+			return target.createDirectory(vscode.Uri.joinPath(base, path)) as unknown as
+				| undefined
+				| string
 		},
 	}
 }

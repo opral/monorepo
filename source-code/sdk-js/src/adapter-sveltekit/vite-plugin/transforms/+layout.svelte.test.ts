@@ -3,12 +3,13 @@ import { describe, it, expect } from "vitest"
 import type { TransformConfig } from "../config.js"
 import { transformSvelte } from "./*.svelte.js"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
+import { getTransformConfig } from "./test-helpers/config.js"
 
 describe("transformLayoutSvelte", () => {
 	describe("basics", () => {
 		describe("root=true", () => {
 			it("adds code to an empty file", async () => {
-				const code = await transformLayoutSvelte({} as TransformConfig, "", true)
+				const code = await transformLayoutSvelte(getTransformConfig(), "", true)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
 					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
@@ -31,7 +32,7 @@ describe("transformLayoutSvelte", () => {
 			})
 			it("adds code to an empty file", async () => {
 				const code = await transformLayoutSvelte(
-					{} as TransformConfig,
+					getTransformConfig(),
 					"<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). -->",
 					true,
 				)
@@ -58,7 +59,7 @@ describe("transformLayoutSvelte", () => {
 
 			it("adds code to a file with arbitrary contents", async () => {
 				const code = await transformLayoutSvelte(
-					{} as TransformConfig,
+					getTransformConfig(),
 					dedent`
 						<script>
 						import { onMount } from "svelte"
@@ -103,7 +104,7 @@ describe("transformLayoutSvelte", () => {
 
 			it("Doesn't wrap the tags <svelte:window>, <svelte:document>, <svelte:body>, <svelte:head> and <svelte:options>", async () => {
 				const code = await transformLayoutSvelte(
-					{} as TransformConfig,
+					getTransformConfig(),
 					dedent`
 						<h1>Hello {data.name}!</h1>
 						<svelte:window/>
@@ -148,7 +149,7 @@ describe("transformLayoutSvelte", () => {
 
 			it("adds script tag if missing", async () => {
 				const code = await transformLayoutSvelte(
-					{} as TransformConfig,
+					getTransformConfig(),
 					dedent`
 						<h1>Hello {data.name}!</h1>
 
@@ -211,7 +212,7 @@ describe("transformLayoutSvelte", () => {
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {
 					const code = await transformLayoutSvelte(
-						{} as TransformConfig,
+						getTransformConfig(),
 						dedent`
 							<script>
 								import { languages, i } from "@inlang/sdk-js"
@@ -298,7 +299,7 @@ describe("transformLayoutSvelte", () => {
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
-				const config = {} as TransformConfig
+				const config = getTransformConfig()
 				const input = dedent`
 					<script>
 						import { language } from '@inlang/sdk-js'

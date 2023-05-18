@@ -10,8 +10,9 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsx ./build.ts",
-		"dev": "DEV=true tsx ./build.ts",
+		"- Build should remove the cache because build injected variables can't be cached.": "",
+		"build": "rm -rf ./.turbo && tsx ./build.ts",
+		"dev": "DEV=true npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"test:watch": "vitest watch --passWithNoTests --coverage",
@@ -21,10 +22,10 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f ./dist ./.turbo ./coverage ./node_modules"
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "^0.7.0",
+		"@inlang/core": "^0.8.0",
 		"dotenv": "^16.0.3",
 		"zod": "^3.21.4"
 	},
@@ -34,6 +35,5 @@
 		"esbuild-plugin-glob": "^2.2.1",
 		"tsx": "^3.12.6"
 	},
-	"version": null,
 	"license": "Apache-2.0"
 }

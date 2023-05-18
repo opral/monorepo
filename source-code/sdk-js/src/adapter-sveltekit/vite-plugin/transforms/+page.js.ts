@@ -16,6 +16,9 @@ import { browser } from "$app/environment";
 import { ${
 	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
 }, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
+import { ${
+	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
+}, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
 import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
 ${config.languageInUrl && config.isStatic ? `import { redirect } from "@sveltejs/kit";` : ""}

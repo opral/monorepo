@@ -2,6 +2,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
+	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -18,13 +19,15 @@ import type * as ast from "@inlang/core/ast"
 import type { Result } from "@inlang/core/utilities"
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
-import { createFsFromVolume, Volume } from "memfs"
+import { createMemoryFs } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "@src/services/github/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
+import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 
 type EditorStateSchema = {
 	/**
@@ -66,7 +69,7 @@ type EditorStateSchema = {
 	/**
 	 * Virtual filesystem
 	 */
-	fs: () => typeof import("memfs").fs
+	fs: () => NodeishFilesystem
 
 	/**
 	 * TextSearch to filter messages
@@ -96,6 +99,9 @@ type EditorStateSchema = {
 
 	languages: () => Language[]
 	setLanguages: Setter<Language[]>
+
+	tourStep: () => TourStepId
+	setTourStep: Setter<TourStepId>
 
 	lint: () => InlangConfig["lint"]
 
@@ -132,6 +138,11 @@ type EditorStateSchema = {
 	 * 	if (user && isCollaborator())
 	 */
 	userIsCollaborator: Resource<boolean>
+
+	/**
+	 * Whether the is private or not.
+	 */
+	repoIsPrivate: Resource<boolean | undefined>
 
 	/**
 	 * The last time the repository was pushed.
@@ -179,11 +190,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
-	const [fs, setFs] = createSignal<typeof import("memfs").fs>(createFsFromVolume(new Volume()))
+	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 
 	/**
 	 * The reference resource.
@@ -198,7 +210,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			// re-initialize fs on every cloneRepository call
 			// until subdirectories are supported
-			setFs(createFsFromVolume(new Volume()))
+			setFs(createMemoryFs())
 			return {
 				fs: fs(),
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
@@ -208,9 +220,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("clone repository", {
+			telemetryBrowser.capture("EDITOR cloned repository", {
 				owner: args.routeParams.owner,
 				repository: args.routeParams.repository,
+				isPrivate: repoIsPrivate(),
 			})
 			return result
 		},
@@ -259,6 +272,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
+	//the effect should skip tour guide steps if not needed
+	createEffect(() => {
+		if (localStorage?.user === undefined) {
+			setTourStep("github-login")
+		} else if (!userIsCollaborator()) {
+			setTourStep("fork-repository")
+		} else if (tourStep() === "fork-repository" && inlangConfig() && filteredLanguages()) {
+			if (filteredLanguages().length > 0) {
+				setTourStep("default-languages")
+			} else {
+				setTourStep("default-languages")
+				setTimeout(() => {
+					const element = document.getElementById("missingMessage-summary")
+					element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+				}, 100)
+			}
+		} else if (tourStep() === "missing-message-rule" && inlangConfig()) {
+			setTimeout(() => {
+				const element = document.getElementById("missingMessage-summary")
+				element !== null ? setTourStep("missing-message-rule") : setTourStep("textfield")
+			}, 100)
+		}
+	})
+
 	// re-fetched if the file system changes
 	const [unpushedChanges] = createResource(() => {
 		if (
@@ -279,6 +316,35 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			lastFsChange: fsChange(),
 		}
 	}, _unpushedChanges)
+
+	const [repoIsPrivate] = createResource(
+		/**
+		 * createResource is not reacting to changes like: "false","Null", or "undefined".
+		 * Hence, a string needs to be passed to the fetch of the resource.
+		 */
+		() => {
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false
+			}
+			return {
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+			}
+		},
+		async (args) => {
+			try {
+				const response = await github.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				return response.data.private
+			} catch (error) {
+				return undefined
+			}
+		},
+	)
 
 	const [userIsCollaborator] = createResource(
 		/**
@@ -490,6 +556,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					referenceLanguage,
 					languages,
 					setLanguages,
+					tourStep,
+					setTourStep,
 					filteredLanguages,
 					setFilteredLanguages,
 					filteredLintRules,
@@ -498,6 +566,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setResources,
 					referenceResource,
 					userIsCollaborator,
+					repoIsPrivate,
 					setLastPush,
 					fs,
 					setLastPullTime,
@@ -512,7 +581,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 // ------------------------------------------
 
 async function cloneRepository(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
@@ -572,7 +641,7 @@ export class UnknownException extends Error {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
@@ -621,19 +690,17 @@ export async function pushChanges(args: {
 }
 
 async function readInlangConfig(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 }): Promise<InlangConfig | undefined> {
 	try {
 		const env: InlangEnvironment = {
 			$import: initialize$import({
-				// @ts-ignore
-				fs: args.fs.promises,
+				fs: args.fs,
 				fetch,
 			}),
-			// @ts-ignore
-			$fs: args.fs.promises,
+			$fs: args.fs,
 		}
-		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
+		const file = await args.fs.readFile("./inlang.config.js", { encoding: "utf-8" })
 		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
 		const module = (await import(/* @vite-ignore */ withMimeType)) as InlangConfigModule
 		const config = setupConfig({ module, env })
@@ -660,7 +727,7 @@ async function readResources(config: InlangConfig) {
 }
 
 async function writeResources(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	config: InlangConfig
 	resources: ast.Resource[]
 	user: NonNullable<LocalStorageSchema["user"]>
@@ -710,7 +777,7 @@ async function writeResources(args: {
 }
 
 async function _unpushedChanges(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	repositoryClonedTime: Date
 	lastPushTime?: Date
 	lastPullTime?: Date
@@ -734,7 +801,7 @@ async function _unpushedChanges(args: {
 }
 
 async function pull(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void

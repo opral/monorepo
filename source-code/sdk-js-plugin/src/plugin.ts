@@ -24,10 +24,6 @@ const addIdeExtensionPluginIfMissing = async (
 ): Promise<{ ideExtension: IdeExtensionSettings } | undefined> => {
 	if (config.ideExtension) return
 
-	// TODO: use ideExtensionPlugin once released
-
-	// TODO: check if correct
-
 	const pluginSetupFunction = ideExtensionPlugin({
 		messageReferenceMatchers: [
 			async (args) => {
@@ -61,11 +57,22 @@ const addIdeExtensionPluginIfMissing = async (
 					}
 				}
 				return result
-			}
+			},
 		],
 		extractMessageOptions: [
 			{
 				callback: (messageId) => `{i("${messageId}")}`,
+			},
+		],
+		documentSelectors: [
+			{
+				language: "javascript",
+			},
+			{
+				language: "typescript",
+			},
+			{
+				language: "svelte",
 			},
 		],
 	})

@@ -6,7 +6,7 @@ import { initialize$import } from "../environment/$import.js"
 /**
  * Initializes a mock environment.
  *
- * The mock environment uses a virtual file system (memfs). If
+ * The mock environment uses a virtual file system (memoryFs). If
  * testing inlang depends on files in the local file system,
  * you can copy directories into the environment by providing
  * the `copyDirectory` argument.
@@ -41,7 +41,7 @@ export async function mockEnvironment(args: {
  *
  * Useful for mocking the environment.
  */
-async function copyDirectory(args: {
+export async function copyDirectory(args: {
 	copyFrom: InlangEnvironment["$fs"]
 	copyTo: InlangEnvironment["$fs"]
 	path: string
@@ -64,7 +64,7 @@ Context: The path is relative to the current working directory, not the file tha
 		// check if the path is a file
 		const path = normalizePath(`${args.path}/${subpath}`)
 		try {
-			const file = await args.copyFrom.readFile(path, { encoding: "utf-8" })
+			const file = await args.copyFrom.readFile(path, { encoding: "binary" })
 			await args.copyTo.writeFile(path, file)
 		} catch (err) {
 			await copyDirectory({ ...args, path })

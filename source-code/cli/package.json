@@ -1,10 +1,23 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.6.0",
+	"version": "0.9.3",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
 	},
+	"keywords": [
+		"i18n",
+		"l10n",
+		"translation",
+		"internationalization",
+		"svelte",
+		"localization",
+		"lint",
+		"i18next",
+		"react",
+		"vue",
+		"angular"
+	],
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",
 	"type": "module",
@@ -30,24 +43,23 @@
 		"format": "cd ../.. && npm run format:base ./source-code/core",
 		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
 		"---- OTHER ---------------------------------------------------------": "",
-		"clean": "rm -r -f dist"
-	},
-	"dependencies": {
-		"ora": "^6.3.0",
-		"ts-dedent": "^2.2.0"
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
+		"@inlang-git/fs": "^0.0.3",
+		"@sentry/node": "^7.51.2",
 		"@inlang/core": "*",
 		"@inlang/rpc": "*",
 		"@types/prompts": "^2.4.2",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
+		"ora": "^6.3.0",
 		"esbuild": "^0.17.14",
 		"fast-glob": "^3.2.12",
-		"memfs": "^3.4.13",
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
-		"prompts": "^2.4.2"
+		"prompts": "^2.4.2",
+		"ts-dedent": "^2.2.0"
 	},
 	"license": "Apache-2.0"
 }

@@ -14,9 +14,9 @@ const options = await pluginBuildConfig({
 	minify: true,
 	plugins: [
 		{
-			name: 'logger',
-			setup: ({ onEnd }) => onEnd(() => console.info('🎉 changes processed'))
-		}
+			name: "logger",
+			setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
+		},
 	],
 })
 

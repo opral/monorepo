@@ -1,6 +1,6 @@
-import type { Result } from "@inlang/core/utilities"
 import { telemetryNode } from "@inlang/telemetry"
 import { privateEnv } from "@inlang/env-variables"
+import type { Result } from "@inlang/core/utilities"
 
 export async function machineTranslate(args: {
 	text: string

@@ -1,10 +1,9 @@
 // clone reposiory with isomorphic-git
 
-import git from "isomorphic-git"
-import http from "isomorphic-git/http/web/index.js"
-import type { Volume } from "memfs/lib/volume.js"
+import { raw, http } from "@inlang-git/client/raw"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 
-const cloneRespository = async (url: string, volume: Volume) => {
+const cloneRespository = async (url: string, fs: NodeishFilesystem) => {
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repo] = [...url.split("/")]
 
@@ -16,8 +15,8 @@ const cloneRespository = async (url: string, volume: Volume) => {
 	}
 
 	// clone the repository, resolves if the repository is cloned
-	await git.clone({
-		fs: volume,
+	await raw.clone({
+		fs,
 		http,
 		dir: "/",
 		url: `https://${host}/${owner}/${repo}`,

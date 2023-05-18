@@ -56,7 +56,12 @@ export async function toJson(args: {
 		} else {
 			const content = await args.fs.readFile(fullPath, { encoding: "binary" })
 			if (!content) throw new Error(`${fullPath} does not exist.`)
+			if (typeof content !== "string")
+				throw new Error(
+					`Badly behaved filesystem, expected string from readFile but got'${content.constructor.name}'.`,
+				)
 
+			console.log("going to btoa", content)
 			result[fullPath.slice(1)] = btoa(content) as string
 		}
 	}

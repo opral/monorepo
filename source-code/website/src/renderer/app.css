@@ -23,6 +23,7 @@
 	--sl-color-primary-950: var(--sl-color-cyan-950);
 
 	--sl-input-font-family: "Inter", sans-serif;
+	--sl-font-sans: "Inter", sans-serif;
 }
 /* The font Inter with variable font support (if supported) */
 @supports (font-variation-settings: normal) {
@@ -212,4 +213,8 @@ sl-menu {
 	float: left;
 	height: 0;
 	pointer-events: none;
+}
+
+sl-listbox {
+	--sl-font-sans: "Inter", sans-serif;
 }

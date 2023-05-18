@@ -1,11 +1,27 @@
-import { it, expect } from "vitest"
+import { it, expect, vi } from "vitest"
 import { setupConfig } from "./setupConfig.js"
-import type { DefineConfig } from "./schema.js"
 
 it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
-			defineConfig: mockDefineConfig,
+			defineConfig: async () => ({
+				readResources: async () => [
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
+				],
+				writeResources: async () => undefined,
+				plugins: [
+					{
+						id: "mock.plugin",
+						config: () => {
+							return {
+								referenceLanguage: "de",
+								languages: ["en", "de"],
+							}
+						},
+					},
+				],
+			}),
 		},
 		env: {} as any,
 	})
@@ -13,13 +29,16 @@ it("should setup the config with plugins", async () => {
 	expect(config.languages).toEqual(["en", "de"])
 })
 
-// Zod removes properties 
+// Zod removes properties
 it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: () => undefined as any,
-				writeResources: () => undefined as any,
+				readResources: async () => [
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+					{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
+				],
+				writeResources: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
 					{
@@ -40,18 +59,71 @@ it("should not remove properties from the config", async () => {
 	expect(config.someProperty).toBe("someValue")
 })
 
-const mockDefineConfig: DefineConfig = async () => ({
-	readResources: () => undefined as any,
-	writeResources: () => undefined as any,
-	plugins: [
-		{
-			id: "mock.plugin",
-			config: () => {
-				return {
-					referenceLanguage: "de",
-					languages: ["en", "de"],
-				}
+it("should throw if the module has no define config function", async () => {
+	expect(
+		setupConfig({
+			// @ts-expect-error
+			module: {},
+			env: {} as any,
+		}),
+	).rejects.toBeTruthy()
+})
+
+it("should throw if the config is invalid", async () => {
+	expect(
+		setupConfig({
+			module: {
+				defineConfig: async () => ({
+					writeResources: async () => undefined,
+					someProperty: "someValue",
+					plugins: [
+						{
+							id: "mock.plugin",
+							config: () => {
+								return {
+									referenceLanguage: "de",
+									languages: ["en", "de"],
+								}
+							},
+						},
+					],
+				}),
 			},
-		},
-	],
+			env: {} as any,
+		}),
+	).rejects.toBeTruthy()
+})
+
+// if the minimal config to run the app is valid, the app start not crash but
+// the plugin errors should be logged
+it("should NOT throw if the config is valid but a plugin has an error", async () => {
+	vi.spyOn(console, "error").mockImplementation(() => undefined)
+
+	try {
+		await setupConfig({
+			module: {
+				defineConfig: async () => ({
+					referenceLanguage: "de",
+					languages: ["de", "en"],
+					readResources: async () => [
+						{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] },
+						{ type: "Resource", languageTag: { type: "LanguageTag", name: "de" }, body: [] },
+					],
+					writeResources: async () => undefined,
+					plugins: [
+						{
+							id: "mock.plugin",
+							config: () => {
+								throw new Error("Plugin crashed")
+							},
+						},
+					],
+				}),
+			},
+			env: {} as any,
+		})
+		expect(console.error).toHaveBeenCalledOnce()
+	} catch (error) {
+		expect(error).toBeFalsy()
+	}
 })
