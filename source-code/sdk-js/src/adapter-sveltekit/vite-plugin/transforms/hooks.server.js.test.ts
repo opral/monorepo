@@ -25,7 +25,7 @@ describe("transformHooksServerJs", () => {
 			`)
 		})
 
-		it.todo("adds handle endpoint to a file with arbitrary contents", () => {
+		it("adds handle endpoint to a file with arbitrary contents", () => {
 			const code = transformHooksServerJs(
 				{} as TransformConfig,
 				dedent`

@@ -64,6 +64,7 @@ export const replaceOrAddExportNamedFunction = (
 	name: string,
 	replacementAst: types.namedTypes.ExportNamedDeclaration,
 ) => {
+	let replaced = false
 	jsWalk(ast as Node, {
 		enter(node) {
 			if (
@@ -73,12 +74,16 @@ export const replaceOrAddExportNamedFunction = (
 					n.Identifier.check(node.declaration.declarations[0].id) &&
 					node.declaration.declarations[0].id.name === name) ||
 					(n.FunctionDeclaration.check(node.declaration) &&
-						n.Identifier.check(node.declaration.id)))
+						n.Identifier.check(node.declaration.id) &&
+						node.declaration.id.name === name))
 			) {
+				replaced = true
 				this.replace(replacementAst as Node)
+				this.skip()
 			}
 		},
 	})
+	if (!replaced) ast.body.push(replacementAst)
 }
 
 export const getWrappedExport = (
