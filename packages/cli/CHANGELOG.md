@@ -1,5 +1,12 @@
 # @inlang/cli
 
+## 0.9.3
+
+### Patch Changes
+
+- 31f55f21: Dependencies are now declared as dev dependencies. The CLI is bundled, there was no need to define regular dependencies.
+- 32cfc814: Improve the README on NPM.
+
 ## 0.9.2
 
 ### Patch Changes
