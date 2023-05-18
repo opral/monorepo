@@ -4,6 +4,7 @@ import type { TransformConfig } from "./config.js"
 export type FileType =
 	| "hooks.server.js"
 	| "[language].json"
+	| "+server.js"
 	| "+layout.server.js"
 	| "+layout.js"
 	| "+layout.svelte"
@@ -49,6 +50,13 @@ export const getFileInformation = (
 		return {
 			type: "[language].json",
 			root: true,
+		}
+	}
+
+	if (name === "+server" && scriptExtensions.includes(ext)) {
+		return {
+			type: "+server.js",
+			root,
 		}
 	}
 
