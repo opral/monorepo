@@ -1,6 +1,6 @@
 {
 	"name": "@inlang-git/fs",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
