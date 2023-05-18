@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.5.1
+
+### Patch Changes
+
+- e5f71e02: add `@inlang/core` as a regular dependency
+
 ## 0.5.0
 
 ### Minor Changes
