@@ -18,7 +18,7 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
 
 ## Getting Started
 
-1. Add `@inlang/core` and `@inlang/sdk-js` dependency to your project
+1. Add `@inlang/sdk-js` dependency to your project
 
    ```js
    // using npm
