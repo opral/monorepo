@@ -103,17 +103,26 @@ export const initRootLayoutServerLoadWrapper = <
 
 // ------------------------------------------------------------------------------------------------
 
-export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
+const initGenericServerWrapper = <Event extends Kit.RequestEvent>() => ({
 	wrap:
 		<Data extends Record<string, any> | void>(
-			load: (
-				event: Parameters<ServerLoad>[0],
+			fn: (
+				event: Event,
 				runtime: SvelteKitServerRuntime,
 			) => Promise<Data> | Data,
 		) =>
-			async (event: Parameters<ServerLoad>[0]): Promise<Data> => {
+			async (event: Event): Promise<Data> => {
 				const runtime = getRuntimeFromLocals(event.locals)
 
-				return load(event, runtime)
+				return fn(event, runtime)
 			},
 })
+
+export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() =>
+	initGenericServerWrapper<Parameters<ServerLoad>[0]>()
+
+export const initActionWrapper = <Action extends Kit.Action<any, any, any>>() =>
+	initGenericServerWrapper<Parameters<Action>[0]>()
+
+export const initRequestHandlerWrapper = <RequestHandler extends Kit.RequestHandler<any, any>>() =>
+	initGenericServerWrapper<Parameters<RequestHandler>[0]>()
