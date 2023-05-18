@@ -222,6 +222,37 @@ describe("transformHooksServerJs", () => {
 					}).wrap(hndl);"
 				`)
 			})
+			it("function keyword, sequence, with imports from sdk-js", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
+						import { sequence } from "@sveltejs/kit/hooks";
+						import { i } from "@inlang/sdk-js";
+						
+						const seq1 = async ({ event, resolve }) => {
+						console.log(i("welcome"));
+						return resolve(event);
+						};
+						
+						export const handle = sequence(seq1);
+					`,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					import { sequence } from \\"@sveltejs/kit/hooks\\";
+					import { i } from \\"@inlang/sdk-js\\";
+
+					const seq1 = async ({ event, resolve }) => {
+					console.log(getRuntimeFromLocals(event.locals).i(\\"welcome\\"));
+					return resolve(event);
+					};
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap(sequence(seq1));"
+				`)
+			})
 		})
 	})
 

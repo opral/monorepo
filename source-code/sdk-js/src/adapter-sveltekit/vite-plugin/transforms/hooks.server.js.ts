@@ -68,17 +68,9 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	// Replace imports from sdk
 	replaceSdkImports(ast.$ast, "locals")
 	// Make sure that exported "handle" function exists & has the parameters we need
-
 	const [renamings, initialMergeError] = mergeNodes(ast.$ast, functionTemplate)
-
-	//console.log(renamings)
 	const [def, error] = findDefinition(ast.$ast, "handle")
-	if (
-		n.CallExpression.check(def) &&
-		n.Identifier.check(def.callee) &&
-		def.callee.name === "sequence"
-	) {
-	} else if (def) {
+	if (def) {
 		const exportAst = getWrappedExport(
 			parseExpression(options(config)),
 			[def as ExpressionKind],
