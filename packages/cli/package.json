@@ -32,23 +32,21 @@
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"@inlang-git/fs": "^0.0.3",
 		"@sentry/node": "^7.51.2",
-		"ora": "^6.3.0",
-		"ts-dedent": "^2.2.0"
-	},
-	"devDependencies": {
 		"@inlang/core": "*",
 		"@inlang/rpc": "*",
 		"@types/prompts": "^2.4.2",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
+		"ora": "^6.3.0",
 		"esbuild": "^0.17.14",
 		"fast-glob": "^3.2.12",
 		"node-fetch": "^3.3.0",
 		"openai": "^3.2.1",
-		"prompts": "^2.4.2"
+		"prompts": "^2.4.2",
+		"ts-dedent": "^2.2.0"
 	},
 	"license": "Apache-2.0"
 }
