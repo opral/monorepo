@@ -1,67 +1,3 @@
-# Flows
-
-## `JavaScript`
-
-### `hooks.server.js`
-
-things we need to wrap:
-	- `handle`
-
-### `+layout.server.js`
-
-things we need to wrap:
-	- `load`
-
-### `+page.server.js`
-
-things we need to wrap:
-	- `load`
-	- individual `actions`
-
-### `+server.js`
-
-things we need to wrap:
- - `POST`
- - `PUT`
- - `PATCH`
- - `DELETE`
- - `OPTIONS`
-
-### `+page.js`
-
-### `+layout.js`
-
-### `*.js`
-#### `server`
-#### `client`
-
-
----
-
-## `svelte`
-
-### `+layout.svelte`
-
- - if root
-    - import all necessary things
-    - insert codeblocks where needed (only non-reactive)
-    - wrap markup
- - pass everything to `*.svelte`
-
-### `+page.svelte`
-
- - pass everything to `*.svelte`
-
-### `*.svelte`
-
- - replace `@inlang/sdk-js` imports with `getRuntimeFromContext`
- - resolve aliases and placeholders
- - if reactive
-   - transform `i` and `language` to `$i` and `$language`
-
----
----
----
 
 # Placeholders
 
@@ -155,3 +91,208 @@ for markup block:
 	const result = serialize(ast)
 	// result => '{#if $$_INLANG_LANGUAGE_$$}<h1>i("welcome")</h1>{/if}'
 	```
+
+---
+---
+---
+
+# Flows
+
+## `JavaScript`
+
+### `hooks.server.js`
+
+things we need to wrap:
+	- `handle`
+
+wrap with `initHandleWrapper`
+
+### `+layout.server.js`
+
+things we need to wrap:
+	- `load`
+
+if root
+	wrap with `initRootLayoutServerLoadWrapper`
+else
+	wrap with `initServerLoadWrapper`
+
+### `+page.server.js`
+
+things we need to wrap:
+	- `load`
+	- individual `actions`
+
+if load
+	wrap with `initServerLoadWrapper`
+if actions
+	wrap with `initActionWrapper`
+
+### `+server.js`
+
+things we need to wrap:
+ - `POST`
+ - `PUT`
+ - `PATCH`
+ - `DELETE`
+ - `OPTIONS`
+
+wrap with `initRequestHandlerWrapper`
+
+### `+layout.js`
+
+things we need to wrap:
+	- `load`
+
+if root
+	wrap with `initRootLayoutLoadWrapper`
+else
+	wrap with `initLoadWrapper`
+
+### `+page.js`
+
+things we need to wrap:
+	- `load`
+
+if root
+	wrap with `initRootPageLoadWrapper`
+else
+	wrap with `initLoadWrapper`
+
+### `*.server.js`
+
+This is not supported.
+
+Throw a meaningful error if we encounter an import from `@inlang/sdk-js`.
+
+### `*.js`
+
+JavaScript files can run on the server and on the client. So we need to detect that case during runtime. `getRuntimeFromContext` will throw an error if it get's called on the server.
+
+ - transform imports
+	```ts
+	const code = 'import { i } from "@inlang/sdk-js";const fn = () => { i("test") }'
+	const ast = parse(code)
+	wrapWithPlaceholder(ast, 'load')
+	const result = serialize(ast)
+	// result => 'const fn = () => { const { i } = getRuntimeFromContext();i("test") }'
+	```
+ - getRuntimeFromContext calls should only happen once per function
+  		 - right before a variable is referenced the first time
+ - we need to make sure to not redeclare imports multiple times
+	```ts
+	const code = 'import { i } from "@inlang/sdk-js";const fn = () => { console.log(123); i("test"); i("hello") }'
+	const ast = parse(code)
+	wrapWithPlaceholder(ast, 'load')
+	const result = serialize(ast)
+	// result => 'const fn = () => { console.log(123); const { i } = getRuntimeFromContext();i("test"); i("hello") }'
+	```
+ - if reactive
+    - wrap reactive functions with `get()`
+		```ts
+		const code = 'const fn = () => { const { i } = getRuntimeFromContext();i("test") }'
+		const ast = parse(code)
+		wrapWithPlaceholder(ast, 'load')
+		const result = serialize(ast)
+		// result => 'import { get } from "svelte/store";const fn = () => { const { i } = getRuntimeFromContext();get(i)("test") }'
+		```
+
+
+## `svelte`
+
+### `+layout.svelte`
+
+ - if root
+    - import all necessary things
+    - insert codeblocks where needed (only non-reactive)
+    - wrap markup
+ - pass everything to `*.svelte`
+
+### `+page.svelte`
+
+ - pass everything to `*.svelte`
+
+### `*.svelte`
+
+ - replace `@inlang/sdk-js` imports with `getRuntimeFromContext`
+ - resolve aliases and placeholders
+ - if reactive
+   - transform `i` and `language` to `$i` and `$language`
+
+---
+
+# Flow details
+
+## wrap functionality
+
+Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `handle` has the special case with `sequence`. so the `findLeaf` functionality must be different. The rest stays the same.
+ - if no import from `@inlang/sdk-js` exists
+    - return input code without any transformation
+
+ - pass code to generic `wrap` function
+    - function traverses the AST and finds the export, traverses it's aliases
+    - if leaf function does not use any import from `@inlang/sdk-js`
+       - return input code
+    - else
+       - wrap the leaf function with a placeholder
+		 	```ts
+			const code = 'import { i } from "@inlang/sdk-js";const fn = () => { i("test") };const ld = fn;export  const load = ld'
+			const ast = parse(code)
+			wrapWithPlaceholder(ast, 'load')
+			const result = serialize(ast)
+			// result => 'import { i } from "@inlang/sdk-js";const fn = $$_INLANG_PLACEHOLDER_$$(() => { i("test") });const ld = fn;export const load = ld'
+			```
+	    - rewrite parameter e.g.
+			```ts
+			`() => { i("test") }` => `(_, { i }) => { i("test") }`
+			`(event) => { i("test") }` => `(event, { i }) => { i("test") }`
+			`({ locals }) => { i("test") }` => `({ locals }, { i }) => { i("test") }`
+			```
+ - look if any import from `@inlang/sdk-js` get's used outside of a placeholder wrapper
+    - if yes => throw meaningful error
+ - remove imports from `@inlang/sdk-js`
+ - import all necessary things
+ - replace placeholder with specific function of that file
+	```ts
+	const code = 'const fn = $$_INLANG_PLACEHOLDER_$$((_, { i }) => { i("test") });'
+	const wrapperAst = parse('initHandleWrapper({ key: "value" }).wrap($$_INLANG_PLACEHOLDER_$$)')
+	wrap(ast, wrapperAst)
+	const result = serialize(ast)
+	// result => 'const fn = initHandleWrapper({ key: "value" }).wrap((_, { i }) => { i("test") });'
+	```
+
+The wrap function needs to work with the following code snippets:
+
+```ts
+const load = () = {}
+```
+
+```ts
+function load = () = {}
+export { load }
+```
+
+```ts
+const fn = () = {}
+export { fn as load }
+```
+
+```ts
+const fn1 = () = {}
+const fn2 = fn1
+const fn3 = fn2
+export const load = fn3
+```
+
+```ts
+import { appendFunctionality } from './utils.js'
+export const load = appendFunctionality(() => { })
+```
+
+```ts
+const load: PageLoad = () => {}
+```
+
+```ts
+const load = (() => {}) satisfies PageLoad
+```
