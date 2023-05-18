@@ -5,6 +5,19 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"keywords": [
+		"i18n",
+		"l10n",
+		"translation",
+		"internationalization",
+		"svelte",
+		"localization",
+		"lint",
+		"i18next",
+		"react",
+		"vue",
+		"angular"
+	],
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",
 	"type": "module",
