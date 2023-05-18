@@ -2,15 +2,14 @@ import type { TransformConfig } from "../config.js"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import {
-	findUsedImportsInAst,
-	getFunctionOrDeclarationValue,
-	getWrappedExport,
-	removeSdkJsImport,
-	replaceOrAddExportNamedFunction,
-} from "../../../helpers/ast.js"
+import { findUsedImportsInAst, getFunctionOrDeclarationValue } from "../../../helpers/ast.js"
 import { dedent } from "ts-dedent"
-import { extractWrappableExpression } from "../../../helpers/inlangAst.js"
+import {
+	extractWrappableExpression,
+	getWrappedExport,
+	getSdkImportedModules,
+	replaceOrAddExportNamedFunction,
+} from "../../../helpers/inlangAst.js"
 
 const requiredImports = (root: boolean) => `
 import { browser } from "$app/environment";
@@ -45,7 +44,7 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	const n = types.namedTypes
 	const ast = parseModule(code)
 	// Remove imports, but save their names
-	const importNames = removeSdkJsImport(ast.$ast)
+	const importNames = getSdkImportedModules(ast.$ast)
 	// Merge imports with required imports
 	const importsAst = parseModule(requiredImports(root))
 	deepMergeObject(ast, importsAst)

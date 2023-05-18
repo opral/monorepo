@@ -270,7 +270,6 @@ describe("findDefinition", () => {
 			`
 			const ast = parseModule(code).$ast
 			const resultAst = findDefinition(ast, "blue", true)[0]
-			console.log(findDefinition(ast, "blue", true))
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toBe('"green"')
 		})
@@ -301,10 +300,10 @@ describe("findDefinition", () => {
 					console.log(i)
 				}
 				const hndl1 = hndl
-				export const handle = hndl1
+				export const identifier = hndl1
 			`
 			const ast = parseModule(code).$ast
-			const resultAst = findDefinition(ast, "handle", true)[0]
+			const resultAst = findDefinition(ast, "identifier", true)[0]
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toMatchInlineSnapshot(`
 				"function hndl() {
@@ -380,12 +379,12 @@ describe("mergeNodes", () => {
 					b.property("init", b.identifier("key"), b.identifier("alias")),
 				])
 				// merge property: `key: alias2`
-				const result = mergeNodes(
-					ast,
-					b.property("init", b.identifier("key"), b.identifier("alias2")),
-				)[0]?.[0]?.[1]
-				const resultCode = result ? print(result).code : ""
-				expect(resultCode).toEqual("alias")
+				const { newName } =
+					mergeNodes(
+						ast,
+						b.property("init", b.identifier("key"), b.identifier("alias2")),
+					)[0]?.[0] ?? {}
+				expect(newName ? print(newName).code : "").toEqual("alias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"{
 					    key: alias
@@ -418,7 +417,7 @@ describe("mergeNodes", () => {
 			const result = mergeNodes(
 				ast,
 				b.property("init", b.identifier("key"), b.identifier("alias2")),
-			)[0]?.[0]?.[1]
+			)[0]?.[0]?.newName
 			const resultCode = result ? print(result).code : ""
 			expect(resultCode).toBe("identifier.key")
 			expect(print(ast).code).toMatchInlineSnapshot(`
@@ -473,7 +472,167 @@ describe("mergeNodes", () => {
 					        key: alias
 					    }
 					) {}"
-			`)
+				`)
+			})
+		})
+		describe("... into arrow function declaration", () => {
+			test("Simple declaration", () => {
+				const code = dedent`
+					import {i} from "@inlang/sdk-js"
+					const hndl = () => {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1
+				`
+				const ast = parseModule(code).$ast
+				// merge `function identifier({key:alias}) {}`
+				const result = mergeNodes(
+					ast,
+					b.functionDeclaration(
+						b.identifier("identifier"),
+						[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+						b.blockStatement([]),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"import {i} from \\"@inlang/sdk-js\\"
+					const hndl = (
+					    {
+					        key: alias
+					    }
+					) => {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1"
+				`)
+			})
+			test("Rename parameters", () => {
+				const code = dedent`
+					import {i} from "@inlang/sdk-js"
+					const hndl = (parameter1) => {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1
+				`
+				const ast = parseModule(code).$ast
+				// merge `function identifier({key:alias}) {}`
+				const { originalName, newName, scope } =
+					mergeNodes(
+						ast,
+						b.functionDeclaration(
+							b.identifier("identifier"),
+							[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+							b.blockStatement([]),
+						),
+					)[0]?.[0] ?? {}
+				expect(originalName ? print(originalName).code : "").toBe("alias")
+				expect(newName ? print(newName).code : "").toBe("parameter1.key")
+				expect(scope ? print(scope).code : "").toMatchInlineSnapshot(`
+					"{
+						console.log(i)
+					}"
+				`)
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"import {i} from \\"@inlang/sdk-js\\"
+					const hndl = (parameter1) => {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1"
+				`)
+			})
+		})
+	})
+	describe("Merge export statement", () => {
+		describe("... into Program", () => {
+			test("Simple function", () => {
+				const code = dedent`
+					export function identifier() {}
+				`
+				const ast = parseModule(code).$ast
+				const result = mergeNodes(
+					ast,
+					b.exportNamedDeclaration(
+						b.functionDeclaration(
+							b.identifier("identifier"),
+							[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+							b.blockStatement([]),
+						),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"export function identifier(
+					  {
+					    key: alias
+					  }
+					) {}"
+				`)
+			})
+			test("Simple function, append", () => {
+				const code = dedent`
+					export function identifier2() {}
+				`
+				const ast = parseModule(code).$ast
+				const result = mergeNodes(
+					ast,
+					b.exportNamedDeclaration(
+						b.functionDeclaration(
+							b.identifier("identifier"),
+							[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+							b.blockStatement([]),
+						),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"export function identifier2() {}
+
+					export function identifier(
+					  {
+					    key: alias
+					  }
+					) {}"
+				`)
+			})
+			test.todo("function declaration chain", () => {
+				const code = dedent`
+					import {i} from "@inlang/sdk-js"
+					function hndl() {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1
+				`
+				const ast = parseModule(code).$ast
+				// merge `function identifier({key:alias}) {}`
+				const result = mergeNodes(
+					ast,
+					b.exportNamedDeclaration(
+						b.functionDeclaration(
+							b.identifier("identifier"),
+							[b.objectPattern([b.property("init", b.identifier("key"), b.identifier("alias"))])],
+							b.blockStatement([]),
+						),
+					),
+				)
+				expect(result).toEqual([[], undefined])
+				expect(print(ast).code).toMatchInlineSnapshot(`
+					"import {i} from \\"@inlang/sdk-js\\"
+					function hndl(
+					    {
+					        key: alias
+					    }
+					) {
+						console.log(i)
+					}
+					const hndl1 = hndl
+					export const identifier = hndl1"
+				`)
 			})
 		})
 	})

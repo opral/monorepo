@@ -3,8 +3,8 @@ import type { Result } from "@inlang/core/utilities"
 import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
 import type { Ast } from "../../../../node_modules/svelte/types/compiler/interfaces.js"
-import { types } from "recast"
-import { parseModule, builders } from "magicast"
+import { types, print } from "recast"
+import { parseModule } from "magicast"
 import type MagicStringImport from "magic-string"
 import type { ExpressionKind } from "ast-types/gen/kinds.js"
 
@@ -135,36 +135,6 @@ const emptyLoadFunction = `export const load = async () => {};`
 export const emptyLoadExportNodes = () =>
 	(parseModule(emptyLoadFunction).$ast as types.namedTypes.Program).body
 
-// NOTES: Test this with imports on a single line or on multiple lines
-// Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
-// Returns an array with the import properties and their aliases
-export const removeSdkJsImport = (ast: types.namedTypes.Node | Node): [string, string][] =>
-	findAstJs(
-		ast,
-		[
-			({ node }) =>
-				n.ImportDeclaration.check(node) &&
-				n.Literal.check(node.source) &&
-				node.source.value === "@inlang/sdk-js",
-			({ node }) => n.ImportSpecifier.check(node),
-		],
-		(node) =>
-			n.ImportSpecifier.check(node)
-				? (meta) => {
-						const { parent } = meta.get(
-							node,
-						) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
-						// Remove the complete import from "@inlang/sdk-js"
-						// (We assume that imports can only be top-level)
-						if (n.Program.check(ast)) {
-							const declarationIndex = ast.body.findIndex((node) => node === parent)
-							declarationIndex != -1 && ast.body.splice(declarationIndex, 1)
-						}
-						return [node.imported.name, node.local?.name ?? node.imported.name]
-				  }
-				: undefined,
-	)[0] ?? []
-
 export const makeMarkupReactive = (
 	parsed: Ast,
 	s: MagicStringImport.default,
@@ -252,7 +222,7 @@ export const functionMatchers = (name: string): Parameters<typeof findAstJs>[1] 
 	({ node }) => n.Identifier.check(node) && node.name === name,
 ]
 
-const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
+export const arrowFunctionMatchers = (name: string): Parameters<typeof findAstJs>[1] => [
 	({ node }) => n.VariableDeclaration.check(node),
 	({ node }) =>
 		n.VariableDeclarator.check(node) && n.Identifier.check(node.id) && node.id.name === name,
@@ -322,54 +292,6 @@ export const getFunctionOrDeclarationValue = (
 			  })
 			: undefined
 	return variableDeclarationExpression ?? functionDeclaration ?? fallbackFunction
-}
-
-export const replaceOrAddExportNamedFunction = (
-	ast: types.namedTypes.Program,
-	name: string,
-	replacementAst: types.namedTypes.ExportNamedDeclaration,
-) => {
-	const runOn = ((node) =>
-		n.ExportNamedDeclaration.check(node)
-			? (meta) => {
-					const { index } = meta.get(node) as NodeInfoMapEntry<types.namedTypes.Program>
-					if (index != undefined) ast.body.splice(index, 1, replacementAst)
-					return true
-			  }
-			: undefined) satisfies RunOn<types.namedTypes.Node, true | void>
-	const functionWasReplacedResult = findAstJs(ast, functionMatchers(name), runOn)[0] as
-		| true[]
-		| undefined
-	const functionWasReplaced =
-		functionWasReplacedResult != undefined && functionWasReplacedResult.length > 0
-	if (!functionWasReplaced) {
-		const arrowFunctionWasReplacedResult = findAstJs(ast, arrowFunctionMatchers(name), runOn)[0] as
-			| true[]
-			| undefined
-		const arrowFunctionWasReplaced =
-			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
-		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
-	}
-}
-
-export const getWrappedExport = (
-	options: unknown,
-	params: ExpressionKind[],
-	exportedName: string,
-	wrapperName: string,
-) => {
-	const initHandleWrapperCall = options
-		? builders.functionCall(wrapperName, options)
-		: builders.functionCall(wrapperName)
-	const wrapperDeclarationAst = b.callExpression(
-		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
-		params,
-	)
-	return b.exportNamedDeclaration(
-		b.variableDeclaration("const", [
-			b.variableDeclarator(b.identifier(exportedName), wrapperDeclarationAst),
-		]),
-	)
 }
 
 export const variableDeclarationAst = (importNames: [string, string][]) =>
@@ -648,32 +570,58 @@ export class MergeNodesError extends Error {
 // {key: alias, ...rest} & {event} -> {key: alias, event, ...rest} with rest -> {...rest, event}
 // or -> {key: alias, ...rest} with event -> rest.event
 // {key: {key2: value2, ...rest2}, ...rest1} & {key: {event}}
-type Renamings = [
-	types.namedTypes.Identifier | Identifier,
-	types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier,
-][]
+type Renamings = {
+	originalName: types.namedTypes.Identifier | Identifier
+	newName: types.namedTypes.Expression | Expression | types.namedTypes.Identifier | Identifier
+	scope?: types.namedTypes.Node | Node
+}[]
 
+// Merges nodes.
+// If some things don't turn out to be as requested, try to rename stuff in the code (but only if a scope is provided). Otherwise return the stuff that has to be renamed
 export const mergeNodes = (
 	ast: types.namedTypes.Node | Node,
 	node: types.namedTypes.Node | Node,
+	renamingScope?: types.namedTypes.Node | Node,
 ): Result<Renamings, MergeNodesError> => {
 	if (n.ObjectPattern.check(node)) {
 		for (const property of node.properties) {
-			return mergeNodes(ast, property)
+			return mergeNodes(ast, property, renamingScope)
 		}
 	} else if (n.Property.check(node)) {
 		if (n.Identifier.check(node.value)) {
-			if (identifierIsDeclarable(ast, node.value.name)[0] === true) {
-				if (n.Identifier.check(node.key)) {
+			if (n.Identifier.check(node.key)) {
+				if (
+					identifierIsDeclarable(ast, node.value.name)[0] === true ||
+					node.key.name === node.value.name
+				) {
 					if (n.ObjectPattern.check(ast)) {
 						const foundAlias = findAlias(ast, node.key.name)[0]
 						if (n.Identifier.check(foundAlias) && foundAlias.name === node.key.name)
 							return [[], undefined]
-						if (foundAlias !== undefined)
-							return [[[b.identifier(node.value.name), foundAlias]], undefined]
+						if (foundAlias !== undefined) {
+							return [
+								[
+									{
+										originalName: b.identifier(node.value.name),
+										newName: foundAlias,
+										scope: renamingScope,
+									},
+								],
+								undefined,
+							]
+						}
 						ast.properties.push(node)
 					} else if (n.Identifier.check(ast)) {
-						return [[[b.identifier(node.value.name), b.memberExpression(ast, node.key)]], undefined]
+						return [
+							[
+								{
+									originalName: b.identifier(node.value.name),
+									newName: b.memberExpression(ast, node.key),
+									scope: renamingScope,
+								},
+							],
+							undefined,
+						]
 					} else {
 						return [
 							undefined,
@@ -681,13 +629,13 @@ export const mergeNodes = (
 						]
 					}
 				} else {
-					return [undefined, new Error("Unsupported type for key of Property.") as MergeNodesError]
+					return [
+						undefined,
+						new Error("Some of the requested identifiers are already in use.") as MergeNodesError,
+					]
 				}
 			} else {
-				return [
-					undefined,
-					new Error("Some of the requested identifiers are already in use.") as MergeNodesError,
-				]
+				return [undefined, new Error("Unsupported type for key of Property.") as MergeNodesError]
 			}
 		} else {
 			return [undefined, new Error("Unsupported type for value of Property") as MergeNodesError]
@@ -696,13 +644,21 @@ export const mergeNodes = (
 		if (node.id != undefined) {
 			if (n.Identifier.check(node.id)) {
 				// Find the function definition in the ast
-				const def = findDefinition(ast, node.id.name, true)[0]
-				if (n.FunctionDeclaration.check(def)) {
+				const searchResult = findDefinition(ast, node.id.name, true)
+				const def = searchResult[0]
+				if (ast) console.log(print(ast).code)
+				console.log(node.id.name ?? "blue")
+				if (
+					searchResult[1] instanceof Error &&
+					searchResult[1].message === "Couldn't find definition"
+				)
+					return [undefined, new Error("Couldn't find a function to merge into") as MergeNodesError]
+				else if (n.FunctionDeclaration.check(def) || n.ArrowFunctionExpression.check(def)) {
 					const renamings: Renamings = []
 					for (const [index, parameter] of node.params.entries()) {
 						const targetParameter = def.params[index]
 						if (targetParameter !== undefined) {
-							const mergeResult = mergeNodes(targetParameter, parameter)
+							const mergeResult = mergeNodes(targetParameter, parameter, def.body)
 							if (mergeResult[0] !== undefined) renamings.push(...mergeResult[0])
 							else
 								return [
@@ -728,6 +684,39 @@ export const mergeNodes = (
 			}
 		} else {
 			return [undefined, new Error("Can't merge anonymous function into an ast") as MergeNodesError]
+		}
+	} else if (n.ExportNamedDeclaration.check(node) && node.declaration) {
+		if (n.ExportNamedDeclaration.check(ast) && ast.declaration) {
+			return mergeNodes(ast.declaration, node.declaration, renamingScope)
+		} else if (n.Program.check(ast)) {
+			const mergeResults: Renamings = []
+			const errors: MergeNodesError[] = []
+			for (const statement of ast.body) {
+				//console.log(print(statement).code)
+				//console.log(print(node.declaration).code)
+				// This line is bad
+				const [namingsStatement, errorStatement] = mergeNodes(
+					statement,
+					node.declaration,
+					renamingScope,
+				)
+				if (errorStatement instanceof Error) errors.push(errorStatement)
+				else if (namingsStatement !== undefined) mergeResults.push(...namingsStatement)
+			}
+			if (errors.length === ast.body.length) {
+				// There exists no function of this name. Push to body!
+				if (
+					errors.every((error) => error.message === "Couldn't find a function to merge into") ||
+					errors[0] === undefined ||
+					ast.body.length === 0
+				) {
+					//console.log(errors)
+					ast.body.push(node)
+				}
+				// Merge fails for other reasons
+				else return [undefined, errors[0]]
+			}
+			return [mergeResults, undefined]
 		}
 	}
 	return [[], undefined]

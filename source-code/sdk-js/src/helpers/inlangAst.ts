@@ -1,6 +1,17 @@
 import { types } from "recast"
-import { findUsedImportsInAst, getFunctionOrDeclarationValue } from "./ast.js"
+import { builders } from "magicast"
+import {
+	NodeInfoMapEntry,
+	RunOn,
+	findAstJs,
+	findUsedImportsInAst,
+	getFunctionOrDeclarationValue,
+	functionMatchers,
+	arrowFunctionMatchers,
+} from "./ast.js"
 import type { ExpressionKind } from "ast-types/gen/kinds.js"
+import type { FunctionDeclaration, Node } from "estree"
+import { walk as jsWalk } from "estree-walker"
 
 const b = types.builders
 const n = types.namedTypes
@@ -46,4 +57,120 @@ export const extractWrappableExpression = ({
 	if (n.ArrowFunctionExpression.check(expression) || n.FunctionExpression.check(expression))
 		rewriteLoadOrHandleParameters(expression, availableImports)
 	return expression
+}
+
+export const replaceOrAddExportNamedFunction = (
+	ast: types.namedTypes.Program,
+	name: string,
+	replacementAst: types.namedTypes.ExportNamedDeclaration,
+) => {
+	const runOn = ((node) =>
+		n.ExportNamedDeclaration.check(node)
+			? (meta) => {
+					const { index } = meta.get(node) as NodeInfoMapEntry<types.namedTypes.Program>
+					if (index != undefined) ast.body.splice(index, 1, replacementAst)
+					return true
+			  }
+			: undefined) satisfies RunOn<types.namedTypes.Node, true | void>
+	const functionWasReplacedResult = findAstJs(ast, functionMatchers(name), runOn)[0] as
+		| true[]
+		| undefined
+	const functionWasReplaced =
+		functionWasReplacedResult != undefined && functionWasReplacedResult.length > 0
+	if (!functionWasReplaced) {
+		const arrowFunctionWasReplacedResult = findAstJs(ast, arrowFunctionMatchers(name), runOn)[0] as
+			| true[]
+			| undefined
+		const arrowFunctionWasReplaced =
+			arrowFunctionWasReplacedResult != undefined && arrowFunctionWasReplacedResult.length > 0
+		if (!functionWasReplaced && !arrowFunctionWasReplaced) ast.body.push(replacementAst)
+	}
+}
+
+export const getWrappedExport = (
+	options: unknown,
+	params: (FunctionDeclaration | ExpressionKind)[],
+	exportedName: string,
+	wrapperName: string,
+) => {
+	const initHandleWrapperCall = options
+		? builders.functionCall(wrapperName, options)
+		: builders.functionCall(wrapperName)
+	const wrapperDeclarationAst = b.callExpression(
+		b.memberExpression(initHandleWrapperCall.$ast, b.identifier("wrap")),
+		params.map((parameter) =>
+			n.FunctionDeclaration.check(parameter)
+				? b.functionExpression.from({
+						id: parameter.id,
+						generator: parameter.generator,
+						async: parameter.async,
+						params: parameter.params,
+						body: parameter.body,
+				  })
+				: parameter,
+		) as ExpressionKind[],
+	)
+	return b.exportNamedDeclaration(
+		b.variableDeclaration("const", [
+			b.variableDeclarator(b.identifier(exportedName), wrapperDeclarationAst),
+		]),
+	)
+}
+
+// NOTES: Test this with imports on a single line or on multiple lines
+// Removes all the @inlang/sdk-js import(s) (There could theoretically be multiple imports on multiple lines)
+// Returns an array with the import properties and their aliases
+export const getSdkImportedModules = (
+	ast: types.namedTypes.Node | Node,
+	remove = true,
+): [string, string][] =>
+	findAstJs(
+		ast,
+		[
+			({ node }) =>
+				n.ImportDeclaration.check(node) &&
+				n.Literal.check(node.source) &&
+				node.source.value === "@inlang/sdk-js",
+			({ node }) => n.ImportSpecifier.check(node),
+		],
+		(node) =>
+			n.ImportSpecifier.check(node)
+				? (meta) => {
+						const { parent } = meta.get(
+							node,
+						) as NodeInfoMapEntry<types.namedTypes.ImportDeclaration>
+						// Remove the complete import from "@inlang/sdk-js"
+						// (We assume that imports can only be top-level)
+						if (n.Program.check(ast) && remove) {
+							const declarationIndex = ast.body.findIndex((node) => node === parent)
+							declarationIndex != -1 && ast.body.splice(declarationIndex, 1)
+						}
+						return [node.imported.name, node.local?.name ?? node.imported.name]
+				  }
+				: undefined,
+	)[0] ?? []
+
+export const replaceSdkImports = (ast: types.namedTypes.Node | Node, from: "locals") => {
+	const importedModules = getSdkImportedModules(ast, false)
+	// <id> -> getRuntimeFromLocals(event.locals).<id>
+	const localsReplace = (id: string) =>
+		b.memberExpression(
+			b.callExpression(b.identifier("getRuntimeFromLocals"), [
+				b.memberExpression(b.identifier("event"), b.identifier("locals")),
+			]),
+			b.identifier(id),
+		)
+	const replace = from === "locals" ? localsReplace : () => undefined
+	jsWalk(ast as Node, {
+		enter(node) {
+			if (n.ImportDeclaration.check(node)) this.skip()
+			else if (
+				n.Identifier.check(node) &&
+				importedModules.some(([, alias]) => node.name === alias)
+			) {
+				this.replace(replace(node.name) as Node)
+				this.skip()
+			}
+		},
+	})
 }

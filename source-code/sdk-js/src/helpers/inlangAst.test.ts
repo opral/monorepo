@@ -1,7 +1,7 @@
 import { parseModule } from "magicast"
 import { dedent } from "ts-dedent"
 import { describe, expect, test } from "vitest"
-import { rewriteLoadOrHandleParameters } from "./inlangAst.js"
+import { replaceSdkImports, rewriteLoadOrHandleParameters } from "./inlangAst.js"
 import { print, types } from "recast"
 
 const n = types.namedTypes
@@ -101,5 +101,25 @@ describe("extractWrappableExpression", () => {
             const fn = () => {}
             export const load = fn
         `
+	})
+})
+describe("replaceSdkImports", () => {
+	describe("locals", () => {
+		test("Simple replace", () => {
+			const code = dedent`
+				import {i} from "@inlang/sdk-js"
+				export const handle = () => {
+					console.log(i)
+				}
+			`
+			const ast = parseModule(code).$ast
+			replaceSdkImports(ast, "locals")
+			expect(print(ast).code).toMatchInlineSnapshot(`
+				"import {i} from \\"@inlang/sdk-js\\"
+				export const handle = () => {
+					console.log(getRuntimeFromLocals(event.locals).i)
+				}"
+			`)
+		})
 	})
 })
