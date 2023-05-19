@@ -6,8 +6,8 @@ import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
-import { telemetryNode } from "@inlang/telemetry"
-import { exec } from "node:child_process"
+import { raw } from "@inlang-git/client/raw"
+import { telemetry } from "../../services/telemetry/index.js"
 
 export const translate = new Command()
 	.command("translate")
@@ -149,26 +149,30 @@ async function translateCommandAction() {
 		resources: resources,
 	})
 
-	// get remote origin url by executing git command
-	exec("git config --get remote.origin.url", (error, stdout) => {
-		if (error) {
-			console.error("Failed to get the remote URL.", error.message)
-			return
-		}
-
-		const remoteUrl = stdout.trim()
-
-		telemetryNode.capture({
-			distinctId: "unknown",
-			event: "CLI command executed [machine translate]",
-			properties: {
-				remoteUrl,
-				referenceLanguage,
-				languages: languagesToTranslateTo.map((language) => language.languageTag.name),
-			},
-		})
-	})
-
 	// Log the message counts
 	log.info("✅ Translated all messages.")
+
+	// inline try catch to avoid erroring out the entire command
+	const gitOrigin = await (async () => {
+		try {
+			const remotes = await raw.listRemotes({
+				fs,
+				dir: await raw.findRoot({ fs, filepath: process.cwd() }),
+			})
+			return remotes.find((remote) => remote.remote === "origin")?.url
+		} catch (e) {
+			console.warn("Couldn't get git origin. ", e)
+			return undefined
+		}
+	})()
+
+	telemetry.capture({
+		distinctId: "unknown",
+		event: "CLI command executed [machine translate]",
+		properties: {
+			gitOrigin,
+			referenceLanguage,
+			languages: languagesToTranslateTo.map((language) => language.languageTag.name),
+		},
+	})
 }
