@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.5
+
+### Patch Changes
+
+- 10947cea: refactoring of telemetry logic
+
 ## 0.9.4
 
 ### Patch Changes
