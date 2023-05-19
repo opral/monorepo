@@ -40,7 +40,7 @@ const data = [
 	},
 	{
 		title: "IDE Extension",
-		isSoon: false,
+		isSoon: true,
 		description:
 			"Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
 		link: "/documentation/getting-started",
@@ -48,7 +48,7 @@ const data = [
 	},
 	{
 		title: "inlang CLI",
-		isSoon: true,
+		isSoon: false,
 		description:
 			"Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
 		link: "/documentation/getting-started",
