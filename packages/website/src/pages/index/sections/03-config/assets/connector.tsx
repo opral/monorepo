@@ -5,8 +5,6 @@ const SVGConnector = (props: {
 	startColor: string
 	endColor: string
 }) => {
-	console.log(props.width, props.height, props.radius)
-
 	return (
 		<svg
 			width={props.width + 1}
