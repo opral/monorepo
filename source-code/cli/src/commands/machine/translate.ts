@@ -91,7 +91,6 @@ async function translateCommandAction() {
 
 			// 🌏 Translation
 			const [translation, exception] = await rpc.machineTranslate({
-				telemetryId: "CLI",
 				referenceLanguage: referenceLanguage,
 				targetLanguage: language.languageTag.name,
 				text: message.pattern.elements[0]!.value as string,
