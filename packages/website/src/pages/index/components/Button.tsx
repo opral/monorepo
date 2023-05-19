@@ -37,7 +37,7 @@ export const Button = (props: ButtonProps) => {
 						props.href && navigate(props.href)
 					}}
 					class={
-						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer " +
+						"flex justify-center items-center h-10 relative gap-2 rounded flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
 						bgColor(props.type)
 					}
 				>
