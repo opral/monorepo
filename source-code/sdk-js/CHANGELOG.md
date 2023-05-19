@@ -1,5 +1,17 @@
 # @inlang/sdk-js
 
+## 0.6.0
+
+### Minor Changes
+
+- d56185f5: don't initialize runtime multiple times if `sequence` helper function get's used
+
+### Patch Changes
+
+- dcfea692: fix: better detect and wrap `handle` and `load` functions
+- d56185f5: improve detection of `SvelteKit` version
+- d56185f5: support style preprocessors
+
 ## 0.5.1
 
 ### Patch Changes
