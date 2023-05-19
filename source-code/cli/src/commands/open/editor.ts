@@ -1,49 +1,39 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
 import { log } from "../../utilities.js"
-import { telemetryNode } from "@inlang/telemetry"
+import { getGitOrigin } from "../../utilities/getGitOrigin.js"
 
 export const editor = new Command()
 	.command("editor")
 	.description("Open the Inlang editor for the current repository.")
 	.action(editorCommandAction)
 
-function editorCommandAction() {
-	exec("git config --get remote.origin.url", (error, stdout) => {
+async function editorCommandAction() {
+	const gitOrigin = await getGitOrigin()
+	if (!gitOrigin) {
+		log.error("Failed to get the git origin.")
+		return
+	}
+
+	// Print out the remote URL
+	log.info(`Origin URL: ${gitOrigin}`)
+
+	const githubUrl = parseGithubUrl(gitOrigin)
+
+	if (!githubUrl) {
+		log.error("Failed to parse the GitHub URL from the remote URL.")
+		return
+	}
+
+	const inlangEditorUrl = `https://inlang.com/editor/${githubUrl}`
+
+	exec(`open ${inlangEditorUrl}`, (error) => {
 		if (error) {
-			log.error("Failed to get the remote URL.", error.message)
+			log.error("Failed to open the Inlang editor.", error.message)
 			return
 		}
 
-		const remoteUrl = stdout.trim()
-		// Print out the remote URL
-		log.info(`Remote URL: ${remoteUrl}`)
-
-		const githubUrl = parseGithubUrl(remoteUrl)
-
-		if (!githubUrl) {
-			log.error("Failed to parse the GitHub URL from the remote URL.")
-			return
-		}
-
-		const inlangEditorUrl = `https://inlang.com/editor/${githubUrl}`
-
-		exec(`open ${inlangEditorUrl}`, (error) => {
-			if (error) {
-				log.error("Failed to open the Inlang editor.", error.message)
-				return
-			}
-
-			telemetryNode.capture({
-				distinctId: "CLI",
-				event: "CLI command executed [open editor]",
-				properties: {
-					inlangEditorUrl,
-				},
-			})
-
-			log.info("✅ Opened the Inlang editor for the repository.")
-		})
+		log.info("✅ Opened the Inlang editor for the repository.")
 	})
 }
 
