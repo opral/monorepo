@@ -1,12 +1,12 @@
-import { Show } from "solid-js"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import { Button } from "../../components/Button.jsx"
 
 const data = {
-	title: "inlang stays free",
+	title: "Dev-friendly pricing",
 	caption: "Pricing",
-	description: "Individual usage and open source stays free. Enterprise pricing is coming soon.",
-	button: "Why the pricing stays free?",
+	description:
+		"Individual developers and open source projects can continue to enjoy our services free of charge. We may introduce a paid plan for enterprises in the future. Stay tuned for updates on our pricing options.",
+	button: "Read the discussion on GitHub",
 	buttonLink: "/docs/plugins/jsonPlugin",
 }
 
