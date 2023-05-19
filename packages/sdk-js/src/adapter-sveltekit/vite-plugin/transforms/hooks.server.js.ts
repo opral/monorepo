@@ -2,12 +2,14 @@ import type { TransformConfig } from "../config.js"
 import { types } from "recast"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
+import { findDefinition, mergeNodes } from "../../../helpers/ast.js"
+import { dedent } from "ts-dedent"
 import {
-	getArrowOrFunction,
 	getWrappedExport,
 	replaceOrAddExportNamedFunction,
-} from "../../../helpers/ast.js"
-import { dedent } from "ts-dedent"
+	replaceSdkImports,
+} from "../../../helpers/inlangAst.js"
+import type { ExpressionKind } from "ast-types/gen/kinds.js"
 
 const requiredImports = (config: TransformConfig) =>
 	`
@@ -48,26 +50,38 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	const imports = requiredImports(config)
 	const importsAst = parseModule(imports)
 	deepMergeObject(ast, importsAst)
-	const emptyArrowFunctionDeclaration = b.arrowFunctionExpression(
-		[
-			b.objectPattern([
-				b.property("init", b.identifier("event"), b.identifier("event")),
-				b.property("init", b.identifier("resolve"), b.identifier("resolve")),
+	// export function handle({event, resolve}) {}
+	const functionTemplate = b.exportNamedDeclaration(
+		b.functionDeclaration(
+			b.identifier("handle"),
+			[
+				b.objectPattern([
+					b.property("init", b.identifier("event"), b.identifier("event")),
+					b.property("init", b.identifier("resolve"), b.identifier("resolve")),
+				]),
+			],
+			b.blockStatement([
+				b.returnStatement(b.callExpression(b.identifier("resolve"), [b.identifier("event")])),
 			]),
-		],
-		b.callExpression(b.identifier("resolve"), [b.identifier("event")]),
+		),
 	)
-	const arrowOrFunctionNode = getArrowOrFunction(ast.$ast, "handle", emptyArrowFunctionDeclaration)
-	const exportAst = getWrappedExport(
-		parseExpression(options(config)),
-		[arrowOrFunctionNode],
-		"handle",
-		"initHandleWrapper",
-	)
+	// Replace imports from sdk
+	replaceSdkImports(ast.$ast, "locals")
+	// Make sure that exported "handle" function exists & has the parameters we need
+	const [renamings, initialMergeError] = mergeNodes(ast.$ast, functionTemplate)
+	const [def, error] = findDefinition(ast.$ast, "handle")
+	if (def) {
+		const exportAst = getWrappedExport(
+			parseExpression(options(config)),
+			[def as ExpressionKind],
+			"handle",
+			"initHandleWrapper",
+		)
 
-	// Replace or add current export handle
-	if (n.Program.check(ast.$ast)) {
-		replaceOrAddExportNamedFunction(ast.$ast, "handle", exportAst)
+		// Replace or add current export handle
+		if (n.Program.check(ast.$ast)) {
+			replaceOrAddExportNamedFunction(ast.$ast, "handle", exportAst)
+		}
 	}
 	return generateCode(ast).code
 }

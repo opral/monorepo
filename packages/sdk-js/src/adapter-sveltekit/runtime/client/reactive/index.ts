@@ -1,9 +1,10 @@
 import type * as Ast from "@inlang/core/ast"
-import { getContext, setContext } from "svelte"
+import { setContext } from "svelte"
 import { writable, type Readable } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/index.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
 
@@ -26,7 +27,7 @@ export type RuntimeContext<
 	route: (href: RelativeUrl) => RelativeUrl
 }
 
-export const getRuntimeFromContext = (): RuntimeContext => getContext(inlangSymbol)
+export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const _language = writable(runtime.language as Language)
