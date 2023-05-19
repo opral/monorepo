@@ -4,10 +4,9 @@ import { Button } from "../../components/Button.jsx"
 const data = {
 	title: "Free for individual use and open source",
 	caption: "Pricing",
-	description:
-		`Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good "marketing" that helps us acquiring enterprise customers.`,
+	description: `Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good "marketing" that helps us acquiring enterprise customers.`,
 	button: "Read the discussion on GitHub",
-	buttonLink: "/docs/plugins/jsonPlugin",
+	buttonLink: "https://github.com/inlang/inlang",
 }
 
 const Pricing = () => {
