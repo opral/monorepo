@@ -27,13 +27,12 @@ export async function machineTranslate(args: {
 			return [undefined, new Error(response.statusText)]
 		}
 		telemetryNode.capture({
-			event: "machine translation created",
+			event: "RPC machine translation created",
 			distinctId: args.telemetryId ?? "unknown",
 		})
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {
-		console.error("ml failed", error)
 		return [undefined, error as Error]
 	}
 }

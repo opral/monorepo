@@ -159,7 +159,7 @@ async function translateCommandAction() {
 		const remoteUrl = stdout.trim()
 
 		telemetryNode.capture({
-			distinctId: "CLI",
+			distinctId: "unknown",
 			event: "CLI command executed [machine translate]",
 			properties: {
 				remoteUrl,
