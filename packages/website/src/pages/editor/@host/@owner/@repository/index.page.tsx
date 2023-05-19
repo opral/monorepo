@@ -190,13 +190,12 @@ function NoInlangConfigFoundCard() {
 		const [configFile, error] = await rpc.generateConfigFile({
 			applicationId: "EDITOR",
 			resolveFrom: "/",
-			// @ts-expect-error
-			fs: fs().promises,
+			fs: fs(),
 		})
 		if (error) {
 			return false
 		} else {
-			await fs().promises.writeFile("/inlang.config.js", configFile, { encoding: "utf8" })
+			await fs().writeFile("/inlang.config.js", configFile)
 			return true
 		}
 	})
