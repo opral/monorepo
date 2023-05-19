@@ -2,10 +2,10 @@ import { SectionLayout } from "../../components/sectionLayout.jsx"
 import { Button } from "../../components/Button.jsx"
 
 const data = {
-	title: "Dev-friendly pricing",
+	title: "Free for individual use and open source",
 	caption: "Pricing",
 	description:
-		"Individual developers and open source projects can continue to enjoy our services free of charge. We may introduce a paid plan for enterprises in the future. Stay tuned for updates on our pricing options.",
+		`Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good "marketing" that helps us acquiring enterprise customers.`,
 	button: "Read the discussion on GitHub",
 	buttonLink: "/docs/plugins/jsonPlugin",
 }
