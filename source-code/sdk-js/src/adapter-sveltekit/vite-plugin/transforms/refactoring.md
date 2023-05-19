@@ -100,7 +100,7 @@ for markup block:
   const markup = '<h1>i("welcome")</h1>'
   const ast = parse(markup)
   const ifAst = parse("{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_PLACEHOLDER_$${/if}")
-  wrap(ast, ifAst)
+  replacePlaceholder(ast, ifAst)
   const result = serialize(ast)
   // result => '{#if $$_INLANG_LANGUAGE_$$}<h1>i("welcome")</h1>{/if}'
   ```
@@ -121,23 +121,70 @@ things we need to wrap: - `handle`
 
 wrap with `initHandleWrapper` (with special case `sequence`)
 
+Pseudo-code:
+
+```js
+function transformHooksServerJsAst(ast, config) {
+	// Wrap handle function
+	const wrapper = "initHandleWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "handle").wrap(parse(wrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
+
 ### `+layout.server.js`
 
 things we need to wrap: - `load`
 
-if root
-wrap with `initRootLayoutServerLoadWrapper`
-else
-wrap with `initServerLoadWrapper`
+- `if root` wrap with `initRootLayoutServerLoadWrapper`
+- `else` wrap with `initServerLoadWrapper`
+
+Pseudo-code:
+
+```js
+function transformLayoutServerJsAst(ast, config) {
+	// Wrap load function
+	const wrapper = config.isRoot
+		? "initRootLayoutServerLoadWrapper(/*options here*/).wrap"
+		: "initServerLoadWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "load").wrap(parse(wrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
 
 ### `+page.server.js`
 
 things we need to wrap: - `load` - individual `actions`
 
-if load
-wrap with `initServerLoadWrapper`
-if actions
-wrap with `initActionWrapper`
+- `if load` wrap with `initServerLoadWrapper`
+- `if actions` wrap with `initActionWrapper`
+
+Pseudo-code:
+
+```js
+function wrap(ast, config, exportName) {}
+
+function transformPageServerJsAst(ast, config) {
+	// Wrap load function
+	const loadWrapper = "initServerLoadWrapper(/*options here*/).wrap"
+	const actionsWrapper = "initActionWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "load").wrap(parse(loadWrapper))
+	definitions(ast, "load").wrap(parse(actionsWrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
 
 ### `+server.js`
 
@@ -152,29 +199,83 @@ things we need to wrap:
 
 wrap with `initRequestHandlerWrapper`
 
+Pseudo-code:
+
+```js
+function transformServerJsAst(ast, config) {
+	// Wrap GET, POST, PUT, PATCH, DELETE & OPTIONS function
+	const wrapper = "initRequestHandlerWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS").wrap(parse(actionsWrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
+
 ### `+layout.js`
 
 things we need to wrap: - `load`
 
-if root
-wrap with `initRootLayoutLoadWrapper`
-else
-wrap with `initLoadWrapper`
+- `if root` wrap with `initRootLayoutLoadWrapper`
+- `else` wrap with `initLoadWrapper`
+
+Pseudo-code:
+
+```js
+function transformLayoutJsAst(ast, config) {
+	// Wrap load function
+	const wrapper = config.isRoot
+		? "initRootLayoutLoadWrapper(/*options here*/).wrap"
+		: "initLoadWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "load").wrap(parse(wrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
 
 ### `+page.js`
 
 things we need to wrap: - `load`
 
-if root
-wrap with `initRootPageLoadWrapper`
-else
-wrap with `initLoadWrapper`
+- `if root` wrap with `initRootPageLoadWrapper`
+- `else` wrap with `initLoadWrapper`
+
+Pseudo-code:
+
+```js
+function transformPageJsAst(ast, config) {
+	// Wrap load function
+	const wrapper = config.isRoot
+		? "initRootPageLoadWrapper(/*options here*/).wrap"
+		: "initLoadWrapper(/*options here*/).wrap"
+	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
+	definitions(ast, "load").wrap(parse(wrapper))
+
+	// Run generic *.js transforms
+	transformJs(ast, config)
+	return ast
+}
+```
 
 ### `*.server.js`
 
 This is not supported.
 
 Throw a meaningful error if we encounter an import from `@inlang/sdk-js`.
+
+Pseudo-code:
+
+```js
+function transformGenericServerJsAst(ast, config) {
+	// The below assert function throws
+	imports(ast, "@inlang/sdk-js").assertIsMissing()
+}
+```
 
 ### `*.js`
 
@@ -208,6 +309,22 @@ JavaScript files can run on the server and on the client. So we need to detect t
       const result = serialize(ast)
       // result => 'import { get } from "svelte/store";const fn = () => { const { i } = getRuntimeFromContext();get(i)("test") }'
       ```
+
+Pseudo Code:
+
+```js
+function transformJs(ast, config) {
+	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [[i, iAlias]]
+	const aliases = imports(ast, "@inlang/sdk-js").remove().getAliases()
+	aliases.forEach(([definition, alias]) =>
+    // Wrap all occurences of `i`, `language`, etc with `get()`
+    if(/*is reactive condition*/) identifiers(alias).wrap(parse("get"))
+	  // Prepend `const { i } = getRuntimeFromContext()` in each context of iAlias
+		contexts(alias).declare(parse(`const { ${definition}:${alias} } = getRuntimeFromContext()`)),
+	)
+	return ast
+}
+```
 
 ## `svelte`
 
@@ -338,7 +455,7 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
     ```ts
     const code = 'const fn = $$_INLANG_PLACEHOLDER_$$((_, { i }) => { i("test") });'
     const wrapperAst = parse('initHandleWrapper({ key: "value" }).wrap($$_INLANG_PLACEHOLDER_$$)')
-    wrap(ast, wrapperAst)
+    replacePlaceholder(ast, wrapperAst)
     const result = serialize(ast)
     // result => 'const fn = initHandleWrapper({ key: "value" }).wrap((_, { i }) => { i("test") });'
     ```
