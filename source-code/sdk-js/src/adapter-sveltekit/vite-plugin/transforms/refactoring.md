@@ -263,11 +263,32 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
  1. if no import from `@inlang/sdk-js` exists
     - return input code without any transformation
       - except for the `handle` function; we ALWAYS need to wrap it
+      	```ts
+			const fn1 = () => { }
+			export const handle = fn1
+			// =>
+			export const handle = initHandleWrapper().wrap(fn1)
+			```
+      	```ts
+			export const handle = sequence(fn1, fn2)
+			// =>
+			export const handle = initHandleWrapper().wrap(sequence(fn1, fn2))
+			```
+			we will wrap the `sequence` function so we can assure that we can use `handle` functions that get declared outside of the `hooks.server.js` file.
+
+			We can implement a generic rule that says, everything `handle` references (also an external function), we just wrap it. So we can handle `sequence` and `handle` the same way.
+			```ts
+			import { appendFunctionality } from './utils.js'
+			export const handle = appendFunctionality(() => { }) // handle it the same as sequence
+			// =>
+			export const handle = initHandleWrapper().wrap(appendFunctionality(() => { }))
+			```
+			The only difference is, that we track functions that get passed to `sequence` to resolve imports from `@inlang/sdk-js` by wrapping those functions. Because we don't know the function signature of other external functions, we can't do it there.
 
  2. pass code to generic `wrap` function
     - function traverses the AST and finds the export, traverses it's aliases
     - if leaf function does not use any import from `@inlang/sdk-js`
-       - special case `handle` with `sequence` where we ALWAYS wrap
+       - special case `handle` with `sequence` where we ALWAYS wrap (see above)
        - return input code (AST without any transformation)
        - this is NOT supported
 			```ts
@@ -343,6 +364,11 @@ const load: PageLoad = () => {}
 const load = (() => {}) satisfies PageLoad
 ```
 
+```ts
+import { appendFunctionality } from './utils.js'
+export const load = appendFunctionality(() => { }) // handle it the same as sequence
+```
+
 The wrap function does not consider these cases:
 
 ```ts
@@ -350,9 +376,4 @@ const fn1 = () = {}
 const fn2 = fn1
 const fn3 = otherFunction(fn2) // this is not supported
 export const load = fn3
-```
-
-```ts
-import { appendFunctionality } from './utils.js'
-export const load = appendFunctionality(() => { }) // this is not supported
 ```
