@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { transformSvelte } from "./*.svelte.js"
+import { transformSvelte } from "./_.svelte.js"
 import { parse, preprocess } from "svelte/compiler"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 import { parseModule, generateCode } from "magicast"
