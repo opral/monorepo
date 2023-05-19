@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.6
+
+### Patch Changes
+
+- f8b09192: Fixes "fetch" is not defined error in Node16 environments.
+
 ## 0.9.5
 
 ### Patch Changes
