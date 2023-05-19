@@ -3,7 +3,9 @@
  *
  * The env variables are set in the build step.
  */
-export const publicEnv: {
+export const {
+	isProduction,
+}: {
 	isProduction: boolean
 } =
 	// @ts-expect-error - defined in the build step
