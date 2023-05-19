@@ -8,13 +8,10 @@ import { initInlangEnvironment, InlangConfigWithSdkProps } from "../../config/co
 import { validateSdkConfig } from "@inlang/sdk-js-plugin"
 // @ts-ignore
 import { version } from "../../../package.json"
-import { promisify } from "node:util"
-import { exec as execCb, type SpawnSyncReturns } from "node:child_process"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
-import type { Config as SvelteConfig } from '@sveltejs/kit'
-
-const exec = promisify(execCb)
+import type { Config as SvelteConfig } from "@sveltejs/kit"
+import { findDepPkgJsonPath } from "vitefu"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -66,11 +63,22 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const inlangConfigModule = await import(pathToFileURL(inlangConfigFilePath).toString())
 		const inlangConfig = await initConfig(inlangConfigModule)
 
-		const { default: svelteConfig } = await import(path.resolve(cwdFolderPath, "svelte.config.js")) as { default: SvelteConfig }
+		const { default: svelteConfig } = (await import(
+			path.resolve(cwdFolderPath, "svelte.config.js")
+		)) as { default: SvelteConfig }
 		const files = {
-			appTemplate: path.resolve(cwdFolderPath, svelteConfig.kit?.files?.appTemplate || path.resolve('src', 'app.html')),
-			routes: path.resolve(cwdFolderPath, svelteConfig.kit?.files?.routes || path.resolve('src', 'routes')),
-			serverHooks: path.resolve(cwdFolderPath, svelteConfig.kit?.files?.hooks?.server || path.resolve('src', 'hooks.server')),
+			appTemplate: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.appTemplate || path.resolve("src", "app.html"),
+			),
+			routes: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.routes || path.resolve("src", "routes"),
+			),
+			serverHooks: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.hooks?.server || path.resolve("src", "hooks.server"),
+			),
 		}
 
 		assertConfigWithSdk(inlangConfig)
@@ -89,7 +97,6 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		// TODO: find a more reliable way (https://github.com/sveltejs/kit/issues/9937)
 		const svelteKitVersion = await getInstalledVersionOfPackage("@sveltejs/kit")
-
 
 		resolve({
 			cwdFolderPath,
@@ -111,7 +118,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigError extends Error { }
+class InlangSdkConfigError extends Error {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
@@ -241,12 +248,10 @@ const updateSdkPluginVersion = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-// move to import from `@sveltejs/kit/package.json` in the future once import assertions are stable
 const getInstalledVersionOfPackage = async (pkg: string) => {
-	const { stderr, stdout } = await exec(`npm list --depth=0 ${pkg}`).catch(
-		({ stderr, stdout }: SpawnSyncReturns<any>) => ({ stderr, stdout }),
-	)
-	if (stderr) return undefined
+	const pkgJsonPath = await findDepPkgJsonPath(pkg, cwdFolderPath)
+	if (!pkgJsonPath) return undefined
 
-	return stdout.trim().match(new RegExp(`${pkg}@(.*)`))?.[1] as VersionString | undefined
+	const pkgJson = JSON.parse(await readFile(pkgJsonPath, { encoding: "utf-8" }))
+	return pkgJson.version
 }
