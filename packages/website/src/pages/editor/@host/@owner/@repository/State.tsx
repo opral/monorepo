@@ -19,7 +19,8 @@ import type * as ast from "@inlang/core/ast"
 import type { Result } from "@inlang/core/utilities"
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
 import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
-import { createFsFromVolume, Volume } from "memfs"
+import { createMemoryFs } from "@inlang-git/fs"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "@src/services/github/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
@@ -68,7 +69,7 @@ type EditorStateSchema = {
 	/**
 	 * Virtual filesystem
 	 */
-	fs: () => typeof import("memfs").fs
+	fs: () => NodeishFilesystem
 
 	/**
 	 * TextSearch to filter messages
@@ -194,7 +195,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
-	const [fs, setFs] = createSignal<typeof import("memfs").fs>(createFsFromVolume(new Volume()))
+	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 
 	/**
 	 * The reference resource.
@@ -209,7 +210,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			// re-initialize fs on every cloneRepository call
 			// until subdirectories are supported
-			setFs(createFsFromVolume(new Volume()))
+			setFs(createMemoryFs())
 			return {
 				fs: fs(),
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
@@ -580,7 +581,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 // ------------------------------------------
 
 async function cloneRepository(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
@@ -640,7 +641,7 @@ export class UnknownException extends Error {
  * Pushed changes and pulls right afterwards.
  */
 export async function pushChanges(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
@@ -689,19 +690,17 @@ export async function pushChanges(args: {
 }
 
 async function readInlangConfig(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 }): Promise<InlangConfig | undefined> {
 	try {
 		const env: InlangEnvironment = {
 			$import: initialize$import({
-				// @ts-ignore
-				fs: args.fs.promises,
+				fs: args.fs,
 				fetch,
 			}),
-			// @ts-ignore
-			$fs: args.fs.promises,
+			$fs: args.fs,
 		}
-		const file = await args.fs.promises.readFile("./inlang.config.js", "utf-8")
+		const file = await args.fs.readFile("./inlang.config.js", { encoding: "utf-8" })
 		const withMimeType = "data:application/javascript;base64," + btoa(file.toString())
 		const module = (await import(/* @vite-ignore */ withMimeType)) as InlangConfigModule
 		const config = setupConfig({ module, env })
@@ -728,7 +727,7 @@ async function readResources(config: InlangConfig) {
 }
 
 async function writeResources(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	config: InlangConfig
 	resources: ast.Resource[]
 	user: NonNullable<LocalStorageSchema["user"]>
@@ -778,7 +777,7 @@ async function writeResources(args: {
 }
 
 async function _unpushedChanges(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	repositoryClonedTime: Date
 	lastPushTime?: Date
 	lastPullTime?: Date
@@ -802,7 +801,7 @@ async function _unpushedChanges(args: {
 }
 
 async function pull(args: {
-	fs: typeof import("memfs").fs
+	fs: NodeishFilesystem
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
 	setLastPullTime: (date: Date) => void

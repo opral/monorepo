@@ -62,13 +62,14 @@ export const Gitfloat = () => {
 		if (localStorage.user === undefined) {
 			return
 		}
-		telemetryBrowser.capture("create fork", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-		})
 		const response = await github.rest.repos.createFork({
 			owner: routeParams().owner,
 			repo: routeParams().repository,
+		})
+		telemetryBrowser.capture("EDITOR created fork", {
+			owner: routeParams().owner,
+			repository: routeParams().repository,
+			sucess: response.status === 202,
 		})
 		if (response.status === 202) {
 			showToast({

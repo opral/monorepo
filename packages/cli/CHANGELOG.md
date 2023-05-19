@@ -1,5 +1,37 @@
 # @inlang/cli
 
+## 0.9.5
+
+### Patch Changes
+
+- 10947cea: refactoring of telemetry logic
+
+## 0.9.4
+
+### Patch Changes
+
+- a05970cd: Fix machine translate command for CJS projects.
+
+## 0.9.3
+
+### Patch Changes
+
+- 31f55f21: Dependencies are now declared as dev dependencies. The CLI is bundled, there was no need to define regular dependencies.
+- 32cfc814: Improve the README on NPM.
+
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies [98b140f1]
+  - @inlang-git/fs@0.0.3
+
+## 0.9.0
+
+### Patch Changes
+
+- e0876036: add machine translate and open editor commands
+
 ## 0.8.0
 
 ### Minor Changes

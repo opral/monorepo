@@ -218,7 +218,6 @@ export function PatternEditor(props: {
 			text,
 			referenceLanguage: referenceResource()!.languageTag.name,
 			targetLanguage: props.language,
-			telemetryId: telemetryBrowser.get_distinct_id(),
 		})
 		if (exception) {
 			showToast({

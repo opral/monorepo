@@ -29,7 +29,7 @@ export const createInlangFunction = <
 		if (!message) return ""
 
 		return message.pattern.elements
-			.map((element) => serializeElement(element, args as BaseArgs))
+			.map((element) => serializeElement(element, args || {}))
 			.join("") as InlangString
 	}) as InlangFunction<InlangFunctionArgs>
 
@@ -49,6 +49,6 @@ const serializeElement = (
 const serializePlaceholder = (placeholder: Placeholder, args: BaseArgs): string => {
 	switch (placeholder.body.type) {
 		case "VariableReference":
-			return args[placeholder.body.name] as string
+			return (args[placeholder.body.name] as string) || ""
 	}
 }

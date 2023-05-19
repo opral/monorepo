@@ -16,7 +16,7 @@ type WrappedHandle = (
 	runtime: SvelteKitServerRuntime,
 ) => ReturnType<Kit.Handle>
 
-export const initHandleWrapper = (options: {
+type HandleOptions = {
 	inlangConfigModule: Promise<InlangConfigModule>
 	getLanguage: (event: Kit.RequestEvent) => Language | undefined
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
@@ -24,12 +24,18 @@ export const initHandleWrapper = (options: {
 		throwable: typeof Kit.redirect
 		getPath: (event: Kit.RequestEvent, language: Language) => URL | string
 	}
-}) => ({
+}
+
+export const initHandleWrapper = (options: HandleOptions) => ({
 	wrap: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
 
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
+				runtime = getRuntimeFromLocals(event.locals)
+				// runtime was already added by a previous wrapper
+				if (runtime) resolve(event)
+
 				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
 
 				const pathname = event.url.pathname as RelativeUrl
@@ -62,9 +68,7 @@ export const initHandleWrapper = (options: {
 
 				return resolve(event, {
 					transformPageChunk: language
-						? async ({ html }) => {
-								return html.replace("<html", `<html lang="${language}"`)
-						  }
+						? async ({ html }) => html.replace("<html", `<html lang="${language}"`)
 						: undefined,
 				})
 			},
@@ -99,17 +103,23 @@ export const initRootLayoutServerLoadWrapper = <
 
 // ------------------------------------------------------------------------------------------------
 
-export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() => ({
+const initGenericServerWrapper = <Event extends Kit.RequestEvent>() => ({
 	wrap:
 		<Data extends Record<string, any> | void>(
-			load: (
-				event: Parameters<ServerLoad>[0],
-				runtime: SvelteKitServerRuntime,
-			) => Promise<Data> | Data,
+			fn: (event: Event, runtime: SvelteKitServerRuntime) => Promise<Data> | Data,
 		) =>
-		async (event: Parameters<ServerLoad>[0]): Promise<Data> => {
+		async (event: Event): Promise<Data> => {
 			const runtime = getRuntimeFromLocals(event.locals)
 
-			return load(event, runtime)
+			return fn(event, runtime)
 		},
 })
+
+export const initServerLoadWrapper = <ServerLoad extends Kit.ServerLoad<any, any, any, any>>() =>
+	initGenericServerWrapper<Parameters<ServerLoad>[0]>()
+
+export const initActionWrapper = <Action extends Kit.Action<any, any, any>>() =>
+	initGenericServerWrapper<Parameters<Action>[0]>()
+
+export const initRequestHandlerWrapper = <RequestHandler extends Kit.RequestHandler<any, any>>() =>
+	initGenericServerWrapper<Parameters<RequestHandler>[0]>()

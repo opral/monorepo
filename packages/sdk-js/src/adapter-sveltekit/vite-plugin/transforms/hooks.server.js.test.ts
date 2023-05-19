@@ -14,12 +14,14 @@ describe("transformHooksServerJs", () => {
 				export const handle = initHandleWrapper({
 				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    getLanguage: () => undefined
-				}).wrap((
+				}).wrap(function handle(
 				  {
 				    event: event,
 				    resolve: resolve
 				  }
-				) => resolve(event));"
+				) {
+				  return resolve(event);
+				});"
 			`)
 		})
 
@@ -67,12 +69,14 @@ describe("transformHooksServerJs", () => {
 				export const handle = initHandleWrapper({
 				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    getLanguage: () => undefined
-				}).wrap((
+				}).wrap(function handle(
 				    {
 				        event: event,
 				        resolve: resolve
 				    }
-				) => resolve(event));"
+				) {
+				    return resolve(event);
+				});"
 			`)
 		})
 
@@ -111,6 +115,33 @@ describe("transformHooksServerJs", () => {
 					});"
 				`)
 			})
+			it("arrow function, with imports from sdk-js", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
+						import {i} from "@inlang/sdk-js"
+						export const handle = () => {
+							console.log(i)
+						}
+					`,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					import {i} from \\"@inlang/sdk-js\\"
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap((
+					    {
+					        event: event,
+					        resolve: resolve
+					    }
+					) => {
+						console.log(getRuntimeFromLocals(event.locals).i)
+					});"
+				`)
+			})
 
 			it("function keyword", () => {
 				const code = transformHooksServerJs(
@@ -133,6 +164,93 @@ describe("transformHooksServerJs", () => {
 						console.log('TADAA!')
 						return resolve(event)
 					});"
+				`)
+			})
+			it("function keyword, with imports from sdk-js", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
+						import {i} from "@inlang/sdk-js"
+						export function handle() {
+							console.log(i)
+						}
+					`,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					import {i} from \\"@inlang/sdk-js\\"
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap(function handle(
+					    {
+					        event: event,
+					        resolve: resolve
+					    }
+					) {
+						console.log(getRuntimeFromLocals(event.locals).i)
+					});"
+				`)
+			})
+			it("function keyword, declaration chain, with imports from sdk-js", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
+						import {i} from "@inlang/sdk-js"
+						function hndl() {
+							console.log(i)
+						}
+						export const handle = hndl
+					`,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					import {i} from \\"@inlang/sdk-js\\"
+					function hndl(
+					    {
+					        event: event,
+					        resolve: resolve
+					    }
+					) {
+						console.log(getRuntimeFromLocals(event.locals).i)
+					}
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap(hndl);"
+				`)
+			})
+			it("function keyword, sequence, with imports from sdk-js", () => {
+				const code = transformHooksServerJs(
+					{} as TransformConfig,
+					dedent`
+						import { sequence } from "@sveltejs/kit/hooks";
+						import { i } from "@inlang/sdk-js";
+						
+						const seq1 = async ({ event, resolve }) => {
+						console.log(i("welcome"));
+						return resolve(event);
+						};
+						
+						export const handle = sequence(seq1);
+					`,
+				)
+				expect(code).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+					import { sequence } from \\"@sveltejs/kit/hooks\\";
+					import { i } from \\"@inlang/sdk-js\\";
+
+					const seq1 = async ({ event, resolve }) => {
+					console.log(getRuntimeFromLocals(event.locals).i(\\"welcome\\"));
+					return resolve(event);
+					};
+
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined
+					}).wrap(sequence(seq1));"
 				`)
 			})
 		})
@@ -161,12 +279,14 @@ describe("transformHooksServerJs", () => {
 				        throwable: redirect,
 				        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 				    }
-				}).wrap((
+				}).wrap(function handle(
 				  {
 				    event: event,
 				    resolve: resolve
 				  }
-				) => resolve(event));"
+				) {
+				  return resolve(event);
+				});"
 			`)
 		})
 
@@ -184,12 +304,14 @@ describe("transformHooksServerJs", () => {
 				export const handle = initHandleWrapper({
 				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
-				}).wrap((
+				}).wrap(function handle(
 				  {
 				    event: event,
 				    resolve: resolve
 				  }
-				) => resolve(event));"
+				) {
+				  return resolve(event);
+				});"
 			`)
 		})
 
@@ -206,12 +328,14 @@ describe("transformHooksServerJs", () => {
 				export const handle = initHandleWrapper({
 				    inlangConfigModule: import(\\"../inlang.config.js\\"),
 				    getLanguage: () => undefined
-				}).wrap((
+				}).wrap(function handle(
 				  {
 				    event: event,
 				    resolve: resolve
 				  }
-				) => resolve(event));"
+				) {
+				  return resolve(event);
+				});"
 			`)
 		})
 	})

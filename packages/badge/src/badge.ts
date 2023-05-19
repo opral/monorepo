@@ -3,8 +3,8 @@ import clone from "./repo/clone.js"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import { getLintReports, lint } from "@inlang/core/lint"
-import { Volume } from "memfs"
-import { getRessourcePercentages, patchedFs, removeCommas } from "./helper/index.js"
+import { createMemoryFs } from "@inlang-git/fs"
+import { getRessourcePercentages, removeCommas } from "./helper/index.js"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
@@ -15,27 +15,24 @@ const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.m
 
 export const badge = async (url: string, preferredLanguage: string | undefined) => {
 	// initialize a new file system on each request to prevent cross request pollution
-	const fs = Volume.fromJSON({})
+	const fs = createMemoryFs()
 	await clone(url, fs)
 
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
-			// @ts-ignore TODO: use @inlang-git/fs
-			fs: patchedFs(fs.promises),
+			fs,
 			fetch,
 		}),
-		// @ts-ignore TODO: use @inlang-git/fs
-		$fs: patchedFs(fs.promises),
-	}
-
-	if (fs.existsSync("/inlang.config.js") === false) {
-		// TODO: render a badge here that says "no inlang.config.js file found in the repository"
-		throw new Error("No inlang.config.js file found in the repository.")
+		$fs: fs
 	}
 
 	// Get the content of the inlang.config.js file
-	const file = await fs.promises.readFile("/inlang.config.js", "utf-8")
+	const file = await fs.readFile("/inlang.config.js", { encoding: "utf-8" })
+	.catch(e => {
+		if (e.code !== "ENOENT") throw e
+		throw new Error("No inlang.config.js file found in the repository.")
+	})
 
 	const config = await setupConfig({
 		module: await import("data:application/javascript;base64," + btoa(file.toString())),

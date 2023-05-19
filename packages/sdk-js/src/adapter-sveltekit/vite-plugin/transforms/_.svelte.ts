@@ -9,11 +9,11 @@ import {
 	initImportedVariablesAst,
 	makeJsReactive,
 	makeMarkupReactive,
-	removeSdkJsImport,
 	variableDeclarationAst,
 } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { vitePreprocess } from "@sveltejs/kit/vite"
+import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
@@ -28,7 +28,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 	const reactiveImportIdentifiers: string[] = []
 
 	// First, we need to remove typescript statements from script tag
-	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
+	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: true })))
 		.code
 
 	// Insert script tag if we don't have one
@@ -54,7 +54,7 @@ ${codeWithoutTypes}`
 			}
 
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
-			const importNames = removeSdkJsImport(ast.$ast)
+			const importNames = getSdkImportedModules(ast.$ast)
 			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
 			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
 			// prefix language and i aliases with $ if reactive
