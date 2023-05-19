@@ -2,7 +2,6 @@ import type { TransformConfig } from "../config.js"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { getFunctionOrDeclarationValue } from "../../../helpers/ast.js"
 import { dedent } from "ts-dedent"
 import {
 	extractWrappableExpression,
