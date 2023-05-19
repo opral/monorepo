@@ -1,14 +1,16 @@
 import { InlangError } from "../../../config/config.js"
 import type { TransformConfig } from "../config.js"
-import type { FileInformation } from '../fileInformation.js'
-import { transformJs } from "./*.js.js"
-import { transformSvelte } from "./*.svelte.js"
+import type { FileInformation } from "../fileInformation.js"
+import { transformJs } from "./_.js.js"
+import { transformSvelte } from "./_.svelte.js"
 import { transformLayoutJs } from "./+layout.js.js"
 import { transformLayoutServerJs } from "./+layout.server.js.js"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { transformPageJs } from "./+page.js.js"
 import { transformPageServerJs } from "./+page.server.js.js"
 import { transformPageSvelte } from "./+page.svelte.js"
+import { transformServerRequestJs } from "./+server.js.js"
+import { transformServerJs } from "./_.server.js.js"
 import { transformHooksServerJs } from "./hooks.server.js.js"
 import { transformLanguageJson } from "./[language].json.js"
 
@@ -26,6 +28,8 @@ export const transformCode = (
 			return transformHooksServerJs(config, code)
 		case "[language].json":
 			return transformLanguageJson(config, code)
+		case "+server.js":
+			return transformServerRequestJs(config, code, root)
 		case "+layout.server.js":
 			return transformLayoutServerJs(config, code, root)
 		case "+layout.js":
@@ -38,6 +42,8 @@ export const transformCode = (
 			return transformPageJs(config, code, root)
 		case "+page.svelte":
 			return transformPageSvelte(config, code, root)
+		case "*.server.js":
+			return transformServerJs(config, code)
 		case "*.js":
 			return transformJs(config, code)
 		case "*.svelte":

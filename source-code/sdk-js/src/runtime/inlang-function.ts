@@ -49,6 +49,6 @@ const serializeElement = (
 const serializePlaceholder = (placeholder: Placeholder, args: BaseArgs): string => {
 	switch (placeholder.body.type) {
 		case "VariableReference":
-			return args[placeholder.body.name] as string || ''
+			return (args[placeholder.body.name] as string) || ""
 	}
 }

@@ -1,9 +1,9 @@
-import { mkdir, writeFile } from 'node:fs/promises'
-import path, { dirname } from 'node:path'
-import { dedent } from 'ts-dedent'
-import { InlangError } from '../../../config/config.js'
-import { doesPathExist, TransformConfig } from '../config.js'
-import type { FileType } from '../fileInformation.js'
+import { mkdir, writeFile } from "node:fs/promises"
+import path, { dirname } from "node:path"
+import { dedent } from "ts-dedent"
+import { InlangError } from "../../../config/config.js"
+import { doesPathExist, TransformConfig } from "../config.js"
+import type { FileType } from "../fileInformation.js"
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.rootRoutesFolder))) {
@@ -68,9 +68,9 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 		`+layout.js`,
 		"+layout.svelte",
 		...(config.isStatic && config.languageInUrl
-			? ([`+page.js`, "+page.svelte"]satisfies FileType[])
+			? ([`+page.js`, "+page.svelte"] satisfies FileType[])
 			: []),
-	]satisfies FileType[]
+	] satisfies FileType[]
 
 	// eslint-disable-next-line no-async-promise-executor
 	const results = await Promise.all(

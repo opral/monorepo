@@ -1,7 +1,7 @@
 import { dedent } from "ts-dedent"
 import { describe, it, expect } from "vitest"
 import type { TransformConfig } from "../config.js"
-import { transformSvelte } from "./*.svelte.js"
+import { transformSvelte } from "./_.svelte.js"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 
