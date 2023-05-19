@@ -1,4 +1,3 @@
-import { telemetryNode } from "@inlang/telemetry"
 import { privateEnv } from "@inlang/env-variables"
 import type { Result } from "@inlang/core/utilities"
 
@@ -6,7 +5,6 @@ export async function machineTranslate(args: {
 	text: string
 	targetLanguage: string
 	referenceLanguage: string
-	telemetryId?: string
 }): Promise<Result<string, Error>> {
 	try {
 		if (!privateEnv.GOOGLE_TRANSLATE_API_KEY) {
@@ -26,10 +24,6 @@ export async function machineTranslate(args: {
 		if (!response.ok) {
 			return [undefined, new Error(response.statusText)]
 		}
-		telemetryNode.capture({
-			event: "RPC machine translation created",
-			distinctId: args.telemetryId ?? "unknown",
-		})
 		const json = await response.json()
 		return [json.data.translations[0].translatedText]
 	} catch (error) {
