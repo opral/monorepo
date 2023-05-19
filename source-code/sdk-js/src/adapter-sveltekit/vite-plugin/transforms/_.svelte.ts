@@ -28,7 +28,7 @@ export const transformSvelte = async (config: TransformConfig, code: string): Pr
 	const reactiveImportIdentifiers: string[] = []
 
 	// First, we need to remove typescript statements from script tag
-	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: false })))
+	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: true })))
 		.code
 
 	// Insert script tag if we don't have one
