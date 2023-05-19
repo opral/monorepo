@@ -4,12 +4,14 @@ import type { TransformConfig } from "./config.js"
 export type FileType =
 	| "hooks.server.js"
 	| "[language].json"
+	| "+server.js"
 	| "+layout.server.js"
 	| "+layout.js"
 	| "+layout.svelte"
 	| "+page.server.js"
 	| "+page.js"
 	| "+page.svelte"
+	| "*.server.js"
 	| "*.js"
 	| "*.svelte"
 
@@ -26,12 +28,14 @@ export const getFileInformation = (
 ): FileInformation | undefined => {
 	const id = normalize(rawId)
 
-	if (!id.startsWith(config.cwdFolderPath)
-		|| id.startsWith(path.resolve(config.cwdFolderPath, 'node_modules'))
-		|| id.startsWith(path.resolve(config.cwdFolderPath, '.svelte-kit'))
-	) return undefined
+	if (
+		!id.startsWith(config.cwdFolderPath) ||
+		id.startsWith(path.resolve(config.cwdFolderPath, "node_modules")) ||
+		id.startsWith(path.resolve(config.cwdFolderPath, ".svelte-kit"))
+	)
+		return undefined
 
-	if (scriptExtensions.map(ext => `${config.svelteKit.files.serverHooks}${ext}`).includes(id)) {
+	if (scriptExtensions.map((ext) => `${config.svelteKit.files.serverHooks}${ext}`).includes(id)) {
 		return {
 			type: "hooks.server.js",
 			root: true,
@@ -42,13 +46,20 @@ export const getFileInformation = (
 	const root = dir === config.svelteKit.files.routes
 
 	if (
-		dir === path.resolve(config.svelteKit.files.routes, 'inlang', '[language].json') &&
+		dir === path.resolve(config.svelteKit.files.routes, "inlang", "[language].json") &&
 		name === "+server" &&
 		scriptExtensions.includes(ext)
 	) {
 		return {
 			type: "[language].json",
 			root: true,
+		}
+	}
+
+	if (name === "+server" && scriptExtensions.includes(ext)) {
+		return {
+			type: "+server.js",
+			root,
 		}
 	}
 
@@ -90,12 +101,20 @@ export const getFileInformation = (
 		}
 	}
 
+	if (name.endsWith(".server") && scriptExtensions.includes(ext)) {
+		return {
+			type: "*.server.js",
+			root: false,
+		}
+	}
+
 	if (scriptExtensions.includes(ext)) {
 		return {
 			type: "*.js",
 			root: false,
 		}
 	}
+
 	if (ext === ".svelte") {
 		return {
 			type: "*.svelte",
