@@ -2,12 +2,9 @@ import { types } from "recast"
 import { builders } from "magicast"
 import {
 	NodeInfoMapEntry,
-	RunOn,
 	findAstJs,
 	findUsedImportsInAst,
 	getFunctionOrDeclarationValue,
-	functionMatchers,
-	arrowFunctionMatchers,
 } from "./ast.js"
 import type { ExpressionKind } from "ast-types/gen/kinds.js"
 import type { FunctionDeclaration, Node } from "estree"
