@@ -2,7 +2,6 @@ import type { TransformConfig } from "../config.js"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { getFunctionOrDeclarationValue } from "../../../helpers/ast.js"
 import { dedent } from "ts-dedent"
 import {
 	extractWrappableExpression,
@@ -30,9 +29,6 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 	// Remove imports, but save their names
 	const importNames = getSdkImportedModules(ast.$ast)
 	// Merge imports with required imports
-	const importsAst = parseModule(
-		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
-	)
 	const importsAst = parseModule(
 		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
 	)

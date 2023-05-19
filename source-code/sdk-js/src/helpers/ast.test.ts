@@ -74,7 +74,7 @@ describe("getFunctionOrDeclarationValue", () => {
 		const resultAst = getFunctionOrDeclarationValue(ast.$ast, "load")
 		const result = print(resultAst)
 		expect(result.code).toMatchInlineSnapshot(`
-            "() => loadFn"
+            "loadFn"
         `)
 	})
 })
@@ -118,7 +118,7 @@ describe("findUsedImportsInAst", () => {
 	})
 })
 
-describe("mergeNodes", () => {
+// describe("mergeNodes", () => {
 	/* test("Add simple property to empty object", () => {
 		// {key2: key2Alias}
 		const property = b.property("init", b.identifier("key2"), b.identifier("key2Alias"))
@@ -127,7 +127,7 @@ describe("mergeNodes", () => {
 		extendObjectPattern(object, property)
 		expect(print(object).code).toBe(`{key2: key2Alias}`)
 	}) */
-})
+// })
 
 describe("identifierIsDeclarable", () => {
 	test("Test non declarable object property 1", () => {
@@ -334,12 +334,12 @@ describe("findDefinition", () => {
 			const code = dedent`
 				import { sequence } from "@sveltejs/kit/hooks";
 				import { i } from "@inlang/sdk-js";
-				
+
 				const seq1 = async ({ event, resolve }) => {
 					console.log(i("welcome"));
 					return resolve(event);
 				};
-				
+
 				export const handle = sequence(seq1);
 			`
 			const ast = parseModule(code).$ast

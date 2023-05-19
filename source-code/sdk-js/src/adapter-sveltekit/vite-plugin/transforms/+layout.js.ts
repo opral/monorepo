@@ -8,6 +8,7 @@ import {
 	getSdkImportedModules,
 	replaceOrAddExportNamedFunction,
 } from "../../../helpers/inlangAst.js"
+import { dedent } from 'ts-dedent'
 
 const requiredImports = (root: boolean) => `
 import { browser } from "$app/environment";

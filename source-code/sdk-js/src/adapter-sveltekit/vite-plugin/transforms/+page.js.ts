@@ -2,7 +2,6 @@ import type { TransformConfig } from "../config.js"
 import { parseModule, generateCode, parseExpression } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import { types } from "recast"
-import { getFunctionOrDeclarationValue } from "../../../helpers/ast.js"
 import { dedent } from "ts-dedent"
 import {
 	extractWrappableExpression,
@@ -13,9 +12,6 @@ import {
 
 const requiredImports = (config: TransformConfig, root: boolean) => `
 import { browser } from "$app/environment";
-import { ${
-	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
-}, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { ${
 	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
 }, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
