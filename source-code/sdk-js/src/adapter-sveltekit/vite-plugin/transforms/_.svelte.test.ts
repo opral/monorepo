@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest"
-import { transformSvelte } from "./*.svelte.js"
+import { transformSvelte } from "./_.svelte.js"
 import { getTransformConfig } from "./test-helpers/config.js"
-import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 
 describe("transformSvelte", () => {

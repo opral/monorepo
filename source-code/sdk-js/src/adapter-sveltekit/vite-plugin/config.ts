@@ -8,22 +8,20 @@ import { initInlangEnvironment, InlangConfigWithSdkProps } from "../../config/co
 import { validateSdkConfig } from "@inlang/sdk-js-plugin"
 // @ts-ignore
 import { version } from "../../../package.json"
-import { promisify } from "node:util"
-import { exec as execCb, type SpawnSyncReturns } from "node:child_process"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
-
-const exec = promisify(execCb)
+import type { Config as SvelteConfig } from "@sveltejs/kit"
+import { findDepPkgJsonPath } from "vitefu"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
 type VersionString = `${number}.${number}.${number}`
 
 export type TransformConfig = {
+	cwdFolderPath: string
 	debug?: boolean
 	languageInUrl: boolean
 	isStatic: boolean
-	srcFolder: string
 	rootRoutesFolder: string
 	sourceFileName?: string
 	sourceMapName?: string
@@ -31,11 +29,16 @@ export type TransformConfig = {
 	svelteKit: {
 		version: VersionString | undefined
 		usesTypeScript: boolean
+		files: {
+			appTemplate: string
+			routes: string
+			serverHooks: string
+		}
 	}
 }
 
-const cwdPath = process.cwd()
-const inlangConfigFilePath = path.resolve(cwdPath, "inlang.config.js")
+const cwdFolderPath = process.cwd()
+const inlangConfigFilePath = path.resolve(cwdFolderPath, "inlang.config.js")
 
 let configPromise: Promise<TransformConfig> | undefined = undefined
 
@@ -44,9 +47,6 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (configPromise = new Promise<TransformConfig>(async (resolve) => {
-		const srcFolderPath = path.resolve(cwdPath, "src")
-		const routesFolderPath = path.resolve(srcFolderPath, "routes")
-
 		await createInlangConfigIfNotPresentYet()
 		await updateSdkPluginVersion()
 
@@ -60,9 +60,26 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		if (exception) {
 			throw exception
 		}
-
 		const inlangConfigModule = await import(pathToFileURL(inlangConfigFilePath).toString())
 		const inlangConfig = await initConfig(inlangConfigModule)
+
+		const { default: svelteConfig } = (await import(
+			path.resolve(cwdFolderPath, "svelte.config.js")
+		)) as { default: SvelteConfig }
+		const files = {
+			appTemplate: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.appTemplate || path.resolve("src", "app.html"),
+			),
+			routes: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.routes || path.resolve("src", "routes"),
+			),
+			serverHooks: path.resolve(
+				cwdFolderPath,
+				svelteConfig.kit?.files?.hooks?.server || path.resolve("src", "hooks.server"),
+			),
+		}
 
 		assertConfigWithSdk(inlangConfig)
 		inlangConfig.sdk = validateSdkConfig(inlangConfig.sdk)
@@ -71,25 +88,27 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 			inlangConfig?.sdk?.languageNegotiation?.strategies?.some(({ type }) => type === "url") ||
 			false
 
-		const rootRoutesFolder = path.resolve(routesFolderPath, languageInUrl ? "[lang]" : "")
+		const rootRoutesFolder = path.resolve(files.routes, languageInUrl ? "[lang]" : "")
 		const isStatic =
-			(await shouldContentBePrerendered(routesFolderPath)) ||
+			(await shouldContentBePrerendered(files.routes)) ||
 			(await shouldContentBePrerendered(rootRoutesFolder))
 
-		const usesTypeScript = await doesPathExist(path.resolve(cwdPath, "tsconfig.json"))
+		const usesTypeScript = await doesPathExist(path.resolve(cwdFolderPath, "tsconfig.json"))
 
+		// TODO: find a more reliable way (https://github.com/sveltejs/kit/issues/9937)
 		const svelteKitVersion = await getInstalledVersionOfPackage("@sveltejs/kit")
 
 		resolve({
+			cwdFolderPath,
 			debug: !!inlangConfig.sdk?.debug,
 			languageInUrl,
 			isStatic,
-			srcFolder: srcFolderPath,
 			rootRoutesFolder,
 			inlang: inlangConfig,
 			svelteKit: {
 				version: svelteKitVersion,
 				usesTypeScript,
+				files,
 			},
 		})
 	}))
@@ -159,7 +178,7 @@ export async function defineConfig(env) {
 
 // TODO: do this in a better way #708
 const createDemoResources = async () => {
-	const resourcesFolder = path.resolve(cwdPath, "languages")
+	const resourcesFolder = path.resolve(cwdFolderPath, "languages")
 
 	if (!(await doesPathExist(resourcesFolder))) {
 		await mkdir(path.resolve(resourcesFolder))
@@ -229,13 +248,10 @@ const updateSdkPluginVersion = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-// move to import from `@sveltejs/kit/package.json` in the future once import assertions are stable
-
 const getInstalledVersionOfPackage = async (pkg: string) => {
-	const { stderr, stdout } = await exec(`npm list --depth=0 ${pkg}`).catch(
-		({ stderr, stdout }: SpawnSyncReturns<any>) => ({ stderr, stdout }),
-	)
-	if (stderr) return undefined
+	const pkgJsonPath = await findDepPkgJsonPath(pkg, cwdFolderPath)
+	if (!pkgJsonPath) return undefined
 
-	return stdout.trim().match(new RegExp(`${pkg}@(.*)`))?.[1] as VersionString | undefined
+	const pkgJson = JSON.parse(await readFile(pkgJsonPath, { encoding: "utf-8" }))
+	return pkgJson.version
 }

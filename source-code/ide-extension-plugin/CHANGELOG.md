@@ -1,5 +1,12 @@
 # @inlang/ide-extension-plugin
 
+## 0.5.8
+
+### Patch Changes
+
+- Updated dependencies [98b140f1]
+  - @inlang-git/fs@0.0.3
+
 ## 0.5.7
 
 ## 0.5.6

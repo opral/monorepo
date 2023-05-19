@@ -17,6 +17,29 @@ describe("memory fs", async () => {
 })
 
 const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
+	// testing characters is important. see bug https://github.com/inlang/inlang/issues/785
+	const textInFirstFile = `
+	  Testing a variety of characters. 
+
+		Testing Umlaute äöüÄÖÜß
+		Testing Chinese 汉字
+		Testing Japanese かんじ
+		Testing Korean 한국어
+		Testing Arabic العَرَبِيَّة
+		Testing Hebrew עִבְרִית
+		Testing Russian русский язык
+		Testing Greek ελληνικά
+		Testing Thai ภาษาไทย
+		Testing Hindi हिन्दी
+		Testing Tamil தமிழ்
+		Testing Georgian ქართული
+		Testing Armenian հայերեն		
+	`
+
+	const textInSecondFile = `
+		Some more text in the second file.
+	`
+
 	test("readdir", async () => {
 		expect(await fs.readdir(tempDir)).toEqual([])
 	})
@@ -43,8 +66,8 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	})
 
 	test("file r/w", async () => {
-		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, "text in the first file")
-		await fs.writeFile(`${tempDir}/file2`, "text in the second file")
+		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
+		await fs.writeFile(`${tempDir}/file2`, textInSecondFile)
 
 		expect(await fs.readdir(`${tempDir}/home/user1/documents/`)).toEqual(["file1"])
 		const dirents = await fs.readdir(tempDir)
@@ -54,11 +77,9 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 
 		expect(
 			await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
-		).toEqual("text in the first file")
+		).toEqual(textInFirstFile)
 
-		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(
-			"text in the second file",
-		)
+		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
 	})
 
 	test("r/w an empty file", async () => {
@@ -76,7 +97,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		await fs.symlink(`${tempDir}/home/user1`, `${tempDir}/user1.link`)
 
 		expect(await fs.readFile(`${tempDir}/file1.link`, { encoding: "utf-8" })).toEqual(
-			"text in the first file",
+			textInFirstFile,
 		)
 		expect(await fs.readFile(`${tempDir}/file3.link`, { encoding: "utf-8" })).toEqual("")
 		expect(await fs.readdir(`${tempDir}/user1.link`)).toEqual(["documents", "downloads"])
@@ -184,7 +205,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 			async () => await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
 		).rejects.toThrow(/ENOENT/)
 
-		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, "text in the first file")
+		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
 		await fs.rm(`${tempDir}/home/user1`, { recursive: true })
 
 		await expect(async () => await fs.readdir(`${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)

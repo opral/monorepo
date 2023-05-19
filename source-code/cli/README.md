@@ -1,4 +1,12 @@
-# @inlang/cli
+---
+title: "CLI"
+href: /documentation/cli
+description: "The Inlang CLI"
+---
+
+# {% $frontmatter.title %}
+
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
 ## Installation
 
@@ -18,11 +26,25 @@ If you have `npx` installed, you can simply type: `npx @inlang/cli`.
 
 ## Commands
 
+```sh
+CLI for inlang.
+
+Options:
+  -V, --version      output the version number
+  -h, --help         display help for command
+
+Commands:
+  config <command>   Commands for managing the config file.
+  machine <command>  Commands for automating translations.
+  open <command>     Commands to open parts of the inlang ecosystem.
+  help [command]     display help for command
+```
+
 The following commands are available with the inlang CLI:
 
 ### `config`
 
-The `config` command is used to interactively configure and create the inlang.config.json file.
+The config command is used to interactively configure and create the inlang.config.json file.
 
 #### `config init`
 
@@ -39,58 +61,42 @@ npx @inlang/cli config init
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
-<!--
-### `remote download`
+### `machine`
 
-Downloads the translations and _OVER-WRITES_ the local files.
+The machine command is used to automate localization processes.
 
-**Example**
+#### `machine translate`
 
-`inlang remote download --path-pattern ./translations/{languageCode}.ftl --api-key <your api key> --format fluent`
+The translate command machine translates all resources.
 
-**Flags**
+To initiate machine translation, run the following command:
 
-`--format: string`
+```sh
+inlang machine translate
+# or
+npx @inlang/cli machine translate
+```
 
-If your environment uses a different translation format than Fluent, a converter is used to transform the format to and from Fluent.
+This command reads the inlang.config.js file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
-`--path-pattern: string`
+The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
-Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.
+> Note: The inlang.config.js file must be present in the repository for the translation to work.
 
-_Examples_
+### `open`
 
---path-pattern ./translations/{languageCode}.ftl
+The open command opens parts of the Inlang infrastructure in your default browser.
 
---path-pattern ./{languageCode}/Localizable.strings
+#### `open editor`
 
-`--api-key: string`
-The api key for the project.
+The editor command opens the Inlang editor for the current repository.
 
-### `remote upload`
+To open the Inlang editor, run the following command:
 
-Uploads the local files and _OVERWRITES_ the remote files.
+```sh
+inlang open editor
+#or
+npx @inlang/cli open editor
+```
 
-**Example**
-
-`inlang remote upload --path-pattern ./translations/{languageCode}.ftl --api-key <your api key>`
-
-**Flags**
-
-`--format: string`
-
-If your environment uses a different translation format than Fluent, a converter is used to transform the format to and from Fluent.
-
-`--path-pattern: string`
-
-Where and how the translation files should be saved. Use "{languageCode}" as dynamic value.
-
-_Examples_
-
---path-pattern ./translations/{languageCode}.ftl
-
---path-pattern ./{languageCode}/Localizable.strings
-
-`--api-key: string`
-
-The api key for the project. -->
+This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.

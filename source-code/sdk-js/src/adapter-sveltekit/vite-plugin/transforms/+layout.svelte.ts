@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { transformSvelte } from "./*.svelte.js"
+import { transformSvelte } from "./_.svelte.js"
 import { parse, preprocess } from "svelte/compiler"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 import { parseModule, generateCode } from "magicast"
@@ -10,7 +10,6 @@ import {
 	getReactiveImportIdentifiers,
 	makeJsReactive,
 	makeMarkupReactive,
-	removeSdkJsImport,
 	sortMarkup,
 	htmlIsEmpty,
 	variableDeclarationAst,
@@ -19,6 +18,7 @@ import {
 } from "../../../helpers/ast.js"
 import MagicStringImport from "magic-string"
 import { types } from "recast"
+import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
@@ -95,7 +95,7 @@ ${codeWithoutTypes}`
 
 			// Remove import "@inlang/sdk-js" but save the aliases of all imports
 			// We need AT LEAST the language declaration for later.
-			const importNames = removeSdkJsImport(ast.$ast)
+			const importNames = getSdkImportedModules(ast.$ast)
 			if (importNames.length === 0 || !importNames.some(([imported]) => imported === "language"))
 				importNames?.push(["language", "language"])
 

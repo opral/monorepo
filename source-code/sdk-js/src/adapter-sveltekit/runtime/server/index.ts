@@ -3,6 +3,8 @@ export {
 	initHandleWrapper,
 	initRootLayoutServerLoadWrapper,
 	initServerLoadWrapper,
+	initActionWrapper,
+	initRequestHandlerWrapper,
 } from "./wrappers.js"
 export {
 	initState,

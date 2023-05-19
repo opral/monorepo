@@ -13,16 +13,10 @@
 		"./src"
 	],
 	"scripts": {
-		"---- BUILD SETUP --------------------------------------------------": "",
-		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 --sparse https://github.com/inlang/isomorphic-git node_modules/isomorphic-git 2>/dev/null || true",
-		"isogit-pull": "cd node_modules/isomorphic-git && git pull",
-		"isogit-http": "cd node_modules/isomorphic-git && git sparse-checkout add http",
-		"isogit-tests": "cd node_modules/isomorphic-git && git sparse-checkout add __tests__/__fixtures__/",
-		"isogit-update": "npm run isogit-clone; npm run isogit-pull && npm run isogit-http && npm run isogit-tests",
-		"---- BUILD --------------------------------------------------------": "",
-		"prebuild": "npm run isogit-update",
+		"---- BUILD AND DEV--------------------------------------------------": "",
+		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 https://github.com/inlang/isomorphic-git node_modules/isomorphic-git",
+		"prebuild": "npm run isogit-clone",
 		"build": "tsc --build ./tsconfig.build.json",
-		"predev": "npm run isogit-update",
 		"dev": "tsc --watch",
 		"---- TEST SETUP ----------------------------------------------------": "",
 		"start-proxy": "cors-proxy start -p 9999 -d",
@@ -46,7 +40,7 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@inlang-git/fs": "^0.0.2",
+		"@inlang-git/fs": "^0.0.3",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@isomorphic-git/pgp-plugin": "^0.0.7",
 		"git-http-mock-server": "^1.1.0"

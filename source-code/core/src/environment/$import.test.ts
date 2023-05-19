@@ -2,38 +2,33 @@
 
 import { describe, expect, it } from "vitest"
 import { initialize$import } from "./$import.js"
-import { fs as memfs } from "memfs"
+import { createMemoryFs } from "@inlang-git/fs"
 
 describe("$import", async () => {
-	// memfs uses process.cwd() to resolve paths
-	// setting the path to "/" to avoid
-	process.cwd = () => "/"
-	// mock module
-	await memfs.promises.writeFile(
+	const fs = createMemoryFs()
+	await fs.writeFile(
 		"./mock-module.js",
 		`
 		export function hello() {
 			return "hello";
 		}
-		`,
-		{ encoding: "utf-8" },
+		`
 	)
 
 	// mock module in a directory
-	await memfs.promises.mkdir("./nested")
-	await memfs.promises.writeFile(
+	await fs.mkdir("./nested")
+	await fs.writeFile(
 		"./nested/mock-module-two.js",
 		`
 		export function hello() {
 			return "world";
 		}
-		`,
-		{ encoding: "utf-8" },
+		`
 	)
 
 	const $import = initialize$import({
 		// @ts-ignore
-		fs: memfs.promises,
+		fs,
 		fetch,
 	})
 

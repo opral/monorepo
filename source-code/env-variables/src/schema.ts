@@ -28,5 +28,6 @@ export const privateEnvVariablesSchema = z.object({
 	OPEN_AI_KEY: z.string().optional(),
 	GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 	SERVER_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (on the server)"),
-	GITHUB_APP_CLIENT_SECRET: z.string(),
+	// prefixed with INLANG_ because github doesn't allow env vars with GITHUB_ in ci/cd.
+	INLANG_GITHUB_APP_CLIENT_SECRET: z.string(),
 })

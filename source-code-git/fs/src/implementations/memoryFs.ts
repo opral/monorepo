@@ -34,15 +34,15 @@ export function createMemoryFs(): NodeishFilesystem {
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
 			options?: Parameters<NodeishFilesystem["writeFile"]>[2],
 		) {
+			const encoder = new TextEncoder()
+
 			path = normalPath(path)
 			const parentDir: Inode | undefined = fsMap.get(getDirname(path))
 
 			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
 			if (typeof data === "string") {
-				const buf = []
-				for (const c of data) buf.push(c.codePointAt(0) ?? 0)
-				data = new Uint8Array(buf)
+				data = encoder.encode(data)
 			}
 
 			parentDir.add(getBasename(path))
@@ -54,6 +54,8 @@ export function createMemoryFs(): NodeishFilesystem {
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
 			options: Parameters<NodeishFilesystem["readFile"]>[1],
 		) {
+			const decoder = new TextDecoder()
+
 			path = normalPath(path)
 			const file: Inode | undefined = fsMap.get(path)
 
@@ -61,9 +63,7 @@ export function createMemoryFs(): NodeishFilesystem {
 			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
 			if (!(options?.encoding || typeof options === "string")) return file
 
-			let string = ""
-			for (const c of file) string += String.fromCodePoint(c)
-			return string
+			return decoder.decode(file)
 		},
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {

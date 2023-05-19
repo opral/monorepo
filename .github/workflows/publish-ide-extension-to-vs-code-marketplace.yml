@@ -25,8 +25,15 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
-      - name: Build project
-        run: npm run build
+
+      - name: Install Doppler CLI for env (public) variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+        run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/ide-extension
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
       - name: test the code
         run: npm run test
       - name: Build VSCode extension package
