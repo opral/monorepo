@@ -79,12 +79,7 @@ const ConfigPage = () => {
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-relaxed tracking-tight">
-					The{" "}
-					<span class="text-surface-700 font-medium text-2xl font-mono bg-surface-200 mx-1 px-2 py-1 rounded-md">
-						config
-					</span>{" "}
-					as a bridge between <span class="text-primary">you</span> and{" "}
-					<span class="text-primary">inlang's infrastructure</span>
+					Multiple apps, endless plugins, one config.
 				</h2>
 			</div>
 
