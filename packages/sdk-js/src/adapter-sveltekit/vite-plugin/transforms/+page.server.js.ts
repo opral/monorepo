@@ -11,7 +11,7 @@ import {
 } from "../../../helpers/inlangAst.js"
 
 // TODO: refactor together with `+layout.server.js.ts`
-export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
+export const transformPageServerJs = (config: TransformConfig, code: string) => {
 	// TODO: implement this
 	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
 		throw Error(dedent`
