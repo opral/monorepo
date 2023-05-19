@@ -44,13 +44,13 @@ export async function initCommandAction() {
 			rpcSpinner.text = `Generating config file with AI 🤖 ... Iteration ${assumedIteration}/3`
 		}, 12000)
 
-		const [configFile, exception] = await rpc.generateConfigFile({
+		const [configFile, error] = await rpc.generateConfigFile({
 			fs: fs,
 			resolveFrom: new URL("./", import.meta.url).pathname,
 			applicationId: "CLI",
 		})
 		clearInterval(interval)
-		if (exception) {
+		if (error && error.type === "Exception") {
 			rpcSpinner.fail(dedent`
 The CLI couldn't generate the config file automatically. 
 
@@ -58,8 +58,16 @@ This is a not a bug, but a limitation of the AI algorithm the CLI uses.
 Please create the config file manually by following the instructions 
 at https://inlang.com/documentation. 
 
-${exception.errorMessage ? "Error message: " + exception.errorMessage : ""}
+${error.message ? "Error message: " + error.message : ""}
 `)
+			return
+		} else if (error) {
+			rpcSpinner.fail(dedent`
+An internal bug occured while generating the config file.
+
+Please report this bug at https://github.com/inlang/inlang/issues
+
+${error.message ? "Error message: " + error.message : ""}`)
 			return
 		}
 		rpcSpinner.succeed("Generated config file.")
