@@ -32,23 +32,30 @@ Such placeholders are:
 	// result => 'console.log(123);export const GET = async ({ params: { language } }) => { /* */ }'
 	```
 
+ - all transform functions get an AST as an input and return an AST as an output. The functions we currently have, just act as a wrapper around the generic ast transform function. This makes it possible to create source maps at the end of the process.
+ 	```ts
+	const ast = parse(code)
+	transformPageJsAst(ast)
+	return generateCode(ast).code
+	```
+
 ## `JavaScript`
 
  - adding imports
 	```ts
 	const code = 'const a = 1'
 	const ast = parse(code)
-	imports(ast, '@inlang/core').add('i', 'language')
+	imports(ast, '@inlang/core').add('$$_INLANG_I_$$', '$$_INLANG_LANGUAGE_$$')
 	const result = serialize(ast)
-	// result => 'import { i, language } from "@inlang/core";const a = 1'
+	// result => 'import { $$_INLANG_I_$$, $$_INLANG_LANGUAGE_$$ } from "@inlang/core";const a = 1'
 	```
 	```ts
 	const code = 'import { i } from "@inlang/core"'
 	const ast = parse(code)
-	imports(ast, '@inlang/core').add('language')
+	imports(ast, '@inlang/core').add('$$_INLANG_LANGUAGE_$$')
 	imports(ast, 'lodash').add('merge')
 	const result = serialize(ast)
-	// result => 'import { i, language } from "@inlang/core";import { merge } from "lodash"'
+	// result => 'import { i, $$_INLANG_LANGUAGE_$$ } from "@inlang/core";import { merge } from "lodash"'
 	```
 
  - removing imports
@@ -86,7 +93,7 @@ for markup block:
    ```ts
 	const markup = '<h1>i("welcome")</h1>'
 	const ast = parse(markup)
-	const ifAst = parse('{#if $$_INLANG_LANGUAGE_$$}<!-- $$_INLANG_PLACEHOLDER_$$ -->{/if}')
+	const ifAst = parse('{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_PLACEHOLDER_$${/if}')
 	wrap(ast, ifAst)
 	const result = serialize(ast)
 	// result => '{#if $$_INLANG_LANGUAGE_$$}<h1>i("welcome")</h1>{/if}'
@@ -105,7 +112,7 @@ for markup block:
 things we need to wrap:
 	- `handle`
 
-wrap with `initHandleWrapper`
+wrap with `initHandleWrapper` (with special case `sequence`)
 
 ### `+layout.server.js`
 
@@ -131,6 +138,7 @@ if actions
 ### `+server.js`
 
 things we need to wrap:
+ - `GET`
  - `POST`
  - `PUT`
  - `PATCH`
@@ -169,25 +177,25 @@ Throw a meaningful error if we encounter an import from `@inlang/sdk-js`.
 
 JavaScript files can run on the server and on the client. So we need to detect that case during runtime. `getRuntimeFromContext` will throw an error if it get's called on the server.
 
- - transform imports
+ 1. transform imports and remove `@inlang/sdk-js` (replace with `getRuntimeFromContext`)
 	```ts
 	const code = 'import { i } from "@inlang/sdk-js";const fn = () => { i("test") }'
 	const ast = parse(code)
-	wrapWithPlaceholder(ast, 'load')
+	insertGetRuntimeFromContext(ast)
 	const result = serialize(ast)
 	// result => 'const fn = () => { const { i } = getRuntimeFromContext();i("test") }'
 	```
- - getRuntimeFromContext calls should only happen once per function
-  		 - right before a variable is referenced the first time
- - we need to make sure to not redeclare imports multiple times
-	```ts
-	const code = 'import { i } from "@inlang/sdk-js";const fn = () => { console.log(123); i("test"); i("hello") }'
-	const ast = parse(code)
-	wrapWithPlaceholder(ast, 'load')
-	const result = serialize(ast)
-	// result => 'const fn = () => { console.log(123); const { i } = getRuntimeFromContext();i("test"); i("hello") }'
-	```
- - if reactive
+    - getRuntimeFromContext calls should only happen once per function
+       - right before a variable is referenced the first time
+    - we need to make sure to not redeclare imports multiple times
+		```ts
+		const code = 'import { i } from "@inlang/sdk-js";const fn = () => { console.log(123); i("test"); i("hello") }'
+		const ast = parse(code)
+		insertGetRuntimeFromContext(ast)
+		const result = serialize(ast)
+		// result => 'const fn = () => { console.log(123); const { i } = getRuntimeFromContext(); i("test"); i("hello") }'
+		```
+ 2. if reactive
     - wrap reactive functions with `get()`
 		```ts
 		const code = 'const fn = () => { const { i } = getRuntimeFromContext();i("test") }'
@@ -202,11 +210,11 @@ JavaScript files can run on the server and on the client. So we need to detect t
 
 ### `+layout.svelte`
 
- - if root
-    - import all necessary things
-    - insert codeblocks where needed (only non-reactive)
+ 1. if root
+    - import all necessary things with placeholders and from `@inlang/sdk-js` where possible
+    - insert codeblocks where needed (only non-reactive) with placeholders
     - wrap markup
- - pass everything to `*.svelte`
+ 2. pass everything to `*.svelte`
 
 ### `+page.svelte`
 
@@ -214,29 +222,65 @@ JavaScript files can run on the server and on the client. So we need to detect t
 
 ### `*.svelte`
 
- - replace `@inlang/sdk-js` imports with `getRuntimeFromContext`
- - resolve aliases and placeholders
- - if reactive
-   - transform `i` and `language` to `$i` and `$language`
+ 1. replace `@inlang/sdk-js` imports with `getRuntimeFromContext`
+ 2. resolve aliases and placeholders
+ 3. if reactive
+    - transform `i` and `language` to `$i` and `$language`
 
 ---
 
 # Flow details
 
+## generic
+
+ - resolve placeholders with correct aliases and remove duplicate imports
+	```ts
+	import { i as x, $$_INLANG_I_$$ } from "@inlang/core";
+	$$_INLANG_I_$$("hello")
+	const y = () => {
+		$$_INLANG_I_$$('hello')
+		const inlang = $$_INLANG_I_$$
+		inlang('hello')
+	}
+	// =>
+	import { i as x } from "@inlang/core";
+	x("hello")
+	const y = () => {
+		x('hello')
+		const inlang = x
+		inlang('hello')
+	}
+	```
+	```ts
+	import { i as inlang, $$_INLANG_I_$$ } from "@inlang/core"; $$_INLANG_I_$$("hello")
+	// =>
+	import { i as inlang } from "@inlang/core"; inlang("hello")
+	```
+
 ## wrap functionality
 
 Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `handle` has the special case with `sequence`. so the `findLeaf` functionality must be different. The rest stays the same.
- - if no import from `@inlang/sdk-js` exists
+ 1. if no import from `@inlang/sdk-js` exists
     - return input code without any transformation
+      - except for the `handle` function; we ALWAYS need to wrap it
 
- - pass code to generic `wrap` function
+ 2. pass code to generic `wrap` function
     - function traverses the AST and finds the export, traverses it's aliases
     - if leaf function does not use any import from `@inlang/sdk-js`
-       - return input code
+       - special case `handle` with `sequence` where we ALWAYS wrap
+       - return input code (AST without any transformation)
+       - this is NOT supported
+			```ts
+			import { i } from "@inlang/sdk-js";
+			export const load = () => {
+				fn()
+			}
+			const fn = () => { i("test") };
+			```
     - else
        - wrap the leaf function with a placeholder
 		 	```ts
-			const code = 'import { i } from "@inlang/sdk-js";const fn = () => { i("test") };const ld = fn;export  const load = ld'
+			const code = 'import { i } from "@inlang/sdk-js";const fn = () => { i("test") };const ld = fn;export const load = ld'
 			const ast = parse(code)
 			wrapWithPlaceholder(ast, 'load')
 			const result = serialize(ast)
@@ -248,11 +292,12 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
 			`(event) => { i("test") }` => `(event, { i }) => { i("test") }`
 			`({ locals }) => { i("test") }` => `({ locals }, { i }) => { i("test") }`
 			```
- - look if any import from `@inlang/sdk-js` get's used outside of a placeholder wrapper
+			 - `_` needs to be variable name that does not exist in the outer scope
+ 3. look if any import from `@inlang/sdk-js` get's used outside of a placeholder wrapper
     - if yes => throw meaningful error
- - remove imports from `@inlang/sdk-js`
- - import all necessary things
- - replace placeholder with specific function of that file
+ 4. remove imports from `@inlang/sdk-js`
+ 5. import all necessary things
+ 6. replace placeholder with specific function of that file
 	```ts
 	const code = 'const fn = $$_INLANG_PLACEHOLDER_$$((_, { i }) => { i("test") });'
 	const wrapperAst = parse('initHandleWrapper({ key: "value" }).wrap($$_INLANG_PLACEHOLDER_$$)')
@@ -285,8 +330,9 @@ export const load = fn3
 ```
 
 ```ts
-import { appendFunctionality } from './utils.js'
-export const load = appendFunctionality(() => { })
+const fn1 = () = {}
+const fn2 = function () { }
+export const load = sequence(fn1, fn2)
 ```
 
 ```ts
@@ -295,4 +341,18 @@ const load: PageLoad = () => {}
 
 ```ts
 const load = (() => {}) satisfies PageLoad
+```
+
+The wrap function does not consider these cases:
+
+```ts
+const fn1 = () = {}
+const fn2 = fn1
+const fn3 = otherFunction(fn2) // this is not supported
+export const load = fn3
+```
+
+```ts
+import { appendFunctionality } from './utils.js'
+export const load = appendFunctionality(() => { }) // this is not supported
 ```
