@@ -39,7 +39,7 @@ export const getTransformConfig = (overrides: DeepPartial<TransformConfig> = {})
 					appTemplate: "src/app.html",
 					routes: "src/routes",
 					serverHooks: "src/hooks.server",
-				}
+				},
 			},
 		} satisfies TransformConfig,
 		overrides as any,

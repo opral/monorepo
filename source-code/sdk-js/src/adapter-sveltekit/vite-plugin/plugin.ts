@@ -1,9 +1,9 @@
 import { dedent } from "ts-dedent"
 import type { ViteDevServer, Plugin } from "vite"
-import { assertAppTemplateIsCorrect } from './checks/appTemplate.js'
-import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from './checks/routes.js'
+import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
+import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
 import { getTransformConfig, resetConfig } from "./config.js"
-import { getFileInformation } from './fileInformation.js'
+import { getFileInformation } from "./fileInformation.js"
 import { transformCode } from "./transforms/index.js"
 
 let viteServer: ViteDevServer | undefined

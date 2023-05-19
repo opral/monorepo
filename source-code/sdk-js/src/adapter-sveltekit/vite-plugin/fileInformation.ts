@@ -28,12 +28,14 @@ export const getFileInformation = (
 ): FileInformation | undefined => {
 	const id = normalize(rawId)
 
-	if (!id.startsWith(config.cwdFolderPath)
-		|| id.startsWith(path.resolve(config.cwdFolderPath, 'node_modules'))
-		|| id.startsWith(path.resolve(config.cwdFolderPath, '.svelte-kit'))
-	) return undefined
+	if (
+		!id.startsWith(config.cwdFolderPath) ||
+		id.startsWith(path.resolve(config.cwdFolderPath, "node_modules")) ||
+		id.startsWith(path.resolve(config.cwdFolderPath, ".svelte-kit"))
+	)
+		return undefined
 
-	if (scriptExtensions.map(ext => `${config.svelteKit.files.serverHooks}${ext}`).includes(id)) {
+	if (scriptExtensions.map((ext) => `${config.svelteKit.files.serverHooks}${ext}`).includes(id)) {
 		return {
 			type: "hooks.server.js",
 			root: true,
@@ -44,7 +46,7 @@ export const getFileInformation = (
 	const root = dir === config.svelteKit.files.routes
 
 	if (
-		dir === path.resolve(config.svelteKit.files.routes, 'inlang', '[language].json') &&
+		dir === path.resolve(config.svelteKit.files.routes, "inlang", "[language].json") &&
 		name === "+server" &&
 		scriptExtensions.includes(ext)
 	) {
