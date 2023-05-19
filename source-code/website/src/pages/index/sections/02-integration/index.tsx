@@ -9,10 +9,10 @@ import Svelte from "./assets/svelte.jsx"
 import Vuejs from "./assets/vuejs.jsx"
 
 const data = {
-	caption: "Not framwork agnostic",
-	title: "Integrate into every code base.",
+	caption: "Tech stack agnostic",
+	title: "Integrates into any codebase",
 	description:
-		"Inlang is not framework agnostic. It seamlessly integrates with every code base, from python to javascript.",
+		"Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
 	button: "Get started",
 	buttonLink: "/documentation/getting-started",
 }
