@@ -2,7 +2,6 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
-	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -241,13 +240,15 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 			return {
 				fs: fs(),
+				// we need to listen to inlang.config.js changes
+				lastFsChange: fsChange(),
 			}
 		},
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
 				const languages = // TODO: move this into setter logic
-					config.languages.sort((a, b) =>
+					config.languages.sort((a: any, b: any) =>
 						// reference language should be first
 						// sort alphabetically otherwise
 						a === config.referenceLanguage
@@ -737,7 +738,7 @@ async function writeResources(args: {
 	const status = await raw.statusMatrix({
 		fs: args.fs,
 		dir: "/",
-		filter: (f) =>
+		filter: (f: any) =>
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
 			f.endsWith(".yaml") ||
@@ -746,7 +747,7 @@ async function writeResources(args: {
 			f.endsWith(".ts"),
 	})
 	const filesWithUncommittedChanges = status.filter(
-		(row) =>
+		(row: any) =>
 			// files with unstaged and uncommitted changes
 			(row[2] === 2 && row[3] === 1) ||
 			// added files
