@@ -14,10 +14,11 @@ export async function generateConfigFileClient(args: {
 	applicationId: string
 }): ReturnType<typeof generateConfigFileServer> {
 	const filesystemAsJson = await toJson({
-		...args,
+		fs: args.fs,
+		resolveFrom: args.resolveFrom,
 		// exclude files that are not relevant for the config file to reduce
 		// bandwith and improve performance
-		matchers: ["**/*", "!**/node_modules/**", "!**/.*", "!**/dist/*"],
+		matchers: ["**/*", "!**/node_modules/**", "!**/dist/*"],
 	})
 	// @ts-ignore - this is a client side function the type doesn't exist
 	return await rpc.generateConfigFileServer({
