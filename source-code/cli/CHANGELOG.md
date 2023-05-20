@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.7
+
+### Patch Changes
+
+- 2ff95127: Improved error messages and internal changes.
+
 ## 0.9.6
 
 ### Patch Changes
