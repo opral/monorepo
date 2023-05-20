@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.8
+
+### Patch Changes
+
+- 4fc27086: Fix autogeneration of the config. The files have been resolved from the binary instead of `cwd`
+
 ## 0.9.7
 
 ### Patch Changes
