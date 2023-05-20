@@ -75,16 +75,12 @@ it("should be able to make a binary roundtrip", async () => {
 // this test is a response to https://github.com/inlang/inlang/issues/811
 it("should work with characters outside of latin1", async () => {
 	const fs = createMemoryFs()
+	await fs.writeFile("/file4.txt", "👨‍👩‍👧")
+	const json = await toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })
 	await fromJson({
 		fs,
 		resolveFrom: "/",
-		json: {
-			"file1.txt": "Y29udGVudDE=",
-			"file2.js": "Y29udGVudDI=",
-			"node_modules/file3.js": "Y29udGVudDM=",
-			"file4.txt": "4pyI",
-		},
+		json,
 	})
-
 	expect(await fs.readFile("/file4.txt", { encoding: "utf-8" })).toEqual("👨‍👩‍👧")
 })

@@ -1,6 +1,7 @@
 import { it, describe, expect } from "vitest"
 import { createMemoryFs } from "../implementations/memoryFs.js"
 import { toJson } from "./toJson.js"
+import { fromJson } from "./fromJson.js"
 
 describe("toJson", async () => {
 	const fs = createMemoryFs()
@@ -41,11 +42,12 @@ describe("toJson", async () => {
 
 	// toJson and fromJson should encode and decode utf-8
 	// this test is a response to https://github.com/inlang/inlang/issues/811
-	it("should work with characters outside of latin1", () => {
+	it("should work with characters outside of latin1", async () => {
 		const fs = createMemoryFs()
 		fs.writeFile("/file1.txt", "👋")
-		expect(toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })).toEqual({
-			"file1.txt": "8J+YgA==",
-		})
+		const json = await toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })
+		const fs2 = createMemoryFs()
+		await fromJson({ fs: fs2, json, resolveFrom: "/" })
+		expect(await fs2.readFile("/file1.txt", { encoding: "utf-8" })).toEqual("👋")
 	})
 })

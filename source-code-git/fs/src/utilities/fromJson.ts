@@ -1,5 +1,6 @@
 import type { NodeishFilesystem } from "../interface.js"
 import { assertIsAbsolutePath } from "./assertIsAbsolutePath.js"
+import { decode as decodeBase64 } from "js-base64"
 
 /**
  * "Imports" files from a JSON into the filesystem.
@@ -17,6 +18,6 @@ export async function fromJson(args: {
 		const path = `${resolveFrom}/${filePath}`
 		await fs.mkdir(path, { recursive: true })
 
-		await fs.writeFile(path, atob(contents))
+		await fs.writeFile(path, decodeBase64(contents))
 	}
 }
