@@ -27,6 +27,7 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"js-base64": "^3.7.5",
 		"outmatch": "^0.7.0"
 	},
 	"license": "Apache-2.0"
