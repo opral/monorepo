@@ -85,11 +85,8 @@ export function PatternEditor(props: {
 	const getEditorFocus = () => {
 		if (editor()) {
 			const isFocus = useEditorIsFocused(() => editor())
-			if (isFocus()) {
-				console.log("focus")
-				if (localStorage.isFirstUse) {
-					setLocalStorage("isFirstUse", false)
-				}
+			if (isFocus() && localStorage.isFirstUse) {
+				setLocalStorage("isFirstUse", false)
 			}
 			return isFocus()
 		}
