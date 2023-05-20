@@ -46,7 +46,7 @@ export async function initCommandAction() {
 
 		const [configFile, error] = await rpc.generateConfigFile({
 			fs: fs,
-			resolveFrom: new URL("./", import.meta.url).pathname,
+			resolveFrom: process.cwd(),
 			applicationId: "CLI",
 		})
 		clearInterval(interval)
