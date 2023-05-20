@@ -36,8 +36,9 @@ export const cli = new Command()
 	.hook("postAction", (command) => {
 		telemetry.capture({
 			distinctId: "unknown",
-			event: `CLI command executed [${command.args.join(" ")}]`,
+			event: `CLI command executed`,
 			properties: {
+				args: command.args.join(" "),
 				gitOrigin,
 			},
 		})
