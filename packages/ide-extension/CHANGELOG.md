@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.5.9
+
+### Patch Changes
+
+- @inlang/core@0.8.6
+
 ## 0.5.8
 
 ### Patch Changes

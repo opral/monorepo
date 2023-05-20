@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.9.7",
+	"version": "0.9.8",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -47,7 +47,7 @@
 	},
 	"devDependencies": {
 		"@inlang-git/client": "*",
-		"@inlang-git/fs": "^0.0.3",
+		"@inlang-git/fs": "^0.0.4",
 		"@inlang/core": "*",
 		"@inlang/rpc": "*",
 		"@sentry/node": "^7.51.2",
