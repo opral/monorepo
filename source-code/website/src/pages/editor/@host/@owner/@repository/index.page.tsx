@@ -182,7 +182,7 @@ function TheActualPage() {
 }
 
 function NoInlangConfigFoundCard() {
-	const { fs } = useEditorState()
+	const { fs, setFsChange } = useEditorState()
 
 	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
 
@@ -196,6 +196,7 @@ function NoInlangConfigFoundCard() {
 			return false
 		} else {
 			await fs().writeFile("/inlang.config.js", configFile)
+			setFsChange(new Date())
 			return true
 		}
 	})
