@@ -70,3 +70,21 @@ it("should be able to make a binary roundtrip", async () => {
 		await fs2.readFile("images/file3.png", { encoding: "binary" }),
 	)
 })
+
+// toJson and fromJson should encode and decode utf-8
+// this test is a response to https://github.com/inlang/inlang/issues/811
+it("should work with characters outside of latin1", async () => {
+	const fs = createMemoryFs()
+	await fromJson({
+		fs,
+		resolveFrom: "/",
+		json: {
+			"file1.txt": "Y29udGVudDE=",
+			"file2.js": "Y29udGVudDI=",
+			"node_modules/file3.js": "Y29udGVudDM=",
+			"file4.txt": "4pyI",
+		},
+	})
+
+	expect(await fs.readFile("/file4.txt", { encoding: "utf-8" })).toEqual("👨‍👩‍👧")
+})

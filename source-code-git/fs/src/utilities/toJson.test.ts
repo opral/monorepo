@@ -38,4 +38,14 @@ describe("toJson", async () => {
 			"node_modules/file3.js": "Y29udGVudDM=",
 		})
 	})
+
+	// toJson and fromJson should encode and decode utf-8
+	// this test is a response to https://github.com/inlang/inlang/issues/811
+	it("should work with characters outside of latin1", () => {
+		const fs = createMemoryFs()
+		fs.writeFile("/file1.txt", "👋")
+		expect(toJson({ fs, matchers: ["**/*"], resolveFrom: "/" })).toEqual({
+			"file1.txt": "8J+YgA==",
+		})
+	})
 })
