@@ -5,7 +5,8 @@ import { telefunc } from "telefunc/vite"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
-import { isProduction } from "./src/utilities.js"
+
+const isProduction = process.env.NODE_ENV === "production"
 
 export default defineConfig({
 	envPrefix: "PUBLIC_",
