@@ -18,17 +18,19 @@ router.all(
 	express.json(),
 	async (request, response, next) => {
 		try {
-			const encryptedAccessToken = request.session?.encryptedAccessToken
-			const decryptedAccessToken = await decryptAccessToken({
-				JWE_SECRET_KEY: privateEnv.JWE_SECRET,
-				jwe: encryptedAccessToken,
-			})
+			const encryptedAccessToken = request.session?.encryptedAccessToken as string | undefined
+			const decryptedAccessToken = encryptedAccessToken
+				? await decryptAccessToken({
+						JWE_SECRET_KEY: privateEnv.JWE_SECRET,
+						jwe: encryptedAccessToken,
+				  })
+				: undefined
 			// slicing the path to remove the path prefix
 			const res = await fetch(request.url.slice(PATH.length), {
 				method: request.method,
 				// @ts-ignore
 				headers: {
-					authorization: `Bearer ${decryptedAccessToken}`,
+					authorization: decryptedAccessToken ? `Bearer ${decryptedAccessToken}` : undefined,
 					"Content-Type": request.get("Content-Type"),
 				},
 				// fetch throws an error if a method is GET and a body is attached
