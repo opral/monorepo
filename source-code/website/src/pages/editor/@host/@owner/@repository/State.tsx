@@ -219,11 +219,20 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("EDITOR cloned repository", {
-				owner: args.routeParams.owner,
-				repository: args.routeParams.repository,
-				isPrivate: repoIsPrivate(),
-			})
+			// not blocking the execution by using the callback pattern
+			// the user does not need to wait for the response
+			github
+				.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				.then((response) => {
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						isPrivate: response.data.private,
+					})
+				})
 			return result
 		},
 	)
