@@ -24,7 +24,12 @@ yarn add @inlang/cli
 
 ## Commands
 
-We recommend to use the CLI with `npx` to avoid installing the CLI globally, and thereby ensure that the CLI always works for the project it's used in. `npx` is auto-installed with Node and NPM.
+We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not intalling the CLI globally has the following advantages:
+
+- the installed CLI version is scoped to the project, ensuring that it always works.
+- the CLI gets installed for team members too, avoiding "why is this command not working for me" questions.
+
+`npx` is auto-installed with Node and NPM.
 
 ```sh
 CLI for inlang.
