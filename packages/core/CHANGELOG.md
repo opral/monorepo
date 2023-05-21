@@ -1,5 +1,12 @@
 # @inlang/core
 
+## 0.8.6
+
+### Patch Changes
+
+- Updated dependencies [81835b11]
+  - @inlang-git/fs@0.0.4
+
 ## 0.8.5
 
 ### Patch Changes
