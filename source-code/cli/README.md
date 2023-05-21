@@ -13,18 +13,18 @@ description: "The Inlang CLI"
 You can install the @inlang/cli with this command:
 
 ```sh
-npm install @inlang/cli -g
+npm install @inlang/cli
 ```
 
 or
 
 ```sh
-yarn global add @inlang/cli
+yarn add @inlang/cli
 ```
 
-If you have `npx` installed, you can simply type: `npx @inlang/cli`.
-
 ## Commands
+
+We recommend to use the CLI with `npx` to avoid installing the CLI globally, and thereby ensure that the CLI always works for the project it's used in. `npx` is auto-installed with Node and NPM.
 
 ```sh
 CLI for inlang.
@@ -54,9 +54,7 @@ It returns a complete config for you to use in your project, which you can modif
 To use the `config init` command, simply run:
 
 ```sh
-inlang config init
-# or
-npx @inlang/cli config init
+npx inlang config init
 ```
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
@@ -72,9 +70,7 @@ The translate command machine translates all resources.
 To initiate machine translation, run the following command:
 
 ```sh
-inlang machine translate
-# or
-npx @inlang/cli machine translate
+npx inlang machine translate
 ```
 
 This command reads the inlang.config.js file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
@@ -94,9 +90,7 @@ The editor command opens the Inlang editor for the current repository.
 To open the Inlang editor, run the following command:
 
 ```sh
-inlang open editor
-#or
-npx @inlang/cli open editor
+npx inlang open editor
 ```
 
 This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.
