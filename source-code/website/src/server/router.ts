@@ -23,7 +23,6 @@ import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
 import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "../services/auth/index.server.js"
 import { router as githubService } from "../services/github/index.server.js"
-import { isProduction } from "../utilities.js"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
@@ -42,7 +41,7 @@ router.use(
 	}),
 )
 
-if (isProduction) {
+if (process.env.NODE_ENV === "production") {
 	// import server code https://github.com/brillout/vite-plugin-ssr/issues/403
 	await import(`${rootPath}/dist/server/importBuild.cjs`)
 	router.use(sirv(`${rootPath}/dist/client`))
