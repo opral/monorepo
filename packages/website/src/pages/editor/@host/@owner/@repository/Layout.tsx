@@ -102,6 +102,8 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial language filter
 	createEffect(() => {
 		if (
+			repositoryIsCloned.error === undefined &&
+			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
 			onlyLanguagesTheUserSpeaks().length > 1
 		) {
