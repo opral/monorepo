@@ -314,13 +314,13 @@ Pseudo Code:
 
 ```js
 function transformJs(ast, config) {
-	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [[i, iAlias]]
+	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
 	const aliases = imports(ast, "@inlang/sdk-js").remove().getAliases()
-	aliases.forEach(([definition, alias]) =>
+	aliases.forEach(({exportN, aliasN}) =>
     // Wrap all occurences of `i`, `language`, etc with `get()`
-    if(/*is reactive condition*/) identifiers(alias).wrap(parse("get"))
+    if(!config.languageInUrl) identifiers(ast, aliasN).wrap(parse("get"))
 	  // Prepend `const { i } = getRuntimeFromContext()` in each context of iAlias
-		contexts(alias).declare(parse(`const { ${definition}:${alias} } = getRuntimeFromContext()`)),
+		contexts(ast, aliasN).before().insert(parse(`const { ${exportN}:${aliasN} } = getRuntimeFromContext()`)),
 	)
 	return ast
 }
@@ -330,22 +330,172 @@ function transformJs(ast, config) {
 
 ### `+layout.svelte`
 
-1.  if root
-    - import all necessary things with placeholders and from `@inlang/sdk-js` where possible
-    - insert codeblocks where needed (only non-reactive) with placeholders
-    - wrap markup
-2.  pass everything to `*.svelte`
+1. if root
+
+   1. import all necessary things with placeholders and from `@inlang/sdk-js` where possible
+      (`getRuntimeFromContext` is imported by `transformSvelte` in a later step):
+
+      1. Imports always required:
+
+      ```ts
+      import { $$_INLANG_LANGUAGE_$$ } from "@inlang/sdk-js"
+      import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
+      ```
+
+      2. Special cases:
+
+      - if `config.languageInUrl`:
+        ```ts
+        import { addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
+        ```
+      - else:
+        ```ts
+        import {
+        	localStorageKey,
+        	addRuntimeToContext,
+        } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
+        import { browser } from "$app/environment"
+        ```
+
+      ```
+
+      ```
+
+   2. insert codeblocks where needed (only non-reactive) with placeholders
+
+      1. Declare `export let data` and `addRuntimeToContext(getRuntimeFromData(data));` after the last import
+      2. If `!config.languageInUrl`: make aliases from sdk-js import reactive (insert the following code block before first usage of ):
+
+      ```ts
+      $: {
+      	addRuntimeToContext(getRuntimeFromData(data))
+      	$$_INLANG_REASSIGN_SDK_IMPORTS_$$
+      }
+      ```
+
+   3. Add `<slot />` if markup is empty (only comments or newline-ish chars)
+   4. wrap markup (the reactive $ will be added by `transformSvelte`)
+      1. if `config.languageInUrl && config.isStatic` with `{#if $$_INLANG_LANGUAGE_$$}{/if}`
+      2. if `config.languageInUrl` with `{#key $$_INLANG_LANGUAGE_$$}{/key}`, else `{#if $$_INLANG_LANGUAGE_$$}{/if}`
+
+2. Pass everything to `transformSvelte`
+
+Pseudo code:
+
+```js
+// NOTES @benjaminpreiss I am not sure whether we can pull `module` out of the preprocessing api
+function transformLayoutSvelte({ markup, style, script }, config) {
+	// Import all necessary things
+	if (config.isRoot) {
+		imports(script.ast, "@inlang/sdk-js").add("$$_INLANG_LANGUAGE_$$")
+		imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/shared").add("getRuntimeFromData")
+		if (config.languageInUrl)
+			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/not-reactive").add(
+				"addRuntimeToContext",
+			)
+		else
+			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/reactive").add(
+				"localStorageKey",
+				"addRuntimeToContext",
+			)
+		// Insert reactive inlang sdk import reassigments
+		if (!config.languageInUrl)
+			contexts(script.ast).insertAfterImports(
+				parse(`
+          $: {
+            addRuntimeToContext(getRuntimeFromData(data))
+            $$_INLANG_REASSIGN_SDK_IMPORTS_$$
+          }
+        `),
+			)
+		// Insert `export let data` and `addRuntimeToContext(getRuntimeFromData(data));`
+		// As you can see, contexts() with only one param returns the top level context
+		contexts(script.ast).insertAfterImports(
+			parse(`
+        export let data;
+        addRuntimeToContext(getRuntimeFromData(data));
+      `),
+		)
+		if (isEmpty(script.markup)) contexts(markup).insert(`<slot/>`)
+	}
+	return transformSvelte({ markup, style, script }, config)
+}
+```
 
 ### `+page.svelte`
 
 - pass everything to `*.svelte`
 
+Pseudo code:
+
+```ts
+function transformPageSvelte(
+	{
+		markup,
+		style,
+		script,
+	}: { markup: { ast: Node; magicString: MagicString }; style: Node; script: { ast: Node } },
+	config,
+) {
+	return transformSvelte({ markup, style, script }, config)
+}
+```
+
 ### `*.svelte`
 
 1.  replace `@inlang/sdk-js` imports with `getRuntimeFromContext`
-2.  resolve aliases and placeholders
-3.  if reactive
+2.  Add import:
+
+    - if `config.languageInUrl`: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
+    - else: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive"`
+
+3.  resolve aliases and placeholders `// NOTES @ivanhofer - what do you mean with this step?`
+4.  if reactive
     - transform `i` and `language` to `$i` and `$language`
+
+Pseudo code:
+
+```ts
+function transformSvelte(
+	{
+		markup,
+		style,
+		script,
+	}: { markup: { ast: Node; magicString: MagicString }; style: Node; script: { ast: Node } },
+	config,
+) {
+	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
+	const aliases = imports(script.ast, "@inlang/sdk-js").remove().getAliases()
+	aliases.forEach(({ exportN, aliasN }) => {
+		// Replace all occurences of `i`, `language` with `$i`, `$language` etc if reactive
+		if (!config.languageInUrl) identifiers(script.ast, aliasN).replace(parse(`$${aliasN}`))
+		// ONLY IN SCRIPT!: Declare all aliases from sdk-import: `let iAlias`, `let languageAlias`, ...
+		// contexts with only one param returns top level context
+		contexts(script.ast)
+			.afterImports()
+			.insert(parse(`let ${aliasN};`))
+		// ONLY IN SCRIPT!: Assign `({ i } = getRuntimeFromContext())` in each context of iAlias (or $iAlias in reactive case).
+		contexts(script.ast, !config.languageInUrl ? `$${aliasN}` : aliasN)
+			.before()
+			.insert(parse(`({ ${exportN}:${aliasN} } = getRuntimeFromContext())`))
+		// IN MARKUP!: Replace iAlias with `getRuntimeFromContext().i` or the corresponding reactive version
+		// As you can see, `identifiers` also accepts an array that can contain an obj {ast, magicString}
+		// (Which will tell us to do the transforms on the magicstring)
+		identifiers(markup, aliasN).replace(
+			parse(
+				!config.languageInUrl
+					? `$(getRuntimeFromContext().${exportN})`
+					: `getRuntimeFromContext().${exportN}`,
+			),
+		)
+	})
+	return {
+		markup,
+		style,
+		script,
+	}
+}
+```
 
 ---
 
