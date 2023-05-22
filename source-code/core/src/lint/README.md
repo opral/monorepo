@@ -35,7 +35,7 @@ const allLints = getLintReports(lintedResources)
 // get lint reports for "error"
 const errors = getLintReports(lintedResources, { level: "error" })
 // get lint reports for "warn" for the first node.
-const warnings = getLintReports(lintedResources, { level: "warn", nested: false })
+const warnings = getLintReports(lintedResources, { level: "warn", recursive: false })
 ```
 
 ## Configuration
