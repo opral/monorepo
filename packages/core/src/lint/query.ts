@@ -9,36 +9,49 @@ import type {
 
 /**
  * Query options for lints.
- *
- *
  */
 type QueryOptions = {
-	nested?: boolean
+	/**
+	 * @deprecated use `options.recursive` instead for better clarity.
+	 */
+	nested?: false
+	recursive?: false
 	level?: LintRule["level"]
 	id?: LintRule["id"]
 }
+
+export type getLintReports = (
+	node: LintedNode | LintedNode[],
+	options?: QueryOptions,
+) => LintReport[]
 
 /**
  * Extracts all lint reports that are present on the given node.
  * Per default it will also return lint reports attached to child nodes.
  *
  * @param node the node to extract lint reports from
- * @param options.nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.recursive `default: true` if set to `false` only the lint reports for the given node will be returned
  * @param options.level filter based on the level
  * @param options.id filter based on the lint id
  * @returns a list of lint reports
  */
-export const getLintReports = (
+export function getLintReports(
 	node: LintedNode | LintedNode[],
 	// Writing out QueryOptions for a better DX.
 	// Developers can see the options instead of the type.
 	options?: {
 		level?: LintRule["level"]
 		id?: LintRule["id"]
-		nested?: boolean
+		/** @deprecated use `options.recursive` instead for better clarity. */
+		nested?: false
+		recursive?: false
 	},
-): LintReport[] => {
-	const withDefaults = { nested: true, ...options }
+): LintReport[] {
+	if (options?.nested !== undefined) {
+		console.warn("The `nested` option is deprecated. Use `recursive` instead for better clarity.")
+	}
+	const withDefaults = { recursive: true as false, ...options }
+
 	if (Array.isArray(node)) {
 		return node.flatMap((n) => getLintReports(n, withDefaults))
 	}
@@ -64,13 +77,18 @@ const getLintReportsFromResource = (
 	options: QueryOptions,
 ): LintReport[] => [
 	...(lint || []),
-	...(options.nested ? body.flatMap((message) => getLintReportsFromMessage(message, options)) : []),
+	...(options.recursive || options.nested
+		? body.flatMap((message) => getLintReportsFromMessage(message, options))
+		: []),
 ]
 
 const getLintReportsFromMessage = (
 	{ lint, pattern }: LintedMessage,
 	options: QueryOptions,
-): LintReport[] => [...(lint || []), ...(options.nested ? getLintReportsFromPattern(pattern) : [])]
+): LintReport[] => [
+	...(lint || []),
+	...(options.recursive || options.nested ? getLintReportsFromPattern(pattern) : []),
+]
 
 const getLintReportsFromPattern = ({ lint }: LintedPattern): LintReport[] => lint || []
 
@@ -95,7 +113,7 @@ const withFilters = (report: LintReport[], options: QueryOptions) => {
  * Per default it will also return lint reports attached to child nodes.
  *
  * @param node the node to extract lint reports from
- * @param options.nested if set to `false` will just return the lint reports directly attached on this node
+ * @param options.recursive `default: true` if set to `false` only the lint reports for the given node will be returned
  * @param options.level filter based on the level
  * @param options.id filter based on the lint id
  * @returns `true` iff the given node has lint reports
@@ -103,9 +121,5 @@ const withFilters = (report: LintReport[], options: QueryOptions) => {
 export const hasLintReports = (
 	node: LintedNode | LintedNode[], // Writing out QueryOptions for a better DX.
 	// Developers can see the options instead of the type.
-	options?: {
-		level?: LintRule["level"]
-		id?: LintRule["id"]
-		nested?: boolean
-	},
+	options?: QueryOptions,
 ): boolean => getLintReports(node, options).length > 0

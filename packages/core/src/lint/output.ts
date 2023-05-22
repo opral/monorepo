@@ -7,7 +7,7 @@ export const print = (resource: LintedResource) => {
 	const separator = `Resource['${resource.languageTag.name}']`
 	console.info(separator)
 
-	const reports = getLintReports(resource, { nested: false })
+	const reports = getLintReports(resource, { recursive: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
@@ -23,7 +23,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
 	const separator = `${prefix} -> Message['${message.id.name}']`
 	console.info(separator)
 
-	const reports = getLintReports(message, { nested: false })
+	const reports = getLintReports(message, { recursive: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
@@ -34,7 +34,7 @@ const printMessage = (message: LintedMessage, prefix: string) => {
 const printPattern = (pattern: LintedPattern) => {
 	if (!hasLintReports(pattern)) return
 
-	const reports = getLintReports(pattern, { nested: false })
+	const reports = getLintReports(pattern, { recursive: false })
 	for (const report of reports) {
 		printReport(report, "info")
 	}
