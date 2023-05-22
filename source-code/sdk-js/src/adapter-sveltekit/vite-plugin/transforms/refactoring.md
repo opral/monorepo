@@ -113,6 +113,67 @@ for markup block:
 
 # Flows
 
+## `Javascript` and `Svelte`
+
+There is some stuff that has to be done both in javascript AND every svelte file:
+
+Possible implementation:
+
+```ts
+function replaceSdkImports(ast) {
+	// Prunes the imports, i.e. merge duplicates.
+	// Then remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
+	const aliases = imports(ast, "@inlang/sdk-js").prune().remove().getAliases()
+	// Declare all aliases from sdk-import: `let iAlias`, `let languageAlias`, ...
+	// Assign `({ i } = getRuntimeFromContext())` in each context of iAlias (or $iAlias in reactive case).
+	contexts(ast).insertAfterImports(
+		parse(`
+      $$_INLANG_DECLARE_SDK_IMPORTS_$$;
+      $$_INLANG_REASSIGN_SDK_IMPORTS_$$;
+    `),
+	)
+	return aliases
+}
+
+function replacePlaceholders(ast, config, fileType: "svelte" | "js") {
+	imports(ast, "@inlang/sdk-js/adapter-sveltekit/client/not-reactive").add("getRuntimeFromContext")
+	// Replace $$_INLANG_REASSIGN_SDK_IMPORTS_$$
+	identifiers(script.ast, "$$_INLANG_REASSIGN_SDK_IMPORTS_$$").replace(
+		parse(`
+      ({
+        ${aliases.map(({ exportN, aliasN }) => `${exportN}:${aliasN}`).join(",")}
+      } = getRuntimeFromContext());
+    `),
+	)
+	// Replace $$_INLANG_DECLARE_SDK_IMPORTS_$$
+	identifiers(script.ast, "$$_INLANG_DECLARE_SDK_IMPORTS_$$").replace(
+		parse(`
+      let ${aliases.map(({ exportN, aliasN }) => `${aliasN}`).join(",")}
+    `),
+	)
+	// Replace placeholders from sdk-js import, language
+	identifiers([script.ast, markup], "$$_INLANG_LANGUAGE_$$").replace(
+		parse(
+			!config.languageInUrl ? (fileType === "svelte" ? "$language" : "get(language)") : "language",
+		),
+	)
+	// Replace placeholders from sdk-js import, i
+	identifiers([script.ast, markup], "$$_INLANG_I_$$").replace(
+		parse(!config.languageInUrl ? (fileType === "svelte" ? "$i" : "get(i)") : "i"),
+	)
+	// Replace placeholders from sdk-js import, languages
+	identifiers([script.ast, markup], "$$_INLANG_LANGUAGES_$$").replace(
+		parse(
+			!config.languageInUrl
+				? fileType === "svelte"
+					? "$languages"
+					: "get(languages)"
+				: "languages",
+		),
+	)
+}
+```
+
 ## `JavaScript`
 
 ### `hooks.server.js`
@@ -121,7 +182,7 @@ things we need to wrap: - `handle`
 
 wrap with `initHandleWrapper` (with special case `sequence`)
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformHooksServerJsAst(ast, config) {
@@ -143,7 +204,7 @@ things we need to wrap: - `load`
 - `if root` wrap with `initRootLayoutServerLoadWrapper`
 - `else` wrap with `initServerLoadWrapper`
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformLayoutServerJsAst(ast, config) {
@@ -167,7 +228,7 @@ things we need to wrap: - `load` - individual `actions`
 - `if load` wrap with `initServerLoadWrapper`
 - `if actions` wrap with `initActionWrapper`
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function wrap(ast, config, exportName) {}
@@ -199,7 +260,7 @@ things we need to wrap:
 
 wrap with `initRequestHandlerWrapper`
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformServerJsAst(ast, config) {
@@ -221,7 +282,7 @@ things we need to wrap: - `load`
 - `if root` wrap with `initRootLayoutLoadWrapper`
 - `else` wrap with `initLoadWrapper`
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformLayoutJsAst(ast, config) {
@@ -245,7 +306,7 @@ things we need to wrap: - `load`
 - `if root` wrap with `initRootPageLoadWrapper`
 - `else` wrap with `initLoadWrapper`
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformPageJsAst(ast, config) {
@@ -268,7 +329,7 @@ This is not supported.
 
 Throw a meaningful error if we encounter an import from `@inlang/sdk-js`.
 
-Pseudo-code:
+Possible implementation:
 
 ```js
 function transformGenericServerJsAst(ast, config) {
@@ -310,18 +371,16 @@ JavaScript files can run on the server and on the client. So we need to detect t
       // result => 'import { get } from "svelte/store";const fn = () => { const { i } = getRuntimeFromContext();get(i)("test") }'
       ```
 
-Pseudo Code:
+Possible implementation:
 
 ```js
 function transformJs(ast, config) {
-	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
-	const aliases = imports(ast, "@inlang/sdk-js").remove().getAliases()
+  const aliases = replaceSdkImports(ast)
 	aliases.forEach(({exportN, aliasN}) =>
     // Wrap all occurences of `i`, `language`, etc with `get()`
     if(!config.languageInUrl) identifiers(ast, aliasN).wrap(parse("get"))
-	  // Prepend `const { i } = getRuntimeFromContext()` in each context of iAlias
-		contexts(ast, aliasN).before().insert(parse(`const { ${exportN}:${aliasN} } = getRuntimeFromContext()`)),
 	)
+	replacePlaceholders(script.ast, config, "js")
 	return ast
 }
 ```
@@ -380,14 +439,14 @@ function transformJs(ast, config) {
 
 2. Pass everything to `transformSvelte`
 
-Pseudo code:
+Possible implementation:
 
 ```js
 // NOTES @benjaminpreiss I am not sure whether we can pull `module` out of the preprocessing api
 function transformLayoutSvelte({ markup, style, script }, config) {
 	// Import all necessary things
 	if (config.isRoot) {
-		imports(script.ast, "@inlang/sdk-js").add("$$_INLANG_LANGUAGE_$$")
+		imports(script.ast, "@inlang/sdk-js").add("language")
 		imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/shared").add("getRuntimeFromData")
 		if (config.languageInUrl)
 			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/not-reactive").add(
@@ -403,8 +462,8 @@ function transformLayoutSvelte({ markup, style, script }, config) {
 			contexts(script.ast).insertAfterImports(
 				parse(`
           $: {
-            addRuntimeToContext(getRuntimeFromData(data))
-            $$_INLANG_REASSIGN_SDK_IMPORTS_$$
+            addRuntimeToContext(getRuntimeFromData(data));
+            $$_INLANG_REASSIGN_SDK_IMPORTS_$$;
           }
         `),
 			)
@@ -416,7 +475,15 @@ function transformLayoutSvelte({ markup, style, script }, config) {
         addRuntimeToContext(getRuntimeFromData(data));
       `),
 		)
+		// Insert slot, only if markup is empty
 		if (isEmpty(script.markup)) contexts(markup).insert(`<slot/>`)
+		// Insert a conditional
+		if (config.languageInUrl && config.isStatic)
+			contexts(markup).wrap(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
+		contexts(markup).wrap(
+			`{#${config.languageInUrl ? "key" : "if"} $$_INLANG_LANGUAGE_$$}`,
+			`{/${config.languageInUrl ? "key" : "if"}}`,
+		)
 	}
 	return transformSvelte({ markup, style, script }, config)
 }
@@ -426,7 +493,7 @@ function transformLayoutSvelte({ markup, style, script }, config) {
 
 - pass everything to `*.svelte`
 
-Pseudo code:
+Possible implementation:
 
 ```ts
 function transformPageSvelte(
@@ -453,7 +520,7 @@ function transformPageSvelte(
 4.  if reactive
     - transform `i` and `language` to `$i` and `$language`
 
-Pseudo code:
+Possible implementation:
 
 ```ts
 function transformSvelte(
@@ -464,31 +531,15 @@ function transformSvelte(
 	}: { markup: { ast: Node; magicString: MagicString }; style: Node; script: { ast: Node } },
 	config,
 ) {
-	// Remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
-	const aliases = imports(script.ast, "@inlang/sdk-js").remove().getAliases()
+	// Removes the sdk import and inserts variable declarations instead
+	const aliases = replaceSdkImports(ast)
 	aliases.forEach(({ exportN, aliasN }) => {
 		// Replace all occurences of `i`, `language` with `$i`, `$language` etc if reactive
-		if (!config.languageInUrl) identifiers(script.ast, aliasN).replace(parse(`$${aliasN}`))
-		// ONLY IN SCRIPT!: Declare all aliases from sdk-import: `let iAlias`, `let languageAlias`, ...
-		// contexts with only one param returns top level context
-		contexts(script.ast)
-			.afterImports()
-			.insert(parse(`let ${aliasN};`))
-		// ONLY IN SCRIPT!: Assign `({ i } = getRuntimeFromContext())` in each context of iAlias (or $iAlias in reactive case).
-		contexts(script.ast, !config.languageInUrl ? `$${aliasN}` : aliasN)
-			.before()
-			.insert(parse(`({ ${exportN}:${aliasN} } = getRuntimeFromContext())`))
-		// IN MARKUP!: Replace iAlias with `getRuntimeFromContext().i` or the corresponding reactive version
 		// As you can see, `identifiers` also accepts an array that can contain an obj {ast, magicString}
-		// (Which will tell us to do the transforms on the magicstring)
-		identifiers(markup, aliasN).replace(
-			parse(
-				!config.languageInUrl
-					? `$(getRuntimeFromContext().${exportN})`
-					: `getRuntimeFromContext().${exportN}`,
-			),
-		)
+		if (!config.languageInUrl)
+			identifiers([script.ast, markup], aliasN).replace(parse(`$${aliasN}`))
 	})
+	replacePlaceholders(script.ast, config, "svelte")
 	return {
 		markup,
 		style,
