@@ -1,12 +1,6 @@
 import { html } from "satori-html"
-import { getTotalTranslatedPercentage } from "./index.js"
 import type { LintReport } from "@inlang/core/lint"
 
-export interface Percentage {
-	lang: string
-	percentage: number
-	count: { total: number; lint: number }
-}
 export interface VNode {
 	type: string
 	props: {
@@ -25,58 +19,22 @@ export interface VNode {
  *
  */
 export const markup = (
-	percentages: Percentage[],
-	preferredLanguage: string | undefined,
-	numberOfMissingMessagesInTotal: number,
-	numberOfMissingMessagesInPreferredLanguage: number | undefined,
+	percentage: number,
+	numberOfMissingMessages: number,
 	lints: LintReport[],
 ): VNode => {
 	// Get language names
-
-	// check if the preferred language is set but there is no corresponsidng object with a lang attribute in percentages for it
-	// this happens when the preferred language is set to a language that is not in the project
-	if (
-		preferredLanguage &&
-		!percentages.map((percentage) => percentage.lang).includes(preferredLanguage) &&
-		percentages.map((percentage) => percentage.lang).includes("en")
-	) {
-		preferredLanguage = "en"
-	} else {
-		// set to first language in percentages
-		if (!percentages[0]) {
-			throw new Error("No language found in project, please add a language.")
-		}
-		preferredLanguage = percentages[0].lang
-	}
-
-	// sort percentages by preferred language
-	const sortedPercentages = percentages.sort((a, b) => {
-		if (a.lang === preferredLanguage) {
-			return -1
-		}
-		if (b.lang === preferredLanguage) {
-			return 1
-		}
-		return 0
-	})
-
-	// Get the total translated percentage
-	const total = getTotalTranslatedPercentage(sortedPercentages)
 
 	return html`<div
 		style="display: flex; padding: 5px 20px; flex-direction: column; position: relative; background-color: white;"
 	>
 		<p style="font-size: 18px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: 0x; color: #000">
-			${headerText(
-				preferredLanguage,
-				numberOfMissingMessagesInTotal,
-				numberOfMissingMessagesInPreferredLanguage,
-			)}
+			${headerText({ numberOfMissingMessages, lints })}
 		</p>
 		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
 				<p style="font-size: 20px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: -12px; color: #62c401">
-					${Math.round(100 - total)}%
+					${percentage}%
 				</p>
 				<p style="font-size: 14px; font-weight: 700; margin-bottom: 0px;">
 					translated
@@ -129,25 +87,9 @@ export const markup = (
 	</div>`
 }
 
-function headerText(
-	preferredLanguage: string | undefined,
-	numberOfMissingMessagesInTotal: number,
-	numberOfMissingMessagesInPreferredLanguage: number | undefined,
-): string {
-	const languageNames = new Intl.DisplayNames(["en"], {
-		type: "language",
-	})
-
-	if (
-		numberOfMissingMessagesInPreferredLanguage &&
-		numberOfMissingMessagesInPreferredLanguage > 0 &&
-		preferredLanguage
-	) {
-		return `${numberOfMissingMessagesInPreferredLanguage} ${languageNames.of(
-			preferredLanguage,
-		)} messages missing`
-	} else if (numberOfMissingMessagesInTotal > 0) {
-		return `${numberOfMissingMessagesInTotal} messages missing`
+function headerText(args: { numberOfMissingMessages: number; lints: LintReport[] }): string {
+	if (args.numberOfMissingMessages > 0) {
+		return `${args.numberOfMissingMessages} messages missing`
 	} else {
 		return "All messages translated"
 	}
