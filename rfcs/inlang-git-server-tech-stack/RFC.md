@@ -26,4 +26,55 @@ Developers should have the possibility to choose their own deployment strategy b
 
 ## Proposal
 
-To be discussed
+All requirements seem to be fulfilled by having a "modern express" server that is runtime and deployment-independent. Deploying plain JS is extremly simple.
+
+### Comparing existing solutions
+
+There are two solutions out there that I am aware of.
+
+#### [Hattip](https://github.com/hattipjs/hattip)
+
+> Instead of writing server code that only works with Express.js, write server code that can be deployed anywhere: AWS, Cloudflare Workers, Vercel, VPS, ...
+
+##### Pros
+
+- Strict goal of obeying to [WinterCG](https://wintercg.org/), ensuring web-interopability.
+- The project is small and needs a main adopter. We could be the main adopter, sponsor the project, and influence the direction of the project (with more financial resources in the future, we could hire the team).
+- @samuelstroschein is in closer contact with one of the maintainers (@brillout) who is brilliant in responding to issues.
+
+##### Cons
+
+- Early. The project is still in early stages and has not been used in production yet. This is a risk we would have to take.
+
+#### [Hattip](https://github.com/hattipjs/hattip)
+
+> Instead of writing server code that only works with Express.js, write server code that can be deployed anywhere: AWS, Cloudflare Workers, Vercel, VPS, ...
+
+##### Pros
+
+- Strictly obeying to [WinterCG](https://wintercg.org/), ensuring web-interopability
+- The project is small and needs a main adopter. We could be the main adopter, sponsor the project, and influence the direction of the project. (With more financial resources, we could maybe even hire the authors to work on hattip and VPS (the framework for the editor) full-time to derisk our tech stack decision and help hattip grow).
+- @samuelstroschein is in closer contact with one of the maintainers (@brillout) who is brilliant in responding to issues.
+
+##### Cons
+
+- Early. The project is still in early stages and has not been used in production yet. This is a risk we would have to take.
+- Hono is establishing itself as the goto "express" of the future, potentially making hattip a slightly better express, but not the goto framework for the future. Similar to express vs fastapi etc.
+
+#### [Hono](https://github.com/honojs/hono)
+
+> Hono - [炎] means flame🔥 in Japanese - is a small, simple, and ultrafast web framework for the Edges. It works on any JavaScript runtime: Cloudflare Workers, Fastly Compute@Edge, Deno, Bun, Vercel, Lagon, AWS Lambda, and Node.js.
+
+##### Pros
+
+- Wider adoption than hattip.
+- Seems more mature than hattip.
+
+##### Neutral
+
+- Hattip seems to have a stricter goal of becoming the default middleware/server system for the web, see https://github.com/honojs/hono/issues/443.
+
+##### Cons
+
+- Doesn't seem to obey to [WinterCG](https://wintercg.org/) to ensuring web-interopability.
+- Already bloated with "nice to have" features that are implemented extremely opinioated like RPC that use tRPC and Zod under the hood, see https://hono.dev/guides/rpc. This is a risk for us as we might have to fight against the framework to implement our own features.
