@@ -136,7 +136,10 @@ function replaceSdkImports(ast) {
 }
 
 function replacePlaceholders(ast, config, fileType: "svelte" | "js") {
-	imports(ast, "@inlang/sdk-js/adapter-sveltekit/client/not-reactive").add("getRuntimeFromContext")
+	imports(
+		ast,
+		`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-" : ""}reactive`,
+	).add("getRuntimeFromContext")
 	// Replace $$_INLANG_REASSIGN_SDK_IMPORTS_$$
 	identifiers(script.ast, "$$_INLANG_REASSIGN_SDK_IMPORTS_$$").replace(
 		parse(`
@@ -187,6 +190,7 @@ Possible implementation:
 ```js
 function transformHooksServerJsAst(ast, config) {
 	// Wrap handle function
+	imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initHandleWrapper")
 	const wrapper = "initHandleWrapper(/*options here*/).wrap"
 	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
 	definitions(ast, "handle").wrap(parse(wrapper))
@@ -208,6 +212,9 @@ Possible implementation:
 
 ```js
 function transformLayoutServerJsAst(ast, config) {
+	imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add(
+		config.isRoot ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
+	)
 	// Wrap load function
 	const wrapper = config.isRoot
 		? "initRootLayoutServerLoadWrapper(/*options here*/).wrap"
@@ -238,8 +245,12 @@ function transformPageServerJsAst(ast, config) {
 	const loadWrapper = "initServerLoadWrapper(/*options here*/).wrap"
 	const actionsWrapper = "initActionWrapper(/*options here*/).wrap"
 	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "load").wrap(parse(loadWrapper))
-	definitions(ast, "load").wrap(parse(actionsWrapper))
+	const loadWasWrapped = definitions(ast, "load").wrap(parse(loadWrapper)).successful()
+	const actionsWasWrapped = definitions(ast, "actions").wrap(parse(actionsWrapper)).successful()
+	if (loadWasWrapped)
+		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initServerLoadWrapper")
+	if (actionsWasWrapped)
+		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initActionWrapper")
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -267,7 +278,11 @@ function transformServerJsAst(ast, config) {
 	// Wrap GET, POST, PUT, PATCH, DELETE & OPTIONS function
 	const wrapper = "initRequestHandlerWrapper(/*options here*/).wrap"
 	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS").wrap(parse(actionsWrapper))
+	const wasWrapped = definitions(ast, "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+		.wrap(parse(actionsWrapper))
+		.successful()
+	if (wasWrapped)
+		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initRequestHandlerWrapper")
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -291,7 +306,11 @@ function transformLayoutJsAst(ast, config) {
 		? "initRootLayoutLoadWrapper(/*options here*/).wrap"
 		: "initLoadWrapper(/*options here*/).wrap"
 	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "load").wrap(parse(wrapper))
+	const wasWrapped = definitions(ast, "load").wrap(parse(wrapper)).successful()
+	if (wasWrapped)
+		imports(ast, "@inlang/sdk-js/adapter-sveltekit/shared").add(
+			config.isRoot ? "initRootLayoutLoadWrapper" : "initLoadWrapper",
+		)
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -315,7 +334,11 @@ function transformPageJsAst(ast, config) {
 		? "initRootPageLoadWrapper(/*options here*/).wrap"
 		: "initLoadWrapper(/*options here*/).wrap"
 	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "load").wrap(parse(wrapper))
+	const wasWrapped = definitions(ast, "load").wrap(parse(wrapper)).successful()
+	if (wasWrapped)
+		imports(ast, "@inlang/sdk-js/adapter-sveltekit/shared").add(
+			config.isRoot ? "initRootPageLoadWrapper" : "initLoadWrapper",
+		)
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -448,15 +471,13 @@ function transformLayoutSvelte({ markup, style, script }, config) {
 	if (config.isRoot) {
 		imports(script.ast, "@inlang/sdk-js").add("language")
 		imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/shared").add("getRuntimeFromData")
-		if (config.languageInUrl)
-			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/not-reactive").add(
-				"addRuntimeToContext",
-			)
-		else
-			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/reactive").add(
-				"localStorageKey",
-				"addRuntimeToContext",
-			)
+		imports(
+			script.ast,
+			`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-" : ""}reactive`,
+		).add("addRuntimeToContext")
+		if (!config.languageInUrl)
+			imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/client/reactive").add("localStorageKey")
+
 		// Insert reactive inlang sdk import reassigments
 		if (!config.languageInUrl)
 			contexts(script.ast).insertAfterImports(
