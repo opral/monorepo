@@ -9,11 +9,23 @@ import { readFileSync } from "node:fs"
 import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { missingTranslations } from "./helper/missingTranslations.js"
+import { caching } from "cache-manager"
 
 const fontMedium = readFileSync(new URL("./assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("./assets/static/Inter-Bold.ttf", import.meta.url))
 
+const cache = await caching("memory", {
+	ttl: 60 * 60 * 24 * 1, // 1 day,
+	sizeCalculation: () => 40000, // approx 40kb per badge
+	maxSize: 1000 * 1000 * 1000 * 0.25, // 250 MB
+})
+
 export const badge = async (url: string) => {
+	const fromCache = (await cache.get(url)) as string | undefined
+	if (fromCache) {
+		return fromCache
+	}
+
 	// initialize a new file system on each request to prevent cross request pollution
 	const fs = createMemoryFs()
 	await clone(url, fs)
@@ -61,8 +73,6 @@ export const badge = async (url: string) => {
 		referenceResource,
 	})
 
-	// markup the percentages
-	const [host, owner, repository] = [...url.split("/")]
 	const vdom = removeCommas(markup(percentage, numberOfMissingTranslations, lints))
 
 	// render the image
@@ -87,16 +97,15 @@ export const badge = async (url: string) => {
 		},
 	)
 
+	await cache.set(url, image)
+
 	telemetryNode.capture({
 		event: "BADGE created",
 		distinctId: "unknown",
 		properties: {
-			host,
-			owner,
-			repository,
+			url,
 		},
 	})
-
 	// return image
 	return image
 }

@@ -25,6 +25,7 @@
 		"@inlang/core": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
+		"cache-manager": "^5.2.1",
 		"satori": "^0.4.7",
 		"satori-html": "^0.3.2"
 	},
