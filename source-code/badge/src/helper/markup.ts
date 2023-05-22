@@ -27,13 +27,11 @@ export interface VNode {
 export const markup = (
 	percentages: Percentage[],
 	preferredLanguage: string | undefined,
-	numberOfMissingMessagesInPreferredLanguage: number,
+	numberOfMissingMessagesInTotal: number,
+	numberOfMissingMessagesInPreferredLanguage: number | undefined,
 	lints: LintReport[],
 ): VNode => {
 	// Get language names
-	const languageNames = new Intl.DisplayNames(["en"], {
-		type: "language",
-	})
 
 	// check if the preferred language is set but there is no corresponsidng object with a lang attribute in percentages for it
 	// this happens when the preferred language is set to a language that is not in the project
@@ -69,13 +67,11 @@ export const markup = (
 		style="display: flex; padding: 5px 20px; flex-direction: column; position: relative; background-color: white;"
 	>
 		<p style="font-size: 18px; font-family: "Inter Bold"; font-weight: 700; margin-bottom: 0x; color: #000">
-			${
-				numberOfMissingMessagesInPreferredLanguage > 0
-					? `${numberOfMissingMessagesInPreferredLanguage}${" "}${languageNames.of(
-							preferredLanguage,
-					  )} messages missing`
-					: `Translated successfully!`
-			} 
+			${headerText(
+				preferredLanguage,
+				numberOfMissingMessagesInTotal,
+				numberOfMissingMessagesInPreferredLanguage,
+			)}
 		</p>
 		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 			<div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -131,4 +127,28 @@ export const markup = (
 			<div style="display: flex; height: 200px; width: 100%; background-color: white;"></div>
 		</div>
 	</div>`
+}
+
+function headerText(
+	preferredLanguage: string | undefined,
+	numberOfMissingMessagesInTotal: number,
+	numberOfMissingMessagesInPreferredLanguage: number | undefined,
+): string {
+	const languageNames = new Intl.DisplayNames(["en"], {
+		type: "language",
+	})
+
+	if (
+		numberOfMissingMessagesInPreferredLanguage &&
+		numberOfMissingMessagesInPreferredLanguage > 0 &&
+		preferredLanguage
+	) {
+		return `${numberOfMissingMessagesInPreferredLanguage} ${languageNames.of(
+			preferredLanguage,
+		)} messages missing`
+	} else if (numberOfMissingMessagesInTotal > 0) {
+		return `${numberOfMissingMessagesInTotal} messages missing`
+	} else {
+		return "All messages translated"
+	}
 }

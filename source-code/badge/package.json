@@ -1,6 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
+	"version": "0.1.0",
 	"private": true,
 	"exports": {
 		".": "./src/index.ts",
@@ -30,6 +31,5 @@
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }
