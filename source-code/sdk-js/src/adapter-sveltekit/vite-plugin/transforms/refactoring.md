@@ -120,6 +120,80 @@ There is some stuff that has to be done both in javascript AND every svelte file
 Possible implementation:
 
 ```ts
+function wrapAndAddParameters(
+	ast,
+	config,
+	wrappers: (
+		| "initHandleWrapper"
+		| "initRootLayoutServerLoadWrapper"
+		| "initServerLoadWrapper"
+		| "initActionWrapper"
+		| "initRequestHandlerWrapper"
+		| "initRootLayoutLoadWrapper"
+		| "initLoadWrapper"
+		| "initRootPageLoadWrapper"
+	)[],
+) {
+	wrappers.forEach((wrapper) => {
+		let identifier
+		let wrapperAst
+		switch (wrapper) {
+			case "initHandleWrapper":
+				identifiers = ["handle"]
+				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
+				break
+			case "initServerLoadWrapper":
+			case "initRootLayoutServerLoadWrapper":
+				identifiers = ["load"]
+				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
+				break
+			case "initRootLayoutLoadWrapper":
+			case "initRootPageLoadWrapper":
+			case "initLoadWrapper":
+				identifiers = ["load"]
+				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				importFrom = "@inlang/sdk-js/adapter-sveltekit/shared"
+				break
+			case "initRequestHandlerWrapper":
+				identifiers = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
+				break
+			case "initActionWrapper":
+				identifiers = ["actions"]
+				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
+				break
+			default:
+				break
+		}
+		// Wrap the specified functions
+		const wasWrapped = definitions(ast, ...identifiers)
+			.wrap(wrapperAst)
+			.successful()
+		if (wasWrapped) imports(ast, importFrom).add(wrapper)
+
+		// Add imports
+	})
+	const aliases = imports(ast, "@inlang/sdk-js").getAliases()
+	// Ensure that function parameters are correct
+	contexts(ast, ...aliases.map(({ aliasN }) => aliasN))
+		.isFunction()
+		.merge(
+			parse(
+				`function(_, {${aliases
+					.map(({ exportN, aliasN }) => `${exportN}:${aliasN}`)
+					.join(",")}}) {}`,
+			),
+		)
+	aliases.forEach(({ exportN, aliasN }) =>
+		// Wrap all occurences of `i`, `language`, etc with `get()`
+		identifiers(ast, aliasN).wrap(parse("get")),
+	)
+}
+
 function replaceSdkImports(ast) {
 	// Prunes the imports, i.e. merge duplicates.
 	// Then remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
@@ -190,10 +264,7 @@ Possible implementation:
 ```js
 function transformHooksServerJsAst(ast, config) {
 	// Wrap handle function
-	imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initHandleWrapper")
-	const wrapper = "initHandleWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "handle").wrap(parse(wrapper))
+	wrapAndAddParameters(ast, config, ["initHandleWrapper"])
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -212,16 +283,9 @@ Possible implementation:
 
 ```js
 function transformLayoutServerJsAst(ast, config) {
-	imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add(
+	wrapAndAddParameters(ast, config, [
 		config.isRoot ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
-	)
-	// Wrap load function
-	const wrapper = config.isRoot
-		? "initRootLayoutServerLoadWrapper(/*options here*/).wrap"
-		: "initServerLoadWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	definitions(ast, "load").wrap(parse(wrapper))
-
+	])
 	// Run generic *.js transforms
 	transformJs(ast, config)
 	return ast
@@ -241,16 +305,7 @@ Possible implementation:
 function wrap(ast, config, exportName) {}
 
 function transformPageServerJsAst(ast, config) {
-	// Wrap load function
-	const loadWrapper = "initServerLoadWrapper(/*options here*/).wrap"
-	const actionsWrapper = "initActionWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	const loadWasWrapped = definitions(ast, "load").wrap(parse(loadWrapper)).successful()
-	const actionsWasWrapped = definitions(ast, "actions").wrap(parse(actionsWrapper)).successful()
-	if (loadWasWrapped)
-		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initServerLoadWrapper")
-	if (actionsWasWrapped)
-		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initActionWrapper")
+	wrapAndAddParameters(ast, config, ["initServerLoadWrapper", "initActionWrapper"])
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -276,13 +331,7 @@ Possible implementation:
 ```js
 function transformServerJsAst(ast, config) {
 	// Wrap GET, POST, PUT, PATCH, DELETE & OPTIONS function
-	const wrapper = "initRequestHandlerWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	const wasWrapped = definitions(ast, "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-		.wrap(parse(actionsWrapper))
-		.successful()
-	if (wasWrapped)
-		imports(ast, "@inlang/sdk-js/adapter-sveltekit/server").add("initRequestHandlerWrapper")
+	wrapAndAddParameters(ast, config, ["initRequestHandlerWrapper"])
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -301,16 +350,9 @@ Possible implementation:
 
 ```js
 function transformLayoutJsAst(ast, config) {
-	// Wrap load function
-	const wrapper = config.isRoot
-		? "initRootLayoutLoadWrapper(/*options here*/).wrap"
-		: "initLoadWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	const wasWrapped = definitions(ast, "load").wrap(parse(wrapper)).successful()
-	if (wasWrapped)
-		imports(ast, "@inlang/sdk-js/adapter-sveltekit/shared").add(
-			config.isRoot ? "initRootLayoutLoadWrapper" : "initLoadWrapper",
-		)
+	wrapAndAddParameters(ast, config, [
+		config.isRoot ? "initRootLayoutLoadWrapper" : "initLoadWrapper",
+	])
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
@@ -329,16 +371,7 @@ Possible implementation:
 
 ```js
 function transformPageJsAst(ast, config) {
-	// Wrap load function
-	const wrapper = config.isRoot
-		? "initRootPageLoadWrapper(/*options here*/).wrap"
-		: "initLoadWrapper(/*options here*/).wrap"
-	// NOTES @ivanhofer - I advise against using the $$ placeholders for wrapping, as I think the below syntax is very simple
-	const wasWrapped = definitions(ast, "load").wrap(parse(wrapper)).successful()
-	if (wasWrapped)
-		imports(ast, "@inlang/sdk-js/adapter-sveltekit/shared").add(
-			config.isRoot ? "initRootPageLoadWrapper" : "initLoadWrapper",
-		)
+	wrapAndAddParameters(ast, config, [config.isRoot ? "initRootPageLoadWrapper" : "initLoadWrapper"])
 
 	// Run generic *.js transforms
 	transformJs(ast, config)
