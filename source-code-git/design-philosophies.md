@@ -1,0 +1,1 @@
+# inlang-git design philosophies
