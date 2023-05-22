@@ -24,12 +24,11 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 			fs,
 			fetch,
 		}),
-		$fs: fs
+		$fs: fs,
 	}
 
 	// Get the content of the inlang.config.js file
-	const file = await fs.readFile("/inlang.config.js", { encoding: "utf-8" })
-	.catch(e => {
+	const file = await fs.readFile("/inlang.config.js", { encoding: "utf-8" }).catch((e) => {
 		if (e.code !== "ENOENT") throw e
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
@@ -100,7 +99,13 @@ export const badge = async (url: string, preferredLanguage: string | undefined) 
 	// markup the percentages
 	const [host, owner, repository] = [...url.split("/")]
 	const vdom = removeCommas(
-		markup(percentages, preferredLanguage, numberOfMissingMessagesInPreferredLanguage, lints),
+		markup(
+			percentages,
+			preferredLanguage,
+			numberOfMissingMessages.length,
+			numberOfMissingMessagesInPreferredLanguage,
+			lints,
+		),
 	)
 
 	// render the image
