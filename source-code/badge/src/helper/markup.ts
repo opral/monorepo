@@ -90,6 +90,8 @@ export const markup = (
 function headerText(args: { numberOfMissingMessages: number; lints: LintReport[] }): string {
 	if (args.numberOfMissingMessages > 0) {
 		return `${args.numberOfMissingMessages} messages missing`
+	} else if (args.lints.some((lint: LintReport) => lint.level === "error")) {
+		return "The project contains errors"
 	} else {
 		return "All messages translated"
 	}
