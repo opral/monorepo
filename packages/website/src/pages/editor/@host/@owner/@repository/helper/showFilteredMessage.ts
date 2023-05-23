@@ -53,5 +53,5 @@ export const showFilteredMessage = (
 	})
 
 	// return if matched
-	return filteredByLintRules.length !== 0
+	return filteredByLintRules
 }
