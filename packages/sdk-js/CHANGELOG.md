@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.6.1
+
+### Patch Changes
+
+- 758797dd: fix import of svelte config on windows
+
 ## 0.6.0
 
 ### Minor Changes
