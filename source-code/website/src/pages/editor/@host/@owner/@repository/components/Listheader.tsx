@@ -18,6 +18,7 @@ type RuleSummaryItem = {
 	id: string
 	amount: number
 	rule: LintRule
+	level: "warn" | "error"
 }
 
 export const messageCount = (
@@ -81,7 +82,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				counter !== 0 &&
 				(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
 			) {
-				lintSummary.push({ id: lintId, amount: counter, rule: lintRule! })
+				lintSummary.push({ id: lintId, amount: counter, rule: lintRule!, level: lintRule.level })
 			}
 		})
 		return lintSummary
@@ -110,6 +111,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 							>
 								<sl-button
 									prop:size="small"
+									class={
+										filteredLintRules().includes(rule.rule["id"])
+											? rule.level === "warn"
+												? "ring-warning/20 ring-1 rounded"
+												: "ring-danger/20 ring-1 rounded"
+											: ""
+									}
 									onClick={() => {
 										if (filteredLintRules().includes(rule.rule["id"])) {
 											setFilteredLintRules(
