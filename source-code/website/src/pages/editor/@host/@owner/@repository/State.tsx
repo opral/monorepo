@@ -227,10 +227,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: args.routeParams.repository,
 				})
 				.then((response) => {
-					telemetryBrowser.capture("EDITOR cloned repository", {
+					telemetryBrowser.group('company', '42dlsfj23f', {
+						name: 'Labfrogs test',
+						user_count: 33,
+						date_joined: '2020-01-23T00:00:00.000Z'
+					});
+					telemetryBrowser.capture("EDITOR cloned Repositor", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
 						isPrivate: response.data.private,
+						// groups: { company: "Klausis_Campnay" },
 					})
 				})
 				.catch((error) => {
@@ -239,6 +245,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						repository: args.routeParams.repository,
 						isPrivate: undefined,
 						errorDuringIsPrivateRequest: error,
+						groups: { company: "Klausis_Campnay" },
 					})
 				})
 			return result
