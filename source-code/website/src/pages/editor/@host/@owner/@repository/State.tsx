@@ -266,8 +266,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 			return {
 				fs: fs(),
+				// BUG: this is not reactive
+				// See https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
 				// we need to listen to inlang.config.js changes
-				lastFsChange: fsChange(),
+				// lastFsChange: fsChange(),
 			}
 		},
 		async (args) => {
