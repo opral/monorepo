@@ -1,7 +1,7 @@
 ---
 # the frontmatter is only relevant for rendering this site on the website
 title: Tech stack
-href: /documentation/rfc-tech-stack
+href: /blog/rfc-tech-stack
 description: This RFC describes the tech stack of inlang.
 ---
 
