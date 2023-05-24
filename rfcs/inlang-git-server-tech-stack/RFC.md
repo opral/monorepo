@@ -38,20 +38,6 @@ There are two solutions out there that I am aware of.
 
 ##### Pros
 
-- Strict goal of obeying to [WinterCG](https://wintercg.org/), ensuring web-interopability.
-- The project is small and needs a main adopter. We could be the main adopter, sponsor the project, and influence the direction of the project (with more financial resources in the future, we could hire the team).
-- @samuelstroschein is in closer contact with one of the maintainers (@brillout) who is brilliant in responding to issues.
-
-##### Cons
-
-- Early. The project is still in early stages and has not been used in production yet. This is a risk we would have to take.
-
-#### [Hattip](https://github.com/hattipjs/hattip)
-
-> Instead of writing server code that only works with Express.js, write server code that can be deployed anywhere: AWS, Cloudflare Workers, Vercel, VPS, ...
-
-##### Pros
-
 - Strictly obeying to [WinterCG](https://wintercg.org/), ensuring web-interopability
 - The project is small and needs a main adopter. We could be the main adopter, sponsor the project, and influence the direction of the project. (With more financial resources, we could maybe even hire the authors to work on hattip and VPS (the framework for the editor) full-time to derisk our tech stack decision and help hattip grow).
 - @samuelstroschein is in closer contact with one of the maintainers (@brillout) who is brilliant in responding to issues.
