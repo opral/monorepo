@@ -1,7 +1,7 @@
 ---
 # the frontmatter is only relevant for rendering this site on the website
 title: Core architecture
-href: /documentation/rfc-core-architecture
+href: /blog/rfc-core-architecture
 description: This RFC describes the architecture of inlang.
 ---
 
