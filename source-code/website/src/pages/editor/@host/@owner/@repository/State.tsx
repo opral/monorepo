@@ -221,6 +221,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			const result = await cloneRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
+			const originURL =
+				args.routeParams.host + "/" + args.routeParams.owner + "/" + args.routeParams.repository
+
+			telemetryBrowser.group("repository", originURL, {
+				name: originURL,
+			})
 			github
 				.request("GET /repos/{owner}/{repo}", {
 					owner: args.routeParams.owner,
@@ -237,21 +243,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: 'unknown',
+						type: "unknown",
 						errorDuringIsPrivateRequest: error,
 					})
 				})
-				.finally(()=>{
-					telemetryBrowser.group('company', args.routeParams.owner, {
-						name: args.routeParams.owner,
-						repository: args.routeParams.repository,
-						last_call_from_editor: new Date().toJSON().slice(0, 10),
-					})
-				})
+
 			return result
 		},
 	)
-
 	// re-fetched if repository has been cloned
 	const [inlangConfig, setInlangConfig] = createResource(
 		() => {
