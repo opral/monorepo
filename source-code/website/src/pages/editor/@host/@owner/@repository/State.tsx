@@ -27,7 +27,6 @@ import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-
 type EditorStateSchema = {
 	/**
 	 * Whether a repository is cloned and when it was cloned.
@@ -221,11 +220,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			const result = await cloneRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
-			const originURL =
-				args.routeParams.host + "/" + args.routeParams.owner + "/" + args.routeParams.repository
-
-			telemetryBrowser.group("repository", originURL, {
-				name: originURL,
+			const gitOrigin = await getGitOrigin(args)
+			telemetryBrowser.group("repository", gitOrigin, {
+				name: gitOrigin,
 			})
 			github
 				.request("GET /repos/{owner}/{repo}", {
@@ -852,5 +849,17 @@ async function pull(args: {
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, error as PullException]
+	}
+}
+async function getGitOrigin(args: { fs: NodeishFilesystem }) {
+	try {
+		const remotes = await raw.listRemotes({
+			fs: args.fs,
+			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
+		})
+		// the browser gemove the '.git' in the end of the origin. Therefore we add this hardcoded
+		return remotes.find((remote) => remote.remote === "origin")?.url + ".git"
+	} catch (e) {
+		return "undefined"
 	}
 }
