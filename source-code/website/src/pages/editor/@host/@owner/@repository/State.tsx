@@ -27,6 +27,8 @@ import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
+import { originChecked } from "@inlang/telemetry"
+
 type EditorStateSchema = {
 	/**
 	 * Whether a repository is cloned and when it was cloned.
@@ -220,7 +222,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			const result = await cloneRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
-			const gitOrigin = await getGitOrigin(args)
+			// checks whether the gitOrigin corresponds to the pattern.
+			const gitOrigin = originChecked(await getGitOrigin(args))
+			console.log(gitOrigin, "should be checked")
 			telemetryBrowser.group("repository", gitOrigin, {
 				name: gitOrigin,
 			})
