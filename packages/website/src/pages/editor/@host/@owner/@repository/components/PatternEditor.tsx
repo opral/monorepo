@@ -37,7 +37,6 @@ export function PatternEditor(props: {
 		userIsCollaborator,
 		routeParams,
 		filteredLanguages,
-		tourStep,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 
@@ -148,10 +147,10 @@ export function PatternEditor(props: {
 	/**
 	 * Saves the changes of the message.
 	 */
-	const [commitIsLoading, setCommitIsLoading] = createSignal(false)
+	const [saveIsLoading, setSaveIsLoading] = createSignal(false)
 
-	const handleCommit = async () => {
-		setCommitIsLoading(true)
+	const handleSave = async () => {
+		setSaveIsLoading(true)
 		const _copy: ast.Message | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
@@ -173,7 +172,7 @@ export function PatternEditor(props: {
 		setTimeout(() => {
 			textArea.parentElement?.click()
 		}, 500)
-		telemetryBrowser.capture("EDITOR commited changes", {
+		telemetryBrowser.capture("EDITOR saved changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
@@ -183,7 +182,7 @@ export function PatternEditor(props: {
 	createEffect(() => {
 		const resource = resources.filter((resource) => resource.languageTag.name === props.language)
 		if (resource && textArea) {
-			setCommitIsLoading(false)
+			setSaveIsLoading(false)
 		}
 	})
 
@@ -282,7 +281,7 @@ export function PatternEditor(props: {
 			userIsCollaborator()
 		) {
 			event.preventDefault()
-			handleCommit()
+			handleSave()
 		}
 	}
 
@@ -359,15 +358,15 @@ export function PatternEditor(props: {
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
-							prop:loading={commitIsLoading()}
+							prop:loading={saveIsLoading()}
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
-								handleCommit()
+								handleSave()
 							}}
 						>
 							<MaterialSymbolsCommitRounded slot="prefix" />
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-							Commit
+							Save
 						</sl-button>
 					</Show>
 				</div>
