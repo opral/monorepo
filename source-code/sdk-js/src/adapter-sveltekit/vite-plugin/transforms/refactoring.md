@@ -197,7 +197,8 @@ function wrapAndAddParameters(
 function replaceSdkImports(ast) {
 	// Prunes the imports, i.e. merge duplicates.
 	// Then remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
-	const aliases = imports(ast, "@inlang/sdk-js").prune().remove().getAliases()
+	const aliases = imports(ast, "@inlang/sdk-js").prune().getAliases()
+	imports(ast, "@inlang/sdk-js").remove()
 	// Declare all aliases from sdk-import: `let iAlias`, `let languageAlias`, ...
 	// Assign `({ i } = getRuntimeFromContext())` in each context of iAlias (or $iAlias in reactive case).
 	contexts(ast).insertAfterImports(
