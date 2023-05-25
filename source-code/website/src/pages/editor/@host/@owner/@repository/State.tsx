@@ -499,15 +499,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					await pull({ setLastPullTime, ...args })
 				}
 			} catch (error) {
-				// showToast({
-				// 	variant: "warning",
-				// 	title: "Syncing fork failed",
-				// 	message:
-				// 		"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
-				// })
-				console.warn(
-					"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
-				)
+				showToast({
+					variant: "warning",
+					title: "Syncing fork failed",
+					message:
+						"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
+				})
 				// rethrow for resource.error to work
 				throw error
 			}
