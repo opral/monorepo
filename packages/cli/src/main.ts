@@ -18,9 +18,8 @@ if (typeof fetch === "undefined") {
 }
 
 initErrorMonitoring()
-
 const gitOrigin = await getGitOrigin()
-
+console.log(gitOrigin)
 // beautiful logging
 ;(consola as unknown as Consola).wrapConsole()
 
@@ -36,6 +35,7 @@ export const cli = new Command()
 	.hook("postAction", (command) => {
 		telemetry.capture({
 			distinctId: "unknown",
+			groups: { repository: gitOrigin! },
 			event: `CLI command executed`,
 			properties: {
 				args: command.args.join(" "),
@@ -50,6 +50,7 @@ export const cli = new Command()
 
 telemetry.capture({
 	distinctId: "unknown",
+	groups: { repository: gitOrigin! },
 	event: "CLI started",
 	properties: {
 		version,
