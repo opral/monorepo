@@ -9,7 +9,7 @@ afterAll(() => {
 	fs.rmSync(tempdir, { recursive: true, force: true })
 })
 
-it("should transpile esm to cjs", () => {
+it("should transpile esm to cjs code which can then be imported with require", () => {
 	const esmCode = `
     export function hello(x) {
       return "Hello " + x
