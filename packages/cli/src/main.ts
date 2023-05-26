@@ -40,7 +40,6 @@ export const cli = new Command()
 			event: `CLI command executed`,
 			properties: {
 				args: command.args.join(" "),
-				checkedOrigin,
 			},
 		})
 	})
@@ -55,6 +54,5 @@ telemetry.capture({
 	event: "CLI started",
 	properties: {
 		version,
-		checkedOrigin,
 	},
 })
