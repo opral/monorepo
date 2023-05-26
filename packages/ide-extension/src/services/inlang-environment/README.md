@@ -1,4 +1,4 @@
-# Inlang Environment
+# Inlang Environment for VSCode
 
 This service is a custom inlang environment based on the requirements of VSCode.
 
