@@ -1,5 +1,8 @@
 import ts from "typescript"
 
+/**
+ * Transpiles ESM code to CJS code.
+ */
 export function transpileToCjs(code: string): string {
 	const compilerOptions = {
 		module: ts.ModuleKind.CommonJS,
