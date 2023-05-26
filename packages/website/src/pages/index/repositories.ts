@@ -54,6 +54,12 @@ export const repositories: Repositories = [
 		description:
 			"Nostr is a simple, open protocol that enables truly censorship-resistant and global value-for-value publishing on the web.",
 	},
+	{
+		owner: "dermotduffy",
+		repository: "frigate-hass-card",
+		description:
+			"A Lovelace card for Frigate in Home Assistant",
+	},
 ]
 
 type Repositories = Array<{
