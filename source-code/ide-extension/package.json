@@ -36,7 +36,7 @@
 	"scripts": {
 		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
-		"package": "npx vsce package",
+		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",
