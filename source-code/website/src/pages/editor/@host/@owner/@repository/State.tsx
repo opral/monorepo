@@ -46,6 +46,11 @@ type EditorStateSchema = {
 	 */
 	unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>
 	/**
+	 * Unpushed saves to the local resource state.
+	 */
+	unpushedSaveCounter: () => number
+	setUnpushedSaveCounter: Setter<number>
+	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
 	githubRepositoryInformation: Resource<
@@ -176,6 +181,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 *  Date of the last push to the Repo
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
+
+	const [unpushedSaveCounter, setUnpushedSaveCounter] = createSignal(0)
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
@@ -563,6 +570,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repositoryIsCloned,
 					currentBranch,
 					unpushedChanges,
+					unpushedSaveCounter,
+					setUnpushedSaveCounter,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
@@ -787,11 +796,11 @@ async function readResources(config: InlangConfig) {
 async function writeResources(args: { config: InlangConfig; resources: ast.Resource[] }) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
 
-	showToast({
-		variant: "info",
-		title: "The change has been saved.",
-		message: `Don't forget to push the changes.`,
-	})
+	// showToast({
+	// 	variant: "info",
+	// 	title: "The change has been saved.",
+	// 	message: `Don't forget to push the changes.`,
+	// })
 }
 
 async function _unpushedChanges(args: {

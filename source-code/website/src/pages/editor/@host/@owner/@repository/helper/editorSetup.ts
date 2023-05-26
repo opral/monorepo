@@ -30,7 +30,7 @@ export const getEditorConfig = (
 			PlaceholderNode.configure({
 				HTMLAttributes: {
 					class:
-						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm ponter-events-none",
+						"bg-primary/10 py-[3px] px-[1px] rounded-sm text-on-primary-container text-sm pointer-events-none",
 				},
 				renderLabel({ node }: any) {
 					return `${node.attrs.label ?? node.attrs.id}`

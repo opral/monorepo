@@ -18,7 +18,8 @@ export const Gitfloat = () => {
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
-		unpushedChanges,
+		unpushedSaveCounter,
+		setUnpushedSaveCounter,
 		setFsChange,
 		setLastPush,
 		routeParams,
@@ -30,7 +31,7 @@ export const Gitfloat = () => {
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const gitState: () => "login" | "fork" | "pullrequest" | "changes" = () => {
+	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
 		} else if (userIsCollaborator() === false) {
@@ -39,13 +40,13 @@ export const Gitfloat = () => {
 		// if changes exist in a fork, show the pull request button
 		else if (
 			hasPushedChanges() &&
-			(unpushedChanges() ?? []).length <= 0 &&
+			unpushedSaveCounter() <= 0 &&
 			githubRepositoryInformation()?.data.fork
 		) {
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus
-		return "changes"
+		return "hasChanges"
 	}
 
 	const [isLoading, setIsLoading] = createSignal(false)
@@ -108,6 +109,7 @@ export const Gitfloat = () => {
 			setLastPush,
 			setLastPullTime,
 		})
+		setUnpushedSaveCounter(0)
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
@@ -149,7 +151,7 @@ export const Gitfloat = () => {
 	}
 
 	type GitFloatArray = {
-		[state in "login" | "fork" | "changes" | "pullrequest"]: GitfloatData
+		[state in "login" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
 	}
 
 	const data: GitFloatArray = {
@@ -169,7 +171,7 @@ export const Gitfloat = () => {
 			onClick: handleFork,
 			tourStepId: "fork-repository",
 		},
-		changes: {
+		hasChanges: {
 			text: "local changes",
 			buttontext: "Push",
 			icon: IconPush,
@@ -199,7 +201,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if ((unpushedChanges() ?? []).length > 0) {
+		if (unpushedSaveCounter() > 0) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
@@ -242,10 +244,10 @@ export const Gitfloat = () => {
 									(gitState() === "pullrequest" && "hidden")
 								}
 							>
-								<Show when={gitState() === "changes"}>
+								<Show when={gitState() === "hasChanges"}>
 									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-											{(unpushedChanges() ?? []).length}
+											{unpushedSaveCounter()}
 										</p>
 									</div>
 								</Show>
@@ -257,7 +259,7 @@ export const Gitfloat = () => {
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
 								prop:loading={isLoading()}
-								prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
+								prop:disabled={unpushedSaveCounter() === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}
