@@ -50,10 +50,12 @@
 	"dependencies": {
 		"@inlang/core": "*",
 		"@inlang/telemetry": "*",
+		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.1",
+		"@types/require-from-string": "^1.2.1",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",
