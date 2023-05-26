@@ -224,7 +224,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			// the user does not need to wait for the response
 			// checks whether the gitOrigin corresponds to the pattern.
 			const gitOrigin = originChecked(await getGitOrigin(args))
-			console.log(gitOrigin, "should be checked")
 			telemetryBrowser.group("repository", gitOrigin, {
 				name: gitOrigin,
 			})
