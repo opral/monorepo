@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 0.6.0
+
+### Minor Changes
+
+- 9cd701a3: The VSCode extension should now work for the majority of projects.
+
+  We fixed a problem that blocked the VSCode extension for months. The extension transpiles ESM under the hood to CJS now because Electron, and thus VSCode, do not support ESM.
+
 ## 0.5.9
 
 ### Patch Changes
