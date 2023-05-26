@@ -33,6 +33,7 @@ export function PatternEditor(props: {
 		resources,
 		setResources,
 		referenceResource,
+		setUnpushedSaveCounter,
 		userIsCollaborator,
 		routeParams,
 		filteredLanguages,
@@ -146,10 +147,8 @@ export function PatternEditor(props: {
 	/**
 	 * Saves the changes of the message.
 	 */
-	// const [saveIsLoading, setSaveIsLoading] = createSignal(false)
 
 	const handleSave = async () => {
-		// setSaveIsLoading(true)
 		const _copy: ast.Message | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
@@ -167,6 +166,7 @@ export function PatternEditor(props: {
 			//@ts-ignore
 			updatedResource as Resource,
 		])
+		setUnpushedSaveCounter((counter) => counter + 1)
 		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
 			textArea.parentElement?.click()
@@ -177,13 +177,6 @@ export function PatternEditor(props: {
 			repository: routeParams().repository,
 		})
 	}
-
-	// createEffect(() => {
-	// 	const resource = resources.filter((resource) => resource.languageTag.name === props.language)
-	// 	if (resource && textArea) {
-	// 		setSaveIsLoading(false)
-	// 	}
-	// })
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -357,7 +350,6 @@ export function PatternEditor(props: {
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
-							// prop:loading={saveIsLoading()}
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
 								handleSave()
