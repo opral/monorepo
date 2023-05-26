@@ -69,6 +69,14 @@ describe("createInlangFunction", () => {
 		expect(result).toBe("Welcome, !")
 	})
 
+	test("it should not fail if placeholders get passed as args", () => {
+		const fn = createInlangFunction(resource)
+
+		const result = fn("welcome")
+
+		expect(result).toBe("Welcome, !")
+	})
+
 	test("it should return an empty string if key does not exist in resource", () => {
 		const fn = createInlangFunction(resource)
 
