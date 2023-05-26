@@ -236,7 +236,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: response.data.private ? "isPrivate" : "isPublic",
+						type: response.data.private ? "Private" : "Public",
 					})
 				})
 				.catch((error) => {
