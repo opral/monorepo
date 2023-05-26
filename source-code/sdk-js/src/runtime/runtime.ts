@@ -17,8 +17,8 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
 	ReadResourcesMaybePromise extends
-		| (Ast.Resource | undefined)
-		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
+	| (Ast.Resource | undefined)
+	| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
 	readResource: (language: Language) => ReadResourcesMaybePromise
 }
@@ -51,11 +51,15 @@ export const initBaseRuntime = <
 		i: undefined,
 	},
 ) => {
-	let loadResourcePromise: Promise<void> | undefined
+	const loadResourcePromises = new Map<Language, ReadResourcesMaybePromise>()
+	let isLoadResourceFunctionAsync = false
 
 	const loadResource = (language: Language): ReadResourcesMaybePromise => {
-		if (state.resources.has(language)) return undefined as ReadResourcesMaybePromise
-		if (loadResourcePromise) return loadResourcePromise as ReadResourcesMaybePromise
+		if (state.resources.has(language)) return isLoadResourceFunctionAsync
+			? Promise.resolve() as ReadResourcesMaybePromise
+			: undefined as ReadResourcesMaybePromise
+
+		if (loadResourcePromises.has(language)) return loadResourcePromises.get(language) as ReadResourcesMaybePromise
 
 		const setResource = (resource: Resource | undefined) =>
 			resource && state.resources.set(language, resource)
@@ -66,16 +70,20 @@ export const initBaseRuntime = <
 			return undefined as ReadResourcesMaybePromise
 		}
 
+		isLoadResourceFunctionAsync = true
+
 		// eslint-disable-next-line no-async-promise-executor
-		loadResourcePromise = new Promise(async (resolve) => {
+		const promise = new Promise<void>(async (resolve) => {
 			const resource = await resourceMaybePromise
 			setResource(resource as Resource | undefined)
 
-			loadResourcePromise = undefined
+			loadResourcePromises.delete(language)
 			resolve()
-		})
+		}) as ReadResourcesMaybePromise
 
-		return loadResourcePromise as ReadResourcesMaybePromise
+		loadResourcePromises.set(language, promise)
+
+		return promise
 	}
 
 	const switchLanguage = (language: Language) => {
@@ -106,7 +114,6 @@ export const initBaseRuntime = <
 	}
 }
 
-// TODO: test this
 export const initRuntimeWithLanguageInformation = <
 	Language extends Ast.Language,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
