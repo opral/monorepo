@@ -1,5 +1,7 @@
 # @inlang/ide-extension-plugin
 
+## 0.6.0
+
 ## 0.5.9
 
 ### Patch Changes
