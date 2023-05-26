@@ -6,7 +6,6 @@ import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
-import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
@@ -147,10 +146,10 @@ export function PatternEditor(props: {
 	/**
 	 * Saves the changes of the message.
 	 */
-	const [saveIsLoading, setSaveIsLoading] = createSignal(false)
+	// const [saveIsLoading, setSaveIsLoading] = createSignal(false)
 
 	const handleSave = async () => {
-		setSaveIsLoading(true)
+		// setSaveIsLoading(true)
 		const _copy: ast.Message | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
@@ -168,7 +167,7 @@ export function PatternEditor(props: {
 			//@ts-ignore
 			updatedResource as Resource,
 		])
-		//this is a dirty fix for getting focus back to the editor after commit
+		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
 			textArea.parentElement?.click()
 		}, 500)
@@ -179,12 +178,12 @@ export function PatternEditor(props: {
 		})
 	}
 
-	createEffect(() => {
-		const resource = resources.filter((resource) => resource.languageTag.name === props.language)
-		if (resource && textArea) {
-			setSaveIsLoading(false)
-		}
-	})
+	// createEffect(() => {
+	// 	const resource = resources.filter((resource) => resource.languageTag.name === props.language)
+	// 	if (resource && textArea) {
+	// 		setSaveIsLoading(false)
+	// 	}
+	// })
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -358,13 +357,12 @@ export function PatternEditor(props: {
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
-							prop:loading={saveIsLoading()}
+							// prop:loading={saveIsLoading()}
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
 								handleSave()
 							}}
 						>
-							<MaterialSymbolsCommitRounded slot="prefix" />
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
 							Save
 						</sl-button>

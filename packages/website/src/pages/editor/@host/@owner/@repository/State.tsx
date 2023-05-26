@@ -538,11 +538,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 		// write to filesystem
 		writeResources({
-			fs: fs(),
 			config,
-			setFsChange,
 			resources: args[0],
-			user: localStorage.user,
 		})
 	}
 
@@ -675,6 +672,44 @@ export async function pushChanges(args: {
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return [undefined, new PushException("h3ni329 Invalid route params")]
 	}
+	// stage all changes
+	const status = await raw.statusMatrix({
+		fs: args.fs,
+		dir: "/",
+		filter: (f: any) =>
+			f.endsWith(".json") ||
+			f.endsWith(".po") ||
+			f.endsWith(".yaml") ||
+			f.endsWith(".yml") ||
+			f.endsWith(".js") ||
+			f.endsWith(".ts"),
+	})
+	const filesWithUncommittedChanges = status.filter(
+		(row: any) =>
+			// files with unstaged and uncommitted changes
+			(row[2] === 2 && row[3] === 1) ||
+			// added files
+			(row[2] === 2 && row[3] === 0),
+	)
+	// add all changes
+	for (const file of filesWithUncommittedChanges) {
+		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
+	}
+	// commit changes
+	await raw.commit({
+		fs: args.fs,
+		dir: "/",
+		author: {
+			name: args.user.username,
+			email: args.user.email,
+		},
+		message: "inlang: update translations",
+	})
+	// triggering a side effect here to trigger a re-render
+	// of components that depends on fs
+	args.setFsChange(new Date())
+
+	// push changes
 	const requestArgs = {
 		fs: args.fs,
 		http,
@@ -749,52 +784,12 @@ async function readResources(config: InlangConfig) {
 	return lintedResources
 }
 
-async function writeResources(args: {
-	fs: NodeishFilesystem
-	config: InlangConfig
-	resources: ast.Resource[]
-	user: NonNullable<LocalStorageSchema["user"]>
-	setFsChange: (date: Date) => void
-}) {
+async function writeResources(args: { config: InlangConfig; resources: ast.Resource[] }) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
-		filter: (f: any) =>
-			f.endsWith(".json") ||
-			f.endsWith(".po") ||
-			f.endsWith(".yaml") ||
-			f.endsWith(".yml") ||
-			f.endsWith(".js") ||
-			f.endsWith(".ts"),
-	})
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0),
-	)
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
-	}
-	// commit changes
-	await raw.commit({
-		fs: args.fs,
-		dir: "/",
-		author: {
-			name: args.user.username,
-			email: args.user.email,
-		},
-		message: "inlang: update translations",
-	})
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	args.setFsChange(new Date())
+
 	showToast({
 		variant: "info",
-		title: "The change has been committed.",
+		title: "The change has been saved.",
 		message: `Don't forget to push the changes.`,
 	})
 }
