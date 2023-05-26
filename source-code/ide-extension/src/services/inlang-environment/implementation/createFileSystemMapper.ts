@@ -21,7 +21,10 @@ export function createFileSystemMapper(
 			return new TextDecoder().decode(rawFile)
 		},
 		writeFile: async (file, data) => {
-			return target.writeFile(vscode.Uri.joinPath(base, file), new TextEncoder().encode(data))
+			return target.writeFile(
+				vscode.Uri.joinPath(base, file),
+				typeof data === "string" ? new TextEncoder().encode(data) : data,
+			)
 		},
 		mkdir: async (path) => {
 			return target.createDirectory(vscode.Uri.joinPath(base, path)) as unknown as

@@ -2,6 +2,7 @@ import * as vscode from "vscode"
 import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
+import { telemetryNode } from "@inlang/telemetry"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -54,7 +55,7 @@ export async function messagePreview(args: {
 		}
 
 		// Get the message references
-		const wrappedDecorations = state().config.ideExtension?.messageReferenceMatchers.map(
+		const wrappedDecorations = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
 			async (matcher) => {
 				const messages = await matcher({
 					documentText: args.activeTextEditor.document.getText(),
