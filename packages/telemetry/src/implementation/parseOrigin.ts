@@ -1,3 +1,8 @@
+/**
+ * Parses the origin from the remotes.
+ *
+ * The function ensures that the same orgin is always returned for the same repository.
+ */
 export function parseOrigin(args: {
 	remotes: Array<{ remote: string; url: string }> | undefined
 }): string {
