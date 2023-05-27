@@ -857,17 +857,10 @@ async function pull(args: {
 }
 async function getGitOrigin(args: { fs: NodeishFilesystem }) {
 	try {
-		//why should I need the findroot?
 		const remotes = await raw.listRemotes({
 			fs: args.fs,
 			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
 		})
-		// this also works
-		// const remotesTest = await raw.listRemotes({
-		// 	fs: args.fs,
-		// 	dir: "/",
-		// })
-		// console.log(remotesTest, "remotesTest")
 		return remotes
 	} catch (e) {
 		return undefined
