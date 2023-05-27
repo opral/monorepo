@@ -178,22 +178,32 @@ function wrapAndAddParameters(
 		// Add imports
 		if (wasWrapped) imports(ast, importFrom).add(wrapper)
 	})
+	// At this point the @inlang/sdk-js import is not removed yet
 	// Ensure that function parameters are correct
 	const aliases = imports(ast, "@inlang/sdk-js").getAliases()
-	contexts(ast, ...aliases.map(({ aliasN }) => aliasN))
-		.isFunction()
-		.merge(
-			parse(
-				`function(_, {
-					$$_INLANG_LOAD_RESOURCE_NON_REACTIVE_$$,
-					$$_INLANG_SWITCH_LANGUAGE_NON_REACTIVE_$$,
-					$$_INLANG_LANGUAGE_NON_REACTIVE_$$,
-					$$_INLANG_I_NON_REACTIVE_$$,
-					$$_INLANG_LANGUAGES_NON_REACTIVE_$$,
-					$$_INLANG_REFERENCE_LANGUAGE_NON_REACTIVE_$$,
-				}) {}`,
-			),
-		)
+	const exportToPlaceholder = (exportN: string) => {
+		switch (exportN) {
+			case "loadResource":
+				return "$$_INLANG_LOAD_RESOURCE_NON_REACTIVE_$$"
+			case "switchLanguage":
+				return "$$_INLANG_SWITCH_LANGUAGE_NON_REACTIVE_$$"
+			case "language":
+				return "$$_INLANG_LANGUAGE_NON_REACTIVE_$$"
+			case "i":
+				return "$$_INLANG_I_NON_REACTIVE_$$"
+			case "languages":
+				return "$$_INLANG_REFERENCE_LANGUAGE_NON_REACTIVE_$$"
+			case "referenceLanguage":
+				return "$$_INLANG_REFERENCE_LANGUAGE_NON_REACTIVE_$$"
+			default:
+				return
+		}
+	}
+	for (const { exportN } of aliases) {
+		contexts(ast, exportN)
+			.isFunction()
+			.merge(parse(`function(_, {${exportToPlaceholder(exportN)}}) {}`))
+	}
 }
 
 // Returns either $$_INLANG_I_ALIAS_$$ for non reactive and $$_INLANG_I_$$ for reactive imports
@@ -292,11 +302,9 @@ Possible implementation:
 
 ```js
 function transformHooksServerJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	// Wrap handle function
 	wrapAndAddParameters(ast, config, ["initHandleWrapper"])
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
@@ -312,12 +320,10 @@ Possible implementation:
 
 ```js
 function transformLayoutServerJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [
 		config.isRoot ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
 	])
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
@@ -335,10 +341,8 @@ Possible implementation:
 function wrap(ast, config, exportName) {}
 
 function transformPageServerJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, ["initServerLoadWrapper", "initActionWrapper"])
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
@@ -360,11 +364,9 @@ Possible implementation:
 
 ```js
 function transformServerJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	// Wrap GET, POST, PUT, PATCH, DELETE & OPTIONS function
 	wrapAndAddParameters(ast, config, ["initRequestHandlerWrapper"])
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
@@ -380,12 +382,10 @@ Possible implementation:
 
 ```js
 function transformLayoutJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [
 		config.isRoot ? "initRootLayoutLoadWrapper" : "initLoadWrapper",
 	])
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
@@ -401,11 +401,8 @@ Possible implementation:
 
 ```js
 function transformPageJsAst(ast, config) {
-	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
-	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [config.isRoot ? "initRootPageLoadWrapper" : "initLoadWrapper"])
-	// Swap the placeholders with real identifiers / code
-	replacePlaceholders({ ast, config, fileType: "js" })
+	transformJs(ast, config)
 	return ast
 }
 ```
