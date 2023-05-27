@@ -27,7 +27,7 @@ import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-import { originChecked } from "@inlang/telemetry"
+import { parseOrigin } from "@inlang/telemetry"
 
 type EditorStateSchema = {
 	/**
@@ -223,7 +223,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
 			// checks whether the gitOrigin corresponds to the pattern.
-			const gitOrigin = originChecked(await getGitOrigin(args))
+
+			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
 			telemetryBrowser.group("repository", gitOrigin, {
 				name: gitOrigin,
 			})
@@ -856,13 +857,19 @@ async function pull(args: {
 }
 async function getGitOrigin(args: { fs: NodeishFilesystem }) {
 	try {
+		//why should I need the findroot?
 		const remotes = await raw.listRemotes({
 			fs: args.fs,
 			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
 		})
-		// the browser gemove the '.git' in the end of the origin. Therefore we add this hardcoded
-		return remotes.find((remote) => remote.remote === "origin")?.url + ".git"
+		// this also works
+		// const remotesTest = await raw.listRemotes({
+		// 	fs: args.fs,
+		// 	dir: "/",
+		// })
+		// console.log(remotesTest, "remotesTest")
+		return remotes
 	} catch (e) {
-		return "undefined"
+		return undefined
 	}
 }
