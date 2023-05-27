@@ -1,5 +1,5 @@
 import satori from "satori"
-import clone from "./repo/clone.js"
+import { cloneRespository } from "./repo/clone.js"
 import { getGitRemotes } from "./repo/getGitRemotes.js"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
@@ -30,7 +30,7 @@ export const badge = async (url: string) => {
 
 	// initialize a new file system on each request to prevent cross request pollution
 	const fs = createMemoryFs()
-	await clone(url, fs)
+	await cloneRespository(url, fs)
 
 	// Set up the environment functions
 	const env: InlangEnvironment = {
