@@ -6,7 +6,7 @@ import fs from "node:fs"
  *
  * @returns The git origin url or undefined if it could not be found.
  */
-export async function getGitOrigin() {
+export async function getGitRemotes() {
 	try {
 		const remotes = await raw.listRemotes({
 			fs,
