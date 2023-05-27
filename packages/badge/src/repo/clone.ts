@@ -3,7 +3,7 @@
 import { raw, http } from "@inlang-git/client/raw"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 
-const cloneRespository = async (url: string, fs: NodeishFilesystem) => {
+export async function cloneRespository(url: string, fs: NodeishFilesystem) {
 	// parse url in the format of github.com/inlang/example and split it to host, owner and repo
 	const [host, owner, repo] = [...url.split("/")]
 
@@ -24,5 +24,3 @@ const cloneRespository = async (url: string, fs: NodeishFilesystem) => {
 		depth: 1,
 	})
 }
-
-export default cloneRespository
