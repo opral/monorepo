@@ -65,6 +65,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 			]),
 		),
 	)
+
 	// Replace imports from sdk
 	replaceSdkImports(ast.$ast, "locals")
 	// Make sure that exported "handle" function exists & has the parameters we need
