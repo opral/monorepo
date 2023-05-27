@@ -11,6 +11,7 @@ export function parseOrigin(args: {
 		result += ".git"
 	}
 	result = transformRemote(result)
+
 	return result
 }
 
@@ -28,6 +29,5 @@ function transformRemote(remote: string) {
 
 		return `${host}/${repo}.git`
 	}
-
-	return remote // Return unchanged if no match
+	return "unknown" // Return unchanged if no match
 }
