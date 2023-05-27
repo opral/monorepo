@@ -184,9 +184,14 @@ function wrapAndAddParameters(
 		.isFunction()
 		.merge(
 			parse(
-				`function(_, {${aliases
-					.map(({ exportN, aliasN }) => `${exportN}:${aliasN}`)
-					.join(",")}}) {}`,
+				`function(_, {
+					$$_INLANG_LOAD_RESOURCE_NON_REACTIVE_$$,
+					$$_INLANG_SWITCH_LANGUAGE_NON_REACTIVE_$$,
+					$$_INLANG_LANGUAGE_NON_REACTIVE_$$,
+					$$_INLANG_I_NON_REACTIVE_$$,
+					$$_INLANG_LANGUAGES_NON_REACTIVE_$$,
+					$$_INLANG_REFERENCE_LANGUAGE_NON_REACTIVE_$$,
+				}) {}`,
 			),
 		)
 }
@@ -287,10 +292,11 @@ Possible implementation:
 
 ```js
 function transformHooksServerJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	// Wrap handle function
 	wrapAndAddParameters(ast, config, ["initHandleWrapper"])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -306,11 +312,12 @@ Possible implementation:
 
 ```js
 function transformLayoutServerJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [
 		config.isRoot ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
 	])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -328,9 +335,10 @@ Possible implementation:
 function wrap(ast, config, exportName) {}
 
 function transformPageServerJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, ["initServerLoadWrapper", "initActionWrapper"])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -352,10 +360,11 @@ Possible implementation:
 
 ```js
 function transformServerJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	// Wrap GET, POST, PUT, PATCH, DELETE & OPTIONS function
 	wrapAndAddParameters(ast, config, ["initRequestHandlerWrapper"])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -371,11 +380,12 @@ Possible implementation:
 
 ```js
 function transformLayoutJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [
 		config.isRoot ? "initRootLayoutLoadWrapper" : "initLoadWrapper",
 	])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -391,9 +401,11 @@ Possible implementation:
 
 ```js
 function transformPageJsAst(ast, config) {
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(ast)
 	wrapAndAddParameters(ast, config, [config.isRoot ? "initRootPageLoadWrapper" : "initLoadWrapper"])
-	// Run generic *.js transforms
-	transformJs(ast, config)
+	// Swap the placeholders with real identifiers / code
+	replacePlaceholders({ ast, config, fileType: "js" })
 	return ast
 }
 ```
@@ -516,7 +528,6 @@ Possible implementation:
 function transformLayoutSvelte({ markup, style, script }, config) {
 	// Import all necessary things
 	if (config.isRoot) {
-		imports(script.ast, "@inlang/sdk-js").add("language")
 		imports(script.ast, "@inlang/sdk-js/adapter-sveltekit/shared").add("getRuntimeFromData")
 		imports(
 			script.ast,
@@ -553,7 +564,8 @@ function transformLayoutSvelte({ markup, style, script }, config) {
 			`{/${config.languageInUrl ? "key" : "if"}}`,
 		)
 	}
-	return
+	transformSvelte({ markup, style, script }, config)
+	return { markup: markup.ast, style, script }
 }
 ```
 
@@ -600,10 +612,11 @@ function transformSvelte(
 	}: { markup: { ast: Node; magicString: MagicString }; style: Node; script: { ast: Node } },
 	config,
 ) {
-	// Removes the sdk import and inserts variable declarations instead
-	replaceSdkImports(ast)
+	// This needs to run first, as we replace all occurrences from the sdk imports with placeholders
+	replaceSdkImports(script.ast)
 	replacePlaceholders({ ast: script.ast, config, fileType: "svelte" })
 	replacePlaceholders({ ...markup, config, fileType: "svelte" })
+	return { markup: markup.ast, style, script }
 }
 ```
 
