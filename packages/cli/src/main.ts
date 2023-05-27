@@ -6,7 +6,7 @@ import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 import { open } from "./commands/open/index.js"
 import { telemetry } from "./services/telemetry/implementation.js"
-import { getGitOrigin } from "./utilities/getGitOrigin.js"
+import { getGitRemotes } from "./utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
 import fetchPolyfill from "node-fetch"
 
@@ -24,7 +24,7 @@ initErrorMonitoring()
 ;(consola as unknown as Consola).wrapConsole()
 
 // --------------- CLI ---------------
-const gitOrigin = parseOrigin({ remotes: await getGitOrigin() })
+const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 
 export const cli = new Command()
 	.name("inlang")
