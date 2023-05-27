@@ -20,6 +20,9 @@ export function parseOrigin(args: {
 	return result
 }
 
+/**
+ * Transforms a remote URL to a standard format.
+ */
 function transformRemote(remote: string) {
 	// Match HTTPS pattern or SSH pattern
 	const regex = /(?:https:\/\/|git@)([^/]+)\/(.+?)(?:\.git)?$/
