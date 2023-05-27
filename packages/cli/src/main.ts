@@ -7,7 +7,7 @@ import { initErrorMonitoring } from "./services/error-monitoring/implementation.
 import { open } from "./commands/open/index.js"
 import { telemetry } from "./services/telemetry/implementation.js"
 import { getGitOrigin } from "./utilities/getGitOrigin.js"
-import { originChecked } from "@inlang/telemetry"
+import { parseOrigin } from "@inlang/telemetry"
 import fetchPolyfill from "node-fetch"
 
 // --------------- INIT ---------------
@@ -20,11 +20,11 @@ if (typeof fetch === "undefined") {
 
 initErrorMonitoring()
 // checks whether the gitOrigin corresponds to the pattern
-const checkedOrigin = originChecked(await getGitOrigin())
 // beautiful logging
 ;(consola as unknown as Consola).wrapConsole()
 
 // --------------- CLI ---------------
+const gitOrigin = parseOrigin({ remotes: await getGitOrigin() })
 
 export const cli = new Command()
 	.name("inlang")
@@ -36,7 +36,7 @@ export const cli = new Command()
 	.hook("postAction", (command) => {
 		telemetry.capture({
 			distinctId: "unknown",
-			groups: { repository: checkedOrigin! },
+			groups: { repository: gitOrigin },
 			event: `CLI command executed`,
 			properties: {
 				args: command.args.join(" "),
@@ -50,7 +50,7 @@ export const cli = new Command()
 
 telemetry.capture({
 	distinctId: "unknown",
-	groups: { repository: checkedOrigin! },
+	groups: { repository: gitOrigin },
 	event: "CLI started",
 	properties: {
 		version,
