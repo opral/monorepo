@@ -12,7 +12,7 @@ export async function getGitOrigin() {
 			fs,
 			dir: await raw.findRoot({ fs, filepath: process.cwd() }),
 		})
-		return remotes.find((remote) => remote.remote === "origin")?.url
+		return remotes
 	} catch (e) {
 		return undefined
 	}
