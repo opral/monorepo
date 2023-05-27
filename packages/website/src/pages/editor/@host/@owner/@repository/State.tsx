@@ -225,6 +225,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			// checks whether the gitOrigin corresponds to the pattern.
 
 			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
+			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
+			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
 			telemetryBrowser.group("repository", gitOrigin, {
 				name: gitOrigin,
 			})
