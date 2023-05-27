@@ -27,6 +27,7 @@ import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
+import { parseOrigin } from "@inlang/telemetry"
 
 type EditorStateSchema = {
 	/**
@@ -221,6 +222,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			const result = await cloneRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
+			// checks whether the gitOrigin corresponds to the pattern.
+
+			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
+			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
+			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
+			telemetryBrowser.group("repository", gitOrigin, {
+				name: gitOrigin,
+			})
 			github
 				.request("GET /repos/{owner}/{repo}", {
 					owner: args.routeParams.owner,
@@ -230,21 +239,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						isPrivate: response.data.private,
+						type: response.data.private ? "Private" : "Public",
 					})
 				})
 				.catch((error) => {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						isPrivate: undefined,
+						type: "unknown",
 						errorDuringIsPrivateRequest: error,
 					})
 				})
+
 			return result
 		},
 	)
-
 	// re-fetched if repository has been cloned
 	const [inlangConfig, setInlangConfig] = createResource(
 		() => {
@@ -848,5 +857,16 @@ async function pull(args: {
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, error as PullException]
+	}
+}
+async function getGitOrigin(args: { fs: NodeishFilesystem }) {
+	try {
+		const remotes = await raw.listRemotes({
+			fs: args.fs,
+			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
+		})
+		return remotes
+	} catch (e) {
+		return undefined
 	}
 }
