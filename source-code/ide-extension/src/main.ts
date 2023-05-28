@@ -8,16 +8,13 @@ import { setupConfig } from "@inlang/core/config"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { msg } from "./utils/message.js"
 import { createInlangEnv, importInlangConfig } from "./services/inlang-environment/index.js"
-import { parseOrigin, telemetryNode } from "@inlang/telemetry"
+import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
-import { getGitRemotes } from "./utils/getGitRemotes.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		telemetryNode.capture({
-			distinctId: "unknown",
+		await telemetry.capture({
 			event: "IDE-EXTENSION activated",
-			groups: { repository: parseOrigin({ remotes: await getGitRemotes() }) },
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
