@@ -1,1 +1,1 @@
-export { telemetry } from "./src/telemetry.js"
+export { telemetry } from "./implementation.js"
