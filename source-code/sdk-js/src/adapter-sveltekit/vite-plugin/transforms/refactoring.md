@@ -780,3 +780,68 @@ const fn2 = fn1
 const fn3 = otherFunction(fn2) // this is not supported
 export const load = fn3
 ```
+
+# Required AST helpers
+
+We summarize the required methods to manipulate the ast:
+
+## General
+
+Every helper...
+
+- Accepts the following params:
+
+  ```ts
+  function helper(target: { ast: Node; magicString: MagicString } | Node, ...otherParams)
+  ```
+
+  The first param can either be an ast or an object containing an ast and a magicstring. In case of an object being passed, all ast manipulations happen on the magicstring and the AST is just used for finding the insertion position.
+
+- The complete set of chained operators should be available at all times. E.g. although different in effect (and possibly nonsensical) a user could call both `.isFunction().merge()` or `.merge().isFunction()`
+
+- For the future the goal would be to enable idempotency, meaning that calling the same code multiple times still leads to the same endresult
+
+## Imports
+
+```ts
+imports(ast, importFrom).add(wrapper)
+const aliases = imports(ast, "@inlang/sdk-js").getAliases()
+const aliases = imports(ast, "@inlang/sdk-js").prune().getAliases()
+imports(ast, "@inlang/sdk-js").remove()
+imports(
+	ast,
+	`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-" : ""}reactive`,
+).add("getRuntimeFromContext")
+imports(ast, "@inlang/sdk-js").assertIsMissing()
+```
+
+## Definitions
+
+```ts
+const wasWrapped = definitions(ast, ...identifiers)
+	.wrap(wrapperAst)
+	.successful()
+```
+
+## Contexts
+
+```ts
+contexts(ast, exportN)
+	.isFunction()
+	.merge(parse(`function(_, {${exportToPlaceholder(exportN)}}) {}`))
+contexts(ast).insertAfterImports(
+	parse(`
+      $$_INLANG_DECLARE_SDK_IMPORTS_$$;
+      $$_INLANG_REASSIGN_SDK_IMPORTS_$$;
+    `),
+)
+contexts(markup).insert(`<slot/>`)
+contexts(markup).wrap(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
+```
+
+## Identifiers
+
+```ts
+identifiers(ast, aliasN).replace(parse(placeholder))
+identifiers({ ast, magicString }, "$$_INLANG_LANGUAGE_NON_REACTIVE_$$").replace(parse("language"))
+```
