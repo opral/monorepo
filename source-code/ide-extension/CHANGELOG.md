@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.6.1
+
+### Patch Changes
+
+- 04f81ae8: Minor refactorings
+
 ## 0.6.0
 
 ### Minor Changes
