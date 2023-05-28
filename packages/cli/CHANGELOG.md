@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.9
+
+### Patch Changes
+
+- 04f81ae8: Minor refactorings
+
 ## 0.9.8
 
 ### Patch Changes
