@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.2.1
+
+### Patch Changes
+
+- 04f81ae8: Minor refactorings
+
 ## 0.2.0
 
 ### Minor Changes
