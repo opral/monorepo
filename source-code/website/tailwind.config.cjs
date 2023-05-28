@@ -30,12 +30,23 @@ module.exports = {
 					"0%": { opacity: 0, transform: "translateY(20px)" },
 					"100%": { opacity: 1, transform: "translateY(0)" },
 				},
+				ripple: {
+					"0%": {
+						boxShadow:
+							"0 0 0 0 rgb(34 211 238 / 0.3), 0 0 0 30px rgb(34 211 238 / 0.1), 0 0 0 60px rgb(34 211 238 / 0.05)",
+					},
+					"100%": {
+						boxShadow:
+							"0 0 0 30px rgb(34 211 238 / 0.1), 0 0 0 60px rgb(34 211 238 / 0.05), 0 0 0 90px transparent",
+					},
+				},
 			},
 			animation: {
 				slideIn: "slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1",
 				jump: "jump 0.3s ease 1",
 				fadeInTop: "fadeInTop 0.3s ease-out 1",
 				fadeInBottom: "fadeInBottom 0.3s ease-out 1",
+				ripple: "ripple 2s linear infinite",
 			},
 		},
 		// no tailwind colors. use color system colors only. see below

@@ -2,7 +2,6 @@ import { currentPageContext } from "@src/renderer/state.js"
 import {
 	createContext,
 	createEffect,
-	createMemo,
 	createResource,
 	createSignal,
 	JSXElement,
@@ -28,6 +27,7 @@ import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
+import { parseOrigin } from "@inlang/telemetry"
 
 type EditorStateSchema = {
 	/**
@@ -220,15 +220,40 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			const result = await cloneRepository(args)
-			telemetryBrowser.capture("EDITOR cloned repository", {
-				owner: args.routeParams.owner,
-				repository: args.routeParams.repository,
-				isPrivate: repoIsPrivate(),
+			// not blocking the execution by using the callback pattern
+			// the user does not need to wait for the response
+			// checks whether the gitOrigin corresponds to the pattern.
+
+			const gitOrigin = parseOrigin({ remotes: await getGitOrigin(args) })
+			//You must include at least one group property for a group to be visible in the "Persons & Groups" tab
+			//https://posthog.com/docs/product-analytics/group-analytics#setting-and-updating-group-properties
+			telemetryBrowser.group("repository", gitOrigin, {
+				name: gitOrigin,
 			})
+			github
+				.request("GET /repos/{owner}/{repo}", {
+					owner: args.routeParams.owner,
+					repo: args.routeParams.repository,
+				})
+				.then((response) => {
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						type: response.data.private ? "Private" : "Public",
+					})
+				})
+				.catch((error) => {
+					telemetryBrowser.capture("EDITOR cloned repository", {
+						owner: args.routeParams.owner,
+						repository: args.routeParams.repository,
+						type: "unknown",
+						errorDuringIsPrivateRequest: error,
+					})
+				})
+
 			return result
 		},
 	)
-
 	// re-fetched if repository has been cloned
 	const [inlangConfig, setInlangConfig] = createResource(
 		() => {
@@ -241,13 +266,17 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 			return {
 				fs: fs(),
+				// BUG: this is not reactive
+				// See https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
+				// we need to listen to inlang.config.js changes
+				// lastFsChange: fsChange(),
 			}
 		},
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
 				const languages = // TODO: move this into setter logic
-					config.languages.sort((a, b) =>
+					config.languages.sort((a: any, b: any) =>
 						// reference language should be first
 						// sort alphabetically otherwise
 						a === config.referenceLanguage
@@ -483,7 +512,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					variant: "warning",
 					title: "Syncing fork failed",
 					message:
-						"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
+						"The fork likely has outstanding changes that have not been merged and led to a merge conflict. You can resolve the merge conflict manually by opening your GitHub repository.",
 				})
 				// rethrow for resource.error to work
 				throw error
@@ -737,7 +766,7 @@ async function writeResources(args: {
 	const status = await raw.statusMatrix({
 		fs: args.fs,
 		dir: "/",
-		filter: (f) =>
+		filter: (f: any) =>
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
 			f.endsWith(".yaml") ||
@@ -746,7 +775,7 @@ async function writeResources(args: {
 			f.endsWith(".ts"),
 	})
 	const filesWithUncommittedChanges = status.filter(
-		(row) =>
+		(row: any) =>
 			// files with unstaged and uncommitted changes
 			(row[2] === 2 && row[3] === 1) ||
 			// added files
@@ -828,5 +857,16 @@ async function pull(args: {
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, error as PullException]
+	}
+}
+async function getGitOrigin(args: { fs: NodeishFilesystem }) {
+	try {
+		const remotes = await raw.listRemotes({
+			fs: args.fs,
+			dir: await raw.findRoot({ fs: args.fs, filepath: "/" }),
+		})
+		return remotes
+	} catch (e) {
+		return undefined
 	}
 }

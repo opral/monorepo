@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.9.4",
+	"version": "0.9.8",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -46,18 +46,20 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang-git/fs": "^0.0.3",
-		"@sentry/node": "^7.51.2",
+		"@inlang-git/client": "*",
+		"@inlang-git/fs": "^0.0.4",
 		"@inlang/core": "*",
 		"@inlang/rpc": "*",
+		"@sentry/node": "^7.51.2",
 		"@types/prompts": "^2.4.2",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
-		"ora": "^6.3.0",
 		"esbuild": "^0.17.14",
 		"fast-glob": "^3.2.12",
-		"node-fetch": "^3.3.0",
+		"node-fetch": "^3.3.1",
 		"openai": "^3.2.1",
+		"ora": "^6.3.0",
+		"posthog-node": "^3.1.1",
 		"prompts": "^2.4.2",
 		"ts-dedent": "^2.2.0"
 	},

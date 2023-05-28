@@ -6,8 +6,6 @@ import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
-import { telemetryNode } from "@inlang/telemetry"
-import { exec } from "node:child_process"
 
 export const translate = new Command()
 	.command("translate")
@@ -91,7 +89,6 @@ async function translateCommandAction() {
 
 			// 🌏 Translation
 			const [translation, exception] = await rpc.machineTranslate({
-				telemetryId: "CLI",
 				referenceLanguage: referenceLanguage,
 				targetLanguage: language.languageTag.name,
 				text: message.pattern.elements[0]!.value as string,
@@ -148,26 +145,6 @@ async function translateCommandAction() {
 	await config.writeResources({
 		config,
 		resources: resources,
-	})
-
-	// get remote origin url by executing git command
-	exec("git config --get remote.origin.url", (error, stdout) => {
-		if (error) {
-			console.error("Failed to get the remote URL.", error.message)
-			return
-		}
-
-		const remoteUrl = stdout.trim()
-
-		telemetryNode.capture({
-			distinctId: "CLI",
-			event: "CLI command executed [machine translate]",
-			properties: {
-				remoteUrl,
-				referenceLanguage,
-				languages: languagesToTranslateTo.map((language) => language.languageTag.name),
-			},
-		})
 	})
 
 	// Log the message counts

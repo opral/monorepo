@@ -1,10 +1,9 @@
 import { LandingPageLayout as RootLayout } from "../Layout.jsx"
 import { Meta, Title } from "@solidjs/meta"
 import Hero from "./sections/01-hero/index.jsx"
-import Credibility from "./sections/02-credibility/index.jsx"
-import Editor from "./sections/03-editor/index.jsx"
-import VsCodeExtension from "./sections/04-vscodExtension/index.jsx"
-import Cli from "./sections/05-cli/index.jsx"
+import Integration from "./sections/02-integration/index.jsx"
+import ConfigPage from "./sections/03-config/index.jsx"
+import Pricing from "./sections/04-pricing/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -21,10 +20,9 @@ export function Page() {
 			<RootLayout landingpage>
 				<div>
 					<Hero />
-					<Credibility />
-					<Editor />
-					<VsCodeExtension />
-					<Cli />
+					<Integration />
+					<ConfigPage />
+					<Pricing />
 				</div>
 			</RootLayout>
 		</>

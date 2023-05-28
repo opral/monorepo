@@ -1,9 +1,10 @@
-import type { LintRule, LintedMessage } from "@inlang/core/lint"
+import { LintRule, LintedMessage, getLintReports } from "@inlang/core/lint"
 import { useEditorState } from "../State.jsx"
 import { For, Show } from "solid-js"
 import type { Accessor } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
+import { handleMissingMessage } from "../helper/handleMissingMessage.js"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -17,6 +18,7 @@ type RuleSummaryItem = {
 	id: string
 	amount: number
 	rule: LintRule
+	level: "warn" | "error"
 }
 
 export const messageCount = (
@@ -31,7 +33,10 @@ export const messageCount = (
 ) => {
 	let counter = 0
 	for (const id of Object.keys(messages())) {
-		if (showFilteredMessage(messages()[id]!, filteredLanguages, textSearch, filteredLintRules)) {
+		if (
+			showFilteredMessage(messages()[id]!, filteredLanguages, textSearch, filteredLintRules)
+				.length > 0
+		) {
 			counter++
 		}
 	}
@@ -65,18 +70,19 @@ export const ListHeader = (props: ListHeaderProps) => {
 			// loop over messages
 			let counter = 0
 			for (const id of Object.keys(props.messages())) {
-				if (
-					showFilteredMessage(props.messages()[id]!, filteredLanguages(), textSearch(), [lintId])
-				) {
-					counter++
-				}
+				const filteredReports = getLintReports(
+					showFilteredMessage(props.messages()[id]!, filteredLanguages(), textSearch(), [
+						lintId,
+					]) as LintedMessage[],
+				).filter((report) => handleMissingMessage(report, filteredLanguages()))
+				counter += filteredReports.length
 			}
 			if (
 				lintRule &&
 				counter !== 0 &&
 				(filteredLintRules().length === 0 || filteredLintRules().includes(lintRule.id))
 			) {
-				lintSummary.push({ id: lintId, amount: counter, rule: lintRule! })
+				lintSummary.push({ id: lintId, amount: counter, rule: lintRule!, level: lintRule.level })
 			}
 		})
 		return lintSummary
@@ -105,6 +111,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 							>
 								<sl-button
 									prop:size="small"
+									class={
+										filteredLintRules().includes(rule.rule["id"])
+											? rule.level === "warn"
+												? "ring-warning/20 ring-1 rounded"
+												: "ring-danger/20 ring-1 rounded"
+											: ""
+									}
 									onClick={() => {
 										if (filteredLintRules().includes(rule.rule["id"])) {
 											setFilteredLintRules(

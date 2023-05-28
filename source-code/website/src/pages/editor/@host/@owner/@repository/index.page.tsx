@@ -182,7 +182,7 @@ function TheActualPage() {
 }
 
 function NoInlangConfigFoundCard() {
-	const { fs } = useEditorState()
+	const { fs, setFsChange } = useEditorState()
 
 	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
 
@@ -190,13 +190,55 @@ function NoInlangConfigFoundCard() {
 		const [configFile, error] = await rpc.generateConfigFile({
 			applicationId: "EDITOR",
 			resolveFrom: "/",
-			// @ts-expect-error
-			fs: fs().promises,
+			fs: fs(),
 		})
 		if (error) {
 			return false
 		} else {
-			await fs().promises.writeFile("/inlang.config.js", configFile, { encoding: "utf8" })
+			await fs().writeFile("/inlang.config.js", configFile)
+			setFsChange(new Date())
+			return true
+		}
+	})
+
+	return (
+		<div class="flex grow items-center justify-center">
+			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
+				<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
+				<p class="pt-1.5 pb-8">
+					Please refer to the documentation and write the config file manually.
+				</p>
+				<a class="self-center" href="/documentation" target="_blank">
+					<sl-button prop:variant="text">
+						Take me to the documentation
+						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
+					</sl-button>
+				</a>
+			</div>
+		</div>
+	)
+}
+
+/**
+ * Deactivated because bug https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
+ */
+function NoInlangConfigFoundCardWithAutoGeneration() {
+	const { fs, setFsChange } = useEditorState()
+
+	const [shouldGenerateConfig, setShouldGenerateConfig] = createSignal(false)
+
+	const [successGeneratingConfig, { refetch }] = createResource(shouldGenerateConfig, async () => {
+		const [configFile, error] = await rpc.generateConfigFile({
+			applicationId: "EDITOR",
+			resolveFrom: "/",
+			fs: fs(),
+		})
+		if (error) {
+			return false
+		} else {
+			await fs().writeFile("/inlang.config.js", configFile)
+			setFsChange(new Date())
 			return true
 		}
 	})

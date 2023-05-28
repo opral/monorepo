@@ -1,5 +1,29 @@
 # @inlang/cli
 
+## 0.9.8
+
+### Patch Changes
+
+- 4fc27086: Fix autogeneration of the config. The files have been resolved from the binary instead of `cwd`
+
+## 0.9.7
+
+### Patch Changes
+
+- 2ff95127: Improved error messages and internal changes.
+
+## 0.9.6
+
+### Patch Changes
+
+- f8b09192: Fixes "fetch" is not defined error in Node16 environments.
+
+## 0.9.5
+
+### Patch Changes
+
+- 10947cea: refactoring of telemetry logic
+
 ## 0.9.4
 
 ### Patch Changes

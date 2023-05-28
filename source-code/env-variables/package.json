@@ -10,8 +10,8 @@
 		"./src"
 	],
 	"scripts": {
-		"- Build should remove the cache because build injected variables can't be cached.": "",
-		"build": "rm -rf ./.turbo && tsx ./build.ts",
+		"- CAREFUL build can have caching issues. Resolve the issue by running npm run clean in the root of the repo": "",
+		"build": "tsx ./build.ts",
 		"dev": "DEV=true npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",

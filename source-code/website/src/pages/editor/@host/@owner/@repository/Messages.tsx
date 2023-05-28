@@ -55,12 +55,13 @@ export function Messages(props: {
 			// Using a <Show> would re-trigger the render of all pattern and
 			// web components. See https://github.com/inlang/inlang/pull/555
 			classList={{
-				["hidden"]: !showFilteredMessage(
-					props.messages,
-					filteredLanguages(),
-					textSearch(),
-					filteredLintRules(),
-				),
+				["hidden"]:
+					showFilteredMessage(
+						props.messages,
+						filteredLanguages(),
+						textSearch(),
+						filteredLintRules(),
+					).length === 0,
 			}}
 		>
 			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">

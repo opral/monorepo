@@ -1,6 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
+	"version": "0.2.0",
 	"private": true,
 	"exports": {
 		".": "./src/index.ts",
@@ -20,16 +21,16 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang-git/fs": "^0.0.3",
+		"@inlang-git/fs": "^0.0.4",
 		"@inlang/core": "*",
 		"@inlang/telemetry": "*",
 		"@resvg/resvg-js": "^2.4.1",
+		"cache-manager": "^5.2.1",
 		"satori": "^0.4.7",
 		"satori-html": "^0.3.2"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }

@@ -102,6 +102,8 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial language filter
 	createEffect(() => {
 		if (
+			repositoryIsCloned.error === undefined &&
+			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
 			onlyLanguagesTheUserSpeaks().length > 1
 		) {
@@ -134,8 +136,8 @@ export function Layout(props: { children: JSXElement }) {
 		])
 	}
 
-	const hasResourceMetadata = () => {
-		if (resources.some((resource) => resource.metadata)) {
+	const isAddingResourcePossible = () => {
+		if (resources.some((resource) => !resource.metadata || resource.metadata.space)) {
 			return true
 		} else {
 			return false
@@ -265,7 +267,7 @@ export function Layout(props: { children: JSXElement }) {
 					prop:value={addLanguageText()}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
-				<Show when={hasResourceMetadata()}>
+				<Show when={!isAddingResourcePossible()}>
 					<p class="text-xs pb-4 -mt-4 pr-8 text-danger">
 						Your plugin is using metadata to parse resources. This is not yet supported.
 					</p>
@@ -274,7 +276,7 @@ export function Layout(props: { children: JSXElement }) {
 					class="w-full"
 					prop:size={"small"}
 					prop:variant={"primary"}
-					prop:disabled={hasResourceMetadata()}
+					prop:disabled={!isAddingResourcePossible()}
 					onClick={() => {
 						addLanguage(addLanguageText())
 						setAddLanguageModalOpen(false)

@@ -17,3 +17,5 @@ assignees: ""
 3. ...
 
 ### Additional information (screenshots?)
+- Browser:
+- Operating system:

@@ -4,8 +4,6 @@ import { describe, expect, test } from "vitest"
 import { replaceSdkImports, rewriteLoadOrHandleParameters } from "./inlangAst.js"
 import { print, types } from "recast"
 
-const n = types.namedTypes
-
 describe("rewriteLoadOrHandleParameters", () => {
 	test("Throw error for an illegal function", () => {
 		const code = dedent`function load(parameter1, parameter2) {}`
@@ -93,14 +91,6 @@ describe("rewriteLoadOrHandleParameters", () => {
                 console.log(language)
             }"
         `)
-	})
-})
-describe("extractWrappableExpression", () => {
-	test("Dont touch non-functions", () => {
-		const code = dedent`
-            const fn = () => {}
-            export const load = fn
-        `
 	})
 })
 describe("replaceSdkImports", () => {

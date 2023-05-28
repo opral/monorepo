@@ -30,7 +30,7 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - name: Build
-        run: doppler run -- node_modules/.bin/turbo run build --filter @inlang/ide-extension
+        run: doppler run -- node_modules/.bin/turbo run build --filter vs-code-extension
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 

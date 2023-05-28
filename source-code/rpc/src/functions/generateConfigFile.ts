@@ -10,15 +10,21 @@ import { prompt, promptVersion, temperature } from "./generateConfigFile.prompt.
 export async function generateConfigFileServer(args: {
 	filesystemAsJson: Record<string, string>
 	applicationId: string
-}): Promise<Result<string, { errorMessage: string }>> {
+}): Promise<
+	Result<
+		string,
+		{ type: "Exception"; message: string } | { type: "Internal Error"; message?: string }
+	>
+> {
 	try {
 		if (Object.keys(args.filesystemAsJson).length === 0) {
 			return [
 				undefined,
 				{
-					errorMessage:
+					type: "Internal Error",
+					message:
 						"The provided filesystem representation contains no files. Received: " +
-						args.filesystemAsJson,
+						JSON.stringify(args.filesystemAsJson, undefined, 2),
 				},
 			]
 		}
@@ -35,11 +41,17 @@ export async function generateConfigFileServer(args: {
 			},
 		})
 		if (exception) {
-			return [undefined, { errorMessage: exception.errorMessage }]
+			return [undefined, { type: "Exception", message: exception.errorMessage }]
 		}
 		return [success.configFile]
 	} catch (error) {
-		return [undefined, { errorMessage: (error as Error)?.message }]
+		return [
+			undefined,
+			{
+				type: "Internal Error",
+				message: (error as Error | undefined)?.message,
+			},
+		]
 	}
 }
 

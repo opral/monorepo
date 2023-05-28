@@ -3,6 +3,7 @@ import type { NodeishFilesystem } from "../interface.js"
 import outmatch from "outmatch"
 import { normalizePath } from "./normalizePath.js"
 import { assertIsAbsolutePath } from "./assertIsAbsolutePath.js"
+import { encode as encodeBase64 } from "js-base64"
 
 /**
  * Serializes the filesystem to a JSON object that can be sent over the network.
@@ -61,8 +62,7 @@ export async function toJson(args: {
 					`Badly behaved filesystem, expected string from readFile but got'${content.constructor.name}'.`,
 				)
 
-			console.log("going to btoa", content)
-			result[fullPath.slice(1)] = btoa(content) as string
+			result[fullPath.slice(1)] = encodeBase64(content)
 		}
 	}
 	return result
