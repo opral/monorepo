@@ -33,7 +33,7 @@
 		"dev:test": "vitest",
 		"dev:watch": "DEV=true node ./build.js",
 		"build": "node ./build.js && tsc -p tsconfig.build.json",
-		"test": "vitest run",
+		"test": "vitest run --coverage",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
