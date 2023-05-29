@@ -1,9 +1,10 @@
-import { type IdeExtensionSettings, validateIdeExtensionSettings } from "./schema.js"
+import { IdeExtensionConfigSchema } from "./schema.js"
+import { zodIdeExtensionConfigSchema } from "./zodSchema.js"
 import { createPlugin } from "@inlang/core/plugin"
 
 // ------------------------------------------------------------------------------------------------
 
-export const ideExtensionPlugin = createPlugin<IdeExtensionSettings>(({ settings }) => ({
+export const ideExtensionPlugin = createPlugin<IdeExtensionConfigSchema>(({ settings }) => ({
 	id: "inlang.ide-extension",
 	config: async () => {
 		// set fallback if no settings are provided
@@ -73,7 +74,7 @@ export const ideExtensionPlugin = createPlugin<IdeExtensionSettings>(({ settings
 			documentSelectors: settings?.documentSelectors || fallback.documentSelectors,
 		}
 
-		const parsedConfig = validateIdeExtensionSettings(updatedSettings)
+		const parsedConfig = zodIdeExtensionConfigSchema.parse(updatedSettings)
 
 		return {
 			ideExtension: parsedConfig,
