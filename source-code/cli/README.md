@@ -78,6 +78,12 @@ To initiate machine translation, run the following command:
 npx inlang machine translate
 ```
 
+##### Options
+
+The translate command has the following options:
+
+- `-f, --force`: If this option is set, the command will not prompt for confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context / wrong translations.**
+
 This command reads the inlang.config.js file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
