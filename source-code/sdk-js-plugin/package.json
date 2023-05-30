@@ -39,7 +39,7 @@
 	},
 	"devDependencies": {
 		"@inlang/core": "*",
-		"@inlang/ide-extension-plugin": "*",
+		"chevrotain": "^10.5.0",
 		"esbuild": "^0.17.10",
 		"npm-run-all": "^4.1.5",
 		"typescript": "^4.9.5",
