@@ -54,8 +54,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	// checking whether a config file exists -> if not dont start the extension
-	const potentialConfigFileUris = await vscode.workspace.findFiles("**/inlang.config.js")
+	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.js")
 	if (potentialConfigFileUris.length === 0) {
+		console.warn("No inlang.config.js file found.")
 		return
 	}
 	const closestConfigPath = determineClosestPath({
@@ -66,12 +67,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	// get current workspace
 	const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
 	if (!workspaceFolder) {
+		console.warn("No workspace folder found.")
 		return
 	}
 
 	// watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(workspaceFolder, "**/inlang.config.js"),
+		new vscode.RelativePattern(workspaceFolder, "inlang.config.js"),
 	)
 
 	const module = await importInlangConfig(closestConfigPath)
@@ -111,7 +113,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	const documentSelectors: vscode.DocumentSelector = [
-		{ language: "javascript", pattern: "!**/inlang.config.js" },
+		{ language: "javascript", pattern: "!inlang.config.js" },
 		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
 	]
 	// register source actions
