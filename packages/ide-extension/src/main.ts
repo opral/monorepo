@@ -10,6 +10,8 @@ import { msg } from "./utils/message.js"
 import { createInlangEnv, importInlangConfig } from "./services/inlang-environment/index.js"
 import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
+import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
+import { promptToReloadWindow } from "./utils/promptToReload.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -125,22 +127,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// register decorations
 	messagePreview({ activeTextEditor, context: args.context })
-}
 
-/** Prompts user to reload editor window in order for configuration change to take effect. */
-const promptToReloadWindow = () => {
-	const action = "Reload"
-
-	vscode.window
-		.showInformationMessage(
-			`To apply changes to the inlang configuration, please reload the window.`,
-			action,
-		)
-		.then((selectedAction) => {
-			if (selectedAction === action) {
-				vscode.commands.executeCommand("workbench.action.reloadWindow")
-			}
-		})
+	// properties missing decoration in inlang.config.js
+	propertiesMissingPreview({ activeTextEditor })
 }
 
 // this method is called when your extension is deactivated
