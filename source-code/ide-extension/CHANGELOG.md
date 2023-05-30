@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 0.6.3
+
+### Patch Changes
+
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/inlang/issues/856.
+- Updated dependencies [04f5ac93]
+  - @inlang/core@0.9.0
+
 ## 0.6.2
 
 ### Patch Changes
