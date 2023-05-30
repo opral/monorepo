@@ -43,9 +43,6 @@ export async function defineConfig(env) {
 	const { default: jsonPugin } = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
 	)
-	const { default: ideExtensionPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/ide-extension-plugin@latest/dist/index.js",
-	)
 
 	return {
 		referenceLanguage: "en",
@@ -53,7 +50,6 @@ export async function defineConfig(env) {
 			jsonPugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
-			ideExtensionPlugin(),
 		],
 	}
 }
@@ -67,8 +63,7 @@ If something isn't working as expected, please join our [Discord](https://discor
 
 ## 3️⃣ Configuration
 
-You can configure the extension to your needs, simply pass the following `ideExtensionPlugin({ /* configuration options */ })` below.
-We also provide you whith an **code template** you can use to fully customize your behavior.
+You can configure the extension to your needs by defining the `ideExtension` property in the config.
 
 | Property                   | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,74 +82,16 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
 	)
 
-	const { default: ideExtensionPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/ide-extension-plugin@latest/dist/index.js",
-	)
-
 	return {
 		referenceLanguage: "en",
 		plugins: [
 			jsonPugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
-			ideExtensionPlugin({
-				messageReferenceMatchers: [
-					async (/** @type {{ "documentText": string; }} */ args) => {
-						const regex = /(?<!\w){?t\(['"](?<messageId>\S+)['"]\)}?/gm
-						const str = args.documentText
-						let match
-						const result = []
-
-						while ((match = regex.exec(str)) !== null) {
-							const startLine =
-								(str.slice(0, Math.max(0, match.index)).match(/\n/g) || []).length + 1
-							const startPos = match.index - str.lastIndexOf("\n", match.index - 1)
-							const endPos =
-								match.index +
-								match[0].length -
-								str.lastIndexOf("\n", match.index + match[0].length - 1)
-							const endLine =
-								(str.slice(0, Math.max(0, match.index + match[0].length)).match(/\n/g) || [])
-									.length + 1
-
-							if (match.groups && "messageId" in match.groups) {
-								result.push({
-									messageId: match.groups["messageId"],
-									position: {
-										start: {
-											line: startLine,
-											character: startPos,
-										},
-										end: {
-											line: endLine,
-											character: endPos,
-										},
-									},
-								})
-							}
-						}
-						return result
-					},
-				],
-				extractMessageOptions: [
-					{
-						callback: (messageId) => `{t("${messageId}")}`,
-					},
-					{
-						callback: (messageId) => `t("${messageId}")`,
-					},
-				],
-				documentSelectors: [
-					{ language: "javascript" },
-					{ language: "javascriptreact" },
-					{ language: "typescript" },
-					{ language: "typescriptreact" },
-					{ language: "svelte" },
-					{ language: "vue" },
-					{ language: "html" },
-				],
-			}),
 		],
+		ideExtension: {
+			// ... your configuration here
+		},
 	}
 }
 ```

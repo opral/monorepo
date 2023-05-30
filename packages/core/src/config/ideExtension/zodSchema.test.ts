@@ -1,7 +1,7 @@
 import * as z from "zod"
 import { zodIdeExtensionConfigSchema } from "./zodSchema.js"
 import { expect, it } from "vitest"
-import { IdeExtensionConfigSchema } from "./schema.js"
+import type { IdeExtensionConfigSchema } from "./schema.js"
 
 it("should have the same type as the manual typescript definition", () => {
 	type ZodType = z.infer<typeof zodIdeExtensionConfigSchema>
@@ -71,6 +71,6 @@ it("should throw an error for a config object with invalid messageReferenceMatch
 
 	const validatedConfig = zodIdeExtensionConfigSchema.parse(invalidConfig)
 	await expect(() =>
-		validatedConfig.messageReferenceMatchers![0]({ documentText: "" }),
+		validatedConfig.messageReferenceMatchers![0]!({ documentText: "" }),
 	).rejects.toBeInstanceOf(z.ZodError)
 })
