@@ -4,7 +4,7 @@ import type { PluginSetupFunction, Plugin } from "./types.js"
 export function createPlugin<
 	PluginSettings extends Record<string, unknown> | undefined = undefined,
 >(
-	callback: (args: { settings?: PluginSettings; env: InlangEnvironment }) => Plugin,
+	callback: (args: { settings: PluginSettings; env: InlangEnvironment }) => Plugin,
 ): PluginSettings extends undefined
 	? () => PluginSetupFunction
 	: (settings?: PluginSettings) => PluginSetupFunction {
