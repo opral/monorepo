@@ -4,7 +4,7 @@ import type { Runtime } from "./runtime/runtime.js"
 import type { RelativeUrl } from "./types.js"
 
 const error = new Error(
-	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/docs/sdk",
+	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/documentation/sdk/overview",
 )
 
 export const referenceLanguage: Language = error as any
