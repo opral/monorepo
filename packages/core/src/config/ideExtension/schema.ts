@@ -11,21 +11,7 @@ export type IdeExtensionConfigSchema = {
 	 * @param args represents the data to conduct the search on
 	 * @returns a promise with matched message references
 	 */
-	messageReferenceMatchers: ((args: { documentText: string }) => Promise<
-		Array<{
-			/**
-			 * The messages id.
-			 */
-			messageId: string
-			/**
-			 * The position from where to where the reference can be found.
-			 */
-			position: {
-				start: { line: number; character: number }
-				end: { line: number; character: number }
-			}
-		}>
-	>)[]
+	messageReferenceMatchers: ((args: { documentText: string }) => Promise<MessageReferenceMatch[]>)[]
 
 	/**
 	 * Defines the options to extract messages.
@@ -52,4 +38,24 @@ export type IdeExtensionConfigSchema = {
 	documentSelectors?: Array<{
 		language?: string
 	}>
+}
+
+/**
+ * The result of a message reference matcher.
+ *
+ * The result contains the message id and the position
+ * from where to where the reference can be found.
+ */
+export type MessageReferenceMatch = {
+	/**
+	 * The messages id.
+	 */
+	messageId: string
+	/**
+	 * The position from where to where the reference can be found.
+	 */
+	position: {
+		start: { line: number; character: number }
+		end: { line: number; character: number }
+	}
 }

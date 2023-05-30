@@ -3,6 +3,7 @@ import type * as ast from "../ast/index.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { LintRule } from "../lint/rule.js"
 import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
+import type { IdeExtensionConfigSchema } from "./ideExtension/schema.js"
 
 /**
  * The entrypoint for inlang.
@@ -70,6 +71,11 @@ export type InlangConfig = {
 	lint?: {
 		rules: (LintRule | LintRule[])[]
 	}
+
+	/**
+	 * The config schema for the ide extension.
+	 */
+	ideExtension?: IdeExtensionConfigSchema
 
 	/**
 	 * WARNING: Experimental properties are not required,
