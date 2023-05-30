@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.11
+
+### Patch Changes
+
+- b60740f9: refactoring
+
 ## 0.9.10
 
 ### Patch Changes
