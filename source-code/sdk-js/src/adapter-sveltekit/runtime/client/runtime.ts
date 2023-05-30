@@ -3,9 +3,9 @@ import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
-	referenceLanguage: string
-	languages: string[]
-	language: string
+	referenceLanguage: Language
+	languages: Language[]
+	language: Language | undefined
 }
 
 export const initSvelteKitClientRuntime = async ({
