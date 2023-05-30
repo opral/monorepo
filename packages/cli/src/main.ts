@@ -34,11 +34,17 @@ export const cli = new Command()
 	.addCommand(machine)
 	.addCommand(open)
 	.hook("postAction", (command) => {
+		// name enables better grouping in the telemetry dashboard
+		const name = command.args.filter(
+			// shouldn't start with a flag and the previous arg shouldn't be a flag
+			(arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-"),
+		)
 		telemetry.capture({
 			distinctId: "unknown",
 			groups: { repository: gitOrigin },
 			event: `CLI command executed`,
 			properties: {
+				name: name.join(" "),
 				args: command.args.join(" "),
 			},
 		})
