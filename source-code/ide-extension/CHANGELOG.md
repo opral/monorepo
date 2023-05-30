@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.6.2
+
+### Patch Changes
+
+- b3e868f1: remove monorepo config parsing and add warning to config if no ide extension properties are set
+
 ## 0.6.1
 
 ### Patch Changes
