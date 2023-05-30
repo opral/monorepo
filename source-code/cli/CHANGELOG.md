@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.10
+
+### Patch Changes
+
+- caa9e747: add --force flag to machine translate command to raise awareness about translation quality
+
 ## 0.9.9
 
 ### Patch Changes
