@@ -72,10 +72,7 @@ async function translateCommandAction() {
 		"📝 Translating to " +
 			languagesToTranslateTo.length +
 			" languages. [" +
-			[...new Set(languagesToTranslateTo)]
-				.splice(0, 3)
-				.map((language) => language.languageTag.name)
-				.join(", ") +
+			[...new Set(languagesToTranslateTo)].map((language) => language.languageTag.name).join(", ") +
 			"]",
 	)
 
