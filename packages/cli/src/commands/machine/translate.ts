@@ -9,10 +9,27 @@ import { rpc } from "@inlang/rpc"
 
 export const translate = new Command()
 	.command("translate")
+	.option("-f, --force", "Force machine translation and skip the confirmation prompt.")
 	.description("Machine translate all resources.")
 	.action(translateCommandAction)
 
 async function translateCommandAction() {
+	// Get the options
+	const options = translate.opts()
+
+	// Prompt the user to confirm
+	if (!options.force) {
+		const promptly = await import("promptly")
+		log.warn(
+			"Machine translations are not very accurate. We advise you to only use machine translations in a build step to have them in production but not commit them to your repository. You can use the force flag (-f, --force) to skip this prompt in a build step.",
+		)
+		const answer = await promptly.prompt("Are you sure you want to machine translate? (y/n)")
+		if (answer !== "y") {
+			log.info("🚫 Aborting machine translation.")
+			return
+		}
+	}
+
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
