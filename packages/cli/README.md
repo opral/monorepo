@@ -79,7 +79,7 @@ To initiate machine translation, run the following command:
 npx inlang machine translate
 ```
 
-##### Options
+**Options**
 
 The translate command has the following options:
 
