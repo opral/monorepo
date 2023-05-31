@@ -3,14 +3,22 @@ import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
 import * as svelte from "svelte"
 import * as navigation from "$app/navigation"
 import * as sharedUtils from "../../shared/utils.js"
-import { initSvelteKitClientRuntime } from "../runtime.js"
+import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
 
 let ctx: ReturnType<typeof getRuntimeFromContext> | undefined
+let runtime: SvelteKitClientRuntime
 
-beforeEach(() => {
+beforeEach(async () => {
 	vi.resetAllMocks()
 
 	ctx = undefined
+
+	runtime = await initSvelteKitClientRuntime({
+		fetch: vi.fn().mockReturnValue(Promise.resolve({})),
+		language: "en",
+		languages: ["en", "de"],
+		referenceLanguage: "en",
+	})
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
 	vi.mock("$app/stores", () => ({ page: vi.fn() }))
@@ -32,14 +40,7 @@ describe("getRuntimeFromContext", () => {
 	})
 })
 
-describe("addRuntimeToContext", async () => {
-	const runtime = await initSvelteKitClientRuntime({
-		fetch: vi.fn().mockReturnValue(Promise.resolve({})),
-		language: "en",
-		languages: ["en", "de"],
-		referenceLanguage: "en",
-	})
-
+describe("addRuntimeToContext", () => {
 	test("should set the runtime to the context", async () => {
 		expect(addRuntimeToContext(runtime)).toBeUndefined()
 

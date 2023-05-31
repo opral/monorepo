@@ -44,7 +44,7 @@ describe("getRuntimeFromContext", () => {
 	})
 })
 
-describe("addRuntimeToContext", async () => {
+describe("addRuntimeToContext", () => {
 	test("should set the runtime to the context", async () => {
 		expect(addRuntimeToContext(runtime)).toBeUndefined()
 
