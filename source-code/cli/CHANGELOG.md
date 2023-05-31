@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.12
+
+### Patch Changes
+
+- 9a7e72ac: add lint command to CLI
+
 ## 0.9.11
 
 ### Patch Changes
