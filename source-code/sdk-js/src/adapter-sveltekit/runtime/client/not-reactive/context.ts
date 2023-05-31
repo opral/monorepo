@@ -1,15 +1,14 @@
 import type * as Ast from "@inlang/core/ast"
-import { inlangSymbol } from "../../shared/utils.js"
-import { replaceLanguageInUrl } from "../../shared/index.js"
-import type { SvelteKitClientRuntime } from "../index.js"
+import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
+import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { RelativeUrl } from "../../../../index.js"
 import type { Language } from "@inlang/core/ast"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
+import type { RelativeUrl } from '../../../../types.js'
 
 type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
@@ -27,7 +26,7 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const language = runtime.language as Language
+	const { language, referenceLanguage, languages, i, loadResource } = runtime
 
 	const switchLanguage = async (language: Language) => {
 		if (runtime.language === language) return
@@ -37,12 +36,12 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 
 	setContext(inlangSymbol, {
 		language,
-		referenceLanguage: runtime.referenceLanguage,
-		languages: runtime.languages,
-		i: runtime.i,
-		loadResource: runtime.loadResource,
+		referenceLanguage,
+		languages,
+		i,
+		loadResource,
 		switchLanguage,
-		route: route.bind(undefined, language),
+		route: route.bind(undefined, language as Language),
 	})
 }
 
