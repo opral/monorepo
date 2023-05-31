@@ -1,11 +1,9 @@
 import { query } from "@inlang/core/query"
-import { InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
-import fs from "node:fs"
 import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
+import { getConfig } from "../../utilities/getConfig.js"
 
 export const translate = new Command()
 	.command("translate")
@@ -30,35 +28,12 @@ async function translateCommandAction() {
 		}
 	}
 
-	// Set up the environment functions
-	const env: InlangEnvironment = {
-		$import: initialize$import({
-			fs: fs.promises,
-			fetch,
-		}),
-		$fs: fs.promises,
-	}
-
-	const filePath = process.cwd() + "/inlang.config.js"
-
-	if (!fs.existsSync(filePath)) {
-		log.error("No inlang.config.js file found in the repository.")
+	// Get the config
+	const config = await getConfig()
+	if (!config) {
+		log.warn("🚫 Inlang config not found. Please check you setup.")
 		return
-	} else {
-		log.info("✅ Using inlang config file at `" + filePath + "`")
 	}
-
-	// Need to manually import the config because CJS projects
-	// might fail otherwise. See https://github.com/inlang/inlang/issues/789
-	const file = fs.readFileSync(filePath, "utf-8")
-	const module: InlangConfigModule = await import(
-		"data:application/javascript;base64," + btoa(file.toString())
-	)
-
-	const config = await setupConfig({
-		module,
-		env,
-	})
 
 	// Get all resources
 	let resources = await config.readResources({ config })
