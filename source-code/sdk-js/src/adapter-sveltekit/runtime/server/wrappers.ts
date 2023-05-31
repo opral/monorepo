@@ -32,17 +32,16 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
+				const pathname = event.url.pathname as RelativeUrl
+
 				runtime = getRuntimeFromLocals(event.locals)
 				// runtime was already added by a previous wrapper
 				if (runtime) resolve(event)
 
 				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
 
-				const pathname = event.url.pathname as RelativeUrl
-				if (pathname.startsWith("/inlang")) return resolve(event)
-
 				let language = options.getLanguage(event)
-				if (!language || !languages.includes(language)) {
+				if (!pathname.startsWith("/inlang") && (!language || !languages.includes(language))) {
 					if (options.redirect) {
 						const detectedLanguage = await detectLanguage(
 							{ referenceLanguage, languages },
