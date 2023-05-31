@@ -2,7 +2,7 @@ import { test, describe, expect } from "vitest"
 import { initSvelteKitClientRuntime } from "./runtime.js"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-import type { Resource } from "@inlang/core/ast"
+import { createMessage, createResource } from '@inlang/core/test'
 
 const PREFIX = "https://www.inlang.com"
 
@@ -25,24 +25,9 @@ describe("initSvelteKitClientRuntime", () => {
 			rest.get(`${PREFIX}/inlang/en.json`, (_, res, ctx) =>
 				res(
 					ctx.status(200),
-					ctx.body(
-						JSON.stringify({
-							type: "Resource",
-							languageTag: { type: "LanguageTag", name: "en" },
-							body: [
-								{
-									type: "Message",
-									id: { type: "Identifier", name: "hello" },
-									pattern: {
-										type: "Pattern",
-										elements: [{ type: "Text", value: "World!" }],
-									},
-								},
-							],
-						} as Resource),
-					),
-				),
-			),
+					ctx.body(JSON.stringify(createResource("en", createMessage("hello", "World!")))),
+				)
+			)
 		)
 
 		server.listen()
