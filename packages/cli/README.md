@@ -22,9 +22,15 @@ or
 yarn add @inlang/cli
 ```
 
+best
+
+```sh
+npx inlang <command>
+```
+
 ## Commands
 
-We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not intalling the CLI globally has the following advantages:
+We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
 - the installed CLI version is scoped to the project, ensuring that it always works.
 - the CLI gets installed for team members too, avoiding "why is this command not working for me" questions.
