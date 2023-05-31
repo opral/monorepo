@@ -7,7 +7,7 @@ export const getRuntimeFromContext = () => {
 		return getContext(inlangSymbol)
 	} catch (e) {
 		throw Error(`
-You cannot directly access any '@inlang/sdk-js' imports in this scop. You need to pass them from 'handle' or 'load' to the function you want to call e.g.
+You cannot directly access any '@inlang/sdk-js' imports in this scope. You need to pass them from 'handle' or 'load' to the function you want to call e.g.
 
 // -- Change this -------------------------------------------------------------
 

@@ -4,7 +4,7 @@ import { writable, type Readable } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
-import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/index.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
 

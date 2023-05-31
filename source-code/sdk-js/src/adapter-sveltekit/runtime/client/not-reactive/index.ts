@@ -9,7 +9,7 @@ import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { RelativeUrl } from "../../../../index.js"
 import type { Language } from "@inlang/core/ast"
-import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/index.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 
 type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
