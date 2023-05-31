@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.13
+
+### Patch Changes
+
+- 99d9a2c3: remove double warning of no config found
+
 ## 0.9.12
 
 ### Patch Changes
