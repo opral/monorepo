@@ -907,4 +907,36 @@ describe("imports", () => {
 			})
 		})
 	})
+	describe("getAliases", () => {
+		test("Detect miscellaneous aliases", () => {
+			const code = dedent`
+				import { exportN as aliasN, default as defaultAlias } from "source";
+				import * as namespaceAlias from "source";
+				console.log()
+			`
+			const ast = parseModule(code).$ast
+			const { aliases } = imports(ast as Program, "source").getAliases("default", "requested")
+			const regularAlias = aliases?.get("exportN")
+			const defaultAlias = aliases?.get("default")
+			const namespaceAlias = aliases?.get("*")
+			const requestedAlias = aliases?.get("requested")
+			expect(aliases?.size).toBe(4)
+			expect(regularAlias ? print(regularAlias).code : "").toEqual("aliasN")
+			expect(defaultAlias ? print(defaultAlias).code : "").toEqual("defaultAlias")
+			expect(namespaceAlias ? print(namespaceAlias).code : "").toEqual("namespaceAlias")
+			expect(requestedAlias ? print(requestedAlias).code : "").toEqual("namespaceAlias.requested")
+		})
+		test("Return error for nonexistent alias", () => {
+			const code = dedent`
+				import { exportN as aliasN, default as defaultAlias } from "source";
+				console.log()
+			`
+			const ast = parseModule(code).$ast
+			const { error } = imports(ast as Program, "source").getAliases("nonexistent")
+			expect(error).toBeInstanceOf(Error)
+			expect(error?.message).toBe(
+				"The alias for nonexistent does not exist. Maybe call imports(...).add() first?",
+			)
+		})
+	})
 })
