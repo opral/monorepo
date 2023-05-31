@@ -15,7 +15,7 @@ async function lintCommandAction() {
 	// Get the config
 	const config = await getConfig()
 	if (!config) {
-		log.warn("🚫 Inlang config not found. Please check you setup.")
+		// no message because that's handled in getConfig
 		return
 	}
 
