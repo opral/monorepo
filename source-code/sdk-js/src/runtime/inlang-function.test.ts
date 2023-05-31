@@ -43,7 +43,7 @@ describe("createInlangFunction", () => {
 		expect(result).toBe("Welcome, !")
 	})
 
-	test("it should not fail if placeholders get passed as args", () => {
+	test("it should not fail if no placeholders get passed as args", () => {
 		const fn = createInlangFunction(resource)
 
 		const result = fn("welcome")
