@@ -16,7 +16,6 @@ import { ${
 	root ? "initRootLayoutLoadWrapper" : "initLoadWrapper"
 } } from "@inlang/sdk-js/adapter-sveltekit/shared";
 import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
-import { localStorageKey } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
 `
 
 const options = (config: TransformConfig) =>
@@ -24,7 +23,7 @@ const options = (config: TransformConfig) =>
 		? `{}`
 		: `
 {initDetectors: browser
-? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
+? () => [initLocalStorageDetector(), navigatorDetector]
 : undefined}
 `
 

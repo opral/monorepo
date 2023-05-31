@@ -100,7 +100,7 @@ describe("initBaseRuntime", () => {
 		})
 
 		test("it should be able to load resources sync", async () => {
-			const context: RuntimeContext<string, Promise<Resource | undefined>> = {
+			const context: RuntimeContext<string, Resource | undefined> = {
 				readResource: (language) => resources[language as keyof typeof resources],
 			}
 
@@ -140,7 +140,7 @@ describe("initBaseRuntime", () => {
 		})
 
 		test("it should return the already loaded resource for multiple loadResource calls with the same params", async () => {
-			const context: RuntimeContext<string, Promise<Resource | undefined>> = {
+			const context: RuntimeContext<string, Resource | undefined> = {
 				readResource: (language) => resources[language as keyof typeof resources],
 			}
 			const state = {

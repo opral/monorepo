@@ -12,7 +12,7 @@ describe("transformLayoutSvelte", () => {
 				const code = await transformLayoutSvelte(getTransformConfig(), "", true)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					export let data;
 					let language;
@@ -25,7 +25,7 @@ describe("transformLayoutSvelte", () => {
 					$:
 					if (browser && $language) {
 					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(localStorageKey, $language);
+					  localStorage.setItem(\\"language\\", $language);
 					}</script>
 					{#if $language}<slot />{/if}"
 				`)
@@ -38,7 +38,7 @@ describe("transformLayoutSvelte", () => {
 				)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					export let data;
 					let language;
@@ -51,7 +51,7 @@ describe("transformLayoutSvelte", () => {
 					$:
 					if (browser && $language) {
 					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(localStorageKey, $language);
+					  localStorage.setItem(\\"language\\", $language);
 					}</script>
 					{#if $language}<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). --><slot />{/if}"
 				`)
@@ -77,7 +77,7 @@ describe("transformLayoutSvelte", () => {
 				)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					import { onMount } from \\"svelte\\"
 
@@ -95,7 +95,7 @@ describe("transformLayoutSvelte", () => {
 					$:
 					if (browser && $language) {
 					    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					    localStorage.setItem(localStorageKey, $language);
+					    localStorage.setItem(\\"language\\", $language);
 					}</script>
 
 					{#if $language}<h1>Hello {data.name}!</h1>{/if}"
@@ -120,7 +120,7 @@ describe("transformLayoutSvelte", () => {
 				)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					export let data;
 					let language;
@@ -133,7 +133,7 @@ describe("transformLayoutSvelte", () => {
 					$:
 					if (browser && $language) {
 					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(localStorageKey, $language);
+					  localStorage.setItem(\\"language\\", $language);
 					}</script><svelte:window/><svelte:document/><svelte:body/><svelte:head/>
 					{#if $language}<h1>Hello {data.name}!</h1>
 
@@ -159,7 +159,7 @@ describe("transformLayoutSvelte", () => {
 				)
 				expect(code).toMatchInlineSnapshot(`
 					"<script>import { browser } from \\"$app/environment\\";
-					import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					export let data;
 					let language;
@@ -172,7 +172,7 @@ describe("transformLayoutSvelte", () => {
 					$:
 					if (browser && $language) {
 					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(localStorageKey, $language);
+					  localStorage.setItem(\\"language\\", $language);
 					}</script>
 					{#if $language}<h1>Hello {data.name}!</h1>
 
@@ -226,7 +226,7 @@ describe("transformLayoutSvelte", () => {
 					)
 					expect(code).toMatchInlineSnapshot(`
 						"<script>import { browser } from \\"$app/environment\\";
-						import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
+						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 						export let data;
 						let language, i, languages;
@@ -241,7 +241,7 @@ describe("transformLayoutSvelte", () => {
 						$:
 						if (browser && $language) {
 						    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-						    localStorage.setItem(localStorageKey, $language);
+						    localStorage.setItem(\\"language\\", $language);
 						}
 
 						console.log(languages)</script>
