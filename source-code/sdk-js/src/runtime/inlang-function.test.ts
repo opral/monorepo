@@ -1,8 +1,9 @@
 import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
-import { createMessage, createResource } from '@inlang/core/test'
+import { createMessage, createResource } from "@inlang/core/test"
 
-const resource = createResource('en',
+const resource = createResource(
+	"en",
 	createMessage("hello", "world"),
 	createMessage("welcome", [
 		{ type: "Text", value: "Welcome, " },
@@ -14,8 +15,7 @@ const resource = createResource('en',
 			},
 		},
 		{ type: "Text", value: "!" },
-	],
-	)
+	]),
 )
 
 describe("createInlangFunction", () => {

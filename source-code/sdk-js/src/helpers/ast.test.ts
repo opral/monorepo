@@ -119,7 +119,7 @@ describe("findUsedImportsInAst", () => {
 })
 
 // describe("mergeNodes", () => {
-	/* test("Add simple property to empty object", () => {
+/* test("Add simple property to empty object", () => {
 		// {key2: key2Alias}
 		const property = b.property("init", b.identifier("key2"), b.identifier("key2Alias"))
 		// {}

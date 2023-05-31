@@ -1,13 +1,15 @@
 import { test, describe, expect, vi } from "vitest"
-import { getRuntimeFromContext } from './context.js'
-import * as svelte from 'svelte'
+import { getRuntimeFromContext } from "./context.js"
+import * as svelte from "svelte"
 
-vi.mock('svelte', () => ({ getContext: vi.fn() }))
-const getContextSpy = vi.spyOn(svelte, 'getContext')
+vi.mock("svelte", () => ({ getContext: vi.fn() }))
+const getContextSpy = vi.spyOn(svelte, "getContext")
 
 describe("getRuntimeFromContext", () => {
 	test("should throw an error if not running in Svelte context", async () => {
-		getContextSpy.mockImplementation(() => { throw new Error() })
+		getContextSpy.mockImplementation(() => {
+			throw new Error()
+		})
 		expect(() => getRuntimeFromContext()).toThrow()
 	})
 

@@ -1,7 +1,13 @@
 import type { Resource } from "@inlang/core/ast"
 import { createResource, createMessage } from "@inlang/core/test"
 import { describe, expect, test } from "vitest"
-import { initBaseRuntime, initRuntime, initRuntimeWithLanguageInformation, RuntimeContext, RuntimeState } from "./runtime.js"
+import {
+	initBaseRuntime,
+	initRuntime,
+	initRuntimeWithLanguageInformation,
+	RuntimeContext,
+	RuntimeState,
+} from "./runtime.js"
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -98,22 +104,22 @@ describe("initBaseRuntime", () => {
 
 		test("it should allow to call loadResource multiple times", async () => {
 			const runtime = initBaseRuntime(context)
-			await expect(runtime.loadResource('de')).resolves.toBeUndefined()
-			await expect(runtime.loadResource('de')).resolves.toBeUndefined()
+			await expect(runtime.loadResource("de")).resolves.toBeUndefined()
+			await expect(runtime.loadResource("de")).resolves.toBeUndefined()
 		})
 
 		test("it should cache multiple loadResource calls with the same params", async () => {
 			const runtime = initBaseRuntime(context)
-			const p1 = runtime.loadResource('de')
-			const p2 = runtime.loadResource('de')
-			const p3 = runtime.loadResource('it')
+			const p1 = runtime.loadResource("de")
+			const p2 = runtime.loadResource("de")
+			const p3 = runtime.loadResource("it")
 
 			expect(p1).toBe(p2) // same language
 			expect(p1).not.toBe(p3) // different language
 
 			await p2
 
-			const p4 = runtime.loadResource('de')
+			const p4 = runtime.loadResource("de")
 			expect(p1).not.toBe(p4) // previous promise was resolved
 		})
 
@@ -129,9 +135,9 @@ describe("initBaseRuntime", () => {
 
 			const runtime = initBaseRuntime(context, state)
 			expect(state.resources.size).toBe(0)
-			runtime.loadResource('de')
+			runtime.loadResource("de")
 			expect(state.resources.size).toBe(1)
-			runtime.loadResource('de')
+			runtime.loadResource("de")
 			expect(state.resources.size).toBe(1)
 		})
 	})
@@ -185,8 +191,8 @@ describe("initBaseRuntime", () => {
 
 		test("it should not create multiple instances", async () => {
 			const runtime = initBaseRuntime(context)
-			await runtime.loadResource('de')
-			runtime.switchLanguage('de')
+			await runtime.loadResource("de")
+			runtime.switchLanguage("de")
 
 			const i1 = runtime.i
 			const i2 = runtime.i
@@ -237,22 +243,22 @@ describe("initBaseRuntime", () => {
 	})
 })
 
-describe('initRuntimeWithLanguageInformation', () => {
+describe("initRuntimeWithLanguageInformation", () => {
 	test("it should create a runtime with the passed language information", async () => {
 		const runtime = initRuntimeWithLanguageInformation({
-			referenceLanguage: 'fr',
-			languages: ['fr', 'it'],
-			readResource: (language) => resources[language as keyof typeof resources]
+			referenceLanguage: "fr",
+			languages: ["fr", "it"],
+			readResource: (language) => resources[language as keyof typeof resources],
 		})
 
-		expect(runtime.referenceLanguage).toBe('fr')
-		expect(runtime.languages).toEqual(['fr', 'it'])
+		expect(runtime.referenceLanguage).toBe("fr")
+		expect(runtime.languages).toEqual(["fr", "it"])
 		const i = runtime.i
 		expect(i).toBeDefined()
-		expect(i('')).toBe('')
+		expect(i("")).toBe("")
 		expect(runtime.switchLanguage).toBeDefined()
-		runtime.switchLanguage('fr')
+		runtime.switchLanguage("fr")
 		expect(runtime.loadResource).toBeDefined()
-		expect(runtime.language).toBe('fr')
+		expect(runtime.language).toBe("fr")
 	})
 })

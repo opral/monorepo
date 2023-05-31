@@ -1,9 +1,9 @@
 import { test, describe, expect, vi, beforeEach } from "vitest"
-import { getRuntimeFromContext, addRuntimeToContext } from './context.js'
-import * as svelte from 'svelte'
-import * as navigation from '$app/navigation';
-import * as sharedUtils from '../../shared/utils.js';
-import { initSvelteKitClientRuntime } from '../runtime.js';
+import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
+import * as svelte from "svelte"
+import * as navigation from "$app/navigation"
+import * as sharedUtils from "../../shared/utils.js"
+import { initSvelteKitClientRuntime } from "../runtime.js"
 
 let ctx: ReturnType<typeof getRuntimeFromContext> | undefined
 
@@ -12,13 +12,18 @@ beforeEach(() => {
 
 	ctx = undefined
 
-	vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
-	vi.mock('$app/stores', () => ({ page: vi.fn() }))
-	vi.mock('svelte/store', () => ({ get: <V>(value: V) => value }))
-	vi.mock('svelte', () => ({ getContext: vi.fn(), setContext: vi.fn() }))
-	vi.spyOn(svelte, 'getContext').mockImplementation(() => ctx)
-	vi.spyOn(svelte, 'setContext').mockImplementation((_, v) => ctx = v as ReturnType<typeof getRuntimeFromContext>)
-	vi.mock('../../shared/utils.js', () => ({ inlangSymbol: Symbol(''), replaceLanguageInUrl: vi.fn() }))
+	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
+	vi.mock("$app/stores", () => ({ page: vi.fn() }))
+	vi.mock("svelte/store", () => ({ get: <V>(value: V) => value }))
+	vi.mock("svelte", () => ({ getContext: vi.fn(), setContext: vi.fn() }))
+	vi.spyOn(svelte, "getContext").mockImplementation(() => ctx)
+	vi.spyOn(svelte, "setContext").mockImplementation(
+		(_, v) => (ctx = v as ReturnType<typeof getRuntimeFromContext>),
+	)
+	vi.mock("../../shared/utils.js", () => ({
+		inlangSymbol: Symbol(""),
+		replaceLanguageInUrl: vi.fn(),
+	}))
 })
 
 describe("getRuntimeFromContext", () => {
@@ -30,9 +35,9 @@ describe("getRuntimeFromContext", () => {
 describe("addRuntimeToContext", async () => {
 	const runtime = await initSvelteKitClientRuntime({
 		fetch: vi.fn().mockReturnValue(Promise.resolve({})),
-		language: 'en',
-		languages: ['en', 'de'],
-		referenceLanguage: 'en'
+		language: "en",
+		languages: ["en", "de"],
+		referenceLanguage: "en",
 	})
 
 	test("should set the runtime to the context", async () => {
@@ -47,11 +52,11 @@ describe("addRuntimeToContext", async () => {
 
 		const r = getRuntimeFromContext()
 
-		await r.switchLanguage('de')
+		await r.switchLanguage("de")
 
 		const mockedReplaceLanguageInUrl = vi.mocked(sharedUtils.replaceLanguageInUrl)
 		expect(mockedReplaceLanguageInUrl).toHaveBeenCalledOnce()
-		expect(mockedReplaceLanguageInUrl).toHaveBeenCalledWith(undefined, 'de')
+		expect(mockedReplaceLanguageInUrl).toHaveBeenCalledWith(undefined, "de")
 
 		const mockedGoto = vi.mocked(navigation.goto)
 		expect(mockedGoto).toHaveBeenCalledOnce()
@@ -63,7 +68,7 @@ describe("addRuntimeToContext", async () => {
 
 		const r = getRuntimeFromContext()
 
-		await r.switchLanguage('en')
+		await r.switchLanguage("en")
 
 		const mockedGoto = vi.mocked(navigation.goto)
 		expect(mockedGoto).not.toHaveBeenCalled()
@@ -74,6 +79,6 @@ describe("addRuntimeToContext", async () => {
 
 		const r = getRuntimeFromContext()
 
-		expect(r.route('/path/to/page')).toBe('/en/path/to/page')
+		expect(r.route("/path/to/page")).toBe("/en/path/to/page")
 	})
 })

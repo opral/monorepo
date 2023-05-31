@@ -5,7 +5,7 @@ import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/dete
 
 export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	initDetectors: browser
-		? () => [initLocalStorageDetector('language'), navigatorDetector]
+		? () => [initLocalStorageDetector("language"), navigatorDetector]
 		: undefined,
 }).wrap(async ({ data }, { i }) => {
 	console.info("+layout.ts", i("welcome"))

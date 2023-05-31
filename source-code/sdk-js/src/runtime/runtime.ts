@@ -17,8 +17,8 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	Language extends Ast.Language = Ast.Language,
 	ReadResourcesMaybePromise extends
-	| (Ast.Resource | undefined)
-	| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
+		| (Ast.Resource | undefined)
+		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
 	readResource: (language: Language) => ReadResourcesMaybePromise
 }
@@ -55,11 +55,13 @@ export const initBaseRuntime = <
 	let isLoadResourceFunctionAsync = false
 
 	const loadResource = (language: Language): ReadResourcesMaybePromise => {
-		if (state.resources.has(language)) return isLoadResourceFunctionAsync
-			? Promise.resolve() as ReadResourcesMaybePromise
-			: undefined as ReadResourcesMaybePromise
+		if (state.resources.has(language))
+			return isLoadResourceFunctionAsync
+				? (Promise.resolve() as ReadResourcesMaybePromise)
+				: (undefined as ReadResourcesMaybePromise)
 
-		if (loadResourcePromises.has(language)) return loadResourcePromises.get(language) as ReadResourcesMaybePromise
+		if (loadResourcePromises.has(language))
+			return loadResourcePromises.get(language) as ReadResourcesMaybePromise
 
 		const setResource = (resource: Resource | undefined) =>
 			resource && state.resources.set(language, resource)
