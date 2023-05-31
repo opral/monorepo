@@ -804,9 +804,10 @@ Every helper...
 ## Imports
 
 ```ts
-imports(ast, importFrom).add(wrapper)
-const aliases = imports(ast, "@inlang/sdk-js").getAliases()
-const aliases = imports(ast, "@inlang/sdk-js").prune().getAliases()
+const {result} = imports(...).add(wrapper)
+imports(ast, importFrom).add(wrapper).getAliases()
+const {aliases, error} = imports(ast, "@inlang/sdk-js").getAliases()
+const {aliases, error} = imports(ast, "@inlang/sdk-js").prune().getAliases()
 imports(ast, "@inlang/sdk-js").remove()
 imports(
 	ast,
@@ -837,6 +838,10 @@ contexts(ast).insertAfterImports(
 )
 contexts(markup).insert(`<slot/>`)
 contexts(markup).wrap(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
+// Returns true or false if identifier is declarable
+contexts(ast).isDeclarable(identifier)
+// Returns an alternative, auto-generated identifier that is declarable
+contexts(ast).findDeclarable(identifier)
 ```
 
 ## Identifiers
