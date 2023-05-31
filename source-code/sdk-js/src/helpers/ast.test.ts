@@ -910,19 +910,22 @@ describe("imports", () => {
 	describe("getAliases", () => {
 		test("Detect miscellaneous aliases", () => {
 			const code = dedent`
-				import { exportN as aliasN, default as defaultAlias } from "source";
+				import { exportN as aliasN, export2N, default as defaultAlias } from "source";
+				import defaultAlias2 from "source";
 				import * as namespaceAlias from "source";
 				console.log()
 			`
 			const ast = parseModule(code).$ast
 			const { aliases } = imports(ast as Program, "source").getAliases("default", "requested")
 			const regularAlias = aliases?.get("exportN")
+			const regular2Alias = aliases?.get("export2N")
 			const defaultAlias = aliases?.get("default")
 			const namespaceAlias = aliases?.get("*")
 			const requestedAlias = aliases?.get("requested")
-			expect(aliases?.size).toBe(4)
+			expect(aliases?.size).toBe(5)
 			expect(regularAlias ? print(regularAlias).code : "").toEqual("aliasN")
-			expect(defaultAlias ? print(defaultAlias).code : "").toEqual("defaultAlias")
+			expect(regular2Alias ? print(regular2Alias).code : "").toEqual("export2N")
+			expect(defaultAlias ? print(defaultAlias).code : "").toEqual("defaultAlias2")
 			expect(namespaceAlias ? print(namespaceAlias).code : "").toEqual("namespaceAlias")
 			expect(requestedAlias ? print(requestedAlias).code : "").toEqual("namespaceAlias.requested")
 		})

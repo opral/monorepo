@@ -225,7 +225,7 @@ function getImportPlaceholders(aliases) {
 function replaceSdkImports(ast) {
 	// Prunes the imports, i.e. merge duplicates.
 	// Then remove sdk imports, but save the aliases: import {i as iAlias} ... returns [{exportN: string, aliasN: string}, ...]
-	const aliases = imports(ast, "@inlang/sdk-js").prune().getAliases()
+	const aliases = imports(ast, "@inlang/sdk-js").getAliases()
 	imports(ast, "@inlang/sdk-js").remove()
 	const importPlaceholders = getImportPlaceholders(aliases)
 	// Replace imported aliases with placeholders
@@ -418,7 +418,8 @@ Possible implementation:
 ```js
 function transformGenericServerJsAst(ast, config) {
 	// The below assert function throws
-	imports(ast, "@inlang/sdk-js").assertIsMissing()
+	const { aliases } = imports(ast, "@inlang/sdk-js").getAliases()
+	if (aliases.size !== 0) throw new Error()
 }
 ```
 
@@ -807,13 +808,11 @@ Every helper...
 const {result} = imports(...).add(wrapper)
 imports(ast, importFrom).add(wrapper).getAliases()
 const {aliases, error} = imports(ast, "@inlang/sdk-js").getAliases()
-const {aliases, error} = imports(ast, "@inlang/sdk-js").prune().getAliases()
 imports(ast, "@inlang/sdk-js").removeAll()
 imports(
 	ast,
 	`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-" : ""}reactive`,
 ).add("getRuntimeFromContext")
-imports(ast, "@inlang/sdk-js").assertIsMissing()
 ```
 
 ## Definitions
