@@ -9,6 +9,7 @@ import { telemetry } from "./services/telemetry/implementation.js"
 import { getGitRemotes } from "./utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
 import fetchPolyfill from "node-fetch"
+import { lint } from "./commands/lint/index.js"
 
 // --------------- INIT ---------------
 
@@ -31,6 +32,7 @@ export const cli = new Command()
 	.version(version)
 	.description("CLI for inlang.")
 	.addCommand(config)
+	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
 	.hook("postAction", (command) => {
