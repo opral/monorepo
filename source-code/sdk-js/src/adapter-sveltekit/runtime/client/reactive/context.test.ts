@@ -1,33 +1,12 @@
-import { test, describe, expect, vi, beforeEach, Mocked, Mock } from "vitest"
+import { test, describe, expect, vi, beforeEach, Mock } from "vitest"
 import { getRuntimeFromContext, addRuntimeToContext } from './context.js'
 import * as svelte from 'svelte'
 import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from '../runtime.js';
 import { get } from 'svelte/store';
-import type { Message } from '@inlang/core/ast';
+import { createResource } from '@inlang/core/test';
 
 let mockedFetch: Mock
 let runtime: SvelteKitClientRuntime
-
-const createResource = (language: Language, ...messages: Message[]) =>
-({
-	type: "Resource",
-	languageTag: {
-		type: "LanguageTag",
-		name: language,
-	},
-	body: messages,
-} satisfies Resource)
-
-const createMessage = (id: string, pattern: string) =>
-({
-	type: "Message",
-	id: { type: "Identifier", name: id },
-	pattern: {
-		type: "Pattern",
-		elements: [{ type: "Text", value: pattern }],
-	},
-} satisfies Message)
-
 
 beforeEach(async () => {
 	vi.resetAllMocks()

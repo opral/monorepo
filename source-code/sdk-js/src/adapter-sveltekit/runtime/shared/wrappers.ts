@@ -50,7 +50,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 		initializedRuntime[language as Language] ||
 		(await initSvelteKitClientRuntime({
 			fetch: event.fetch,
-			language: language,
+			language,
 			referenceLanguage,
 			languages,
 		}))

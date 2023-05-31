@@ -61,7 +61,7 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 				runtime = initSvelteKitServerRuntime({
 					referenceLanguage,
 					languages,
-					language: language!,
+					language,
 				})
 
 				addRuntimeToLocals(event.locals, runtime)
