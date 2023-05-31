@@ -939,4 +939,28 @@ describe("imports", () => {
 			)
 		})
 	})
+	describe("removeAll", () => {
+		test("No delete", () => {
+			const code = dedent`
+				console.log()
+			`
+			const ast = parseModule(code).$ast
+			imports(ast as Program, "source").removeAll()
+			expect(print(ast).code).toMatchInlineSnapshot(`
+				"console.log()"
+			`)
+		})
+		test("Multiple lines", () => {
+			const code = dedent`
+				import { exportN as aliasN, default as defaultAlias } from "source";
+				import * as namespaceAlias from "source";
+				console.log()
+			`
+			const ast = parseModule(code).$ast
+			imports(ast as Program, "source").removeAll()
+			expect(print(ast).code).toMatchInlineSnapshot(`
+				"console.log()"
+			`)
+		})
+	})
 })

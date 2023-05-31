@@ -892,5 +892,15 @@ export const imports = (target: Program | types.namedTypes.Program, source: stri
 				| types.namedTypes.MemberExpression
 			return { ...this, alias: newAliasN }
 		},
+		removeAll: function () {
+			const matchingImports = this.findReferences()
+			if (matchingImports !== undefined) {
+				for (const declaration of matchingImports) {
+					const indexToRemove = target.body.findIndex((statement) => statement === declaration)
+					target.body.splice(indexToRemove, 1)
+				}
+			}
+			return this
+		},
 	}
 }

@@ -808,7 +808,7 @@ const {result} = imports(...).add(wrapper)
 imports(ast, importFrom).add(wrapper).getAliases()
 const {aliases, error} = imports(ast, "@inlang/sdk-js").getAliases()
 const {aliases, error} = imports(ast, "@inlang/sdk-js").prune().getAliases()
-imports(ast, "@inlang/sdk-js").remove()
+imports(ast, "@inlang/sdk-js").removeAll()
 imports(
 	ast,
 	`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-" : ""}reactive`,
