@@ -40,6 +40,7 @@ Options:
 
 Commands:
   config <command>   Commands for managing the config file.
+  lint               Commands for linting translations.
   machine <command>  Commands for automating translations.
   open <command>     Commands to open parts of the inlang ecosystem.
   help [command]     display help for command
@@ -89,6 +90,18 @@ This command reads the inlang.config.js file in the repository and retrieves the
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
 > Note: The inlang.config.js file must be present in the repository for the translation to work.
+
+### `lint`
+
+The lint command lints the translation with the configured lint rules, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules).
+
+```sh
+npx inlang lint
+```
+
+This command will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+
+However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) as a starter template.
 
 ### `open`
 
