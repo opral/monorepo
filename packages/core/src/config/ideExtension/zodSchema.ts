@@ -1,8 +1,5 @@
 import * as z from "zod"
 
-export const validateIdeExtensionSettings = (config: IdeExtensionSettings | undefined) =>
-	ideExtensionSchema.parse(config)
-
 /**
  * The document selector settings for the IDE extension.
  */
@@ -20,7 +17,7 @@ const documentSelectorSchema = z
 /**
  * The position from where to where the reference can be found.
  */
-export const positionSchema = z.object({
+const positionSchema = z.object({
 	start: z.object({
 		line: z.number(),
 		character: z.number(),
@@ -31,12 +28,12 @@ export const positionSchema = z.object({
 	}),
 })
 
-export const messageReferenceSchema = z.object({
+const messageReferenceSchema = z.object({
 	messageId: z.string(),
 	position: positionSchema,
 })
 
-export const ideExtensionSchema = z.object({
+export const zodIdeExtensionConfigSchema = z.object({
 	/**
 	 * Defines matchers for message references inside the code.
 	 *
@@ -79,5 +76,3 @@ export const ideExtensionSchema = z.object({
 	 */
 	documentSelectors: documentSelectorSchema,
 })
-
-export type IdeExtensionSettings = z.infer<typeof ideExtensionSchema> | undefined

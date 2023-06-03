@@ -1,47 +1,39 @@
 import { query } from "@inlang/core/query"
-import { InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
-import fs from "node:fs"
 import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
+import { getConfig } from "../../utilities/getConfig.js"
 
 export const translate = new Command()
 	.command("translate")
+	.option("-f, --force", "Force machine translation and skip the confirmation prompt.")
 	.description("Machine translate all resources.")
 	.action(translateCommandAction)
 
 async function translateCommandAction() {
-	// Set up the environment functions
-	const env: InlangEnvironment = {
-		$import: initialize$import({
-			fs: fs.promises,
-			fetch,
-		}),
-		$fs: fs.promises,
+	// Get the options
+	const options = translate.opts()
+
+	// Prompt the user to confirm
+	if (!options.force) {
+		const promptly = await import("promptly")
+		log.warn(
+			"Machine translations are not very accurate. We advise you to only use machine translations in a build step to have them in production but not commit them to your repository. You can use the force flag (-f, --force) to skip this prompt in a build step.",
+		)
+		const answer = await promptly.prompt("Are you sure you want to machine translate? (y/n)")
+		if (answer !== "y") {
+			log.info("🚫 Aborting machine translation.")
+			return
+		}
 	}
 
-	const filePath = process.cwd() + "/inlang.config.js"
-
-	if (!fs.existsSync(filePath)) {
-		log.error("No inlang.config.js file found in the repository.")
+	// Get the config
+	const config = await getConfig()
+	if (!config) {
+		// no message because that's handled in getConfig
 		return
-	} else {
-		log.info("✅ Using inlang config file at `" + filePath + "`")
 	}
-
-	// Need to manually import the config because CJS projects
-	// might fail otherwise. See https://github.com/inlang/inlang/issues/789
-	const file = fs.readFileSync(filePath, "utf-8")
-	const module: InlangConfigModule = await import(
-		"data:application/javascript;base64," + btoa(file.toString())
-	)
-
-	const config = await setupConfig({
-		module,
-		env,
-	})
 
 	// Get all resources
 	let resources = await config.readResources({ config })
@@ -72,10 +64,7 @@ async function translateCommandAction() {
 		"📝 Translating to " +
 			languagesToTranslateTo.length +
 			" languages. [" +
-			[...new Set(languagesToTranslateTo)]
-				.splice(0, 3)
-				.map((language) => language.languageTag.name)
-				.join(", ") +
+			[...new Set(languagesToTranslateTo)].map((language) => language.languageTag.name).join(", ") +
 			"]",
 	)
 

@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.9.8",
+	"version": "0.9.13",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -51,15 +51,17 @@
 		"@inlang/core": "*",
 		"@inlang/rpc": "*",
 		"@sentry/node": "^7.51.2",
+		"@types/promptly": "^3.0.2",
 		"@types/prompts": "^2.4.2",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
-		"esbuild": "^0.17.14",
+		"esbuild": "^0.17.19",
 		"fast-glob": "^3.2.12",
 		"node-fetch": "^3.3.1",
 		"openai": "^3.2.1",
 		"ora": "^6.3.0",
 		"posthog-node": "^3.1.1",
+		"promptly": "^3.2.0",
 		"prompts": "^2.4.2",
 		"ts-dedent": "^2.2.0"
 	},

@@ -7,6 +7,7 @@
 		// Not specifying node16 causes https://github.com/rollup/plugins/issues/1224#issuecomment-1242109375
 		// interestingly, extending a base config taht contains module node16 still requires explicit manual
 		// setting of module node16 here.
-		"module": "Node16"
+		"module": "Node16",
+		"resolveJsonModule": true
 	}
 }

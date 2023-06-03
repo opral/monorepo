@@ -1,12 +1,13 @@
 import satori from "satori"
-import clone from "./repo/clone.js"
+import { cloneRespository } from "./repo/clone.js"
+import { getGitRemotes } from "./repo/getGitRemotes.js"
 import { setupConfig } from "@inlang/core/config"
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import { getLintReports, lint } from "@inlang/core/lint"
 import { createMemoryFs } from "@inlang-git/fs"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
-import { telemetryNode } from "@inlang/telemetry"
+import { telemetryNode, parseOrigin } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { missingTranslations } from "./helper/missingTranslations.js"
 import { caching } from "cache-manager"
@@ -22,13 +23,14 @@ const cache = await caching("memory", {
 
 export const badge = async (url: string) => {
 	const fromCache = (await cache.get(url)) as string | undefined
+
 	if (fromCache) {
 		return fromCache
 	}
 
 	// initialize a new file system on each request to prevent cross request pollution
 	const fs = createMemoryFs()
-	await clone(url, fs)
+	await cloneRespository(url, fs)
 
 	// Set up the environment functions
 	const env: InlangEnvironment = {
@@ -98,13 +100,12 @@ export const badge = async (url: string) => {
 	)
 
 	await cache.set(url, image)
+	const gitOrigin = parseOrigin({ remotes: await getGitRemotes({ fs }) })
 
 	telemetryNode.capture({
 		event: "BADGE created",
+		groups: { repository: gitOrigin },
 		distinctId: "unknown",
-		properties: {
-			url,
-		},
 	})
 	// return image
 	return image
