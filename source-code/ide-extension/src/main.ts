@@ -1,23 +1,27 @@
 import * as vscode from "vscode"
-import fetch from "node-fetch"
 import { debounce } from "throttle-debounce"
 import { setState, state } from "./state.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { determineClosestPath } from "./utils/determineClosestPath.js"
-import { InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { setupConfig } from "@inlang/core/config"
 import { ExtractMessage } from "./actions/extractMessage.js"
-import { createFileSystemMapper } from "./utils/createFileSystemMapper.js"
-import { initialize$import } from "./utils/$import.js"
 import { msg } from "./utils/message.js"
-// import { telemetryNode } from "@inlang/telemetry"
+import { createInlangEnv, importInlangConfig } from "./services/inlang-environment/index.js"
+import { telemetry } from "./services/telemetry/index.js"
+import { version } from "../package.json"
+import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
+import { promptToReloadWindow } from "./utils/promptToReload.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		// telemetryNode.capture({
-		// 	distinctId: "unknown",
-		// 	event: "IDE-EXTENSION activated",
-		// })
+		await telemetry.capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version: version,
+			},
+		})
 		msg("Inlang extension activated.", "info")
 
 		// start the extension
@@ -52,8 +56,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	// checking whether a config file exists -> if not dont start the extension
-	const potentialConfigFileUris = await vscode.workspace.findFiles("**/inlang.config.js")
+	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.js")
 	if (potentialConfigFileUris.length === 0) {
+		console.warn("No inlang.config.js file found.")
 		return
 	}
 	const closestConfigPath = determineClosestPath({
@@ -62,25 +67,19 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	})
 
 	// get current workspace
-	const workspace = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
-	if (!workspace) {
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
+	if (!workspaceFolder) {
+		console.warn("No workspace folder found.")
 		return
 	}
 
-	// initialize inlang core and resources for current workspace
-	const fileSystemMapper = createFileSystemMapper(vscode.workspace.fs, workspace.uri)
-
 	// watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(workspace, "**/inlang.config.js"),
+		new vscode.RelativePattern(workspaceFolder, "inlang.config.js"),
 	)
 
-	const env = {
-		$fs: fileSystemMapper,
-		$import: initialize$import({ fs: fileSystemMapper, fetch }),
-	}
-
-	const module = (await import(closestConfigPath)) as InlangConfigModule
+	const module = await importInlangConfig(closestConfigPath)
+	const env = createInlangEnv({ workspaceFolder })
 
 	const config = await setupConfig({ module, env })
 
@@ -115,8 +114,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		),
 	)
 
-	const documentSelectors = [
-		{ language: "javascript", pattern: "!**/inlang.config.js" },
+	const documentSelectors: vscode.DocumentSelector = [
+		{ language: "javascript", pattern: "!inlang.config.js" },
 		...(state().config.ideExtension?.documentSelectors || []), // an empty array as fallback
 	]
 	// register source actions
@@ -128,22 +127,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// register decorations
 	messagePreview({ activeTextEditor, context: args.context })
-}
 
-/** Prompts user to reload editor window in order for configuration change to take effect. */
-const promptToReloadWindow = () => {
-	const action = "Reload"
-
-	vscode.window
-		.showInformationMessage(
-			`To apply changes to the inlang configuration, please reload the window.`,
-			action,
-		)
-		.then((selectedAction) => {
-			if (selectedAction === action) {
-				vscode.commands.executeCommand("workbench.action.reloadWindow")
-			}
-		})
+	// properties missing decoration in inlang.config.js
+	propertiesMissingPreview({ activeTextEditor })
 }
 
 // this method is called when your extension is deactivated

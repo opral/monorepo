@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.9.0
+
+### Minor Changes
+
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/inlang/issues/856.
+
 ## 0.8.7
 
 ### Patch Changes

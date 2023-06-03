@@ -3,6 +3,7 @@ import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
 import { msg } from "../utils/message.js"
+import { telemetry } from "../services/telemetry/index.js"
 // import { telemetryNode } from "@inlang/telemetry"
 
 /**
@@ -106,13 +107,10 @@ export const extractMessageCommand = {
 		await textEditor.edit((editor) => {
 			editor.replace(textEditor.selection, preparedExtractOption)
 		})
-		// telemetryNode.capture({
-		// 	distinctId: "unknown",
-		// 	event: "IDE-EXTENSION message extracted",
-		// 	properties: {
-		// 		config: state().config,
-		// 	},
-		// })
+		telemetry.capture({
+			event: "IDE-EXTENSION command executed",
+			properties: { name: "extract message" },
+		})
 		return msg("Message extracted.")
 	},
 } as const

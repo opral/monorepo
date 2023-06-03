@@ -1,5 +1,18 @@
 # @inlang/sdk-js
 
+## 0.6.3
+
+### Patch Changes
+
+- b2fc11d5: don't remove other attributes when removing the `lang` attribute from the `html` tag
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [04f5ac93]
+  - @inlang/core@0.9.0
+
 ## 0.6.1
 
 ### Patch Changes

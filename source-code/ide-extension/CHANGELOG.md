@@ -1,5 +1,33 @@
 # inlang-vs-code-extension
 
+## 0.6.3
+
+### Patch Changes
+
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/inlang/issues/856.
+- Updated dependencies [04f5ac93]
+  - @inlang/core@0.9.0
+
+## 0.6.2
+
+### Patch Changes
+
+- b3e868f1: remove monorepo config parsing and add warning to config if no ide extension properties are set
+
+## 0.6.1
+
+### Patch Changes
+
+- 04f81ae8: Minor refactorings
+
+## 0.6.0
+
+### Minor Changes
+
+- 9cd701a3: The VSCode extension should now work for the majority of projects.
+
+  We fixed a problem that blocked the VSCode extension for months. The extension transpiles ESM under the hood to CJS now because Electron, and thus VSCode, do not support ESM.
+
 ## 0.5.9
 
 ### Patch Changes

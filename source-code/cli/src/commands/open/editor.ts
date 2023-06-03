@@ -1,7 +1,8 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
 import { log } from "../../utilities.js"
-import { getGitOrigin } from "../../utilities/getGitOrigin.js"
+import { getGitRemotes } from "../../utilities/getGitRemotes.js"
+import { parseOrigin } from "@inlang/telemetry"
 
 export const editor = new Command()
 	.command("editor")
@@ -9,7 +10,7 @@ export const editor = new Command()
 	.action(editorCommandAction)
 
 async function editorCommandAction() {
-	const gitOrigin = await getGitOrigin()
+	const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 	if (!gitOrigin) {
 		log.error("Failed to get the git origin.")
 		return
