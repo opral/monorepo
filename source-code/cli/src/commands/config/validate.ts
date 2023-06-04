@@ -18,7 +18,14 @@ async function validateCommandAction() {
 		return
 	}
 
-	const result = parseConfig({ config })
+	const result = await parseConfig({ config })
 	//! TODO: Add proper result handling and logging and docs
-	log.info(result)
+
+	if (result) {
+		log.info("🎉 Inlang config is valid")
+	} else {
+		log.error("🚫 Something went wrong, please check you inlang.config.js file.")
+	}
+
+	return
 }
