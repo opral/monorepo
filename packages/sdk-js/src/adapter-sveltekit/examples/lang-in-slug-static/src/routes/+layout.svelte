@@ -2,6 +2,7 @@
 	import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 	import { getRuntimeFromData } from "@inlang/sdk-js/adapter-sveltekit/shared"
 	import type { LayoutData } from "./$types.js"
+	import { browser } from '$app/environment'
 
 	export let data: LayoutData
 
@@ -10,7 +11,7 @@
 	addRuntimeToContext(getRuntimeFromData(data))
 	let { i, language } = getRuntimeFromContext()
 
-	$: {
+	$: if (browser) {
 		addRuntimeToContext(getRuntimeFromData(data))
 		;({ i, language } = getRuntimeFromContext())
 	}

@@ -92,6 +92,9 @@ export const initRootLayoutServerLoadWrapper = <
 		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & DataPayload> => {
 			const runtime = getRuntimeFromLocals(event.locals)
 
+			// TODO: only insert if language detection strategy url is used
+			event.params.lang
+
 			return {
 				...(await load(event, runtime)),
 				referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
