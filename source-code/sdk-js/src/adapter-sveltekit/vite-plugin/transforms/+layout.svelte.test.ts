@@ -187,7 +187,8 @@ describe("transformLayoutSvelte", () => {
 					true,
 				)
 				expect(code).toMatchInlineSnapshot(`
-					"<script>import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
+					"<script>import { browser } from \\"$app/environment\\";
+					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
 					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 					export let data;
 					let language;
@@ -198,7 +199,7 @@ describe("transformLayoutSvelte", () => {
 					} = getRuntimeFromContext());
 
 					$:
-					{
+					if (browser) {
 					  addRuntimeToContext(getRuntimeFromData(data));
 
 					  ({
@@ -265,7 +266,8 @@ describe("transformLayoutSvelte", () => {
 						true,
 					)
 					expect(code).toMatchInlineSnapshot(`
-						"<script>import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
+						"<script>import { browser } from \\"$app/environment\\";
+						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 						export let data;
 						let language, i, languages;
@@ -278,7 +280,7 @@ describe("transformLayoutSvelte", () => {
 						} = getRuntimeFromContext());
 
 						$:
-						{
+						if (browser) {
 						    addRuntimeToContext(getRuntimeFromData(data));
 
 						    ({
