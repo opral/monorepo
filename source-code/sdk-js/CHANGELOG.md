@@ -1,5 +1,12 @@
 # @inlang/sdk-js
 
+## 0.6.4
+
+### Patch Changes
+
+- 785c3f4e: change language if browser back button gets pressed
+- 8112e300: add support for `path.base`
+
 ## 0.6.3
 
 ### Patch Changes
