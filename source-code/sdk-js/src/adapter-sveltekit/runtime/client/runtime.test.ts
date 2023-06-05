@@ -1,8 +1,10 @@
-import { test, describe, expect } from "vitest"
+import { test, describe, expect, vi } from "vitest"
 import { initSvelteKitClientRuntime } from "./runtime.js"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
 import { createMessage, createResource } from "@inlang/core/test"
+
+vi.mock('$app/paths', () => ({ base: '' }))
 
 const PREFIX = "https://www.inlang.com"
 

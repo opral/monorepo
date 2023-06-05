@@ -22,6 +22,7 @@ beforeEach(async () => {
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
 	vi.mock("$app/stores", () => ({ page: vi.fn() }))
+	vi.mock('$app/paths', () => ({ base: '' }))
 	vi.mock("svelte/store", () => ({ get: <V>(value: V) => value }))
 	vi.mock("svelte", () => ({ getContext: vi.fn(), setContext: vi.fn() }))
 	vi.spyOn(svelte, "getContext").mockImplementation(() => ctx)
