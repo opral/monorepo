@@ -1,7 +1,7 @@
 ---
-title: Getting started
-href: /documentation/getting-started
-description: Learn on how to get started with inlang.
+title: Quick start
+href: /documentation/quick-start
+description: This is the description foe thw quickstart guide
 ---
 
 # {% $frontmatter.title %}
