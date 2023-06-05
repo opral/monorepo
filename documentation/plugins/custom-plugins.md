@@ -1,10 +1,12 @@
 ---
-title: Plugins
-href: /documentation/plugins
-description: Learn more about plugins and how to build them.
+title: Custom Plugins
+href: /documentation/plugins/custom-plugins
+description: This is the custom plugins description
 ---
 
 # {% $frontmatter.title %}
+
+This is a text about the custom plugins
 
 **Plugins allow the customization of inlang's behavior by, for example, defining how resources should be parsed and serialized.**
 
