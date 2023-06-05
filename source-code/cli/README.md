@@ -25,10 +25,10 @@ yarn add @inlang/cli
 best
 
 ```sh
-npx inlang <command>
+npx inlang [command]
 ```
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest <command>`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
 
 ## Commands
 
@@ -39,7 +39,7 @@ We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not
 
 `npx` is auto-installed with Node and NPM.
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest <command>`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
 
 ```sh
 CLI for inlang.
@@ -49,10 +49,10 @@ Options:
   -h, --help         display help for command
 
 Commands:
-  config <command>   Commands for managing the config file.
+  config [command]   Commands for managing the config file.
   lint               Commands for linting translations.
-  machine <command>  Commands for automating translations.
-  open <command>     Commands to open parts of the inlang ecosystem.
+  machine [command]  Commands for automating translations.
+  open [command]     Commands to open parts of the inlang ecosystem.
   help [command]     display help for command
 ```
 
