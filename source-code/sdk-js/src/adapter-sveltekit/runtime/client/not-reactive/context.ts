@@ -46,6 +46,8 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 }
 
 const route = (language: string, href: RelativeUrl) => {
+	if (!href.startsWith("/")) return href as RelativeUrl
+
 	const url = `/${language}${href}`
 
 	return (url.endsWith("/") ? url.slice(0, -1) : url) as RelativeUrl

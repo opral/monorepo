@@ -4,6 +4,7 @@ import * as svelte from "svelte"
 import * as navigation from "$app/navigation"
 import * as sharedUtils from "../../shared/utils.js"
 import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
+import type { RelativeUrl } from '../../../../types.js'
 
 let ctx: ReturnType<typeof getRuntimeFromContext> | undefined
 let runtime: SvelteKitClientRuntime
@@ -42,16 +43,14 @@ describe("getRuntimeFromContext", () => {
 })
 
 describe("addRuntimeToContext", () => {
-	test("should set the runtime to the context", async () => {
-		expect(addRuntimeToContext(runtime)).toBeUndefined()
+	beforeEach(() => addRuntimeToContext(runtime))
 
+	test("should set the runtime to the context", async () => {
 		const r = getRuntimeFromContext()
 		expect(r).toBeDefined()
 	})
 
 	test("should make a page navigation if switchLanguage gets called", async () => {
-		expect(addRuntimeToContext(runtime)).toBeUndefined()
-
 		const r = getRuntimeFromContext()
 
 		await r.switchLanguage("de")
@@ -66,8 +65,6 @@ describe("addRuntimeToContext", () => {
 	})
 
 	test("should not make a page navigation if switchLanguage gets called with the already set language", async () => {
-		expect(addRuntimeToContext(runtime)).toBeUndefined()
-
 		const r = getRuntimeFromContext()
 
 		await r.switchLanguage("en")
@@ -75,12 +72,26 @@ describe("addRuntimeToContext", () => {
 		const mockedGoto = vi.mocked(navigation.goto)
 		expect(mockedGoto).not.toHaveBeenCalled()
 	})
+})
 
-	test("route function should return a path with the current language as prefix", async () => {
-		expect(addRuntimeToContext(runtime)).toBeUndefined()
+describe("route", () => {
+	beforeEach(() => addRuntimeToContext(runtime))
 
+	test("should return a path with the current language as prefix", async () => {
 		const r = getRuntimeFromContext()
 
 		expect(r.route("/path/to/page")).toBe("/en/path/to/page")
+	})
+
+	test("should not alter absolute urls", async () => {
+		const r = getRuntimeFromContext()
+
+		expect(r.route("path/to/page" as RelativeUrl)).toBe("path/to/page")
+	})
+
+	test("should remove trailing slashes", async () => {
+		const r = getRuntimeFromContext()
+
+		expect(r.route("/")).toBe("/en")
 	})
 })
