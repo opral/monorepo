@@ -4,20 +4,29 @@ import type { RequestEvent } from "@sveltejs/kit"
 import { initConfig } from "../../../config/config.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
-import { languages, referenceLanguage, resources } from "virtual:inlang-static"
 
 let config: InlangConfig
 
 export const initState = async (module: InlangConfigModule) => {
+	if (!config && !import.meta.env.DEV) {
+		try {
+			const {
+				languages,
+				referenceLanguage,
+				resources,
+			} = await import("virtual:inlang-static")
+
+			config = ({
+				referenceLanguage,
+				languages,
+				readResources: async () => resources,
+				writeResources: async () => undefined,
+			} as InlangConfig)
+		} catch { /* empty */ }
+	}
+
 	if (!config) {
-		config = import.meta.env.DEV
-			? await initConfig(module)
-			: ({
-					referenceLanguage,
-					languages,
-					readResources: async () => resources,
-					writeResources: async () => undefined,
-			  } as InlangConfig)
+		config = await initConfig(module)
 	}
 
 	await reloadResources()

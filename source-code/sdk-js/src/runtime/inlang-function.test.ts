@@ -1,48 +1,22 @@
 import { createInlangFunction } from "./inlang-function.js"
 import { test, describe, expect } from "vitest"
-import type { Resource } from "@inlang/core/ast"
+import { createMessage, createResource } from "@inlang/core/test"
 
-const resource = {
-	type: "Resource",
-	languageTag: {
-		type: "LanguageTag",
-		name: "en",
-	},
-	body: [
+const resource = createResource(
+	"en",
+	createMessage("hello", "world"),
+	createMessage("welcome", [
+		{ type: "Text", value: "Welcome, " },
 		{
-			type: "Message",
-			id: {
-				type: "Identifier",
-				name: "hello",
-			},
-			pattern: {
-				type: "Pattern",
-				elements: [{ type: "Text", value: "world" }],
+			type: "Placeholder",
+			body: {
+				type: "VariableReference",
+				name: "name",
 			},
 		},
-		{
-			type: "Message",
-			id: {
-				type: "Identifier",
-				name: "welcome",
-			},
-			pattern: {
-				type: "Pattern",
-				elements: [
-					{ type: "Text", value: "Welcome, " },
-					{
-						type: "Placeholder",
-						body: {
-							type: "VariableReference",
-							name: "name",
-						},
-					},
-					{ type: "Text", value: "!" },
-				],
-			},
-		},
-	],
-} satisfies Resource
+		{ type: "Text", value: "!" },
+	]),
+)
 
 describe("createInlangFunction", () => {
 	test("it should resolve the message", () => {
@@ -65,6 +39,14 @@ describe("createInlangFunction", () => {
 		const fn = createInlangFunction(resource)
 
 		const result = fn("welcome", {})
+
+		expect(result).toBe("Welcome, !")
+	})
+
+	test("it should not fail if no placeholders get passed as args", () => {
+		const fn = createInlangFunction(resource)
+
+		const result = fn("welcome")
 
 		expect(result).toBe("Welcome, !")
 	})
