@@ -1,13 +1,14 @@
-import { getContext } from 'svelte'
-import { inlangSymbol } from '../../shared/utils.js'
+import { getContext } from "svelte"
+import { inlangSymbol } from "../../shared/utils.js"
 
 // TODO: wrap with error message only during development
 export const getRuntimeFromContext = () => {
 	try {
 		return getContext(inlangSymbol)
 	} catch (e) {
-		throw Error(`
-You cannot directly access any '@inlang/sdk-js' imports in this scop. You need to pass them from 'handle' or 'load' to the function you want to call e.g.
+		throw Error(
+			`
+You cannot directly access any '@inlang/sdk-js' imports in this scope. You need to pass them from 'handle' or 'load' to the function you want to call e.g.
 
 // -- Change this -------------------------------------------------------------
 
@@ -34,6 +35,8 @@ const getPageTitle = (/** @type { import('@inlang/sdk-js/runtime').InlangFunctio
 }
 
 // ----------------------------------------------------------------------------
-`, { cause: e })
+`,
+			{ cause: e },
+		)
 	}
 }

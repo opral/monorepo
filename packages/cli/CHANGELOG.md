@@ -1,5 +1,17 @@
 # @inlang/cli
 
+## 0.9.15
+
+### Patch Changes
+
+- 95bfe307: add config validate
+
+## 0.9.14
+
+### Patch Changes
+
+- 43a00f83: Added an info that `inlang config init` is work in progres.
+
 ## 0.9.13
 
 ### Patch Changes
