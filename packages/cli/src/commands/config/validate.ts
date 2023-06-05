@@ -9,23 +9,20 @@ export const validate = new Command()
 	.action(validateCommandAction)
 
 async function validateCommandAction() {
-	log.info("ℹ️  Validating the config ...")
+	try {
+		// Get the config
+		const config = await getConfig()
+		if (!config) {
+			// no message because that's handled in getConfig
+			return
+		}
 
-	// Get the config
-	const config = await getConfig()
-	if (!config) {
-		// no message because that's handled in getConfig
-		return
-	}
+		log.info("ℹ️  Validating the config ...")
 
-	const result = await parseConfig({ config })
-	//! TODO: Add proper result handling and logging and docs
+		await parseConfig({ config })
 
-	if (result) {
 		log.info("🎉 Inlang config is valid!")
-	} else {
-		log.error("🚫 Something went wrong, please check you inlang.config.js file.")
+	} catch (error) {
+		log.error(error)
 	}
-
-	return
 }
