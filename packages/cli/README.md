@@ -28,6 +28,8 @@ best
 npx inlang <command>
 ```
 
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest <command>`.
+
 ## Commands
 
 We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
@@ -70,6 +72,16 @@ npx inlang config init
 ```
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
+
+#### `config validate`
+
+This command validates the `inlang.config.js` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and perform a _dry run of the translation process_.
+
+To validate the `inlang.config.js` file, run the following command:
+
+```sh
+npx inlang config validate
+```
 
 ### `machine`
 
