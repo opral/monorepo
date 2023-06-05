@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, MockContext, test, vi } from "vitest"
-import type { Language, Message, Resource } from "@inlang/core/ast"
+import type { Resource } from "@inlang/core/ast"
 import { lint } from "./linter.js"
 import type { LintRule } from "./rule.js"
 import { createLintRule } from "./createLintRule.js"
+import { createMessage, createResource } from '../test/utils.js'
 
 vi.spyOn(console, "info").mockImplementation(vi.fn)
 vi.spyOn(console, "warn").mockImplementation(vi.fn)
@@ -17,26 +18,6 @@ const doLint = (rules: LintRule[], resources: Resource[]) => {
 	}
 	return lint({ config, resources })
 }
-
-const createResource = (language: Language, ...messages: Message[]) =>
-	({
-		type: "Resource",
-		languageTag: {
-			type: "LanguageTag",
-			name: language,
-		},
-		body: messages,
-	} satisfies Resource)
-
-const createMessage = (id: string, pattern: string) =>
-	({
-		type: "Message",
-		id: { type: "Identifier", name: id },
-		pattern: {
-			type: "Pattern",
-			elements: [{ type: "Text", value: pattern }],
-		},
-	} satisfies Message)
 
 // --------------------------------------------------------------------------------------------------------------------
 

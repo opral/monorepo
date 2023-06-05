@@ -1,6 +1,6 @@
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 import { describe, it, expect } from "vitest"
-import { removeHtmlLangAttribute } from './appTemplate.js'
+import { removeHtmlLangAttribute } from "./appTemplate.js"
 
 describe("removeHtmlLangAttribute", () => {
 	it("should return undefined if the lang attribute is not present", () => {

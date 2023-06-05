@@ -14,8 +14,7 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
 				export const load = initRootLayoutLoadWrapper({}).wrap(() => {});"
@@ -31,14 +30,13 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
 
 				export const load = initRootLayoutLoadWrapper({
 				  initDetectors: browser
-				  ? () => [initLocalStorageDetector(localStorageKey), navigatorDetector]
+				  ? () => [initLocalStorageDetector(), navigatorDetector]
 				  : undefined
 				}).wrap(() => {});"
 			`)
@@ -55,8 +53,7 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
 				export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
@@ -75,8 +72,7 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
 				export const load = initRootLayoutLoadWrapper({}).wrap(async () => {});"
@@ -95,8 +91,7 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, false)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { localStorageKey } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-				import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
 				import { initLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 				import { browser } from \\"$app/environment\\";
 				export const load = initLoadWrapper({}).wrap(async () => {});"
