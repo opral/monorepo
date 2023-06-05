@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js"
+import { createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
@@ -39,6 +39,7 @@ export function PatternEditor(props: {
 		filteredLanguages,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
+	const [savedEditorText, setSavedEditorText] = createSignal()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -132,9 +133,14 @@ export function PatternEditor(props: {
 	const hasChanges = () => {
 		const _updatedText =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		const ast_elements = props.message?.pattern.elements
+		let compare_elements
+		if (savedEditorText()) {
+			compare_elements = savedEditorText()
+		} else {
+			compare_elements = props.message?.pattern.elements
+		}
 		if (_updatedText) {
-			if (JSON.stringify(_updatedText) !== JSON.stringify(ast_elements)) {
+			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
 				return _updatedText
 			} else {
 				return ""
@@ -167,6 +173,7 @@ export function PatternEditor(props: {
 			updatedResource as Resource,
 		])
 		setUnpushedSaveCounter((counter) => counter + 1)
+		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
 			textArea.parentElement?.click()
