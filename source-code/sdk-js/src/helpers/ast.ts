@@ -1,4 +1,11 @@
-import type { Expression, Identifier, Node } from "estree"
+import type {
+	Expression,
+	Identifier,
+	ImportDeclaration,
+	ImportSpecifier,
+	Node,
+	Program,
+} from "estree"
 import type { Result } from "@inlang/core/utilities"
 import { walk as jsWalk, type SyncHandler } from "estree-walker"
 import { walk as svelteWalk } from "svelte/compiler"
@@ -723,4 +730,177 @@ export const mergeNodes = (
 		}
 	}
 	return [[], undefined]
+}
+
+// This function cannot error.
+export const findDeclarableIdentifier = (ast: Node | types.namedTypes.Node, identifier: string) => {
+	let newIdentifier: string | undefined
+	jsWalk(ast as Node, {
+		enter(node) {
+			if (newIdentifier !== undefined) this.skip()
+			else if (n.ImportDeclaration.check(node)) {
+				for (const specifier of node.specifiers) {
+					if (n.ImportSpecifier.check(specifier) && specifier.local.name === identifier) {
+						newIdentifier = findDeclarableIdentifier(ast, `${identifier}_`)
+						this.skip()
+					}
+				}
+			} else if (n.Identifier.check(node) && node.name === identifier) {
+				newIdentifier = findDeclarableIdentifier(ast, `${identifier}_`)
+				this.skip()
+			}
+		},
+	})
+	return newIdentifier === undefined ? identifier : newIdentifier
+}
+
+export class ImportsAddError extends Error {
+	readonly #id = "ImportsAddException"
+}
+
+export class ImportsGetAliasesError extends Error {
+	readonly #id = "ImportsGetAliasesException"
+}
+
+export const imports = (target: Program | types.namedTypes.Program, source: string) => {
+	const findReferences = (): [ImportDeclaration, ...ImportDeclaration[]] | undefined => {
+		const references: ImportDeclaration[] = []
+		jsWalk(target as Program, {
+			enter(node) {
+				if (
+					n.ImportDeclaration.check(node) &&
+					n.Literal.check(node.source) &&
+					node.source.value === source
+				) {
+					references.push(node)
+					this.skip()
+				}
+			},
+		})
+		return references.length === 0
+			? undefined
+			: (references as [ImportDeclaration, ...ImportDeclaration[]])
+	}
+	const base = {
+		findReferences,
+	}
+	type AliasesMap = Map<string, types.namedTypes.Identifier | types.namedTypes.MemberExpression>
+	return {
+		...base,
+		getAliases: function (
+			...exportNames: string[]
+		): typeof base &
+			(
+				| { aliases: AliasesMap; error?: never }
+				| { aliases?: never; error: ImportsGetAliasesError }
+			) {
+			try {
+				const matchingImports = this.findReferences()
+				const aliases: AliasesMap = new Map()
+				// There are no matching imports -> Return aliases: undefined
+				if (matchingImports === undefined) return { ...this, aliases: aliases }
+				// Construct map of aliases: exportN -> aliasN
+				for (const { specifiers } of matchingImports) {
+					for (const specifier of specifiers) {
+						const newKey =
+							specifier.type === "ImportDefaultSpecifier"
+								? "default"
+								: specifier.type === "ImportNamespaceSpecifier"
+								? "*"
+								: specifier.imported.name
+						aliases.set(newKey, specifier.local)
+					}
+				}
+				// Extend map of aliases with requested exportNames
+				for (const exportN of exportNames) {
+					if (!aliases.has(exportN)) {
+						const namespaceAlias = aliases.get("*")
+						if (n.Identifier.check(namespaceAlias))
+							aliases.set(exportN, b.memberExpression(namespaceAlias, b.identifier(exportN)))
+						else
+							throw new ImportsGetAliasesError(
+								`The alias for ${exportN} does not exist. Maybe call imports(...).add() first?`,
+							)
+					}
+				}
+				return { ...this, aliases }
+			} catch (error) {
+				return { ...this, error: error as ImportsGetAliasesError }
+			}
+		},
+		add: function (
+			exportN: string,
+			aliasN?: string,
+		): typeof base & { alias: types.namedTypes.Identifier | types.namedTypes.MemberExpression } {
+			// The aliasN should be available. Find a declarable identifier.
+			// This also goes through all import aliases to check for availability.
+			const declarableIdentifier = findDeclarableIdentifier(target, aliasN ?? exportN)
+			// Can the import be added?
+			// Y -> Proceed
+			const matchingImports = this.findReferences()
+			if (
+				// There has to be one line that does not include a namespace import
+				matchingImports === undefined ||
+				(matchingImports.some(({ specifiers }) =>
+					specifiers.every(
+						(specifier) =>
+							n.ImportSpecifier.check(specifier) || n.ImportDefaultSpecifier.check(specifier),
+					),
+				) &&
+					// exportN cannot be used already
+					matchingImports.every(({ specifiers }) =>
+						specifiers.every((specifier) =>
+							specifier.type === "ImportSpecifier"
+								? specifier.imported.name !== exportN
+								: specifier.type === "ImportDefaultSpecifier"
+								? exportN !== "default"
+								: exportN !== "*",
+						),
+					))
+			) {
+				const localIdentifier =
+					declarableIdentifier !== exportN ? b.identifier(declarableIdentifier) : undefined
+				const newImportSpecifierAst =
+					exportN === "*"
+						? b.importNamespaceSpecifier(localIdentifier)
+						: exportN === "default"
+						? b.importDefaultSpecifier(localIdentifier)
+						: b.importSpecifier(b.identifier(exportN), localIdentifier)
+				// Should we add a new line?
+				// Y -> Append new line
+				// N -> Push specifier into existing import
+				if (exportN === "*" || matchingImports === undefined) {
+					const newImportDeclarationAst = b.importDeclaration(
+						[newImportSpecifierAst],
+						b.literal(source),
+					)
+					target.body.splice(0, 0, newImportDeclarationAst)
+				} else {
+					// Find the right line to add import
+					const insertionPoint = matchingImports.find(({ specifiers }) =>
+						specifiers.every(
+							(specifier) =>
+								n.ImportSpecifier.check(specifier) || n.ImportDefaultSpecifier.check(specifier),
+						),
+					)
+					insertionPoint?.specifiers.push(newImportSpecifierAst as ImportSpecifier)
+				}
+			}
+			// Return changed identifiers
+			const newAliasN = this.getAliases(exportN).aliases?.get(exportN) as
+				| types.namedTypes.Identifier
+				| types.namedTypes.MemberExpression
+			return { ...this, alias: newAliasN }
+		},
+		removeAll: function () {
+			const matchingImports = this.findReferences()
+			if (matchingImports !== undefined) {
+				for (const declaration of matchingImports) {
+					const indexToRemove = target.body.findIndex((statement) => statement === declaration)
+					target.body.splice(indexToRemove, 1)
+				}
+			}
+			return this
+		},
+	}
 }

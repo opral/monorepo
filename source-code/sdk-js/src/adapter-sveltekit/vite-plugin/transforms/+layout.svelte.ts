@@ -49,7 +49,7 @@ const transformRootLayoutSvelte = async (config: TransformConfig, code: string) 
 	else
 		requiredImportsAsts.push(
 			parseModule(
-				`import { localStorageKey, getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`,
+				`import { getRuntimeFromContext, addRuntimeToContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`,
 			),
 			parseModule(`import { browser } from "$app/environment";`),
 		)
@@ -162,7 +162,7 @@ ${codeWithoutTypes}`
 						b.expressionStatement(
 							b.callExpression(
 								b.memberExpression(b.identifier("localStorage"), b.identifier("setItem")),
-								[b.identifier("localStorageKey"), b.identifier("$" + localLanguageName)],
+								[b.literal("language"), b.identifier("$" + localLanguageName)],
 							),
 						),
 					]),

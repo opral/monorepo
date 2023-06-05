@@ -3,7 +3,6 @@
 	import {
 		getRuntimeFromContext,
 		addRuntimeToContext,
-		localStorageKey,
 	} from "@inlang/sdk-js/adapter-sveltekit/client/reactive"
 	import type { LayoutData } from "./$types.js"
 	import { browser } from "$app/environment"
@@ -20,7 +19,7 @@
 		document.body.parentElement?.setAttribute("lang", $language)
 
 		// TODO: only if localStorageDetector
-		localStorage.setItem(localStorageKey, $language)
+		localStorage.setItem('language', $language)
 	}
 
 	// ----
