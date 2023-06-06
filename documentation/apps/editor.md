@@ -1,6 +1,6 @@
 ---
 title: Web Editor
-href: /documentation/apps/editor
+href: /documentation/apps/web-editor
 description: This is the editor description
 ---
 

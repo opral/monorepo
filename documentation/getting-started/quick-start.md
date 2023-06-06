@@ -10,7 +10,7 @@ An `inlang.config.js` needs to be created at the root of your git repository.
 
 ### Using the CLI
 
-Open your repository and execute the inlang CLI on the root level:
+Open your repository and execute the [inlang CLI](/documentation/apps/inlang-cli) on the root level:
 
 ```
 npx @inlang/cli@latest config init
