@@ -1,5 +1,17 @@
 # @inlang/sdk-js-plugin
 
+## 0.6.4
+
+## 0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/inlang/issues/856.
+
+## 0.6.1
+
 ## 0.6.0
 
 ## 0.5.1

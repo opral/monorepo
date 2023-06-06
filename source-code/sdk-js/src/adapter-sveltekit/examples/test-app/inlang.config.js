@@ -6,7 +6,7 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js",
 	)
 	const { default: sdkPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@0.4.5/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@0.6.3/dist/index.js",
 	)
 
 	return {

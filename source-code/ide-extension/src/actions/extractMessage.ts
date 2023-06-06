@@ -1,5 +1,7 @@
 import * as vscode from "vscode"
 import { extractMessageCommand } from "../commands/extractMessage.js"
+import { telemetry } from "../services/telemetry/index.js"
+import { getUserId } from "../utils/getUserId.js"
 
 /**
  * Show light bulb quick fixes when text is selected, offering message extraction.
@@ -20,13 +22,26 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 			title: extractMessageCommand.title,
 			command: extractMessageCommand.id,
 		}
+		telemetry.capture({
+			event: "IDE-EXTENSION code action provided",
+			properties: { name: "extract message", user: await getUserId() },
+		})
 		return [extractMessageAction]
 	}
 
-	public resolveCodeAction(
-		codeAction: vscode.CodeAction,
-	): vscode.ProviderResult<vscode.CodeAction> {
-		console.log(codeAction)
-		return
+	public async resolveCodeAction(): Promise<vscode.CodeAction> {
+		console.log("code action resolved")
+		telemetry.capture({
+			event: "IDE-EXTENSION code action resolved",
+			properties: { name: "extract message", user: await getUserId() },
+		})
+
+		// Replace the following line with your code logic
+		const codeAction: vscode.CodeAction = new vscode.CodeAction(
+			"Code action resolved",
+			vscode.CodeActionKind.Refactor,
+		)
+
+		return codeAction
 	}
 }

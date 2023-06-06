@@ -1,5 +1,19 @@
 # @inlang/core
 
+## 0.9.0
+
+### Minor Changes
+
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/inlang/issues/856.
+
+## 0.8.7
+
+### Patch Changes
+
+- 0b43c17c: refactor: rename `options.nested` to `options.recursive` for better clarity
+
+  It was ambigious what `nested` does. Recursive is a clear term to describe the flag that should avoid confusion.
+
 ## 0.8.6
 
 ### Patch Changes

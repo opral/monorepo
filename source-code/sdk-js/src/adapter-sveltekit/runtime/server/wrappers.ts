@@ -32,17 +32,16 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
+				const pathname = event.url.pathname as RelativeUrl
+
 				runtime = getRuntimeFromLocals(event.locals)
 				// runtime was already added by a previous wrapper
 				if (runtime) resolve(event)
 
 				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
 
-				const pathname = event.url.pathname as RelativeUrl
-				if (pathname.startsWith("/inlang")) return resolve(event)
-
 				let language = options.getLanguage(event)
-				if (!language || !languages.includes(language)) {
+				if (!pathname.startsWith("/inlang") && (!language || !languages.includes(language))) {
 					if (options.redirect) {
 						const detectedLanguage = await detectLanguage(
 							{ referenceLanguage, languages },
@@ -61,7 +60,7 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 				runtime = initSvelteKitServerRuntime({
 					referenceLanguage,
 					languages,
-					language: language!,
+					language,
 				})
 
 				addRuntimeToLocals(event.locals, runtime)
@@ -91,6 +90,9 @@ export const initRootLayoutServerLoadWrapper = <
 		) =>
 		async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & DataPayload> => {
 			const runtime = getRuntimeFromLocals(event.locals)
+
+			// TODO: only insert if language detection strategy url is used
+			event.params.lang
 
 			return {
 				...(await load(event, runtime)),

@@ -2,6 +2,8 @@ import * as vscode from "vscode"
 import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
+import { telemetry } from "../services/telemetry/index.js"
+import { getUserId } from "../utils/getUserId.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -54,7 +56,7 @@ export async function messagePreview(args: {
 		}
 
 		// Get the message references
-		const wrappedDecorations = state().config.ideExtension?.messageReferenceMatchers.map(
+		const wrappedDecorations = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
 			async (matcher) => {
 				const messages = await matcher({
 					documentText: args.activeTextEditor.document.getText(),
@@ -101,6 +103,10 @@ export async function messagePreview(args: {
 		)
 		const decorations = (await Promise.all(wrappedDecorations || [])).flat()
 		activeTextEditor.setDecorations(messagePreview, decorations)
+		telemetry.capture({
+			event: "IDE-EXTENSION decoration set",
+			properties: { name: "message preview", user: await getUserId() },
+		})
 	}
 
 	const debouncedUpdateDecorations = debounce(500, updateDecorations)

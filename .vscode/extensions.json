@@ -2,6 +2,7 @@
 	"recommendations": [
 		"ms-vscode-remote.remote-containers",
 		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode"
+		"esbenp.prettier-vscode",
+		"inlang.vs-code-extension"
 	]
 }

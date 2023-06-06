@@ -22,14 +22,24 @@ or
 yarn add @inlang/cli
 ```
 
+best
+
+```sh
+npx inlang [command]
+```
+
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
+
 ## Commands
 
-We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not intalling the CLI globally has the following advantages:
+We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
 - the installed CLI version is scoped to the project, ensuring that it always works.
 - the CLI gets installed for team members too, avoiding "why is this command not working for me" questions.
 
 `npx` is auto-installed with Node and NPM.
+
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
 
 ```sh
 CLI for inlang.
@@ -39,9 +49,10 @@ Options:
   -h, --help         display help for command
 
 Commands:
-  config <command>   Commands for managing the config file.
-  machine <command>  Commands for automating translations.
-  open <command>     Commands to open parts of the inlang ecosystem.
+  config [command]   Commands for managing the config file.
+  lint               Commands for linting translations.
+  machine [command]  Commands for automating translations.
+  open [command]     Commands to open parts of the inlang ecosystem.
   help [command]     display help for command
 ```
 
@@ -64,6 +75,16 @@ npx inlang config init
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
 
+#### `config validate`
+
+This command validates the `inlang.config.js` file in the current directory. It checks if the file is valid JSON and if it contains **all required fields**. It also checks if the specified resources exist and perform a _dry run of the translation process_.
+
+To validate the `inlang.config.js` file, run the following command:
+
+```sh
+npx inlang config validate
+```
+
 ### `machine`
 
 The machine command is used to automate localization processes.
@@ -78,11 +99,29 @@ To initiate machine translation, run the following command:
 npx inlang machine translate
 ```
 
+**Options**
+
+The translate command has the following options:
+
+- `-f, --force`: If this option is set, the command will not prompt for confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context / wrong translations.**
+
 This command reads the inlang.config.js file in the repository and retrieves the resources and reference language specified in the configuration. It then translates all messages from the reference language to other languages defined in the configuration.
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
 > Note: The inlang.config.js file must be present in the repository for the translation to work.
+
+### `lint`
+
+The lint command lints the translation with the configured lint rules, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules).
+
+```sh
+npx inlang lint
+```
+
+This command will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+
+However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) as a starter template.
 
 ### `open`
 

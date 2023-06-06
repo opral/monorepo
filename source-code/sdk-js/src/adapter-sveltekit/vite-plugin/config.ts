@@ -64,7 +64,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 		const inlangConfig = await initConfig(inlangConfigModule)
 
 		const { default: svelteConfig } = (await import(
-			path.resolve(cwdFolderPath, "svelte.config.js")
+			pathToFileURL(path.resolve(cwdFolderPath, "svelte.config.js")).toString()
 		)) as { default: SvelteConfig }
 		const files = {
 			appTemplate: path.resolve(

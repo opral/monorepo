@@ -37,7 +37,7 @@ Manage translations in a git repository.
 
 ![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
 
-### IDE-Extension ([get notified](https://tally.so/r/wgbOpJ))
+### IDE-Extension
 
 Improve the DX when working on localized codebases.
 
@@ -46,7 +46,7 @@ Improve the DX when working on localized codebases.
 
 ![Screen Recording 2022-02-15 at 15 02 26](https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif)
 
-### CLI ([get notified](https://tally.so/r/wgbOpJ))
+### CLI
 
 Automate localization via CI/CD.
 

@@ -1,5 +1,47 @@
 # @inlang/cli
 
+## 0.9.15
+
+### Patch Changes
+
+- 95bfe307: add config validate
+
+## 0.9.14
+
+### Patch Changes
+
+- 43a00f83: Added an info that `inlang config init` is work in progres.
+
+## 0.9.13
+
+### Patch Changes
+
+- 99d9a2c3: remove double warning of no config found
+
+## 0.9.12
+
+### Patch Changes
+
+- 9a7e72ac: add lint command to CLI
+
+## 0.9.11
+
+### Patch Changes
+
+- b60740f9: refactoring
+
+## 0.9.10
+
+### Patch Changes
+
+- caa9e747: add --force flag to machine translate command to raise awareness about translation quality
+
+## 0.9.9
+
+### Patch Changes
+
+- 04f81ae8: Minor refactorings
+
 ## 0.9.8
 
 ### Patch Changes

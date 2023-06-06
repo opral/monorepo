@@ -1,7 +1,7 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "inlang",
+	"displayName": "inlang (i18n)",
 	"type": "module",
 	"description": "i18n extension that makes developers more productive.",
 	"publisher": "inlang",
@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/inlang.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "0.5.9",
+	"version": "0.6.4",
 	"engines": {
 		"vscode": "^1.75.0"
 	},
@@ -31,12 +31,20 @@
 				"command": "inlang.extractMessage",
 				"title": "Inlang: Extract Message"
 			}
-		]
+		],
+		"configuration": {
+			"properties": {
+				"inlang.userId": {
+					"type": "string",
+					"default": ""
+				}
+			}
+		}
 	},
 	"scripts": {
 		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
-		"package": "npx vsce package",
+		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run --coverage",
 		"---- LINT ----------------------------------------------------------": "",
@@ -50,10 +58,13 @@
 	"dependencies": {
 		"@inlang/core": "*",
 		"@inlang/telemetry": "*",
+		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
+		"@inlang-git/client": "*",
 		"@types/fs-extra": "^11.0.1",
+		"@types/require-from-string": "^1.2.1",
 		"@types/throttle-debounce": "^5.0.0",
 		"@types/vscode": "^1.75.0",
 		"@vscode/vsce": "^2.18.0",

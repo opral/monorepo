@@ -81,36 +81,36 @@ const resource = createLintedResource(
 
 describe("getLintReports", async () => {
 	describe("'Resource'", async () => {
-		test("nested", async () => {
-			const reports = getLintReports(resource, { nested: true })
+		test("recursive", async () => {
+			const reports = getLintReports(resource)
 
 			expect(reports).toHaveLength(12)
 		})
 
-		test("not nested", async () => {
-			const reports = getLintReports(resource, { nested: false })
+		test("not recursive", async () => {
+			const reports = getLintReports(resource, { recursive: false })
 
 			expect(reports).toHaveLength(3)
 		})
 
-		test("by level nested", async () => {
-			const reports = getLintReports(resource, { nested: true, level: "error" })
+		test("by level recursive", async () => {
+			const reports = getLintReports(resource, { level: "error" })
 			expect(reports).toHaveLength(6)
 		})
 
-		test("by level not nested", async () => {
-			const reports = getLintReports(resource, { nested: false, level: "error" })
+		test("by level not recursive", async () => {
+			const reports = getLintReports(resource, { recursive: false, level: "error" })
 			expect(reports).toHaveLength(2)
 		})
 
-		test("with id nested", async () => {
-			const reports = getLintReports(resource, { nested: true, id: "id.3" })
+		test("with id recursive", async () => {
+			const reports = getLintReports(resource, { id: "id.3" })
 
 			expect(reports).toHaveLength(3)
 		})
 
-		test("with id not nested", async () => {
-			const reports = getLintReports(resource, { nested: false, id: "id.3" })
+		test("with id not recursive", async () => {
+			const reports = getLintReports(resource, { recursive: false, id: "id.3" })
 
 			expect(reports).toHaveLength(1)
 		})
