@@ -13,7 +13,7 @@
 
 **[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
 
-**[🌱 Ecosystem](https://github.com/inlang/ecosystem)** - Plugins, resources, and more.
+**[🌱 Ecosystem](https://inlang.com/documentation/plugins/registry)** - Plugins, resources, and more.
 
 **[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
 
@@ -31,10 +31,10 @@ Inlang consists of multipe applications that can be used individually, or in com
 
 Manage translations in a simple web interface and push changes to your repository.
 
-- [x] works with existing translation files
-- [x] git workflows like pull requests
-- [x] no hosting, no sync pipelines
-- [x] no extra accounts
+✅ works with existing translation files </br>
+✅ git workflows like pull requests </br>
+✅ no hosting, no sync pipelines </br>
+✅ no extra accounts </br>
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png"/>
 
@@ -42,9 +42,9 @@ Manage translations in a simple web interface and push changes to your repositor
 
 The IDE-extension allows you to translate your content directly in your IDE.
 
-- [x] extract messages
-- [x] inline annotations to see translations
-- [x] linting errors and warnings
+✅ extract messages </br>
+✅ inline annotations to see translations </br>
+✅ linting errors and warnings </br>
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
 
@@ -52,9 +52,9 @@ The IDE-extension allows you to translate your content directly in your IDE.
 
 [@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
-- [x] init & validate config
-- [x] lint translations
-- [x] machine translate
-- [x] open inlang editor
+✅ init & validate config </br>
+✅ lint translations </br>
+✅ machine translate </br>
+✅ open inlang editor </br>
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png"/>
