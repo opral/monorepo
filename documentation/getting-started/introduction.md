@@ -82,3 +82,5 @@ We are building tools that increases the developer experience in the context of 
     caption="The IDE extension is an example of the developer first approach."
 
 /%}
+
+{% Feedback /%}
