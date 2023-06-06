@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.6.4
+
+### Patch Changes
+
+- 1cad35e9: persist user with id
+
 ## 0.6.3
 
 ### Patch Changes
