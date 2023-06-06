@@ -25,3 +25,5 @@ Releases are managed with [changesets](https://github.com/changesets/changesets)
 The [changeset-bot](https://github.com/apps/changeset-bot) helps to organise this workflow, by posting on someones pull requests with instructions.
 
 The [Changesets Release Action](https://github.com/changesets/action) organizes pull requests which trigger a release of the next version, according to the described changesets.
+
+{% Feedback /%}

@@ -59,3 +59,5 @@ A plugin to enable linting feature for your translation files. For example, you 
 **Add new languages**
 
 **Placeholder**
+
+{% Feedback /%}
