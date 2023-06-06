@@ -46,3 +46,5 @@ A plugin to enable linting feature for your translation files. For example, you 
 **Filter languages & search**
 
 **Add new languages**
+
+**Placeholder**
