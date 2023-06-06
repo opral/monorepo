@@ -1,6 +1,8 @@
 import { createResource, Match, onMount, Suspense, Switch } from "solid-js"
 import mermaid from "mermaid"
 import { getHighlighter, Highlighter, Lang, setCDN } from "shiki"
+import copy from "clipboard-copy"
+import { showToast } from "@src/components/Toast.jsx"
 
 // importing themes and language colors from a cdn
 setCDN("https://cdn.jsdelivr.net/npm/shiki/")
@@ -27,7 +29,7 @@ export function Fence(props: { language?: string; content: string }) {
 }
 
 const highlighter: Highlighter = await getHighlighter({
-	theme: "dark-plus",
+	theme: "github-dark-dimmed",
 	// preventing layout shift on client side be pre-fecthing
 	// js and ts by default.
 	langs: ["js", "ts"],
@@ -50,12 +52,23 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 
 	return (
 		<Suspense>
-			<div
-				// eslint-disable-next-line solid/no-innerhtml
-				innerHTML={code()}
-				class="not-prose p-4 rounded overflow-auto text-sm"
-				style={{ "background-color": highlighter.getBackgroundColor() }}
-			/>
+			<div class="relative">
+				<div
+					// eslint-disable-next-line solid/no-innerhtml
+					innerHTML={code()}
+					class="not-prose p-6 pb-4 overflow-auto text-sm rounded-xl"
+					style={{ "background-color": highlighter.getBackgroundColor() }}
+				/>
+				<div
+					onClick={() => {
+						copy(props.content),
+							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+					}}
+					class="absolute top-0 right-0 py-2 px-4 text-info hover:text-hover-info cursor-pointer"
+				>
+					Copy
+				</div>
+			</div>
 		</Suspense>
 	)
 }
