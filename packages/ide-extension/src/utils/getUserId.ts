@@ -7,7 +7,7 @@ import * as vscode from "vscode"
  *
  * @example
  * const userId = await getUserId()
- * console.log(userId) // id-123456
+ * console.log(userId) // 123e4567-e89b-12d3-a456-426614174000
  */
 export async function getUserId() {
 	const persistedId = await getPersistedId()
