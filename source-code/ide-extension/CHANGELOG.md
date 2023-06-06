@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 0.7.0
+
+### Minor Changes
+
+- 16f4307f: add recommendation prompt
+- d9ff0e23: change recommendation key to "disableRecommendation"
+
 ## 0.6.4
 
 ### Patch Changes
