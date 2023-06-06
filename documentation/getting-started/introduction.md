@@ -43,13 +43,14 @@ The automation and collaboration power a version control system provides might j
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png"
+    src="https://github.com/inlang/inlang/assets/58360188/fe79a58a-7804-4731-999c-b421164a7a34"
 
     alt="git-based localization infrastructure"
 
     caption="Git repositories act as building block for tools, applications like the editor and automation via CI/CD."
 
 /%}
+
 
 ## Infrastructure Approach
 
