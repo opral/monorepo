@@ -48,7 +48,7 @@
 		"magicast": "0.2.4",
 		"msw": "^1.2.1",
 		"npm-run-all": "^4.1.5",
-		"recast": "^0.22.0",
+		"recast": "^0.23.2",
 		"svelte": "^3.59.1",
 		"svelte-preprocess": "^5.0.3",
 		"ts-dedent": "^2.2.0",
