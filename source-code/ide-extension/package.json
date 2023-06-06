@@ -31,7 +31,15 @@
 				"command": "inlang.extractMessage",
 				"title": "Inlang: Extract Message"
 			}
-		]
+		],
+		"configuration": {
+			"properties": {
+				"inlang.userId": {
+					"type": "string",
+					"default": ""
+				}
+			}
+		}
 	},
 	"scripts": {
 		"build": "node ./build.js",
