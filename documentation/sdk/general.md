@@ -27,10 +27,11 @@ inlang's SDK works the same in each environment it runs. Take a look at the [Usa
 
 Inlang also provides custom solutions that are built specifically for certain Frameworks.
 
-### Supported Frameworks
+### Supported SDKs
 
-- [SvelteKit](/documentation/sdk/sveltekit)
-- [Your own custom solution](/documentation/sdk/custom)
+- [SvelteKit SDK](/documentation/sdk/sveltekit) maintained by inlang.
+- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) A fully type-safe and lightweight internationalization library for all TypeScript and JavaScript projects.
+- [i18next](https://www.i18next.com/) is an internationalization-SDK written in and for JavaScript.
 
 #### Your favorite frameworks is missing?
 
