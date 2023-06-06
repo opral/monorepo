@@ -1,7 +1,7 @@
 ---
-title: "CLI"
-href: /documentation/cli
-description: "The Inlang CLI"
+title: "inlang CLI"
+href: /documentation/apps/inlang-cli
+description: "The inlang CLI"
 ---
 
 # {% $frontmatter.title %}
