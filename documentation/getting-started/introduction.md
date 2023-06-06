@@ -51,13 +51,11 @@ The automation and collaboration power a version control system provides might j
 
 /%}
 
-
 ## Infrastructure Approach
 
 Inlang is designed to enable developers to build on top of inlang to suit their needs.
 
 Localization is too complicated and involves too many stakeholders to be solvable with one single solution. It needs a variety of solutions for developers, translators, product-managers, business owners, static site, dynamic apps, etc.
-
 
 {% Figure
 
@@ -84,5 +82,16 @@ We are building tools that increases the developer experience in the context of 
     caption="The IDE extension is an example of the developer first approach."
 
 /%}
+
+{% QuickLinks %}
+
+    {% QuickLink
+        title="Setup your config now"
+        icon="fast"
+        href="/documentation/quick-start"
+        description="Setup inlang for a localized project."
+    /%}
+
+{% /QuickLinks %}
 
 {% Feedback /%}
