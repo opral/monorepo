@@ -95,3 +95,5 @@ Loads all Resources during build time and adds them to the bundle.
 ---
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+
+{% Feedback /%}

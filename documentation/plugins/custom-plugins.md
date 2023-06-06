@@ -47,3 +47,5 @@ const myPlugin = createPlugin(() => {
 	}
 })
 ```
+
+{% Feedback /%}

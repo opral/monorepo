@@ -11,3 +11,5 @@ description: The reference for the query module.
 ## Reference
 
 Up-to-date reference can be found [in the repository](https://github.com/inlang/inlang/blob/main/source-code/core/src/query).
+
+{% Feedback /%}

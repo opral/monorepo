@@ -67,6 +67,4 @@ export async function defineConfig(env) {
 
 {% /QuickLinks %}
 
-```
-
-```
+{% Feedback /%}

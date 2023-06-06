@@ -75,3 +75,5 @@ for (const resource of resources) {
 	}
 }
 ```
+
+{% Feedback /%}
