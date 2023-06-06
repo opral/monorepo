@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { addImport, removeImport } from './imports.js';
-import { codeToAst, astToCode } from '../recast.js';
+import { codeToAst, astToCode } from '../../helpers/recast.js';
 
 describe("removeImport", () => {
 	describe("no modifications", () => {
