@@ -228,6 +228,12 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							Blog
 						</a>
 						<a
+							href="https://github.com/orgs/inlang/projects?query=is%3Aopen"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Roadmap
+						</a>
+						<a
 							href="https://github.com/inlang/inlang"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
