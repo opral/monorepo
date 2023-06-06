@@ -75,7 +75,7 @@ We are building tools that increases the developer experience in the context of 
 
 {% Figure
 
-    src="https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif"
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif"
 
     alt="inlang ide extension"
 
