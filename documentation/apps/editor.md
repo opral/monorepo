@@ -19,32 +19,11 @@ The inlang web editor is a simple and easy to use nocode tool to manage your tra
 
 You can use the editor with any git repository. The only requirement is that you have a `inlang.config.js` file in the root of your repository. This file contains the configuration for the editor.
 
-```js
-// filename: inlang.config.js
+Required:
+A plugin to read and write your translation files. To find the correct plugin for your project, check out the [plugin registry](/documentation/plugins/registry).
 
-export async function defineConfig(env) {
-	const { default: pluginJson } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js",
-	)
-
-	// recommended: standardLintRules to enable linting features
-	const { default: standardLintRules } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/inlang/standard-lint-rules@2/dist/index.js",
-	)
-
-	return {
-		referenceLanguage: "en",
-		plugins: [
-			pluginJson({
-				pathPattern: ".example/{language}.json",
-			}),
-			standardLintRules(),
-		],
-	}
-}
-```
-
-To find the correct plugin for your project, check out the [plugin registry](/documentation/plugins/registry).
+Recommended:
+A plugin to enable linting feature for your translation files. For example, you can use the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) plugin.
 
 ## How to use
 
