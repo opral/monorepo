@@ -50,7 +50,7 @@ async function capture(args: CaptureEventArguments) {
 /**
  * Gets the git origin url of the currently opened repository.
  */
-async function getGitOrigin() {
+export async function getGitOrigin() {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
 	const remotes = await raw.listRemotes({
 		fs,

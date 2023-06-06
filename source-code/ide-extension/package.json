@@ -38,9 +38,9 @@
 					"type": "string",
 					"default": ""
 				},
-				"inlang.showRecommendation": {
-					"type": "boolean",
-					"default": true
+				"inlang.disableRecommendation": {
+					"type": "array",
+					"default": []
 				}
 			}
 		}
