@@ -10,4 +10,6 @@ export const printCode = (ast: recast.types.ASTNode) => recast.print(ast).code
 
 export const codeToAst = (code: string) => parseCode(dedent(code))
 
+export const codeToDeclarationAst = (code: string) => codeToAst(code).program.body[0].declarations[0]
+
 export const astToCode = (ast: recast.types.ASTNode) => recast.print(ast).code

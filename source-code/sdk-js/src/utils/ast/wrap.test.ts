@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest"
-import { codeToAst, astToCode } from '../../helpers/recast.js';
+import { astToCode, codeToDeclarationAst } from '../../helpers/recast.js';
 import { wrapWithPlaceholder } from './wrap.js';
-
-const arrowFunctionAst = codeToAst(`const fn = () => {}`).program.body[0].declarations[0]
-const functionAst = codeToAst(`const fn = function() {}`).program.body[0].declarations[0]
-const variableDeclaratorAst = codeToAst(`const fn = someFn`).program.body[0].declarations[0]
 
 describe("wrapWithPlaceholder", () => {
 	test("arrow function", () => {
-		const ast = wrapWithPlaceholder(arrowFunctionAst)
+		let ast = codeToDeclarationAst(`const fn =
+			() => {}
+		`)
+
+		ast = wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(() => {})"
@@ -16,7 +16,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("function", () => {
-		const ast = wrapWithPlaceholder(functionAst)
+		let ast = codeToDeclarationAst(`const fn =
+			function() {}
+		`)
+
+		ast = wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(function() {})"
@@ -24,7 +28,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("variable", () => {
-		const ast = wrapWithPlaceholder(variableDeclaratorAst)
+		let ast = codeToDeclarationAst(`const fn =
+			someFn
+		`)
+
+		ast = wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(someFn)"
