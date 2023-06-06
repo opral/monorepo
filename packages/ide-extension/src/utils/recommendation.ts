@@ -1,12 +1,15 @@
 import * as vscode from "vscode"
 import * as path from "node:path"
 import * as fs from "node:fs"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 
 export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
 	// check if the showRecommendation setting is set to false
-	const showRecommendation = vscode.workspace.getConfiguration("inlang").get("showRecommendation")
-	if (showRecommendation === false) {
+	const gitOrigin = await getGitOrigin()
+	const showRecommendation = vscode.workspace
+		.getConfiguration("inlang")
+		.get("disableRecommendation") as string[]
+	if (showRecommendation.includes(gitOrigin)) {
 		return
 	}
 
@@ -49,7 +52,9 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 			fs.writeFileSync(extensionsJsonPath, JSON.stringify(newExtensions, undefined, 2))
 		} else {
 			// persist the user's choice in a workspace setting
-			await vscode.workspace.getConfiguration("inlang").update("showRecommendation", false, true)
+			await vscode.workspace
+				.getConfiguration("inlang")
+				.update("disableRecommendation", [...showRecommendation, gitOrigin], true)
 		}
 
 		// Track the outcome
