@@ -1,7 +1,7 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "inlang",
+	"displayName": "inlang (i18n)",
 	"type": "module",
 	"description": "i18n extension that makes developers more productive.",
 	"publisher": "inlang",
