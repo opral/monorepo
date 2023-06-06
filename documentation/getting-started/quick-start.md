@@ -46,3 +46,23 @@ npx @inlang/cli@latest config init
     ```
 
 3.  Commit the config and open the repository in the [inlang editor](https://inlang.com/editor)
+
+## Next steps
+
+{% QuickLinks %}
+
+    {% QuickLink
+        title="Plugins"
+        icon="add-plugin"
+        href="/documentation/plugins/registry"
+        description="Extend inlang to fit your needs."
+    /%}
+
+    {% QuickLink
+        title="Badge"
+        icon="badge"
+        href="/documentation/badge"
+        description="Include a dynamic badge in your docs."
+    /%}
+
+{% /QuickLinks %}

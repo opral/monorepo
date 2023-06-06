@@ -27,11 +27,11 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./sdk/usage.md?raw")).default,
 		(await import("./sdk/configuration.md?raw")).default,
 		(await import("./sdk/sveltekit.md?raw")).default,
-		(await import("./sdk/custom.md?raw")).default,
+		// (await import("./sdk/custom.md?raw")).default,
 	],
 	Guide: [
 		(await import("./badge.md?raw")).default,
-		(await import("./ci-cd.md?raw")).default,
+		// (await import("./ci-cd.md?raw")).default,
 		(await import("./build-on-inlang.md?raw")).default,
 	],
 	Core: [

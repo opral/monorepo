@@ -25,6 +25,17 @@ A plugin to read and write your translation files. To find the correct plugin fo
 **Recommended:**
 A plugin to enable linting feature for your translation files. For example, you can use the [standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) plugin.
 
+{% QuickLinks %}
+
+    {% QuickLink
+        title="Setup your config now"
+        icon="fast"
+        href="/documentation/quick-start"
+        description="Setup inlang for a localized project."
+    /%}
+
+{% /QuickLinks %}
+
 ## How to use
 
 1. Go to the [Editor](https://inlang.com/editor)

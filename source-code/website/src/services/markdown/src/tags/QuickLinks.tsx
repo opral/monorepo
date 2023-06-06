@@ -1,8 +1,18 @@
 import { Icon, type AvailableIcon } from "@src/components/Icon.jsx"
 import type { JSXElement } from "solid-js"
 
-export function QuickLinks(props: { children: JSXElement }) {
-	return <div class="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-3">{props.children}</div>
+export function QuickLinks(props: { children: JSXElement[] }) {
+	return (
+		<div
+			class={
+				"not-prose my-12 grid grid-cols-1 gap-6 " +
+				"sm:grid-cols-" +
+				(props.children as JSXElement[]).length
+			}
+		>
+			{props.children}
+		</div>
+	)
 }
 
 export function QuickLink(props: {
