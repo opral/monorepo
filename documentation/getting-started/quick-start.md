@@ -18,27 +18,26 @@ npx @inlang/cli@latest config init
 
 ### Manual step-by-step guide
 
-1. Create a new file named `inlang.config.js` at the root of your git repository.
+1.  Create a new file named `inlang.config.js` at the root of your git repository.
+2.  Select a [plugin](https://github.com/inlang/ecosystem) and import it in the config:
 
-2. Select a [plugin](https://github.com/inlang/ecosystem) and import it in the config:
+    ```js
+    // filename: inlang.config.js
 
-   ```js
-   // filename: inlang.config.js
+    export async function defineConfig(env) {
+    	const { default: pluginJson } = await env.$import(
+    		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js",
+    	)
 
-   export async function defineConfig(env) {
-   	const { default: pluginJson } = await env.$import(
-   		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js",
-   	)
+    	return {
+    		referenceLanguage: "en",
+    		plugins: [
+    			pluginJson({
+    				pathPattern: ".example/{language}.json",
+    			}),
+    		],
+    	}
+    }
+    ```
 
-   	return {
-   		referenceLanguage: "en",
-   		plugins: [
-   			pluginJson({
-   				pathPattern: ".example/{language}.json",
-   			}),
-   		],
-   	}
-   }
-   ```
-
-3. Commit the config and open the repository in the [inlang editor](https://inlang.com/editor)
+3.  Commit the config and open the repository in the [inlang editor](https://inlang.com/editor)
