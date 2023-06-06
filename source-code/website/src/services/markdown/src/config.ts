@@ -9,6 +9,7 @@ import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx"
 import { Link } from "./nodes/Link.jsx"
 import { Document } from "./nodes/Document.jsx"
 import { Video } from "./tags/Video.jsx"
+import { Feedback } from "./tags/Feedback.jsx"
 
 /**
  * The components that render custom nodes or tags
@@ -23,6 +24,7 @@ export const components = {
 	Heading,
 	Document,
 	Video,
+	Feedback,
 }
 
 /**
@@ -120,6 +122,9 @@ export const config: Config = {
 			attributes: {
 				src: { type: "String", required: true },
 			},
+		},
+		Feedback: {
+			render: "Feedback",
 		},
 	},
 }
