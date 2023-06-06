@@ -43,7 +43,7 @@ The automation and collaboration power a version control system provides might j
 
 {% Figure
 
-    src="https://github.com/inlang/inlang/assets/58360188/fe79a58a-7804-4731-999c-b421164a7a34"
+    src="https://github.com/inlang/inlang/assets/58360188/b571b4d3-aacf-4410-9965-d92cf8be1c72"
 
     alt="git-based localization infrastructure"
 
@@ -58,9 +58,10 @@ Inlang is designed to enable developers to build on top of inlang to suit their 
 
 Localization is too complicated and involves too many stakeholders to be solvable with one single solution. It needs a variety of solutions for developers, translators, product-managers, business owners, static site, dynamic apps, etc.
 
+
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/one-config-to-power-everything.webp"
+    src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
 
     alt="one config file to power all infrastructure tools"
 
