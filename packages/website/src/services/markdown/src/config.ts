@@ -2,6 +2,7 @@ import type { Config } from "@markdoc/markdoc"
 import type { SemanticColorTokens } from "../../../../tailwind.config.cjs"
 import { icons } from "../../../components/Icon.jsx"
 import { Fence } from "./nodes/Fence.jsx"
+import { Heading } from "./nodes/Heading.jsx"
 import { Callout } from "./tags/Callout.jsx"
 import { Figure } from "./tags/Figure.jsx"
 import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx"
@@ -19,6 +20,7 @@ export const components = {
 	QuickLink,
 	QuickLinks,
 	Link,
+	Heading,
 	Document,
 	Video,
 }
@@ -59,6 +61,15 @@ export const config: Config = {
 				href: {
 					required: true,
 					type: "String",
+				},
+			},
+		},
+		heading: {
+			render: "Heading",
+			attributes: {
+				level: {
+					required: true,
+					type: "Number",
 				},
 			},
 		},

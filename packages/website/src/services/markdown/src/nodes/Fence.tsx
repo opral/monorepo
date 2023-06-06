@@ -56,7 +56,7 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 				<div
 					// eslint-disable-next-line solid/no-innerhtml
 					innerHTML={code()}
-					class="not-prose p-6 pb-4 overflow-auto text-sm rounded-xl"
+					class="not-prose p-6 py-4 overflow-auto text-sm rounded-xl"
 					style={{ "background-color": highlighter.getBackgroundColor() }}
 				/>
 				<div
@@ -64,7 +64,7 @@ function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {
 						copy(props.content),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
-					class="absolute top-0 right-0 py-2 px-4 text-info hover:text-hover-info cursor-pointer"
+					class="text-base absolute top-0 right-0 py-2 px-4 text-info hover:text-hover-info cursor-pointer"
 				>
 					Copy
 				</div>

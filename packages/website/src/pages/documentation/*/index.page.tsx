@@ -92,7 +92,6 @@ function NavbarCommon(props: {
 	onLinkClick?: () => void
 }) {
 	const isSelected = (href: string) => {
-		console.log(href === currentPageContext.urlParsed.pathname)
 		if (href === currentPageContext.urlParsed.pathname) {
 			return true
 		} else {
