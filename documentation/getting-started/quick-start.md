@@ -20,7 +20,7 @@ npx @inlang/cli@latest config init
 
 1\. Create a new file named `inlang.config.js` at the root of your git repository.
 
-2\. Select a [plugin](https://github.com/inlang/ecosystem) and import it in the config:
+2\. Select a [plugin](/documentation/plugins/registry) and import it in the config:
 
 ```js
 // filename: inlang.config.js
