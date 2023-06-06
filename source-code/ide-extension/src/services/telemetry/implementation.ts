@@ -26,6 +26,7 @@ type CaptureEventArguments =
 	  }
 
 let gitOrigin: string
+let userID: string
 
 /**
  * Capture a telemetry event in a typesafe way.
@@ -34,9 +35,12 @@ async function capture(args: CaptureEventArguments) {
 	if (gitOrigin === undefined) {
 		gitOrigin = await getGitOrigin()
 	}
+	if (userID === undefined) {
+		userID = await getUserId()
+	}
 	return telemetryNode.capture({
 		...args,
-		distinctId: await getUserId(),
+		distinctId: userID,
 		groups: {
 			repository: gitOrigin,
 		},
