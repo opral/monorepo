@@ -41,7 +41,6 @@
 		"@inlang/sdk-js-plugin": "*",
 		"@sveltejs/kit": "^1.16.3",
 		"@types/estree": "^1.0.1",
-		"astring": "^1.8.4",
 		"deepmerge-ts": "^5.1.0",
 		"esbuild": "^0.17.19",
 		"estree-walker": "^3.0.3",
