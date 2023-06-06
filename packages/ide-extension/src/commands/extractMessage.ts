@@ -4,6 +4,7 @@ import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
 import { msg } from "../utils/message.js"
 import { telemetry } from "../services/telemetry/index.js"
+import { getUserId } from "../utils/getUserId.js"
 // import { telemetryNode } from "@inlang/telemetry"
 
 /**
@@ -109,7 +110,7 @@ export const extractMessageCommand = {
 		})
 		telemetry.capture({
 			event: "IDE-EXTENSION command executed",
-			properties: { name: "extract message" },
+			properties: { name: "extract message", user: await getUserId() },
 		})
 		return msg("Message extracted.")
 	},
