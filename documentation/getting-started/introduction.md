@@ -6,36 +6,36 @@ description: Learn how to get started with inlang, the design principles, and mo
 
 # {% $frontmatter.title %}
 
-Inlang is infrastructure that consists of extendable tools and apps to make localization of software simple.
-
 {% QuickLinks %}
 
     {% QuickLink
-        title="Getting started"
-        icon="turn-slight-left"
-        href="/documentation/getting-started"
-        description="Step-by-step guide to setting up inlang."
+        title="Quickstart"
+        icon="fast"
+        href="/documentation/quick-start"
+        description="Setup inlang for a localized project."
     /%}
 
     {% QuickLink
-        title="Why inlang?"
-        icon="architecture"
-        href="/documentation/why-inlang"
-        description="Learn how inlang is designed."
+        title="Plugins"
+        icon="add-plugin"
+        href="/documentation/plugins/registry"
+        description="Extend inlang to fit your needs."
     /%}
 
     {% QuickLink
-        title="Build on inlang"
-        icon="construction"
-        href="/documentation/build-on-inlang"
-        description="Extend the library with third-party plugins or write your own."
+        title="SDKs"
+        icon="code"
+        href="/documentation/sdk/overview"
+        description="Use a SDK if you didn't localized yet?"
     /%}
 
 {% /QuickLinks %}
 
-**Git-based, infrastructure, and developer-first.**
+## What is inlang?
 
-## Git Based
+inlang (pronounced /Ínlang/) is localization that consists of extendable tools and apps to make localization of software simple. It uses a versioned backend that allows for efficient collaboartion between developers, translators or designers.
+
+### Git-compatible, infrastructure, and developer-first.
 
 All tools and applications that inlang provides are built on Git, the version control, automation and collaboration system used by software engineers.
 
