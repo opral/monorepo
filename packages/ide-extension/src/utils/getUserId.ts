@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import * as vscode from "vscode"
 
 /**
@@ -13,7 +14,7 @@ export async function getUserId() {
 
 	if (!persistedId) {
 		// Generate a new ID
-		const newId = generateUniqueId()
+		const newId = randomUUID()
 
 		// Persist the new ID
 		await persistId(newId)
@@ -23,10 +24,6 @@ export async function getUserId() {
 
 	// ID already exists, use it
 	return persistedId
-}
-
-const generateUniqueId = (): string => {
-	return "id-" + Math.random().toString(36).slice(6)
 }
 
 const getPersistedId = async (): Promise<string | undefined> => {

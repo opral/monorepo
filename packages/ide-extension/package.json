@@ -37,6 +37,10 @@
 				"inlang.userId": {
 					"type": "string",
 					"default": ""
+				},
+				"inlang.showRecommendation": {
+					"type": "boolean",
+					"default": true
 				}
 			}
 		}

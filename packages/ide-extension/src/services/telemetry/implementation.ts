@@ -3,6 +3,7 @@ import { raw } from "@inlang-git/client/raw"
 import fs from "node:fs"
 import * as vscode from "vscode"
 import type { TelemetryEvents } from "./events.js"
+import { getUserId } from "../../utils/getUserId.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -35,7 +36,7 @@ async function capture(args: CaptureEventArguments) {
 	}
 	return telemetryNode.capture({
 		...args,
-		distinctId: "unknown",
+		distinctId: await getUserId(),
 		groups: {
 			repository: gitOrigin,
 		},

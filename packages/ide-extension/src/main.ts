@@ -13,6 +13,7 @@ import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utils/promptToReload.js"
 import { getUserId } from "./utils/getUserId.js"
+import { recommendation } from "./utils/recommendation.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -132,6 +133,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// properties missing decoration in inlang.config.js
 	propertiesMissingPreview({ activeTextEditor })
+
+	// add inlang extension to recommended extensions
+	recommendation({ workspaceFolder })
 }
 
 // this method is called when your extension is deactivated

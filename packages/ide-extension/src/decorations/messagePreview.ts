@@ -3,7 +3,6 @@ import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 import { telemetry } from "../services/telemetry/index.js"
-import { getUserId } from "../utils/getUserId.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -105,7 +104,7 @@ export async function messagePreview(args: {
 		activeTextEditor.setDecorations(messagePreview, decorations)
 		telemetry.capture({
 			event: "IDE-EXTENSION decoration set",
-			properties: { name: "message preview", user: await getUserId() },
+			properties: { name: "message preview" },
 		})
 	}
 
