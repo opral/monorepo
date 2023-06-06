@@ -6,7 +6,7 @@ description: This is the editor description
 
 # {% $frontmatter.title %}
 
-The inlang web editor is a simple and easy to use nocode tool to manage your translations. It let's translators work on translations without having to touch the code and pushes changes directly to your git repository.
+The inlang web editor is a simple and easy to use no-code tool to manage your translations. It let's translators work on translations without having to touch the code and pushes changes directly to your git repository.
 
 ### Benefits
 

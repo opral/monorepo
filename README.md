@@ -27,30 +27,34 @@
 
 Inlang consists of multipe applications that can be used individually, or in combination with each other.
 
-### Editor
+### [Editor](https://inlang.com/documentation/apps/editor)
 
-Manage translations in a git repository.
+Manage translations in a simple web interface and push changes to your repository.
 
-- [x] git(hub) workflows like pull requests.
+- [x] works with existing translation files
+- [x] git workflows like pull requests
 - [x] no hosting, no sync pipelines
 - [x] no extra accounts
 
-![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png"/>
 
-### IDE-Extension
+### [IDE-Extension](https://inlang.com/documentation/apps/ide-extension)
 
-Improve the DX when working on localized codebases.
+The IDE-extension allows you to translate your content directly in your IDE.
 
-- [x] extract translations
-- [x] see errors directly in the IDE
+- [x] extract messages
+- [x] inline annotations to see translations
+- [x] linting errors and warnings
 
-![Screen Recording 2022-02-15 at 15 02 26](https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif)
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
 
-### CLI
+### [CLI](https://inlang.com/documentation/apps/cli)
 
-Automate localization via CI/CD.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
-- [x] validate translations
-- [x] auto machine translate
+- [x] init & validate config
+- [x] lint translations
+- [x] machine translate
+- [x] open inlang editor
 
-![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png"/>
