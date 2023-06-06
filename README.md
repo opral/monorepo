@@ -36,7 +36,7 @@ Manage translations in a simple web interface and push changes to your repositor
 ✅ no hosting, no sync pipelines </br>
 ✅ no extra accounts </br>
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png"/>
+![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
 
 ### [IDE-Extension](https://inlang.com/documentation/apps/ide-extension)
 
@@ -45,6 +45,8 @@ The IDE-extension allows you to translate your content directly in your IDE.
 ✅ extract messages </br>
 ✅ inline annotations to see translations </br>
 ✅ linting errors and warnings </br>
+
+![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif)
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
 
@@ -57,4 +59,4 @@ The IDE-extension allows you to translate your content directly in your IDE.
 ✅ machine translate </br>
 ✅ open inlang editor </br>
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png"/>
+![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
