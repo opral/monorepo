@@ -2,9 +2,9 @@ import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import { getResource } from "./index.js"
 
 type InitSvelteKitServerRuntimeArgs = {
-	referenceLanguage: string
-	languages: string[]
-	language: string
+	referenceLanguage: Language
+	languages: Language[]
+	language: Language | undefined
 }
 
 export const initSvelteKitServerRuntime = ({

@@ -40,7 +40,7 @@ const data = [
 	},
 	{
 		title: "IDE Extension",
-		isSoon: true,
+		isSoon: false,
 		description:
 			"Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
 		link: "/documentation/getting-started",
