@@ -4,8 +4,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"exports": {
-		".": "./src/index.ts",
-		"./schema": "./src/schema.ts"
+		".": "./src/index.ts"
 	},
 	"scripts": {
 		"---- DEV AND BUILD": "Are not required. Direct TypeScript import is possible because this module is only used internally.",
