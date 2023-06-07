@@ -25,7 +25,7 @@ export function parseOrigin(args: {
  */
 function transformRemote(remote: string) {
 	// Match HTTPS pattern or SSH pattern
-	const regex = /(?:https:\/\/|git@)([^/]+)\/(.+?)(?:\.git)?$/
+	const regex = /(?:https:\/\/|@)([^/]+)\/(.+?)(?:\.git)?$/
 	const matches = remote.match(regex)
 
 	if (matches && matches[1] && matches[2]) {
