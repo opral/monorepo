@@ -1,5 +1,3 @@
-[![](https://dcbadge.vercel.app/api/server/gdMPPWy57R)](https://discord.gg/gdMPPWy57R) [![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/inlangHQ)
-
 <div>
     <p align="center">
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
@@ -8,6 +6,12 @@
         Localization infrastructure for software 
     </h2>
 </div>
+
+<p align="center">
+  <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Join the community on Discord' src='https://img.shields.io/badge/Discord-100000?style=flat&logo=Discord&logoColor=white&labelColor=5865F2&color=5865F2'/></a>
+  <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Follow inlang on Twitter' src='https://img.shields.io/badge/Twitter-100000?style=flat&logo=Twitter&logoColor=white&labelColor=1A8CD8&color=1A8CD8'/></a>
+
+</p>
 
 ## Community & Support
 
