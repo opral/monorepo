@@ -1,9 +1,11 @@
 import { it, expect, afterAll } from "vitest"
 import fs from "node:fs"
-import { $import } from "./$import.js"
+import { create$import } from "./create$import.js"
 
 const currentDirectoryPath = new URL(import.meta.url).pathname.replace(/\/[^/]+$/, "/")
 const tempdir = fs.mkdtempSync(currentDirectoryPath)
+
+const $import = create$import(currentDirectoryPath)
 
 afterAll(() => {
 	fs.rmSync(tempdir, { recursive: true, force: true })
@@ -34,7 +36,13 @@ it("should throw if the imported file is invalid", async () => {
 	expect($import(`${tempdir}/testfile2.js`)).rejects.toThrow()
 })
 
-it("should be able to import an inlang plugin", async () => {
+it("should be able to import an inlang plugin from a relative path", async () => {
+	const module = await $import(`./$import.test.plugin.js`)
+	const pluginAfterSetup = module.default()()
+	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
+})
+
+it("should be able to import an inlang plugin from an absolute path", async () => {
 	const module = await $import(`${currentDirectoryPath}/$import.test.plugin.js`)
 	const pluginAfterSetup = module.default()()
 	expect(pluginAfterSetup.id).toBe("samuelstroschein.inlangPluginJson")
