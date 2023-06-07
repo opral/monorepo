@@ -44,4 +44,5 @@ export const icons = {
 	"add-plugin": import("~icons/material-symbols/extension-outline"),
 	code: import("~icons/material-symbols/code-rounded"),
 	badge: import("~icons/material-symbols/bar-chart-rounded"),
+	external: import("~icons/material-symbols/arrow-outward-rounded"),
 } as const
