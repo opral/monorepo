@@ -5,6 +5,12 @@
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js",
