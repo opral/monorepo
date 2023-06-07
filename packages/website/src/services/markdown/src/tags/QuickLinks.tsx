@@ -6,8 +6,8 @@ export function QuickLinks(props: { children: JSXElement[] }) {
 		<div
 			class={
 				"not-prose my-12 grid grid-cols-1 gap-6 " +
-				"sm:grid-cols-" +
-				(props.children as JSXElement[]).length
+				((props.children as JSXElement[]).length === 2 && " sm:grid-cols-2 ") +
+				((props.children as JSXElement[]).length === 3 && " sm:grid-cols-3 ")
 			}
 		>
 			{props.children}
