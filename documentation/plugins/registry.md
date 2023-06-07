@@ -8,4 +8,6 @@ description: This is the plugin registry description
 
 This is a text about the plugin registry
 
+{% Registry /%}
+
 {% Feedback /%}

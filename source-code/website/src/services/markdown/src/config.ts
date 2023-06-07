@@ -10,6 +10,7 @@ import { Link } from "./nodes/Link.jsx"
 import { Document } from "./nodes/Document.jsx"
 import { Video } from "./tags/Video.jsx"
 import { Feedback } from "./tags/Feedback.jsx"
+import { Registry } from "./tags/Registry.jsx"
 
 /**
  * The components that render custom nodes or tags
@@ -25,6 +26,7 @@ export const components = {
 	Document,
 	Video,
 	Feedback,
+	Registry,
 }
 
 /**
@@ -125,6 +127,9 @@ export const config: Config = {
 		},
 		Feedback: {
 			render: "Feedback",
+		},
+		Registry: {
+			render: "Registry",
 		},
 	},
 }
