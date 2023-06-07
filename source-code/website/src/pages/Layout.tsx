@@ -95,7 +95,7 @@ function Header(props: { landingpage?: boolean }) {
 		<>
 			<header
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-400/10"
+				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-2"
 			>
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
