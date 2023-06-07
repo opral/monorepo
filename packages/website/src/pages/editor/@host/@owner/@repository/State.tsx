@@ -240,7 +240,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
 						type: response.data.private ? "Private" : "Public",
-						userPermission: userIsCollaborator(),
+						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
 					})
 				})
 				.catch((error) => {
@@ -249,7 +249,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						repository: args.routeParams.repository,
 						type: "unknown",
 						errorDuringIsPrivateRequest: error,
-						userPermission: userIsCollaborator(),
+						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
 					})
 				})
 
