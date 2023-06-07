@@ -3,6 +3,7 @@ import { raw } from "@inlang-git/client/raw"
 import fs from "node:fs"
 import * as vscode from "vscode"
 import type { TelemetryEvents } from "./events.js"
+import { getUserId } from "../../utils/getUserId.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -25,6 +26,7 @@ type CaptureEventArguments =
 	  }
 
 let gitOrigin: string
+let userID: string
 
 /**
  * Capture a telemetry event in a typesafe way.
@@ -33,9 +35,12 @@ async function capture(args: CaptureEventArguments) {
 	if (gitOrigin === undefined) {
 		gitOrigin = await getGitOrigin()
 	}
+	if (userID === undefined) {
+		userID = await getUserId()
+	}
 	return telemetryNode.capture({
 		...args,
-		distinctId: "unknown",
+		distinctId: userID,
 		groups: {
 			repository: gitOrigin,
 		},
@@ -45,7 +50,7 @@ async function capture(args: CaptureEventArguments) {
 /**
  * Gets the git origin url of the currently opened repository.
  */
-async function getGitOrigin() {
+export async function getGitOrigin() {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
 	const remotes = await raw.listRemotes({
 		fs,

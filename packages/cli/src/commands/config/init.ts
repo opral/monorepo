@@ -19,6 +19,16 @@ export const init = new Command()
  */
 export async function initCommandAction() {
 	{
+		const answerWip = await prompts({
+			type: "confirm",
+			name: "wip",
+			message:
+				"The auto generation is work in progress and might not work as expected. Do you want to continue?",
+			initial: true,
+		})
+		if (answerWip.wip === false) {
+			return
+		}
 		// ----------- CHECK IF CONFIG FILE ALREADY EXISTS --------------
 		if (await configAlreadyExists()) {
 			log.error("Config file already exists.")

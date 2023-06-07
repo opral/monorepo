@@ -28,7 +28,9 @@ export const removeHtmlLangAttribute = (markup: string) => {
 	const langAttribute = execArray[1] as string
 	const index = execArray.index
 
-	return markup.slice(0, index) +
+	return (
+		markup.slice(0, index) +
 		htmlTag.replace(langAttribute, "") +
 		markup.slice(index + htmlTag.length)
+	)
 }
