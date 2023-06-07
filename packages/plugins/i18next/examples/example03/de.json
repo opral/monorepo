@@ -1,0 +1,6 @@
+{
+  "title": "@:appName",
+  "description": "@:appName ist cool.",
+  "nav.home": "Startseite",
+  "nav.about": "Über uns"
+}

@@ -1,0 +1,10 @@
+{
+    "nav": {
+      "about.you": "test"
+    },
+    "nav.b": {
+        "nav.c": {
+            "d": "e"
+        }
+    }
+}
