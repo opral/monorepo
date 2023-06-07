@@ -76,7 +76,7 @@ class Parser extends EmbeddedActionsParser {
 		 * Aggregates all matches and returns them.
 		 */
 		this.RULE("result", () => {
-			let result: Match[] = []
+			const result: Match[] = []
 
 			this.MANY(() => {
 				this.OR([
@@ -136,7 +136,7 @@ class Parser extends EmbeddedActionsParser {
 				},
 			])
 			// that has contains the id of the message
-			let id: string = ""
+			let id = ""
 			this.MANY(() => {
 				// can be any character except the end of the string (must be the same quotation token as the start)
 				const char = this.OPTION({
