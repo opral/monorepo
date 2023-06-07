@@ -17,7 +17,8 @@ export function createFileSystemMapper(
 			return (await target.readDirectory(vscode.Uri.joinPath(base, path))).map((dir) => dir[0])
 		},
 		readFile: async (id) => {
-			const rawFile = await target.readFile(vscode.Uri.joinPath(base, id))
+			const path = vscode.Uri.joinPath(base, id)
+			const rawFile = await target.readFile(path)
 			return new TextDecoder().decode(rawFile)
 		},
 		writeFile: async (file, data) => {
