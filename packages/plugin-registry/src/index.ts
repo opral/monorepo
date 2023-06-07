@@ -1,4 +1,4 @@
-import { InlangPluginManifest } from "./schema"
+import type { InlangPluginManifest } from "./schema.js"
 
 export const plugins: InlangPluginManifest[] = [
 	{
