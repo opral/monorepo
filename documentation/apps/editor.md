@@ -10,10 +10,10 @@ The inlang web editor is a simple and easy to use no-code tool to manage your tr
 
 ### Benefits
 
-- works with existing translation files
-- git workflows like pull requests
-- no hosting, no sync pipelines
-- no extra accounts
+- ✅ Works with existing translation files
+- 🔀 Git workflows, like pull requests
+- 🚫 No hosting, no sync pipelines
+- 🙅‍♂️ No extra accounts
 
 ## Setup
 
