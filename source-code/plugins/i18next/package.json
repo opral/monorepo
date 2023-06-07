@@ -11,7 +11,7 @@
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js && size-limit",
-    "--- Pretest is required to build the plugin before testing. ---": "",
+		"--- Pretest is required to build the plugin before testing. ---": "",
 		"pretest": "npm run build",
 		"test": "vitest run",
 		"---- OTHER ---------------------------------------------------------": "",

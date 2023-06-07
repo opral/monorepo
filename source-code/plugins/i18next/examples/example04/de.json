@@ -1,8 +1,8 @@
 {
-  "title": "{appName}",
-  "description": "{appName} ist cool.",
-  "nav": {
-    "home": "Startseite",
-    "about": "Über uns"
-  }
+	"title": "{appName}",
+	"description": "{appName} ist cool.",
+	"nav": {
+		"home": "Startseite",
+		"about": "Über uns"
+	}
 }
