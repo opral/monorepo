@@ -3,6 +3,7 @@
 	"type": "module",
 	"workspaces": [
 		"source-code/*",
+		"source-code/plugins/*",
 		"source-code-git/*"
 	],
 	"scripts": {
