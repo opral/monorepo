@@ -240,7 +240,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
 						type: response.data.private ? "Private" : "Public",
-						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
+						userPermission:
+							userIsCollaborator() && !response.data.fork ? "collaborator" : "contributor",
 					})
 				})
 				.catch((error) => {
