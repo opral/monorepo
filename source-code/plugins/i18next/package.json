@@ -15,7 +15,7 @@
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js && size-limit",
 		"--- Pretest is required to build the plugin before testing. ---": "",
-		"pretest": "npm run build",
+		"pretest": "node ./build.js",
 		"test": "vitest run",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
@@ -35,8 +35,7 @@
 		"esbuild": "^0.17.19",
 		"memfs": "^3.4.12",
 		"size-limit": "^8.2.4",
-		"typescript": "^4.9.4",
-		"vitest": "^0.26.2"
+		"typescript": "^4.9.4"
 	},
 	"size-limit": [
 		{
