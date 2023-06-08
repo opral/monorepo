@@ -1,5 +1,7 @@
 import type { InlangConfigModule } from "@inlang/core/config"
-import { $import } from "./$import.js"
+import { create$import } from "./create$import.js"
+
+const $import = create$import("")
 
 /**
  * Imports the inlang config from the given path.
