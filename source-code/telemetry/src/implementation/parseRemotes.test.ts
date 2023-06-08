@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { parseOrigin } from "./parseOrigin.js"
+import { parseOrigin } from "./parseRemotes.js"
 
 it("should return 'unknown' if the remotes are undefined", () => {
 	const result = parseOrigin({ remotes: undefined })
@@ -73,3 +73,5 @@ it("should match different origin patterns to one unambigious identifier", () =>
 		expect(result).toBe("github.com/example/repo.git")
 	}
 })
+
+//TODO writte test for the Upstream functions

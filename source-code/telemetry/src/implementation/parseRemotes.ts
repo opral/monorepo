@@ -20,6 +20,23 @@ export function parseOrigin(args: {
 	return result
 }
 
+export function parseUpstream(args: {
+	remotes: Array<{ remote: string; url: string }> | undefined
+}): string | undefined {
+	const upstream = args.remotes?.find((elements) => elements.remote === "upstream")
+	if (upstream === undefined) {
+		return undefined
+	}
+	// polyfill for some editor related origin issues
+	let result = upstream.url
+	if (result.endsWith(".git") === false) {
+		result += ".git"
+	}
+	result = transformRemote(result)
+
+	return result
+}
+
 /**
  * Transforms a remote URL to a standard format.
  */
