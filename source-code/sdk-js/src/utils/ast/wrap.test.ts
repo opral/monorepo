@@ -4,11 +4,11 @@ import { createWrapperAst, mergeWrapperAst, wrapExportedFunction, wrapWithPlaceh
 
 describe("wrapWithPlaceholder", () => {
 	test("arrow function", () => {
-		let ast = codeToDeclarationAst(`const fn =
+		const ast = codeToDeclarationAst(`const x =
 			() => {}
 		`)
 
-		ast = wrapWithPlaceholder(ast)
+		wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(() => {})"
@@ -16,11 +16,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("async arrow function", () => {
-		let ast = codeToDeclarationAst(`const fn =
+		const ast = codeToDeclarationAst(`const x =
 			async () => {}
 		`)
 
-		ast = wrapWithPlaceholder(ast)
+		wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(async () => {})"
@@ -28,11 +28,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("function", () => {
-		let ast = codeToDeclarationAst(`const fn =
+		const ast = codeToDeclarationAst(`const x =
 			function() {}
 		`)
 
-		ast = wrapWithPlaceholder(ast)
+		wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(function() {})"
@@ -40,11 +40,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("async function", () => {
-		let ast = codeToDeclarationAst(`const fn =
+		const ast = codeToDeclarationAst(`const x =
 			async function() {}
 		`)
 
-		ast = wrapWithPlaceholder(ast)
+		wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(async function() {})"
@@ -52,11 +52,11 @@ describe("wrapWithPlaceholder", () => {
 	})
 
 	test("variable", () => {
-		let ast = codeToDeclarationAst(`const fn =
+		const ast = codeToDeclarationAst(`const x =
 			someFn
 		`)
 
-		ast = wrapWithPlaceholder(ast)
+		wrapWithPlaceholder(ast)
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"$$_INLANG_WRAP_$$(someFn)"
@@ -102,66 +102,66 @@ describe("createWrapperAst", () => {
 
 describe("mergeWrapperAst", () => {
 	test("arrow function", () => {
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const fn =
+		const wrapWithAst = createWrapperAst('initWrapper')
+		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
 			() => {}
 		`))
 
-		const wrapWithAst = createWrapperAst('initWrapper')
-		const ast = mergeWrapperAst(toWrapAst, wrapWithAst)
+		mergeWrapperAst(toWrapAst, wrapWithAst)
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
+		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(() => {})"
 		`)
 	})
 
 	test("async arrow function", () => {
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const fn =
+		const wrapWithAst = createWrapperAst('initWrapper')
+		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
 			async () => {}
 		`))
 
-		const wrapWithAst = createWrapperAst('initWrapper')
-		const ast = mergeWrapperAst(toWrapAst, wrapWithAst)
+		mergeWrapperAst(toWrapAst, wrapWithAst)
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
+		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(async () => {})"
 		`)
 	})
 
 	test("function", () => {
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const fn =
+		const wrapWithAst = createWrapperAst('initWrapper')
+		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
 			function() {}
 		`))
 
-		const wrapWithAst = createWrapperAst('initWrapper')
-		const ast = mergeWrapperAst(toWrapAst, wrapWithAst)
+		mergeWrapperAst(toWrapAst, wrapWithAst)
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
+		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(function() {})"
 		`)
 	})
 
 	test("async function", () => {
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const fn =
+		const wrapWithAst = createWrapperAst('initWrapper')
+		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
 			async function() {}
 		`))
 
-		const wrapWithAst = createWrapperAst('initWrapper')
-		const ast = mergeWrapperAst(toWrapAst, wrapWithAst)
+		mergeWrapperAst(toWrapAst, wrapWithAst)
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
+		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(async function() {})"
 		`)
 	})
 
 	test("variable", () => {
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const fn =
+		const wrapWithAst = createWrapperAst('initWrapper')
+		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
 			someFn
 		`))
 
-		const wrapWithAst = createWrapperAst('initWrapper')
-		const ast = mergeWrapperAst(toWrapAst, wrapWithAst)
+		mergeWrapperAst(toWrapAst, wrapWithAst)
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
+		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(someFn)"
 		`)
 	})

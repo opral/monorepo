@@ -1,27 +1,16 @@
 import * as recast from "recast"
-import { astToCode, codeToAst, codeToDeclarationAst } from '../recast.js'
-import type { NodePath } from "ast-types"
+import { NodePath, ASTNode, codeToAst, codeToDeclarationAst, n, b, astToCode } from '../recast.js'
 import { findExport, findFunctionExpression } from './exports.js'
-
-const b = recast.types.builders
-const n = recast.types.namedTypes
-
-type ASTNode = recast.types.ASTNode
-type Expression = recast.types.namedTypes.Expression
-type ArrowFunctionExpression = recast.types.namedTypes.ArrowFunctionExpression
-type FunctionExpression = recast.types.namedTypes.FunctionExpression
-type VariableDeclarator = recast.types.namedTypes.VariableDeclarator
-type Identifier = recast.types.namedTypes.Identifier
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const wrapWithPlaceholder = (ast: ASTNode) => {
-	let expressionAst: InstanceType<typeof NodePath<Expression, any>> | undefined
+export const wrapWithPlaceholder = (ast: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier>) => {
+	let expressionAst: NodePath<n.Expression> | undefined
 
-	recast.visit(ast, {
+	recast.visit(ast.value, {
 		visitArrowFunctionExpression(path) {
 			expressionAst = path
 
@@ -43,21 +32,24 @@ export const wrapWithPlaceholder = (ast: ASTNode) => {
 		throw new Error(`wrapWithPlaceholder does not support '${ast.value?.type || ast?.type || 'unknown'}'`)
 	}
 
-	return b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst?.value || expressionAst])
+	ast.replace(b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst?.value || expressionAst]))
+
+	return ast as NodePath<n.CallExpression>
 }
 
 // ------------------------------------------------------------------------------------------------
 
 export const createWrapperAst = (name: string, options = '') => codeToDeclarationAst(`
-	${name}(${options}).wrap(${WRAP_IDENTIFIER})`)
+	const x = ${name}(${options}).wrap(${WRAP_IDENTIFIER})
+`) as NodePath<n.CallExpression>
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test this
-const findWrappingPoint = (ast: ASTNode) => {
-	let callExpressionAst: InstanceType<(typeof NodePath<FunctionExpression | ArrowFunctionExpression | VariableDeclarator, any>)> | undefined
+const findWrappingPoint = (ast: NodePath<n.CallExpression>) => {
+	let callExpressionAst: NodePath<n.FunctionExpression | n.ArrowFunctionExpression | n.VariableDeclarator> | undefined
 
-	recast.visit(ast, {
+	recast.visit(ast.value, {
 		visitCallExpression: function (path) {
 			if (path.value.callee.name === WRAP_IDENTIFIER) {
 				this.traverse(path, {
@@ -85,10 +77,10 @@ const findWrappingPoint = (ast: ASTNode) => {
 }
 
 // TODO: test this
-const findInsertionPoint = (ast: ASTNode) => {
-	let identifierAst: InstanceType<(typeof NodePath<Identifier, any>)> | undefined
+const findInsertionPoint = (ast: NodePath<n.CallExpression>) => {
+	let identifierAst: NodePath<n.Identifier> | undefined
 
-	recast.visit(ast, {
+	recast.visit(ast.value, {
 		visitCallExpression: function (path) {
 			if (path.value.arguments[0].name === WRAP_IDENTIFIER) {
 				this.traverse(path, {
@@ -107,37 +99,42 @@ const findInsertionPoint = (ast: ASTNode) => {
 }
 
 // TODO: test this
-export const mergeWrapperAst = (toWrapAst: ASTNode, wrapWithAst: ASTNode) => {
+export const mergeWrapperAst = (toWrapAst: NodePath<n.CallExpression>, wrapWithAst: NodePath<n.CallExpression>) => {
 	const wrappingPointAst = findWrappingPoint(toWrapAst)
 	if (!wrappingPointAst) {
-		throw new Error(`Could not find wrapping point in ${toWrapAst.type}`)
+		throw new Error(`Could not find wrapping point in ${toWrapAst.value.type}`)
 	}
 
 	const insertionPointAst = findInsertionPoint(wrapWithAst)
 	if (!insertionPointAst) {
-		throw new Error(`Could not find insertion point in ${toWrapAst.type}`)
+		throw new Error(`Could not find insertion point in ${toWrapAst.value.type}`)
 	}
 
 	insertionPointAst.replace(wrappingPointAst.value)
 
-	return wrapWithAst
+	// toWrapAst.replace(wrapWithAst.value)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-export const wrapExportedFunction = (ast: ASTNode, options: string, wrapperFunctionName: string) => {
+export const wrapExportedFunction = (ast: n.File, options: string, wrapperFunctionName: string) => {
+	// TODO: extract into helper function
+	// start
 	let loadFnExport = findExport(ast, 'load')
 	if (!loadFnExport) {
 		const loadFnAst = codeToAst('export const load = () => {}')
-		ast.program.body.push(loadFnAst.program.body[0])
+		ast.program.body.push(loadFnAst.program.body[0]!)
 		loadFnExport = findExport(ast, 'load')!
 	}
+	// end
 
+	// TODO: extract into helper function
+	// if export is a function declaration, convert it to a function expression
 	if (n.FunctionDeclaration.check(loadFnExport.value)) {
 		const functionExpressionAst = b.functionExpression(loadFnExport.value.id, loadFnExport.value.params, loadFnExport.value.body)
 		functionExpressionAst.async = loadFnExport.value.async
 		const variableDeclarationAst = b.variableDeclaration('const', [
-			b.variableDeclarator(loadFnExport.value.id, functionExpressionAst)
+			b.variableDeclarator(loadFnExport.value.id!, functionExpressionAst)
 		])
 		loadFnExport.replace(variableDeclarationAst)
 	}
@@ -152,6 +149,7 @@ export const wrapExportedFunction = (ast: ASTNode, options: string, wrapperFunct
 	const toWrapAst = wrapWithPlaceholder(loadFn as any)
 	const wrapWithAst = createWrapperAst(wrapperFunctionName, options)
 
-	loadFn.replace(mergeWrapperAst(toWrapAst, wrapWithAst))
+	mergeWrapperAst(toWrapAst, wrapWithAst)
 
+	loadFn.replace(wrapWithAst.value)
 }

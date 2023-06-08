@@ -15,6 +15,10 @@ describe("codeToDeclarationAst", () => {
 		expect(() => codeToDeclarationAst("")).toThrow()
 	})
 
+	test("should throw an error if variable does not get named 'x'", () => {
+		expect(() => codeToDeclarationAst("const y = () => {}")).toThrow()
+	})
+
 	test("should return the arrow function expression", () => {
 		const ast = codeToDeclarationAst("const x = () => {}")
 		n.ArrowFunctionExpression.assert(ast.value)
@@ -36,6 +40,14 @@ describe("codeToDeclarationAst", () => {
 		n.FunctionExpression.assert(ast.value)
 		expect(astToCode(ast)).toMatchInlineSnapshot(
 			'"function fn() {}"'
+		)
+	})
+
+	test("should return the call expression", () => {
+		const ast = codeToDeclarationAst("const x = fn('hello')")
+		n.CallExpression.assert(ast.value)
+		expect(astToCode(ast)).toMatchInlineSnapshot(
+			'"fn(\'hello\')"'
 		)
 	})
 

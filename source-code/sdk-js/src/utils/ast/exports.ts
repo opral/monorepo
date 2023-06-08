@@ -1,5 +1,6 @@
 import * as recast from "recast"
 import type { NodePath, namedTypes } from "ast-types"
+import type { n } from '../recast.js'
 
 type ASTNode = recast.types.ASTNode
 type ExportDeclaration = namedTypes.ExportDeclaration
@@ -12,8 +13,11 @@ type FunctionDeclaration = namedTypes.FunctionDeclaration
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test output
-export const findExport = (ast: InstanceType<(typeof NodePath<ASTNode>)>, name: string) => {
-	if (!recast.types.namedTypes.File.check(ast)) return // we only work on the root ast
+export const findExport = (ast: n.File, name: string) => {
+	if (!recast.types.namedTypes.File.check(ast)) {
+		// we only work on the root File ast
+		throw new Error(`findExport does not support '${ast || 'unknown'}'`)
+	}
 
 	let exportDeclarationAst: InstanceType<(typeof NodePath<ExportDeclaration | ExportSpecifier, any>)> | undefined
 
@@ -42,8 +46,6 @@ export const findExport = (ast: InstanceType<(typeof NodePath<ASTNode>)>, name: 
 					return false
 				},
 			})
-
-			return false
 		}
 	})
 

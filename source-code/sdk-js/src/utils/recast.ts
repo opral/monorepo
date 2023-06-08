@@ -40,7 +40,7 @@ export const codeToAst = (code: string) => parseCode(dedent(code))
 export const codeToDeclarationAst = (code: string) => {
 	const ast = codeToAst(code).program.body[0]!
 
-	let foundDeclarationAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.Identifier> | undefined
+	let foundDeclarationAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier> | undefined
 
 	recast.visit(ast, {
 		visitVariableDeclarator(path) {
@@ -57,11 +57,17 @@ export const codeToDeclarationAst = (code: string) => {
 					foundDeclarationAst = path
 					return false
 				},
+				visitCallExpression(path: NodePath<n.CallExpression>) {
+					foundDeclarationAst = path
+					return false
+				},
 				visitIdentifier(path: NodePath<n.Identifier>) {
 					foundDeclarationAst = path
 					return false
 				},
 			})
+
+			return false
 		}
 	})
 
