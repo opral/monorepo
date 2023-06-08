@@ -62,7 +62,7 @@ export const addImport = (ast: n.File, path: string, ...names: [string, ...strin
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-const findImportDeclarations = (ast: n.File, name: string) => {
+export const findImportDeclarations = (ast: n.File, name: string) => {
 	const importDeclarationAsts: NodePath<n.ImportDeclaration>[] = []
 
 	visitNode(ast, {

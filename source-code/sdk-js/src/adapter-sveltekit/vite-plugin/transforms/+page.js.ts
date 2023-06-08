@@ -1,7 +1,7 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 import { astToCode, codeToAst, n } from '../../../utils/recast.js'
-import { addImport } from '../../../utils/ast/imports.js'
+import { addImport, findImportDeclarations } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
 
 // ------------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ const addImports = (ast: n.File, config: TransformConfig, root: boolean, wrapper
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
-const getOptions = (config: TransformConfig) =>
+const getOptions = (config: TransformConfig, root: boolean) =>
 	config.languageInUrl && config.isStatic
 		? dedent`
 			{
@@ -37,9 +37,8 @@ const getOptions = (config: TransformConfig) =>
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
-	// TODO: implement this
-	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
+const assertNoImportsFromSdkJs = (ast: n.File) => {
+	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
 		throw Error(dedent`
 			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
 
@@ -48,14 +47,19 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 			}
 		`)
 	}
+}
+
+export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
+	const ast = codeToAst(code)
+
+	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+	if (!root) return code // for now we don't need to transform non-root pages
 
 	const wrapperFunctionName = root ? 'initRootPageLoadWrapper' : 'initLoadWrapper'
 
-	const ast = codeToAst(code)
-
 	addImports(ast, config, root, wrapperFunctionName)
 
-	const options = root ? getOptions(config) : ''
+	const options = root ? getOptions(config, root) : ''
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
 	return astToCode(ast)
