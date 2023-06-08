@@ -103,11 +103,12 @@ describe("createWrapperAst", () => {
 describe("mergeWrapperAst", () => {
 	test("arrow function", () => {
 		const wrapWithAst = createWrapperAst('initWrapper')
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
+		const ast = codeToDeclarationAst(`const x =
 			() => {}
-		`))
+		`)
 
-		mergeWrapperAst(toWrapAst, wrapWithAst)
+		wrapWithPlaceholder(ast)
+		mergeWrapperAst(ast, wrapWithAst)
 
 		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(() => {})"
@@ -116,11 +117,12 @@ describe("mergeWrapperAst", () => {
 
 	test("async arrow function", () => {
 		const wrapWithAst = createWrapperAst('initWrapper')
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
+		const ast = codeToDeclarationAst(`const x =
 			async () => {}
-		`))
+		`)
 
-		mergeWrapperAst(toWrapAst, wrapWithAst)
+		wrapWithPlaceholder(ast)
+		mergeWrapperAst(ast, wrapWithAst)
 
 		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(async () => {})"
@@ -129,11 +131,12 @@ describe("mergeWrapperAst", () => {
 
 	test("function", () => {
 		const wrapWithAst = createWrapperAst('initWrapper')
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
+		const ast = codeToDeclarationAst(`const x =
 			function() {}
-		`))
+		`)
 
-		mergeWrapperAst(toWrapAst, wrapWithAst)
+		wrapWithPlaceholder(ast)
+		mergeWrapperAst(ast, wrapWithAst)
 
 		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(function() {})"
@@ -142,11 +145,12 @@ describe("mergeWrapperAst", () => {
 
 	test("async function", () => {
 		const wrapWithAst = createWrapperAst('initWrapper')
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
+		const ast = codeToDeclarationAst(`const x =
 			async function() {}
-		`))
+		`)
 
-		mergeWrapperAst(toWrapAst, wrapWithAst)
+		wrapWithPlaceholder(ast)
+		mergeWrapperAst(ast, wrapWithAst)
 
 		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(async function() {})"
@@ -155,11 +159,12 @@ describe("mergeWrapperAst", () => {
 
 	test("variable", () => {
 		const wrapWithAst = createWrapperAst('initWrapper')
-		const toWrapAst = wrapWithPlaceholder(codeToDeclarationAst(`const x =
+		const ast = codeToDeclarationAst(`const x =
 			someFn
-		`))
+		`)
 
-		mergeWrapperAst(toWrapAst, wrapWithAst)
+		wrapWithPlaceholder(ast)
+		mergeWrapperAst(ast, wrapWithAst)
 
 		expect(astToCode(wrapWithAst)).toMatchInlineSnapshot(`
 			"initWrapper().wrap(someFn)"
@@ -172,7 +177,7 @@ describe("mergeWrapperAst", () => {
 describe("wrapExportedFunction", () => {
 	test("should add and wrap load function for empty file", () => {
 		const ast = codeToAst("")
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const load = initWrapper().wrap(() => {});"
@@ -183,7 +188,7 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export const prerender = true
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const prerender = true;
@@ -195,7 +200,7 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export const load = () => {}
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const load = initWrapper().wrap(() => {});"
@@ -206,7 +211,7 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export const load = async () => {}
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const load = initWrapper().wrap(async () => {});"
@@ -218,11 +223,10 @@ describe("wrapExportedFunction", () => {
 			export const load = function() {}
 		`)
 
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"export const load = function() {};
-			export const load = initWrapper().wrap(() => {});"
+			"export const load = initWrapper().wrap(function() {});"
 		`)
 	})
 
@@ -230,11 +234,10 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export const load = async function() {}
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"export const load = async function() {};
-			export const load = initWrapper().wrap(() => {});"
+			"export const load = initWrapper().wrap(async function() {});"
 		`)
 	})
 
@@ -242,7 +245,7 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export function load() {}
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const load = initWrapper().wrap(function load() {});"
@@ -253,7 +256,7 @@ describe("wrapExportedFunction", () => {
 		const ast = codeToAst(`
 			export async function load() {}
 		`)
-		wrapExportedFunction(ast, '', 'initWrapper')
+		wrapExportedFunction(ast, '', 'initWrapper', 'load')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"export const load = initWrapper().wrap(async function load() {});"

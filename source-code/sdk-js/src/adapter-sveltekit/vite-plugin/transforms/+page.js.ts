@@ -1,15 +1,13 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { astToCode, codeToAst } from '../../../utils/recast.js'
+import { astToCode, codeToAst, n } from '../../../utils/recast.js'
 import { addImport } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import type * as recast from "recast"
-
-type ASTNode = recast.types.ASTNode
 
 // ------------------------------------------------------------------------------------------------
 
-const addImports = (ast: ASTNode, config: TransformConfig, root: boolean, wrapperFunctionName: string) => {
+// TODO: test
+const addImports = (ast: n.File, config: TransformConfig, root: boolean, wrapperFunctionName: string) => {
 	addImport(ast, '$app/environment', 'browser')
 	addImport(ast, '@inlang/sdk-js/adapter-sveltekit/shared', wrapperFunctionName, 'replaceLanguageInUrl')
 	addImport(ast, '@inlang/sdk-js/detectors/client', 'initLocalStorageDetector', 'navigatorDetector')
@@ -20,6 +18,7 @@ const addImports = (ast: ASTNode, config: TransformConfig, root: boolean, wrappe
 
 // ------------------------------------------------------------------------------------------------
 
+// TODO: test
 const getOptions = (config: TransformConfig) =>
 	config.languageInUrl && config.isStatic
 		? dedent`
@@ -57,7 +56,7 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	addImports(ast, config, root, wrapperFunctionName)
 
 	const options = root ? getOptions(config) : ''
-	wrapExportedFunction(ast, options, wrapperFunctionName)
+	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
 	return astToCode(ast)
 }

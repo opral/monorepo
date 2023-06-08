@@ -1,54 +1,37 @@
 import * as recast from "recast"
-import { ASTNode, NodePath, n, visitNode } from '../recast.js'
+import { ASTNode, NodePath, codeToAst, n, visitNode } from '../recast.js'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-// TODO: test output
 export const findExport = (ast: n.File, name: string) => {
 	if (!recast.types.namedTypes.File.check(ast)) {
 		// we only work on the root File ast
 		throw new Error(`findExport does not support '${ast || 'unknown'}'`)
 	}
 
-	let exportDeclarationAst: NodePath<n.ExportDeclaration | n.ExportSpecifier> | undefined
+	let exportAst: NodePath<n.VariableDeclarator | n.FunctionDeclaration | n.ExportSpecifier> | undefined
 
 	visitNode(ast, {
-		visitExportNamedDeclaration(path) {
+		visitExportNamedDeclaration(path: NodePath<n.ExportNamedDeclaration>) {
 			visitNode(path.value, {
-				visitVariableDeclarator(path) {
-					if (path.value.id.name === name) {
-						visitNode(path.value, {
-							visitArrowFunctionExpression(path) {
-								exportDeclarationAst = path
-
-								return false
-							}
-						})
+				visitVariableDeclarator(path: NodePath<n.VariableDeclarator>) {
+					if (n.Identifier.check(path.value.id) && path.value.id.name === name) {
+						exportAst = path
 					}
 
 					return false
 				},
-				visitFunctionDeclaration(path) {
-					if (path.value.id.name === name) {
-						exportDeclarationAst = path
+				visitFunctionDeclaration(path: NodePath<n.FunctionDeclaration>) {
+					if (n.Identifier.check(path.value.id) && path.value.id.name === name) {
+						exportAst = path
 					}
 
 					return false
 				},
-				visitExportSpecifier(path) {
+				visitExportSpecifier(path: NodePath<n.ExportSpecifier>) {
 					if (path.value.exported.name === name) {
-						const local = path.value.local
-
-						visitNode(path.value, {
-							visitIdentifier(path) {
-								if (path.value === local) {
-									exportDeclarationAst = path
-								}
-
-								return false
-							}
-						})
+						exportAst = path
 					}
 
 					return false
@@ -59,25 +42,36 @@ export const findExport = (ast: n.File, name: string) => {
 		}
 	})
 
-	return exportDeclarationAst
+	return exportAst
 }
 
 // TODO: test
-export const findFunctionExpression = (ast: ASTNode) => {
+export const findOrCreateExport = (ast: n.File, name: string) => {
+	const loadFnExport = findExport(ast, name)
+	if (loadFnExport) return loadFnExport
+
+	const loadFnAst = codeToAst(`export const ${name} = () => {}`)
+	ast.program.body.push(loadFnAst.program.body[0]!)
+	return findExport(ast, name)!
+}
+
+
+// TODO: test
+export const findFunctionExpression = (ast: NodePath<n.VariableDeclarator | n.FunctionDeclaration | n.ExportSpecifier>) => {
 	let functionExpressionAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.FunctionDeclaration> | undefined
 
-	visitNode(ast, {
-		visitArrowFunctionExpression(path) {
+	visitNode(ast.value, {
+		visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
 			functionExpressionAst = path
 
 			return false
 		},
-		visitFunctionExpression(path) {
+		visitFunctionExpression(path: NodePath<n.FunctionExpression>) {
 			functionExpressionAst = path
 
 			return false
 		},
-		visitFunctionDeclaration(path) {
+		visitFunctionDeclaration(path: NodePath<n.FunctionDeclaration>) {
 			functionExpressionAst = path
 
 			return false

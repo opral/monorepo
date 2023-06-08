@@ -1,39 +1,44 @@
-import { NodePath, codeToAst, codeToDeclarationAst, n, b, visitNode } from '../recast.js'
-import { findExport, findFunctionExpression } from './exports.js'
+import { NodePath, codeToDeclarationAst, n, b, visitNode } from '../recast.js'
+import { findFunctionExpression, findOrCreateExport } from './exports.js'
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const wrapWithPlaceholder = (ast: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier>) => {
+export function wrapWithPlaceholder(ast: NodePath<n.Identifier | n.ArrowFunctionExpression | n.FunctionExpression | n.FunctionDeclaration | n.CallExpression>): asserts ast is NodePath<n.CallExpression> {
 	let expressionAst: NodePath<n.Expression> | undefined
 
 	visitNode(ast.value, {
-		visitArrowFunctionExpression(path) {
+		visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
 			expressionAst = path
 
 			return false
 		},
-		visitFunctionExpression(path) {
+		visitFunctionExpression(path: NodePath<n.FunctionExpression>) {
 			expressionAst = path
 
 			return false
 		},
-		visitIdentifier(path) {
+		visitIdentifier(path: NodePath<n.Identifier>) {
 			expressionAst = path
 
 			return false
 		},
+		visitCallExpression(path: NodePath<n.CallExpression>) {
+			expressionAst = path
+
+			return false
+		}
 	})
 
 	if (!expressionAst) {
-		throw new Error(`wrapWithPlaceholder does not support '${ast.value?.type || ast?.type || 'unknown'}'`)
+		throw new Error(`wrapWithPlaceholder does not support '${ast.value?.type || 'unknown'}'`)
+	} else if (n.CallExpression.check(expressionAst.value)) {
+		ast.replace(expressionAst.value) // TODO test this case
+	} else {
+		ast.replace(b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst.value as n.CallExpression]))
 	}
-
-	ast.replace(b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst?.value || expressionAst]))
-
-	return ast as NodePath<n.CallExpression>
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -110,45 +115,35 @@ export const mergeWrapperAst = (toWrapAst: NodePath<n.CallExpression>, wrapWithA
 	}
 
 	insertionPointAst.replace(wrappingPointAst.value)
-
-	// toWrapAst.replace(wrapWithAst.value)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-export const wrapExportedFunction = (ast: n.File, options: string, wrapperFunctionName: string) => {
-	// TODO: extract into helper function
-	// start
-	let loadFnExport = findExport(ast, 'load')
-	if (!loadFnExport) {
-		const loadFnAst = codeToAst('export const load = () => {}')
-		ast.program.body.push(loadFnAst.program.body[0]!)
-		loadFnExport = findExport(ast, 'load')!
-	}
-	// end
+const convertToFunctionExpression = (ast: NodePath<n.FunctionDeclaration>) => {
+	const functionExpressionAst = b.functionExpression(ast.value.id, ast.value.params, ast.value.body)
+	functionExpressionAst.async = ast.value.async
+	const variableDeclarationAst = b.variableDeclaration('const', [
+		b.variableDeclarator(ast.value.id!, functionExpressionAst)
+	])
+	ast.replace(variableDeclarationAst)
+}
 
-	// TODO: extract into helper function
+export const wrapExportedFunction = (ast: n.File, options: string, wrapperFunctionName: string, exportName: string) => {
+	const fnExport = findOrCreateExport(ast, exportName)
 	// if export is a function declaration, convert it to a function expression
-	if (n.FunctionDeclaration.check(loadFnExport.value)) {
-		const functionExpressionAst = b.functionExpression(loadFnExport.value.id, loadFnExport.value.params, loadFnExport.value.body)
-		functionExpressionAst.async = loadFnExport.value.async
-		const variableDeclarationAst = b.variableDeclaration('const', [
-			b.variableDeclarator(loadFnExport.value.id!, functionExpressionAst)
-		])
-		loadFnExport.replace(variableDeclarationAst)
+	if (n.FunctionDeclaration.check(fnExport.value)) {
+		convertToFunctionExpression(fnExport as NodePath<n.FunctionDeclaration>)
 	}
 
-	// TODO: fix type
-	const loadFn = findFunctionExpression(loadFnExport as any)
-	if (!loadFn) {
-		throw Error('Could not find load function')
+	const fn = findFunctionExpression(fnExport)
+	if (!fn) {
+		throw Error(`Could not find ${exportName} function`)
 	}
 
-	// TODO: fix type
-	const toWrapAst = wrapWithPlaceholder(loadFn as any)
+	wrapWithPlaceholder(fn)
 	const wrapWithAst = createWrapperAst(wrapperFunctionName, options)
 
-	mergeWrapperAst(toWrapAst, wrapWithAst)
+	mergeWrapperAst(fn, wrapWithAst)
 
-	loadFn.replace(wrapWithAst.value)
+	fn.replace(wrapWithAst.value)
 }

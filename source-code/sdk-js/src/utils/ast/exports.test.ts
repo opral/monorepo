@@ -25,8 +25,8 @@ describe("findExport", () => {
 		`)
 
 		const node = findExport(ast, 'load')!
-		n.ArrowFunctionExpression.assert(node.value)
-		expect(astToCode(node)).toMatchInlineSnapshot('"() => {}"')
+		n.VariableDeclarator.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"load = () => {}"')
 	})
 
 	test("should find let export", () => {
@@ -35,8 +35,8 @@ describe("findExport", () => {
 		`)
 
 		const node = findExport(ast, 'load')!
-		n.ArrowFunctionExpression.assert(node.value)
-		expect(astToCode(node)).toMatchInlineSnapshot('"() => {}"')
+		n.VariableDeclarator.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"load = () => {}"')
 	})
 
 	test("should find function export", () => {
@@ -56,8 +56,8 @@ describe("findExport", () => {
 		`)
 
 		const node = findExport(ast, 'load')!
-		n.Identifier.assert(node.value)
-		expect(astToCode(node)).toMatchInlineSnapshot('"fn"')
+		n.ExportSpecifier.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"fn as load"')
 	})
 
 	test("should find re-exported imports", () => {
@@ -66,7 +66,7 @@ describe("findExport", () => {
 		`)
 
 		const node = findExport(ast, 'load')!
-		n.Identifier.assert(node.value)
-		expect(astToCode(node)).toMatchInlineSnapshot('"fn"')
+		n.ExportSpecifier.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"fn as load"')
 	})
 })
