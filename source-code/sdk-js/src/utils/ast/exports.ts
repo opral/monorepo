@@ -50,6 +50,7 @@ export const findOrCreateExport = (ast: n.File, name: string) => {
 	const loadFnExport = findExport(ast, name)
 	if (loadFnExport) return loadFnExport
 
+	// TODO: check if a local variable named `name` already exists
 	const loadFnAst = codeToAst(`export const ${name} = () => {}`)
 	ast.program.body.push(loadFnAst.program.body[0]!)
 	return findExport(ast, name)!

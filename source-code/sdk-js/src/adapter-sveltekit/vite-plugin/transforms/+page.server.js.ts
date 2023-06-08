@@ -1,52 +1,27 @@
 import type { TransformConfig } from "../config.js"
-import { parseModule, generateCode } from "magicast"
-import { deepMergeObject } from "magicast/helpers"
-import { types } from "recast"
-import { dedent } from "ts-dedent"
-import {
-	extractWrappableExpression,
-	getWrappedExport,
-	getSdkImportedModules,
-	replaceOrAddExportNamedFunction,
-} from "../../../helpers/inlangAst.js"
+import { codeToAst, n } from '../../../utils/recast.js'
+import { findImportDeclarations } from '../../../utils/ast/imports.js'
 
-// TODO: refactor together with `+layout.server.js.ts`
+// ------------------------------------------------------------------------------------------------
+
+const assertNoImportsFromSdkJs = (ast: n.File) => {
+	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
+		throw Error(`It is currently not supported to import something from '@inlang/sdk-js' in this file.`)
+	}
+}
+
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	// TODO: implement this
-	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
-		throw Error(dedent`
-			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
+	const ast = codeToAst(code)
 
-			export const load = async (event, { i }) => {
-				console.info(i('hello.inlang'))
-			}
-		`)
-	}
+	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 
-	const n = types.namedTypes
-	const ast = parseModule(code)
+	return code // for now we don't need to transform any files
 
-	// Remove imports, but save their names
-	const importNames = getSdkImportedModules(ast.$ast)
-	// Merge imports with required imports
-	const importsAst = parseModule(
-		'import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";',
-	)
-	deepMergeObject(ast, importsAst)
-	const arrowOrFunctionNode = extractWrappableExpression({
-		ast: ast.$ast,
-		name: "load",
-		availableImports: importNames,
-	})
-	const exportAst = getWrappedExport(
-		undefined,
-		[arrowOrFunctionNode],
-		"load",
-		"initServerLoadWrapper",
-	)
-	// Replace or add current export handle
-	if (n.Program.check(ast.$ast)) {
-		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
-	}
-	return generateCode(ast).code
+	// const wrapperFunctionName = 'initServerLoadWrapper'
+
+	// addImport(ast, '@inlang/sdk-js/adapter-sveltekit/server', wrapperFunctionName)
+
+	// wrapExportedFunction(ast, '', wrapperFunctionName, 'load')
+
+	// return astToCode(ast)
 }

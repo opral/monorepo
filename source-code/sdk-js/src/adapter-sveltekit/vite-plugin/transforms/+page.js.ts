@@ -37,6 +37,13 @@ const getOptions = (config: TransformConfig, root: boolean) =>
 
 // ------------------------------------------------------------------------------------------------
 
+export const _FOR_TESTING = {
+	addImports,
+	getOptions,
+}
+
+// ------------------------------------------------------------------------------------------------
+
 const assertNoImportsFromSdkJs = (ast: n.File) => {
 	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
 		throw Error(`It is currently not supported to import something from '@inlang/sdk-js' in this file.`)
@@ -47,7 +54,7 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	const ast = codeToAst(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
-	if (!root) return code // for now we don't need to transform non-root pages
+	if (!root) return code // for now we don't need to transform non-root files
 
 	const wrapperFunctionName = root ? 'initRootPageLoadWrapper' : 'initLoadWrapper'
 
@@ -57,11 +64,4 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
 	return astToCode(ast)
-}
-
-// ------------------------------------------------------------------------------------------------
-
-export const _FOR_TESTING = {
-	addImports,
-	getOptions,
 }

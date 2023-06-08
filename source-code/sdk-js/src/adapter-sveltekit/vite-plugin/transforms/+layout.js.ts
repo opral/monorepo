@@ -45,7 +45,7 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	const ast = codeToAst(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
-	if (!root) return code // for now we don't need to transform non-root pages
+	if (!root) return code // for now we don't need to transform non-root files
 
 	const wrapperFunctionName = root ? 'initRootLayoutLoadWrapper' : 'initLayoutLoadWrapper'
 
