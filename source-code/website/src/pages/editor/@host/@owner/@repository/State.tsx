@@ -239,6 +239,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					telemetryBrowser.group("repository", gitOrigin, {
 						visibility: response.data.private ? "Private" : "Public",
 						isFork: response.data.fork ? "Fork" : "isNotFork",
+						parentGitOrigin: response.data.parent?.git_url.replace("git://", ""),
 					})
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
