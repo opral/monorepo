@@ -1,23 +1,16 @@
-import * as recast from "recast"
-import type { NodePath } from "ast-types"
-
-const b = recast.types.builders
-
-type ASTNode = recast.types.ASTNode
-type ImportDeclaration = recast.types.namedTypes.ImportDeclaration
-type ImportSpecifier = recast.types.namedTypes.ImportSpecifier
+import { NodePath, b, n, visitNode } from '../recast.js'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const removeImport = (ast: ASTNode, path: string, ...names: string[]) => {
-	if (!recast.types.namedTypes.File.check(ast)) return // we only work on the root ast
+export const removeImport = (ast: n.File, path: string, ...names: string[]) => {
+	if (!n.File.check(ast)) return // we only work on the root ast
 
 	const importDeclarationAsts = findImportDeclarations(ast, path)
 	if (!importDeclarationAsts.length) return
 
 	for (const importDeclarationAst of importDeclarationAsts) {
-		if (!importDeclarationAst.value.specifiers.length) return
+		if (!importDeclarationAst.value.specifiers?.length) return
 
 		for (const name of names) {
 			const importSpecifierAst = findImportSpecifier(importDeclarationAst.value, name)
@@ -26,7 +19,7 @@ export const removeImport = (ast: ASTNode, path: string, ...names: string[]) => 
 			importSpecifierAst.replace()
 		}
 
-		if ( // remove all imports
+		if ( // remove import completely
 			!names.length // if no names get passed
 			|| !importDeclarationAst.value.specifiers.length // if no specifiers are left
 		) {
@@ -37,8 +30,8 @@ export const removeImport = (ast: ASTNode, path: string, ...names: string[]) => 
 
 // ------------------------------------------------------------------------------------------------
 
-export const addImport = (ast: ASTNode, path: string, ...names: [string, ...string[]]) => {
-	if (!recast.types.namedTypes.File.check(ast)) return // we only work on the root ast
+export const addImport = (ast: n.File, path: string, ...names: [string, ...string[]]) => {
+	if (!n.File.check(ast)) return // we only work on the root ast
 	if (names.length === 0) return // return early if no names are passed
 
 	const importSpecifiersAst = names.map(name => b.importSpecifier(
@@ -48,7 +41,7 @@ export const addImport = (ast: ASTNode, path: string, ...names: [string, ...stri
 
 	const importDeclarationAsts = findImportDeclarations(ast, path)
 		// only keep import declarations with specifiers
-		.filter(importDeclarationAst => importDeclarationAst.value.specifiers.length)
+		.filter(importDeclarationAst => importDeclarationAst.value.specifiers?.length)
 
 	if (!importDeclarationAsts.length) {
 		// add new import declaration at the beginning of the file
@@ -59,21 +52,20 @@ export const addImport = (ast: ASTNode, path: string, ...names: [string, ...stri
 
 	const importDeclarationAst = importDeclarationAsts[0]!
 	// add new import specifiers
-	importDeclarationAst.value.specifiers.push(
+	importDeclarationAst.value.specifiers?.push(
 		...importSpecifiersAst.filter(({ local: toAdd }) =>
 			// remove duplicates
-			importDeclarationAst.value.specifiers
-				.every(({ local: existing }: ImportSpecifier) => toAdd?.name !== existing?.name)
+			importDeclarationAst.value.specifiers?.every(({ local: existing }) => toAdd?.name !== existing?.name)
 		))
 }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-const findImportDeclarations = (ast: ASTNode, name: string) => {
-	const importDeclarationAsts: InstanceType<(typeof NodePath<ImportDeclaration, any>)>[] = []
+const findImportDeclarations = (ast: n.File, name: string) => {
+	const importDeclarationAsts: NodePath<n.ImportDeclaration>[] = []
 
-	recast.visit(ast, {
+	visitNode(ast, {
 		visitImportDeclaration: function (path) {
 			if (path.value.source.value === name) {
 				importDeclarationAsts.push(path)
@@ -85,10 +77,10 @@ const findImportDeclarations = (ast: ASTNode, name: string) => {
 	return importDeclarationAsts
 }
 
-const findImportSpecifier = (ast: ASTNode, name: string) => {
-	let importSpecifierAst: InstanceType<(typeof NodePath<ImportSpecifier, any>)> | undefined
+const findImportSpecifier = (ast: n.ImportDeclaration, name: string) => {
+	let importSpecifierAst: NodePath<n.ImportSpecifier> | undefined
 
-	recast.visit(ast, {
+	visitNode(ast, {
 		visitImportSpecifier: function (path) {
 			if (path.value.imported.name === name) {
 				importSpecifierAst = path

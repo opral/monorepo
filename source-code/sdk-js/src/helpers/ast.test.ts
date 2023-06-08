@@ -38,7 +38,7 @@ describe("getFunctionOrDeclarationValue", () => {
 	test("function", () => {
 		const code = dedent`
             export function load() {
-                console.log("load")
+                console.info("load")
             }
         `
 		const ast = parseModule(code)
@@ -46,14 +46,14 @@ describe("getFunctionOrDeclarationValue", () => {
 		const result = print(resultAst)
 		expect(result.code).toMatchInlineSnapshot(`
             "function load() {
-                console.log(\\"load\\")
+                console.info(\\"load\\")
             }"
         `)
 	})
 	test("arrow function", () => {
 		const code = dedent`
             export const load = () => {
-                console.log("load")
+                console.info("load")
             }
         `
 		const ast = parseModule(code)
@@ -61,14 +61,14 @@ describe("getFunctionOrDeclarationValue", () => {
 		const result = print(resultAst)
 		expect(result.code).toMatchInlineSnapshot(`
             "() => {
-                console.log(\\"load\\")
+                console.info(\\"load\\")
             }"
         `)
 	})
 	test("declaration value", () => {
 		const code = dedent`
             const loadFn = () => {
-                console.log("load")
+                console.info("load")
             }
             export const load = loadFn
         `
@@ -91,8 +91,8 @@ describe("findUsedImportsInAst", () => {
 	test("Return matching array 1", () => {
 		const code = dedent`
 			function load() {
-				console.log(iAlias)
-				console.log(language)
+				console.info(iAlias)
+				console.info(language)
 			}
 		`
 		const ast = parseModule(code)
@@ -108,7 +108,7 @@ describe("findUsedImportsInAst", () => {
 	test("Return matching array 2", () => {
 		const code = dedent`
 			function load() {
-				console.log(iAlias)
+				console.info(iAlias)
 			}
 		`
 		const ast = parseModule(code)
@@ -282,7 +282,7 @@ describe("findDefinition", () => {
 			const code = dedent`
 				import {i} from "@inlang/sdk-js"
 				function hndl() {
-					console.log(i)
+					console.info(i)
 				}
 				export const handle = hndl
 			`
@@ -291,7 +291,7 @@ describe("findDefinition", () => {
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toMatchInlineSnapshot(`
 				"function hndl() {
-					console.log(i)
+					console.info(i)
 				}"
 			`)
 		})
@@ -299,7 +299,7 @@ describe("findDefinition", () => {
 			const code = dedent`
 				import {i} from "@inlang/sdk-js"
 				function hndl() {
-					console.log(i)
+					console.info(i)
 				}
 				const hndl1 = hndl
 				export const identifier = hndl1
@@ -309,7 +309,7 @@ describe("findDefinition", () => {
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toMatchInlineSnapshot(`
 				"function hndl() {
-					console.log(i)
+					console.info(i)
 				}"
 			`)
 		})
@@ -317,7 +317,7 @@ describe("findDefinition", () => {
 			const code = dedent`
 				import {i} from "@inlang/sdk-js"
 				const hndl = () => {
-					console.log(i)
+					console.info(i)
 				}
 				const hndl1 = hndl
 				export const handle = hndl1
@@ -327,7 +327,7 @@ describe("findDefinition", () => {
 			const result = resultAst ? print(resultAst).code : ""
 			expect(result).toMatchInlineSnapshot(`
 				"() => {
-					console.log(i)
+					console.info(i)
 				}"
 			`)
 		})
@@ -338,7 +338,7 @@ describe("findDefinition", () => {
 				import { i } from "@inlang/sdk-js";
 
 				const seq1 = async ({ event, resolve }) => {
-					console.log(i("welcome"));
+					console.info(i("welcome"));
 					return resolve(event);
 				};
 
@@ -482,7 +482,7 @@ describe("mergeNodes", () => {
 				const code = dedent`
 					import {i} from "@inlang/sdk-js"
 					const hndl = () => {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1
@@ -505,7 +505,7 @@ describe("mergeNodes", () => {
 					        key: alias
 					    }
 					) => {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1"
@@ -515,7 +515,7 @@ describe("mergeNodes", () => {
 				const code = dedent`
 					import {i} from "@inlang/sdk-js"
 					const hndl = (parameter1) => {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1
@@ -535,13 +535,13 @@ describe("mergeNodes", () => {
 				expect(newName ? print(newName).code : "").toBe("parameter1.key")
 				expect(scope ? print(scope).code : "").toMatchInlineSnapshot(`
 					"{
-						console.log(i)
+						console.info(i)
 					}"
 				`)
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import {i} from \\"@inlang/sdk-js\\"
 					const hndl = (parameter1) => {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1"
@@ -605,7 +605,7 @@ describe("mergeNodes", () => {
 				const code = dedent`
 					import {i} from "@inlang/sdk-js"
 					function hndl() {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1
@@ -630,7 +630,7 @@ describe("mergeNodes", () => {
 					        key: alias
 					    }
 					) {
-						console.log(i)
+						console.info(i)
 					}
 					const hndl1 = hndl
 					export const identifier = hndl1"
@@ -650,7 +650,7 @@ describe("imports", () => {
 		test("single matching import", () => {
 			const code = dedent`
 				import {module} from "source"
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			const result = imports(ast as Program, "source").findReferences()
@@ -662,7 +662,7 @@ describe("imports", () => {
 			const code = dedent`
 				import {module} from "source"
 				import {module2} from "source"
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			const result = imports(ast as Program, "source").findReferences()
@@ -678,231 +678,231 @@ describe("imports", () => {
 		describe("Regular ...", () => {
 			test("... into empty", () => {
 				const code = dedent`
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular", () => {
 				const code = dedent`
 					import { export2N as alias2N } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { export2N as alias2N, exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular, duplicate", () => {
 				const code = dedent`
 					import { exportN as aliasN } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasDuplicateN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular and namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
 					import { export2N as alias2N } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import { export2N as alias2N, exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into default", () => {
 				const code = dedent`
 					import { default as defaultAlias } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { default as defaultAlias, exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into default and namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
 					import { default as defaultAlias } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import { default as defaultAlias, exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("exportN", "aliasN")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 		})
 		describe("Default ...", () => {
 			test("... into empty", () => {
 				const code = dedent`
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import defaultAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular", () => {
 				const code = dedent`
 					import { exportN as aliasN } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import defaultAlias, { exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular and namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
 					import { exportN as aliasN } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import defaultAlias, { exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into default", () => {
 				const code = dedent`
 					import { default as defaultAlias } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultDuplicateAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { default as defaultAlias } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into default and namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
 					import { default as defaultAlias } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultDuplicateAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import { default as defaultAlias } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("default", "defaultAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 		})
 		describe("Namespace ...", () => {
 			test("... into empty", () => {
 				const code = dedent`
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("*", "namespaceAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into regular", () => {
 				const code = dedent`
 					import { exportN as aliasN } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("*", "namespaceAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import { exportN as aliasN } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into default", () => {
 				const code = dedent`
 					import { default as defaultAlias } from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("*", "namespaceAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
 					import { default as defaultAlias } from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into namespace", () => {
 				const code = dedent`
 					import * as namespaceAlias from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("*", "namespaceDuplicateAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import * as namespaceAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 			test("... into namespace and regular", () => {
 				const code = dedent`
 					import { exportN as aliasN } from "source";
 					import * as namespaceAlias from "source";
-					console.log()
+					console.info()
 				`
 				const ast = parseModule(code).$ast
 				imports(ast as Program, "source").add("*", "namespaceDuplicateAlias")
 				expect(print(ast).code).toMatchInlineSnapshot(`
 					"import { exportN as aliasN } from \\"source\\";
 					import * as namespaceAlias from \\"source\\";
-					console.log()"
+					console.info()"
 				`)
 			})
 		})
@@ -913,7 +913,7 @@ describe("imports", () => {
 				import { exportN as aliasN, export2N, default as defaultAlias } from "source";
 				import defaultAlias2 from "source";
 				import * as namespaceAlias from "source";
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			const { aliases } = imports(ast as Program, "source").getAliases("default", "requested")
@@ -932,7 +932,7 @@ describe("imports", () => {
 		test("Return error for nonexistent alias", () => {
 			const code = dedent`
 				import { exportN as aliasN, default as defaultAlias } from "source";
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			const { error } = imports(ast as Program, "source").getAliases("nonexistent")
@@ -945,24 +945,24 @@ describe("imports", () => {
 	describe("removeAll", () => {
 		test("No delete", () => {
 			const code = dedent`
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			imports(ast as Program, "source").removeAll()
 			expect(print(ast).code).toMatchInlineSnapshot(`
-				"console.log()"
+				"console.info()"
 			`)
 		})
 		test("Multiple lines", () => {
 			const code = dedent`
 				import { exportN as aliasN, default as defaultAlias } from "source";
 				import * as namespaceAlias from "source";
-				console.log()
+				console.info()
 			`
 			const ast = parseModule(code).$ast
 			imports(ast as Program, "source").removeAll()
 			expect(print(ast).code).toMatchInlineSnapshot(`
-				"console.log()"
+				"console.info()"
 			`)
 		})
 	})

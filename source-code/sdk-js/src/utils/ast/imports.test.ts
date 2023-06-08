@@ -143,7 +143,7 @@ describe("addImport", () => {
 
 	test("should add import at the top of the file", () => {
 		const ast = codeToAst(`
-			console.log(1234)
+			console.info(1234)
 
 			import './app.css'
 
@@ -153,7 +153,7 @@ describe("addImport", () => {
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
 			"import { language } from '@inlang/sdk-js';
-			console.log(1234);
+			console.info(1234);
 			import './app.css';"
 		`)
 	})

@@ -35,8 +35,8 @@ describe("rewriteLoadOrHandleParameters", () => {
 	test("Keep first parameter while adding the used imports as second parameter", () => {
 		const code = dedent`
             function load(parameter1) {
-                console.log(iAlias)
-                console.log(language)
+                console.info(iAlias)
+                console.info(language)
             }
         `
 		const expression = parseModule(code)
@@ -57,16 +57,16 @@ describe("rewriteLoadOrHandleParameters", () => {
                     language: language
                 }
             ) {
-                console.log(iAlias)
-                console.log(language)
+                console.info(iAlias)
+                console.info(language)
             }"
         `)
 	})
 	test("Add empty first parameter while adding the used imports as second parameter", () => {
 		const code = dedent`
             function load() {
-                console.log(iAlias)
-                console.log(language)
+                console.info(iAlias)
+                console.info(language)
             }
         `
 		const expression = parseModule(code)
@@ -87,8 +87,8 @@ describe("rewriteLoadOrHandleParameters", () => {
                     language: language
                 }
             ) {
-                console.log(iAlias)
-                console.log(language)
+                console.info(iAlias)
+                console.info(language)
             }"
         `)
 	})
@@ -99,7 +99,7 @@ describe("replaceSdkImports", () => {
 			const code = dedent`
 				import {i} from "@inlang/sdk-js"
 				export const handle = () => {
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const ast = parseModule(code).$ast
@@ -107,7 +107,7 @@ describe("replaceSdkImports", () => {
 			expect(print(ast).code).toMatchInlineSnapshot(`
 				"import {i} from \\"@inlang/sdk-js\\"
 				export const handle = () => {
-					console.log(getRuntimeFromLocals(event.locals).i)
+					console.info(getRuntimeFromLocals(event.locals).i)
 				}"
 			`)
 		})

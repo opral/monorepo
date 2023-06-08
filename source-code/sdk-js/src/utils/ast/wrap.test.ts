@@ -221,18 +221,20 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(ast, '', 'initWrapper')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(function() {});"
+			"export const load = function() {};
+			export const load = initWrapper().wrap(() => {});"
 		`)
 	})
 
-	test("should wrap regular function", () => {
+	test("should wrap async const function", () => {
 		const ast = codeToAst(`
 			export const load = async function() {}
 		`)
 		wrapExportedFunction(ast, '', 'initWrapper')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(async function() {});"
+			"export const load = async function() {};
+			export const load = initWrapper().wrap(() => {});"
 		`)
 	})
 

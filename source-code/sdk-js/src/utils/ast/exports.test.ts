@@ -1,13 +1,12 @@
 import { describe, expect, test } from "vitest"
 import { findExport } from './exports.js';
-import { codeToAst } from '../recast.js';
+import { astToCode, codeToAst, n } from '../recast.js';
 
 describe("findExport", () => {
 	test("should return undefined if no export was found", () => {
 		const ast = codeToAst(``)
 
 		const node = findExport(ast, 'load')
-
 		expect(node).toBeUndefined()
 	})
 
@@ -17,7 +16,6 @@ describe("findExport", () => {
 		`)
 
 		const node = findExport(ast, 'load')
-
 		expect(node).toBeUndefined()
 	})
 
@@ -26,9 +24,9 @@ describe("findExport", () => {
 			export const load = () => {}
 		`)
 
-		const node = findExport(ast, 'load')
-
-		expect(node).toBeDefined()
+		const node = findExport(ast, 'load')!
+		n.ArrowFunctionExpression.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"() => {}"')
 	})
 
 	test("should find let export", () => {
@@ -36,9 +34,19 @@ describe("findExport", () => {
 			export let load = () => {}
 		`)
 
-		const node = findExport(ast, 'load')
+		const node = findExport(ast, 'load')!
+		n.ArrowFunctionExpression.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"() => {}"')
+	})
 
-		expect(node).toBeDefined()
+	test("should find function export", () => {
+		const ast = codeToAst(`
+			export function load() {}
+		`)
+
+		const node = findExport(ast, 'load')!
+		n.FunctionDeclaration.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"function load() {}"')
 	})
 
 	test("should find named exports", () => {
@@ -47,9 +55,9 @@ describe("findExport", () => {
 			export { fn as load }
 		`)
 
-		const node = findExport(ast, 'load')
-
-		expect(node).toBeDefined()
+		const node = findExport(ast, 'load')!
+		n.Identifier.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"fn"')
 	})
 
 	test("should find re-exported imports", () => {
@@ -57,8 +65,8 @@ describe("findExport", () => {
 			export { fn as load } from 'some-module'
 		`)
 
-		const node = findExport(ast, 'load')
-
-		expect(node).toBeDefined()
+		const node = findExport(ast, 'load')!
+		n.Identifier.assert(node.value)
+		expect(astToCode(node)).toMatchInlineSnapshot('"fn"')
 	})
 })

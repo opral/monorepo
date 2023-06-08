@@ -1,6 +1,6 @@
 # Placeholders
 
-Placeholders are internal variables that get resolved at a later point. This makes it more easy to inject something arbitrary into the code. Without an additional resolve logic at the time we define them.
+Placeholders are internal variables that get resolved at a later point. This makes it more easy to inject something arbitrary into the code. Without an additional resolve infoic at the time we define them.
 
 Such placeholders are:
 
@@ -26,12 +26,12 @@ Such placeholders are:
 - code blocks should be inserted as code and not as a hardcoded AST like this:
 
   ```ts
-  const code = "console.log(123)"
+  const code = "console.info(123)"
   const ast = parse(code)
   const exportsGetAst = parse("export const GET = async ({ params: { language } }) => { /* */ }")
   append(ast, exportsGetAst)
   const result = serialize(ast)
-  // result => 'console.log(123);export const GET = async ({ params: { language } }) => { /* */ }'
+  // result => 'console.info(123);export const GET = async ({ params: { language } }) => { /* */ }'
   ```
 
 - all transform functions get an AST as an input and return an AST as an output. The functions we currently have, just act as a wrapper around the generic ast transform function. This makes it possible to create source maps at the end of the process.
@@ -440,11 +440,11 @@ JavaScript files can run on the server and on the client. So we need to detect t
     - we need to make sure to not redeclare imports multiple times
       ```ts
       const code =
-      	'import { i } from "@inlang/sdk-js";const fn = () => { console.log(123); i("test"); i("hello") }'
+      	'import { i } from "@inlang/sdk-js";const fn = () => { console.info(123); i("test"); i("hello") }'
       const ast = parse(code)
       insertGetRuntimeFromContext(ast)
       const result = serialize(ast)
-      // result => 'const fn = () => { console.log(123); const { i } = getRuntimeFromContext(); i("test"); i("hello") }'
+      // result => 'const fn = () => { console.info(123); const { i } = getRuntimeFromContext(); i("test"); i("hello") }'
       ```
 2.  if reactive
     - wrap reactive functions with `get()`

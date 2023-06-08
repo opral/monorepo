@@ -1,13 +1,5 @@
 import * as recast from "recast"
-import type { NodePath, namedTypes } from "ast-types"
-import type { n } from '../recast.js'
-
-type ASTNode = recast.types.ASTNode
-type ExportDeclaration = namedTypes.ExportDeclaration
-type ExportSpecifier = namedTypes.ExportSpecifier
-type ArrowFunctionExpression = namedTypes.ArrowFunctionExpression
-type FunctionExpression = namedTypes.FunctionExpression
-type FunctionDeclaration = namedTypes.FunctionDeclaration
+import { ASTNode, NodePath, n, visitNode } from '../recast.js'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
@@ -19,14 +11,20 @@ export const findExport = (ast: n.File, name: string) => {
 		throw new Error(`findExport does not support '${ast || 'unknown'}'`)
 	}
 
-	let exportDeclarationAst: InstanceType<(typeof NodePath<ExportDeclaration | ExportSpecifier, any>)> | undefined
+	let exportDeclarationAst: NodePath<n.ExportDeclaration | n.ExportSpecifier> | undefined
 
-	recast.visit(ast, {
+	visitNode(ast, {
 		visitExportNamedDeclaration(path) {
-			this.traverse(path, {
+			visitNode(path.value, {
 				visitVariableDeclarator(path) {
 					if (path.value.id.name === name) {
-						exportDeclarationAst = path
+						visitNode(path.value, {
+							visitArrowFunctionExpression(path) {
+								exportDeclarationAst = path
+
+								return false
+							}
+						})
 					}
 
 					return false
@@ -40,12 +38,24 @@ export const findExport = (ast: n.File, name: string) => {
 				},
 				visitExportSpecifier(path) {
 					if (path.value.exported.name === name) {
-						exportDeclarationAst = path
+						const local = path.value.local
+
+						visitNode(path.value, {
+							visitIdentifier(path) {
+								if (path.value === local) {
+									exportDeclarationAst = path
+								}
+
+								return false
+							}
+						})
 					}
 
 					return false
 				},
 			})
+
+			return false
 		}
 	})
 
@@ -54,9 +64,9 @@ export const findExport = (ast: n.File, name: string) => {
 
 // TODO: test
 export const findFunctionExpression = (ast: ASTNode) => {
-	let functionExpressionAst: InstanceType<(typeof NodePath<ArrowFunctionExpression | FunctionExpression | FunctionDeclaration, any>)> | undefined
+	let functionExpressionAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.FunctionDeclaration> | undefined
 
-	recast.visit(ast, {
+	visitNode(ast, {
 		visitArrowFunctionExpression(path) {
 			functionExpressionAst = path
 

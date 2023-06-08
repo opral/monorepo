@@ -20,13 +20,13 @@ export const transformJs = (config: TransformConfig, code: string) => {
 
 			export const clientFn = () => {
 				const { i } = getRuntimeFromContext()
-				console.log(${config.languageInUrl ? "i" : `get(i)`}('hello.inlang'))
+				console.info(${config.languageInUrl ? "i" : `get(i)`}('hello.inlang'))
 			}
 
 			// server code
 			// you need to pass in the function as a parameter
 			export const serverFn = (/** @type { import('@inlang/sdk-js/runtime').InlangFunction } */ i) => {
-				console.log(i('hello.inlang'))
+				console.info(i('hello.inlang'))
 			}
 		`)
 	}

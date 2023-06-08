@@ -121,7 +121,7 @@ describe("transformHooksServerJs", () => {
 					dedent`
 						import {i} from "@inlang/sdk-js"
 						export const handle = () => {
-							console.log(i)
+							console.info(i)
 						}
 					`,
 				)
@@ -138,7 +138,7 @@ describe("transformHooksServerJs", () => {
 					        resolve: resolve
 					    }
 					) => {
-						console.log(getRuntimeFromLocals(event.locals).i)
+						console.info(getRuntimeFromLocals(event.locals).i)
 					});"
 				`)
 			})
@@ -148,7 +148,7 @@ describe("transformHooksServerJs", () => {
 					getTransformConfig(),
 					dedent`
 						export function handle({ event, resolve }) {
-							console.log('TADAA!')
+							console.info('TADAA!')
 							return resolve(event)
 						}
 					`,
@@ -161,7 +161,7 @@ describe("transformHooksServerJs", () => {
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    getLanguage: () => undefined
 					}).wrap(function handle({ event, resolve }) {
-						console.log('TADAA!')
+						console.info('TADAA!')
 						return resolve(event)
 					});"
 				`)
@@ -172,7 +172,7 @@ describe("transformHooksServerJs", () => {
 					dedent`
 						import {i} from "@inlang/sdk-js"
 						export function handle() {
-							console.log(i)
+							console.info(i)
 						}
 					`,
 				)
@@ -189,7 +189,7 @@ describe("transformHooksServerJs", () => {
 					        resolve: resolve
 					    }
 					) {
-						console.log(getRuntimeFromLocals(event.locals).i)
+						console.info(getRuntimeFromLocals(event.locals).i)
 					});"
 				`)
 			})
@@ -199,7 +199,7 @@ describe("transformHooksServerJs", () => {
 					dedent`
 						import {i} from "@inlang/sdk-js"
 						function hndl() {
-							console.log(i)
+							console.info(i)
 						}
 						export const handle = hndl
 					`,
@@ -213,7 +213,7 @@ describe("transformHooksServerJs", () => {
 					        resolve: resolve
 					    }
 					) {
-						console.log(getRuntimeFromLocals(event.locals).i)
+						console.info(getRuntimeFromLocals(event.locals).i)
 					}
 
 					export const handle = initHandleWrapper({
@@ -228,12 +228,12 @@ describe("transformHooksServerJs", () => {
 					dedent`
 						import { sequence } from "@sveltejs/kit/hooks";
 						import { i } from "@inlang/sdk-js";
-						
+
 						const seq1 = async ({ event, resolve }) => {
-						console.log(i("welcome"));
+						console.info(i("welcome"));
 						return resolve(event);
 						};
-						
+
 						export const handle = sequence(seq1);
 					`,
 				)
@@ -243,7 +243,7 @@ describe("transformHooksServerJs", () => {
 					import { i } from \\"@inlang/sdk-js\\";
 
 					const seq1 = async ({ event, resolve }) => {
-					console.log(getRuntimeFromLocals(event.locals).i(\\"welcome\\"));
+					console.info(getRuntimeFromLocals(event.locals).i(\\"welcome\\"));
 					return resolve(event);
 					};
 

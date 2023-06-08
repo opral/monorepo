@@ -35,6 +35,8 @@ const printCode = (ast: ASTNode | NodePath) => recast.prettyPrint(
 
 // ------------------------------------------------------------------------------------------------
 
+export const visitNode = recast.visit
+
 export const codeToAst = (code: string) => parseCode(dedent(code))
 
 export const codeToDeclarationAst = (code: string) => {
@@ -42,13 +44,13 @@ export const codeToDeclarationAst = (code: string) => {
 
 	let foundDeclarationAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier> | undefined
 
-	recast.visit(ast, {
+	visitNode(ast, {
 		visitVariableDeclarator(path) {
 			if (path.value.id.name !== 'x') {
 				throw new Error('you must name the variable "x"')
 			}
 
-			this.traverse(path, {
+			visitNode(path.value, {
 				visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
 					foundDeclarationAst = path
 					return false

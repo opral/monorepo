@@ -19,7 +19,7 @@ export const load = async () => {
 }
 
 const getPageTitle = () => {
-   console.log(i('hello.inlang'))
+   console.info(i('hello.inlang'))
 }
 
 // -- To this -----------------------------------------------------------------
@@ -31,7 +31,7 @@ export const load = async () => {
 }
 
 const getPageTitle = (/** @type { import('@inlang/sdk-js/runtime').InlangFunction } */ i) => {
-   console.log(i('hello.inlang'))
+   console.info(i('hello.inlang'))
 }
 
 // ----------------------------------------------------------------------------

@@ -27,7 +27,7 @@ export const transformLayoutServerJs = (config: TransformConfig, code: string, r
 			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
 
 			export const load = async (event, { i }) => {
-				console.log(i('hello.inlang'))
+				console.info(i('hello.inlang'))
 			}
 		`)
 	}

@@ -67,7 +67,7 @@ describe("transformLayoutSvelte", () => {
 							export let data
 
 							onMount(() => {
-								console.log(123)
+								console.info(123)
 							})
 						</script>
 
@@ -82,7 +82,7 @@ describe("transformLayoutSvelte", () => {
 					import { onMount } from \\"svelte\\"
 
 					onMount(() => {
-					    console.log(123)
+					    console.info(123)
 					})
 					export let data;
 					let language;
@@ -218,7 +218,7 @@ describe("transformLayoutSvelte", () => {
 							<script>
 								import { languages, i } from "@inlang/sdk-js"
 
-								console.log(languages)
+								console.info(languages)
 							</script>
 
 							{i('hello')}
@@ -245,7 +245,7 @@ describe("transformLayoutSvelte", () => {
 						    localStorage.setItem(\\"language\\", $language);
 						}
 
-						console.log(languages)</script>
+						console.info(languages)</script>
 
 						{#if $language}{$i('hello')}{/if}"
 					`)
@@ -258,7 +258,7 @@ describe("transformLayoutSvelte", () => {
 							<script>
 								import { languages, i } from "@inlang/sdk-js"
 
-								console.log(languages)
+								console.info(languages)
 							</script>
 
 							{i('hello')}
@@ -289,7 +289,7 @@ describe("transformLayoutSvelte", () => {
 						    } = getRuntimeFromContext());
 						}
 
-						console.log(languages)</script>
+						console.info(languages)</script>
 
 						{#key language}{i('hello')}{/key}"
 					`)

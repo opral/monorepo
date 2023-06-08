@@ -1,5 +1,4 @@
-import * as recast from "recast"
-import { NodePath, ASTNode, codeToAst, codeToDeclarationAst, n, b, astToCode } from '../recast.js'
+import { NodePath, codeToAst, codeToDeclarationAst, n, b, visitNode } from '../recast.js'
 import { findExport, findFunctionExpression } from './exports.js'
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
@@ -10,7 +9,7 @@ const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
 export const wrapWithPlaceholder = (ast: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier>) => {
 	let expressionAst: NodePath<n.Expression> | undefined
 
-	recast.visit(ast.value, {
+	visitNode(ast.value, {
 		visitArrowFunctionExpression(path) {
 			expressionAst = path
 
@@ -49,10 +48,10 @@ export const createWrapperAst = (name: string, options = '') => codeToDeclaratio
 const findWrappingPoint = (ast: NodePath<n.CallExpression>) => {
 	let callExpressionAst: NodePath<n.FunctionExpression | n.ArrowFunctionExpression | n.VariableDeclarator> | undefined
 
-	recast.visit(ast.value, {
+	visitNode(ast.value, {
 		visitCallExpression: function (path) {
 			if (path.value.callee.name === WRAP_IDENTIFIER) {
-				this.traverse(path, {
+				visitNode(path.value, {
 					visitFunctionExpression: function (path) {
 						callExpressionAst = path
 						return false
@@ -80,10 +79,10 @@ const findWrappingPoint = (ast: NodePath<n.CallExpression>) => {
 const findInsertionPoint = (ast: NodePath<n.CallExpression>) => {
 	let identifierAst: NodePath<n.Identifier> | undefined
 
-	recast.visit(ast.value, {
+	visitNode(ast.value, {
 		visitCallExpression: function (path) {
 			if (path.value.arguments[0].name === WRAP_IDENTIFIER) {
-				this.traverse(path, {
+				visitNode(path.value, {
 					visitIdentifier: function (path) {
 						identifierAst = path
 						return false

@@ -64,7 +64,7 @@ describe("transformLayoutServerJs", () => {
 						import type { LayoutLoad } from './$types.js'
 
 						export async function load({ }) {
-							console.log('hi!')
+							console.info('hi!')
 							return { }
 						}
 					`,
@@ -76,7 +76,7 @@ describe("transformLayoutServerJs", () => {
 						import type { LayoutLoad } from './$types.js'
 
 						export const load = initRootLayoutServerLoadWrapper().wrap(async function load({ }) {
-							console.log('hi!')
+							console.info('hi!')
 							return { }
 						});"
 					`)
@@ -145,7 +145,7 @@ describe("transformLayoutServerJs", () => {
 						import type { LayoutLoad } from './$types.js'
 
 						export async function load({ }) {
-							console.log('hi!')
+							console.info('hi!')
 							return { }
 						}
 					`,
@@ -157,7 +157,7 @@ describe("transformLayoutServerJs", () => {
 						import type { LayoutLoad } from './$types.js'
 
 						export const load = initServerLoadWrapper().wrap(async function load({ }) {
-							console.log('hi!')
+							console.info('hi!')
 							return { }
 						});"
 					`)

@@ -58,7 +58,7 @@ describe("transformSvelte", () => {
 					import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
 					const blue = iStore;
 					const green = iLanguage
-					console.log(blue)
+					console.info(blue)
 				</script>
 
 				<style>
@@ -86,7 +86,7 @@ describe("transformSvelte", () => {
 
 			const blue = $iStore;
 			const green = $iLanguage;
-			console.log(blue);</script>
+			console.info(blue);</script>
 
 			<style>
 				.red {
@@ -112,7 +112,7 @@ describe("transformSvelte", () => {
 					import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
 					const blue = iStore;
 					const green = iLanguage
-					console.log(blue)
+					console.info(blue)
 				</script>
 
 				<style>
@@ -140,7 +140,7 @@ describe("transformSvelte", () => {
 
 			const blue = $iStore;
 			const green = $iLanguage;
-			console.log(blue);</script>
+			console.info(blue);</script>
 
 			<style>
 				.red {

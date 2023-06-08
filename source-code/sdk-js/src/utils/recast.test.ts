@@ -75,7 +75,7 @@ describe("astToCode", () => {
 							b.blockStatement([
 								b.expressionStatement(
 									b.callExpression(
-										b.memberExpression(b.identifier("console"), b.identifier("log")),
+										b.memberExpression(b.identifier("console"), b.identifier("info")),
 										[b.literal('test')]
 									)
 								)
@@ -88,7 +88,7 @@ describe("astToCode", () => {
 
 		expect(ast).toMatchInlineSnapshot(`
 			"const fn = () => {
-			   console.log('test');
+			   console.info('test');
 			};"
 		`)
 	})
