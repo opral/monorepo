@@ -1,0 +1,29 @@
+{
+	"name": "@inlang/plugin-standard-lint-rules",
+	"version": "3.0.0",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "DEV=true node ./build.js",
+		"build": "node ./build.js",
+		"test": "vitest run",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"devDependencies": {
+		"@inlang/core": "*",
+		"concurrently": "^8.0.1",
+		"esbuild": "^0.17.19",
+		"tsd": "^0.28.1",
+		"typescript": "^5.0.3",
+		"vitest": "^0.29.8"
+	}
+}

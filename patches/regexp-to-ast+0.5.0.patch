@@ -1,0 +1,14 @@
+diff --git a/node_modules/regexp-to-ast/package.json b/node_modules/regexp-to-ast/package.json
+index 1748bff..5f7f777 100644
+--- a/node_modules/regexp-to-ast/package.json
++++ b/node_modules/regexp-to-ast/package.json
+@@ -5,6 +5,9 @@
+   "repository": "https://github.com/bd82/regexp-to-ast.git",
+   "author": "Shahar Soel",
+   "license": "MIT",
++  "exports": {
++    ".": "./lib/regexp-to-ast.js"
++  },
+   "description": "Parses a Regular Expression and outputs an AST",
+   "keywords": [
+     "regExp",
