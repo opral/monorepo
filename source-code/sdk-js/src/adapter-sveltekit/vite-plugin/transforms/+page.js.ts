@@ -39,13 +39,7 @@ const getOptions = (config: TransformConfig, root: boolean) =>
 
 const assertNoImportsFromSdkJs = (ast: n.File) => {
 	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
-		throw Error(dedent`
-			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
-
-			export const load = async (event, { i }) => {
-				console.info(i('hello.inlang'))
-			}
-		`)
+		throw Error(`It is currently not supported to import something from '@inlang/sdk-js' in this file.`)
 	}
 }
 
