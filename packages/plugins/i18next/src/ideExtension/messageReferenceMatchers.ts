@@ -14,7 +14,7 @@ type Match = {
 
 const Character = createToken({
 	name: "Character",
-	pattern: /[^\s\\]/,
+	pattern: /[^\s]/,
 })
 
 // const StringDelimiter = createToken({
@@ -49,17 +49,18 @@ const ClosingParenthesis = createToken({
 const Whitespace = createToken({
 	name: "Whitespace",
 	pattern: /\s+/,
-	line_breaks: true,
+	// skip whitespace
+	group: Lexer.SKIPPED,
 })
 
 const allTokens = [
+	Whitespace,
 	SingleQuotationMark,
 	DoubleQuotationMark,
 	TemplateLiteral,
 	OpeningParenthesis,
 	ClosingParenthesis,
 	Character,
-	Whitespace,
 ]
 
 /**
@@ -75,12 +76,14 @@ class Parser extends EmbeddedActionsParser {
 		 *
 		 * Aggregates all matches and returns them.
 		 */
-		this.RULE("result", () => {
+		this.RULE("entry", () => {
 			const result: Match[] = []
 
+			// match all possible matches
 			this.MANY(() => {
 				this.OR([
 					{
+						// match a reference via a function
 						ALT: () => {
 							const match = this.SUBRULE(
 								// @ts-expect-error - The parser is only partially typesafe.
@@ -89,10 +92,8 @@ class Parser extends EmbeddedActionsParser {
 							result.push(match as Match)
 						},
 					},
-					{
-						ALT: () => this.CONSUME(Character),
-					},
-					{ ALT: () => this.CONSUME(Whitespace) },
+					// if no match, consume the next character or whitespace
+					{ ALT: () => this.CONSUME(Character) },
 				])
 			})
 			return result
@@ -109,6 +110,7 @@ class Parser extends EmbeddedActionsParser {
 		 */
 		this.RULE("ReferenceViaFunction", () => {
 			// Message is referenced with a function named
+
 			this.OR4([
 				{
 					// next character is t
@@ -225,7 +227,11 @@ export async function parse(text: any) {
 	parser.input = lexResult.tokens
 
 	// @ts-expect-error - The parser is not typesafe.
-	const matches = parser.result() as Match[] | undefined
+	const matches = parser.entry() as Match[] | undefined
+
+	if (parser.errors.length > 0) {
+		throw Error(parser.errors)
+	}
 
 	return matches ?? []
 }
