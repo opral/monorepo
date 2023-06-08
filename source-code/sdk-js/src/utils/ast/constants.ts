@@ -1,5 +1,5 @@
 import type * as recast from "recast"
-import { codeToAst } from '../../helpers/recast.js'
+import { codeToAst } from '../recast.js'
 
 export const arrowFunctionAst = codeToAst(`const fn = () => {}`)
 	.program.body[0].declarations[0] as recast.types.namedTypes.ArrowFunctionExpression

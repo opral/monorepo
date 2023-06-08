@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { astToCode, codeToDeclarationAst } from '../../helpers/recast.js';
-import { createWrapperAst, mergeWrapperAst, wrapWithPlaceholder } from './wrap.js';
+import { astToCode, codeToAst, codeToDeclarationAst } from '../recast.js';
+import { createWrapperAst, mergeWrapperAst, wrapExportedFunction, wrapWithPlaceholder } from './wrap.js';
 
 describe("wrapWithPlaceholder", () => {
 	test("arrow function", () => {
@@ -66,7 +66,7 @@ describe("wrapWithPlaceholder", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("wrapWithPlaceholder", () => {
+describe("createWrapperAst", () => {
 	test("without params", () => {
 		const ast = createWrapperAst('someFn')
 
@@ -79,7 +79,9 @@ describe("wrapWithPlaceholder", () => {
 		const ast = createWrapperAst('someFn', '{ test: true }')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"someFn({ test: true }).wrap($$_INLANG_WRAP_$$)"
+			"someFn({
+			   test: true
+			}).wrap($$_INLANG_WRAP_$$)"
 		`)
 	})
 
@@ -87,7 +89,11 @@ describe("wrapWithPlaceholder", () => {
 		const ast = createWrapperAst('someFn', '{ nested: { fn: () => concole.log(123) } }')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"someFn({ nested: { fn: () => concole.log(123) } }).wrap($$_INLANG_WRAP_$$)"
+			"someFn({
+			   nested: {
+				   fn: () => concole.log(123)
+				}
+			}).wrap($$_INLANG_WRAP_$$)"
 		`)
 	})
 })
@@ -159,5 +165,96 @@ describe("mergeWrapperAst", () => {
 			"initWrapper().wrap(someFn)"
 		`)
 	})
+})
 
+// ------------------------------------------------------------------------------------------------
+
+describe("wrapExportedFunction", () => {
+	test("should add and wrap load function for empty file", () => {
+		const ast = codeToAst("")
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(() => {});"
+		`)
+	})
+
+	test("should add and wrap load function if not present", () => {
+		const ast = codeToAst(`
+			export const prerender = true
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const prerender = true;
+			export const load = initWrapper().wrap(() => {});"
+		`)
+	})
+
+	test("should wrap arrow function", () => {
+		const ast = codeToAst(`
+			export const load = () => {}
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(() => {});"
+		`)
+	})
+
+	test("should wrap async arrow function", () => {
+		const ast = codeToAst(`
+			export const load = async () => {}
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(async () => {});"
+		`)
+	})
+
+	test("should wrap const function", () => {
+		const ast = codeToAst(`
+			export const load = function() {}
+		`)
+
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(function() {});"
+		`)
+	})
+
+	test("should wrap regular function", () => {
+		const ast = codeToAst(`
+			export const load = async function() {}
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(async function() {});"
+		`)
+	})
+
+	test("should wrap regular function", () => {
+		const ast = codeToAst(`
+			export function load() {}
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(function load() {});"
+		`)
+	})
+
+	test("should wrap regular async function", () => {
+		const ast = codeToAst(`
+			export async function load() {}
+		`)
+		wrapExportedFunction(ast, '', 'initWrapper')
+
+		expect(astToCode(ast)).toMatchInlineSnapshot(`
+			"export const load = initWrapper().wrap(async function load() {});"
+		`)
+	})
 })

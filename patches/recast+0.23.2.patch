@@ -2434,7 +2434,7 @@ index 0000000..baa32b7
 +        reprints.forEach(function (reprint) {
 +            const oldComment = reprint.oldPath.getValue();
 +            assert.ok(oldComment.leading || oldComment.trailing);
-+            patcher.replace(oldComment.loc, 
++            patcher.replace(oldComment.loc,
 +            // Comments can't have .comments, so it doesn't matter whether we
 +            // print with comments or without.
 +            print(reprint.newPath).indentTail(oldComment.loc.indent));
@@ -4081,7 +4081,7 @@ index 0000000..496bf7a
 +        case "EnumStringBody":
 +        case "EnumSymbolBody": {
 +            if (n.type === "EnumSymbolBody" || n.explicitType) {
-+                parts.push(" of ", 
++                parts.push(" of ",
 +                // EnumBooleanBody => boolean, etc.
 +                n.type.slice(4, -4).toLowerCase());
 +            }
@@ -5492,12 +5492,12 @@ index 0000000..767c0cb
 +import * as types from "ast-types";
 +import { parse } from "./lib/parser.js";
 +import { Options } from "./lib/options.js";
-+export { 
++export {
 +/**
 + * Parse a string of code into an augmented syntax tree suitable for
 + * arbitrary modification and reprinting.
 + */
-+parse, 
++parse,
 +/**
 + * Convenient shorthand for the ast-types package.
 + */
@@ -5549,12 +5549,12 @@ index 0000000..d7dba06
 +import * as types from "ast-types";
 +import { parse } from "./lib/parser.mjs";
 +import { Printer } from "./lib/printer.mjs";
-+export { 
++export {
 +/**
 + * Parse a string of code into an augmented syntax tree suitable for
 + * arbitrary modification and reprinting.
 + */
-+parse, 
++parse,
 +/**
 + * Convenient shorthand for the ast-types package.
 + */
@@ -14900,7 +14900,7 @@ index ae89c3b..767c0cb 100644
 -import { Options } from "./lib/options";
 +import { parse } from "./lib/parser.js";
 +import { Options } from "./lib/options.js";
- export { 
+ export {
  /**
   * Parse a string of code into an augmented syntax tree suitable for
 @@ -28,16 +28,16 @@ export { visit } from "ast-types";
@@ -24889,7 +24889,7 @@ new file mode 100644
 index 0000000..c3ad722
 --- /dev/null
 +++ b/node_modules/recast/rename-mjs-output.mjs
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,14 @@
 +import { renameSync } from 'fs'
 +import { resolve } from 'path'
 +import * as glob from 'glob'
@@ -24904,7 +24904,6 @@ index 0000000..c3ad722
 +	const fullFilePath = resolve(__dirname, file)
 +	renameSync(fullFilePath, fullFilePath.replace(/\.js$/, '.mjs'))
 +})
-+console.log('done');
 diff --git a/node_modules/recast/tsconfig.cjs.json b/node_modules/recast/tsconfig.cjs.json
 new file mode 100644
 index 0000000..2c7b284

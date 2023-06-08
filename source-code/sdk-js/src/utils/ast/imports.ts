@@ -70,13 +70,13 @@ export const addImport = (ast: ASTNode, path: string, ...names: [string, ...stri
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-const findImportDeclarations = (ast: ASTNode, path: string) => {
+const findImportDeclarations = (ast: ASTNode, name: string) => {
 	const importDeclarationAsts: InstanceType<(typeof NodePath<ImportDeclaration, any>)>[] = []
 
 	recast.visit(ast, {
-		visitImportDeclaration: function (node) {
-			if (node.value.source.value === path) {
-				importDeclarationAsts.push(node)
+		visitImportDeclaration: function (path) {
+			if (path.value.source.value === name) {
+				importDeclarationAsts.push(path)
 			}
 			return false
 		},
@@ -89,9 +89,9 @@ const findImportSpecifier = (ast: ASTNode, name: string) => {
 	let importSpecifierAst: InstanceType<(typeof NodePath<ImportSpecifier, any>)> | undefined
 
 	recast.visit(ast, {
-		visitImportSpecifier: function (node) {
-			if (node.value.imported.name === name) {
-				importSpecifierAst = node
+		visitImportSpecifier: function (path) {
+			if (path.value.imported.name === name) {
+				importSpecifierAst = path
 			}
 			return false
 		},

@@ -1,37 +1,42 @@
 import type { TransformConfig } from "../config.js"
-import { parseModule, generateCode, parseExpression } from "magicast"
-import { deepMergeObject } from "magicast/helpers"
-import { types } from "recast"
 import { dedent } from "ts-dedent"
-import {
-	extractWrappableExpression,
-	getWrappedExport,
-	getSdkImportedModules,
-	replaceOrAddExportNamedFunction,
-} from "../../../helpers/inlangAst.js"
+import { astToCode, codeToAst } from '../../../utils/recast.js'
+import { addImport } from '../../../utils/ast/imports.js'
+import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
+import type * as recast from "recast"
 
-const requiredImports = (config: TransformConfig, root: boolean) => `
-import { browser } from "$app/environment";
-import { ${
-	root ? "initRootPageLoadWrapper" : "initLoadWrapper"
-}, replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared";
-import { initLocalStorageDetector, navigatorDetector } from "@inlang/sdk-js/detectors/client";
-${config.languageInUrl && config.isStatic ? `import { redirect } from "@sveltejs/kit";` : ""}
-`
+type ASTNode = recast.types.ASTNode
 
-const options = (config: TransformConfig) =>
-	config.languageInUrl && config.isStatic
-		? `
-{
-	browser,
-	initDetectors: () => [navigatorDetector],
-	redirect: {
-		throwable: redirect,
-		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
-	},
+// ------------------------------------------------------------------------------------------------
+
+const addImports = (ast: ASTNode, config: TransformConfig, root: boolean, wrapperFunctionName: string) => {
+	addImport(ast, '$app/environment', 'browser')
+	addImport(ast, '@inlang/sdk-js/adapter-sveltekit/shared', wrapperFunctionName, 'replaceLanguageInUrl')
+	addImport(ast, '@inlang/sdk-js/detectors/client', 'initLocalStorageDetector', 'navigatorDetector')
+	if (config.languageInUrl && config.isStatic) {
+		addImport(ast, '@sveltejs/kit', 'redirect')
+	}
 }
-	`
-		: `{browser}`
+
+// ------------------------------------------------------------------------------------------------
+
+const getOptions = (config: TransformConfig) =>
+	config.languageInUrl && config.isStatic
+		? dedent`
+			{
+					browser,
+					initDetectors: () => [navigatorDetector],
+					redirect: {
+						throwable: redirect,
+						getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+					},
+			}`
+		: dedent`
+			{
+			 		browser
+			}`
+
+// ------------------------------------------------------------------------------------------------
 
 export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
 	// TODO: implement this
@@ -45,28 +50,21 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 		`)
 	}
 
-	const n = types.namedTypes
-	const ast = parseModule(code)
+	const wrapperFunctionName = root ? 'initRootPageLoadWrapper' : 'initLoadWrapper'
 
-	// Remove imports, but save their names
-	const importNames = getSdkImportedModules(ast.$ast)
-	// Merge imports with required imports
-	const importsAst = parseModule(requiredImports(config, root))
-	deepMergeObject(ast, importsAst)
-	const arrowOrFunctionNode = extractWrappableExpression({
-		ast: ast.$ast,
-		name: "load",
-		availableImports: importNames,
-	})
-	const exportAst = getWrappedExport(
-		parseExpression(root ? options(config) : "{}"),
-		[arrowOrFunctionNode],
-		"load",
-		root ? "initRootPageLoadWrapper" : "initLoadWrapper",
-	)
-	// Replace or add current export handle
-	if (n.Program.check(ast.$ast)) {
-		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
-	}
-	return generateCode(ast).code
+	const ast = codeToAst(code)
+
+	addImports(ast, config, root, wrapperFunctionName)
+
+	const options = root ? getOptions(config) : ''
+	wrapExportedFunction(ast, options, wrapperFunctionName)
+
+	return astToCode(ast)
+}
+
+// ------------------------------------------------------------------------------------------------
+
+export const _FOR_TESTING = {
+	addImports,
+	getOptions,
 }

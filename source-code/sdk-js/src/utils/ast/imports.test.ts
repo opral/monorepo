@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { addImport, removeImport } from './imports.js';
-import { codeToAst, astToCode } from '../../helpers/recast.js';
+import { codeToAst, astToCode } from '../recast.js';
 
 describe("removeImport", () => {
 	describe("no modifications", () => {
@@ -19,9 +19,9 @@ describe("removeImport", () => {
 
 			removeImport(ast, '@inlang/sdk-js', 'i')
 
-			expect(astToCode(ast)).toMatchInlineSnapshot(`
-				"const a = 0"
-			`)
+			expect(astToCode(ast)).toMatchInlineSnapshot(
+				'"const a = 0;"'
+			)
 		})
 
 		test("should not fail if import is not found", () => {
@@ -31,9 +31,9 @@ describe("removeImport", () => {
 
 			removeImport(ast, '@inlang/sdk-js', 'i')
 
-			expect(astToCode(ast)).toMatchInlineSnapshot(`
-				"import { get } from 'svelte/store'"
-			`)
+			expect(astToCode(ast)).toMatchInlineSnapshot(
+				'"import { get } from \'svelte/store\';"'
+			)
 		})
 
 		test("should not remove import with another name from the same package", () => {
@@ -43,9 +43,9 @@ describe("removeImport", () => {
 
 			removeImport(ast, '@inlang/sdk-js', 'i')
 
-			expect(astToCode(ast)).toMatchInlineSnapshot(`
-				"import { languages } from '@inlang/sdk-js'"
-			`)
+			expect(astToCode(ast)).toMatchInlineSnapshot(
+				'"import { languages } from \'@inlang/sdk-js\';"'
+			)
 		})
 	})
 
@@ -84,8 +84,8 @@ describe("removeImport", () => {
 			removeImport(ast, '@inlang/sdk-js', 'i')
 
 			expect(astToCode(ast)).toMatchInlineSnapshot(`
-				"import { languages } from '@inlang/sdk-js'
-				import '@inlang/sdk-js'"
+				"import { languages } from '@inlang/sdk-js';
+				import '@inlang/sdk-js';"
 			`)
 		})
 
@@ -114,9 +114,9 @@ describe("addImport", () => {
 
 		addImport(ast, '@inlang/sdk-js', 'i')
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"import { i } from '@inlang/sdk-js'"
-		`)
+		expect(astToCode(ast)).toMatchInlineSnapshot(
+			'"import { i } from \'@inlang/sdk-js\';"'
+		)
 	})
 
 	test("should add multiple imports", () => {
@@ -124,9 +124,9 @@ describe("addImport", () => {
 
 		addImport(ast, '@inlang/sdk-js', 'i', 'language')
 
-		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"import { i, language } from \\"@inlang/sdk-js\\";"
-		`)
+		expect(astToCode(ast)).toMatchInlineSnapshot(
+			'"import { i, language } from \'@inlang/sdk-js\';"'
+		)
 	})
 
 	test("should add multiple imports to existing import", () => {
@@ -152,11 +152,9 @@ describe("addImport", () => {
 		addImport(ast, '@inlang/sdk-js', 'language')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"import { language } from \\"@inlang/sdk-js\\";
-			console.log(1234)
-
-			import './app.css'
-			"
+			"import { language } from '@inlang/sdk-js';
+			console.log(1234);
+			import './app.css';"
 		`)
 	})
 
@@ -180,8 +178,8 @@ describe("addImport", () => {
 		addImport(ast, '@inlang/sdk-js', 'i')
 
 		expect(astToCode(ast)).toMatchInlineSnapshot(`
-			"import { i } from \\"@inlang/sdk-js\\";
-			import '@inlang/sdk-js'"
+			"import { i } from '@inlang/sdk-js';
+			import '@inlang/sdk-js';"
 		`)
 	})
 })

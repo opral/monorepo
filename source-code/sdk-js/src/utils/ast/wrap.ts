@@ -1,8 +1,10 @@
 import * as recast from "recast"
-import { codeToDeclarationAst } from '../../helpers/recast.js'
+import { astToCode, codeToAst, codeToDeclarationAst } from '../recast.js'
 import type { NodePath } from "ast-types"
+import { findExport, findFunctionExpression } from './exports.js'
 
 const b = recast.types.builders
+const n = recast.types.namedTypes
 
 type ASTNode = recast.types.ASTNode
 type Expression = recast.types.namedTypes.Expression
@@ -11,26 +13,37 @@ type FunctionExpression = recast.types.namedTypes.FunctionExpression
 type VariableDeclarator = recast.types.namedTypes.VariableDeclarator
 type Identifier = recast.types.namedTypes.Identifier
 
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
 
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
 export const wrapWithPlaceholder = (ast: ASTNode) => {
-	let expression: Expression | undefined
-	if (recast.types.namedTypes.ArrowFunctionExpression.check(ast)) {
-		expression = ast
-	} else if (recast.types.namedTypes.FunctionDeclaration.check(ast)) {
-		expression = ast
-	} else if (recast.types.namedTypes.VariableDeclarator.check(ast)) {
-		expression = ast.init!
+	let expressionAst: InstanceType<typeof NodePath<Expression, any>> | undefined
+
+	recast.visit(ast, {
+		visitArrowFunctionExpression(path) {
+			expressionAst = path
+
+			return false
+		},
+		visitFunctionExpression(path) {
+			expressionAst = path
+
+			return false
+		},
+		visitIdentifier(path) {
+			expressionAst = path
+
+			return false
+		},
+	})
+
+	if (!expressionAst) {
+		throw new Error(`wrapWithPlaceholder does not support '${ast.value?.type || ast?.type || 'unknown'}'`)
 	}
 
-	if (!expression) {
-		throw new Error(`wrapWithPlaceholder does not support '${ast?.type || 'unknown'}'`)
-	}
-
-	return b.callExpression(b.identifier(WRAP_IDENTIFIER), [expression as any])
+	return b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst?.value || expressionAst])
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -40,23 +53,24 @@ export const createWrapperAst = (name: string, options = '') => codeToDeclaratio
 
 // ------------------------------------------------------------------------------------------------
 
+// TODO: test this
 const findWrappingPoint = (ast: ASTNode) => {
 	let callExpressionAst: InstanceType<(typeof NodePath<FunctionExpression | ArrowFunctionExpression | VariableDeclarator, any>)> | undefined
 
 	recast.visit(ast, {
-		visitCallExpression: function (node) {
-			if (node.value.callee.name === WRAP_IDENTIFIER) {
-				this.traverse(node, {
-					visitFunctionExpression: function (node) {
-						callExpressionAst = node
+		visitCallExpression: function (path) {
+			if (path.value.callee.name === WRAP_IDENTIFIER) {
+				this.traverse(path, {
+					visitFunctionExpression: function (path) {
+						callExpressionAst = path
 						return false
 					},
-					visitArrowFunctionExpression: function (node) {
-						callExpressionAst = node
+					visitArrowFunctionExpression: function (path) {
+						callExpressionAst = path
 						return false
 					},
-					visitIdentifier: function (node) {
-						callExpressionAst = node
+					visitIdentifier: function (path) {
+						callExpressionAst = path
 						return false
 					},
 				})
@@ -70,15 +84,16 @@ const findWrappingPoint = (ast: ASTNode) => {
 	return callExpressionAst
 }
 
+// TODO: test this
 const findInsertionPoint = (ast: ASTNode) => {
 	let identifierAst: InstanceType<(typeof NodePath<Identifier, any>)> | undefined
 
 	recast.visit(ast, {
-		visitCallExpression: function (node) {
-			if (node.value.arguments[0].name === WRAP_IDENTIFIER) {
-				this.traverse(node, {
-					visitIdentifier: function (node) {
-						identifierAst = node
+		visitCallExpression: function (path) {
+			if (path.value.arguments[0].name === WRAP_IDENTIFIER) {
+				this.traverse(path, {
+					visitIdentifier: function (path) {
+						identifierAst = path
 						return false
 					},
 				})
@@ -91,6 +106,7 @@ const findInsertionPoint = (ast: ASTNode) => {
 	return identifierAst
 }
 
+// TODO: test this
 export const mergeWrapperAst = (toWrapAst: ASTNode, wrapWithAst: ASTNode) => {
 	const wrappingPointAst = findWrappingPoint(toWrapAst)
 	if (!wrappingPointAst) {
@@ -105,4 +121,37 @@ export const mergeWrapperAst = (toWrapAst: ASTNode, wrapWithAst: ASTNode) => {
 	insertionPointAst.replace(wrappingPointAst.value)
 
 	return wrapWithAst
+}
+
+// ------------------------------------------------------------------------------------------------
+
+export const wrapExportedFunction = (ast: ASTNode, options: string, wrapperFunctionName: string) => {
+	let loadFnExport = findExport(ast, 'load')
+	if (!loadFnExport) {
+		const loadFnAst = codeToAst('export const load = () => {}')
+		ast.program.body.push(loadFnAst.program.body[0])
+		loadFnExport = findExport(ast, 'load')!
+	}
+
+	if (n.FunctionDeclaration.check(loadFnExport.value)) {
+		const functionExpressionAst = b.functionExpression(loadFnExport.value.id, loadFnExport.value.params, loadFnExport.value.body)
+		functionExpressionAst.async = loadFnExport.value.async
+		const variableDeclarationAst = b.variableDeclaration('const', [
+			b.variableDeclarator(loadFnExport.value.id, functionExpressionAst)
+		])
+		loadFnExport.replace(variableDeclarationAst)
+	}
+
+	// TODO: fix type
+	const loadFn = findFunctionExpression(loadFnExport as any)
+	if (!loadFn) {
+		throw Error('Could not find load function')
+	}
+
+	// TODO: fix type
+	const toWrapAst = wrapWithPlaceholder(loadFn as any)
+	const wrapWithAst = createWrapperAst(wrapperFunctionName, options)
+
+	loadFn.replace(mergeWrapperAst(toWrapAst, wrapWithAst))
+
 }
