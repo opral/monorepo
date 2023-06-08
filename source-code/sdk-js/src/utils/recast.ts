@@ -1,32 +1,75 @@
 import { dedent } from 'ts-dedent'
 import * as recast from "recast"
+import type { NodePath as NodePathOriginal } from "ast-types/lib/node-path"
+import type { ASTNode } from "ast-types/lib/types"
+import { namedTypes as n } from "ast-types"
+
 // TODO: use TypeScript parser if TypeScript is installed
 import * as parser from "recast/parsers/esprima"
-type ASTNode = recast.types.ASTNode
 
-export const parseCode = (code: string) => recast.parse(code, { parser }) as ASTNode
+// ------------------------------------------------------------------------------------------------
 
-export const printCode = (ast: recast.types.ASTNode) => recast.print(ast).code
+type NodePath<V = any> = NodePathOriginal<any, V>
+
+export type {
+	ASTNode,
+	NodePath,
+}
+
+export const b = recast.types.builders
+
+export { n }
+
+// ------------------------------------------------------------------------------------------------
+
+const parseCode = (code: string) => recast.parse(code, { parser }) as n.File
+
+const printCode = (ast: ASTNode | NodePath) => recast.prettyPrint(
+	n.Node.check(ast) ? ast : (ast as NodePath).value,
+	{
+		quote: 'single',
+		tabWidth: 3,
+		useTabs: true,
+	}
+).code
 
 // ------------------------------------------------------------------------------------------------
 
 export const codeToAst = (code: string) => parseCode(dedent(code))
 
 export const codeToDeclarationAst = (code: string) => {
-	const ast = codeToAst(code).program.body[0]
+	const ast = codeToAst(code).program.body[0]!
 
-	if (recast.types.namedTypes.ExpressionStatement.check(ast)) {
-		return ast.expression
-	}
-	if (recast.types.namedTypes.VariableDeclaration.check(ast)) {
-		return ast.declarations[0]?.init
+	let foundDeclarationAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.Identifier> | undefined
+
+	recast.visit(ast, {
+		visitVariableDeclarator(path) {
+			if (path.value.id.name !== 'x') {
+				throw new Error('you must name the variable "x"')
+			}
+
+			this.traverse(path, {
+				visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
+					foundDeclarationAst = path
+					return false
+				},
+				visitFunctionExpression(path: NodePath<n.FunctionExpression>) {
+					foundDeclarationAst = path
+					return false
+				},
+				visitIdentifier(path: NodePath<n.Identifier>) {
+					foundDeclarationAst = path
+					return false
+				},
+			})
+		}
+	})
+
+	if (!foundDeclarationAst) {
+		throw new Error('codeToDeclarationAst: could not find declaration')
 	}
 
-	return ast.declarations[0]
+	return foundDeclarationAst
 }
 
-export const astToCode = (ast: recast.types.ASTNode) => recast.prettyPrint(ast, {
-	quote: 'single',
-	tabWidth: 3,
-	useTabs: true,
-}).code
+export const astToCode = (ast: ASTNode | NodePath) => printCode(ast)

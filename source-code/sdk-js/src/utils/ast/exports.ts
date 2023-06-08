@@ -1,18 +1,18 @@
 import * as recast from "recast"
-import type { NodePath } from "ast-types"
+import type { NodePath, namedTypes } from "ast-types"
 
 type ASTNode = recast.types.ASTNode
-type ExportDeclaration = recast.types.namedTypes.ExportDeclaration
-type ExportSpecifier = recast.types.namedTypes.ExportSpecifier
-type ArrowFunctionExpression = recast.types.namedTypes.ArrowFunctionExpression
-type FunctionExpression = recast.types.namedTypes.FunctionExpression
-type FunctionDeclaration = recast.types.namedTypes.FunctionDeclaration
+type ExportDeclaration = namedTypes.ExportDeclaration
+type ExportSpecifier = namedTypes.ExportSpecifier
+type ArrowFunctionExpression = namedTypes.ArrowFunctionExpression
+type FunctionExpression = namedTypes.FunctionExpression
+type FunctionDeclaration = namedTypes.FunctionDeclaration
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test output
-export const findExport = (ast: ASTNode, name: string) => {
+export const findExport = (ast: InstanceType<(typeof NodePath<ASTNode>)>, name: string) => {
 	if (!recast.types.namedTypes.File.check(ast)) return // we only work on the root ast
 
 	let exportDeclarationAst: InstanceType<(typeof NodePath<ExportDeclaration | ExportSpecifier, any>)> | undefined
