@@ -236,24 +236,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: args.routeParams.repository,
 				})
 				.then((response) => {
-					console.log(response)
+					telemetryBrowser.group("repository", gitOrigin, {
+						visibility: response.data.private ? "Private" : "Public",
+						isFork: response.data.fork ? "Fork" : "isNotFork",
+					})
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: response.data.private ? "Private" : "Public",
 						userPermission:
 							userIsCollaborator() && !response.data.fork ? "collaborator" : "contributor",
-					})
-					telemetryBrowser.group("repository", gitOrigin, {
-						type: response.data.private ? "Private" : "Public",
-						isAFork: response.data.fork ? "Fork" : "isNOTAFork",
 					})
 				})
 				.catch((error) => {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: "unknown",
 						errorDuringIsPrivateRequest: error,
 						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
 					})
