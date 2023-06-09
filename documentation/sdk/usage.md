@@ -4,7 +4,7 @@ href: /documentation/sdk/usage
 description: This is a list of all the functions you can export from the inlang SDK, what they provide and how to use them.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.title %} SDKs
 
 With `@inlang/sdk-js` you get many useful functions to help you implement internationalization in your application. This is a list of all the functions, what they provide and how to use them.
 
@@ -118,3 +118,5 @@ The `loadResource` function allows you to load the resource file for a specific 
 ---
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
+
+{% Feedback /%}

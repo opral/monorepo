@@ -5,8 +5,8 @@ import { forEachColorToken } from "../forEachColorToken.cjs"
 export default function (): CSSRuleObject[] {
 	const base = {
 		".link": {
-			"@apply font-medium hover:underline": "true",
-			transition: "color .25s",
+			"@apply font-medium hover:text-on-background": "true",
+			transition: "color .1s",
 		},
 	}
 

@@ -40,4 +40,9 @@ export const icons = {
 	"turn-slight-left": import("~icons/material-symbols/turn-slight-left-rounded"),
 	architecture: import("~icons/material-symbols/architecture-rounded"),
 	construction: import("~icons/material-symbols/construction-rounded"),
+	fast: import("~icons/material-symbols/fast-forward-outline-rounded"),
+	"add-plugin": import("~icons/material-symbols/extension-outline"),
+	code: import("~icons/material-symbols/code-rounded"),
+	badge: import("~icons/material-symbols/bar-chart-rounded"),
+	external: import("~icons/material-symbols/arrow-outward-rounded"),
 } as const

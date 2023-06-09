@@ -1,12 +1,21 @@
 ---
-title: "CLI"
-href: /documentation/cli
-description: "The Inlang CLI"
+title: "inlang CLI"
+href: /documentation/apps/inlang-cli
+description: "The inlang CLI"
 ---
 
 # {% $frontmatter.title %}
 
-[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure. It ca be used to automate localization tasks, such as machine translation, linting and more.
+
+### Benefits
+
+- ✨ **Automate** tedious localization tasks
+- ⚙️ Integrate localization into your **CI/CD** pipeline
+- 🔍 **Lint** your translations
+- 🤖 **Machine translate** your resources
+- 🖊️ Open web editor right from the command line
+- ✅ Validate your `inlang.config.js` configuration file
 
 ## Installation
 

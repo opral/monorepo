@@ -1,14 +1,41 @@
 ---
-title: Why inlang?
-href: /documentation/why-inlang
-description: Learn more about the design principles behind inlang.
+title: Introduction
+href: /documentation
+description: Learn how to get started with inlang, the design principles, and more.
 ---
 
 # {% $frontmatter.title %}
 
-**Git-based, infrastructure, and developer-first.**
+{% QuickLinks %}
 
-## Git Based
+    {% QuickLink
+        title="Quickstart"
+        icon="fast"
+        href="/documentation/quick-start"
+        description="Setup inlang for a localized project."
+    /%}
+
+    {% QuickLink
+        title="Plugins"
+        icon="add-plugin"
+        href="/documentation/plugins/registry"
+        description="Extend inlang to fit your needs."
+    /%}
+
+    {% QuickLink
+        title="SDKs"
+        icon="code"
+        href="/documentation/sdk/overview"
+        description="Use a SDK if you didn't localized yet?"
+    /%}
+
+{% /QuickLinks %}
+
+## What is inlang?
+
+inlang (pronounced /Ínlang/) is localization that consists of extendable tools and apps to make localization of software simple. It uses a versioned backend that allows for efficient collaboartion between developers, translators or designers.
+
+### Git-compatible, infrastructure, and developer-first.
 
 All tools and applications that inlang provides are built on Git, the version control, automation and collaboration system used by software engineers.
 
@@ -16,7 +43,7 @@ The automation and collaboration power a version control system provides might j
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/rfcs/core-architecture/assets/001-git-based-architecture.png"
+    src="https://github.com/inlang/inlang/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070"
 
     alt="git-based localization infrastructure"
 
@@ -32,7 +59,7 @@ Localization is too complicated and involves too many stakeholders to be solvabl
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/inlang/documentation/assets/one-config-to-power-everything.webp"
+    src="https://github.com/inlang/inlang/assets/58360188/55c61841-ab73-4fa8-a828-3c2016ced872"
 
     alt="one config file to power all infrastructure tools"
 
@@ -48,10 +75,23 @@ We are building tools that increases the developer experience in the context of 
 
 {% Figure
 
-    src="https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif"
+    src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif"
 
     alt="inlang ide extension"
 
     caption="The IDE extension is an example of the developer first approach."
 
 /%}
+
+{% QuickLinks %}
+
+    {% QuickLink
+        title="Setup your config now"
+        icon="fast"
+        href="/documentation/quick-start"
+        description="Setup inlang for a localized project."
+    /%}
+
+{% /QuickLinks %}
+
+{% Feedback /%}

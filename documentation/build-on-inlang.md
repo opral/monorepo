@@ -18,9 +18,7 @@ Inlang is designed to be build upon. The [@inlang/core](https://github.com/inlan
 
 If you build on inlang, the "logic" usually resembles the following flow:
 
-```
-config.readResources() -> query(AST) -> config.writeResources()
-```
+> config.readResources() -> query(AST) -> config.writeResources()
 
 ```js
 // The `inlang.config.js` file can be imported by your application
@@ -75,3 +73,5 @@ for (const resource of resources) {
 	}
 }
 ```
+
+{% Feedback /%}

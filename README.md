@@ -1,5 +1,3 @@
-[![](https://dcbadge.vercel.app/api/server/gdMPPWy57R)](https://discord.gg/gdMPPWy57R) [![Twitter](https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/inlangHQ)
-
 <div>
     <p align="center">
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
@@ -9,11 +7,19 @@
     </h2>
 </div>
 
+<p align="center">
+  <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Join the community on Discord' src='https://img.shields.io/badge/Discord-100000?style=flat&logo=Discord&logoColor=white&labelColor=5865F2&color=5865F2'/></a>
+  <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Follow inlang on Twitter' src='https://img.shields.io/badge/Twitter-100000?style=flat&logo=Twitter&logoColor=white&labelColor=1A8CD8&color=1A8CD8'/></a>
+
+</p>
+
 ## Community & Support
 
 **[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
 
-**[🌱 Ecosystem](https://github.com/inlang/ecosystem)** - Plugins, resources, and more.
+**[🌱 Ecosystem](https://inlang.com/documentation/plugins/registry)** - Plugins, resources, and more.
+
+**[🛠️ Not localized yet](https://inlang.com/documentation/sdk/overview)** - Supported SDKs to localize your app.
 
 **[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
 
@@ -27,30 +33,34 @@
 
 Inlang consists of multipe applications that can be used individually, or in combination with each other.
 
-### Editor
+### [Editor](https://inlang.com/documentation/apps/web-editor)
 
-Manage translations in a git repository.
+Manage translations in a simple web interface and push changes to your repository.
 
-- [x] git(hub) workflows like pull requests.
-- [x] no hosting, no sync pipelines
-- [x] no extra accounts
+✅ works with existing translation files </br>
+✅ git workflows like pull requests </br>
+✅ no hosting, no sync pipelines </br>
+✅ no extra accounts </br>
 
-![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
+![the inlang editor to manage translations](https://github.com/inlang/inlang/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
 
-### IDE-Extension
+### [IDE-Extension](https://inlang.com/documentation/apps/ide-extension)
 
-Improve the DX when working on localized codebases.
+The IDE-extension allows you to translate your content directly in your IDE.
 
-- [x] extract translations
-- [x] see errors directly in the IDE
+✅ extract messages </br>
+✅ inline annotations to see translations </br>
+✅ linting errors and warnings </br>
 
-![Screen Recording 2022-02-15 at 15 02 26](https://user-images.githubusercontent.com/35429197/154270998-3e8d147a-b979-4df5-b6df-a53c900d962e.gif)
+![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif)
 
-### CLI
+### [CLI](https://inlang.com/documentation/apps/inlang-cli)
 
-Automate localization via CI/CD.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
-- [x] validate translations
-- [x] auto machine translate
+✅ init & validate config </br>
+✅ lint translations </br>
+✅ machine translate </br>
+✅ open inlang editor </br>
 
 ![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
