@@ -163,19 +163,33 @@ export function PatternEditor(props: {
 		}
 		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
 
-		setLocalChanges((prev: any[]) => [
-			...prev.filter(
-				(change) =>
-					!(
-						change.languageTag === resource().languageTag &&
-						change.newCopy.id.name === _copy.id.name
+		setLocalChanges((prev: any[]) => {
+			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
+				return [
+					...prev.filter(
+						(change) =>
+							!(
+								change.languageTag === resource().languageTag &&
+								change.newCopy.id.name === _copy.id.name
+							),
 					),
-			),
-			{
-				languageTag: resource().languageTag,
-				newCopy: _copy,
-			},
-		])
+				]
+			} else {
+				return [
+					...prev.filter(
+						(change) =>
+							!(
+								change.languageTag === resource().languageTag &&
+								change.newCopy.id.name === _copy.id.name
+							),
+					),
+					{
+						languageTag: resource().languageTag,
+						newCopy: _copy,
+					},
+				]
+			}
+		})
 		console.log(localChanges())
 
 		setSavedEditorText(_textValue)
