@@ -4,7 +4,6 @@ import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
 import { msg } from "../utils/message.js"
 import { telemetry } from "../services/telemetry/index.js"
-// import { telemetryNode } from "@inlang/telemetry"
 
 /**
  * Helps the user to extract messages from the active text editor.

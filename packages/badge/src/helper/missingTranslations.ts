@@ -33,11 +33,15 @@ export function missingTranslations(args: {
 	}
 
 	return {
-		percentage: Math.round(
-			(numberOfMissingTranslations /
-				(totalNumberOfReferenceMessages * resourcesToTranslateTo.length)) *
-				100,
-		),
+		// math 1x1 :(
+		percentage:
+			100 -
+			// takes the inverse
+			Math.round(
+				(numberOfMissingTranslations /
+					(totalNumberOfReferenceMessages * resourcesToTranslateTo.length)) *
+					100,
+			),
 		numberOfMissingTranslations,
 	}
 }
