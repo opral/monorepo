@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.15
+
+### Patch Changes
+
+- 95bfe307: add config validate
+
 ## 0.9.14
 
 ### Patch Changes
