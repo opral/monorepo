@@ -6,10 +6,6 @@ import type { coreUsedConfigEvent } from "@inlang/telemetry"
  * Exists to avoid typos/always set the correct event name and properties.
  */
 export type TelemetryEvents =
-	| "IDE-EXTENSION activated"
-	| "IDE-EXTENSION code action provided"
-	| "IDE-EXTENSION code action resolved"
-	| "IDE-EXTENSION decoration set"
-	| "IDE-EXTENSION command executed"
-	| "IDE-EXTENSION completed add to workspace recommendations"
+	| "CLI command executed"
+	| "CLI started"
 	| typeof coreUsedConfigEvent.name

@@ -11,9 +11,9 @@ export const validate = new Command()
 async function validateCommandAction() {
 	try {
 		// Get the config
-		const config = await getConfig()
-		if (!config) {
-			// no message because that's handled in getConfig
+		const [config, errorMessage] = await getConfig()
+		if (errorMessage) {
+			log.error(errorMessage)
 			return
 		}
 
