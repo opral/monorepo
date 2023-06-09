@@ -11,9 +11,9 @@ export const lint = new Command()
 async function lintCommandAction() {
 	try {
 		// Get the config
-		const config = await getConfig()
+		const [config, errorMessage] = await getConfig()
 		if (!config) {
-			// no message because that's handled in getConfig
+			log.error(errorMessage)
 			return
 		}
 
