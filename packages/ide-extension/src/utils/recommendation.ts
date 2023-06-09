@@ -68,7 +68,8 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 		// Track the outcome
 		telemetry.capture({
 			event: "IDE-EXTENSION completed add to workspace recommendations",
-			properties: { outcome: installInlangExtension },
+			// if the user does not react, the outcome is undefined aka "Ignored"
+			properties: { outcome: installInlangExtension ?? "Ignored" },
 		})
 	}
 }
