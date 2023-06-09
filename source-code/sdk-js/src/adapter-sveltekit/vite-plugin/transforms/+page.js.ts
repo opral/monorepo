@@ -63,7 +63,7 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 
 	addImports(ast, config, root, wrapperFunctionName)
 
-	const options = root ? getOptions(config, root) : ''
+	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
 	return astToCode(ast)

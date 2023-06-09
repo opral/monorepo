@@ -1,174 +1,64 @@
 import { dedent } from "ts-dedent"
-import { describe, expect, it } from "vitest"
+import { describe, expect, test } from "vitest"
 import { transformLayoutServerJs } from "./+layout.server.js.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 
 describe("transformLayoutServerJs", () => {
-	describe("root=true", () => {
-		describe("basics", () => {
-			it("adds load function to an empty file", () => {
-				const code = transformLayoutServerJs(getTransformConfig(), "", true)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const load = initRootLayoutServerLoadWrapper().wrap(() => {});"
-				`)
-			})
+	describe("root", () => {
+		test("empty file", () => {
+			const code = ""
+			const transformed = transformLayoutServerJs(getTransformConfig(), code, true)
 
-			it("adds handle endpoint to a file with arbitrary contents", () => {
-				const code = transformLayoutServerJs(
-					getTransformConfig(),
-					dedent`
-					export const prerender = true;
-				`,
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const prerender = true;
-					export const load = initRootLayoutServerLoadWrapper().wrap(() => {});"
-				`)
-			})
+			expect(transformed).toMatchInlineSnapshot(`
+				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				export const load = initRootLayoutServerLoadWrapper().wrap(() => {});"
+			`)
+		})
 
-			describe("should wrap handle if already defined", () => {
-				it("arrow function", () => {
-					const code = transformLayoutServerJs(
-						getTransformConfig(),
-						dedent`
-						import type { LayoutLoad } from './$types.js'
+		test("basic load function", () => {
+			const code = dedent`
+				export const load = async () => {};
+			`
+			const transformed = transformLayoutServerJs(
+				getTransformConfig(),
+				code,
+				true,
+			)
 
-						export const load: LayoutLoad = ({ locals }) => {
-							return {
-								userId: locals.userId
-							}
-						}
-					`,
-						true,
-					)
-
-					expect(code).toMatchInlineSnapshot(`
-						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-						import type { LayoutLoad } from './$types.js'
-
-						export const load = initRootLayoutServerLoadWrapper().wrap(({ locals }) => {
-							return {
-								userId: locals.userId
-							}
-						});"
-					`)
-				})
-
-				it("function keyword", () => {
-					const code = transformLayoutServerJs(
-						getTransformConfig(),
-						dedent`
-						import type { LayoutLoad } from './$types.js'
-
-						export async function load({ }) {
-							console.info('hi!')
-							return { }
-						}
-					`,
-						true,
-					)
-
-					expect(code).toMatchInlineSnapshot(`
-						"import { initRootLayoutServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-						import type { LayoutLoad } from './$types.js'
-
-						export const load = initRootLayoutServerLoadWrapper().wrap(async function load({ }) {
-							console.info('hi!')
-							return { }
-						});"
-					`)
-				})
-			})
+			expect(transformed).toMatchInlineSnapshot(`
+				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				export const load = initRootLayoutServerLoadWrapper().wrap(async () => {});"
+			`)
 		})
 	})
 
-	describe("root=false", () => {
-		describe("basics", () => {
-			it("adds load function to an empty file", () => {
-				const code = transformLayoutServerJs(getTransformConfig(), "", false)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const load = initServerLoadWrapper().wrap(() => {});"
-				`)
-			})
+	describe("non-root", () => {
+		test("should not do anything", () => {
+			const code = ""
+			const config = getTransformConfig()
+			const transformed = transformLayoutServerJs(config, code, false)
+			expect(transformed).toEqual(code)
+		})
+	})
 
-			it("adds handle endpoint to a file with arbitrary contents", () => {
-				const code = transformLayoutServerJs(
-					getTransformConfig(),
-					dedent`
-					export const prerender = true;
-				`,
-					false,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					export const prerender = true;
-					export const load = initServerLoadWrapper().wrap(() => {});"
-				`)
-			})
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformLayoutServerJs(config, code, true)
+		expect(transformed).toEqual(code)
+	})
 
-			describe("should wrap handle if already defined", () => {
-				it("arrow function", () => {
-					const code = transformLayoutServerJs(
-						getTransformConfig(),
-						dedent`
-						import type { LayoutLoad } from './$types.js'
+	describe("'@inlang/sdk-js' imports", () => {
+		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
+			const code = "import { i } from '@inlang/sdk-js'"
+			const config = getTransformConfig()
+			expect(() => transformLayoutServerJs(config, code, true)).toThrow()
+		})
 
-						export const load: LayoutLoad = ({ locals }) => {
-							return {
-								userId: locals.userId
-							}
-						}
-					`,
-						false,
-					)
-
-					expect(code).toMatchInlineSnapshot(`
-						"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-						import type { LayoutLoad } from './$types.js'
-
-						export const load = initServerLoadWrapper().wrap(({ locals }) => {
-							return {
-								userId: locals.userId
-							}
-						});"
-					`)
-				})
-
-				it("function keyword", () => {
-					const code = transformLayoutServerJs(
-						getTransformConfig(),
-						dedent`
-						import type { LayoutLoad } from './$types.js'
-
-						export async function load({ }) {
-							console.info('hi!')
-							return { }
-						}
-					`,
-						false,
-					)
-
-					expect(code).toMatchInlineSnapshot(`
-						"import { initServerLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-						import type { LayoutLoad } from './$types.js'
-
-						export const load = initServerLoadWrapper().wrap(async function load({ }) {
-							console.info('hi!')
-							return { }
-						});"
-					`)
-				})
-			})
+		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
+			const code = "import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+			const config = getTransformConfig()
+			expect(() => transformLayoutServerJs(config, code, true)).not.toThrow()
 		})
 	})
 })
-
-// NOTES
-// - Allows merging of already present and required imports
-// - adds an empty exported arrow function named load if not present
-// - Wraps this load function (whether present or not) with initRootServerLayoutLoadWrapper().wrap()
-// - Adds options to initRootServerLayoutLoadWrapper if necessary

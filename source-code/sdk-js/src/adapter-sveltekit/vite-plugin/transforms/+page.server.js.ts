@@ -23,7 +23,7 @@ export const transformPageServerJs = (config: TransformConfig, code: string, roo
 
 	// addImport(ast, '@inlang/sdk-js/adapter-sveltekit/server', wrapperFunctionName)
 
-	// wrapExportedFunction(ast, '', wrapperFunctionName, 'load')
+	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'load')
 
 	// return astToCode(ast)
 }

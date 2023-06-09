@@ -1,59 +1,28 @@
 import type { TransformConfig } from "../config.js"
-import { parseModule, generateCode } from "magicast"
-import { deepMergeObject } from "magicast/helpers"
-import { types } from "recast"
-import { dedent } from "ts-dedent"
-import {
-	extractWrappableExpression,
-	getWrappedExport,
-	getSdkImportedModules,
-	replaceOrAddExportNamedFunction,
-} from "../../../helpers/inlangAst.js"
+import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
+import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
+import { codeToAst, astToCode, n } from '../../../utils/recast.js'
 
-const requiredImports = (root: boolean) =>
-	root
-		? `
-import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
-`
-		: `
-import { initServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server";
-`
+const assertNoImportsFromSdkJs = (ast: n.File) => {
+	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
+		throw Error(`It is currently not supported to import something from '@inlang/sdk-js' in this file.`)
+	}
+}
 
-// TODO: refactor together with `+page.server.js.ts`
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	// TODO: implement this
-	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
-		throw Error(dedent`
-			It is currently not supported to import something from '@inlang/sdk-js' in this file. You can use the following code to make it work:
+	const ast = codeToAst(code)
 
-			export const load = async (event, { i }) => {
-				console.info(i('hello.inlang'))
-			}
-		`)
-	}
+	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 
-	const n = types.namedTypes
-	const ast = parseModule(code)
+	if (isOptOutImportPresent(ast)) return code
 
-	// Remove imports, but save their names
-	const importNames = getSdkImportedModules(ast.$ast)
-	// Merge imports with required imports
-	const importsAst = parseModule(requiredImports(root))
-	deepMergeObject(ast, importsAst)
-	const arrowOrFunctionNode = extractWrappableExpression({
-		ast: ast.$ast,
-		name: "load",
-		availableImports: importNames,
-	})
-	const exportAst = getWrappedExport(
-		undefined,
-		[arrowOrFunctionNode],
-		"load",
-		root ? "initRootLayoutServerLoadWrapper" : "initServerLoadWrapper",
-	)
-	// Replace or add current export handle
-	if (n.Program.check(ast.$ast)) {
-		replaceOrAddExportNamedFunction(ast.$ast, "load", exportAst)
-	}
-	return generateCode(ast).code
+	if (!root) return code // for now we don't need to transform non-root files
+
+	const wrapperFunctionName = root ? 'initRootLayoutServerLoadWrapper' : 'initServerLoadWrapper'
+
+	addImport(ast, '@inlang/sdk-js/adapter-sveltekit/server', wrapperFunctionName)
+
+	wrapExportedFunction(ast, undefined, wrapperFunctionName, 'load')
+
+	return astToCode(ast)
 }

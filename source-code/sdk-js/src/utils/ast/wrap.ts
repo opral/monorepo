@@ -128,7 +128,7 @@ const convertToFunctionExpression = (ast: NodePath<n.FunctionDeclaration>) => {
 	ast.replace(variableDeclarationAst)
 }
 
-export const wrapExportedFunction = (ast: n.File, options: string, wrapperFunctionName: string, exportName: string) => {
+export const wrapExportedFunction = (ast: n.File, options: string | undefined, wrapperFunctionName: string, exportName: string) => {
 	const fnExport = findOrCreateExport(ast, exportName)
 	// if export is a function declaration, convert it to a function expression
 	if (n.FunctionDeclaration.check(fnExport.value)) {

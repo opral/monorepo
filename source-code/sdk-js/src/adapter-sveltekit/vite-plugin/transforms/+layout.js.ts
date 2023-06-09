@@ -53,7 +53,7 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 
 	addImports(ast, config, root, wrapperFunctionName)
 
-	const options = root ? getOptions(config, root) : ''
+	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
 	return astToCode(ast)
