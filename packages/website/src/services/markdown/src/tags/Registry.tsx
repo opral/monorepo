@@ -32,10 +32,7 @@ export const Registry = () => {
 							<a href={plugin.repository} target="_blanc" class="relative no-underline">
 								<div class="flex flex-col gap-4 bg-surface-100 hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 									<div class="flex items-center gap-4">
-										<img
-											class="w-8 h-8 rounded m-0 shadow-lg"
-											src={getRawUrl(plugin.repository, "assets/icon.png")}
-										/>
+										<img class="w-8 h-8 rounded m-0 shadow-lg" src={plugin.icon} />
 										<p class="m-0 text-surface-900 font-semibold text-md">{plugin.id}</p>
 									</div>
 									<Description repository={plugin.repository} />
@@ -93,7 +90,7 @@ const Description = (props: { repository: string }) => {
 
 	const fetchReadMeFromRepoURL = async function (repository: string) {
 		await fetchDataFromRepo(repository).then((data) => {
-			console.log(data)
+			//console.log(data)
 			if (data) {
 				const pattern = /(?<=\n\n|^)(?![###|####])((?!\n\n).)+/g
 				const paragraphs = data.match(pattern)
@@ -101,7 +98,6 @@ const Description = (props: { repository: string }) => {
 					setDescription(paragraphs[0].slice(0, 80) + "...")
 				}
 			}
-			console.log("set readme")
 		})
 	}
 
@@ -119,6 +115,7 @@ const Description = (props: { repository: string }) => {
 }
 
 const fetchDataFromRepo = async (url: string) => {
+	console.log(url)
 	let _data: string | undefined
 	await fetch(url)
 		.then((response) => {
@@ -134,5 +131,7 @@ const fetchDataFromRepo = async (url: string) => {
 }
 
 const getRawUrl = (repository: string, filepath: string) => {
-	return repository.replace("github.com", "raw.githubusercontent.com") + "/main/" + filepath
+	return (
+		repository.replace("github.com", "raw.githubusercontent.com").replace("/tree", "") + filepath
+	)
 }
