@@ -17,19 +17,19 @@ export const plugins: InlangPluginManifest[] = [
 	{
 		id: "inlang-plugin-json",
 		icon: "https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/main/assets/icon.png",
-		repository: "https://github.com/samuelstroschein/inlang-plugin-json/main/",
+		repository: "https://github.com/samuelstroschein/inlang-plugin-json/",
 		keywords: ["json", "placeholder"],
 	},
 	{
 		id: "inlang-plugin-yaml",
 		icon: "https://github.com/felixhaeberle/inlang-plugin-yaml/blob/main/assets/icon.png?raw=true",
-		repository: "https://github.com/felixhaeberle/inlang-plugin-yaml/main/",
+		repository: "https://github.com/felixhaeberle/inlang-plugin-yaml/",
 		keywords: ["yaml", "yml"],
 	},
 	{
 		id: "inlang-plugin-po",
 		icon: "https://github.com/jannesblobel/inlang-plugin-po/blob/main/assets/icon.png?raw=true",
-		repository: "https://github.com/jannesblobel/inlang-plugin-po/main/",
+		repository: "https://github.com/jannesblobel/inlang-plugin-po/",
 		keywords: ["po", "python"],
 	},
 ]
