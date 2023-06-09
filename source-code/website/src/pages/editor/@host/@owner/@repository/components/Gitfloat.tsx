@@ -12,13 +12,18 @@ import { SignInDialog } from "@src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
+import { query } from "@inlang/core/query"
+import type { Resource } from "@inlang/core/ast"
 
 export const Gitfloat = () => {
 	const {
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
-		unpushedChanges,
+		localChanges,
+		setLocalChanges,
+		resources,
+		setResources,
 		setFsChange,
 		setLastPush,
 		routeParams,
@@ -30,7 +35,7 @@ export const Gitfloat = () => {
 	const [localStorage] = useLocalStorage()
 
 	// ui states
-	const gitState: () => "login" | "fork" | "pullrequest" | "changes" = () => {
+	const gitState: () => "login" | "fork" | "pullrequest" | "hasChanges" = () => {
 		if (localStorage?.user === undefined) {
 			return "login"
 		} else if (userIsCollaborator() === false) {
@@ -39,13 +44,13 @@ export const Gitfloat = () => {
 		// if changes exist in a fork, show the pull request button
 		else if (
 			hasPushedChanges() &&
-			(unpushedChanges() ?? []).length <= 0 &&
+			localChanges().length === 0 &&
 			githubRepositoryInformation()?.data.fork
 		) {
 			return "pullrequest"
 		}
 		// user is logged in and a collaborator, thus show changeStatus
-		return "changes"
+		return "hasChanges"
 	}
 
 	const [isLoading, setIsLoading] = createSignal(false)
@@ -99,6 +104,31 @@ export const Gitfloat = () => {
 			})
 		}
 		setIsLoading(true)
+		// write resources to fs
+		/** the resource the message belongs to */
+
+		let _resources = resources.map((resource) => {
+			return { ...resource }
+		})
+
+		for (const change of localChanges()) {
+			const [updatedResource] = query(
+				_resources.find(
+					(resource: Resource) => resource.languageTag.name === change.languageTag.name,
+				)!,
+			).upsert({ message: change.newCopy! })!
+
+			_resources = [
+				...(_resources.filter(
+					(resource) => resource.languageTag.name !== change.languageTag.name,
+				) as Resource[]),
+				updatedResource as Resource,
+			]
+		}
+
+		setResources(_resources)
+
+		// commit & push
 		const [, exception] = await pushChanges({
 			fs: fs(),
 			routeParams: routeParams(),
@@ -107,6 +137,7 @@ export const Gitfloat = () => {
 			setLastPush,
 			setLastPullTime,
 		})
+		setLocalChanges([])
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
@@ -148,7 +179,7 @@ export const Gitfloat = () => {
 	}
 
 	type GitFloatArray = {
-		[state in "login" | "fork" | "changes" | "pullrequest"]: GitfloatData
+		[state in "login" | "fork" | "hasChanges" | "pullrequest"]: GitfloatData
 	}
 
 	const data: GitFloatArray = {
@@ -168,7 +199,7 @@ export const Gitfloat = () => {
 			onClick: handleFork,
 			tourStepId: "fork-repository",
 		},
-		changes: {
+		hasChanges: {
 			text: "local changes",
 			buttontext: "Push",
 			icon: IconPush,
@@ -198,12 +229,12 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if ((unpushedChanges() ?? []).length > 0) {
+		if (localChanges().length > 0) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
 				gitfloat?.classList.remove("animate-jump")
-			}, 300)
+			}, 1000)
 		}
 	})
 
@@ -241,10 +272,10 @@ export const Gitfloat = () => {
 									(gitState() === "pullrequest" && "hidden")
 								}
 							>
-								<Show when={gitState() === "changes"}>
+								<Show when={gitState() === "hasChanges"}>
 									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-											{(unpushedChanges() ?? []).length}
+											{localChanges().length}
 										</p>
 									</div>
 								</Show>
@@ -256,7 +287,7 @@ export const Gitfloat = () => {
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
 								prop:loading={isLoading()}
-								prop:disabled={(unpushedChanges() ?? []).length === 0 && gitState() === "changes"}
+								prop:disabled={localChanges().length === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}

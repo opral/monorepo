@@ -42,6 +42,7 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 			return ast_elements
 		}
 	}
+	return undefined
 }
 
 // setTipTapMessage
