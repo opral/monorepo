@@ -66,6 +66,7 @@ it("should match different origin patterns to one unambigious identifier", () =>
 		"git@github.com:example/repo.git",
 		"username@github.com/example/repo.git",
 		"https://ghp_Es2aQE4V0jE7hnm59Zo1GfSSDdRVDE0BxMO1@github.com/example/repo.git",
+		"git://github.com/example/repo.git",
 	]
 
 	for (const remote of remotes) {
@@ -73,5 +74,3 @@ it("should match different origin patterns to one unambigious identifier", () =>
 		expect(result).toBe("github.com/example/repo.git")
 	}
 })
-
-//TODO writte test for the Upstream functions
