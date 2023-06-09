@@ -1,5 +1,11 @@
 # @inlang/plugin-registry
 
+## 1.1.2
+
+### Patch Changes
+
+- e28947dc: Fix link of registry
+
 ## 1.1.1
 
 ### Patch Changes
