@@ -32,7 +32,7 @@ export const Registry = () => {
 							<a href={plugin.repository} target="_blanc" class="relative no-underline">
 								<div class="flex flex-col gap-4 bg-surface-100 hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 									<div class="flex items-center gap-4">
-										<img class="w-8 h-8 rounded m-0 shadow-lg" src={plugin.icon} />
+										<img class="w-8 h-8 rounded-md m-0 shadow-lg" src={plugin.icon} />
 										<p class="m-0 text-surface-900 font-semibold text-md">{plugin.id}</p>
 									</div>
 									<Description repository={plugin.repository} />
@@ -41,7 +41,7 @@ export const Registry = () => {
 											class="w-6 h-6 rounded-full m-0"
 											src={"https://github.com/" + user + ".png"}
 										/>
-										<p class="m-0 text-surface-600">{user}</p>
+										<p class="m-0 text-surface-600 no-underline hover:text-surface-900">{user}</p>
 									</div>
 								</div>
 								<div class="absolute top-0 right-0 -translate-x-4 translate-y-4">
@@ -104,7 +104,7 @@ const Description = (props: { repository: string }) => {
 	onMount(() => fetchReadMeFromRepoURL(getRawUrl(props.repository, "README.md")))
 
 	return (
-		<div>
+		<div class="h-8">
 			<Show fallback={"Repository description..."} when={description()}>
 				<div class="m-0 font-normal leading-6 text-sm tracking-wide text-surface-500">
 					{description()}
@@ -131,7 +131,17 @@ const fetchDataFromRepo = async (url: string) => {
 }
 
 const getRawUrl = (repository: string, filepath: string) => {
-	return (
-		repository.replace("github.com", "raw.githubusercontent.com").replace("/tree", "") + filepath
-	)
+	if (repository.includes("/tree/main/")) {
+		//in monorepo
+		return (
+			repository.replace("github.com", "raw.githubusercontent.com").replace("/tree", "") + filepath
+		)
+	} else {
+		//own repo
+		return (
+			repository.replace("github.com", "raw.githubusercontent.com").replace("/tree", "") +
+			"/main/" +
+			filepath
+		)
+	}
 }
