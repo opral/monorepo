@@ -21,7 +21,11 @@ export const Registry = () => {
 
 	return (
 		<div class="flex flex-col gap-4 pt-4">
-			<Search placeholder={"Search plugins"} textValue={textValue} setTextValue={setTextValue} />
+			<Search
+				placeholder={"Search for plugins, SDKs, frameworks, languages ..."}
+				textValue={textValue}
+				setTextValue={setTextValue}
+			/>
 			<div class="grid grid-cols-2 flex-col gap-4 ">
 				<For each={filteredPlugins()}>
 					{(plugin) => {
@@ -32,7 +36,7 @@ export const Registry = () => {
 							<a href={plugin.repository} target="_blanc" class="relative no-underline">
 								<div class="flex flex-col gap-4 bg-surface-100 hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 									<div class="flex items-center gap-4">
-										<img class="w-8 h-8 rounded-md m-0 shadow-lg" src={plugin.icon} />
+										<img class="w-10 h-10 rounded-md m-0 shadow-lg" src={plugin.icon} />
 										<p class="m-0 text-surface-900 font-semibold text-md">{plugin.id}</p>
 									</div>
 									<Description repository={plugin.repository} />
