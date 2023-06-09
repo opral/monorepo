@@ -1,5 +1,11 @@
 # @inlang/plugin-registry
 
+## 1.1.1
+
+### Patch Changes
+
+- 99a8f88e: Fix registry links
+
 ## 1.1.0
 
 ### Minor Changes
