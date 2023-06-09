@@ -47,11 +47,6 @@ type EditorStateSchema = {
 	 */
 	unpushedChanges: Resource<Awaited<ReturnType<typeof raw.log>>>
 	/**
-	 * Unpushed saves to the local resource state.
-	 */
-	unpushedSaveCounter: () => number
-	setUnpushedSaveCounter: Setter<number>
-	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
 	githubRepositoryInformation: Resource<
@@ -189,7 +184,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
-	const [unpushedSaveCounter, setUnpushedSaveCounter] = createSignal(0)
 	const [localChanges, setLocalChanges] = createSignal<Array<ast.Text | ast.Placeholder>[]>([])
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
@@ -583,8 +577,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repositoryIsCloned,
 					currentBranch,
 					unpushedChanges,
-					unpushedSaveCounter,
-					setUnpushedSaveCounter,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,

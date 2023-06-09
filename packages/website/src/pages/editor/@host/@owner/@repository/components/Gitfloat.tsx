@@ -20,8 +20,6 @@ export const Gitfloat = () => {
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
-		unpushedSaveCounter,
-		setUnpushedSaveCounter,
 		localChanges,
 		setLocalChanges,
 		resources,
@@ -46,7 +44,7 @@ export const Gitfloat = () => {
 		// if changes exist in a fork, show the pull request button
 		else if (
 			hasPushedChanges() &&
-			unpushedSaveCounter() <= 0 &&
+			localChanges().length === 0 &&
 			githubRepositoryInformation()?.data.fork
 		) {
 			return "pullrequest"
@@ -140,7 +138,6 @@ export const Gitfloat = () => {
 			setLastPullTime,
 		})
 		setLocalChanges([])
-		setUnpushedSaveCounter(0)
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
 			owner: routeParams().owner,
@@ -232,7 +229,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (unpushedSaveCounter() > 0) {
+		if (localChanges().length > 0) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {
@@ -278,7 +275,7 @@ export const Gitfloat = () => {
 								<Show when={gitState() === "hasChanges"}>
 									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
-											{unpushedSaveCounter()}
+											{localChanges().length}
 										</p>
 									</div>
 								</Show>
@@ -290,7 +287,7 @@ export const Gitfloat = () => {
 								prop:href={data[gitState()].href === "pullrequest" ? pullrequestUrl() : undefined}
 								prop:target="_blank"
 								prop:loading={isLoading()}
-								prop:disabled={unpushedSaveCounter() === 0 && gitState() === "hasChanges"}
+								prop:disabled={localChanges().length === 0 && gitState() === "hasChanges"}
 								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
 							>
 								{data[gitState()].buttontext}
