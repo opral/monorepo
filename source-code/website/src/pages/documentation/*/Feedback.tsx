@@ -9,8 +9,8 @@ export function Feedback() {
 		setSubmittedFeedback(true)
 	}
 
-	// in order good to bad
-	const feedbackEmojis = ["🤩", "🙂", "😕", "😥"]
+	//* Only two emojis because of https://github.com/inlang/inlang/pull/910#issuecomment-1584832926
+	const feedbackEmojis: [string, string] = ["🤩", "😥"]
 
 	const [submittedFeedback, setSubmittedFeedback] = createSignal(false)
 
