@@ -1,6 +1,6 @@
 ---
 title: inlang CLI
-href: /documentation/apps/cli
+href: /documentation/apps/inlang-cli
 description: This is the CLI description
 ---
 

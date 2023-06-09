@@ -33,7 +33,7 @@
 
 Inlang consists of multipe applications that can be used individually, or in combination with each other.
 
-### [Editor](https://inlang.com/documentation/apps/editor)
+### [Editor](https://inlang.com/documentation/apps/web-editor)
 
 Manage translations in a simple web interface and push changes to your repository.
 
@@ -43,7 +43,6 @@ Manage translations in a simple web interface and push changes to your repositor
 ✅ no extra accounts </br>
 
 ![the inlang editor to manage translations](https://github.com/inlang/inlang/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
-
 
 ### [IDE-Extension](https://inlang.com/documentation/apps/ide-extension)
 
@@ -55,7 +54,7 @@ The IDE-extension allows you to translate your content directly in your IDE.
 
 ![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif)
 
-### [CLI](https://inlang.com/documentation/apps/cli)
+### [CLI](https://inlang.com/documentation/apps/inlang-cli)
 
 [@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
 
