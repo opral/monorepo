@@ -7,5 +7,3 @@ description: TODO write some description
 # {% $frontmatter.title %}
 
 TBD
-
-{% Feedback /%}

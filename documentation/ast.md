@@ -23,5 +23,3 @@ Up-to-date reference can be found [in the repository](https://github.com/inlang/
   alt="visualisation of the inlang AST/object"
   caption="Visualisation of the inlang AST/object"
 /%}
-
-{% Feedback /%}

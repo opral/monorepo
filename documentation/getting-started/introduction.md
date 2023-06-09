@@ -93,5 +93,3 @@ We are building tools that increases the developer experience in the context of 
     /%}
 
 {% /QuickLinks %}
-
-{% Feedback /%}

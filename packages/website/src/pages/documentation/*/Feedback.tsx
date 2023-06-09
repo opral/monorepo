@@ -15,7 +15,7 @@ export function Feedback() {
 	const [submittedFeedback, setSubmittedFeedback] = createSignal(false)
 
 	return (
-		<div class="flex justify-center items-center h-48">
+		<div class="flex justify-center items-center">
 			<div class="flex gap-2 border border-surface-1 py-1 px-3 rounded-full ">
 				<p class="no-prose m-1 text-xs text-info">Was this helpful?</p>
 				<For each={feedbackEmojis}>
