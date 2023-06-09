@@ -19,7 +19,7 @@ export function Callout(props: { variant: SemanticColorTokens[number]; children:
 			</div>
 			{/* wrapped in a div and prose to re-initialize prosing and thereby remove
 			unexpected paddings and margins  */}
-			<div class="prose">{props.children}</div>
+			<div class="prose prose-p:m-0">{props.children}</div>
 		</div>
 	)
 }
