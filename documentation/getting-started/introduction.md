@@ -43,7 +43,7 @@ The automation and collaboration power a version control system provides might j
 
 {% Figure
 
-    src="https://github.com/inlang/inlang/assets/58360188/b571b4d3-aacf-4410-9965-d92cf8be1c72"
+    src="https://github.com/inlang/inlang/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070"
 
     alt="git-based localization infrastructure"
 
