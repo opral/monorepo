@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js"
+import { createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
@@ -6,7 +6,6 @@ import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
-import MaterialSymbolsCommitRounded from "~icons/material-symbols/commit-rounded"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
@@ -32,14 +31,15 @@ export function PatternEditor(props: {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		resources,
-		setResources,
+		localChanges,
+		setLocalChanges,
 		referenceResource,
 		userIsCollaborator,
 		routeParams,
 		filteredLanguages,
-		tourStep,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
+	const [savedEditorText, setSavedEditorText] = createSignal()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -133,9 +133,14 @@ export function PatternEditor(props: {
 	const hasChanges = () => {
 		const _updatedText =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
-		const ast_elements = props.message?.pattern.elements
+		let compare_elements
+		if (savedEditorText()) {
+			compare_elements = savedEditorText()
+		} else {
+			compare_elements = props.message?.pattern.elements
+		}
 		if (_updatedText) {
-			if (JSON.stringify(_updatedText) !== JSON.stringify(ast_elements)) {
+			if (JSON.stringify(_updatedText) !== JSON.stringify(compare_elements)) {
 				return _updatedText
 			} else {
 				return ""
@@ -148,10 +153,8 @@ export function PatternEditor(props: {
 	/**
 	 * Saves the changes of the message.
 	 */
-	const [commitIsLoading, setCommitIsLoading] = createSignal(false)
 
-	const handleCommit = async () => {
-		setCommitIsLoading(true)
+	const handleSave = async () => {
 		const _copy: ast.Message | undefined = copy()
 		const _textValue =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
@@ -160,32 +163,46 @@ export function PatternEditor(props: {
 		}
 		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
 
-		const [updatedResource] = query(resource()).upsert({ message: _copy! })
+		setLocalChanges((prev: any[]) => {
+			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
+				return [
+					...prev.filter(
+						(change) =>
+							!(
+								change.languageTag === resource().languageTag &&
+								change.newCopy.id.name === _copy.id.name
+							),
+					),
+				]
+			} else {
+				return [
+					...prev.filter(
+						(change) =>
+							!(
+								change.languageTag === resource().languageTag &&
+								change.newCopy.id.name === _copy.id.name
+							),
+					),
+					{
+						languageTag: resource().languageTag,
+						newCopy: _copy,
+					},
+				]
+			}
+		})
+		console.log(localChanges())
 
-		setResources([
-			...(resources.filter(
-				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-			) as Resource[]),
-			//@ts-ignore
-			updatedResource as Resource,
-		])
-		//this is a dirty fix for getting focus back to the editor after commit
+		setSavedEditorText(_textValue)
+		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
 			textArea.parentElement?.click()
 		}, 500)
-		telemetryBrowser.capture("EDITOR commited changes", {
+		telemetryBrowser.capture("EDITOR saved changes", {
 			targetLanguage: props.language,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
 	}
-
-	createEffect(() => {
-		const resource = resources.filter((resource) => resource.languageTag.name === props.language)
-		if (resource && textArea) {
-			setCommitIsLoading(false)
-		}
-	})
 
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
@@ -282,7 +299,7 @@ export function PatternEditor(props: {
 			userIsCollaborator()
 		) {
 			event.preventDefault()
-			handleCommit()
+			handleSave()
 		}
 	}
 
@@ -359,15 +376,13 @@ export function PatternEditor(props: {
 						<sl-button
 							prop:variant="primary"
 							prop:size="small"
-							prop:loading={commitIsLoading()}
 							prop:disabled={hasChanges() === false || userIsCollaborator() === false}
 							onClick={() => {
-								handleCommit()
+								handleSave()
 							}}
 						>
-							<MaterialSymbolsCommitRounded slot="prefix" />
 							<Shortcut slot="suffix" color="primary" codes={["ControlLeft", "s"]} />
-							Commit
+							Save
 						</sl-button>
 					</Show>
 				</div>
