@@ -20,3 +20,33 @@ it("should not throw if the path pattern is valid", async () => {
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	expect(await x.config({})).toBeTruthy()
 })
+
+it("should work with empty json files", async () => {
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", "{}")
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
+	const config = await x.config({})
+	expect(
+		config.readResources({
+			config: {
+				referenceLanguage: "en",
+				languages: ["en"],
+			},
+		}),
+	).resolves.toBeTruthy()
+})
+
+it("should work with not yet existing files", async () => {
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", "{}")
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
+	const config = await x.config({})
+	expect(
+		config.readResources({
+			config: {
+				referenceLanguage: "en",
+				languages: ["en", "de"],
+			},
+		}),
+	).resolves.toBeTruthy()
+})
