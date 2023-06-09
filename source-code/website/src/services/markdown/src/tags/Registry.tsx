@@ -26,7 +26,7 @@ export const Registry = () => {
 				textValue={textValue}
 				setTextValue={setTextValue}
 			/>
-			<div class="grid grid-cols-2 flex-col gap-4 ">
+			<div class="grid grid-cols-1 md:grid-cols-2 flex-col gap-4 ">
 				<For each={filteredPlugins()}>
 					{(plugin) => {
 						// const description = fetch(plugin.repository + "/master/README.md")
