@@ -1,3 +1,5 @@
+import type { coreUsedConfigEvent } from "@inlang/telemetry"
+
 /**
  * Typesafe telemetry events.
  *
@@ -10,3 +12,4 @@ export type TelemetryEvents =
 	| "IDE-EXTENSION decoration set"
 	| "IDE-EXTENSION command executed"
 	| "IDE-EXTENSION completed add to workspace recommendations"
+	| typeof coreUsedConfigEvent.name
