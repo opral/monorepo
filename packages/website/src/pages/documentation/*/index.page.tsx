@@ -6,6 +6,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
+import { Feedback } from "./Feedback.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -78,6 +79,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<Feedback />
 							</div>
 						</div>
 					</Show>
