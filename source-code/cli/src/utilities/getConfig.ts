@@ -1,9 +1,15 @@
-import { InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
 import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
 import fs from "node:fs"
-import { log } from "../utilities.js"
+import type { Result } from "@inlang/core/utilities"
 
-export const getConfig = async () => {
+// in case multiple commands run getConfig in the same process
+let configCache: InlangConfig | undefined = undefined
+
+export async function getConfig(): Promise<
+	Result<InlangConfig, "No inlang.config.js file found in the repository.">
+> {
+	if (configCache) return [configCache]
 	// Set up the environment functions
 	const env: InlangEnvironment = {
 		$import: initialize$import({
@@ -16,10 +22,7 @@ export const getConfig = async () => {
 	const filePath = process.cwd() + "/inlang.config.js"
 
 	if (!fs.existsSync(filePath)) {
-		log.error("No inlang.config.js file found in the repository.")
-		return
-	} else {
-		log.info("✅ Using inlang config file at `" + filePath + "`")
+		return [undefined, "No inlang.config.js file found in the repository."]
 	}
 
 	// Need to manually import the config because CJS projects
@@ -34,5 +37,6 @@ export const getConfig = async () => {
 		env,
 	})
 
-	return config
+	configCache = config
+	return [config]
 }

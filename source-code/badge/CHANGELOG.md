@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.2.2
+
+### Patch Changes
+
+- 2dd0a6c0: fix percentage calculation
+
 ## 0.2.1
 
 ### Patch Changes

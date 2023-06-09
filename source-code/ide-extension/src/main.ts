@@ -14,6 +14,8 @@ import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview
 import { promptToReloadWindow } from "./utils/promptToReload.js"
 import { getUserId } from "./utils/getUserId.js"
 import { recommendation } from "./utils/recommendation.js"
+import { coreUsedConfigEvent } from "@inlang/telemetry"
+import { recommendation, disableRecommendation } from "./utils/recommendation.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -22,7 +24,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				user: await getUserId(),
+				workspaceRecommendation: !(await disableRecommendation()),
 			},
 		})
 		msg("Inlang extension activated.", "info")
@@ -85,6 +87,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const env = createInlangEnv({ workspaceFolder })
 
 	const config = await setupConfig({ module, env })
+
+	// shouldn't block the function from executing
+	// thus wrapped in async immediately executed function
+	;(async () => {
+		telemetry.capture({
+			event: coreUsedConfigEvent.name,
+			properties: coreUsedConfigEvent.properties(config),
+		})
+	})()
 
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })
