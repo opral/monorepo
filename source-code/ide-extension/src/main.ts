@@ -12,8 +12,7 @@ import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utils/promptToReload.js"
-import { getUserId } from "./utils/getUserId.js"
-import { recommendation } from "./utils/recommendation.js"
+import { recommendation, disableRecommendation } from "./utils/recommendation.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -22,7 +21,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				user: await getUserId(),
+				workspaceRecommendation: !(await disableRecommendation()),
 			},
 		})
 		msg("Inlang extension activated.", "info")
