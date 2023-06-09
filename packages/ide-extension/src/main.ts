@@ -12,6 +12,9 @@ import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utils/promptToReload.js"
+import { getUserId } from "./utils/getUserId.js"
+import { recommendation } from "./utils/recommendation.js"
+import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { recommendation, disableRecommendation } from "./utils/recommendation.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -84,6 +87,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const env = createInlangEnv({ workspaceFolder })
 
 	const config = await setupConfig({ module, env })
+
+	// shouldn't block the function from executing
+	// thus wrapped in async immediately executed function
+	;(async () => {
+		telemetry.capture({
+			event: coreUsedConfigEvent.name,
+			properties: coreUsedConfigEvent.properties(config),
+		})
+	})()
 
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })

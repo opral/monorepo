@@ -30,8 +30,9 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const config = await getConfig()
+		const [config, errorMessage] = await getConfig()
 		if (!config) {
+			log.error(errorMessage)
 			// no message because that's handled in getConfig
 			return
 		}
