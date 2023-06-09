@@ -163,13 +163,18 @@ export function PatternEditor(props: {
 		}
 		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
 
-		setLocalChanges((prev) => [
-			...prev,
-			{
-				languageTag: resource().languageTag,
-				newCopy: _copy,
-			},
-		])
+		setLocalChanges((prev: any[]) => {
+			return [
+				...prev.filter(
+					(change) =>
+						change.languageTag !== resource().languageTag && change.newCopy.id !== _copy.id,
+				),
+				{
+					languageTag: resource().languageTag,
+					newCopy: _copy,
+				},
+			]
+		})
 
 		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save
