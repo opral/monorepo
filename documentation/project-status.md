@@ -29,5 +29,3 @@ export async function config() {
 	}
 }
 ```
-
-{% Feedback /%}

@@ -15,5 +15,3 @@ Currently the file system supports the following operations:
 - `readdir`: To find out about existing resource files in the same folder.
 
 The file system is asynchronous only.
-
-{% Feedback /%}

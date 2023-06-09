@@ -9,7 +9,6 @@ import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx"
 import { Link } from "./nodes/Link.jsx"
 import { Document } from "./nodes/Document.jsx"
 import { Video } from "./tags/Video.jsx"
-import { Feedback } from "./tags/Feedback.jsx"
 import { Registry } from "./tags/Registry.jsx"
 
 /**
@@ -25,7 +24,6 @@ export const components = {
 	Heading,
 	Document,
 	Video,
-	Feedback,
 	Registry,
 }
 
@@ -124,9 +122,6 @@ export const config: Config = {
 			attributes: {
 				src: { type: "String", required: true },
 			},
-		},
-		Feedback: {
-			render: "Feedback",
 		},
 		Registry: {
 			render: "Registry",

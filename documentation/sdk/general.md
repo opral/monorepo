@@ -36,5 +36,3 @@ Inlang also provides custom solutions that are built specifically for certain Fr
 #### Your favorite frameworks is missing?
 
 [Reach out to us](https://github.com/inlang/inlang/discussions) and we develop an SDK for your favorite framework.
-
-{% Feedback /%}

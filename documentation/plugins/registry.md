@@ -13,5 +13,3 @@ Because every project is different, `inlang` is built to be flexible and extensi
 Here you can find a list of plugins that are available for inlang:
 
 {% Registry /%}
-
-{% Feedback /%}
