@@ -236,19 +236,30 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: args.routeParams.repository,
 				})
 				.then((response) => {
+					if (response.data.parent?.git_url) {
+						console.log(
+							parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] }),
+							"gucken was hier raus kommt",
+						)
+					}
+					telemetryBrowser.group("repository", gitOrigin, {
+						visibility: response.data.private ? "Private" : "Public",
+						isFork: response.data.fork ? "Fork" : "isNotFork",
+						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
+						parentGitOrigin: response.data.parent?.git_url
+							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
+							: "",
+					})
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: response.data.private ? "Private" : "Public",
-						userPermission:
-							userIsCollaborator() && !response.data.fork ? "collaborator" : "contributor",
+						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 					})
 				})
 				.catch((error) => {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: "unknown",
 						errorDuringIsPrivateRequest: error,
 						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
 					})
