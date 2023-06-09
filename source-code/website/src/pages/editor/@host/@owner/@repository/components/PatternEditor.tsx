@@ -34,7 +34,6 @@ export function PatternEditor(props: {
 		localChanges,
 		setLocalChanges,
 		referenceResource,
-		setUnpushedSaveCounter,
 		userIsCollaborator,
 		routeParams,
 		filteredLanguages,
@@ -172,7 +171,6 @@ export function PatternEditor(props: {
 			},
 		])
 
-		setUnpushedSaveCounter((counter) => counter + 1)
 		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
