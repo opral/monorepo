@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.9.16
+
+### Patch Changes
+
+- c9208cc6: capture the used configs for roadmap priorization
+
 ## 0.9.15
 
 ### Patch Changes
