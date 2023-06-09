@@ -1,4 +1,3 @@
-import { loadFile, type ProxifiedModule } from "magicast"
 import { mkdir, readFile, writeFile, stat } from "node:fs/promises"
 import { initConfig } from "../../config/index.js"
 import { dedent } from "ts-dedent"
@@ -213,12 +212,12 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 	const modules = (
 		await Promise.all(
 			filesToLookFor.map((file) =>
-				loadFile(path.resolve(routesFolder, file)).catch(() => undefined),
+				import(path.resolve(routesFolder, file)).catch(() => undefined),
 			),
 		)
-	).filter(Boolean) as ProxifiedModule<any>[]
+	).filter(Boolean)
 
-	return modules.map((mod) => [true, "auto"].includes(mod.exports.prerender)).some(Boolean)
+	return modules.map((mod) => [true, "auto"].includes(mod.exports?.prerender)).some(Boolean)
 }
 
 // ------------------------------------------------------------------------------------------------
