@@ -1,0 +1,14 @@
+diff --git a/node_modules/@chevrotain/gast/package.json b/node_modules/@chevrotain/gast/package.json
+index 16eb823..a7accf3 100644
+--- a/node_modules/@chevrotain/gast/package.json
++++ b/node_modules/@chevrotain/gast/package.json
+@@ -9,6 +9,9 @@
+   "license": "Apache-2.0",
+   "typings": "lib/src/api.d.ts",
+   "main": "lib/src/api.js",
++  "exports": {
++    ".": "./lib/src/api.js"
++  },
+   "files": [
+     "src/**/*.ts",
+     "lib/src/**/*.js",

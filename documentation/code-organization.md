@@ -6,12 +6,14 @@ description: How inlangs code is organized.
 
 # {% $frontmatter.title %}
 
-[Inlangs repository](https://github.com/inlang/inlang) is organized as a [monorepo](https://monorepo.tools/). It consists of the following packages:
+[inlangs repository](https://github.com/inlang/inlang) is organized as a [monorepo](https://monorepo.tools/). It consists of the following packages:
 
+- `badge`: Contains badge to display the current state of translations, including linting.
+- `cli`: Contains the inlang command line interface to interact with the inlang ecosystem.
 - `core`: Lays the fundament of inlang. It defines the aspects AST, config and query, as well as some commonly used utils.
 - `design-system`: Contains common design identity of the project.
-- `git-sdk`: Offers the tools to integrate directly into git.
-- `ide-extension`: Contains the VSCode extension.
+- `ide-extension`: Contains the VS Code extension.
+- `sdk-js`: Contains the JavaScript SDK to easily integrate inlang into your application.
 - `website`: Relates to everything you can find on this website and the editor, which will become its own package.
 
 ## Version management

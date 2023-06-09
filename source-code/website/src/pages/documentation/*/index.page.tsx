@@ -6,6 +6,7 @@ import { currentPageContext } from "@src/renderer/state.js"
 import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
+import { Feedback } from "./Feedback.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -31,7 +32,7 @@ export function Page(props: PageProps) {
 					hacking the left margins to apply bg-surface-2 with 100rem 
 				    (tested on an ultrawide monitor, works!) 
 				*/}
-					<nav class="hidden md:block -ml-[100rem] pl-[100rem] bg-surface-2 py-4 pr-8">
+					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 py-4 pr-8">
 						{/* `Show` is a hotfix when client side rendering loaded this page
 						 * filteredTableContents is not available on the client.
 						 */}
@@ -78,6 +79,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<Feedback />
 							</div>
 						</div>
 					</Show>
@@ -91,13 +93,21 @@ function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
 	onLinkClick?: () => void
 }) {
+	const isSelected = (href: string) => {
+		if (href === currentPageContext.urlParsed.pathname) {
+			return true
+		} else {
+			return false
+		}
+	}
+
 	return (
-		<ul role="list" class="divide-y divide-outline w-full">
+		<ul role="list" class="w-full">
 			<For each={Object.keys(props.processedTableOfContents)}>
 				{(section) => (
 					<li class="py-3">
-						<h2 class="font-bold text-on-surface pb-3">{section}</h2>
-						<ul class="space-y-1.5" role="list">
+						<h2 class="tracking-wide pt-2 text-sm font-semibold text-on-surface pb-2">{section}</h2>
+						<ul class="space-y-2" role="list">
 							<For
 								each={
 									props.processedTableOfContents[
@@ -109,13 +119,12 @@ function NavbarCommon(props: {
 									<li>
 										<a
 											onClick={props.onLinkClick}
-											class="block w-full font-medium link link-primary"
-											classList={{
-												"text-primary":
-													document.frontmatter.href === currentPageContext.urlParsed.pathname,
-												"text-on-surface-variant":
-													document.frontmatter.href !== currentPageContext.urlParsed.pathname,
-											}}
+											class={
+												(isSelected(document.frontmatter.href)
+													? "text-primary font-semibold "
+													: "text-info/80 hover:text-on-background ") +
+												"tracking-wide text-sm block w-full font-normal"
+											}
 											href={document.frontmatter.href}
 										>
 											{document.frontmatter.title}
