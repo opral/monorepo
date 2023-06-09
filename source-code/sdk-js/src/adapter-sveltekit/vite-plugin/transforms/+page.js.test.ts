@@ -94,6 +94,13 @@ describe("transformPageJs", () => {
 		})
 	})
 
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformPageJs(config, code, true)
+		expect(transformed).toEqual(code)
+	})
+
 	describe("'@inlang/sdk-js' imports", () => {
 		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
 			const code = "import { i } from '@inlang/sdk-js'"

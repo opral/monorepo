@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 import { dedent } from "ts-dedent"
+import { transformPageJs } from './+page.js.js'
 
 // TODO: create test matrix for all possible combinations
 
@@ -67,6 +68,13 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, false)
 			expect(transformed).toEqual(code)
 		})
+	})
+
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformPageJs(config, code, true)
+		expect(transformed).toEqual(code)
 	})
 
 	describe("'@inlang/sdk-js' imports", () => {

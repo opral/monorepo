@@ -64,7 +64,8 @@
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/runtime/*/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
-		"./runtime": "./dist/runtime/index.js"
+		"./runtime": "./dist/runtime/index.js",
+		"./no-transforms": "./dist/no-transforms.js"
 	},
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",

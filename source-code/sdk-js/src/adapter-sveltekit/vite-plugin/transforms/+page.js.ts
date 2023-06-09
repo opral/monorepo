@@ -1,7 +1,7 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 import { astToCode, codeToAst, n } from '../../../utils/recast.js'
-import { addImport, findImportDeclarations } from '../../../utils/ast/imports.js'
+import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
 
 // ------------------------------------------------------------------------------------------------
@@ -54,6 +54,9 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	const ast = codeToAst(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+
+	if (isOptOutImportPresent(ast)) return code
+
 	if (!root) return code // for now we don't need to transform non-root files
 
 	const wrapperFunctionName = root ? 'initRootPageLoadWrapper' : 'initLoadWrapper'

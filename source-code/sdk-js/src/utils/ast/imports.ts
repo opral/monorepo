@@ -91,3 +91,8 @@ const findImportSpecifier = (ast: n.ImportDeclaration, name: string) => {
 
 	return importSpecifierAst
 }
+
+// ------------------------------------------------------------------------------------------------
+
+// TODO: test
+export const isOptOutImportPresent = (ast: n.File) => !!findImportDeclarations(ast, '@inlang/sdk-js/no-transforms').length

@@ -5,10 +5,17 @@ import { transformPageServerJs } from './+page.server.js.js'
 // TODO: create test matrix for all possible combinations
 
 describe("transformPageServerJs", () => {
-	test("should not do anything", () => {
+	test("should not do anything (for now)", () => {
 		const code = ""
 		const config = getTransformConfig()
 		const transformed = transformPageServerJs(config, code, false)
+		expect(transformed).toEqual(code)
+	})
+
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformPageServerJs(config, code, true)
 		expect(transformed).toEqual(code)
 	})
 
