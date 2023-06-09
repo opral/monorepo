@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.7.2
+
+### Patch Changes
+
+- 719c1e8b: internal refacotring
+
 ## 0.7.1
 
 ### Patch Changes
