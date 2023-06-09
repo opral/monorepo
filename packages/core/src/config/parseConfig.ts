@@ -40,7 +40,7 @@ export async function parseConfig(args: {
 function hasSetupAResourcePlugin(config: InlangConfig) {
 	if (!config.readResources || !config.writeResources) {
 		throw new ParseConfigException(
-			`It seems you didn't set up a plugin to handle Resource files. See https://github.com/inlang/ecosystem#resources.`,
+			`It seems you didn't set up a plugin to handle Resource files. See https://inlang.com/documentation/plugins/registry.`,
 		)
 	}
 }

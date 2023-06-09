@@ -14,7 +14,7 @@ const data = {
 	description:
 		"Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
 	button: "Get started",
-	buttonLink: "/documentation/getting-started",
+	buttonLink: "/documentation/",
 }
 
 const Integration = () => {

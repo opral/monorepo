@@ -21,7 +21,7 @@ import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/in
 import { createMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "@src/services/github/index.js"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
@@ -305,6 +305,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setReferenceLanguage(config.referenceLanguage)
 				setLanguages(languages)
 				setFilteredLanguages(languages)
+				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
 		},

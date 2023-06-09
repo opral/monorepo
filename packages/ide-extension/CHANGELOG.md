@@ -1,5 +1,19 @@
 # inlang-vs-code-extension
 
+## 0.7.2
+
+### Patch Changes
+
+- 719c1e8b: internal refacotring
+
+## 0.7.1
+
+### Patch Changes
+
+- 66e85ac1: Fix: Importing local JavaScript files via $import() has been fixed.
+- c9208cc6: capture the used configs for roadmap priorization
+- 7f4e79bb: add telemetry for recommended in workspace
+
 ## 0.7.0
 
 ### Minor Changes

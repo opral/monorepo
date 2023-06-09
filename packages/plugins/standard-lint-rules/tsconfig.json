@@ -1,0 +1,24 @@
+{
+	"extends": "../../../tsconfig.base.json",
+	"include": ["src/**/*", "./build.js"],
+	"compilerOptions": {
+		// treat as "pure" ESM module
+		"module": "Node16",
+		// inlangs source code uses node16 to have first-class ESM support.
+		// read more https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#package-json-exports-imports-and-self-referencing
+		"moduleResolution": "node16",
+		// backwards compatibility for older browsers. do not remove this.
+		"target": "ES2020",
+		// enable strict type checking (recommended, reduces bugs)
+		"strict": true,
+		// to improve bundling, types should explicitly importes as types
+		"importsNotUsedAsValues": "error",
+		// esmoduleinterop is oftentimes required
+		"esModuleInterop": true,
+		"checkJs": true,
+		"allowJs": true,
+		"outDir": "dist",
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true
+	}
+}

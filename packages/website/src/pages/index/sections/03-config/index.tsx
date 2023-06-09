@@ -35,7 +35,7 @@ const data = [
 		isSoon: false,
 		description:
 			"Simplifies translation management by keeping translations in a Git repository without the need for hosting, additional accounts, or synchronization.",
-		link: "/documentation/getting-started",
+		link: "/documentation/apps/web-editor",
 		image: "/images/AppSVGs/editor.svg",
 	},
 	{
@@ -43,7 +43,7 @@ const data = [
 		isSoon: false,
 		description:
 			"Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
-		link: "/documentation/getting-started",
+		link: "/documentation/apps/ide-extension",
 		image: "/images/AppSVGs/ide.svg",
 	},
 	{
@@ -51,7 +51,7 @@ const data = [
 		isSoon: false,
 		description:
 			"Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
-		link: "/documentation/getting-started",
+		link: "/documentation/apps/inlang-cli",
 		image: "/images/AppSVGs/cli.svg",
 	},
 ]

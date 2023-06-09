@@ -5,7 +5,21 @@ import fs from "node:fs/promises"
 import ts from "typescript"
 import requireFromString from "require-from-string"
 
-export const $import: InlangEnvironment$import = async (uri: string) => {
+/**
+ * Wraps the import function to inject the base path.
+ *
+ * The wrapping is necessary to resolve relative imports.
+ */
+export function create$import(basePath: string): InlangEnvironment$import {
+	return (uri: string) => {
+		if (uri.startsWith("./")) {
+			return $import(normalizePath(basePath + "/" + uri.slice(2)))
+		}
+		return $import(uri)
+	}
+}
+
+const $import: InlangEnvironment$import = async (uri: string) => {
 	// polyfill for environments that don't support dynamic
 	// http imports yet like VSCode.
 	const moduleAsText = uri.startsWith("http")

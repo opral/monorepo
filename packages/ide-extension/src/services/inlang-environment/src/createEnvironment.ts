@@ -1,5 +1,5 @@
 import type { InlangEnvironment } from "@inlang/core/environment"
-import { $import } from "./$import.js"
+import { create$import } from "./create$import.js"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import * as vscode from "vscode"
 
@@ -10,7 +10,7 @@ export function createInlangEnv(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): InlangEnvironment {
 	return {
-		$import,
+		$import: create$import(args.workspaceFolder.uri.path),
 		$fs: createFileSystemMapper(vscode.workspace.fs, args.workspaceFolder.uri),
 	}
 }

@@ -1,16 +1,16 @@
 ---
-title: Plugins
-href: /documentation/plugins
-description: Learn more about plugins and how to build them.
+title: Custom Plugins
+href: /documentation/plugins/custom-plugins
+description: This is the custom plugins description
 ---
 
 # {% $frontmatter.title %}
 
-**Plugins allow the customization of inlang's behavior by, for example, defining how resources should be parsed and serialized.**
+Plugins allow the customization of inlang's behavior by, for example, defining how resources should be parsed and serialized.
 
 ## Finding plugins
 
-The [ecosystem](https://github.com/inlang/ecosystem) repository contains a list of available (and awesome) plugins for inlang.
+The [plugin registry](/documentation/plugins/registry) contains a list of available (and awesome) plugins for inlang.
 
 ## Using plugins
 
