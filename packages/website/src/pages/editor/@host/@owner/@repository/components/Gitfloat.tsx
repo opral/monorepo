@@ -12,6 +12,8 @@ import { SignInDialog } from "@src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { TourHintWrapper, TourStepId } from "./Notification/TourHintWrapper.jsx"
+import { query } from "@inlang/core/query"
+import type { Resource } from "@inlang/core/ast"
 
 export const Gitfloat = () => {
 	const {
@@ -20,6 +22,10 @@ export const Gitfloat = () => {
 		currentBranch,
 		unpushedSaveCounter,
 		setUnpushedSaveCounter,
+		localChanges,
+		setLocalChanges,
+		resources,
+		setResources,
 		setFsChange,
 		setLastPush,
 		routeParams,
@@ -100,6 +106,30 @@ export const Gitfloat = () => {
 			})
 		}
 		setIsLoading(true)
+		// write resources to fs
+		/** the resource the message belongs to */
+
+		let _resources = resources.map((resource) => {
+			return { ...resource }
+		})
+
+		for (const change of localChanges()) {
+			const [updatedResource] = query(
+				_resources.find(
+					(resource: Resource) => resource.languageTag.name === change.languageTag.name,
+				)!,
+			).upsert({ message: change.newCopy! })!
+
+			_resources = [
+				...(_resources.filter(
+					(_resource) => _resource.languageTag.name !== change.languageTag.name,
+				) as Resource[]),
+				updatedResource as Resource,
+			]
+		}
+
+		setResources(_resources)
+
 		// commit & push
 		const [, exception] = await pushChanges({
 			fs: fs(),
@@ -109,6 +139,7 @@ export const Gitfloat = () => {
 			setLastPush,
 			setLastPullTime,
 		})
+		setLocalChanges([])
 		setUnpushedSaveCounter(0)
 		setIsLoading(false)
 		telemetryBrowser.capture("EDITOR pushed changes", {
