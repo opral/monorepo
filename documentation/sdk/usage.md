@@ -4,7 +4,7 @@ href: /documentation/sdk/usage
 description: This is a list of all the functions you can export from the inlang SDK, what they provide and how to use them.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.title %} SDKs
 
 With `@inlang/sdk-js` you get many useful functions to help you implement internationalization in your application. This is a list of all the functions, what they provide and how to use them.
 
