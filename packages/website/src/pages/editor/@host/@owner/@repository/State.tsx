@@ -244,12 +244,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: args.routeParams.repository,
 				})
 				.then((response) => {
-					if (response.data.parent?.git_url) {
-						console.log(
-							parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] }),
-							"gucken was hier raus kommt",
-						)
-					}
 					telemetryBrowser.group("repository", gitOrigin, {
 						visibility: response.data.private ? "Private" : "Public",
 						isFork: response.data.fork ? "Fork" : "isNotFork",
