@@ -42,7 +42,8 @@ Manage translations in a simple web interface and push changes to your repositor
 ✅ no hosting, no sync pipelines </br>
 ✅ no extra accounts </br>
 
-![the inlang editor to manage translations](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/editor-example.png)
+![the inlang editor to manage translations](https://github.com/inlang/inlang/assets/59048346/85cfee69-96da-4b2d-8e34-a0b7abc72212)
+
 
 ### [IDE-Extension](https://inlang.com/documentation/apps/ide-extension)
 
