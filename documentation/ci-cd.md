@@ -15,5 +15,3 @@ Similar to [building entire apps on inlang](/documentation/build-on-inlang), the
 **The documentation is work in progress.** Reach out via [discussions](https://github.com/inlang/inlang/discussions) or email `hello@inlang.com` if you have questions.
 
 {% /Callout %}
-
-{% Feedback /%}

@@ -11,5 +11,3 @@ Because every project is different, `inlang` is built to be flexible and extensi
 {% /Callout %}
 
 {% Registry /%}
-
-{% Feedback /%}

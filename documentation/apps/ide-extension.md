@@ -96,5 +96,3 @@ export async function defineConfig(env) {
 	}
 }
 ```
-
-{% Feedback /%}

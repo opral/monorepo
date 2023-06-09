@@ -45,5 +45,3 @@ const myPlugin = createPlugin(() => {
 	}
 })
 ```
-
-{% Feedback /%}
