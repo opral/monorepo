@@ -31,7 +31,8 @@ export function PatternEditor(props: {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		resources,
-		setResources,
+		localChanges,
+		setLocalChanges,
 		referenceResource,
 		setUnpushedSaveCounter,
 		userIsCollaborator,
@@ -163,15 +164,14 @@ export function PatternEditor(props: {
 		}
 		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
 
-		const [updatedResource] = query(resource()).upsert({ message: _copy! })
-
-		setResources([
-			...(resources.filter(
-				(_resource) => _resource.languageTag.name !== resource().languageTag.name,
-			) as Resource[]),
-			//@ts-ignore
-			updatedResource as Resource,
+		setLocalChanges((prev) => [
+			...prev,
+			{
+				languageTag: resource().languageTag,
+				newCopy: _copy,
+			},
 		])
+
 		setUnpushedSaveCounter((counter) => counter + 1)
 		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save

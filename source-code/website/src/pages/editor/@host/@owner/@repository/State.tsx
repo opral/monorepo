@@ -123,6 +123,12 @@ type EditorStateSchema = {
 	setFilteredLintRules: Setter<LintRule["id"][]>
 
 	/**
+	 * Unpushed changes in the repository.
+	 */
+	localChanges: () => any[]
+	setLocalChanges: Setter<any[]>
+
+	/**
 	 * The resources in a given repository.
 	 */
 	resources: LintedResource[]
@@ -184,6 +190,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [lastPush, setLastPush] = createSignal<Date>()
 
 	const [unpushedSaveCounter, setUnpushedSaveCounter] = createSignal(0)
+	const [localChanges, setLocalChanges] = createSignal<Array<ast.Text | ast.Placeholder>[]>([])
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
@@ -597,6 +604,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLanguages,
 					filteredLintRules,
 					setFilteredLintRules,
+					localChanges,
+					setLocalChanges,
 					resources,
 					setResources,
 					referenceResource,
