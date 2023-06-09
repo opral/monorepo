@@ -120,7 +120,7 @@ export const Gitfloat = () => {
 
 			_resources = [
 				...(_resources.filter(
-					(_resource) => _resource.languageTag.name !== change.languageTag.name,
+					(resource) => resource.languageTag.name !== change.languageTag.name,
 				) as Resource[]),
 				updatedResource as Resource,
 			]
