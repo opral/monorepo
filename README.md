@@ -55,8 +55,6 @@ The IDE-extension allows you to translate your content directly in your IDE.
 
 ![VS code extension inline annotation](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif)
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/inline.gif"/>
-
 ### [CLI](https://inlang.com/documentation/apps/cli)
 
 [@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
