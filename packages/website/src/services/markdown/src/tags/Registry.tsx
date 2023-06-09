@@ -30,9 +30,11 @@ export const Registry = () => {
 			<div class="grid grid-cols-2 flex-col gap-4 ">
 				<For each={plugins}>
 					{(plugin) => {
+						// const description = fetch(plugin.repository + "/master/README.md")
+						// console.log(description)
 						const user = plugin.repository.split("/")[3]
 						return (
-							<div class="relative">
+							<a href={plugin.repository} target="_blanc" class="relative no-underline">
 								<div class="flex flex-col gap-4 bg-surface-100 hover:bg-surface-200 p-6 rounded-xl border border-surface-2 cursor-pointer">
 									<div class="flex items-center gap-4">
 										<img class="w-8 h-8 rounded m-0" src={plugin.icon} />
@@ -49,7 +51,7 @@ export const Registry = () => {
 								<div class="absolute top-0 right-0 -translate-x-4 translate-y-4">
 									<Icon name={"external"} class="h-6 w-6 text-info/50" />
 								</div>
-							</div>
+							</a>
 						)
 					}}
 				</For>
