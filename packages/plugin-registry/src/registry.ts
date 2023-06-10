@@ -15,6 +15,12 @@ export const plugins: InlangPluginManifest[] = [
 		keywords: ["lint", "inlang", "report", "missingMessage"],
 	},
 	{
+		id: "typesafe-i18n",
+		icon: "https://em-content.zobj.net/source/microsoft-teams/363/globe-showing-americas_1f30e.png",
+		repository: "https://github.com/ivanhofer/inlang-plugin-typesafe-i18n",
+		keywords: ["typescript", "typesafe", "svelte", "react", "vue", "angular", "ivan hofer"],
+	},
+	{
 		id: "inlang-plugin-json",
 		icon: "https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/main/assets/icon.png",
 		repository: "https://github.com/samuelstroschein/inlang-plugin-json/",
