@@ -1,96 +1,89 @@
-import { NodePath, b, n, visitNode } from '../recast.js'
+import { type SourceFile, Node, type ImportDeclaration } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const removeImport = (ast: n.File, path: string, ...names: string[]) => {
-	if (!n.File.check(ast)) return // we only work on the root ast
+export const removeImport = (sourceFile: SourceFile, path: string, ...names: string[]) => {
+	if (!Node.isSourceFile(sourceFile)) return // we only work on the root node
 
-	const importDeclarationAsts = findImportDeclarations(ast, path)
-	if (!importDeclarationAsts.length) return
+	const importDeclarations = findImportDeclarations(sourceFile, path)
+	if (!importDeclarations.length) return
 
-	for (const importDeclarationAst of importDeclarationAsts) {
-		if (!importDeclarationAst.value.specifiers?.length) return
+	for (const importDeclaration of importDeclarations) {
+		if (!importDeclaration.getImportClause()?.getNamedBindings()) return
 
 		for (const name of names) {
-			const importSpecifierAst = findImportSpecifier(importDeclarationAst.value, name)
-			if (!importSpecifierAst) continue
+			const importSpecifier = findNamedImportSpecifier(importDeclaration, name)
+			if (!importSpecifier) continue
 
-			importSpecifierAst.replace()
+			importSpecifier.remove()
 		}
 
 		if ( // remove import completely
 			!names.length // if no names get passed
-			|| !importDeclarationAst.value.specifiers.length // if no specifiers are left
+			|| !getNamedImportSpecifiers(importDeclaration).length // if no specifiers are left
 		) {
-			importDeclarationAst.replace()
+			importDeclaration.remove()
 		}
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 
-export const addImport = (ast: n.File, path: string, ...names: [string, ...string[]]) => {
-	if (!n.File.check(ast)) return // we only work on the root ast
+export const addImport = (sourceFile: SourceFile, path: string, ...names: [string, ...string[]]) => {
+	if (!Node.isSourceFile(sourceFile)) return // we only work on the root node
 	if (names.length === 0) return // return early if no names are passed
 
-	const importSpecifiersAst = names.map(name => b.importSpecifier(
-		b.identifier(name),
-		b.identifier(name)
-	))
-
-	const importDeclarationAsts = findImportDeclarations(ast, path)
+	const importDeclarations = findImportDeclarations(sourceFile, path)
 		// only keep import declarations with specifiers
-		.filter(importDeclarationAst => importDeclarationAst.value.specifiers?.length)
+		.filter(importDeclaration => !!getNamedImportSpecifiers(importDeclaration).length)
 
-	if (!importDeclarationAsts.length) {
+	if (!importDeclarations.length) {
 		// add new import declaration at the beginning of the file
-		ast.program.body = [b.importDeclaration(importSpecifiersAst, b.literal(path)), ...ast.program.body]
+		sourceFile.insertImportDeclarations(0, [{
+			moduleSpecifier: path,
+			namedImports: names.map(name => ({ name })),
+		}])
 
 		return
 	}
 
-	const importDeclarationAst = importDeclarationAsts[0]!
+	// TODO: we must check first if one of the import declarations already contains a named import
+	const importDeclaration = importDeclarations[0]!
 	// add new import specifiers
-	importDeclarationAst.value.specifiers?.push(
-		...importSpecifiersAst.filter(({ local: toAdd }) =>
-			// remove duplicates
-			importDeclarationAst.value.specifiers?.every(({ local: existing }) => toAdd?.name !== existing?.name)
-		))
+	for (const name of names) {
+		if (!findNamedImportSpecifier(importDeclaration, name))
+			importDeclaration.addNamedImports(names.map(name => ({ name })))
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const findImportDeclarations = (ast: n.File, name: string) => {
-	const importDeclarationAsts: NodePath<n.ImportDeclaration>[] = []
+const textWithoutQuotes = (text: string) => text.replace(/^['"]|['"]$/g, '')
 
-	visitNode(ast, {
-		visitImportDeclaration: function (path) {
-			if (path.value.source.value === name) {
-				importDeclarationAsts.push(path)
-			}
-			return false
-		},
-	})
+// TODO: test
+export const findImportDeclarations = (sourceFile: SourceFile, name: string) =>
+	sourceFile.forEachChildAsArray()
+		.map((node) => Node.isImportDeclaration(node)
+			&& textWithoutQuotes(node.getModuleSpecifier().getText()) === name
+			? node
+			: undefined
+		).filter(Boolean) as ImportDeclaration[]
 
-	return importDeclarationAsts
+// TODO: test
+const getNamedImportSpecifiers = (importDeclaration: ImportDeclaration) => {
+	const namedImports = importDeclaration.getImportClause()?.getNamedBindings()
+	if (!Node.isNamedImports(namedImports)) return []
+
+	return namedImports.getElements()
 }
 
-const findImportSpecifier = (ast: n.ImportDeclaration, name: string) => {
-	let importSpecifierAst: NodePath<n.ImportSpecifier> | undefined
-
-	visitNode(ast, {
-		visitImportSpecifier: function (path) {
-			if (path.value.imported.name === name) {
-				importSpecifierAst = path
-			}
-			return false
-		},
-	})
-
-	return importSpecifierAst
-}
+// TODO: test
+const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, name: string) =>
+	getNamedImportSpecifiers(importDeclaration).find((element) =>
+		(element.getAliasNode()?.getText() || element.getName()) === name
+	)
 
 // ------------------------------------------------------------------------------------------------
 

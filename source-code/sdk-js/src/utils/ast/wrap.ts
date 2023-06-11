@@ -1,4 +1,4 @@
-import { NodePath, codeToDeclarationAst, n, b, visitNode } from '../recast.js'
+import { NodePath, codeToNode, n, b, visitNode } from '../recast.js'
 import { findFunctionExpression, findOrCreateExport } from './exports.js'
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
@@ -43,7 +43,7 @@ export function wrapWithPlaceholder(ast: NodePath<n.Identifier | n.ArrowFunction
 
 // ------------------------------------------------------------------------------------------------
 
-export const createWrapperAst = (name: string, options = '') => codeToDeclarationAst(`
+export const createWrapperAst = (name: string, options = '') => codeToNode(`
 	const x = ${name}(${options}).wrap(${WRAP_IDENTIFIER})
 `) as NodePath<n.CallExpression>
 

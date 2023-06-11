@@ -4,8 +4,7 @@ import type { NodePath as NodePathOriginal } from "ast-types/lib/node-path"
 import type { ASTNode } from "ast-types/lib/types"
 import { namedTypes as n } from "ast-types"
 
-// TODO: use TypeScript parser if TypeScript is installed
-import * as parser from "recast/parsers/esprima"
+import { Project, Node } from "ts-morph";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -22,29 +21,22 @@ export { n }
 
 // ------------------------------------------------------------------------------------------------
 
-const parseCode = (code: string) => recast.parse(code, { parser }) as n.File
+const parseCode = (code: string) => new Project().createSourceFile('', code)
 
-const printCode = (ast: ASTNode | NodePath) => recast.prettyPrint(
-	n.Node.check(ast) ? ast : (ast as NodePath).value,
-	{
-		quote: 'single',
-		tabWidth: 3,
-		useTabs: true,
-	}
-).code
+const printCode = (node: Node) => node.print().trim()
 
 // ------------------------------------------------------------------------------------------------
 
 export const visitNode = recast.visit
 
-export const codeToAst = (code: string) => parseCode(dedent(code))
+export const codeToSourceFile = (code: string) => parseCode(dedent(code))
 
-export const codeToDeclarationAst = (code: string) => {
-	const ast = codeToAst(code).program.body[0]!
+export const codeToNode = (code: string) => {
+	const node = codeToSourceFile(code).program.body[0]!
 
 	let foundDeclarationAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.CallExpression | n.Identifier> | undefined
 
-	visitNode(ast, {
+	visitNode(node, {
 		visitVariableDeclarator(path) {
 			if (path.value.id.name !== 'x') {
 				throw new Error('you must name the variable "x"')
@@ -80,4 +72,4 @@ export const codeToDeclarationAst = (code: string) => {
 	return foundDeclarationAst
 }
 
-export const astToCode = (ast: ASTNode | NodePath) => printCode(ast)
+export const nodeToCode = (ast: Node) => printCode(ast)

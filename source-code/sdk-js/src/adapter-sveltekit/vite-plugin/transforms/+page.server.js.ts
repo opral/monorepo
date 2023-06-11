@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { codeToAst, n } from '../../../utils/recast.js'
+import { codeToSourceFile, n } from '../../../utils/recast.js'
 import { findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 
 // ------------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ const assertNoImportsFromSdkJs = (ast: n.File) => {
 }
 
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToAst(code)
+	const ast = codeToSourceFile(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 

@@ -1,6 +1,6 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { astToCode, codeToAst, n } from '../../../utils/recast.js'
+import { nodeToCode, codeToSourceFile, n } from '../../../utils/recast.js'
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
 
@@ -51,7 +51,7 @@ const assertNoImportsFromSdkJs = (ast: n.File) => {
 }
 
 export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToAst(code)
+	const ast = codeToSourceFile(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 
@@ -66,5 +66,5 @@ export const transformPageJs = (config: TransformConfig, code: string, root: boo
 	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
-	return astToCode(ast)
+	return nodeToCode(ast)
 }

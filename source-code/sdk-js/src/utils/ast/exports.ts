@@ -1,5 +1,5 @@
 import * as recast from "recast"
-import { ASTNode, NodePath, codeToAst, n, visitNode } from '../recast.js'
+import { ASTNode, NodePath, codeToSourceFile, n, visitNode } from '../recast.js'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ export const findOrCreateExport = (ast: n.File, name: string) => {
 	if (loadFnExport) return loadFnExport
 
 	// TODO: check if a local variable named `name` already exists
-	const loadFnAst = codeToAst(`export const ${name} = () => {}`)
+	const loadFnAst = codeToSourceFile(`export const ${name} = () => {}`)
 	ast.program.body.push(loadFnAst.program.body[0]!)
 	return findExport(ast, name)!
 }

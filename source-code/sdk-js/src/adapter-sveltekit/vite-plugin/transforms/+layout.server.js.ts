@@ -1,7 +1,7 @@
 import type { TransformConfig } from "../config.js"
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToAst, astToCode, n } from '../../../utils/recast.js'
+import { codeToSourceFile, nodeToCode, n } from '../../../utils/recast.js'
 
 const assertNoImportsFromSdkJs = (ast: n.File) => {
 	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
@@ -10,7 +10,7 @@ const assertNoImportsFromSdkJs = (ast: n.File) => {
 }
 
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToAst(code)
+	const ast = codeToSourceFile(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 
@@ -24,5 +24,5 @@ export const transformLayoutServerJs = (config: TransformConfig, code: string, r
 
 	wrapExportedFunction(ast, undefined, wrapperFunctionName, 'load')
 
-	return astToCode(ast)
+	return nodeToCode(ast)
 }

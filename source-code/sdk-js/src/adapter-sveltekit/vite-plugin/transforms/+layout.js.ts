@@ -2,7 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToAst, astToCode, n } from '../../../utils/recast.js'
+import { codeToSourceFile, nodeToCode, n } from '../../../utils/recast.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ const assertNoImportsFromSdkJs = (ast: n.File) => {
 }
 
 export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToAst(code)
+	const ast = codeToSourceFile(code)
 
 	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
 	if (!root) return code // for now we don't need to transform non-root files
@@ -56,5 +56,5 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 	const options = root ? getOptions(config, root) : undefined
 	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
 
-	return astToCode(ast)
+	return nodeToCode(ast)
 }

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { b, n, codeToAst, astToCode, codeToDeclarationAst } from './recast.js';
+import { b, n, codeToSourceFile, nodeToCode, codeToNode } from './recast.js';
 
 describe("codeToAst", () => {
 	test("should return a File", () => {
-		const ast = codeToAst("")
-		n.File.assert(ast)
+		const node = codeToSourceFile("")
+		n.File.assert(node)
 	})
 })
 
@@ -12,49 +12,49 @@ describe("codeToAst", () => {
 
 describe("codeToDeclarationAst", () => {
 	test("should throw if nothing matches", () => {
-		expect(() => codeToDeclarationAst("")).toThrow()
+		expect(() => codeToNode("")).toThrow()
 	})
 
 	test("should throw an error if variable does not get named 'x'", () => {
-		expect(() => codeToDeclarationAst("const y = () => {}")).toThrow()
+		expect(() => codeToNode("const y = () => {}")).toThrow()
 	})
 
 	test("should return the arrow function expression", () => {
-		const ast = codeToDeclarationAst("const x = () => {}")
+		const ast = codeToNode("const x = () => {}")
 		n.ArrowFunctionExpression.assert(ast.value)
-		expect(astToCode(ast)).toMatchInlineSnapshot(
+		expect(nodeToCode(ast)).toMatchInlineSnapshot(
 			'"() => {}"'
 		)
 	})
 
 	test("should return the function expression", () => {
-		const ast = codeToDeclarationAst("const x = function() {}")
+		const ast = codeToNode("const x = function() {}")
 		n.FunctionExpression.assert(ast.value)
-		expect(astToCode(ast)).toMatchInlineSnapshot(
+		expect(nodeToCode(ast)).toMatchInlineSnapshot(
 			'"function() {}"'
 		)
 	})
 
 	test("should return the named function expression", () => {
-		const ast = codeToDeclarationAst("const x = function fn() {}")
+		const ast = codeToNode("const x = function fn() {}")
 		n.FunctionExpression.assert(ast.value)
-		expect(astToCode(ast)).toMatchInlineSnapshot(
+		expect(nodeToCode(ast)).toMatchInlineSnapshot(
 			'"function fn() {}"'
 		)
 	})
 
 	test("should return the call expression", () => {
-		const ast = codeToDeclarationAst("const x = fn('hello')")
+		const ast = codeToNode("const x = fn('hello')")
 		n.CallExpression.assert(ast.value)
-		expect(astToCode(ast)).toMatchInlineSnapshot(
+		expect(nodeToCode(ast)).toMatchInlineSnapshot(
 			'"fn(\'hello\')"'
 		)
 	})
 
 	test("should return an identifier", () => {
-		const ast = codeToDeclarationAst("const x = func")
+		const ast = codeToNode("const x = func")
 		n.Identifier.assert(ast.value)
-		expect(astToCode(ast)).toMatchInlineSnapshot(
+		expect(nodeToCode(ast)).toMatchInlineSnapshot(
 			'"func"'
 		)
 	})
@@ -64,7 +64,7 @@ describe("codeToDeclarationAst", () => {
 
 describe("astToCode", () => {
 	test("should print formatted Code", () => {
-		const ast = astToCode(
+		const ast = nodeToCode(
 			b.variableDeclaration(
 				'const',
 				[
