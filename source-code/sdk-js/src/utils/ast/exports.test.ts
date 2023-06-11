@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { findExport } from './exports.js';
-import { nodeToCode, codeToSourceFile, n } from '../recast.js';
+import { nodeToCode, codeToSourceFile, n } from '../utils.js';
 
 describe("findExport", () => {
 	test("should return undefined if no export was found", () => {

@@ -2,7 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToSourceFile, nodeToCode, n } from '../../../utils/recast.js'
+import { codeToSourceFile, nodeToCode, n } from '../../../utils/utils.js'
 
 // ------------------------------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { codeToSourceFile, n } from '../../../utils/recast.js'
+import { codeToSourceFile, n } from '../../../utils/utils.js'
 import { findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 
 // ------------------------------------------------------------------------------------------------

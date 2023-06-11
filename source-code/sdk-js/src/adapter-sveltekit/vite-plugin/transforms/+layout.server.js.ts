@@ -1,7 +1,7 @@
 import type { TransformConfig } from "../config.js"
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToSourceFile, nodeToCode, n } from '../../../utils/recast.js'
+import { codeToSourceFile, nodeToCode, n } from '../../../utils/utils.js'
 
 const assertNoImportsFromSdkJs = (ast: n.File) => {
 	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {

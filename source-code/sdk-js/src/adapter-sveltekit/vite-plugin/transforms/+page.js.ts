@@ -1,6 +1,6 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { nodeToCode, codeToSourceFile, n } from '../../../utils/recast.js'
+import { nodeToCode, codeToSourceFile, n } from '../../../utils/utils.js'
 import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
 

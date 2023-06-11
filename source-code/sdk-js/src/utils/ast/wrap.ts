@@ -1,4 +1,4 @@
-import { NodePath, codeToNode, n, b, visitNode } from '../recast.js'
+import { NodePath, codeToNode, n, b, visitNode } from '../utils.js'
 import { findFunctionExpression, findOrCreateExport } from './exports.js'
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { nodeToCode, codeToSourceFile, codeToNode } from '../recast.js';
+import { nodeToCode, codeToSourceFile, codeToNode } from '../utils.js';
 import { createWrapperAst, mergeWrapperAst, wrapExportedFunction, wrapWithPlaceholder } from './wrap.js';
 
 describe("wrapWithPlaceholder", () => {

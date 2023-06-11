@@ -1,5 +1,5 @@
 import * as recast from "recast"
-import { ASTNode, NodePath, codeToSourceFile, n, visitNode } from '../recast.js'
+import { ASTNode, NodePath, codeToSourceFile, n, visitNode } from '../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
