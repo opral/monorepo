@@ -1,12 +1,14 @@
 import { describe, expect, test } from "vitest"
 import { findExport } from './exports.js';
 import { nodeToCode, codeToSourceFile, n } from '../utils.js';
+import { Node } from 'ts-morph';
 
 describe("findExport", () => {
 	test("should return undefined if no export was found", () => {
 		const node = codeToSourceFile(``)
 
 		const exportNode = findExport(node, 'load')
+
 		expect(exportNode).toBeUndefined()
 	})
 
@@ -16,6 +18,7 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')
+
 		expect(exportNode).toBeUndefined()
 	})
 
@@ -25,8 +28,11 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')!
-		n.VariableDeclarator.assert(exportNode.value)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => {}"')
+
+		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"load = () => { }"'
+		)
 	})
 
 	test("should find let export", () => {
@@ -35,8 +41,11 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')!
-		n.VariableDeclarator.assert(exportNode.value)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => {}"')
+
+		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"load = () => { }"'
+		)
 	})
 
 	test("should find function export", () => {
@@ -45,8 +54,11 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')!
-		n.FunctionDeclaration.assert(exportNode.value)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() {}"')
+
+		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"function load() { }"'
+		)
 	})
 
 	test("should find named exports", () => {
@@ -56,8 +68,11 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')!
-		n.ExportSpecifier.assert(exportNode.value)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"fn as load"')
+
+		expect(Node.isExportSpecifier(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"fn as load"'
+		)
 	})
 
 	test("should find re-exported imports", () => {
@@ -66,7 +81,10 @@ describe("findExport", () => {
 		`)
 
 		const exportNode = findExport(node, 'load')!
-		n.ExportSpecifier.assert(exportNode.value)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"fn as load"')
+
+		expect(Node.isExportSpecifier(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"fn as load"'
+		)
 	})
 })

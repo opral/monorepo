@@ -5,7 +5,7 @@ import { dedent } from 'ts-dedent'
 
 const parseCode = (code: string) => new Project().createSourceFile('', code)
 
-const printCode = (node: Node) => node.print().trim()
+const printCode = (node: Node) => node && node.print().trim() || ''
 
 // ------------------------------------------------------------------------------------------------
 

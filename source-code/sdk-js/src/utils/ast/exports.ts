@@ -1,48 +1,47 @@
-import * as recast from "recast"
-import { ASTNode, NodePath, codeToSourceFile, n, visitNode } from '../utils.js'
+import { NodePath, codeToSourceFile, n, visitNode } from '../utils.js'
+import { Node, SyntaxKind, type SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export const findExport = (ast: n.File, name: string) => {
-	if (!recast.types.namedTypes.File.check(ast)) {
-		// we only work on the root File ast
-		throw new Error(`findExport does not support '${ast || 'unknown'}'`)
+export const findExport = (sourceFile: SourceFile, name: string) => {
+	if (!Node.isSourceFile(sourceFile)) return // we only work on the root node
+
+	const exportVariableStatements = sourceFile.getVariableStatements()
+		.filter(statement => statement.getModifiers().some(m => m.isKind(SyntaxKind.ExportKeyword)))
+
+	for (const variableStatements of exportVariableStatements) {
+		const declarations = variableStatements.getDeclarations()
+		for (const declaration of declarations) {
+			const nameNode = declaration.getNameNode()
+			if (nameNode && nameNode.getText() === name) {
+				return declaration;
+			}
+		}
 	}
 
-	let exportAst: NodePath<n.VariableDeclarator | n.FunctionDeclaration | n.ExportSpecifier> | undefined
+	const exportFunctionDeclarations = sourceFile.getFunctions()
+		.filter(declaration => declaration.getModifiers().some(m => m.isKind(SyntaxKind.ExportKeyword)))
 
-	visitNode(ast, {
-		visitExportNamedDeclaration(path: NodePath<n.ExportNamedDeclaration>) {
-			visitNode(path.value, {
-				visitVariableDeclarator(path: NodePath<n.VariableDeclarator>) {
-					if (n.Identifier.check(path.value.id) && path.value.id.name === name) {
-						exportAst = path
-					}
-
-					return false
-				},
-				visitFunctionDeclaration(path: NodePath<n.FunctionDeclaration>) {
-					if (n.Identifier.check(path.value.id) && path.value.id.name === name) {
-						exportAst = path
-					}
-
-					return false
-				},
-				visitExportSpecifier(path: NodePath<n.ExportSpecifier>) {
-					if (path.value.exported.name === name) {
-						exportAst = path
-					}
-
-					return false
-				},
-			})
-
-			return false
+	for (const declaration of exportFunctionDeclarations) {
+		const nameNode = declaration.getNameNode()
+		if (nameNode && nameNode.getText() === name) {
+			declaration.toggleModifier("export", false);
+			return declaration;
 		}
-	})
+	}
 
-	return exportAst
+	const exportDeclararions = sourceFile.getExportDeclarations()
+
+	for (const declaration of exportDeclararions) {
+		const namedExports = declaration.getNamedExports()
+		for (const namedExport of namedExports) {
+			if ((namedExport.getAliasNode() || namedExport.getNameNode()).getText())
+				return namedExport;
+		}
+	}
+
+	return undefined
 }
 
 // TODO: test
