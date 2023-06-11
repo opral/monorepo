@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { addImport, removeImport } from './imports.js';
-import { codeToSourceFile, nodeToCode } from '../recnode.js';
+import { codeToSourceFile, nodeToCode } from '../utils.js';
 
 describe("removeImport", () => {
 	describe("no modifications", () => {
