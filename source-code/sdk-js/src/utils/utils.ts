@@ -37,28 +37,3 @@ export const codeToNode = (code: string) => {
 }
 
 export const nodeToCode = (ast: any) => printCode(ast)
-
-
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-
-
-// TODO: remove the following code
-
-import * as recast from "recast"
-import type { NodePath as NodePathOriginal } from "ast-types/lib/node-path"
-import type { ASTNode } from "ast-types/lib/types"
-import { namedTypes as n } from "ast-types"
-import { IndentStyle } from 'typescript'
-type NodePath<V = any> = NodePathOriginal<any, V>
-
-export type {
-	ASTNode,
-	NodePath,
-}
-
-export const b = recast.types.builders
-
-export { n }
-
-export const visitNode = recast.visit
