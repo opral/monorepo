@@ -3,7 +3,7 @@ import { initConfig } from "../../config/index.js"
 import { dedent } from "ts-dedent"
 import type { InlangConfig } from "@inlang/core/config"
 import { testConfigFile } from "@inlang/core/test"
-import { initInlangEnvironment, InlangConfigWithSdkProps } from "../../config/config.js"
+import { initInlangEnvironment, type InlangConfigWithSdkProps } from "../../config/config.js"
 import { validateSdkConfig } from "@inlang/sdk-js-plugin"
 // @ts-ignore
 import { version } from "../../../package.json"

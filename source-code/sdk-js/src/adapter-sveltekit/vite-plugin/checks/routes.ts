@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
 import { dedent } from "ts-dedent"
 import { InlangError } from "../../../config/config.js"
-import { doesPathExist, TransformConfig } from "../config.js"
+import { doesPathExist, type TransformConfig } from "../config.js"
 import type { FileType } from "../fileInformation.js"
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {

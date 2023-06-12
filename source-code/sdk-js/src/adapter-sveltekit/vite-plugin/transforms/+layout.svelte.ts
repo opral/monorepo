@@ -5,7 +5,7 @@ import { vitePreprocess } from "@sveltejs/kit/vite"
 import { parseModule, generateCode } from "magicast"
 import { deepMergeObject } from "magicast/helpers"
 import {
-	NodeInfoMapEntry,
+	type NodeInfoMapEntry,
 	findAstJs,
 	getReactiveImportIdentifiers,
 	makeJsReactive,

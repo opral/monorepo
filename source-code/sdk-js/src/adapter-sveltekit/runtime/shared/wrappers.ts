@@ -1,13 +1,13 @@
 import { browser } from "$app/environment"
 import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
-import { detectLanguage, Detector } from "../../../detectors/index.js"
-import { initSvelteKitClientRuntime, SvelteKitClientRuntime } from "../client/runtime.js"
+import { detectLanguage, type Detector } from "../../../detectors/index.js"
+import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
 import {
 	addRuntimePromiseToEvent,
 	addRuntimeToData,
-	DataWithRuntime,
-	EventWithRuntimePromise,
+	type DataWithRuntime,
+	type EventWithRuntimePromise,
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"

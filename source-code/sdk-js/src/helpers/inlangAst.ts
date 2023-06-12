@@ -1,7 +1,7 @@
 import { types } from "recast"
 import { builders } from "magicast"
 import {
-	NodeInfoMapEntry,
+	type NodeInfoMapEntry,
 	findAstJs,
 	findUsedImportsInAst,
 	getFunctionOrDeclarationValue,

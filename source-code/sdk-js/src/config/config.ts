@@ -1,6 +1,6 @@
 import type { $fs } from "@inlang/core/environment"
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
+import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import type { SdkConfig } from "@inlang/sdk-js-plugin"
 import { dedent } from "ts-dedent"
 
