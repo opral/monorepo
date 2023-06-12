@@ -48,10 +48,15 @@ export const addImport = (sourceFile: SourceFile, path: string, ...names: [strin
 		return
 	}
 
-	// TODO: we must check first if one of the import declarations already contains a named import
-	const importDeclaration = importDeclarations[0]!
+
 	// add new import specifiers
 	for (const name of names) {
+		// check if one of the import declarations already contains the import
+		if (importDeclarations.some(importDeclaration => findNamedImportSpecifier(importDeclaration, name)))
+			continue
+
+		// add the import to the first import declaration
+		const importDeclaration = importDeclarations[0]!
 		if (!findNamedImportSpecifier(importDeclaration, name))
 			importDeclaration.addNamedImports(names.map(name => ({ name })))
 	}
@@ -62,16 +67,14 @@ export const addImport = (sourceFile: SourceFile, path: string, ...names: [strin
 
 const textWithoutQuotes = (text: string) => text.replace(/^['"]|['"]$/g, '')
 
-// TODO: test
-export const findImportDeclarations = (sourceFile: SourceFile, name: string) =>
+export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 	sourceFile.forEachChildAsArray()
 		.map((node) => Node.isImportDeclaration(node)
-			&& textWithoutQuotes(node.getModuleSpecifier().getText()) === name
+			&& textWithoutQuotes(node.getModuleSpecifier().getText()) === path
 			? node
 			: undefined
 		).filter(Boolean) as ImportDeclaration[]
 
-// TODO: test
 const getNamedImportSpecifiers = (importDeclaration: ImportDeclaration) => {
 	const namedImports = importDeclaration.getImportClause()?.getNamedBindings()
 	if (!Node.isNamedImports(namedImports)) return []
@@ -79,8 +82,7 @@ const getNamedImportSpecifiers = (importDeclaration: ImportDeclaration) => {
 	return namedImports.getElements()
 }
 
-// TODO: test
-const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, name: string) =>
+export const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, name: string) =>
 	getNamedImportSpecifiers(importDeclaration).find((element) =>
 		(element.getAliasNode()?.getText() || element.getName()) === name
 	)

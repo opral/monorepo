@@ -1,9 +1,15 @@
 import { describe, expect, test } from "vitest"
-import { addImport, removeImport } from './imports.js';
-import { codeToSourceFile, nodeToCode } from '../utils.js';
+import { addImport, findImportDeclarations, findNamedImportSpecifier, isOptOutImportPresent, removeImport } from './imports.js';
+import { codeToNode, codeToSourceFile, nodeToCode } from '../utils.js';
+import { Node } from 'ts-morph';
 
 describe("removeImport", () => {
 	describe("no modifications", () => {
+		test("should not fail if node is not a SourceFile", () => {
+			const node = codeToNode(`const x = 0`)
+			removeImport(node as any, '@inlang/sdk-js', 'i')
+		})
+
 		test("should not fail if file is empty", () => {
 			const node = codeToSourceFile(``)
 
@@ -107,6 +113,16 @@ describe("removeImport", () => {
 // ------------------------------------------------------------------------------------------------
 
 describe("addImport", () => {
+	test("should not fail if node is not a SourceFile", () => {
+		const node = codeToNode(`const x = 0`)
+		addImport(node as any, '@inlang/sdk-js', 'i')
+	})
+
+	test("should not fail if no names get passed", () => {
+		const node = codeToSourceFile(``)
+		addImport(node as any, '@inlang/sdk-js', ...([] as unknown as ['']))
+	})
+
 	test("should not add if import is already present", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js'
@@ -165,7 +181,23 @@ describe("addImport", () => {
 
 		addImport(node, '@inlang/sdk-js', 'languages')
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"import { languages as langs, languages } from \'@inlang/sdk-js\';"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"import { languages as langs, languages } from \'@inlang/sdk-js\';"'
+		)
+	})
+
+	test("should check multiple import statements", () => {
+		const node = codeToSourceFile(`
+			import { i } from '@inlang/sdk-js'
+			import { languages } from '@inlang/sdk-js'
+		`)
+
+		addImport(node, '@inlang/sdk-js', 'languages')
+
+		expect(nodeToCode(node)).toMatchInlineSnapshot(`
+			"import { i } from '@inlang/sdk-js';
+			import { languages } from '@inlang/sdk-js';"
+		`)
 	})
 
 	test("should leave module import intact", () => {
@@ -179,5 +211,75 @@ describe("addImport", () => {
 			"import { i } from '@inlang/sdk-js';
 			import '@inlang/sdk-js';"
 		`)
+	})
+})
+
+// ------------------------------------------------------------------------------------------------
+
+describe("findImportDeclarations", () => {
+	test("should return an empty array if no import declarations were found", () => {
+		const node = codeToSourceFile(``)
+		const result = findImportDeclarations(node, '')
+		expect(result).toHaveLength(0)
+	})
+
+	test("should return an empty array if no import declarations with a given path were found", () => {
+		const node = codeToSourceFile(`
+			import { i } from '@inlang/sdk-js/ignore'
+		`)
+		const result = findImportDeclarations(node, '@inlang/sdk-js')
+		expect(result).toHaveLength(0)
+	})
+
+	test("should return an array containing all import declarations", () => {
+		const node = codeToSourceFile(`
+			import { i } from '@inlang/sdk-js'
+			const x = false
+			import { languages } from '@inlang/sdk-js'
+		`)
+		const result = findImportDeclarations(node, '@inlang/sdk-js')
+		expect(result).toHaveLength(2)
+	})
+})
+
+// ------------------------------------------------------------------------------------------------
+
+describe("findNamedImportSpecifier", () => {
+	test("should return undefined if the named import specifier was not found", () => {
+		const node = codeToSourceFile(`
+			import '@inlang/sdk-js'
+		`)
+		const importDeclaration = findImportDeclarations(node, '@inlang/sdk-js')
+		const result = findNamedImportSpecifier(importDeclaration[0]!, 'i')
+		expect(result).toBeUndefined()
+	})
+
+	test("should find a named import specifier if present", () => {
+		const node = codeToSourceFile(`
+			import { i } from '@inlang/sdk-js'
+		`)
+		const importDeclaration = findImportDeclarations(node, '@inlang/sdk-js')
+		const result = findNamedImportSpecifier(importDeclaration[0]!, 'i')
+		expect(Node.isImportSpecifier(result)).toBe(true)
+	})
+})
+
+// ------------------------------------------------------------------------------------------------
+
+describe("isOptOutImportPresent", () => {
+	test("should return false if the opt-out import specifier was was not found", () => {
+		const node = codeToSourceFile(`
+			import '@inlang/sdk-js'
+		`)
+		const result = isOptOutImportPresent(node)
+		expect(result).toBe(false)
+	})
+
+	test("should return false if the opt-out import specifier was was not found", () => {
+		const node = codeToSourceFile(`
+			import '@inlang/sdk-js/no-transforms'
+		`)
+		const result = isOptOutImportPresent(node)
+		expect(result).toBe(true)
 	})
 })

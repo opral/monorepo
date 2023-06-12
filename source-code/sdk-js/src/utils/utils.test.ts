@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { n, codeToSourceFile, nodeToCode, codeToNode } from './utils.js';
+import { codeToSourceFile, nodeToCode, codeToNode } from './utils.js';
 import { Node, VariableDeclarationKind } from 'ts-morph';
 
 describe("codeToAst", () => {
@@ -11,13 +11,17 @@ describe("codeToAst", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("codeToDeclarationAst", () => {
+describe("codeToNode", () => {
 	test("should throw if nothing matches", () => {
 		expect(() => codeToNode("")).toThrow()
 	})
 
 	test("should throw an error if variable does not get named 'x'", () => {
 		expect(() => codeToNode("const y = () => {}")).toThrow()
+	})
+
+	test("should throw an error if variable does not have an initializer", () => {
+		expect(() => codeToNode("let x")).toThrow()
 	})
 
 	test("should return the arrow function expression", () => {
