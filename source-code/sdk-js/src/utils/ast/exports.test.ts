@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { findExport } from './exports.js';
+import { findExport, findOrCreateExport } from './exports.js';
 import { nodeToCode, codeToSourceFile, n } from '../utils.js';
 import { Node } from 'ts-morph';
 
@@ -85,6 +85,40 @@ describe("findExport", () => {
 		expect(Node.isExportSpecifier(exportNode)).toBe(true)
 		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
 			'"fn as load"'
+		)
+	})
+})
+
+describe("findOrCreateExport", () => {
+	test("should find existing export", () => {
+		const node = codeToSourceFile(`
+			export function load() {}
+		`)
+
+		const exportNode = findOrCreateExport(node, 'load')!
+
+		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"function load() { }"'
+		)
+	})
+
+	test("should throw an error if a non-exWported variable with the same name already exists", () => {
+		const node = codeToSourceFile(`
+			const load = () => {}
+		`)
+
+		expect(() => findOrCreateExport(node, 'load')).toThrow()
+	})
+
+	test("should create an export if export is missing", () => {
+		const node = codeToSourceFile("")
+
+		const exportNode = findOrCreateExport(node, 'load')!
+
+		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
+			'"load = () => { }"'
 		)
 	})
 })

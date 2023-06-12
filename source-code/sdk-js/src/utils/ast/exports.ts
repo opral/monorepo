@@ -2,7 +2,6 @@ import { codeToSourceFile } from '../utils.js'
 import { Node, SyntaxKind, type SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
 
 export const findExport = (sourceFile: SourceFile, name: string) => {
 	if (!Node.isSourceFile(sourceFile)) return // we only work on the root node
@@ -41,15 +40,23 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 		}
 	}
 
-	return undefined
+	return
 }
 
-// TODO: test
+// ------------------------------------------------------------------------------------------------
+
 export const findOrCreateExport = (sourceFile: SourceFile, name: string) => {
 	const loadFnExport = findExport(sourceFile, name)
 	if (loadFnExport) return loadFnExport
 
-	// TODO: check if a local variable named `name` already exists
+	const isVariableAlreadyDefined = !!sourceFile.getVariableStatements()
+		.filter(statement => statement.getDeclarationList().getDeclarations()
+			.some(declaration => declaration.getName() === name)
+		).length
+	if (isVariableAlreadyDefined)
+		throw new Error(`Variable ${name} already exists`)
+	// TODO: use `export { randomVariableName as load } instead of throwing an error
+
 	const loadFnAst = codeToSourceFile(`export const ${name} = () => {}`)
 	sourceFile.addVariableStatement(loadFnAst.getVariableStatement(name)!.getStructure())
 
