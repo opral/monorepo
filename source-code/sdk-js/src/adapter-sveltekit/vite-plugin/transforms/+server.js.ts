@@ -3,8 +3,8 @@ import { findImportDeclarations, isOptOutImportPresent } from '../../../utils/as
 import { codeToSourceFile } from '../../../utils/utils.js'
 import type { TransformConfig } from "../config.js"
 
-const assertNoImportsFromSdkJs = (ast: SourceFile) => {
-	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
+const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
+	if (findImportDeclarations(sourceFile, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
 		)
@@ -12,24 +12,24 @@ const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 }
 
 export const transformServerRequestJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToSourceFile(code)
+	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 
-	if (isOptOutImportPresent(ast)) return code
+	if (isOptOutImportPresent(sourceFile)) return code
 
 	return code // for now we don't need to transform any files
 
 	// const wrapperFunctionName = 'initRequestHandlerWrapper'
 
-	// addImport(ast, '@inlang/sdk-js/adapter-sveltekit/server', initRequestHandlerWrapper)
+	// addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/server', initRequestHandlerWrapper)
 
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'GET')
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'POST')
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'PUT')
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'PATCH')
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'DELETE')
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'OPTIONS')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'GET')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'POST')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'PUT')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'PATCH')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'DELETE')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'OPTIONS')
 
-	// return astToCode(ast)
+	// return nodeToCode(sourceFile)
 }

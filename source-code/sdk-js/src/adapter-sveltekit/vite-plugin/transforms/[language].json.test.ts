@@ -1,28 +1,54 @@
-import { describe, it, expect } from "vitest"
+import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
 import type { TransformConfig } from "../config.js"
 import { transformLanguageJson } from "../transforms/[language].json.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 
 describe("transformLanguageJson", () => {
-	it("adds GET endpoint to an empty file", () => {
-		const code = transformLanguageJson(getTransformConfig(), "")
-		expect(code).toMatchInlineSnapshot(`
-			"
-			import { json } from \\"@sveltejs/kit\\"
-			import { getResource, reloadResources } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
+	test("should throw if GET endpoint is already defined", () => {
+		expect(() =>
+			transformLanguageJson(
+				getTransformConfig(),
+				dedent`
+					export const GET = () => json({ hackerman: true })
+				`,
+			),
+		).toThrowError()
+	})
 
+	test("empty file", () => {
+		const code = ""
+		const transformed = transformLanguageJson(getTransformConfig(), code)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { json } from '@sveltejs/kit';
+			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
-				await reloadResources()
-				return json(getResource(language) || null)
-			}
-
-
-			"
+			    await reloadResources();
+			    return json(getResource(language) || null);
+			};"
 		`)
 	})
 
-	it("should add `entries` if SvelteKit version >= 1.16.3", () => {
+	test("adds GET endpoint to a file with arbitrary contents", () => {
+		const code = transformLanguageJson(
+			getTransformConfig(),
+			dedent`
+				const someFunction = console.info(123)
+			`,
+		)
+		expect(code).toMatchInlineSnapshot(`
+			"import { json } from '@sveltejs/kit';
+			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+			const someFunction = console.info(123);
+			export const GET = async ({ params: { language } }) => {
+			    await reloadResources();
+			    return json(getResource(language) || null);
+			};"
+		`)
+	})
+
+	test("should add `entries` export if SvelteKit version >= 1.16.3", () => {
 		const code = transformLanguageJson(
 			getTransformConfig({
 				svelteKit: {
@@ -32,80 +58,38 @@ describe("transformLanguageJson", () => {
 			"",
 		)
 		expect(code).toMatchInlineSnapshot(`
-			"
-			import { json } from \\"@sveltejs/kit\\"
-			import { getResource, reloadResources } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
-
+			"import { json } from '@sveltejs/kit';
+			import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
-				await reloadResources()
-				return json(getResource(language) || null)
-			}
-
-
-			import { initState } from '@inlang/sdk-js/adapter-sveltekit/server'
-
+			    await reloadResources();
+			    return json(getResource(language) || null);
+			};
 			export const entries = async () => {
-				const { languages } = await initState(await import('../../../../inlang.config.js'))
-
-				return languages.map(language => ({ language }))
-			}
-			"
+			    const { languages } = await initState(await import('../../../../inlang.config.js'));
+			    return languages.map(language => ({ language }));
+			};"
 		`)
 	})
 
-	it.skip("adds GET endpoint to a file with arbitrary contents", () => {
-		const code = transformLanguageJson(
-			getTransformConfig(),
-			dedent`
-			import { error } from "@sveltejs/kit"
-
-			export const GET = () => {
-				throw error(500, 'not implemented')
-			}
-		`,
-		)
-		expect(code).toMatchInlineSnapshot(`
-			"
-			import { json, error } from \\"@sveltejs/kit\\"
-			import { getResource } from \\"@inlang/sdk-js/adapter-sveltekit/server\\"
-
-			export const GET = (({ params: { language } }) =>
-				json(getResource(language) || null))
-
-			export const POST = () => {
-				throw Error('not implemented')
-			}
-			"
-		`)
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformLanguageJson(config, code)
+		expect(transformed).toEqual(code)
 	})
 
-	describe("should throw if GET endpoint is already defined", () => {
-		it.skip("arrow function", () => {
-			expect(() =>
-				transformLanguageJson(
-					getTransformConfig(),
-					dedent`
-				import { error } from "@sveltejs/kit"
-
-				export const GET = () => json({ hackerman: true })
-			`,
-				),
-			).toThrowError()
+	describe("'@inlang/sdk-js' imports", () => {
+		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
+			const code = "import { i } from '@inlang/sdk-js'"
+			const config = getTransformConfig()
+			expect(() => transformLanguageJson(config, code)).toThrow()
 		})
 
-		it.skip("function keyword", () => {
-			expect(() =>
-				transformLanguageJson(
-					getTransformConfig(),
-					`
-				import { error } from "@sveltejs/kit"
-
-				export async function GET({ params }) {
-					return new Response(params.language)
-				}
-			`,
-				),
-			).toThrowError()
+		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
+			const code =
+				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+			const config = getTransformConfig()
+			expect(() => transformLanguageJson(config, code)).not.toThrow()
 		})
 	})
 })

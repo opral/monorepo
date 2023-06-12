@@ -68,20 +68,20 @@ const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 }
 
 export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToSourceFile(code)
+	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 
-	if (isOptOutImportPresent(ast)) return code
+	if (isOptOutImportPresent(sourceFile)) return code
 
 	if (!root) return code // for now we don't need to transform non-root files
 
 	const wrapperFunctionName = root ? "initRootPageLoadWrapper" : "initLoadWrapper"
 
-	addImports(ast, config, root, wrapperFunctionName)
+	addImports(sourceFile, config, root, wrapperFunctionName)
 
 	const options = root ? getOptions(config, root) : undefined
-	wrapExportedFunction(ast, options, wrapperFunctionName, "load")
+	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "load")
 
-	return nodeToCode(ast)
+	return nodeToCode(sourceFile)
 }

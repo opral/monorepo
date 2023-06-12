@@ -5,8 +5,8 @@ import type { SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 
-const assertNoImportsFromSdkJs = (ast: SourceFile) => {
-	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
+const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
+	if (findImportDeclarations(sourceFile, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
 		)
@@ -14,19 +14,19 @@ const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 }
 
 export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToSourceFile(code)
+	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 
-	if (isOptOutImportPresent(ast)) return code
+	if (isOptOutImportPresent(sourceFile)) return code
 
 	return code // for now we don't need to transform any files
 
 	// const wrapperFunctionName = 'initServerLoadWrapper'
 
-	// addImport(ast, '@inlang/sdk-js/adapter-sveltekit/server', wrapperFunctionName)
+	// addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/server', wrapperFunctionName)
 
-	// wrapExportedFunction(ast, undefined, wrapperFunctionName, 'load')
+	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'load')
 
-	// return astToCode(ast)
+	// return nodeToCode(sourceFile)
 }

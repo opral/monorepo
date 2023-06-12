@@ -6,20 +6,21 @@ import {
 	isOptOutImportPresent,
 } from "../../../utils/ast/imports.js"
 import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
-import { codeToSourceFile, nodeToCode, n } from "../../../utils/utils.js"
+import { codeToSourceFile, nodeToCode } from "../../../utils/utils.js"
+import type { SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
 const addImports = (
-	ast: n.File,
+	sourceFile: SourceFile,
 	config: TransformConfig,
 	root: boolean,
 	wrapperFunctionName: string,
 ) => {
-	addImport(ast, "$app/environment", "browser")
-	addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
-	addImport(ast, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
+	addImport(sourceFile, "$app/environment", "browser")
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
+	addImport(sourceFile, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -44,8 +45,8 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-const assertNoImportsFromSdkJs = (ast: n.File) => {
-	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
+const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
+	if (findImportDeclarations(sourceFile, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
 		)
@@ -53,19 +54,19 @@ const assertNoImportsFromSdkJs = (ast: n.File) => {
 }
 
 export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
-	const ast = codeToSourceFile(code)
+	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(ast) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 	if (!root) return code // for now we don't need to transform non-root files
 
-	if (isOptOutImportPresent(ast)) return code
+	if (isOptOutImportPresent(sourceFile)) return code
 
 	const wrapperFunctionName = root ? "initRootLayoutLoadWrapper" : "initLayoutLoadWrapper"
 
-	addImports(ast, config, root, wrapperFunctionName)
+	addImports(sourceFile, config, root, wrapperFunctionName)
 
 	const options = root ? getOptions(config, root) : undefined
-	wrapExportedFunction(ast, options, wrapperFunctionName, "load")
+	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "load")
 
-	return nodeToCode(ast)
+	return nodeToCode(sourceFile)
 }
