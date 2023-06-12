@@ -40,6 +40,7 @@ export async function defineConfig(env) {
 			pluginJson({
 				pathPattern: ".example/{language}.json",
 			}),
+			standardLintRules(),
 		],
 	}
 }
