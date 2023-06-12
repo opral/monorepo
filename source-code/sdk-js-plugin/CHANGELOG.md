@@ -1,5 +1,13 @@
 # @inlang/sdk-js-plugin
 
+## 0.6.5
+
+### Patch Changes
+
+- 7022cdc0: fix: message reference matching
+
+  The message reference matching used `t` instead of `i`.
+
 ## 0.6.4
 
 ## 0.6.3
