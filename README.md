@@ -63,4 +63,4 @@ The IDE-extension allows you to translate your content directly in your IDE.
 ✅ machine translate </br>
 ✅ open inlang editor </br>
 
-![CLI validate example](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/cli-validate.png)
+![CLI validate example](https://github.com/inlang/inlang/assets/59048346/44fcaf1e-aff4-4533-b973-1690fc6db93e)
