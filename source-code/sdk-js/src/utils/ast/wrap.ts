@@ -39,7 +39,6 @@ export const createWrapperAst = (name: string, options = "") =>
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: test this
 const findWrappingPoint = (callExpression: CallExpression) => {
 	if (!callExpression.getExpression().getText()) {
 		throw new Error(`Could not find wrapping point in ${callExpression.getText()}`)
@@ -53,7 +52,6 @@ const findWrappingPoint = (callExpression: CallExpression) => {
 	return argument
 }
 
-// TODO: test this
 const findInsertionPoint = (callExpression: CallExpression) => {
 	const insertionPoint = callExpression
 		.getDescendantsOfKind(SyntaxKind.Identifier)
@@ -66,7 +64,6 @@ const findInsertionPoint = (callExpression: CallExpression) => {
 	return insertionPoint
 }
 
-// TODO: test this
 export const mergeWrapperAst = (toWrapAst: CallExpression, wrapWithAst: CallExpression) => {
 	const wrappingPointAst = findWrappingPoint(toWrapAst)
 	const insertionPointAst = findInsertionPoint(wrapWithAst)

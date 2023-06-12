@@ -5,9 +5,10 @@ import {
 	isOptOutImportPresent,
 } from "../../../utils/ast/imports.js"
 import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
-import { codeToSourceFile, nodeToCode, n } from "../../../utils/utils.js"
+import { codeToSourceFile, nodeToCode } from "../../../utils/utils.js"
+import type { SourceFile } from 'ts-morph'
 
-const assertNoImportsFromSdkJs = (ast: n.File) => {
+const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,

@@ -102,6 +102,5 @@ export const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, n
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: test
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
 	!!findImportDeclarations(sourceFile, "@inlang/sdk-js/no-transforms").length

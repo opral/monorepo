@@ -1,18 +1,19 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { nodeToCode, codeToSourceFile, n } from "../../../utils/utils.js"
+import { nodeToCode, codeToSourceFile } from "../../../utils/utils.js"
 import {
 	addImport,
 	findImportDeclarations,
 	isOptOutImportPresent,
 } from "../../../utils/ast/imports.js"
 import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
+import type { SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
 const addImports = (
-	ast: n.File,
+	ast: SourceFile,
 	config: TransformConfig,
 	root: boolean,
 	wrapperFunctionName: string,
@@ -58,7 +59,7 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-const assertNoImportsFromSdkJs = (ast: n.File) => {
+const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,

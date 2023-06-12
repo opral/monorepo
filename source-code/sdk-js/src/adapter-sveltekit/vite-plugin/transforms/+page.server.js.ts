@@ -1,10 +1,11 @@
 import type { TransformConfig } from "../config.js"
-import { codeToSourceFile, n } from "../../../utils/utils.js"
+import { codeToSourceFile } from "../../../utils/utils.js"
 import { findImportDeclarations, isOptOutImportPresent } from "../../../utils/ast/imports.js"
+import type { SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
 
-const assertNoImportsFromSdkJs = (ast: n.File) => {
+const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
 		throw Error(
 			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
