@@ -125,7 +125,7 @@ describe("addImport", () => {
 		addImport(node, '@inlang/sdk-js', 'i', 'language')
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"import { i, language } from \\"@inlang/sdk-js\\";"'
+			'"import { i, language } from \'@inlang/sdk-js\';"'
 		)
 	})
 
@@ -152,7 +152,7 @@ describe("addImport", () => {
 		addImport(node, '@inlang/sdk-js', 'language')
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { language } from \\"@inlang/sdk-js\\";
+			"import { language } from '@inlang/sdk-js';
 			console.info(1234);
 			import './app.css';"
 		`)
@@ -176,7 +176,7 @@ describe("addImport", () => {
 		addImport(node, '@inlang/sdk-js', 'i')
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { i } from \\"@inlang/sdk-js\\";
+			"import { i } from '@inlang/sdk-js';
 			import '@inlang/sdk-js';"
 		`)
 	})

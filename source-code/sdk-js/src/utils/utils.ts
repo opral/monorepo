@@ -1,12 +1,17 @@
-import { Project, Node } from "ts-morph"
+import { Project, Node, QuoteKind, IndentationText, ScriptKind } from "ts-morph"
 import { dedent } from 'ts-dedent'
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: https://ts-morph.com/manipulation/settings
-const parseCode = (code: string) => new Project().createSourceFile('', code)
+const parseCode = (code: string) => new Project({
+	manipulationSettings: {
+		quoteKind: QuoteKind.Single,
+		indentationText: IndentationText.Tab,
+		useTrailingCommas: true,
+	}
+}).createSourceFile('', code)
 
-const printCode = (node: Node) => node && node.print().trim() || ''
+const printCode = (node: Node) => node && node.print({ scriptKind: ScriptKind.TS }).trim() || ''
 
 // ------------------------------------------------------------------------------------------------
 
@@ -44,6 +49,7 @@ import * as recast from "recast"
 import type { NodePath as NodePathOriginal } from "ast-types/lib/node-path"
 import type { ASTNode } from "ast-types/lib/types"
 import { namedTypes as n } from "ast-types"
+import { IndentStyle } from 'typescript'
 type NodePath<V = any> = NodePathOriginal<any, V>
 
 export type {
