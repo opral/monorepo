@@ -1,4 +1,4 @@
-import { NodePath, codeToSourceFile, n, visitNode } from '../utils.js'
+import { codeToSourceFile } from '../utils.js'
 import { Node, SyntaxKind, type SourceFile } from 'ts-morph'
 
 // ------------------------------------------------------------------------------------------------
@@ -45,38 +45,13 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 }
 
 // TODO: test
-export const findOrCreateExport = (ast: n.File, name: string) => {
-	const loadFnExport = findExport(ast, name)
+export const findOrCreateExport = (sourceFile: SourceFile, name: string) => {
+	const loadFnExport = findExport(sourceFile, name)
 	if (loadFnExport) return loadFnExport
 
 	// TODO: check if a local variable named `name` already exists
 	const loadFnAst = codeToSourceFile(`export const ${name} = () => {}`)
-	ast.program.body.push(loadFnAst.program.body[0]!)
-	return findExport(ast, name)!
-}
+	sourceFile.addVariableStatement(loadFnAst.getVariableStatement(name)!.getStructure())
 
-
-// TODO: test
-export const findFunctionExpression = (ast: NodePath<n.VariableDeclarator | n.FunctionDeclaration | n.ExportSpecifier>) => {
-	let functionExpressionAst: NodePath<n.ArrowFunctionExpression | n.FunctionExpression | n.FunctionDeclaration> | undefined
-
-	visitNode(ast.value, {
-		visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
-			functionExpressionAst = path
-
-			return false
-		},
-		visitFunctionExpression(path: NodePath<n.FunctionExpression>) {
-			functionExpressionAst = path
-
-			return false
-		},
-		visitFunctionDeclaration(path: NodePath<n.FunctionDeclaration>) {
-			functionExpressionAst = path
-
-			return false
-		}
-	})
-
-	return functionExpressionAst
+	return findExport(sourceFile, name)!
 }

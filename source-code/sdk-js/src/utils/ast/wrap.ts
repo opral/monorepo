@@ -1,138 +1,91 @@
-import { NodePath, codeToNode, n, b, visitNode } from '../utils.js'
-import { findFunctionExpression, findOrCreateExport } from './exports.js'
+import { Node, type CallExpression, SyntaxKind, SourceFile, VariableDeclaration, FunctionDeclaration, ExportSpecifier } from 'ts-morph'
+import { codeToNode, nodeToCode } from '../utils.js'
+import { findOrCreateExport } from './exports.js'
 
 const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export function wrapWithPlaceholder(ast: NodePath<n.Identifier | n.ArrowFunctionExpression | n.FunctionExpression | n.FunctionDeclaration | n.CallExpression>): asserts ast is NodePath<n.CallExpression> {
-	let expressionAst: NodePath<n.Expression> | undefined
+export function wrapWithPlaceholder(node: Node): CallExpression {
+	if (
+		Node.isArrowFunction(node)
+		|| Node.isFunctionExpression(node)
+		|| Node.isIdentifier(node)
+		|| Node.isCallExpression(node)
+	)
+		return node.transform(({ factory, currentNode }) =>
+			factory.createCallExpression(factory.createIdentifier(WRAP_IDENTIFIER), undefined, [currentNode as any])
+		) as CallExpression
 
-	visitNode(ast.value, {
-		visitArrowFunctionExpression(path: NodePath<n.ArrowFunctionExpression>) {
-			expressionAst = path
-
-			return false
-		},
-		visitFunctionExpression(path: NodePath<n.FunctionExpression>) {
-			expressionAst = path
-
-			return false
-		},
-		visitIdentifier(path: NodePath<n.Identifier>) {
-			expressionAst = path
-
-			return false
-		},
-		visitCallExpression(path: NodePath<n.CallExpression>) {
-			expressionAst = path
-
-			return false
-		}
-	})
-
-	if (!expressionAst) {
-		throw new Error(`wrapWithPlaceholder does not support '${ast.value?.type || 'unknown'}'`)
-	} else if (n.CallExpression.check(expressionAst.value)) {
-		ast.replace(expressionAst.value) // TODO test this case
-	} else {
-		ast.replace(b.callExpression(b.identifier(WRAP_IDENTIFIER), [expressionAst.value as n.CallExpression]))
-	}
+	throw new Error(`wrapWithPlaceholder does not support '${node.getKindName()}'`)
 }
 
 // ------------------------------------------------------------------------------------------------
 
 export const createWrapperAst = (name: string, options = '') => codeToNode(`
 	const x = ${name}(${options}).wrap(${WRAP_IDENTIFIER})
-`) as NodePath<n.CallExpression>
+`) as CallExpression
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test this
-const findWrappingPoint = (ast: NodePath<n.CallExpression>) => {
-	let callExpressionAst: NodePath<n.FunctionExpression | n.ArrowFunctionExpression | n.VariableDeclarator> | undefined
+const findWrappingPoint = (callExpression: CallExpression) => {
+	if (!callExpression.getExpression().getText()) {
+		throw new Error(`Could not find wrapping point in ${callExpression.getText()}`)
+	}
 
-	visitNode(ast.value, {
-		visitCallExpression: function (path) {
-			if (path.value.callee.name === WRAP_IDENTIFIER) {
-				visitNode(path.value, {
-					visitFunctionExpression: function (path) {
-						callExpressionAst = path
-						return false
-					},
-					visitArrowFunctionExpression: function (path) {
-						callExpressionAst = path
-						return false
-					},
-					visitIdentifier: function (path) {
-						callExpressionAst = path
-						return false
-					},
-				})
-			}
+	const argument = callExpression.getArguments()[0]
+	if (!argument) {
+		throw new Error(`Could not find wrapping point in ${callExpression.getText()}`)
+	}
 
-			return false
-		},
-
-	})
-
-	return callExpressionAst
+	return argument
 }
 
 // TODO: test this
-const findInsertionPoint = (ast: NodePath<n.CallExpression>) => {
-	let identifierAst: NodePath<n.Identifier> | undefined
+const findInsertionPoint = (callExpression: CallExpression) => {
+	const insertionPoint = callExpression.getDescendantsOfKind(SyntaxKind.Identifier)
+		.find(identifier => identifier.getText() === WRAP_IDENTIFIER)
 
-	visitNode(ast.value, {
-		visitCallExpression: function (path) {
-			if (path.value.arguments[0].name === WRAP_IDENTIFIER) {
-				visitNode(path.value, {
-					visitIdentifier: function (path) {
-						identifierAst = path
-						return false
-					},
-				})
-			}
+	if (!insertionPoint) {
+		throw new Error(`Could not find insertion point in ${callExpression.getText()}`)
+	}
 
-			return false
-		},
-	})
-
-	return identifierAst
+	return insertionPoint
 }
 
 // TODO: test this
-export const mergeWrapperAst = (toWrapAst: NodePath<n.CallExpression>, wrapWithAst: NodePath<n.CallExpression>) => {
+export const mergeWrapperAst = (toWrapAst: CallExpression, wrapWithAst: CallExpression) => {
 	const wrappingPointAst = findWrappingPoint(toWrapAst)
-	if (!wrappingPointAst) {
-		throw new Error(`Could not find wrapping point in ${toWrapAst.value.type}`)
-	}
-
 	const insertionPointAst = findInsertionPoint(wrapWithAst)
-	if (!insertionPointAst) {
-		throw new Error(`Could not find insertion point in ${toWrapAst.value.type}`)
-	}
 
-	insertionPointAst.replace(wrappingPointAst.value)
+	insertionPointAst.transform(() => wrappingPointAst.compilerNode)
 }
 
 // ------------------------------------------------------------------------------------------------
 
-const convertToFunctionExpression = (ast: NodePath<n.FunctionDeclaration>) => {
-	const functionExpressionAst = b.functionExpression(ast.value.id, ast.value.params, ast.value.body)
-	functionExpressionAst.async = ast.value.async
-	const variableDeclarationAst = b.variableDeclaration('const', [
-		b.variableDeclarator(ast.value.id!, functionExpressionAst)
-	])
-	ast.replace(variableDeclarationAst)
+// TODO: test
+export const findFunctionExpression = (node: VariableDeclaration | FunctionDeclaration | ExportSpecifier) => {
+	if (Node.isVariableDeclaration(node)) {
+		return node.getInitializer()!
+	}
+
+	if (Node.isFunctionDeclaration(node)) {
+		return node
+	}
+
+	throw new Error(`Could not find function expression in ${node.getText()}`)
 }
 
-export const wrapExportedFunction = (ast: n.File, options: string | undefined, wrapperFunctionName: string, exportName: string) => {
-	const fnExport = findOrCreateExport(ast, exportName)
+export const wrapExportedFunction = (sourceFile: SourceFile, options: string | undefined, wrapperFunctionName: string, exportName: string) => {
+	const fnExport = findOrCreateExport(sourceFile, exportName)
+
 	// if export is a function declaration, convert it to a function expression
-	if (n.FunctionDeclaration.check(fnExport.value)) {
-		convertToFunctionExpression(fnExport as NodePath<n.FunctionDeclaration>)
+	if (Node.isFunctionDeclaration(fnExport)) {
+		fnExport.replaceWithText(`export const ${exportName} = ${nodeToCode(fnExport)}`)
+		wrapExportedFunction(sourceFile, options, wrapperFunctionName, exportName)
+		return
 	}
 
 	const fn = findFunctionExpression(fnExport)
@@ -140,10 +93,9 @@ export const wrapExportedFunction = (ast: n.File, options: string | undefined, w
 		throw Error(`Could not find ${exportName} function`)
 	}
 
-	wrapWithPlaceholder(fn)
+	const wrapped = wrapWithPlaceholder(fn)
 	const wrapWithAst = createWrapperAst(wrapperFunctionName, options)
 
-	mergeWrapperAst(fn, wrapWithAst)
-
-	fn.replace(wrapWithAst.value)
+	mergeWrapperAst(wrapped, wrapWithAst)
+	wrapped.transform(() => wrapWithAst.compilerNode)
 }

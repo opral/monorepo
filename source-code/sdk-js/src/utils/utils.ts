@@ -3,6 +3,7 @@ import { dedent } from 'ts-dedent'
 
 // ------------------------------------------------------------------------------------------------
 
+// TODO: https://ts-morph.com/manipulation/settings
 const parseCode = (code: string) => new Project().createSourceFile('', code)
 
 const printCode = (node: Node) => node && node.print().trim() || ''
@@ -22,7 +23,12 @@ export const codeToNode = (code: string) => {
 		throw new Error('you must name the variable "x"')
 	}
 
-	return node.getInitializer()
+	const initializer = node.getInitializer()
+	if (!initializer) {
+		throw new Error('codeToDeclarationAst: could not find initializer')
+	}
+
+	return initializer
 }
 
 export const nodeToCode = (ast: any) => printCode(ast)
