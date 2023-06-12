@@ -40,14 +40,14 @@ Create a `inlang.config.js` in the **root** of your project. You can use the fol
 
 ```js
 export async function defineConfig(env) {
-	const { default: jsonPugin } = await env.$import(
+	const { default: jsonPlugin } = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPugin({
+			jsonPlugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
 		],
@@ -78,14 +78,14 @@ If your are using a different translation function, you can use the following co
 
 ```js
 export async function defineConfig(env) {
-	const { default: jsonPugin } = await env.$import(
+	const { default: jsonPlugin } = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPugin({
+			jsonPlugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
 		],
