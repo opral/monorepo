@@ -19,9 +19,9 @@ const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
 export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
 	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
-
 	if (isOptOutImportPresent(sourceFile)) return code
+
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 
 	if (!root) return code // for now we don't need to transform non-root files
 

@@ -37,9 +37,9 @@ const assertNoImportsFromSdkJs = (ast: SourceFile) => {
 export const transformLanguageJson = (config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code)
 
-	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
-
 	if (isOptOutImportPresent(sourceFile)) return code
+
+	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 
 	if (findExport(sourceFile, 'GET'))
 		throw Error(`The file already contains a 'GET' export.`)

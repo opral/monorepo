@@ -56,10 +56,10 @@ const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
 export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
 	const sourceFile = codeToSourceFile(code)
 
+	if (isOptOutImportPresent(sourceFile)) return code
+
 	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
 	if (!root) return code // for now we don't need to transform non-root files
-
-	if (isOptOutImportPresent(sourceFile)) return code
 
 	const wrapperFunctionName = root ? "initRootLayoutLoadWrapper" : "initLayoutLoadWrapper"
 
