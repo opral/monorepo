@@ -20,7 +20,7 @@ export const sdkPlugin = createPlugin<SdkConfigInput>(({ settings }) => ({
 const ideExtensionDefaultConfig: InlangConfig["ideExtension"] = {
 	messageReferenceMatchers: [
 		async (args) => {
-			const regex = /(?<!\w){?t\(['"](?<messageId>\S+)['"]\)}?/gm
+			const regex = /(?<!\w){?i\(['"](?<messageId>\S+)['"]\)}?/gm
 			const str = args.documentText
 			let match
 			const result = []
