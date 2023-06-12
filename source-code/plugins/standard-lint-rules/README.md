@@ -14,7 +14,7 @@ _inlang.config.js_
 export async function defineConfig(env) {
 	// import the rules you want to use
 	const { default: standardLintRules } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/pluing-standard-lint-rules@3/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js",
 	)
 
 	return {
