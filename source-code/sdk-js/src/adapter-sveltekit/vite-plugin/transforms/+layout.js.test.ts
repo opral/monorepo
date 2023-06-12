@@ -18,10 +18,10 @@ describe("transformLayoutJs", () => {
 				const transformed = transformLayoutJs(config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-					import { browser } from '$app/environment';
-					export const load = initRootLayoutLoadWrapper().wrap(() => {});"
+					"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+					import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					import { browser } from \\"$app/environment\\";
+					export const load = initRootLayoutLoadWrapper().wrap(() => { });"
 				`)
 		})
 
@@ -31,13 +31,12 @@ describe("transformLayoutJs", () => {
 				const transformed = transformLayoutJs(config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-					import { browser } from '$app/environment';
-
+					"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+					import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+					import { browser } from \\"$app/environment\\";
 					export const load = initRootLayoutLoadWrapper({
-					   initDetectors: browser ? () => [initLocalStorageDetector(), navigatorDetector] : undefined
-					}).wrap(() => {});"
+					    initDetectors: browser ? () => [initLocalStorageDetector(), navigatorDetector] : undefined
+					}).wrap(() => { });"
 				`)
 			})
 		})
@@ -53,10 +52,10 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-				import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { browser } from '$app/environment';
-				export const load = initRootLayoutLoadWrapper().wrap(async () => {});"
+				"import { initLocalStorageDetector, navigatorDetector } from \\"@inlang/sdk-js/detectors/client\\";
+				import { initRootLayoutLoadWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
+				import { browser } from \\"$app/environment\\";
+				export const load = initRootLayoutLoadWrapper().wrap(async () => { });"
 			`)
 		})
 	})
