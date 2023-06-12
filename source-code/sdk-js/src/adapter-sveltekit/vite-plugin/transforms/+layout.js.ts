@@ -1,16 +1,25 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
-import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToSourceFile, nodeToCode, n } from '../../../utils/utils.js'
+import {
+	addImport,
+	findImportDeclarations,
+	isOptOutImportPresent,
+} from "../../../utils/ast/imports.js"
+import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
+import { codeToSourceFile, nodeToCode, n } from "../../../utils/utils.js"
 
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
-const addImports = (ast: n.File, config: TransformConfig, root: boolean, wrapperFunctionName: string) => {
-	addImport(ast, '$app/environment', 'browser')
-	addImport(ast, '@inlang/sdk-js/adapter-sveltekit/shared', wrapperFunctionName)
-	addImport(ast, '@inlang/sdk-js/detectors/client', 'initLocalStorageDetector', 'navigatorDetector')
+const addImports = (
+	ast: n.File,
+	config: TransformConfig,
+	root: boolean,
+	wrapperFunctionName: string,
+) => {
+	addImport(ast, "$app/environment", "browser")
+	addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
+	addImport(ast, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -18,7 +27,7 @@ const addImports = (ast: n.File, config: TransformConfig, root: boolean, wrapper
 // TODO: test
 const getOptions = (config: TransformConfig, root: boolean) =>
 	config.languageInUrl
-		? ''
+		? ""
 		: dedent`
 			{
 				initDetectors: browser
@@ -36,8 +45,10 @@ export const _FOR_TESTING = {
 // ------------------------------------------------------------------------------------------------
 
 const assertNoImportsFromSdkJs = (ast: n.File) => {
-	if (findImportDeclarations(ast, '@inlang/sdk-js').length) {
-		throw Error(`It is currently not supported to import something from '@inlang/sdk-js' in this file.`)
+	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
+		throw Error(
+			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
+		)
 	}
 }
 
@@ -49,12 +60,12 @@ export const transformLayoutJs = (config: TransformConfig, code: string, root: b
 
 	if (isOptOutImportPresent(ast)) return code
 
-	const wrapperFunctionName = root ? 'initRootLayoutLoadWrapper' : 'initLayoutLoadWrapper'
+	const wrapperFunctionName = root ? "initRootLayoutLoadWrapper" : "initLayoutLoadWrapper"
 
 	addImports(ast, config, root, wrapperFunctionName)
 
 	const options = root ? getOptions(config, root) : undefined
-	wrapExportedFunction(ast, options, wrapperFunctionName, 'load')
+	wrapExportedFunction(ast, options, wrapperFunctionName, "load")
 
 	return nodeToCode(ast)
 }

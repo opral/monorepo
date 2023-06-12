@@ -86,11 +86,11 @@ ${codeWithoutTypes}`
 				(node) =>
 					n.ExportNamedDeclaration.check(node)
 						? (meta) => {
-							const { parent, index } = meta.get(
-								node,
-							) as NodeInfoMapEntry<types.namedTypes.Program>
-							if (index != undefined) parent.body.splice(index, 1)
-						}
+								const { parent, index } = meta.get(
+									node,
+								) as NodeInfoMapEntry<types.namedTypes.Program>
+								if (index != undefined) parent.body.splice(index, 1)
+						  }
 						: undefined,
 			)
 
@@ -127,14 +127,15 @@ ${codeWithoutTypes}`
 			const nonReactiveLabeledStatementAst = (importNames: [string, string][]) =>
 				b.labeledStatement(
 					b.identifier("$"),
-					b.ifStatement(b.identifier("browser"),
+					b.ifStatement(
+						b.identifier("browser"),
 						b.blockStatement([
 							addRuntimeToContextAst,
 							...([initImportedVariablesAst(importNames)].filter(
 								(n) => n !== undefined,
 							) as types.namedTypes.ExpressionStatement[]),
-						])
-					)
+						]),
+					),
 				)
 			localLanguageName =
 				importNames.find(([imported]) => imported === "language")?.[1] ?? "language"
@@ -207,15 +208,15 @@ ${codeWithoutTypes}`
 			s.appendRight(
 				parsed.html.start,
 				"" +
-				(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : "") +
-				(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`),
+					(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : "") +
+					(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`),
 			)
 			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
 			s.append(
 				(insertSlot ? `<slot />` : ``) +
-				(config.languageInUrl ? `{/key}` : `{/if}`) +
-				(config.languageInUrl && config.isStatic ? `{/if}` : ""),
+					(config.languageInUrl ? `{/key}` : `{/if}`) +
+					(config.languageInUrl && config.isStatic ? `{/if}` : ""),
 			)
 			const map = s.generateMap({
 				source: config.sourceFileName,

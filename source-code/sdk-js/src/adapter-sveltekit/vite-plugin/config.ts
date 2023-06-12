@@ -211,9 +211,7 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 	const modules = (
 		await Promise.all(
-			filesToLookFor.map((file) =>
-				import(path.resolve(routesFolder, file)).catch(() => undefined),
-			),
+			filesToLookFor.map((file) => import(path.resolve(routesFolder, file)).catch(() => undefined)),
 		)
 	).filter(Boolean)
 

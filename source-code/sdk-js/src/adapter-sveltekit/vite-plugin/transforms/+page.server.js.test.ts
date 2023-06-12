@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { getTransformConfig } from "./test-helpers/config.js"
-import { transformPageServerJs } from './+page.server.js.js'
+import { transformPageServerJs } from "./+page.server.js.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -27,7 +27,8 @@ describe("transformPageServerJs", () => {
 		})
 
 		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code = "import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+			const code =
+				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
 			const config = getTransformConfig()
 			expect(() => transformPageServerJs(config, code, true)).not.toThrow()
 		})

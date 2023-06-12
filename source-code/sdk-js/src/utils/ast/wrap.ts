@@ -1,21 +1,30 @@
-import { Node, type CallExpression, SyntaxKind, SourceFile, VariableDeclaration, FunctionDeclaration, ExportSpecifier } from 'ts-morph'
-import { codeToNode, nodeToCode } from '../utils.js'
-import { findOrCreateExport } from './exports.js'
+import {
+	Node,
+	type CallExpression,
+	SyntaxKind,
+	SourceFile,
+	VariableDeclaration,
+	FunctionDeclaration,
+	ExportSpecifier,
+} from "ts-morph"
+import { codeToNode, nodeToCode } from "../utils.js"
+import { findOrCreateExport } from "./exports.js"
 
-const WRAP_IDENTIFIER = '$$_INLANG_WRAP_$$'
+const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
-// ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
 export function wrapWithPlaceholder(node: Node): CallExpression {
 	if (
-		Node.isArrowFunction(node)
-		|| Node.isFunctionExpression(node)
-		|| Node.isIdentifier(node)
-		|| Node.isCallExpression(node)
+		Node.isArrowFunction(node) ||
+		Node.isFunctionExpression(node) ||
+		Node.isIdentifier(node) ||
+		Node.isCallExpression(node)
 	)
 		return node.transform(({ factory, currentNode }) =>
-			factory.createCallExpression(factory.createIdentifier(WRAP_IDENTIFIER), undefined, [currentNode as any])
+			factory.createCallExpression(factory.createIdentifier(WRAP_IDENTIFIER), undefined, [
+				currentNode as any,
+			]),
 		) as CallExpression
 
 	throw new Error(`wrapWithPlaceholder does not support '${node.getKindName()}'`)
@@ -23,7 +32,8 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 
 // ------------------------------------------------------------------------------------------------
 
-export const createWrapperAst = (name: string, options = '') => codeToNode(`
+export const createWrapperAst = (name: string, options = "") =>
+	codeToNode(`
 	const x = ${name}(${options}).wrap(${WRAP_IDENTIFIER})
 `) as CallExpression
 
@@ -45,8 +55,9 @@ const findWrappingPoint = (callExpression: CallExpression) => {
 
 // TODO: test this
 const findInsertionPoint = (callExpression: CallExpression) => {
-	const insertionPoint = callExpression.getDescendantsOfKind(SyntaxKind.Identifier)
-		.find(identifier => identifier.getText() === WRAP_IDENTIFIER)
+	const insertionPoint = callExpression
+		.getDescendantsOfKind(SyntaxKind.Identifier)
+		.find((identifier) => identifier.getText() === WRAP_IDENTIFIER)
 
 	if (!insertionPoint) {
 		throw new Error(`Could not find insertion point in ${callExpression.getText()}`)
@@ -65,8 +76,9 @@ export const mergeWrapperAst = (toWrapAst: CallExpression, wrapWithAst: CallExpr
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: test
-export const findFunctionExpression = (node: VariableDeclaration | FunctionDeclaration | ExportSpecifier) => {
+const findFunctionExpression = (
+	node: VariableDeclaration | FunctionDeclaration | ExportSpecifier,
+) => {
 	if (Node.isVariableDeclaration(node)) {
 		return node.getInitializer()!
 	}
@@ -78,7 +90,12 @@ export const findFunctionExpression = (node: VariableDeclaration | FunctionDecla
 	throw new Error(`Could not find function expression in ${node.getText()}`)
 }
 
-export const wrapExportedFunction = (sourceFile: SourceFile, options: string | undefined, wrapperFunctionName: string, exportName: string) => {
+export const wrapExportedFunction = (
+	sourceFile: SourceFile,
+	options: string | undefined,
+	wrapperFunctionName: string,
+	exportName: string,
+) => {
 	const fnExport = findOrCreateExport(sourceFile, exportName)
 
 	// if export is a function declaration, convert it to a function expression

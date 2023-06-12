@@ -1,51 +1,47 @@
 import { describe, expect, test } from "vitest"
-import { findExport, findOrCreateExport } from './exports.js';
-import { nodeToCode, codeToSourceFile, n } from '../utils.js';
-import { Node } from 'ts-morph';
+import { findExport, findOrCreateExport } from "./exports.js"
+import { nodeToCode, codeToSourceFile, n } from "../utils.js"
+import { Node } from "ts-morph"
 
 describe("findExport", () => {
 	test("should return undefined if no export was found", () => {
 		const node = codeToSourceFile(``)
 
-		const exportNode = findExport(node, 'load')
+		const exportNode = findExport(node, "load")
 
 		expect(exportNode).toBeUndefined()
 	})
 
 	test("should return undefined if export with the name was not found", () => {
 		const node = codeToSourceFile(`
-			export const fn = () => {}
+			export const fn = () => { }
 		`)
 
-		const exportNode = findExport(node, 'load')
+		const exportNode = findExport(node, "load")
 
 		expect(exportNode).toBeUndefined()
 	})
 
 	test("should find const export", () => {
 		const node = codeToSourceFile(`
-			export const load = () => {}
+			export const load = () => { }
 		`)
 
-		const exportNode = findExport(node, 'load')!
+		const exportNode = findExport(node, "load")!
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"load = () => { }"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => { }"')
 	})
 
 	test("should find let export", () => {
 		const node = codeToSourceFile(`
-			export let load = () => {}
+			export let load = () => { }
 		`)
 
-		const exportNode = findExport(node, 'load')!
+		const exportNode = findExport(node, "load")!
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"load = () => { }"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => { }"')
 	})
 
 	test("should find function export", () => {
@@ -53,12 +49,10 @@ describe("findExport", () => {
 			export function load() {}
 		`)
 
-		const exportNode = findExport(node, 'load')!
+		const exportNode = findExport(node, "load")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"function load() { }"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
 	})
 
 	test("should find named exports", () => {
@@ -67,12 +61,10 @@ describe("findExport", () => {
 			export { fn as load }
 		`)
 
-		const exportNode = findExport(node, 'load')!
+		const exportNode = findExport(node, "load")!
 
 		expect(Node.isExportSpecifier(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"fn as load"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"fn as load"')
 	})
 
 	test("should find re-exported imports", () => {
@@ -80,12 +72,10 @@ describe("findExport", () => {
 			export { fn as load } from 'some-module'
 		`)
 
-		const exportNode = findExport(node, 'load')!
+		const exportNode = findExport(node, "load")!
 
 		expect(Node.isExportSpecifier(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"fn as load"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"fn as load"')
 	})
 })
 
@@ -95,30 +85,26 @@ describe("findOrCreateExport", () => {
 			export function load() {}
 		`)
 
-		const exportNode = findOrCreateExport(node, 'load')!
+		const exportNode = findOrCreateExport(node, "load")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"function load() { }"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
 	})
 
 	test("should throw an error if a non-exWported variable with the same name already exists", () => {
 		const node = codeToSourceFile(`
-			const load = () => {}
+			const load = () => { }
 		`)
 
-		expect(() => findOrCreateExport(node, 'load')).toThrow()
+		expect(() => findOrCreateExport(node, "load")).toThrow()
 	})
 
 	test("should create an export if export is missing", () => {
 		const node = codeToSourceFile("")
 
-		const exportNode = findOrCreateExport(node, 'load')!
+		const exportNode = findOrCreateExport(node, "load")!
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot(
-			'"load = () => { }"'
-		)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => { }"')
 	})
 })

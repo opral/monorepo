@@ -1,19 +1,25 @@
 import { describe, expect, test } from "vitest"
-import { addImport, findImportDeclarations, findNamedImportSpecifier, isOptOutImportPresent, removeImport } from './imports.js';
-import { codeToNode, codeToSourceFile, nodeToCode } from '../utils.js';
-import { Node } from 'ts-morph';
+import {
+	addImport,
+	findImportDeclarations,
+	findNamedImportSpecifier,
+	isOptOutImportPresent,
+	removeImport,
+} from "./imports.js"
+import { codeToNode, codeToSourceFile, nodeToCode } from "../utils.js"
+import { Node } from "ts-morph"
 
 describe("removeImport", () => {
 	describe("no modifications", () => {
 		test("should not fail if node is not a SourceFile", () => {
 			const node = codeToNode(`const x = 0`)
-			removeImport(node as any, '@inlang/sdk-js', 'i')
+			removeImport(node as any, "@inlang/sdk-js", "i")
 		})
 
 		test("should not fail if file is empty", () => {
 			const node = codeToSourceFile(``)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot('""')
 		})
@@ -23,11 +29,9 @@ describe("removeImport", () => {
 				const a = 0
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
-			expect(nodeToCode(node)).toMatchInlineSnapshot(
-				'"const a = 0;"'
-			)
+			expect(nodeToCode(node)).toMatchInlineSnapshot('"const a = 0;"')
 		})
 
 		test("should not fail if import is not found", () => {
@@ -35,11 +39,9 @@ describe("removeImport", () => {
 				import { get } from 'svelte/store'
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
-			expect(nodeToCode(node)).toMatchInlineSnapshot(
-				'"import { get } from \'svelte/store\';"'
-			)
+			expect(nodeToCode(node)).toMatchInlineSnapshot("\"import { get } from 'svelte/store';\"")
 		})
 
 		test("should not remove import with another name from the same package", () => {
@@ -47,10 +49,10 @@ describe("removeImport", () => {
 				import { languages } from '@inlang/sdk-js'
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(
-				'"import { languages } from \'@inlang/sdk-js\';"'
+				"\"import { languages } from '@inlang/sdk-js';\"",
 			)
 		})
 	})
@@ -61,7 +63,7 @@ describe("removeImport", () => {
 				import { i, languages } from '@inlang/sdk-js'
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				"import { languages } from '@inlang/sdk-js';"
@@ -73,7 +75,7 @@ describe("removeImport", () => {
 				import { i } from '@inlang/sdk-js'
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				""
@@ -87,7 +89,7 @@ describe("removeImport", () => {
 				import '@inlang/sdk-js'
 			`)
 
-			removeImport(node, '@inlang/sdk-js', 'i')
+			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				"import { languages } from '@inlang/sdk-js';
@@ -101,7 +103,7 @@ describe("removeImport", () => {
 				import { languages, referenceLanguage } from '@inlang/sdk-js'
 			`)
 
-			removeImport(node, '@inlang/sdk-js')
+			removeImport(node, "@inlang/sdk-js")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
 				""
@@ -115,12 +117,12 @@ describe("removeImport", () => {
 describe("addImport", () => {
 	test("should not fail if node is not a SourceFile", () => {
 		const node = codeToNode(`const x = 0`)
-		addImport(node as any, '@inlang/sdk-js', 'i')
+		addImport(node as any, "@inlang/sdk-js", "i")
 	})
 
 	test("should not fail if no names get passed", () => {
 		const node = codeToSourceFile(``)
-		addImport(node as any, '@inlang/sdk-js', ...([] as unknown as ['']))
+		addImport(node as any, "@inlang/sdk-js", ...([] as unknown as [""]))
 	})
 
 	test("should not add if import is already present", () => {
@@ -128,20 +130,18 @@ describe("addImport", () => {
 			import { i } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'i')
+		addImport(node, "@inlang/sdk-js", "i")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"import { i } from \'@inlang/sdk-js\';"'
-		)
+		expect(nodeToCode(node)).toMatchInlineSnapshot("\"import { i } from '@inlang/sdk-js';\"")
 	})
 
 	test("should add multiple imports", () => {
 		const node = codeToSourceFile(``)
 
-		addImport(node, '@inlang/sdk-js', 'i', 'language')
+		addImport(node, "@inlang/sdk-js", "i", "language")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"import { i, language } from \'@inlang/sdk-js\';"'
+			"\"import { i, language } from '@inlang/sdk-js';\"",
 		)
 	})
 
@@ -150,7 +150,7 @@ describe("addImport", () => {
 			import { languages } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'language', 'i')
+		addImport(node, "@inlang/sdk-js", "language", "i")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"import { languages, language, i } from '@inlang/sdk-js';"
@@ -165,7 +165,7 @@ describe("addImport", () => {
 
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'language')
+		addImport(node, "@inlang/sdk-js", "language")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"import { language } from '@inlang/sdk-js';
@@ -179,10 +179,10 @@ describe("addImport", () => {
 			import { languages as langs } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'languages')
+		addImport(node, "@inlang/sdk-js", "languages")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"import { languages as langs, languages } from \'@inlang/sdk-js\';"'
+			"\"import { languages as langs, languages } from '@inlang/sdk-js';\"",
 		)
 	})
 
@@ -192,7 +192,7 @@ describe("addImport", () => {
 			import { languages } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'languages')
+		addImport(node, "@inlang/sdk-js", "languages")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"import { i } from '@inlang/sdk-js';
@@ -205,7 +205,7 @@ describe("addImport", () => {
 			import '@inlang/sdk-js'
 		`)
 
-		addImport(node, '@inlang/sdk-js', 'i')
+		addImport(node, "@inlang/sdk-js", "i")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"import { i } from '@inlang/sdk-js';
@@ -219,7 +219,7 @@ describe("addImport", () => {
 describe("findImportDeclarations", () => {
 	test("should return an empty array if no import declarations were found", () => {
 		const node = codeToSourceFile(``)
-		const result = findImportDeclarations(node, '')
+		const result = findImportDeclarations(node, "")
 		expect(result).toHaveLength(0)
 	})
 
@@ -227,7 +227,7 @@ describe("findImportDeclarations", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js/ignore'
 		`)
-		const result = findImportDeclarations(node, '@inlang/sdk-js')
+		const result = findImportDeclarations(node, "@inlang/sdk-js")
 		expect(result).toHaveLength(0)
 	})
 
@@ -237,7 +237,7 @@ describe("findImportDeclarations", () => {
 			const x = false
 			import { languages } from '@inlang/sdk-js'
 		`)
-		const result = findImportDeclarations(node, '@inlang/sdk-js')
+		const result = findImportDeclarations(node, "@inlang/sdk-js")
 		expect(result).toHaveLength(2)
 	})
 })
@@ -249,8 +249,8 @@ describe("findNamedImportSpecifier", () => {
 		const node = codeToSourceFile(`
 			import '@inlang/sdk-js'
 		`)
-		const importDeclaration = findImportDeclarations(node, '@inlang/sdk-js')
-		const result = findNamedImportSpecifier(importDeclaration[0]!, 'i')
+		const importDeclaration = findImportDeclarations(node, "@inlang/sdk-js")
+		const result = findNamedImportSpecifier(importDeclaration[0]!, "i")
 		expect(result).toBeUndefined()
 	})
 
@@ -258,8 +258,8 @@ describe("findNamedImportSpecifier", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js'
 		`)
-		const importDeclaration = findImportDeclarations(node, '@inlang/sdk-js')
-		const result = findNamedImportSpecifier(importDeclaration[0]!, 'i')
+		const importDeclaration = findImportDeclarations(node, "@inlang/sdk-js")
+		const result = findNamedImportSpecifier(importDeclaration[0]!, "i")
 		expect(Node.isImportSpecifier(result)).toBe(true)
 	})
 })

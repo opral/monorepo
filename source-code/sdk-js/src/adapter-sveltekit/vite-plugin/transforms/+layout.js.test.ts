@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 import { dedent } from "ts-dedent"
-import { transformPageJs } from './+page.js.js'
+import { transformPageJs } from "./+page.js.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -23,7 +23,7 @@ describe("transformLayoutJs", () => {
 					import { browser } from '$app/environment';
 					export const load = initRootLayoutLoadWrapper().wrap(() => { });"
 				`)
-		})
+			})
 
 			test("spa", () => {
 				const code = ""
@@ -43,7 +43,7 @@ describe("transformLayoutJs", () => {
 
 		test("basic load function", () => {
 			const code = dedent`
-				export const load = async () => {};
+				export const load = async () => { };
 			`
 			const config = {
 				...getTransformConfig(),
@@ -84,7 +84,8 @@ describe("transformLayoutJs", () => {
 		})
 
 		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code = "import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+			const code =
+				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
 			const config = getTransformConfig()
 			expect(() => transformLayoutJs(config, code, true)).not.toThrow()
 		})
