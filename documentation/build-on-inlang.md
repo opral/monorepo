@@ -1,5 +1,5 @@
 ---
-title: Build your own inlang app
+title: Build apps on inlang
 href: /documentation/build-on-inlang
 description: Learn how to build your own inlang app.
 ---
