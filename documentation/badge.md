@@ -6,6 +6,13 @@ description: "API endpoint for generating badges"
 
 # {% $frontmatter.title %}
 
+## Quick Generator
+
+Enter your repository to copy the badge markdown to your clipboard.
+{% BadgeGenerator /%}
+
+## Guide
+
 This documentation page provides information about the Badge endpoint, which allows users to generate badges dynamically. The badge generation API endpoint can be used in Github READMEs and anywhere else on the web to display real-time data on your projects.
 
 This badge provides you with the overall translation progress of your project. It is a great way to show off your project's localization progress to your users.
