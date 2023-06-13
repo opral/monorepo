@@ -1,5 +1,5 @@
 ---
-title: Write your own plugin
+title: Custom Plugin
 href: /documentation/plugins/custom-plugins
 description: Learn how to write your own inlang plugin.
 ---
