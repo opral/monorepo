@@ -240,6 +240,11 @@ function newStatEntry(
 }
 
 function getDirname(path: string): string {
+	// `normalPath` is used here to ensure proper behavior when we are dealing
+	// with a top level directory.
+	//
+	// This is the most concise way to ensure that a path begins and ends with
+	// '/', and also that the dirname of a top level directory resolves to '/'
 	return normalPath(
 		path
 			.split("/")
