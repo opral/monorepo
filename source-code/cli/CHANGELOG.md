@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.10.1
+
+### Patch Changes
+
+- 6a3063f0: support windows with open editor
+
 ## 0.10.0
 
 ### Minor Changes
