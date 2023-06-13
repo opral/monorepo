@@ -27,19 +27,25 @@ initErrorMonitoring()
 // --------------- CLI ---------------
 
 export const cli = new Command()
+	// Settings
 	.name("inlang")
 	.version(version)
 	.description("CLI for inlang.")
+	// Commands
 	.addCommand(config)
 	.addCommand(lint)
 	.addCommand(machine)
 	.addCommand(open)
+	// Global options
+	.option("-c, --config <value>", "Path to the inlang.config.js file.")
+	// Hooks
 	.hook("postAction", (command) => {
 		// name enables better grouping in the telemetry dashboard
 		const name = command.args.filter(
 			// shouldn't start with a flag and the previous arg shouldn't be a flag
 			(arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-"),
 		)
+
 		telemetry.capture({
 			event: `CLI command executed`,
 			properties: {
@@ -60,7 +66,7 @@ telemetry.capture({
 	},
 })
 
-const [inlangConfig] = await getConfig()
+const [inlangConfig] = await getConfig({ options: cli.opts() })
 
 if (inlangConfig) {
 	telemetry.capture({

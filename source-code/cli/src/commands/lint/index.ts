@@ -1,5 +1,6 @@
 import { getLintReports, lint as _lint, LintReport } from "@inlang/core/lint"
 import { Command } from "commander"
+import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import { getConfig } from "../../utilities/getConfig.js"
 
@@ -11,7 +12,7 @@ export const lint = new Command()
 async function lintCommandAction() {
 	try {
 		// Get the config
-		const [config, errorMessage] = await getConfig()
+		const [config, errorMessage] = await getConfig({ options: cli.opts() })
 		if (!config) {
 			log.error(errorMessage)
 			return
