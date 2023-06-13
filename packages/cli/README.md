@@ -54,8 +54,9 @@ If one of the commands can't be found, you are probably using an outdated versio
 CLI for inlang.
 
 Options:
-  -V, --version      output the version number
-  -h, --help         display help for command
+  -V, --version         output the version number
+  -h, --help            display help for command
+  -c, --config <path>   path to the config file.
 
 Commands:
   config [command]   Commands for managing the config file.

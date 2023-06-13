@@ -4,6 +4,7 @@ import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { getConfig } from "../../utilities/getConfig.js"
+import { cli } from "../../main.js"
 
 export const translate = new Command()
 	.command("translate")
@@ -30,7 +31,7 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const [config, errorMessage] = await getConfig()
+		const [config, errorMessage] = await getConfig({ options: cli.opts() })
 		if (!config) {
 			log.error(errorMessage)
 			// no message because that's handled in getConfig
