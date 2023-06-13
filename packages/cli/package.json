@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.9.16",
+	"version": "0.10.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
