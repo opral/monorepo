@@ -1,7 +1,7 @@
 ---
-title: Build apps on inlang
+title: Build your own inlang app
 href: /documentation/build-on-inlang
-description: Learn how to build on top of inlang.
+description: Learn how to build your own inlang app.
 ---
 
 # {% $frontmatter.title %}

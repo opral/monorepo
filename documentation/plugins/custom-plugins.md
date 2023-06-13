@@ -1,7 +1,7 @@
 ---
-title: Custom Plugins
+title: Write your own plugin
 href: /documentation/plugins/custom-plugins
-description: This is the custom plugins description
+description: Learn how to write your own inlang plugin.
 ---
 
 # {% $frontmatter.title %}
