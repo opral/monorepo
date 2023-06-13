@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.10.0
+
+### Minor Changes
+
+- c67535d5: add --config option for monorepos
+
 ## 0.9.16
 
 ### Patch Changes
