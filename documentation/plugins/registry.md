@@ -1,7 +1,7 @@
 ---
 title: Available Plugins
 href: /documentation/plugins/registry
-description: This is the plugin registry description
+description: A list of available plugins for inlang.
 ---
 
 # {% $frontmatter.title %}

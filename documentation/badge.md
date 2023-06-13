@@ -1,7 +1,7 @@
 ---
 title: "Badges"
 href: /documentation/badge
-description: "API endpoint for generating badges"
+description: Generate badges for your project.
 ---
 
 # {% $frontmatter.title %}
