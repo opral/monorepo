@@ -250,7 +250,7 @@ function getDirname(path: string): string {
 			.split("/")
 			.filter((x) => x)
 			.slice(0, -1)
-			.join("/") ?? path,
+			.join("/")
 	)
 }
 
