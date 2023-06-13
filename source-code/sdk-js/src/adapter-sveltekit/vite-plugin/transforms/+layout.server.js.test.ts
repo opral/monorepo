@@ -11,7 +11,8 @@ describe("transformLayoutServerJs", () => {
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
-				export const load = initRootLayoutServerLoadWrapper().wrap(() => { });"
+				export const load = initRootLayoutServerLoadWrapper().wrap(() => {
+				});"
 			`)
 		})
 
@@ -23,7 +24,8 @@ describe("transformLayoutServerJs", () => {
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
-				export const load = initRootLayoutServerLoadWrapper().wrap(async () => { });"
+				export const load = initRootLayoutServerLoadWrapper().wrap(async () => {
+				});"
 			`)
 		})
 	})

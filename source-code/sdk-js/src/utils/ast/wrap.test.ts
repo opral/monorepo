@@ -22,7 +22,8 @@ describe("wrapWithPlaceholder", () => {
 		const wrapped = wrapWithPlaceholder(node)
 
 		expect(nodeToCode(wrapped)).toMatchInlineSnapshot(`
-			"$$_INLANG_WRAP_$$(() => { })"
+			"$$_INLANG_WRAP_$$(() => {
+			})"
 		`)
 	})
 
@@ -34,7 +35,8 @@ describe("wrapWithPlaceholder", () => {
 		const wrapped = wrapWithPlaceholder(node)
 
 		expect(nodeToCode(wrapped)).toMatchInlineSnapshot(`
-			"$$_INLANG_WRAP_$$(async () => { })"
+			"$$_INLANG_WRAP_$$(async () => {
+			})"
 		`)
 	})
 
@@ -45,7 +47,10 @@ describe("wrapWithPlaceholder", () => {
 
 		const wrapped = wrapWithPlaceholder(node)
 
-		expect(nodeToCode(wrapped)).toMatchInlineSnapshot('"$$_INLANG_WRAP_$$(function () { })"')
+		expect(nodeToCode(wrapped)).toMatchInlineSnapshot(`
+			"$$_INLANG_WRAP_$$(function () {
+			})"
+		`)
 	})
 
 	test("async function", () => {
@@ -55,7 +60,10 @@ describe("wrapWithPlaceholder", () => {
 
 		const wrapped = wrapWithPlaceholder(node)
 
-		expect(nodeToCode(wrapped)).toMatchInlineSnapshot('"$$_INLANG_WRAP_$$(async function () { })"')
+		expect(nodeToCode(wrapped)).toMatchInlineSnapshot(`
+			"$$_INLANG_WRAP_$$(async function () {
+			})"
+		`)
 	})
 
 	test("variable", () => {
@@ -112,7 +120,8 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(() => { })"
+			"initWrapper().wrap(() => {
+			})"
 		`)
 	})
 
@@ -126,7 +135,8 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(async () => { })"
+			"initWrapper().wrap(async () => {
+			})"
 		`)
 	})
 
@@ -139,7 +149,10 @@ describe("mergeWrapperAst", () => {
 		const wrapped = wrapWithPlaceholder(node)
 		mergeWrapperAst(wrapped, wrapWithAst)
 
-		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot('"initWrapper().wrap(function () { })"')
+		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
+			"initWrapper().wrap(function () {
+			})"
+		`)
 	})
 
 	test("async function", () => {
@@ -152,7 +165,10 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(
-			'"initWrapper().wrap(async function () { })"',
+			`
+			"initWrapper().wrap(async function () {
+			})"
+		`,
 		)
 	})
 
@@ -179,7 +195,8 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(() => { });"
+			"export const load = initWrapper().wrap(() => {
+			});"
 		`)
 	})
 
@@ -191,7 +208,8 @@ describe("wrapExportedFunction", () => {
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"export const prerender = true;
-			export const load = initWrapper().wrap(() => { });"
+			export const load = initWrapper().wrap(() => {
+			});"
 		`)
 	})
 
@@ -202,7 +220,8 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(() => { });"
+			"export const load = initWrapper().wrap(() => {
+			});"
 		`)
 	})
 
@@ -213,7 +232,8 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(async () => { });"
+			"export const load = initWrapper().wrap(async () => {
+			});"
 		`)
 	})
 
@@ -225,7 +245,10 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"export const load = initWrapper().wrap(function () { });"',
+			`
+			"export const load = initWrapper().wrap(function () {
+			});"
+		`,
 		)
 	})
 
@@ -236,7 +259,10 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			'"export const load = initWrapper().wrap(async function () { });"',
+			`
+			"export const load = initWrapper().wrap(async function () {
+			});"
+		`,
 		)
 	})
 
@@ -247,7 +273,8 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(function load() { });"
+			"export const load = initWrapper().wrap(function load() {
+			});"
 		`)
 	})
 
@@ -258,7 +285,8 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(async function load() { });"
+			"export const load = initWrapper().wrap(async function load() {
+			});"
 		`)
 	})
 })

@@ -20,7 +20,8 @@ describe("transformPageJs", () => {
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser
-						}).wrap(() => { });"
+						}).wrap(() => {
+						});"
 					`)
 				})
 
@@ -38,10 +39,14 @@ describe("transformPageJs", () => {
 						import { initRootPageLoadWrapper, replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
-						    browser, initDetectors: () => [navigatorDetector], redirect: {
-						        throwable: redirect, getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+						    browser,
+						    initDetectors: () => [navigatorDetector],
+						    redirect: {
+						        throwable: redirect,
+						        getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
 						    },
-						}).wrap(() => { });"
+						}).wrap(() => {
+						});"
 					`)
 				})
 			})
@@ -60,7 +65,8 @@ describe("transformPageJs", () => {
 				import { browser } from '$app/environment';
 				export const load = initRootPageLoadWrapper({
 				    browser
-				}).wrap(async () => { });"
+				}).wrap(async () => {
+				});"
 			`)
 		})
 	})
