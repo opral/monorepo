@@ -11,10 +11,7 @@ describe("transformPageJs", () => {
 			describe("lang-in-slug", () => {
 				test("non-static", () => {
 					const code = ""
-					const config = {
-						...getTransformConfig(),
-						languageInUrl: true,
-					}
+					const config = getTransformConfig({ languageInUrl: true, })
 					const transformed = transformPageJs(config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
@@ -29,11 +26,10 @@ describe("transformPageJs", () => {
 
 				test("static", () => {
 					const code = ""
-					const config = {
-						...getTransformConfig(),
+					const config = getTransformConfig({
 						languageInUrl: true,
 						isStatic: true,
-					}
+					})
 					const transformed = transformPageJs(config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
@@ -55,10 +51,7 @@ describe("transformPageJs", () => {
 			const code = dedent`
 				export const load = async () => { };
 			`
-			const config = {
-				...getTransformConfig(),
-				languageInUrl: true,
-			}
+			const config = getTransformConfig({ languageInUrl: true, })
 			const transformed = transformPageJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`

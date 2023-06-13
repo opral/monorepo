@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest"
 import { transformLayoutJs } from "./+layout.js.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 import { dedent } from "ts-dedent"
-import { transformPageJs } from "./+page.js.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -11,10 +10,7 @@ describe("transformLayoutJs", () => {
 		describe("empty file", () => {
 			test("lang-in-slug", () => {
 				const code = ""
-				const config = {
-					...getTransformConfig(),
-					languageInUrl: true,
-				}
+				const config = getTransformConfig({ languageInUrl: true, })
 				const transformed = transformLayoutJs(config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
@@ -45,10 +41,7 @@ describe("transformLayoutJs", () => {
 			const code = dedent`
 				export const load = async () => { };
 			`
-			const config = {
-				...getTransformConfig(),
-				languageInUrl: true,
-			}
+			const config = getTransformConfig({ languageInUrl: true })
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
@@ -72,7 +65,7 @@ describe("transformLayoutJs", () => {
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
 		const config = getTransformConfig()
-		const transformed = transformPageJs(config, code, true)
+		const transformed = transformLayoutJs(config, code, true)
 		expect(transformed).toEqual(code)
 	})
 

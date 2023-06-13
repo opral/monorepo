@@ -25,6 +25,7 @@ const addImports = (
 
 // ------------------------------------------------------------------------------------------------
 
+// TODO: use ast transformation instead of string manipulation
 // TODO: test
 const getOptions = (config: TransformConfig, root: boolean) =>
 	config.languageInUrl

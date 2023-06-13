@@ -10,7 +10,9 @@ const parseCode = (code: string) =>
 			indentationText: IndentationText.Tab,
 			useTrailingCommas: true,
 		},
+		// TODO: add correct file path
 	}).createSourceFile("", code)
+	// }).createSourceFile("test.ts", code, { overwrite: true })
 
 const printCode = (node: Node) => (node && node.print({ scriptKind: ScriptKind.TS }).trim()) || ""
 
@@ -40,4 +42,4 @@ export const codeToNode = (code: string) => {
 	return initializer
 }
 
-export const nodeToCode = (ast: any) => printCode(ast)
+export const nodeToCode = (node: Node) => printCode(node)

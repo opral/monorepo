@@ -65,10 +65,10 @@ const findInsertionPoint = (callExpression: CallExpression) => {
 }
 
 export const mergeWrapperAst = (toWrapAst: CallExpression, wrapWithAst: CallExpression) => {
-	const wrappingPointAst = findWrappingPoint(toWrapAst)
-	const insertionPointAst = findInsertionPoint(wrapWithAst)
+	const wrappingPoint = findWrappingPoint(toWrapAst)
+	const insertionPoint = findInsertionPoint(wrapWithAst)
 
-	insertionPointAst.transform(() => wrappingPointAst.compilerNode)
+	insertionPoint.transform(() => wrappingPoint.compilerNode)
 }
 
 // ------------------------------------------------------------------------------------------------
