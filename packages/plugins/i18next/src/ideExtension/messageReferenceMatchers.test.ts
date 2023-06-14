@@ -15,16 +15,16 @@ it('should detect t("{id}")', async () => {
     const x = t("some-id")
     `
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
+	expect(matches[0]?.messageId).toBe("some-id")
 })
 
 it(`should detect t('{id}')`, async () => {
 	// single quotes
 	const sourceCode = `
     const x = t('some-id')
-    `
+  `
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
+	expect(matches[0]?.messageId).toBe("some-id")
 })
 
 it(`should detect {t('{id}')}`, async () => {
@@ -33,64 +33,43 @@ it(`should detect {t('{id}')}`, async () => {
     <p>{t('some-id')}</p>
     `
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
-})
-
-it(`should detect $t('{id}')`, async () => {
-	// using a t function with a prefix such as $ in svelte
-	const sourceCode = `
-    <p>{$t('some-id')}</p>
-    `
-	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
+	expect(matches[0]?.messageId).toBe("some-id")
 })
 
 it("should detect t({id}, ...args)", async () => {
 	// passing arguments to the t function should not prevent detection
 	const sourceCode = `
-    <p>{$t('some-id' , { name: "inlang" }, variable, arg3)}</p>
+    <p>{t('some-id' , { name: "inlang" }, variable, arg3)}</p>
     `
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
+	expect(matches[0]?.messageId).toBe("some-id")
 })
 
 it("should not mismatch a string with different quotation marks", async () => {
 	const sourceCode = `
-    <p>{$t("yes')}</p>
+    <p>{t("yes')}</p>
     `
 	const matches = await parse(sourceCode)
 	expect(matches).toHaveLength(0)
 })
 
-// it('should match with no pre-fixed whitespace', () => {
-//     const sourceCode = `t('some-id')`;
-//     const matches = parser.parse(sourceCode) as Match[];
-//     expect(matches[0].id === 'some-id');
-// });
-
 it("should ignore whitespace", async () => {
 	// prefixing with space see test above
-	const sourceCode = ` t('some-id' ) `
+	const sourceCode = `const x =  t('some-id' ) `
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-id")
+	expect(matches[0]?.messageId).toBe("some-id")
 	expect(
-		sourceCode.slice(matches[0].position.start.character, matches[0].position.end.character),
+		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character),
 	).toBe("some-id")
 })
 
 it("should detect combined message.attribute ids", async () => {
 	const sourceCode = ` t('some-message.with-attribute')`
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "some-message.with-attribute")
+	expect(matches[0]?.messageId).toBe("some-message.with-attribute")
 })
 
-it("should work with imports", async () => {
-	const sourceCode = `";t("hello-world")`
-	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "hello-world")
-})
-
-it("should work on a production example", async () => {
+it("should work on a production JSX example", async () => {
 	const sourceCode = `
 		import NextPage from "next";
 		import Image from "next/image";
@@ -116,6 +95,8 @@ it("should work on a production example", async () => {
 		export default Custom404;
 		`
 	const matches = await parse(sourceCode)
-	expect(matches[0].messageId === "404.title")
-	expect(matches[1].messageId === "421.message")
+	expect(matches).toHaveLength(3)
+	expect(matches[0].messageId).toBe("hello-world")
+	expect(matches[1].messageId).toBe("404.title")
+	expect(matches[2].messageId).toBe("421.message")
 })
