@@ -1,9 +1,9 @@
 import type { InlangConfig } from "@inlang/core/config"
+import { parse } from "./messageReferenceMatchers.typescript.js"
 
 export const ideExtensionConfig: InlangConfig["ideExtension"] = {
 	messageReferenceMatchers: [
 		async (args) => {
-			const { parse } = await import("./messageReferenceMatchers.js")
 			return parse(args.documentText)
 		},
 	],
