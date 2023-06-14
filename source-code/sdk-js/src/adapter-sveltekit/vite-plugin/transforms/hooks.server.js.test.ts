@@ -1,346 +1,157 @@
-import { describe, it, expect } from "vitest"
+import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
 import { transformHooksServerJs } from "../transforms/hooks.server.js.js"
 import { getTransformConfig } from "./test-helpers/config.js"
-import type { TransformConfig } from "../config.js"
+import { codeToNode, codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+
+// TODO: create test matrix for all possible combinations
 
 describe("transformHooksServerJs", () => {
-	describe("basics", () => {
-		it("adds handle function to an empty file", () => {
-			const code = transformHooksServerJs(getTransformConfig(), "")
-			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
+	describe("empty file", () => {
+		describe("lang-in-slug", () => {
+			test("non-static", () => {
+				const code = ""
+				const config = getTransformConfig({ languageInUrl: true })
+				const transformed = transformHooksServerJs(config, code)
 
-				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
-				    getLanguage: () => undefined
-				}).wrap(function handle(
-				  {
-				    event: event,
-				    resolve: resolve
-				  }
-				) {
-				  return resolve(event);
-				});"
-			`)
+				expect(transformed).toMatchInlineSnapshot(`
+					"import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
+					import { initAcceptLanguageHeaderDetector } from '@inlang/sdk-js/detectors/server';
+					import { redirect } from '@sveltejs/kit';
+					import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
+					    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
+					    redirect: {
+					        throwable: redirect,
+					        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+					    },
+					}).wrap(() => {
+					});"
+				`)
+			})
+
+			test("static", () => {
+				const code = ""
+				const config = getTransformConfig({ languageInUrl: true, isStatic: true })
+				const transformed = transformHooksServerJs(config, code)
+
+				expect(transformed).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
+					}).wrap(() => {
+					});"
+				`)
+			})
 		})
 
-		it("adds handle endpoint to a file with arbitrary contents", () => {
-			const code = transformHooksServerJs(
-				getTransformConfig(),
-				dedent`
-					import * as Sentry from '@sentry/node';
-					import crypto from 'crypto';
+		describe("spa", () => {
+			test("static", () => {
+				const code = ""
+				const config = getTransformConfig({ isStatic: true })
+				const transformed = transformHooksServerJs(config, code)
 
-					Sentry.init.skip({/*...*/})
+				expect(transformed).toMatchInlineSnapshot(`
+					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+					export const handle = initHandleWrapper({
+					    inlangConfigModule: import(\\"../inlang.config.js\\"),
+					    getLanguage: () => undefined,
+					}).wrap(() => {
+					});"
+				`)
+			})
+		})
+	})
 
-					/** @type {import('@sveltejs/kit').HandleServerError} */
-					export async function handleError({ error, event }) {
-						const errorId = crypto.randomUUID();
-						// example integration with https://sentry.io/
-						Sentry.captureException(error, { event, errorId });
+	test("adds handle hook to a file with arbitrary contents", () => {
+		const code = dedent`
+			import * as Sentry from '@sentry/node';
+			import crypto from 'crypto';
 
-						return {
-							message: 'Whoops!',
-							errorId
-						};
-					}
-				`,
-			)
-			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-				import * as Sentry from '@sentry/node';
-				import crypto from 'crypto';
+			Sentry.init.skip({/*...*/})
 
-				Sentry.init.skip({/*...*/})
+			/** @type {import('@sveltejs/kit').HandleServerError} */
+			export async function handleError({ error, event }) {
+				const errorId = crypto.randomUUID();
+				// example integration with https://sentry.io/
+				Sentry.captureException(error, { event, errorId });
 
-				/** @type {import('@sveltejs/kit').HandleServerError} */
-				export async function handleError({ error, event }) {
-					const errorId = crypto.randomUUID();
-					// example integration with https://sentry.io/
-					Sentry.captureException(error, { event, errorId });
+				return {
+					message: 'Whoops!',
+					errorId
+				};
+			}
+		`
+		const config = getTransformConfig()
+		const transformed = transformHooksServerJs(config, code)
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import * as Sentry from '@sentry/node';
+			import crypto from 'crypto';
+			Sentry.init.skip({ /*...*/});
+			/** @type {import('@sveltejs/kit').HandleServerError} */
+			export async function handleError({ error, event }) {
+			    const errorId = crypto.randomUUID();
+			    // example integration with https://sentry.io/
+			    Sentry.captureException(error, { event, errorId });
+			    return {
+			        message: 'Whoops!',
+			        errorId
+			    };
+			}
+			export const handle = initHandleWrapper({
+			    inlangConfigModule: import(\\"../inlang.config.js\\"),
+			    getLanguage: () => undefined,
+			}).wrap(() => {
+			});"
+		`)
+	})
 
-					return {
-						message: 'Whoops!',
-						errorId
-					};
+	test("should wrap handle if already defined", () => {
+		const code = transformHooksServerJs(
+			getTransformConfig(),
+			dedent`
+				export function handle({ event, resolve }) {
+					console.info('TADAA!')
+					return resolve(event)
 				}
+			`,
+		)
 
-				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
-				    getLanguage: () => undefined
-				}).wrap(function handle(
-				    {
-				        event: event,
-				        resolve: resolve
-				    }
-				) {
-				    return resolve(event);
-				});"
-			`)
-		})
-
-		describe("should wrap handle if already defined", () => {
-			it("arrow function", () => {
-				const code = transformHooksServerJs(
-					getTransformConfig(),
-					dedent`
-						import type { Handle } from '@sveltejs/kit'
-
-						export const handle: Handle = ({ event, resolve }) => {
-
-							event.locals = {
-								userId: 123
-							}
-
-							return resolve(event)
-						}
-					`,
-				)
-
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import type { Handle } from '@sveltejs/kit'
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(({ event, resolve }) => {
-
-						event.locals = {
-							userId: 123
-						}
-
-						return resolve(event)
-					});"
-				`)
-			})
-			it("arrow function, with imports from sdk-js", () => {
-				const code = transformHooksServerJs(
-					{} as TransformConfig,
-					dedent`
-						import {i} from "@inlang/sdk-js"
-						export const handle = () => {
-							console.info(i)
-						}
-					`,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import {i} from \\"@inlang/sdk-js\\"
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap((
-					    {
-					        event: event,
-					        resolve: resolve
-					    }
-					) => {
-						console.info(getRuntimeFromLocals(event.locals).i)
-					});"
-				`)
-			})
-
-			it("function keyword", () => {
-				const code = transformHooksServerJs(
-					getTransformConfig(),
-					dedent`
-						export function handle({ event, resolve }) {
-							console.info('TADAA!')
-							return resolve(event)
-						}
-					`,
-				)
-
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(function handle({ event, resolve }) {
-						console.info('TADAA!')
-						return resolve(event)
-					});"
-				`)
-			})
-			it("function keyword, with imports from sdk-js", () => {
-				const code = transformHooksServerJs(
-					{} as TransformConfig,
-					dedent`
-						import {i} from "@inlang/sdk-js"
-						export function handle() {
-							console.info(i)
-						}
-					`,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import {i} from \\"@inlang/sdk-js\\"
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(function handle(
-					    {
-					        event: event,
-					        resolve: resolve
-					    }
-					) {
-						console.info(getRuntimeFromLocals(event.locals).i)
-					});"
-				`)
-			})
-			it("function keyword, declaration chain, with imports from sdk-js", () => {
-				const code = transformHooksServerJs(
-					{} as TransformConfig,
-					dedent`
-						import {i} from "@inlang/sdk-js"
-						function hndl() {
-							console.info(i)
-						}
-						export const handle = hndl
-					`,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import {i} from \\"@inlang/sdk-js\\"
-					function hndl(
-					    {
-					        event: event,
-					        resolve: resolve
-					    }
-					) {
-						console.info(getRuntimeFromLocals(event.locals).i)
-					}
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(hndl);"
-				`)
-			})
-			it("function keyword, sequence, with imports from sdk-js", () => {
-				const code = transformHooksServerJs(
-					{} as TransformConfig,
-					dedent`
-						import { sequence } from "@sveltejs/kit/hooks";
-						import { i } from "@inlang/sdk-js";
-
-						const seq1 = async ({ event, resolve }) => {
-						console.info(i("welcome"));
-						return resolve(event);
-						};
-
-						export const handle = sequence(seq1);
-					`,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-					import { sequence } from \\"@sveltejs/kit/hooks\\";
-					import { i } from \\"@inlang/sdk-js\\";
-
-					const seq1 = async ({ event, resolve }) => {
-					console.info(getRuntimeFromLocals(event.locals).i(\\"welcome\\"));
-					return resolve(event);
-					};
-
-					export const handle = initHandleWrapper({
-					    inlangConfigModule: import(\\"../inlang.config.js\\"),
-					    getLanguage: () => undefined
-					}).wrap(sequence(seq1));"
-				`)
-			})
-		})
+		expect(code).toMatchInlineSnapshot(`
+			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			export const handle = initHandleWrapper({
+			    inlangConfigModule: import(\\"../inlang.config.js\\"),
+			    getLanguage: () => undefined,
+			}).wrap(function handle({ event, resolve }) {
+			    console.info(\\"TADAA!\\");
+			    return resolve(event);
+			});"
+		`)
 	})
 
-	describe("variations", () => {
-		it("languageInUrl", () => {
-			const code = transformHooksServerJs(
-				getTransformConfig({
-					languageInUrl: true,
-				}),
-				"",
-			)
-			expect(code).toMatchInlineSnapshot(`
-				"import { replaceLanguageInUrl } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-				import { redirect } from \\"@sveltejs/kit\\";
-				import { initAcceptLanguageHeaderDetector } from \\"@inlang/sdk-js/detectors/server\\";
-				import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-
-				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
-				    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
-				    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
-
-				    redirect: {
-				        throwable: redirect,
-				        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
-				    }
-				}).wrap(function handle(
-				  {
-				    event: event,
-				    resolve: resolve
-				  }
-				) {
-				  return resolve(event);
-				});"
-			`)
-		})
-
-		it("languageInUrl and isStatic", () => {
-			const code = transformHooksServerJs(
-				getTransformConfig({
-					languageInUrl: true,
-					isStatic: true,
-				}),
-				"",
-			)
-			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-
-				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
-				    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1]
-				}).wrap(function handle(
-				  {
-				    event: event,
-				    resolve: resolve
-				  }
-				) {
-				  return resolve(event);
-				});"
-			`)
-		})
-
-		it("isStatic", () => {
-			const code = transformHooksServerJs(
-				getTransformConfig({
-					isStatic: true,
-				}),
-				"",
-			)
-			expect(code).toMatchInlineSnapshot(`
-				"import { initHandleWrapper } from \\"@inlang/sdk-js/adapter-sveltekit/server\\";
-
-				export const handle = initHandleWrapper({
-				    inlangConfigModule: import(\\"../inlang.config.js\\"),
-				    getLanguage: () => undefined
-				}).wrap(function handle(
-				  {
-				    event: event,
-				    resolve: resolve
-				  }
-				) {
-				  return resolve(event);
-				});"
-			`)
-		})
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = "import '@inlang/sdk-js/no-transforms'"
+		const config = getTransformConfig()
+		const transformed = transformHooksServerJs(config, code)
+		expect(transformed).toEqual(code)
 	})
 
-	describe.todo("detectors", () => {
-		// TODO
+	describe("'@inlang/sdk-js' imports", () => {
+		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
+			const code = "import { i } from '@inlang/sdk-js'"
+			const config = getTransformConfig()
+			expect(() => transformHooksServerJs(config, code)).toThrow()
+		})
+
+		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
+			const code =
+				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+			const config = getTransformConfig()
+			expect(() => transformHooksServerJs(config, code)).not.toThrow()
+		})
 	})
 })

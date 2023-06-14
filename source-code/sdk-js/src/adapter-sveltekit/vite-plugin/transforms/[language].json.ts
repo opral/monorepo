@@ -1,8 +1,8 @@
-import type { SourceFile } from 'ts-morph'
-import { addImport, findImportDeclarations, isOptOutImportPresent } from '../../../utils/ast/imports.js'
+import { addImport, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
 import type { TransformConfig } from "../config.js"
 import { findExport } from '../../../utils/ast/exports.js'
+import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 
 const exportPrerenderNode = codeToSourceFile(`
 	export const prerender = true
@@ -25,14 +25,6 @@ const exportEntriesNode = codeToSourceFile(`
 `).getStatements()[0]!
 
 // ------------------------------------------------------------------------------------------------
-
-const assertNoImportsFromSdkJs = (ast: SourceFile) => {
-	if (findImportDeclarations(ast, "@inlang/sdk-js").length) {
-		throw Error(
-			`It is currently not supported to import something from '@inlang/sdk-js' in this file.`,
-		)
-	}
-}
 
 export const transformLanguageJson = (config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code)
