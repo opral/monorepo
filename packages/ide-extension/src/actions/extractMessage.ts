@@ -21,10 +21,6 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 			title: extractMessageCommand.title,
 			command: extractMessageCommand.id,
 		}
-		telemetry.capture({
-			event: "IDE-EXTENSION code action provided",
-			properties: { name: "extract message" },
-		})
 		return [extractMessageAction]
 	}
 

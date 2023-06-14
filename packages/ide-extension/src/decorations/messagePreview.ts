@@ -102,10 +102,6 @@ export async function messagePreview(args: {
 		)
 		const decorations = (await Promise.all(wrappedDecorations || [])).flat()
 		activeTextEditor.setDecorations(messagePreview, decorations)
-		telemetry.capture({
-			event: "IDE-EXTENSION decoration set",
-			properties: { name: "message preview" },
-		})
 	}
 
 	const debouncedUpdateDecorations = debounce(500, updateDecorations)
