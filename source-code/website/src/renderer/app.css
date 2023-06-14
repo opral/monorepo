@@ -234,5 +234,5 @@ sl-details[open]::part(base) {
 sl-details::part(content) {
 	overflow-y: scroll;
 	height: calc(100vh - 124px);
-	padding-bottom: 4rem;
+	padding-bottom: 8rem;
 }
