@@ -129,7 +129,7 @@ describe("transformHooksServerJs", () => {
 		`)
 	})
 
-	test.only("should wrap handle if sequence helper get's used", () => {
+	test("should wrap handle if sequence helper get's used", () => {
 		const code = transformHooksServerJs(
 			getTransformConfig(),
 			dedent`
