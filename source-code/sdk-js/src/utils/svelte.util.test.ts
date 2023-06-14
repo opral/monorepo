@@ -63,8 +63,8 @@ describe("getSvelteFileParts", () => {
 			`
 			const result = getSvelteFileParts(code)
 
-			expect(result.moduleScript).toBeUndefined()
-			expect(result.script).toBeUndefined()
+			expect(result.moduleScript).toBe("")
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot(`
 				"{#if true}
 					<script src=\\"https://jquery.com/some-script.js\\"></script>
@@ -80,8 +80,8 @@ describe("getSvelteFileParts", () => {
 			`
 			const result = getSvelteFileParts(code)
 
-			expect(result.moduleScript).toBeUndefined()
-			expect(result.script).toBeUndefined()
+			expect(result.moduleScript).toBe("")
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot(`
 				"<svelte:head>
 					<script src=\\"https://jquery.com/some-script.js\\"></script>
@@ -97,8 +97,8 @@ describe("getSvelteFileParts", () => {
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toBeUndefined()
-			expect(result.script).toBeUndefined()
+			expect(result.moduleScript).toBe("")
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('""')
 		})
 
@@ -107,8 +107,8 @@ describe("getSvelteFileParts", () => {
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toBeUndefined()
-			expect(result.script).toBeUndefined()
+			expect(result.moduleScript).toBe("")
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('"<h1>test</h1>"')
 		})
 
@@ -117,7 +117,7 @@ describe("getSvelteFileParts", () => {
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toBeUndefined()
+			expect(result.moduleScript).toBe("")
 			expect(result.script).toMatchInlineSnapshot('"console.log(\'test\')"')
 			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_SCRIPT_PLACEHOLDER_$"')
 		})
@@ -128,7 +128,7 @@ describe("getSvelteFileParts", () => {
 
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toMatchInlineSnapshot('"console.log(\'test\')"')
-			expect(result.script).toBeUndefined()
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$"')
 		})
 
@@ -137,8 +137,8 @@ describe("getSvelteFileParts", () => {
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toBeUndefined()
-			expect(result.script).toBeUndefined()
+			expect(result.moduleScript).toBe("")
+			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_STYLE_PLACEHOLDER_$"')
 		})
 	})

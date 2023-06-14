@@ -6,11 +6,11 @@ export const getSvelteFileParts = (code: string) => {
 	let markupContent = code
 	let moduleScriptOpeningTag = '<script context="module">\n'
 	let moduleScriptClosingTag = '\n</script>'
-	let moduleScriptContent: string | undefined = undefined
+	let moduleScriptContent = ""
 	let scriptOpeningTag = '<script>\n'
 	let scriptClosingTag = '\n</script>'
-	let scriptContent: string | undefined = undefined
-	let styleTag: string | undefined = undefined
+	let scriptContent = ""
+	let styleTag = ""
 
 	const moduleScriptMatch = markupContent.match(REGEX_MODULE_SCRIPT_TAG)
 	if (moduleScriptMatch) {
@@ -38,13 +38,13 @@ export const getSvelteFileParts = (code: string) => {
 	}
 
 	return {
-		get moduleScript(): string | undefined {
+		get moduleScript(): string {
 			return moduleScriptContent
 		},
 		set moduleScript(newModuleScript: string) {
 			moduleScriptContent = newModuleScript
 		},
-		get script(): string | undefined {
+		get script(): string {
 			return scriptContent
 		},
 		set script(newScript: string) {
