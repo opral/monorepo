@@ -1,7 +1,6 @@
 import { dedent } from "ts-dedent"
 import type { TransformConfig } from "../config.js"
 
-// TODO: @benjaminpreiss: transform
 export const transformJs = (config: TransformConfig, code: string) => {
 	if (code.includes("'@inlang/sdk-js'") || code.includes('"@inlang/sdk-js"')) {
 		throw Error(dedent`
