@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { parse } from "./messageReferenceMatchers.typescript.js"
+import { parse } from "./messageReferenceMatchers.parsimmon.js"
 
 it("should not match a string without a t function", async () => {
 	const sourceCode = `
@@ -18,7 +18,7 @@ it('should detect t("{id}")', async () => {
 	expect(matches[0]?.messageId).toBe("some-id")
 })
 
-it(`should detect t('{id}')`, async () => {
+it(`should detect t('id')`, async () => {
 	// single quotes
 	const sourceCode = `
     const x = t('some-id')
@@ -27,7 +27,7 @@ it(`should detect t('{id}')`, async () => {
 	expect(matches[0]?.messageId).toBe("some-id")
 })
 
-it(`should detect {t('{id}')}`, async () => {
+it(`should detect {t('id')}`, async () => {
 	// using the t function in markup
 	const sourceCode = `
     <p>{t('some-id')}</p>
@@ -36,7 +36,7 @@ it(`should detect {t('{id}')}`, async () => {
 	expect(matches[0]?.messageId).toBe("some-id")
 })
 
-it("should detect t({id}, ...args)", async () => {
+it("should detect t('id', ...args)", async () => {
 	// passing arguments to the t function should not prevent detection
 	const sourceCode = `
     <p>{t('some-id' , { name: "inlang" }, variable, arg3)}</p>
