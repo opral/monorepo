@@ -20,7 +20,7 @@ describe("transformPageJs", () => {
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser
-						}).wrap(() => {
+						}).use(() => {
 						});"
 					`)
 				})
@@ -45,7 +45,7 @@ describe("transformPageJs", () => {
 						        throwable: redirect,
 						        getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
 						    },
-						}).wrap(() => {
+						}).use(() => {
 						});"
 					`)
 				})
@@ -65,7 +65,7 @@ describe("transformPageJs", () => {
 				import { browser } from '$app/environment';
 				export const load = initRootPageLoadWrapper({
 				    browser
-				}).wrap(async () => {
+				}).use(async () => {
 				});"
 			`)
 		})

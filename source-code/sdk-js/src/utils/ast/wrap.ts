@@ -34,7 +34,7 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 
 export const createWrapperAst = (name: string, options = "") =>
 	codeToNode(`
-	const x = ${name}(${options}).wrap(${WRAP_IDENTIFIER})
+	const x = ${name}(${options}).use(${WRAP_IDENTIFIER})
 `) as CallExpression
 
 // ------------------------------------------------------------------------------------------------

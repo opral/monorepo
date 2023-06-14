@@ -27,7 +27,7 @@ describe("transformHooksServerJs", () => {
 					        throwable: redirect,
 					        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 					    },
-					}).wrap(({ resolve, event }) => resolve(event));"
+					}).use(({ resolve, event }) => resolve(event));"
 				`)
 			})
 
@@ -41,7 +41,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
-					}).wrap(({ resolve, event }) => resolve(event));"
+					}).use(({ resolve, event }) => resolve(event));"
 				`)
 			})
 		})
@@ -57,7 +57,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    getLanguage: () => undefined,
-					}).wrap(({ resolve, event }) => resolve(event));"
+					}).use(({ resolve, event }) => resolve(event));"
 				`)
 			})
 		})
@@ -102,7 +102,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    getLanguage: () => undefined,
-			}).wrap(({ resolve, event }) => resolve(event));"
+			}).use(({ resolve, event }) => resolve(event));"
 		`)
 	})
 
@@ -122,7 +122,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    getLanguage: () => undefined,
-			}).wrap(function handle({ event, resolve }) {
+			}).use(function handle({ event, resolve }) {
 			    console.info(\\"TADAA!\\");
 			    return resolve(event);
 			});"
@@ -157,7 +157,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    getLanguage: () => undefined,
-			}).wrap(sequence(handle1, handle2));"
+			}).use(sequence(handle1, handle2));"
 		`)
 	})
 

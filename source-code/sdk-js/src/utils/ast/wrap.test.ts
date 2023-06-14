@@ -86,7 +86,7 @@ describe("createWrapperAst", () => {
 		const node = createWrapperAst("someFn")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"someFn().wrap($$_INLANG_WRAP_$$)"
+			"someFn().use($$_INLANG_WRAP_$$)"
 		`)
 	})
 
@@ -94,7 +94,7 @@ describe("createWrapperAst", () => {
 		const node = createWrapperAst("someFn", "{ test: true }")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"someFn({ test: true }).wrap($$_INLANG_WRAP_$$)"
+			"someFn({ test: true }).use($$_INLANG_WRAP_$$)"
 		`)
 	})
 
@@ -102,7 +102,7 @@ describe("createWrapperAst", () => {
 		const node = createWrapperAst("someFn", "{ nested: { fn: () => concole.log(123) } }")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"someFn({ nested: { fn: () => concole.log(123) } }).wrap($$_INLANG_WRAP_$$)"
+			"someFn({ nested: { fn: () => concole.log(123) } }).use($$_INLANG_WRAP_$$)"
 		`)
 	})
 })
@@ -120,7 +120,7 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(() => {
+			"initWrapper().use(() => {
 			})"
 		`)
 	})
@@ -135,7 +135,7 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(async () => {
+			"initWrapper().use(async () => {
 			})"
 		`)
 	})
@@ -150,7 +150,7 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(function () {
+			"initWrapper().use(function () {
 			})"
 		`)
 	})
@@ -166,7 +166,7 @@ describe("mergeWrapperAst", () => {
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(
 			`
-			"initWrapper().wrap(async function () {
+			"initWrapper().use(async function () {
 			})"
 		`,
 		)
@@ -182,7 +182,7 @@ describe("mergeWrapperAst", () => {
 		mergeWrapperAst(wrapped, wrapWithAst)
 
 		expect(nodeToCode(wrapWithAst)).toMatchInlineSnapshot(`
-			"initWrapper().wrap(someFn)"
+			"initWrapper().use(someFn)"
 		`)
 	})
 })
@@ -195,7 +195,7 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(() => {
+			"export const load = initWrapper().use(() => {
 			});"
 		`)
 	})
@@ -208,7 +208,7 @@ describe("wrapExportedFunction", () => {
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"export const prerender = true;
-			export const load = initWrapper().wrap(() => {
+			export const load = initWrapper().use(() => {
 			});"
 		`)
 	})
@@ -220,7 +220,7 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(() => {
+			"export const load = initWrapper().use(() => {
 			});"
 		`)
 	})
@@ -232,7 +232,7 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(async () => {
+			"export const load = initWrapper().use(async () => {
 			});"
 		`)
 	})
@@ -246,7 +246,7 @@ describe("wrapExportedFunction", () => {
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
 			`
-			"export const load = initWrapper().wrap(function () {
+			"export const load = initWrapper().use(function () {
 			});"
 		`,
 		)
@@ -260,7 +260,7 @@ describe("wrapExportedFunction", () => {
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
 			`
-			"export const load = initWrapper().wrap(async function () {
+			"export const load = initWrapper().use(async function () {
 			});"
 		`,
 		)
@@ -273,7 +273,7 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(function load() {
+			"export const load = initWrapper().use(function load() {
 			});"
 		`)
 	})
@@ -285,7 +285,7 @@ describe("wrapExportedFunction", () => {
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"export const load = initWrapper().wrap(async function load() {
+			"export const load = initWrapper().use(async function load() {
 			});"
 		`)
 	})

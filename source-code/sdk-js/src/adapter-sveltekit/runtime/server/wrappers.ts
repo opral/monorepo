@@ -27,7 +27,7 @@ type HandleOptions = {
 }
 
 export const initHandleWrapper = (options: HandleOptions) => ({
-	wrap: (handle: WrappedHandle) => {
+	use: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
 
 		return sequence(
@@ -81,7 +81,7 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 export const initRootLayoutServerLoadWrapper = <
 	LayoutServerLoad extends Kit.ServerLoad<any, any, any, any>,
 >() => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: Parameters<LayoutServerLoad>[0],
@@ -106,7 +106,7 @@ export const initRootLayoutServerLoadWrapper = <
 // ------------------------------------------------------------------------------------------------
 
 const initGenericServerWrapper = <Event extends Kit.RequestEvent>() => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			fn: (event: Event, runtime: SvelteKitServerRuntime) => Promise<Data> | Data,
 		) =>

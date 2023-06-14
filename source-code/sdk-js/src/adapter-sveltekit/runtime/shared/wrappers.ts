@@ -77,7 +77,7 @@ export const initRootLayoutLoadWrapper = <
 >(options: {
 	initDetectors?: (event: Parameters<LayoutLoad>[0]) => Detector[]
 }) => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<LayoutLoad>[0]>,
@@ -113,7 +113,7 @@ export const initRootPageLoadWrapper = <
 		getPath: (event: Parameters<PageLoad>[0], language: Language) => URL | string
 	}
 }) => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<PageLoad>[0]>,
@@ -150,7 +150,7 @@ export const initRootPageLoadWrapper = <
 // ------------------------------------------------------------------------------------------------
 
 export const initLoadWrapper = <Load extends Kit.Load<any, any, any, any, any>>() => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<Load>[0]>,

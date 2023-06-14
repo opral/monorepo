@@ -142,30 +142,30 @@ function wrapAndAddParameters(
 		switch (wrapper) {
 			case "initHandleWrapper":
 				identifiers = ["handle"]
-				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				wrapperAst = parse(`${wrapper}(/*options here*/).use`)
 				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
 				break
 			case "initServerLoadWrapper":
 			case "initRootLayoutServerLoadWrapper":
 				identifiers = ["load"]
-				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				wrapperAst = parse(`${wrapper}(/*options here*/).use`)
 				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
 				break
 			case "initRootLayoutLoadWrapper":
 			case "initRootPageLoadWrapper":
 			case "initLoadWrapper":
 				identifiers = ["load"]
-				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				wrapperAst = parse(`${wrapper}(/*options here*/).use`)
 				importFrom = "@inlang/sdk-js/adapter-sveltekit/shared"
 				break
 			case "initRequestHandlerWrapper":
 				identifiers = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				wrapperAst = parse(`${wrapper}(/*options here*/).use`)
 				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
 				break
 			case "initActionWrapper":
 				identifiers = ["actions"]
-				wrapperAst = parse(`${wrapper}(/*options here*/).wrap`)
+				wrapperAst = parse(`${wrapper}(/*options here*/).use`)
 				importFrom = "@inlang/sdk-js/adapter-sveltekit/server"
 				break
 			default:
@@ -173,7 +173,7 @@ function wrapAndAddParameters(
 		}
 		// Wrap the specified functions
 		const wasWrapped = definitions(ast, ...identifiers)
-			.wrap(wrapperAst)
+			.use(wrapperAst)
 			.successful()
 		// Add imports
 		if (wasWrapped) imports(ast, importFrom).add(wrapper)
@@ -556,8 +556,8 @@ function transformLayoutSvelte({ markup, style, script }, config) {
 		if (isEmpty(script.markup)) contexts(markup).insert(`<slot/>`)
 		// Insert a conditional
 		if (config.languageInUrl && config.isStatic)
-			contexts(markup).wrap(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
-		contexts(markup).wrap(
+			contexts(markup).use(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
+		contexts(markup).use(
 			`{#${config.languageInUrl ? "key" : "if"} $$_INLANG_LANGUAGE_$$}`,
 			`{/${config.languageInUrl ? "key" : "if"}}`,
 		)
@@ -664,13 +664,13 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
         const fn1 = () => {}
         export const handle = fn1
         // =>
-        export const handle = initHandleWrapper().wrap(fn1)
+        export const handle = initHandleWrapper().use(fn1)
         ```
 
         ```ts
         export const handle = sequence(fn1, fn2)
         // =>
-        export const handle = initHandleWrapper().wrap(sequence(fn1, fn2))
+        export const handle = initHandleWrapper().use(sequence(fn1, fn2))
         ```
 
         we will wrap the `sequence` function so we can assure that we can use `handle` functions that get declared outside of the `hooks.server.js` file.
@@ -681,7 +681,7 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
         import { appendFunctionality } from "./utils.js"
         export const handle = appendFunctionality(() => {}) // handle it the same as sequence
         // =>
-        export const handle = initHandleWrapper().wrap(appendFunctionality(() => {}))
+        export const handle = initHandleWrapper().use(appendFunctionality(() => {}))
         ```
 
         The only difference is, that we track functions that get passed to `sequence` to resolve imports from `@inlang/sdk-js` by wrapping those functions. Because we don't know the function signature of other external functions, we can't do it there.
@@ -725,10 +725,10 @@ Wrapping `load`, individual `actions` and `RequestHandler` is identical. Only `h
 6.  replace placeholder with specific function of that file
     ```ts
     const code = 'const fn = $$_INLANG_PLACEHOLDER_$$((_, { i }) => { i("test") });'
-    const wrapperAst = parse('initHandleWrapper({ key: "value" }).wrap($$_INLANG_PLACEHOLDER_$$)')
+    const wrapperAst = parse('initHandleWrapper({ key: "value" }).use($$_INLANG_PLACEHOLDER_$$)')
     replacePlaceholder(ast, wrapperAst)
     const result = serialize(ast)
-    // result => 'const fn = initHandleWrapper({ key: "value" }).wrap((_, { i }) => { i("test") });'
+    // result => 'const fn = initHandleWrapper({ key: "value" }).use((_, { i }) => { i("test") });'
     ```
 
 The wrap function needs to work with the following code snippets:
@@ -819,7 +819,7 @@ imports(
 
 ```ts
 const wasWrapped = definitions(ast, ...identifiers)
-	.wrap(wrapperAst)
+	.use(wrapperAst)
 	.successful()
 ```
 
@@ -836,7 +836,7 @@ contexts(ast).insertAfterImports(
     `),
 )
 contexts(markup).insert(`<slot/>`)
-contexts(markup).wrap(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
+contexts(markup).use(`{#if $$_INLANG_LANGUAGE_$$}`, `{/if}`)
 // Returns true or false if identifier is declarable
 contexts(ast).isDeclarable(identifier)
 // Returns an alternative, auto-generated identifier that is declarable
