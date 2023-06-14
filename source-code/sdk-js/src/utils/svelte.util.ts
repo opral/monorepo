@@ -1,6 +1,8 @@
-const REGEX_MODULE_SCRIPT_TAG = /(<script[^]*?context="module"[^]*?>)([^]+?)(<\/script>)/
-const REGEX_SCRIPT_TAG = /(<script[^]*?>)([^]+?)(<\/script>)/
+const REGEX_MODULE_SCRIPT_TAG = /(<script[^]*?context="module"[^]*?>\s*)([^]+?)(\s*<\/script>)/
+const REGEX_SCRIPT_TAG = /(<script[^]*?>\s*)([^]+?)(\s*<\/script>)/
 const REGEX_STYLE_TAG = /<style[^]*?>[^]+?<\/style>/
+
+export type SvelteFileParts = ReturnType<typeof getSvelteFileParts>
 
 export const getSvelteFileParts = (code: string) => {
 	let markupContent = code

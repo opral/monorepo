@@ -27,16 +27,8 @@ describe("getSvelteFileParts", () => {
 			`
 		const result = getSvelteFileParts(code)
 
-		expect(result.moduleScript).toMatchInlineSnapshot(`
-			"
-				import * from 'foo'
-			"
-		`)
-		expect(result.script).toMatchInlineSnapshot(`
-			"
-				console.log('hello world')
-			"
-		`)
+		expect(result.moduleScript).toMatchInlineSnapshot('"import * from \'foo\'"')
+		expect(result.script).toMatchInlineSnapshot('"console.log(\'hello world\')"')
 		expect(result.markup).toMatchInlineSnapshot(`
 			"<svelte:options />
 
