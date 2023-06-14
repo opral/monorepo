@@ -12,7 +12,6 @@
 		"access": "public"
 	},
 	"scripts": {
-		"postinstall": "node ./fix-node-modules-exports.js",
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js && size-limit",
 		"--- Pretest is required to build the plugin before testing. ---": "",

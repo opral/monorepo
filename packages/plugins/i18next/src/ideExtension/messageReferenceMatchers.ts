@@ -1,3 +1,11 @@
+/**
+ * Using parsimmon because:
+ *
+ * 1. Chevrotain is too complicated.
+ * 2. TypeScript's compiler doesn't work in the browser.
+ * 3. TypeScripts compiler
+ */
+
 import Parsimmon from "parsimmon"
 import type { MessageReferenceMatch } from "@inlang/core/config"
 
@@ -69,7 +77,7 @@ const parser = Parsimmon.createLanguage({
 })
 
 // Parse the expression
-export function parse(sourceCode: string) {
+export function parse(sourceCode: string): MessageReferenceMatch[] {
 	try {
 		return parser.entry.tryParse(sourceCode)
 	} catch {
