@@ -64,10 +64,7 @@ export async function pluginBuildConfig(
 	// ------------ STATIC OPTIONS ------------
 
 	ops.bundle = true
-	//! "neutral" leads to errors if an npm module does not have an "exports" field
-	//! see https://github.com/Chevrotain/chevrotain/issues/1941
-	//! also typescript itself is not compatible with "neutral"
-	ops.platform = "browser"
+	ops.platform = "neutral"
 	ops.format = "esm"
 	// es2020 in anticipation of sandboxing JS with QuickJS in the near future
 	ops.target = "es2020"
