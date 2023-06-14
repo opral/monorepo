@@ -27,6 +27,16 @@ export function Heading(props: { level: number; children: JSXElement }) {
 					<CopyWrapper>{props.children}</CopyWrapper>
 				</h3>
 			</Show>
+			<Show when={props.level === 4}>
+				<h4 class="text-base font-semibold pb-2">
+					<CopyWrapper>{props.children}</CopyWrapper>
+				</h4>
+			</Show>
+			<Show when={props.level === 5}>
+				<h4 class="text-sm font-semibold pb-2">
+					<CopyWrapper>{props.children}</CopyWrapper>
+				</h4>
+			</Show>
 		</Wrapper>
 	)
 }

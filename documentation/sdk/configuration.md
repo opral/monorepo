@@ -4,7 +4,7 @@ href: /documentation/sdk/configuration
 description: TODO write some description
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.title %} Options
 
 You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
 
@@ -32,19 +32,17 @@ export async function defineConfig(env) {
 }
 ```
 
-## Configuration options
-
 > There are limited configuration options for now. We will add more options in the coming weeks.
 
-### languageNegotiation
+## languageNegotiation
 
 The `languageNegotiation` property makes it possible to customize the behavior how you application detects the language of the user.
 
-#### strategies
+## strategies
 
 You can choose between different strategies to detect the language of the user. You can specify multiple strategies. The first strategy that returns a language will be used.
 
-##### **localStorage**
+- localStorage
 
 Detects if the `language` key is set in the localStorage and uses it as the language for the application.
 
@@ -56,9 +54,7 @@ Detects if the `language` key is set in the localStorage and uses it as the lang
 },
 ```
 
-###
-
-##### **url**
+- url
 
 Detects the `language` by looking at the first segment of the url e.g. `/en/about`
 
@@ -70,17 +66,17 @@ Detects the `language` by looking at the first segment of the url e.g. `/en/abou
 },
 ```
 
-### resources
+## resources
 
 The `resources` property defines how to deal with resources read with the resolved `inlang.config.js`.
 
-#### cache
+- cache
 
 Defines how to cache resources.
 
 > Right now we only support static Resources. Please open an [Issue](https://github.com/inlang/inlang/issues) if you need to regularly fetch Resources.
 
-##### **build-time** (default)
+- build-time (default)
 
 Loads all Resources during build time and adds them to the bundle.
 

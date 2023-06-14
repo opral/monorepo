@@ -23,6 +23,7 @@ import { router as vitePluginSsr } from "./vite-plugin-ssr.js"
 import { router as telefunc } from "./telefunc.js"
 import { router as authService } from "../services/auth/index.server.js"
 import { router as githubService } from "../services/github/index.server.js"
+import { redirects } from "./redirects.js"
 
 /** the root path of the server (website/) */
 const rootPath = new URL("../..", import.meta.url).pathname
@@ -62,6 +63,8 @@ if (process.env.NODE_ENV === "production") {
 router.all(privateEnv.PUBLIC_GIT_PROXY_PATH + "*", proxy)
 
 router.use("/services/auth", authService)
+
+router.use(redirects)
 
 router.use(telefunc)
 
