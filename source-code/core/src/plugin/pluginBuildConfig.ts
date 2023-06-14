@@ -71,7 +71,10 @@ export async function pluginBuildConfig(
 	//! no CommonJS, no NodeJS, no nothing. Pure EcmaScript.
 	//!
 	//! Pure ECMAScript is important to future proof the plugin
-	//! ecosystem and ease inlang's maintenance burden.
+	//! ecosystem and ease inlang's maintenance burden. Everything
+	//! else than pure ESM will die in the long run. We don't want to
+	//! take on technical debt now which we will have to MASSIVELY pay off
+	//! later.
 	ops.platform = "neutral"
 	ops.format = "esm"
 	// es2020 in anticipation of sandboxing JS with QuickJS in the near future
