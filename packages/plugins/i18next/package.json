@@ -15,28 +15,23 @@
 		"dev": "DEV=true node ./build.js",
 		"build": "node ./build.js && size-limit",
 		"--- Pretest is required to build the plugin before testing. ---": "",
-		"pretest": "npm run build",
+		"pretest": "node ./build.js",
 		"test": "vitest run",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
-	"dependencies": {
-		"@inlang/core": "*",
-		"chevrotain": "^10.5.0",
-		"flat": "^5.0.2",
-		"lodash.merge": "^4.6.2",
-		"patch-package": "^7.0.0"
-	},
 	"devDependencies": {
+		"@inlang/core": "*",
 		"@size-limit/preset-app": "^8.2.4",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
-		"concurrently": "^7.6.0",
+		"@types/parsimmon": "^1.10.6",
 		"esbuild": "^0.17.19",
-		"memfs": "^3.4.12",
+		"flat": "^5.0.2",
+		"lodash.merge": "^4.6.2",
+		"parsimmon": "^1.18.1",
 		"size-limit": "^8.2.4",
-		"typescript": "^4.9.4",
-		"vitest": "^0.26.2"
+		"typescript": "^5.1.3"
 	},
 	"size-limit": [
 		{
