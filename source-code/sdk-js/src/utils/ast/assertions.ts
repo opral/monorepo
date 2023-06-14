@@ -1,6 +1,7 @@
 import type { SourceFile } from 'ts-morph'
 import { findImportDeclarations } from './imports.js'
 
+// TODO: test
 export const assertNoImportsFromSdkJs = (sourceFile: SourceFile) => {
 	if (findImportDeclarations(sourceFile, "@inlang/sdk-js").length) {
 		throw Error(

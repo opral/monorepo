@@ -1,5 +1,5 @@
 import type { TransformConfig } from "../config.js"
-import { transformSvelte } from "./_.svelte.js"
+import { isOptOutImportPresent, transformSvelte } from "./_.svelte.js"
 import { parse, preprocess } from "svelte/compiler"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 import { parseModule, generateCode } from "magicast"
@@ -19,11 +19,54 @@ import {
 import MagicStringImport from "magic-string"
 import { types } from "recast"
 import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
+import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import { getSvelteFileParts } from '../../../utils/svelte.util.js'
+import { markupToAst, wrapMarkupChildren } from '../../../utils/ast/svelte.js'
+
+export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
+	const fileParts = getSvelteFileParts(code)
+
+	if (isOptOutImportPresent(fileParts)) return code
+
+	if (!root) return transformSvelte(config, code)
+
+	fileParts.script = transformScript(config, fileParts.script)
+	fileParts.markup = transformMarkup(config, fileParts.markup)
+
+	return transformSvelte(config, fileParts.toString())
+}
+
+const transformScript = (config: TransformConfig, code: string) => {
+	const sourceFile = codeToSourceFile(code)
+
+	// TODO: add imports
+	// TODO: add export let data if not present
+	// TODO: inject setContext and code for reactivity
+
+	return nodeToCode(sourceFile)
+}
+
+const transformMarkup = (config: TransformConfig, markup: string) => {
+	const ast = markupToAst(markup)
+
+	// TODO: insert </slot> if not present
+
+	wrapMarkupChildren(ast, markupToAst('{#key $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/key}'))
+	if (!config.languageInUrl) {
+		wrapMarkupChildren(ast, markupToAst('{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/if}'))
+	}
+
+	return markup
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
-export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
+export const transformLayoutSvelteOld = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) {
 		return transformRootLayoutSvelte(config, code)
 	}
@@ -86,11 +129,11 @@ ${codeWithoutTypes}`
 				(node) =>
 					n.ExportNamedDeclaration.check(node)
 						? (meta) => {
-								const { parent, index } = meta.get(
-									node,
-								) as NodeInfoMapEntry<types.namedTypes.Program>
-								if (index != undefined) parent.body.splice(index, 1)
-						  }
+							const { parent, index } = meta.get(
+								node,
+							) as NodeInfoMapEntry<types.namedTypes.Program>
+							if (index != undefined) parent.body.splice(index, 1)
+						}
 						: undefined,
 			)
 
@@ -208,15 +251,15 @@ ${codeWithoutTypes}`
 			s.appendRight(
 				parsed.html.start,
 				"" +
-					(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : "") +
-					(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`),
+				(config.languageInUrl && config.isStatic ? `{#if ${localLanguageName}}` : "") +
+				(config.languageInUrl ? `{#key ${localLanguageName}}` : `{#if $${localLanguageName}}`),
 			)
 			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
 			sortMarkup(parsed, s)
 			s.append(
 				(insertSlot ? `<slot />` : ``) +
-					(config.languageInUrl ? `{/key}` : `{/if}`) +
-					(config.languageInUrl && config.isStatic ? `{/if}` : ""),
+				(config.languageInUrl ? `{/key}` : `{/if}`) +
+				(config.languageInUrl && config.isStatic ? `{/if}` : ""),
 			)
 			const map = s.generateMap({
 				source: config.sourceFileName,

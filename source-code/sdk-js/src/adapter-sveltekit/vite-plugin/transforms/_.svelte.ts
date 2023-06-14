@@ -14,13 +14,31 @@ import {
 import MagicStringImport from "magic-string"
 import { vitePreprocess } from "@sveltejs/kit/vite"
 import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
+import { isOptOutImportPresent as isOptOutImportPresentOriginal } from '../../../utils/ast/imports.js'
+import { codeToSourceFile } from '../../../utils/utils.js'
+import type { SvelteFileParts } from '../../../utils/svelte.util.js'
 
-// the type definitions don't match
-const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
+// TODO: test
+export const isOptOutImportPresent = ({ script }: SvelteFileParts) => {
+	const scriptSourceFile = codeToSourceFile(script)
+	if (isOptOutImportPresentOriginal(scriptSourceFile)) return true
+
+	const moduleScriptSourceFile = codeToSourceFile(script)
+	if (isOptOutImportPresentOriginal(moduleScriptSourceFile)) return true
+
+	return false
+}
 
 export const transformSvelte = (config: TransformConfig, code: string): string => {
 	return code
 }
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+// the type definitions don't match
+const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
 export const transformSvelteOld = async (config: TransformConfig, code: string): Promise<string> => {
 	const n = types.namedTypes
