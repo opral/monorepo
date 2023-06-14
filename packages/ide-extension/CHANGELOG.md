@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 0.7.3
+
+### Patch Changes
+
+- 97092de0: fix config not loading because of wrong path detection
+- 97092de0: remove telemetry events "decoration set" and "code action provided"
+
 ## 0.7.2
 
 ### Patch Changes
