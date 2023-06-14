@@ -1,3 +1,8 @@
+/**
+ * Not running in the browser, so we can't use this parser...
+ * Would be the most elegant solution though. Keeping for reference.
+ */
+
 import type { MessageReferenceMatch } from "@inlang/core/config"
 
 import {

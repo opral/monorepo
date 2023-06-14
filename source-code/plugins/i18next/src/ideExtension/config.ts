@@ -1,5 +1,5 @@
 import type { InlangConfig } from "@inlang/core/config"
-import { parse } from "./messageReferenceMatchers.parsimmon.js"
+import { parse } from "./messageReferenceMatchers.js"
 
 export const ideExtensionConfig: InlangConfig["ideExtension"] = {
 	messageReferenceMatchers: [
