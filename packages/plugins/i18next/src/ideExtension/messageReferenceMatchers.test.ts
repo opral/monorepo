@@ -1,5 +1,5 @@
 import { it, expect } from "vitest"
-import { parse } from "./messageReferenceMatchers.js"
+import { parse } from "./messageReferenceMatchers.typescript.js"
 
 it("should not match a string without a t function", async () => {
 	const sourceCode = `
