@@ -77,9 +77,9 @@ const ConfigPage = () => {
 
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
-			<div class="flex flex-col items-center gap-8 pt-20 px-8 lg:px-0">
-				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-relaxed tracking-tight">
-					Multiple apps, endless plugins, one config.
+			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
+				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
+					Multiple <a href="/documentation/apps/web-editor" class="underline transition link-primary">apps</a>, endless <a href="/documentation/plugins/registry" class="underline transition link-primary">plugins</a>, one <a href="/documentation/quick-start" class="underline transition link-primary">config</a>.
 				</h2>
 			</div>
 
@@ -88,7 +88,7 @@ const ConfigPage = () => {
 					{(card) => (
 						<a
 							href={card.link}
-							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70 hover:text-primary"
+							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
 							<div class="p-8 flex flex-col gap-2">
@@ -144,9 +144,9 @@ const ConfigPage = () => {
 				</div>
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
-				<div class="relative" style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}>
+				<a href="/documentation/plugins/registry" class="relative cursor-pointer group" style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
-						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700">
+						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
 							plugins
 						</pre>
 					</div>
@@ -171,7 +171,7 @@ const ConfigPage = () => {
 						}}
 						class="absolute bg-on-background top-0 left-0 w-full h-full opacity-50 blur-sm"
 					/>
-				</div>
+				</a>
 			</div>
 			<div class="z-10 relative flex justify-center px-10 gap-10 overflow-hidden transition-all duration-200">
 				<div id="connector4" class="w-[1px]">
@@ -208,25 +208,25 @@ const ConfigPage = () => {
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-col items-center gap-8 px-8 pb-28 lg:px-0">
-				<div class="w-full lg:w-fit overflow-x-scroll relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg">
+			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
+				<a href="/documentation/quick-start" class="w-full lg:w-fit overflow-x-scroll relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group">
 					<div class="absolute top-5 left-6 flex gap-2">
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 					</div>
-					<pre class="text-surface-400 w-full text-center">inlang.config.js</pre>
+					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">inlang.config.js</pre>
 					<div class="flex flex-col gap-1 px-8 py-4 pr-16">
 						<For each={code}>
 							{(line, index) => (
-								<div class="flex gap-8 items-center text-sm">
+								<div class="flex gap-8 items-center text-xs sm:text-sm">
 									<pre class="text-xs text-surface-500">{index()}</pre>
 									<pre>{line}</pre>
 								</div>
 							)}
 						</For>
 					</div>
-				</div>
+				</a>
 			</div>
 		</SectionLayout>
 	)
