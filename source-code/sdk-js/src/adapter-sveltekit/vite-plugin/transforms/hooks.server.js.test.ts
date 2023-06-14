@@ -27,8 +27,7 @@ describe("transformHooksServerJs", () => {
 					        throwable: redirect,
 					        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 					    },
-					}).wrap(() => {
-					});"
+					}).wrap(({ resolve, event }) => resolve(event));"
 				`)
 			})
 
@@ -42,8 +41,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
-					}).wrap(() => {
-					});"
+					}).wrap(({ resolve, event }) => resolve(event));"
 				`)
 			})
 		})
@@ -59,8 +57,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    getLanguage: () => undefined,
-					}).wrap(() => {
-					});"
+					}).wrap(({ resolve, event }) => resolve(event));"
 				`)
 			})
 		})
@@ -105,8 +102,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    getLanguage: () => undefined,
-			}).wrap(() => {
-			});"
+			}).wrap(({ resolve, event }) => resolve(event));"
 		`)
 	})
 

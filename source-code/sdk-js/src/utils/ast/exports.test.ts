@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { findExport, findOrCreateExport } from "./exports.js"
-import { nodeToCode, codeToSourceFile, n } from "../utils.js"
+import { nodeToCode, codeToSourceFile } from "../utils.js"
 import { Node } from "ts-morph"
 
 describe("findExport", () => {
@@ -106,5 +106,14 @@ describe("findOrCreateExport", () => {
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
 		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => { }"')
+	})
+
+	test("should create an export with a custom function implementation", () => {
+		const node = codeToSourceFile("")
+
+		const exportNode = findOrCreateExport(node, "load", "(param) => console.log(param)")!
+
+		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = (param) => console.log(param)"')
 	})
 })

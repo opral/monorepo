@@ -92,8 +92,9 @@ export const wrapExportedFunction = (
 	options: string | undefined,
 	wrapperFunctionName: string,
 	exportName: string,
+	defaultImplementation?: string | undefined,
 ) => {
-	const fnExport = findOrCreateExport(sourceFile, exportName)
+	const fnExport = findOrCreateExport(sourceFile, exportName, defaultImplementation)
 
 	// if export is a function declaration, convert it to a function expression
 	if (Node.isFunctionDeclaration(fnExport)) {

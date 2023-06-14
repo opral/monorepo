@@ -123,7 +123,7 @@ export const transformHooksServerJs = (config: TransformConfig, code: string) =>
 	addImports(sourceFile, config, wrapperFunctionName)
 
 	const options = getOptions(config)
-	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "handle")
+	wrapExportedFunction(sourceFile, options, wrapperFunctionName, "handle", '({ resolve, event }) => resolve(event)')
 	// TODO: check if handle must return `resolve(event)`
 
 	return nodeToCode(sourceFile)

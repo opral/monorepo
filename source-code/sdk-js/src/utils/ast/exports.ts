@@ -48,7 +48,7 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 
 // ------------------------------------------------------------------------------------------------
 
-export const findOrCreateExport = (sourceFile: SourceFile, name: string) => {
+export const findOrCreateExport = (sourceFile: SourceFile, name: string, defaultImplementation = '() => { }') => {
 	const loadFnExport = findExport(sourceFile, name)
 	if (loadFnExport) return loadFnExport
 
@@ -61,7 +61,7 @@ export const findOrCreateExport = (sourceFile: SourceFile, name: string) => {
 	if (isVariableAlreadyDefined) throw new Error(`Variable ${name} already exists`)
 	// TODO: use `export { randomVariableName as load } instead of throwing an error
 
-	const loadFnAst = codeToSourceFile(`export const ${name} = () => { }`)
+	const loadFnAst = codeToSourceFile(`export const ${name} = ${defaultImplementation}`)
 	sourceFile.addVariableStatement(loadFnAst.getVariableStatement(name)!.getStructure())
 
 	return findExport(sourceFile, name)!
