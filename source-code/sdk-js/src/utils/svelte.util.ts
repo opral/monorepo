@@ -10,7 +10,7 @@ export const getSvelteFileParts = (code: string) => {
 	let scriptOpeningTag = '<script>\n'
 	let scriptClosingTag = '\n</script>'
 	let scriptContent: string | undefined = undefined
-	let styleContent: string | undefined = undefined
+	let styleTag: string | undefined = undefined
 
 	const moduleScriptMatch = markupContent.match(REGEX_MODULE_SCRIPT_TAG)
 	if (moduleScriptMatch) {
@@ -32,7 +32,7 @@ export const getSvelteFileParts = (code: string) => {
 
 	const styleMatch = markupContent.match(REGEX_STYLE_TAG)
 	if (styleMatch) {
-		styleContent = styleMatch[0]!
+		styleTag = styleMatch[0]!
 
 		markupContent = markupContent.replace(styleMatch[0], '$_INLANG_STYLE_PLACEHOLDER_$')
 	}
@@ -61,22 +61,25 @@ export const getSvelteFileParts = (code: string) => {
 
 			code = replacePlaceholder(code, '$_INLANG_SCRIPT_PLACEHOLDER_$', scriptOpeningTag, scriptClosingTag, scriptContent)
 			code = replacePlaceholder(code, '$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$', moduleScriptOpeningTag, moduleScriptClosingTag, moduleScriptContent)
-
-			code = code.replace('$_INLANG_STYLE_PLACEHOLDER_$', styleContent!)
+			code = replacePlaceholder(code, '$_INLANG_STYLE_PLACEHOLDER_$', '', '', styleTag, false)
 
 			return code.trim()
 		}
 	}
 }
 
-const replacePlaceholder = (code: string, placeholder: string, openTag: string, closeTag: string, content: string | undefined): string => {
+const replacePlaceholder = (code: string, placeholder: string, openTag: string, closeTag: string, content: string | undefined, insertAtTheTop = true): string => {
 	if (code.includes(placeholder)) {
 		const newContent = content
-			? openTag + content + closeTag
-			: ''
+			? openTag + content + closeTag // insert new content if specified
+			: '' // remove placeholder if content is empty
 		return code.replace(placeholder, newContent)
 	} else if (content) {
-		return replacePlaceholder(`${placeholder}\n${code}`, placeholder, openTag, closeTag, content)
+		// insert placeholder if it doesn't exist yet
+		const newCode = insertAtTheTop
+			? `${placeholder}\n${code}`
+			: `${code}\n${placeholder}`
+		return replacePlaceholder(newCode, placeholder, openTag, closeTag, content)
 	}
 
 	return code
