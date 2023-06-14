@@ -12,8 +12,6 @@ import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utils/promptToReload.js"
-import { getUserId } from "./utils/getUserId.js"
-import { recommendation } from "./utils/recommendation.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { recommendation, disableRecommendation } from "./utils/recommendation.js"
 
@@ -67,8 +65,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	const closestConfigPath = determineClosestPath({
-		options: potentialConfigFileUris.map((uri) => uri.path),
-		to: activeTextEditor.document.uri.path,
+		options: potentialConfigFileUris.map((uri) => uri.fsPath),
+		to: activeTextEditor.document.uri.fsPath,
 	})
 
 	// get current workspace
