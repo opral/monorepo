@@ -5,6 +5,7 @@ import {
 	FrontmatterSchema,
 } from "../../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "@src/services/markdown/index.js"
+import { RenderErrorPage } from "vite-plugin-ssr/server"
 
 /**
  * the table of contents without the html for each document
@@ -25,7 +26,6 @@ export type ProcessedTableOfContents = Record<
  * 	}
  */
 const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
-
 /**
  * the table of contents without the html for each document
  * saving bandwith and speeding up the site)
@@ -39,6 +39,9 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 	// dirty way to get reload of markdown (not hot reload though)
 	if (import.meta.env.DEV) {
 		await generateIndexAndTableOfContents()
+	}
+	if (!Object.keys(index).includes(pageContext.urlPathname)) {
+		throw RenderErrorPage({ pageContext: { is404: true } })
 	}
 	return {
 		pageContext: {
