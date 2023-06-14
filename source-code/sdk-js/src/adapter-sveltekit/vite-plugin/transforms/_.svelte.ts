@@ -18,7 +18,11 @@ import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
 // the type definitions don't match
 const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
-export const transformSvelte = async (config: TransformConfig, code: string): Promise<string> => {
+export const transformSvelte = (config: TransformConfig, code: string): string => {
+	return code
+}
+
+export const transformSvelteOld = async (config: TransformConfig, code: string): Promise<string> => {
 	const n = types.namedTypes
 
 	const requiredImports = config.languageInUrl

@@ -6,4 +6,6 @@ export const transformServerJs = (config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code)
 
 	assertNoImportsFromSdkJs(sourceFile)
+
+	return code
 }
