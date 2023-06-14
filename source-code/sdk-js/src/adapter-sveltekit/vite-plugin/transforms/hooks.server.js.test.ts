@@ -129,6 +129,38 @@ describe("transformHooksServerJs", () => {
 		`)
 	})
 
+	test.only("should wrap handle if sequence helper get's used", () => {
+		const code = transformHooksServerJs(
+			getTransformConfig(),
+			dedent`
+				import { sequence } from '@sveltejs/kit'
+
+				const handle1 = ({ resolve, event }) => resolve(event)
+
+				function handle2({ resolve, event }) {
+					console.log('handle called')
+					return resolve(event)
+				}
+
+				export const handle = sequence(handle1, handle2)
+			`,
+		)
+
+		expect(code).toMatchInlineSnapshot(`
+			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import { sequence } from '@sveltejs/kit';
+			const handle1 = ({ resolve, event }) => resolve(event);
+			function handle2({ resolve, event }) {
+			    console.log('handle called');
+			    return resolve(event);
+			}
+			export const handle = initHandleWrapper({
+			    inlangConfigModule: import(\\"../inlang.config.js\\"),
+			    getLanguage: () => undefined,
+			}).wrap(sequence(handle1, handle2));"
+		`)
+	})
+
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
 		const config = getTransformConfig()
