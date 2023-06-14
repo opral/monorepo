@@ -9,31 +9,37 @@ it("should not match a string without a t function", async () => {
 	expect(matches).toHaveLength(0)
 })
 
-it('should detect t("{id}")', async () => {
+it('should detect double quotes t("id")', async () => {
 	// double quotes
 	const sourceCode = `
     const x = t("some-id")
     `
 	const matches = await parse(sourceCode)
 	expect(matches[0]?.messageId).toBe("some-id")
+	expect(matches[0]?.position.start.character).toBe(17)
+	expect(matches[0]?.position.end.character).toBe(26)
 })
 
-it(`should detect t('id')`, async () => {
+it(`should detect single quotes t('id')`, async () => {
 	// single quotes
 	const sourceCode = `
     const x = t('some-id')
   `
 	const matches = await parse(sourceCode)
 	expect(matches[0]?.messageId).toBe("some-id")
+	expect(matches[0]?.position.start.character).toBe(17)
+	expect(matches[0]?.position.end.character).toBe(26)
 })
 
-it(`should detect {t('id')}`, async () => {
+it(`should detect JSX <p>{t('id')}</p>`, async () => {
 	// using the t function in markup
 	const sourceCode = `
     <p>{t('some-id')}</p>
     `
 	const matches = await parse(sourceCode)
 	expect(matches[0]?.messageId).toBe("some-id")
+	expect(matches[0]?.position.start.character).toBe(11)
+	expect(matches[0]?.position.end.character).toBe(20)
 })
 
 it("should detect t('id', ...args)", async () => {

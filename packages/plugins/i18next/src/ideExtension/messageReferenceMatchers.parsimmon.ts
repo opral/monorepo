@@ -1,14 +1,14 @@
 import Parsimmon from "parsimmon"
+import type { MessageReferenceMatch } from "@inlang/core/config"
 
-// Utility tokens
-const whitespace = Parsimmon.optWhitespace
-
-const character = Parsimmon.any
-
-// Main parser
 const parser = Parsimmon.createLanguage({
+	// The entry point for message reference matching.
+	//
+	// 1. Match a t function call or any other character.
+	// 2. Match as many of these as possible.
+	// 3. Filter out any non-object matches.
 	entry: (r) => {
-		return Parsimmon.alt(r.tFunctionCall, character)
+		return Parsimmon.alt(r.tFunctionCall, Parsimmon.any)
 			.many()
 			.map((matches) => {
 				// filter arbitrary characters
@@ -42,27 +42,31 @@ const parser = Parsimmon.createLanguage({
 	// Parser for t function calls
 	tFunctionCall: function (r) {
 		return Parsimmon.seqMap(
-			Parsimmon.string("t"),
-			Parsimmon.string("("),
-			Parsimmon.index, // start position
+			Parsimmon.string("t"), // starts with t
+			Parsimmon.string("("), // then an opening parenthesis
+			Parsimmon.index, // start position of the message id
 			r.stringLiteral, // message id
-			Parsimmon.index, // end position
-			Parsimmon.string(")").trim(whitespace),
+			Parsimmon.index, // end position of the message id
+			Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
+			Parsimmon.string(")"), // end with a closing parenthesis
 			(_, __, start, messageId, end) => {
 				return {
 					messageId,
 					position: {
-						start,
-						end,
+						start: {
+							line: start.line,
+							character: start.column,
+						},
+						end: {
+							line: end.line,
+							character: end.column,
+						},
 					},
-				}
+				} satisfies MessageReferenceMatch
 			},
 		)
 	},
 })
-
-// Test expression
-const sourceCode = `sss  t("some-id"  )   t('www-ddd'  ) dd`
 
 // Parse the expression
 export function parse(sourceCode: string) {
@@ -72,5 +76,3 @@ export function parse(sourceCode: string) {
 		return []
 	}
 }
-
-console.log(parse(sourceCode))
