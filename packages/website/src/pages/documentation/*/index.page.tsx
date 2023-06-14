@@ -41,7 +41,7 @@ export function Page(props: PageProps) {
 						</Show>
 					</nav>
 					{/* Mobile navbar */}
-					<nav class="block md:hidden overflow-y-auto overflow-auto min-w-full pt-5">
+					<nav class="fixed -translate-x-4 min-w-full z-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
 							<h3 slot="summary" class="font-medium">
 								Menu
