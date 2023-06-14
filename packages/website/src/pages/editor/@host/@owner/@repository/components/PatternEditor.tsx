@@ -190,7 +190,6 @@ export function PatternEditor(props: {
 				]
 			}
 		})
-		console.log(localChanges())
 
 		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save

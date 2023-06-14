@@ -42,6 +42,7 @@ const Integration = () => {
 							prop:distance={16}
 							prop:trigger="maunual"
 							prop:hoist={true}
+							prop:placement="top"
 						>
 							<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 								<Svelte size={44} startColor="#434343" endColor="#959595" />
@@ -63,10 +64,10 @@ const Integration = () => {
 								{data.caption}
 							</p>
 						</div>
-						<h2 class="text-center text-3xl font-semibold text-on-background leading-relaxed tracking-tight">
+						<h2 class="text-center text-3xl font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
 							{data.title}
 						</h2>
-						<p class="text-base md:w-[55%] text-center text-outline-variant">{data.description}</p>
+						<p class="text-base px-10 md:w-[55%] text-center text-outline-variant">{data.description}</p>
 						<div class="pt-4">
 							<Button href={data.buttonLink} type="secondary">
 								{data.button}
