@@ -134,9 +134,7 @@ export async function readResources(
 					parsedMassagesForAst,
 					language,
 					space,
-					args.settings.variableReferencePattern
-						? args.settings.variableReferencePattern
-						: ["{{", "}}"],
+					args.settings.variableReferencePattern,
 				),
 			)
 		} catch {
@@ -189,16 +187,7 @@ export async function readResources(
 					}
 				}
 			}
-			result.push(
-				parseResource(
-					obj,
-					language,
-					space,
-					args.settings.variableReferencePattern
-						? args.settings.variableReferencePattern
-						: ["{{", "}}"],
-				),
-			)
+			result.push(parseResource(obj, language, space, args.settings.variableReferencePattern))
 		}
 	}
 	return result
@@ -369,13 +358,7 @@ async function writeResources(
 				}
 				await args.$fs.writeFile(
 					resourcePath.replace("*", fileName),
-					serializeResource(
-						splitedResource,
-						space,
-						args.settings.variableReferencePattern
-							? args.settings.variableReferencePattern
-							: ["{{", "}}"],
-					),
+					serializeResource(splitedResource, space, args.settings.variableReferencePattern),
 				)
 			}
 		} else {
