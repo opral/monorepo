@@ -202,7 +202,7 @@ function parseResource(
 	messages: ExtendedMessagesType,
 	language: string,
 	space: number | string,
-	variableReferencePattern?: [string, string],
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Resource {
 	return {
 		type: "Resource",
@@ -227,16 +227,13 @@ function parseResource(
 function parseMessage(
 	id: string,
 	extendedMessage: ExtendedMessagesType[string],
-	variableReferencePattern?: [string, string],
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Message {
-	const regex =
-		variableReferencePattern &&
-		(variableReferencePattern[1]
-			? new RegExp(
-					`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-					"g",
-			  )
-			: new RegExp(`(${variableReferencePattern}\\w+)`, "g"))
+	const regex = new RegExp(
+		`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+		"g",
+	)
+
 	const newElements = []
 	if (regex) {
 		const splitArray = extendedMessage.value.split(regex)
@@ -246,12 +243,11 @@ function parseMessage(
 					type: "Placeholder",
 					body: {
 						type: "VariableReference",
-						name: variableReferencePattern[1]
-							? element.slice(
-									variableReferencePattern[0].length,
-									variableReferencePattern[1].length * -1,
-							  )
-							: element.slice(variableReferencePattern[0].length),
+						name: element.slice(
+							variableReferencePattern[0].length,
+							// negative index, removing the trailing pattern
+							-variableReferencePattern[1].length,
+						),
 					},
 				})
 			} else {
@@ -378,7 +374,7 @@ async function writeResources(
 function serializeResource(
 	resource: ast.Resource,
 	space: number | string,
-	variableReferencePattern: [string, string],
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
 	const obj = {}
 	for (const message of resource.body) {
@@ -393,17 +389,18 @@ function serializeResource(
  *
  * @example serializeMessage(message, ["{{", "}}"])
  */
-const serializeMessage = (message: ast.Message, variableReferencePattern: [string, string]) => {
+const serializeMessage = (
+	message: ast.Message,
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
+) => {
 	const newStringArr = []
 	for (const element of message.pattern.elements) {
-		if (element.type === "Text" || !variableReferencePattern) {
+		if (element.type === "Text") {
 			newStringArr.push(element.value)
 		} else if (element.type === "Placeholder") {
-			variableReferencePattern[1]
-				? newStringArr.push(
-						`${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`,
-				  )
-				: newStringArr.push(`${variableReferencePattern[0]}${element.body.name}`)
+			newStringArr.push(
+				`${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`,
+			)
 		}
 	}
 	const newString: string = newStringArr.join("")
