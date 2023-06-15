@@ -22,7 +22,7 @@ async function validateCommandAction() {
 
 		await parseConfig({ config })
 
-		log.info("🎉 Inlang config is valid!")
+		log.success("🎉 Inlang config is valid!")
 	} catch (error) {
 		log.error(error)
 	}
