@@ -229,10 +229,12 @@ function parseMessage(
 	extendedMessage: ExtendedMessagesType[string],
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Message {
-	const regex = new RegExp(
-		`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-		"g",
-	)
+	const regex = variableReferencePattern[1]
+		? new RegExp(
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+				"g",
+		  )
+		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 
 	const newElements = []
 	if (regex) {
@@ -243,11 +245,13 @@ function parseMessage(
 					type: "Placeholder",
 					body: {
 						type: "VariableReference",
-						name: element.slice(
-							variableReferencePattern[0].length,
-							// negative index, removing the trailing pattern
-							-variableReferencePattern[1].length,
-						),
+						name: variableReferencePattern[1]
+							? element.slice(
+									variableReferencePattern[0].length,
+									// negative index, removing the trailing pattern
+									-variableReferencePattern[1].length,
+							  )
+							: element.slice(variableReferencePattern[0].length),
 					},
 				})
 			} else {
@@ -301,7 +305,7 @@ async function writeResources(
 		const space = resource.metadata?.space || 2
 
 		if (resource.body.length === 0) {
-			//make a dir if resource with no messages
+			// make a dir if resource with no messages
 			if (resourcePath.split(resource.languageTag.name.toString())[1].includes("/")) {
 				await args.$fs.mkdir(
 					resourcePath.replace(
@@ -362,50 +366,52 @@ async function writeResources(
 
 /**
  * Serializes a resource.
- *
- * @example serializeResource(resource, 2, ["{{", "}}"])
  */
 function serializeResource(
 	resource: ast.Resource,
 	space: number | string,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
-	const obj = {}
+	const result = {}
 	for (const message of resource.body) {
-		const returnedJsonMessage = serializeMessage(message, variableReferencePattern)
-		merge(obj, returnedJsonMessage)
+		const msg: Record<string, string | Record<string, string>> = {}
+		const serializedPattern = serializePattern(message.pattern, variableReferencePattern)
+		if (message.metadata.keyName) {
+			addNestedKeys(msg, message.metadata.parentKeys, message.metadata.keyName, serializedPattern)
+		} else if (message.metadata.fileName) {
+			msg[message.id.name.split(".").slice(1).join(".")] = serializedPattern
+		} else {
+			msg[message.id.name] = serializedPattern
+		}
+		// nested keys
+		merge(result, msg)
 	}
-	return JSON.stringify(obj, undefined, space)
+	return JSON.stringify(result, undefined, space)
 }
 
 /**
- * Serializes a message.
- *
- * @example serializeMessage(message, ["{{", "}}"])
+ * Serializes a pattern.
  */
-const serializeMessage = (
-	message: ast.Message,
+function serializePattern(
+	pattern: ast.Message["pattern"],
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
-) => {
-	const newStringArr = []
-	for (const element of message.pattern.elements) {
-		if (element.type === "Text") {
-			newStringArr.push(element.value)
-		} else if (element.type === "Placeholder") {
-			newStringArr.push(
-				`${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`,
-			)
+) {
+	const result = []
+	for (const element of pattern.elements) {
+		switch (element.type) {
+			case "Text":
+				result.push(element.value)
+				break
+			case "Placeholder":
+				result.push(
+					variableReferencePattern[1]
+						? `${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`
+						: `${variableReferencePattern[0]}${element.body.name}`,
+				)
+				break
+			default:
+				throw new Error(`Unknown message pattern element of type: ${(element as any)?.type}`)
 		}
 	}
-	const newString: string = newStringArr.join("")
-	const newObj: any = {}
-	if (message.metadata?.keyName) {
-		addNestedKeys(newObj, message.metadata?.parentKeys, message.metadata?.keyName, newString)
-	} else if (message.metadata?.fileName) {
-		newObj[message.id.name.split(".").slice(1).join(".")] = newString
-	} else {
-		newObj[message.id.name] = newString
-	}
-
-	return newObj
+	return result.join("")
 }
