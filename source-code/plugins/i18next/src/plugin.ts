@@ -269,15 +269,9 @@ function parseMessage(
 	return {
 		type: "Message",
 		metadata: {
-			...(extendedMessage.fileName !== undefined && {
-				fileName: extendedMessage.fileName,
-			}),
-			...(extendedMessage.parents !== undefined && {
-				parentKeys: extendedMessage.parents,
-			}),
-			...(extendedMessage.keyName !== undefined && {
-				keyName: extendedMessage.keyName,
-			}),
+			fileName: extendedMessage.fileName,
+			parentKeys: extendedMessage.parents,
+			keyName: extendedMessage.keyName,
 		},
 		id: {
 			type: "Identifier",
