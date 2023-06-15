@@ -55,7 +55,7 @@ async function lintCommandAction() {
 		})
 
 		if (!lints.length) {
-			log.info("🎉 Everything translated correctly.")
+			log.success("🎉 Everything translated correctly.")
 		}
 	} catch (error) {
 		log.error(error)
