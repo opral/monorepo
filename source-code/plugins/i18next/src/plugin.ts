@@ -237,37 +237,30 @@ function parseMessage(
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 
 	const newElements = []
-	if (regex) {
-		const splitArray = extendedMessage.value.split(regex)
-		for (const element of splitArray) {
-			if (regex.test(element)) {
+	const splitArray = extendedMessage.value.split(regex)
+	for (const element of splitArray) {
+		if (regex.test(element)) {
+			newElements.push({
+				type: "Placeholder",
+				body: {
+					type: "VariableReference",
+					name: variableReferencePattern[1]
+						? element.slice(
+								variableReferencePattern[0].length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern[1].length,
+						  )
+						: element.slice(variableReferencePattern[0].length),
+				},
+			})
+		} else {
+			if (element !== "") {
 				newElements.push({
-					type: "Placeholder",
-					body: {
-						type: "VariableReference",
-						name: variableReferencePattern[1]
-							? element.slice(
-									variableReferencePattern[0].length,
-									// negative index, removing the trailing pattern
-									-variableReferencePattern[1].length,
-							  )
-							: element.slice(variableReferencePattern[0].length),
-					},
+					type: "Text",
+					value: element,
 				})
-			} else {
-				if (element !== "") {
-					newElements.push({
-						type: "Text",
-						value: element,
-					})
-				}
 			}
 		}
-	} else {
-		newElements.push({
-			type: "Text",
-			value: extendedMessage.value,
-		})
 	}
 
 	return {
