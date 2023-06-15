@@ -65,7 +65,7 @@ You can configure the inlang SDK depending on your needs. You can learn more in 
 
 ## Further reading
 
-The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. If that doesn't match your requirements check out the other [plugins](https://inlang.com/documentation/plugins).
+The sdk is using the [json-plugin](https://github.com/samuelstroschein/inlang-plugin-json) as a default interface to parse the language strings. To use this code, you need to have language resources in JSON format in a `languages` folder in the root of your project. Each file should have the language ID as the file name. If that doesn't match your requirements check out the other [plugins](https://inlang.com/documentation/plugins/registry).
 
 ```
 languages
@@ -87,10 +87,8 @@ A valid JSON file would look like this.
 
 ---
 
-
 - minimum `node` version is `18.0.0`
 - minimum `Svelte` version is `3.0.0`
 - minimum `SvelteKit` version is `1.16.3`
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
-
