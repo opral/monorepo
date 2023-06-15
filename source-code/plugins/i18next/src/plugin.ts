@@ -2,7 +2,11 @@ import type { InlangConfig } from "@inlang/core/config"
 import type { InlangEnvironment } from "@inlang/core/environment"
 import type * as ast from "@inlang/core/ast"
 import { createPlugin } from "@inlang/core/plugin"
-import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
+import {
+	throwIfInvalidSettings,
+	type PluginSettings,
+	type PluginSettingsWithDefaults,
+} from "./settings.js"
 import merge from "lodash.merge"
 import {
 	addNestedKeys,
@@ -18,6 +22,12 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 		// will throw if the settings are invalid,
 		// leading to better DX because fails fast
 		throwIfInvalidSettings(settings)
+
+		const withDefaultSettings: PluginSettingsWithDefaults = {
+			variableReferencePattern: ["{{", "}}"],
+			...settings,
+		}
+
 		return {
 			languages: await getLanguages({
 				$fs: env.$fs,
@@ -27,13 +37,13 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 				readResources({
 					...args,
 					$fs: env.$fs,
-					settings,
+					settings: withDefaultSettings,
 				}),
 			writeResources: (args) =>
 				writeResources({
 					...args,
 					$fs: env.$fs,
-					settings,
+					settings: withDefaultSettings,
 				}),
 			ideExtension: ideExtensionConfig,
 		} satisfies Partial<InlangConfig>
@@ -46,6 +56,9 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
 	// replace the path
 	const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
+	if (pathBeforeLanguage === undefined) {
+		throw new Error("pathPattern must contain {language} placeholder")
+	}
 	const paths = await args.$fs.readdir(pathBeforeLanguage)
 	const languages: Array<string> = []
 	for (const language of paths) {
@@ -82,7 +95,7 @@ export async function readResources(
 	// with the custom settings argument
 	args: Parameters<InlangConfig["readResources"]>[0] & {
 		$fs: InlangEnvironment["$fs"]
-		settings: PluginSettings
+		settings: PluginSettingsWithDefaults
 	},
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
@@ -299,12 +312,13 @@ function parseMessage(
  */
 async function writeResources(
 	args: Parameters<InlangConfig["writeResources"]>[0] & {
-		settings: PluginSettings
+		settings: PluginSettingsWithDefaults
 		$fs: InlangEnvironment["$fs"]
 	},
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
+		// default to 2 spaces
 		const space = resource.metadata?.space || 2
 
 		if (resource.body.length === 0) {
@@ -328,6 +342,7 @@ async function writeResources(
 				resource.body.length === 0 ? {} : JSON.parse(JSON.stringify(resource.body))
 			//get prefixes
 			const fileNames: Array<string> = []
+
 			clonedResource.map((message: ast.Message) => {
 				if (!message.metadata?.fileName) {
 					fileNames.push(message.id.name.split(".")[0])
@@ -366,13 +381,7 @@ async function writeResources(
 		} else {
 			await args.$fs.writeFile(
 				resourcePath,
-				serializeResource(
-					resource,
-					space,
-					args.settings.variableReferencePattern
-						? args.settings.variableReferencePattern
-						: ["{{", "}}"],
-				),
+				serializeResource(resource, space, args.settings.variableReferencePattern),
 			)
 		}
 	}
@@ -386,7 +395,7 @@ async function writeResources(
 function serializeResource(
 	resource: ast.Resource,
 	space: number | string,
-	variableReferencePattern?: [string, string],
+	variableReferencePattern: [string, string],
 ): string {
 	const obj = {}
 	for (const message of resource.body) {
@@ -401,7 +410,7 @@ function serializeResource(
  *
  * @example serializeMessage(message, ["{{", "}}"])
  */
-const serializeMessage = (message: ast.Message, variableReferencePattern?: [string, string]) => {
+const serializeMessage = (message: ast.Message, variableReferencePattern: [string, string]) => {
 	const newStringArr = []
 	for (const element of message.pattern.elements) {
 		if (element.type === "Text" || !variableReferencePattern) {
