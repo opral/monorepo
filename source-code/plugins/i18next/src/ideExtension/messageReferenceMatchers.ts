@@ -16,7 +16,7 @@ const parser = Parsimmon.createLanguage({
 	// 2. Match as many of these as possible.
 	// 3. Filter out any non-object matches.
 	entry: (r) => {
-		return Parsimmon.alt(r.tFunctionCall, Parsimmon.any)
+		return Parsimmon.alt(r.tFunctionCall!, Parsimmon.any)
 			.many()
 			.map((matches) => {
 				// filter arbitrary characters
@@ -26,7 +26,7 @@ const parser = Parsimmon.createLanguage({
 
 	// A string literal is either a single or double quoted string
 	stringLiteral: (r) => {
-		return Parsimmon.alt(r.doubleQuotedString, r.singleQuotedString)
+		return Parsimmon.alt(r.doubleQuotedString!, r.singleQuotedString!)
 	},
 
 	// Double quoted string literal parser
@@ -53,7 +53,7 @@ const parser = Parsimmon.createLanguage({
 			Parsimmon.string("t"), // starts with t
 			Parsimmon.string("("), // then an opening parenthesis
 			Parsimmon.index, // start position of the message id
-			r.stringLiteral, // message id
+			r.stringLiteral!, // message id
 			Parsimmon.index, // end position of the message id
 			Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 			Parsimmon.string(")"), // end with a closing parenthesis
@@ -79,7 +79,7 @@ const parser = Parsimmon.createLanguage({
 // Parse the expression
 export function parse(sourceCode: string): MessageReferenceMatch[] {
 	try {
-		return parser.entry.tryParse(sourceCode)
+		return parser.entry!.tryParse(sourceCode)
 	} catch {
 		return []
 	}
