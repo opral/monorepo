@@ -60,7 +60,7 @@ export async function defineConfig(env) {
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
 
 ## Configuration
 
