@@ -27,11 +27,11 @@ it("should work with empty json files", async () => {
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
 	expect(
-		config.readResources({
+		config.readResources!({
 			config: {
 				referenceLanguage: "en",
 				languages: ["en"],
-			},
+			} as any,
 		}),
 	).resolves.toBeTruthy()
 })
@@ -42,11 +42,11 @@ it("should work with not yet existing files", async () => {
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
 	expect(
-		config.readResources({
+		config.readResources!({
 			config: {
 				referenceLanguage: "en",
 				languages: ["en", "de"],
-			},
+			} as any,
 		}),
 	).resolves.toBeTruthy()
 })
