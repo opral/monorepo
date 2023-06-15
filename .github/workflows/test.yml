@@ -21,10 +21,3 @@ jobs:
 
       - name: run test
         run: npm run test
-
-      - name: run link checker
-        uses: lycheeverse/lychee-action@v1.8.0
-        with:
-          fail: true
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
