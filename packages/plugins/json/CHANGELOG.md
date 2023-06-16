@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.1
+
+### Patch Changes
+
+- cbe0f68e: Fix github workflow
+
 ## 3.0.0
 
 ### Major Changes
