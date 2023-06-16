@@ -1,0 +1,9 @@
+{
+	"title": "{appName}",
+	"description": "{appName} ist cool.",
+	"nav": {
+		"home": "Startseite",
+		"about": "Ueber uns"
+	},
+	"dumpKey_is_with_dot.": "Der Schluessel hat einen Punkt."
+}

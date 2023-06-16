@@ -1,0 +1,9 @@
+{
+  "title": "{appName}",
+  "description": "{appName} is cool.",
+  "nav": {
+    "home": "Home",
+    "about": "About"
+  },
+  "dumpKey_is_with_dot.": "The key has a dot."
+}
