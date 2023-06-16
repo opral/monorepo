@@ -240,20 +240,15 @@ async function writeResources(
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
+		const isDirectory = await pathIsDirectory({ path: resourcePath, $fs: args.$fs })
 
-		if (resource.body.length === 0) {
-			// make a dir if resource with no messages
-			if (resourcePath.split(resource.languageTag.name.toString())[1].includes("/")) {
-				await args.$fs.mkdir(
-					resourcePath.replace(
-						resourcePath.split(resource.languageTag.name.toString())[1].toString(),
-						"",
-					),
-				)
-				if (!resourcePath.includes("/*.json")) {
-					await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
-				}
-			} else {
+		if (resource.body.length === 0 && isDirectory === false) {
+			await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
+		} else if (resource.body.length === 0 && isDirectory === true) {
+			const [directoryPath] = resourcePath.split(resource.languageTag.name)
+			await args.$fs.mkdir(directoryPath!)
+
+			if (!resourcePath.includes("/*.json")) {
 				await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
 			}
 		} else if (resourcePath.includes("/*.json")) {
