@@ -2,6 +2,7 @@ import { getLintReports, lint as _lint, LintReport } from "@inlang/core/lint"
 import { Command } from "commander"
 import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
+import { bold, italic } from "../../utilities/format.js"
 import { getConfig } from "../../utilities/getConfig.js"
 
 export const lint = new Command()
@@ -35,9 +36,6 @@ async function lintCommandAction() {
 
 		// get lint report
 		const lints = getLintReports(resourcesWithLints)
-
-		const bold = (text: string) => `\x1b[1m${text}\x1b[0m`
-		const italic = (text: string) => `\x1b[3m${text}\x1b[0m`
 
 		// map over lints with correct log function
 		lints.map((lint: LintReport) => {
