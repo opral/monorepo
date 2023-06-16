@@ -310,6 +310,7 @@ const collectStringsWithParents = (
 		})
 	} else if (typeof obj === "object" && obj !== null) {
 		for (const key in obj) {
+			// eslint-disable-next-line no-prototype-builtins
 			if (obj.hasOwnProperty(key)) {
 				const currentParents = [...parents, key]
 				const childResults = collectStringsWithParents(obj[key], currentParents, fileName)
