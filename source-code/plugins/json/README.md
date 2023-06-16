@@ -1,4 +1,4 @@
-## This plugin is planned to be depricated in the future, it should be replaced by sdk or framework specific plugins
+### The plugin is complicated to set up. We highly encourage alternative i18n library focused plugins like the i18next plugin, typesafe-i18n. See [available plugins](https://inlang.com/documentation/plugins/registry)
 
 # inlang-plugin-json
 
