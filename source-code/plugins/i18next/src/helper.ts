@@ -1,17 +1,12 @@
-export interface StringWithParents {
-	value: string
-	parents: string[] | undefined
+export type SerializedMessage = {
 	id: string
-	keyName: string
-}
+	text: string
+} & MessageMetadata
 
-export type ExtendedMessagesType = {
-	[key: string]: {
-		value: string
-		parents?: StringWithParents["parents"]
-		fileName?: string
-		keyName?: string
-	}
+export type MessageMetadata = {
+	parentKeys?: string[]
+	fileName?: string
+	keyName?: string
 }
 
 /**
@@ -90,30 +85,34 @@ export const detectJsonSpacing = (jsonString: string) => {
  *
  * @example collectStringsWithParents(parsedResource)
  */
-export const collectStringsWithParents = (
-	obj: any,
+export const collectNestedSerializedMessages = (
+	node: unknown,
 	parents: string[] | undefined = [],
 	fileName?: string,
 ) => {
-	const results: StringWithParents[] = []
+	const result: SerializedMessage[] = []
 
-	if (typeof obj === "string") {
-		results.push({
-			value: obj,
-			parents: parents.length > 1 ? parents.slice(0, -1) : undefined,
+	if (typeof node === "string") {
+		result.push({
+			text: node,
+			parentKeys: parents.length > 1 ? parents.slice(0, -1) : undefined,
 			id: fileName ? fileName + "." + parents.join(".") : parents.join("."),
 			keyName: parents.at(-1)!,
 		})
-	} else if (typeof obj === "object" && obj !== null) {
-		for (const key in obj) {
+	} else if (typeof node === "object" && node !== null) {
+		for (const key in node) {
 			// eslint-disable-next-line no-prototype-builtins
-			if (obj.hasOwnProperty(key)) {
+			if (node.hasOwnProperty(key)) {
 				const currentParents = [...parents, key]
-				const childResults = collectStringsWithParents(obj[key], currentParents, fileName)
-				results.push(...childResults)
+				const childResults = collectNestedSerializedMessages(
+					node[key as keyof typeof node],
+					currentParents,
+					fileName,
+				)
+				result.push(...childResults)
 			}
 		}
 	}
 
-	return results
+	return result
 }

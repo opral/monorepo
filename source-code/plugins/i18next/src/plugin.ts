@@ -10,9 +10,10 @@ import {
 import merge from "lodash.merge"
 import {
 	addNestedKeys,
-	collectStringsWithParents,
+	collectNestedSerializedMessages,
 	detectJsonSpacing,
-	type ExtendedMessagesType,
+	type MessageMetadata,
+	type SerializedMessage,
 } from "./helper.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 
@@ -90,7 +91,7 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 /**
  * Reading resources.
  */
-export async function readResources(
+async function readResources(
 	// merging the first argument from config (which contains all arguments)
 	// with the custom settings argument
 	args: Parameters<InlangConfig["readResources"]>[0] & {
@@ -100,46 +101,30 @@ export async function readResources(
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
 	const languages = await getLanguages(args)
+
 	for (const language of languages) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
-		//try catch workaround because stats is not working
+		// try catch workaround because stats is not working
 		try {
-			// is file
-			const stringifiedFile = (await args.$fs.readFile(resourcePath, {
+			const file = (await args.$fs.readFile(resourcePath, {
 				encoding: "utf-8",
 			})) as string
-			const space = detectJsonSpacing(
-				(await args.$fs.readFile(resourcePath, {
-					encoding: "utf-8",
-				})) as string,
-			)
-			const extendedMessages = collectStringsWithParents(JSON.parse(stringifiedFile))
 
-			//make a object out of the extendedMessages Array
-			let parsedMassagesForAst: ExtendedMessagesType = {}
-			extendedMessages.map((message) => {
-				parsedMassagesForAst = {
-					...parsedMassagesForAst,
-					...{
-						[message.id]: {
-							value: message.value,
-							parents: message.parents,
-							keyName: message.keyName,
-						},
-					},
-				}
-			})
+			const spacing = detectJsonSpacing(file)
+
+			const serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
+
 			result.push(
 				parseResource(
-					parsedMassagesForAst,
+					serializedMessages,
 					language,
-					space,
+					spacing,
 					args.settings.variableReferencePattern,
 				),
 			)
 		} catch {
 			// is directory
-			let obj: any = {}
+			let serializedMessages: SerializedMessage[] = []
 			const path = `${resourcePath.replace("/*.json", "")}`
 			const files = await args.$fs.readdir(path)
 			const space =
@@ -154,40 +139,19 @@ export async function readResources(
 			if (files.length !== 0) {
 				//go through the files per language
 				for (const languagefile of files) {
-					const stringifiedFile = (await args.$fs.readFile(`${path}/${languagefile}`, {
+					const file = (await args.$fs.readFile(`${path}/${languagefile}`, {
 						encoding: "utf-8",
 					})) as string
 					const fileName = languagefile.replace(".json", "")
-					const extendedMessages = collectStringsWithParents(
-						JSON.parse(stringifiedFile),
-						[],
-						fileName,
-					)
-
-					//make a object out of the extendedMessages Array
-					let parsedMassagesForAst: ExtendedMessagesType = {}
-					extendedMessages.map((message) => {
-						parsedMassagesForAst = {
-							...parsedMassagesForAst,
-							...{
-								[message.id]: {
-									value: message.value,
-									parents: message.parents,
-									fileName,
-									keyName: message.keyName,
-								},
-							},
-						}
-					})
-
-					//merge the objects of every file
-					obj = {
-						...obj,
-						...parsedMassagesForAst,
-					}
+					serializedMessages = [
+						...serializedMessages,
+						...collectNestedSerializedMessages(JSON.parse(file), [], fileName),
+					]
 				}
 			}
-			result.push(parseResource(obj, language, space, args.settings.variableReferencePattern))
+			result.push(
+				parseResource(serializedMessages, language, space, args.settings.variableReferencePattern),
+			)
 		}
 	}
 	return result
@@ -199,7 +163,7 @@ export async function readResources(
  * @example parseResource(resource, en, 2,["{{", "}}"])
  */
 function parseResource(
-	messages: ExtendedMessagesType,
+	serializedMessages: SerializedMessage[],
 	language: string,
 	space: number | string,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
@@ -213,9 +177,9 @@ function parseResource(
 			type: "LanguageTag",
 			name: language,
 		},
-		body: Object.entries(messages).map(([id, value]) =>
-			parseMessage(id, value, variableReferencePattern),
-		),
+		body: serializedMessages.map((serializedMessage) => {
+			return parseMessage(serializedMessage, variableReferencePattern)
+		}),
 	}
 }
 
@@ -225,59 +189,21 @@ function parseResource(
  * @example parseMessage("testId", "test", ["{{", "}}"])
  */
 function parseMessage(
-	id: string,
-	extendedMessage: ExtendedMessagesType[string],
+	serializedMessage: SerializedMessage,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Message {
-	const regex = variableReferencePattern[1]
-		? new RegExp(
-				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-				"g",
-		  )
-		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
-
-	const newElements = []
-	const splitArray = extendedMessage.value.split(regex)
-	for (const element of splitArray) {
-		if (regex.test(element)) {
-			newElements.push({
-				type: "Placeholder",
-				body: {
-					type: "VariableReference",
-					name: variableReferencePattern[1]
-						? element.slice(
-								variableReferencePattern[0].length,
-								// negative index, removing the trailing pattern
-								-variableReferencePattern[1].length,
-						  )
-						: element.slice(variableReferencePattern[0].length),
-				},
-			})
-		} else {
-			if (element !== "") {
-				newElements.push({
-					type: "Text",
-					value: element,
-				})
-			}
-		}
-	}
-
 	return {
 		type: "Message",
 		metadata: {
-			fileName: extendedMessage.fileName,
-			parentKeys: extendedMessage.parents,
-			keyName: extendedMessage.keyName,
-		},
+			fileName: serializedMessage.fileName,
+			keyName: serializedMessage.keyName,
+			parentKeys: serializedMessage.parentKeys,
+		} satisfies MessageMetadata,
 		id: {
 			type: "Identifier",
-			name: id,
+			name: serializedMessage.id,
 		},
-		pattern: {
-			type: "Pattern",
-			elements: newElements as Array<ast.Text | ast.Placeholder>,
-		},
+		pattern: parsePattern(serializedMessage.text, variableReferencePattern),
 	}
 }
 
@@ -407,4 +333,51 @@ function serializePattern(
 		}
 	}
 	return result.join("")
+}
+
+/**
+ * Parses a message.
+ *
+ * @example parseMessage("testId", "test", ["{{", "}}"])
+ */
+function parsePattern(
+	text: string,
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
+): ast.Pattern {
+	// dependent on the variableReferencePattern, different regex
+	// expressions are used for matching
+	const placeholder = variableReferencePattern[1]
+		? new RegExp(
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+				"g",
+		  )
+		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+
+	const elements: ast.Pattern["elements"] = text.split(placeholder).map((element) => {
+		if (placeholder.test(element)) {
+			return {
+				type: "Placeholder",
+				body: {
+					type: "VariableReference",
+					name: variableReferencePattern[1]
+						? element.slice(
+								variableReferencePattern[0].length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern[1].length,
+						  )
+						: element.slice(variableReferencePattern[0].length),
+				},
+			}
+		} else {
+			return {
+				type: "Text",
+				value: element,
+			}
+		}
+	})
+
+	return {
+		type: "Pattern",
+		elements,
+	}
 }
