@@ -240,33 +240,30 @@ async function writeResources(
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
-		const isDirectory = await pathIsDirectory({ path: resourcePath, $fs: args.$fs })
 
-		if (resource.body.length === 0 && isDirectory === false) {
-			await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
-		} else if (resource.body.length === 0 && isDirectory === true) {
-			const [directoryPath] = resourcePath.split(resource.languageTag.name)
-			await args.$fs.mkdir(directoryPath!)
-
-			if (!resourcePath.includes("/*.json")) {
-				await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
+		if (REPO_USES_DIRECTORY_STRUCTURE === false) {
+			await args.$fs.writeFile(
+				resourcePath,
+				serializeResource(
+					resource,
+					SPACING[resourcePath] ?? defaultSpacing(),
+					args.settings.variableReferencePattern,
+				),
+			)
+		} else if (REPO_USES_DIRECTORY_STRUCTURE) {
+			// just in case try to create a directory to not make file operations fail
+			try {
+				const [directoryPath] = resourcePath.split(resource.languageTag.name)
+				await args.$fs.mkdir(directoryPath!)
+			} catch {
+				// directory likely already exists
 			}
-		} else if (resourcePath.includes("/*.json")) {
-			//deserialize the file names
-			const clonedResource =
-				resource.body.length === 0 ? {} : JSON.parse(JSON.stringify(resource.body))
-			//get prefixes
-			const fileNames: Array<string> = []
 
-			clonedResource.map((message: ast.Message) => {
-				if (!message.metadata?.fileName) {
-					fileNames.push(message.id.name.split(".")[0])
-				} else if (message.metadata?.fileName && !fileNames.includes(message.metadata?.fileName)) {
-					fileNames.push(message.metadata?.fileName)
-				}
-			})
-			for (const fileName of fileNames) {
-				const filteredMassages = clonedResource
+			//* Performance optimization in the future: Only iterate over the resource body once
+			const filePaths = new Set(resource.body.map((message) => message.metadata?.fileName))
+
+			for (const fileName of filePaths) {
+				const filteredMassages = resource.body
 					.filter((message: ast.Message) => message.id.name.startsWith(fileName))
 					.map((message: ast.Message) => {
 						return {
@@ -293,14 +290,7 @@ async function writeResources(
 				)
 			}
 		} else {
-			await args.$fs.writeFile(
-				resourcePath,
-				serializeResource(
-					resource,
-					SPACING[resourcePath] ?? defaultSpacing(),
-					args.settings.variableReferencePattern,
-				),
-			)
+			throw new Error("None-exhaustive if statement in writeResources")
 		}
 	}
 }
