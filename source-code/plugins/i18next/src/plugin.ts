@@ -240,8 +240,6 @@ async function writeResources(
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
-		// default to 2 spaces
-		const space = resource.metadata?.space || 2
 
 		if (resource.body.length === 0) {
 			// make a dir if resource with no messages
@@ -253,10 +251,10 @@ async function writeResources(
 					),
 				)
 				if (!resourcePath.includes("/*.json")) {
-					await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, space))
+					await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
 				}
 			} else {
-				await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, space))
+				await args.$fs.writeFile(resourcePath, JSON.stringify({}, undefined, defaultSpacing()))
 			}
 		} else if (resourcePath.includes("/*.json")) {
 			//deserialize the file names
