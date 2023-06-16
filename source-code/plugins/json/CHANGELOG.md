@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.2
+
+### Patch Changes
+
+- 65c3af4b: Changed readme
+
 ## 3.0.1
 
 ### Patch Changes
