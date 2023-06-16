@@ -1,10 +1,11 @@
 import { Command } from "commander"
-import { exec } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
 import { bold, italic } from "../../utilities/format.js"
+import { validateCommandAction } from "./validate.js"
+import * as vscode from "vscode"
 
 // Plugin import types
 type PluginImports = {
@@ -14,7 +15,7 @@ type PluginImports = {
 export const init = new Command()
 	.command("init")
 	.description("Initialize the inlang.config.js file.")
-	.action(initCommandAction)
+	.action(() => initCommandAction({ fs }))
 
 // Function to determine the first potential language folder path based on the file system
 function getLanguageFolderPath(rootDir: string): string | undefined {
@@ -78,20 +79,30 @@ function getLanguageFolderPath(rootDir: string): string | undefined {
 }
 
 /**
- * The action for the init command.
+ * Initialize the inlang.config.js file.
  *
- * Exported for testing purposes. Should not be used directly.
+ * @returns {Promise<void>} Promise that resolves when the command is done.
+ * @example
  *
+ * ```ts
+ * import { initCommandAction } from "@inlang/cli/dist/commands/config/init.js"
+ *
+ * await initCommandAction()
+ * ```
  */
+export async function initCommandAction(args: { fs: typeof fs }): Promise<void> {
+	// Detect visual studio code environment
+	const isVsCode = !!process.env.VSCODE_PID
 
-export async function initCommandAction() {
 	// Check if config file already exists
 	const packageJsonPath = "./package.json"
 	const inlangConfigPath = "./inlang.config.js"
 	const rootDir = "./"
 
-	if (fs.existsSync(inlangConfigPath)) {
+	if (args.fs.existsSync(inlangConfigPath)) {
 		log.error("⏸️  Config file already exists.")
+		if (isVsCode) return
+
 		const answer = await prompts({
 			type: "confirm",
 			name: "overwrite",
@@ -105,19 +116,21 @@ export async function initCommandAction() {
 	}
 
 	// Check if the user wants to continue with the WIP version
-	const answerWip = await prompts({
-		type: "confirm",
-		name: "wip",
-		message:
-			"The auto generation is work in progress and might not work as expected. Do you want to continue?",
-		initial: true,
-	})
-	if (answerWip.wip === false) {
-		return
+	if (!isVsCode) {
+		const answerWip = await prompts({
+			type: "confirm",
+			name: "wip",
+			message:
+				"The auto generation is work in progress and might not work as expected. Do you want to continue?",
+			initial: true,
+		})
+		if (answerWip.wip === false) {
+			return
+		}
 	}
 
 	// Check if popular internationalization libraries are dependencies
-	const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
+	const packageJson = JSON.parse(args.fs.readFileSync(packageJsonPath, "utf-8"))
 	const dependencies = packageJson.dependencies || {}
 	const devDependencies = packageJson.devDependencies || {}
 	const isI18nextInstalled = !!dependencies["i18next"] || !!devDependencies["i18next"]
@@ -188,18 +201,10 @@ export async function initCommandAction() {
   }`
 
 	// Write the config file
-	fs.writeFileSync(inlangConfigPath, configContent)
+	args.fs.writeFileSync(inlangConfigPath, configContent)
 
 	log.success(`🎉 inlang.config.js file created successfully.`)
 
 	// validate the config file
-	exec("npx @inlang/cli@latest config validate", (error, stdout, stderr) => {
-		if (error) {
-			log.error(`❌ ${error}`)
-		} else if (stderr) {
-			log.error(`❌ ${stderr}`)
-		} else if (stdout) {
-			log.log(`${stdout}`)
-		}
-	})
+	validateCommandAction()
 }

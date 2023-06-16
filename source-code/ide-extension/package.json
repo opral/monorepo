@@ -41,6 +41,10 @@
 				"inlang.disableRecommendation": {
 					"type": "array",
 					"default": []
+				},
+				"inlang.disableConfigFileCreation": {
+					"type": "array",
+					"default": []
 				}
 			}
 		}

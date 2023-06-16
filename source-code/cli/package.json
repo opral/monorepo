@@ -18,6 +18,9 @@
 		"vue",
 		"angular"
 	],
+	"exports": {
+		"./config": "./src/commands/config/init.ts"
+	},
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",
 	"type": "module",
@@ -63,7 +66,8 @@
 		"posthog-node": "^3.1.1",
 		"promptly": "^3.2.0",
 		"prompts": "^2.4.2",
-		"ts-dedent": "^2.2.0"
+		"ts-dedent": "^2.2.0",
+		"vscode": "^1.1.37"
 	},
 	"license": "Apache-2.0"
 }

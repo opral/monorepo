@@ -145,6 +145,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// add inlang extension to recommended extensions
 	recommendation({ workspaceFolder })
+
+	// config create
+	configCreate({ workspaceFolder })
 }
 
 // this method is called when your extension is deactivated
