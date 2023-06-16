@@ -102,17 +102,14 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
  * Reading resources.
  */
 async function readResources(
-	// merging the first argument from config (which contains all arguments)
-	// with the custom settings argument
 	args: Parameters<InlangConfig["readResources"]>[0] & {
 		$fs: InlangEnvironment["$fs"]
 		settings: PluginSettingsWithDefaults
 	},
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
-	const languages = await getLanguages(args)
 
-	for (const language of languages) {
+	for (const language of args.config.languages) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
 		// try catch workaround because stats is not working
 		try {
