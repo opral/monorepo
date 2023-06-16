@@ -1,3 +1,5 @@
+import type { InlangEnvironment } from "@inlang/core/environment"
+
 export type SerializedMessage = {
 	id: string
 	text: string
@@ -76,7 +78,7 @@ export const detectJsonSpacing = (jsonString: string) => {
 	}
 
 	// No matching spacing configuration found
-	return 2
+	return undefined
 }
 
 /**
@@ -115,4 +117,21 @@ export const collectNestedSerializedMessages = (
 	}
 
 	return result
+}
+
+/**
+ * Checks if a path is a directory.
+ *
+ * @example isDirectory({ path: "path/to/dir", $fs: fs })
+ */
+export async function pathIsDirectory(args: {
+	path: string
+	$fs: InlangEnvironment["$fs"]
+}): Promise<boolean> {
+	return await Promise.resolve(
+		args.$fs
+			.readdir(args.path)
+			.then(() => true)
+			.catch(() => false),
+	)
 }
