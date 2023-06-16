@@ -10,6 +10,7 @@ import {
 import merge from "lodash.merge"
 import {
 	addNestedKeys,
+	pathIsDirectory,
 	collectNestedSerializedMessages,
 	detectJsonSpacing,
 	type MessageMetadata,
@@ -28,6 +29,29 @@ import { ideExtensionConfig } from "./ideExtension/config.js"
  *   /en/other.json = true
  */
 let REPO_USES_DIRECTORY_STRUCTURE: boolean
+
+/**
+ * The spacing of the JSON files in this repository.
+ *
+ * @example
+ *  { "/en.json" = 2 }
+ */
+const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+
+/**
+ * Defines the default spacing for JSON files.
+ *
+ * Takes the majority spacing of resource files in this repository to determine
+ * the default spacing.
+ */
+function defaultSpacing() {
+	const values = Object.values(SPACING)
+	return (
+		values
+			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
+			.pop() ?? 2 // if no default has been found -> 2
+	)
+}
 
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 	id: "inlang.plugin-i18next",
@@ -80,12 +104,11 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 	const languages: string[] = []
 
 	for (const filePath of parentDirectory) {
-		const isDirectory = await Promise.resolve(
-			args.$fs
-				.readdir(pathBeforeLanguage + filePath)
-				.then(() => true)
-				.catch(() => false),
-		)
+		const isDirectory = await pathIsDirectory({
+			path: pathBeforeLanguage + filePath,
+			$fs: args.$fs,
+		})
+
 		if (REPO_USES_DIRECTORY_STRUCTURE && isDirectory) {
 			languages.push(filePath)
 		} else if (
@@ -110,55 +133,45 @@ async function readResources(
 	const result: ast.Resource[] = []
 
 	for (const language of args.config.languages) {
+		let serializedMessages: SerializedMessage[] = []
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
-		// try catch workaround because stats is not working
 		try {
-			const file = (await args.$fs.readFile(resourcePath, {
-				encoding: "utf-8",
-			})) as string
-
-			const spacing = detectJsonSpacing(file)
-
-			const serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
-
-			result.push(
-				parseResource(
-					serializedMessages,
-					language,
-					spacing,
-					args.settings.variableReferencePattern,
-				),
-			)
-		} catch {
-			// is directory
-			let serializedMessages: SerializedMessage[] = []
-			const path = `${resourcePath.replace("/*.json", "")}`
-			const files = await args.$fs.readdir(path)
-			const space =
-				files.length === 0
-					? 2
-					: detectJsonSpacing(
-							(await args.$fs.readFile(`${path}/${files[0]}`, {
-								encoding: "utf-8",
-							})) as string,
-					  )
-
-			if (files.length !== 0) {
-				// go through the files per language
-				for (const languagefile of files) {
-					const file = (await args.$fs.readFile(`${path}/${languagefile}`, {
+			if (REPO_USES_DIRECTORY_STRUCTURE) {
+				const directoryPath = `${resourcePath.replace("/*.json", "")}`
+				const files = await args.$fs.readdir(directoryPath)
+				for (const potentialResourcePath of files) {
+					if (args.settings.ignore?.some((s) => s === potentialResourcePath) === true) {
+						continue
+					}
+					const file = (await args.$fs.readFile(`${directoryPath}/${potentialResourcePath}`, {
 						encoding: "utf-8",
 					})) as string
-					const fileName = languagefile.replace(".json", "")
+
+					SPACING[`${directoryPath}/${potentialResourcePath}`] = detectJsonSpacing(file)
+
 					serializedMessages = [
 						...serializedMessages,
-						...collectNestedSerializedMessages(JSON.parse(file), [], fileName),
+						...collectNestedSerializedMessages(JSON.parse(file), [], potentialResourcePath),
 					]
 				}
+			} else {
+				const file = (await args.$fs.readFile(resourcePath, {
+					encoding: "utf-8",
+				})) as string
+
+				SPACING[`${resourcePath}`] = detectJsonSpacing(file)
+
+				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
 			}
 			result.push(
-				parseResource(serializedMessages, language, space, args.settings.variableReferencePattern),
+				parseResource(serializedMessages, language, 2, args.settings.variableReferencePattern),
 			)
+		} catch (e) {
+			if ((e as any).code === "ENOENT") {
+				// file does not exist yet
+				continue
+			}
+			throw e
 		}
 	}
 	return result
@@ -276,15 +289,24 @@ async function writeResources(
 					languageTag: resource.languageTag,
 					body: filteredMassages,
 				}
+				const path = resourcePath.replace("*", fileName)
 				await args.$fs.writeFile(
-					resourcePath.replace("*", fileName),
-					serializeResource(splitedResource, space, args.settings.variableReferencePattern),
+					path,
+					serializeResource(
+						splitedResource,
+						SPACING[path] ?? defaultSpacing(),
+						args.settings.variableReferencePattern,
+					),
 				)
 			}
 		} else {
 			await args.$fs.writeFile(
 				resourcePath,
-				serializeResource(resource, space, args.settings.variableReferencePattern),
+				serializeResource(
+					resource,
+					SPACING[resourcePath] ?? defaultSpacing(),
+					args.settings.variableReferencePattern,
+				),
 			)
 		}
 	}
@@ -302,9 +324,9 @@ function serializeResource(
 	for (const message of resource.body) {
 		const msg: Record<string, string | Record<string, string>> = {}
 		const serializedPattern = serializePattern(message.pattern, variableReferencePattern)
-		if (message.metadata.keyName) {
+		if (message.metadata?.keyName) {
 			addNestedKeys(msg, message.metadata.parentKeys, message.metadata.keyName, serializedPattern)
-		} else if (message.metadata.fileName) {
+		} else if (message.metadata?.fileName) {
 			msg[message.id.name.split(".").slice(1).join(".")] = serializedPattern
 		} else {
 			msg[message.id.name] = serializedPattern
