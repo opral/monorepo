@@ -1,0 +1,39 @@
+{
+	"name": "@inlang/plugin-json",
+	"version": "2.4.0",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "DEV=true node ./build.js",
+		"build": "node ./build.js && size-limit",
+		"--- Pretest is required to build the plugin before testing. ---": "",
+		"pretest": "node ./build.js",
+		"test": "vitest run",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"devDependencies": {
+		"@inlang/core": "*",
+		"flat": "^5.0.2",
+		"lodash.merge": "^4.6.2",
+		"@size-limit/preset-app": "^8.2.4",
+		"@types/flat": "^5.0.2",
+		"@types/lodash.merge": "^4.6.7",
+		"concurrently": "^7.6.0",
+		"esbuild": "^0.17.10",
+		"memfs": "^3.4.12",
+		"size-limit": "^8.2.4",
+		"typescript": "^4.9.4",
+		"vitest": "^0.26.2"
+	},
+	"size-limit": [
+		{
+			"path": "dist/*.js"
+		}
+	]
+}
