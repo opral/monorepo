@@ -17,6 +17,18 @@ import {
 } from "./helper.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 
+/**
+ * Whether the repository uses a directory structure.
+ *
+ * @example
+ *   /en.json = false
+ *   /de.json = false
+ *
+ *   /en/common.json = true
+ *   /en/other.json = true
+ */
+let REPO_USES_DIRECTORY_STRUCTURE: boolean
+
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 	id: "inlang.plugin-i18next",
 	async config() {
@@ -26,13 +38,17 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 
 		const withDefaultSettings: PluginSettingsWithDefaults = {
 			variableReferencePattern: ["{{", "}}"],
+			ignore: [], // ignore no files by default
 			...settings,
 		}
+
+		// if the path pattern contains a wildcard, we assume that the repo uses a directory structure
+		REPO_USES_DIRECTORY_STRUCTURE = settings.pathPattern.includes("/*.json")
 
 		return {
 			languages: await getLanguages({
 				$fs: env.$fs,
-				settings,
+				settings: withDefaultSettings,
 			}),
 			readResources: (args) =>
 				readResources({
@@ -60,29 +76,23 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 	if (pathBeforeLanguage === undefined) {
 		throw new Error("pathPattern must contain {language} placeholder")
 	}
-	const paths = await args.$fs.readdir(pathBeforeLanguage)
-	const languages: Array<string> = []
-	for (const language of paths) {
-		if (!language.includes(".")) {
-			// this is a dir
-			const languagefiles = await args.$fs.readdir(`${pathBeforeLanguage}${language}`)
-			if (languagefiles.length === 0) {
-				languages.push(language)
-			} else {
-				for (const languagefile of languagefiles) {
-					// this is the file, check if the language folder contains .json files
-					if (
-						languagefile.endsWith(".json") &&
-						!args.settings.ignore?.some((s) => s === language) &&
-						!languages.includes(language)
-					) {
-						languages.push(language)
-					}
-				}
-			}
-		} else if (language.endsWith(".json") && !args.settings.ignore?.some((s) => s === language)) {
-			// this is the file, remove the .json extension to only get language name
-			languages.push(language.replace(".json", ""))
+	const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
+	const languages: string[] = []
+
+	for (const filePath of parentDirectory) {
+		const isDirectory = await Promise.resolve(
+			args.$fs
+				.readdir(pathBeforeLanguage + filePath)
+				.then(() => true)
+				.catch(() => false),
+		)
+		if (REPO_USES_DIRECTORY_STRUCTURE && isDirectory) {
+			languages.push(filePath)
+		} else if (
+			filePath.endsWith(".json") &&
+			args.settings.ignore?.some((s) => s === filePath) === false
+		) {
+			languages.push(filePath.replace(".json", ""))
 		}
 	}
 	return languages
@@ -137,7 +147,7 @@ async function readResources(
 					  )
 
 			if (files.length !== 0) {
-				//go through the files per language
+				// go through the files per language
 				for (const languagefile of files) {
 					const file = (await args.$fs.readFile(`${path}/${languagefile}`, {
 						encoding: "utf-8",
