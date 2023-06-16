@@ -36,3 +36,8 @@ jobs:
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
           package: source-code/plugins/i18next/package.json
+
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          package: source-code/plugins/json/package.json
