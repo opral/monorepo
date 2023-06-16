@@ -4,6 +4,7 @@ import fs from "node:fs"
 import path from "node:path"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
+import { bold, italic } from "../../utilities/format.js"
 
 // Plugin import types
 type PluginImports = {
@@ -44,11 +45,6 @@ function getLanguageFolderPath(rootDir: string): string | undefined {
 				.filter((line) => !line.startsWith("#") && line !== "")
 		}
 
-		// Check if the current directory has a package.json file
-		if (files.includes("package.json")) {
-			return undefined
-		}
-
 		for (const file of files) {
 			const filePath = path.join(dir, file)
 			const stat = fs.statSync(filePath)
@@ -61,7 +57,9 @@ function getLanguageFolderPath(rootDir: string): string | undefined {
 				const folderName = file.toLowerCase()
 				if (potentialFolders.includes(folderName)) {
 					return filePath
-				} else {
+				}
+
+				if (!filePath.includes("node_modules")) {
 					const subLanguageFolder = searchForLanguageFolder(filePath, [
 						...ignoredPaths,
 						...subIgnoredPaths,
@@ -78,6 +76,13 @@ function getLanguageFolderPath(rootDir: string): string | undefined {
 
 	return searchForLanguageFolder(rootDir, [])
 }
+
+/**
+ * The action for the init command.
+ *
+ * Exported for testing purposes. Should not be used directly.
+ *
+ */
 
 export async function initCommandAction() {
 	// Check if config file already exists
@@ -114,15 +119,17 @@ export async function initCommandAction() {
 	// Check if popular internationalization libraries are dependencies
 	const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
 	const dependencies = packageJson.dependencies || {}
-	const isI18nextInstalled = !!dependencies["i18next"]
-	const isTypesafeI18nInstalled = !!dependencies["typesafe-i18n"]
+	const devDependencies = packageJson.devDependencies || {}
+	const isI18nextInstalled = !!dependencies["i18next"] || !!devDependencies["i18next"]
+	const isTypesafeI18nInstalled =
+		!!dependencies["typesafe-i18n"] || !!devDependencies["typesafe-i18n"]
 
 	// log that supported package was found
 	if (isI18nextInstalled) {
-		log.info("✅ Supported library found: i18next")
+		log.info(`✅ Supported library found: ${bold("i18next")}`)
 	}
 	if (isTypesafeI18nInstalled) {
-		log.info("✅ Supported library found: typesafe-i18n")
+		log.info(`✅ Supported library found: ${bold("typesafe-i18n")}`)
 	}
 
 	// Determine the plugin based on the installed libraries or fallback to JSON plugin
@@ -144,15 +151,15 @@ export async function initCommandAction() {
 			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
 		)
 	} else {
-		log.info(`🗂️  Found language folder path: ${languageFolderPath}`)
+		log.info(`🗂️  Found language folder path: ${italic(pathPattern)}`)
 		log.info(
-			`🗂️  Please adjust the pathPattern in the inlang.config.js manually if it is not parsed correctly.`,
+			`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.js manually if it is not parsed correctly.`,
 		)
 	}
 
 	const pluginImports: PluginImports = {
 		json: `const { default: jsonPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js');`,
-		i18next: `const { default: i18nextPlugin } = await env.$import('ht= await env.$import(tps://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@2/dist/index.js');`,
+		i18next: `const { default: i18nextPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@2/dist/index.js');`,
 		"typesafe-i18n": `const { default: typesafeI18nPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/ivanhofer/inlang-plugin-typesafe-i18n@2/dist/index.js');`,
 	}
 
@@ -186,19 +193,13 @@ export async function initCommandAction() {
 	log.success(`🎉 inlang.config.js file created successfully.`)
 
 	// validate the config file
-	log.info(`🔎 Validating the config file...`)
-	exec("inlang validate", (error, stdout, stderr) => {
-		if (error || stderr || stdout) {
-			log.error(`❌ Validation failed. Please check the config file manually.`)
-			if (error) {
-				log.error(`❌ ${error}`)
-			} else if (stderr) {
-				log.error(`❌ ${stderr}`)
-			} else if (stdout) {
-				log.error(`❌ ${stdout}`)
-			}
-			return
+	exec("npx @inlang/cli@latest config validate", (error, stdout, stderr) => {
+		if (error) {
+			log.error(`❌ ${error}`)
+		} else if (stderr) {
+			log.error(`❌ ${stderr}`)
+		} else if (stdout) {
+			log.log(`${stdout}`)
 		}
-		log.success(`✅  Validation succeeded.`)
 	})
 }

@@ -18,11 +18,11 @@ async function validateCommandAction() {
 			return
 		}
 
-		log.info("ℹ️  Validating the config ...")
+		log.info("🔎  Validating the config file...")
 
 		await parseConfig({ config })
 
-		log.info("🎉 Inlang config is valid!")
+		log.success("🎉 Inlang config is valid!")
 	} catch (error) {
 		log.error(error)
 	}
