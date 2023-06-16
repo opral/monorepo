@@ -18,7 +18,7 @@ async function validateCommandAction() {
 			return
 		}
 
-		log.info("ℹ️  Validating the config ...")
+		log.info("🔎  Validating the config file...")
 
 		await parseConfig({ config })
 
