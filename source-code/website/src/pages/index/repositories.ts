@@ -11,10 +11,21 @@ export const repositories: Repositories = [
 		description: "Example repository that showcases inlang.",
 	},
 	{
+		owner: "LAION-AI",
+		repository: "Open-Assistant",
+		description:
+			"OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.",
+	},
+	{
 		owner: "AppFlowy-IO",
 		repository: "AppFlowy",
 		description:
 			"AppFlowy is an open-source alternative to Notion. You are in charge of your data and customizations. Built with Flutter and Rust.",
+	},
+	{
+		owner: "jazzband",
+		repository: "djangorestframework-simplejwt",
+		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
 	},
 	{
 		owner: "osmosis-labs",
@@ -25,11 +36,6 @@ export const repositories: Repositories = [
 		owner: "allinurl",
 		repository: "goaccess",
 		description: "GoAccess is a real-time web log analyzer and interactive viewer",
-	},
-	{
-		owner: "jazzband",
-		repository: "djangorestframework-simplejwt",
-		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
 	},
 	{
 		owner: "knadh",
@@ -57,8 +63,7 @@ export const repositories: Repositories = [
 	{
 		owner: "dermotduffy",
 		repository: "frigate-hass-card",
-		description:
-			"A Lovelace card for Frigate in Home Assistant",
+		description: "A Lovelace card for Frigate in Home Assistant",
 	},
 ]
 
