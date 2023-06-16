@@ -167,6 +167,7 @@ sl-tag {
 }
 sl-input::part(base) {
 	--tw-ring-color: "#FFF";
+	--sl-input-border-radius-large: 8px;
 }
 
 sl-tag::part(base) {
@@ -223,12 +224,12 @@ sl-details::part(base) {
 	border-radius: 0;
 	border: none;
 	border-bottom: 1px solid theme(colors.surface-2);
-	background: rgba(255, 255 , 255, 0.5);
+	background: rgba(255, 255, 255, 0.5);
 	transition: 0.3s;
 }
 
 sl-details[open]::part(base) {
-	background: rgba(255, 255 , 255, 1);
+	background: rgba(255, 255, 255, 1);
 }
 
 sl-details::part(content) {
