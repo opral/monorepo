@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.1
+
+### Patch Changes
+
+- 49adbea4: add inlang/sdk-js plugin
+
 ## 0.11.0
 
 ### Minor Changes
