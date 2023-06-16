@@ -133,11 +133,16 @@ export async function initCommandAction(args: { fs: typeof fs }): Promise<void> 
 	const packageJson = JSON.parse(args.fs.readFileSync(packageJsonPath, "utf-8"))
 	const dependencies = packageJson.dependencies || {}
 	const devDependencies = packageJson.devDependencies || {}
+	const isInlangSdkJsInstalled =
+		!!dependencies["@inlang/sdk-js"] || !!devDependencies["@inlang/sdk-js"]
 	const isI18nextInstalled = !!dependencies["i18next"] || !!devDependencies["i18next"]
 	const isTypesafeI18nInstalled =
 		!!dependencies["typesafe-i18n"] || !!devDependencies["typesafe-i18n"]
 
 	// log that supported package was found
+	if (isInlangSdkJsInstalled) {
+		log.info(`✅ Supported library found: ${bold("@inlang/sdk-js")}`)
+	}
 	if (isI18nextInstalled) {
 		log.info(`✅ Supported library found: ${bold("i18next")}`)
 	}
@@ -147,13 +152,22 @@ export async function initCommandAction(args: { fs: typeof fs }): Promise<void> 
 
 	// Determine the plugin based on the installed libraries or fallback to JSON plugin
 	let plugin = ""
-	if (isI18nextInstalled) {
+	if (isInlangSdkJsInstalled) {
+		plugin = "@inlang/sdk-js"
+	} else if (isI18nextInstalled) {
 		plugin = "i18next"
 	} else if (isTypesafeI18nInstalled) {
 		plugin = "typesafe-i18n"
 	} else {
 		// Fallback, remove this someday
 		plugin = "json"
+	}
+
+	// Plugin specific logs
+	if (plugin === "@inlang/sdk-js") {
+		log.warn(
+			"📦 Using plugin: @inlang/sdk-js. You have to add a plugin which reads and writes resources e.g. the inlang-plugin-json. See: https://inlang.com/documentation/plugins/registry",
+		)
 	}
 
 	// Generate the config file content
@@ -174,19 +188,27 @@ export async function initCommandAction(args: { fs: typeof fs }): Promise<void> 
 		json: `const { default: jsonPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js');`,
 		i18next: `const { default: i18nextPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@2/dist/index.js');`,
 		"typesafe-i18n": `const { default: typesafeI18nPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/ivanhofer/inlang-plugin-typesafe-i18n@2/dist/index.js');`,
+		"@inlang/sdk-js": `const { default: sdkPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js');`,
 	}
 
 	const pluginImportsCode = pluginImports[plugin] || ""
 
 	const pluginFunctions = [
 		plugin === "json" ? `jsonPlugin({ pathPattern: '${pathPattern}' }),` : undefined,
+		plugin === "@inlang/sdk-js"
+			? `sdkPlugin({languageNegotiation: { strategies: [{ type: "localStorage" }]}}),`
+			: undefined,
 		plugin === "i18next" ? `i18nextPlugin({ pathPattern: '${pathPattern}' }),` : undefined,
 		plugin === "typesafe-i18n" ? `typesafeI18nPlugin(),` : undefined,
 	]
 		.filter((x) => x !== undefined)
 		.join("\n")
 
-	const configContent = `export async function defineConfig(env) {
+	const configContent = `
+	/**
+ 	* @type { import("@inlang/core/config").DefineConfig }
+ 	*/
+	export async function defineConfig(env) {
     ${pluginImportsCode}
     
     const { default: standardLintRules } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js');
