@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.0
+
+### Minor Changes
+
+- 49269a2f: rework config init command to detect supported libraries
+
 ## 0.10.1
 
 ### Patch Changes
