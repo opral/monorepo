@@ -13,10 +13,9 @@ import {
 	pathIsDirectory,
 	collectNestedSerializedMessages,
 	detectJsonSpacing,
-	type MessageMetadata,
-	type SerializedMessage,
-} from "./helper.js"
+} from "./utilities.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
+import type { MessageMetadata, SerializedMessage } from "./types.js"
 
 /**
  * Whether the repository uses the wildcard structure.
