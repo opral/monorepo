@@ -19,16 +19,13 @@ import {
 import { ideExtensionConfig } from "./ideExtension/config.js"
 
 /**
- * Whether the repository uses a directory structure.
+ * Whether the repository uses the wildcard structure.
  *
  * @example
- *   /en.json = false
- *   /de.json = false
- *
- *   /en/common.json = true
- *   /en/other.json = true
+ *   pathPattern: "/{language}/*.json" -> true
+ *   pathPattern: "/{language}/resource.json" -> false
  */
-let REPO_USES_DIRECTORY_STRUCTURE: boolean
+let REPO_USES_WILDCARD_STRUCTURE: boolean
 
 /**
  * The spacing of the JSON files in this repository.
@@ -75,8 +72,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 			...settings,
 		}
 
-		// if the path pattern contains a wildcard, we assume that the repo uses a directory structure
-		REPO_USES_DIRECTORY_STRUCTURE = settings.pathPattern.includes("/*.json")
+		REPO_USES_WILDCARD_STRUCTURE = settings.pathPattern.endsWith("/*.json")
 
 		return {
 			languages: await getLanguages({
@@ -118,7 +114,7 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 			$fs: args.$fs,
 		})
 
-		if (REPO_USES_DIRECTORY_STRUCTURE && isDirectory) {
+		if (isDirectory) {
 			languages.push(filePath)
 		} else if (
 			filePath.endsWith(".json") &&
@@ -145,7 +141,7 @@ async function readResources(
 		let serializedMessages: SerializedMessage[] = []
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
 		try {
-			if (REPO_USES_DIRECTORY_STRUCTURE) {
+			if (REPO_USES_WILDCARD_STRUCTURE) {
 				const directoryPath = `${resourcePath.replace("/*.json", "")}`
 				const files = await args.$fs.readdir(directoryPath)
 				for (const potentialResourcePath of files) {
@@ -252,7 +248,7 @@ async function writeResources(
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
 
-		if (REPO_USES_DIRECTORY_STRUCTURE === false) {
+		if (REPO_USES_WILDCARD_STRUCTURE === false) {
 			await args.$fs.writeFile(
 				resourcePath,
 				serializeResource(
@@ -262,7 +258,7 @@ async function writeResources(
 					args.settings.variableReferencePattern,
 				),
 			)
-		} else if (REPO_USES_DIRECTORY_STRUCTURE) {
+		} else if (REPO_USES_WILDCARD_STRUCTURE) {
 			// just in case try to create a directory to not make file operations fail
 			try {
 				const [directoryPath] = resourcePath.split(resource.languageTag.name)
