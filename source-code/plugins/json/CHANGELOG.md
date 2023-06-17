@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.3
+
+### Patch Changes
+
+- db4949e3: Internal refactoring by using the i18next plugin as base.
+
 ## 3.0.2
 
 ### Patch Changes
