@@ -1,15 +1,5 @@
 import type { InlangEnvironment } from "@inlang/core/environment"
-
-export type SerializedMessage = {
-	id: string
-	text: string
-} & MessageMetadata
-
-export type MessageMetadata = {
-	parentKeys?: string[]
-	fileName?: string
-	keyName?: string
-}
+import type { SerializedMessage } from "./types.js"
 
 /**
  * Recursive function to add nested keys to an object.

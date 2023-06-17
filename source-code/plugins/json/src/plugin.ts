@@ -2,49 +2,98 @@ import type { InlangConfig } from "@inlang/core/config"
 import type { InlangEnvironment } from "@inlang/core/environment"
 import type * as ast from "@inlang/core/ast"
 import { createPlugin } from "@inlang/core/plugin"
-import { throwIfInvalidSettings, type PluginSettings } from "./settings.js"
+import {
+	throwIfInvalidSettings,
+	type PluginSettings,
+	type PluginSettingsWithDefaults,
+} from "./settings.js"
 import merge from "lodash.merge"
+import {
+	addNestedKeys,
+	pathIsDirectory,
+	collectNestedSerializedMessages,
+	detectJsonSpacing,
+} from "./utilities.js"
+import { ideExtensionConfig } from "./ideExtension/config.js"
+import type { MessageMetadata, SerializedMessage } from "./types.js"
 
-interface StringWithParents {
-	value: string
-	parents: string[] | undefined
-	id: string
-	keyName: string
-}
+/**
+ * Whether the repository uses the wildcard structure.
+ *
+ * @example
+ *   pathPattern: "/{language}/*.json" -> true
+ *   pathPattern: "/{language}/resource.json" -> false
+ */
+let REPO_USES_WILDCARD_STRUCTURE: boolean
 
-type ExtendedMessagesType = {
-	[key: string]: {
-		value: string
-		parents?: StringWithParents["parents"]
-		fileName?: string
-		keyName?: string
-	}
+/**
+ * The spacing of the JSON files in this repository.
+ *
+ * @example
+ *  { "/en.json" = 2 }
+ */
+const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+
+/**
+ * Whether a file has a new line at the end.
+ *
+ * @example
+ * { "/en.json" = true }
+ * { "/de.json" = false }
+ */
+const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+
+/**
+ * Defines the default spacing for JSON files.
+ *
+ * Takes the majority spacing of resource files in this repository to determine
+ * the default spacing.
+ */
+function defaultSpacing() {
+	const values = Object.values(SPACING)
+	return (
+		values
+			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
+			.pop() ?? 2 // if no default has been found -> 2
+	)
 }
 
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
-	id: "samuelstroschein.inlangPluginJson",
+	id: "inlang.plugin-i18next",
 	async config() {
 		// will throw if the settings are invalid,
 		// leading to better DX because fails fast
 		throwIfInvalidSettings(settings)
+
+		const withDefaultSettings: PluginSettingsWithDefaults = {
+			ignore: [], // ignore no files by default
+			// copied the plugin logic from the i18next plugin. for easy copy & pasting some mock
+			// placeholders are used.
+			variableReferencePattern: ["PLACEHOLDER_NO_DEFAULT", "PLACEHOLDER_NO_DEFAULT"],
+			...settings,
+		}
+
+		REPO_USES_WILDCARD_STRUCTURE = settings.pathPattern.endsWith("/*.json")
+
 		return {
 			languages: await getLanguages({
 				$fs: env.$fs,
-				settings,
+				settings: withDefaultSettings,
 			}),
-			readResources: async (args) =>
+			readResources: (args) =>
 				readResources({
 					...args,
 					$fs: env.$fs,
-					settings,
+					settings: withDefaultSettings,
 				}),
-			writeResources: async (args) =>
+			writeResources: (args) =>
 				writeResources({
 					...args,
 					$fs: env.$fs,
-					settings,
+					settings: withDefaultSettings,
 				}),
-		}
+			ideExtension: ideExtensionConfig,
+		} satisfies Partial<InlangConfig>
 	},
 }))
 
@@ -53,30 +102,26 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
  */
 async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
 	// replace the path
-	const [pathBeforeLanguage, pathAfterLanguage] = args.settings.pathPattern.split("{language}")
-	const paths = await args.$fs.readdir(pathBeforeLanguage)
-	const languages: Array<string> = []
-	for (const language of paths) {
-		if (!language.includes(".")) {
-			// this is a dir
-			const languagefiles = await args.$fs.readdir(`${pathBeforeLanguage}${language}`)
-			if (languagefiles.length === 0) {
-				languages.push(language)
-			} else {
-				for (const languagefile of languagefiles) {
-					// this is the file, check if the language folder contains .json files
-					if (
-						languagefile.endsWith(".json") &&
-						!args.settings.ignore?.some((s) => s === language) &&
-						!languages.includes(language)
-					) {
-						languages.push(language)
-					}
-				}
-			}
-		} else if (language.endsWith(".json") && !args.settings.ignore?.some((s) => s === language)) {
-			// this is the file, remove the .json extension to only get language name
-			languages.push(language.replace(".json", ""))
+	const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
+	if (pathBeforeLanguage === undefined) {
+		throw new Error("pathPattern must contain {language} placeholder")
+	}
+	const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
+	const languages: string[] = []
+
+	for (const filePath of parentDirectory) {
+		const isDirectory = await pathIsDirectory({
+			path: pathBeforeLanguage + filePath,
+			$fs: args.$fs,
+		})
+
+		if (isDirectory) {
+			languages.push(filePath)
+		} else if (
+			filePath.endsWith(".json") &&
+			args.settings.ignore?.some((s) => s === filePath) === false
+		) {
+			languages.push(filePath.replace(".json", ""))
 		}
 	}
 	return languages
@@ -84,108 +129,57 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 
 /**
  * Reading resources.
- *
- * The function merges the args from Config['readResources'] with the settings
- * and EnvironmentFunctions.
  */
-export async function readResources(
-	// merging the first argument from config (which contains all arguments)
-	// with the custom settings argument
+async function readResources(
 	args: Parameters<InlangConfig["readResources"]>[0] & {
 		$fs: InlangEnvironment["$fs"]
-		settings: PluginSettings
+		settings: PluginSettingsWithDefaults
 	},
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
-	const languages = await getLanguages(args)
-	for (const language of languages) {
+
+	for (const language of args.config.languages) {
+		let serializedMessages: SerializedMessage[] = []
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
-		//try catch workaround because stats is not working
 		try {
-			// is file
-			const stringifiedFile = (await args.$fs.readFile(resourcePath, {
-				encoding: "utf-8",
-			})) as string
-			const space = detectJsonSpacing(
-				await args.$fs.readFile(resourcePath, {
-					encoding: "utf-8",
-				}),
-			)
-			const extendedMessages = collectStringsWithParents(JSON.parse(stringifiedFile))
-
-			//make a object out of the extendedMessages Array
-			let parsedMassagesForAst: ExtendedMessagesType = {}
-			extendedMessages.map((message) => {
-				parsedMassagesForAst = {
-					...parsedMassagesForAst,
-					...{
-						[message.id]: {
-							value: message.value,
-							parents: message.parents,
-							keyName: message.keyName,
-						},
-					},
-				}
-			})
-			result.push(
-				parseResource(
-					parsedMassagesForAst,
-					language,
-					space,
-					args.settings.variableReferencePattern,
-				),
-			)
-		} catch {
-			// is directory
-			let obj: any = {}
-			const path = `${resourcePath.replace("/*.json", "")}`
-			const files = await args.$fs.readdir(path)
-			const space =
-				files.length === 0
-					? 2
-					: detectJsonSpacing(
-							await args.$fs.readFile(`${path}/${files[0]}`, {
-								encoding: "utf-8",
-							}),
-					  )
-
-			if (files.length !== 0) {
-				//go through the files per language
-				for (const languagefile of files) {
-					const stringifiedFile = (await args.$fs.readFile(`${path}/${languagefile}`, {
+			if (REPO_USES_WILDCARD_STRUCTURE) {
+				const directoryPath = `${resourcePath.replace("/*.json", "")}`
+				const files = await args.$fs.readdir(directoryPath)
+				for (const potentialResourcePath of files) {
+					if (args.settings.ignore?.some((s) => s === potentialResourcePath) === true) {
+						continue
+					}
+					const file = (await args.$fs.readFile(`${directoryPath}/${potentialResourcePath}`, {
 						encoding: "utf-8",
 					})) as string
-					const fileName = languagefile.replace(".json", "")
-					const extendedMessages = collectStringsWithParents(
-						JSON.parse(stringifiedFile),
-						[],
-						fileName,
-					)
 
-					//make a object out of the extendedMessages Array
-					let parsedMassagesForAst: ExtendedMessagesType = {}
-					extendedMessages.map((message) => {
-						parsedMassagesForAst = {
-							...parsedMassagesForAst,
-							...{
-								[message.id]: {
-									value: message.value,
-									parents: message.parents,
-									fileName,
-									keyName: message.keyName,
-								},
-							},
-						}
-					})
+					FILE_HAS_NEW_LINE[`${directoryPath}/${potentialResourcePath}`] = file.endsWith("\n")
+					SPACING[`${directoryPath}/${potentialResourcePath}`] = detectJsonSpacing(file)
 
-					//merge the objects of every file
-					obj = {
-						...obj,
-						...parsedMassagesForAst,
-					}
+					serializedMessages = [
+						...serializedMessages,
+						...collectNestedSerializedMessages(JSON.parse(file), [], potentialResourcePath),
+					]
 				}
+			} else {
+				const file = (await args.$fs.readFile(resourcePath, {
+					encoding: "utf-8",
+				})) as string
+
+				FILE_HAS_NEW_LINE[`${resourcePath}`] = file.endsWith("\n")
+				SPACING[`${resourcePath}`] = detectJsonSpacing(file)
+
+				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
 			}
-			result.push(parseResource(obj, language, space, args.settings.variableReferencePattern))
+			result.push(
+				parseResource(serializedMessages, language, 2, args.settings.variableReferencePattern),
+			)
+		} catch (e) {
+			if ((e as any).code === "ENOENT") {
+				// file does not exist yet
+				continue
+			}
+			throw e
 		}
 	}
 	return result
@@ -194,217 +188,88 @@ export async function readResources(
 /**
  * Parses a resource.
  *
- * @example
- *  parseResource({ "test": "Hello world" }, "en")
+ * @example parseResource(resource, en, 2,["{{", "}}"])
  */
 function parseResource(
-	messages: ExtendedMessagesType,
+	serializedMessages: SerializedMessage[],
 	language: string,
 	space: number | string,
-	variableReferencePattern?: [string, string],
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Resource {
 	return {
 		type: "Resource",
-		metadata: {
-			space: space,
-		},
 		languageTag: {
 			type: "LanguageTag",
 			name: language,
 		},
-		body: Object.entries(messages).map(([id, value]) =>
-			parseMessage(id, value, variableReferencePattern),
-		),
+		body: serializedMessages.map((serializedMessage) => {
+			return parseMessage(serializedMessage, variableReferencePattern)
+		}),
 	}
 }
 
 /**
  * Parses a message.
  *
- * @example
- *  parseMessage("test", "Hello world")
+ * @example parseMessage("testId", "test", ["{{", "}}"])
  */
 function parseMessage(
-	id: string,
-	extendedMessage: ExtendedMessagesType[string],
-	variableReferencePattern?: [string, string],
+	serializedMessage: SerializedMessage,
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Message {
-	const regex =
-		variableReferencePattern &&
-		(variableReferencePattern[1]
-			? new RegExp(
-					`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
-					"g",
-			  )
-			: new RegExp(`(${variableReferencePattern}\\w+)`, "g"))
-	const newElements = []
-	if (regex) {
-		const splitArray = extendedMessage.value.split(regex)
-		for (const element of splitArray) {
-			if (regex.test(element)) {
-				newElements.push({
-					type: "Placeholder",
-					body: {
-						type: "VariableReference",
-						name: variableReferencePattern[1]
-							? element.slice(
-									variableReferencePattern[0].length,
-									variableReferencePattern[1].length * -1,
-							  )
-							: element.slice(variableReferencePattern[0].length),
-					},
-				})
-			} else {
-				if (element !== "") {
-					newElements.push({
-						type: "Text",
-						value: element,
-					})
-				}
-			}
-		}
-	} else {
-		newElements.push({
-			type: "Text",
-			value: extendedMessage.value,
-		})
-	}
-
 	return {
 		type: "Message",
 		metadata: {
-			...(extendedMessage.fileName !== undefined && {
-				fileName: extendedMessage.fileName,
-			}),
-			...(extendedMessage.parents !== undefined && {
-				parentKeys: extendedMessage.parents,
-			}),
-			...(extendedMessage.keyName !== undefined && {
-				keyName: extendedMessage.keyName,
-			}),
-		},
+			fileName: serializedMessage.fileName,
+			keyName: serializedMessage.keyName,
+			parentKeys: serializedMessage.parentKeys,
+		} satisfies MessageMetadata,
 		id: {
 			type: "Identifier",
-			name: id,
+			name: serializedMessage.id,
 		},
-		pattern: {
-			type: "Pattern",
-			elements: newElements as Array<ast.Text | ast.Placeholder>,
-		},
+		pattern: parsePattern(serializedMessage.text, variableReferencePattern),
 	}
-}
-
-const collectStringsWithParents = (
-	obj: any,
-	parents: string[] | undefined = [],
-	fileName?: string,
-) => {
-	const results: StringWithParents[] = []
-
-	if (typeof obj === "string") {
-		results.push({
-			value: obj,
-			parents: parents.length > 1 ? parents.slice(0, -1) : undefined,
-			id: fileName ? fileName + "." + parents.join(".") : parents.join("."),
-			keyName: parents.at(-1),
-		})
-	} else if (typeof obj === "object" && obj !== null) {
-		for (const key in obj) {
-			// eslint-disable-next-line no-prototype-builtins
-			if (obj.hasOwnProperty(key)) {
-				const currentParents = [...parents, key]
-				const childResults = collectStringsWithParents(obj[key], currentParents, fileName)
-				results.push(...childResults)
-			}
-		}
-	}
-
-	return results
-}
-
-const detectJsonSpacing = (jsonString: string) => {
-	const patterns = [
-		{
-			spacing: 1,
-			regex: /^{\n {1}[^ ]+.*$/m,
-		},
-		{
-			spacing: 2,
-			regex: /^{\n {2}[^ ]+.*$/m,
-		},
-		{
-			spacing: 3,
-			regex: /^{\n {3}[^ ]+.*$/m,
-		},
-		{
-			spacing: 4,
-			regex: /^{\n {4}[^ ]+.*$/m,
-		},
-		{
-			spacing: 6,
-			regex: /^{\n {6}[^ ]+.*$/m,
-		},
-		{
-			spacing: 8,
-			regex: /^{\n {8}[^ ]+.*$/m,
-		},
-	]
-
-	for (const { spacing, regex } of patterns) {
-		if (regex.test(jsonString)) {
-			return spacing
-		}
-	}
-
-	return 2 // No matching spacing configuration found
 }
 
 /**
  * Writing resources.
  *
- * The function merges the args from Config['readResources'] with the settings
- * and EnvironmentFunctions.
+ * @example writeResources({resources, settings, $fs})
  */
 async function writeResources(
 	args: Parameters<InlangConfig["writeResources"]>[0] & {
-		settings: PluginSettings
+		settings: PluginSettingsWithDefaults
 		$fs: InlangEnvironment["$fs"]
 	},
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const resourcePath = args.settings.pathPattern.replace("{language}", resource.languageTag.name)
-		const space = resource.metadata?.space || 2
 
-		if (resource.body.length === 0) {
-			//make a dir if resource with no messages
-			if (resourcePath.split(resource.languageTag.name.toString())[1].includes("/")) {
-				await args.$fs.mkdir(
-					resourcePath.replace(
-						resourcePath.split(resource.languageTag.name.toString())[1].toString(),
-						"",
-					),
-				)
-				if (!resourcePath.includes("/*.json")) {
-					await args.$fs.writeFile(resourcePath, JSON.stringify({}, null, space))
-				}
-			} else {
-				await args.$fs.writeFile(resourcePath, JSON.stringify({}, null, space))
+		if (REPO_USES_WILDCARD_STRUCTURE === false) {
+			await args.$fs.writeFile(
+				resourcePath,
+				serializeResource(
+					resource,
+					SPACING[resourcePath] ?? defaultSpacing(),
+					FILE_HAS_NEW_LINE[resourcePath]!,
+					args.settings.variableReferencePattern,
+				),
+			)
+		} else if (REPO_USES_WILDCARD_STRUCTURE) {
+			// just in case try to create a directory to not make file operations fail
+			try {
+				const [directoryPath] = resourcePath.split(resource.languageTag.name)
+				await args.$fs.mkdir(directoryPath!)
+			} catch {
+				// directory likely already exists
 			}
-		} else if (resourcePath.includes("/*.json")) {
-			//deserialize the file names
-			const clonedResource =
-				resource.body.length === 0 ? {} : JSON.parse(JSON.stringify(resource.body))
-			//get prefixes
-			const fileNames: Array<string> = []
-			clonedResource.map((message: ast.Message) => {
-				if (!message.metadata?.fileName) {
-					fileNames.push(message.id.name.split(".")[0])
-				} else if (message.metadata?.fileName && !fileNames.includes(message.metadata?.fileName)) {
-					fileNames.push(message.metadata?.fileName)
-				}
-			})
-			for (const fileName of fileNames) {
-				const filteredMassages = clonedResource
+
+			//* Performance optimization in the future: Only iterate over the resource body once
+			const filePaths = new Set(resource.body.map((message) => message.metadata?.fileName))
+
+			for (const fileName of filePaths) {
+				const filteredMassages = resource.body
 					.filter((message: ast.Message) => message.id.name.startsWith(fileName))
 					.map((message: ast.Message) => {
 						return {
@@ -420,89 +285,119 @@ async function writeResources(
 					languageTag: resource.languageTag,
 					body: filteredMassages,
 				}
+				const path = resourcePath.replace("*", fileName)
 				await args.$fs.writeFile(
-					resourcePath.replace("*", fileName),
-					serializeResource(splitedResource, space, args.settings.variableReferencePattern),
+					path,
+					serializeResource(
+						splitedResource,
+						SPACING[path] ?? defaultSpacing(),
+						FILE_HAS_NEW_LINE[path]!,
+						args.settings.variableReferencePattern,
+					),
 				)
 			}
 		} else {
-			await args.$fs.writeFile(
-				resourcePath,
-				serializeResource(resource, space, args.settings.variableReferencePattern),
-			)
+			throw new Error("None-exhaustive if statement in writeResources")
 		}
 	}
 }
 
 /**
  * Serializes a resource.
- *
- * The function un-flattens, and therefore reverses the flattening
- * in parseResource, of a given object. The result is a stringified JSON
- * that is beautified by adding (null, 2) to the arguments.
- *
- * @example
- *  serializeResource(resource)
  */
 function serializeResource(
 	resource: ast.Resource,
 	space: number | string,
-	variableReferencePattern?: [string, string],
+	withNewLine: boolean,
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
-	const obj = {}
+	const result = {}
 	for (const message of resource.body) {
-		const returnedJsonMessage = serializeMessage(message, variableReferencePattern)
-		merge(obj, returnedJsonMessage)
+		const msg: Record<string, string | Record<string, string>> = {}
+		const serializedPattern = serializePattern(message.pattern, variableReferencePattern)
+		if (message.metadata?.keyName) {
+			addNestedKeys(msg, message.metadata.parentKeys, message.metadata.keyName, serializedPattern)
+		} else if (message.metadata?.fileName) {
+			msg[message.id.name.split(".").slice(1).join(".")] = serializedPattern
+		} else {
+			msg[message.id.name] = serializedPattern
+		}
+		// nested keys
+		merge(result, msg)
 	}
-	return JSON.stringify(obj, null, space)
+	return JSON.stringify(result, undefined, space) + (withNewLine ? "\n" : "")
 }
 
 /**
- * Serializes a message.
- *
- * Note that only the first element of the pattern is used as inlang, as of v0.3,
- * does not support more than 1 element in a pattern.
+ * Serializes a pattern.
  */
-const serializeMessage = (message: ast.Message, variableReferencePattern?: [string, string]) => {
-	const newStringArr = []
-	for (const element of message.pattern.elements) {
-		if (element.type === "Text" || !variableReferencePattern) {
-			newStringArr.push(element.value)
-		} else if (element.type === "Placeholder") {
-			variableReferencePattern[1]
-				? newStringArr.push(
-						`${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`,
-				  )
-				: newStringArr.push(`${variableReferencePattern[0]}${element.body.name}`)
+function serializePattern(
+	pattern: ast.Message["pattern"],
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
+) {
+	const result = []
+	for (const element of pattern.elements) {
+		switch (element.type) {
+			case "Text":
+				result.push(element.value)
+				break
+			case "Placeholder":
+				result.push(
+					variableReferencePattern[1]
+						? `${variableReferencePattern[0]}${element.body.name}${variableReferencePattern[1]}`
+						: `${variableReferencePattern[0]}${element.body.name}`,
+				)
+				break
+			default:
+				throw new Error(`Unknown message pattern element of type: ${(element as any)?.type}`)
 		}
 	}
-	const newString: string = newStringArr.join("")
-	const newObj: any = {}
-	if (message.metadata?.keyName) {
-		addNestedKeys(newObj, message.metadata?.parentKeys, message.metadata?.keyName, newString)
-	} else if (message.metadata?.fileName) {
-		newObj[message.id.name.split(".").slice(1).join(".")] = newString
-	} else {
-		newObj[message.id.name] = newString
-	}
-
-	return newObj
+	return result.join("")
 }
 
-const addNestedKeys = (
-	obj: any,
-	parentKeys: string[] | undefined,
-	keyName: string,
-	value: string,
-) => {
-	if (!parentKeys || parentKeys.length === 0) {
-		obj[keyName] = value
-	} else if (parentKeys.length === 1) {
-		obj[parentKeys[0]] = { [keyName]: value }
-	} else {
-		if (!obj[parentKeys[0]]) {
-			obj[parentKeys[0]] = {}
+/**
+ * Parses a message.
+ *
+ * @example parseMessage("testId", "test", ["{{", "}}"])
+ */
+function parsePattern(
+	text: string,
+	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
+): ast.Pattern {
+	// dependent on the variableReferencePattern, different regex
+	// expressions are used for matching
+	const placeholder = variableReferencePattern[1]
+		? new RegExp(
+				`(\\${variableReferencePattern[0]}[^\\${variableReferencePattern[1]}]+\\${variableReferencePattern[1]})`,
+				"g",
+		  )
+		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
+
+	const elements: ast.Pattern["elements"] = text.split(placeholder).map((element) => {
+		if (placeholder.test(element)) {
+			return {
+				type: "Placeholder",
+				body: {
+					type: "VariableReference",
+					name: variableReferencePattern[1]
+						? element.slice(
+								variableReferencePattern[0].length,
+								// negative index, removing the trailing pattern
+								-variableReferencePattern[1].length,
+						  )
+						: element.slice(variableReferencePattern[0].length),
+				},
+			}
+		} else {
+			return {
+				type: "Text",
+				value: element,
+			}
 		}
-		addNestedKeys(obj[parentKeys[0]], parentKeys.slice(1), keyName, value)
+	})
+
+	return {
+		type: "Pattern",
+		elements,
 	}
 }
