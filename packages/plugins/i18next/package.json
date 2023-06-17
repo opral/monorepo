@@ -16,7 +16,7 @@
 		"build": "node ./build.js && size-limit",
 		"--- Pretest is required to build the plugin before testing. ---": "",
 		"pretest": "node ./build.js",
-		"test": "vitest run",
+		"test": "vitest run --coverage",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
