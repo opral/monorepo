@@ -39,6 +39,15 @@ let REPO_USES_DIRECTORY_STRUCTURE: boolean
 const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
 
 /**
+ * Whether a file has a new line at the end.
+ *
+ * @example
+ * { "/en.json" = true }
+ * { "/de.json" = false }
+ */
+const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+
+/**
  * Defines the default spacing for JSON files.
  *
  * Takes the majority spacing of resource files in this repository to determine
@@ -147,6 +156,7 @@ async function readResources(
 						encoding: "utf-8",
 					})) as string
 
+					FILE_HAS_NEW_LINE[`${directoryPath}/${potentialResourcePath}`] = file.endsWith("\n")
 					SPACING[`${directoryPath}/${potentialResourcePath}`] = detectJsonSpacing(file)
 
 					serializedMessages = [
@@ -159,6 +169,7 @@ async function readResources(
 					encoding: "utf-8",
 				})) as string
 
+				FILE_HAS_NEW_LINE[`${resourcePath}`] = file.endsWith("\n")
 				SPACING[`${resourcePath}`] = detectJsonSpacing(file)
 
 				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
@@ -247,6 +258,7 @@ async function writeResources(
 				serializeResource(
 					resource,
 					SPACING[resourcePath] ?? defaultSpacing(),
+					FILE_HAS_NEW_LINE[resourcePath]!,
 					args.settings.variableReferencePattern,
 				),
 			)
@@ -285,6 +297,7 @@ async function writeResources(
 					serializeResource(
 						splitedResource,
 						SPACING[path] ?? defaultSpacing(),
+						FILE_HAS_NEW_LINE[path]!,
 						args.settings.variableReferencePattern,
 					),
 				)
@@ -301,6 +314,7 @@ async function writeResources(
 function serializeResource(
 	resource: ast.Resource,
 	space: number | string,
+	withNewLine: boolean,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
 	const result = {}
@@ -317,7 +331,7 @@ function serializeResource(
 		// nested keys
 		merge(result, msg)
 	}
-	return JSON.stringify(result, undefined, space)
+	return JSON.stringify(result, undefined, space) + (withNewLine ? "\n" : "")
 }
 
 /**
