@@ -191,14 +191,10 @@ async function readResources(
 function parseResource(
 	serializedMessages: SerializedMessage[],
 	language: string,
-	space: number | string,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Resource {
 	return {
 		type: "Resource",
-		metadata: {
-			space: space,
-		},
 		languageTag: {
 			type: "LanguageTag",
 			name: language,
