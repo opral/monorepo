@@ -11,7 +11,7 @@ import { pluginBuildConfig } from "@inlang/core/plugin"
 const options = await pluginBuildConfig({
 	entryPoints: ["./src/index.js"],
 	outfile: "./dist/index.js",
-	minify: false,
+	minify: true,
 	define: {
 		__dirname: '"hello"',
 		__filename: '"hello"',
