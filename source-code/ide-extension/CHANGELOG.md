@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.7.5
+
+### Patch Changes
+
+- 66519584: Fixes https://github.com/inlang/inlang/issues/927
+
 ## 0.7.4
 
 ### Patch Changes
