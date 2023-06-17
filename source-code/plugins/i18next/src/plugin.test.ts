@@ -118,3 +118,41 @@ it("should preserve the spacing resources and determine a default based on the m
 	expect(file3).toBe(withTabs)
 	expect(file4).toBe(with4Spaces)
 })
+
+it("should remember if a file has a new line at the end or not", async () => {
+	// @prettier-ignore
+	const withNewLine = `{
+    "test": "test"
+}
+`
+
+	// @prettier-ignore
+	const withoutNewLine = `{
+	"test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", withNewLine)
+	await env.$fs.writeFile("./fr.json", withoutNewLine)
+
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en", "de", "fr"]
+
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+
+	await config.writeResources!({
+		config: config as any,
+		resources,
+	})
+
+	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+
+	expect(file1).toBe(withNewLine)
+	expect(file2).toBe(withoutNewLine)
+})
