@@ -2,7 +2,6 @@ import * as vscode from "vscode"
 import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
-import { telemetry } from "../services/telemetry/index.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -34,24 +33,19 @@ export async function messagePreview(args: {
 		// Get the reference language
 		const { referenceLanguage } = state().config
 		const messageReferenceMatchers = state().config.ideExtension?.messageReferenceMatchers
-		if (referenceLanguage === undefined) {
-			return vscode.window.showWarningMessage(
-				"The `referenceLanguage` must be defined in the inlang.config.js to show patterns inline.",
-			)
-		}
-		if (messageReferenceMatchers === undefined) {
-			return vscode.window.showWarningMessage(
-				"The `messageReferenceMatchers` must be defined in the inlang.config.js to show patterns inline.",
-			)
-		}
 
-		const ref = state().resources.find(
+		const refResource = state().resources.find(
 			(resource) => resource.languageTag.name === referenceLanguage,
 		)
-		if (!ref) {
-			return vscode.window.showWarningMessage(
-				`The reference language '${referenceLanguage}' is not defined in the inlang.config.js.`,
-			)
+
+		if (
+			referenceLanguage === undefined ||
+			messageReferenceMatchers === undefined ||
+			refResource === undefined
+		) {
+			// don't show an error message. See issue:
+			// https://github.com/inlang/inlang/issues/927
+			return
 		}
 
 		// Get the message references
@@ -61,7 +55,7 @@ export async function messagePreview(args: {
 					documentText: args.activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = query(ref).get({
+					const translation = query(refResource).get({
 						id: message.messageId,
 					})?.pattern.elements
 
