@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 2.2.1
+
+### Patch Changes
+
+- 138df7cc: fix: don't match functions that ends with a t but are not a t function like somet("key").
+
 ## 2.2.0
 
 ### Minor Changes
