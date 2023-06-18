@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.4
+
+### Patch Changes
+
+- 138df7cc: fix: don't match functions that ends with a t but are not a t function like somet("key").
+
 ## 3.0.3
 
 ### Patch Changes
