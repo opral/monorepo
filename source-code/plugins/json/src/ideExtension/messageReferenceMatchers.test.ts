@@ -1,6 +1,14 @@
 import { it, expect } from "vitest"
 import { parse } from "./messageReferenceMatchers.js"
 
+it("should not match a function that ends with t but is not a t function", async () => {
+	const sourceCode = `
+    const x = somet("some-id")
+    `
+	const matches = parse(sourceCode)
+	expect(matches).toHaveLength(0)
+})
+
 it("should not match a string without a t function", async () => {
 	const sourceCode = `
     const x = some("some-id")

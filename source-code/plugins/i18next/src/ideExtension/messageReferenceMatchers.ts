@@ -16,7 +16,7 @@ const parser = Parsimmon.createLanguage({
 	// 2. Match as many of these as possible.
 	// 3. Filter out any non-object matches.
 	entry: (r) => {
-		return Parsimmon.alt(r.tFunctionCall!, Parsimmon.any)
+		return Parsimmon.alt(r.FunctionCall!, Parsimmon.any)
 			.many()
 			.map((matches) => {
 				// filter arbitrary characters
@@ -48,8 +48,9 @@ const parser = Parsimmon.createLanguage({
 	},
 
 	// Parser for t function calls
-	tFunctionCall: function (r) {
+	FunctionCall: function (r) {
 		return Parsimmon.seqMap(
+			Parsimmon.regex(/[^a-zA-Z0-9]/), // no preceding letters or numbers
 			Parsimmon.string("t"), // starts with t
 			Parsimmon.string("("), // then an opening parenthesis
 			Parsimmon.index, // start position of the message id
@@ -57,7 +58,7 @@ const parser = Parsimmon.createLanguage({
 			Parsimmon.index, // end position of the message id
 			Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 			Parsimmon.string(")"), // end with a closing parenthesis
-			(_, __, start, messageId, end) => {
+			(_, __, ___, start, messageId, end) => {
 				return {
 					messageId,
 					position: {
