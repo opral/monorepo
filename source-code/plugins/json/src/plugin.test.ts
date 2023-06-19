@@ -156,3 +156,23 @@ it("should remember if a file has a new line at the end or not", async () => {
 	expect(file1).toBe(withNewLine)
 	expect(file2).toBe(withoutNewLine)
 })
+
+it("should correctly identify placeholders", async () => {
+	const enResource = `{
+    "test": "Hello {username}"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{", "}"] })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
+	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
+})

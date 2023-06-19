@@ -69,7 +69,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 			ignore: [], // ignore no files by default
 			// copied the plugin logic from the i18next plugin. for easy copy & pasting some mock
 			// placeholders are used.
-			variableReferencePattern: ["PLACEHOLDER_NO_DEFAULT", "PLACEHOLDER_NO_DEFAULT"],
+			variableReferencePattern: ["{", "}"],
 			...settings,
 		}
 
@@ -172,7 +172,7 @@ async function readResources(
 				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
 			}
 			result.push(
-				parseResource(serializedMessages, language, 2, args.settings.variableReferencePattern),
+				parseResource(serializedMessages, language, args.settings.variableReferencePattern),
 			)
 		} catch (e) {
 			if ((e as any).code === "ENOENT") {
@@ -193,7 +193,6 @@ async function readResources(
 function parseResource(
 	serializedMessages: SerializedMessage[],
 	language: string,
-	space: number | string,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): ast.Resource {
 	return {

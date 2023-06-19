@@ -170,7 +170,7 @@ async function readResources(
 				serializedMessages = collectNestedSerializedMessages(JSON.parse(file))
 			}
 			result.push(
-				parseResource(serializedMessages, language, 2, args.settings.variableReferencePattern),
+				parseResource(serializedMessages, language, args.settings.variableReferencePattern),
 			)
 		} catch (e) {
 			if ((e as any).code === "ENOENT") {
