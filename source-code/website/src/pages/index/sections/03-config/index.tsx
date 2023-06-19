@@ -45,7 +45,7 @@ const data = [
 	{
 		title: "IDE Extension",
 		isSoon: false,
-		description: "Handle translations directly in your VSCode.",
+		description: "Handle translations directly in VSCode through an extension.",
 		benefit: [
 			"Extract messages from code",
 			"Inline annotations behind key",
@@ -57,7 +57,7 @@ const data = [
 	{
 		title: "inlang CLI",
 		isSoon: false,
-		description: "CLI to interact with the inlang's infastructure.",
+		description: "CLI to interact with inlang's infastructure.",
 		benefit: [
 			"Automate localization tasks (CI/CD)",
 			"Lint your translations",
