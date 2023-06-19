@@ -209,7 +209,7 @@ const ConfigPage = () => {
 				</div>
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
-				<a href="/documentation/quick-start" class="w-full lg:w-fit overflow-x-scroll relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group">
+				<a href="/documentation/quick-start" class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group">
 					<div class="absolute top-5 left-6 flex gap-2">
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
