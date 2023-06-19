@@ -33,24 +33,36 @@ const data = [
 	{
 		title: "Web Editor",
 		isSoon: false,
-		description:
-			"Simplifies translation management by keeping translations in a Git repository without the need for hosting, additional accounts, or synchronization.",
+		description: "No-code editor to manage your translations.",
+		benefit: [
+			"No translator needs to touch code",
+			"Push through interface",
+			"No sync pipelines and extra accounts",
+		],
 		link: "/documentation/apps/web-editor",
 		image: "/images/AppSVGs/editor.svg",
 	},
 	{
 		title: "IDE Extension",
 		isSoon: false,
-		description:
-			"Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
+		description: "Handle translations directly in your VSCode.",
+		benefit: [
+			"Extract messages from code",
+			"Inline annotations behind key",
+			"Auto-update for synced resources",
+		],
 		link: "/documentation/apps/ide-extension",
 		image: "/images/AppSVGs/ide.svg",
 	},
 	{
 		title: "inlang CLI",
 		isSoon: false,
-		description:
-			"Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
+		description: "CLI to interact with the inlang's infastructure.",
+		benefit: [
+			"Automate localization tasks (CI/CD)",
+			"Lint your translations",
+			"Machine translate your resources",
+		],
 		link: "/documentation/apps/inlang-cli",
 		image: "/images/AppSVGs/cli.svg",
 	},
@@ -79,7 +91,19 @@ const ConfigPage = () => {
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
-					Multiple <a href="/documentation/apps/web-editor" class="underline transition link-primary">apps</a>, endless <a href="/documentation/plugins/registry" class="underline transition link-primary">plugins</a>, one <a href="/documentation/quick-start" class="underline transition link-primary">config</a>.
+					Multiple{" "}
+					<a href="/documentation/apps/web-editor" class="underline transition link-primary">
+						apps
+					</a>
+					, endless{" "}
+					<a href="/documentation/plugins/registry" class="underline transition link-primary">
+						plugins
+					</a>
+					, one{" "}
+					<a href="/documentation/quick-start" class="underline transition link-primary">
+						config
+					</a>
+					.
 				</h2>
 			</div>
 
@@ -88,19 +112,24 @@ const ConfigPage = () => {
 					{(card) => (
 						<a
 							href={card.link}
-							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary"
+							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary pb-4"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
 							<div class="p-8 flex flex-col gap-2">
 								<div class="flex gap-4">
-									<h3 class="text-base font-semibold">{card.title}</h3>
+									<h3 class="text-xl font-semibold">{card.title}</h3>
 									<Show when={card.isSoon}>
 										<p class="h-6 bg-primary/10 text-primary px-2 flex justify-center items-center w-fit rounded-md">
 											soon
 										</p>
 									</Show>
 								</div>
-								<p class="text-sm text-outline-variant">{card.description}</p>
+								<p class="text-md text-outline-variant">{card.description}</p>
+								<ul class="items-center list-disc pl-4 pt-2">
+									<For each={card.benefit}>
+										{(benefit) => <li class="text-sm text-outline-variant pt-2">{benefit}</li>}
+									</For>
+								</ul>
 							</div>
 						</a>
 					)}
@@ -144,7 +173,11 @@ const ConfigPage = () => {
 				</div>
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
-				<a href="/documentation/plugins/registry" class="relative cursor-pointer group" style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}>
+				<a
+					href="/documentation/plugins/registry"
+					class="relative cursor-pointer group"
+					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
+				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
 						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
 							plugins
@@ -209,13 +242,18 @@ const ConfigPage = () => {
 				</div>
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
-				<a href="/documentation/quick-start" class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group">
+				<a
+					href="/documentation/quick-start"
+					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
+				>
 					<div class="absolute top-5 left-6 flex gap-2">
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 					</div>
-					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">inlang.config.js</pre>
+					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">
+						inlang.config.js
+					</pre>
 					<div class="flex flex-col gap-1 px-8 py-4 pr-16">
 						<For each={code}>
 							{(line, index) => (
