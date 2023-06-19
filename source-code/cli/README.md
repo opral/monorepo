@@ -37,7 +37,7 @@ best
 npx inlang [command]
 ```
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ## Commands
 
@@ -48,7 +48,7 @@ We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not
 
 `npx` is auto-installed with Node and NPM.
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ```sh
 CLI for inlang.
