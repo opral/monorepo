@@ -23,11 +23,11 @@ const Pricing = () => {
 					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant">
 						{data.description}
 					</p>
-					<div class="pt-4">
+					{/* <div class="pt-4">
 						<Button href={data.buttonLink} type="secondary">
 							{data.button}
 						</Button>
-					</div>
+					</div> */}
 				</div>
 				<div class="w-full lg:w-[calc((100%_-_40px)_/_2)] flex items-end lg:pl-4">
 					<div class="h-full w-[55%] rounded-2xl rounded-br-none flex flex-col p-6 lg:p-8 gap-4 bg-gradient-to-b from-hover-primary/70 to-hover-primary/30">
