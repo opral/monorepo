@@ -162,10 +162,10 @@ function Header(props: { landingpage?: boolean }) {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-full min-h-full pt-3 overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
 								<For each={links}>
 									{(link) => (
-										<sl-tree class="">
+										<sl-tree>
 											<a
 												class="link grow min-w-full text-on-surface link-primary w-full"
 												href={link.href}
