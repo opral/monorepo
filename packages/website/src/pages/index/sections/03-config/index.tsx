@@ -8,15 +8,11 @@ const code = [
 		<span class="text-primary-on-inverted-container">plugins</span>: [
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\tideExtensionPlugin"}</span>
-		{"(),"}
-	</p>,
-	<p>
 		<span class="text-primary-on-inverted-container">{"\tstandardLintRules"}</span>
 		{"(),"}
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\tjsonPlugin"}</span>
+		<span class="text-primary-on-inverted-container">{"\ti18next"}</span>
 		{"({ "}
 	</p>,
 	<p>
