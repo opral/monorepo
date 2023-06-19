@@ -31,6 +31,10 @@ inlang provides an SDK that integrates seamlessly with SvelteKit.
    pnpm add -D @inlang/sdk-js
    ```
 
+    - minimum `node` version is `18.0.0`
+    - minimum `Svelte` version is `3.0.0`
+    - minimum `SvelteKit` version is `1.16.3`
+  
 2. Add the inlang plugin to the `plugins` section of `vite.config.js`
 
    ```js
@@ -86,9 +90,5 @@ A valid JSON file would look like this.
 ```
 
 ---
-
-- minimum `node` version is `18.0.0`
-- minimum `Svelte` version is `3.0.0`
-- minimum `SvelteKit` version is `1.16.3`
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._
