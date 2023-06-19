@@ -57,7 +57,8 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 			id={props.children?.toString().replace(" ", "-").toLowerCase()}
 			onClick={() => {
 				copy(
-					(document.location.host +
+					(	"https://" +
+						document.location.host +
 						document.location.pathname +
 						"#" +
 						props.children?.toString().replace(" ", "-").toLowerCase()) as string,
