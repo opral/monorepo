@@ -41,11 +41,8 @@ type Node<
 	Extension["Node"] & {
 		type: Name
 		/**
-		 * Metadata is ignored by inlang.
 		 *
-		 * Use the metadata property to store additional
-		 * information for a particular node like parsing
-		 * and serialization information.
+		 * @deprecated Will be removed in the future, see https://github.com/inlang/inlang/issues/945.
 		 */
 		metadata?: any
 	}
