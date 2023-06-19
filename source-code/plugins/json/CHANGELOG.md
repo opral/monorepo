@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.5
+
+### Patch Changes
+
+- 6326e01e: fix: placeholder matching https://github.com/inlang/inlang/issues/955
+
 ## 3.0.4
 
 ### Patch Changes
