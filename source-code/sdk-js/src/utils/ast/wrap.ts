@@ -68,7 +68,7 @@ export const mergeWrapperAst = (toWrapAst: CallExpression, wrapWithAst: CallExpr
 	const wrappingPoint = findWrappingPoint(toWrapAst)
 	const insertionPoint = findInsertionPoint(wrapWithAst)
 
-	insertionPoint.transform(() => wrappingPoint.compilerNode)
+	insertionPoint.replaceWithText(nodeToCode(wrappingPoint))
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -112,5 +112,5 @@ export const wrapExportedFunction = (
 	const wrapWithAst = createWrapperAst(wrapperFunctionName, options)
 
 	mergeWrapperAst(wrapped, wrapWithAst)
-	wrapped.transform(() => wrapWithAst.compilerNode)
+	wrapped.replaceWithText(nodeToCode(wrapWithAst))
 }
