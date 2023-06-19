@@ -16,12 +16,13 @@ import {
 	initImportedVariablesAst,
 	getRootReferenceIndexes,
 } from "../../../helpers/ast.js"
-import MagicStringImport from "magic-string"
 import { types } from "recast"
 import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
 import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
 import { getSvelteFileParts } from '../../../utils/svelte.util.js'
-import { markupToAst, wrapMarkupChildren } from '../../../utils/ast/svelte.js'
+import { MagicString, addDataExportIfMissingAndReturnInsertionIndex, markupToAst, wrapMarkupChildren, insertSlotIfEmptyFile } from '../../../utils/ast/svelte.js'
+import { addImport } from '../../../utils/ast/imports.js'
+import { dedent } from 'ts-dedent'
 
 export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
 	const fileParts = getSvelteFileParts(code)
@@ -39,32 +40,47 @@ export const transformLayoutSvelte = (config: TransformConfig, code: string, roo
 const transformScript = (config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code)
 
-	// TODO: add imports
-	// TODO: add export let data if not present
-	// TODO: inject setContext and code for reactivity
+	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/shared', 'getRuntimeFromData')
+	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/not-reactive', 'addRuntimeToContext', 'getRuntimeFromContext')
+	addImport(sourceFile, '$app/environment', 'browser')
+
+	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
+
+	sourceFile.insertStatements(index + 1, dedent`
+		$: if (browser) {
+			addRuntimeToContext(getRuntimeFromData(data))
+			;({ i, language } = getRuntimeFromContext())
+		}
+	`)
+	sourceFile.insertStatements(index + 1, dedent`
+		addRuntimeToContext(getRuntimeFromData(data))
+		let { i, language } = getRuntimeFromContext()
+	`)
 
 	return nodeToCode(sourceFile)
 }
 
-const transformMarkup = (config: TransformConfig, markup: string) => {
+const transformMarkup = (config: TransformConfig, markup: string): string => {
+	const s = new MagicString(markup)
 	const ast = markupToAst(markup)
 
-	// TODO: insert </slot> if not present
-
-	wrapMarkupChildren(ast, markupToAst('{#key $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/key}'))
-	if (!config.languageInUrl) {
-		wrapMarkupChildren(ast, markupToAst('{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/if}'))
+	const inserted = insertSlotIfEmptyFile(s, ast)
+	if (inserted) {
+		return transformMarkup(config, s.toString())
 	}
 
-	return markup
+	wrapMarkupChildren(s, ast, '{#key $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/key}')
+	// TODO: only insert if reactive stores are not used
+	// if (!config.languageInUrl) {
+	wrapMarkupChildren(s, ast, '{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/if}')
+	// }
+
+	return s.toString()
 }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
-
-// the type definitions don't match
-const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 
 export const transformLayoutSvelteOld = (config: TransformConfig, code: string, root: boolean) => {
 	if (root) {

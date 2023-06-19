@@ -1,7 +1,7 @@
-import { test, describe, expect, vi, beforeEach, Mock } from "vitest"
+import { test, describe, expect, vi, beforeEach, type Mock } from "vitest"
 import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
 import * as svelte from "svelte"
-import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
+import { type SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
 import { get } from "svelte/store"
 import { createResource } from "@inlang/core/test"
 

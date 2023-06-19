@@ -20,7 +20,7 @@ export const getSvelteFileParts = (code: string) => {
 		moduleScriptContent = moduleScriptMatch[2]!
 		moduleScriptClosingTag = moduleScriptMatch[3]!
 
-		markupContent = markupContent.replace(moduleScriptMatch[0], '$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$')
+		markupContent = markupContent.replace(moduleScriptMatch[0], '{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}')
 	}
 
 	const scriptMatch = markupContent.match(REGEX_SCRIPT_TAG)
@@ -29,14 +29,14 @@ export const getSvelteFileParts = (code: string) => {
 		scriptContent = scriptMatch[2]!
 		scriptClosingTag = scriptMatch[3]!
 
-		markupContent = markupContent.replace(scriptMatch[0], '$_INLANG_SCRIPT_PLACEHOLDER_$')
+		markupContent = markupContent.replace(scriptMatch[0], '{$_INLANG_SCRIPT_PLACEHOLDER_$}')
 	}
 
 	const styleMatch = markupContent.match(REGEX_STYLE_TAG)
 	if (styleMatch) {
 		styleTag = styleMatch[0]!
 
-		markupContent = markupContent.replace(styleMatch[0], '$_INLANG_STYLE_PLACEHOLDER_$')
+		markupContent = markupContent.replace(styleMatch[0], '{$_INLANG_STYLE_PLACEHOLDER_$}')
 	}
 
 	return {
@@ -61,9 +61,9 @@ export const getSvelteFileParts = (code: string) => {
 		toString() {
 			let code = markupContent
 
-			code = replacePlaceholder(code, '$_INLANG_SCRIPT_PLACEHOLDER_$', scriptOpeningTag, scriptClosingTag, scriptContent)
-			code = replacePlaceholder(code, '$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$', moduleScriptOpeningTag, moduleScriptClosingTag, moduleScriptContent)
-			code = replacePlaceholder(code, '$_INLANG_STYLE_PLACEHOLDER_$', '', '', styleTag, false)
+			code = replacePlaceholder(code, '{$_INLANG_SCRIPT_PLACEHOLDER_$}', scriptOpeningTag, scriptClosingTag, scriptContent)
+			code = replacePlaceholder(code, '{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}', moduleScriptOpeningTag, moduleScriptClosingTag, moduleScriptContent)
+			code = replacePlaceholder(code, '{$_INLANG_STYLE_PLACEHOLDER_$}', '', '', styleTag, false)
 
 			return code.trim()
 		}

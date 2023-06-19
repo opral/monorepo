@@ -4,45 +4,123 @@ import type { TransformConfig } from "../config.js"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 
-vi.mock("./_.svelte.js", () => ({
-	transformSvelte: (_: unknown, c: string) => c,
-	isOptOutImportPresent: () => false,
-}))
+vi.mock("./_.svelte.js", async () => {
+	const svelteTransforms = await vi.importActual<typeof import('./_.svelte.js')>('./_.svelte.js')
+
+	return ({
+		...svelteTransforms,
+		transformSvelte: (_: unknown, c: string) => c,
+	})
+})
 
 describe("transformLayoutSvelte", () => {
-	test('TESTING OUTPUT', () => {
-		const code = dedent`
-			<script lang="src">
-				console.log('hello world')
-			</script>
-
-			<h1 class="heading">
-				Hello World
-			</h1>
-
-			<style>
-				h1 {
-					color: red;
+	describe("root=true", () => {
+		test("should insert code to an empty file", () => {
+			const code = ""
+			const config = getTransformConfig()
+			const transformed = transformLayoutSvelte(config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+				import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
 				}
-			</style>
+				</script>
+				{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}<slot />{/key}{/if}"
+			`)
+		})
+
+		test("should add code to existing code", () => {
+			const code = dedent`
+				<script>
+					export let data;
+
+					console.log(data)
+				</script>
+
+				<h1>this is a test</h1>
+
+				<p>{JSON.stringify(data, null, 3)}</p>
 			`
-		const config = getTransformConfig()
-		const result = transformLayoutSvelte(config, code, true)
-		expect(result).toMatchInlineSnapshot(`
-			"<script lang=\\"src\\">
-				console.log('hello world');
-			</script>
-
-			<h1 class=\\"heading\\">
-				Hello World
-			</h1>
-
-			<style>
-				h1 {
-					color: red;
+			const config = getTransformConfig()
+			const transformed = transformLayoutSvelte(config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
 				}
-			</style>"
-		`)
+				console.log(data);
+				</script>{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}
+
+				<h1>this is a test</h1>
+
+				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
+			`)
+		})
+
+		test("should not wrap special svelte elements", () => {
+			const code = dedent`
+				<svelte:window on:load={onLoad} />
+
+				test
+
+				<svelte:body on:click={onClick} />
+
+				other test
+
+				<svelte:head>
+					<title>test</title>
+				</svelte:head>
+
+				<svelte:options tag="test" />
+
+				random content
+			`
+			const config = getTransformConfig()
+			const transformed = transformLayoutSvelte(config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+				import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				</script>
+				<svelte:window on:load={onLoad} />{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}
+
+				test
+
+				{/key}{/if}<svelte:body on:click={onClick} />{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}
+
+				other test
+
+				{/key}{/if}<svelte:head>
+					<title>test</title>
+				</svelte:head>{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}
+
+				{/key}{/if}<svelte:options tag=\\"test\\" />{#key $$_INLANG_LANGUAGE_$$}{#if $$_INLANG_LANGUAGE_$$}
+
+				random content{/key}{/if}"
+			`)
+		})
 	})
 
 	describe("non-root", () => {
@@ -80,208 +158,6 @@ describe("transformLayoutSvelte", () => {
 describe.skip("transformLayoutSvelte", () => {
 	describe("basics", () => {
 		describe("root=true", () => {
-			it("adds code to an empty file", async () => {
-				const code = await transformLayoutSvelte(getTransformConfig(), "", true)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					  language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser && $language) {
-					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(\\"language\\", $language);
-					}</script>
-					{#if $language}<slot />{/if}"
-				`)
-			})
-			it("adds code to an empty file", async () => {
-				const code = await transformLayoutSvelte(
-					getTransformConfig(),
-					"<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). -->",
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					  language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser && $language) {
-					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(\\"language\\", $language);
-					}</script>
-					{#if $language}<!-- This file was created by inlang. It is needed in order to circumvent a current limitation of SvelteKit. Please do not delete it (inlang will recreate it if needed). --><slot />{/if}"
-				`)
-			})
-
-			it("adds code to a file with arbitrary contents", async () => {
-				const code = await transformLayoutSvelte(
-					getTransformConfig(),
-					dedent`
-						<script>
-						import { onMount } from "svelte"
-
-							export let data
-
-							onMount(() => {
-								console.info(123)
-							})
-						</script>
-
-						<h1>Hello {data.name}!</h1>
-					`,
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					import { onMount } from \\"svelte\\"
-
-					onMount(() => {
-					    console.info(123)
-					})
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					    language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser && $language) {
-					    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					    localStorage.setItem(\\"language\\", $language);
-					}</script>
-
-					{#if $language}<h1>Hello {data.name}!</h1>{/if}"
-				`)
-			})
-
-			it("Doesn't wrap the tags <svelte:window>, <svelte:document>, <svelte:body>, <svelte:head> and <svelte:options>", async () => {
-				const code = await transformLayoutSvelte(
-					getTransformConfig(),
-					dedent`
-						<h1>Hello {data.name}!</h1>
-						<svelte:window/>
-						<svelte:document/>
-						<h2>Blue</h2>
-						<svelte:body/>
-						<svelte:fragment/>
-						<div />
-						<svelte:head/>
-						<slot />
-					`,
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					  language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser && $language) {
-					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(\\"language\\", $language);
-					}</script><svelte:window/><svelte:document/><svelte:body/><svelte:head/>
-					{#if $language}<h1>Hello {data.name}!</h1>
-
-
-					<h2>Blue</h2>
-
-					<svelte:fragment/>
-					<div />
-
-					<slot />{/if}"
-				`)
-			})
-
-			it("adds script tag if missing", async () => {
-				const code = await transformLayoutSvelte(
-					getTransformConfig(),
-					dedent`
-						<h1>Hello {data.name}!</h1>
-
-						<slot />
-					`,
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					  language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser && $language) {
-					  document.body.parentElement?.setAttribute(\\"lang\\", $language);
-					  localStorage.setItem(\\"language\\", $language);
-					}</script>
-					{#if $language}<h1>Hello {data.name}!</h1>
-
-					<slot />{/if}"
-				`)
-			})
-
-			it("wraps #if and #key around markup", async () => {
-				const code = await transformLayoutSvelte(
-					{ isStatic: true, languageInUrl: true } as TransformConfig,
-					"",
-					true,
-				)
-				expect(code).toMatchInlineSnapshot(`
-					"<script>import { browser } from \\"$app/environment\\";
-					import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
-					import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
-					export let data;
-					let language;
-					addRuntimeToContext(getRuntimeFromData(data));
-
-					({
-					  language: language
-					} = getRuntimeFromContext());
-
-					$:
-					if (browser) {
-					  addRuntimeToContext(getRuntimeFromData(data));
-
-					  ({
-					    language: language
-					  } = getRuntimeFromContext());
-					}</script>
-					{#if language}{#key language}<slot />{/key}{/if}"
-				`)
-			})
-
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {
 					const code = await transformLayoutSvelte(

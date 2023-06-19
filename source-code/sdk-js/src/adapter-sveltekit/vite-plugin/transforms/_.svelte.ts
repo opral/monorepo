@@ -19,11 +19,11 @@ import { codeToSourceFile } from '../../../utils/utils.js'
 import type { SvelteFileParts } from '../../../utils/svelte.util.js'
 
 // TODO: test
-export const isOptOutImportPresent = ({ script }: SvelteFileParts) => {
+export const isOptOutImportPresent = ({ script, moduleScript }: SvelteFileParts) => {
 	const scriptSourceFile = codeToSourceFile(script)
 	if (isOptOutImportPresentOriginal(scriptSourceFile)) return true
 
-	const moduleScriptSourceFile = codeToSourceFile(script)
+	const moduleScriptSourceFile = codeToSourceFile(moduleScript)
 	if (isOptOutImportPresentOriginal(moduleScriptSourceFile)) return true
 
 	return false
