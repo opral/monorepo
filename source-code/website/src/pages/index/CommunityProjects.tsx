@@ -6,7 +6,7 @@ export function CommunityProjects() {
 	return (
 		<div class="pb-16">
 			{/* START repository grid */}
-			<div class="w-full flex justify-between items-center pb-6">
+			<div class="w-full flex justify-between items-end pb-6">
 				<div class="flex flex-col gap-2 grow">
 					<h2 class="text-2xl font-medium text-slate-900">Projects that use inlang</h2>
 					<p class="text-md font-regular text-outline-variant">
