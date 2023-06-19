@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 2.2.2
+
+### Patch Changes
+
+- 6326e01e: fix: placeholder matching https://github.com/inlang/inlang/issues/955
+
 ## 2.2.1
 
 ### Patch Changes
