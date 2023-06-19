@@ -1,5 +1,11 @@
 # @inlang/core
 
+## 0.9.2
+
+### Patch Changes
+
+- 4460a451: Deprecate ast.metadata. See https://github.com/inlang/inlang/issues/945
+
 ## 0.9.0
 
 ### Minor Changes
