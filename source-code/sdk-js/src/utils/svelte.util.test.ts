@@ -32,15 +32,15 @@ describe("getSvelteFileParts", () => {
 		expect(result.markup).toMatchInlineSnapshot(`
 			"<svelte:options />
 
-			$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$
+			{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}
 
-			$_INLANG_SCRIPT_PLACEHOLDER_$
+			{$_INLANG_SCRIPT_PLACEHOLDER_$}
 
 			<h1 class=\\"heading\\">
 				Hello World
 			</h1>
 
-			$_INLANG_STYLE_PLACEHOLDER_$"
+			{$_INLANG_STYLE_PLACEHOLDER_$}"
 		`)
 
 		expect(result.toString()).toEqual(code)
@@ -111,7 +111,7 @@ describe("getSvelteFileParts", () => {
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toBe("")
 			expect(result.script).toMatchInlineSnapshot('"console.log(\'test\')"')
-			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_SCRIPT_PLACEHOLDER_$"')
+			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_SCRIPT_PLACEHOLDER_$}"')
 		})
 
 		test('just module script tag', () => {
@@ -121,7 +121,7 @@ describe("getSvelteFileParts", () => {
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toMatchInlineSnapshot('"console.log(\'test\')"')
 			expect(result.script).toBe("")
-			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$"')
+			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}"')
 		})
 
 		test('just style tag', () => {
@@ -131,7 +131,7 @@ describe("getSvelteFileParts", () => {
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toBe("")
 			expect(result.script).toBe("")
-			expect(result.markup).toMatchInlineSnapshot('"$_INLANG_STYLE_PLACEHOLDER_$"')
+			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_STYLE_PLACEHOLDER_$}"')
 		})
 	})
 

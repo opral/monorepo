@@ -18,9 +18,11 @@ const addImports = (
 	root: boolean,
 	wrapperFunctionName: string,
 ) => {
-	addImport(sourceFile, "$app/environment", "browser")
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
-	addImport(sourceFile, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
+	if (!config.languageInUrl) {
+		addImport(sourceFile, "$app/environment", "browser")
+		addImport(sourceFile, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

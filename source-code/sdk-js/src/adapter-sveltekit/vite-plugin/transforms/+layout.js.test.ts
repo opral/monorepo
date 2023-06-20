@@ -14,9 +14,7 @@ describe("transformLayoutJs", () => {
 				const transformed = transformLayoutJs(config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`
-					"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-					import { browser } from '$app/environment';
+					"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper().use(() => {
 					});"
 				`)
@@ -29,8 +27,8 @@ describe("transformLayoutJs", () => {
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 					import { browser } from '$app/environment';
+					import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 					export const load = initRootLayoutLoadWrapper({
 					    initDetectors: browser
 					        ? () => [initLocalStorageDetector(), navigatorDetector]
@@ -49,9 +47,7 @@ describe("transformLayoutJs", () => {
 			const transformed = transformLayoutJs(config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-				import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				import { browser } from '$app/environment';
+				"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export const load = initRootLayoutLoadWrapper().use(async () => {
 				});"
 			`)
