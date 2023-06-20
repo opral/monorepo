@@ -11,6 +11,11 @@ export const repositories: Repositories = [
 		description: "Example repository that showcases inlang.",
 	},
 	{
+		owner: "calcom",
+		repository: "cal.com",
+		description: "Scheduling infrastructure for absolutely everyone.",
+	},
+	{
 		owner: "LAION-AI",
 		repository: "Open-Assistant",
 		description:
@@ -23,14 +28,14 @@ export const repositories: Repositories = [
 			"AppFlowy is an open-source alternative to Notion. You are in charge of your data and customizations. Built with Flutter and Rust.",
 	},
 	{
-		owner: "jazzband",
-		repository: "djangorestframework-simplejwt",
-		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
-	},
-	{
 		owner: "osmosis-labs",
 		repository: "osmosis-frontend",
 		description: "Web interface for Osmosis Zone",
+	},
+	{
+		owner: "jazzband",
+		repository: "djangorestframework-simplejwt",
+		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
 	},
 	{
 		owner: "allinurl",
