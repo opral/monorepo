@@ -157,9 +157,9 @@ it("should remember if a file has a new line at the end or not", async () => {
 	expect(file2).toBe(withoutNewLine)
 })
 
-it("should correctly identify placeholders", async () => {
+it("should correctly identify placeholders without adding Text elements around it", async () => {
 	const enResource = `{
-    "test": "Hello {{username}}"
+    "test": "{{username}}"
 }`
 
 	const env = await mockEnvironment({})
@@ -175,6 +175,6 @@ it("should correctly identify placeholders", async () => {
 	const resources = await config.readResources!({
 		config: config as any,
 	})
-	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
-	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
+	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
+	expect(resources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
 })
