@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 2.2.3
+
+### Patch Changes
+
+- ceae4a83: fix: prevent split(regex) from generating empty text elements
+
 ## 2.2.2
 
 ### Patch Changes
