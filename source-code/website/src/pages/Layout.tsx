@@ -200,14 +200,14 @@ const Footer = (props: { isLandingPage: boolean }) => {
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Docs</p>
 						<a
-							href="https://inlang.com/documentation/getting-started"
+							href="https://inlang.com/documentation/quick-start"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Getting Started
 						</a>
 
 						<a
-							href="https://inlang.com/documentation/why-inlang"
+							href="https://inlang.com/documentation"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Why Inlang
