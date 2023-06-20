@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.6
+
+### Patch Changes
+
+- ceae4a83: fix: prevent split(regex) from generating empty text elements
+
 ## 3.0.5
 
 ### Patch Changes
