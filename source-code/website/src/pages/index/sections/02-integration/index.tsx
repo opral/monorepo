@@ -73,7 +73,9 @@ const Integration = () => {
 						<h2 class="text-center text-3xl font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
 							{data.title}
 						</h2>
-						<p class="text-base px-10 md:w-[55%] text-center text-outline-variant">{data.description}</p>
+						<p class="text-base px-10 md:w-[55%] sm:leading-7 text-center text-outline-variant">
+							{data.description}
+						</p>
 						<div class="pt-4">
 							<Button href={data.buttonLink} type="secondary">
 								{data.button}
