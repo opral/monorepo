@@ -372,28 +372,31 @@ function parsePattern(
 		  )
 		: new RegExp(`(${variableReferencePattern}\\w+)`, "g")
 
-	const elements: ast.Pattern["elements"] = text.split(placeholder).map((element) => {
-		if (placeholder.test(element)) {
-			return {
-				type: "Placeholder",
-				body: {
-					type: "VariableReference",
-					name: variableReferencePattern[1]
-						? element.slice(
-								variableReferencePattern[0].length,
-								// negative index, removing the trailing pattern
-								-variableReferencePattern[1].length,
-						  )
-						: element.slice(variableReferencePattern[0].length),
-				},
+	const elements: ast.Pattern["elements"] = text
+		.split(placeholder)
+		.filter((element) => element !== "")
+		.map((element) => {
+			if (placeholder.test(element)) {
+				return {
+					type: "Placeholder",
+					body: {
+						type: "VariableReference",
+						name: variableReferencePattern[1]
+							? element.slice(
+									variableReferencePattern[0].length,
+									// negative index, removing the trailing pattern
+									-variableReferencePattern[1].length,
+							  )
+							: element.slice(variableReferencePattern[0].length),
+					},
+				}
+			} else {
+				return {
+					type: "Text",
+					value: element,
+				}
 			}
-		} else {
-			return {
-				type: "Text",
-				value: element,
-			}
-		}
-	})
+		})
 
 	return {
 		type: "Pattern",
