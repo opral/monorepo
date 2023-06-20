@@ -4,16 +4,17 @@ import copy from "clipboard-copy"
 
 const data = {
 	caption: "Add inlang to your project",
-	title: "Take your software worldwide today",
+	title: "Take your software global",
 	description: "Setup inlang in your code base and start using IDE extension, CLI and web editor.",
 	button: {
 		href: "/documentation",
-		text: "Get started now - free",
+		text: "Get started",
 	},
 	secondaryButton: {
-		copyText: "Copied command to clipboard",
+		copyToast: "Copied command to clipboard",
+		copyText: "npx @inlang/cli config init",
 		toolTip: "Copy",
-		text: "npx inlang config init",
+		text: "$ npx @inlang/cli config init",
 	},
 }
 
@@ -37,7 +38,7 @@ const GetStarted = () => {
 						</p>
 						<a href={data.button.href}>
 							<button class="relative bg-surface-800">
-								<div class="relative z-20 bg-surface-200 h-10 w-64 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
+								<div class="relative z-20 bg-surface-200 h-10 w-72 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
 										{data.button.text}
 									</span>
@@ -75,16 +76,16 @@ const GetStarted = () => {
 						>
 							<button
 								onClick={() => {
-									copy(data.secondaryButton.text),
+									copy(data.secondaryButton.copyText),
 										showToast({
 											variant: "success",
-											title: data.secondaryButton.copyText,
+											title: data.secondaryButton.copyToast,
 											duration: 3000,
 										})
 								}}
 								class="bg-gradient-to-r from-surface-500 via-surface-700 via-40% to-surface-500 p-[1px] rounded-md"
 							>
-								<pre class="z-20 h-10 w-64 flex justify-center items-center bg-surface-800 text-sm text-surface-400 rounded-[5px] hover:text-surface-100">
+								<pre class="z-20 h-10 w-72 flex justify-center items-center bg-surface-800 text-sm text-surface-400 rounded-[5px] hover:text-surface-100">
 									{data.secondaryButton.text}
 								</pre>
 							</button>
