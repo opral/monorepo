@@ -178,3 +178,25 @@ it("should correctly identify placeholders", async () => {
 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
 	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
 })
+
+it("should parse Placeholders without adding Text elements around it", async () => {
+	const enResource = `{
+    "test": "{{username}}"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
+		env,
+	)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
+	expect(resources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
+})
