@@ -120,7 +120,7 @@ const ConfigPage = () => {
 										</p>
 									</Show>
 								</div>
-								<p class="text-md text-outline-variant">{card.description}</p>
+								<p class="text-md text-outline-variant sm:leading-7">{card.description}</p>
 								<ul class="items-center list-disc pl-4 pt-2">
 									<For each={card.benefit}>
 										{(benefit) => <li class="text-sm text-outline-variant pt-2">{benefit}</li>}
