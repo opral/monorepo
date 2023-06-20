@@ -1,4 +1,5 @@
 import { parse } from 'svelte/compiler'
+import type { Ast, TemplateNode } from '../../../../../node_modules/svelte/types/compiler/interfaces.js'
 import { Node, type SourceFile } from 'ts-morph'
 import { findExport } from './exports.js'
 import MagicStringImport from "magic-string"
@@ -6,10 +7,6 @@ import MagicStringImport from "magic-string"
 export const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 export type MagicStringType = InstanceType<typeof MagicStringImport.default>
 
-export type Ast = ReturnType<typeof parse>
-type TemplateNode = Exclude<Ast['html']['children'], undefined>[number]
-
-// @ts-ignore
 export const markupToAst = (markup: string) => parse(markup)
 
 // ------------------------------------------------------------------------------------------------
