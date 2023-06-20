@@ -17,6 +17,7 @@ import { transformLanguageJson } from "./[language].json.js"
 // TODO: throw errors if something is not supported and show a guide how to add the functionality manually
 
 export const transformCode = (
+	filePath: string,
 	config: TransformConfig,
 	code: string,
 	{ type, root }: FileInformation,
@@ -25,29 +26,29 @@ export const transformCode = (
 
 	switch (type) {
 		case "hooks.server.js":
-			return transformHooksServerJs(config, code)
+			return transformHooksServerJs(filePath, config, code)
 		case "[language].json":
-			return transformLanguageJson(config, code)
+			return transformLanguageJson(filePath, config, code)
 		case "+server.js":
-			return transformServerRequestJs(config, code, root)
+			return transformServerRequestJs(filePath, config, code, root)
 		case "+layout.server.js":
-			return transformLayoutServerJs(config, code, root)
+			return transformLayoutServerJs(filePath, config, code, root)
 		case "+layout.js":
-			return transformLayoutJs(config, code, root)
+			return transformLayoutJs(filePath, config, code, root)
 		case "+layout.svelte":
-			return transformLayoutSvelte(config, code, root)
+			return transformLayoutSvelte(filePath, config, code, root)
 		case "+page.server.js":
-			return transformPageServerJs(config, code, root)
+			return transformPageServerJs(filePath, config, code, root)
 		case "+page.js":
-			return transformPageJs(config, code, root)
+			return transformPageJs(filePath, config, code, root)
 		case "+page.svelte":
-			return transformPageSvelte(config, code, root)
+			return transformPageSvelte(filePath, config, code, root)
 		case "*.server.js":
-			return transformServerJs(config, code)
+			return transformServerJs(filePath, config, code)
 		case "*.js":
-			return transformJs(config, code)
+			return transformJs(filePath, config, code)
 		case "*.svelte":
-			return transformSvelte(config, code)
+			return transformSvelte(filePath, config, code)
 	}
 }
 

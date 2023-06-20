@@ -3,8 +3,8 @@ import { isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { codeToSourceFile } from '../../../utils/utils.js'
 import type { TransformConfig } from "../config.js"
 
-export const transformServerRequestJs = (config: TransformConfig, code: string, root: boolean) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformServerRequestJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

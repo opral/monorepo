@@ -11,7 +11,7 @@ describe("transformHooksServerJs", () => {
 			test("non-static", () => {
 				const code = ""
 				const config = getTransformConfig({ languageInUrl: true })
-				const transformed = transformHooksServerJs(config, code)
+				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
@@ -33,7 +33,7 @@ describe("transformHooksServerJs", () => {
 			test("static", () => {
 				const code = ""
 				const config = getTransformConfig({ languageInUrl: true, isStatic: true })
-				const transformed = transformHooksServerJs(config, code)
+				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
@@ -49,7 +49,7 @@ describe("transformHooksServerJs", () => {
 			test("static", () => {
 				const code = ""
 				const config = getTransformConfig({ isStatic: true })
-				const transformed = transformHooksServerJs(config, code)
+				const transformed = transformHooksServerJs("", config, code)
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
@@ -82,7 +82,7 @@ describe("transformHooksServerJs", () => {
 			}
 		`
 		const config = getTransformConfig()
-		const transformed = transformHooksServerJs(config, code)
+		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			import * as Sentry from '@sentry/node';
@@ -107,6 +107,7 @@ describe("transformHooksServerJs", () => {
 
 	test("should wrap handle if already defined", () => {
 		const code = transformHooksServerJs(
+			"",
 			getTransformConfig(),
 			dedent`
 				export function handle({ event, resolve }) {
@@ -130,6 +131,7 @@ describe("transformHooksServerJs", () => {
 
 	test("should wrap handle if sequence helper get's used", () => {
 		const code = transformHooksServerJs(
+			"",
 			getTransformConfig(),
 			dedent`
 				import { sequence } from '@sveltejs/kit'
@@ -163,7 +165,7 @@ describe("transformHooksServerJs", () => {
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
 		const config = getTransformConfig()
-		const transformed = transformHooksServerJs(config, code)
+		const transformed = transformHooksServerJs("", config, code)
 		expect(transformed).toEqual(code)
 	})
 
@@ -171,14 +173,14 @@ describe("transformHooksServerJs", () => {
 		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
 			const code = "import { i } from '@inlang/sdk-js'"
 			const config = getTransformConfig()
-			expect(() => transformHooksServerJs(config, code)).toThrow()
+			expect(() => transformHooksServerJs("", config, code)).toThrow()
 		})
 
 		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
 			const code =
 				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
 			const config = getTransformConfig()
-			expect(() => transformHooksServerJs(config, code)).not.toThrow()
+			expect(() => transformHooksServerJs("", config, code)).not.toThrow()
 		})
 	})
 })

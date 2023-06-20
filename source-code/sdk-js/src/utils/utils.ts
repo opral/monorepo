@@ -3,25 +3,23 @@ import { dedent } from "ts-dedent"
 
 // ------------------------------------------------------------------------------------------------
 
-const parseCode = (code: string) =>
+const parseCode = (code: string, filePath: string | undefined) =>
 	new Project({
 		manipulationSettings: {
 			quoteKind: QuoteKind.Single,
 			indentationText: IndentationText.Tab,
 			useTrailingCommas: true,
 		},
-		// TODO: add correct file path
-	}).createSourceFile("", code)
-	// }).createSourceFile("test.ts", code, { overwrite: true })
+	}).createSourceFile(filePath || "_dummy_.ts", code, { overwrite: true })
 
 const printCode = (node: Node) => (node && node.print({ scriptKind: ScriptKind.TS }).trim()) || ""
 
 // ------------------------------------------------------------------------------------------------
 
-export const codeToSourceFile = (code: string) => parseCode(dedent(code))
+export const codeToSourceFile = (code: string, filePath?: string) => parseCode(dedent(code), filePath)
 
 export const codeToNode = (code: string) => {
-	const node = codeToSourceFile(code)
+	const node = codeToSourceFile(code, "")
 		.getStatement(Node.isVariableStatement)
 		?.getDeclarationList()
 		.getDeclarations()[0]

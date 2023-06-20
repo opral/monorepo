@@ -1,6 +1,5 @@
 import { dedent } from "ts-dedent"
 import { describe, it, test, expect, vi } from "vitest"
-import type { TransformConfig } from "../config.js"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 
@@ -9,7 +8,7 @@ vi.mock("./_.svelte.js", async () => {
 
 	return ({
 		...svelteTransforms,
-		transformSvelte: (_: unknown, c: string) => c,
+		transformSvelte: (_: unknown, __: unknown, c: string) => c,
 	})
 })
 
@@ -18,7 +17,7 @@ describe("transformLayoutSvelte", () => {
 		test("should insert code to an empty file", () => {
 			const code = ""
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, true)
+			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
@@ -49,7 +48,7 @@ describe("transformLayoutSvelte", () => {
 				<p>{JSON.stringify(data, null, 3)}</p>
 			`
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, true)
+			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
@@ -90,7 +89,7 @@ describe("transformLayoutSvelte", () => {
 				random content
 			`
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, true)
+			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
@@ -127,7 +126,7 @@ describe("transformLayoutSvelte", () => {
 		test("should not do anything", () => {
 			const code = ""
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, false)
+			const transformed = transformLayoutSvelte("", config, code, false)
 			expect(transformed).toEqual(code)
 		})
 	})
@@ -139,7 +138,7 @@ describe("transformLayoutSvelte", () => {
 					import '@inlang/sdk-js/no-transforms';
 				</script>`
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, true)
+			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toEqual(code)
 		})
 
@@ -149,7 +148,7 @@ describe("transformLayoutSvelte", () => {
 					import '@inlang/sdk-js/no-transforms';
 				</script>`
 			const config = getTransformConfig()
-			const transformed = transformLayoutSvelte(config, code, true)
+			const transformed = transformLayoutSvelte("", config, code, true)
 			expect(transformed).toEqual(code)
 		})
 	})
@@ -160,7 +159,8 @@ describe.skip("transformLayoutSvelte", () => {
 		describe("root=true", () => {
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {
-					const code = await transformLayoutSvelte(
+					const code = transformLayoutSvelte(
+						"",
 						getTransformConfig(),
 						dedent`
 							<script>
@@ -200,8 +200,11 @@ describe.skip("transformLayoutSvelte", () => {
 				})
 
 				it("resolves imports correctly (not-reactive)", async () => {
-					const code = await transformLayoutSvelte(
-						{ languageInUrl: true } as TransformConfig,
+					const code = transformLayoutSvelte(
+						"",
+						getTransformConfig({
+							languageInUrl: true
+						}),
 						dedent`
 							<script>
 								import { languages, i } from "@inlang/sdk-js"
@@ -260,8 +263,8 @@ describe.skip("transformLayoutSvelte", () => {
 
 					{language.toUpperCase()}
 				`
-				const code = await transformLayoutSvelte(config, input, false)
-				// expect(code).toMatch(await transformSvelte(config, input))
+				const code = transformLayoutSvelte("", config, input, false)
+				// expect(code).toMatch(transformSvelte(config, input))
 			})
 		})
 	})

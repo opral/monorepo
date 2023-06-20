@@ -5,8 +5,8 @@ import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformPageServerJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

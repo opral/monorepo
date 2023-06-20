@@ -7,8 +7,8 @@ import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
 import { codeToSourceFile, nodeToCode } from "../../../utils/utils.js"
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 
-export const transformLayoutServerJs = (config: TransformConfig, code: string, root: boolean) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformLayoutServerJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

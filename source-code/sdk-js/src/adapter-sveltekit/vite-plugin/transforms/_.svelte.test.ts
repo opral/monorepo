@@ -5,7 +5,8 @@ import { dedent } from "ts-dedent"
 
 describe("transformSvelte", () => {
 	it("basics", async () => {
-		const code = await transformSvelte(
+		const code = transformSvelte(
+			"",
 			getTransformConfig(),
 			dedent`
 				<script>
@@ -43,7 +44,8 @@ describe("transformSvelte", () => {
 	})
 
 	it("languageInUrl is true", async () => {
-		const code = await transformSvelte(
+		const code = transformSvelte(
+			"",
 			getTransformConfig({
 				languageInUrl: false,
 				sourceFileName: "test.svelte",
@@ -101,7 +103,8 @@ describe("transformSvelte", () => {
 	})
 
 	it("languageInUrl is false", async () => {
-		const code = await transformSvelte(
+		const code = transformSvelte(
+			"",
 			getTransformConfig(),
 			dedent`
 				<script lang="ts" context="module">

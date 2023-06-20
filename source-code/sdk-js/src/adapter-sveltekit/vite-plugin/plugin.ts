@@ -76,7 +76,7 @@ export const plugin = () => {
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			const transformedCode = transformCode(config, code, fileInformation)
+			const transformedCode = transformCode(id, config, code, fileInformation)
 			if (config.debug) {
 				const filePath = id.replace(config.cwdFolderPath, "")
 				console.info(dedent`

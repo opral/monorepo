@@ -12,7 +12,7 @@ describe("transformPageJs", () => {
 				test("non-static", () => {
 					const code = ""
 					const config = getTransformConfig({ languageInUrl: true, })
-					const transformed = transformPageJs(config, code, true)
+					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
 						"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
@@ -31,7 +31,7 @@ describe("transformPageJs", () => {
 						languageInUrl: true,
 						isStatic: true,
 					})
-					const transformed = transformPageJs(config, code, true)
+					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
 						"import { redirect } from '@sveltejs/kit';
@@ -57,7 +57,7 @@ describe("transformPageJs", () => {
 				export const load = async () => { };
 			`
 			const config = getTransformConfig({ languageInUrl: true, })
-			const transformed = transformPageJs(config, code, true)
+			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
@@ -75,7 +75,7 @@ describe("transformPageJs", () => {
 		test("should not do anything", () => {
 			const code = ""
 			const config = getTransformConfig()
-			const transformed = transformPageJs(config, code, false)
+			const transformed = transformPageJs("", config, code, false)
 			expect(transformed).toEqual(code)
 		})
 	})
@@ -83,7 +83,7 @@ describe("transformPageJs", () => {
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
 		const code = "import '@inlang/sdk-js/no-transforms'"
 		const config = getTransformConfig()
-		const transformed = transformPageJs(config, code, true)
+		const transformed = transformPageJs("", config, code, true)
 		expect(transformed).toEqual(code)
 	})
 
@@ -91,14 +91,14 @@ describe("transformPageJs", () => {
 		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
 			const code = "import { i } from '@inlang/sdk-js'"
 			const config = getTransformConfig()
-			expect(() => transformPageJs(config, code, true)).toThrow()
+			expect(() => transformPageJs("", config, code, true)).toThrow()
 		})
 
 		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
 			const code =
 				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
 			const config = getTransformConfig()
-			expect(() => transformPageJs(config, code, true)).not.toThrow()
+			expect(() => transformPageJs("", config, code, true)).not.toThrow()
 		})
 	})
 })

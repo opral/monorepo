@@ -6,23 +6,23 @@ import { MagicString, addDataExportIfMissingAndReturnInsertionIndex, markupToAst
 import { addImport } from '../../../utils/ast/imports.js'
 import { dedent } from 'ts-dedent'
 
-export const transformLayoutSvelte = (config: TransformConfig, code: string, root: boolean) => {
+export const transformLayoutSvelte = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
 	const fileParts = getSvelteFileParts(code)
 
-	if (isOptOutImportPresent(fileParts)) return code
+	if (isOptOutImportPresent(filePath, fileParts)) return code
 
-	if (!root) return transformSvelte(config, code)
+	if (!root) return transformSvelte(filePath, config, code)
 
-	fileParts.script = transformScript(config, fileParts.script)
+	fileParts.script = transformScript(filePath, config, fileParts.script)
 	fileParts.markup = transformMarkup(config, fileParts.markup)
 
-	return transformSvelte(config, fileParts.toString())
+	return transformSvelte(filePath, config, fileParts.toString())
 }
 
 // ------------------------------------------------------------------------------------------------
 
-const transformScript = (config: TransformConfig, code: string) => {
-	const sourceFile = codeToSourceFile(code)
+const transformScript = (filePath: string, config: TransformConfig, code: string) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/shared', 'getRuntimeFromData')
 	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/not-reactive', 'addRuntimeToContext', 'getRuntimeFromContext')

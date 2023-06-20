@@ -48,8 +48,8 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformLayoutJs = (config: TransformConfig, code: string, root: boolean) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformLayoutJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

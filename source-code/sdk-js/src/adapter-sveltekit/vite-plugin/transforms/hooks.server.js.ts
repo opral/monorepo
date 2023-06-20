@@ -54,8 +54,8 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformHooksServerJs = (config: TransformConfig, code: string) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformHooksServerJs = (filePath: string, config: TransformConfig, code: string) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

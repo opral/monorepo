@@ -26,8 +26,8 @@ const exportEntriesNode = codeToSourceFile(`
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformLanguageJson = (config: TransformConfig, code: string) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformLanguageJson = (filePath: string, config: TransformConfig, code: string) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

@@ -59,8 +59,8 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageJs = (config: TransformConfig, code: string, root: boolean) => {
-	const sourceFile = codeToSourceFile(code)
+export const transformPageJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 

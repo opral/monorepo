@@ -7,8 +7,8 @@ describe('transformPageSvelte', () => {
 	test('should call transformSvelte', async () => {
 		const code = "<script>console.log('hello world')</script>"
 		const config = getTransformConfig()
-		const transformed = await transformPageSvelte(config, code, true)
-		expect(transformed).toBe(await transformSvelte(config, code))
+		const transformed = transformPageSvelte("", config, code, true)
+		expect(transformed).toBe(transformSvelte("", config, code))
 		// expect(transformed).toBe(code)
 		// expect(transformSvelte).toBeCalled()
 	})
