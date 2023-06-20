@@ -27,6 +27,7 @@ export const tableOfContents: Record<string, string[]> = {
 		(await import("./sdk/usage.md?raw")).default,
 		(await import("./sdk/configuration.md?raw")).default,
 		(await import("./sdk/sveltekit.md?raw")).default,
+		(await import("./sdk/sveltekit-advanced.md?raw")).default,
 		// (await import("./sdk/custom.md?raw")).default,
 	],
 	Guide: [
