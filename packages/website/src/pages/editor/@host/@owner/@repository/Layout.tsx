@@ -23,6 +23,7 @@ export function Layout(props: { children: JSXElement }) {
 		inlangConfig,
 		repositoryIsCloned,
 		setTextSearch,
+		textSearch,
 		filteredLintRules,
 		setFilteredLintRules,
 		filteredLanguages,
@@ -46,7 +47,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 	const handleSearchText = (text: string) => {
-		setTextSearch(text)
+		if (text !== "") setTextSearch(text)
 	}
 	const filters: Filter[] = [
 		{
@@ -143,6 +144,10 @@ export function Layout(props: { children: JSXElement }) {
 			return false
 		}
 	}
+
+	createEffect(() => {
+		console.log(filteredLanguages(), filteredLintRules(), textSearch())
+	})
 
 	return (
 		<RootLayout>

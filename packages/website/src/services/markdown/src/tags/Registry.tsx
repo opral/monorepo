@@ -119,7 +119,6 @@ const Description = (props: { repository: string }) => {
 }
 
 const fetchDataFromRepo = async (url: string) => {
-	console.log(url)
 	let _data: string | undefined
 	await fetch(url)
 		.then((response) => {
