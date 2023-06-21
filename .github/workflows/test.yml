@@ -17,7 +17,6 @@ jobs:
         with:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
-            '*'
             '!source-code/website'
       - name: install node
         uses: actions/setup-node@v3
