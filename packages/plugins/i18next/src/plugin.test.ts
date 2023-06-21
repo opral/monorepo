@@ -1,4 +1,5 @@
 import { mockEnvironment } from "@inlang/core/test"
+import { query } from "@inlang/core/query"
 import { expect, it } from "vitest"
 import { plugin } from "./plugin.js"
 
@@ -199,4 +200,39 @@ it("should parse Placeholders without adding Text elements around it", async () 
 	})
 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
 	expect(resources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
+})
+
+it("should serialize newly added messages", async () => {
+	const enResource = `{
+    "test": "{{username}}"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
+		env,
+	)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	const [newResource] = query(resources[0]!).create({
+		message: {
+			type: "Message",
+			id: { type: "Identifier", name: "test2" },
+			pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello world" }] },
+		},
+	})
+	await config.writeResources!({
+		config: config as any,
+		resources: [newResource!],
+	})
+	const newFile = (await env.$fs.readFile("./en.json", { encoding: "utf-8" })) as string
+	const json = JSON.parse(newFile)
+	expect(json.test).toBe("{{username}}")
+	expect(json.test2).toBe("Hello world")
 })
