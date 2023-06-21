@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.2
+
+### Patch Changes
+
+- f5e76f98: introduce dynamic versions and fix Windows path bug
+
 ## 0.11.1
 
 ### Patch Changes
