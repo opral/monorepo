@@ -16,6 +16,20 @@ assignees: ""
 2. Click on '....'
 3. ...
 
-### Additional information (screenshots?)
+### Additional information
+
+- Please add `inlang.config.js` file:
+
+```js
+// Please paste the file content here
+```
+
+- Validate config with `npx @inlang/cli config validate`:
+
+```sh
+# Please paste the output here
+```
+
 - Browser:
 - Operating system:
+- Screenshots ?
