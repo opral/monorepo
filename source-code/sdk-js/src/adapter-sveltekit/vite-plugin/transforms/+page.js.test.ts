@@ -20,8 +20,7 @@ describe("transformPageJs", () => {
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser
-						}).use(() => {
-						});"
+						}).use(() => { });"
 					`)
 				})
 
@@ -45,8 +44,7 @@ describe("transformPageJs", () => {
 						        throwable: redirect,
 						        getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
 						    },
-						}).use(() => {
-						});"
+						}).use(() => { });"
 					`)
 				})
 			})
@@ -65,8 +63,7 @@ describe("transformPageJs", () => {
 				import { browser } from '$app/environment';
 				export const load = initRootPageLoadWrapper({
 				    browser
-				}).use(async () => {
-				});"
+				}).use(async () => { });"
 			`)
 		})
 	})

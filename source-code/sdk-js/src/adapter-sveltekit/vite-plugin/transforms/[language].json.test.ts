@@ -1,6 +1,5 @@
 import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
-import type { TransformConfig } from "../config.js"
 import { transformLanguageJson } from "../transforms/[language].json.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 

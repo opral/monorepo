@@ -123,7 +123,7 @@ describe("transformHooksServerJs", () => {
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    getLanguage: () => undefined,
 			}).use(function handle({ event, resolve }) {
-			    console.info(\\"TADAA!\\");
+			    console.info('TADAA!');
 			    return resolve(event);
 			});"
 		`)

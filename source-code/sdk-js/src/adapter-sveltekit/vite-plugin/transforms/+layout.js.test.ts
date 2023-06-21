@@ -15,8 +15,7 @@ describe("transformLayoutJs", () => {
 
 				expect(transformed).toMatchInlineSnapshot(`
 					"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-					export const load = initRootLayoutLoadWrapper().use(() => {
-					});"
+					export const load = initRootLayoutLoadWrapper().use(() => { });"
 				`)
 			})
 
@@ -33,8 +32,7 @@ describe("transformLayoutJs", () => {
 					    initDetectors: browser
 					        ? () => [initLocalStorageDetector(), navigatorDetector]
 					        : undefined
-					}).use(() => {
-					});"
+					}).use(() => { });"
 				`)
 			})
 		})
@@ -48,8 +46,7 @@ describe("transformLayoutJs", () => {
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				export const load = initRootLayoutLoadWrapper().use(async () => {
-				});"
+				export const load = initRootLayoutLoadWrapper().use(async () => { });"
 			`)
 		})
 	})
