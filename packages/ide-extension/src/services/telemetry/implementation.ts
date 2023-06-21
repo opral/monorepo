@@ -38,6 +38,15 @@ async function capture(args: CaptureEventArguments) {
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
+	if (args.event === "IDE-EXTENSION activated") {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
+	}
 	return telemetryNode.capture({
 		...args,
 		distinctId: userID,
