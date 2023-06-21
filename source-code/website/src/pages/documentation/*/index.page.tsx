@@ -32,7 +32,7 @@ export function Page(props: PageProps) {
 					hacking the left margins to apply bg-surface-2 with 100rem 
 				    (tested on an ultrawide monitor, works!) 
 				*/}
-					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 py-4 pr-8">
+					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
 						{/* `Show` is a hotfix when client side rendering loaded this page
 						 * filteredTableContents is not available on the client.
 						 */}
@@ -41,7 +41,7 @@ export function Page(props: PageProps) {
 						</Show>
 					</nav>
 					{/* Mobile navbar */}
-					<nav class="fixed -translate-x-4 min-w-full z-10 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
+					<nav class="fixed min-w-full z-10 -translate-x-4 sm:-translate-x-10 sm:px-6 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
 							<h3 slot="summary" class="font-medium">
 								Menu

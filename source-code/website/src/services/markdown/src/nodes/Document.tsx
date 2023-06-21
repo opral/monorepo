@@ -4,7 +4,7 @@ export function Document(props: { children: JSXElement }) {
 	// the style comes from https://tailwindcss.com/docs/typography-plugin
 	return (
 		<article
-			class="pt-24 prose w-full mx-auto max-w-3xl"
+			class="pt-24 md:pt-10 prose w-full mx-auto max-w-3xl"
 			classList={{ [codeStyle]: true, [fontStyle]: true }}
 		>
 			{props.children}
