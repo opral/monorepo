@@ -9,7 +9,7 @@ export const validate = new Command()
 	.description("Validate the inlang config.")
 	.action(validateCommandAction)
 
-async function validateCommandAction() {
+export async function validateCommandAction() {
 	try {
 		// Get the config
 		const [config, errorMessage] = await getConfig({ options: cli.opts() })
@@ -18,7 +18,7 @@ async function validateCommandAction() {
 			return
 		}
 
-		log.info("🔎  Validating the config file...")
+		log.info("🔎 Validating the config file...")
 
 		await parseConfig({ config })
 

@@ -6,6 +6,7 @@ import prompts from "prompts"
 import { log } from "../../utilities.js"
 import { bold, italic } from "../../utilities/format.js"
 import { getLatestVersion } from "../../utilities/getLatestVersion.js"
+import { validateCommandAction } from "./validate.js"
 
 // Plugin import types
 type PluginImports = {
@@ -237,13 +238,5 @@ export async function initCommandAction() {
 	log.success(`🎉 inlang.config.js file created successfully.`)
 
 	// validate the config file
-	exec("npx @inlang/cli@latest config validate", (error, stdout, stderr) => {
-		if (error) {
-			log.error(`❌ ${error}`)
-		} else if (stderr) {
-			log.error(`❌ ${stderr}`)
-		} else if (stdout) {
-			log.log(`${stdout}`)
-		}
-	})
+	validateCommandAction()
 }
