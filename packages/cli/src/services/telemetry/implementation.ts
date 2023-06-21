@@ -40,6 +40,15 @@ export const telemetry = new Proxy(posthog, {
  * Wrapper to auto inject the git origin url and user id.
  */
 function capture(args: CaptureEventArguments) {
+	if (args.event === "CLI started") {
+		posthog.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
+	}
 	return posthog.capture({
 		...args,
 		distinctId: "unknown",
