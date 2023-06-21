@@ -23,7 +23,7 @@ The config must be named `inlang.config.js`, exist at the root of a repository, 
 export async function defineConfig(env) {
 	// importing the json plugin
 	const plugin = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
 	)
 
 	const pluginConfig = {

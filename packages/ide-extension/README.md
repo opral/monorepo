@@ -41,7 +41,7 @@ Create a `inlang.config.js` in the **root** of your project. You can use the fol
 ```js
 export async function defineConfig(env) {
 	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
 	)
 
 	return {
@@ -79,7 +79,7 @@ If you are using a different translation function, you can use the following cod
 ```js
 export async function defineConfig(env) {
 	const { default: jsonPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
 	)
 
 	return {
