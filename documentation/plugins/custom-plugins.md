@@ -21,7 +21,7 @@ Plugins can be imported via the `$import` [environment function](/documentation/
 
 export async function defineConfig(env) {
 	const { default: plugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js",
 	)
 	return {
 		plugins: [plugin()],
