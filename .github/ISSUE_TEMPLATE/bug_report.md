@@ -18,13 +18,15 @@ assignees: ""
 
 ### Additional information
 
-- Please add `inlang.config.js` file:
+- `inlang.config.js` file:
 
 ```js
 // Please paste the file content here
 ```
 
-- Validate config with `npx @inlang/cli config validate`:
+<!-- Validate config with `npx @inlang/cli config validate` -->
+
+- `npx @inlang/cli config validate` output:
 
 ```sh
 # Please paste the output here
