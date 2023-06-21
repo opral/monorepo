@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.4
+
+### Patch Changes
+
+- 56c9d56f: fix auto major version
+
 ## 0.11.3
 
 ### Patch Changes
