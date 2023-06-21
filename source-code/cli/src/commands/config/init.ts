@@ -5,6 +5,7 @@ import prompts from "prompts"
 import { log } from "../../utilities.js"
 import { bold, italic } from "../../utilities/format.js"
 import { getLatestVersion } from "../../utilities/getLatestVersion.js"
+import { validateCommandAction } from "./validate.js"
 
 // Plugin import types
 type PluginImports = {
