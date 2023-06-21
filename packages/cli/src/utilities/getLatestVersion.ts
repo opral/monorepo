@@ -4,7 +4,12 @@ export async function getLatestVersion(packageName: string): Promise<string | un
 	try {
 		const response = await fetch(`https://registry.npmjs.org/${packageName}`)
 		const metadata = await response.json()
-		return metadata["dist-tags"].latest
+		const latestVersion = metadata["dist-tags"].latest
+
+		// Extract the major version with a single digit
+		const majorVersion = latestVersion.split(".")[0]
+
+		return majorVersion
 	} catch (error) {
 		log.error(`Failed to retrieve the latest version for ${packageName}:`, error)
 		return undefined
