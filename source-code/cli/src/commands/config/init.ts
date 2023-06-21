@@ -5,6 +5,7 @@ import path from "node:path"
 import prompts from "prompts"
 import { log } from "../../utilities.js"
 import { bold, italic } from "../../utilities/format.js"
+import { getLatestVersion } from "../../utilities/getLatestVersion.js"
 
 // Plugin import types
 type PluginImports = {
@@ -159,7 +160,11 @@ export async function initCommandAction() {
 
 	// Generate the config file content
 	const languageFolderPath = getLanguageFolderPath(rootDir)
-	const pathPattern = languageFolderPath ? path.join(languageFolderPath, "{language}.json") : ""
+	const pathPatternRaw = languageFolderPath ? path.join(languageFolderPath, "{language}.json") : ""
+
+	// Windows: Replace backward slashes with forward slashes
+	const pathPattern = pathPatternRaw.replace(/\\/g, "/")
+
 	if (pathPattern === "") {
 		log.warn(
 			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
@@ -171,11 +176,19 @@ export async function initCommandAction() {
 		)
 	}
 
+	const v = getLatestVersion
+
 	const pluginImports: PluginImports = {
-		json: `const { default: jsonPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js');`,
-		i18next: `const { default: i18nextPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@2/dist/index.js');`,
+		json: `const { default: jsonPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-json@${await v(
+			"@inlang/plugin-json",
+		)}/dist/index.js');`,
+		i18next: `const { default: i18nextPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@${await v(
+			"@inlang/plugin-i18next",
+		)}/dist/index.js');`,
 		"typesafe-i18n": `const { default: typesafeI18nPlugin } = await env.$import('https://cdn.jsdelivr.net/gh/ivanhofer/inlang-plugin-typesafe-i18n@2/dist/index.js');`,
-		"@inlang/sdk-js": `const { default: sdkPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin/dist/index.js');`,
+		"@inlang/sdk-js": `const { default: sdkPlugin } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/sdk-js-plugin@${await v(
+			"@inlang/sdk-js-plugin",
+		)}/dist/index.js');`,
 	}
 
 	const pluginImportsCode = pluginImports[plugin] || ""
@@ -198,7 +211,9 @@ export async function initCommandAction() {
 	export async function defineConfig(env) {
     ${pluginImportsCode}
     
-    const { default: standardLintRules } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js');
+    const { default: standardLintRules } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@${await v(
+			"@inlang/plugin-standard-lint-rules",
+		)}/dist/index.js');
 
     return {
       referenceLanguage: 'en',
