@@ -1,15 +1,15 @@
 import type { TransformConfig } from "../config.js"
-import { isOptOutImportPresent, transformSvelte } from "./_.svelte.js"
+import { transformSvelte } from "./_.svelte.js"
 import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
 import { getSvelteFileParts } from '../../../utils/svelte.util.js'
-import { MagicString, addDataExportIfMissingAndReturnInsertionIndex, markupToAst, wrapMarkupChildren, insertSlotIfEmptyFile } from '../../../utils/ast/svelte.js'
+import { MagicString, addDataExportIfMissingAndReturnInsertionIndex, markupToAst, wrapMarkupChildren, insertSlotIfEmptyFile, isOptOutImportPresent } from '../../../utils/ast/svelte.js'
 import { addImport } from '../../../utils/ast/imports.js'
 import { dedent } from 'ts-dedent'
 
 export const transformLayoutSvelte = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
 	const fileParts = getSvelteFileParts(code)
 
-	if (isOptOutImportPresent(filePath, fileParts)) return code
+	if (isOptOutImportPresent(fileParts)) return code
 
 	if (!root) return transformSvelte(filePath, config, code)
 

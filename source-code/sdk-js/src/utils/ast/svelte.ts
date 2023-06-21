@@ -3,6 +3,9 @@ import type { Ast, TemplateNode } from '../../../../../node_modules/svelte/types
 import { Node, type SourceFile } from 'ts-morph'
 import { findExport } from './exports.js'
 import MagicStringImport from "magic-string"
+import type { SvelteFileParts } from '../svelte.util.js'
+import { codeToSourceFile } from '../utils.js'
+import { isOptOutImportPresent as isOptOutImportPresentOriginal, isSdkImportPresent as isSdkImportPresentOriginal } from './imports.js'
 
 export const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
 export type MagicStringType = InstanceType<typeof MagicStringImport.default>
@@ -89,4 +92,28 @@ export const addDataExportIfMissingAndReturnInsertionIndex = (sourceFile: Source
 	sourceFile.insertStatements(index, `export let data`)
 
 	return index
+}
+
+// ------------------------------------------------------------------------------------------------
+
+// TODO: test
+export const isOptOutImportPresent = ({ script, moduleScript }: SvelteFileParts) => {
+	const scriptSourceFile = codeToSourceFile(script)
+	if (isOptOutImportPresentOriginal(scriptSourceFile)) return true
+
+	const moduleScriptSourceFile = codeToSourceFile(moduleScript)
+	if (isOptOutImportPresentOriginal(moduleScriptSourceFile)) return true
+
+	return false
+}
+
+// TODO: test
+export const isSdkImportPresent = ({ script, moduleScript }: SvelteFileParts) => {
+	const scriptSourceFile = codeToSourceFile(script)
+	if (isSdkImportPresentOriginal(scriptSourceFile)) return true
+
+	const moduleScriptSourceFile = codeToSourceFile(moduleScript)
+	if (isSdkImportPresentOriginal(moduleScriptSourceFile)) return true
+
+	return false
 }

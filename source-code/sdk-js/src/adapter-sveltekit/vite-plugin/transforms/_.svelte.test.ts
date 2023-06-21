@@ -1,171 +1,101 @@
-import { describe, it, expect } from "vitest"
+import { describe, test, expect } from "vitest"
 import { transformSvelte } from "./_.svelte.js"
 import { getTransformConfig } from "./test-helpers/config.js"
 import { dedent } from "ts-dedent"
 
+
 describe("transformSvelte", () => {
-	it("basics", async () => {
-		const code = transformSvelte(
-			"",
-			getTransformConfig(),
-			dedent`
+	describe("empty file", () => {
+		test("should not do anything", () => {
+			const code = ""
+			const config = getTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toEqual(code)
+		})
+	})
+
+	describe("'@inlang/sdk-js' imports", () => {
+		test("should transform imports", () => {
+			const code = dedent`
 				<script>
-					import { i, languages, switchLanguage } from "@inlang/sdk-js";
-					const blue = i;
-					const green = languages;
+					import { i } from "@inlang/sdk-js"
 				</script>
 
-				{#each languages as lang}
-					<button on:click={() =>switchLanguage(lang)}>{lang}</button>
-				{/each}
+				<h1>{i('hello')}</h1>
+			`
+			const config = getTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				const { i } = getRuntimeFromContext();
+				</script>
 
-				<h1>{i("welcome")}</h1>
-			`,
-		)
-		expect(code).toMatchInlineSnapshot(`
-			"<script>import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-			let i, languages, switchLanguage;
+				<h1>{i('hello')}</h1>"
+			`)
+		})
 
-			({
-			    i: i,
-			    languages: languages,
-			    switchLanguage: switchLanguage
-			} = getRuntimeFromContext());
+		test("should resolve aliases", () => {
+			const code = dedent`
+				<script>
+					import { i as u } from "@inlang/sdk-js"
+				</script>
+			`
+			const config = getTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				const { i: u } = getRuntimeFromContext();
+				</script>"
+			`)
+		})
 
-			const blue = $i;
-			const green = languages;</script>
+		test("should support multiple imports", () => {
+			const code = dedent`
+				<script>
+					import { i as u } from "@inlang/sdk-js"
+					import { languages, i } from "@inlang/sdk-js"
+				</script>
+			`
+			const config = getTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				const { i: u, languages, i } = getRuntimeFromContext();
+				</script>"
+			`)
+		})
 
-			{#each languages as lang}
-				<button on:click={() =>switchLanguage(lang)}>{lang}</button>
-			{/each}
-
-			<h1>{$i(\\"welcome\\")}</h1>"
-		`)
+		test("should work on module script", () => {
+			const code = dedent`
+				<script context="module">
+					import { i as u } from "@inlang/sdk-js"
+					import { languages, i } from "@inlang/sdk-js"
+				</script>
+			`
+			const config = getTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script context=\\"module\\">
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				const { i: u, languages, i } = getRuntimeFromContext();
+				</script>"
+			`)
+		})
 	})
 
-	it("languageInUrl is true", async () => {
-		const code = transformSvelte(
-			"",
-			getTransformConfig({
-				languageInUrl: false,
-				sourceFileName: "test.svelte",
-				sourceMapName: "test.svelte.js",
-			}),
-			dedent`
-				<script lang="ts" context="module">
-				</script>
+	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {
+		const code = dedent`
+			<script>
+				import '@inlang/sdk-js/no-transforms'
+			</script>
 
-				<script lang="ts">
-					export let prop: string
-					import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
-					const blue = iStore;
-					const green = iLanguage
-					console.info(blue)
-				</script>
-
-				<style>
-					.red {
-						color: red;
-					}
-				</style>
-
-				<h1 class="red">{prop}</h1>
-				<h1 class="red">{iStore}</h1>
-				<h1 class="red">{iLanguage}</h1>
-			`,
-		)
-		expect(code).toMatchInlineSnapshot(`
-			"<script lang=\\"ts\\" context=\\"module\\"></script>
-
-			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-			export let prop;
-			let iStore, iLanguage;
-
-			({
-			  i: iStore,
-			  language: iLanguage
-			} = getRuntimeFromContext());
-
-			const blue = $iStore;
-			const green = $iLanguage;
-			console.info(blue);</script>
-
-			<style>
-				.red {
-					color: red;
-				}
-			</style>
-
-			<h1 class=\\"red\\">{prop}</h1>
-			<h1 class=\\"red\\">{$iStore}</h1>
-			<h1 class=\\"red\\">{$iLanguage}</h1>"
-		`)
-	})
-
-	it("languageInUrl is false", async () => {
-		const code = transformSvelte(
-			"",
-			getTransformConfig(),
-			dedent`
-				<script lang="ts" context="module">
-				</script>
-
-				<script lang="ts">
-					export let prop: string
-					import { i as iStore, language as iLanguage } from '@inlang/sdk-js';
-					const blue = iStore;
-					const green = iLanguage
-					console.info(blue)
-				</script>
-
-				<style>
-					.red {
-						color: red;
-					}
-				</style>
-
-				<h1 class="red">{prop}</h1>
-				<h1 class="red">{iStore}</h1>
-				<h1 class="red">{iLanguage}</h1>
-			`,
-		)
-		expect(code).toMatchInlineSnapshot(`
-			"<script lang=\\"ts\\" context=\\"module\\"></script>
-
-			<script lang=\\"ts\\">import { getRuntimeFromContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
-			export let prop;
-			let iStore, iLanguage;
-
-			({
-			  i: iStore,
-			  language: iLanguage
-			} = getRuntimeFromContext());
-
-			const blue = $iStore;
-			const green = $iLanguage;
-			console.info(blue);</script>
-
-			<style>
-				.red {
-					color: red;
-				}
-			</style>
-
-			<h1 class=\\"red\\">{prop}</h1>
-			<h1 class=\\"red\\">{$iStore}</h1>
-			<h1 class=\\"red\\">{$iLanguage}</h1>"
-		`)
+			<h1>hello</h1>
+		`
+		const config = getTransformConfig()
+		const transformed = transformSvelte("", config, code)
+		expect(transformed).toEqual(code)
 	})
 })
-
-// NOTES
-// - Can merge imports of
-//     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";
-//     - import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";
-// - Removes ALL imports from "@inlang/sdk-js"
-// - Allows import aliasing for all imports of "import {i as iLanguage} from '@inlang/sdk-js"
-// - Destructures all previosly imported module ALIASES or MODULES from "@inlang/sdk-js" at "... = getRuntimeFromContext()"
-// - Prepends the imports "i" and "language" from "@inlang/sdk-js" wherever they are used in the code with a "$" in the reactive case
-
-// NOTES pt.2
-// - Also test for files that don't have a regular script tag (meaning one without `context="module"`).

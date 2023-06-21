@@ -73,7 +73,6 @@ export const addImport = (
 }
 
 // ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
 
 const textWithoutQuotes = (text: string) => text.replace(/^['"]|['"]$/g, "")
 
@@ -82,7 +81,7 @@ export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 		.forEachChildAsArray()
 		.map((node) =>
 			Node.isImportDeclaration(node) &&
-			textWithoutQuotes(node.getModuleSpecifier().getText()) === path
+				textWithoutQuotes(node.getModuleSpecifier().getText()) === path
 				? node
 				: undefined,
 		)
@@ -100,7 +99,15 @@ export const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, n
 		(element) => (element.getAliasNode()?.getText() || element.getName()) === name,
 	)
 
+// TODO: test
+export const getImportSpecifiers = (importDeclaration: ImportDeclaration) =>
+	getNamedImportSpecifiers(importDeclaration)
+
 // ------------------------------------------------------------------------------------------------
 
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
 	!!findImportDeclarations(sourceFile, "@inlang/sdk-js/no-transforms").length
+
+// TODO: test
+export const isSdkImportPresent = (sourceFile: SourceFile) =>
+	!!findImportDeclarations(sourceFile, "@inlang/sdk-js").length

@@ -1,125 +1,52 @@
 import type { TransformConfig } from "../config.js"
-import { parse, preprocess } from "svelte/compiler"
-import { parseModule, generateCode } from "magicast"
-import { deepMergeObject } from "magicast/helpers"
-import { types } from "recast"
-import {
-	getReactiveImportIdentifiers,
-	getRootReferenceIndexes,
-	initImportedVariablesAst,
-	makeJsReactive,
-	makeMarkupReactive,
-	variableDeclarationAst,
-} from "../../../helpers/ast.js"
-import MagicStringImport from "magic-string"
-import { vitePreprocess } from "@sveltejs/kit/vite"
-import { getSdkImportedModules } from "../../../helpers/inlangAst.js"
-import { isOptOutImportPresent as isOptOutImportPresentOriginal } from '../../../utils/ast/imports.js'
-import { codeToSourceFile } from '../../../utils/utils.js'
-import type { SvelteFileParts } from '../../../utils/svelte.util.js'
-
-// TODO: test
-export const isOptOutImportPresent = (filePath: string, { script, moduleScript }: SvelteFileParts) => {
-	const scriptSourceFile = codeToSourceFile(script, filePath)
-	if (isOptOutImportPresentOriginal(scriptSourceFile)) return true
-
-	const moduleScriptSourceFile = codeToSourceFile(moduleScript, filePath)
-	if (isOptOutImportPresentOriginal(moduleScriptSourceFile)) return true
-
-	return false
-}
+import { getSvelteFileParts, type SvelteFileParts } from '../../../utils/svelte.util.js'
+import { isOptOutImportPresent } from '../../../utils/ast/svelte.js'
+import { addImport, findImportDeclarations, getImportSpecifiers, isSdkImportPresent, removeImport } from '../../../utils/ast/imports.js'
+import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import type { SourceFile } from 'ts-morph'
+import { dedent } from 'ts-dedent'
 
 export const transformSvelte = (filePath: string, config: TransformConfig, code: string): string => {
-	return code
+	const fileParts = getSvelteFileParts(code)
+
+	if (isOptOutImportPresent(fileParts)) return code
+
+	transform(filePath, config, fileParts)
+
+	return fileParts.toString()
 }
 
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
+// TODO: what if both script tags import different variables?
 
-// the type definitions don't match
-const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
+const transform = (filePath: string, config: TransformConfig, fileParts: SvelteFileParts) => {
+	fileParts.script = transformScriptTag(filePath, config, fileParts.script)
+	fileParts.moduleScript = transformScriptTag(filePath, config, fileParts.moduleScript)
+}
 
-export const transformSvelteOld = async (config: TransformConfig, code: string): Promise<string> => {
-	const n = types.namedTypes
+const transformScriptTag = (filePath: string, config: TransformConfig, script: string) => {
+	const sourceFile = codeToSourceFile(script, filePath)
 
-	const requiredImports = config.languageInUrl
-		? `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive";`
-		: `import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/reactive";`
+	transformSdkImports(config, sourceFile)
 
-	const reactiveImportIdentifiers: string[] = []
+	return nodeToCode(sourceFile)
+}
 
-	// First, we need to remove typescript statements from script tag
-	const codeWithoutTypes = (await preprocess(code, vitePreprocess({ script: true, style: true })))
-		.code
+const transformSdkImports = (config: TransformConfig, sourceFile: SourceFile) => {
+	if (!isSdkImportPresent(sourceFile)) return
 
-	// Insert script tag if we don't have one
-	const svelteAst = parse(codeWithoutTypes)
-	// TODO @benjaminpreiss I wonder how we could include adding the empty script tag to the sourcemap
-	// TODO @benjaminpreiss Find out, why we have to add the lang="ts" attribute below... Otherwise preprocess doesn't recognize the script tag :/
-	const codeWithScriptTag = !svelteAst.instance
-		? `<script>
-// Inserted by inlang
-</script>
-${codeWithoutTypes}`
-		: codeWithoutTypes
+	const importDeclarations = findImportDeclarations(sourceFile, '@inlang/sdk-js')
+	const importSpecifiers = []
+	for (const importDeclaration of importDeclarations) {
+		importSpecifiers.push(...getImportSpecifiers(importDeclaration))
+	}
 
-	const processedScript = await preprocess(codeWithScriptTag, {
-		script: async (options) => {
-			const ast = parseModule(options.content, {
-				sourceFileName: config.sourceFileName,
-			})
-			const importsAst = parseModule(requiredImports)
-			if (!options.attributes.context) {
-				// Deep merge imports that we need
-				deepMergeObject(ast, importsAst)
-			}
+	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/client/not-reactive', 'getRuntimeFromContext')
 
-			// Remove import "@inlang/sdk-js" but save the aliases of all imports
-			const importNames = getSdkImportedModules(ast.$ast)
-			reactiveImportIdentifiers.push(...getReactiveImportIdentifiers(importNames))
-			const usageIndexes = getRootReferenceIndexes(ast.$ast, [...importNames, ["data", "data"]])
-			// prefix language and i aliases with $ if reactive
-			if (!config.languageInUrl) makeJsReactive(ast.$ast, reactiveImportIdentifiers)
-			// Insert all variable declarations after the injected import for getRuntimeFromContext
-			if (n.Program.check(ast.$ast)) {
-				ast.$ast.body.splice(
-					usageIndexes?.[0] ?? ast.$ast.body.length,
-					0,
-					...([variableDeclarationAst(importNames), initImportedVariablesAst(importNames)].filter(
-						(n) => n !== undefined,
-					) as types.namedTypes.ExpressionStatement[]),
-				)
-			}
-			const generated = generateCode(ast, {
-				sourceMapName: config.sourceMapName,
-			})
+	const imports = importSpecifiers.map((importSpecifier) => importSpecifier.getText().replace('as', ':'))
 
-			return { ...options, ...generated }
-		},
-	})
+	importDeclarations[0]!.replaceWithText(dedent`
+		const { ${imports} } = getRuntimeFromContext()
+	`)
 
-	const processedMarkup = await preprocess(processedScript.code, {
-		markup: (options) => {
-			const parsed = parse(options.content)
-			const { instance, module } = parsed
-			// We already iterated over .instance and .module
-			parsed.instance = undefined
-			parsed.module = undefined
-			// Find locations of nodes with i or language
-			const s = new MagicString(options.content)
-			if (!config.languageInUrl) makeMarkupReactive(parsed, s, reactiveImportIdentifiers)
-			parsed.instance = instance
-			parsed.module = module
-			const map = s.generateMap({
-				source: config.sourceFileName,
-				file: config.sourceMapName,
-				includeContent: true,
-			})
-			const code = s.toString()
-			return { code, map }
-		},
-	})
-
-	return processedMarkup.code
+	removeImport(sourceFile, '@inlang/sdk-js')
 }
