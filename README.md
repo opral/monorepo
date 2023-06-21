@@ -3,7 +3,7 @@
         <img width="300" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/logo-white-background.png"/>
     </p>
     <h2 align="center">
-        Localization infrastructure for software 
+        Globalization infrastructure for software 
     </h2>
 </div>
 
