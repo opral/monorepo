@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.3
+
+### Patch Changes
+
+- 7ed241ae: fix config init validate step
+
 ## 0.11.2
 
 ### Patch Changes
