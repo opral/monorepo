@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.7
+
+### Patch Changes
+
+- 80dc45d4: Added icon and changed links to point on json plugin in monorepo
+
 ## 3.0.6
 
 ### Patch Changes
