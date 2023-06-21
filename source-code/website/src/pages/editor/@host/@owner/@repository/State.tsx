@@ -190,8 +190,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
 
-	const [textSearch, setTextSearch] = createSignal<string>("")
-
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
@@ -199,9 +197,20 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
-	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
-	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
+	//set filter with search params
+	const params = new URL(document.URL).searchParams
+
+	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
+	console.log("textSearch")
+
+	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>(
+		params.getAll("lang") as string[],
+	)
+
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
+		params.getAll("lint") as `${string}.${string}`[],
+	)
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 
