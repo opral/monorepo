@@ -22,8 +22,8 @@ export const plugins: InlangPluginManifest[] = [
 	},
 	{
 		id: "inlang-plugin-json",
-		icon: "https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/main/assets/icon.png",
-		repository: "https://github.com/samuelstroschein/inlang-plugin-json/",
+		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
+		repository: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json/",
 		keywords: ["json", "placeholder"],
 	},
 	{
