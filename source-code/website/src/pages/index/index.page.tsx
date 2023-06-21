@@ -13,10 +13,10 @@ export type PageProps = {
 export function Page() {
 	return (
 		<>
-			<Title>inlang Developer-first localization infrastructure.</Title>
+			<Title>Globalization infrastructure for software</Title>
 			<Meta
 				name="description"
-				content="Inlang provides dev tools, an editor to manage translations and automation via CI/CD to streamline localization."
+				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
 			<RootLayout landingpage>
 				<div>
