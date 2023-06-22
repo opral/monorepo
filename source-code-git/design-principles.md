@@ -11,3 +11,7 @@ If apps A (e.g. CLI) and B (e.g. IDE) operate on files, both apps have interop. 
 #### 3. Git compatible.
 
 Without git compatibility, no adoption. 
+
+#### 4. Iteration speed over optimization. 
+
+Iteration speed is crucial to de-risk design decisions that could de-rail the project. Thus, high level scripting language (TypeScript) with WASM if required.  
