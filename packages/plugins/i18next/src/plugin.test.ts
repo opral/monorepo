@@ -294,7 +294,7 @@ it("should read and write path patterns with language folders correctly", async 
 	const [newResource] = query(resources[0]!).create({
 		message: {
 			type: "Message",
-			id: { type: "Identifier", name: "test2" },
+			id: { type: "Identifier", name: "translation.test2" },
 			pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello world" }] },
 		},
 	})
