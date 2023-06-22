@@ -8,7 +8,7 @@ import { setupConfig } from "@inlang/core/config"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { msg } from "./utilities/message.js"
 import { createInlangEnv, importInlangConfig } from "./services/inlang-environment/index.js"
-import { telemetry } from "./services/telemetry/index.js"
+import { getGitOrigin, telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
@@ -26,6 +26,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				workspaceRecommendation: !(await disableRecommendation()),
 			},
 		})
+		const gitOrigin = await getGitOrigin()
+		await telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
+
 		msg("Inlang extension activated.", "info")
 
 		// start the extension
