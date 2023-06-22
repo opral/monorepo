@@ -4,7 +4,7 @@ import type { TelemetryEvents } from "./events.js"
 import { getGitRemotes } from "../../utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
 
-const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
+export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 
 const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN!, {
 	host: "https://eu.posthog.com",
@@ -40,15 +40,6 @@ export const telemetry = new Proxy(posthog, {
  * Wrapper to auto inject the git origin url and user id.
  */
 function capture(args: CaptureEventArguments) {
-	if (args.event === "CLI started") {
-		posthog.groupIdentify({
-			groupType: "repository",
-			groupKey: gitOrigin,
-			properties: {
-				name: gitOrigin,
-			},
-		})
-	}
 	return posthog.capture({
 		...args,
 		distinctId: "unknown",
