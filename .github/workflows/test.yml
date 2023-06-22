@@ -13,7 +13,6 @@ jobs:
         version: [18, 20]
     runs-on: ${{ matrix.os }}
     steps:
-      - run:
       - uses: actions/checkout@v3
         with:
           sparse-checkout-cone-mode: false
