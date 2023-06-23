@@ -15,7 +15,7 @@ Furthermore, the repository makes use of [Dev Containers](https://containers.dev
 
 Make sure you have [Git](https://git-scm.com/), [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed. Provide your Docker setup plenty of memory (>4GB). If you are a Windows user, please read the subsection below.
 
-1. Clone the inlangs repository.
+1. Clone inlangs repository.
 2. Open the repository folder in Visual Studio Code.
 3. Run `Dev Containers: Reopen in Container` via `CTRL + Shift + P` or `⌘ + Shift + P`.
 4. `npm install` to install dependencies
@@ -33,6 +33,16 @@ Install [Windows Subsystem Linux 2 (WSL 2)](https://learn.microsoft.com/en-us/wi
 4. `npm run dev` to run the development environment.
 5. `npm run test` to run the tests.
 6. `npm run build` to compile a production build.
+
+### Without Dev Container
+
+1. Install Node 16
+2. Clone inlangs repository.
+3. Open the repository folder in Visual Studio Code.
+4. `npm install` to install dependencies
+5. `npm run dev` to run the development environment.
+6. `npm run test` to run the tests.
+7. `npm run build` to compile a production build.
 
 ## Debugging
 
