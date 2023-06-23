@@ -156,7 +156,11 @@ async function readResources(
 
 					serializedMessages = [
 						...serializedMessages,
-						...collectNestedSerializedMessages(JSON.parse(file), [], potentialResourcePath),
+						...collectNestedSerializedMessages(
+							JSON.parse(file),
+							[],
+							potentialResourcePath.replace(".json", ""),
+						),
 					]
 				}
 			} else {
@@ -283,7 +287,6 @@ async function writeResources(
 					body: filteredMessages,
 				}
 				const path = resourcePath.replace("*", fileName!)
-				console.log(path)
 
 				await args.$fs.writeFile(
 					path,
@@ -294,6 +297,7 @@ async function writeResources(
 						args.settings.variableReferencePattern,
 					),
 				)
+				console.log(await args.$fs.readFile(`${path}`, { encoding: "utf-8" }))
 			}
 		} else {
 			throw new Error("None-exhaustive if statement in writeResources")
