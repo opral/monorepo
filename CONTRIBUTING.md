@@ -34,16 +34,6 @@ Install [Windows Subsystem Linux 2 (WSL 2)](https://learn.microsoft.com/en-us/wi
 5. `npm run test` to run the tests.
 6. `npm run build` to compile a production build.
 
-### Without Dev Container
-
-1. Install [Node 18 LTS](https://nodejs.org/).
-2. Clone inlangs repository.
-3. Open the repository folder in Visual Studio Code.
-4. `npm install` to install dependencies.
-5. `npm run dev` to run the development environment.
-6. `npm run test` to run the tests.
-7. `npm run build` to compile a production build.
-
 ## Debugging
 
 1. Run `npm run dev`.
