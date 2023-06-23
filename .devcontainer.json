@@ -15,7 +15,8 @@
 				"esbenp.prettier-vscode",
 				"eamodio.gitlens",
 				"dbaeumer.vscode-eslint",
-				"GitHub.vscode-pull-request-github"
+				"GitHub.vscode-pull-request-github",
+				"GitHub.vscode-github-actions"
 			]
 		}
 	}

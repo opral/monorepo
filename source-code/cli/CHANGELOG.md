@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.5
+
+### Patch Changes
+
+- 3d248d71: fix wrong conditional on package.json checking
+
 ## 0.11.4
 
 ### Patch Changes

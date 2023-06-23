@@ -119,7 +119,7 @@ export async function initCommandAction() {
 
 	// check if package.json exists
 	let plugin = ""
-	if (!fs.existsSync(packageJsonPath)) {
+	if (fs.existsSync(packageJsonPath)) {
 		// Check if popular internationalization libraries are dependencies
 		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
 		const dependencies = packageJson.dependencies || {}
