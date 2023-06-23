@@ -41,9 +41,7 @@ export function createMemoryFs(): NodeishFilesystem {
 
 			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
 
-			if (typeof data === "string") {
-				data = encoder.encode(data)
-			}
+			if (typeof data === "string") data = encoder.encode(data)
 
 			parentDir.add(getBasename(path))
 			newStatEntry(path, fsStats, 0, options?.mode ?? 0o644)
