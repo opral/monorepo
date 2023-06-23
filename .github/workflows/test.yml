@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: install node
+      - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
@@ -22,5 +22,5 @@ jobs:
 
       - run: npm install --no-save
 
-      - name: run test
+      - name: Run tests
         run: npm run test
