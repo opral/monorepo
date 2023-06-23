@@ -18,7 +18,7 @@ Make sure you have [Git](https://git-scm.com/), [Docker](https://www.docker.com/
 1. Clone inlangs repository.
 2. Open the repository folder in Visual Studio Code.
 3. Run `Dev Containers: Reopen in Container` via `CTRL + Shift + P` or `⌘ + Shift + P`.
-4. `npm install` to install dependencies
+4. `npm install` to install dependencies.
 5. `npm run dev` to run the development environment.
 6. `npm run test` to run the tests.
 7. `npm run build` to compile a production build.
@@ -29,17 +29,17 @@ Install [Windows Subsystem Linux 2 (WSL 2)](https://learn.microsoft.com/en-us/wi
 
 1. Start Visual Studio Code.
 2. Run `Dev Containers: Clone Repository in Container Volume...` via `CTRL + Shift + P`.
-3. `npm install` to install dependencies
+3. `npm install` to install dependencies.
 4. `npm run dev` to run the development environment.
 5. `npm run test` to run the tests.
 6. `npm run build` to compile a production build.
 
 ### Without Dev Container
 
-1. Install Node 16
+1. Install [Node 18 LTS](https://nodejs.org/).
 2. Clone inlangs repository.
 3. Open the repository folder in Visual Studio Code.
-4. `npm install` to install dependencies
+4. `npm install` to install dependencies.
 5. `npm run dev` to run the development environment.
 6. `npm run test` to run the tests.
 7. `npm run build` to compile a production build.
