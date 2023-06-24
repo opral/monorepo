@@ -36,18 +36,18 @@ Translations from the resource files are automatically updated when you change t
 
 ## 1️⃣ Setup
 
-Create a `inlang.config.js` in the **root** of your project. You can use the following template hen using json files as translation files, if not, please look fo other [supported resource file types](https://github.com/inlang/ecosystem#resources):
+Create a `inlang.config.js` in the **root** of your project. You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://github.com/inlang/ecosystem#resources):
 
 ```js
 export async function defineConfig(env) {
-	const { default: jsonPugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+	const { default: jsonPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPugin({
+			jsonPlugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
 		],
@@ -74,18 +74,18 @@ You can configure the extension to your needs by defining the `ideExtension` pro
 For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
 You can fully customize this behavior with the example code below.
 
-If your are using a different translation function, you can use the following code as a template:
+If you are using a different translation function, you can use the following code as a template:
 
 ```js
 export async function defineConfig(env) {
-	const { default: jsonPugin } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@latest/dist/index.js",
+	const { default: jsonPlugin } = await env.$import(
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
 	)
 
 	return {
 		referenceLanguage: "en",
 		plugins: [
-			jsonPugin({
+			jsonPlugin({
 				pathPattern: "./path/to/languages/{language}.json",
 			}),
 		],

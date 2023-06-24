@@ -31,7 +31,7 @@ export function Page() {
 			/>
 			<RootLayout>
 				{/* START search bar */}
-				<div class="flex flex-col items-center justify-center grow">
+				<div class="flex flex-col items-center justify-center py-24">
 					{/* negative margin as a dirty way of centering the search bar */}
 					<div class="flex p-10 items-center justify-center gap-4">
 						<img src="/favicon/android-chrome-256x256.png" alt="inlang logo" class="w-20 h-20" />
@@ -45,7 +45,7 @@ export function Page() {
 						<sl-input
 							class="border-none p-0 w-full max-w-xl"
 							prop:size={isMobile() ? "medium" : "large"}
-							prop:placeholder="Paste a link of a repository on GitHub"
+							prop:placeholder="Link of a repository on GitHub ..."
 							// when pressing enter
 							on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
 							onInput={(event) => {
@@ -75,7 +75,7 @@ export function Page() {
 							>
 								Open
 							</sl-button>
-							<a href="/documentation/getting-started">
+							<a href="/documentation">
 								<sl-button prop:variant="text" prop:size={isMobile() ? "small" : "medium"}>
 									How to get started?
 								</sl-button>

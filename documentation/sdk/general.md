@@ -4,7 +4,7 @@ href: /documentation/sdk/overview
 description: inlang is not framework specific. It can be used with any framework.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.title %} SDKs
 
 inlang is not Framework specific. It can be used with any framework. To translate with the [editor](/editor) or use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) only the `inlang.config.js` file is needed.
 
@@ -27,10 +27,11 @@ inlang's SDK works the same in each environment it runs. Take a look at the [Usa
 
 Inlang also provides custom solutions that are built specifically for certain Frameworks.
 
-### Supported Frameworks
+### Supported SDKs
 
-- [SvelteKit](/documentation/sdk/sveltekit)
-- [Your own custom solution](/documentation/sdk/custom)
+- [SvelteKit SDK](/documentation/sdk/sveltekit) maintained by inlang.
+- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) A fully type-safe and lightweight internationalization library for all TypeScript and JavaScript projects.
+- [i18next](https://www.i18next.com/) is an internationalization-SDK written in and for JavaScript.
 
 #### Your favorite frameworks is missing?
 

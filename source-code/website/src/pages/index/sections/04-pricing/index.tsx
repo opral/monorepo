@@ -1,5 +1,4 @@
 import { SectionLayout } from "../../components/sectionLayout.jsx"
-import { Button } from "../../components/Button.jsx"
 
 const data = {
 	title: "Free for individual use and open source",
@@ -12,22 +11,22 @@ const data = {
 const Pricing = () => {
 	return (
 		<SectionLayout type="white" showLines={true}>
-			<div class="flex justify-between px-10 py-20 lg:py-32 gap-16 lg:gap-0 flex-col lg:flex-row">
+			<div class="flex justify-between px-10 py-16 sm:py-20 lg:py-32 gap-16 lg:gap-0 flex-col lg:flex-row">
 				<div class="w-full lg:w-[calc((100%_-_40px)_/_2)] flex flex-col gap-2 lg:gap-4 items-center lg:items-start">
-					<p class="text-xs text-center lg:text-start text-primary bg-primary/10 h-7 flex items-center px-4 rounded-full w-fit">
+					<p class="text-sm text-center lg:text-start text-primary bg-primary/10 h-7 flex items-center px-4 rounded-full w-fit tracking-relaxed">
 						{data.caption}
 					</p>
-					<h2 class="text-3xl text-center lg:text-start  font-semibold text-on-background leading-relaxed tracking-tight">
+					<h2 class="text-3xl text-center lg:text-start  font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
 						{data.title}
 					</h2>
-					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant">
+					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant sm:leading-7">
 						{data.description}
 					</p>
-					<div class="pt-4">
+					{/* <div class="pt-4">
 						<Button href={data.buttonLink} type="secondary">
 							{data.button}
 						</Button>
-					</div>
+					</div> */}
 				</div>
 				<div class="w-full lg:w-[calc((100%_-_40px)_/_2)] flex items-end lg:pl-4">
 					<div class="h-full w-[55%] rounded-2xl rounded-br-none flex flex-col p-6 lg:p-8 gap-4 bg-gradient-to-b from-hover-primary/70 to-hover-primary/30">

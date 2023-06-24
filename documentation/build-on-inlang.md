@@ -1,7 +1,7 @@
 ---
 title: Build apps on inlang
 href: /documentation/build-on-inlang
-description: Learn how to build on top of inlang.
+description: Learn how to build your own inlang app.
 ---
 
 # {% $frontmatter.title %}
@@ -18,9 +18,7 @@ Inlang is designed to be build upon. The [@inlang/core](https://github.com/inlan
 
 If you build on inlang, the "logic" usually resembles the following flow:
 
-```
-config.readResources() -> query(AST) -> config.writeResources()
-```
+> config.readResources() -> query(AST) -> config.writeResources()
 
 ```js
 // The `inlang.config.js` file can be imported by your application

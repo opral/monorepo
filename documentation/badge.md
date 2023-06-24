@@ -1,10 +1,21 @@
 ---
 title: "Badges"
 href: /documentation/badge
-description: "API endpoint for generating badges"
+description: Generate badges for your project.
 ---
 
 # {% $frontmatter.title %}
+
+This example shows how the badge looks like in a GitHub README based on the example project:
+
+[![translation badge](https://inlang.com/badge?url=github.com/inlang/example)](https://inlang.com/editor/github.com/inlang/example?ref=badge)
+
+## Quick Generator
+
+Enter your repository to copy the badge markdown to your clipboard.
+{% BadgeGenerator /%}
+
+## Guide
 
 This documentation page provides information about the Badge endpoint, which allows users to generate badges dynamically. The badge generation API endpoint can be used in Github READMEs and anywhere else on the web to display real-time data on your projects.
 
@@ -21,12 +32,6 @@ Furthermore, you get the numbers of errors and warnings to keep track of your pr
 ```
 
 Please note to replace `username/repo` with your username or organization name and your repositories name and make sure to add a `ref=badge` query parameter to the link, so we can prevent bad actors from spamming our services.
-
-### Badge
-
-This example shows how the badge looks like in a GitHub README based on the example project:
-
-[![translation badge](https://inlang.com/badge?url=github.com/inlang/example)](https://inlang.com/editor/github.com/inlang/example?ref=badge)
 
 ## API Endpoint
 

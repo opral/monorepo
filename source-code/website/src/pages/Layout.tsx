@@ -95,7 +95,7 @@ function Header(props: { landingpage?: boolean }) {
 		<>
 			<header
 				// bg-surface-1 is with fixed hex value to avoid transparency with dooms scrolling behaviour
-				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-400/10"
+				class="sticky top-0 z-[9999] w-full bg-background border-b border-surface-2"
 			>
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
@@ -162,10 +162,10 @@ function Header(props: { landingpage?: boolean }) {
 						</div>
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
-							<ol class="space-y-1 relativ w-full min-h-full pt-3 overflow">
+							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
 								<For each={links}>
 									{(link) => (
-										<sl-tree class="">
+										<sl-tree>
 											<a
 												class="link grow min-w-full text-on-surface link-primary w-full"
 												href={link.href}
@@ -200,14 +200,14 @@ const Footer = (props: { isLandingPage: boolean }) => {
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Docs</p>
 						<a
-							href="https://inlang.com/documentation/getting-started"
+							href="https://inlang.com/documentation/quick-start"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Getting Started
 						</a>
 
 						<a
-							href="https://inlang.com/documentation/why-inlang"
+							href="https://inlang.com/documentation"
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Why Inlang
@@ -226,6 +226,12 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							class="font-medium text-surface-500 hover:text-primary"
 						>
 							Blog
+						</a>
+						<a
+							href="https://github.com/orgs/inlang/projects?query=is%3Aopen"
+							class="font-medium text-surface-500 hover:text-primary"
+						>
+							Roadmap
 						</a>
 						<a
 							href="https://github.com/inlang/inlang"

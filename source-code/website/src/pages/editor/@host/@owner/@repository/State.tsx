@@ -21,7 +21,7 @@ import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/in
 import { createMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 import { github } from "@src/services/github/index.js"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 import type { Language } from "@inlang/core/ast"
@@ -118,6 +118,12 @@ type EditorStateSchema = {
 	setFilteredLintRules: Setter<LintRule["id"][]>
 
 	/**
+	 * Unpushed changes in the repository.
+	 */
+	localChanges: () => any[]
+	setLocalChanges: Setter<any[]>
+
+	/**
 	 * The resources in a given repository.
 	 */
 	resources: LintedResource[]
@@ -178,6 +184,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
+	const [localChanges, setLocalChanges] = createSignal<Array<ast.Text | ast.Placeholder>[]>([])
+
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
@@ -236,18 +244,26 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: args.routeParams.repository,
 				})
 				.then((response) => {
+					telemetryBrowser.group("repository", gitOrigin, {
+						visibility: response.data.private ? "Private" : "Public",
+						isFork: response.data.fork ? "Fork" : "isNotFork",
+						// parseOrgin requiers a "remote"="origing" to transform the url in the git origin
+						parentGitOrigin: response.data.parent?.git_url
+							? parseOrigin({ remotes: [{ remote: "origin", url: response.data.parent.git_url }] })
+							: "",
+					})
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: response.data.private ? "Private" : "Public",
+						userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 					})
 				})
 				.catch((error) => {
 					telemetryBrowser.capture("EDITOR cloned repository", {
 						owner: args.routeParams.owner,
 						repository: args.routeParams.repository,
-						type: "unknown",
 						errorDuringIsPrivateRequest: error,
+						userPermission: userIsCollaborator() ? "collaborator" : "contributor",
 					})
 				})
 
@@ -291,6 +307,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setReferenceLanguage(config.referenceLanguage)
 				setLanguages(languages)
 				setFilteredLanguages(languages)
+				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
 		},
@@ -544,11 +561,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 		// write to filesystem
 		writeResources({
-			fs: fs(),
 			config,
-			setFsChange,
 			resources: args[0],
-			user: localStorage.user,
 		})
 	}
 
@@ -591,6 +605,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredLanguages,
 					filteredLintRules,
 					setFilteredLintRules,
+					localChanges,
+					setLocalChanges,
 					resources,
 					setResources,
 					referenceResource,
@@ -681,6 +697,44 @@ export async function pushChanges(args: {
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return [undefined, new PushException("h3ni329 Invalid route params")]
 	}
+	// stage all changes
+	const status = await raw.statusMatrix({
+		fs: args.fs,
+		dir: "/",
+		filter: (f: any) =>
+			f.endsWith(".json") ||
+			f.endsWith(".po") ||
+			f.endsWith(".yaml") ||
+			f.endsWith(".yml") ||
+			f.endsWith(".js") ||
+			f.endsWith(".ts"),
+	})
+	const filesWithUncommittedChanges = status.filter(
+		(row: any) =>
+			// files with unstaged and uncommitted changes
+			(row[2] === 2 && row[3] === 1) ||
+			// added files
+			(row[2] === 2 && row[3] === 0),
+	)
+	// add all changes
+	for (const file of filesWithUncommittedChanges) {
+		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
+	}
+	// commit changes
+	await raw.commit({
+		fs: args.fs,
+		dir: "/",
+		author: {
+			name: args.user.username,
+			email: args.user.email,
+		},
+		message: "inlang: update translations",
+	})
+	// triggering a side effect here to trigger a re-render
+	// of components that depends on fs
+	args.setFsChange(new Date())
+
+	// push changes
 	const requestArgs = {
 		fs: args.fs,
 		http,
@@ -755,54 +809,14 @@ async function readResources(config: InlangConfig) {
 	return lintedResources
 }
 
-async function writeResources(args: {
-	fs: NodeishFilesystem
-	config: InlangConfig
-	resources: ast.Resource[]
-	user: NonNullable<LocalStorageSchema["user"]>
-	setFsChange: (date: Date) => void
-}) {
+async function writeResources(args: { config: InlangConfig; resources: ast.Resource[] }) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
-		filter: (f: any) =>
-			f.endsWith(".json") ||
-			f.endsWith(".po") ||
-			f.endsWith(".yaml") ||
-			f.endsWith(".yml") ||
-			f.endsWith(".js") ||
-			f.endsWith(".ts"),
-	})
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0),
-	)
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
-	}
-	// commit changes
-	await raw.commit({
-		fs: args.fs,
-		dir: "/",
-		author: {
-			name: args.user.username,
-			email: args.user.email,
-		},
-		message: "inlang: update translations",
-	})
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	args.setFsChange(new Date())
-	showToast({
-		variant: "info",
-		title: "The change has been committed.",
-		message: `Don't forget to push the changes.`,
-	})
+
+	// showToast({
+	// 	variant: "info",
+	// 	title: "The change has been saved.",
+	// 	message: `Don't forget to push the changes.`,
+	// })
 }
 
 async function _unpushedChanges(args: {

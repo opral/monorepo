@@ -1,5 +1,13 @@
 # @inlang/sdk-js
 
+## 0.6.6
+
+### Patch Changes
+
+- 584e436b: Updated to new plugin-json link from monorepo
+
+## 0.6.5
+
 ## 0.6.4
 
 ### Patch Changes

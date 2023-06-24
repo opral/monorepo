@@ -4,6 +4,7 @@ import Hero from "./sections/01-hero/index.jsx"
 import Integration from "./sections/02-integration/index.jsx"
 import ConfigPage from "./sections/03-config/index.jsx"
 import Pricing from "./sections/04-pricing/index.jsx"
+import GetStarted from "./sections/06-getStarted/index.jsx"
 
 export type PageProps = {
 	markdown: string
@@ -12,10 +13,10 @@ export type PageProps = {
 export function Page() {
 	return (
 		<>
-			<Title>inlang Developer-first localization infrastructure.</Title>
+			<Title>Globalization infrastructure for software</Title>
 			<Meta
 				name="description"
-				content="Inlang provides dev tools, an editor to manage translations and automation via CI/CD to streamline localization."
+				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
 			<RootLayout landingpage>
 				<div>
@@ -23,6 +24,7 @@ export function Page() {
 					<Integration />
 					<ConfigPage />
 					<Pricing />
+					<GetStarted />
 				</div>
 			</RootLayout>
 		</>

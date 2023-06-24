@@ -1,12 +1,21 @@
 ---
-title: "CLI"
-href: /documentation/cli
-description: "The Inlang CLI"
+title: CLI
+href: /documentation/apps/inlang-cli
+description: The inlang CLI automates localization processes.
 ---
 
-# {% $frontmatter.title %}
+# Inlang CLI
 
-[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure.
+[@inlang/cli](https://github.com/inlang/inlang/tree/main/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infastructure. It ca be used to automate localization tasks, such as machine translation, linting and more.
+
+### Benefits
+
+- ✨ **Automate** tedious localization tasks
+- ⚙️ Integrate localization into your **CI/CD** pipeline
+- 🔍 **Lint** your translations
+- 🤖 **Machine translate** your resources
+- 🖊️ Open web editor right from the command line
+- ✅ Validate your `inlang.config.js` configuration file
 
 ## Installation
 
@@ -25,10 +34,10 @@ yarn add @inlang/cli
 best
 
 ```sh
-npx inlang [command]
+npx @inlang/cli [command]
 ```
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ## Commands
 
@@ -39,14 +48,15 @@ We recommend to use the CLI with `npx` to avoid installing the CLI globally. Not
 
 `npx` is auto-installed with Node and NPM.
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx inlang@latest [command]`.
+If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ```sh
 CLI for inlang.
 
 Options:
-  -V, --version      output the version number
-  -h, --help         display help for command
+  -V, --version         output the version number
+  -h, --help            display help for command
+  -c, --config [path]   path to the config file.
 
 Commands:
   config [command]   Commands for managing the config file.
@@ -70,7 +80,7 @@ It returns a complete config for you to use in your project, which you can modif
 To use the `config init` command, simply run:
 
 ```sh
-npx inlang config init
+npx @inlang/cli config init
 ```
 
 This will launch an interactive prompt that will guide you through the process of creating the inlang configuration file.
@@ -82,7 +92,7 @@ This command validates the `inlang.config.js` file in the current directory. It 
 To validate the `inlang.config.js` file, run the following command:
 
 ```sh
-npx inlang config validate
+npx @inlang/cli config validate
 ```
 
 ### `machine`
@@ -96,7 +106,7 @@ The translate command machine translates all resources.
 To initiate machine translation, run the following command:
 
 ```sh
-npx inlang machine translate
+npx @inlang/cli machine translate
 ```
 
 **Options**
@@ -116,7 +126,7 @@ The translations are performed using machine translation services. The translate
 The lint command lints the translation with the configured lint rules, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules).
 
 ```sh
-npx inlang lint
+npx @inlang/cli lint
 ```
 
 This command will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
@@ -134,7 +144,7 @@ The editor command opens the Inlang editor for the current repository.
 To open the Inlang editor, run the following command:
 
 ```sh
-npx inlang open editor
+npx @inlang/cli open editor
 ```
 
 This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.

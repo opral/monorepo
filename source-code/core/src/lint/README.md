@@ -74,7 +74,7 @@ export async function defineConfig(env) {
 
 ## Lint Rules
 
-There exist some lint rules you can use to check your `Resources` against. You can find them [here](https://github.com/inlang/ecosystem). Or you can write your own rules.
+There exist some lint rules you can use to check your `Resources` against. You can find them [here](/documentation/plugins/registry). Or you can write your own rules.
 
 ### Creating your own lint rule
 

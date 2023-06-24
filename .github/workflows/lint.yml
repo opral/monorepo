@@ -24,3 +24,11 @@ jobs:
 
       - name: run linters
         run: npm run lint
+
+      - name: run link checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: --verbose --no-progress './documentation/**/*.md' './README.md'
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

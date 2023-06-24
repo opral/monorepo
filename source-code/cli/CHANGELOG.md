@@ -1,5 +1,59 @@
 # @inlang/cli
 
+## 0.11.5
+
+### Patch Changes
+
+- 3d248d71: fix wrong conditional on package.json checking
+
+## 0.11.4
+
+### Patch Changes
+
+- 56c9d56f: fix auto major version
+
+## 0.11.3
+
+### Patch Changes
+
+- 7ed241ae: fix config init validate step
+
+## 0.11.2
+
+### Patch Changes
+
+- f5e76f98: introduce dynamic versions and fix Windows path bug
+
+## 0.11.1
+
+### Patch Changes
+
+- 49adbea4: add inlang/sdk-js plugin
+
+## 0.11.0
+
+### Minor Changes
+
+- 49269a2f: rework config init command to detect supported libraries
+
+## 0.10.1
+
+### Patch Changes
+
+- 6a3063f0: support windows with open editor
+
+## 0.10.0
+
+### Minor Changes
+
+- c67535d5: add --config option for monorepos
+
+## 0.9.16
+
+### Patch Changes
+
+- c9208cc6: capture the used configs for roadmap priorization
+
 ## 0.9.15
 
 ### Patch Changes

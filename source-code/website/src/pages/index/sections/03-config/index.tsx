@@ -8,15 +8,11 @@ const code = [
 		<span class="text-primary-on-inverted-container">plugins</span>: [
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\tideExtensionPlugin"}</span>
-		{"(),"}
-	</p>,
-	<p>
 		<span class="text-primary-on-inverted-container">{"\tstandardLintRules"}</span>
 		{"(),"}
 	</p>,
 	<p>
-		<span class="text-primary-on-inverted-container">{"\tjsonPlugin"}</span>
+		<span class="text-primary-on-inverted-container">{"\ti18next"}</span>
 		{"({ "}
 	</p>,
 	<p>
@@ -33,25 +29,37 @@ const data = [
 	{
 		title: "Web Editor",
 		isSoon: false,
-		description:
-			"Simplifies translation management by keeping translations in a Git repository without the need for hosting, additional accounts, or synchronization.",
-		link: "/documentation/getting-started",
+		description: "No-code editor to manage your translations.",
+		benefit: [
+			"No translator needs to touch code",
+			"Push through interface",
+			"No sync pipelines and extra accounts",
+		],
+		link: "/documentation/apps/web-editor",
 		image: "/images/AppSVGs/editor.svg",
 	},
 	{
 		title: "IDE Extension",
 		isSoon: false,
-		description:
-			"Improves developer experience when working on localized codebases by extracting translations and performing error checking directly in your IDE. This saves time and reduces the risk of errors.",
-		link: "/documentation/getting-started",
+		description: "Handle translations directly in VSCode through an extension.",
+		benefit: [
+			"Extract messages from code",
+			"Inline annotations behind key",
+			"Auto-update for synced resources",
+		],
+		link: "/documentation/apps/ide-extension",
 		image: "/images/AppSVGs/ide.svg",
 	},
 	{
 		title: "inlang CLI",
 		isSoon: false,
-		description:
-			"Automates localization via CI/CD through translation validation and automatic machine translation. This saves time and reduces errors, resulting in a more efficient localization process.",
-		link: "/documentation/getting-started",
+		description: "CLI to interact with inlang's infastructure.",
+		benefit: [
+			"Automate localization tasks (CI/CD)",
+			"Lint your translations",
+			"Machine translate your resources",
+		],
+		link: "/documentation/apps/inlang-cli",
 		image: "/images/AppSVGs/cli.svg",
 	},
 ]
@@ -77,9 +85,21 @@ const ConfigPage = () => {
 
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
-			<div class="flex flex-col items-center gap-8 pt-20 px-8 lg:px-0">
-				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-relaxed tracking-tight">
-					Multiple apps, endless plugins, one config.
+			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
+				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
+					Multiple{" "}
+					<a href="/documentation/apps/web-editor" class="underline transition link-primary">
+						apps
+					</a>
+					, endless{" "}
+					<a href="/documentation/plugins/registry" class="underline transition link-primary">
+						plugins
+					</a>
+					, one{" "}
+					<a href="/documentation/quick-start" class="underline transition link-primary">
+						config
+					</a>
+					.
 				</h2>
 			</div>
 
@@ -88,19 +108,24 @@ const ConfigPage = () => {
 					{(card) => (
 						<a
 							href={card.link}
-							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:border-outline-variant/70 hover:text-primary"
+							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary pb-4"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
 							<div class="p-8 flex flex-col gap-2">
 								<div class="flex gap-4">
-									<h3 class="text-base font-semibold">{card.title}</h3>
+									<h3 class="text-xl font-semibold">{card.title}</h3>
 									<Show when={card.isSoon}>
 										<p class="h-6 bg-primary/10 text-primary px-2 flex justify-center items-center w-fit rounded-md">
 											soon
 										</p>
 									</Show>
 								</div>
-								<p class="text-sm text-outline-variant">{card.description}</p>
+								<p class="text-md text-outline-variant sm:leading-7">{card.description}</p>
+								<ul class="items-center list-disc pl-4 pt-2">
+									<For each={card.benefit}>
+										{(benefit) => <li class="text-sm text-outline-variant pt-2">{benefit}</li>}
+									</For>
+								</ul>
 							</div>
 						</a>
 					)}
@@ -144,9 +169,13 @@ const ConfigPage = () => {
 				</div>
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
-				<div class="relative" style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}>
+				<a
+					href="/documentation/plugins/registry"
+					class="relative cursor-pointer group"
+					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
+				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
-						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700">
+						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
 							plugins
 						</pre>
 					</div>
@@ -171,7 +200,7 @@ const ConfigPage = () => {
 						}}
 						class="absolute bg-on-background top-0 left-0 w-full h-full opacity-50 blur-sm"
 					/>
-				</div>
+				</a>
 			</div>
 			<div class="z-10 relative flex justify-center px-10 gap-10 overflow-hidden transition-all duration-200">
 				<div id="connector4" class="w-[1px]">
@@ -208,25 +237,30 @@ const ConfigPage = () => {
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-col items-center gap-8 px-8 pb-28 lg:px-0">
-				<div class="w-full lg:w-fit overflow-x-scroll relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg">
+			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
+				<a
+					href="/documentation/quick-start"
+					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
+				>
 					<div class="absolute top-5 left-6 flex gap-2">
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 						<div class="w-3 h-3 bg-surface-600 rounded-full" />
 					</div>
-					<pre class="text-surface-400 w-full text-center">inlang.config.js</pre>
+					<pre class="text-surface-400 leading-relaxed pl-12 sm:pl-0 w-full text-center transition duration-200 group-hover:text-primary-on-inverted-container">
+						inlang.config.js
+					</pre>
 					<div class="flex flex-col gap-1 px-8 py-4 pr-16">
 						<For each={code}>
 							{(line, index) => (
-								<div class="flex gap-8 items-center text-sm">
+								<div class="flex gap-8 items-center text-xs sm:text-sm">
 									<pre class="text-xs text-surface-500">{index()}</pre>
 									<pre>{line}</pre>
 								</div>
 							)}
 						</For>
 					</div>
-				</div>
+				</a>
 			</div>
 		</SectionLayout>
 	)

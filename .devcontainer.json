@@ -1,6 +1,7 @@
 {
 	"name": "inlang-dev-container",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
+	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -15,7 +16,8 @@
 				"esbenp.prettier-vscode",
 				"eamodio.gitlens",
 				"dbaeumer.vscode-eslint",
-				"GitHub.vscode-pull-request-github"
+				"GitHub.vscode-pull-request-github",
+				"GitHub.vscode-github-actions"
 			]
 		}
 	}

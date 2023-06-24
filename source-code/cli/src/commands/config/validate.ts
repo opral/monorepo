@@ -1,5 +1,6 @@
 import { parseConfig } from "@inlang/core/config"
 import { Command } from "commander"
+import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import { getConfig } from "../../utilities/getConfig.js"
 
@@ -8,20 +9,20 @@ export const validate = new Command()
 	.description("Validate the inlang config.")
 	.action(validateCommandAction)
 
-async function validateCommandAction() {
+export async function validateCommandAction() {
 	try {
 		// Get the config
-		const config = await getConfig()
-		if (!config) {
-			// no message because that's handled in getConfig
+		const [config, errorMessage] = await getConfig({ options: cli.opts() })
+		if (errorMessage) {
+			log.error(errorMessage)
 			return
 		}
 
-		log.info("ℹ️  Validating the config ...")
+		log.info("🔎 Validating the config file...")
 
 		await parseConfig({ config })
 
-		log.info("🎉 Inlang config is valid!")
+		log.success("🎉 Inlang config is valid!")
 	} catch (error) {
 		log.error(error)
 	}

@@ -2,12 +2,15 @@ import type { Config } from "@markdoc/markdoc"
 import type { SemanticColorTokens } from "../../../../tailwind.config.cjs"
 import { icons } from "../../../components/Icon.jsx"
 import { Fence } from "./nodes/Fence.jsx"
+import { Heading } from "./nodes/Heading.jsx"
 import { Callout } from "./tags/Callout.jsx"
 import { Figure } from "./tags/Figure.jsx"
 import { QuickLink, QuickLinks } from "./tags/QuickLinks.jsx"
 import { Link } from "./nodes/Link.jsx"
 import { Document } from "./nodes/Document.jsx"
 import { Video } from "./tags/Video.jsx"
+import { Registry } from "./tags/Registry.jsx"
+import { BadgeGenerator } from "./tags/BadgeGenerator.jsx"
 
 /**
  * The components that render custom nodes or tags
@@ -19,8 +22,11 @@ export const components = {
 	QuickLink,
 	QuickLinks,
 	Link,
+	Heading,
 	Document,
 	Video,
+	Registry,
+	BadgeGenerator,
 }
 
 /**
@@ -59,6 +65,15 @@ export const config: Config = {
 				href: {
 					required: true,
 					type: "String",
+				},
+			},
+		},
+		heading: {
+			render: "Heading",
+			attributes: {
+				level: {
+					required: true,
+					type: "Number",
 				},
 			},
 		},
@@ -109,6 +124,13 @@ export const config: Config = {
 			attributes: {
 				src: { type: "String", required: true },
 			},
+		},
+		Registry: {
+			selfClosing: true,
+			render: "Registry",
+		},
+		BadgeGenerator: {
+			render: "BadgeGenerator",
 		},
 	},
 }

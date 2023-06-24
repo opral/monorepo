@@ -28,7 +28,23 @@ async function editorCommandAction() {
 
 	const inlangEditorUrl = `https://inlang.com/editor/${githubUrl}`
 
-	exec(`open ${inlangEditorUrl}`, (error) => {
+	let command
+	let args
+
+	if (process.platform === "win32") {
+		// Windows
+		command = "start"
+		args = [inlangEditorUrl]
+	} else if (process.platform === "darwin") {
+		// macOS
+		command = "open"
+		args = [inlangEditorUrl]
+	} else {
+		console.error("Unsupported platform.")
+		return
+	}
+
+	exec(`${command} ${args.join(" ")}`, (error) => {
 		if (error) {
 			log.error("Failed to open the Inlang editor.", error.message)
 			return

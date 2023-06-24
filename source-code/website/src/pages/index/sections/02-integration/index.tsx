@@ -14,7 +14,7 @@ const data = {
 	description:
 		"Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
 	button: "Get started",
-	buttonLink: "/documentation/getting-started",
+	buttonLink: "/documentation/",
 }
 
 const Integration = () => {
@@ -36,17 +36,24 @@ const Integration = () => {
 						<div class="z-10 mx-8 md:mx-16 text-background bg-on-background w-16 h-16 flex justify-center items-center rounded-full shadow-lg">
 							<InlangWordIcon />
 						</div>
-						<sl-tooltip
-							prop:content="New SDK!"
-							prop:open={true}
-							prop:distance={16}
-							prop:trigger="maunual"
-							prop:hoist={true}
-						>
-							<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
-								<Svelte size={44} startColor="#434343" endColor="#959595" />
+						<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
+							<div class="rounded bg-surface-800 absolute mb-36 text-background px-2 py-1 text-sm ">
+								New SDK!
+								<svg
+									width={14}
+									height={7}
+									viewBox="0 0 14 7"
+									fill="currentColor"
+									stroke="currentColor"
+									xmlns="http://www.w3.org/2000/svg"
+									preserveAspectRatio="none"
+									class="absolute center-x -mt-[1px] left-1/2 transform -translate-x-1/2 top-full text-surface-800"
+								>
+									<path d="M7 6L2 1H12L7 6Z" />
+								</svg>
 							</div>
-						</sl-tooltip>
+							<Svelte size={44} startColor="#434343" endColor="#959595" />
+						</div>
 						<div class="z-10 pacity-75 w-20 h-20 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 							<Flutter size={32} startColor="#434343" endColor="#959595" />
 						</div>
@@ -63,10 +70,12 @@ const Integration = () => {
 								{data.caption}
 							</p>
 						</div>
-						<h2 class="text-center text-3xl font-semibold text-on-background leading-relaxed tracking-tight">
+						<h2 class="text-center text-3xl font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
 							{data.title}
 						</h2>
-						<p class="text-base md:w-[55%] text-center text-outline-variant">{data.description}</p>
+						<p class="text-base px-10 md:w-[55%] sm:leading-7 text-center text-outline-variant">
+							{data.description}
+						</p>
 						<div class="pt-4">
 							<Button href={data.buttonLink} type="secondary">
 								{data.button}

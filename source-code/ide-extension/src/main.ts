@@ -12,6 +12,8 @@ import { telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utils/promptToReload.js"
+import { coreUsedConfigEvent } from "@inlang/telemetry"
+import { recommendation, disableRecommendation } from "./utils/recommendation.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -20,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
+				workspaceRecommendation: !(await disableRecommendation()),
 			},
 		})
 		msg("Inlang extension activated.", "info")
@@ -62,8 +65,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	const closestConfigPath = determineClosestPath({
-		options: potentialConfigFileUris.map((uri) => uri.path),
-		to: activeTextEditor.document.uri.path,
+		options: potentialConfigFileUris.map((uri) => uri.fsPath),
+		to: activeTextEditor.document.uri.fsPath,
 	})
 
 	// get current workspace
@@ -82,6 +85,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const env = createInlangEnv({ workspaceFolder })
 
 	const config = await setupConfig({ module, env })
+
+	// shouldn't block the function from executing
+	// thus wrapped in async immediately executed function
+	;(async () => {
+		telemetry.capture({
+			event: coreUsedConfigEvent.name,
+			properties: coreUsedConfigEvent.properties(config),
+		})
+	})()
 
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })
@@ -130,6 +142,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// properties missing decoration in inlang.config.js
 	propertiesMissingPreview({ activeTextEditor })
+
+	// add inlang extension to recommended extensions
+	recommendation({ workspaceFolder })
 }
 
 // this method is called when your extension is deactivated

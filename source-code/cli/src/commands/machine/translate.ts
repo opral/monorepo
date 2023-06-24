@@ -4,6 +4,8 @@ import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
 import type { Message } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { getConfig } from "../../utilities/getConfig.js"
+import { cli } from "../../main.js"
+import { bold, italic } from "../../utilities/format.js"
 
 export const translate = new Command()
 	.command("translate")
@@ -30,8 +32,9 @@ async function translateCommandAction() {
 		}
 
 		// Get the config
-		const config = await getConfig()
+		const [config, errorMessage] = await getConfig({ options: cli.opts() })
 		if (!config) {
+			log.error(errorMessage)
 			// no message because that's handled in getConfig
 			return
 		}
@@ -90,8 +93,6 @@ async function translateCommandAction() {
 					continue
 				}
 
-				const bold = (text: string) => `\x1b[1m${text}\x1b[0m`
-				const italic = (text: string) => `\x1b[3m${text}\x1b[0m`
 				log.info(
 					getFlag(language.languageTag.name) +
 						" Translated message " +
