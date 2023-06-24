@@ -4,4 +4,4 @@
 "@inlang/cli": minor
 ---
 
-add groupIdentifyer
+added a missing group identifier event   
