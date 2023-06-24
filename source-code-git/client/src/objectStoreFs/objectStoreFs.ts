@@ -1,8 +1,8 @@
+import type { NodeishFilesystem } from "@inlang-git/fs"
 import type TreeEntry from "./store/trees/TreeEntry.js"
 import type { MappedObjectStore, ObjectStats } from "./store/types.js"
-import type { NodeishFilesystem } from "../../interface.js"
 
-import { FilesystemError } from "../../errors/FilesystemError.js"
+import { FilesystemError } from "./errors/FilesystemError.js"
 
 import { getBasename, normalPath, oidToString, stringToOid, modeToType } from "./util.js"
 

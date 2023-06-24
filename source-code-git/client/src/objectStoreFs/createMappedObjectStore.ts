@@ -1,5 +1,5 @@
 import type { MappedObjectStore } from "./store/types.js"
-import type { NodeishFilesystem } from "../../interface.js"
+import type { NodeishFilesystem } from "@inlang-git/fs"
 
 import {
 	_readObject,

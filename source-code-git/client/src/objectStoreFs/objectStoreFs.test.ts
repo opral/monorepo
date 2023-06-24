@@ -1,7 +1,7 @@
 import { it, expect, describe } from "vitest"
 import { raw, http } from "@inlang-git/client/raw"
+import { createMemoryFs } from "@inlang-git/fs"
 import { createObjectStoreFs } from "./objectStoreFs.js"
-import { createMemoryFs } from "../memoryFs.js"
 
 describe("git fs", async () => {
 	const fs = createMemoryFs()
