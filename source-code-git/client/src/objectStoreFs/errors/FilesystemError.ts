@@ -3,7 +3,7 @@ export class FilesystemError extends Error {
 	path: string
 	syscall: string
 
-	constructor(code: string, path: string, syscall: string, target?: string) {
+	constructor(code: string, path: string, syscall: string) {
 		let message
 		switch (code) {
 			case "ENOENT":
