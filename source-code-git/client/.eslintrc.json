@@ -1,6 +1,6 @@
 {
 	"extends": ["../../.eslintrc.json"],
-	"ignorePatterns": ["**/raw/tests/**/*"],
+	"ignorePatterns": ["**/raw/tests/**/*", "**/git-internal-apis.*"],
 	"rules": {
 		"no-restricted-imports": [
 			"error",

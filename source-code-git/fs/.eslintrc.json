@@ -12,6 +12,5 @@
 				]
 			}
 		]
-	},
-	"ignorePatterns": ["**/git-internal-apis.*"]
+	}
 }
