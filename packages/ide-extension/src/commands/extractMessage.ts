@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import { setState, state } from "../state.js"
 import { query } from "@inlang/core/query"
 import type { Message } from "@inlang/core/ast"
-import { msg } from "../utils/message.js"
+import { msg } from "../utilities/message.js"
 import { telemetry } from "../services/telemetry/index.js"
 
 /**

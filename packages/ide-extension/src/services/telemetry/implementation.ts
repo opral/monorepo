@@ -3,7 +3,7 @@ import { raw } from "@inlang-git/client/raw"
 import fs from "node:fs"
 import * as vscode from "vscode"
 import type { TelemetryEvents } from "./events.js"
-import { getUserId } from "../../utils/getUserId.js"
+import { getUserId } from "../../utilities/getUserId.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -37,6 +37,15 @@ async function capture(args: CaptureEventArguments) {
 	}
 	if (userID === undefined) {
 		userID = await getUserId()
+	}
+	if (args.event === "IDE-EXTENSION activated") {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
 	}
 	return telemetryNode.capture({
 		...args,

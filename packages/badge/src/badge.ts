@@ -107,6 +107,12 @@ export const badge = async (url: string) => {
 		groups: { repository: gitOrigin },
 		distinctId: "unknown",
 	})
-	// return image
+	telemetryNode.groupIdentify({
+		groupType: "repository",
+		groupKey: gitOrigin,
+		properties: {
+			name: gitOrigin,
+		},
+	})
 	return image
 }
