@@ -6,6 +6,10 @@
 		"./raw": {
 			"types": "./dist/raw/index.d.ts",
 			"import": "./dist/raw/index.js"
+		},
+		"./object-store-apis": {
+			"types": "./dist/object-store-apis/index.d.ts",
+			"import": "./dist/object-store-apis/index.js"
 		}
 	},
 	"files": [
