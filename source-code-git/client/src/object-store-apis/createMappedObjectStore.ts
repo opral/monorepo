@@ -7,7 +7,7 @@ import {
 	GitAnnotatedTag,
 	GitCommit,
 	FileSystem,
-} from "./git/git-internal-apis.js"
+} from "./git-internal/internal-apis.js"
 
 import { stringToOid } from "./util.js"
 
