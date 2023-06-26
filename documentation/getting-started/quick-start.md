@@ -8,7 +8,11 @@ description: Learn how to get started with inlang.
 
 An `inlang.config.js` needs to be created at the root of your git repository.
 
-### Using the CLI
+{% Callout variant="info" %}
+You are not globalizing yet? Checkout the [SDKs](/documentation/sdk/overview) first.
+{% /Callout %}
+
+## Using the CLI
 
 Open your repository and execute the [inlang CLI](/documentation/apps/inlang-cli) on the root level:
 
@@ -16,7 +20,7 @@ Open your repository and execute the [inlang CLI](/documentation/apps/inlang-cli
 npx @inlang/cli@latest config init
 ```
 
-### Manual step-by-step guide
+## Manual step-by-step guide
 
 1\. Create a new file named `inlang.config.js` at the root of your git repository.
 
