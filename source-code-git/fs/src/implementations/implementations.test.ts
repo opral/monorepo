@@ -10,16 +10,16 @@ describe("node fs", async () => {
 	const tempDir = path.join(path.parse(pathname).dir, "__test")
 
 	await fs.mkdir(tempDir, { recursive: true })
-	await runFsTestSuite("node fs", tempDir, fs)
+	await runFsTestSuite("node fs", tempDir, fs, path.sep)
 })
 
 describe("memory fs", async () => {
 	const fs = createMemoryFs()
 
-	await runFsTestSuite("memory fs", "", fs)
+	await runFsTestSuite("memory fs", "", fs, '/')
 })
 
-const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
+const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem, sep: '\\' | '/') => {
 	// testing characters is important. see bug https://github.com/inlang/inlang/issues/785
 	const textInFirstFile = `
 	  Testing a variety of characters.
@@ -48,62 +48,62 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	})
 
 	test("recursive mkdir", async () => {
-		expect(await fs.mkdir(`${tempDir}/home/user1/documents/`, { recursive: true })).toMatch(
-			/^.*\/home\/?$/,
+		expect(await fs.mkdir(`${tempDir}${sep}home${sep}user1${sep}documents${sep}`, { recursive: true })).toMatch(
+			new RegExp(`^.*${sep}home${sep}?$`),
 		)
 		expect(await fs.mkdir(`${tempDir}/home/user1/downloads/`, { recursive: true })).toMatch(
-			/^.*\/home\/user1\/downloads\/?$/,
+			new RegExp(`^.*${sep}home${sep}user1${sep}downloads${sep}?$`),
 		)
 		expect(await fs.readdir(tempDir)).toEqual(["home"])
-		expect(await fs.readdir(`${tempDir}/home/user1/`)).toEqual(["documents", "downloads"])
-		expect(await fs.readdir(`${tempDir}/home/user1/documents`)).toEqual([])
+		expect(await fs.readdir(`${tempDir}${sep}home${sep}user1${sep}`)).toEqual(["documents", "downloads"])
+		expect(await fs.readdir(`${tempDir}${sep}home${sep}user1${sep}documents`)).toEqual([])
 	})
 
 	test("funny paths", async () => {
-		expect(await fs.readdir(`${tempDir}///.//`)).toEqual(["home"])
-		expect(await fs.readdir(`${tempDir}/home/user1/../user1/./`)).toEqual([
+		expect(await fs.readdir(`${tempDir}${sep}${sep}${sep}.${sep}${sep}`)).toEqual(["home"])
+		expect(await fs.readdir(`${tempDir}${sep}home${sep}user1${sep}..${sep}user1${sep}.${sep}`)).toEqual([
 			"documents",
 			"downloads",
 		])
-		expect(await fs.readdir(`${tempDir}/home/./../home/.//user1/documents`)).toEqual([])
+		expect(await fs.readdir(`${tempDir}${sep}home${sep}.${sep}..${sep}home${sep}.${sep}${sep}user1${sep}documents`)).toEqual([])
 	})
 
 	test("file r/w", async () => {
-		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
-		await fs.writeFile(`${tempDir}/file2`, textInSecondFile)
+		await fs.writeFile(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`, textInFirstFile)
+		await fs.writeFile(`${tempDir}${sep}file2`, textInSecondFile)
 
-		expect(await fs.readdir(`${tempDir}/home/user1/documents/`)).toEqual(["file1"])
+		expect(await fs.readdir(`${tempDir}${sep}home${sep}user1${sep}documents${sep}`)).toEqual(["file1"])
 		const dirents = await fs.readdir(tempDir)
 		expect(dirents).toContain("home")
 		expect(dirents).toContain("file2")
 		expect(dirents).toHaveLength(2)
 
 		expect(
-			await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
+			await fs.readFile(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`, { encoding: "utf-8" }),
 		).toEqual(textInFirstFile)
 
-		expect(await fs.readFile(`${tempDir}/file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
+		expect(await fs.readFile(`${tempDir}${sep}file2`, { encoding: "utf-8" })).toEqual(textInSecondFile)
 	})
 
 	test("r/w an empty file", async () => {
-		await fs.writeFile(`${tempDir}/file3`, "")
-		expect(await fs.readFile(`${tempDir}/file3`, { encoding: "utf-8" })).toEqual("")
-		expect(await fs.readFile(`${tempDir}/file3`)).toHaveLength(0)
+		await fs.writeFile(`${tempDir}${sep}file3`, "")
+		expect(await fs.readFile(`${tempDir}${sep}file3`, { encoding: "utf-8" })).toEqual("")
+		expect(await fs.readFile(`${tempDir}${sep}file3`)).toHaveLength(0)
 	})
 
 	test("symlink", async () => {
 		await fs.symlink(
-			`${tempDir}/home/./user1/../user1/documents///./file1`,
-			`${tempDir}/file1.link`,
+			`${tempDir}${sep}home${sep}.${sep}user1${sep}..${sep}user1${sep}documents${sep}${sep}${sep}.${sep}file1`,
+			`${tempDir}${sep}file1.link`,
 		)
-		await fs.symlink(`${tempDir}/file3`, `${tempDir}/file3.link`)
-		await fs.symlink(`${tempDir}/home/user1`, `${tempDir}/user1.link`)
+		await fs.symlink(`${tempDir}${sep}file3`, `${tempDir}${sep}file3.link`)
+		await fs.symlink(`${tempDir}${sep}home${sep}user1`, `${tempDir}${sep}user1.link`)
 
-		expect(await fs.readFile(`${tempDir}/file1.link`, { encoding: "utf-8" })).toEqual(
+		expect(await fs.readFile(`${tempDir}${sep}file1.link`, { encoding: "utf-8" })).toEqual(
 			textInFirstFile,
 		)
-		expect(await fs.readFile(`${tempDir}/file3.link`, { encoding: "utf-8" })).toEqual("")
-		expect(await fs.readdir(`${tempDir}/user1.link`)).toEqual(["documents", "downloads"])
+		expect(await fs.readFile(`${tempDir}${sep}file3.link`, { encoding: "utf-8" })).toEqual("")
+		expect(await fs.readdir(`${tempDir}${sep}user1.link`)).toEqual(["documents", "downloads"])
 
 		const dirents = await fs.readdir(tempDir)
 		expect(dirents).toHaveLength(6)
@@ -113,21 +113,21 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	})
 
 	test("readlink", async () => {
-		expect(await fs.readlink(`${tempDir}/file1.link`)).toEqual(
-			`${tempDir}/home/./user1/../user1/documents///./file1`,
+		expect(await fs.readlink(`${tempDir}${sep}file1.link`)).toEqual(
+			`${tempDir}${sep}home${sep}.${sep}user1${sep}..${sep}user1${sep}documents${sep}${sep}${sep}.${sep}file1`,
 		)
 
-		expect(await fs.readlink(`${tempDir}/file3.link`)).toEqual(`${tempDir}/file3`)
+		expect(await fs.readlink(`${tempDir}${sep}file3.link`)).toEqual(`${tempDir}${sep}file3`)
 
-		expect(await fs.readlink(`${tempDir}/user1.link`)).toEqual(`${tempDir}/home/user1`)
+		expect(await fs.readlink(`${tempDir}${sep}user1.link`)).toEqual(`${tempDir}${sep}home${sep}user1`)
 	})
 
 	test("stat/lstat", async () => {
 		const stats = {
-			user1: await fs.lstat(`${tempDir}/user1.link`),
-			file1: await fs.lstat(`${tempDir}/file1.link`),
-			file2: await fs.stat(`${tempDir}/file2`),
-			home: await fs.stat(`${tempDir}/home`),
+			user1: await fs.lstat(`${tempDir}${sep}user1.link`),
+			file1: await fs.lstat(`${tempDir}${sep}file1.link`),
+			file2: await fs.stat(`${tempDir}${sep}file2`),
+			home: await fs.stat(`${tempDir}${sep}home`),
 		}
 		expect([stats.user1.isFile(), stats.user1.isDirectory(), stats.user1.isSymbolicLink()]).toEqual(
 			[false, false, true],
@@ -149,9 +149,9 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 	})
 
 	test("unlink", async () => {
-		await fs.unlink(`${tempDir}/user1.link`)
-		await fs.unlink(`${tempDir}/file1.link`)
-		await fs.unlink(`${tempDir}/file3.link`)
+		await fs.unlink(`${tempDir}${sep}user1.link`)
+		await fs.unlink(`${tempDir}${sep}file1.link`)
+		await fs.unlink(`${tempDir}${sep}file3.link`)
 
 		const dirents = await fs.readdir(tempDir)
 		expect(dirents).toHaveLength(3)
@@ -162,64 +162,64 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 
 	describe("throw errors", async () => {
 		test("rm", async () => {
-			await expect(async () => await fs.rm(`${tempDir}/home/dne/dne2`)).rejects.toThrow(/ENOENT/)
+			await expect(async () => await fs.rm(`${tempDir}${sep}home${sep}dne${sep}dne2`)).rejects.toThrow(/ENOENT/)
 
-			await expect(async () => await fs.rm(`${tempDir}/home/dne`)).rejects.toThrow(/ENOENT/)
+			await expect(async () => await fs.rm(`${tempDir}${sep}home${sep}dne`)).rejects.toThrow(/ENOENT/)
 
-			await expect(async () => await fs.rm(`${tempDir}/home/user1`)).rejects.toThrow(/EISDIR/)
+			await expect(async () => await fs.rm(`${tempDir}${sep}home${sep}user1`)).rejects.toThrow(/EISDIR/)
 		})
 
 		test("mkdir", async () => {
-			await expect(async () => await fs.mkdir(`${tempDir}/home/dne/dne2`)).rejects.toThrow(/ENOENT/)
+			await expect(async () => await fs.mkdir(`${tempDir}${sep}home${sep}dne${sep}dne2`)).rejects.toThrow(/ENOENT/)
 		})
 
 		test("writeFile", async () => {
 			await expect(
-				async () => await fs.readFile(`${tempDir}/home/dne/file`, { encoding: "utf-8" }),
+				async () => await fs.readFile(`${tempDir}${sep}home${sep}dne${sep}file`, { encoding: "utf-8" }),
 			).rejects.toThrow(/ENOENT/)
 		})
 
 		test("readFile", async () => {
 			await expect(
-				async () => await fs.readFile(`${tempDir}/home/dne`, { encoding: "utf-8" }),
+				async () => await fs.readFile(`${tempDir}${sep}home${sep}dne`, { encoding: "utf-8" }),
 			).rejects.toThrow(/ENOENT/)
 
 			await expect(
-				async () => await fs.readFile(`${tempDir}/home/user1`, { encoding: "utf-8" }),
+				async () => await fs.readFile(`${tempDir}${sep}home${sep}user1`, { encoding: "utf-8" }),
 			).rejects.toThrow(/EISDIR/)
 		})
 
 		test("readdir", async () => {
-			await expect(async () => await fs.readdir(`${tempDir}/home/dne`)).rejects.toThrow(/ENOENT/)
+			await expect(async () => await fs.readdir(`${tempDir}${sep}home${sep}dne`)).rejects.toThrow(/ENOENT/)
 
 			await expect(
-				async () => await fs.readdir(`${tempDir}/home/user1/documents/file1`),
+				async () => await fs.readdir(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`),
 			).rejects.toThrow(/ENOTDIR/)
 		})
 	})
 
 	test("rm", async () => {
-		await expect(async () => await fs.rm(`${tempDir}/home/user1/documents/`)).rejects.toThrow(
+		await expect(async () => await fs.rm(`${tempDir}${sep}home${sep}user1${sep}documents${sep}`)).rejects.toThrow(
 			/EISDIR/,
 		)
 
-		await fs.rm(`${tempDir}/home/user1/documents/file1`)
+		await fs.rm(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`)
 		await expect(
-			async () => await fs.readFile(`${tempDir}/home/user1/documents/file1`, { encoding: "utf-8" }),
+			async () => await fs.readFile(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`, { encoding: "utf-8" }),
 		).rejects.toThrow(/ENOENT/)
 
-		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
-		await fs.rm(`${tempDir}/home/user1`, { recursive: true })
+		await fs.writeFile(`${tempDir}${sep}home${sep}user1${sep}documents${sep}file1`, textInFirstFile)
+		await fs.rm(`${tempDir}${sep}home${sep}user1`, { recursive: true })
 
-		await expect(async () => await fs.readdir(`${tempDir}/home/user1`)).rejects.toThrow(/ENOENT/)
+		await expect(async () => await fs.readdir(`${tempDir}${sep}home${sep}user1`)).rejects.toThrow(/ENOENT/)
 
-		expect(await fs.readdir(`${tempDir}/home`)).toEqual([])
+		expect(await fs.readdir(`${tempDir}${sep}home`)).toEqual([])
 	})
 
 	test("rmdir", async () => {
-		await fs.mkdir(`${tempDir}/dir1`)
+		await fs.mkdir(`${tempDir}${sep}dir1`)
 		expect(await fs.readdir(tempDir)).toContain("dir1")
-		await fs.rmdir(`${tempDir}/dir1`)
+		await fs.rmdir(`${tempDir}${sep}dir1`)
 		expect(await fs.readdir(tempDir)).not.toContain("dir1")
 	})
 
