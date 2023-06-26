@@ -261,11 +261,12 @@ async function writeResources(
 			)
 		} else if (REPO_USES_WILDCARD_STRUCTURE) {
 			// just in case try to create a directory to not make file operations fail
+			const [directoryPath] = resourcePath.split(resource.languageTag.name)
 			try {
-				const [directoryPath] = resourcePath.split(resource.languageTag.name)
-				await args.$fs.mkdir(directoryPath!)
+				await args.$fs.readdir(directoryPath!)
 			} catch {
-				// directory likely already exists
+				// directory doen't exists
+				await args.$fs.mkdir(directoryPath!)
 			}
 
 			//* Performance optimization in the future: Only iterate over the resource body once
