@@ -51,7 +51,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		expect(await fs.mkdir(`${tempDir}${sep}home${sep}user1${sep}documents${sep}`, { recursive: true })).toMatch(
 			new RegExp(`^.*${sep}home${sep}?$`),
 		)
-		expect(await fs.mkdir(`${tempDir}/home/user1/downloads/`, { recursive: true })).toMatch(
+		expect(await fs.mkdir(`${tempDir}${sep}home${sep}user1${sep}downloads${sep}`, { recursive: true })).toMatch(
 			new RegExp(`^.*${sep}home${sep}user1${sep}downloads${sep}?$`),
 		)
 		expect(await fs.readdir(tempDir)).toEqual(["home"])
