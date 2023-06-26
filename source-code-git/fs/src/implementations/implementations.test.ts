@@ -5,9 +5,9 @@ import { createMemoryFs } from "./memoryFs.js"
 describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
 	const path = await import("node:path")
-	const tempDir = path.join(import.meta.url, "./__test")
-	await fs.mkdir(tempDir, { recursive: true })
+	const tempDir = path.join(path.parse(new URL(import.meta.url).pathname).dir, "__test")
 
+	await fs.mkdir(tempDir, { recursive: true })
 	await runFsTestSuite("node fs", tempDir, fs)
 })
 
