@@ -1,4 +1,5 @@
 import path from "node:path"
+import { log } from "../utilities.js"
 import type { FileSystem } from "./fs/types.js"
 import { potentialFolders } from "./potentialFolders.js"
 
@@ -9,21 +10,22 @@ try {
 	// ignore
 }
 
-export const getLanguageFolderPath = async (
-	rootDir: string,
-	fileSystem: FileSystem,
-): Promise<string | undefined> => {
+export const getLanguageFolderPath = async (args: {
+	rootDir: string
+	fs: FileSystem
+}): Promise<string | undefined> => {
+	log.info("Searching for language folder in", args.rootDir)
 	try {
 		const searchForLanguageFolder = async (
 			dir: string,
 			ignoredPaths: string[],
 		): Promise<string | undefined> => {
-			const files = await fileSystem.readDirectory(dir)
+			const files = await args.fs.readDirectory(dir)
 
 			const gitignorePath = path.join(dir, ".gitignore")
 			let subIgnoredPaths: string[] = []
-			if (await fileSystem.exists(gitignorePath)) {
-				const gitignoreContent = await fileSystem.readFile(gitignorePath, "utf-8")
+			if (await args.fs.exists(gitignorePath)) {
+				const gitignoreContent = await args.fs.readFile(gitignorePath, "utf-8")
 				subIgnoredPaths = gitignoreContent
 					.split("\n")
 					.map((line) => line.trim())
@@ -32,7 +34,7 @@ export const getLanguageFolderPath = async (
 
 			for (const [file] of files) {
 				const filePath = path.join(dir, file)
-				const stat = await fileSystem.stat(filePath)
+				const stat = await args.fs.stat(filePath)
 
 				if (
 					// @ts-ignore
@@ -64,7 +66,7 @@ export const getLanguageFolderPath = async (
 			return undefined
 		}
 
-		return await searchForLanguageFolder(rootDir, [])
+		return await searchForLanguageFolder(args.rootDir, [])
 	} catch (error) {
 		console.error("Error in getLanguageFolderPath:", error)
 		return undefined
