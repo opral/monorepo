@@ -31,6 +31,13 @@
 		"/bin",
 		"/dist"
 	],
+	"exports": {
+		"./src/utlilities/fs": "./src/utilities/fs/index.ts",
+		"./src/utlilities/format": "./src/utilities/format.ts",
+		"./src/utilities/getLanguageFolderPath": "./src/utilities/getLanguageFolderPath.ts",
+		"./src/utilities/getSupportedLibrary": "./src/utilities/getSupportedLibrary.ts",
+		"./src/utilities/getConfigContent": "./src/utilities/getConfigContent.ts"
+	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "NODE_ENV=production node ./build.js",
@@ -53,6 +60,8 @@
 		"@sentry/node": "^7.51.2",
 		"@types/promptly": "^3.0.2",
 		"@types/prompts": "^2.4.2",
+		"@types/vscode": "^1.79.1",
+		"@vscode/vsce": "^2.18.0",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
 		"esbuild": "^0.17.19",
