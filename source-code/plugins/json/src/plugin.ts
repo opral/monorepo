@@ -158,7 +158,11 @@ async function readResources(
 
 					serializedMessages = [
 						...serializedMessages,
-						...collectNestedSerializedMessages(JSON.parse(file), [], potentialResourcePath),
+						...collectNestedSerializedMessages(
+							JSON.parse(file),
+							[],
+							potentialResourcePath.replace(".json", ""),
+						),
 					]
 				}
 			} else {
@@ -265,11 +269,11 @@ async function writeResources(
 			}
 
 			//* Performance optimization in the future: Only iterate over the resource body once
-			const filePaths = new Set(resource.body.map((message) => message.metadata?.fileName))
+			const filePaths = new Set(resource.body.map((message) => message.id.name!.split(".")[0]))
 
 			for (const fileName of filePaths) {
-				const filteredMassages = resource.body
-					.filter((message: ast.Message) => message.id.name.startsWith(fileName))
+				const filteredMessages = resource.body
+					.filter((message: ast.Message) => message.id.name.startsWith(fileName!))
 					.map((message: ast.Message) => {
 						return {
 							...message,
@@ -282,9 +286,9 @@ async function writeResources(
 				const splitedResource: ast.Resource = {
 					type: resource.type,
 					languageTag: resource.languageTag,
-					body: filteredMassages,
+					body: filteredMessages,
 				}
-				const path = resourcePath.replace("*", fileName)
+				const path = resourcePath.replace("*", fileName!)
 				await args.$fs.writeFile(
 					path,
 					serializeResource(
