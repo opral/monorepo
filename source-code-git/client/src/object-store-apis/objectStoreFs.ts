@@ -92,6 +92,6 @@ export async function createObjectStoreFs(args: {
 
 			return [...readTreeEntries(tree)].map((x) => objectStore.textDecoder.decode(x.pathBuffer))
 		},
-		getRoot: () => objectStore.fsMap.get("/"),
+		getRootOid: () => oidToString(objectStore.fsMap.get("/") ?? new Uint8Array()),
 	}
 }

@@ -33,7 +33,7 @@ describe("git fs", async () => {
 	const gitFs = await createObjectStoreFs({ fs, gitdir: `${dir}/.git`, treeOid: main })
 
 	const readWrite = async (path: string, content: string) => {
-		const fsRoot = gitFs.getRoot()
+		const fsRoot = gitFs.getRootOid()
 		const dirents = await gitFs.readdir(`${path}/..`).catch((e) => {
 			if (e.code === "ENOENT") return []
 			else throw e
@@ -55,7 +55,7 @@ describe("git fs", async () => {
 		).toBe(content)
 
 		// Make sure hash changes propogated up the entire branch
-		expect(gitFs.getRoot()).not.toEqual(fsRoot)
+		expect(gitFs.getRootOid()).not.toEqual(fsRoot)
 
 		const newDirents = await gitFs.readdir(`${path}/..`)
 		for (const dirent of dirents) {
