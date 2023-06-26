@@ -7,4 +7,5 @@ export interface FileSystem {
 	exists(path: string): Promise<boolean>
 	readFile(path: string, encoding: BufferEncoding | undefined): Promise<string>
 	stat(path: string): Promise<fs.Stats | FileStat | undefined>
+	isDirectory(stat: fs.Stats | FileStat): Promise<boolean>
 }

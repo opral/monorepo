@@ -40,4 +40,7 @@ export const nodeFileSystem: FileSystem = {
 			return undefined
 		}
 	},
+	isDirectory: async (stat: fs.Stats) => {
+		return stat.isDirectory()
+	},
 }

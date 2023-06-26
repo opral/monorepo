@@ -3,13 +3,6 @@ import { log } from "../utilities.js"
 import type { FileSystem } from "./fs/types.js"
 import { potentialFolders } from "./potentialFolders.js"
 
-let vscode: typeof import("vscode") | undefined
-try {
-	vscode = require("vscode")
-} catch (error) {
-	// ignore
-}
-
 export const getLanguageFolderPath = async (args: {
 	rootDir: string
 	fs: FileSystem
@@ -37,14 +30,10 @@ export const getLanguageFolderPath = async (args: {
 				const stat = await args.fs.stat(filePath)
 
 				if (
-					// @ts-ignore
-					(stat && typeof stat === "object" && stat.isDirectory()) ||
-					(vscode &&
-						vscode?.FileType &&
-						// @ts-ignore
-						stat.type === vscode.FileType.Directory &&
-						file !== "node_modules" &&
-						!ignoredPaths.some((ignoredPath) => filePath.includes(ignoredPath)))
+					stat &&
+					(await args.fs.isDirectory(stat)) &&
+					file !== "node_modules" &&
+					!ignoredPaths.some((ignoredPath) => filePath.includes(ignoredPath))
 				) {
 					const folderName = file.toLowerCase()
 					if (potentialFolders.includes(folderName)) {
