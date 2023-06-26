@@ -10,24 +10,34 @@ import {
 	useContext,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
+import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
+
 import { http, raw } from "@inlang-git/client/raw"
-import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
-import { createStore, SetStoreFunction } from "solid-js/store"
-import type * as ast from "@inlang/core/ast"
-import type { Result } from "@inlang/core/utilities"
-import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
-import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
+import { createObjectStoreFs } from "@inlang-git/client/object-store-apis"
+import type { ObjectStoreFilesystem } from "@inlang-git/client/object-store-apis"
+
 import { createMemoryFs } from "@inlang-git/fs"
 import type { NodeishFilesystem } from "@inlang-git/fs"
-import { github } from "@src/services/github/index.js"
-import { coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
-import { showToast } from "@src/components/Toast.jsx"
-import { lint, LintedResource, LintRule } from "@inlang/core/lint"
+
+import { createStore, SetStoreFunction } from "solid-js/store"
+
+import { InlangConfig, InlangConfigModule, setupConfig } from "@inlang/core/config"
+import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
+import type * as ast from "@inlang/core/ast"
 import type { Language } from "@inlang/core/ast"
+import type { Result } from "@inlang/core/utilities"
+import { lint, LintedResource, LintRule } from "@inlang/core/lint"
+
 import { publicEnv } from "@inlang/env-variables"
-import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
-import { parseOrigin } from "@inlang/telemetry"
+
+import { parseOrigin, coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
+
+import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
+import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/index.js"
+
+import { github } from "@src/services/github/index.js"
+import { showToast } from "@src/components/Toast.jsx"
+
 
 type EditorStateSchema = {
 	/**
