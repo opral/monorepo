@@ -31,6 +31,8 @@ description: Learn how to get started with inlang, the design principles, and mo
 
 {% /QuickLinks %}
 
+{% Video src="https://www.youtube.com/embed/mB2-Ze-SjXE?rel=0" / %}
+
 ## What is inlang?
 
 inlang (pronounced /Ínlang/) is localization that consists of extendable tools and apps to make localization of software simple. It uses a versioned backend that allows for efficient collaboartion between developers, translators or designers.
