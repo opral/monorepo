@@ -5,10 +5,9 @@ import { createMemoryFs } from "./memoryFs.js"
 describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
 	const path = await import("node:path")
-	console.log(import.meta.url);
-	console.log(new URL(import.meta.url));
-	console.log(path.parse(new URL(import.meta.url).pathname));
-	const tempDir = path.join(path.parse(new URL(import.meta.url).pathname).dir, "__test")
+	// remove Windows drive letter as it path.join adds the current path drive letter again
+	const pathname = new URL(import.meta.url).pathname.replace(/^\/\w:/, "");
+	const tempDir = path.join(path.parse(pathname).dir, "__test")
 
 	await fs.mkdir(tempDir, { recursive: true })
 	await runFsTestSuite("node fs", tempDir, fs)
