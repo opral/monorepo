@@ -1,7 +1,13 @@
 import path from "node:path"
-import * as vscode from "vscode"
 import type { FileSystem } from "./fs/types.js"
 import { potentialFolders } from "./potentialFolders.js"
+
+let vscode: typeof import("vscode") | undefined
+try {
+	vscode = require("vscode")
+} catch (error) {
+	// ignore
+}
 
 export const getLanguageFolderPath = async (
 	rootDir: string,
@@ -14,7 +20,6 @@ export const getLanguageFolderPath = async (
 		): Promise<string | undefined> => {
 			const files = await fileSystem.readDirectory(dir)
 
-			// Check if .gitignore exists
 			const gitignorePath = path.join(dir, ".gitignore")
 			let subIgnoredPaths: string[] = []
 			if (await fileSystem.exists(gitignorePath)) {
@@ -30,11 +35,14 @@ export const getLanguageFolderPath = async (
 				const stat = await fileSystem.stat(filePath)
 
 				if (
-					stat &&
 					// @ts-ignore
-					(stat.isDirectory() || stat.type === vscode.FileType.Directory) &&
-					file !== "node_modules" &&
-					!ignoredPaths.some((ignoredPath) => filePath.includes(ignoredPath))
+					(stat && typeof stat === "object" && stat.isDirectory()) ||
+					(vscode &&
+						vscode?.FileType &&
+						// @ts-ignore
+						stat.type === vscode.FileType.Directory &&
+						file !== "node_modules" &&
+						!ignoredPaths.some((ignoredPath) => filePath.includes(ignoredPath)))
 				) {
 					const folderName = file.toLowerCase()
 					if (potentialFolders.includes(folderName)) {
@@ -58,7 +66,7 @@ export const getLanguageFolderPath = async (
 
 		return await searchForLanguageFolder(rootDir, [])
 	} catch (error) {
-		console.error(`Error in getLanguageFolderPath:`, error)
+		console.error("Error in getLanguageFolderPath:", error)
 		return undefined
 	}
 }

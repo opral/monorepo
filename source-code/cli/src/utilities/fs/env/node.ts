@@ -1,4 +1,4 @@
-import type { FileSystem } from "./types.js"
+import type { FileSystem } from "../types.js"
 import * as fs from "node:fs"
 
 // fs wrapper
@@ -17,7 +17,8 @@ export const nodeFileSystem: FileSystem = {
 			await fs.promises.access(path, fs.constants.F_OK)
 			return true
 		} catch (error) {
-			console.error(`node:fs: Error checking existence of '${path}':`, error)
+			// We don't want to pollute the console with errors
+			// console.error(`node:fs: Error checking existence of '${path}':`, error)
 			return false
 		}
 	},

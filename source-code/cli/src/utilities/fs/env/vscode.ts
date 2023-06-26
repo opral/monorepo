@@ -1,4 +1,4 @@
-import type { FileSystem } from "./types.js"
+import type { FileSystem } from "../types.js"
 import { workspace, Uri } from "vscode"
 
 // vscode.workspace.fs wrapper
@@ -19,7 +19,8 @@ export const vscodeFileSystem: FileSystem = {
 			await workspace.fs.stat(uri)
 			return true
 		} catch (error) {
-			console.error(`vscode: Error checking existence of '${path}':`, error)
+			// We don't want to pollute the console with errors
+			// console.error(`vscode: Error checking existence of '${path}':`, error)
 			return false
 		}
 	},

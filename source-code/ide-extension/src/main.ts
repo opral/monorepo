@@ -14,6 +14,7 @@ import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview
 import { promptToReloadWindow } from "./utils/promptToReload.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { recommendation, disableRecommendation } from "./utils/recommendation.js"
+import { createInlangConfigFile } from "./utils/createInlangConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -62,7 +63,16 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.js")
 	if (potentialConfigFileUris.length === 0) {
 		console.warn("No inlang.config.js file found.")
-		return
+
+		// get workspace folder
+		const _workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
+		if (!_workspaceFolder) {
+			console.warn("No workspace folder found.")
+		} else {
+			console.log("Creating inlang.config.js file.")
+			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
+		}
+		return main(args)
 	}
 	const closestConfigPath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.fsPath),
