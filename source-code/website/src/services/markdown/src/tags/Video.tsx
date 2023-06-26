@@ -21,7 +21,7 @@ export function Video(props: { src: string }) {
 			<iframe
 				src={embedSrc()}
 				class="rounded"
-				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
 				allowfullscreen
 			/>
 		</div>
