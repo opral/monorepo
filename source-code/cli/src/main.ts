@@ -5,12 +5,11 @@ import { version } from "../package.json"
 import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 import { open } from "./commands/open/index.js"
-import { telemetry } from "./services/telemetry/implementation.js"
+import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { getConfig } from "./utilities/getConfig.js"
-
 // --------------- INIT ---------------
 
 // polyfilling node < 18 with fetch
@@ -63,6 +62,13 @@ telemetry.capture({
 	event: "CLI started",
 	properties: {
 		version,
+	},
+})
+telemetry.groupIdentify({
+	groupType: "repository",
+	groupKey: gitOrigin,
+	properties: {
+		name: gitOrigin,
 	},
 })
 
