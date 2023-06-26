@@ -74,7 +74,7 @@ export async function initCommandAction() {
 	}
 
 	// Generate the config file content
-	const languageFolderPath = await getLanguageFolderPath(rootDir, nodeFileSystem)
+	const languageFolderPath = await getLanguageFolderPath({ fs: nodeFileSystem, rootDir })
 	const pathPatternRaw = languageFolderPath ? path.join(languageFolderPath, "{language}.json") : ""
 
 	// Windows: Replace backward slashes with forward slashes

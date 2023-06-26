@@ -1,5 +1,5 @@
 import type { FileSystem } from "../types.js"
-import { workspace, Uri } from "vscode"
+import { workspace, Uri, FileType, FileStat } from "vscode"
 
 // vscode.workspace.fs wrapper
 export const vscodeFileSystem: FileSystem = {
@@ -43,5 +43,8 @@ export const vscodeFileSystem: FileSystem = {
 			console.error(`vscode: Error getting file stats for '${path}':`, error)
 			return undefined
 		}
+	},
+	isDirectory: async (stat: FileStat) => {
+		return stat.type === FileType.Directory
 	},
 }
