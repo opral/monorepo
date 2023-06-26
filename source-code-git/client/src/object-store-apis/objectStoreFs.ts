@@ -20,8 +20,16 @@ import updatePathRecursive from "./store/updatePathRecursive.js"
 // - modify readObject to take Uint8Arrays instead of strings for oid
 // - SHA-256 support, remove hardcoded 20 byte hash lengths
 
-export async function createObjectStoreFs(fs: NodeishFilesystem, gitdir: string, treeOid: string) {
-	const objectStore: MappedObjectStore = await createMappedObjectStore(treeOid, gitdir, fs)
+export async function createObjectStoreFs(args: {
+	fs: NodeishFilesystem
+	gitdir: string
+	treeOid: string
+}) {
+	const objectStore: MappedObjectStore = await createMappedObjectStore(
+		args.treeOid,
+		args.gitdir,
+		args.fs,
+	)
 
 	return {
 		readFile: async function (

@@ -30,7 +30,7 @@ describe("git fs", async () => {
 		depth: 1,
 	})
 
-	const gitFs = await createObjectStoreFs(fs, `${dir}/.git`, main)
+	const gitFs = await createObjectStoreFs({ fs, gitdir: `${dir}/.git`, treeOid: main })
 
 	const readWrite = async (path: string, content: string) => {
 		const fsRoot = gitFs.getRoot()
