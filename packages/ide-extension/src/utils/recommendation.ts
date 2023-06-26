@@ -58,7 +58,7 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 
 			// Write the updated extensions.json file
 			fs.writeFileSync(extensionsJsonPath, JSON.stringify(newExtensions, undefined, 2))
-		} else {
+		} else if (installInlangExtension === "Reject") {
 			// persist the user's choice in a workspace setting
 			await vscode.workspace
 				.getConfiguration("inlang")

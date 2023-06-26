@@ -72,7 +72,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			console.log("Creating inlang.config.js file.")
 			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
 		}
-		return main(args)
+		return
 	}
 	const closestConfigPath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.fsPath),
