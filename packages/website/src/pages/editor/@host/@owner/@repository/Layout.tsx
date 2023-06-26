@@ -10,6 +10,7 @@ import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import { setSearchParams } from "./helper/setSearchParams.js"
 
 interface Filter {
 	name: string
@@ -252,6 +253,41 @@ export function Layout(props: { children: JSXElement }) {
 					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
+				<button
+					class="border"
+					onClick={() => {
+						setSearchParams({ key: "search", value: "today" })
+					}}
+				>
+					Search
+				</button>
+				<button
+					class="border"
+					onClick={() => {
+						setSearchParams({ key: "search", value: "" })
+					}}
+				>
+					Remove search
+				</button>
+				<button
+					class="border"
+					onClick={() => {
+						setSearchParams({
+							key: "lint",
+							value: ["inlang.missingMessage", "inlang.messageWithoutReference"],
+						})
+					}}
+				>
+					Lint
+				</button>
+				<button
+					class="border"
+					onClick={() => {
+						setSearchParams({ key: "lang", value: ["en", "de"] })
+					}}
+				>
+					Search
+				</button>
 				{props.children}
 			</div>
 			<sl-dialog
