@@ -12,7 +12,7 @@ description: Learn how to get started with inlang, the design principles, and mo
         title="Quickstart"
         icon="fast"
         href="/documentation/quick-start"
-        description="Setup inlang for a localized project."
+        description="Setup inlang for a globalized project."
     /%}
 
     {% QuickLink
@@ -26,7 +26,7 @@ description: Learn how to get started with inlang, the design principles, and mo
         title="SDKs"
         icon="code"
         href="/documentation/sdk/overview"
-        description="Use a SDK if you didn't localized yet?"
+        description="Start with an SDK if you are not globalizing yet."
     /%}
 
 {% /QuickLinks %}
