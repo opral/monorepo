@@ -1,8 +1,13 @@
 import { state } from "../state.js"
 import * as vscode from "vscode"
 
-export const propertiesMissingPreview = (args: { activeTextEditor: vscode.TextEditor }) => {
+export const propertiesMissingPreview = () => {
 	const ideExtension = state().config.ideExtension
+
+	const activeTextEditor = vscode.window.activeTextEditor
+	if (!activeTextEditor) {
+		return
+	}
 
 	if (!ideExtension) {
 		// create decoration in inlang.config.js file stating that the ideExtension properties are missing
@@ -17,13 +22,14 @@ export const propertiesMissingPreview = (args: { activeTextEditor: vscode.TextEd
 			},
 		})
 
-		const document = args.activeTextEditor.document
+		const document = activeTextEditor.document
+
 		const firstLine = document.lineAt(0)
 		const range = new vscode.Range(firstLine.range.start, firstLine.range.end)
 
 		// if the file is inlang.config.js -> decorate the first line with the decorationType
 		if (document.fileName.endsWith("inlang.config.js")) {
-			args.activeTextEditor.setDecorations(decorationType, [range])
+			activeTextEditor.setDecorations(decorationType, [range])
 		}
 	}
 }

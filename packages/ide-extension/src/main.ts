@@ -143,10 +143,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	// register decorations
-	messagePreview({ activeTextEditor, context: args.context })
+	messagePreview(args)
 
 	// properties missing decoration in inlang.config.js
-	propertiesMissingPreview({ activeTextEditor })
+	propertiesMissingPreview()
 
 	// add inlang extension to recommended extensions
 	recommendation({ workspaceFolder })
