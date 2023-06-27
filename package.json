@@ -11,7 +11,7 @@
 		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "turbo run test --log-order=grouped",
-		"test:windows": "turbo run test --log-order=grouped --filter='./source-code/ide-extension' --filter='./source-code/core' --filter='./source-code/env-variables' --filter='./source-code/telemetry' --filter='./source-code/plugins/*' --filter='./source-code-git/client' --filter='./source-code-git/fs'",
+		"test:windows": "turbo run test --log-order=grouped --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter='./source-code/plugins/*' --filter=./source-code-git/client --filter=./source-code-git/fs",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint:base": "eslint --ignore-path .gitignore --cache",
 		"lint:fix:base": "npm run lint:base --fix",
