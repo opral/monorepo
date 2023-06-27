@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.6
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.11.5
 
 ### Patch Changes
