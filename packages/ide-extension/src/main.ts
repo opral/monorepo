@@ -31,30 +31,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 		const gitOrigin = await getGitOrigin()
-		await telemetry.groupIdentify({
+		telemetry.groupIdentify({
 			groupType: "repository",
 			groupKey: gitOrigin,
 			properties: {
 				name: gitOrigin,
 			},
 		})
-
 		msg("Inlang extension activated.", "info")
-
-		// start the extension
+		// start the ide extension
 		main({ context })
-		// in case the active window changes -> restart the extension
-		// (could be improved in the future for performance reasons
-		// by detecting whether the closest config differs. For now,
-		// it's easier to restart the application each time.)
-		vscode.window.onDidChangeActiveTextEditor(() => {
-			// in case of running subscriptions -> dispose them (no commands will be shown anymore in the IDE)
-			for (const subscription of context.subscriptions) {
-				subscription.dispose()
-			}
-			// restart extension
-			main({ context })
-		})
 	} catch (error) {
 		vscode.window.showErrorMessage((error as Error).message)
 		console.error(error)
@@ -109,14 +95,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	const config = await setupConfig({ module, env })
 
-	// shouldn't block the function from executing
-	// thus wrapped in async immediately executed function
-	;(async () => {
-		telemetry.capture({
-			event: coreUsedConfigEvent.name,
-			properties: coreUsedConfigEvent.properties(config),
-		})
-	})()
+	telemetry.capture({
+		event: coreUsedConfigEvent.name,
+		properties: coreUsedConfigEvent.properties(config),
+	})
 
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })
