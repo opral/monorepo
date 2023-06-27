@@ -148,7 +148,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	)
 
 	// register decorations
-	messagePreview(args)
+	messagePreview({ activeTextEditor, context: args.context })
 
 	// properties missing decoration in inlang.config.js
 	propertiesMissingPreview()
