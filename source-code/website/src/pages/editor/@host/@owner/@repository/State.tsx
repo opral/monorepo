@@ -227,7 +227,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	// re-fetched if currentPageContext changes
 	const [repositoryIsCloned] = createResource(
 		() => {
-			// re-initialize fs on every fetchRepository call
+			// re-initialize fs on every cloneRepository call
 			// until subdirectories are supported
 			setFs(createMemoryFs())
 			return {
@@ -239,7 +239,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async (args) => {
-			const result = await fetchRepository(args)
+			const result = await cloneRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
 			// checks whether the gitOrigin corresponds to the pattern.
@@ -637,7 +637,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 // ------------------------------------------
 
-async function fetchRepository(args: {
+async function cloneRepository(args: {
 	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: LocalStorageSchema["user"]
@@ -661,6 +661,8 @@ async function fetchRepository(args: {
 		singleBranch: true,
 		noCheckout: true,
 		depth: 1,
+		onMessage: console.log,
+		onProgress: console.log,
 	})
 
 	// TODO: Don't re-create the fs each time we re-fetch, instead simply
