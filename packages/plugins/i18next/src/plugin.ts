@@ -10,11 +10,6 @@ import {
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 
-/**
- * Whether namespaces are in use
- */
-let CONTAINS_NAMESPACES = undefined
-
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 	id: "inlang.plugin-i18next",
 	async config() {
@@ -61,10 +56,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
 	const languages: string[] = []
 
-	// check if there are Namespaces
-	CONTAINS_NAMESPACES = typeof args.settings.pathPattern !== "string"
-
-	if (CONTAINS_NAMESPACES) {
+	if (typeof args.settings.pathPattern !== "string") {
 		//resources are stored with namespaces
 		for (const path of Object.values(args.settings.pathPattern)) {
 			const [pathBeforeLanguage] = path.split("{language}")
@@ -131,7 +123,7 @@ async function readResources(
 			body: [],
 		}
 
-		if (CONTAINS_NAMESPACES) {
+		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				const messages = await getFileToParse(path, language, args.$fs)
 				if (messages) {
@@ -314,7 +306,7 @@ async function writeResources(
 	for (const resource of args.resources) {
 		const language = resource.languageTag.name
 
-		if (CONTAINS_NAMESPACES) {
+		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				//filter the messages by prefxes (paths)
 				const filteredMessages = resource.body
@@ -377,7 +369,7 @@ function serializeResource(
 			object: true,
 		})
 	}
-	return JSON.stringify(result, undefined, format.space) + (format.endsWithNewLine ? "\n" : "")
+	return JSON.stringify(result, undefined, format.space) + (format!.endsWithNewLine ? "\n" : "")
 }
 
 /**

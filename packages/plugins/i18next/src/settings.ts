@@ -5,10 +5,7 @@
  */
 export function throwIfInvalidSettings(settings: PluginSettings) {
 	if (typeof settings.pathPattern === "string") {
-		if (
-			settings.pathPattern === undefined ||
-			settings.pathPattern.includes("{language}") === false
-		) {
+		if (settings.pathPattern.includes("{language}") === false) {
 			throw new Error(
 				"The pathPattern setting must be defined and include the {language} placeholder. An example would be './resources/{language}.json'.",
 			)
