@@ -41,6 +41,10 @@
 				"inlang.disableRecommendation": {
 					"type": "array",
 					"default": []
+				},
+				"inlang.disableConfigFileCreation": {
+					"type": "array",
+					"default": []
 				}
 			}
 		}
@@ -80,7 +84,8 @@
 		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
-		"workspaceContains:**/inlang.config.js"
+		"workspaceContains:**/inlang.config.js",
+		"onStartupFinished"
 	],
 	"license": "Apache-2.0"
 }
