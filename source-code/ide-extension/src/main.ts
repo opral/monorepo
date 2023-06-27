@@ -13,8 +13,11 @@ import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
-import { recommendation, disableRecommendation } from "./utilities/recommendation.js"
-import { createInlangConfigFile } from "./utilities/createInlangConfigFile.js"
+import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
+import {
+	createInlangConfigFile,
+	isDisabledConfigFileCreation,
+} from "./utilities/createInlangConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -23,7 +26,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				workspaceRecommendation: !(await disableRecommendation()),
+				workspaceRecommendation: !(await isDisabledRecommendation()),
+				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
 		const gitOrigin = await getGitOrigin()

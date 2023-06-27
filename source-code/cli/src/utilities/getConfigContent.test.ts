@@ -10,12 +10,12 @@ type TestArgs = {
 test("getConfigContent - plugin 'json'", async () => {
 	const args: TestArgs = {
 		plugin: "json",
-		pathPattern: "/path/to/json",
+		pathPattern: "",
 	}
 
 	const configContent = await getConfigContent(args)
 
-	expect(configContent).toContain("jsonPlugin({ pathPattern: '/path/to/json' }),")
+	expect(configContent).toContain("jsonPlugin({ pathPattern: '' }),")
 	expect(configContent).toContain("standardLintRules()")
 })
 
