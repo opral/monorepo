@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.2.3
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.2.2
 
 ### Patch Changes
