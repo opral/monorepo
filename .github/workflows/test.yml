@@ -15,18 +15,20 @@ jobs:
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
+
       - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
           cache: "npm"
 
-      - run: npm install --no-save
+      - name: Install dependencies
+        run: npm install --no-save
 
-      - name: Run tests of all packages
+      - name: Run all tests
         if: startsWith(matrix.os, 'windows') == false
         run: npm run test
 
-      - name: Run tests relevant to Windows
+      - name: Run tests relevant to the Windows platform
         if: startsWith(matrix.os, 'windows')
         run: npm run test:windows
