@@ -11,6 +11,9 @@ export async function defineConfig(env) {
 				pathPattern: "./examples/example01/{language}.json",
 				variableReferencePattern: ["{", "}"],
 				ignore: [".file.json"],
+				format: {
+					nested: true,
+				},
 			}),
 		],
 	}

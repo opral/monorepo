@@ -1,9 +1,9 @@
 {
 	"nav": {
-		"about.you": "test"
+		"about": "test"
 	},
-	"nav.b": {
-		"nav.c": {
+	"b": {
+		"c": {
 			"d": "e"
 		}
 	}

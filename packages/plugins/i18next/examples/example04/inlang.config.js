@@ -10,6 +10,9 @@ export async function defineConfig(env) {
 			plugin({
 				pathPattern: "./examples/example04/{language}.json",
 				variableReferencePattern: ["{", "}"],
+				format: {
+					nested: true,
+				},
 			}),
 		],
 	}
