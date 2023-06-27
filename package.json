@@ -11,6 +11,7 @@
 		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "turbo run test --log-order=grouped",
+		"test:windows": "turbo run test --log-order=grouped --ignore='source-code-git/**/*'",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint:base": "eslint --ignore-path .gitignore --cache",
 		"lint:fix:base": "npm run lint:base --fix",
