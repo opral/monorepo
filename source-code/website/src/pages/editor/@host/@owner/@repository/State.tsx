@@ -661,8 +661,6 @@ async function cloneRepository(args: {
 		singleBranch: true,
 		noCheckout: true,
 		depth: 1,
-		onMessage: console.log,
-		onProgress: console.log,
 	})
 
 	// TODO: Don't re-create the fs each time we re-fetch, instead simply
