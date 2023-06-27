@@ -18,8 +18,15 @@ The moment project lisa breaks the "filesystem is the universal data API constra
 
 Git is the most widely used version control system. If project lisa is not git compatible, the wide ecosystem of git repositories can't be leveraged, and inlang wouldn't exist. 
 
-### 4. Iteration speed over (premature) optimization. 
+### 4. Host Agnostic.
+
+#### Locking ourselves into a git host means locking ourselves into their userbase
+
+If GitHub were to disappear tomorrow, project lisa should not disappear with it. Likewise, if a new git host appears and sees widespread adoption, lisa should work with it out of the box, without us needing to scramble to implement support.
+
+### 5. Iteration speed over (premature) optimization. 
 
 #### Iteration speed is crucial to de-risk design decisions that could de-rail the project.
 
 One of the reasons why using TypeScript is the primary language. Using TypeScript as the primary language ensures compatibility with the rest of the codebase, is higher level (faster to iterate), and cross-app debugging is easier. If performance is needed, WebAssembly can be used to offload performance-limiting computations.
+
