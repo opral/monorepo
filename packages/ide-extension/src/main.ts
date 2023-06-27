@@ -21,6 +21,7 @@ import {
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
+		// activation telemetry
 		await telemetry.capture({
 			event: "IDE-EXTENSION activated",
 			properties: {
@@ -30,14 +31,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
-		const gitOrigin = await getGitOrigin()
-		telemetry.groupIdentify({
-			groupType: "repository",
-			groupKey: gitOrigin,
-			properties: {
-				name: gitOrigin,
-			},
-		})
+		try {
+			const gitOrigin = await getGitOrigin()
+			telemetry.groupIdentify({
+				groupType: "repository",
+				groupKey: gitOrigin,
+				properties: {
+					name: gitOrigin,
+				},
+			})
+		} catch (error) {
+			console.warn(error)
+		}
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
 		main({ context })
