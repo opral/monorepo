@@ -8,6 +8,8 @@ import { ZodError } from "zod"
 /**
  * Sets up the inlang config module.
  *
+ * @throws {Error} If the config is invalid.
+ *
  * @example
  * 	import { setupConfig, type InlangConfigModule } from "@inlang/core/config"
  *
