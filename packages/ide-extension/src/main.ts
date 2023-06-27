@@ -13,7 +13,11 @@ import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
-import { recommendation, disableRecommendation } from "./utilities/recommendation.js"
+import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
+import {
+	createInlangConfigFile,
+	isDisabledConfigFileCreation,
+} from "./utilities/createInlangConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -23,7 +27,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				workspaceRecommendation: !(await disableRecommendation()),
+				workspaceRecommendation: !(await isDisabledRecommendation()),
+				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
 		try {
@@ -62,6 +67,15 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const potentialConfigFileUris = await vscode.workspace.findFiles("inlang.config.js")
 	if (potentialConfigFileUris.length === 0) {
 		console.warn("No inlang.config.js file found.")
+
+		// get workspace folder
+		const _workspaceFolder = vscode.workspace.getWorkspaceFolder(activeTextEditor.document.uri)
+		if (!_workspaceFolder) {
+			console.warn("No workspace folder found.")
+		} else {
+			console.log("Creating inlang.config.js file.")
+			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
+		}
 		return
 	}
 	const closestConfigPath = determineClosestPath({

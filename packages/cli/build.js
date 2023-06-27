@@ -22,6 +22,7 @@ const ctx = await context({
 			isProduction: isProduction,
 		}),
 	},
+	external: ["vscode"],
 })
 
 if (isProduction === false) {
