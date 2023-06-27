@@ -19,7 +19,7 @@ inlang wouldn't exist.
 
 ### 3. Host Agnostic.
 
-#### Locking ourselves into a git host means locking ourselves into their userbase
+#### Locking ourselves into a git host means locking ourselves into their userbase.
 
 If GitHub were to disappear tomorrow, project lisa should not disappear with
 it. Likewise, if a new git host appears and sees widespread adoption, lisa
