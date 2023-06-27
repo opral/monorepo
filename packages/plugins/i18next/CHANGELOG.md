@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 2.2.4
+
+### Patch Changes
+
+- 12fe1943: support language folders and addLanguage button
+
 ## 2.2.3
 
 ### Patch Changes
