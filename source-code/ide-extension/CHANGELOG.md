@@ -1,5 +1,15 @@
 # inlang-vs-code-extension
 
+## 0.8.0
+
+### Minor Changes
+
+- 283f5764: Several performance improvements.
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.7.6
 
 ### Patch Changes
