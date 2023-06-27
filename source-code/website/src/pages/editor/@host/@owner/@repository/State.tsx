@@ -214,6 +214,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
+	const [objectFs, setObjectFs] = createSignal<ObjectStoreFilesystem| undefined>()
 
 	/**
 	 * The reference resource.
@@ -226,7 +227,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	// re-fetched if currentPageContext changes
 	const [repositoryIsCloned] = createResource(
 		() => {
-			// re-initialize fs on every cloneRepository call
+			// re-initialize fs on every fetchRepository call
 			// until subdirectories are supported
 			setFs(createMemoryFs())
 			return {
@@ -234,10 +235,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
 				user: localStorage?.user,
 				setFsChange,
+				setObjectFs,
 			}
 		},
 		async (args) => {
-			const result = await cloneRepository(args)
+			const result = await fetchRepository(args)
 			// not blocking the execution by using the callback pattern
 			// the user does not need to wait for the response
 			// checks whether the gitOrigin corresponds to the pattern.
@@ -291,7 +293,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 			return {
-				fs: fs(),
+				fs: objectFs(),
 				// BUG: this is not reactive
 				// See https://github.com/inlang/inlang/issues/838#issuecomment-1560745678
 				// we need to listen to inlang.config.js changes
@@ -635,27 +637,42 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 // ------------------------------------------
 
-async function cloneRepository(args: {
+async function fetchRepository(args: {
 	fs: NodeishFilesystem
 	routeParams: EditorRouteParams
 	user: LocalStorageSchema["user"]
 	setFsChange: (date: Date) => void
+	setObjectFs: (objectFs: ObjectStoreFilesystem) => void
 }): Promise<Date | undefined> {
 	const { host, owner, repository } = args.routeParams
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return undefined
 	}
 
+	const gitdir = ".git"
 	// do shallow clone, get first commit and just one branch
 	await raw.clone({
 		fs: args.fs,
 		http,
-		dir: "/",
-		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+		gitdir,
 		url: `https://${host}/${owner}/${repository}`,
+		corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
+		remote: `${owner}/${repository}`,
 		singleBranch: true,
+		noCheckout: true,
 		depth: 1,
 	})
+
+	// TODO: Don't re-create the fs each time we re-fetch, instead simply
+	// update the head of an existing fs interface. This will require garbage
+	// collection to remain memory efficient.
+	args.setObjectFs(
+		await createObjectStoreFs({
+			fs: args.fs,
+			gitdir,
+			treeOid: await raw.resolveRef({ fs: args.fs, gitdir, ref: 'HEAD' })
+		})
+	)
 
 	// fetch 100 more commits, can get more commits if needed
 	// https://isomorphic-git.org/docs/en/faq#how-to-make-a-shallow-repository-unshallow
@@ -707,38 +724,16 @@ export async function pushChanges(args: {
 	if (host === undefined || owner === undefined || repository === undefined) {
 		return [undefined, new PushException("h3ni329 Invalid route params")]
 	}
-	// stage all changes
-	const status = await raw.statusMatrix({
-		fs: args.fs,
-		dir: "/",
-		filter: (f: any) =>
-			f.endsWith(".json") ||
-			f.endsWith(".po") ||
-			f.endsWith(".yaml") ||
-			f.endsWith(".yml") ||
-			f.endsWith(".js") ||
-			f.endsWith(".ts"),
-	})
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0),
-	)
-	// add all changes
-	for (const file of filesWithUncommittedChanges) {
-		await raw.add({ fs: args.fs, dir: "/", filepath: file[0] })
-	}
 	// commit changes
 	await raw.commit({
 		fs: args.fs,
-		dir: "/",
+		gitdir: ".git",
 		author: {
 			name: args.user.username,
 			email: args.user.email,
 		},
 		message: "inlang: update translations",
+		tree: objectFs().getRoot()
 	})
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
@@ -783,7 +778,7 @@ export async function pushChanges(args: {
 }
 
 async function readInlangConfig(args: {
-	fs: NodeishFilesystem
+	fs: ObjectStoreFilesystem
 }): Promise<InlangConfig | undefined> {
 	try {
 		const env: InlangEnvironment = {
@@ -811,6 +806,7 @@ async function readInlangConfig(args: {
 async function readResources(config: InlangConfig) {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	const resources = await config.readResources({ config }).catch(() => {})
+
 	if (!resources) return
 
 	const [lintedResources] = await lint({ config, resources })
