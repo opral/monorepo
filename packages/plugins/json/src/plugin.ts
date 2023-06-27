@@ -261,11 +261,11 @@ async function writeResources(
 			)
 		} else if (REPO_USES_WILDCARD_STRUCTURE) {
 			// just in case try to create a directory to not make file operations fail
-			const [directoryPath] = resourcePath.split(resource.languageTag.name)
+			const [directoryPath] = resourcePath.split("/*.json")
 			try {
 				await args.$fs.readdir(directoryPath!)
 			} catch {
-				// directory doen't exists
+				// directory doesn't exists
 				await args.$fs.mkdir(directoryPath!)
 			}
 
