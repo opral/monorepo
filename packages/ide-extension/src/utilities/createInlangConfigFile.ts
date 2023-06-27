@@ -9,6 +9,7 @@ import { vscodeFs } from "@inlang/cli/src/utlilities/fs"
 import path from "node:path"
 import * as vscode from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
+import { msg } from "./message.js"
 import { getSetting, updateSetting } from "./settings/index.js"
 
 /**
@@ -52,6 +53,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		}
 
 		// Generate config file content
+		msg("Creating inlang.config.js ...", "info", "statusBar", vscode.StatusBarAlignment.Left, 5000)
 		const configContent = await getConfigContent({ plugin, pathPattern })
 		await writeConfigFile(configContent, args.workspaceFolder)
 	} else if (createConfigFile === "Reject") {
