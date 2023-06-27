@@ -1,4 +1,7 @@
-export const rootEnvFilePath = new URL("../../../../.env", import.meta.url).pathname
+import { fileURLToPath } from 'node:url'
+import path from 'node:path';
+
+export const rootEnvFilePath = path.join(fileURLToPath(import.meta.url), "../../../../../.env")
 
 /**
  * Define the public environment variables.

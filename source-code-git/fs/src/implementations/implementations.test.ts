@@ -4,9 +4,11 @@ import { createMemoryFs } from "./memoryFs.js"
 
 describe("node fs", async () => {
 	const fs = await import("node:fs/promises")
-	const tempDir = new URL("./__test", import.meta.url).pathname
-	await fs.mkdir(tempDir, { recursive: true })
+	const url = await import("node:url")
+	const path = await import("node:path")
+	const tempDir = path.join(url.fileURLToPath(import.meta.url), "../__test")
 
+	await fs.mkdir(tempDir, { recursive: true })
 	await runFsTestSuite("node fs", tempDir, fs)
 })
 
@@ -19,7 +21,7 @@ describe("memory fs", async () => {
 const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesystem) => {
 	// testing characters is important. see bug https://github.com/inlang/inlang/issues/785
 	const textInFirstFile = `
-	  Testing a variety of characters. 
+	  Testing a variety of characters.
 
 		Testing Umlaute äöüÄÖÜß
 		Testing Chinese 汉字
@@ -33,7 +35,7 @@ const runFsTestSuite = async (name: string, tempDir: string, fs: NodeishFilesyst
 		Testing Hindi हिन्दी
 		Testing Tamil தமிழ்
 		Testing Georgian ქართული
-		Testing Armenian հայերեն		
+		Testing Armenian հայերեն
 	`
 
 	const textInSecondFile = `
