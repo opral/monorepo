@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import * as vscode from "vscode"
+import { getSetting, updateSetting } from "./index.js"
 
 /**
  * Returns the user ID. If it doesn't exist yet, it will be generated and persisted.
@@ -27,11 +27,9 @@ export async function getUserId() {
 }
 
 const getPersistedId = async (): Promise<string | undefined> => {
-	return await vscode.workspace.getConfiguration("inlang").get("userId")
+	return await getSetting("userId")
 }
 
-const persistId = async (id: string) => {
-	await vscode.workspace
-		.getConfiguration("inlang")
-		.update("userId", id, vscode.ConfigurationTarget.Global)
+const persistId = async (id: string): Promise<void> => {
+	await updateSetting("userId", id)
 }

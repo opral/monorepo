@@ -9,6 +9,7 @@ import { vscodeFs } from "@inlang/cli/src/utlilities/fs"
 import path from "node:path"
 import * as vscode from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
+import { getSetting, updateSetting } from "./settings/index.js"
 
 /**
  * Creates an Inlang config file if it doesn't already exist and the user approves it.
@@ -23,7 +24,7 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 	}
 
 	// Check if prompt is disabled
-	if (await disableConfigFileCreation()) return
+	if (await isDisabledConfigFileCreation()) return
 
 	// Check for supported library
 	const plugin = await getSupportedLibraryInProject(args.workspaceFolder)
@@ -54,8 +55,8 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
 		const configContent = await getConfigContent({ plugin, pathPattern })
 		await writeConfigFile(configContent, args.workspaceFolder)
 	} else if (createConfigFile === "Reject") {
-		const gitOrigin = await getGitOrigin()
-		await updateDisableConfigFileCreationSetting(gitOrigin)
+		// Disable config file creation
+		disableConfigFileCreation()
 	}
 
 	trackOutcome(createConfigFile)
@@ -65,21 +66,26 @@ export const createInlangConfigFile = async (args: { workspaceFolder: vscode.Wor
  * Checks if the config file creation is disabled based on the git origin.
  * @returns A promise that resolves to a boolean indicating whether the config file creation is disabled.
  */
-export const disableConfigFileCreation = async (): Promise<boolean> => {
-	const gitOrigin = await getGitOrigin()
-	const recommendation = await getDisableConfigFileCreationSetting()
-
-	return recommendation.includes(gitOrigin)
+export const isDisabledConfigFileCreation = async (): Promise<boolean> => {
+	return (await getSetting("disableConfigFileCreation")).includes(await getGitOrigin())
 }
 
 /**
- * Retrieves the disableConfigFileCreation setting.
- * @returns A promise that resolves to an array of strings representing git origins.
+ * Update the setting to disable the config file creation.
+ * @param gitOrigin - The git origin.
+ * @returns A promise that resolves once the setting has been updated.
  */
-const getDisableConfigFileCreationSetting = async (): Promise<string[]> => {
-	return (await vscode.workspace
-		.getConfiguration("inlang")
-		.get("disableConfigFileCreation")) as string[]
+const disableConfigFileCreation = async (): Promise<void> => {
+	const gitOrigin = await getGitOrigin()
+	try {
+		await updateSetting("disableConfigFileCreation", [
+			...(await getSetting("disableConfigFileCreation")),
+			gitOrigin,
+		])
+	} catch (error) {
+		console.error(`Could not update setting 'disableConfigFileCreation'`)
+		console.error(error)
+	}
 }
 
 /**
@@ -168,17 +174,6 @@ const writeConfigFile = async (configContent: string, workspaceFolder: vscode.Wo
 		console.error(`📄 Could not create inlang.config.js file at ${italic(configFilePath.fsPath)}`)
 		console.error(error)
 	}
-}
-
-/**
- * Updates the disableConfigFileCreation setting with the git origin.
- * @param gitOrigin - The git origin.
- */
-const updateDisableConfigFileCreationSetting = async (gitOrigin: string) => {
-	const recommendation = await getDisableConfigFileCreationSetting()
-	await vscode.workspace
-		.getConfiguration("inlang")
-		.update("disableConfigFileCreation", [...recommendation, gitOrigin], true)
 }
 
 /**
