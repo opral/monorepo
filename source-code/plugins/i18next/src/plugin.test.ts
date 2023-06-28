@@ -2,6 +2,8 @@ import { mockEnvironment } from "@inlang/core/test"
 import { query } from "@inlang/core/query"
 import { expect, it } from "vitest"
 import { plugin } from "./plugin.js"
+import type { InlangConfig } from "@inlang/core/config"
+import type * as ast from "@inlang/core/ast"
 
 it("should throw if the path pattern does not include the {language} placeholder", async () => {
 	const env = await mockEnvironment({})
@@ -92,7 +94,7 @@ it("should work with empty json files", async () => {
 			config: {
 				referenceLanguage: "en",
 				languages: ["en"],
-			} as any,
+			} as InlangConfig,
 		}),
 	).resolves.toBeTruthy()
 })
@@ -107,7 +109,7 @@ it("should work with not yet existing files", async () => {
 			config: {
 				referenceLanguage: "en",
 				languages: ["en", "de"],
-			} as any,
+			} as InlangConfig,
 		}),
 	).resolves.toBeTruthy()
 })
@@ -135,7 +137,7 @@ it("should preserve the spacing resources and determine a default based on the m
 	config.languages = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 
 	resources.push({
@@ -165,7 +167,7 @@ it("should preserve the spacing resources and determine a default based on the m
 	})
 
 	await config.writeResources!({
-		config: config as any,
+		config: config as InlangConfig,
 		resources,
 	})
 
@@ -203,11 +205,11 @@ it("should remember if a file has a new line at the end or not", async () => {
 	config.languages = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 
 	await config.writeResources!({
-		config: config as any,
+		config: config as InlangConfig,
 		resources,
 	})
 
@@ -234,7 +236,7 @@ it("should correctly identify placeholders", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
 	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
@@ -254,13 +256,14 @@ it("should correctly identify placeholders with only no trailing pattern", async
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	await config.writeResources!({
 		resources: resources,
+		config: config as InlangConfig,
 	})
 	const newResources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
 	expect(newResources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
@@ -282,13 +285,14 @@ it("should parse Placeholders without adding Text elements around it", async () 
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	await config.writeResources!({
 		resources: resources,
+		config: config as InlangConfig,
 	})
 	const newResources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
 	expect(newResources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
@@ -310,7 +314,7 @@ it("should serialize newly added messages", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	const [newResource] = query(resources[0]!).create({
 		message: {
@@ -320,7 +324,7 @@ it("should serialize newly added messages", async () => {
 		},
 	})
 	await config.writeResources!({
-		config: config as any,
+		config: config as InlangConfig,
 		resources: [newResource!],
 	})
 	const newFile = (await env.$fs.readFile("./en.json", { encoding: "utf-8" })) as string
@@ -423,7 +427,7 @@ it("should correctly parse resources with pathPattern that contain namespaces", 
 	config.referenceLanguage = "en"
 
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 
 	const reference = [
@@ -471,7 +475,7 @@ it("should add a new language for pathPattern string", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	resources.push({
 		type: "Resource",
@@ -483,7 +487,7 @@ it("should add a new language for pathPattern string", async () => {
 	})
 
 	await config.writeResources!({
-		config: config as any,
+		config: config as InlangConfig,
 		resources: resources,
 	})
 
@@ -509,7 +513,7 @@ it("should add a new language for pathPattern with namespaces", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 	resources.push({
 		type: "Resource",
@@ -521,7 +525,7 @@ it("should add a new language for pathPattern with namespaces", async () => {
 	})
 
 	await config.writeResources!({
-		config: config as any,
+		config: config as InlangConfig,
 		resources: resources,
 	})
 
@@ -547,7 +551,7 @@ it("should escape `.` in flattened json structures", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 
 	const reference = [
@@ -620,7 +624,7 @@ it("should escape `.` in nested json structures", async () => {
 	config.referenceLanguage = "en"
 	config.languages = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config as InlangConfig,
 	})
 
 	const reference = [
@@ -671,6 +675,7 @@ it("should escape `.` in nested json structures", async () => {
 
 	await config.writeResources!({
 		resources: resources,
+		config: config as InlangConfig,
 	})
 
 	const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
@@ -697,7 +702,7 @@ it("should throw if there are nested structures but the 'nested' setting is not 
 
 	try {
 		await config.readResources!({
-			config: config as any,
+			config: config as InlangConfig,
 		})
 	} catch (e) {
 		expect((e as Error).message).toContain("You configured a flattened key project")
@@ -705,7 +710,7 @@ it("should throw if there are nested structures but the 'nested' setting is not 
 })
 
 it("should throw if element type is not known", async () => {
-	const resources = [
+	const resources: ast.Resource[] = [
 		{
 			type: "Resource",
 			languageTag: {
@@ -723,6 +728,7 @@ it("should throw if element type is not known", async () => {
 						type: "Pattern",
 						elements: [
 							{
+								// @ts-ignore
 								type: "FalseType",
 								value: "test",
 							},
@@ -733,7 +739,7 @@ it("should throw if element type is not known", async () => {
 		},
 	]
 	const env = await mockEnvironment({})
-	await env.$fs.writeFile("./en.json", {})
+	await env.$fs.writeFile("./en.json", "{}")
 
 	const x = plugin({
 		pathPattern: { common: "./{language}.json" },
@@ -745,6 +751,7 @@ it("should throw if element type is not known", async () => {
 	try {
 		await config.writeResources!({
 			resources: resources,
+			config: config as InlangConfig,
 		})
 	} catch (e) {
 		expect((e as Error).message).toContain("Unknown message pattern element of type")
