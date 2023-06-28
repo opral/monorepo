@@ -91,7 +91,7 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 		//resources are stored with namespaces
 		for (const path of Object.values(args.settings.pathPattern)) {
 			const [pathBeforeLanguage] = path.split("{language}")
-			const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
+			const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
 
 			for (const filePath of parentDirectory) {
 				//check if file really exists in the dir
@@ -112,7 +112,7 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 	} else {
 		//resources are stored without namespaces
 		const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
-		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
+		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
 
 		for (const filePath of parentDirectory) {
 			if (
@@ -179,7 +179,6 @@ async function readResources(
 		resources.push(resource)
 	}
 
-	//console.log(resources[0].body.map((m) => m.pattern.elements))
 	return resources
 }
 
@@ -190,12 +189,10 @@ async function getFileToParse(path: string, language: string, $fs: InlangEnviron
 	const pathWithLanguage = path.replace("{language}", language)
 	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
 	try {
-		const file = await $fs.readFile(pathWithLanguage, {
-			encoding: "utf-8",
-		})
+		const file = await $fs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
-		SPACING[pathWithLanguage] = detectJsonSpacing(file)
-		FILE_HAS_NEW_LINE[pathWithLanguage] = file.endsWith("\n")
+		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
+		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
 
 		return JSON.parse(file as string)
 	} catch (e) {
@@ -393,7 +390,7 @@ function serializeResource(
 	nested: boolean,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
-	let result = {}
+	let result: { [key: string]: string } = {}
 	for (const message of messages) {
 		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
 		let id = message.id.name.replace("..", "u002E.")
