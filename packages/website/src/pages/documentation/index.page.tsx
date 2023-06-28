@@ -33,7 +33,7 @@ export function Page(props: PageProps) {
 				    (tested on an ultrawide monitor, works!) 
 				*/}
 					<div class="hidden md:block h-full -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
-						<nav class="sticky top-24 pb-24">
+						<nav class="sticky top-[120px] pb-24">
 							{/* `Show` is a hotfix when client side rendering loaded this page
 							 * filteredTableContents is not available on the client.
 							 */}
@@ -129,7 +129,7 @@ function NavbarCommon(props: {
 											}
 											href={document.frontmatter.href}
 										>
-											{document.frontmatter.title}
+											{document.frontmatter.shortTitle}
 										</a>
 									</li>
 								)}

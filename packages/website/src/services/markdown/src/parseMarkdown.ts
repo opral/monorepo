@@ -20,6 +20,7 @@ export const RequiredFrontmatter = z.object({
 		})
 		.startsWith("/"),
 	title: z.string(),
+	shortTitle: z.string().optional(),
 	description: z
 		.string({ description: "Description for SEO and prerendering purposes." })
 		.min(10)
@@ -46,7 +47,12 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
 	text: string
 	FrontmatterSchema: typeof RequiredFrontmatter
 }): {
-	frontmatter: FrontmatterSchema
+	frontmatter: {
+		title: string
+		shortTitle?: string
+		description: string
+		href: string
+	}
 	renderableTree?: Markdoc.RenderableTreeNode
 	error?: string
 } {

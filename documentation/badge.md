@@ -1,10 +1,11 @@
 ---
-title: "Badges"
+title: Badge Generator
+shortTitle: Badges
 href: /documentation/badge
-description: Generate badges for your project.
+description: Generate a badge to show your project's translation progress.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 This example shows how the badge looks like in a GitHub README based on the example project:
 

@@ -1,7 +1,8 @@
 ---
-title: CLI
+title: CLI for globalizing with inlang
+shortTitle: CLI
 href: /documentation/apps/inlang-cli
-description: The inlang CLI automates localization processes.
+description: The inlang Command Line Interface (CLI) automates globalization processes.
 ---
 
 # Inlang CLI

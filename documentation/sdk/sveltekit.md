@@ -1,5 +1,6 @@
 ---
-title: SDK for SvelteKit
+title: Globalization SDK for SvelteKit
+shortTitle: SDK for SvelteKit
 href: /documentation/sdk/sveltekit
 description: i18n SDK designed and fully integrated for SvelteKit.
 ---
@@ -12,7 +13,7 @@ description: i18n SDK designed and fully integrated for SvelteKit.
 
 /%}
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 inlang provides an SDK that integrates seamlessly with SvelteKit.
 
