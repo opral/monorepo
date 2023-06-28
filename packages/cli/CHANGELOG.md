@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.11.7
+
+### Patch Changes
+
+- 1cff6e4d: fix btoa with Buffer.from
+
 ## 0.11.6
 
 ### Patch Changes
