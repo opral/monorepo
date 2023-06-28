@@ -26,7 +26,7 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 				)
 			} else if (prefix.includes(".")) {
 				throw new Error(
-					"A prefix of pathPatterm includes an '.'. Use a string without dot notations. An example would be 'common'.",
+					"A prefix of pathPattern includes an '.'. Use a string without dot notations. An example would be 'common'.",
 				)
 			}
 		}
