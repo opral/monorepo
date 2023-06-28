@@ -212,8 +212,14 @@ it("should correctly identify placeholders with only no trailing pattern", async
 	const resources = await config.readResources!({
 		config: config as any,
 	})
-	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
-	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
+	await config.writeResources!({
+		resources: resources,
+	})
+	const newResources = await config.readResources!({
+		config: config as any,
+	})
+	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
+	expect(newResources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
 })
 
 it("should parse Placeholders without adding Text elements around it", async () => {
@@ -234,8 +240,14 @@ it("should parse Placeholders without adding Text elements around it", async () 
 	const resources = await config.readResources!({
 		config: config as any,
 	})
-	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
-	expect(resources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
+	await config.writeResources!({
+		resources: resources,
+	})
+	const newResources = await config.readResources!({
+		config: config as any,
+	})
+	expect(newResources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
+	expect(newResources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
 })
 
 it("should serialize newly added messages", async () => {
@@ -645,5 +657,52 @@ it("should throw if there are nested structures but the 'nested' setting is not 
 		})
 	} catch (e) {
 		expect((e as Error).message).toContain("You configured a flattened key project")
+	}
+})
+
+it("should throw if element type is not known", async () => {
+	const resources = [
+		{
+			type: "Resource",
+			languageTag: {
+				type: "LanguageTag",
+				name: "en",
+			},
+			body: [
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "test",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "FalseType",
+								value: "test",
+							},
+						],
+					},
+				},
+			],
+		},
+	]
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", {})
+
+	const x = plugin({
+		pathPattern: { common: "./{language}.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+
+	try {
+		await config.writeResources!({
+			resources: resources,
+		})
+	} catch (e) {
+		expect((e as Error).message).toContain("Unknown message pattern element of type")
 	}
 })
