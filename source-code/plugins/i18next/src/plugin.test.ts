@@ -196,6 +196,26 @@ it("should correctly identify placeholders", async () => {
 	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
 })
 
+it("should correctly identify placeholders with only no trailing pattern", async () => {
+	const enResource = `{
+    "test": "Hello @:username"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["@:"] })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
+	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
+})
+
 it("should parse Placeholders without adding Text elements around it", async () => {
 	const enResource = `{
     "test": "{{username}}"
@@ -525,7 +545,8 @@ it("should escape `.` in nested json structures", async () => {
 	const enResource = `{
 	"a.": {
 		"b": "test"
-	}
+	},
+	"c.": "test"
 }`
 
 	const env = await mockEnvironment({})
@@ -570,6 +591,22 @@ it("should escape `.` in nested json structures", async () => {
 						],
 					},
 				},
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "common.c.",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
 			],
 		},
 	]
@@ -582,5 +619,32 @@ it("should escape `.` in nested json structures", async () => {
 
 	const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
 	const json = JSON.parse(file as string)
+	console.log(json)
 	expect(json["a."].b).toStrictEqual("test")
+	expect(json["c."]).toStrictEqual("test")
+})
+
+it("should throw if there are nested structures but the 'nested' setting is not true", async () => {
+	const enResource = `{
+		"a": {
+			"b": "test"
+		}
+	}`
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({
+		pathPattern: { common: "./{language}.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+
+	try {
+		await config.readResources!({
+			config: config as any,
+		})
+	} catch (e) {
+		expect((e as Error).message).toContain("You configured a flattened key project")
+	}
 })

@@ -222,7 +222,7 @@ function parseBody(
 		? flatten(messages, {
 				transformKey: function (key) {
 					//replace dots in keys with unicode
-					return key.replace(".", "u002E")
+					return key.replaceAll(".", "u002E")
 				},
 		  })
 		: messages
@@ -254,7 +254,9 @@ function parseMessage(
 	prefix?: string,
 ): ast.Message {
 	// add the prefix infromt if it has namespaces
-	const prefixedId = prefix ? prefix + "." + id.replace("u002E", ".") : id.replace("u002E", ".")
+	const prefixedId = prefix
+		? prefix + "." + id.replaceAll("u002E", ".")
+		: id.replaceAll("u002E", ".")
 	return {
 		type: "Message",
 		id: {
@@ -341,7 +343,7 @@ async function writeResources(
 				//filter the messages by prefxes (paths)
 				const filteredMessages = resource.body
 					.filter((message) => message.id.name.split(".")[0] === prefix)
-					//remove the perfix from the id
+					//remove the prefix from the id
 					.map((message) => ({
 						...message,
 						id: {
@@ -393,7 +395,7 @@ function serializeResource(
 	let result: { [key: string]: string } = {}
 	for (const message of messages) {
 		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
-		let id = message.id.name.replace("..", "u002E.")
+		let id = message.id.name.replaceAll("..", "u002E.")
 		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
 		if (id.slice(-1) === ".") {
 			id = id.replace(/.$/, "u002E")
@@ -408,7 +410,8 @@ function serializeResource(
 		})
 	}
 	return (
-		JSON.stringify(result, undefined, space).replace("u002E", ".") + (endsWithNewLine ? "\n" : "")
+		JSON.stringify(result, undefined, space).replaceAll("u002E", ".") +
+		(endsWithNewLine ? "\n" : "")
 	)
 }
 
