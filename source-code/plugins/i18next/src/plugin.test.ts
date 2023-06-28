@@ -15,6 +15,22 @@ it("should throw if the path pattern does not include the {language} placeholder
 	}
 })
 
+it("should throw if the path pattern with namespaces does not include the {language} placeholder", async () => {
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", "{}")
+	const x = plugin({
+		pathPattern: {
+			common: "./common.json",
+		},
+	})(env)
+	try {
+		await x.config({})
+		throw new Error("should not reach this")
+	} catch (e) {
+		expect((e as Error).message).toContain("pathPattern")
+	}
+})
+
 it("should not throw if the path pattern is valid", async () => {
 	const env = await mockEnvironment({})
 	await env.$fs.writeFile("./en.json", "{}")
@@ -235,4 +251,204 @@ it("should serialize newly added messages", async () => {
 	const json = JSON.parse(newFile)
 	expect(json.test).toBe("{{username}}")
 	expect(json.test2).toBe("Hello world")
+})
+
+it("should return languages of a pathPattern string", async () => {
+	const enResource = `{
+    "test": "hello"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	const languages = config.languages
+	expect(languages).toStrictEqual(["en"])
+})
+
+it("should return languages of a pathPattern object", async () => {
+	const testResource = `{
+    "test": "hello"
+}`
+
+	const env = await mockEnvironment({})
+	await env.$fs.mkdir("./en")
+	await env.$fs.mkdir("./de")
+	await env.$fs.writeFile("./en/common.json", testResource)
+	await env.$fs.writeFile("./en/vital.json", testResource)
+	await env.$fs.writeFile("./de/common.json", testResource)
+	await env.$fs.writeFile("./de/vital.json", testResource)
+
+	const x = plugin({
+		pathPattern: {
+			common: "./{language}/common.json",
+			vital: "./{language}/vital.json",
+		},
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	const languages = config.languages
+	expect(languages).toStrictEqual(["en", "de"])
+})
+
+it("should return languages of a pathPattern object in monorepo", async () => {
+	const testResource = `{
+    "test": "hello"
+}`
+
+	const env = await mockEnvironment({})
+	await env.$fs.mkdir("./projectA")
+	await env.$fs.mkdir("./projectA/en")
+	await env.$fs.mkdir("./projectA/de")
+	await env.$fs.mkdir("./projectB")
+	await env.$fs.mkdir("./projectB/en")
+	await env.$fs.mkdir("./projectB/de")
+	await env.$fs.mkdir("./projectB/fr")
+	await env.$fs.writeFile("./projectA/en/common.json", testResource)
+	await env.$fs.writeFile("./projectA/de/common.json", testResource)
+	await env.$fs.writeFile("./projectB/en/common.json", testResource)
+	await env.$fs.writeFile("./projectB/de/common.json", testResource)
+	await env.$fs.writeFile("./projectB/fr/common.json", testResource)
+
+	const x = plugin({
+		pathPattern: {
+			"projectA-common": "./projectA/{language}/common.json",
+			"projectB-common": "./projectB/{language}/common.json",
+		},
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	const languages = config.languages
+	expect(languages).toStrictEqual(["en", "de", "fr"])
+})
+
+it("should correctly parse resources with pathPattern that contain namespaces", async () => {
+	const testResource = `{
+    "test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.mkdir("./en")
+	await env.$fs.writeFile("./en/common.json", testResource)
+
+	const x = plugin({
+		pathPattern: {
+			common: "./{language}/common.json",
+		},
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+
+	const reference = [
+		{
+			type: "Resource",
+			languageTag: {
+				type: "LanguageTag",
+				name: "en",
+			},
+			body: [
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "common.test",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
+			],
+		},
+	]
+
+	expect(resources).toStrictEqual(reference)
+})
+
+it("should add a new language for pathPattern string", async () => {
+	const enResource = `{
+    "test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	resources.push({
+		type: "Resource",
+		languageTag: {
+			type: "LanguageTag",
+			name: "de",
+		},
+		body: [],
+	})
+
+	await config.writeResources!({
+		config: config as any,
+		resources: resources,
+	})
+
+	const newFile = (await env.$fs.readFile("./de.json", { encoding: "utf-8" })) as string
+	const json = JSON.parse(newFile)
+	expect(json).toStrictEqual({})
+})
+
+it("should add a new language for pathPattern with namespaces", async () => {
+	const enResource = `{
+    "test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.mkdir("./en")
+	await env.$fs.writeFile("./en/common.json", enResource)
+
+	const x = plugin({
+		pathPattern: { common: "./{language}/common.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	resources.push({
+		type: "Resource",
+		languageTag: {
+			type: "LanguageTag",
+			name: "de",
+		},
+		body: [],
+	})
+
+	await config.writeResources!({
+		config: config as any,
+		resources: resources,
+	})
+
+	const dir = await env.$fs.readdir("./de")
+	expect(dir).toStrictEqual([])
 })

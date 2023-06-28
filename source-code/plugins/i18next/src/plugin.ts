@@ -92,9 +92,6 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 		//resources are stored with namespaces
 		for (const path of Object.values(args.settings.pathPattern)) {
 			const [pathBeforeLanguage] = path.split("{language}")
-			if (pathBeforeLanguage === undefined) {
-				throw new Error("pathPattern must contain {language} placeholder")
-			}
 			const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
 
 			for (const filePath of parentDirectory) {
@@ -116,9 +113,6 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 	} else {
 		//resources are stored without namespaces
 		const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
-		if (pathBeforeLanguage === undefined) {
-			throw new Error("pathPattern must contain {language} placeholder")
-		}
 		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage)
 
 		for (const filePath of parentDirectory) {
@@ -349,6 +343,7 @@ async function writeResources(
 				try {
 					await args.$fs.readdir(directoryPath)
 				} catch {
+					console.log(language, path, prefix)
 					// directory doesn't exists
 					await args.$fs.mkdir(directoryPath)
 				}
