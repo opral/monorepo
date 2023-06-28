@@ -47,8 +47,9 @@ export const badge = async (url: string) => {
 		throw new Error("No inlang.config.js file found in the repository.")
 	})
 
+	const base64Data = Buffer.from(file.toString(), "binary").toString("base64")
 	const config = await setupConfig({
-		module: await import("data:application/javascript;base64," + btoa(file.toString())),
+		module: await import("data:application/javascript;base64," + base64Data),
 		env,
 	})
 
