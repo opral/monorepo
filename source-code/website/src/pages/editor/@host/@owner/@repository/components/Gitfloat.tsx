@@ -28,6 +28,7 @@ export const Gitfloat = () => {
 		setLastPush,
 		routeParams,
 		fs,
+		objectFs,
 		setLastPullTime,
 		tourStep,
 		inlangConfig,
@@ -131,6 +132,7 @@ export const Gitfloat = () => {
 		// commit & push
 		const [, exception] = await pushChanges({
 			fs: fs(),
+			objectFs: objectFs(),
 			routeParams: routeParams(),
 			user: localStorage.user,
 			setFsChange,

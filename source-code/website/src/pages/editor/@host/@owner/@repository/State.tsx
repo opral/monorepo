@@ -82,6 +82,11 @@ type EditorStateSchema = {
 	fs: () => NodeishFilesystem
 
 	/**
+	 * Object Store interface
+	 */
+	objectFs: () => ObjectStoreFilesystem
+
+	/**
 	 * TextSearch to filter messages
 	 */
 	textSearch: () => string
@@ -626,6 +631,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repoIsPrivate,
 					setLastPush,
 					fs,
+					objectFs,
 					setLastPullTime,
 				} satisfies EditorStateSchema
 			}
@@ -714,6 +720,7 @@ export class UnknownException extends Error {
  */
 export async function pushChanges(args: {
 	fs: NodeishFilesystem
+	objectFs: ObjectStoreFilesystem
 	routeParams: EditorRouteParams
 	user: NonNullable<LocalStorageSchema["user"]>
 	setFsChange: (date: Date) => void
@@ -733,7 +740,7 @@ export async function pushChanges(args: {
 			email: args.user.email,
 		},
 		message: "inlang: update translations",
-		tree: objectFs().getRoot()
+		tree: args.objectFs.getRootOid()
 	})
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
