@@ -127,7 +127,7 @@ export const Gitfloat = () => {
 			]
 		}
 
-		setResources(_resources)
+		await setResources(_resources)
 
 		// commit & push
 		const [, exception] = await pushChanges({

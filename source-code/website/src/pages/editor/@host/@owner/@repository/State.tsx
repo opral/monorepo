@@ -568,17 +568,28 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 * (which seems much better than effects anyways) is to modify the
 	 * setStore function to trigger the desired side-effect.
 	 */
-	const setResources: typeof setOriginResources = (...args: any) => {
-		const localStorage = getLocalStorage()
-		const config = inlangConfig()
-		if (config === undefined || localStorage?.user === undefined) {
-			return
-		}
+	const setResources: typeof setOriginResources = async (...args: any) => {
+		// eslint-disable-next-line no-async-promise-executor
+		return new Promise<void>(async (resolve, reject) => {
+			try {
+				const localStorage = getLocalStorage()
+				const config = inlangConfig()
 
-		// write to filesystem
-		writeResources({
-			config,
-			resources: args[0],
+				if (config === undefined || localStorage?.user === undefined) {
+					resolve() // Resolve immediately if conditions are not met
+					return
+				}
+
+				// write to filesystem
+				await writeResources({
+					config,
+					resources: args[0],
+				})
+
+				resolve() // Resolve after writeResources is completed
+			} catch (error) {
+				reject(error) // Reject if any error occurs
+			}
 		})
 	}
 
