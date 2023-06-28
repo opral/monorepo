@@ -619,7 +619,6 @@ it("should escape `.` in nested json structures", async () => {
 
 	const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
 	const json = JSON.parse(file as string)
-	console.log(json)
 	expect(json["a."].b).toStrictEqual("test")
 	expect(json["c."]).toStrictEqual("test")
 })
