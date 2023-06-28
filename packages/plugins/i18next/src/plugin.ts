@@ -9,7 +9,7 @@ import {
 } from "./settings.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
-import { detectJsonSpacing } from "./utilities.js"
+import { detectJsonSpacing, replaceAll } from "./utilities.js"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -222,7 +222,7 @@ function parseBody(
 		? flatten(messages, {
 				transformKey: function (key) {
 					//replace dots in keys with unicode
-					return key.replaceAll(".", "u002E")
+					return replaceAll(key, ".", "u002E")
 				},
 		  })
 		: messages
@@ -255,8 +255,8 @@ function parseMessage(
 ): ast.Message {
 	// add the prefix infromt if it has namespaces
 	const prefixedId = prefix
-		? prefix + "." + id.replaceAll("u002E", ".")
-		: id.replaceAll("u002E", ".")
+		? prefix + "." + replaceAll(id, "u002E", ".")
+		: replaceAll(id, "u002E", ".")
 	return {
 		type: "Message",
 		id: {
@@ -395,7 +395,7 @@ function serializeResource(
 	let result: { [key: string]: string } = {}
 	for (const message of messages) {
 		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
-		let id = message.id.name.replaceAll("..", "u002E.")
+		let id = replaceAll(message.id.name, "..", "u002E.")
 		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
 		if (id.slice(-1) === ".") {
 			id = id.replace(/.$/, "u002E")
@@ -410,7 +410,7 @@ function serializeResource(
 		})
 	}
 	return (
-		JSON.stringify(result, undefined, space).replaceAll("u002E", ".") +
+		replaceAll(JSON.stringify(result, undefined, space), "u002E", ".") +
 		(endsWithNewLine ? "\n" : "")
 	)
 }
