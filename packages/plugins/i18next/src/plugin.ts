@@ -308,6 +308,15 @@ async function writeResources(
 
 		if (typeof args.settings.pathPattern !== "string") {
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
+				// check if directory exists
+				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
+				console.log(directoryPath)
+				try {
+					await args.$fs.readdir(directoryPath)
+				} catch {
+					// directory doesn't exists
+					await args.$fs.mkdir(directoryPath)
+				}
 				//filter the messages by prefxes (paths)
 				const filteredMessages = resource.body
 					.filter((message) => message.id.name.split(".")[0] === prefix)
