@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.2.4
+
+### Patch Changes
+
+- 1cff6e4d: fix btoa with Buffer.from
+
 ## 0.2.3
 
 ### Patch Changes
