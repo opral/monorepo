@@ -225,7 +225,7 @@ function parseBody(
 		? flatten(messages, {
 				transformKey: function (key) {
 					//replace dots in keys with unicode
-					return key.replace(".", "\\u002E")
+					return key.replace(".", "u002E")
 				},
 		  })
 		: messages
@@ -257,7 +257,7 @@ function parseMessage(
 	prefix?: string,
 ): ast.Message {
 	// add the prefix infromt if it has namespaces
-	const prefixedId = prefix ? prefix + "." + id.replace("\\u002E", ".") : id.replace("\\u002E", ".")
+	const prefixedId = prefix ? prefix + "." + id.replace("u002E", ".") : id.replace("u002E", ".")
 	return {
 		type: "Message",
 		id: {
@@ -338,7 +338,6 @@ async function writeResources(
 				try {
 					await args.$fs.readdir(directoryPath)
 				} catch {
-					console.log(language, path, prefix)
 					// directory doesn't exists
 					await args.$fs.mkdir(directoryPath)
 				}
@@ -396,22 +395,24 @@ function serializeResource(
 ): string {
 	let result = {}
 	for (const message of messages) {
+		//check if there are two dots after each other -> that would brake unflatten -> replace with unicode
+		let id = message.id.name.replace("..", "u002E.")
 		//check if the last char is a dot -> that would brake unflatten -> replace with unicode
-		const id =
-			message.id.name.slice(-1) === "." ? message.id.name.replace(/.$/, "\\u002E") : message.id.name
+		if (id.slice(-1) === ".") {
+			id = id.replace(/.$/, "u002E")
+		}
 		result[id] = serializePattern(message.pattern, variableReferencePattern)
 	}
-	// for nested structures -> unflatten the keys -> replace unicode
+	// for nested structures -> unflatten the keys
 	if (nested) {
 		result = unflatten(result, {
-			transformKey: function (key) {
-				return key.replace("\\u002E", ".")
-			},
 			//prevent numbers from creating arrays automatically
 			object: true,
 		})
 	}
-	return JSON.stringify(result, undefined, space) + (endsWithNewLine ? "\n" : "")
+	return (
+		JSON.stringify(result, undefined, space).replace("u002E", ".") + (endsWithNewLine ? "\n" : "")
+	)
 }
 
 /**

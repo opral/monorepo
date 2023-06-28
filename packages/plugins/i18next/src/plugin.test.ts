@@ -452,3 +452,135 @@ it("should add a new language for pathPattern with namespaces", async () => {
 	const dir = await env.$fs.readdir("./de")
 	expect(dir).toStrictEqual([])
 })
+
+it("should escape `.` in flattened json structures", async () => {
+	const enResource = `{
+    "test.": "test",
+	"test.test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.mkdir("./en")
+	await env.$fs.writeFile("./en/common.json", enResource)
+
+	const x = plugin({
+		pathPattern: { common: "./{language}/common.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+
+	const reference = [
+		{
+			type: "Resource",
+			languageTag: {
+				type: "LanguageTag",
+				name: "en",
+			},
+			body: [
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "common.test.",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "common.test.test",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
+			],
+		},
+	]
+
+	expect(resources).toStrictEqual(reference)
+})
+
+it("should escape `.` in nested json structures", async () => {
+	const enResource = `{
+	"a.": {
+		"b": "test"
+	}
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.mkdir("./en")
+	await env.$fs.writeFile("./en/common.json", enResource)
+
+	const x = plugin({
+		pathPattern: { common: "./{language}/common.json" },
+		format: {
+			nested: true,
+		},
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+
+	const reference = [
+		{
+			type: "Resource",
+			languageTag: {
+				type: "LanguageTag",
+				name: "en",
+			},
+			body: [
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "common.a..b",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
+			],
+		},
+	]
+
+	expect(resources).toStrictEqual(reference)
+
+	await config.writeResources!({
+		resources: resources,
+	})
+
+	const file = await env.$fs.readFile("./en/common.json", { encoding: "utf-8" })
+	const json = JSON.parse(file as string)
+	expect(json["a."].b).toStrictEqual("test")
+})
