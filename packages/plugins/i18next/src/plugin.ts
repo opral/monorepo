@@ -9,7 +9,6 @@ import {
 } from "./settings.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
-import type { detectJsonSpacing } from "./utilities.js"
 import { detectJsonSpacing } from "./utilities.js"
 
 /**
@@ -159,7 +158,7 @@ async function readResources(
 							messages,
 							language,
 							args.settings.variableReferencePattern,
-							args.settings.format.nested,
+							args.settings.format.nested!,
 							prefix,
 						),
 					]
@@ -173,7 +172,7 @@ async function readResources(
 					messages,
 					language,
 					args.settings.variableReferencePattern,
-					args.settings.format.nested,
+					args.settings.format.nested!,
 				),
 			]
 		}
@@ -187,11 +186,7 @@ async function readResources(
 /**
  * Get the files that needs to be parsed.
  */
-async function getFileToParse(
-	path: string,
-	language: string,
-	$fs: InlangEnvironment["$fs"],
-): Promise<ast.Resource> {
+async function getFileToParse(path: string, language: string, $fs: InlangEnvironment["$fs"]) {
 	const pathWithLanguage = path.replace("{language}", language)
 	// get file, make sure that is not braking when the namespace doesn't exist in every language dir
 	try {
@@ -207,7 +202,7 @@ async function getFileToParse(
 		// if the namespace doesn't exist for this dir -> continue
 		if ((e as any).code === "ENOENT") {
 			// file does not exist yet
-			return undefined
+			return
 		}
 		throw e
 	}
@@ -237,7 +232,7 @@ function parseBody(
 	if (flattenedMessages !== undefined) {
 		//Iterate over the messages and execute parseMessage function
 		//If you have a nested structure but didn't add it to config throw error
-		return Object.entries(flattenedMessages).map((message) => {
+		return Object.entries(flattenedMessages!).map((message) => {
 			if (typeof message[1] !== "string") {
 				throw new Error(
 					"You configured a flattened key project. If you have nested keys please add 'format: { nested: true }' to the pluginSettings",
@@ -367,7 +362,7 @@ async function writeResources(
 							filteredMessages,
 							SPACING[pathWithLanguage] ?? defaultSpacing(),
 							FILE_HAS_NEW_LINE[pathWithLanguage]!,
-							args.settings.format.nested,
+							args.settings.format.nested!,
 							args.settings.variableReferencePattern,
 						),
 					)
@@ -381,7 +376,7 @@ async function writeResources(
 					resource.body,
 					SPACING[pathWithLanguage] ?? defaultSpacing(),
 					FILE_HAS_NEW_LINE[pathWithLanguage]!,
-					args.settings.format.nested,
+					args.settings.format.nested!,
 					args.settings.variableReferencePattern,
 				),
 			)
@@ -426,7 +421,7 @@ function serializePattern(
 	pattern: ast.Message["pattern"],
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ) {
-	const result = []
+	const result: string[] = []
 	for (const element of pattern.elements) {
 		switch (element.type) {
 			case "Text":
