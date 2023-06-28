@@ -64,17 +64,9 @@ export type PluginSettings = {
 	 */
 	format?: {
 		/**
-		 * Defines how JSON.serialize() should handle spaces
-		 */
-		space?: "\t" | number
-		/**
 		 * Defines if the keys are flattened or nested
 		 */
 		nested?: boolean
-		/**
-		 * Defines if a file end with an '\n'
-		 */
-		endsWithNewLine?: boolean
 	}
 	ignore?: string[]
 }
