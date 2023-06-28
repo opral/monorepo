@@ -9,6 +9,40 @@ import {
 } from "./settings.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
+import type { detectJsonSpacing } from "./utilities.js"
+import { detectJsonSpacing } from "./utilities.js"
+
+/**
+ * The spacing of the JSON files in this repository.
+ *
+ * @example
+ *  { "/en.json" = 2 }
+ */
+const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+
+/**
+ * Whether a file has a new line at the end.
+ *
+ * @example
+ * { "/en.json" = true }
+ * { "/de.json" = false }
+ */
+const FILE_HAS_NEW_LINE: Record<string, boolean> = {}
+
+/**
+ * Defines the default spacing for JSON files.
+ *
+ * Takes the majority spacing of resource files in this repository to determine
+ * the default spacing.
+ */
+function defaultSpacing() {
+	const values = Object.values(SPACING)
+	return (
+		values
+			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
+			.pop() ?? 2 // if no default has been found -> 2
+	)
+}
 
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 	id: "inlang.plugin-i18next",
@@ -21,9 +55,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 			variableReferencePattern: ["{{", "}}"],
 			ignore: [], // ignore no files by default
 			format: {
-				space: 2, // default spacing 2
 				nested: false, // default nesting false
-				endsWithNewLine: true, // adds a '\n' to the end of every file if not already there
 			},
 			...settings,
 		}
@@ -172,6 +204,10 @@ async function getFileToParse(
 		const file = await $fs.readFile(pathWithLanguage, {
 			encoding: "utf-8",
 		})
+		//analyse format of file
+		SPACING[pathWithLanguage] = detectJsonSpacing(file)
+		FILE_HAS_NEW_LINE[pathWithLanguage] = file.endsWith("\n")
+
 		return JSON.parse(file as string)
 	} catch (e) {
 		// if the namespace doesn't exist for this dir -> continue
@@ -310,7 +346,6 @@ async function writeResources(
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				// check if directory exists
 				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
-				console.log(directoryPath)
 				try {
 					await args.$fs.readdir(directoryPath)
 				} catch {
@@ -330,22 +365,28 @@ async function writeResources(
 					}))
 				//check if there is something to write in this file
 				if (filteredMessages.length !== 0) {
+					const pathWithLanguage = path.replace("{language}", language)
 					await args.$fs.writeFile(
-						path.replace("{language}", language),
+						pathWithLanguage,
 						serializeResource(
 							filteredMessages,
-							args.settings.format,
+							SPACING[pathWithLanguage] ?? defaultSpacing(),
+							FILE_HAS_NEW_LINE[pathWithLanguage]!,
+							args.settings.format.nested,
 							args.settings.variableReferencePattern,
 						),
 					)
 				}
 			}
 		} else {
+			const pathWithLanguage = args.settings.pathPattern.replace("{language}", language)
 			await args.$fs.writeFile(
-				args.settings.pathPattern.replace("{language}", language),
+				pathWithLanguage,
 				serializeResource(
 					resource.body,
-					args.settings.format,
+					SPACING[pathWithLanguage] ?? defaultSpacing(),
+					FILE_HAS_NEW_LINE[pathWithLanguage]!,
+					args.settings.format.nested,
 					args.settings.variableReferencePattern,
 				),
 			)
@@ -358,7 +399,9 @@ async function writeResources(
  */
 function serializeResource(
 	messages: ast.Message[],
-	format: PluginSettings["format"],
+	space: number | string,
+	endsWithNewLine: boolean,
+	nested: boolean,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 ): string {
 	let result = {}
@@ -369,7 +412,7 @@ function serializeResource(
 		result[id] = serializePattern(message.pattern, variableReferencePattern)
 	}
 	// for nested structures -> unflatten the keys -> replace unicode
-	if (format?.nested) {
+	if (nested) {
 		result = unflatten(result, {
 			transformKey: function (key) {
 				return key.replace("\\u002E", ".")
@@ -378,7 +421,7 @@ function serializeResource(
 			object: true,
 		})
 	}
-	return JSON.stringify(result, undefined, format.space) + (format!.endsWithNewLine ? "\n" : "")
+	return JSON.stringify(result, undefined, space) + (endsWithNewLine ? "\n" : "")
 }
 
 /**
