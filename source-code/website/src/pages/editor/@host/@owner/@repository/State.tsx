@@ -38,7 +38,6 @@ import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/in
 import { github } from "@src/services/github/index.js"
 import { showToast } from "@src/components/Toast.jsx"
 
-
 type EditorStateSchema = {
 	/**
 	 * Whether a repository is cloned and when it was cloned.
@@ -219,7 +218,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
-	const [objectFs, setObjectFs] = createSignal<ObjectStoreFilesystem| undefined>()
+	const [objectFs, setObjectFs] = createSignal<ObjectStoreFilesystem | undefined>()
 
 	/**
 	 * The reference resource.
@@ -676,8 +675,8 @@ async function cloneRepository(args: {
 		await createObjectStoreFs({
 			fs: args.fs,
 			gitdir,
-			treeOid: await raw.resolveRef({ fs: args.fs, gitdir, ref: 'HEAD' })
-		})
+			treeOid: await raw.resolveRef({ fs: args.fs, gitdir, ref: "HEAD" }),
+		}),
 	)
 
 	// fetch 100 more commits, can get more commits if needed
@@ -740,7 +739,7 @@ export async function pushChanges(args: {
 			email: args.user.email,
 		},
 		message: "inlang: update translations",
-		tree: args.objectFs.getRootOid()
+		tree: args.objectFs.getRootOid(),
 	})
 	// triggering a side effect here to trigger a re-render
 	// of components that depends on fs
