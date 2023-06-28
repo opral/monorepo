@@ -1,5 +1,5 @@
 ---
-title: Badge Generator
+title: Badges Generator
 shortTitle: Badges
 href: /documentation/badge
 description: Generate a badge to show your project's translation progress.
