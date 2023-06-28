@@ -16,16 +16,19 @@
     "accept-language": "^3.0.18",
     "autoprefixer": "10.4.14",
     "eslint": "8.41.0",
-    "eslint-config-next": "13.4.3",
     "i18next": "^22.5.0",
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-resources-to-backend": "^1.1.4",
-    "next": "13.4.3",
+    "next": "^13.4.3",
     "postcss": "8.4.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-i18next": "^12.3.1",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^13.4.7",
+    "eslint-config-next": "^13.4.7"
   }
 }
