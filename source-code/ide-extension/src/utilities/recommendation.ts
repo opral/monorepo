@@ -1,19 +1,19 @@
+import { getSetting, updateSetting } from "./settings/index.js"
 import * as vscode from "vscode"
 import * as path from "node:path"
 import * as fs from "node:fs"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 
-export const disableRecommendation = async (): Promise<boolean> => {
-	const gitOrigin = await getGitOrigin()
-	const _recommendation = vscode.workspace
-		.getConfiguration("inlang")
-		.get("disableRecommendation") as string[]
-	return _recommendation.includes(gitOrigin)
-}
-
-export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFolder }) => {
+/**
+ * Displays an popup to add the Inlang extension to your recommendation.
+ * @param {vscode.WorkspaceFolder} args.workspaceFolder - The workspace folder.
+ * @returns {Promise<void>} - A Promise that resolves once the recommendation process is completed.
+ */
+export const recommendation = async (args: {
+	workspaceFolder: vscode.WorkspaceFolder
+}): Promise<void> => {
 	// check if the showRecommendation setting is set to false
-	if (await disableRecommendation()) {
+	if (await isDisabledRecommendation()) {
 		return
 	}
 
@@ -29,10 +29,6 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 
 	// If not already recommended
 	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
-		const _recommendation = vscode.workspace
-			.getConfiguration("inlang")
-			.get("disableRecommendation") as string[]
-		const gitOrigin = await getGitOrigin()
 		// Prompt the user to install the Inlang extension
 		const installInlangExtension = await vscode.window.showInformationMessage(
 			"The Inlang extension is recommended for this project. Do you want to add it to your recommendations?",
@@ -58,11 +54,9 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 
 			// Write the updated extensions.json file
 			fs.writeFileSync(extensionsJsonPath, JSON.stringify(newExtensions, undefined, 2))
-		} else {
+		} else if (installInlangExtension === "Reject") {
 			// persist the user's choice in a workspace setting
-			await vscode.workspace
-				.getConfiguration("inlang")
-				.update("disableRecommendation", [..._recommendation, gitOrigin], true)
+			await updateDisabledRecommendation()
 		}
 
 		// Track the outcome
@@ -72,4 +66,23 @@ export const recommendation = async (args: { workspaceFolder: vscode.WorkspaceFo
 			properties: { outcome: installInlangExtension ?? "Ignored" },
 		})
 	}
+}
+
+/**
+ * Checks if the Inlang extension recommendation is disabled.
+ * @returns {Promise<boolean>} - A Promise that resolves to true if the recommendation is disabled, false otherwise.
+ */
+export const isDisabledRecommendation = async (): Promise<boolean> => {
+	return (await getSetting("disableRecommendation")).includes(await getGitOrigin())
+}
+
+/**
+ * Updates the configuration setting to disable the Inlang extension recommendation.
+ * @returns {Promise<void>} - A Promise that resolves once the setting has been updated.
+ */
+const updateDisabledRecommendation = async (): Promise<void> => {
+	await updateSetting("disableRecommendation", [
+		...(await getSetting("disableRecommendation")),
+		await getGitOrigin(),
+	])
 }

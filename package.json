@@ -11,6 +11,7 @@
 		"dev": "turbo run build --no-daemon && turbo run dev --parallel",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "turbo run test --log-order=grouped",
+		"test:windows": "turbo run test --log-order=grouped --filter=./source-code/ide-extension --filter=./source-code/core --filter=./source-code/env-variables --filter=./source-code/telemetry --filter=\"./source-code/plugins/*\"",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint:base": "eslint --ignore-path .gitignore --cache",
 		"lint:fix:base": "npm run lint:base --fix",
@@ -33,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.26.0",
+		"@next/eslint-plugin-next": "^13.4.7",
 		"@rollup/plugin-json": "^6.0.0",
 		"@types/node": "^18.15.11",
 		"@typescript-eslint/eslint-plugin": "^5.48.2",
