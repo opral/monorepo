@@ -29,7 +29,7 @@ import ignore from "ignore"
 import pify from "pify"
 import diff3Merge from "diff3"
 import _path from "path"
-import { Buffer } from "buffer";
+import { Buffer } from "buffer"
 
 class BaseError extends Error {
 	constructor(message) {
