@@ -84,7 +84,10 @@ export const Gitfloat = () => {
 			})
 			setIsLoading(false)
 			// full name is owner/repo
-			return navigate(`/editor/github.com/${response.data.full_name}`)
+			setTimeout(() => {
+				navigate(`/editor/github.com/${response.data.full_name}`)
+			}, 500)
+			return
 		} else {
 			showToast({
 				variant: "danger",
