@@ -58,22 +58,14 @@ export type PluginSettings = {
 	 */
 	variableReferencePattern?: [string] | [string, string]
 	/**
-	 * Defines how the resources get serialized
-	 *
-	 * Default space: 2, nested: false
+	 * Ignores all files that match the given pattern.
 	 */
-	format?: {
-		/**
-		 * Defines if the keys are flattened or nested
-		 */
-		nested?: boolean
-	}
 	ignore?: string[]
 }
 
 export type PluginSettingsWithDefaults = WithRequired<
 	PluginSettings,
-	"variableReferencePattern" | "ignore" | "format" | "pathPattern"
+	"variableReferencePattern" | "ignore" | "pathPattern"
 >
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
