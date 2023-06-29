@@ -236,3 +236,74 @@ it("should serialize newly added messages", async () => {
 	expect(json.test).toBe("{{username}}")
 	expect(json.test2).toBe("Hello world")
 })
+
+it("should serialize newly added messages", async () => {
+	const enResource = `{
+    "test": "{{username}}"
+	}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{{", "}}"] })(
+		env,
+	)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	const [newResource] = query(resources[0]!).create({
+		message: {
+			type: "Message",
+			id: { type: "Identifier", name: "test2" },
+			pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello world" }] },
+		},
+	})
+	await config.writeResources!({
+		config: config as any,
+		resources: [newResource!],
+	})
+	const newFile = (await env.$fs.readFile("./en.json", { encoding: "utf-8" })) as string
+	const json = JSON.parse(newFile)
+	expect(json.test).toBe("{{username}}")
+	expect(json.test2).toBe("Hello world")
+})
+
+it("should read and write path patterns with language folders correctly", async () => {
+	const enResource = `{
+    "test": "{{username}}"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.mkdir("./en/", { recursive: true })
+	await env.$fs.writeFile("./en/translation.json", enResource)
+
+	const x = plugin({ pathPattern: "./{language}/*.json", variableReferencePattern: ["{{", "}}"] })(
+		env,
+	)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+	const resources = await config.readResources!({
+		config: config as any,
+	})
+	const [newResource] = query(resources[0]!).create({
+		message: {
+			type: "Message",
+			id: { type: "Identifier", name: "translation.test2" },
+			pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello world" }] },
+		},
+	})
+	await config.writeResources!({
+		config: config as any,
+		resources: [newResource!],
+	})
+	const newFile = (await env.$fs.readFile("./en/translation.json", { encoding: "utf-8" })) as string
+	const json = JSON.parse(newFile)
+	expect(json.test).toBe("{{username}}")
+	expect(json.test2).toBe("Hello world")
+})

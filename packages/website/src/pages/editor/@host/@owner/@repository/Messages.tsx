@@ -74,9 +74,7 @@ export function Messages(props: {
 			</div>
 			<div>
 				<For each={inlangConfig()?.languages}>
-					{(language, index) => {
-						//console.log(props.isTourExampleId)
-						//console.log(index())
+					{(language) => {
 						return (
 							<>
 								<Show
