@@ -10,6 +10,7 @@ import {
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
 import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
+import type { FilteredResourcesProps } from "./types.js"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -346,7 +347,7 @@ async function writeResources(
 
 		if (typeof pathPattern === "object") {
 			// filter the resources prefix -> performance optimized (only one loop over messages)
-			const filteredResources: { [prefix: string]: typeof resource.body } = {}
+			const filteredResources: FilteredResourcesProps = {}
 
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				// check if directory exists

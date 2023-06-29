@@ -65,7 +65,7 @@ export type PluginSettings = {
 
 export type PluginSettingsWithDefaults = WithRequired<
 	PluginSettings,
-	"variableReferencePattern" | "ignore" | "pathPattern"
+	"variableReferencePattern" | "ignore"
 >
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
