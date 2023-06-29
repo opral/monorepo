@@ -11,9 +11,6 @@ export async function defineConfig(env) {
 				pathPattern: {
 					translation: "./examples/example05/{language}/translation.json",
 				},
-				format: {
-					nested: true,
-				},
 			}),
 		],
 	}

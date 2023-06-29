@@ -13,9 +13,6 @@ export async function defineConfig(env) {
 					vital: "./examples/example02/{language}/vital.json",
 				},
 				ignore: [".file.json"],
-				format: {
-					nested: true,
-				},
 			}),
 		],
 	}

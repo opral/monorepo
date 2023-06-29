@@ -1,4 +1,20 @@
 /**
+ * Detects the nesting of the JSON file.
+ *
+ * @example detectJsonSpacing(stringifiedFile)
+ */
+export const detectIsNested = (file: string): boolean | undefined => {
+	const json = JSON.parse(file)
+	if (file === "{}") return undefined
+	for (const value of Object.values(json)) {
+		if (typeof value === "object") {
+			return true
+		}
+	}
+	return false
+}
+
+/**
  * Detects the spacing of a JSON string.
  *
  * @example detectJsonSpacing(stringifiedFile)
@@ -19,6 +35,7 @@ export const detectJsonSpacing = (jsonString: string) => {
 		},
 		{
 			spacing: 4,
+
 			regex: /^{\n {4}[^ ]+.*$/m,
 		},
 		{

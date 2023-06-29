@@ -616,9 +616,6 @@ it("should escape `.` in nested json structures", async () => {
 
 	const x = plugin({
 		pathPattern: { common: "./{language}/common.json" },
-		format: {
-			nested: true,
-		},
 	})(env)
 	const config = await x.config({})
 	config.referenceLanguage = "en"
@@ -684,29 +681,105 @@ it("should escape `.` in nested json structures", async () => {
 	expect(json["c."]).toStrictEqual("test")
 })
 
-it("should throw if there are nested structures but the 'nested' setting is not true", async () => {
-	const enResource = `{
-		"a": {
-			"b": "test"
-		}
-	}`
-	const env = await mockEnvironment({})
-	await env.$fs.writeFile("./en.json", enResource)
+// it("should throw if there are nested structures but the 'nested' setting is not true", async () => {
+// 	const enResource = `{
+// 		"a": {
+// 			"b": "test"
+// 		}
+// 	}`
+// 	const env = await mockEnvironment({})
+// 	await env.$fs.writeFile("./en.json", enResource)
 
-	const x = plugin({
-		pathPattern: { common: "./{language}.json" },
-	})(env)
+// 	const x = plugin({
+// 		pathPattern: { common: "./{language}.json" },
+// 	})(env)
+// 	const config = await x.config({})
+// 	config.referenceLanguage = "en"
+// 	config.languages = ["en"]
+
+// 	try {
+// 		await config.readResources!({
+// 			config: config as InlangConfig,
+// 		})
+// 	} catch (e) {
+// 		expect((e as Error).message).toContain("You configured a flattened key project")
+// 	}
+// })
+
+it("should correctly detect the nesting in a file and determine a default based on the majority for newly added resources", async () => {
+	const withNesting = JSON.stringify(
+		{
+			test: {
+				test: "test",
+			},
+		},
+		undefined,
+		2,
+	)
+
+	const withoutNesting = JSON.stringify(
+		{
+			"test.test": "test",
+		},
+		undefined,
+		4,
+	)
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./en.json", withNesting)
+	await env.$fs.writeFile("./fr.json", withNesting)
+	await env.$fs.writeFile("./de.json", withoutNesting)
+
+	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
 	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.languages = ["en", "de", "fr"]
 
-	try {
-		await config.readResources!({
-			config: config as InlangConfig,
-		})
-	} catch (e) {
-		expect((e as Error).message).toContain("You configured a flattened key project")
-	}
+	const resources = await config.readResources!({
+		config: config as InlangConfig,
+	})
+
+	resources.push({
+		type: "Resource",
+		languageTag: {
+			type: "LanguageTag",
+			name: "es",
+		},
+		body: [
+			{
+				type: "Message",
+				id: {
+					type: "Identifier",
+					name: "test.test",
+				},
+				pattern: {
+					type: "Pattern",
+					elements: [
+						{
+							type: "Text",
+							value: "test",
+						},
+					],
+				},
+			},
+		],
+	})
+
+	await config.writeResources!({
+		config: config as InlangConfig,
+		resources,
+	})
+
+	const file1 = await env.$fs.readFile("./en.json", { encoding: "utf-8" })
+	const file2 = await env.$fs.readFile("./fr.json", { encoding: "utf-8" })
+	const file3 = await env.$fs.readFile("./de.json", { encoding: "utf-8" })
+	const file4 = await env.$fs.readFile("./es.json", { encoding: "utf-8" })
+
+	expect(file1).toBe(withNesting)
+	expect(file2).toBe(withNesting)
+	expect(file3).toBe(withoutNesting)
+	expect(file4).toBe(withNesting)
 })
 
 it("should throw if element type is not known", async () => {
@@ -756,4 +829,45 @@ it("should throw if element type is not known", async () => {
 	} catch (e) {
 		expect((e as Error).message).toContain("Unknown message pattern element of type")
 	}
+})
+
+it("should successfully do a roundtrip with complex content", async () => {
+	const complexContent = JSON.stringify(
+		{
+			"//multiLineString": {
+				multiline: "This is a\nmulti-line\nstring.",
+			},
+			unicodeCharacters: {
+				emoji: "\uD83D\uDE00",
+				currency: "€",
+			},
+			test: 'Single "quote" test',
+		},
+		undefined,
+		4,
+	)
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", complexContent)
+
+	const x = plugin({
+		pathPattern: { common: "./{language}.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+
+	const resources = await config.readResources!({
+		config: config as InlangConfig,
+	})
+
+	await config.writeResources!({
+		resources: resources,
+		config: config as InlangConfig,
+	})
+
+	const newResources = await config.readResources!({
+		config: config as InlangConfig,
+	})
+
+	expect(newResources).toStrictEqual(resources)
 })

@@ -9,7 +9,7 @@ import {
 } from "./settings.js"
 import { ideExtensionConfig } from "./ideExtension/config.js"
 import { flatten, unflatten } from "flat"
-import { detectJsonSpacing, replaceAll } from "./utilities.js"
+import { detectJsonSpacing, detectIsNested, replaceAll } from "./utilities.js"
 
 /**
  * The spacing of the JSON files in this repository.
@@ -18,6 +18,14 @@ import { detectJsonSpacing, replaceAll } from "./utilities.js"
  *  { "/en.json" = 2 }
  */
 const SPACING: Record<string, ReturnType<typeof detectJsonSpacing>> = {}
+
+/**
+ * The nesting the JSON files in this repository
+ *
+ * @example
+ *  { "/en.json" = nested }
+ */
+const NESTED: Record<string, ReturnType<typeof detectIsNested>> = {}
 
 /**
  * Whether a file has a new line at the end.
@@ -43,6 +51,21 @@ function defaultSpacing() {
 	)
 }
 
+/**
+ * Defines the default nesting for JSON files.
+ *
+ * Takes the majority of nested/flatten resource files in this repository to determine
+ * the default spacing.
+ */
+function defaultNesting() {
+	const values = Object.values(NESTED)
+	return (
+		values
+			.sort((a, b) => values.filter((v) => v === a).length - values.filter((v) => v === b).length)
+			.pop() ?? false // if no default has been found -> false -> flatten
+	)
+}
+
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 	id: "inlang.plugin-i18next",
 	async config() {
@@ -53,9 +76,6 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 		const withDefaultSettings: PluginSettingsWithDefaults = {
 			variableReferencePattern: ["{{", "}}"],
 			ignore: [], // ignore no files by default
-			format: {
-				nested: false, // default nesting false
-			},
 			...settings,
 		}
 
@@ -156,9 +176,8 @@ async function readResources(
 						...resource.body,
 						...parseBody(
 							messages,
-							language,
 							args.settings.variableReferencePattern,
-							args.settings.format.nested!,
+							NESTED[path.replace("{language}", language)] ?? defaultNesting(),
 							prefix,
 						),
 					]
@@ -170,9 +189,8 @@ async function readResources(
 				...resource.body,
 				...parseBody(
 					messages,
-					language,
 					args.settings.variableReferencePattern,
-					args.settings.format.nested!,
+					NESTED[args.settings.pathPattern.replace("{language}", language)] ?? defaultNesting(),
 				),
 			]
 		}
@@ -192,6 +210,7 @@ async function getFileToParse(path: string, language: string, $fs: InlangEnviron
 		const file = await $fs.readFile(pathWithLanguage, { encoding: "utf-8" })
 		//analyse format of file
 		SPACING[pathWithLanguage] = detectJsonSpacing(file as string)
+		NESTED[pathWithLanguage] = detectIsNested(file as string)
 		FILE_HAS_NEW_LINE[pathWithLanguage] = (file as string).endsWith("\n")
 
 		return JSON.parse(file as string)
@@ -212,7 +231,6 @@ async function getFileToParse(path: string, language: string, $fs: InlangEnviron
  */
 function parseBody(
 	messages: Record<string, string>,
-	language: string,
 	variableReferencePattern: PluginSettingsWithDefaults["variableReferencePattern"],
 	isNested: boolean,
 	prefix?: string,
@@ -230,11 +248,6 @@ function parseBody(
 		//Iterate over the messages and execute parseMessage function
 		//If you have a nested structure but didn't add it to config throw error
 		return Object.entries(flattenedMessages!).map((message) => {
-			if (typeof message[1] !== "string") {
-				throw new Error(
-					"You configured a flattened key project. If you have nested keys please add 'format: { nested: true }' to the pluginSettings",
-				)
-			}
 			return parseMessage(message[0], message[1], variableReferencePattern, prefix)
 		})
 	} else {
@@ -360,7 +373,7 @@ async function writeResources(
 							filteredMessages,
 							SPACING[pathWithLanguage] ?? defaultSpacing(),
 							FILE_HAS_NEW_LINE[pathWithLanguage]!,
-							args.settings.format.nested!,
+							NESTED[pathWithLanguage] ?? defaultNesting(),
 							args.settings.variableReferencePattern,
 						),
 					)
@@ -374,7 +387,7 @@ async function writeResources(
 					resource.body,
 					SPACING[pathWithLanguage] ?? defaultSpacing(),
 					FILE_HAS_NEW_LINE[pathWithLanguage]!,
-					args.settings.format.nested!,
+					NESTED[pathWithLanguage] ?? defaultNesting(),
 					args.settings.variableReferencePattern,
 				),
 			)
