@@ -13,7 +13,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}\\source-code\\ide-extension",
 				"${workspaceFolder}\\source-code\\starters\\inlang-svelte"
 			],
-			"outFiles": ["${workspaceFolder}\\source-code\\ide-extension\\dist\\**\\*.js"]
+			"outFiles": ["${workspaceFolder}\\source-code\\ide-extension\\dist\\**\\*.cjs"]
 		},
 		{
 			"name": "debug ide-extension",
@@ -23,7 +23,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
 				"${workspaceFolder}/source-code/ide-extension/example"
 			],
-			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
+			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.cjs"]
 		},
 		{
 			"name": "debug @inlang/website",
