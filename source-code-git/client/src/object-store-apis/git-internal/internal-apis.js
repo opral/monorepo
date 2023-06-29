@@ -2047,7 +2047,11 @@ async function readObjectLoose({ fs, gitdir, oid }) {
 	if (!file) {
 		return null
 	}
-	return { object: file, format: "deflated", source }
+
+	// If the file begins with a valid zlib header, assume it is compressed
+	return file[0] === 0x78 && file[1] in [0x01, 0x9c, 0xda, 0x5e]
+		? { object: file, format: "deflated", source }
+		: { object: file, format: "wrapped", source }
 }
 
 // Modeled after https://github.com/tjfontaine/node-buffercursor
@@ -4933,8 +4937,10 @@ class GitSideBand {
 }
 
 async function writeObjectLoose({ fs, gitdir, object, format, oid }) {
-	if (format !== "deflated") {
-		throw new InternalError("GitObjectStoreLoose expects objects to write to be in deflated format")
+	if (format !== "deflated" && format !== "wrapped") {
+		throw new InternalError(
+			"GitObjectStoreLoose expects objects to write to be in deflated or wrapped format",
+		)
 	}
 	const source = `objects/${oid.slice(0, 2)}/${oid.slice(2)}`
 	const filepath = `${gitdir}/${source}`
@@ -4953,15 +4959,12 @@ async function _writeObject({
 	oid = undefined,
 	dryRun = false,
 }) {
-	if (format !== "deflated") {
-		if (format !== "wrapped") {
-			object = GitObject.wrap({ type, object })
-		}
-		oid = await shasum(object)
-		object = Buffer.from(await deflate(object))
+	if (format !== "wrapped") {
+		object = GitObject.wrap({ type, object })
 	}
+	oid = await shasum(object)
 	if (!dryRun) {
-		await writeObjectLoose({ fs, gitdir, object, format: "deflated", oid })
+		await writeObjectLoose({ fs, gitdir, object, format: "wrapped", oid })
 	}
 	return oid
 }
