@@ -442,7 +442,7 @@ it("should correctly parse resources with pathPattern that contain namespaces", 
 					type: "Message",
 					id: {
 						type: "Identifier",
-						name: "common.test",
+						name: "common:test",
 					},
 					pattern: {
 						type: "Pattern",
@@ -566,7 +566,7 @@ it("should escape `.` in flattened json structures", async () => {
 					type: "Message",
 					id: {
 						type: "Identifier",
-						name: "common.test.",
+						name: "common:test.",
 					},
 					pattern: {
 						type: "Pattern",
@@ -582,7 +582,7 @@ it("should escape `.` in flattened json structures", async () => {
 					type: "Message",
 					id: {
 						type: "Identifier",
-						name: "common.test.test",
+						name: "common:test.test",
 					},
 					pattern: {
 						type: "Pattern",
@@ -636,7 +636,7 @@ it("should escape `.` in nested json structures", async () => {
 					type: "Message",
 					id: {
 						type: "Identifier",
-						name: "common.a..b",
+						name: "common:a..b",
 					},
 					pattern: {
 						type: "Pattern",
@@ -652,7 +652,7 @@ it("should escape `.` in nested json structures", async () => {
 					type: "Message",
 					id: {
 						type: "Identifier",
-						name: "common.c.",
+						name: "common:c.",
 					},
 					pattern: {
 						type: "Pattern",

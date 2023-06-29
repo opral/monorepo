@@ -269,7 +269,7 @@ function parseMessage(
 ): ast.Message {
 	// add the prefix infromt if it has namespaces
 	const prefixedId = prefix
-		? prefix + "." + replaceAll(id, "u002E", ".")
+		? prefix + ":" + replaceAll(id, "u002E", ".")
 		: replaceAll(id, "u002E", ".")
 	return {
 		type: "Message",
@@ -363,7 +363,7 @@ async function writeResources(
 
 			//sort messages by prefxes (paths)
 			for (const message of resource.body) {
-				const prefix = message.id.name.split(".")[0]!
+				const prefix = message.id.name.split(":")[0]!
 
 				if (prefix in filteredResources) {
 					//put the messages in the filteredResource object
@@ -371,7 +371,7 @@ async function writeResources(
 						...message,
 						id: {
 							...message.id,
-							name: message.id.name.replace(prefix + ".", ""),
+							name: message.id.name.replace(prefix + ":", ""),
 						},
 					})
 				}
