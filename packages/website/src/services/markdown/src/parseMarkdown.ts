@@ -47,12 +47,7 @@ export function parseMarkdown<FrontmatterSchema extends RequiredFrontmatter>(arg
 	text: string
 	FrontmatterSchema: typeof RequiredFrontmatter
 }): {
-	frontmatter: {
-		title: string
-		shortTitle?: string
-		description: string
-		href: string
-	}
+	frontmatter: FrontmatterSchema
 	renderableTree?: Markdoc.RenderableTreeNode
 	error?: string
 } {
