@@ -1,4 +1,5 @@
 import type { NodeishFilesystem } from "@inlang-git/fs"
+import type { ObjectStoreFilesystem } from "./types.js"
 import type TreeEntry from "./store/trees/TreeEntry.js"
 import type { MappedObjectStore, ObjectStats } from "./store/types.js"
 
@@ -24,7 +25,7 @@ export async function createObjectStoreFs(args: {
 	fs: NodeishFilesystem
 	gitdir: string
 	treeOid: string
-}) {
+}): Promise<ObjectStoreFilesystem> {
 	const objectStore: MappedObjectStore = await createMappedObjectStore(
 		args.treeOid,
 		args.gitdir,
@@ -33,8 +34,8 @@ export async function createObjectStoreFs(args: {
 
 	return {
 		readFile: async function (
-			path: Parameters<NodeishFilesystem["readFile"]>[0],
-			options: Parameters<NodeishFilesystem["readFile"]>[1],
+			path: Parameters<ObjectStoreFilesystem["readFile"]>[0],
+			options: Parameters<ObjectStoreFilesystem["readFile"]>[1],
 		) {
 			path = normalPath(path)
 
@@ -54,8 +55,8 @@ export async function createObjectStoreFs(args: {
 		},
 
 		writeFile: async function (
-			path: Parameters<NodeishFilesystem["writeFile"]>[0],
-			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+			path: Parameters<ObjectStoreFilesystem["writeFile"]>[0],
+			data: Parameters<ObjectStoreFilesystem["writeFile"]>[1],
 			options?: { mode: string },
 		) {
 			path = normalPath(path)
@@ -77,7 +78,7 @@ export async function createObjectStoreFs(args: {
 			objectStore.fsStats.set(path, { mode: options.mode })
 		},
 
-		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
+		readdir: async function (path: Parameters<ObjectStoreFilesystem["readdir"]>[0]) {
 			path = normalPath(path)
 
 			const dirOid: Uint8Array | undefined = await getOidWithCheckout(path, objectStore)
@@ -92,7 +93,7 @@ export async function createObjectStoreFs(args: {
 
 			return [...readTreeEntries(tree)].map((x) => objectStore.textDecoder.decode(x.pathBuffer))
 		},
-		mkdir: async function (path: Parameters<NodeishFilesystem["mkdir"]>[0]) {
+		mkdir: async function (path: Parameters<ObjectStoreFilesystem["mkdir"]>[0]) {
 			const newTreeId = stringToOid((await objectStore.writeObject(new Uint8Array(), "tree")) ?? "")
 			const newEntry: TreeEntry = {
 				pathBuffer: objectStore.textEncoder.encode(getBasename(path) + "\0"),
