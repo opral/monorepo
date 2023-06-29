@@ -111,7 +111,7 @@ function get(resource: Resource, args: { id: Message["id"]["name"] }): Message |
 		//! do not return a reference to the message in a resource
 		//! modifications to the returned message will leak into the
 		//! resource which is considered to be unmutable.
-		return JSON.parse(JSON.stringify(message))
+		return structuredClone(message)
 	}
 	return undefined
 }
