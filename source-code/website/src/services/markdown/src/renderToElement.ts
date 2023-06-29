@@ -32,7 +32,7 @@ export function renderToElement(
 ): JSXElement {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function deepRender(value: any): any {
-		if (value == undefined || typeof value !== "object") {
+		if (value === undefined || typeof value !== "object") {
 			return value
 		}
 
@@ -69,7 +69,7 @@ export function renderToElement(
 			Object.keys(attributes).length === 0 ? null : deepRender(attributes)
 
 		if (args.components?.[name]) {
-			return createComponent(args.components[name] as Component<any>, {
+			return createComponent(args.components[name] as Component, {
 				...attr,
 				children: children.map(render),
 			})
