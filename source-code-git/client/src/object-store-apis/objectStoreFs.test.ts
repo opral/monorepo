@@ -57,29 +57,71 @@ describe("git fs", async () => {
 		// Make sure hash changes propogated up the entire branch
 		expect(gitFs.getRootOid()).not.toEqual(fsRoot)
 
+		// Make sure existing directory contents are still there
 		const newDirents = await gitFs.readdir(`${path}/..`)
 		for (const dirent of dirents) {
 			expect(newDirents).toContain(dirent)
 		}
 	}
 
-	describe.shuffle("read and write files", () => {
-		it("at the beginning of an existing tree", () =>
+	const mkdir = async (path: string) => {
+		const fsRoot = gitFs.getRootOid()
+		const dirents = await gitFs.readdir(`${path}/..`).catch((e) => {
+			if (e.code === "ENOENT") return []
+			else throw e
+		})
+
+		await expect(async () => await gitFs.readdir(path)).rejects.toThrow(/ENOENT/)
+
+		await gitFs.mkdir(path)
+
+		expect(await gitFs.readdir(path)).toEqual([])
+
+		expect(gitFs.getRootOid()).not.toEqual(fsRoot)
+
+		const newDirents = await gitFs.readdir(`${path}/..`)
+		for (const dirent of dirents) {
+			expect(newDirents).toContain(dirent)
+		}
+
+		// Make sure the directory can be properly written to and read from
+		await readWrite(`${path}/file.txt`, "test file content")
+	}
+
+	describe.shuffle("read and write", () => {
+		it("file at the beginning of an existing tree", () =>
 			readWrite("./frontend/appflowy_flutter/assets/translations/!!.json", "test file content!"))
 
-		it("at the end of an existing tree", () =>
+		it("directory at the beginning of an existing tree", () =>
+			mkdir("./frontend/appflowy_flutter/assets/translations/!!!"))
+
+		it("file at the end of an existing tree", () =>
 			readWrite("./frontend/appflowy_flutter/assets/translations/~~.json", "test file content!"))
 
-		it("unicode to an existing tree", () =>
+		it("directory at the end of an existing tree", () =>
+			mkdir("./frontend/appflowy_flutter/assets/translations/~~~"))
+
+		it("file with unicode to an existing tree", () =>
 			readWrite("./frontend/appflowy_flutter/assets/translations/😃.json", "😃😃😃😃😃😃wow!"))
 
-		it("to one new tree", () =>
+		it("directory with unicode to an existing tree", () =>
+			mkdir("./frontend/appflowy_flutter/assets/translations/😃"))
+
+		it("file to one new tree", () =>
 			readWrite("./frontend/appflowy_flutter/assets/translations2/😃.json", "test file content!"))
 
-		it("to multiple new trees", () =>
+		it("directory to one new tree", () =>
+			mkdir("./frontend/appflowy_flutter/assets/translations2_/😃"))
+
+		it("file to multiple new trees", () =>
 			readWrite("./frontend/new/folder/file.txt", "test file content!"))
 
-		it("to multiple new trees at the root", () =>
+		it("directory to multiple new trees", () => mkdir("./frontend/new_/folder_/directory"))
+
+		it("file to multiple new trees at the root", () =>
 			readWrite("./brand/new/folder/file.txt", "test file content!"))
+
+		it("directory to multiple new trees at the root", () =>
+			mkdir("./brand_/new_/folder_/directory"))
 	})
 })

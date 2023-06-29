@@ -92,6 +92,19 @@ export async function createObjectStoreFs(args: {
 
 			return [...readTreeEntries(tree)].map((x) => objectStore.textDecoder.decode(x.pathBuffer))
 		},
+		mkdir: async function (path: Parameters<NodeishFilesystem["mkdir"]>[0]) {
+			const newTreeId = stringToOid((await objectStore.writeObject(new Uint8Array(), "tree")) ?? "")
+			const newEntry: TreeEntry = {
+				pathBuffer: objectStore.textEncoder.encode(getBasename(path) + "\0"),
+				modeBuffer: objectStore.textEncoder.encode("40000" + " "),
+				oid: newTreeId,
+			}
+
+			await updatePathRecursive(path, newEntry, objectStore)
+
+			objectStore.fsMap.set(path, newTreeId)
+			objectStore.fsStats.set(path, { mode: "40000" })
+		},
 		getRootOid: () => oidToString(objectStore.fsMap.get("/") ?? new Uint8Array()),
 	}
 }
