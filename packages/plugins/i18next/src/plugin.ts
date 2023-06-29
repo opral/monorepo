@@ -342,8 +342,12 @@ async function writeResources(
 ): ReturnType<InlangConfig["writeResources"]> {
 	for (const resource of args.resources) {
 		const language = resource.languageTag.name
+		const pathPattern: PluginSettings["pathPattern"] = args.settings.pathPattern
 
-		if (typeof args.settings.pathPattern !== "string") {
+		if (typeof pathPattern === "object") {
+			// filter the resources prefix -> performance optimized (only one loop over messages)
+			const filteredResources: { [prefix: string]: typeof resource.body } = {}
+
 			for (const [prefix, path] of Object.entries(args.settings.pathPattern)) {
 				// check if directory exists
 				const directoryPath = path.replace("{language}", language).split("/").slice(0, -1).join("/")
@@ -353,20 +357,29 @@ async function writeResources(
 					// directory doesn't exists
 					await args.$fs.mkdir(directoryPath)
 				}
-				//filter the messages by prefxes (paths)
-				const filteredMessages = resource.body
-					.filter((message) => message.id.name.split(".")[0] === prefix)
-					//remove the prefix from the id
-					.map((message) => ({
+				filteredResources[prefix] = []
+			}
+
+			//sort messages by prefxes (paths)
+			for (const message of resource.body) {
+				const prefix = message.id.name.split(".")[0]!
+
+				if (prefix in filteredResources) {
+					//put the messages in the filteredResource object
+					filteredResources[prefix]!.push({
 						...message,
 						id: {
 							...message.id,
 							name: message.id.name.replace(prefix + ".", ""),
 						},
-					}))
+					})
+				}
+			}
+
+			for (const [prefix, filteredMessages] of Object.entries(filteredResources)) {
 				//check if there is something to write in this file
 				if (filteredMessages.length !== 0) {
-					const pathWithLanguage = path.replace("{language}", language)
+					const pathWithLanguage = pathPattern[prefix]!.replace("{language}", language)
 					await args.$fs.writeFile(
 						pathWithLanguage,
 						serializeResource(
@@ -379,8 +392,8 @@ async function writeResources(
 					)
 				}
 			}
-		} else {
-			const pathWithLanguage = args.settings.pathPattern.replace("{language}", language)
+		} else if (typeof pathPattern === "string") {
+			const pathWithLanguage = pathPattern.replace("{language}", language)
 			await args.$fs.writeFile(
 				pathWithLanguage,
 				serializeResource(
