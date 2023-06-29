@@ -1,0 +1,17 @@
+{
+	"rules": {
+		"no-undef": "warn"
+	},
+	"overrides": [
+		{
+			"files": ["app/**/*.{js,jsx,ts,tsx}"],
+			"extends": ["plugin:@next/next/recommended"],
+			"rules": {
+				"solid/no-destructure": "off",
+				"solid/prefer-for": "off",
+				"solid/no-react-specific-props": "off",
+				"solid/style-prop": "off"
+			}
+		}
+	]
+}

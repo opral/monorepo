@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/inlang.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "0.7.6",
+	"version": "0.8.0",
 	"engines": {
 		"vscode": "^1.75.0"
 	},
@@ -39,6 +39,10 @@
 					"default": ""
 				},
 				"inlang.disableRecommendation": {
+					"type": "array",
+					"default": []
+				},
+				"inlang.disableConfigFileCreation": {
 					"type": "array",
 					"default": []
 				}
@@ -80,7 +84,8 @@
 		"typescript": "^5.0.4"
 	},
 	"activationEvents": [
-		"workspaceContains:**/inlang.config.js"
+		"workspaceContains:**/inlang.config.js",
+		"onStartupFinished"
 	],
 	"license": "Apache-2.0"
 }

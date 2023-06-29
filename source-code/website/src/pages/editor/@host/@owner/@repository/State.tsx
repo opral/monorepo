@@ -29,6 +29,11 @@ import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { parseOrigin } from "@inlang/telemetry"
 
+export type LocalChange = {
+	languageTag: ast.Resource["languageTag"]
+	newCopy: ast.Message
+}
+
 type EditorStateSchema = {
 	/**
 	 * Whether a repository is cloned and when it was cloned.
@@ -120,8 +125,9 @@ type EditorStateSchema = {
 	/**
 	 * Unpushed changes in the repository.
 	 */
-	localChanges: () => any[]
-	setLocalChanges: Setter<any[]>
+
+	localChanges: () => LocalChange[]
+	setLocalChanges: Setter<LocalChange[]>
 
 	/**
 	 * The resources in a given repository.
@@ -184,7 +190,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
-	const [localChanges, setLocalChanges] = createSignal<Array<ast.Text | ast.Placeholder>[]>([])
+	const [localChanges, setLocalChanges] = createSignal<LocalChange[]>([])
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
@@ -563,6 +569,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		writeResources({
 			config,
 			resources: args[0],
+			setFsChange,
 		})
 	}
 
@@ -809,8 +816,13 @@ async function readResources(config: InlangConfig) {
 	return lintedResources
 }
 
-async function writeResources(args: { config: InlangConfig; resources: ast.Resource[] }) {
+async function writeResources(args: {
+	config: InlangConfig
+	resources: ast.Resource[]
+	setFsChange: (date: Date) => void
+}) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
+	args.setFsChange(new Date())
 
 	// showToast({
 	// 	variant: "info",

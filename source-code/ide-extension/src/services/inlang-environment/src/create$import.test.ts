@@ -1,8 +1,10 @@
 import { it, expect, afterAll } from "vitest"
 import fs from "node:fs"
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
 import { create$import } from "./create$import.js"
 
-const currentDirectoryPath = new URL(import.meta.url).pathname.replace(/\/[^/]+$/, "/")
+const currentDirectoryPath = dirname(fileURLToPath(import.meta.url))
 const tempdir = fs.mkdtempSync(currentDirectoryPath)
 
 const $import = create$import(currentDirectoryPath)

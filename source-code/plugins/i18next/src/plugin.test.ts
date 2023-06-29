@@ -681,31 +681,6 @@ it("should escape `.` in nested json structures", async () => {
 	expect(json["c."]).toStrictEqual("test")
 })
 
-// it("should throw if there are nested structures but the 'nested' setting is not true", async () => {
-// 	const enResource = `{
-// 		"a": {
-// 			"b": "test"
-// 		}
-// 	}`
-// 	const env = await mockEnvironment({})
-// 	await env.$fs.writeFile("./en.json", enResource)
-
-// 	const x = plugin({
-// 		pathPattern: { common: "./{language}.json" },
-// 	})(env)
-// 	const config = await x.config({})
-// 	config.referenceLanguage = "en"
-// 	config.languages = ["en"]
-
-// 	try {
-// 		await config.readResources!({
-// 			config: config as InlangConfig,
-// 		})
-// 	} catch (e) {
-// 		expect((e as Error).message).toContain("You configured a flattened key project")
-// 	}
-// })
-
 it("should correctly detect the nesting in a file and determine a default based on the majority for newly added resources", async () => {
 	const withNesting = JSON.stringify(
 		{
