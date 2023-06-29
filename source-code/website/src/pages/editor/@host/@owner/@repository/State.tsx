@@ -752,9 +752,6 @@ export async function pushChanges(args: {
 		message: "inlang: update translations",
 		tree: args.objectFs.getRootOid(),
 	})
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	args.setFsChange(new Date())
 
 	// push changes
 	const requestArgs = {
@@ -784,10 +781,6 @@ export async function pushChanges(args: {
 			return [undefined, new PushException("Failed to push", { cause: push.error })]
 		}
 		await raw.pull(requestArgs)
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPush(time)
 		return [true, undefined]
 	} catch (error) {
 		return [undefined, (error as PushException) ?? "h3ni329 Unknown error"]
