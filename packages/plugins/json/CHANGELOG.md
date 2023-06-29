@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.8
+
+### Patch Changes
+
+- 12fe1943: support language folders and addLanguage button
+
 ## 3.0.7
 
 ### Patch Changes
