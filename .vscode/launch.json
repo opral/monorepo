@@ -6,6 +6,16 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "debug ide-extension (windows)",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}\\source-code\\ide-extension",
+				"${workspaceFolder}\\source-code\\starters\\inlang-svelte"
+			],
+			"outFiles": ["${workspaceFolder}\\source-code\\ide-extension\\dist\\**\\*.js"]
+		},
+		{
 			"name": "debug ide-extension",
 			"type": "extensionHost",
 			"request": "launch",
