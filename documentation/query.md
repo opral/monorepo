@@ -1,10 +1,11 @@
 ---
-title: Query
+title: Query Module for building on inlang
+shortTitle: Query
 href: /documentation/query
-description: The reference for the query module.
+description: The reference for inlang's query module.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 **`@inlang/core/query` provides queries (Create, Retrieve, Update, Delete) on the [AST](/documentation/ast). This module can be used to [build apps on top of inlang](/documentation/build-on-inlang).**
 

@@ -1,10 +1,11 @@
 ---
-title: Configuration
+title: Configuration Options for the inlang SDK
+shortTitle: Configuration
 href: /documentation/sdk/configuration
-description: TODO write some description
+description: Configure the inlang SDK to your needs.
 ---
 
-# {% $frontmatter.title %} Options
+# {% $frontmatter.shortTitle %} Options
 
 You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
 

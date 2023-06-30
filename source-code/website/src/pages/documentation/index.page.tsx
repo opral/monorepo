@@ -32,14 +32,16 @@ export function Page(props: PageProps) {
 					hacking the left margins to apply bg-surface-2 with 100rem 
 				    (tested on an ultrawide monitor, works!) 
 				*/}
-					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
-						{/* `Show` is a hotfix when client side rendering loaded this page
-						 * filteredTableContents is not available on the client.
-						 */}
-						<Show when={props.processedTableOfContents}>
-							<NavbarCommon {...props} />
-						</Show>
-					</nav>
+					<div class="hidden md:block h-full -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
+						<nav class="sticky top-[120px] pb-24">
+							{/* `Show` is a hotfix when client side rendering loaded this page
+							 * filteredTableContents is not available on the client.
+							 */}
+							<Show when={props.processedTableOfContents}>
+								<NavbarCommon {...props} />
+							</Show>
+						</nav>
+					</div>
 					{/* Mobile navbar */}
 					<nav class="fixed min-w-full z-10 -translate-x-4 sm:-translate-x-10 sm:px-6 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
@@ -127,7 +129,7 @@ function NavbarCommon(props: {
 											}
 											href={document.frontmatter.href}
 										>
-											{document.frontmatter.title}
+											{document.frontmatter.shortTitle}
 										</a>
 									</li>
 								)}
