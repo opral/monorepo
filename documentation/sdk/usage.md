@@ -1,5 +1,6 @@
 ---
-title: Usage
+title: How to use the inlang SDK
+shortTitle: Usage
 href: /documentation/sdk/usage
 description: This is a list of all the functions you can export from the inlang SDK, what they provide and how to use them.
 ---

@@ -1,12 +1,13 @@
 ---
-title: IDE Extension
+title: IDE Extension for translating with inlang
+shortTitle: IDE Extension
 href: /documentation/apps/ide-extension
-description: This is the IDE Extension description
+description: With the inlang IDE extension you can translate your content directly in your IDE and more.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
-The VS Code extension provides a seamless integration of Inlang's localization infrastructure into Visual Studio Code. It allows you to translate your content directly in your IDE, extract messages and more.
+The VS Code extension provides a seamless integration of Inlang's globalization infrastructure into Visual Studio Code. It allows you to translate your content directly in your IDE, extract messages and more.
 
 ## Benefits
 
