@@ -34,7 +34,7 @@
 		// Lint JS files
 		"checkJs": true,
 		// Distingish between type imports and code imports.
-		"importsNotUsedAsValues": "error",
+		"verbatimModuleSyntax": true,
 		// tremendous helper to avoid hard to debug bugs.
 		// see https://github.com/inlang/inlang/issues/157
 		"noUncheckedIndexedAccess": true,
