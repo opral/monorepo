@@ -1,10 +1,11 @@
 ---
-title: Overview
+title: SDK Overview and Setup
+shortTitle: Overview
 href: /documentation/sdk/overview
-description: inlang is not framework specific. It can be used with any framework.
+description: inlang is not framework specific. It can be used with any framework such as React, Vue, Svelte, Next.js, etc.
 ---
 
-# {% $frontmatter.title %} SDKs
+# {% $frontmatter.shortTitle %} SDKs
 
 inlang is not Framework specific. It can be used with any framework. To translate with the [editor](/editor) or use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) only the `inlang.config.js` file is needed.
 
