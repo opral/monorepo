@@ -1,13 +1,6 @@
-### The plugin is complicated to set up. We highly encourage alternative i18n library focused plugins like the i18next plugin, typesafe-i18n. See [available plugins](https://inlang.com/documentation/plugins/registry)
+### The plugin is complicated to set up. We highly encourage alternative i18n library-focused plugins like the i18next plugin, typesafe-i18n. See [available plugins](https://inlang.com/documentation/plugins/registry)
 
 # inlang-plugin-json
-
-This plugin reads and writes resources that are stored as JSON. The following features are supported:
-
-- [x] key-value pair (`"key": "value"`)
-- [x] nested key-value pairs (`{ "key": { "nested-key": "value" } }`)
-
-<br>
 
 ## Usage
 
