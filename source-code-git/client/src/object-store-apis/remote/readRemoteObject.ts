@@ -1,6 +1,13 @@
-export default async function fetchPackedObject(oid: string, url: string, options?: {
-	headers: Record<string, string>
-}) {
+//TODO: Test with trees larger than 64k
+/*
+ * Fetch a packfile containing a single object from the remote and return the
+ * object in loose object format.
+ */
+export default async function fetchPackedObject(
+	oid: string, 
+	url: string,
+	headers?: Record<string, string>
+): Uint8Array {
 	headers = {
 		...headers, 
 		"Content-Type": "application/x-git-upload-pack-request"
@@ -22,5 +29,4 @@ export default async function fetchPackedObject(oid: string, url: string, option
 
 	if (response.status !== 200) throw new Error(response.statusText)
 	
-	return new Uint8Array(response.arrayBuffer)
 }
