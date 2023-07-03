@@ -34,11 +34,11 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
+		"@inlang-git/fs": "^0.0.4",
 		"isomorphic-git": "github:inlang/isomorphic-git"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@inlang-git/fs": "^0.0.4",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@isomorphic-git/pgp-plugin": "^0.0.7",
 		"git-http-mock-server": "^1.1.0"
