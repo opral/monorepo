@@ -121,3 +121,67 @@ it("should work on a production JSX example", async () => {
 	expect(matches[1]?.messageId).toBe("404.title")
 	expect(matches[2]?.messageId).toBe("421.message")
 })
+
+it("should work on a production JSX example with namespaces", async () => {
+	const sourceCode = `
+		import NextPage from "next";
+		import Image from "next/image";
+		import { useTranslation } from "react-multi-lang";
+
+		t("common:hello-world")
+
+		const Custom404: NextPage = () => {
+			const t = useTranslation();
+			return (
+				<div className="flex h-screen items-center justify-center">
+					<Image
+						src="/icons/warning.svg"
+						alt={t("vital:404.title")}
+						height={25}
+						width={25}
+					/>
+					<h6>{t("common:421.message")}</h6>
+				</div>
+			);
+		};
+
+		export default Custom404;
+		`
+	const matches = parse(sourceCode)
+	expect(matches).toHaveLength(3)
+	expect(matches[0]?.messageId).toBe("common:hello-world")
+	expect(matches[1]?.messageId).toBe("vital:404.title")
+	expect(matches[2]?.messageId).toBe("common:421.message")
+})
+
+it("should work on a production JSX example with namespaces option syntax", async () => {
+	const sourceCode = `
+		<p>{t("a", {ns: "common"})}</p>
+		<p>{t("b", { ns: "vital" })}</p>
+		<p>{t("c",{  ns: "translation" })}</p>
+		<p>{t("d" , { ns: "test"  })}</p>
+		<p>{t('a', {ns: 'common'})}</p>
+		<p>{t('b', { ns: 'vital' })}</p>
+		<p>{t('c',{  ns: 'translation' })}</p>
+		<p>{t('d' , { ns: 'test'  })}</p>
+	`
+	const matches = parse(sourceCode)
+	expect(matches).toHaveLength(8)
+	expect(matches[0]?.messageId).toBe("common:a")
+	expect(matches[1]?.messageId).toBe("vital:b")
+	expect(matches[2]?.messageId).toBe("translation:c")
+	expect(matches[3]?.messageId).toBe("test:d")
+	expect(matches[4]?.messageId).toBe("common:a")
+	expect(matches[5]?.messageId).toBe("vital:b")
+	expect(matches[6]?.messageId).toBe("translation:c")
+	expect(matches[7]?.messageId).toBe("test:d")
+})
+
+it("should work on a production JSX example with namespaces option syntax and aditional arguments", async () => {
+	const sourceCode = `
+		<p>{t("a", {ns: "common"}, variable, arg3)}</p>
+	`
+	const matches = parse(sourceCode)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("common:a")
+})

@@ -47,6 +47,29 @@ const parser = Parsimmon.createLanguage({
 		return Parsimmon.string("'").then(Parsimmon.regex(/[^']*/)).skip(Parsimmon.string("'"))
 	},
 
+	// Whitespace parser
+	whitespace: () => {
+		return Parsimmon.optWhitespace
+	},
+
+	// Colon parser
+	colon: (r) => {
+		return Parsimmon.string(":").trim(r.whitespace!)
+	},
+
+	// Comma parser
+	comma: (r) => {
+		return Parsimmon.string(",").trim(r.whitespace!)
+	},
+
+	nsValue: (r) => {
+		return Parsimmon.seq(
+			r.whitespace!,
+			Parsimmon.string("ns").trim(r.whitespace!).skip(r.colon!), // namespace key parser
+			r.stringLiteral!.trim(r.whitespace!),
+		).map(([, , val]) => `${val}`)
+	},
+
 	// Parser for t function calls
 	FunctionCall: function (r) {
 		return Parsimmon.seqMap(
@@ -58,7 +81,20 @@ const parser = Parsimmon.createLanguage({
 			Parsimmon.index, // end position of the message id
 			Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 			Parsimmon.string(")"), // end with a closing parenthesis
-			(_, __, ___, start, messageId, end) => {
+			(_, __, ___, start, messageId, end, rest) => {
+				const namespaceParser = r
+					.comma! // comma
+					.then(Parsimmon.string("{")) // opening bracket
+					.trim(r.whitespace!) // whitespace
+					.then(r.nsValue!) // namespace value parser
+					.skip(Parsimmon.string("}")) // closing bracket
+					.skip(Parsimmon.regex(/[^)]*/)) // ignore the rest of the function call
+					.trim(r.whitespace!) // whitespace
+
+				const namespace = (namespaceParser.parse(rest) as { status: boolean; value: string }).value
+				// add namespace to messageId if namespace exists
+				messageId = namespace ? namespace + ":" + messageId : messageId
+
 				return {
 					messageId,
 					position: {
