@@ -10,7 +10,9 @@
 				// change this path to specify what folder should be opened upon running this configuration
 				"${workspaceFolder}/source-code/starters/inlang-svelte"
 			],
-			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.cjs"]
+			"outFiles": [
+				"${workspaceFolder}/source-code/ide-extension/dist/**/*.cjs"
+			]
 		},
 		{
 			"name": "debug @inlang/website",
