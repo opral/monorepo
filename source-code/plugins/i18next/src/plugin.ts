@@ -363,7 +363,9 @@ async function writeResources(
 
 			//sort messages by prefxes (paths)
 			for (const message of resource.body) {
-				const prefix = message.id.name.split(":")[0]!
+				const prefix: string = message.id.name.includes(":")
+					? message.id.name.split(":")[0]!
+					: Object.keys(pathPattern)[0]!
 
 				if (prefix in filteredResources) {
 					//put the messages in the filteredResource object

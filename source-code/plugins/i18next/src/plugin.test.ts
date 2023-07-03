@@ -846,3 +846,53 @@ it("should successfully do a roundtrip with complex content", async () => {
 
 	expect(newResources).toStrictEqual(resources)
 })
+
+it("should add default namespace if required by pathPattern", async () => {
+	const resources: ast.Resource[] = [
+		{
+			type: "Resource",
+			languageTag: {
+				type: "LanguageTag",
+				name: "en",
+			},
+			body: [
+				{
+					type: "Message",
+					id: {
+						type: "Identifier",
+						name: "test",
+					},
+					pattern: {
+						type: "Pattern",
+						elements: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				},
+			],
+		},
+	]
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", "{}")
+
+	const x = plugin({
+		pathPattern: { common: "./{language}.json" },
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	config.languages = ["en"]
+
+	await config.writeResources!({
+		resources: resources,
+		config: config as InlangConfig,
+	})
+
+	const newResources = await config.readResources!({
+		config: config as InlangConfig,
+	})
+
+	expect(newResources[0]?.body[0]?.id.name).toStrictEqual("common:test")
+})
