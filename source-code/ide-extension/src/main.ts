@@ -32,13 +32,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			},
 		})
 		const gitOrigin = await getGitOrigin()
-		telemetry.groupIdentify({
-			groupType: "repository",
-			groupKey: gitOrigin,
-			properties: {
-				name: gitOrigin,
-			},
-		})
+		if (gitOrigin) {
+			telemetry.groupIdentify({
+				groupType: "repository",
+				groupKey: gitOrigin,
+				properties: {
+					name: gitOrigin,
+				},
+			})
+		}
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
 		main({ context })
