@@ -896,3 +896,39 @@ it("should add default namespace if required by pathPattern", async () => {
 
 	expect(newResources[0]?.body[0]?.id.name).toStrictEqual("common:test")
 })
+
+it("should not throw an error when read Resources with empty namespaces", async () => {
+	const test = JSON.stringify({
+		test: "test",
+	})
+
+	const env = await mockEnvironment({})
+	await env.$fs.mkdir("./en")
+	await env.$fs.mkdir("./de")
+	await env.$fs.writeFile("./en/common.json", test)
+	await env.$fs.writeFile("./en/vital.json", test)
+	await env.$fs.writeFile("./de/common.json", test)
+
+	const x = plugin({
+		pathPattern: {
+			common: "./{language}/common.json",
+			vital: "./{language}/vital.json",
+		},
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	expect(config.languages).toStrictEqual(["en", "de"])
+
+	let isThrown = false
+
+	try {
+		await config.readResources!({
+			config: config as InlangConfig,
+		})
+	} catch (e) {
+		isThrown = true
+	}
+
+	expect(isThrown).toBe(false)
+})

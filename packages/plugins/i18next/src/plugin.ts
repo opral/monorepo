@@ -217,7 +217,7 @@ async function getFileToParse(path: string, language: string, $fs: InlangEnviron
 		return JSON.parse(file as string)
 	} catch (e) {
 		// if the namespace doesn't exist for this dir -> continue
-		if ((e as any).code === "ENOENT") {
+		if ((e as any).code === "FileNotFound" || (e as any).code === "ENOENT") {
 			// file does not exist yet
 			return
 		}
