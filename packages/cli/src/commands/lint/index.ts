@@ -21,7 +21,7 @@ async function lintCommandAction() {
 		}
 
 		log.info(
-			"ℹ️  For this command to work, you need lint rules configured in your inlang.config.js – for example, through the https://github.com/inlang/plugin-standard-lint-rules plugin.",
+			"ℹ️  For this command to work, you need lint rules configured in your `inlang.config.js` – for example, through the https://github.com/inlang/plugin-standard-lint-rules plugin.",
 		)
 
 		const resources = await config.readResources({ config })
@@ -106,6 +106,9 @@ async function lintCommandAction() {
 		log.log(summaryTable.render())
 
 		if (hasError && lint.opts().fail) {
+			log.info(
+				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
+			)
 			throw new Error("🚫 Lint failed with errors.")
 		}
 	} catch (error) {
