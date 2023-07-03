@@ -38,6 +38,11 @@ async function lintCommandAction() {
 		// Get lint report
 		const lints = getLintReports(resourcesWithLints)
 
+		if (lints.length === 0) {
+			log.success("🎉 Everything translated correctly.")
+			return
+		}
+
 		// Map over lints with correct log function
 		const lintTable = new Table({
 			title: "Lint Report",
@@ -102,8 +107,6 @@ async function lintCommandAction() {
 
 		if (hasError && lint.opts().fail) {
 			throw new Error("🚫 Lint failed with errors.")
-		} else if (!lints.length) {
-			log.success("🎉 Everything translated correctly.")
 		}
 	} catch (error) {
 		log.error(error)
