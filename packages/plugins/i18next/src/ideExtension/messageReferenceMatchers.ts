@@ -62,6 +62,7 @@ const parser = Parsimmon.createLanguage({
 		return Parsimmon.string(",").trim(r.whitespace!)
 	},
 
+	// Parser for namespace value
 	nsValue: (r) => {
 		return Parsimmon.seq(
 			r.whitespace!,
@@ -92,6 +93,7 @@ const parser = Parsimmon.createLanguage({
 					.trim(r.whitespace!) // whitespace
 
 				const namespace = (namespaceParser.parse(rest) as { status: boolean; value: string }).value
+
 				// add namespace to messageId if namespace exists
 				messageId = namespace ? namespace + ":" + messageId : messageId
 
