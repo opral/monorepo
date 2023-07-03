@@ -1,10 +1,11 @@
 ---
-title: Quickstart
+title: Quickstart with inlang
+shortTitle: Quickstart
 href: /documentation/quick-start
-description: Learn how to get started with inlang.
+description: Learn how you can get started with inlang in less than 5 minutes to globalize your project.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 An `inlang.config.js` needs to be created at the root of your git repository.
 

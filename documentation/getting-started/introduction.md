@@ -1,10 +1,11 @@
 ---
-title: Introduction
+title: Introduction to globalize with inlang
+shortTitle: Introduction
 href: /documentation
-description: Learn how to get started with inlang, the design principles, and more.
+description: Learn how to get started with inlang, the globalization infrastructure for developers.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 {% QuickLinks %}
 

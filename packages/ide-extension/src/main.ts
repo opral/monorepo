@@ -31,8 +31,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
 			},
 		})
-		try {
-			const gitOrigin = await getGitOrigin()
+		const gitOrigin = await getGitOrigin()
+		if (gitOrigin) {
 			telemetry.groupIdentify({
 				groupType: "repository",
 				groupKey: gitOrigin,
@@ -40,8 +40,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					name: gitOrigin,
 				},
 			})
-		} catch (error) {
-			console.warn(error)
 		}
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
@@ -79,12 +77,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 	const closestConfigPath = determineClosestPath({
-		options: potentialConfigFileUris.map((uri) => uri.fsPath),
-		to: activeTextEditor.document.uri.fsPath,
+		options: potentialConfigFileUris.map((uri) => uri.path),
+		to: activeTextEditor.document.uri.path,
 	})
+	const closestConfigPathUri = vscode.Uri.parse(closestConfigPath)
 
 	// get current workspace
-	const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(closestConfigPath))
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(closestConfigPathUri)
 	if (!workspaceFolder) {
 		console.warn("No workspace folder found.")
 		return
@@ -95,9 +94,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		new vscode.RelativePattern(workspaceFolder, "inlang.config.js"),
 	)
 
-	const module = await importInlangConfig(closestConfigPath)
+	const module = await importInlangConfig(closestConfigPathUri.fsPath)
 	const env = createInlangEnv({ workspaceFolder })
-
 	const config = await setupConfig({ module, env })
 
 	telemetry.capture({
