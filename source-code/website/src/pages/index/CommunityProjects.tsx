@@ -62,7 +62,6 @@ export function RepositoryCard(props: {
 	}
 }) {
 	const getRelativeTime = (timestamp: number) => {
-		console.log(timestamp)
 		// Calculate the time difference
 		const currentTime = new Date().getTime()
 		const timeDifference = currentTime - timestamp
