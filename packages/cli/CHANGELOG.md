@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.12.0
+
+### Minor Changes
+
+- 7bad2441: add `--no-fail` flag to lint command and output lint messages in tables
+
 ## 0.11.7
 
 ### Patch Changes

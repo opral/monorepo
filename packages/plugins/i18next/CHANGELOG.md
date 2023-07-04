@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 3.0.0
+
+### Major Changes
+
+- 66fd1a55: The pathPattern has a different type now. Old: `pathPattern: string` new: `pathPattern: string | {[key: string]: string}`
+
 ## 2.2.4
 
 ### Patch Changes
