@@ -15,7 +15,7 @@ export function CommunityProjects() {
 				</div>
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min pb-12">
 					<For each={store.recentProjects}>
-						{(recentProjects) => <RepositoryCard repository={recentProjects} />}
+						{(recentProject) => <RepositoryCard repository={recentProject} />}
 					</For>
 				</div>
 			</Show>
@@ -102,10 +102,15 @@ export function RepositoryCard(props: {
 		>
 			<div>
 				<div class="flex flex-col">
-					<img
-						class="w-10 h-10 rounded-md m-0 shadow-lg"
-						src={`https://github.com/${props.repository.owner}.png?size=40`}
-					/>
+					<div class="flex justify-between">
+						<img
+							class="w-10 h-10 rounded-md m-0 shadow-lg"
+							src={`https://github.com/${props.repository.owner}.png?size=40`}
+						/>
+						<span class=" font-normal text-sm tracking-wide text-surface-500">
+							{props.repository.lastOpened && getRelativeTime(props.repository.lastOpened)}
+						</span>
+					</div>
 					<p class="m-0 text-surface-900 font-semibold text-lg break-all pt-4">
 						{props.repository.owner}
 					</p>
@@ -114,11 +119,11 @@ export function RepositoryCard(props: {
 					</p>
 				</div>
 				{/* break all in case the repository name is too long */}
-				<p class="pt-6 font-normal leading-6 text-ellipsis w-full h-[72px] overflow-hidden text-sm tracking-wide text-surface-500">
-					{props.repository.lastOpened
-						? getRelativeTime(props.repository.lastOpened)
-						: props.repository.description}
-				</p>
+				<Show when={props.repository.description !== ""}>
+					<p class="pt-6 font-normal leading-6 text-ellipsis w-full h-[72px] overflow-hidden text-sm tracking-wide text-surface-500">
+						{props.repository.description}
+					</p>
+				</Show>
 			</div>
 		</a>
 	)

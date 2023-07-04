@@ -4,13 +4,11 @@ import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
-import { query } from "@inlang/core/query"
 import { showToast } from "@src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
 import { getLintReports, LintedMessage } from "@inlang/core/lint"
 import { Shortcut } from "./Shortcut.jsx"
-import type { Resource } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
@@ -31,7 +29,6 @@ export function PatternEditor(props: {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		resources,
-		localChanges,
 		setLocalChanges,
 		referenceResource,
 		userIsCollaborator,

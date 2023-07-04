@@ -8,6 +8,7 @@ import {
 	Switch,
 	Show,
 	onMount,
+	createEffect,
 } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
@@ -52,7 +53,7 @@ function TheActualPage() {
 		filteredLintRules,
 		tourStep,
 	} = useEditorState()
-	const [store, setStore] = useLocalStorage()
+	const [, setLocalStorage] = useLocalStorage()
 	/**
 	 * Messages for a particular message id in all languages
 	 *
@@ -86,35 +87,25 @@ function TheActualPage() {
 	})
 
 	onMount(() => {
-		setStore((prev: { recentProjects: RecentProjectType[] }) => {
-			const recentProjects = prev.recentProjects[0] !== undefined ? prev.recentProjects : []
-			const alreadyOpened = recentProjects.find(
-				(project) =>
-					project.owner === routeParams().owner && project.repository === routeParams().repository,
-			)
-			if (alreadyOpened) {
-				// update last opened
-				alreadyOpened.lastOpened = new Date().getTime()
-				console.log(alreadyOpened.lastOpened)
-			} else {
-				// add new project
-				const newProject = {
-					owner: routeParams().owner,
-					repository: routeParams().repository,
-					description: "",
-					lastOpened: new Date().getTime(),
-				}
-				recentProjects.push(newProject)
-			}
+		setLocalStorage("recentProjects", (prev) => {
+			let recentProjects = prev[0] !== undefined ? prev : []
 
-			return {
-				...prev,
-				recentProjects: recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7),
+			recentProjects = recentProjects.filter(
+				(project) =>
+					project.owner !== routeParams().owner && project.repository !== routeParams().repository,
+			)
+
+			const newProject: RecentProjectType = {
+				owner: routeParams().owner,
+				repository: routeParams().repository,
+				description: "",
+				lastOpened: new Date().getTime(),
 			}
+			recentProjects.push(newProject)
+
+			return recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7)
 		})
 	})
-
-	console.log(store.recentProjects[0]?.lastOpened)
 
 	return (
 		<>
