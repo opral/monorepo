@@ -56,26 +56,17 @@ async function lintCommandAction() {
 		let hasError = false
 
 		for (const lint of lints) {
-			switch (lint.level) {
-				case "error":
-					hasError = true
-					lintTable.addRow(
-						{ Level: "Error", "Lint Rule": lint.id, Message: lint.message },
-						{ color: "red" },
-					)
-					break
-				case "warn":
-					lintTable.addRow(
-						{ Level: "Warning", "Lint Rule": lint.id, Message: lint.message },
-						{ color: "yellow" },
-					)
-					break
-				default:
-					lintTable.addRow(
-						{ Level: "Info", "Lint Rule": lint.id, Message: lint.message },
-						{ color: "blue" },
-					)
-					break
+			if (lint.level === "error") {
+				hasError = true
+				lintTable.addRow(
+					{ Level: "Error", "Lint Rule": lint.id, Message: lint.message },
+					{ color: "red" },
+				)
+			} else if (lint.level === "warn") {
+				lintTable.addRow(
+					{ Level: "Warning", "Lint Rule": lint.id, Message: lint.message },
+					{ color: "yellow" },
+				)
 			}
 		}
 
@@ -97,10 +88,6 @@ async function lintCommandAction() {
 		summaryTable.addRow({
 			Level: "Warning",
 			Count: lints.filter((lint) => lint.level === "warn").length,
-		})
-		summaryTable.addRow({
-			Level: "Info",
-			Count: lints.filter((lint) => lint.level === undefined).length,
 		})
 
 		log.log(summaryTable.render())
