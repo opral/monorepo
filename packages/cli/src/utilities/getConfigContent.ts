@@ -1,4 +1,3 @@
-import { log } from "node:console"
 import { getLatestVersion } from "./getLatestVersion.js"
 import type { SupportedLibrary } from "./getSupportedLibrary.js"
 
@@ -31,8 +30,6 @@ export const getConfigContent = async (args: {
 	const standardLintRules = `const { default: standardLintRules } = await env.$import('https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@${await v(
 		"@inlang/plugin-standard-lint-rules",
 	)}/dist/index.js');`
-
-	log(standardLintRules)
 
 	const pluginImportsCode = pluginImports[plugin] || ""
 
