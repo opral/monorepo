@@ -97,7 +97,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 					$fs: env.$fs,
 					settings: withDefaultSettings,
 				}),
-			ideExtension: ideExtensionConfig,
+			ideExtension: ideExtensionConfig(withDefaultSettings),
 		} satisfies Partial<InlangConfig>
 	},
 }))
