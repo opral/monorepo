@@ -16,22 +16,22 @@ To get started with globalizing your app, you just need to choose an SDK from th
     {% QuickLink
         title="SvelteKit"
         logo="svelte"
-        href="/documentation/sdk/sveltekit"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-svelte"
         description="@inlang/sdk-js"
     /%}
 
     {% QuickLink
         title="Next.js"
         logo="next"
-        href="https://github.com/i18next/next-i18next"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nextjs"
         description="next-i18next"
     /%}
 
     {% QuickLink
-        title="Vue.js"
+        title="Nuxt.js"
         logo="vue"
-        href="https://github.com/i18next/i18next-vue"
-        description="i18next-vue"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nuxt"
+        description="nuxtjs/i18n"
     /%}
 
     {% QuickLink
