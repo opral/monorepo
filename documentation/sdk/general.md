@@ -24,7 +24,7 @@ To get started with globalizing your app, you just need to choose an SDK from th
         title="Next.js"
         logo="next"
         href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nextjs"
-        description="next-i18next"
+        description="i18next"
     /%}
 
     {% QuickLink
