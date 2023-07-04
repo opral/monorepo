@@ -17,8 +17,6 @@ export const Registry = () => {
 		setFilteredPlugins(filteredPlugins)
 	})
 
-	console.log()
-
 	return (
 		<div class="flex flex-col gap-4 pt-4">
 			<Search
@@ -29,8 +27,6 @@ export const Registry = () => {
 			<div class="grid grid-cols-1 md:grid-cols-2 flex-col gap-4 ">
 				<For each={filteredPlugins()}>
 					{(plugin) => {
-						// const description = fetch(plugin.repository + "/master/README.md")
-						// console.log(description)
 						const user = plugin.repository.split("/")[3]
 						return (
 							<a href={plugin.repository} target="_blanc" class="relative no-underline">
@@ -94,7 +90,6 @@ const Description = (props: { repository: string }) => {
 
 	const fetchReadMeFromRepoURL = async function (repository: string) {
 		await fetchDataFromRepo(repository).then((data) => {
-			//console.log(data)
 			if (data) {
 				const pattern = /(?<=\n\n|^)(?![###|####])((?!\n\n).)+/g
 				const paragraphs = data.match(pattern)

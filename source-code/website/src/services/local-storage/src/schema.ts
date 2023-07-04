@@ -14,6 +14,14 @@ export type LocalStorageSchema = {
 	 */
 	showMachineTranslationWarning: boolean
 	isFirstUse: boolean
+	recentProjects: RecentProjectType[]
+}
+
+export type RecentProjectType = {
+	owner: string
+	repository: string
+	description: string
+	lastOpened: number
 }
 
 /**
@@ -22,4 +30,5 @@ export type LocalStorageSchema = {
 export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
 	isFirstUse: true,
+	recentProjects: [],
 }

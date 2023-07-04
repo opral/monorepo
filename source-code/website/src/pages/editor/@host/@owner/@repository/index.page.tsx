@@ -1,5 +1,14 @@
 import { query } from "@inlang/core/query"
-import { createMemo, createResource, createSignal, For, Match, Switch, Show } from "solid-js"
+import {
+	createMemo,
+	createResource,
+	createSignal,
+	For,
+	Match,
+	Switch,
+	Show,
+	onMount,
+} from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -12,6 +21,8 @@ import type { LintedMessage } from "@inlang/core/lint"
 import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
+import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
 
 export function Page() {
 	return (
@@ -41,6 +52,7 @@ function TheActualPage() {
 		filteredLintRules,
 		tourStep,
 	} = useEditorState()
+	const [store, setStore] = useLocalStorage()
 	/**
 	 * Messages for a particular message id in all languages
 	 *
@@ -72,6 +84,37 @@ function TheActualPage() {
 		}
 		return result
 	})
+
+	onMount(() => {
+		setStore((prev: { recentProjects: RecentProjectType[] }) => {
+			const recentProjects = prev.recentProjects[0] !== undefined ? prev.recentProjects : []
+			const alreadyOpened = recentProjects.find(
+				(project) =>
+					project.owner === routeParams().owner && project.repository === routeParams().repository,
+			)
+			if (alreadyOpened) {
+				// update last opened
+				alreadyOpened.lastOpened = new Date().getTime()
+				console.log(alreadyOpened.lastOpened)
+			} else {
+				// add new project
+				const newProject = {
+					owner: routeParams().owner,
+					repository: routeParams().repository,
+					description: "",
+					lastOpened: new Date().getTime(),
+				}
+				recentProjects.push(newProject)
+			}
+
+			return {
+				...prev,
+				recentProjects: recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7),
+			}
+		})
+	})
+
+	console.log(store.recentProjects[0]?.lastOpened)
 
 	return (
 		<>
