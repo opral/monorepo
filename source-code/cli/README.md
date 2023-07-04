@@ -130,7 +130,9 @@ The lint command lints the translation with the configured lint rules, for examp
 npx @inlang/cli lint
 ```
 
-This command will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+The `lint` command is provided with an optional `--no-fail` flag, which will not fail the command if there are any linting errors.
+
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) as a starter template.
 
