@@ -1,6 +1,6 @@
 # inlang-plugin-i18next
 
-This plugin reads and writes resources in combination with i18next.
+This plugin works with i18next to read and write resources. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
 ## Usage
 
@@ -9,7 +9,7 @@ This plugin reads and writes resources in combination with i18next.
 
 export async function defineConfig(env) {
 	const { default: i18nextPlugin } = await env.$import(
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@2/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
 	)
 
 	return {
@@ -29,7 +29,9 @@ The plugin offers further configuration options that can be passed as arguments.
 
 ```typescript
 type PluginSettings = {
-	pathPattern: string
+	pathPattern: string | { [key: string]: string }
+	variableReferencePattern?: [string] | [string, string]
+	ignore?: [string]
 }
 ```
 
@@ -37,23 +39,51 @@ type PluginSettings = {
 
 To use our plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{language}` to specify the language name. Note that subfile structures are not supported.
 
-**Most common for i18next with namespace support:**
-
-```typescript
-pathPattern: "./resources/{language}/*.json"
-```
-
-**Only one namespace:**
-
-```typescript
-pathPattern: "./resources/{language}/translation.json"
-```
-
-**Language as file name:**
+#### Without namespaces
 
 ```typescript
 pathPattern: "./resources/{language}.json"
 ```
+
+#### With namespaces
+
+> Does not get created by 'npx @inlang/cli config init'
+
+```typescript
+pathPattern: {
+	common: "./resources/{language}/common.json"
+	vital: "./resources/{language}/vital.json"
+}
+```
+
+`key` (prefix): is prefixing the key with a colon
+`values` (path): is the path to the namespace resources
+
+### `variableReferencePattern`
+
+Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
+
+default:
+
+```typescript
+variableReferencePattern: ["{{", "}}"]
+```
+
+### `ignore`
+
+When you want to ignore files like `languages.json` that are on the same level as your language files, you can ignore them to not brake the `getLanguages` function.
+
+```typescript
+ignore: ["languages.json"]
+```
+
+## IDE-extension usage
+
+The plugin automatically informs the [IDE extension](https://inlang.com/documentation/apps/ide-extension) how to extract keys and namespaces from your code in order to display inline annotations.
+
+### In-code usage
+
+To learn about namespaces and how to use translation functions in your code, you can refer to [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin is capable of parsing the code and providing the IDE-extension with this information.
 
 ## Contributing
 
@@ -73,3 +103,7 @@ Run `npm run build` to generate a build.
 The [dist](./dist/) directory is used to distribute the plugin directly via CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang config uses dynamic imports to import plugins.
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
+
+---
+
+_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

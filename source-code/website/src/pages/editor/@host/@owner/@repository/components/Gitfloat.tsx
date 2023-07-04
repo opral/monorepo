@@ -83,7 +83,10 @@ export const Gitfloat = () => {
 				message: `Don't forget to open a pull request`,
 			})
 			setIsLoading(false)
-			// full name is owner/repo
+			await github.rest.repos.get({
+				owner: routeParams().owner,
+				repo: routeParams().repository,
+			})
 			return navigate(`/editor/github.com/${response.data.full_name}`)
 		} else {
 			showToast({
