@@ -98,9 +98,9 @@ npx @inlang/cli config validate
 
 #### `config update`
 
-This command updates the `inlang.config.js` file with the latest versions of the plugins used. This is helpful if you want to update your plugins to the latest major version and don't want to look them up manually.
+This command updates the `inlang.config.js` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
 
-Keep in mind updating to a new major version might break your configuration. We recommend to always check the changelog of the plugin before updating.
+Keep in mind updating to a new major version might break your configuration. _We recommend to always check the changelog of the plugin before updating._
 
 To update the `inlang.config.js` file, run the following command:
 
