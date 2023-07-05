@@ -28,6 +28,7 @@ import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { parseOrigin } from "@inlang/telemetry"
+import { setSearchParams } from "./helper/setSearchParams.js"
 
 type EditorStateSchema = {
 	/**
@@ -70,6 +71,12 @@ type EditorStateSchema = {
 	 * Virtual filesystem
 	 */
 	fs: () => NodeishFilesystem
+
+	/**
+	 * Id to filter messages
+	 */
+	filteredId: () => string
+	setFilteredId: Setter<string>
 
 	/**
 	 * TextSearch to filter messages
@@ -201,16 +208,26 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	//set filter with search params
 	const params = new URL(document.URL).searchParams
 
+	const [filteredId, setFilteredId] = createSignal<string>((params.get("id") || "") as string)
+
 	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
-	console.log("textSearch")
+	createEffect(() => {
+		setSearchParams({ key: "search", value: textSearch() })
+	})
 
 	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>(
 		params.getAll("lang") as string[],
 	)
+	createEffect(() => {
+		setSearchParams({ key: "lang", value: filteredLanguages() })
+	})
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
 		params.getAll("lint") as `${string}.${string}`[],
 	)
+	createEffect(() => {
+		setSearchParams({ key: "lint", value: filteredLintRules() })
+	})
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 
@@ -598,6 +615,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
+					filteredId,
+					setFilteredId,
 					textSearch,
 					setTextSearch,
 					fsChange,

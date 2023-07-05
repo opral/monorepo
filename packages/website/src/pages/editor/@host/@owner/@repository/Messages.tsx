@@ -9,8 +9,14 @@ import { showFilteredMessage } from "./helper/showFilteredMessage.js"
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
 }) {
-	const { inlangConfig, referenceLanguage, filteredLanguages, textSearch, filteredLintRules } =
-		useEditorState()
+	const {
+		inlangConfig,
+		referenceLanguage,
+		filteredLanguages,
+		textSearch,
+		filteredId,
+		filteredLintRules,
+	} = useEditorState()
 	const referenceMessage = () => {
 		return props.messages[referenceLanguage()!]
 	}

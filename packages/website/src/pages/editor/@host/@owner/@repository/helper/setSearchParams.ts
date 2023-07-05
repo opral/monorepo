@@ -2,6 +2,7 @@
 
 type SearchParams = {
 	search?: string
+	id?: string
 	lint?: `${string}.${string}`[]
 	lang?: string[]
 }
@@ -10,16 +11,23 @@ type SearchType = {
 	key: "search"
 	value: string
 }
+
+type idType = {
+	key: "id"
+	value: string
+}
+
 type LintType = {
 	key: "lint"
 	value: `${string}.${string}`[]
 }
+
 type LangType = {
 	key: "lang"
 	value: string[]
 }
 
-type SearchParamsType = SearchType | LintType | LangType
+type SearchParamsType = SearchType | LintType | LangType | idType
 
 export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	//get url from window
@@ -28,6 +36,7 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	//extract search params from url
 	const searchParamsObj: SearchParams = {
 		search: currentUrl.searchParams.get("search") || "",
+		id: currentUrl.searchParams.get("id") || "",
 		lint: currentUrl.searchParams.getAll("lint") as `${string}.${string}`[],
 		lang: currentUrl.searchParams.getAll("lang"),
 	}
@@ -36,6 +45,9 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	switch (key) {
 		case "search":
 			searchParamsObj.search = value as string
+			break
+		case "id":
+			searchParamsObj.id = value as string
 			break
 		case "lint":
 			searchParamsObj.lint = []
@@ -52,7 +64,7 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	const currentParams = newUrl.searchParams
 	for (const [key, value] of Object.entries(searchParamsObj)) {
 		if (typeof value === "string") {
-			// for search
+			// for search and id
 			if (value && value !== "") {
 				currentParams.append(key, value as string)
 			}
