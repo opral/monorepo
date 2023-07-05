@@ -1,4 +1,3 @@
-import { plugin } from "./../../../../plugins/json/src/plugin"
 import fs from "node:fs"
 import { Command } from "commander"
 import path from "node:path"
