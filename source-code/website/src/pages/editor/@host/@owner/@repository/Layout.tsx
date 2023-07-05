@@ -47,9 +47,6 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-	const handleSearchText = (text: string) => {
-		if (text !== "") setTextSearch(text)
-	}
 	const filters: Filter[] = [
 		{
 			name: "Language",
@@ -242,7 +239,10 @@ export function Layout(props: { children: JSXElement }) {
 						</Show>
 					</div>
 					<div class="flex gap-2">
-						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<SearchInput
+							placeholder="Search ..."
+							handleChange={(text: string) => setTextSearch(text)}
+						/>
 						<sl-button
 							prop:size={"small"}
 							onClick={() => setAddLanguageModalOpen(true)}
@@ -260,6 +260,14 @@ export function Layout(props: { children: JSXElement }) {
 					}}
 				>
 					Search
+				</button>
+				<button
+					class="border"
+					onClick={() => {
+						setSearchParams({ key: "id", value: "app.today" })
+					}}
+				>
+					Id
 				</button>
 				<button
 					class="border"
