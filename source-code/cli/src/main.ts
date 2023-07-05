@@ -72,11 +72,15 @@ telemetry.groupIdentify({
 	},
 })
 
-const [inlangConfig] = await getConfig({ options: cli.opts() })
+try {
+	const [inlangConfig] = await getConfig({ options: cli.opts() })
 
-if (inlangConfig) {
-	telemetry.capture({
-		event: coreUsedConfigEvent.name,
-		properties: coreUsedConfigEvent.properties(inlangConfig),
-	})
+	if (inlangConfig) {
+		telemetry.capture({
+			event: coreUsedConfigEvent.name,
+			properties: coreUsedConfigEvent.properties(inlangConfig),
+		})
+	}
+} catch (error) {
+	// ignore, because of telemetry usage
 }
