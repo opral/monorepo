@@ -43,7 +43,7 @@ async function updateCommandAction() {
 
 		// parse the urls
 		const pluginURLsParsed = pluginURLs.map((url) => {
-			const cleanedUrl = url.replace(/^"(.*)"$/, "$1") // Remove leading and trailing double quotes
+			const cleanedUrl = url.replace(/^(['"])(.*?)\1$/, "$2") // Remove leading and trailing double quotes
 			const urlParts = cleanedUrl.split("/")
 			const nameWithVersion = urlParts[5]!
 			const [name, version] = nameWithVersion.split("@")
@@ -147,8 +147,10 @@ function readConfigFile(filePath: string): Promise<string> {
  * @returns {string[]} An array of extracted URLs.
  */
 function extractPluginUrls(code: string): string[] {
-	const urlRegex = /"(https?:\/\/.*?)(?=")/g
-	return [...code.matchAll(urlRegex)].map((match) => match[0]).map((url) => url.replace(/^"/, ""))
+	const urlRegex = /(["'])(https?:\/\/.*?)(?=\1)/g
+	return [...code.matchAll(urlRegex)]
+		.map((match) => match[0])
+		.map((url) => url.replace(/^["']/, ""))
 }
 
 /**
