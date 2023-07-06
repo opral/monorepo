@@ -1,5 +1,14 @@
 import { query } from "@inlang/core/query"
-import { createMemo, createResource, createSignal, For, Match, Switch, Show } from "solid-js"
+import {
+	createMemo,
+	createResource,
+	createSignal,
+	For,
+	Match,
+	Switch,
+	Show,
+	onMount,
+} from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
@@ -12,6 +21,8 @@ import type { LintedMessage } from "@inlang/core/lint"
 import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
+import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
 
 export function Page() {
 	return (
@@ -38,9 +49,11 @@ function TheActualPage() {
 		doesInlangConfigExist,
 		filteredLanguages,
 		textSearch,
+		filteredId,
 		filteredLintRules,
 		tourStep,
 	} = useEditorState()
+	const [, setLocalStorage] = useLocalStorage()
 	/**
 	 * Messages for a particular message id in all languages
 	 *
@@ -71,6 +84,27 @@ function TheActualPage() {
 			}
 		}
 		return result
+	})
+
+	onMount(() => {
+		setLocalStorage("recentProjects", (prev) => {
+			let recentProjects = prev[0] !== undefined ? prev : []
+
+			recentProjects = recentProjects.filter(
+				(project) =>
+					project.owner !== routeParams().owner && project.repository !== routeParams().repository,
+			)
+
+			const newProject: RecentProjectType = {
+				owner: routeParams().owner,
+				repository: routeParams().repository,
+				description: "",
+				lastOpened: new Date().getTime(),
+			}
+			recentProjects.push(newProject)
+
+			return recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7)
+		})
 	})
 
 	return (
@@ -162,8 +196,13 @@ function TheActualPage() {
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
 								["hidden"]:
-									messageCount(messages, filteredLanguages(), textSearch(), filteredLintRules()) !==
-									0,
+									messageCount(
+										messages,
+										filteredLanguages(),
+										textSearch(),
+										filteredLintRules(),
+										filteredId(),
+									) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
