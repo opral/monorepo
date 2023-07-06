@@ -2,7 +2,7 @@ import { getLintReports, lint as _lint } from "@inlang/core/lint"
 import { Command } from "commander"
 import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
-import { Table } from "console-table-printer"
+import Table from "cli-table3"
 import { getConfig } from "../../utilities/getConfig.js"
 
 export const lint = new Command()
@@ -45,12 +45,9 @@ async function lintCommandAction() {
 
 		// Map over lints with correct log function
 		const lintTable = new Table({
-			title: "Lint Report",
-			columns: [
-				{ name: "Level", alignment: "left" },
-				{ name: "Lint Rule", alignment: "left" },
-				{ name: "Message", alignment: "left" },
-			],
+			head: ["Level", "Lint Rule", "Message"],
+			colWidths: [12, 35, 50],
+			wordWrap: true,
 		})
 
 		let hasError = false
@@ -58,39 +55,25 @@ async function lintCommandAction() {
 		for (const lint of lints) {
 			if (lint.level === "error") {
 				hasError = true
-				lintTable.addRow(
-					{ Level: "Error", "Lint Rule": lint.id, Message: lint.message },
-					{ color: "red" },
-				)
+				lintTable.push(["Error", lint.id, lint.message])
 			} else if (lint.level === "warn") {
-				lintTable.addRow(
-					{ Level: "Warning", "Lint Rule": lint.id, Message: lint.message },
-					{ color: "yellow" },
-				)
+				lintTable.push(["Warning", lint.id, lint.message])
 			}
 		}
 
-		log.log(lintTable.render())
+		log.log("🚨 Lint Report")
+		log.log(lintTable.toString())
 
 		// create summary table with total number of errors and warnings
 		const summaryTable = new Table({
-			title: "Lint Summary",
-			columns: [
-				{ name: "Level", alignment: "left" },
-				{ name: "Count", alignment: "left" },
-			],
+			head: ["Level", "Count"],
 		})
 
-		summaryTable.addRow({
-			Level: "Error",
-			Count: lints.filter((lint) => lint.level === "error").length,
-		})
-		summaryTable.addRow({
-			Level: "Warning",
-			Count: lints.filter((lint) => lint.level === "warn").length,
-		})
+		summaryTable.push(["Error", lints.filter((lint) => lint.level === "error").length])
+		summaryTable.push(["Warning", lints.filter((lint) => lint.level === "warn").length])
 
-		log.log(summaryTable.render())
+		log.log("📊 Summary")
+		log.log(summaryTable.toString())
 
 		if (hasError && lint.opts().fail) {
 			log.info(
