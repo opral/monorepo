@@ -1,5 +1,15 @@
 # @inlang/cli
 
+## 0.13.0
+
+### Minor Changes
+
+- 1bc427b7: add `config update` command
+
+### Patch Changes
+
+- 74e18d43: fix typos and add one edge case
+
 ## 0.12.0
 
 ### Minor Changes
