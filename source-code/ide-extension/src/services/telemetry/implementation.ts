@@ -3,7 +3,7 @@ import { raw } from "@inlang-git/client/raw"
 import fs from "node:fs"
 import * as vscode from "vscode"
 import type { TelemetryEvents } from "./events.js"
-import { getUserId } from "../../utils/getUserId.js"
+import { getUserId } from "../../utilities/settings/getUserId.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -22,10 +22,10 @@ export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeo
  */
 type CaptureEventArguments =
 	| Omit<Parameters<typeof telemetryNode.capture>[0], "distinctId" | "groups"> & {
-			event: TelemetryEvents
-	  }
+		event: TelemetryEvents
+	}
 
-let gitOrigin: string
+let gitOrigin: string | undefined
 let userID: string
 
 /**
@@ -38,12 +38,21 @@ async function capture(args: CaptureEventArguments) {
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
+	if (args.event === "IDE-EXTENSION activated" && gitOrigin) {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+			},
+		})
+	}
 	return telemetryNode.capture({
 		...args,
 		distinctId: userID,
-		groups: {
+		groups: gitOrigin ? {
 			repository: gitOrigin,
-		},
+		} : undefined,
 	})
 }
 
@@ -51,14 +60,18 @@ async function capture(args: CaptureEventArguments) {
  * Gets the git origin url of the currently opened repository.
  */
 export async function getGitOrigin() {
-	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
-	const remotes = await raw.listRemotes({
-		fs,
-		dir: await raw.findRoot({
+	try {
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+		const remotes = await raw.listRemotes({
 			fs,
-			filepath: workspaceRoot ?? process.cwd(),
-		}),
-	})
-	const gitOrigin = parseOrigin({ remotes })
-	return gitOrigin
+			dir: await raw.findRoot({
+				fs,
+				filepath: workspaceRoot ?? process.cwd(),
+			}),
+		})
+		const gitOrigin = parseOrigin({ remotes })
+		return gitOrigin
+	} catch (e) {
+		return undefined
+	}
 }

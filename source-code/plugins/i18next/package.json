@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-i18next",
-	"version": "2.2.3",
+	"version": "3.0.0",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
@@ -28,7 +28,6 @@
 		"@types/parsimmon": "^1.10.6",
 		"esbuild": "^0.17.19",
 		"flat": "^5.0.2",
-		"lodash.merge": "^4.6.2",
 		"parsimmon": "^1.18.1",
 		"size-limit": "^8.2.4",
 		"typescript": "^5.1.3"

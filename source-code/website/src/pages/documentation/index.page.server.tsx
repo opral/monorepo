@@ -1,9 +1,6 @@
 import type { OnBeforeRender } from "@src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
-import {
-	tableOfContents,
-	FrontmatterSchema,
-} from "../../../../../../documentation/tableOfContents.js"
+import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "@src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/server"
 

@@ -1,41 +1,39 @@
 ---
 # the frontmatter is only relevant for rendering this site on the website
-title: Contributing
+title: Contributing to inlang
+shortTitle: Contributing
 href: /documentation/contributing
-description: Learn on how to contribute to inlang.
+description: Learn on how to contribute to inlang and its ecosystem.
 ---
 
 # Contributing
 
-Inlang is setup as monorepo with NPM workspaces and [turborepo](https://turbo.build/).
+Inlang is setup as [monorepo](https://monorepo.tools/) with NPM workspaces and [turborepo](https://turbo.build/).
 
 Furthermore, the repository makes use of [Dev Containers](https://containers.dev/) ensuring that everyone works in the same environment. If you don't use dev containers, we won't be able to support dev related setup problems.
 
 ## Getting started
 
-0.1. Install [Docker](https://www.docker.com/)
-0.2. Install the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+Make sure you have [Git](https://git-scm.com/), [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the [VSCode DevContainers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed. Provide your Docker setup plenty of memory (>4GB). If you are a Windows user, please read the subsection below.
 
-1. Open the repository in VSCode.
-2. Open the repository in a dev container via `CMD + Shift + P` and search for `Open in container`. Make sure to allocate enough memory in your Docker setup (>4GB).
-3. `npm install` to install dependencies
-4. `npm run dev` to run the development environment.
-5. `npm run test` to run the tests.
-6. `npm run build` to compile a production build.
+1. Clone inlangs repository.
+2. Open the repository folder in Visual Studio Code.
+3. Run `Dev Containers: Reopen in Container` via `CTRL + Shift + P` or `⌘ + Shift + P`.
+4. `npm install` to install dependencies.
+5. `npm run dev` to run the development environment.
+6. `npm run test` to run the tests.
+7. `npm run build` to compile a production build.
 
 ### For Windows users
 
-There is a problem with Hot Module Reloading (HMR) within the Windows file system. To fix this problem, you can use the Linux subsystem:
+Install [Windows Subsystem Linux 2 (WSL 2)](https://learn.microsoft.com/en-us/windows/wsl/install) as well. Make sure that the user has the right to edit files. For Docker Desktop, the user should be `node`.
 
-1. Start the dev container first
-2. Navigate to the Linux subsystem with `cd $HOME` & `cd /mnt`.
-3. Clone the inlang repo into the Linux subsystem
-4. Navigate to the inlang repo
-5. Run `npm install` & `npm run dev`
-
-**Note:**
-Make sure that the user has the right to edit files.
-For Docker Desktop, the user should be `node`.
+1. Start Visual Studio Code.
+2. Run `Dev Containers: Clone Repository in Container Volume...` via `CTRL + Shift + P`.
+3. `npm install` to install dependencies.
+4. `npm run dev` to run the development environment.
+5. `npm run test` to run the tests.
+6. `npm run build` to compile a production build.
 
 ## Debugging
 

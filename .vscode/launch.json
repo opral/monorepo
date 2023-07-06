@@ -1,7 +1,3 @@
-// A launch configuration that compiles the extension and then opens it inside a new window
-// Use IntelliSense to learn about possible attributes.
-// Hover to view descriptions of existing attributes.
-// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 {
 	"version": "0.2.0",
 	"configurations": [
@@ -11,9 +7,12 @@
 			"request": "launch",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}/source-code/ide-extension",
-				"${workspaceFolder}/source-code/ide-extension/example"
+				// change this path to specify what folder should be opened upon running this configuration
+				"${workspaceFolder}/source-code/starters/inlang-svelte"
 			],
-			"outFiles": ["${workspaceFolder}/source-code/ide-extension/dist/**/*.js"]
+			"outFiles": [
+				"${workspaceFolder}/source-code/ide-extension/dist/**/*.cjs"
+			]
 		},
 		{
 			"name": "debug @inlang/website",

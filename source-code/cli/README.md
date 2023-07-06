@@ -1,7 +1,8 @@
 ---
-title: CLI
+title: CLI for globalizing with inlang
+shortTitle: CLI
 href: /documentation/apps/inlang-cli
-description: The inlang CLI automates localization processes.
+description: The inlang Command Line Interface (CLI) automates globalization processes.
 ---
 
 # Inlang CLI
@@ -95,6 +96,18 @@ To validate the `inlang.config.js` file, run the following command:
 npx @inlang/cli config validate
 ```
 
+#### `config update`
+
+This command updates the `inlang.config.js` file with the latest versions of the plugins used. This is helpful if you want to **update your plugins** to the latest major version and don't want to look them up manually.
+
+Keep in mind updating to a new major version might break your configuration. _We recommend to always check the changelog of the plugin before updating._
+
+To update the `inlang.config.js` file, run the following command:
+
+```sh
+npx @inlang/cli config update
+```
+
 ### `machine`
 
 The machine command is used to automate localization processes.
@@ -129,7 +142,9 @@ The lint command lints the translation with the configured lint rules, for examp
 npx @inlang/cli lint
 ```
 
-This command will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+The `lint` command is provided with an optional `--no-fail` flag, which will not fail the command if there are any linting errors.
+
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
 
 However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) as a starter template.
 

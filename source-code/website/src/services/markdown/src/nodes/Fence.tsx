@@ -32,7 +32,7 @@ const highlighter: Highlighter = await getHighlighter({
 	theme: "github-dark-dimmed",
 	// preventing layout shift on client side be pre-fecthing
 	// js and ts by default.
-	langs: ["js", "ts"],
+	langs: ["js", "ts", "json", "html", "md", "sh"],
 })
 
 function SyntaxHighlight(props: Parameters<typeof Fence>[0]) {

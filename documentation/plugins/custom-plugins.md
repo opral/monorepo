@@ -1,10 +1,11 @@
 ---
-title: Custom Plugin
+title: How to build a custom plugin
+shortTitle: Custom Plugin
 href: /documentation/plugins/custom-plugins
-description: Learn how to write your own inlang plugin.
+description: Learn how to write your custom inlang plugin.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 Plugins allow the customization of inlang's behavior by, for example, defining how resources should be parsed and serialized.
 

@@ -1,10 +1,5 @@
-export type SerializedMessage = {
-	id: string
-	text: string
-} & MessageMetadata
+import type * as ast from "@inlang/core/ast"
 
-export type MessageMetadata = {
-	parentKeys?: string[]
-	fileName?: string
-	keyName?: string
+export type FilteredResourcesProps = {
+	[prefix: string]: ast.Resource["body"]
 }

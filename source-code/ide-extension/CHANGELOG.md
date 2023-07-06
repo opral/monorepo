@@ -1,5 +1,22 @@
 # inlang-vs-code-extension
 
+## 0.8.1
+
+### Patch Changes
+
+- 06b12597: Adjust loading inlangs config so it is compatible with Windows
+- 543231e4: Fixes telemtry in ide-extension, so it won't crash if there is no git.
+
+## 0.8.0
+
+### Minor Changes
+
+- 283f5764: Several performance improvements.
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.7.6
 
 ### Patch Changes

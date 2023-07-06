@@ -1,5 +1,17 @@
 # @inlang/plugin-i18next
 
+## 3.0.0
+
+### Major Changes
+
+- 66fd1a55: The pathPattern has a different type now. Old: `pathPattern: string` new: `pathPattern: string | {[key: string]: string}`
+
+## 2.2.4
+
+### Patch Changes
+
+- 12fe1943: support language folders and addLanguage button
+
 ## 2.2.3
 
 ### Patch Changes

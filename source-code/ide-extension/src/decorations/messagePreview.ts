@@ -1,32 +1,25 @@
 import * as vscode from "vscode"
-import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
-export async function messagePreview(args: {
-	activeTextEditor: vscode.TextEditor
-	context: vscode.ExtensionContext
-}) {
-	const { context } = args
-	let activeTextEditor = vscode.window.activeTextEditor
-
+export async function messagePreview(args: { context: vscode.ExtensionContext }) {
 	const messagePreview = vscode.window.createTextEditorDecorationType({
 		after: {
 			margin: "0 0.5rem",
 		},
 	})
 
-	updateDecorations()
-
 	async function updateDecorations() {
+		const activeTextEditor = vscode.window.activeTextEditor
+
 		if (!activeTextEditor) {
 			return
 		}
 
 		// TODO: this is a hack to prevent the message preview from showing up in the inlang.config.js file
-		if (args.activeTextEditor.document.fileName.includes("inlang.config.js")) {
+		if (activeTextEditor.document.fileName.includes("inlang.config.js")) {
 			return activeTextEditor.setDecorations(messagePreview, [])
 		}
 
@@ -52,7 +45,7 @@ export async function messagePreview(args: {
 		const wrappedDecorations = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
 			async (matcher) => {
 				const messages = await matcher({
-					documentText: args.activeTextEditor.document.getText(),
+					documentText: activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
 					const translation = query(refResource).get({
@@ -98,26 +91,24 @@ export async function messagePreview(args: {
 		activeTextEditor.setDecorations(messagePreview, decorations)
 	}
 
-	const debouncedUpdateDecorations = debounce(500, updateDecorations)
+	// in case the active text editor is already open, update decorations
+	updateDecorations()
 
+	// immediately update decorations when the active text editor changes
 	vscode.window.onDidChangeActiveTextEditor(
-		(editor) => {
-			if (editor) {
-				activeTextEditor = editor
-				debouncedUpdateDecorations()
-			}
-		},
+		() => updateDecorations(),
 		undefined,
-		context.subscriptions,
+		args.context.subscriptions,
 	)
 
+	// update decorations when the text changes in a document
 	vscode.workspace.onDidChangeTextDocument(
 		(event) => {
-			if (activeTextEditor && event.document === activeTextEditor.document) {
+			if (event.document === vscode.window.activeTextEditor?.document) {
 				updateDecorations()
 			}
 		},
 		undefined,
-		context.subscriptions,
+		args.context.subscriptions,
 	)
 }

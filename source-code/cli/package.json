@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "0.11.3",
+	"version": "0.13.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -31,12 +31,19 @@
 		"/bin",
 		"/dist"
 	],
+	"exports": {
+		"./src/utlilities/fs": "./src/utilities/fs/index.ts",
+		"./src/utlilities/format": "./src/utilities/format.ts",
+		"./src/utilities/getLanguageFolderPath": "./src/utilities/getLanguageFolderPath.ts",
+		"./src/utilities/getSupportedLibrary": "./src/utilities/getSupportedLibrary.ts",
+		"./src/utilities/getConfigContent": "./src/utilities/getConfigContent.ts"
+	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "NODE_ENV=production node ./build.js",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
-		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
+		"test:watch": "vitest watch --passWithNoTests --coverage --test-timeout=10000",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "cd ../.. && npm run lint:base ./source-code/core",
 		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
@@ -53,8 +60,11 @@
 		"@sentry/node": "^7.51.2",
 		"@types/promptly": "^3.0.2",
 		"@types/prompts": "^2.4.2",
+		"@types/vscode": "^1.79.1",
+		"@vscode/vsce": "^2.18.0",
 		"commander": "^10.0.0",
 		"consola": "^2.15.3",
+		"console-table-printer": "^2.11.2",
 		"esbuild": "^0.17.19",
 		"fast-glob": "^3.2.12",
 		"node-fetch": "^3.3.1",
@@ -63,7 +73,9 @@
 		"posthog-node": "^3.1.1",
 		"promptly": "^3.2.0",
 		"prompts": "^2.4.2",
-		"ts-dedent": "^2.2.0"
+		"ts-dedent": "^2.2.0",
+		"acorn": "^8.9.0",
+		"estree-walker": "^3.0.3"
 	},
 	"license": "Apache-2.0"
 }

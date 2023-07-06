@@ -1,14 +1,51 @@
 ---
-title: Overview
+title: SDK Overview and Setup
+shortTitle: Overview
 href: /documentation/sdk/overview
-description: inlang is not framework specific. It can be used with any framework.
+description: inlang is not framework specific. It can be used with any framework such as React, Vue, Svelte, Next.js, etc.
 ---
 
-# {% $frontmatter.title %} SDKs
+# {% $frontmatter.shortTitle %} SDKs
 
 inlang is not Framework specific. It can be used with any framework. To translate with the [editor](/editor) or use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) only the `inlang.config.js` file is needed.
 
-However, we want to provide SDKs for some of the most popular frameworks. These SDKs are designed and fully integrated for the specific framework. It provides a lot of features that make it easy to use inlang with your framework of choice.
+To get started with globalizing your app, you just need to choose an SDK from the options below and follow their setup guide. Once that's done, you can jump right into the [Quickstart](/documentation/quick-start). Plus, if you go with the SvelteKit SDK, you won't have to worry about any extra inlang setup!
+
+{% QuickLinks %}
+
+    {% QuickLink
+        title="SvelteKit"
+        logo="svelte"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-svelte"
+        description="@inlang/sdk-js"
+    /%}
+
+    {% QuickLink
+        title="Next.js"
+        logo="next"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nextjs"
+        description="i18next"
+    /%}
+
+    {% QuickLink
+        title="Nuxt.js"
+        logo="vue"
+        href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nuxt"
+        description="nuxtjs/i18n"
+    /%}
+
+    {% QuickLink
+        title="React.js"
+        logo="react"
+        href="https://github.com/i18next/react-i18next"
+        description="react-i18next"
+    /%}
+
+{% /QuickLinks %}
+
+{% Callout variant="info" %}
+Nothing that fits your needs? Check out [i18n libraries that are supported via plugins](/documentation/plugins/registry).
+{% /Callout %}
 
 ## What benefits does the SDK provide?
 
@@ -17,8 +54,6 @@ However, we want to provide SDKs for some of the most popular frameworks. These 
 - fully integrated with your Framework (compiler-based to avoid a heavy runtime)
 - automatic language specific routing (e.g. `/en/site`, `/de/site`)
 - faster page loads (resource splitting per route) [coming soon]
-- typesafety (due to compiler) [coming soon]
-- better SEO (localized head tags and sitemaps) [coming soon]
 - automatic setup for inlang editor and VS Code extension
 
 ## Usage
@@ -26,12 +61,6 @@ However, we want to provide SDKs for some of the most popular frameworks. These 
 inlang's SDK works the same in each environment it runs. Take a look at the [Usage](/documentation/sdk/usage) section to learn how to use inlang in your project.
 
 Inlang also provides custom solutions that are built specifically for certain Frameworks.
-
-### Supported SDKs
-
-- [SvelteKit SDK](/documentation/sdk/sveltekit) maintained by inlang.
-- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) A fully type-safe and lightweight internationalization library for all TypeScript and JavaScript projects.
-- [i18next](https://www.i18next.com/) is an internationalization-SDK written in and for JavaScript.
 
 #### Your favorite frameworks is missing?
 

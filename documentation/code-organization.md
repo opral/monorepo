@@ -1,10 +1,11 @@
 ---
-title: Code organization
+title: How inlang's code is organized
+shortTitle: Code organization
 href: /documentation/code-organization
-description: How inlangs code is organized.
+description: Learn how inlang's code for globalizing apps is organized.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 [inlangs repository](https://github.com/inlang/inlang) is organized as a [monorepo](https://monorepo.tools/). It consists of the following packages:
 

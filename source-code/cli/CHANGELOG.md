@@ -1,5 +1,45 @@
 # @inlang/cli
 
+## 0.13.0
+
+### Minor Changes
+
+- 1bc427b7: add `config update` command
+
+### Patch Changes
+
+- 74e18d43: fix typos and add one edge case
+
+## 0.12.0
+
+### Minor Changes
+
+- 7bad2441: add `--no-fail` flag to lint command and output lint messages in tables
+
+## 0.11.7
+
+### Patch Changes
+
+- 1cff6e4d: fix btoa with Buffer.from
+
+## 0.11.6
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
+## 0.11.5
+
+### Patch Changes
+
+- 3d248d71: fix wrong conditional on package.json checking
+
+## 0.11.4
+
+### Patch Changes
+
+- 56c9d56f: fix auto major version
+
 ## 0.11.3
 
 ### Patch Changes

@@ -1,10 +1,11 @@
 ---
-title: Lint
+title: Linting with inlang
+shortTitle: Lint
 href: /documentation/lint
-description: Check `Resources` for potential errors and other insights.
+description: Learn how to use the lint module of inlang to check your resources for potential errors and other insights.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 This module provides the functionality to automatically check `Resources` for potential errors and other insights.
 
