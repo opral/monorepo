@@ -23,7 +23,6 @@ export function Layout(props: { children: JSXElement }) {
 		inlangConfig,
 		repositoryIsCloned,
 		setTextSearch,
-		textSearch,
 		filteredLintRules,
 		setFilteredLintRules,
 		filteredLanguages,
@@ -31,7 +30,6 @@ export function Layout(props: { children: JSXElement }) {
 		userIsCollaborator,
 		languages,
 		setLanguages,
-		filteredId,
 		resources,
 		setResources,
 		tourStep,
@@ -160,10 +158,6 @@ export function Layout(props: { children: JSXElement }) {
 			return false
 		}
 	}
-
-	createEffect(() => {
-		console.log(filteredLanguages(), filteredLintRules(), textSearch(), filteredId())
-	})
 
 	return (
 		<RootLayout>
