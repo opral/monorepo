@@ -93,7 +93,7 @@ export function Messages(props: {
 						),
 							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
 					}}
-					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-8 w-8 rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
+					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-7 w-7 text-sm rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
 				>
 					<IconCopy />
 				</div>

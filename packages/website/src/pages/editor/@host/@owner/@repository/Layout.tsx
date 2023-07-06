@@ -37,13 +37,13 @@ export function Layout(props: { children: JSXElement }) {
 		tourStep,
 	} = useEditorState()
 
-	const onlyLanguagesTheUserSpeaks = () => {
-		const languages = inlangConfig()?.languages.filter(
-			(language) =>
-				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
-		)
-		return languages ?? []
-	}
+	// const onlyLanguagesTheUserSpeaks = () => {
+	// 	const languages = inlangConfig()?.languages.filter(
+	// 		(language) =>
+	// 			navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+	// 	)
+	// 	return languages ?? []
+	// }
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
@@ -108,9 +108,9 @@ export function Layout(props: { children: JSXElement }) {
 		) {
 			if (filteredLanguages().length > 0) {
 				addFilter("Language")
-			} else if (onlyLanguagesTheUserSpeaks().length > 1) {
-				setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-				addFilter("Language")
+				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
+				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
+				// 	addFilter("Language")
 			} else {
 				setFilteredLanguages(inlangConfig()!.languages)
 			}
