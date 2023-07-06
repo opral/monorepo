@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.13.1
+
+### Patch Changes
+
+- 9171a188: fix lint table and config update plugin link quotes
+
 ## 0.13.0
 
 ### Minor Changes
