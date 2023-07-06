@@ -5,6 +5,9 @@ import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
 import { showFilteredMessage } from "./helper/showFilteredMessage.js"
+import IconCopy from "~icons/material-symbols/content-copy-outline"
+import copy from "clipboard-copy"
+import { showToast } from "@src/components/Toast.jsx"
 
 export function Messages(props: {
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>
@@ -67,16 +70,33 @@ export function Messages(props: {
 						filteredLanguages(),
 						textSearch(),
 						filteredLintRules(),
+						filteredId(),
 					).length === 0,
 			}}
 		>
-			<div class="flex justify-between items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
+			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
 				<h3
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:content-['#'] before:text-on-surface"
 				>
 					{id()}
 				</h3>
+				<div
+					onClick={() => {
+						copy(
+							document.location.protocol +
+								"//" +
+								document.location.host +
+								document.location.pathname +
+								"?id=" +
+								id(),
+						),
+							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+					}}
+					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-8 w-8 rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
+				>
+					<IconCopy />
+				</div>
 			</div>
 			<div>
 				<For each={inlangConfig()?.languages}>

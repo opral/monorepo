@@ -10,7 +10,6 @@ import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
-import { setSearchParams } from "./helper/setSearchParams.js"
 
 interface Filter {
 	name: string
@@ -32,6 +31,7 @@ export function Layout(props: { children: JSXElement }) {
 		userIsCollaborator,
 		languages,
 		setLanguages,
+		filteredId,
 		resources,
 		setResources,
 		tourStep,
@@ -104,10 +104,28 @@ export function Layout(props: { children: JSXElement }) {
 			repositoryIsCloned.error === undefined &&
 			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			onlyLanguagesTheUserSpeaks().length > 1
+			inlangConfig()
 		) {
-			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-			addFilter("Language")
+			if (filteredLanguages().length > 0) {
+				addFilter("Language")
+			} else if (onlyLanguagesTheUserSpeaks().length > 1) {
+				setFilteredLanguages(onlyLanguagesTheUserSpeaks())
+				addFilter("Language")
+			} else {
+				setFilteredLanguages(inlangConfig()!.languages)
+			}
+		}
+	})
+
+	//add initial lintRule filter
+	createEffect(() => {
+		if (
+			repositoryIsCloned.error === undefined &&
+			repositoryIsCloned.loading === false &&
+			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			filteredLintRules().length > 0
+		) {
+			addFilter("Linting")
 		}
 	})
 
@@ -144,7 +162,7 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	createEffect(() => {
-		console.log(filteredLanguages(), filteredLintRules(), textSearch())
+		console.log(filteredLanguages(), filteredLintRules(), textSearch(), filteredId())
 	})
 
 	return (
@@ -253,49 +271,6 @@ export function Layout(props: { children: JSXElement }) {
 					</div>
 				</div>
 				{/* <hr class="h-px w-full bg-outline-variant my-2"> </hr> */}
-				<button
-					class="border"
-					onClick={() => {
-						setSearchParams({ key: "search", value: "today" })
-					}}
-				>
-					Search
-				</button>
-				<button
-					class="border"
-					onClick={() => {
-						setSearchParams({ key: "id", value: "app.today" })
-					}}
-				>
-					Id
-				</button>
-				<button
-					class="border"
-					onClick={() => {
-						setSearchParams({ key: "search", value: "" })
-					}}
-				>
-					Remove search
-				</button>
-				<button
-					class="border"
-					onClick={() => {
-						setSearchParams({
-							key: "lint",
-							value: ["inlang.missingMessage", "inlang.messageWithoutReference"],
-						})
-					}}
-				>
-					Lint
-				</button>
-				<button
-					class="border"
-					onClick={() => {
-						setSearchParams({ key: "lang", value: ["en", "de"] })
-					}}
-				>
-					Search
-				</button>
 				{props.children}
 			</div>
 			<sl-dialog
