@@ -8,7 +8,6 @@ import {
 	Switch,
 	Show,
 	onMount,
-	createEffect,
 } from "solid-js"
 import { Messages } from "./Messages.jsx"
 import { Layout as EditorLayout } from "./Layout.jsx"
@@ -50,6 +49,7 @@ function TheActualPage() {
 		doesInlangConfigExist,
 		filteredLanguages,
 		textSearch,
+		filteredId,
 		filteredLintRules,
 		tourStep,
 	} = useEditorState()
@@ -196,8 +196,13 @@ function TheActualPage() {
 							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
 								["hidden"]:
-									messageCount(messages, filteredLanguages(), textSearch(), filteredLintRules()) !==
-									0,
+									messageCount(
+										messages,
+										filteredLanguages(),
+										textSearch(),
+										filteredLintRules(),
+										filteredId(),
+									) !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

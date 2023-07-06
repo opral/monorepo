@@ -209,6 +209,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const params = new URL(document.URL).searchParams
 
 	const [filteredId, setFilteredId] = createSignal<string>((params.get("id") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "id", value: filteredId() })
+	})
 
 	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
 	createEffect(() => {
@@ -332,7 +335,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setLint(config.lint)
 				setReferenceLanguage(config.referenceLanguage)
 				setLanguages(languages)
-				setFilteredLanguages(languages)
+				//filteredLanguages().length === 0 && setFilteredLanguages(languages)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
