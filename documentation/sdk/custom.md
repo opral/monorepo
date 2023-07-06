@@ -1,9 +1,10 @@
 ---
 title: Custom integration
+shortTitle: Custom integration
 href: /documentation/sdk/custom
 description: TODO write some description
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 TBD

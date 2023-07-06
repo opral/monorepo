@@ -1,5 +1,6 @@
 import { Command } from "commander"
 import { init } from "./init.js"
+import { update } from "./update.js"
 import { validate } from "./validate.js"
 
 export const config = new Command()
@@ -8,3 +9,4 @@ export const config = new Command()
 	.argument("<command>")
 	.addCommand(init)
 	.addCommand(validate)
+	.addCommand(update)

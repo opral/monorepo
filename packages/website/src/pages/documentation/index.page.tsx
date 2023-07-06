@@ -127,7 +127,7 @@ function NavbarCommon(props: {
 											}
 											href={document.frontmatter.href}
 										>
-											{document.frontmatter.title}
+											{document.frontmatter.shortTitle}
 										</a>
 									</li>
 								)}

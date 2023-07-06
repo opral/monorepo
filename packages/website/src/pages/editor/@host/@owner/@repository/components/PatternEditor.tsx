@@ -2,7 +2,7 @@ import { createSignal, onMount, Show } from "solid-js"
 import { useEditorIsFocused, createTiptapEditor } from "solid-tiptap"
 import type * as ast from "@inlang/core/ast"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
-import { useEditorState } from "../State.jsx"
+import { LocalChange, useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "@src/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
@@ -36,7 +36,6 @@ export function PatternEditor(props: {
 		filteredLanguages,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
-	const [savedEditorText, setSavedEditorText] = createSignal()
 
 	const [showMachineLearningWarningDialog, setShowMachineLearningWarningDialog] =
 		createSignal(false)
@@ -75,9 +74,25 @@ export function PatternEditor(props: {
 
 	//create editor
 	let textArea!: HTMLDivElement
-	const editor = createTiptapEditor(() =>
-		getEditorConfig(textArea, props.message, variableReferences()),
-	)
+	const editor = createTiptapEditor(() => {
+		if (
+			localChanges().some(
+				(change) =>
+					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+			)
+		) {
+			return getEditorConfig(
+				textArea,
+				localChanges().find(
+					(change) =>
+						change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+				)?.newCopy,
+				variableReferences(),
+			)
+		} else {
+			return getEditorConfig(textArea, props.message, variableReferences())
+		}
+	})
 
 	const getEditorFocus = () => {
 		if (editor()) {
@@ -131,8 +146,16 @@ export function PatternEditor(props: {
 		const _updatedText =
 			JSON.stringify(getTextValue(editor)) === "[]" ? undefined : getTextValue(editor)
 		let compare_elements
-		if (savedEditorText()) {
-			compare_elements = savedEditorText()
+		if (
+			localChanges().some(
+				(change) =>
+					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+			)
+		) {
+			compare_elements = localChanges().find(
+				(change) =>
+					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+			)?.newCopy.pattern.elements
 		} else {
 			compare_elements = props.message?.pattern.elements
 		}
@@ -160,7 +183,7 @@ export function PatternEditor(props: {
 		}
 		_copy.pattern.elements = _textValue as Array<ast.Text | ast.Placeholder>
 
-		setLocalChanges((prev: any[]) => {
+		setLocalChanges((prev: LocalChange[]) => {
 			if (JSON.stringify(copy()?.pattern.elements) === JSON.stringify(_copy.pattern.elements)) {
 				return [
 					...prev.filter(
@@ -188,7 +211,6 @@ export function PatternEditor(props: {
 			}
 		})
 
-		setSavedEditorText(_textValue)
 		//this is a dirty fix for getting focus back to the editor after save
 		setTimeout(() => {
 			textArea.parentElement?.click()

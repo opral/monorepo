@@ -4,7 +4,7 @@ import type { TelemetryEvents } from "./events.js"
 import { getGitRemotes } from "../../utilities/getGitRemotes.js"
 import { parseOrigin } from "@inlang/telemetry"
 
-const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
+export const gitOrigin = parseOrigin({ remotes: await getGitRemotes() })
 
 const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN!, {
 	host: "https://eu.posthog.com",

@@ -292,5 +292,6 @@ export const getFlag = (countryCode: string) => {
 	if (cc == "YT") return "🇾🇹"
 	if (cc == "ZA") return "🇿🇦"
 	if (cc == "ZM") return "🇿🇲"
+	if (cc == "ZW") return "🇿🇼"
 	return "🏳"
 }

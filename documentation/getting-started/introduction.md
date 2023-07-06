@@ -1,10 +1,11 @@
 ---
-title: Introduction
+title: Introduction to globalize with inlang
+shortTitle: Introduction
 href: /documentation
-description: Learn how to get started with inlang, the design principles, and more.
+description: Learn how to get started with inlang, the globalization infrastructure for developers.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 {% QuickLinks %}
 
@@ -12,7 +13,7 @@ description: Learn how to get started with inlang, the design principles, and mo
         title="Quickstart"
         icon="fast"
         href="/documentation/quick-start"
-        description="Setup inlang for a localized project."
+        description="Setup inlang for a globalized project."
     /%}
 
     {% QuickLink
@@ -26,10 +27,12 @@ description: Learn how to get started with inlang, the design principles, and mo
         title="SDKs"
         icon="code"
         href="/documentation/sdk/overview"
-        description="Use a SDK if you didn't localized yet?"
+        description="Start with an SDK if you are not globalizing yet."
     /%}
 
 {% /QuickLinks %}
+
+{% Video src="https://www.youtube.com/embed/mB2-Ze-SjXE?rel=0" / %}
 
 ## What is inlang?
 

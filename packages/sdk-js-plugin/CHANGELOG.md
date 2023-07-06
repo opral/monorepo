@@ -1,5 +1,11 @@
 # @inlang/sdk-js-plugin
 
+## 0.7.0
+
+### Minor Changes
+
+- 16190aa2: fix config override behavior
+
 ## 0.6.6
 
 ## 0.6.5

@@ -1,10 +1,11 @@
 ---
-title: Web Editor
+title: Edit translations with inlang's web editor
+shortTitle: Web Editor
 href: /documentation/apps/web-editor
-description: This is the editor description
+description: inlang's web editor is a simple and easy to use no-code tool to manage your translations.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 The inlang web editor is a simple and easy to use no-code tool to manage your translations. It let's translators work on translations without having to touch the code and pushes changes directly to your git repository.
 

@@ -28,6 +28,12 @@ export const repositories: Repositories = [
 			"AppFlowy is an open-source alternative to Notion. You are in charge of your data and customizations. Built with Flutter and Rust.",
 	},
 	{
+		owner: "remnoteio",
+		repository: "translation",
+		description:
+			"The all-in-one tool forthinking and learning",
+	},
+	{
 		owner: "osmosis-labs",
 		repository: "osmosis-frontend",
 		description: "Web interface for Osmosis Zone",
