@@ -14,6 +14,10 @@ export const update = new Command()
 	.description("Update the inlang config.")
 	.action(updateCommandAction)
 
+/**
+ * Updates the plugins in the config file to the latest major version.
+ * @returns {Promise<void>} A Promise that resolves when the update is completed.
+ */
 async function updateCommandAction() {
 	try {
 		const answer = await prompts({
@@ -116,6 +120,11 @@ async function updateCommandAction() {
 	}
 }
 
+/**
+ * Reads the content of a config file.
+ * @param {string} filePath - The path to the config file.
+ * @returns {Promise<string>} A Promise that resolves with the content of the config file.
+ */
 function readConfigFile(filePath: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		fs.readFile(filePath, "utf8", (err, data) => {
@@ -132,16 +141,33 @@ function readConfigFile(filePath: string): Promise<string> {
 	})
 }
 
+/**
+ * Extracts URLs from a given code.
+ * @param {string} code - The code to extract URLs from.
+ * @returns {string[]} An array of extracted URLs.
+ */
 function extractPluginUrls(code: string): string[] {
 	const urlRegex = /"(https?:\/\/.*?)(?=")/g
 	return [...code.matchAll(urlRegex)].map((match) => match[0]).map((url) => url.replace(/^"/, ""))
 }
 
+/**
+ * Updates the version in a plugin URL.
+ * @param {string} url - The plugin URL.
+ * @param {string} newVersion - The new version to update to.
+ * @returns {string} The updated plugin URL.
+ */
 function updatePluginVersion(url: string, newVersion: string): string {
 	const versionRegex = /(@[\w.-]+)(?=\/dist\/index.js)/
 	return url.replace(versionRegex, `@${newVersion}`)
 }
 
+/**
+ * Writes data to a file.
+ * @param {string} filePath - The path to the file.
+ * @param {string} data - The data to write to the file.
+ * @returns {Promise<void>} A Promise that resolves when the file is successfully written.
+ */
 function writeFile(filePath: string, data: string): Promise<void> {
 	return new Promise((resolve, reject) => {
 		fs.writeFile(filePath, data, (err) => {
