@@ -29,6 +29,7 @@ export function PatternEditor(props: {
 	const [localStorage, setLocalStorage] = useLocalStorage()
 	const {
 		resources,
+		localChanges,
 		setLocalChanges,
 		referenceResource,
 		userIsCollaborator,
