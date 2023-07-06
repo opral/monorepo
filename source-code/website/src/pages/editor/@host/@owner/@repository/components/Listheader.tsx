@@ -5,6 +5,7 @@ import type { Accessor } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import { handleMissingMessage } from "../helper/handleMissingMessage.js"
+import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -30,12 +31,18 @@ export const messageCount = (
 	filteredLanguages: string[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
+	messageId: string,
 ) => {
 	let counter = 0
 	for (const id of Object.keys(messages())) {
 		if (
-			showFilteredMessage(messages()[id]!, filteredLanguages, textSearch, filteredLintRules)
-				.length > 0
+			showFilteredMessage(
+				messages()[id]!,
+				filteredLanguages,
+				textSearch,
+				filteredLintRules,
+				messageId,
+			).length > 0
 		) {
 			counter++
 		}
@@ -49,6 +56,8 @@ export const ListHeader = (props: ListHeaderProps) => {
 		setFilteredLintRules,
 		filteredLintRules,
 		filteredLanguages,
+		filteredId,
+		setFilteredId,
 		textSearch,
 		setTourStep,
 		tourStep,
@@ -71,9 +80,13 @@ export const ListHeader = (props: ListHeaderProps) => {
 			let counter = 0
 			for (const id of Object.keys(props.messages())) {
 				const filteredReports = getLintReports(
-					showFilteredMessage(props.messages()[id]!, filteredLanguages(), textSearch(), [
-						lintId,
-					]) as LintedMessage[],
+					showFilteredMessage(
+						props.messages()[id]!,
+						filteredLanguages(),
+						textSearch(),
+						[lintId],
+						filteredId(),
+					) as LintedMessage[],
 				).filter((report) => handleMissingMessage(report, filteredLanguages()))
 				counter += filteredReports.length
 			}
@@ -90,10 +103,30 @@ export const ListHeader = (props: ListHeaderProps) => {
 
 	return (
 		<div class="h-14 w-full bg-background border border-surface-3 rounded-t-md flex items-center px-4 justify-between">
-			<div class="font-medium text-on-surface">
-				{messageCount(props.messages, filteredLanguages(), textSearch(), filteredLintRules()) +
-					" Messages"}
-			</div>
+			<Show
+				when={filteredId() === ""}
+				fallback={
+					<div class="flex gap-2 items-center">
+						<sl-button prop:size="small" onClick={() => setFilteredId("")}>
+							<IconArrowLeft slot="prefix" />
+							Back to all messages
+						</sl-button>
+						<div class="h-[30px] px-3 flex gap-2 font-medium items-center rounded-md text-xs bg-hover-primary/10 text-primary">
+							Isolated view (single ID)
+						</div>
+					</div>
+				}
+			>
+				<div class="font-medium text-on-surface">
+					{messageCount(
+						props.messages,
+						filteredLanguages(),
+						textSearch(),
+						filteredLintRules(),
+						filteredId(),
+					) + " Messages"}
+				</div>
+			</Show>
 
 			<div class="flex gap-2">
 				<For each={getLintSummary()}>

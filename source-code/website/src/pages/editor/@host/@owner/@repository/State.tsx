@@ -28,6 +28,7 @@ import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { parseOrigin } from "@inlang/telemetry"
+import { setSearchParams } from "./helper/setSearchParams.js"
 
 export type LocalChange = {
 	languageTag: ast.Resource["languageTag"]
@@ -75,6 +76,12 @@ type EditorStateSchema = {
 	 * Virtual filesystem
 	 */
 	fs: () => NodeishFilesystem
+
+	/**
+	 * Id to filter messages
+	 */
+	filteredId: () => string
+	setFilteredId: Setter<string>
 
 	/**
 	 * TextSearch to filter messages
@@ -196,8 +203,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
 
-	const [textSearch, setTextSearch] = createSignal<string>("")
-
 	const [fsChange, setFsChange] = createSignal(new Date())
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
@@ -205,9 +210,33 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
-	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
-	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
+	//set filter with search params
+	const params = new URL(document.URL).searchParams
+
+	const [filteredId, setFilteredId] = createSignal<string>((params.get("id") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "id", value: filteredId() })
+	})
+
+	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "search", value: textSearch() })
+	})
+
+	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>(
+		params.getAll("lang") as string[],
+	)
+	createEffect(() => {
+		setSearchParams({ key: "lang", value: filteredLanguages() })
+	})
+
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
+		params.getAll("lint") as `${string}.${string}`[],
+	)
+	createEffect(() => {
+		setSearchParams({ key: "lint", value: filteredLintRules() })
+	})
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 
@@ -312,7 +341,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setLint(config.lint)
 				setReferenceLanguage(config.referenceLanguage)
 				setLanguages(languages)
-				setFilteredLanguages(languages)
+				//filteredLanguages().length === 0 && setFilteredLanguages(languages)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
@@ -596,6 +625,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
+					filteredId,
+					setFilteredId,
 					textSearch,
 					setTextSearch,
 					fsChange,

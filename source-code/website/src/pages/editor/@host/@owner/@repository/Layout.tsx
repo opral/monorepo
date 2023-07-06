@@ -35,19 +35,16 @@ export function Layout(props: { children: JSXElement }) {
 		tourStep,
 	} = useEditorState()
 
-	const onlyLanguagesTheUserSpeaks = () => {
-		const languages = inlangConfig()?.languages.filter(
-			(language) =>
-				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
-		)
-		return languages ?? []
-	}
+	// const onlyLanguagesTheUserSpeaks = () => {
+	// 	const languages = inlangConfig()?.languages.filter(
+	// 		(language) =>
+	// 			navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+	// 	)
+	// 	return languages ?? []
+	// }
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-	const handleSearchText = (text: string) => {
-		setTextSearch(text)
-	}
 	const filters: Filter[] = [
 		{
 			name: "Language",
@@ -105,10 +102,28 @@ export function Layout(props: { children: JSXElement }) {
 			repositoryIsCloned.error === undefined &&
 			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			onlyLanguagesTheUserSpeaks().length > 1
+			inlangConfig()
 		) {
-			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-			addFilter("Language")
+			if (filteredLanguages().length > 0) {
+				addFilter("Language")
+				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
+				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
+				// 	addFilter("Language")
+			} else {
+				setFilteredLanguages(inlangConfig()!.languages)
+			}
+		}
+	})
+
+	//add initial lintRule filter
+	createEffect(() => {
+		if (
+			repositoryIsCloned.error === undefined &&
+			repositoryIsCloned.loading === false &&
+			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			filteredLintRules().length > 0
+		) {
+			addFilter("Linting")
 		}
 	})
 
@@ -236,7 +251,10 @@ export function Layout(props: { children: JSXElement }) {
 						</Show>
 					</div>
 					<div class="flex gap-2">
-						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<SearchInput
+							placeholder="Search ..."
+							handleChange={(text: string) => setTextSearch(text)}
+						/>
 						<sl-button
 							prop:size={"small"}
 							onClick={() => setAddLanguageModalOpen(true)}
