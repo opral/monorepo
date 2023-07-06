@@ -20,7 +20,7 @@ async function updateCommandAction() {
 			type: "confirm",
 			name: "update",
 			message:
-				"This command will update the plugins in you config file to the latest major version. Updating to a new major version can break the code, please look into the docs of the plugins you are using to see if there are breaking changes. Do you want to continue?",
+				"This command will update the plugins in your config file to the latest major version. Updating to a new major version can break the code, please look into the docs of the plugins you are using to see if there are breaking changes. Do you want to continue?",
 			initial: true,
 		})
 		if (answer.update === false) {
@@ -63,8 +63,29 @@ async function updateCommandAction() {
 			}),
 		)
 
-		// for each  version, log which current version and which latest version will be used
-		for (const pluginURL of pluginURLsWithLatestVersion) {
+		// if the version & the latest version are equal, the plugin is already on the latest version and does not need to be updated
+		const pluginURLsToBeUpdated = pluginURLsWithLatestVersion.filter(
+			(pluginURL) => pluginURL.version !== pluginURL.latestVersion,
+		)
+		const pluginURLsAlreadyUpToDate = pluginURLsWithLatestVersion.filter(
+			(pluginURL) => pluginURL.version === pluginURL.latestVersion,
+		)
+		for (const pluginURL of pluginURLsAlreadyUpToDate) {
+			log.info(
+				`📦 ${bold(`${pluginURL.publisher}/${pluginURL.name}`)} is already up to date at v${italic(
+					`${pluginURL.version}`,
+				)}`,
+			)
+		}
+
+		// skip if all plugins are already up to date
+		if (pluginURLsToBeUpdated.length === 0) {
+			log.success("🎉 All plugins are already up to date.")
+			return
+		}
+
+		// for each plugin, log which current version and which latest version will be used
+		for (const pluginURL of pluginURLsToBeUpdated) {
 			log.info(
 				`📦 ${bold(`${pluginURL.publisher}/${pluginURL.name}`)} will be updated from v${italic(
 					`${pluginURL.version}`,
