@@ -299,6 +299,31 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	)
 }
 
+const subscribeNewsletter = async (email: any) => {
+	try {
+		await fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ email }),
+			redirect: "follow",
+		})
+
+		showToast({
+			title: "Subscribed",
+			variant: "success",
+			message: "You have been subscribed to our newsletter",
+		})
+	} catch (error) {
+		showToast({
+			title: "Error",
+			variant: "danger",
+			message: "Please try again later.",
+		})
+	}
+}
+
 const Newsletter = () => {
 	const [email, setEmail] = createSignal("")
 
@@ -331,49 +356,29 @@ const Newsletter = () => {
 			return
 		}
 
-		const requestOptions = {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				email: email(),
-			}),
-			redirect: "follow",
-		} as const
-
-		fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", requestOptions)
-			.then((response) => response.text())
-			.then(() => {
-				showToast({
-					title: "Subscribed",
-					variant: "success",
-					message: "You have been subscribed to our newsletter",
-				})
-				setEmail("")
-			})
-			.catch(() => {
-				showToast({
-					title: "Error",
-					variant: "danger",
-					message: "Please try again later.",
-				})
-			})
+		subscribeNewsletter(email())
+		setEmail("")
 	}
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full mr-10 max-xl:mb-8">
 			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
-			<div class="flex items-start justify-stretch gap-3 w-full flex-row">
-				<input
-					class="xl:w-[282px] w-full h-10 px-4 rounded-md flex-grow border border-surface-200 text-surface-800"
-					type="email"
-					placeholder="E-Mail"
-					value={email()}
-					onInput={(e) => setEmail(e.currentTarget.value)}
+			<div class="flex items-start justify-stretch gap-3 w-full md:flex-row flex-col">
+				<sl-input
+					class="border-none p-0 md:w-[312px] w-full"
+					prop:size={"medium"}
+					prop:placeholder="E-Mail"
+					onInput={(event) => {
+						// @ts-ignore
+						setEmail(event.target.value)
+					}}
+					onPaste={(event) => {
+						// @ts-ignore
+						setEmail(event.target.value)
+					}}
 				/>
 				<button
-					class="h-10 text-sm text-background px-4 bg-surface-700 rounded-md font-medium"
+					class="h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200"
 					onClick={handleSubscribe}
 				>
 					Subscribe
