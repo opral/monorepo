@@ -25,7 +25,7 @@
 		"inlang": "./bin/run.js"
 	},
 	"engines": {
-		"node": ">=16.15.0"
+		"node": ">=18.0.0"
 	},
 	"files": [
 		"/bin",
