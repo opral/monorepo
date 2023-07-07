@@ -195,7 +195,6 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
-						<p class="text-surface-700 font-medium">© inlang 2023</p>
 					</div>
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
 						<p class="font-semibold text-surface-900">Docs</p>
@@ -281,14 +280,106 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							please don't hesitate to send us an email.
 						</p>
 						<a href="mailto:hello@inlang.com">
-							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md">
+							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md font-medium">
 								Get in Touch
 							</button>
 						</a>
 					</div>
 				</div>
+				<div class="flex flex-col xl:flex-row justify-between items-end gap-8 pb-16 max-xl:px-10">
+					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
+						<Newsletter />
+					</div>
+					<div class="xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
+						<p class="text-surface-700 font-medium">© inlang 2023</p>
+					</div>
+				</div>
 			</SectionLayout>
 		</footer>
+	)
+}
+
+const Newsletter = () => {
+	const [email, setEmail] = createSignal("")
+
+	function handleSubscribe() {
+		function checkEmail(email: any) {
+			const re = /\S+@\S+\.\S+/
+
+			if (email === "") {
+				return "empty"
+			} else if (!re.test(email)) {
+				return "invalid"
+			} else {
+				return "valid"
+			}
+		}
+
+		if (checkEmail(email()) === "empty") {
+			showToast({
+				title: "Error",
+				variant: "danger",
+				message: "Please enter an email address.",
+			})
+			return
+		} else if (checkEmail(email()) === "invalid") {
+			showToast({
+				title: "Error",
+				variant: "danger",
+				message: "Please enter a valid email address.",
+			})
+			return
+		}
+
+		const requestOptions = {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				email: email(),
+			}),
+			redirect: "follow",
+		} as const
+
+		fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", requestOptions)
+			.then((response) => response.text())
+			.then(() => {
+				showToast({
+					title: "Subscribed",
+					variant: "success",
+					message: "You have been subscribed to our newsletter",
+				})
+				setEmail("")
+			})
+			.catch(() => {
+				showToast({
+					title: "Error",
+					variant: "danger",
+					message: "Please try again later.",
+				})
+			})
+	}
+
+	return (
+		<div class="flex flex-col items-start justify-center w-full mr-10 max-xl:mb-8">
+			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
+			<div class="flex items-start justify-stretch gap-3 w-full flex-row">
+				<input
+					class="xl:w-[282px] w-full h-10 px-4 rounded-md flex-grow border border-surface-200 text-surface-800"
+					type="email"
+					placeholder="E-Mail"
+					value={email()}
+					onInput={(e) => setEmail(e.currentTarget.value)}
+				/>
+				<button
+					class="h-10 text-sm text-background px-4 bg-surface-700 rounded-md font-medium"
+					onClick={handleSubscribe}
+				>
+					Subscribe
+				</button>
+			</div>
+		</div>
 	)
 }
 
