@@ -38,6 +38,8 @@ best
 npx @inlang/cli [command]
 ```
 
+Minimum node version: `v18.0.0`
+
 If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ## Commands
