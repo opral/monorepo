@@ -30,6 +30,10 @@
 			{
 				"command": "inlang.extractMessage",
 				"title": "Inlang: Extract Message"
+			},
+			{
+				"command": "inlang.openInEditor",
+				"title": "Inlang: Open in Editor"
 			}
 		],
 		"configuration": {
