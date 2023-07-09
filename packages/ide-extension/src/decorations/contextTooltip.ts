@@ -19,11 +19,10 @@ export function contextTooltip(message: MessageReferenceMatch) {
   const messages = resources.reduce<ContextTableRow[]>((acc, r) => {
     const m = query(r).get({ id: message.messageId })
 
-    if (m?.pattern.elements[0]!.value) {
-      return [...acc, { language: r.languageTag.name, message: m.pattern.elements[0].value as string }]
-    } else {
-      return [...acc, { language: r.languageTag.name, message: MISSING_TRANSLATION_MESSAGE }]
-    }
+    return [...acc, {
+      language: r.languageTag.name,
+      message: m?.pattern.elements[0]!.value ? m.pattern.elements[0].value as string : MISSING_TRANSLATION_MESSAGE
+    }]
   }, [])
   const contextTable = `<table>${messages.map((m) => renderTranslationRow(m)).join('')}</table>`
   const tooltip = new MarkdownString(contextTable)
