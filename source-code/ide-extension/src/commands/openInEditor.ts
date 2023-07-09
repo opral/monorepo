@@ -9,7 +9,7 @@ export const openInEditorCommand = {
   callback: async function ({ messageId }: { messageId?: string }) {
     // TODO: Probably the origin should be configurable via the config.
     const origin = (await getGitOrigin())?.replaceAll('.git', '')
-    const uri = messageId ? `${EDITOR_BASE_PATH}${origin}?id=${messageId}` : `${EDITOR_BASE_PATH}${origin}`;
+    const uri = messageId ? `${EDITOR_BASE_PATH}${origin}?id=${messageId}` : `${EDITOR_BASE_PATH}${origin}`
 
     vscode.env.openExternal(vscode.Uri.parse(uri))
     return undefined

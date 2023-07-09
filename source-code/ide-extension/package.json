@@ -28,6 +28,10 @@
 	"contributes": {
 		"commands": [
 			{
+				"command": "inlang.editMessage",
+				"title": "Inlang: Edit a Message"
+			},
+			{
 				"command": "inlang.extractMessage",
 				"title": "Inlang: Extract Message"
 			},
