@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
+import { contextTooltip } from './contextTooltip.js'
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -81,7 +82,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 									: "1px solid rgb(244 63 94/.50)",
 							},
 						},
-						hoverMessage: translationText,
+						hoverMessage: contextTooltip(message),
 					}
 					return decoration
 				})
