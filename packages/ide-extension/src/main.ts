@@ -19,6 +19,7 @@ import {
 	isDisabledConfigFileCreation,
 } from "./utilities/createInlangConfigFile.js"
 import { openInEditorCommand } from './commands/openInEditor.js'
+import { editMessageCommand } from './commands/editMessage.js'
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -129,6 +130,10 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// register command
 	args.context.subscriptions.push(
+		vscode.commands.registerCommand(
+			editMessageCommand.id,
+			editMessageCommand.callback,
+		),
 		vscode.commands.registerTextEditorCommand(
 			extractMessageCommand.id,
 			extractMessageCommand.callback,
