@@ -11,7 +11,7 @@ type ContextTableRow = {
 }
 
 function renderTranslationRow(row: ContextTableRow) {
-  return `<tr><td><strong>${row.language}</strong></td><td>${row.message}</td><td>$(edit)</td><td>$(go-to-file)</td><td>$(cloud)</td></tr>`
+  return `<tr><td><strong>${row.language}</strong></td><td>${row.message}</td><td>$(edit)</td><td>$(go-to-file)</td><td>$(link-external)</td></tr>`
 }
 
 export function contextTooltip(message: MessageReferenceMatch) {
