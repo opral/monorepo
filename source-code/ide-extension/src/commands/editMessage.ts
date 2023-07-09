@@ -37,7 +37,7 @@ export const editMessageCommand = {
       },
     }
 
-    const [newResource, exception] = query(currentResource).update({ id: messageId, with: newMessage })
+    const [newResource, exception] = query(currentResource).upsert({ message: newMessage })
 
     if (exception) {
       return window.showErrorMessage("Couldn't update message. ", exception.message)
