@@ -22,8 +22,8 @@ export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeo
  */
 type CaptureEventArguments =
 	| Omit<Parameters<typeof telemetryNode.capture>[0], "distinctId" | "groups"> & {
-		event: TelemetryEvents
-	}
+			event: TelemetryEvents
+	  }
 
 let gitOrigin: string | undefined
 let userID: string
@@ -38,21 +38,14 @@ async function capture(args: CaptureEventArguments) {
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
-	if (args.event === "IDE-EXTENSION activated" && gitOrigin) {
-		telemetry.groupIdentify({
-			groupType: "repository",
-			groupKey: gitOrigin,
-			properties: {
-				name: gitOrigin,
-			},
-		})
-	}
 	return telemetryNode.capture({
 		...args,
 		distinctId: userID,
-		groups: gitOrigin ? {
-			repository: gitOrigin,
-		} : undefined,
+		groups: gitOrigin
+			? {
+					repository: gitOrigin,
+			  }
+			: undefined,
 	})
 }
 
