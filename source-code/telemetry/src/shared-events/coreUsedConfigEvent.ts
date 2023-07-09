@@ -14,7 +14,7 @@ import type { InlangConfig } from "@inlang/core/config"
  *
  */
 export const coreUsedConfigEvent = {
-	name: "CORE used config",
+	name: "CORE used config" as const,
 	// typesafe properties
 	properties: (config: InlangConfig) => config,
 }
