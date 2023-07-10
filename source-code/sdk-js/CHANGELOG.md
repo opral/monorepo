@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.7.1
+
+### Patch Changes
+
+- 11acba7b: add support for svelte@4
+
 ## 0.7.0
 
 ## 0.6.6
