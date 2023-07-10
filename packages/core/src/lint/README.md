@@ -19,7 +19,7 @@ Use cases could be:
 
 ## Usage
 
-> Note: In the future we will provide a `CLI` to make it easier to use this package.
+> Note: We provide you with a [CLI](/documentation/apps/inlang-cli) to lint your resources. You can also use the CLI to integrate linting into your CI/CD pipeline.
 
 ```ts
 import { lint, getLintReports } from "@inlang/core/lint"
