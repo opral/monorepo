@@ -21,7 +21,7 @@ export const editMessageCommand = {
 
     const newValue = await window.showInputBox({
       title: "Enter new value:",
-      placeHolder: message?.pattern.elements[0]!.value as string
+      value: message?.pattern.elements[0]!.value as string
     })
 
     if (newValue === undefined) {
