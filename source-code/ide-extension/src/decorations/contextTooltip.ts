@@ -13,9 +13,9 @@ type ContextTableRow = {
 }
 
 function renderTranslationRow(row: ContextTableRow) {
-  const messageListing = `<td><strong>${row.language}</strong></td><td>${row.message}</td>`
-  const editCommand = row.editCommand ? `<td><a href="${row.editCommand}">$(edit)</a></td>` : ''
-  const openInEditorCommand = row.openInEditorCommand ? `<td><a href="${row.openInEditorCommand}">$(link-external)</a></td>` : ''
+  const messageListing = `<td><strong>${row.language}&nbsp;</strong></td><td>${row.message}</td>`
+  const editCommand = row.editCommand ? `<td>&nbsp;&nbsp;<a href="${row.editCommand}">$(edit)</a></td>` : ''
+  const openInEditorCommand = row.openInEditorCommand ? `<td>&nbsp;<a href="${row.openInEditorCommand}">$(link-external)</a></td>` : ''
   return `<tr>${messageListing}${editCommand}${openInEditorCommand}</tr>`
 }
 
