@@ -20,7 +20,7 @@ function renderTranslationRow(row: ContextTableRow) {
 }
 
 export function contextTooltip(message: MessageReferenceMatch) {
-  const resources = state().resources
+  const resources = state().resources.sort((a, b) => a.languageTag.name.localeCompare(b.languageTag.name))
   const messages = resources.reduce<ContextTableRow[]>((acc, r) => {
     const m = query(r).get({ id: message.messageId })
     const args = encodeURIComponent(JSON.stringify([{ messageId: message.messageId, resource: r.languageTag.name }]));
