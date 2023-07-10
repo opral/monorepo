@@ -301,7 +301,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 
 const subscribeNewsletter = async (email: any) => {
 	try {
-		await fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", {
+		const response = await fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -310,12 +310,31 @@ const subscribeNewsletter = async (email: any) => {
 			redirect: "follow",
 		})
 
-		showToast({
-			title: "Subscribed",
-			variant: "success",
-			message: "You have been subscribed to our newsletter",
-		})
+		if (response.status === 200) {
+			showToast({
+				title: "Success",
+				variant: "success",
+				message: "You have been subscribed to our newsletter.",
+			})
+		} else {
+			const body = await response.text()
+			if (body && body === "twice") {
+				showToast({
+					title: "Error",
+					variant: "danger",
+					message: "You are already subscribed to our newsletter.",
+				})
+				return
+			}
+
+			showToast({
+				title: "Error",
+				variant: "danger",
+				message: "Please try again later.",
+			})
+		}
 	} catch (error) {
+		console.error(error)
 		showToast({
 			title: "Error",
 			variant: "danger",
@@ -331,7 +350,7 @@ const Newsletter = () => {
 		function checkEmail(email: any) {
 			const re = /\S+@\S+\.\S+/
 
-			if (email === "") {
+			if (email.trim() === "") {
 				return "empty"
 			} else if (!re.test(email)) {
 				return "invalid"
@@ -340,14 +359,15 @@ const Newsletter = () => {
 			}
 		}
 
-		if (checkEmail(email()) === "empty") {
+		const emailValue = email()
+		if (checkEmail(emailValue) === "empty") {
 			showToast({
 				title: "Error",
 				variant: "danger",
 				message: "Please enter an email address.",
 			})
 			return
-		} else if (checkEmail(email()) === "invalid") {
+		} else if (checkEmail(emailValue) === "invalid") {
 			showToast({
 				title: "Error",
 				variant: "danger",
@@ -356,7 +376,7 @@ const Newsletter = () => {
 			return
 		}
 
-		subscribeNewsletter(email())
+		subscribeNewsletter(emailValue)
 		setEmail("")
 	}
 
@@ -368,6 +388,8 @@ const Newsletter = () => {
 					class="border-none p-0 md:w-[312px] w-full"
 					prop:size={"medium"}
 					prop:placeholder="E-Mail"
+					// @ts-ignore
+					value={email()}
 					onInput={(event) => {
 						// @ts-ignore
 						setEmail(event.target.value)
