@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.13.2
+
+### Patch Changes
+
+- e7546f74: add nodejs minimum support
+
 ## 0.13.1
 
 ### Patch Changes
