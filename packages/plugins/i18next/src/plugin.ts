@@ -108,42 +108,48 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
 	const languages: string[] = []
 
-	if (typeof args.settings.pathPattern !== "string") {
-		//resources are stored with namespaces
-		for (const path of Object.values(args.settings.pathPattern)) {
-			const [pathBeforeLanguage] = path.split("{language}")
-			const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
+	const pathArray: Array<string> =
+		typeof args.settings.pathPattern !== "string"
+			? Object.values(args.settings.pathPattern)
+			: [args.settings.pathPattern]
 
-			for (const filePath of parentDirectory) {
-				//check if file really exists in the dir
-				const fileExists = await Promise.resolve(
-					args.$fs
-						.readFile(path.replace("{language}", filePath))
-						.then(() => true)
-						.catch(() => false),
-				)
-
-				//collect languages for each pathPattern -> so we do not miss any language
-				//It is not enough to just get the prentDirectory -> there could be false directories
-				if (fileExists) {
-					languages.push(filePath)
-				}
-			}
-		}
-	} else {
-		//resources are stored without namespaces
-		const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
+	//resources are stored with namespaces
+	for (const path of pathArray) {
+		const [pathBeforeLanguage] = path.split("{language}")
 		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
 
 		for (const filePath of parentDirectory) {
-			if (
-				filePath.endsWith(".json") &&
-				args.settings.ignore?.some((s) => s === filePath) === false
-			) {
+			//check if file really exists in the dir
+			const fileExists = await Promise.resolve(
+				args.$fs
+					.readFile(path.replace("{language}", filePath.replace(".json", "")))
+					.then(() => true)
+					.catch(() => false),
+			)
+
+			//collect languages for each pathPattern -> so we do not miss any language
+			//It is not enough to just get the prentDirectory -> there could be false directories
+			if (fileExists && args.settings.ignore?.some((s) => s === filePath) === false) {
 				languages.push(filePath.replace(".json", ""))
 			}
 		}
 	}
+	// //resources are stored without namespaces
+	// const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
+	// const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
+
+	// for (const language of parentDirectory) {
+	// 	//check if file really exists in the dir
+	// 	const fileExists = await Promise.resolve(
+	// 		args.$fs
+	// 			.readFile(args.settings.pathPattern.replace("{language}", language.replace(".json", "")))
+	// 			.then(() => true)
+	// 			.catch(() => false),
+	// 	)
+	// 	if (fileExists && args.settings.ignore?.some((s) => s === language) === false) {
+	// 		languages.push(language.replace(".json", ""))
+	// 	}
+	// }
 
 	// Using Set(), an instance of unique values will be created, implicitly using this instance will delete the duplicates.
 	return [...new Set(languages)]
