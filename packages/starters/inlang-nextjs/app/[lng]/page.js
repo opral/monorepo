@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { useTranslation } from "../i18n";
-import Footer from "../components/footer";
+import Link from "next/link"
+import Footer from "../components/footer"
+import { t } from "i18next"
 
 export default async function Page({ params: { lng } }) {
-  const { t } = await useTranslation(lng);
-  return (
-    <>
-      <h1>{t("title")}</h1>
-      <Link href={`/${lng}/second-page`}>{t("to-second-page")}</Link>
-      <br />
-      <Link href={`/${lng}/client-page`}>{t("to-client-page")}</Link>
-      <Footer lng={lng} />
-    </>
-  );
+	return (
+		<>
+			<h1>{t("translation:title")}</h1>
+			<Link href={`/${lng}/second-page`}>{t("translation:to-second-page")}</Link>
+			<br />
+			<Link href={`/${lng}/client-page`}>{t("translation:to-client-page")}</Link>
+			<Link href={`/${lng}/client-page`}>{t("translation:missingReference")}</Link>
+			<Footer lng={lng} />
+		</>
+	)
 }
