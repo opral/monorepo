@@ -72,6 +72,8 @@
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
+		"@types/ungap__structured-clone": "^0.3.0",
+		"@ungap/structured-clone": "^1.2.0",
 		"esbuild": "^0.17.14",
 		"tsd": "^0.25.0"
 	},
