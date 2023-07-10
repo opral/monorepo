@@ -13,6 +13,7 @@ import { onSignOut } from "@src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
+import { rpc } from "@inlang/rpc"
 
 /**
  * Ensure that all elements use the same margins.
@@ -299,54 +300,40 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	)
 }
 
-const subscribeNewsletter = async (email: any) => {
-	try {
-		const response = await fetch("https://hook.eu2.make.com/lt52ew79dojhjj5yneo2lf9pv92sihjj", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ email }),
-			redirect: "follow",
-		})
+const Newsletter = () => {
+	const [email, setEmail] = createSignal("")
+	const [loading, setLoading] = createSignal(false)
 
-		if (response.status === 200) {
+	const fetchSubscriber = async (email: any) => {
+		setLoading(true)
+		const [response] = await rpc.subscribeNewsletter({ email })
+		if (response === "already subscribed") {
+			showToast({
+				title: "Error",
+				variant: "danger",
+				message: "You are already subscribed to our newsletter.",
+			})
+		} else if (response === "success") {
 			showToast({
 				title: "Success",
 				variant: "success",
 				message: "You have been subscribed to our newsletter.",
 			})
 		} else {
-			const body = await response.text()
-			if (body && body === "twice") {
-				showToast({
-					title: "Error",
-					variant: "danger",
-					message: "You are already subscribed to our newsletter.",
-				})
-				return
-			}
-
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please try again later.",
+				message: "Something went wrong. Please try again later.",
 			})
 		}
-	} catch (error) {
-		console.error(error)
-		showToast({
-			title: "Error",
-			variant: "danger",
-			message: "Please try again later.",
-		})
-	}
-}
 
-const Newsletter = () => {
-	const [email, setEmail] = createSignal("")
+		setLoading(false)
+		setEmail("")
+	}
 
 	function handleSubscribe() {
+		if (loading()) return
+
 		function checkEmail(email: any) {
 			const re = /\S+@\S+\.\S+/
 
@@ -376,16 +363,20 @@ const Newsletter = () => {
 			return
 		}
 
-		subscribeNewsletter(emailValue)
-		setEmail("")
+		fetchSubscriber(emailValue)
 	}
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full mr-10 max-xl:mb-8">
 			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
-			<div class="flex items-start justify-stretch gap-3 w-full md:flex-row flex-col">
+			<div
+				class={
+					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
+					(loading() ? "opacity-70 cursor-not-allowed" : "")
+				}
+			>
 				<sl-input
-					class="border-none p-0 md:w-[312px] w-full"
+					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
 					prop:size={"medium"}
 					prop:placeholder="E-Mail"
 					// @ts-ignore
@@ -398,9 +389,18 @@ const Newsletter = () => {
 						// @ts-ignore
 						setEmail(event.target.value)
 					}}
+					// on enter press
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							handleSubscribe()
+						}
+					}}
 				/>
 				<button
-					class="h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200"
+					class={
+						"h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200 " +
+						(loading() ? "pointer-events-none" : "")
+					}
 					onClick={handleSubscribe}
 				>
 					Subscribe
