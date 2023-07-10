@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 3.0.1
+
+### Patch Changes
+
+- 6c7e2077: Single namespace path defined without object syntax
+
 ## 3.0.0
 
 ### Major Changes
