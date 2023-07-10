@@ -932,3 +932,35 @@ it("should not throw an error when read Resources with empty namespaces", async 
 
 	expect(isThrown).toBe(false)
 })
+
+it("should get the correct languages, when single namespace is defined as a pathPattern string 'pathPattern: `public/locales/{language}/translation.json`'", async () => {
+	const test = JSON.stringify({
+		test: "test",
+	})
+
+	const env = await mockEnvironment({})
+	await env.$fs.mkdir("./en")
+	await env.$fs.mkdir("./de")
+	await env.$fs.writeFile("./en/common.json", test)
+	await env.$fs.writeFile("./de/common.json", test)
+
+	const x = plugin({
+		pathPattern: "./{language}/common.json",
+	})(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+
+	expect(config.languages).toStrictEqual(["en", "de"])
+
+	let isThrown = false
+
+	try {
+		await config.readResources!({
+			config: config as InlangConfig,
+		})
+	} catch (e) {
+		isThrown = true
+	}
+
+	expect(isThrown).toBe(false)
+})
