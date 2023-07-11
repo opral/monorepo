@@ -13,6 +13,8 @@
 
 </p>
 
+**[🧑‍💻 Open positions](https://inlang.com/documentation)** - Jobs at inlang.
+
 ## Community & Support
 
 **[📝 Documentation](https://inlang.com/documentation)** - Getting started and more.
