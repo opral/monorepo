@@ -19,12 +19,13 @@ export async function inWorkspacerecommendation(args: { workspaceFolder: vscode.
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
 		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
 	}
-	console.log("Ich bin die Zwei", extensions)
+
 	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
 		return false
 	} else if (extensions.recommendations.includes("inlang.vs-code-extension")) {
 		return true
 	}
+	return
 }
 export const recommendation = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
@@ -35,11 +36,6 @@ export const recommendation = async (args: {
 	}
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
-
-	console.log(
-		"was bin ich",
-		await inWorkspacerecommendation({ workspaceFolder: args.workspaceFolder }),
-	)
 
 	// If not already recommended
 	if ((await inWorkspacerecommendation({ workspaceFolder: args.workspaceFolder })) === false) {
