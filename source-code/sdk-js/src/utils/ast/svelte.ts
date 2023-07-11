@@ -10,7 +10,7 @@ import { isOptOutImportPresent as isOptOutImportPresentOriginal, isSdkImportPres
 export const MagicString = MagicStringImport as unknown as typeof MagicStringImport
 export type MagicStringType = InstanceType<typeof MagicStringImport>
 
-export const markupToAst = (markup: string) => parse(markup)
+export const markupToAst = (markup: string) => parse(markup) as any as Ast
 
 // ------------------------------------------------------------------------------------------------
 
