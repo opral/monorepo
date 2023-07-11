@@ -108,12 +108,13 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: PluginSettings }) {
 	const languages: string[] = []
 
+	// because of duplication of code the pathArray is eather parsed by th epathPattern object or created by the pathPattern string
 	const pathArray: Array<string> =
 		typeof args.settings.pathPattern !== "string"
 			? Object.values(args.settings.pathPattern)
 			: [args.settings.pathPattern]
 
-	//resources are stored with namespaces
+	// When there are namespaces, this will loop through all namespaces and collect the languages, otherwise it is just one path
 	for (const path of pathArray) {
 		const [pathBeforeLanguage] = path.split("{language}")
 		const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
@@ -134,22 +135,6 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 			}
 		}
 	}
-	// //resources are stored without namespaces
-	// const [pathBeforeLanguage] = args.settings.pathPattern.split("{language}")
-	// const parentDirectory = await args.$fs.readdir(pathBeforeLanguage!)
-
-	// for (const language of parentDirectory) {
-	// 	//check if file really exists in the dir
-	// 	const fileExists = await Promise.resolve(
-	// 		args.$fs
-	// 			.readFile(args.settings.pathPattern.replace("{language}", language.replace(".json", "")))
-	// 			.then(() => true)
-	// 			.catch(() => false),
-	// 	)
-	// 	if (fileExists && args.settings.ignore?.some((s) => s === language) === false) {
-	// 		languages.push(language.replace(".json", ""))
-	// 	}
-	// }
 
 	// Using Set(), an instance of unique values will be created, implicitly using this instance will delete the duplicates.
 	return [...new Set(languages)]
