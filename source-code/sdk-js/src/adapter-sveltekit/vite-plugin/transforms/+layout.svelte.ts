@@ -25,7 +25,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/shared', 'getRuntimeFromData')
-	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/not-reactive', 'addRuntimeToContext', 'getRuntimeFromContext')
+	addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/client/not-reactive', 'addRuntimeToContext', 'getRuntimeFromContext')
 	addImport(sourceFile, '$app/environment', 'browser')
 
 	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
@@ -55,11 +55,15 @@ const transformMarkup = (config: TransformConfig, markup: string): string => {
 		return transformMarkup(config, s.toString())
 	}
 
-	wrapMarkupChildren(s, ast, '{#key $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/key}')
+	wrapMarkupChildren(s, ast, '{#key language}$$_INLANG_WRAP_$${/key}')
+
+	const markup1 = s.toString()
+	const s1 = new MagicString(markup1)
+	const ast1 = markupToAst(markup1)
 	// TODO: only insert if reactive stores are not used
 	// if (!config.languageInUrl) {
-	wrapMarkupChildren(s, ast, '{#if $$_INLANG_LANGUAGE_$$}$$_INLANG_WRAP_$${/if}')
+	wrapMarkupChildren(s1, ast1, '{#if language}$$_INLANG_WRAP_$${/if}')
 	// }
 
-	return s.toString()
+	return s1.toString()
 }

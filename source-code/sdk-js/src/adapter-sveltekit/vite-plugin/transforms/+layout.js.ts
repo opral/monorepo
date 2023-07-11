@@ -31,7 +31,7 @@ const addImports = (
 // TODO: test
 const getOptions = (config: TransformConfig, root: boolean) =>
 	config.languageInUrl
-		? ""
+		? "{}"
 		: dedent`
 			{
 				initDetectors: browser
