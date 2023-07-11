@@ -3,9 +3,10 @@ import Nextjs from "@src/pages/index/sections/02-integration/assets/nextjs.jsx"
 import Svelte from "@src/pages/index/sections/02-integration/assets/svelte.jsx"
 import Vuejs from "@src/pages/index/sections/02-integration/assets/vuejs.jsx"
 import Reactjs from "@src/pages/index/sections/02-integration/assets/reactjs.jsx"
+import Nuxt from "@src/pages/index/sections/02-integration/assets/nuxt.jsx"
 import { JSXElement, Show } from "solid-js"
 
-type BrandLogo = "next" | "vue" | "react" | "svelte"
+type BrandLogo = "next" | "vue" | "react" | "svelte" | "nuxt"
 
 export function QuickLinks(props: { children: JSXElement[] }) {
 	return (
@@ -45,6 +46,9 @@ export function QuickLink(props: {
 						</Show>
 						<Show when={props.logo === "vue"}>
 							<Vuejs size={28} startColor="#434343" endColor="#434343" />
+						</Show>
+						<Show when={props.logo === "nuxt"}>
+							<Nuxt size={28} startColor="#434343" endColor="#434343" />
 						</Show>
 						<Show when={props.logo === "react"}>
 							<Reactjs size={28} startColor="#434343" endColor="#434343" />
