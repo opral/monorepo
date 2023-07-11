@@ -3,7 +3,6 @@ import type * as ast from "@inlang/core/ast"
 import type { LintedResource, LintRule, Visitors } from "./rule.js"
 import { createReportFunction } from "./report.js"
 import type { Language } from "@inlang/core/ast"
-import structuredClone from "@ungap/structured-clone"
 
 const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)

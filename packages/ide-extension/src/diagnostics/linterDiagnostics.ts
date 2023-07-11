@@ -1,6 +1,12 @@
 import { getLintReports, lint, LintReport } from "@inlang/core/lint"
 import * as vscode from "vscode"
 import { state } from "../state.js"
+import structuredClonePolyfill from "@ungap/structured-clone"
+
+// polyfilling node < 17 with structuredClone
+if (typeof structuredClone === "undefined") {
+	;(globalThis as any).structuredClone = structuredClonePolyfill
+}
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
@@ -51,7 +57,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 
 						const diagnostic = new vscode.Diagnostic(
 							diagnosticRange,
-							message.messageId + ": " + lintReport.message,
+							"[" + message.messageId + "] – " + lintReport.message,
 							mapLintLevelToSeverity(level),
 						)
 
