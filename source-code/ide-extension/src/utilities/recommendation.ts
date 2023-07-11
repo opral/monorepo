@@ -9,14 +9,7 @@ import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js
  * @param {vscode.WorkspaceFolder} args.workspaceFolder - The workspace folder.
  * @returns {Promise<void>} - A Promise that resolves once the recommendation process is completed.
  */
-export const recommendation = async (args: {
-	workspaceFolder: vscode.WorkspaceFolder
-}): Promise<void> => {
-	// check if the showRecommendation setting is set to false
-	if (await isDisabledRecommendation()) {
-		return
-	}
-
+export async function inWorkspacerecommendation(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
@@ -26,9 +19,30 @@ export const recommendation = async (args: {
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
 		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
 	}
+	console.log("Ich bin die Zwei", extensions)
+	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
+		return false
+	} else if (extensions.recommendations.includes("inlang.vs-code-extension")) {
+		return true
+	}
+}
+export const recommendation = async (args: {
+	workspaceFolder: vscode.WorkspaceFolder
+}): Promise<void> => {
+	// check if the showRecommendation setting is set to false
+	if (await isDisabledRecommendation()) {
+		return
+	}
+	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
+	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
+
+	console.log(
+		"was bin ich",
+		await inWorkspacerecommendation({ workspaceFolder: args.workspaceFolder }),
+	)
 
 	// If not already recommended
-	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
+	if ((await inWorkspacerecommendation({ workspaceFolder: args.workspaceFolder })) === false) {
 		// Prompt the user to install the Inlang extension
 		const installInlangExtension = await vscode.window.showInformationMessage(
 			"The Inlang extension is recommended for this project. Do you want to add it to your recommendations?",
