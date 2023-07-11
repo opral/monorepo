@@ -32,6 +32,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				vscode_version: vscode.version,
 				version: version,
 				$set: {
+					// this information are user based, it will help us to create cohorts and to get a understanding why some projects are exclude
 					"user-IDE-settings": {
 						"workspace-recommendation-setting": !(await isDisabledRecommendation()),
 						"auto-config-file-creation-setting": !(await isDisabledConfigFileCreation()),
@@ -88,6 +89,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	}
 
 	const gitOrigin = await getGitOrigin()
+	//identify the group after we get the information about the workspaceFolder to get the possibillty to save these  data into the Repo group.
 	if (gitOrigin) {
 		telemetry.groupIdentify({
 			groupType: "repository",
