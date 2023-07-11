@@ -19,7 +19,7 @@
 
 **[🌱 Ecosystem](https://inlang.com/documentation/plugins/registry)** - Plugins, resources, and more.
 
-**[🛠️ Not localized yet](https://inlang.com/documentation/sdk/overview)** - Supported SDKs to localize your app.
+**[🛠️ SDKs](https://inlang.com/documentation/sdk/overview)** - Supported SDKs to globalize your app.
 
 **[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
 
