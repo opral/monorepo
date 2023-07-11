@@ -7,8 +7,8 @@ import type { SvelteFileParts } from '../svelte.util.js'
 import { codeToSourceFile } from '../utils.js'
 import { isOptOutImportPresent as isOptOutImportPresentOriginal, isSdkImportPresent as isSdkImportPresentOriginal } from './imports.js'
 
-export const MagicString = MagicStringImport as unknown as typeof MagicStringImport.default
-export type MagicStringType = InstanceType<typeof MagicStringImport.default>
+export const MagicString = MagicStringImport as unknown as typeof MagicStringImport
+export type MagicStringType = InstanceType<typeof MagicStringImport>
 
 export const markupToAst = (markup: string) => parse(markup)
 
@@ -29,7 +29,7 @@ const canNodeBeWrapped = (node: TemplateNode) => {
 // ------------------------------------------------------------------------------------------------
 
 // TODO: test
-const wrapNodes = (s: MagicStringImport.default, ast: Ast, start: number, end: number, wrapWith: string) => {
+const wrapNodes = (s: MagicStringImport, ast: Ast, start: number, end: number, wrapWith: string) => {
 	// TODO: only wrap if @inlnag/sdk-js imports get used or if it's a component or a <slot />
 	const nodes = ast.html.children?.slice(start, end) || []
 	if (!nodes.length) return
@@ -43,7 +43,7 @@ const wrapNodes = (s: MagicStringImport.default, ast: Ast, start: number, end: n
 }
 
 // TODO: test
-export const wrapMarkupChildren = (s: MagicStringImport.default, ast: Ast, wrapWith: string) => {
+export const wrapMarkupChildren = (s: MagicStringImport, ast: Ast, wrapWith: string) => {
 	const children = [...(ast.html.children?.values() || [])]
 	let start = 0
 	for (const [i, child] of children.entries()) {
