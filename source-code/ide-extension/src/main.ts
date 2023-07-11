@@ -13,7 +13,11 @@ import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
-import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
+import {
+	recommendation,
+	isDisabledRecommendation,
+	inWorkspacerecommendation,
+} from "./utilities/recommendation.js"
 import {
 	createInlangConfigFile,
 	isDisabledConfigFileCreation,
@@ -27,20 +31,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				workspaceRecommendation: !(await isDisabledRecommendation()),
-				autoConfigFileCreation: !(await isDisabledConfigFileCreation()),
+				$set: {
+					"user-IDE-settings": {
+						"workspace-recommendation-setting": !(await isDisabledRecommendation()),
+						"auto-config-file-creation-setting": !(await isDisabledConfigFileCreation()),
+					},
+				},
 			},
 		})
-		const gitOrigin = await getGitOrigin()
-		if (gitOrigin) {
-			telemetry.groupIdentify({
-				groupType: "repository",
-				groupKey: gitOrigin,
-				properties: {
-					name: gitOrigin,
-				},
-			})
-		}
 		msg("Inlang extension activated.", "info")
 		// start the ide extension
 		main({ context })
@@ -89,6 +87,17 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		return
 	}
 
+	const gitOrigin = await getGitOrigin()
+	if (gitOrigin) {
+		telemetry.groupIdentify({
+			groupType: "repository",
+			groupKey: gitOrigin,
+			properties: {
+				name: gitOrigin,
+				"in-workspace-recommendation": await inWorkspacerecommendation({ workspaceFolder }),
+			},
+		})
+	}
 	// watch for changes in the config file
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(workspaceFolder, "inlang.config.js"),
