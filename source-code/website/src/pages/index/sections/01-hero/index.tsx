@@ -33,19 +33,19 @@ const Hero = () => {
 					<div class="flex flex-col gap-6 pt-8">
 						<p class="text-md font-normal text-surface-400">Used by devs at</p>
 						<div class="flex flex-wrap items-center gap-6 xl:w-3/4 xl:pb-8 opacity-90">
-							<a class="hover:opacity-70" href="https://cal.com">
+							<a class="hover:opacity-70" href="https://cal.com" target="_blank">
 								<Calcom />
 							</a>
-							<a class="hover:opacity-70" href="https://appflowy.io">
+							<a class="hover:opacity-70" href="https://appflowy.io" target="_blank">
 								<AppFlowy />
 							</a>
-							<a class="hover:opacity-70" href="https://listmonk.app">
+							<a class="hover:opacity-70" href="https://listmonk.app" target="_blank">
 								<Listmonk />
 							</a>
-							<a class="hover:opacity-70" href="https://open-assistant.io">
+							<a class="hover:opacity-70" href="https://open-assistant.io" target="_blank">
 								<OpenAssistant />
 							</a>
-							<a class="hover:opacity-70" href="https://meet.jit.si">
+							<a class="hover:opacity-70" href="https://meet.jit.si" target="_blank">
 								<Jitsi />
 							</a>
 						</div>
