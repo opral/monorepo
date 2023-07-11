@@ -10,10 +10,13 @@
 <p align="center">
   <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Join the community on Discord' src='https://img.shields.io/badge/Discord-100000?style=flat&logo=Discord&logoColor=white&labelColor=5865F2&color=5865F2'/></a>
   <a href='https://twitter.com/inlangHQ' target="_blank"><img alt='Follow inlang on Twitter' src='https://img.shields.io/badge/Twitter-100000?style=flat&logo=Twitter&logoColor=white&labelColor=1A8CD8&color=1A8CD8'/></a>
-
 </p>
 
-**[🧑‍💻 Open positions](https://inlang.com/documentation)** - Jobs at inlang.
+<p align="center">
+    <b>
+        <a href='https://github.com/inlang/inlang/open-positions'>🧑‍💻 Open positions</a>
+    </b>
+</p>
 
 ## Community & Support
 
