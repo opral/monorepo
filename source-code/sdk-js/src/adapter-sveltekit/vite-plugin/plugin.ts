@@ -82,7 +82,7 @@ export const plugin = () => {
 				console.info(dedent`
 					-- INLANG DEBUG START-----------------------------------------------------------
 
-					transformed '${fileInformation.type}' file: '${filePath}'
+					transformed file '${filePath}' (${fileInformation.type})
 
 					-- INPUT -----------------------------------------------------------------------
 
@@ -90,16 +90,13 @@ export const plugin = () => {
 
 					-- OUTPUT ----------------------------------------------------------------------
 
-					${transformedCode}
+					${code === transformedCode ? "NO TRANSFORMATIONS MADE" : transformedCode}
 
 					-- INLANG DEBUG END ------------------------------------------------------------
 				`)
 			}
 
 			return transformedCode
-				.replaceAll("languages: languages", "languages")
-				.replaceAll("language: language", "language")
-				.replaceAll("i: i", "i")
 		},
 	} satisfies Plugin
 }
