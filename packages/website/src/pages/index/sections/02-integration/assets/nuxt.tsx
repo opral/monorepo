@@ -5,7 +5,6 @@ const Nuxt = (props: { size: number; startColor: string; endColor: string }) => 
 			width={props.size}
 			height={props.size}
 			fill="none"
-			//
 			viewBox="0 0 900 900"
 		>
 			<path
