@@ -29,7 +29,7 @@ To get started with globalizing your app, you just need to choose an SDK from th
 
     {% QuickLink
         title="Nuxt.js"
-        logo="vue"
+        logo="nuxt"
         href="https://github.com/inlang/inlang/tree/main/source-code/starters/inlang-nuxt"
         description="nuxtjs/i18n"
     /%}
