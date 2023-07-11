@@ -70,6 +70,8 @@
 		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
+		"@types/ungap__structured-clone": "^0.3.0",
+		"@ungap/structured-clone": "^1.2.0",
 		"@inlang-git/client": "*",
 		"@types/fs-extra": "^11.0.1",
 		"@types/require-from-string": "^1.2.1",
