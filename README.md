@@ -14,7 +14,7 @@
 
 <p align="center">
     <b>
-        <a href='https://github.com/inlang/inlang/open-positions'>🧑‍💻 Open positions</a>
+        <a href='/open-positions'>🧑‍💻 Open positions</a>
     </b>
 </p>
 
