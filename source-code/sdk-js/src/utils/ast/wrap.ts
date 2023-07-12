@@ -7,7 +7,7 @@ import {
 	FunctionDeclaration,
 	ExportSpecifier,
 } from "ts-morph"
-import { codeToNode, nodeToCode } from "../utils.js"
+import { codeToNode, nodeToCode } from "../js.util.js"
 import { findOrCreateExport } from "./exports.js"
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"

@@ -1,5 +1,5 @@
 import { addImport, isOptOutImportPresent } from '../../../utils/ast/imports.js'
-import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import { codeToSourceFile, nodeToCode } from '../../../utils/js.util.js'
 import type { TransformConfig } from "../config.js"
 import { findExport } from '../../../utils/ast/exports.js'
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'

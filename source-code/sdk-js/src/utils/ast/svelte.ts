@@ -4,7 +4,7 @@ import { Node, type SourceFile } from 'ts-morph'
 import { findExport } from './exports.js'
 import MagicStringImport from "magic-string"
 import type { SvelteFileParts } from '../svelte.util.js'
-import { codeToSourceFile } from '../utils.js'
+import { codeToSourceFile } from '../js.util.js'
 import { isOptOutImportPresent as isOptOutImportPresentOriginal, isSdkImportPresent as isSdkImportPresentOriginal } from './imports.js'
 
 export const MagicString = MagicStringImport as unknown as typeof MagicStringImport

@@ -1,6 +1,6 @@
 import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
-import { nodeToCode, codeToSourceFile } from "../../../utils/utils.js"
+import { nodeToCode, codeToSourceFile } from "../../../utils/js.util.js"
 import {
 	addImport,
 	isOptOutImportPresent,

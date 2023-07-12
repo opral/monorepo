@@ -6,7 +6,7 @@ import {
 	isOptOutImportPresent,
 	removeImport,
 } from "./imports.js"
-import { codeToNode, codeToSourceFile, nodeToCode } from "../utils.js"
+import { codeToNode, codeToSourceFile, nodeToCode } from "../js.util.js"
 import { Node } from "ts-morph"
 
 describe("removeImport", () => {

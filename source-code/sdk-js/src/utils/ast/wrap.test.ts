@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { nodeToCode, codeToSourceFile, codeToNode } from "../utils.js"
+import { nodeToCode, codeToSourceFile, codeToNode } from "../js.util.js"
 import {
 	createWrapperAst,
 	mergeWrapperAst,

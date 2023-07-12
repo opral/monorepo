@@ -1,6 +1,6 @@
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 import { isOptOutImportPresent } from '../../../utils/ast/imports.js'
-import { codeToSourceFile } from '../../../utils/utils.js'
+import { codeToSourceFile } from '../../../utils/js.util.js'
 import type { TransformConfig } from "../config.js"
 
 export const transformServerRequestJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {

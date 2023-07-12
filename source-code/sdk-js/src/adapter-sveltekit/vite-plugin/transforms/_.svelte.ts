@@ -2,7 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { getSvelteFileParts, type SvelteFileParts } from '../../../utils/svelte.util.js'
 import { isOptOutImportPresent } from '../../../utils/ast/svelte.js'
 import { addImport, findImportDeclarations, getImportSpecifiers, isSdkImportPresent, removeImport } from '../../../utils/ast/imports.js'
-import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import { codeToSourceFile, nodeToCode } from '../../../utils/js.util.js'
 import type { SourceFile } from 'ts-morph'
 import { dedent } from 'ts-dedent'
 

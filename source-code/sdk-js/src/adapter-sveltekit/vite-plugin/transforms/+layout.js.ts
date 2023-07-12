@@ -5,7 +5,7 @@ import {
 	isOptOutImportPresent,
 } from "../../../utils/ast/imports.js"
 import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
-import { codeToSourceFile, nodeToCode } from "../../../utils/utils.js"
+import { codeToSourceFile, nodeToCode } from "../../../utils/js.util.js"
 import type { SourceFile } from 'ts-morph'
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 

@@ -2,7 +2,7 @@ import type { TransformConfig } from "../config.js"
 import { dedent } from "ts-dedent"
 import { addImport, isOptOutImportPresent } from '../../../utils/ast/imports.js'
 import { wrapExportedFunction } from '../../../utils/ast/wrap.js'
-import { codeToNode, codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import { codeToNode, codeToSourceFile, nodeToCode } from '../../../utils/js.util.js'
 import type { SourceFile } from 'ts-morph'
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 

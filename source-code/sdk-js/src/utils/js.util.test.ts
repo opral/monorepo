@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { codeToSourceFile, nodeToCode, codeToNode } from "./utils.js"
+import { codeToSourceFile, nodeToCode, codeToNode } from "./js.util.js"
 import { Node, VariableDeclarationKind } from "ts-morph"
 
 describe("codeToAst", () => {

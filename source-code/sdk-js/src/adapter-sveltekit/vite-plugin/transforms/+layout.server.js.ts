@@ -4,7 +4,7 @@ import {
 	isOptOutImportPresent,
 } from "../../../utils/ast/imports.js"
 import { wrapExportedFunction } from "../../../utils/ast/wrap.js"
-import { codeToSourceFile, nodeToCode } from "../../../utils/utils.js"
+import { codeToSourceFile, nodeToCode } from "../../../utils/js.util.js"
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
 
 export const transformLayoutServerJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {

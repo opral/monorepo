@@ -1,6 +1,6 @@
 import type { TransformConfig } from "../config.js"
 import { transformSvelte } from "./_.svelte.js"
-import { codeToSourceFile, nodeToCode } from '../../../utils/utils.js'
+import { codeToSourceFile, nodeToCode } from '../../../utils/js.util.js'
 import { getSvelteFileParts } from '../../../utils/svelte.util.js'
 import { MagicString, addDataExportIfMissingAndReturnInsertionIndex, markupToAst, wrapMarkupChildren, insertSlotIfEmptyFile, isOptOutImportPresent } from '../../../utils/ast/svelte.js'
 import { addImport, removeImport } from '../../../utils/ast/imports.js'

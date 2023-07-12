@@ -1,5 +1,5 @@
 import { assertNoImportsFromSdkJs } from '../../../utils/ast/assertions.js'
-import { codeToSourceFile } from '../../../utils/utils.js'
+import { codeToSourceFile } from '../../../utils/js.util.js'
 import type { TransformConfig } from "../config.js"
 
 export const transformServerJs = (filePath: string, config: TransformConfig, code: string) => {

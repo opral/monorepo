@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { findExport, findOrCreateExport } from "./exports.js"
-import { nodeToCode, codeToSourceFile } from "../utils.js"
+import { nodeToCode, codeToSourceFile } from "../js.util.js"
 import { Node } from "ts-morph"
 
 describe("findExport", () => {
