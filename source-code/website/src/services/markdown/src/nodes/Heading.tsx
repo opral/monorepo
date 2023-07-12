@@ -55,11 +55,20 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 		element: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined,
 		props: { children: JSXElement },
 	) {
-		const children = props.children?.toString().replace(" ", "-").replace("#", "").toLowerCase()
+		const children = props.children
+			?.toString()
+			.replaceAll(" ", "-")
+			.replaceAll("#", "")
+			.toLowerCase()
 
 		if (children?.includes("native code")) {
 			if (typeof element === "object" && element instanceof HTMLDivElement) {
-				return element.innerText?.toString().replace(" ", "-").replace("#", "").toLowerCase().trim()
+				return element.innerText
+					?.toString()
+					.replaceAll(" ", "-")
+					.replaceAll("#", "")
+					.toLowerCase()
+					.trim()
 			} else {
 				return ""
 			}
@@ -73,7 +82,11 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 		props: { children: JSXElement },
 	) {
 		if (typeof element === "object" && element instanceof HTMLDivElement) {
-			const children = props.children?.toString().replace(" ", "-").replace("#", "").toLowerCase()
+			const children = props.children
+				?.toString()
+				.replaceAll(" ", "-")
+				.replaceAll("#", "")
+				.toLowerCase()
 
 			if (children?.includes("native code")) {
 				copy(
@@ -83,8 +96,8 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 						"#" +
 						element?.innerText
 							?.toString()
-							.replace(" ", "-")
-							.replace("#", "")
+							.replaceAll(" ", "-")
+							.replaceAll("#", "")
 							.toLowerCase()) as string,
 				)
 			} else {
