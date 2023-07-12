@@ -34,8 +34,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				$set: {
 					// this information are user based, it will help us to create cohorts and to get a understanding why some projects are exclude
 					"user-IDE-settings": {
-						"workspace-recommendation-setting": !(await isDisabledRecommendation()),
-						"auto-config-file-creation-setting": !(await isDisabledConfigFileCreation()),
+						workspaceRecommendationSettingIsEnabled: !(await isDisabledRecommendation()),
+						autoConfigRecommendationSettingIsEnabled: !(await isDisabledConfigFileCreation()),
 					},
 				},
 			},
