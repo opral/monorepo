@@ -19,7 +19,8 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		Node.isArrowFunction(node) ||
 		Node.isFunctionExpression(node) ||
 		Node.isIdentifier(node) ||
-		Node.isCallExpression(node)
+		Node.isCallExpression(node) ||
+		Node.isSatisfiesExpression(node)
 	) {
 		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
 	}

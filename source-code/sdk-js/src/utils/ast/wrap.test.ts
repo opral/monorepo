@@ -244,7 +244,7 @@ describe("wrapExportedFunction", () => {
 		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(async function load() { });"')
 	})
 
-	test.only("should wrap export followed by a comment", () => {
+	test("should wrap export followed by a comment", () => {
 		const node = codeToSourceFile(`
 			export const handle = ({ resolve, event }) => {
 				return resolve(event);
@@ -259,6 +259,42 @@ describe("wrapExportedFunction", () => {
 			    return resolve(event);
 			});
 			// a comment"
+		`)
+	})
+
+	test("should wrap export with type information", () => {
+		const node = codeToSourceFile(`
+			import type { Handle } from '@sveltejs/kit'
+
+			export const handle: Handle = ({ resolve, event }) => {
+				return resolve(event);
+			}
+		`)
+		wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+		expect(nodeToCode(node)).toMatchInlineSnapshot(`
+			"import type { Handle } from '@sveltejs/kit';
+			export const handle: Handle = initHandleWrapper().use(({ resolve, event }) => {
+			    return resolve(event);
+			});"
+		`)
+	})
+
+	test("should wrap export with satisfies", () => {
+		const node = codeToSourceFile(`
+			import type { Handle } from '@sveltejs/kit'
+
+			export const handle = (({ resolve, event }) => {
+				return resolve(event);
+			}) satisfies Handle
+		`)
+		wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+		expect(nodeToCode(node)).toMatchInlineSnapshot(`
+			"import type { Handle } from '@sveltejs/kit';
+			export const handle = initHandleWrapper().use((({ resolve, event }) => {
+			    return resolve(event);
+			}) satisfies Handle);"
 		`)
 	})
 })
