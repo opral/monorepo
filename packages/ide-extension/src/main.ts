@@ -18,6 +18,7 @@ import {
 	createInlangConfigFile,
 	isDisabledConfigFileCreation,
 } from "./utilities/createInlangConfigFile.js"
+import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from './commands/openInEditor.js'
 import { editMessageCommand } from './commands/editMessage.js'
 
@@ -163,6 +164,9 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// add inlang extension to recommended extensions
 	recommendation({ workspaceFolder })
+
+	// linter diagnostics
+	linterDiagnostics(args)
 }
 
 // this method is called when your extension is deactivated
