@@ -140,7 +140,7 @@ If you want to use an import from the SDK inside a file where you have opted out
 </h2>
 ```
 
-### `*.js` (called from a .svelte file)
+<!-- ### `*.js` (called from a .svelte file)
 
 ```ts
 import '@inlang/sdk-js/no-transforms'
@@ -151,9 +151,10 @@ const getPageTitle = (page: string) => {
 
 	return i(`title.${page}`)
 }
-```
+``` -->
 
-### `*.js` (called from a +*.js file on the server)
+### `*.js`
+<!-- (called from a +*.js file on the server) -->
 
 You need to pass the `i` function to the function you want to call it from.
 
