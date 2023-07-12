@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 0.9.0
+
+### Minor Changes
+
+- 9ff20754: Add context tooltip, which lets you view all localizations of a message, edit and open them in the editor.
+- 823cec8a: add lints to ide extension
+
 ## 0.8.1
 
 ### Patch Changes
