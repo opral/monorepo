@@ -20,12 +20,9 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		Node.isFunctionExpression(node) ||
 		Node.isIdentifier(node) ||
 		Node.isCallExpression(node)
-	)
-		return node.transform(({ factory, currentNode }) =>
-			factory.createCallExpression(factory.createIdentifier(WRAP_IDENTIFIER), undefined, [
-				currentNode as any,
-			]),
-		) as CallExpression
+	) {
+		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
+	}
 
 	throw new Error(`wrapWithPlaceholder does not support '${node.getKindName()}'`)
 }

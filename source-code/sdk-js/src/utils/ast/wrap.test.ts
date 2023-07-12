@@ -243,4 +243,22 @@ describe("wrapExportedFunction", () => {
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(async function load() { });"')
 	})
+
+	test.only("should wrap export followed by a comment", () => {
+		const node = codeToSourceFile(`
+			export const handle = ({ resolve, event }) => {
+				return resolve(event);
+			}
+
+			// a comment
+		`)
+		wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+		expect(nodeToCode(node)).toMatchInlineSnapshot(`
+			"export const handle = initHandleWrapper().use(({ resolve, event }) => {
+			    return resolve(event);
+			});
+			// a comment"
+		`)
+	})
 })
