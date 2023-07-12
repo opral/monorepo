@@ -2,6 +2,7 @@ import { getContext } from "svelte"
 import { inlangSymbol } from "../../shared/utils.js"
 
 // TODO: wrap with error message only during development
+// TODO: link to docs instead of showing detailed error message
 export const getRuntimeFromContext = () => {
 	try {
 		return getContext(inlangSymbol)
