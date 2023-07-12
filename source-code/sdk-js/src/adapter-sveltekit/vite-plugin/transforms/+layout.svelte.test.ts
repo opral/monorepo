@@ -120,6 +120,35 @@ describe("transformLayoutSvelte", () => {
 				random content{/key}{/if}"
 			`)
 		})
+
+
+		test("should remove @inlang/sdk-js imports that are used reactively", () => {
+			const code = dedent`
+				<script>
+					import { language } from '@inlang/sdk-js'
+				</script>
+
+				{language}
+			`
+			const config = getTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				</script>{#if language}{#key language}
+
+				{language}{/key}{/if}"
+			`)
+		})
 	})
 
 	describe("non-root", () => {
