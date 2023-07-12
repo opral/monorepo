@@ -31,7 +31,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, '')) // TODO: implement functionality
 
 	if (findExport(sourceFile, 'GET'))
 		throw Error(`The file already contains a 'GET' export.`)

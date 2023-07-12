@@ -5,7 +5,7 @@ import type { TransformConfig } from "../config.js"
 export const transformServerJs = (filePath: string, config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
-	assertNoImportsFromSdkJs(sourceFile)
+	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, ''))
 
 	return code
 }

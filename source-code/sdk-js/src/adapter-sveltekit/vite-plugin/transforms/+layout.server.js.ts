@@ -12,7 +12,7 @@ export const transformLayoutServerJs = (filePath: string, config: TransformConfi
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, '')) // TODO: implement functionality
 
 	if (!root) return code // for now we don't need to transform non-root files
 

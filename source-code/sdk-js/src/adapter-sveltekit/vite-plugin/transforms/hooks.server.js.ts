@@ -59,7 +59,7 @@ export const transformHooksServerJs = (filePath: string, config: TransformConfig
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, '')) // TODO: implement functionality
 
 	const wrapperFunctionName = "initHandleWrapper"
 

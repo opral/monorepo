@@ -5,7 +5,7 @@ import { codeToSourceFile } from '../../../utils/utils.js'
 export const transformJs = (filePath: string, config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
-	assertNoImportsFromSdkJs(sourceFile)
+	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, ''))
 
 	return code
 }
