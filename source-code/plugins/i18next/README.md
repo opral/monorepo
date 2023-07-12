@@ -83,6 +83,12 @@ The plugin automatically informs the [IDE extension](https://inlang.com/document
 
 ### In-code usage
 
+`t("key")`
+
+With namespaces:
+
+`t("namespace:key")` or `t("key", { ns: "namespace" })`
+
 To learn about namespaces and how to use translation functions in your code, you can refer to [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin is capable of parsing the code and providing the IDE-extension with this information.
 
 ## Contributing

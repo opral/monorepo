@@ -10,7 +10,12 @@
 <p align="center">
   <a href='https://discord.gg/gdMPPWy57R' target="_blank"><img alt='Join the community on Discord' src='https://img.shields.io/badge/Discord-100000?style=flat&logo=Discord&logoColor=white&labelColor=5865F2&color=5865F2'/></a>
   <a href='https://twitter.com/inlangHQ' target="_blank"><img alt='Follow inlang on Twitter' src='https://img.shields.io/badge/Twitter-100000?style=flat&logo=Twitter&logoColor=white&labelColor=1A8CD8&color=1A8CD8'/></a>
+</p>
 
+<p align="center">
+    <b>
+        <a href='/open-positions'>🧑‍💻 Open positions</a>
+    </b>
 </p>
 
 ## Community & Support
@@ -19,7 +24,7 @@
 
 **[🌱 Ecosystem](https://inlang.com/documentation/plugins/registry)** - Plugins, resources, and more.
 
-**[🛠️ Not localized yet](https://inlang.com/documentation/sdk/overview)** - Supported SDKs to localize your app.
+**[🛠️ SDKs](https://inlang.com/documentation/sdk/overview)** - Supported SDKs to globalize your app.
 
 **[🚩 Issues](https://github.com/inlang/inlang/issues)** - Bugs end errors you encounter using inlang.
 
