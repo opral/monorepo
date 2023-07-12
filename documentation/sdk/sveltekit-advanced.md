@@ -70,9 +70,9 @@ import '@inlang/sdk-js/no-transforms'
 import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
 import type { LayoutLoad } from "./$types.js"
 
-export const load = initRootLayoutLoadWrapper<LayoutLoad>().use(({
+export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	// ... see TypeScript definition or source code for all parameters
-}) => {
+}).use(() => {
 
 	// your code goes here
 
