@@ -186,6 +186,21 @@ describe("addImport", () => {
 		)
 	})
 
+	test("should create new import statement if type only import is present", () => {
+		const node = codeToSourceFile(`
+			import type { Hanlde } from '@sveltejs/kit'
+		`)
+
+		addImport(node, "@sveltejs/kit", "redirect")
+
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			`
+			"import { redirect } from '@sveltejs/kit';
+			import type { Hanlde } from '@sveltejs/kit';"
+		`,
+		)
+	})
+
 	test("should check multiple import statements", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js'

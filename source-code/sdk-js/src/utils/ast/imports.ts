@@ -42,6 +42,7 @@ export const addImport = (
 	const importDeclarations = findImportDeclarations(sourceFile, path)
 		// only keep import declarations with specifiers
 		.filter((importDeclaration) => !!getNamedImportSpecifiers(importDeclaration).length)
+		.filter(importDeclaration => !importDeclaration.isTypeOnly())
 
 	if (!importDeclarations.length) {
 		// add new import declaration at the beginning of the file
