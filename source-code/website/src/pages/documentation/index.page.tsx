@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createSignal } from "solid-js"
+import { For, Show, createRenderEffect, createSignal, createEffect } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -112,6 +112,7 @@ function NavbarCommon(props: {
 	headings: PageProps["headings"]
 	onLinkClick?: () => void
 }) {
+	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 	const isSelected = (href: string) => {
 		if (href === currentPageContext.urlParsed.pathname) {
 			return true
@@ -119,6 +120,23 @@ function NavbarCommon(props: {
 			return false
 		}
 	}
+
+	const onAnchorClick = (anchor: string) => {
+		setHighlightedAnchor(anchor)
+	}
+
+	createEffect(() => {
+		if (
+			currentPageContext.urlParsed.hash &&
+			props.headings
+				.toString()
+				.toLowerCase()
+				.replaceAll(" ", "-")
+				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
+		) {
+			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+		}
+	})
 
 	return (
 		<ul role="list" class="w-full">
@@ -159,7 +177,18 @@ function NavbarCommon(props: {
 															props.headings.filter((h) => h === heading).length < 2 && (
 																<li>
 																	<a
-																		class="text-info/60 hover:text-info/80 tracking-wide text-sm block w-full font-normal"
+																		onClick={() => {
+																			onAnchorClick(
+																				heading.toString().toLowerCase().replaceAll(" ", "-"),
+																			)
+																		}}
+																		class={
+																			"text-sm tracking-widem block w-full " +
+																			(highlightedAnchor() ===
+																			heading.toString().toLowerCase().replaceAll(" ", "-")
+																				? "font-medium text-info/80 "
+																				: "text-info/60 hover:text-info/80 font-normal")
+																		}
 																		href={`#${heading
 																			.toString()
 																			.toLowerCase()
