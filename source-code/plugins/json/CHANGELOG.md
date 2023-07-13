@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.9
+
+### Patch Changes
+
+- 0c82623d: fix ignore folder at getLanguage function
+
 ## 3.0.8
 
 ### Patch Changes
