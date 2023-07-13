@@ -179,7 +179,7 @@ export async function defineConfig(env) {
 	)
 }
 
-// TODO!!: do this in a better way https://github.com/inlang/inlang/issues/708
+// TODO: do this in a better way https://github.com/inlang/inlang/issues/708
 const createDemoResources = async () => {
 	const resourcesFolder = path.resolve(cwdFolderPath, "languages")
 
