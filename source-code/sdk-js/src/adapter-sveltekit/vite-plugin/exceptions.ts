@@ -1,21 +1,20 @@
-import { dedent } from 'ts-dedent'
 import { InlangException } from '../../exceptions.js'
 
 export class InlangSdkException extends InlangException {
 	constructor(message: string, override readonly cause?: Error) {
 		super()
 
-		this.message = dedent`\n
+		this.message = `
 
-			--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
-			[${this.constructor.name}]
+[${this.constructor.name}]
 
-			${message}
+${message}
 
-			--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
-			Cause:
-		`
+Cause:
+`
 	}
 }
