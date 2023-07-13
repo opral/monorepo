@@ -115,12 +115,14 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 			$fs: args.$fs,
 		})
 
-		if (isDirectory) {
+		if (isDirectory && args.settings.ignore?.some((s) => s === filePath) === false) {
+			console.log("dir")
 			languages.push(filePath)
 		} else if (
 			filePath.endsWith(".json") &&
 			args.settings.ignore?.some((s) => s === filePath) === false
 		) {
+			console.log("files")
 			languages.push(filePath.replace(".json", ""))
 		}
 	}
