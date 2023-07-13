@@ -1,5 +1,5 @@
+import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
@@ -31,11 +31,11 @@ interface ButtonProps {
 }
 
 export const Button = (props: ButtonProps) => {
-	const [localStorage] = useLocalStorage()
+	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const locale = localStorage.locale || defaultLanguage
-		return locale !== defaultLanguage ? "/" + locale : ""
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
 	}
 
 	return (
@@ -43,7 +43,6 @@ export const Button = (props: ButtonProps) => {
 			<Show when={props?.href?.startsWith("/") && !props.function}>
 				<button
 					onClick={() => {
-						console.log(localStorage.locale)
 						props.href && navigate(getLocale() + props.href)
 					}}
 					class={

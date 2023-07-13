@@ -1,7 +1,7 @@
+import { useI18n } from "@solid-primitives/i18n"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import { showToast } from "@src/components/Toast.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
 import copy from "clipboard-copy"
 
 const data = {
@@ -21,11 +21,11 @@ const data = {
 }
 
 const GetStarted = () => {
-	const [localStorage] = useLocalStorage()
+	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const locale = localStorage.locale || defaultLanguage
-		return locale !== defaultLanguage ? "/" + locale : ""
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
 	}
 
 	return (

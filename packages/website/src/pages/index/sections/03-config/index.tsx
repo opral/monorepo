@@ -1,7 +1,6 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 
@@ -30,7 +29,7 @@ const code = [
 
 const ConfigPage = () => {
 	const [connectorSizes, setConnectorSizes] = createSignal<Array<number>>([0, 0, 0, 0, 0, 0])
-	const [localStorage] = useLocalStorage()
+	const [, { locale }] = useI18n()
 
 	onMount(() => {
 		const box1 = document.getElementById("connector1")
@@ -50,8 +49,8 @@ const ConfigPage = () => {
 	})
 
 	const getLocale = () => {
-		const locale = localStorage.locale || defaultLanguage
-		return locale !== defaultLanguage ? "/" + locale : ""
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
 	}
 
 	const [t] = useI18n()
