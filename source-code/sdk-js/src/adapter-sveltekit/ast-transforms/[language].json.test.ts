@@ -31,14 +31,14 @@ describe("transformLanguageJson", () => {
 	})
 
 	test("adds GET endpoint to a file with arbitrary contents", () => {
-		const code = transformLanguageJson(
+		const transformed = transformLanguageJson(
 			"",
 			initTransformConfig(),
 			dedent`
 				const someFunction = console.info(123)
 			`,
 		)
-		expect(code).toMatchInlineSnapshot(`
+		expect(transformed).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
 			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
@@ -49,28 +49,49 @@ describe("transformLanguageJson", () => {
 		`)
 	})
 
-	test("should add `entries` export if SvelteKit version >= 1.16.3", () => {
-		const code = transformLanguageJson(
-			"",
-			initTransformConfig({
-				svelteKit: {
-					version: "1.16.3",
-				},
-			}),
-			"",
-		)
-		expect(code).toMatchInlineSnapshot(`
-			"import { json } from '@sveltejs/kit';
-			export const entries = async () => {
-			    const { languages } = await initState(await import('../../../../inlang.config.js'));
-			    return languages.map(language => ({ language }));
-			};
-			import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
-			export const GET = async ({ params: { language } }) => {
-			    await reloadResources();
-			    return json(getResource(language) || null);
-			};"
-		`)
+
+	describe("variations", () => {
+		test("should add `entries` export if SvelteKit version >= 1.16.3", () => {
+			const transformed = transformLanguageJson(
+				"",
+				initTransformConfig({
+					svelteKit: {
+						version: "1.16.3",
+					},
+				}),
+				"",
+			)
+			expect(transformed).toMatchInlineSnapshot(`
+				"import { json } from '@sveltejs/kit';
+				export const entries = async () => {
+				    const { languages } = await initState(await import('../../../../inlang.config.js'));
+				    return languages.map(language => ({ language }));
+				};
+				import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+				export const GET = async ({ params: { language } }) => {
+				    await reloadResources();
+				    return json(getResource(language) || null);
+				};"
+			`)
+		})
+
+		test("static output", () => {
+			const code = ""
+			const transformed = transformLanguageJson("", initTransformConfig({
+				isStatic: true,
+				inlang: { sdk: { resources: { cache: "build-time" } } }
+			}), code)
+
+			expect(transformed).toMatchInlineSnapshot(`
+				"import { json } from '@sveltejs/kit';
+				import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
+				export const GET = async ({ params: { language } }) => {
+				    await reloadResources();
+				    return json(getResource(language) || null);
+				};
+				export const prerender = true;"
+			`)
+		})
 	})
 
 	test("should not do anything if '@inlang/sdk-js/no-transforms' import is detected", () => {

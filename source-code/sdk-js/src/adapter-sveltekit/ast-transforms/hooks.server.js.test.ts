@@ -106,7 +106,7 @@ describe("transformHooksServerJs", () => {
 	})
 
 	test("should wrap handle if already defined", () => {
-		const code = transformHooksServerJs(
+		const transformed = transformHooksServerJs(
 			"",
 			initTransformConfig(),
 			dedent`
@@ -117,7 +117,7 @@ describe("transformHooksServerJs", () => {
 			`,
 		)
 
-		expect(code).toMatchInlineSnapshot(`
+		expect(transformed).toMatchInlineSnapshot(`
 			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
@@ -130,7 +130,7 @@ describe("transformHooksServerJs", () => {
 	})
 
 	test("should wrap handle if sequence helper get's used", () => {
-		const code = transformHooksServerJs(
+		const transformed = transformHooksServerJs(
 			"",
 			initTransformConfig(),
 			dedent`
@@ -147,7 +147,7 @@ describe("transformHooksServerJs", () => {
 			`,
 		)
 
-		expect(code).toMatchInlineSnapshot(`
+		expect(transformed).toMatchInlineSnapshot(`
 			"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
 			import { sequence } from '@sveltejs/kit';
 			const handle1 = ({ resolve, event }) => resolve(event);

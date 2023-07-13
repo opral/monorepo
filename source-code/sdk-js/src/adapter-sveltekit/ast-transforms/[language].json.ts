@@ -20,15 +20,14 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 			Please remove it as 'inlang' needs to inject it's own magic here.
 		`)
 
+	const index = sourceFile.getPos()
 	const codeToInsert = ''
-	// TODO!!: test this case
 	if (config.isStatic && config.inlang.sdk.resources.cache === "build-time")
-		sourceFile.insertText(sourceFile.getPos(), dedent`
+		sourceFile.insertText(index, dedent`
 			export const prerender = true
 		`)
 
-
-	sourceFile.insertText(sourceFile.getPos(), dedent`
+	sourceFile.insertText(index, dedent`
 		export const GET = async ({ params: { language } }) => {
 			await reloadResources()
 			return json(getResource(language) || null)
@@ -38,7 +37,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 	if (config.svelteKit.version || "" >= "1.16.3") {
 		addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "initState")
 
-		sourceFile.insertText(sourceFile.getPos(), dedent`
+		sourceFile.insertText(index, dedent`
 			export const entries = async () => {
 				const { languages } = await initState(await import('../../../../inlang.config.js'))
 

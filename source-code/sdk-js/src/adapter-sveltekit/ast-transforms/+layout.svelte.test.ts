@@ -284,7 +284,7 @@ describe.skip("transformLayoutSvelte", () => {
 		describe("root=true", () => {
 			describe("transform @inlang/sdk-js", () => {
 				it("resolves imports correctly", async () => {
-					const code = transformLayoutSvelte(
+					const transformed = transformLayoutSvelte(
 						"",
 						initTransformConfig(),
 						dedent`
@@ -298,7 +298,7 @@ describe.skip("transformLayoutSvelte", () => {
 						`,
 						true,
 					)
-					expect(code).toMatchInlineSnapshot(`
+					expect(transformed).toMatchInlineSnapshot(`
 						"<script>import { browser } from \\"$app/environment\\";
 						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
@@ -325,7 +325,7 @@ describe.skip("transformLayoutSvelte", () => {
 				})
 
 				it("resolves imports correctly (not-reactive)", async () => {
-					const code = transformLayoutSvelte(
+					const transformed = transformLayoutSvelte(
 						"",
 						initTransformConfig({
 							languageInUrl: true
@@ -341,7 +341,7 @@ describe.skip("transformLayoutSvelte", () => {
 						`,
 						true,
 					)
-					expect(code).toMatchInlineSnapshot(`
+					expect(transformed).toMatchInlineSnapshot(`
 						"<script>import { browser } from \\"$app/environment\\";
 						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
@@ -388,8 +388,8 @@ describe.skip("transformLayoutSvelte", () => {
 
 					{language.toUpperCase()}
 				`
-				const code = transformLayoutSvelte("", config, input, false)
-				// expect(code).toMatch(transformSvelte(config, input))
+				const transformed = transformLayoutSvelte("", config, input, false)
+				// expect(transformed).toMatch(transformSvelte(config, input))
 			})
 		})
 	})
