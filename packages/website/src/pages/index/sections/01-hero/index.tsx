@@ -19,8 +19,7 @@ const Hero = () => {
 						<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 							{"Globalization "}
 						</span>
-						{t("hello")}
-						infrastructure for software
+						{t("test")}
 					</h1>
 					<p class="text-xl text-surface-600 w-min-full md:w-[70%] leading-relaxed">
 						inlang's <span class="font-semibold text-surface-800">ecosystem</span> makes adapting
