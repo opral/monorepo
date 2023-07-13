@@ -98,6 +98,17 @@ export function Page(props: PageProps) {
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
 								<Feedback />
+								<button
+									class="ml-9 text-info/80 hover:text-info/60"
+									onClick={() => {
+										window.open(
+											`https://github.com/inlang/inlang/tree/main/documentation/`,
+											"_blank",
+										)
+									}}
+								>
+									Edit on GitHub
+								</button>
 							</div>
 						</div>
 					</Show>
@@ -169,7 +180,7 @@ function NavbarCommon(props: {
 										{props.headings &&
 											props.headings.length > 1 &&
 											isSelected(document.frontmatter.href) && (
-												<ul class="mt-2 mb-6 space-y-2 border-l border-l-info/10 pl-3">
+												<ul class="mt-2 mb-6">
 													<For each={props.headings}>
 														{(heading) =>
 															heading !== undefined &&
@@ -181,13 +192,14 @@ function NavbarCommon(props: {
 																			onAnchorClick(
 																				heading.toString().toLowerCase().replaceAll(" ", "-"),
 																			)
+																			props.onLinkClick?.()
 																		}}
 																		class={
-																			"text-sm tracking-widem block w-full " +
+																			"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																			(highlightedAnchor() ===
 																			heading.toString().toLowerCase().replaceAll(" ", "-")
-																				? "font-medium text-info/80 "
-																				: "text-info/60 hover:text-info/80 font-normal")
+																				? "font-medium text-info/80 border-l-info/80 "
+																				: "text-info/60 hover:text-info/80 font-normal border-l-info/10 ")
 																		}
 																		href={`#${heading
 																			.toString()
