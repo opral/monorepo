@@ -2,10 +2,17 @@ import { Accessor, Component, createEffect, ErrorBoundary } from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
 import { LocalStorageProvider } from "@src/services/local-storage/index.js"
+import { I18nContext } from "@solid-primitives/i18n"
+import { rpc } from "@inlang/rpc"
+import { createI18nContext } from "@solid-primitives/i18n"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
 }>
+
+// get translation files and put it in context provider
+const [response] = await rpc.getLangResources()
+const value = createI18nContext(response || {}, "en")
 
 /**
  * The Page that is being rendered.
@@ -17,9 +24,11 @@ export type RootProps = Accessor<{
 export function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
-			<LocalStorageProvider>
-				<Dynamic component={props.page} {...props.pageProps} />
-			</LocalStorageProvider>
+			<I18nContext.Provider value={value}>
+				<LocalStorageProvider>
+					<Dynamic component={props.page} {...props.pageProps} />
+				</LocalStorageProvider>
+			</I18nContext.Provider>
 		</ErrorBoundary>
 	)
 }

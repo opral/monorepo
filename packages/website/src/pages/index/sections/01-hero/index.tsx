@@ -6,8 +6,11 @@ import Jitsi from "./assets/jitsi.jsx"
 import Listmonk from "./assets/listmonk.jsx"
 import OpenAssistant from "./assets/openAssistant.jsx"
 import KeyVisual from "./keyVisual.jsx"
+import { useI18n } from "@solid-primitives/i18n"
 
 const Hero = () => {
+	const [t] = useI18n()
+
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
@@ -16,6 +19,7 @@ const Hero = () => {
 						<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 							{"Globalization "}
 						</span>
+						{t("hello")}
 						infrastructure for software
 					</h1>
 					<p class="text-xl text-surface-600 w-min-full md:w-[70%] leading-relaxed">
