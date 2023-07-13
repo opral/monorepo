@@ -98,17 +98,6 @@ export function Page(props: PageProps) {
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
 								<Feedback />
-								<button
-									class="ml-9 text-info/80 hover:text-info/60"
-									onClick={() => {
-										window.open(
-											`https://github.com/inlang/inlang/tree/main/documentation/`,
-											"_blank",
-										)
-									}}
-								>
-									Edit on GitHub
-								</button>
 							</div>
 						</div>
 					</Show>
