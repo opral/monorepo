@@ -198,3 +198,22 @@ it("should parse Placeholders without adding Text elements around it", async () 
 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Placeholder")
 	expect(resources[0]?.body[0]?.pattern?.elements[1]).toBe(undefined)
 })
+
+it("should pass roundTrip with unused folder in language dir", async () => {
+	const enResource = `{
+    "test": "test"
+}`
+
+	const env = await mockEnvironment({})
+
+	await env.$fs.writeFile("./de.json", enResource)
+	await env.$fs.writeFile("./en.json", enResource)
+	await env.$fs.writeFile("dayjs-locale-en.js", enResource)
+	await env.$fs.mkdir("./__tests__")
+	await env.$fs.writeFile("./__tests__/localizations.test.ts", enResource)
+
+	const x = plugin({ pathPattern: "./{language}.json", ignore: ["__tests__"] })(env)
+	const config = await x.config({})
+	config.referenceLanguage = "en"
+	expect(config.languages).toStrictEqual(["de", "en"])
+})
