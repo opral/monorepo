@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js"
+import { For, Show, createRenderEffect, createSignal } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -14,10 +14,20 @@ import { Feedback } from "./Feedback.jsx"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	headings: any[]
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
+	const [renderedHeadings, setRenderedHeadings] = createSignal<any[]>([])
+
+	createRenderEffect(() => {
+		setRenderedHeadings([])
+		for (const heading of props.headings) {
+			console.log(heading.children[0])
+			setRenderedHeadings((prev) => [...prev, heading.children[0]])
+		}
+	})
 
 	return (
 		<>
@@ -29,15 +39,15 @@ export function Page(props: PageProps) {
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
 					{/* desktop navbar */}
 					{/* 
-					hacking the left margins to apply bg-surface-2 with 100rem 
-				    (tested on an ultrawide monitor, works!) 
-				*/}
+          hacking the left margins to apply bg-surface-2 with 100rem 
+              (tested on an ultrawide monitor, works!) 
+          */}
 					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
 						{/* `Show` is a hotfix when client side rendering loaded this page
 						 * filteredTableContents is not available on the client.
 						 */}
 						<Show when={props.processedTableOfContents}>
-							<NavbarCommon {...props} />
+							<NavbarCommon {...props} headings={renderedHeadings()} />
 						</Show>
 					</nav>
 					{/* Mobile navbar */}
@@ -50,7 +60,13 @@ export function Page(props: PageProps) {
 							 * filteredTableContents is not available on the client.
 							 */}
 							<Show when={props.processedTableOfContents}>
-								<NavbarCommon {...props} onLinkClick={() => mobileDetailMenu?.hide()} />
+								<NavbarCommon
+									{...props}
+									headings={renderedHeadings()}
+									onLinkClick={() => {
+										mobileDetailMenu?.hide()
+									}}
+								/>
 							</Show>
 						</sl-details>
 					</nav>
@@ -59,10 +75,10 @@ export function Page(props: PageProps) {
 						fallback={<p class="text-danger">{props.markdown?.error}</p>}
 					>
 						{/* 
-					rendering on the website is broken due to relative paths and 
-					the escaping of html. it is better to show the RFC's on the website
-					and refer to github for the rendered version than to not show them at all. 
-				*/}
+            rendering on the website is broken due to relative paths and 
+            the escaping of html. it is better to show the RFC's on the website
+            and refer to github for the rendered version than to not show them at all. 
+          */}
 						<div class="w-full justify-self-center mb-8 md:p-6 md:col-span-3">
 							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 								<Callout variant="warning">
@@ -91,6 +107,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
+	headings: PageProps["headings"]
 	onLinkClick?: () => void
 }) {
 	const isSelected = (href: string) => {
@@ -129,6 +146,31 @@ function NavbarCommon(props: {
 										>
 											{document.frontmatter.shortTitle}
 										</a>
+										{props.headings.length > 1 &&
+											// render the headings of the current document
+											// if the document is selected
+											isSelected(document.frontmatter.href) && (
+												<ul class="pl-4 mt-3 mb-6 space-y-2 border-l border-l-info/10">
+													<For each={props.headings}>
+														{(heading) =>
+															heading !== undefined &&
+															heading !== document.frontmatter.shortTitle && (
+																<li>
+																	<a
+																		class="text-info/60 hover:text-info/80 tracking-wide text-sm block w-full font-normal"
+																		href={`#${heading
+																			.toString()
+																			.toLowerCase()
+																			.replaceAll(" ", "-")}`}
+																	>
+																		{heading}
+																	</a>
+																</li>
+															)
+														}
+													</For>
+												</ul>
+											)}
 									</li>
 								)}
 							</For>

@@ -33,9 +33,11 @@ await generateIndexAndTableOfContents()
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
+	let headings = []
 	// dirty way to get reload of markdown (not hot reload though)
 	if (import.meta.env.DEV) {
 		await generateIndexAndTableOfContents()
+		headings = await generateHeadings(pageContext.urlPathname)
 	}
 	if (!Object.keys(index).includes(pageContext.urlPathname)) {
 		throw RenderErrorPage({ pageContext: { is404: true } })
@@ -45,6 +47,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 			pageProps: {
 				markdown: index[pageContext.urlPathname],
 				processedTableOfContents: processedTableOfContents,
+				headings: headings,
 			},
 		},
 	}
@@ -68,4 +71,17 @@ async function generateIndexAndTableOfContents() {
 		}
 		processedTableOfContents[category] = frontmatters
 	}
+}
+
+/**
+ * Generates the headings
+ */
+async function generateHeadings(urlPathname: string) {
+	const headings: PageProps["headings"] = []
+	for (const heading of index[urlPathname].renderableTree.children) {
+		if (heading.name === "Heading") {
+			headings.push(heading)
+		}
+	}
+	return headings
 }
