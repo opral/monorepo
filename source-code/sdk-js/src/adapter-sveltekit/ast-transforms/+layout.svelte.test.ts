@@ -180,6 +180,71 @@ describe("transformLayoutSvelte", () => {
 				{language}{/key}{/if}"
 			`)
 		})
+
+		test("should insert data export right after first import statements", () => {
+			const code = dedent`
+				<script>
+					import { i } from "@inlang/sdk-js"
+					console.log(i("welcome"))
+				</script>
+
+				<slot />
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				console.log(i(\\"welcome\\"));
+				</script>{#if language}{#key language}
+
+				<slot />{/key}{/if}"
+			`)
+		})
+
+		test("should insert code snippets right after data export", () => {
+			const code = dedent`
+				<script>
+					import { i } from "@inlang/sdk-js"
+					console.log(123)
+
+					export let data
+
+					console.log(i("welcome"))
+				</script>
+
+				<slot />
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				console.log(123);
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				console.log(i(\\"welcome\\"));
+				</script>{#if language}{#key language}
+
+				<slot />{/key}{/if}"
+			`)
+		})
 	})
 
 	describe("non-root", () => {
