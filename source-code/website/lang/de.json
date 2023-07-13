@@ -1,3 +1,10 @@
 {
-	"test": "Infrastruktur für Software"
+  "landing.hero.keyword": "Globalisierungs-",
+  "landing.hero.title": "Infrastruktur für Software",
+  "landing.hero.description.inlangs": "inlangs",
+  "landing.hero.description.ecosystem": "Ökosystem",
+  "landing.hero.description.benefit": "macht die Anpassung deiner Anwendung an verschiedene Märkte einfach.",
+  "landing.hero.cta": "Loslegen",
+  "landing.hero.githubLink": "Anzeigen auf GitHub",
+  "landing.hero.usedBy": "Verwendet von Entwicklern bei"
 }

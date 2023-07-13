@@ -1,7 +1,6 @@
 import IconGithub from "~icons/cib/github"
 import CibGit from "~icons/cib/git"
 import MaterialSymbolsArrowRightAltRounded from "~icons/material-symbols/arrow-right-alt-rounded"
-import Calcom from "./sections/01-hero/assets/clacom.jsx"
 
 export function Hero() {
 	return (

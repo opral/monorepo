@@ -1,3 +1,16 @@
 {
-	"test": "infrastructure for software"
+  "landing.hero.keyword": "Globalization",
+  "landing.hero.title": "infrastructure for software",
+  "landing.hero.cta": "Get started",
+  "landing.hero.description.inlangs": "inlang's",
+  "landing.hero.description.ecosystem": "ecosystem",
+  "landing.hero.description.benefit": "makes adapting your application to different markets easy.",
+  "landing.hero.githubLink": "View on GitHub",
+  "landing.hero.usedBy": "Used by devs at",
+  "landing.integration.caption": "Tech stack agnostic",
+  "landing.integration.title": "Integrates into any codebase",
+  "landing.integration.description": "Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
+  "landing.integration.tooltip": "New SDK!",
+  "landing.config.editor.title": "Web Editor",
+  "landing.config.editor.description": "No-code editor to manage your translations."
 }
