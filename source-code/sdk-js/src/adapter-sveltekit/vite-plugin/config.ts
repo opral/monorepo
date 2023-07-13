@@ -96,7 +96,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const usesTypeScript = await doesPathExist(path.resolve(cwdFolderPath, "tsconfig.json"))
 
-		const svelteKitVersion = svelteKit.VERSION || await getInstalledVersionOfPackage("@sveltejs/kit")
+		const svelteKitVersion = (svelteKit as unknown as { VERSION: string }).VERSION || await getInstalledVersionOfPackage("@sveltejs/kit")
 
 		resolve({
 			cwdFolderPath,
