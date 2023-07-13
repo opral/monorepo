@@ -9,6 +9,9 @@ import {
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
+import { InlangException } from '../../exceptions.js'
+import { InlangSdkException } from '../../adapter-sveltekit/vite-plugin/exceptions.js'
+import { dedent } from 'ts-dedent'
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -25,7 +28,7 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
 	}
 
-	throw new Error(`wrapWithPlaceholder does not support '${node.getKindName()}'`)
+	throw new InlangSdkException(`Wrapping placeholder does not support node of kind '${node.getKindName()}'.`)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -39,12 +42,22 @@ export const createWrapperAst = (name: string, options = "") =>
 
 const findWrappingPoint = (callExpression: CallExpression) => {
 	if (!callExpression.getExpression().getText()) {
-		throw new Error(`Could not find wrapping point in ${callExpression.getText()}`)
+		throw new InlangSdkException(dedent`
+			Could not find CallExpression in code:
+
+			${callExpression.getText()}
+
+		`)
 	}
 
 	const argument = callExpression.getArguments()[0]
 	if (!argument) {
-		throw new Error(`Could not find wrapping point in ${callExpression.getText()}`)
+		throw new InlangSdkException(dedent`
+			Could not find Argument in code:
+
+			${callExpression.getText()}
+
+		`)
 	}
 
 	return argument
@@ -56,7 +69,12 @@ const findInsertionPoint = (callExpression: CallExpression) => {
 		.find((identifier) => identifier.getText() === WRAP_IDENTIFIER)
 
 	if (!insertionPoint) {
-		throw new Error(`Could not find insertion point in ${callExpression.getText()}`)
+		throw new InlangSdkException(dedent`
+			Could not find insertion point in code:
+
+			${callExpression.getText()}
+
+		`)
 	}
 
 	return insertionPoint
@@ -82,7 +100,12 @@ const findFunctionExpression = (
 		return node
 	}
 
-	throw new Error(`Could not find function expression in ${node.getText()}`)
+	throw new InlangSdkException(dedent`
+		Could not find function expression in code:
+
+		${node.getText()}
+
+	`)
 }
 
 export const wrapExportedFunction = (
@@ -103,7 +126,7 @@ export const wrapExportedFunction = (
 
 	const fn = findFunctionExpression(fnExport)
 	if (!fn) {
-		throw Error(`Could not find ${exportName} function`)
+		throw new InlangSdkException(`Could not find exported function '${exportName}'`)
 	}
 
 	const wrapped = wrapWithPlaceholder(fn)

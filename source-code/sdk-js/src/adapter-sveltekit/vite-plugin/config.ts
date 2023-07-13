@@ -11,6 +11,7 @@ import path from "node:path"
 import { pathToFileURL } from "node:url"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
+import { InlangSdkException } from './exceptions.js'
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -117,21 +118,24 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigError extends Error {}
+class InlangSdkConfigException extends InlangSdkException { }
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
 ): asserts config is InlangConfigWithSdkProps {
 	if (!config) {
-		throw new InlangSdkConfigError(
-			"Could not find `inlang.config.js` in the root of your project.`",
-		)
+		throw new InlangSdkConfigException(dedent`
+			Could not locate 'inlang.config.js' at the root of your project (${inlangConfigFilePath}).
+			Make sure the file exists. You can generate the file using the inlang CLI.
+			See https://inlang.com/documentation/apps/inlang-cli
+		`)
 	}
 
 	if (!("sdk" in config)) {
-		throw new InlangSdkConfigError(
-			"Invalid config. Make sure to add the `sdkPlugin` to your `inlang.config.js` file. See https://inlang.com/documentation/sdk/configuration",
-		)
+		throw new InlangSdkConfigException(dedent`
+			Invalid config. Make sure to add the 'sdkPlugin' to your 'inlang.config.js' file.
+			See https://inlang.com/documentation/sdk/configuration
+		`)
 	}
 }
 

@@ -1,8 +1,11 @@
+import { dedent } from 'ts-dedent'
 import { assertNoImportsFromSdkJs } from '../../ast-transforms/assertions.js'
 import { findExport } from '../../ast-transforms/utils/exports.js'
 import { addImport, isOptOutImportPresent } from '../../ast-transforms/utils/imports.js'
 import { codeToSourceFile, nodeToCode } from '../../ast-transforms/utils/js.util.js'
 import type { TransformConfig } from '../vite-plugin/config.js'
+import { InlangSdkException } from '../vite-plugin/exceptions.js'
+import { filePathForOutput } from '../vite-plugin/fileInformation.js'
 
 const exportPrerenderNode = codeToSourceFile(`
 	export const prerender = true
@@ -34,7 +37,10 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, '')) // TODO: implement functionality
 
 	if (findExport(sourceFile, 'GET'))
-		throw Error(`The file already contains a 'GET' export.`)
+		throw new InlangSdkException(dedent`
+			The file (${filePathForOutput(config, filePath)}) already contains a 'GET' export.
+			Please remove it as 'inlang' needs to inject it's own magic here.
+		`)
 
 	let codeToInsert = ''
 	if (config.isStatic && config.inlang.sdk.resources.cache === "build-time")

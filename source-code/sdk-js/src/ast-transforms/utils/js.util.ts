@@ -1,5 +1,6 @@
 import { Project, Node, QuoteKind, IndentationText, ScriptKind } from "ts-morph"
 import { dedent } from "ts-dedent"
+import { InlangException } from '../../exceptions.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -25,16 +26,16 @@ export const codeToNode = (code: string) => {
 		.getDeclarations()[0]
 
 	if (!node) {
-		throw new Error("codeToDeclarationAst: could not find declaration")
+		throw new InlangException("Could not find variable declaration.")
 	}
 
 	if (node.getName() !== "x") {
-		throw new Error('you must name the variable "x"')
+		throw new InlangException("The variable must be named 'x'.")
 	}
 
 	const initializer = node.getInitializer()
 	if (!initializer) {
-		throw new Error("codeToDeclarationAst: could not find initializer")
+		throw new InlangException("Could not find variable initializer.")
 	}
 
 	return initializer

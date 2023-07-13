@@ -1,13 +1,14 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path, { dirname } from "node:path"
 import { dedent } from "ts-dedent"
-import { InlangError } from "../../../config/config.js"
 import { doesPathExist, type TransformConfig } from "../config.js"
 import type { FileType } from "../fileInformation.js"
+import { InlangException } from '../../../exceptions.js'
+import { InlangSdkException } from '../exceptions.js'
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.rootRoutesFolder))) {
-		throw new InlangError(dedent`
+		throw new InlangException(dedent`
 
 			Could not find the folder '${config.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
 			It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/inlang/issues/647.
@@ -50,7 +51,7 @@ export const assertNecessaryFilesArePresent = async (config: TransformConfig) =>
 				return path.resolve(config.svelteKit.files.routes, `+page.svelte`)
 		}
 
-		throw Error("not implemented")
+		throw new InlangSdkException(`Could not find path for file type '${fileType}'`)
 	}
 
 	const doesFileOfTypeExist = async (fileType: FileType): Promise<boolean> => {

@@ -1,5 +1,6 @@
 import type { Ast, TemplateNode } from './../../../../node_modules/svelte/types/compiler/interfaces.js'
 import type { MagicStringType } from '../../magic-string.js'
+import { InlangSdkException } from '../../vite-plugin/exceptions.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -19,12 +20,12 @@ const canNodeBeWrapped = (node: TemplateNode) => {
 
 // TODO: test
 const wrapNodes = (s: MagicStringType, ast: Ast, start: number, end: number, wrapWith: string) => {
-	// TODO: only wrap if @inlnag/sdk-js imports get used or if it's a component or a <slot />
+	// TODO: only wrap if @inlnag/sdk-js imports get used inside that block or if it's a component or a <slot />
 	const nodes = ast.html.children?.slice(start, end) || []
 	if (!nodes.length) return
 
 	if (!wrapWith.includes('$$_INLANG_WRAP_$$'))
-		throw new Error('Cannot wrap with a string that contains $$_INLANG_WRAP_$$')
+		throw new InlangSdkException('Could not find wrapping point.')
 
 	const [before, after] = wrapWith.split('$$_INLANG_WRAP_$$') as [string, string]
 	s.appendLeft(nodes.at(0)!.start, before)

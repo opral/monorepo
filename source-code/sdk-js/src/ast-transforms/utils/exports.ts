@@ -1,3 +1,5 @@
+import { dedent } from 'ts-dedent'
+import { InlangSdkException } from '../../adapter-sveltekit/vite-plugin/exceptions.js'
 import { codeToSourceFile } from "./js.util.js"
 import { Node, SyntaxKind, type SourceFile } from "ts-morph"
 
@@ -58,7 +60,11 @@ export const findOrCreateExport = (sourceFile: SourceFile, name: string, default
 			.getDeclarations()
 			.some((declaration) => declaration.getName() === name),
 	).length
-	if (isVariableAlreadyDefined) throw new Error(`Variable ${name} already exists`)
+	if (isVariableAlreadyDefined)
+		throw new InlangSdkException(dedent`
+			Variable '${name}' already exists. The inlang SDK needs to export a variable with this name.
+			Please rename the variable in this file.
+		`)
 	// TODO: use `export { randomVariableName as load } instead of throwing an error
 
 	const createdFn = codeToSourceFile(`export const ${name} = ${defaultImplementation}`)
