@@ -7,6 +7,7 @@ import { Root } from "./Root.jsx"
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
+import { defaultLanguage, languages } from "./_default.page.route.js"
 
 // See https://vite-plugin-ssr.com/data-fetching
 export const passToClient = ["pageProps", "routeParams", "locale"] as const
@@ -89,3 +90,28 @@ gtag('js', new Date());
 gtag('config', 'G-5H3SDF7TVZ');
 </script>
 `
+
+export function onBeforePrerender(prerenderContext: any) {
+	const pageContexts: any = []
+	for (const pageContext of prerenderContext.pageContexts) {
+		// Duplicate pageContext for each locale
+		for (const locale of languages) {
+			// Localize URL
+			let { urlOriginal } = pageContext
+			if (locale !== defaultLanguage) {
+				urlOriginal = `/${locale}${pageContext.urlOriginal}`
+			}
+			pageContexts.push({
+				...pageContext,
+				urlOriginal,
+				// Set pageContext.locale
+				locale,
+			})
+		}
+	}
+	return {
+		prerenderContext: {
+			pageContexts,
+		},
+	}
+}

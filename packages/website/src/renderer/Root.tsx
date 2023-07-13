@@ -47,6 +47,7 @@ function RootWithProviders(props: {
 	const [, { locale }] = useI18n()
 
 	onMount(() => {
+		console.log("set")
 		setLocalStorage({ locale: props.locale })
 		locale(props.locale)
 	})

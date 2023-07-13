@@ -1,3 +1,5 @@
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { JSXElement, Match, Switch } from "solid-js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 
@@ -10,6 +12,12 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 export function Link(props: { href: string; children: JSXElement }) {
 	/** whether a link is an external link */
 	const isExternal = () => props.href.startsWith("http")
+	const [localStorage] = useLocalStorage()
+
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
 
 	return (
 		<Switch>
@@ -25,7 +33,10 @@ export function Link(props: { href: string; children: JSXElement }) {
 				</a>
 			</Match>
 			<Match when={isExternal() === false}>
-				<a href={props.href} class="text-primary hover:text-hover-primary no-underline">
+				<a
+					href={getLocale() + props.href}
+					class="text-primary hover:text-hover-primary no-underline"
+				>
 					{props.children}
 				</a>
 			</Match>

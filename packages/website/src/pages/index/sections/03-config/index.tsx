@@ -1,6 +1,8 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 const code = [
 	<p class="text-surface-500">...</p>,
@@ -66,6 +68,8 @@ const data = [
 
 const ConfigPage = () => {
 	const [connectorSizes, setConnectorSizes] = createSignal<Array<number>>([0, 0, 0, 0, 0, 0])
+	const [localStorage] = useLocalStorage()
+
 	onMount(() => {
 		const box1 = document.getElementById("connector1")
 		const box2 = document.getElementById("connector2")
@@ -83,20 +87,34 @@ const ConfigPage = () => {
 		])
 	})
 
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
+
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
 					Multiple{" "}
-					<a href="/documentation/apps/web-editor" class="underline transition link-primary">
+					<a
+						href={getLocale() + "/documentation/apps/web-editor"}
+						class="underline transition link-primary"
+					>
 						apps
 					</a>
 					, endless{" "}
-					<a href="/documentation/plugins/registry" class="underline transition link-primary">
+					<a
+						href={getLocale() + "/documentation/plugins/registry"}
+						class="underline transition link-primary"
+					>
 						plugins
 					</a>
 					, one{" "}
-					<a href="/documentation/quick-start" class="underline transition link-primary">
+					<a
+						href={getLocale() + "/documentation/quick-start"}
+						class="underline transition link-primary"
+					>
 						config
 					</a>
 					.
@@ -107,7 +125,7 @@ const ConfigPage = () => {
 				<For each={data}>
 					{(card) => (
 						<a
-							href={card.link}
+							href={getLocale() + card.link}
 							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary pb-4"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
@@ -170,7 +188,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
 				<a
-					href="/documentation/plugins/registry"
+					href={getLocale() + "/documentation/plugins/registry"}
 					class="relative cursor-pointer group"
 					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
 				>
@@ -239,7 +257,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
 				<a
-					href="/documentation/quick-start"
+					href={getLocale() + "/documentation/quick-start"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
 				>
 					<div class="absolute top-5 left-6 flex gap-2">

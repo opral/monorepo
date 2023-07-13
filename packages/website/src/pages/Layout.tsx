@@ -14,6 +14,7 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { rpc } from "@inlang/rpc"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 /**
  * Ensure that all elements use the same margins.
@@ -92,6 +93,11 @@ function Header(props: { landingpage?: boolean }) {
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
+
 	return (
 		<>
 			<header
@@ -101,7 +107,7 @@ function Header(props: { landingpage?: boolean }) {
 				<div class={`w-full h-full py-4 px-4 sm:px-10 ${props.landingpage && "px-10"}`}>
 					<nav class={"max-w-screen-xl w-full mx-auto xl:px-10"}>
 						<div class="flex">
-							<a href="/" class="flex items-center w-fit">
+							<a href={getLocale() + "/"} class="flex items-center w-fit">
 								<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 								<span class="self-center pl-2 text-left font-semibold text-surface-900">
 									inlang
@@ -186,6 +192,36 @@ function Header(props: { landingpage?: boolean }) {
 	)
 }
 
+const docLinks = [
+	{ name: "Getting Started", href: "/documentation/quick-start", type: "text" as buttonType },
+	{ name: "Why inlang", href: "/documentation", type: "text" as buttonType },
+	{ name: "Contribute", href: "/documentation/contributing", type: "text" as buttonType },
+]
+const resourceLinks = [
+	{ name: "Blog", href: "/blog", type: "text" as buttonType },
+	{
+		name: "Roadmap",
+		href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
+		type: "text" as buttonType,
+	},
+	{ name: "Github", href: "https://github.com/inlang/inlang", type: "text" as buttonType },
+	{ name: "Twitter", href: "https://twitter.com/inlangHQ", type: "text" as buttonType },
+	{ name: "Discord", href: "https://discord.gg/gdMPPWy57R", type: "text" as buttonType },
+]
+const contactLinks = [
+	{ name: "Get in Touch", href: "mailto:hello@inlang.com", type: "text" as buttonType },
+	{
+		name: "Join the Team",
+		href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
+		type: "text" as buttonType,
+	},
+	{
+		name: "Feedback",
+		href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+		type: "text" as buttonType,
+	},
+]
+
 const Footer = (props: { isLandingPage: boolean }) => {
 	return (
 		<footer class="border-t border-surface-100">
@@ -197,82 +233,41 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 					</div>
-					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
-						<p class="font-semibold text-surface-900">Docs</p>
-						<a
-							href="https://inlang.com/documentation/quick-start"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Getting Started
-						</a>
-
-						<a
-							href="https://inlang.com/documentation"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Why Inlang
-						</a>
-						<a
-							href="https://inlang.com/documentation/contributing"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Contribute
-						</a>
+					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">Docs</p>
+						<For each={docLinks}>
+							{(link) => (
+								<div class="w-fit opacity-80">
+									<Button type={link.type} href={link.href}>
+										{link.name}
+									</Button>
+								</div>
+							)}
+						</For>
 					</div>
-					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col gap-2 md:gap-4 pt-2">
-						<p class="font-semibold text-surface-900">Resources</p>
-						<a
-							href="https://inlang.com/blog"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Blog
-						</a>
-						<a
-							href="https://github.com/orgs/inlang/projects?query=is%3Aopen"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Roadmap
-						</a>
-						<a
-							href="https://github.com/inlang/inlang"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							GitHub
-						</a>
-						<a
-							href="https://twitter.com/inlangHQ"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Twitter
-						</a>
-						<a
-							href="https://discord.gg/gdMPPWy57R"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Discord
-						</a>
+					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">Resources</p>
+						<For each={resourceLinks}>
+							{(link) => (
+								<div class="w-fit opacity-80">
+									<Button type={link.type} href={link.href}>
+										{link.name}
+									</Button>
+								</div>
+							)}
+						</For>
 					</div>
-					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2">
-						<p class="font-semibold text-surface-900">Let's talk</p>
-
-						<a
-							href="mailto:hello@inlang.com"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Get in Touch
-						</a>
-						<a
-							href="https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Join the Team
-						</a>
-						<a
-							href="https://github.com/inlang/inlang/discussions/categories/feedback"
-							class="font-medium text-surface-500 hover:text-primary"
-						>
-							Feedback
-						</a>
+					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">Let's talk</p>
+						<For each={contactLinks}>
+							{(link) => (
+								<div class="w-fit opacity-80">
+									<Button type={link.type} href={link.href}>
+										{link.name}
+									</Button>
+								</div>
+							)}
+						</For>
 					</div>
 					<div class="flex visible xl:invisible w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 xl:hidden flex-col gap-6 py-10 rounded">
 						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>

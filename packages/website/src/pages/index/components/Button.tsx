@@ -1,3 +1,5 @@
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
@@ -29,12 +31,20 @@ interface ButtonProps {
 }
 
 export const Button = (props: ButtonProps) => {
+	const [localStorage] = useLocalStorage()
+
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
+
 	return (
 		<>
 			<Show when={props?.href?.startsWith("/") && !props.function}>
 				<button
 					onClick={() => {
-						props.href && navigate(props.href)
+						console.log(localStorage.locale)
+						props.href && navigate(getLocale() + props.href)
 					}}
 					class={
 						"flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
