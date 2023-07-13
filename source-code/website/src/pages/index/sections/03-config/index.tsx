@@ -61,33 +61,33 @@ const ConfigPage = () => {
 			isSoon: false,
 			description: `${t("landing.config.editor.description")}`,
 			benefit: [
-				"No translator needs to touch code",
-				"Push through interface",
-				"No sync pipelines and extra accounts",
+				`${t("landing.config.editor.benefit1")}`,
+				`${t("landing.config.editor.benefit2")}`,
+				`${t("landing.config.editor.benefit3")}`,
 			],
 			link: "/documentation/apps/web-editor",
 			image: "/images/AppSVGs/editor.svg",
 		},
 		{
-			title: "IDE Extension",
+			title: `${t("landing.config.extension.title")}`,
 			isSoon: false,
-			description: "Handle translations directly in VSCode through an extension.",
+			description: `${t("landing.config.extension.description")}`,
 			benefit: [
-				"Extract messages from code",
-				"Inline annotations behind key",
-				"Auto-update for synced resources",
+				`${t("landing.config.extension.benefit1")}`,
+				`${t("landing.config.extension.benefit2")}`,
+				`${t("landing.config.extension.benefit3")}`,
 			],
 			link: "/documentation/apps/ide-extension",
 			image: "/images/AppSVGs/ide.svg",
 		},
 		{
-			title: "inlang CLI",
+			title: `${t("landing.config.cli.title")}`,
 			isSoon: false,
-			description: "CLI to interact with inlang's infastructure.",
+			description: `${t("landing.config.cli.description")}`,
 			benefit: [
-				"Automate localization tasks (CI/CD)",
-				"Lint your translations",
-				"Machine translate your resources",
+				`${t("landing.config.cli.benefit1")}`,
+				`${t("landing.config.cli.benefit2")}`,
+				`${t("landing.config.cli.benefit3")}`,
 			],
 			link: "/documentation/apps/inlang-cli",
 			image: "/images/AppSVGs/cli.svg",
@@ -98,26 +98,26 @@ const ConfigPage = () => {
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
-					Multiple{" "}
+					{t("landing.config.title.multiple")}{" "}
 					<a
 						href={getLocale() + "/documentation/apps/web-editor"}
 						class="underline transition link-primary"
 					>
-						apps
+						{t("landing.config.title.apps")}
 					</a>
-					, endless{" "}
+					{t("landing.config.title.endless")}{" "}
 					<a
 						href={getLocale() + "/documentation/plugins/registry"}
 						class="underline transition link-primary"
 					>
-						plugins
+						{t("landing.config.title.plugins")}
 					</a>
-					, one{" "}
+					{t("landing.config.title.one")}{" "}
 					<a
 						href={getLocale() + "/documentation/quick-start"}
 						class="underline transition link-primary"
 					>
-						config
+						{t("landing.config.title.config")}
 					</a>
 					.
 				</h2>
@@ -196,7 +196,7 @@ const ConfigPage = () => {
 				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
 						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
-							plugins
+							{t("landing.config.title.plugins")}
 						</pre>
 					</div>
 					<div
