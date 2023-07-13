@@ -5,7 +5,6 @@ import { LocalStorageProvider, useLocalStorage } from "@src/services/local-stora
 import { I18nContext, useI18n } from "@solid-primitives/i18n"
 import { rpc } from "@inlang/rpc"
 import { createI18nContext } from "@solid-primitives/i18n"
-import { on } from "node:events"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -14,6 +13,8 @@ export type RootProps = Accessor<{
 // get translation files and put it in context provider
 const [response] = await rpc.getLangResources()
 const value = createI18nContext(response || {}, "en")
+
+console.log(response)
 
 /**
  * The Page that is being rendered.

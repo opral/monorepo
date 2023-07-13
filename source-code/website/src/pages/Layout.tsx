@@ -15,6 +15,8 @@ import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { rpc } from "@inlang/rpc"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
+import { navigate } from "vite-plugin-ssr/client/router"
 
 /**
  * Ensure that all elements use the same margins.
@@ -92,6 +94,7 @@ function Header(props: { landingpage?: boolean }) {
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
 		const locale = localStorage.locale || defaultLanguage
@@ -136,6 +139,23 @@ function Header(props: { landingpage?: boolean }) {
 											</Button>
 										)}
 									</For>
+									<div class="text-xl -mr-4 w-[100px]">
+										<sl-select
+											prop:value={locale()}
+											on:sl-change={(event: any) => {
+												const language = event.target.value || defaultLanguage
+												navigate(
+													(language !== defaultLanguage ? "/" + language : "") +
+														currentPageContext.urlParsed.pathname,
+												)
+												locale(event.target.value)
+											}}
+										>
+											<sl-option prop:value="en">🇺🇸 English</sl-option>
+											<sl-option prop:value="de">🇩🇪 German</sl-option>
+											<sl-option prop:value="zh">🇨🇳 Chinese</sl-option>
+										</sl-select>
+									</div>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
 											Open Editor
@@ -224,7 +244,7 @@ const contactLinks = [
 
 const Footer = (props: { isLandingPage: boolean }) => {
 	return (
-		<footer class="border-t border-surface-100">
+		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
 				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
