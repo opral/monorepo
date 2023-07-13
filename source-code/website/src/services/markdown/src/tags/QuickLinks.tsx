@@ -5,6 +5,8 @@ import Vuejs from "@src/pages/index/sections/02-integration/assets/vuejs.jsx"
 import Reactjs from "@src/pages/index/sections/02-integration/assets/reactjs.jsx"
 import Nuxt from "@src/pages/index/sections/02-integration/assets/nuxt.jsx"
 import { JSXElement, Show } from "solid-js"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 type BrandLogo = "next" | "vue" | "react" | "svelte" | "nuxt"
 
@@ -30,6 +32,13 @@ export function QuickLink(props: {
 	icon?: AvailableIcon
 	logo?: BrandLogo
 }) {
+	const [localStorage] = useLocalStorage()
+
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage && !props.logo ? "/" + locale : ""
+	}
+
 	return (
 		<div class="group relative rounded-xl bg-surface-100 hover:bg-surface-200  hover:transition-colors duration-200">
 			<div class="relative overflow-hidden rounded-lg p-6">
@@ -57,7 +66,7 @@ export function QuickLink(props: {
 				</div>
 
 				<h2 class="mt-4 text-base font-medium text-active-info">
-					<a href={props.href}>
+					<a href={getLocale() + props.href}>
 						<span class="absolute -inset-px rounded-xl" />
 						{props.title}
 					</a>

@@ -2,8 +2,17 @@ import { Title, Meta } from "@solidjs/meta"
 import { For } from "solid-js"
 import { Layout } from "../Layout.jsx"
 import type { PageProps } from "./@id/index.page.jsx"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 export function Page(props: PageProps) {
+	const [localStorage] = useLocalStorage()
+
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
+
 	return (
 		<>
 			<Title>inlang Blog - Developer-first localization infrastructure.</Title>
@@ -16,7 +25,7 @@ export function Page(props: PageProps) {
 					<For each={Object.entries(props.processedTableOfContents ?? {})}>
 						{([href, frontmatter]) => (
 							<div class="py-12">
-								<a href={href} class="text-ellipsis space-y-4">
+								<a href={getLocale() + href} class="text-ellipsis space-y-4">
 									<h2 class="text-xl font-bold tracking-tight text-on-backround truncate">
 										{frontmatter.title}
 									</h2>

@@ -1,5 +1,7 @@
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import { showToast } from "@src/components/Toast.jsx"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useLocalStorage } from "@src/services/local-storage/index.js"
 import copy from "clipboard-copy"
 
 const data = {
@@ -19,6 +21,13 @@ const data = {
 }
 
 const GetStarted = () => {
+	const [localStorage] = useLocalStorage()
+
+	const getLocale = () => {
+		const locale = localStorage.locale || defaultLanguage
+		return locale !== defaultLanguage ? "/" + locale : ""
+	}
+
 	return (
 		<SectionLayout showLines={true} type="dark">
 			<div class="relative py-24">
@@ -36,7 +45,7 @@ const GetStarted = () => {
 						<p class="text-normal px-10 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
 							{data.description}
 						</p>
-						<a href={data.button.href}>
+						<a href={getLocale() + data.button.href}>
 							<button class="relative bg-surface-800">
 								<div class="relative z-20 bg-surface-200 h-10 w-72 flex justify-center items-center shadow rounded-md hover:shadow-lg hover:bg-background transition-all">
 									<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-surface-900 via-surface-800 to-surface-900 text-sm font-medium">
