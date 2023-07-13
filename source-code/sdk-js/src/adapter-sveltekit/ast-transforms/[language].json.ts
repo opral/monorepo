@@ -38,7 +38,6 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 	if (config.svelteKit.version || "" >= "1.16.3") {
 		addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", "initState")
 
-		// TODO!!: check if relative path is correct
 		sourceFile.insertText(sourceFile.getPos(), dedent`
 			export const entries = async () => {
 				const { languages } = await initState(await import('../../../../inlang.config.js'))
