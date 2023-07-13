@@ -2,7 +2,7 @@ import type { OnBeforeRender } from "@src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
 import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "@src/services/markdown/index.js"
-import { RenderErrorPage } from "vite-plugin-ssr/server"
+import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 
 /**
  * the table of contents without the html for each document
@@ -78,10 +78,19 @@ async function generateIndexAndTableOfContents() {
  */
 async function generateHeadings(urlPathname: string) {
 	const headings: PageProps["headings"] = []
-	for (const heading of index[urlPathname].renderableTree.children) {
-		if (heading.name === "Heading") {
-			headings.push(heading)
+
+	const markdown = index[urlPathname]
+	if (markdown && markdown.renderableTree) {
+		for (const heading of markdown.renderableTree.children) {
+			if (heading.name === "Heading") {
+				if (heading.children[0].name) {
+					headings.push(heading.children[0])
+				} else {
+					headings.push(heading)
+				}
+			}
 		}
 	}
+
 	return headings
 }
