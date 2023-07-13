@@ -92,7 +92,9 @@ function TheActualPage() {
 
 			recentProjects = recentProjects.filter(
 				(project) =>
-					project.owner !== routeParams().owner && project.repository !== routeParams().repository,
+					!(
+						project.owner === routeParams().owner && project.repository === routeParams().repository
+					),
 			)
 
 			const newProject: RecentProjectType = {
