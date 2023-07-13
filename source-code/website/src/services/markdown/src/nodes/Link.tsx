@@ -1,5 +1,5 @@
+import { useI18n } from "@solid-primitives/i18n"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
-import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { JSXElement, Match, Switch } from "solid-js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 
@@ -12,11 +12,11 @@ import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 export function Link(props: { href: string; children: JSXElement }) {
 	/** whether a link is an external link */
 	const isExternal = () => props.href.startsWith("http")
-	const [localStorage] = useLocalStorage()
+	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const locale = localStorage.locale || defaultLanguage
-		return locale !== defaultLanguage ? "/" + locale : ""
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
 	}
 
 	return (

@@ -1,4 +1,4 @@
-import { createSignal, For, JSXElement, Match, Show, Switch } from "solid-js"
+import { createEffect, createSignal, For, JSXElement, Match, onMount, Show, Switch } from "solid-js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
@@ -14,9 +14,10 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { rpc } from "@inlang/rpc"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage, languages } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { navigate } from "vite-plugin-ssr/client/router"
+import type Placeholder from "@tiptap/extension-placeholder"
 
 /**
  * Ensure that all elements use the same margins.
@@ -94,12 +95,17 @@ function Header(props: { landingpage?: boolean }) {
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
+	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
 	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
-		const locale = localStorage.locale || defaultLanguage
-		return locale !== defaultLanguage ? "/" + locale : ""
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
 	}
+
+	onMount(() => {
+		setLocaleIsLoaded(true)
+	})
 
 	return (
 		<>
@@ -140,21 +146,31 @@ function Header(props: { landingpage?: boolean }) {
 										)}
 									</For>
 									<div class="text-xl -mr-4 w-[100px]">
-										<sl-select
-											prop:value={locale()}
-											on:sl-change={(event: any) => {
-												const language = event.target.value || defaultLanguage
-												navigate(
-													(language !== defaultLanguage ? "/" + language : "") +
-														currentPageContext.urlParsed.pathname,
-												)
-												locale(event.target.value)
-											}}
+										<Show
+											when={localeIsLoaded()}
+											fallback={
+												<div class="w-full px-4 h-10 flex justify-center items-center border text-base rounded border-surface-300">
+													...
+												</div>
+											}
 										>
-											<sl-option prop:value="en">🇺🇸 English</sl-option>
-											<sl-option prop:value="de">🇩🇪 German</sl-option>
-											<sl-option prop:value="zh">🇨🇳 Chinese</sl-option>
-										</sl-select>
+											<sl-select
+												prop:value={locale()}
+												prop:defaultValue={defaultLanguage}
+												on:sl-change={(event: any) => {
+													const language = event.target.value || defaultLanguage
+													navigate(
+														(language !== defaultLanguage ? "/" + language : "") +
+															currentPageContext.urlParsed.pathname,
+													)
+													locale(event.target.value)
+												}}
+											>
+												<sl-option prop:value="en">🇺🇸 English</sl-option>
+												<sl-option prop:value="de">🇩🇪 German</sl-option>
+												<sl-option prop:value="zh">🇨🇳 Chinese</sl-option>
+											</sl-select>
+										</Show>
 									</div>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">

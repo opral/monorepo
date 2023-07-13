@@ -15,8 +15,6 @@ export type RootProps = Accessor<{
 const [response] = await rpc.getLangResources()
 const value = createI18nContext(unflatten(response), "en")
 
-console.log(response)
-
 /**
  * The Page that is being rendered.
  *
@@ -45,11 +43,9 @@ function RootWithProviders(props: {
 	pageProps: Record<string, unknown>
 	locale: string
 }) {
-	const [, setLocalStorage] = useLocalStorage()
 	const [, { locale }] = useI18n()
 
 	onMount(() => {
-		setLocalStorage({ locale: props.locale })
 		locale(props.locale)
 	})
 	return <Dynamic component={props.page} {...props.pageProps} />

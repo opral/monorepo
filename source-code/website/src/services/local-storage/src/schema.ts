@@ -17,7 +17,6 @@ export type LocalStorageSchema = {
 	showMachineTranslationWarning: boolean
 	isFirstUse: boolean
 	recentProjects: RecentProjectType[]
-	locale: string
 }
 
 export type RecentProjectType = {
@@ -34,5 +33,4 @@ export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
 	isFirstUse: true,
 	recentProjects: [],
-	locale: defaultLanguage,
 }
