@@ -23,6 +23,9 @@ export function Page(props: PageProps) {
 
 	createRenderEffect(() => {
 		setRenderedHeadings([])
+
+		if (!props.headings) return
+
 		for (const heading of props.headings) {
 			setRenderedHeadings((prev) => [...prev, heading.children[0]])
 		}
@@ -145,11 +148,10 @@ function NavbarCommon(props: {
 										>
 											{document.frontmatter.shortTitle}
 										</a>
-										{props.headings.length > 1 &&
-											// render the headings of the current document
-											// if the document is selected
+										{props.headings &&
+											props.headings.length > 1 &&
 											isSelected(document.frontmatter.href) && (
-												<ul class="mt-3 mb-6 space-y-2 border-l border-l-info/10 pl-3">
+												<ul class="mt-2 mb-6 space-y-2 border-l border-l-info/10 pl-3">
 													<For each={props.headings}>
 														{(heading) =>
 															heading !== undefined &&
