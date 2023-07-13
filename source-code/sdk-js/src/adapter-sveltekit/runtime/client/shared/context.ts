@@ -11,12 +11,12 @@ export const getRuntimeFromContext = () => {
 	// and saves a few bytes from the production bundle
 	try {
 		return getContext(inlangSymbol)
-	} catch (e) {
+	} catch (error) {
 		throw new InlangSdkException(
 			`You cannot directly access any '@inlang/sdk-js' imports in this scope.
 Please read the docs for more information on how to workaround this temporary limitation:
 https://inlang.com/documentation/sdk/sveltekit-advanced`,
-			e as Error,
+			error as Error,
 		)
 	}
 }

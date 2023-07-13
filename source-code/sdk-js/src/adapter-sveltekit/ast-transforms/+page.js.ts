@@ -5,6 +5,7 @@ import { addImport, isOptOutImportPresent } from '../../ast-transforms/utils/imp
 import { wrapExportedFunction } from '../../ast-transforms/utils/wrap.js'
 import { codeToSourceFile, nodeToCode } from '../../ast-transforms/utils/js.util.js'
 import type { TransformConfig } from '../vite-plugin/config.js'
+import { filePathForOutput } from '../vite-plugin/fileInformation.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -61,7 +62,7 @@ export const transformPageJs = (filePath: string, config: TransformConfig, code:
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, '')) // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), '+page.js') // TODO: implement functionality
 
 	if (!root) return code // for now we don't need to transform non-root files
 

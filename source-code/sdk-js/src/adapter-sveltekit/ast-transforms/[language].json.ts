@@ -12,11 +12,13 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePath.replace(config.cwdFolderPath, ''))
+	const fileName = filePathForOutput(config, filePath)
+
+	assertNoImportsFromSdkJs(sourceFile, fileName, '[language].json')
 
 	if (findExport(sourceFile, 'GET'))
 		throw new InlangSdkException(dedent`
-			The file (${filePathForOutput(config, filePath)}) already contains a 'GET' export.
+			The file (${fileName}) already contains a 'GET' export.
 			Please remove it as 'inlang' needs to inject it's own magic here.
 		`)
 
