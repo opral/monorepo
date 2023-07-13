@@ -2,13 +2,14 @@ import { Command } from "commander"
 import fs from "node:fs"
 import path from "node:path"
 import prompts from "prompts"
+import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import { italic } from "../../utilities/format.js"
 import { nodeFileSystem } from "../../utilities/fs/env/node.js"
+import { getConfig } from "../../utilities/getConfig.js"
 import { getConfigContent } from "../../utilities/getConfigContent.js"
 import { getLanguageFolderPath } from "../../utilities/getLanguageFolderPath.js"
 import { getSupportedLibrary, SupportedLibrary } from "../../utilities/getSupportedLibrary.js"
-import { validateCommandAction } from "./validate.js"
 
 export const init = new Command()
 	.command("init")
@@ -74,30 +75,42 @@ export async function initCommandAction() {
 	}
 
 	// Generate the config file content
-	const languageFolderPath = await getLanguageFolderPath({ fs: nodeFileSystem, rootDir })
-	const pathPatternRaw = languageFolderPath ? path.join(languageFolderPath, "{language}.json") : ""
+	let pathPattern = `''`
+	if (plugin !== "typesafe-i18n") {
+		const languageFolderPath = await getLanguageFolderPath({ fs: nodeFileSystem, rootDir })
+		const pathPatternRaw = languageFolderPath
+			? path.join(languageFolderPath, "{language}.json")
+			: ""
 
-	// Windows: Replace backward slashes with forward slashes
-	const pathPattern = pathPatternRaw.replace(/\\/g, "/")
+		// Windows: Replace backward slashes with forward slashes
+		pathPattern = pathPatternRaw.replace(/\\/g, "/")
 
-	if (pathPattern === "") {
-		log.warn(
-			"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
-		)
-	} else {
-		log.info(`🗂️  Found language folder path: ${italic(pathPattern)}`)
-		log.info(
-			`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.js manually if it is not parsed correctly.`,
-		)
+		if (pathPattern === "") {
+			log.warn(
+				"Could not find a language folder in the project. You have to enter the path to your language files (pathPattern) manually.",
+			)
+		} else {
+			log.info(`🗂️  Found language folder path: ${italic(pathPattern)}`)
+			log.info(
+				`🗂️  Please adjust the ${`pathPattern`} in the inlang.config.js manually if it is not parsed correctly.`,
+			)
+		}
 	}
 
-	const configContent = await getConfigContent({ plugin, pathPattern })
+	const configContent = await getConfigContent({
+		plugin,
+		pathPattern,
+	})
 
 	// Write the config file
 	fs.writeFileSync(inlangConfigPath, configContent)
 
-	log.success(`🎉 inlang.config.js file created successfully.`)
-
 	// validate the config file
-	validateCommandAction()
+	const [, errorMessage] = await getConfig({ options: cli.opts() })
+	if (errorMessage) {
+		log.error(errorMessage)
+		return
+	}
+
+	log.success(`🎉 inlang.config.js file created successfully.`)
 }
