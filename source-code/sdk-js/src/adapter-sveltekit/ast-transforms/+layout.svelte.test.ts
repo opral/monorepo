@@ -121,6 +121,37 @@ describe("transformLayoutSvelte", () => {
 			`)
 		})
 
+		test.todo("should wrap code inside special svelte elements", () => {
+			const code = dedent`
+				<script>
+					import { i } from '@inlang/sdk-js'
+				</script>
+
+				<svelte:head>
+					<title>{i('title')}</title>
+				</svelte:head>
+			`
+			const config = initTransformConfig()
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+					import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				</script>{#if language}{#key language}
+
+				{/key}{/if}<svelte:head>{#key language}
+					<title>{i('title')}</title>
+				{/key}{/if}<</svelte:head>"
+			`)
+		})
 
 		test("should remove @inlang/sdk-js imports that are used reactively", () => {
 			const code = dedent`
