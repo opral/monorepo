@@ -3,6 +3,7 @@ import { SectionLayout } from "../../components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 
 const code = [
 	<p class="text-surface-500">...</p>,
@@ -25,45 +26,6 @@ const code = [
 	<p>{"\t}),"}</p>,
 
 	<p>]</p>,
-]
-
-const data = [
-	{
-		title: "Web Editor",
-		isSoon: false,
-		description: "No-code editor to manage your translations.",
-		benefit: [
-			"No translator needs to touch code",
-			"Push through interface",
-			"No sync pipelines and extra accounts",
-		],
-		link: "/documentation/apps/web-editor",
-		image: "/images/AppSVGs/editor.svg",
-	},
-	{
-		title: "IDE Extension",
-		isSoon: false,
-		description: "Handle translations directly in VSCode through an extension.",
-		benefit: [
-			"Extract messages from code",
-			"Inline annotations behind key",
-			"Auto-update for synced resources",
-		],
-		link: "/documentation/apps/ide-extension",
-		image: "/images/AppSVGs/ide.svg",
-	},
-	{
-		title: "inlang CLI",
-		isSoon: false,
-		description: "CLI to interact with inlang's infastructure.",
-		benefit: [
-			"Automate localization tasks (CI/CD)",
-			"Lint your translations",
-			"Machine translate your resources",
-		],
-		link: "/documentation/apps/inlang-cli",
-		image: "/images/AppSVGs/cli.svg",
-	},
 ]
 
 const ConfigPage = () => {
@@ -91,6 +53,46 @@ const ConfigPage = () => {
 		const locale = localStorage.locale || defaultLanguage
 		return locale !== defaultLanguage ? "/" + locale : ""
 	}
+
+	const [t] = useI18n()
+	const data = [
+		{
+			title: `${t("landing.config.editor.title")}`,
+			isSoon: false,
+			description: `${t("landing.config.editor.description")}`,
+			benefit: [
+				"No translator needs to touch code",
+				"Push through interface",
+				"No sync pipelines and extra accounts",
+			],
+			link: "/documentation/apps/web-editor",
+			image: "/images/AppSVGs/editor.svg",
+		},
+		{
+			title: "IDE Extension",
+			isSoon: false,
+			description: "Handle translations directly in VSCode through an extension.",
+			benefit: [
+				"Extract messages from code",
+				"Inline annotations behind key",
+				"Auto-update for synced resources",
+			],
+			link: "/documentation/apps/ide-extension",
+			image: "/images/AppSVGs/ide.svg",
+		},
+		{
+			title: "inlang CLI",
+			isSoon: false,
+			description: "CLI to interact with inlang's infastructure.",
+			benefit: [
+				"Automate localization tasks (CI/CD)",
+				"Lint your translations",
+				"Machine translate your resources",
+			],
+			link: "/documentation/apps/inlang-cli",
+			image: "/images/AppSVGs/cli.svg",
+		},
+	]
 
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
