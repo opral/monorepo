@@ -1,3 +1,5 @@
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+
 export type LocalStorageSchema = {
 	/**
 	 * Reflects https://docs.github.com/en/rest/users/users#get-the-authenticated-user
@@ -15,6 +17,7 @@ export type LocalStorageSchema = {
 	showMachineTranslationWarning: boolean
 	isFirstUse: boolean
 	recentProjects: RecentProjectType[]
+	locale: string
 }
 
 export type RecentProjectType = {
@@ -31,4 +34,5 @@ export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
 	isFirstUse: true,
 	recentProjects: [],
+	locale: defaultLanguage,
 }

@@ -1,10 +1,11 @@
-import { Accessor, Component, createEffect, ErrorBoundary } from "solid-js"
+import { Accessor, Component, createEffect, ErrorBoundary, onMount } from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
-import { LocalStorageProvider } from "@src/services/local-storage/index.js"
-import { I18nContext } from "@solid-primitives/i18n"
+import { LocalStorageProvider, useLocalStorage } from "@src/services/local-storage/index.js"
+import { I18nContext, useI18n } from "@solid-primitives/i18n"
 import { rpc } from "@inlang/rpc"
 import { createI18nContext } from "@solid-primitives/i18n"
+import { on } from "node:events"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -21,16 +22,35 @@ const value = createI18nContext(response || {}, "en")
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
+export function Root(props: {
+	page: Component
+	pageProps: Record<string, unknown>
+	locale: string
+}) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<I18nContext.Provider value={value}>
 				<LocalStorageProvider>
-					<Dynamic component={props.page} {...props.pageProps} />
+					<RootWithProviders page={props.page} pageProps={props.pageProps} locale={props.locale} />
 				</LocalStorageProvider>
 			</I18nContext.Provider>
 		</ErrorBoundary>
 	)
+}
+
+function RootWithProviders(props: {
+	page: Component
+	pageProps: Record<string, unknown>
+	locale: string
+}) {
+	const [, setLocalStorage] = useLocalStorage()
+	const [, { locale }] = useI18n()
+
+	onMount(() => {
+		setLocalStorage({ locale: props.locale })
+		locale(props.locale)
+	})
+	return <Dynamic component={props.page} {...props.pageProps} />
 }
 
 function ErrorMessage(props: { error: Error }) {
