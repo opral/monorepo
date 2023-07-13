@@ -9,7 +9,7 @@ import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams"] as const
+export const passToClient = ["pageProps", "routeParams", "locale"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
@@ -38,7 +38,11 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 		? undefined
 		: renderToString(() => (
 				<MetaProvider tags={tags}>
-					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+					<Root
+						page={pageContext.Page}
+						pageProps={pageContext.pageProps}
+						locale={pageContext.locale}
+					/>
 				</MetaProvider>
 		  ))
 
