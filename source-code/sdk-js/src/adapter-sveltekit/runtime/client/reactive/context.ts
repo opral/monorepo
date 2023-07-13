@@ -51,7 +51,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-// TODO: output warning that calling this does not make sense
+// TODO: output warning during dev that calling this does not make sense
 const route = (href: RelativeUrl) => href
 
 // ------------------------------------------------------------------------------------------------

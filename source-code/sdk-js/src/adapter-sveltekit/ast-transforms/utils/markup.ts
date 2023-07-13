@@ -20,7 +20,7 @@ const canNodeBeWrapped = (node: TemplateNode) => {
 
 // TODO: test
 const wrapNodes = (s: MagicStringType, ast: Ast, start: number, end: number, wrapWith: string) => {
-	// TODO: only wrap if @inlnag/sdk-js imports get used inside that block or if it's a component or a <slot />
+	// TODO: only wrap if @inlang/sdk-js imports get used inside that block or if it's a component or a <slot />
 	const nodes = ast.html.children?.slice(start, end) || []
 	if (!nodes.length) return
 

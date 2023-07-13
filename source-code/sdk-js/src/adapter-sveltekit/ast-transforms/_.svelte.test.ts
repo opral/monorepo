@@ -98,4 +98,26 @@ describe("transformSvelte", () => {
 		const transformed = transformSvelte("", config, code)
 		expect(transformed).toEqual(code)
 	})
+
+	test.todo("should not generate duplicated import and variable declaration", () => {
+		const code = dedent`
+			<script context="module">
+				import { languages } from "@inlang/sdk-js"
+			</script>
+			<script>
+				import { i } from "@inlang/sdk-js"
+			</script>
+		`
+		const config = initTransformConfig()
+		const transformed = transformSvelte("", config, code)
+		expect(transformed).toMatchInlineSnapshot(`
+			"<script context=\\"module\\">
+				import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+			const { languages, i } = getRuntimeFromContext();
+			</script>
+			<script>
+			</script>"
+		`)
+	})
+
 })

@@ -4,7 +4,7 @@ import { dedent } from 'ts-dedent'
 import { InlangSdkException } from '../adapter-sveltekit/vite-plugin/exceptions.js'
 
 // TODO: test
-// TODO: link to correct section of docs
+// TODO!!: link to correct section of docs
 export const assertNoImportsFromSdkJs = (sourceFile: SourceFile, filePath: string) => {
 	if (isSdkImportPresent(sourceFile)) {
 		throw new InlangSdkException(dedent`

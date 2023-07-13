@@ -41,11 +41,11 @@ describe("transformLanguageJson", () => {
 		expect(code).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
 			import { getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
-			const someFunction = console.info(123);
 			export const GET = async ({ params: { language } }) => {
 			    await reloadResources();
 			    return json(getResource(language) || null);
-			};"
+			};
+			const someFunction = console.info(123);"
 		`)
 	})
 
@@ -61,14 +61,14 @@ describe("transformLanguageJson", () => {
 		)
 		expect(code).toMatchInlineSnapshot(`
 			"import { json } from '@sveltejs/kit';
+			export const entries = async () => {
+			    const { languages } = await initState(await import('../../../../inlang.config.js'));
+			    return languages.map(language => ({ language }));
+			};
 			import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 			export const GET = async ({ params: { language } }) => {
 			    await reloadResources();
 			    return json(getResource(language) || null);
-			};
-			export const entries = async () => {
-			    const { languages } = await initState(await import('../../../../inlang.config.js'));
-			    return languages.map(language => ({ language }));
 			};"
 		`)
 	})

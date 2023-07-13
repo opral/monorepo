@@ -10,6 +10,7 @@ import { version } from "../../../package.json"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
+import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
 import { InlangSdkException } from './exceptions.js'
 
@@ -95,8 +96,7 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const usesTypeScript = await doesPathExist(path.resolve(cwdFolderPath, "tsconfig.json"))
 
-		// TODO: find a more reliable way (https://github.com/sveltejs/kit/issues/9937)
-		const svelteKitVersion = await getInstalledVersionOfPackage("@sveltejs/kit")
+		const svelteKitVersion = svelteKit.VERSION || await getInstalledVersionOfPackage("@sveltejs/kit")
 
 		resolve({
 			cwdFolderPath,
@@ -179,7 +179,7 @@ export async function defineConfig(env) {
 	)
 }
 
-// TODO: do this in a better way #708
+// TODO!!: do this in a better way https://github.com/inlang/inlang/issues/708
 const createDemoResources = async () => {
 	const resourcesFolder = path.resolve(cwdFolderPath, "languages")
 

@@ -15,7 +15,7 @@ import { transformServerJs } from './_.server.js.js'
 import { transformSvelte } from './_.svelte.js'
 import { transformHooksServerJs } from './hooks.server.js.js'
 
-// TODO: throw errors if something is not supported and show a guide how to add the functionality manually
+// TODO!!: throw errors if something is not supported and show a guide how to add the functionality manually
 export const transformCode = (
 	filePath: string,
 	config: TransformConfig,
