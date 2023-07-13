@@ -1,5 +1,5 @@
-import { dedent } from 'ts-dedent'
-import { InlangSdkException } from '../../adapter-sveltekit/vite-plugin/exceptions.js'
+import { dedent } from "ts-dedent"
+import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { codeToSourceFile } from "./js.util.js"
 import { Node, SyntaxKind, type SourceFile } from "ts-morph"
 
@@ -50,7 +50,11 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 
 // ------------------------------------------------------------------------------------------------
 
-export const findOrCreateExport = (sourceFile: SourceFile, name: string, defaultImplementation = '() => { }') => {
+export const findOrCreateExport = (
+	sourceFile: SourceFile,
+	name: string,
+	defaultImplementation = "() => { }",
+) => {
 	const fnExport = findExport(sourceFile, name)
 	if (fnExport) return fnExport
 

@@ -1,6 +1,6 @@
 import { getContext } from "svelte"
 import { inlangSymbol } from "../../shared/utils.js"
-import { InlangSdkException } from '../../../vite-plugin/exceptions.js'
+import { InlangSdkException } from "../../../vite-plugin/exceptions.js"
 
 export const getRuntimeFromContext = () => {
 	if (import.meta.env.PROD) {

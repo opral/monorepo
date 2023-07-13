@@ -3,7 +3,7 @@ import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang
 import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import type { SdkConfig } from "@inlang/sdk-js-plugin"
 import { dedent } from "ts-dedent"
-import { InlangSdkException } from '../adapter-sveltekit/vite-plugin/exceptions.js'
+import { InlangSdkException } from "../adapter-sveltekit/vite-plugin/exceptions.js"
 
 export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk: SdkConfig
@@ -17,7 +17,9 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 					if (key === "then") return Promise.resolve(target)
 
 					return () => {
-						throw new InlangSdkException("`node:fs/promises` is not available in the current environment")
+						throw new InlangSdkException(
+							"`node:fs/promises` is not available in the current environment",
+						)
 					}
 				},
 			}),
@@ -34,7 +36,8 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 						error instanceof TypeError &&
 						(error.cause as any)?.code === "UND_ERR_CONNECT_TIMEOUT"
 					) {
-						throw new InlangSdkException(dedent`
+						throw new InlangSdkException(
+							dedent`
 								Node.js failed to resolve the URL. This can happen sometimes during development.
 								Usually restarting the server helps.
 							`,

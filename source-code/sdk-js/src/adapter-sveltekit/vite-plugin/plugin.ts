@@ -4,8 +4,8 @@ import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
 import { getTransformConfig, resetConfig } from "./config.js"
 import { filePathForOutput, getFileInformation } from "./fileInformation.js"
-import { transformCode } from '../ast-transforms/index.js'
-import { InlangSdkException } from './exceptions.js'
+import { transformCode } from "../ast-transforms/index.js"
+import { InlangSdkException } from "./exceptions.js"
 
 let viteServer: ViteDevServer | undefined
 
@@ -108,7 +108,6 @@ export const plugin = () => {
 		},
 	} satisfies Plugin
 }
-
 
 export class InlangTransformException extends InlangSdkException {
 	constructor(path: string, override readonly cause: Error) {

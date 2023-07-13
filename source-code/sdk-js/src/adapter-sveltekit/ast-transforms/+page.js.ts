@@ -1,11 +1,11 @@
 import { dedent } from "ts-dedent"
-import type { SourceFile } from 'ts-morph'
-import { assertNoImportsFromSdkJs } from '../../ast-transforms/assertions.js'
-import { addImport, isOptOutImportPresent } from '../../ast-transforms/utils/imports.js'
-import { wrapExportedFunction } from '../../ast-transforms/utils/wrap.js'
-import { codeToSourceFile, nodeToCode } from '../../ast-transforms/utils/js.util.js'
-import type { TransformConfig } from '../vite-plugin/config.js'
-import { filePathForOutput } from '../vite-plugin/fileInformation.js'
+import type { SourceFile } from "ts-morph"
+import { assertNoImportsFromSdkJs } from "../../ast-transforms/assertions.js"
+import { addImport, isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
+import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
+import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
+import type { TransformConfig } from "../vite-plugin/config.js"
+import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -57,12 +57,17 @@ export const _FOR_TESTING = {
 
 // ------------------------------------------------------------------------------------------------
 
-export const transformPageJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+export const transformPageJs = (
+	filePath: string,
+	config: TransformConfig,
+	code: string,
+	root: boolean,
+) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), '+page.js') // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), "+page.js") // TODO: implement functionality
 
 	if (!root) return code // for now we don't need to transform non-root files
 

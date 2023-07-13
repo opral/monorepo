@@ -9,9 +9,9 @@ import {
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
-import { InlangException } from '../../exceptions.js'
-import { InlangSdkException } from '../../adapter-sveltekit/vite-plugin/exceptions.js'
-import { dedent } from 'ts-dedent'
+import { InlangException } from "../../exceptions.js"
+import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
+import { dedent } from "ts-dedent"
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -28,7 +28,9 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
 	}
 
-	throw new InlangSdkException(`Wrapping placeholder does not support node of kind '${node.getKindName()}'.`)
+	throw new InlangSdkException(
+		`Wrapping placeholder does not support node of kind '${node.getKindName()}'.`,
+	)
 }
 
 // ------------------------------------------------------------------------------------------------

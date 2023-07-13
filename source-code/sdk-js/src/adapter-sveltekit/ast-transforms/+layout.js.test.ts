@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { dedent } from "ts-dedent"
-import { initTransformConfig } from './test.utils.js'
-import { transformLayoutJs } from './+layout.js.js'
+import { initTransformConfig } from "./test.utils.js"
+import { transformLayoutJs } from "./+layout.js.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -10,7 +10,7 @@ describe("transformLayoutJs", () => {
 		describe("empty file", () => {
 			test("lang-in-slug", () => {
 				const code = ""
-				const config = initTransformConfig({ languageInUrl: true, })
+				const config = initTransformConfig({ languageInUrl: true })
 				const transformed = transformLayoutJs("", config, code, true)
 
 				expect(transformed).toMatchInlineSnapshot(`

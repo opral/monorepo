@@ -1,8 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { transformSvelte } from "./_.svelte.js"
 import { dedent } from "ts-dedent"
-import { initTransformConfig } from './test.utils.js'
-
+import { initTransformConfig } from "./test.utils.js"
 
 describe("transformSvelte", () => {
 	describe("empty file", () => {
@@ -119,5 +118,4 @@ describe("transformSvelte", () => {
 			</script>"
 		`)
 	})
-
 })

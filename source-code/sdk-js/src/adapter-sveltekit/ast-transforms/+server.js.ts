@@ -1,15 +1,20 @@
-import { assertNoImportsFromSdkJs } from '../../ast-transforms/assertions.js'
-import { isOptOutImportPresent } from '../../ast-transforms/utils/imports.js'
-import { codeToSourceFile } from '../../ast-transforms/utils/js.util.js'
-import type { TransformConfig } from '../vite-plugin/config.js'
-import { filePathForOutput } from '../vite-plugin/fileInformation.js'
+import { assertNoImportsFromSdkJs } from "../../ast-transforms/assertions.js"
+import { isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
+import { codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
+import type { TransformConfig } from "../vite-plugin/config.js"
+import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 
-export const transformServerRequestJs = (filePath: string, config: TransformConfig, code: string, root: boolean) => {
+export const transformServerRequestJs = (
+	filePath: string,
+	config: TransformConfig,
+	code: string,
+	root: boolean,
+) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), '+server.js') // TODO: implement functionality
+	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), "+server.js") // TODO: implement functionality
 
 	return code // for now we don't need to transform any files
 

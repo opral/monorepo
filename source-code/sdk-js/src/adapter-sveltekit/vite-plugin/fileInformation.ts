@@ -128,6 +128,6 @@ export const getFileInformation = (
 // ------------------------------------------------------------------------------------------------
 
 export const filePathForOutput = (config: TransformConfig, path: string) => {
-	const relativePath = path.replace(config.cwdFolderPath, '')
-	return relativePath.startsWith('/') ? relativePath.slice(1) : relativePath
+	const relativePath = path.replace(config.cwdFolderPath, "")
+	return relativePath.startsWith("/") ? relativePath.slice(1) : relativePath
 }

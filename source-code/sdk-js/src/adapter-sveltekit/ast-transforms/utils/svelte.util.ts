@@ -1,5 +1,5 @@
-import { parse } from 'svelte/compiler'
-import type { Ast } from './../../../../node_modules/svelte/types/compiler/interfaces.js'
+import { parse } from "svelte/compiler"
+import type { Ast } from "./../../../../node_modules/svelte/types/compiler/interfaces.js"
 
 export const markupToAst = (markup: string) => parse(markup) as any as Ast
 
@@ -14,10 +14,10 @@ export type SvelteFileParts = ReturnType<typeof getSvelteFileParts>
 export const getSvelteFileParts = (code: string) => {
 	let markupContent = code
 	let moduleScriptOpeningTag = '<script context="module">\n'
-	let moduleScriptClosingTag = '\n</script>'
+	let moduleScriptClosingTag = "\n</script>"
 	let moduleScriptContent = ""
-	let scriptOpeningTag = '<script>\n'
-	let scriptClosingTag = '\n</script>'
+	let scriptOpeningTag = "<script>\n"
+	let scriptClosingTag = "\n</script>"
 	let scriptContent = ""
 	let styleTag = ""
 
@@ -27,7 +27,10 @@ export const getSvelteFileParts = (code: string) => {
 		moduleScriptContent = moduleScriptMatch[2]!
 		moduleScriptClosingTag = moduleScriptMatch[3]!
 
-		markupContent = markupContent.replace(moduleScriptMatch[0], '{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}')
+		markupContent = markupContent.replace(
+			moduleScriptMatch[0],
+			"{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}",
+		)
 	}
 
 	const scriptMatch = markupContent.match(REGEX_SCRIPT_TAG)
@@ -36,14 +39,14 @@ export const getSvelteFileParts = (code: string) => {
 		scriptContent = scriptMatch[2]!
 		scriptClosingTag = scriptMatch[3]!
 
-		markupContent = markupContent.replace(scriptMatch[0], '{$_INLANG_SCRIPT_PLACEHOLDER_$}')
+		markupContent = markupContent.replace(scriptMatch[0], "{$_INLANG_SCRIPT_PLACEHOLDER_$}")
 	}
 
 	const styleMatch = markupContent.match(REGEX_STYLE_TAG)
 	if (styleMatch) {
 		styleTag = styleMatch[0]!
 
-		markupContent = markupContent.replace(styleMatch[0], '{$_INLANG_STYLE_PLACEHOLDER_$}')
+		markupContent = markupContent.replace(styleMatch[0], "{$_INLANG_STYLE_PLACEHOLDER_$}")
 	}
 
 	return {
@@ -68,26 +71,43 @@ export const getSvelteFileParts = (code: string) => {
 		toString() {
 			let code = markupContent
 
-			code = replacePlaceholder(code, '{$_INLANG_SCRIPT_PLACEHOLDER_$}', scriptOpeningTag, scriptClosingTag, scriptContent)
-			code = replacePlaceholder(code, '{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}', moduleScriptOpeningTag, moduleScriptClosingTag, moduleScriptContent)
-			code = replacePlaceholder(code, '{$_INLANG_STYLE_PLACEHOLDER_$}', '', '', styleTag, false)
+			code = replacePlaceholder(
+				code,
+				"{$_INLANG_SCRIPT_PLACEHOLDER_$}",
+				scriptOpeningTag,
+				scriptClosingTag,
+				scriptContent,
+			)
+			code = replacePlaceholder(
+				code,
+				"{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}",
+				moduleScriptOpeningTag,
+				moduleScriptClosingTag,
+				moduleScriptContent,
+			)
+			code = replacePlaceholder(code, "{$_INLANG_STYLE_PLACEHOLDER_$}", "", "", styleTag, false)
 
 			return code.trim()
-		}
+		},
 	}
 }
 
-const replacePlaceholder = (code: string, placeholder: string, openTag: string, closeTag: string, content: string | undefined, insertAtTheTop = true): string => {
+const replacePlaceholder = (
+	code: string,
+	placeholder: string,
+	openTag: string,
+	closeTag: string,
+	content: string | undefined,
+	insertAtTheTop = true,
+): string => {
 	if (code.includes(placeholder)) {
 		const newContent = content
 			? openTag + content + closeTag // insert new content if specified
-			: '' // remove placeholder if content is empty
+			: "" // remove placeholder if content is empty
 		return code.replace(placeholder, newContent)
 	} else if (content) {
 		// insert placeholder if it doesn't exist yet
-		const newCode = insertAtTheTop
-			? `${placeholder}\n${code}`
-			: `${code}\n${placeholder}`
+		const newCode = insertAtTheTop ? `${placeholder}\n${code}` : `${code}\n${placeholder}`
 		return replacePlaceholder(newCode, placeholder, openTag, closeTag, content)
 	}
 

@@ -1,7 +1,7 @@
 import { dedent } from "ts-dedent"
 import { describe, expect, test } from "vitest"
-import { transformLayoutServerJs } from './+layout.server.js.js'
-import { initTransformConfig } from './test.utils.js'
+import { transformLayoutServerJs } from "./+layout.server.js.js"
+import { initTransformConfig } from "./test.utils.js"
 
 describe("transformLayoutServerJs", () => {
 	describe("root", () => {

@@ -1,15 +1,15 @@
 import { dedent } from "ts-dedent"
 import { describe, it, test, expect, vi } from "vitest"
 import { transformLayoutSvelte } from "./+layout.svelte.js"
-import { initTransformConfig } from './test.utils.js'
+import { initTransformConfig } from "./test.utils.js"
 
 vi.mock("./_.svelte.js", async () => {
-	const svelteTransforms = await vi.importActual<typeof import('./_.svelte.js')>('./_.svelte.js')
+	const svelteTransforms = await vi.importActual<typeof import("./_.svelte.js")>("./_.svelte.js")
 
-	return ({
+	return {
 		...svelteTransforms,
 		transformSvelte: (_: unknown, __: unknown, c: string) => c,
-	})
+	}
 })
 
 describe("transformLayoutSvelte", () => {
@@ -328,7 +328,7 @@ describe.skip("transformLayoutSvelte", () => {
 					const transformed = transformLayoutSvelte(
 						"",
 						initTransformConfig({
-							languageInUrl: true
+							languageInUrl: true,
 						}),
 						dedent`
 							<script>

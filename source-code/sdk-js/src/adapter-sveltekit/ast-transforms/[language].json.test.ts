@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
-import { transformLanguageJson } from './[language].json.js'
-import { initTransformConfig } from './test.utils.js'
+import { transformLanguageJson } from "./[language].json.js"
+import { initTransformConfig } from "./test.utils.js"
 
 describe("transformLanguageJson", () => {
 	test("should throw if GET endpoint is already defined", () => {
@@ -49,7 +49,6 @@ describe("transformLanguageJson", () => {
 		`)
 	})
 
-
 	describe("variations", () => {
 		test("should add `entries` export if SvelteKit version >= 1.16.3", () => {
 			const transformed = transformLanguageJson(
@@ -77,10 +76,14 @@ describe("transformLanguageJson", () => {
 
 		test("static output", () => {
 			const code = ""
-			const transformed = transformLanguageJson("", initTransformConfig({
-				isStatic: true,
-				inlang: { sdk: { resources: { cache: "build-time" } } }
-			}), code)
+			const transformed = transformLanguageJson(
+				"",
+				initTransformConfig({
+					isStatic: true,
+					inlang: { sdk: { resources: { cache: "build-time" } } },
+				}),
+				code,
+			)
 
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { json } from '@sveltejs/kit';

@@ -1,1 +1,1 @@
-export class InlangException extends Error { }
+export class InlangException extends Error {}

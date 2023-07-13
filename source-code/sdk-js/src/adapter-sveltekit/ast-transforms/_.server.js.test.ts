@@ -1,6 +1,6 @@
-import { describe, expect, test } from 'vitest';
-import { transformServerJs } from './_.server.js.js';
-import { initTransformConfig } from './test.utils.js';
+import { describe, expect, test } from "vitest"
+import { transformServerJs } from "./_.server.js.js"
+import { initTransformConfig } from "./test.utils.js"
 
 describe("'@inlang/sdk-js' imports", () => {
 	test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
@@ -10,8 +10,7 @@ describe("'@inlang/sdk-js' imports", () => {
 	})
 
 	test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-		const code =
-			"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
+		const code = "import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
 		const config = initTransformConfig()
 		expect(() => transformServerJs("", config, code)).not.toThrow()
 	})

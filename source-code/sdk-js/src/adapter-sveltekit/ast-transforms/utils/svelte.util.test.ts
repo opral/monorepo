@@ -1,9 +1,9 @@
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 import { describe, test, expect } from "vitest"
-import { getSvelteFileParts } from './svelte.util.js'
+import { getSvelteFileParts } from "./svelte.util.js"
 
 describe("getSvelteFileParts", () => {
-	test('should split script, markup and style blocks', () => {
+	test("should split script, markup and style blocks", () => {
 		const code = dedent`
 			<svelte:options />
 
@@ -27,8 +27,8 @@ describe("getSvelteFileParts", () => {
 			`
 		const result = getSvelteFileParts(code)
 
-		expect(result.moduleScript).toMatchInlineSnapshot('"import * from \'foo\'"')
-		expect(result.script).toMatchInlineSnapshot('"console.log(\'hello world\')"')
+		expect(result.moduleScript).toMatchInlineSnapshot("\"import * from 'foo'\"")
+		expect(result.script).toMatchInlineSnapshot("\"console.log('hello world')\"")
 		expect(result.markup).toMatchInlineSnapshot(`
 			"<svelte:options />
 
@@ -46,8 +46,8 @@ describe("getSvelteFileParts", () => {
 		expect(result.toString()).toEqual(code)
 	})
 
-	describe('should not mark injected scripts as script block', () => {
-		test('in #if statement', () => {
+	describe("should not mark injected scripts as script block", () => {
+		test("in #if statement", () => {
 			const code = dedent`
 				{#if true}
 					<script src="https://jquery.com/some-script.js"></script>
@@ -64,7 +64,7 @@ describe("getSvelteFileParts", () => {
 			`)
 		})
 
-		test('in svelte:head', () => {
+		test("in svelte:head", () => {
 			const code = dedent`
 				<svelte:head>
 					<script src="https://jquery.com/some-script.js"></script>
@@ -82,9 +82,8 @@ describe("getSvelteFileParts", () => {
 		})
 	})
 
-
-	describe('should return undefined if blocks are missing', () => {
-		test('empty file', () => {
+	describe("should return undefined if blocks are missing", () => {
+		test("empty file", () => {
 			const code = ""
 			const result = getSvelteFileParts(code)
 
@@ -94,7 +93,7 @@ describe("getSvelteFileParts", () => {
 			expect(result.markup).toMatchInlineSnapshot('""')
 		})
 
-		test('just html', () => {
+		test("just html", () => {
 			const code = "<h1>test</h1>"
 			const result = getSvelteFileParts(code)
 
@@ -104,27 +103,27 @@ describe("getSvelteFileParts", () => {
 			expect(result.markup).toMatchInlineSnapshot('"<h1>test</h1>"')
 		})
 
-		test('just script tag', () => {
+		test("just script tag", () => {
 			const code = "<script>console.log('test')</script>"
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toBe("")
-			expect(result.script).toMatchInlineSnapshot('"console.log(\'test\')"')
+			expect(result.script).toMatchInlineSnapshot("\"console.log('test')\"")
 			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_SCRIPT_PLACEHOLDER_$}"')
 		})
 
-		test('just module script tag', () => {
+		test("just module script tag", () => {
 			const code = `<script context="module">console.log('test')</script>`
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toMatchInlineSnapshot('"console.log(\'test\')"')
+			expect(result.moduleScript).toMatchInlineSnapshot("\"console.log('test')\"")
 			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}"')
 		})
 
-		test('just style tag', () => {
+		test("just style tag", () => {
 			const code = `<style lang="scss" global>h1 { color: red; }</style>`
 			const result = getSvelteFileParts(code)
 
@@ -135,9 +134,9 @@ describe("getSvelteFileParts", () => {
 		})
 	})
 
-	describe('alter specific parts of code', () => {
-		describe('add', () => {
-			test('should add a module script', () => {
+	describe("alter specific parts of code", () => {
+		describe("add", () => {
+			test("should add a module script", () => {
 				const code = ""
 				const result = getSvelteFileParts(code)
 
@@ -150,7 +149,7 @@ describe("getSvelteFileParts", () => {
 				`)
 			})
 
-			test('should add a script', () => {
+			test("should add a script", () => {
 				const code = ""
 				const result = getSvelteFileParts(code)
 
@@ -163,7 +162,7 @@ describe("getSvelteFileParts", () => {
 				`)
 			})
 
-			test('should add markup', () => {
+			test("should add markup", () => {
 				const code = ""
 				const result = getSvelteFileParts(code)
 
@@ -173,8 +172,8 @@ describe("getSvelteFileParts", () => {
 			})
 		})
 
-		describe('remove', () => {
-			test('should remove a module script', () => {
+		describe("remove", () => {
+			test("should remove a module script", () => {
 				const code = dedent`
 					<script context="module">
 						import * from 'foo'
@@ -186,7 +185,7 @@ describe("getSvelteFileParts", () => {
 				expect(result.toString()).toMatchInlineSnapshot('""')
 			})
 
-			test('should remove a script', () => {
+			test("should remove a script", () => {
 				const code = dedent`
 					<script>
 						console.log('hello world')
@@ -198,7 +197,7 @@ describe("getSvelteFileParts", () => {
 				expect(result.toString()).toMatchInlineSnapshot('""')
 			})
 
-			test('should remove markup', () => {
+			test("should remove markup", () => {
 				const code = "<slot/>"
 				const result = getSvelteFileParts(code)
 
@@ -207,18 +206,18 @@ describe("getSvelteFileParts", () => {
 				expect(result.toString()).toMatchInlineSnapshot('""')
 			})
 
-			test('should remove markup but leave module script', () => {
+			test("should remove markup but leave module script", () => {
 				const code = `<script context="module">const fn = () => { }</script><slot/>`
 				const result = getSvelteFileParts(code)
 
 				result.markup = ""
 
 				expect(result.toString()).toMatchInlineSnapshot(
-					'"<script context=\\"module\\">const fn = () => { }</script>"'
+					'"<script context=\\"module\\">const fn = () => { }</script>"',
 				)
 			})
 
-			test('should remove markup but leave script', () => {
+			test("should remove markup but leave script", () => {
 				const code = "<script>export let data</script><slot/>"
 				const result = getSvelteFileParts(code)
 
@@ -227,7 +226,7 @@ describe("getSvelteFileParts", () => {
 				expect(result.toString()).toMatchInlineSnapshot('"<script>export let data</script>"')
 			})
 
-			test('should remove markup but leave styles', () => {
+			test("should remove markup but leave styles", () => {
 				const code = "<style>h1 { color: blue; }</style><h1>Hello</h1>"
 				const result = getSvelteFileParts(code)
 
@@ -236,7 +235,7 @@ describe("getSvelteFileParts", () => {
 				expect(result.toString()).toMatchInlineSnapshot('"<style>h1 { color: blue; }</style>"')
 			})
 
-			test('should remove markup but leave rest', () => {
+			test("should remove markup but leave rest", () => {
 				const code = dedent`
 					<script context="module">
 						import * from 'foo'

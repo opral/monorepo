@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { initTransformConfig } from './test.utils.js'
-import { transformServerRequestJs } from './+server.js.js'
+import { initTransformConfig } from "./test.utils.js"
+import { transformServerRequestJs } from "./+server.js.js"
 
 // TODO: create test matrix for all possible combinations
 

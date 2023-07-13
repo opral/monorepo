@@ -3,8 +3,8 @@ import path, { dirname } from "node:path"
 import { dedent } from "ts-dedent"
 import { doesPathExist, type TransformConfig } from "../config.js"
 import type { FileType } from "../fileInformation.js"
-import { InlangException } from '../../../exceptions.js'
-import { InlangSdkException } from '../exceptions.js'
+import { InlangException } from "../../../exceptions.js"
+import { InlangSdkException } from "../exceptions.js"
 
 export const assertRoutesFolderPathExists = async (config: TransformConfig) => {
 	if (!(await doesPathExist(config.rootRoutesFolder))) {

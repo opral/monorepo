@@ -55,7 +55,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 const route = (href: RelativeUrl) => {
 	if (import.meta.env.DEV) {
 		console.info(
-			`Calling the function 'route' is unnecessary with this project configuration, because it only returns the input.`
+			`Calling the function 'route' is unnecessary with this project configuration, because it only returns the input.`,
 		)
 	}
 

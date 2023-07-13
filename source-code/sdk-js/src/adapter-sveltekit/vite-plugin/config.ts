@@ -12,7 +12,7 @@ import { pathToFileURL } from "node:url"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
 import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
-import { InlangSdkException } from './exceptions.js'
+import { InlangSdkException } from "./exceptions.js"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -96,7 +96,9 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const usesTypeScript = await doesPathExist(path.resolve(cwdFolderPath, "tsconfig.json"))
 
-		const svelteKitVersion = (svelteKit as unknown as { VERSION: string }).VERSION || await getInstalledVersionOfPackage("@sveltejs/kit")
+		const svelteKitVersion =
+			(svelteKit as unknown as { VERSION: string }).VERSION ||
+			(await getInstalledVersionOfPackage("@sveltejs/kit"))
 
 		resolve({
 			cwdFolderPath,
@@ -118,7 +120,7 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigException extends InlangSdkException { }
+class InlangSdkConfigException extends InlangSdkException {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,

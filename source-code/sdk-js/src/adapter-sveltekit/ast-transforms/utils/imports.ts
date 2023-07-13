@@ -1,6 +1,9 @@
-import type { SvelteFileParts } from './svelte.util.js'
-import { codeToSourceFile } from '../../../ast-transforms/utils/js.util.js'
-import { isOptOutImportPresent as isOptOutImportPresentOriginal, isSdkImportPresent as isSdkImportPresentOriginal } from '../../../ast-transforms/utils/imports.js'
+import type { SvelteFileParts } from "./svelte.util.js"
+import { codeToSourceFile } from "../../../ast-transforms/utils/js.util.js"
+import {
+	isOptOutImportPresent as isOptOutImportPresentOriginal,
+	isSdkImportPresent as isSdkImportPresentOriginal,
+} from "../../../ast-transforms/utils/imports.js"
 
 // TODO: test
 export const isOptOutImportPresent = ({ script, moduleScript }: SvelteFileParts) => {

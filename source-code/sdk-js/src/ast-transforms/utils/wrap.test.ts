@@ -170,7 +170,9 @@ describe("wrapExportedFunction", () => {
 		const node = codeToSourceFile("")
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(() => { });"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"export const load = initWrapper().use(() => { });"',
+		)
 	})
 
 	test("should add and wrap load function if not present", () => {
@@ -191,7 +193,9 @@ describe("wrapExportedFunction", () => {
 		`)
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(() => { });"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"export const load = initWrapper().use(() => { });"',
+		)
 	})
 
 	test("should wrap async arrow function", () => {
@@ -200,7 +204,9 @@ describe("wrapExportedFunction", () => {
 		`)
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(async () => { });"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"export const load = initWrapper().use(async () => { });"',
+		)
 	})
 
 	test("should wrap const function", () => {
@@ -232,7 +238,9 @@ describe("wrapExportedFunction", () => {
 		`)
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(function load() { });"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"export const load = initWrapper().use(function load() { });"',
+		)
 	})
 
 	test("should wrap regular async function", () => {
@@ -241,7 +249,9 @@ describe("wrapExportedFunction", () => {
 		`)
 		wrapExportedFunction(node, "", "initWrapper", "load")
 
-		expect(nodeToCode(node)).toMatchInlineSnapshot('"export const load = initWrapper().use(async function load() { });"')
+		expect(nodeToCode(node)).toMatchInlineSnapshot(
+			'"export const load = initWrapper().use(async function load() { });"',
+		)
 	})
 
 	test("should wrap export followed by a comment", () => {

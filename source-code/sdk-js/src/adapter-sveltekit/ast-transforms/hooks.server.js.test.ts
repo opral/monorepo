@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { dedent } from "ts-dedent"
-import { transformHooksServerJs } from './hooks.server.js.js'
-import { initTransformConfig } from './test.utils.js'
+import { transformHooksServerJs } from "./hooks.server.js.js"
+import { initTransformConfig } from "./test.utils.js"
 
 // TODO: create test matrix for all possible combinations
 

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { dedent } from "ts-dedent"
-import { initTransformConfig } from './test.utils.js'
-import { transformPageJs } from './+page.js.js'
+import { initTransformConfig } from "./test.utils.js"
+import { transformPageJs } from "./+page.js.js"
 
 // TODO: create test matrix for all possible combinations
 
@@ -11,7 +11,7 @@ describe("transformPageJs", () => {
 			describe("lang-in-slug", () => {
 				test("non-static", () => {
 					const code = ""
-					const config = initTransformConfig({ languageInUrl: true, })
+					const config = initTransformConfig({ languageInUrl: true })
 					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
@@ -54,7 +54,7 @@ describe("transformPageJs", () => {
 			const code = dedent`
 				export const load = async () => { };
 			`
-			const config = initTransformConfig({ languageInUrl: true, })
+			const config = initTransformConfig({ languageInUrl: true })
 			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`

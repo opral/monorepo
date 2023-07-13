@@ -1,6 +1,6 @@
 import { Project, Node, QuoteKind, IndentationText, ScriptKind } from "ts-morph"
 import { dedent } from "ts-dedent"
-import { InlangException } from '../../exceptions.js'
+import { InlangException } from "../../exceptions.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -17,7 +17,8 @@ const printCode = (node: Node) => (node && node.print({ scriptKind: ScriptKind.T
 
 // ------------------------------------------------------------------------------------------------
 
-export const codeToSourceFile = (code: string, filePath?: string) => parseCode(dedent(code), filePath)
+export const codeToSourceFile = (code: string, filePath?: string) =>
+	parseCode(dedent(code), filePath)
 
 export const codeToNode = (code: string) => {
 	const node = codeToSourceFile(code, "")

@@ -1,19 +1,19 @@
-import { dedent } from 'ts-dedent'
-import type { TransformConfig } from '../vite-plugin/config.js'
-import { InlangSdkException } from '../vite-plugin/exceptions.js'
-import type { FileInformation } from '../vite-plugin/fileInformation.js'
-import { transformLayoutJs } from './+layout.js.js'
-import { transformLayoutServerJs } from './+layout.server.js.js'
-import { transformLayoutSvelte } from './+layout.svelte.js'
-import { transformPageJs } from './+page.js.js'
-import { transformPageServerJs } from './+page.server.js.js'
-import { transformPageSvelte } from './+page.svelte.js'
-import { transformServerRequestJs } from './+server.js.js'
-import { transformLanguageJson } from './[language].json.js'
-import { transformJs } from './_.js.js'
-import { transformServerJs } from './_.server.js.js'
-import { transformSvelte } from './_.svelte.js'
-import { transformHooksServerJs } from './hooks.server.js.js'
+import { dedent } from "ts-dedent"
+import type { TransformConfig } from "../vite-plugin/config.js"
+import { InlangSdkException } from "../vite-plugin/exceptions.js"
+import type { FileInformation } from "../vite-plugin/fileInformation.js"
+import { transformLayoutJs } from "./+layout.js.js"
+import { transformLayoutServerJs } from "./+layout.server.js.js"
+import { transformLayoutSvelte } from "./+layout.svelte.js"
+import { transformPageJs } from "./+page.js.js"
+import { transformPageServerJs } from "./+page.server.js.js"
+import { transformPageSvelte } from "./+page.svelte.js"
+import { transformServerRequestJs } from "./+server.js.js"
+import { transformLanguageJson } from "./[language].json.js"
+import { transformJs } from "./_.js.js"
+import { transformServerJs } from "./_.server.js.js"
+import { transformSvelte } from "./_.svelte.js"
+import { transformHooksServerJs } from "./hooks.server.js.js"
 
 export const transformCode = (
 	filePath: string,
