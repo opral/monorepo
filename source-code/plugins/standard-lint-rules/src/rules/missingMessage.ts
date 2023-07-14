@@ -20,7 +20,7 @@ export const missingMessage = createLintRule({
 					targetMessageLanguage = target?.languageTag.name
 				},
 				Message: ({ target, reference }) => {
-					if (!target && reference) {
+					if (target === undefined && reference) {
 						report({
 							node: reference,
 							message: `Message with id '${reference.id.name}' is missing for '${targetMessageLanguage}'.`,
