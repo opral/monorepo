@@ -59,7 +59,7 @@ function defaultSpacing() {
 }
 
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
-	id: "inlang.plugin-i18next",
+	id: "inlang.plugin-json",
 	async config() {
 		// will throw if the settings are invalid,
 		// leading to better DX because fails fast
