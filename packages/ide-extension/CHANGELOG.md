@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.9.1
+
+### Patch Changes
+
+- ce0c2566: add jsonc parser for extensions.json parsing
+
 ## 0.9.0
 
 ### Minor Changes
