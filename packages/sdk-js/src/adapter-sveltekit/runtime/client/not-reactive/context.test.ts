@@ -3,8 +3,8 @@ import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
 import * as svelte from "svelte"
 import * as navigation from "$app/navigation"
 import * as sharedUtils from "../../shared/utils.js"
-import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
-import type { RelativeUrl } from '../../../../types.js'
+import { type SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
+import type { RelativeUrl } from "../../../../types.js"
 
 let ctx: ReturnType<typeof getRuntimeFromContext> | undefined
 let runtime: SvelteKitClientRuntime
@@ -23,7 +23,7 @@ beforeEach(async () => {
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
 	vi.mock("$app/stores", () => ({ page: vi.fn() }))
-	vi.mock('$app/paths', () => ({ base: '' }))
+	vi.mock("$app/paths", () => ({ base: "" }))
 	vi.mock("svelte/store", () => ({ get: <V>(value: V) => value }))
 	vi.mock("svelte", () => ({ getContext: vi.fn(), setContext: vi.fn() }))
 	vi.spyOn(svelte, "getContext").mockImplementation(() => ctx)

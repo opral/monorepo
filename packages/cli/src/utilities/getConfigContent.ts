@@ -44,23 +44,22 @@ export const getConfigContent = async (args: {
 		.filter((x) => x !== undefined)
 		.join("\n")
 
-	const configContent = `
-	/**
- 	* @type { import("@inlang/core/config").DefineConfig }
- 	*/
-	export async function defineConfig(env) {
-    ${pluginImportsCode}
-    
-		${standardLintRules}
+	const configContent = `/**
+* @type { import("@inlang/core/config").DefineConfig }
+*/
+export async function defineConfig(env) {
+	${pluginImportsCode}
 
-    return {
-      referenceLanguage: 'en',
-      plugins: [
-        ${pluginFunctions}
-        standardLintRules(),
-      ],
-    };
-  }`
+	${standardLintRules}
+
+	return {
+		referenceLanguage: 'en',
+		plugins: [
+			${pluginFunctions}
+			standardLintRules(),
+		],
+	};
+}`
 
 	return configContent
 }

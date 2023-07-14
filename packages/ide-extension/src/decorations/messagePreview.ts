@@ -1,8 +1,8 @@
 import * as vscode from "vscode"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
-import { contextTooltip } from './contextTooltip.js'
-import { onDidEditMessage } from '../commands/editMessage.js'
+import { contextTooltip } from "./contextTooltip.js"
+import { onDidEditMessage } from "../commands/editMessage.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -115,5 +115,5 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	)
 
 	// update decorations, when message was edited
-	onDidEditMessage(() => updateDecorations());
+	onDidEditMessage(() => updateDecorations())
 }

@@ -3,6 +3,14 @@ import * as vscode from "vscode"
 import * as path from "node:path"
 import * as fs from "node:fs"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
+import { parse, stringify } from "comment-json"
+
+/**
+ * Defines the structure of the extensions.json file.
+ */
+type ExtensionsJson = {
+	recommendations: string[]
+}
 
 /**
  * Displays an popup to add the Inlang extension to your recommendation.
@@ -20,11 +28,10 @@ export const recommendation = async (args: {
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
-	let extensions: { recommendations: string[] } | undefined
-
+	let extensions: ExtensionsJson | undefined
 	// Read the extensions.json file
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
-		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
+		extensions = parse(fs.readFileSync(extensionsJsonPath, "utf8")) as any
 	}
 
 	// If not already recommended
@@ -49,11 +56,13 @@ export const recommendation = async (args: {
 			}
 
 			// Add the Inlang extension to the recommendations object
-			const newExtensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
+			const newExtensions: ExtensionsJson = parse(
+				fs.readFileSync(extensionsJsonPath, "utf8"),
+			) as any
 			newExtensions.recommendations.push("inlang.vs-code-extension")
 
 			// Write the updated extensions.json file
-			fs.writeFileSync(extensionsJsonPath, JSON.stringify(newExtensions, undefined, 2))
+			fs.writeFileSync(extensionsJsonPath, stringify(newExtensions, undefined, 2))
 		} else if (installInlangExtension === "Reject") {
 			// persist the user's choice in a workspace setting
 			await updateDisabledRecommendation()

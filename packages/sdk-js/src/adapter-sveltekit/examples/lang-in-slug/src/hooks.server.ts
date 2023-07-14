@@ -12,7 +12,7 @@ export const handle = initHandleWrapper({
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
 	},
-}).wrap(async ({ event, resolve }, { i }) => {
+}).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())
 
 	console.info("hooks.server.ts", i("welcome"))

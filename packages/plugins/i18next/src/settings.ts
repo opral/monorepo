@@ -13,6 +13,10 @@ export function throwIfInvalidSettings(settings: PluginSettings) {
 			throw new Error(
 				"The pathPattern setting must end with '.json'. An example would be './resources/{language}.json'.",
 			)
+		} else if (settings.pathPattern.includes("*")) {
+			throw new Error(
+				"The pathPattern includes a '*' wildcard. This was depricated in version 3.0.0. Check https://github.com/inlang/inlang/tree/main/source-code/plugins/i18next/ for how to use PluginSettings",
+			)
 		}
 	} else {
 		for (const [prefix, path] of Object.entries(settings.pathPattern)) {
