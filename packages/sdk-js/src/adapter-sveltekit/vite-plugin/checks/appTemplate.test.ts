@@ -31,9 +31,9 @@ describe("removeHtmlLangAttribute", () => {
 			</html>
 		`)
 
-		expect(markup).toBe(dedent`
-			<html>
-			</html>
+		expect(markup).toMatchInlineSnapshot(`
+			"<html>
+			</html>"
 		`)
 	})
 
@@ -43,9 +43,9 @@ describe("removeHtmlLangAttribute", () => {
 			</html>
 		`)
 
-		expect(markup).toBe(dedent`
-			<html>
-			</html>
+		expect(markup).toMatchInlineSnapshot(`
+			"<html>
+			</html>"
 		`)
 	})
 
@@ -55,9 +55,9 @@ describe("removeHtmlLangAttribute", () => {
 			</html>
 		`)
 
-		expect(markup).toBe(dedent`
-			<html>
-			</html>
+		expect(markup).toMatchInlineSnapshot(`
+			"<html>
+			</html>"
 		`)
 	})
 
@@ -67,9 +67,9 @@ describe("removeHtmlLangAttribute", () => {
 			</html>
 		`)
 
-		expect(markup).toBe(dedent`
-			<html data-theme="dark" style="color-scheme: normal">
-			</html>
+		expect(markup).toMatchInlineSnapshot(`
+			"<html data-theme=\\"dark\\" style=\\"color-scheme: normal\\">
+			</html>"
 		`)
 	})
 })

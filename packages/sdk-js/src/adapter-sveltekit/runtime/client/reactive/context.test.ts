@@ -1,7 +1,7 @@
-import { test, describe, expect, vi, beforeEach, Mock } from "vitest"
+import { test, describe, expect, vi, beforeEach, type Mock } from "vitest"
 import { getRuntimeFromContext, addRuntimeToContext } from "./context.js"
 import * as svelte from "svelte"
-import { SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
+import { type SvelteKitClientRuntime, initSvelteKitClientRuntime } from "../runtime.js"
 import { get } from "svelte/store"
 import { createResource } from "@inlang/core/test"
 
@@ -27,7 +27,7 @@ beforeEach(async () => {
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
 	vi.mock("$app/stores", () => ({ page: vi.fn() }))
-	vi.mock('$app/paths', () => ({ base: '' }))
+	vi.mock("$app/paths", () => ({ base: "" }))
 	vi.mock("svelte", () => ({ getContext: vi.fn(), setContext: vi.fn() }))
 	vi.spyOn(svelte, "getContext").mockImplementation(() => ctx)
 	vi.spyOn(svelte, "setContext").mockImplementation(
