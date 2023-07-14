@@ -15,10 +15,7 @@ export const identicalPattern = createLintRule({
 		return {
 			visitors: {
 				Resource: ({ target, reference }) => {
-					// set the target resource language
-					if (target) {
-						targetMessageLanguage = target.languageTag.name
-					}
+					targetMessageLanguage = target?.languageTag.name
 					if (
 						(target && target.languageTag.name === config.referenceLanguage) ||
 						!target?.body.find((element) => element.pattern) ||
