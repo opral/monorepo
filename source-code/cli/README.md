@@ -138,7 +138,7 @@ The translations are performed using machine translation services. The translate
 
 ### `lint`
 
-The lint command lints the translation with the configured lint rules, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules).
+The lint command lints the translation with the configured lint rules, for example with the [plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -146,9 +146,9 @@ npx @inlang/cli lint
 
 The `lint` command is provided with an optional `--no-fail` flag, which will not fail the command if there are any linting errors.
 
-`lint` will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example with the [plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns / duplicates**.
 
-However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) as a starter template.
+However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules) as a starter template.
 
 ### `open`
 

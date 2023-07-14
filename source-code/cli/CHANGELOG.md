@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 0.13.3
+
+### Patch Changes
+
+- 1b7a054e: improve error DX and update links
+
 ## 0.13.2
 
 ### Patch Changes

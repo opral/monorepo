@@ -51,8 +51,16 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-// TODO: output warning that calling this does not make sense
-const route = (href: RelativeUrl) => href
+// TODO: output warning during dev that calling this does not make sense
+const route = (href: RelativeUrl) => {
+	if (import.meta.env.DEV) {
+		console.info(
+			`Calling the function 'route' is unnecessary with this project configuration, because it only returns the input.`,
+		)
+	}
+
+	return href
+}
 
 // ------------------------------------------------------------------------------------------------
 

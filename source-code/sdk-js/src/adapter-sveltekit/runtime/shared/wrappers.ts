@@ -1,13 +1,13 @@
 import { browser } from "$app/environment"
 import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
-import { detectLanguage, Detector } from "../../../detectors/index.js"
-import { initSvelteKitClientRuntime, SvelteKitClientRuntime } from "../client/runtime.js"
+import { detectLanguage, type Detector } from "../../../detectors/index.js"
+import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
 import {
 	addRuntimePromiseToEvent,
 	addRuntimeToData,
-	DataWithRuntime,
-	EventWithRuntimePromise,
+	type DataWithRuntime,
+	type EventWithRuntimePromise,
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
@@ -36,8 +36,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
-	const data = event.data as DataPayload
-
+	const data = (event.data as DataPayload)["[inlang]"]
 	const { referenceLanguage = undefined as unknown as Language, languages = [] } = data
 
 	// TODO: only add this conditional logic if shared detection strategies get used
@@ -67,9 +66,11 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 // ------------------------------------------------------------------------------------------------
 
 export type DataPayload = {
-	referenceLanguage: Language
-	languages: Language[]
-	language: Language | undefined
+	"[inlang]": {
+		referenceLanguage: Language
+		languages: Language[]
+		language: Language | undefined
+	}
 }
 
 export const initRootLayoutLoadWrapper = <
@@ -77,7 +78,7 @@ export const initRootLayoutLoadWrapper = <
 >(options: {
 	initDetectors?: (event: Parameters<LayoutLoad>[0]) => Detector[]
 }) => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<LayoutLoad>[0]>,
@@ -89,15 +90,10 @@ export const initRootLayoutLoadWrapper = <
 
 			const payload = await load(event, runtime)
 
-			return addRuntimeToData(
-				{
-					...(payload || event.data),
-					referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-					languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
-					language: runtime.language, // TODO: only pass this if `language` gets detected on server
-				},
-				runtime,
-			)
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { "[inlang]": _, ...data } = payload || event.data
+
+			return addRuntimeToData(data, runtime)
 		},
 })
 
@@ -113,7 +109,7 @@ export const initRootPageLoadWrapper = <
 		getPath: (event: Parameters<PageLoad>[0], language: Language) => URL | string
 	}
 }) => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<PageLoad>[0]>,
@@ -150,7 +146,7 @@ export const initRootPageLoadWrapper = <
 // ------------------------------------------------------------------------------------------------
 
 export const initLoadWrapper = <Load extends Kit.Load<any, any, any, any, any>>() => ({
-	wrap:
+	use:
 		<Data extends Record<string, any> | void>(
 			load: (
 				event: EventWithRuntimePromise<Parameters<Load>[0]>,

@@ -12,7 +12,7 @@
 		"unplugin",
 		"vite"
 	],
-	"version": "0.7.1",
+	"version": "0.8.1",
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin tsc:watch",
 		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
@@ -35,29 +35,25 @@
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/core": "*"
+		"@inlang/core": "*",
+		"ts-morph": "^19.0.0",
+		"typescript": "^5.1.6"
 	},
 	"devDependencies": {
 		"@inlang/sdk-js-plugin": "*",
-		"@sveltejs/kit": "^1.16.3",
-		"@types/estree": "^1.0.1",
-		"astring": "^1.8.4",
+		"@sveltejs/kit": "1.0.0",
 		"deepmerge-ts": "^5.1.0",
-		"esbuild": "^0.17.19",
-		"estree-walker": "^3.0.3",
-		"magic-string": "^0.30.0",
-		"magicast": "0.2.4",
-		"msw": "^1.2.1",
+		"esbuild": "^0.18.11",
+		"magic-string": "^0.30.1",
+		"msw": "^1.2.2",
 		"npm-run-all": "^4.1.5",
-		"recast": "^0.22.0",
-		"svelte": "^3.59.1",
-		"svelte-preprocess": "^5.0.3",
+		"svelte": "3.54.0",
 		"ts-dedent": "^2.2.0",
 		"vitefu": "^0.2.4"
 	},
 	"peerDependencies": {
 		"@sveltejs/kit": "^1.0.0",
-		"svelte": "^3.0.0 || ^4.0.0"
+		"svelte": "^3.54.0 || ^4.0.0"
 	},
 	"exports": {
 		".": "./dist/index.js",
@@ -65,7 +61,8 @@
 		"./adapter-sveltekit/*": "./dist/adapter-sveltekit/runtime/*/index.js",
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
-		"./runtime": "./dist/runtime/index.js"
+		"./runtime": "./dist/runtime/index.js",
+		"./no-transforms": "./dist/no-transforms.js"
 	},
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -82,6 +79,9 @@
 			],
 			"adapter-sveltekit/client/reactive": [
 				"./dist/adapter-sveltekit/runtime/client/reactive/index.d.ts"
+			],
+			"adapter-sveltekit/client/reactive-workaround": [
+				"./dist/adapter-sveltekit/runtime/client/reactive-workaround/index.d.ts"
 			],
 			"adapter-sveltekit/server": [
 				"./dist/adapter-sveltekit/runtime/server/index.d.ts"

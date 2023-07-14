@@ -124,3 +124,10 @@ export const getFileInformation = (
 
 	return undefined
 }
+
+// ------------------------------------------------------------------------------------------------
+
+export const filePathForOutput = (config: TransformConfig, path: string) => {
+	const relativePath = path.replace(config.cwdFolderPath, "")
+	return relativePath.startsWith("/") ? relativePath.slice(1) : relativePath
+}

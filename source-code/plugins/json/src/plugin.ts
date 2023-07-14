@@ -59,7 +59,7 @@ function defaultSpacing() {
 }
 
 export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
-	id: "inlang.plugin-i18next",
+	id: "inlang.plugin-json",
 	async config() {
 		// will throw if the settings are invalid,
 		// leading to better DX because fails fast
@@ -116,7 +116,6 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 		})
 
 		if (isDirectory && args.settings.ignore?.some((s) => s === filePath) === false) {
-			console.log("dir")
 			languages.push(filePath)
 		} else if (
 			filePath.endsWith(".json") &&

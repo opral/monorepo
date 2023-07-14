@@ -3,8 +3,9 @@ import type { ViteDevServer, Plugin } from "vite"
 import { assertAppTemplateIsCorrect } from "./checks/appTemplate.js"
 import { assertRoutesFolderPathExists, assertNecessaryFilesArePresent } from "./checks/routes.js"
 import { getTransformConfig, resetConfig } from "./config.js"
-import { getFileInformation } from "./fileInformation.js"
-import { transformCode } from "./transforms/index.js"
+import { filePathForOutput, getFileInformation } from "./fileInformation.js"
+import { transformCode } from "../ast-transforms/index.js"
+import { InlangSdkException } from "./exceptions.js"
 
 let viteServer: ViteDevServer | undefined
 
@@ -76,13 +77,20 @@ export const plugin = () => {
 			// eslint-disable-next-line unicorn/no-null
 			if (!fileInformation) return null
 
-			const transformedCode = await transformCode(config, code, fileInformation)
+			const filePath = filePathForOutput(config, id)
+
+			let transformedCode: string = code
+			try {
+				transformedCode = transformCode(id, config, code, fileInformation)
+			} catch (error) {
+				throw new InlangTransformException(filePath, error as Error)
+			}
+
 			if (config.debug) {
-				const filePath = id.replace(config.cwdFolderPath, "")
 				console.info(dedent`
 					-- INLANG DEBUG START-----------------------------------------------------------
 
-					transformed '${fileInformation.type}' file: '${filePath}'
+					transformed file '${filePath}' (${fileInformation.type})
 
 					-- INPUT -----------------------------------------------------------------------
 
@@ -90,16 +98,26 @@ export const plugin = () => {
 
 					-- OUTPUT ----------------------------------------------------------------------
 
-					${transformedCode}
+					${code === transformedCode ? "NO TRANSFORMATIONS MADE" : transformedCode}
 
 					-- INLANG DEBUG END ------------------------------------------------------------
 				`)
 			}
 
 			return transformedCode
-				.replaceAll("languages: languages", "languages")
-				.replaceAll("language: language", "language")
-				.replaceAll("i: i", "i")
 		},
 	} satisfies Plugin
+}
+
+export class InlangTransformException extends InlangSdkException {
+	constructor(path: string, override readonly cause: Error) {
+		super(dedent`
+			An error occurred while transforming the code in file (${path})
+
+			Please open an issue on GitHub so we can investigate and improve the SDK: https://github.com/inlang/inlang/issues/new/
+
+			Don't worry, we can probably already unblock you so you can continue working on your project.
+			You can find more information about it here: https://inlang.com/documentation/sdk/sveltekit/advanced
+		`)
+	}
 }

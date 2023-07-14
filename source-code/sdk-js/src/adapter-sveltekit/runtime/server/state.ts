@@ -10,19 +10,17 @@ let config: InlangConfig
 export const initState = async (module: InlangConfigModule) => {
 	if (!config && !import.meta.env.DEV) {
 		try {
-			const {
-				languages,
-				referenceLanguage,
-				resources,
-			} = await import("virtual:inlang-static")
+			const { languages, referenceLanguage, resources } = await import("virtual:inlang-static")
 
-			config = ({
+			config = {
 				referenceLanguage,
 				languages,
 				readResources: async () => resources,
 				writeResources: async () => undefined,
-			} as InlangConfig)
-		} catch { /* empty */ }
+			} as InlangConfig
+		} catch {
+			/* empty */
+		}
 	}
 
 	if (!config) {

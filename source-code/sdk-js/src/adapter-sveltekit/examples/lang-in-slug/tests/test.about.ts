@@ -20,7 +20,7 @@ test("Localized website", async ({ page }) => {
 	// Go to english page
 	await page.goto(`${baseURL}/en/about`)
 	expect(page.url()).toBe(`${baseURL}/en/about`)
-	await page.evaluate(() => console.log("English About page loaded"))
+	await page.evaluate(() => console.info("English About page loaded"))
 
 	/* Check the headline */
 	await checkHeadline(page, "About page en")
@@ -28,7 +28,7 @@ test("Localized website", async ({ page }) => {
 	// Go to german page
 	await page.goto(`${baseURL}/de/about`)
 	expect(page.url()).toBe(`${baseURL}/de/about`)
-	await page.evaluate(() => console.log("German About page loaded"))
+	await page.evaluate(() => console.info("German About page loaded"))
 
 	/* Check the headline */
 	await checkHeadline(page, "About page de")
