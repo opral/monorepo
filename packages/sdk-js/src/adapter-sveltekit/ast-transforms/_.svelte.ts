@@ -25,7 +25,6 @@ export const transformSvelte = (
 
 	return fileParts.toString()
 }
-
 // TODO: what if both script tags import different variables?
 
 const transform = (filePath: string, config: TransformConfig, fileParts: SvelteFileParts) => {
@@ -52,7 +51,7 @@ const transformSdkImports = (config: TransformConfig, sourceFile: SourceFile) =>
 
 	addImport(
 		sourceFile,
-		"@inlang/sdk-js/adapter-sveltekit/client/not-reactive",
+		`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? 'not-reactive' : 'reactive-workaround'}`,
 		"getRuntimeFromContext",
 	)
 

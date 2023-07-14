@@ -21,7 +21,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -52,7 +52,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -93,7 +93,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 				import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -166,7 +166,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -195,7 +195,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
@@ -229,7 +229,7 @@ describe("transformLayoutSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { browser } from '$app/environment';
-				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				console.info(123);
 				export let data;
@@ -243,6 +243,27 @@ describe("transformLayoutSvelte", () => {
 				</script>{#if language}{#key language}
 
 				<slot />{/key}{/if}"
+			`)
+		})
+
+		test("languageInUrl", () => {
+			const code = ""
+			const config = initTransformConfig({ languageInUrl: true })
+			const transformed = transformLayoutSvelte("", config, code, true)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script>
+				import { browser } from '$app/environment';
+				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				export let data;
+				addRuntimeToContext(getRuntimeFromData(data));
+				let { i, language } = getRuntimeFromContext();
+				$: if (browser) {
+				    addRuntimeToContext(getRuntimeFromData(data));
+				    ({ i, language } = getRuntimeFromContext());
+				}
+				</script>
+				{#if language}{#key language}<slot />{/key}{/if}"
 			`)
 		})
 	})

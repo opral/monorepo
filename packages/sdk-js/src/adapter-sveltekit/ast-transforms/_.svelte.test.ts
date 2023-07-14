@@ -26,7 +26,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				const { i } = getRuntimeFromContext();
 				</script>
 
@@ -44,7 +44,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				const { i: u } = getRuntimeFromContext();
 				</script>"
 			`)
@@ -61,7 +61,7 @@ describe("transformSvelte", () => {
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
-					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
 				const { i: u, languages, i } = getRuntimeFromContext();
 				</script>"
 			`)
@@ -75,6 +75,23 @@ describe("transformSvelte", () => {
 				</script>
 			`
 			const config = initTransformConfig()
+			const transformed = transformSvelte("", config, code)
+			expect(transformed).toMatchInlineSnapshot(`
+				"<script context=\\"module\\">
+					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
+				const { i: u, languages, i } = getRuntimeFromContext();
+				</script>"
+			`)
+		})
+
+		test("languageInUrl", () => {
+			const code = dedent`
+				<script context="module">
+					import { i as u } from "@inlang/sdk-js"
+					import { languages, i } from "@inlang/sdk-js"
+				</script>
+			`
+			const config = initTransformConfig({ languageInUrl: true })
 			const transformed = transformSvelte("", config, code)
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
