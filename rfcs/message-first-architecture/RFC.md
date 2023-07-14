@@ -14,6 +14,11 @@ Inlang core, and thereby inlang itself, is architected "resource-first". Among t
 - Complicated application logic because apps care about messages, not resources.
 - Potentially, technical debt when extending inlang (core) beyong messages to other types of content (e.g. markdown, images, etc.).
 
+### Wrong assumptions with core's "resource-first" architecture
+
+- Resources are the primary data structure of inlang.
+- Plugins need exact knowledge of AST which turned out to be false. Every plugin, regardless of the format, treats resources as key-value data structure (e.g. JSON, YAML, etc.).
+
 ## Proposal
 
 Inlang core should be refactored to be "message-first".
@@ -75,6 +80,10 @@ messages = messages.delete({
 ```ts
 await config.saveMessages(messages)
 ```
+
+### Plugins
+
+- nothing changes for plugins except that they need to expose `saveMessages()` and `getMessages()`.
 
 ### Linting
 
