@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.8.1
+
+### Patch Changes
+
+- 50fa75e2: correctly switch language in SPA mode
+
 ## 0.8.0
 
 ### Minor Changes
