@@ -15,6 +15,8 @@ export const missingMessage = createLintRule({
 		return {
 			visitors: {
 				Resource: ({ target }) => {
+					// we need to derive the target language from the resource
+					// because the message is missing.
 					targetMessageLanguage = target?.languageTag.name
 				},
 				Message: ({ target, reference }) => {
