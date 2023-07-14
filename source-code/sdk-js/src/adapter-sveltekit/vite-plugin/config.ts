@@ -1,17 +1,18 @@
-import { loadFile, type ProxifiedModule } from "magicast"
 import { mkdir, readFile, writeFile, stat } from "node:fs/promises"
 import { initConfig } from "../../config/index.js"
 import { dedent } from "ts-dedent"
 import type { InlangConfig } from "@inlang/core/config"
 import { testConfigFile } from "@inlang/core/test"
-import { initInlangEnvironment, InlangConfigWithSdkProps } from "../../config/config.js"
+import { initInlangEnvironment, type InlangConfigWithSdkProps } from "../../config/config.js"
 import { validateSdkConfig } from "@inlang/sdk-js-plugin"
 // @ts-ignore
 import { version } from "../../../package.json"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import type { Config as SvelteConfig } from "@sveltejs/kit"
+import * as svelteKit from "@sveltejs/kit"
 import { findDepPkgJsonPath } from "vitefu"
+import { InlangSdkException } from "./exceptions.js"
 
 export const doesPathExist = async (path: string) => !!(await stat(path).catch(() => false))
 
@@ -95,8 +96,9 @@ export const getTransformConfig = async (): Promise<TransformConfig> => {
 
 		const usesTypeScript = await doesPathExist(path.resolve(cwdFolderPath, "tsconfig.json"))
 
-		// TODO: find a more reliable way (https://github.com/sveltejs/kit/issues/9937)
-		const svelteKitVersion = await getInstalledVersionOfPackage("@sveltejs/kit")
+		const svelteKitVersion =
+			(svelteKit as unknown as { VERSION: string }).VERSION ||
+			(await getInstalledVersionOfPackage("@sveltejs/kit"))
 
 		resolve({
 			cwdFolderPath,
@@ -118,21 +120,24 @@ export const resetConfig = () => (configPromise = undefined)
 
 // ------------------------------------------------------------------------------------------------
 
-class InlangSdkConfigError extends Error {}
+class InlangSdkConfigException extends InlangSdkException {}
 
 function assertConfigWithSdk(
 	config: InlangConfig | undefined,
 ): asserts config is InlangConfigWithSdkProps {
 	if (!config) {
-		throw new InlangSdkConfigError(
-			"Could not find `inlang.config.js` in the root of your project.`",
-		)
+		throw new InlangSdkConfigException(dedent`
+			Could not locate 'inlang.config.js' at the root of your project (${inlangConfigFilePath}).
+			Make sure the file exists. You can generate the file using the inlang CLI.
+			See https://inlang.com/documentation/apps/inlang-cli
+		`)
 	}
 
 	if (!("sdk" in config)) {
-		throw new InlangSdkConfigError(
-			"Invalid config. Make sure to add the `sdkPlugin` to your `inlang.config.js` file. See https://inlang.com/documentation/sdk/configuration",
-		)
+		throw new InlangSdkConfigException(dedent`
+			Invalid config. Make sure to add the 'sdkPlugin' to your 'inlang.config.js' file.
+			See https://inlang.com/documentation/sdk/configuration
+		`)
 	}
 }
 
@@ -176,7 +181,7 @@ export async function defineConfig(env) {
 	)
 }
 
-// TODO: do this in a better way #708
+// TODO: do this in a better way https://github.com/inlang/inlang/issues/708
 const createDemoResources = async () => {
 	const resourcesFolder = path.resolve(cwdFolderPath, "languages")
 
@@ -212,13 +217,11 @@ const shouldContentBePrerendered = async (routesFolder: string) => {
 
 	const modules = (
 		await Promise.all(
-			filesToLookFor.map((file) =>
-				loadFile(path.resolve(routesFolder, file)).catch(() => undefined),
-			),
+			filesToLookFor.map((file) => import(path.resolve(routesFolder, file)).catch(() => undefined)),
 		)
-	).filter(Boolean) as ProxifiedModule<any>[]
+	).filter(Boolean)
 
-	return modules.map((mod) => [true, "auto"].includes(mod.exports.prerender)).some(Boolean)
+	return modules.map((mod) => [true, "auto"].includes(mod.exports?.prerender)).some(Boolean)
 }
 
 // ------------------------------------------------------------------------------------------------

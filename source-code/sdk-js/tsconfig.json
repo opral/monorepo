@@ -8,6 +8,8 @@
 		"lib": ["ESNext", "DOM"],
 		"types": [],
 		"outDir": "./dist",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"verbatimModuleSyntax": true,
+		"ignoreDeprecations": "5.0"
 	}
 }

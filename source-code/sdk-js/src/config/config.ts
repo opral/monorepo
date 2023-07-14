@@ -1,14 +1,13 @@
 import type { $fs } from "@inlang/core/environment"
 import { type InlangConfig, type InlangConfigModule, setupConfig } from "@inlang/core/config"
-import { initialize$import, InlangEnvironment } from "@inlang/core/environment"
+import { initialize$import, type InlangEnvironment } from "@inlang/core/environment"
 import type { SdkConfig } from "@inlang/sdk-js-plugin"
 import { dedent } from "ts-dedent"
+import { InlangSdkException } from "../adapter-sveltekit/vite-plugin/exceptions.js"
 
 export type InlangConfigWithSdkProps = InlangConfig & {
 	sdk: SdkConfig
 }
-
-export class InlangError extends Error {}
 
 export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 	const fs = await import("node:fs/promises").catch(
@@ -18,7 +17,9 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 					if (key === "then") return Promise.resolve(target)
 
 					return () => {
-						throw new InlangError("`node:fs/promises` is not available in the current environment")
+						throw new InlangSdkException(
+							"`node:fs/promises` is not available in the current environment",
+						)
 					}
 				},
 			}),
@@ -35,17 +36,16 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 						error instanceof TypeError &&
 						(error.cause as any)?.code === "UND_ERR_CONNECT_TIMEOUT"
 					) {
-						throw new InlangError(
+						throw new InlangSdkException(
 							dedent`
-
-							Node.js failed to resolve the URL. This can happen sometimes during development. Usually restarting the server helps.
-
-						`,
-							{ cause: error },
+								Node.js failed to resolve the URL. This can happen sometimes during development.
+								Usually restarting the server helps.
+							`,
+							error,
 						)
 					}
 
-					throw error
+					throw new InlangSdkException(`Failed to fetch from (${args[0]})`, error)
 				}),
 		}),
 	}
@@ -53,7 +53,7 @@ export const initInlangEnvironment = async (): Promise<InlangEnvironment> => {
 
 export const initConfig = async (module: InlangConfigModule) => {
 	if (!module) {
-		throw Error("could not read `inlang.config.js`")
+		throw new InlangSdkException("could not read `inlang.config.js`")
 	}
 	const env = await initInlangEnvironment()
 

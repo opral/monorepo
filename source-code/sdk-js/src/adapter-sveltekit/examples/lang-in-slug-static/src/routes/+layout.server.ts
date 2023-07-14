@@ -3,11 +3,13 @@ import type { LayoutServerLoad } from "./$types.js"
 
 export const prerender = true
 
-export const load = initRootLayoutServerLoadWrapper<LayoutServerLoad>().wrap(async ({ params }, { i }) => {
-	console.info("+layout.server.ts", i("welcome"))
+export const load = initRootLayoutServerLoadWrapper<LayoutServerLoad>().use(
+	async ({ params }, { i }) => {
+		console.info("+layout.server.ts", i("welcome"))
 
-	// to retrigger load function when language changes e.g. due to a popstate event
-	params.lang
+		// to retrigger load function when language changes e.g. due to a popstate event
+		params.lang
 
-	return { "+layout.server.ts": Math.random() }
-})
+		return { "+layout.server.ts": Math.random() }
+	},
+)
