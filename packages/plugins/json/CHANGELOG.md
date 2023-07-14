@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.10
+
+### Patch Changes
+
+- 61ec4dac: chore: fix the id of the plugin from `inlang.plugin-i18next` to `inlang.plugin-json`
+
 ## 3.0.9
 
 ### Patch Changes
