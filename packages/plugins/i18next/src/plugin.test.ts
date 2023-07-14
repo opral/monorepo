@@ -77,6 +77,20 @@ it("should throw if the path pattern with namespaces has a namespace with a dot"
 	}
 })
 
+it("should throw if the path pattern includes wildcard", async () => {
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile("./en.json", "{}")
+	const x = plugin({
+		pathPattern: "./{language}/*.json",
+	})(env)
+	try {
+		await x.config({})
+		throw new Error("should not reach this")
+	} catch (e) {
+		expect((e as Error).message).toContain("wildcard")
+	}
+})
+
 it("should not throw if the path pattern is valid", async () => {
 	const env = await mockEnvironment({})
 	await env.$fs.writeFile("./en.json", "{}")
