@@ -35,7 +35,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "getRuntimeFromData")
 	addImport(
 		sourceFile,
-		"@inlang/sdk-js/adapter-sveltekit/client/not-reactive",
+		`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? 'not-reactive' : 'reactive-workaround'}`,
 		"addRuntimeToContext",
 		"getRuntimeFromContext",
 	)

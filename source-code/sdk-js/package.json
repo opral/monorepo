@@ -80,6 +80,9 @@
 			"adapter-sveltekit/client/reactive": [
 				"./dist/adapter-sveltekit/runtime/client/reactive/index.d.ts"
 			],
+			"adapter-sveltekit/client/reactive-workaround": [
+				"./dist/adapter-sveltekit/runtime/client/reactive-workaround/index.d.ts"
+			],
 			"adapter-sveltekit/server": [
 				"./dist/adapter-sveltekit/runtime/server/index.d.ts"
 			],
