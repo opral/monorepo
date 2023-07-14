@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 3.0.2
+
+### Patch Changes
+
+- 1672ec38: Throw error when using wildcard in version 3
+
 ## 3.0.1
 
 ### Patch Changes
