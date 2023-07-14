@@ -87,10 +87,10 @@ describe("createWrapperAst", () => {
 	})
 
 	test("with nested params", () => {
-		const node = createWrapperAst("someFn", "{ nested: { fn: () => concole.log(123) } }")
+		const node = createWrapperAst("someFn", "{ nested: { fn: () => concole.info(123) } }")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"someFn({ nested: { fn: () => concole.log(123) } }).use($$_INLANG_WRAP_$$)"
+			"someFn({ nested: { fn: () => concole.info(123) } }).use($$_INLANG_WRAP_$$)"
 		`)
 	})
 })

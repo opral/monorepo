@@ -9,7 +9,7 @@ describe("transformPageSvelte", () => {
 		const code = dedent`
 			<script>
 				import { i } from '@inlang/sdk-js'
-				console.log('hello world')
+				console.info('hello world')
 			</script>
 
 			{i('hello')}

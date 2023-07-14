@@ -15,7 +15,7 @@ export const getRuntimeFromContext = () => {
 		throw new InlangSdkException(
 			`You cannot directly access any '@inlang/sdk-js' imports in this scope.
 Please read the docs for more information on how to workaround this temporary limitation:
-https://inlang.com/documentation/sdk/sveltekit-advanced`,
+https://inlang.com/documentation/sdk/sveltekit/advanced`,
 			error as Error,
 		)
 	}

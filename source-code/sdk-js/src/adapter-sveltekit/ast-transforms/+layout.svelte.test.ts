@@ -40,7 +40,7 @@ describe("transformLayoutSvelte", () => {
 				<script>
 					export let data;
 
-					console.log(data)
+					console.info(data)
 				</script>
 
 				<h1>this is a test</h1>
@@ -61,7 +61,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				}
-				console.log(data);
+				console.info(data);
 				</script>{#if language}{#key language}
 
 				<h1>this is a test</h1>
@@ -185,7 +185,7 @@ describe("transformLayoutSvelte", () => {
 			const code = dedent`
 				<script>
 					import { i } from "@inlang/sdk-js"
-					console.log(i("welcome"))
+					console.info(i("welcome"))
 				</script>
 
 				<slot />
@@ -204,7 +204,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				}
-				console.log(i(\\"welcome\\"));
+				console.info(i(\\"welcome\\"));
 				</script>{#if language}{#key language}
 
 				<slot />{/key}{/if}"
@@ -215,11 +215,11 @@ describe("transformLayoutSvelte", () => {
 			const code = dedent`
 				<script>
 					import { i } from "@inlang/sdk-js"
-					console.log(123)
+					console.info(123)
 
 					export let data
 
-					console.log(i("welcome"))
+					console.info(i("welcome"))
 				</script>
 
 				<slot />
@@ -231,7 +231,7 @@ describe("transformLayoutSvelte", () => {
 					import { browser } from '$app/environment';
 				import { addRuntimeToContext, getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
-				console.log(123);
+				console.info(123);
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
 				let { i, language } = getRuntimeFromContext();
@@ -239,7 +239,7 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				}
-				console.log(i(\\"welcome\\"));
+				console.info(i(\\"welcome\\"));
 				</script>{#if language}{#key language}
 
 				<slot />{/key}{/if}"

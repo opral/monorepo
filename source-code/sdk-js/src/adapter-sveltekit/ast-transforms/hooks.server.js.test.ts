@@ -139,7 +139,7 @@ describe("transformHooksServerJs", () => {
 				const handle1 = ({ resolve, event }) => resolve(event)
 
 				function handle2({ resolve, event }) {
-					console.log('handle called')
+					console.info('handle called')
 					return resolve(event)
 				}
 
@@ -152,7 +152,7 @@ describe("transformHooksServerJs", () => {
 			import { sequence } from '@sveltejs/kit';
 			const handle1 = ({ resolve, event }) => resolve(event);
 			function handle2({ resolve, event }) {
-			    console.log('handle called');
+			    console.info('handle called');
 			    return resolve(event);
 			}
 			export const handle = initHandleWrapper({

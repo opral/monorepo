@@ -1,6 +1,7 @@
 ---
-title: SDK for SvelteKit - Advanced Usage
-href: /documentation/sdk/sveltekit-advanced
+title: Globalization SDK for SvelteKit - Advanced Usage
+shortTitle: SvelteKit (Advanced)
+href: /documentation/sdk/sveltekit/advanced
 description: i18n SDK designed and fully integrated for SvelteKit.
 ---
 
@@ -18,15 +19,11 @@ import '@inlang/sdk-js/no-transforms'
 
 By adding this line, the code in that file will not be transformed and you need to make sure you manually add the necessary functionality.
 
-Here are some examples of what you need to do:
-
 ## Required Setup
 
 Those files require to be set up if you want to use any functionality of the SDK
 
 ### `hooks.server.js`
-
-You need to wrap the `handle` function in order to setup the inlang SDK.
 
 ```ts
 import '@inlang/sdk-js/no-transforms'
@@ -43,8 +40,6 @@ export const handle = initHandleWrapper({
 ```
 
 ### `/routes/+layout.server.js` (root server layout)
-
-You need to wrap the `load` function in your root server layout in order to setup the inlang SDK.
 
 ```ts
 import '@inlang/sdk-js/no-transforms'
@@ -63,8 +58,6 @@ export const load = initRootLayoutServerLoadWrapper<LayoutServerLoad>().use(() =
 
 ### `/routes/+layout.js` (root layout)
 
-You need to wrap the `load` function in your root layout in order to setup the inlang SDK.
-
 ```ts
 import '@inlang/sdk-js/no-transforms'
 import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
@@ -82,9 +75,26 @@ export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 })
 ```
 
-### `/routes/+layout.server.js` (root svelte layout)
+### `/routes/+page.js` (root page)
 
-You need to call a few functions in your root svelte layout file in order to setup the inlang SDK.
+```ts
+import '@inlang/sdk-js/no-transforms'
+import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import type { LayoutLoad } from "./$types.js"
+
+export const load = initRootPageLoadWrapper<LayoutLoad>({
+	// ... see TypeScript definition or source code for all parameters
+}).use(() => {
+
+	// your code goes here
+
+	return {
+		// ...
+	}
+})
+```
+
+### `/routes/+layout.svelte` (root svelte layout)
 
 ```svelte
 <script>
@@ -123,7 +133,7 @@ You need to call a few functions in your root svelte layout file in order to set
 
 If you want to use an import from the SDK inside a file where you have opted out of the SDK magic, you need to use it like this:
 
-> The examples always show the usage of the [inlang function (`i`)](https://inlang.com/documentation/sdk/usage) from the SDK. You can use any other import from the SDK in the same way.
+> The examples always show the usage of the [inlang function (`i`)](https://inlang.com/documentation/sdk/usage). You can use any other import from `@inlang/sdk-js` in the same way.
 
 ### `*.svelte`
 
@@ -140,21 +150,7 @@ If you want to use an import from the SDK inside a file where you have opted out
 </h2>
 ```
 
-<!-- ### `*.js` (called from a .svelte file)
-
-```ts
-import '@inlang/sdk-js/no-transforms'
-import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared'
-
-const getPageTitle = (page: string) => {
-	const  { i } = getRuntimeFromContext()
-
-	return i(`title.${page}`)
-}
-``` -->
-
 ### `*.js`
-<!-- (called from a +*.js file on the server) -->
 
 You need to pass the `i` function to the function you want to call it from.
 
@@ -167,6 +163,19 @@ const getPageTitle = (i: InlangFunction, page: string) => {
 }
 ```
 
+And then call it from somewhere like this:
+
+```svelte
+<script>
+	import { i } from '@inlang/sdk-js'
+	import { getPageTitle } from './utils.js'
+</script>
+
+<svelte:head>
+	<title>{getPageTitle(i, 'home')}</title>
+</svelte:head>
+```
+
 ### `+layout.server.js`
 
 The first parameter of the `use` function is the Event you usually get on a `load` function. You can access any import from the SDK through the second parameter.
@@ -176,12 +185,13 @@ import '@inlang/sdk-js/no-transforms'
 import { initLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
 import type { LayoutServerLoad } from "./$types.js"
 
-export const load = initLayoutServerLoadWrapper<LayoutServerLoad>().use(({ params }, { i }) => {
-	return {
-		id: params.id,
-		title: i('title', { name: 'inlang' }),
-	}
-})
+export const load = initLayoutServerLoadWrapper<LayoutServerLoad>()
+	.use(({ params }, { i }) => {
+		return {
+			id: params.id,
+			title: i('title', { name: 'inlang' }),
+		}
+	})
 ```
 
 > You need to replace `initLayoutServerLoadWrapper` with `initRootLayoutServerLoadWrapper` of it is your root server layout file.
@@ -195,12 +205,13 @@ import '@inlang/sdk-js/no-transforms'
 import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
 import type { LayoutLoad } from "./$types.js"
 
-export const load = initLoadWrapper<LayoutLoad>().use(({ params }, { i }) => {
-	return {
-		id: params.id,
-		title: i('title', { name: 'inlang' }),
-	}
-})
+export const load = initLoadWrapper<LayoutLoad>()
+	.use(({ params }, { i }) => {
+		return {
+			id: params.id,
+			title: i('title', { name: 'inlang' }),
+		}
+	})
 ```
 
 > You need to replace `initLoadWrapper` with `initRootLayoutLoadWrapper` of it is your root layout file.
@@ -214,15 +225,32 @@ import '@inlang/sdk-js/no-transforms'
 import { initPageServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
 import type { PageServerLoad } from "./$types.js"
 
-export const load = initPageServerLoadWrapper<PageServerLoad>().use(({ params }, { i }) => {
-	return {
-		id: params.id,
-		title: i('title', { name: 'inlang' }),
-	}
-})
+export const load = initPageServerLoadWrapper<PageServerLoad>()
+	.use(({ params }, { i }) => {
+		return {
+			id: params.id,
+			title: i('title', { name: 'inlang' }),
+		}
+	})
 ```
 
 > You need to replace `initPageServerLoadWrapper` with `initRootPageServerLoadWrapper` of it is your root server page file.
+
+Using inlang inside Actions looks similar:
+
+```ts
+import '@inlang/sdk-js/no-transforms'
+import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import type { PageLoad } from "./$types.js"
+
+const delete = initActionWrapper<PageLoad>()
+	.use((event, { i }) => {
+		// your code goes here
+		console.info(i('delete.success'))
+	})
+
+export const actions = { delete }
+```
 
 ### `+page.js`
 
@@ -233,12 +261,31 @@ import '@inlang/sdk-js/no-transforms'
 import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
 import type { PageLoad } from "./$types.js"
 
-export const load = initLoadWrapper<PageLoad>().use(({ params }, { i }) => {
-	return {
-		id: params.id,
-		title: i('title', { name: 'inlang' }),
-	}
-})
+export const load = initLoadWrapper<PageLoad>()
+	.use(({ params }, { i }) => {
+		return {
+			id: params.id,
+			title: i('title', { name: 'inlang' }),
+		}
+	})
 ```
 
 > You need to replace `initLoadWrapper` with `initRootPageLoadWrapper` of it is your root page file.
+
+### `+server.js`
+
+The first parameter of the `use` function is the Event you usually get on a `ReqestHandler` function. You can access any import from the SDK through the second parameter.
+
+```ts
+import '@inlang/sdk-js/no-transforms'
+import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import type { PageLoad } from "./$types.js"
+
+export const GET = initRequestHandlerWrapper<PageLoad>()
+	.use(({ params }, { i }) => {
+		const text = i('title', { name: 'inlang' })
+		return new Response(text)
+	})
+
+// same goes for POST, PATCH, PUT, DELETE, OPTIONS and HEAD
+```

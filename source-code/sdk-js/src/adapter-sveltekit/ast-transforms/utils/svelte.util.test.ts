@@ -12,7 +12,7 @@ describe("getSvelteFileParts", () => {
 			</script>
 
 			<script lang="ts">
-				console.log('hello world')
+				console.info('hello world')
 			</script>
 
 			<h1 class="heading">
@@ -28,7 +28,7 @@ describe("getSvelteFileParts", () => {
 		const result = getSvelteFileParts(code)
 
 		expect(result.moduleScript).toMatchInlineSnapshot("\"import * from 'foo'\"")
-		expect(result.script).toMatchInlineSnapshot("\"console.log('hello world')\"")
+		expect(result.script).toMatchInlineSnapshot("\"console.info('hello world')\"")
 		expect(result.markup).toMatchInlineSnapshot(`
 			"<svelte:options />
 
@@ -104,21 +104,21 @@ describe("getSvelteFileParts", () => {
 		})
 
 		test("just script tag", () => {
-			const code = "<script>console.log('test')</script>"
+			const code = "<script>console.info('test')</script>"
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
 			expect(result.moduleScript).toBe("")
-			expect(result.script).toMatchInlineSnapshot("\"console.log('test')\"")
+			expect(result.script).toMatchInlineSnapshot("\"console.info('test')\"")
 			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_SCRIPT_PLACEHOLDER_$}"')
 		})
 
 		test("just module script tag", () => {
-			const code = `<script context="module">console.log('test')</script>`
+			const code = `<script context="module">console.info('test')</script>`
 			const result = getSvelteFileParts(code)
 
 			expect(result.toString()).toEqual(code)
-			expect(result.moduleScript).toMatchInlineSnapshot("\"console.log('test')\"")
+			expect(result.moduleScript).toMatchInlineSnapshot("\"console.info('test')\"")
 			expect(result.script).toBe("")
 			expect(result.markup).toMatchInlineSnapshot('"{$_INLANG_MODULE_SCRIPT_PLACEHOLDER_$}"')
 		})
@@ -140,11 +140,11 @@ describe("getSvelteFileParts", () => {
 				const code = ""
 				const result = getSvelteFileParts(code)
 
-				result.moduleScript = "console.log('hello module')"
+				result.moduleScript = "console.info('hello module')"
 
 				expect(result.toString()).toMatchInlineSnapshot(`
 					"<script context=\\"module\\">
-					console.log('hello module')
+					console.info('hello module')
 					</script>"
 				`)
 			})
@@ -153,11 +153,11 @@ describe("getSvelteFileParts", () => {
 				const code = ""
 				const result = getSvelteFileParts(code)
 
-				result.script = "console.log('hello world')"
+				result.script = "console.info('hello world')"
 
 				expect(result.toString()).toMatchInlineSnapshot(`
 					"<script>
-					console.log('hello world')
+					console.info('hello world')
 					</script>"
 				`)
 			})
@@ -188,7 +188,7 @@ describe("getSvelteFileParts", () => {
 			test("should remove a script", () => {
 				const code = dedent`
 					<script>
-						console.log('hello world')
+						console.info('hello world')
 					</script>`
 				const result = getSvelteFileParts(code)
 
@@ -242,7 +242,7 @@ describe("getSvelteFileParts", () => {
 					</script>
 
 					<script lang="ts">
-						console.log('hello world')
+						console.info('hello world')
 					</script>
 
 					<h1 class="heading">
@@ -264,7 +264,7 @@ describe("getSvelteFileParts", () => {
 						import * from 'foo'
 					</script>
 					<script lang=\\"ts\\">
-						console.log('hello world')
+						console.info('hello world')
 					</script>
 
 					<style>

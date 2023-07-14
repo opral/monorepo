@@ -117,7 +117,7 @@ export class InlangTransformException extends InlangSdkException {
 			Please open an issue on GitHub so we can investigate and improve the SDK: https://github.com/inlang/inlang/issues/new/
 
 			Don't worry, we can probably already unblock you so you can continue working on your project.
-			You can find more information about it here: https://inlang.com/documentation/sdk/sveltekit-advanced
+			You can find more information about it here: https://inlang.com/documentation/sdk/sveltekit/advanced
 		`)
 	}
 }

@@ -111,9 +111,9 @@ describe("findOrCreateExport", () => {
 	test("should create an export with a custom function implementation", () => {
 		const node = codeToSourceFile("")
 
-		const exportNode = findOrCreateExport(node, "load", "(param) => console.log(param)")!
+		const exportNode = findOrCreateExport(node, "load", "(param) => console.info(param)")!
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = (param) => console.log(param)"')
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = (param) => console.info(param)"')
 	})
 })
