@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.8.0
+
+### Minor Changes
+
+- e36e6767: complete rewrite of the vite plugin to make it more robust
+
 ## 0.7.1
 
 ### Patch Changes
