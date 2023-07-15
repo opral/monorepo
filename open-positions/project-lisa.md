@@ -6,13 +6,14 @@
 
 **Requirements**
 
-- experience with git internals (objects, pack files, etc)/local-first software
+- experience with git internals (objects, pack files, etc)
 - web engineer (JS/TS) with systems knowledge (C/Rust)
 - senior level
 - located in the EU
 
 **Nice to have**
 
+- experience with local-first software
 - experience with building version control systems
 - presentation skills (you will likely present lisa at conferences etc.)
 - end-to-end product building experience
