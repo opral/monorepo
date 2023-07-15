@@ -16,8 +16,17 @@ Inlang core, and thereby inlang itself, is architected "resource-first". Among t
 
 ### Wrong assumptions with core's "resource-first" architecture
 
-- Resources are the primary data structure of inlang. That's not true. Messages is what matters to apps and users.
-- Plugins need exact knowledge of AST which turned out to be false. Every plugin, regardless of the format, treats resources as key-value data structure (e.g. JSON, YAML, etc.).
+#### 1. [False] Resources are the primary data structure of inlang
+
+That's not true. Messages is what matters to apps and users.
+
+No inlang application does anything with resources. However, plugins do. The derived insight is that plugins deal with resources because plugins are the interface between app and source code. If this insight is true, apps should not care about resources.
+
+#### 2. [False] A resource AST is required
+
+Turned out to be false. Plugins re-construct resources from Messages, not from a resource AST.
+
+Resources are almost always key-value data structures with a parsing and serialization spec. Precise knowledge how a resource file is "construcuted" e.g. message id "5" starts on line 3 column 5 is not required. As a matter of fact, the AST approach for resources doesn't even work because CRUD operations, by nature, do not contain information like message id "5" starts on line 3 column 5. CRUD operations not providing AST information lead to the [removal of `metadata`](https://github.com/inlang/inlang/issues/945).
 
 ## Proposal
 
