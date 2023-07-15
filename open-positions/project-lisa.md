@@ -2,12 +2,12 @@
 
 - build the version control system for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
 - hands-down deep CS work
-- small team, overproportional impact
+- small team, over proportional impact
 
 **Requirements**
 
 - experience with local-first, git internals (objects, pack files, etc)
-- web engineer (JS/TS) with systems experience (C, Rust, WebAssembly)
+- web engineer (JS/TS) with systems knowledge (C, WebAssembly)
 - senior level
 - located in the EU
 
