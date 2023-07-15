@@ -19,4 +19,6 @@
 
 **Additional information**
 
+
 - read the [design principles](https://github.com/inlang/inlang/blob/0c36a50b0594543acf5a86b4cbf534610eded082/source-code-git/design-principles.md)
+- example discussions: [design approach](https://github.com/inlang/inlang/issues/836), [lazy loading of files](https://github.com/inlang/inlang/issues/915), [rfc about requirements](https://github.com/inlang/inlang/blob/main/rfcs/git-sdk-requirements/RFC.md)
