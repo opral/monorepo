@@ -14,7 +14,6 @@
 **Nice to have**
 
 - experience with building version control systems
-- design skills (figma etc.)
 - presentation skills (you will likely present lisa at conferences etc.)
 - end-to-end product building experience
 
