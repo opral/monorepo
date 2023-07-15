@@ -82,6 +82,20 @@ messages = messages.delete({
 })
 ```
 
+```ts
+// For comparison, here is the current API:
+
+const refResource = resources.find((resource) => resource.languageTag.name === "en-US")
+const message = query(refResource).get({
+	id: "hello.login",
+})
+
+// -------------------
+
+// this proposal
+const message = messages.get({ id: "hello.login", languageTag: "en-US" })
+```
+
 #### 3. `config.saveMessages()`
 
 - A plugin can save messages anywhere (e.g. resources files, remote APIs, embedded databases).
