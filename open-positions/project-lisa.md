@@ -11,6 +11,12 @@
 - senior level
 - located in the EU
 
+**Nice to have**
+
+- design skills (figma etc.)
+- presentation skills (you will likely present lisa at conferences etc.)
+- end-to-end product building experience 
+
 **Additional information**
 
 - read the [design principles](https://github.com/inlang/inlang/blob/0c36a50b0594543acf5a86b4cbf534610eded082/source-code-git/design-principles.md)
