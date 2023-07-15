@@ -7,7 +7,7 @@
 **Requirements**
 
 - experience with local-first, git internals (objects, pack files, etc)
-- typescript fluent with option to go low-level C, Rust to WebAssembly
+- web engineer (JS/TS) with systems experience (C, Rust, WebAssembly)
 - senior level
 - located in the EU
 
@@ -15,10 +15,10 @@
 
 - design skills (figma etc.)
 - presentation skills (you will likely present lisa at conferences etc.)
-- end-to-end product building experience 
+- end-to-end product building experience
 
 **Additional information**
 
-
 - read the [design principles](https://github.com/inlang/inlang/blob/0c36a50b0594543acf5a86b4cbf534610eded082/source-code-git/design-principles.md)
 - example discussions: [design approach](https://github.com/inlang/inlang/issues/836), [lazy loading of files](https://github.com/inlang/inlang/issues/915), [rfc about requirements](https://github.com/inlang/inlang/blob/main/rfcs/git-sdk-requirements/RFC.md)
+- stuff that will be of interest: [replicache](https://pitch.com/public/a49fccb0-da65-4d64-966e-e519674d951f/9ba6d165-4062-4f66-85aa-9fb9f979e618)
