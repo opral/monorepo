@@ -2,17 +2,18 @@
 
 - build the version control system for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
 - hands-down deep CS work
-- small team, over proportional impact
+- small team, overproportional impact
 
 **Requirements**
 
-- experience with local-first, git internals (objects, pack files, etc)
-- web engineer (JS/TS) with systems knowledge (C, WebAssembly)
+- experience with git internals (objects, pack files, etc)/local-first software
+- web engineer (JS/TS) with systems knowledge (C/Rust)
 - senior level
 - located in the EU
 
 **Nice to have**
 
+- experience with building version control systems
 - design skills (figma etc.)
 - presentation skills (you will likely present lisa at conferences etc.)
 - end-to-end product building experience
