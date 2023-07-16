@@ -164,11 +164,6 @@ export const missingMessage = createLintRule({
 							node: reference,
 							message: `Message with id '${reference.id.name}' is missing for '${targetLanguage}'.`,
 						})
-						return {
-							ruleId: reference.id.name,
-							languageTag: targetLanguage,
-							message: `Message with id '${reference.id.name}' is missing for '${targetLanguage}'.`,
-						}
 					}
 				},
 			},
