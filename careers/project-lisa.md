@@ -1,4 +1,4 @@
-write `hello@inlang.com` to apply
+> write `hello@inlang.com` to apply
 
 **Opportunity**
 
