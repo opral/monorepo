@@ -185,7 +185,7 @@ export const missingMessage = createLintRule({
 export const missingMessage = createLintRule({
 	id: "inlang.missingMessage",
 	message: ({ message, messages, config }) => {
-		if (message.languageTag === config.referenceLanguageTag) {
+		if (message.languageTag !== config.referenceLanguageTag) {
 			return
 		}
 		const result: LintReport[] = []
