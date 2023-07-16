@@ -1,3 +1,5 @@
+write `hello@inlang.com` to apply
+
 **Opportunity**
 
 - build the version control system for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
