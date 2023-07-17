@@ -159,7 +159,9 @@ function Header(props: { landingpage?: boolean }) {
 												prop:defaultValue={defaultLanguage}
 												on:sl-change={(event: any) => {
 													const language = event.target.value || defaultLanguage
-													navigate(
+													window.history.pushState(
+														{},
+														"",
 														(language !== defaultLanguage ? "/" + language : "") +
 															currentPageContext.urlParsed.pathname,
 													)
