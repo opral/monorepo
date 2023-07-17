@@ -24,24 +24,34 @@ type HandleOptions = {
 		throwable: typeof Kit.redirect
 		getPath: (event: Kit.RequestEvent, language: Language) => URL | string
 	}
+	excludedRoutes?: RelativeUrl[]
 }
 
 export const initHandleWrapper = (options: HandleOptions) => ({
 	use: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
 
+		const excludedRoutes = ["/inlang", ...(options.excludedRoutes || [])]
+
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {
 				const pathname = event.url.pathname as RelativeUrl
 
 				runtime = getRuntimeFromLocals(event.locals)
-				// runtime was already added by a previous wrapper
-				if (runtime) resolve(event)
+				if (runtime) {
+					// runtime was already added by a previous wrapper
+					return resolve(event)
+				}
+
+				if (excludedRoutes.some((route) => pathname.startsWith(route))) {
+					return resolve(event)
+				}
 
 				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
 
 				let language = options.getLanguage(event)
-				if (!pathname.startsWith("/inlang") && (!language || !languages.includes(language))) {
+				// TODO: create `isLanguage` helper function
+				if (!language || !languages.includes(language)) {
 					if (options.redirect) {
 						const detectedLanguage = await detectLanguage(
 							{ referenceLanguage, languages },
@@ -97,9 +107,9 @@ export const initRootLayoutServerLoadWrapper = <
 			return {
 				...(await load(event, runtime)),
 				"[inlang]": {
-					referenceLanguage: runtime.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-					languages: runtime.languages, // TODO: only pass this if `languages` get used somewhere
-					language: runtime.language, // TODO: only pass this if `language` gets detected on server
+					referenceLanguage: runtime?.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
+					languages: runtime?.languages, // TODO: only pass this if `languages` get used somewhere
+					language: runtime?.language, // TODO: only pass this if `language` gets detected on server
 				},
 			}
 		},
