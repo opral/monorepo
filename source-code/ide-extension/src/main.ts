@@ -103,10 +103,12 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const config = await setupConfig({ module, env })
 
 	telemetry.capture({
-		event: "IDE-EXTENSION config loaded",
+		event: coreUsedConfigEvent.name,
 		properties: coreUsedConfigEvent.properties(config),
 	})
-
+	telemetry.capture({
+		event: "IDE-EXTENSION config loaded",
+	})
 	const loadResources = async () => {
 		const resources = await config.readResources({ config })
 		setState({
