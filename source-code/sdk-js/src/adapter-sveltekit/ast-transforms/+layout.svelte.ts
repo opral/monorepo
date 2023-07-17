@@ -83,8 +83,9 @@ const transformMarkup = (config: TransformConfig, markup: string): string => {
 	const s1 = new MagicString(markup1)
 	const ast1 = markupToAst(markup1)
 	// TODO: only insert if reactive stores are not used
+	// TODO: check what to do with `routing.exclude` option
 	// if (!config.languageInUrl) {
-	wrapMarkupChildren(s1, ast1, "{#if language}$$_INLANG_WRAP_$${/if}")
+	// wrapMarkupChildren(s1, ast1, "{#if language}$$_INLANG_WRAP_$${/if}")
 	// }
 
 	return s1.toString()
