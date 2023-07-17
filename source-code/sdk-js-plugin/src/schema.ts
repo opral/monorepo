@@ -84,6 +84,9 @@ const zSdkConfig = object({
 			),
 	}),
 	resources: zResources.default({ cache: "build-time" }),
+	routing: object({
+		exclude: array(string().startsWith('/')).default([]),
+	}).default({ exclude: [] }),
 })
 
 export const validateSdkConfig = (config?: SdkConfigInput): SdkConfig => zSdkConfig.parse(config)
