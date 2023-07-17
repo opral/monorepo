@@ -21,3 +21,6 @@ jobs:
 
       - name: run build
         run: npm run build
+
+      - name: run inlang machine translate
+        run: npx inlang machine translate
