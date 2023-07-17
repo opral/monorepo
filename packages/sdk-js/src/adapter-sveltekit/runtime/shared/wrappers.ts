@@ -37,7 +37,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
 	const data = (event.data as DataPayload)["[inlang]"]
-	const { referenceLanguage = undefined as unknown as Language, languages = [] } = data
+	const { referenceLanguage, languages } = data
 
 	// TODO: only add this conditional logic if shared detection strategies get used
 	const language =

@@ -15,7 +15,12 @@ export const transformLayoutServerJs = (
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), "+layout.server.js", root) // TODO: implement functionality
+	assertNoImportsFromSdkJs(
+		sourceFile,
+		filePathForOutput(config, filePath),
+		"+layout.server.js",
+		root,
+	) // TODO: implement functionality
 
 	if (!root) return code // for now we don't need to transform non-root files
 
