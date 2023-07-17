@@ -29,7 +29,7 @@ const code = [
 
 const ConfigPage = () => {
 	const [connectorSizes, setConnectorSizes] = createSignal<Array<number>>([0, 0, 0, 0, 0, 0])
-	const [, { locale }] = useI18n()
+	const [t, { locale }] = useI18n()
 
 	onMount(() => {
 		const box1 = document.getElementById("connector1")
@@ -53,45 +53,46 @@ const ConfigPage = () => {
 		return language !== defaultLanguage ? "/" + language : ""
 	}
 
-	const [t] = useI18n()
-	const data = [
-		{
-			title: `${t("landing.config.editor.title")}`,
-			isSoon: false,
-			description: `${t("landing.config.editor.description")}`,
-			benefit: [
-				`${t("landing.config.editor.benefit1")}`,
-				`${t("landing.config.editor.benefit2")}`,
-				`${t("landing.config.editor.benefit3")}`,
-			],
-			link: "/documentation/apps/web-editor",
-			image: "/images/AppSVGs/editor.svg",
-		},
-		{
-			title: `${t("landing.config.extension.title")}`,
-			isSoon: false,
-			description: `${t("landing.config.extension.description")}`,
-			benefit: [
-				`${t("landing.config.extension.benefit1")}`,
-				`${t("landing.config.extension.benefit2")}`,
-				`${t("landing.config.extension.benefit3")}`,
-			],
-			link: "/documentation/apps/ide-extension",
-			image: "/images/AppSVGs/ide.svg",
-		},
-		{
-			title: `${t("landing.config.cli.title")}`,
-			isSoon: false,
-			description: `${t("landing.config.cli.description")}`,
-			benefit: [
-				`${t("landing.config.cli.benefit1")}`,
-				`${t("landing.config.cli.benefit2")}`,
-				`${t("landing.config.cli.benefit3")}`,
-			],
-			link: "/documentation/apps/inlang-cli",
-			image: "/images/AppSVGs/cli.svg",
-		},
-	]
+	const getData = () => {
+		return [
+			{
+				title: `${t("landing.config.editor.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.editor.description")}`,
+				benefit: [
+					`${t("landing.config.editor.benefit1")}`,
+					`${t("landing.config.editor.benefit2")}`,
+					`${t("landing.config.editor.benefit3")}`,
+				],
+				link: "/documentation/apps/web-editor",
+				image: "/images/AppSVGs/editor.svg",
+			},
+			{
+				title: `${t("landing.config.extension.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.extension.description")}`,
+				benefit: [
+					`${t("landing.config.extension.benefit1")}`,
+					`${t("landing.config.extension.benefit2")}`,
+					`${t("landing.config.extension.benefit3")}`,
+				],
+				link: "/documentation/apps/ide-extension",
+				image: "/images/AppSVGs/ide.svg",
+			},
+			{
+				title: `${t("landing.config.cli.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.cli.description")}`,
+				benefit: [
+					`${t("landing.config.cli.benefit1")}`,
+					`${t("landing.config.cli.benefit2")}`,
+					`${t("landing.config.cli.benefit3")}`,
+				],
+				link: "/documentation/apps/inlang-cli",
+				image: "/images/AppSVGs/cli.svg",
+			},
+		]
+	}
 
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
@@ -123,7 +124,7 @@ const ConfigPage = () => {
 			</div>
 
 			<div class="z-10 relative flex justify-between px-10 pt-10 gap-4 lg:gap-0 flex-col lg:flex-row">
-				<For each={data}>
+				<For each={getData()}>
 					{(card) => (
 						<a
 							href={getLocale() + card.link}

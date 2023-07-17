@@ -11,12 +11,14 @@ import { useI18n } from "@solid-primitives/i18n"
 
 const Integration = () => {
 	const [t] = useI18n()
-	const data = {
-		caption: `${t("landing.integration.caption")}`,
-		title: `${t("landing.integration.title")}`,
-		description: `${t("landing.integration.description")}`,
-		button: `${t("landing.hero.cta")}`,
-		buttonLink: "/documentation/",
+	const getData = () => {
+		return {
+			caption: `${t("landing.integration.caption")}`,
+			title: `${t("landing.integration.title")}`,
+			description: `${t("landing.integration.description")}`,
+			button: `${t("landing.hero.cta")}`,
+			buttonLink: "/documentation/",
+		}
 	}
 	return (
 		<SectionLayout showLines={true} type="white">
@@ -67,18 +69,18 @@ const Integration = () => {
 					<div class="flex flex-col items-center gap-4">
 						<div class="bg-background">
 							<p class="text-xs text-primary bg-primary/10 h-7 flex items-center px-4 rounded-full w-fit">
-								{data.caption}
+								{getData().caption}
 							</p>
 						</div>
 						<h2 class="text-center text-3xl font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
-							{data.title}
+							{getData().title}
 						</h2>
 						<p class="text-base px-10 md:w-[55%] sm:leading-7 text-center text-outline-variant">
-							{data.description}
+							{getData().description}
 						</p>
 						<div class="pt-4">
-							<Button href={data.buttonLink} type="secondary">
-								{data.button}
+							<Button href={getData().buttonLink} type="secondary">
+								{getData().button}
 							</Button>
 						</div>
 					</div>

@@ -31,5 +31,20 @@
 	"landing.config.title.plugins": "plugins",
 	"landing.config.title.config": "config",
 	"landing.config.title.endless": ", endless",
-	"landing.config.title.one": ", one"
+	"landing.config.title.one": ", one",
+	"landing.pricing.title": "Free for individual use and open source",
+	"landing.pricing.caption": "Pricing",
+	"landing.pricing.description": "Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good \"marketing\" that helps us acquiring enterprise customers.",
+	"landing.pricing.free.name": "free",
+	"landing.pricing.free.title": "Individuals and Open Source",
+	"landing.pricing.free.amount": "$0",
+	"landing.pricing.paid.name": "paid",
+	"landing.pricing.paid.title": "Enterprise",
+	"landing.pricing.paid.amount": "soon",
+	"landing.getstarted.caption": "Add inlang to your project",
+	"landing.getstarted.title": "Take your software global",
+	"landing.getstarted.description": "Setup inlang in your code base and start using IDE extension, CLI and web editor.",
+	"landing.getstarted.button": "Get started",
+	"landing.getstarted.toast.text": "Copied command to clipboard",
+	"landing.getstarted.toast.tooltip": "Copy"
 }
