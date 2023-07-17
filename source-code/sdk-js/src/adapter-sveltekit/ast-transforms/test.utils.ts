@@ -34,7 +34,7 @@ export const initTransformConfig = (
 					},
 					routing: {
 						exclude: [],
-					}
+					},
 				},
 			},
 			svelteKit: {

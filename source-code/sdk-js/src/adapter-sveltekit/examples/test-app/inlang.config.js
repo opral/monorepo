@@ -19,8 +19,8 @@ export async function defineConfig(env) {
 					strategies: [{ type: "url" }],
 				},
 				routing: {
-					exclude: ['/api'],
-				}
+					exclude: ["/api"],
+				},
 			}),
 		],
 	}
