@@ -20,6 +20,7 @@ export function Page(props: PageProps) {
 				name="description"
 				content="Posts that revolve around inlang, git, and localization (i18n)."
 			/>
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<Layout>
 				<div class="flex-row min-h-full w-full items-center justify-center mx-auto md:max-w-2xl divide-y divide-solid divide-outline">
 					<For each={Object.entries(props.processedTableOfContents ?? {})}>
