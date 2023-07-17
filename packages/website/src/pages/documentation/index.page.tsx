@@ -24,6 +24,7 @@ export function Page(props: PageProps) {
 			{/* frontmatter is undefined on first client side nav  */}
 			<Title>{props.markdown?.frontmatter?.title}</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
