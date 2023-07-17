@@ -53,6 +53,7 @@
 		"cookie-session": "^2.0.0",
 		"date-fns": "^2.29.3",
 		"dotenv": "^16.0.3",
+		"flat": "^5.0.2",
 		"jose": "^4.11.1",
 		"marked": "^4.2.4",
 		"mermaid": "^9.3.0",
