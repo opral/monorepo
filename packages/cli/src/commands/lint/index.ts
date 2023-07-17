@@ -4,6 +4,7 @@ import { cli } from "../../main.js"
 import { log } from "../../utilities.js"
 import Table from "cli-table3"
 import { getConfig } from "../../utilities/getConfig.js"
+import { bold, italic } from "../../utilities/format.js"
 
 export const lint = new Command()
 	.command("lint")
@@ -20,9 +21,16 @@ async function lintCommandAction() {
 			return
 		}
 
-		log.info(
-			"ℹ️  For this command to work, you need lint rules configured in your `inlang.config.js` – for example, through the https://github.com/inlang/plugin-standard-lint-rules plugin.",
-		)
+		if (config.lint?.rules === undefined) {
+			log.error(
+				`🚫 For this command to work, you need lint rules configured in your inlang.config.js – for example, the ${bold(
+					"standard-lint-rule",
+				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
+					"Learn more about lints here:",
+				)} https://inlang.com/documentation/lint`,
+			)
+			return
+		}
 
 		const resources = await config.readResources({ config })
 
@@ -31,7 +39,7 @@ async function lintCommandAction() {
 		if (errors) {
 			console.error(
 				"🚫 Lints partially failed. Please check if you have your lint rules configured correctly.",
-				errors && errors,
+				errors.length && errors,
 			)
 		}
 
@@ -39,7 +47,7 @@ async function lintCommandAction() {
 		const lints = getLintReports(resourcesWithLints)
 
 		if (lints.length === 0) {
-			log.success("🎉 Everything translated correctly.")
+			log.success("🎉 Linting successful.")
 			return
 		}
 
@@ -61,6 +69,7 @@ async function lintCommandAction() {
 			}
 		}
 
+		log.log("") // spacer line
 		log.log("🚨 Lint Report")
 		log.log(lintTable.toString())
 
@@ -72,10 +81,13 @@ async function lintCommandAction() {
 		summaryTable.push(["Error", lints.filter((lint) => lint.level === "error").length])
 		summaryTable.push(["Warning", lints.filter((lint) => lint.level === "warn").length])
 
+		log.log("") // spacer line
 		log.log("📊 Summary")
 		log.log(summaryTable.toString())
 
 		if (hasError && lint.opts().fail) {
+			// spacer line
+			log.log("")
 			log.info(
 				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails.",
 			)
