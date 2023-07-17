@@ -11,4 +11,5 @@ export type TelemetryEvents =
 	| "IDE-EXTENSION command executed"
 	| "IDE-EXTENSION completed add to workspace recommendations"
 	| "IDE-EXTENSION completed create config file"
+	| "IDE-EXTENSION config loaded"
 	| typeof coreUsedConfigEvent.name

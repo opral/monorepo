@@ -19,8 +19,8 @@ import {
 	isDisabledConfigFileCreation,
 } from "./utilities/createInlangConfigFile.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { openInEditorCommand } from './commands/openInEditor.js'
-import { editMessageCommand } from './commands/editMessage.js'
+import { openInEditorCommand } from "./commands/openInEditor.js"
+import { editMessageCommand } from "./commands/editMessage.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -79,6 +79,13 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		}
 		return
 	}
+	telemetry.capture({
+		event: "IDE-EXTENSION config loaded",
+		properties: {
+			vscode_version: vscode.version,
+			version: version,
+		},
+	})
 	const closestConfigPath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
@@ -131,18 +138,12 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 
 	// register command
 	args.context.subscriptions.push(
-		vscode.commands.registerCommand(
-			editMessageCommand.id,
-			editMessageCommand.callback,
-		),
+		vscode.commands.registerCommand(editMessageCommand.id, editMessageCommand.callback),
 		vscode.commands.registerTextEditorCommand(
 			extractMessageCommand.id,
 			extractMessageCommand.callback,
 		),
-		vscode.commands.registerCommand(
-			openInEditorCommand.id,
-			openInEditorCommand.callback,
-		),
+		vscode.commands.registerCommand(openInEditorCommand.id, openInEditorCommand.callback),
 	)
 
 	const documentSelectors: vscode.DocumentSelector = [
