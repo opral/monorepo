@@ -45,6 +45,7 @@
 		"@tiptap/extension-placeholder": "^2.0.3",
 		"@tiptap/pm": "^2.0.3",
 		"@tiptap/starter-kit": "^2.0.3",
+		"@types/flat": "^5.0.2",
 		"@zag-js/checkbox": "^0.2.1",
 		"@zag-js/menu": "^0.2.1",
 		"@zag-js/pressable": "^0.3.1",
