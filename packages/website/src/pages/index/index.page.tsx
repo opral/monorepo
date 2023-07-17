@@ -18,6 +18,7 @@ export function Page() {
 				name="description"
 				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout landingpage>
 				<div>
 					<Hero />
