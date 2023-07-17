@@ -1,4 +1,4 @@
-import type { coreUsedConfigEvent } from "@inlang/telemetry"
+import type { ecosystemUsedConfigEvent } from "@inlang/telemetry"
 
 /**
  * Typesafe telemetry events.
@@ -8,4 +8,4 @@ import type { coreUsedConfigEvent } from "@inlang/telemetry"
 export type TelemetryEvents =
 	| "CLI command executed"
 	| "CLI started"
-	| typeof coreUsedConfigEvent.name
+	| typeof ecosystemUsedConfigEvent.name

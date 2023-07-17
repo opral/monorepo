@@ -13,8 +13,8 @@ import type { InlangConfig } from "@inlang/core/config"
  * ultimately build a better product.
  *
  */
-export const coreUsedConfigEvent = {
-	name: "Ecosystem used config" as const,
+export const ecosystemUsedConfigEvent = {
+	name: "ECOSYSTEM used config" as const,
 	// typesafe properties
 	properties: (config: InlangConfig) => config,
 }

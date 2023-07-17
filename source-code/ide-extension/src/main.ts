@@ -12,7 +12,6 @@ import { getGitOrigin, telemetry } from "./services/telemetry/index.js"
 import { version } from "../package.json"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { promptToReloadWindow } from "./utilities/promptToReload.js"
-import { coreUsedConfigEvent } from "@inlang/telemetry"
 import { recommendation, isDisabledRecommendation } from "./utilities/recommendation.js"
 import {
 	createInlangConfigFile,
@@ -21,6 +20,7 @@ import {
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { openInEditorCommand } from "./commands/openInEditor.js"
 import { editMessageCommand } from "./commands/editMessage.js"
+import { ecosystemUsedConfigEvent } from "@inlang/telemetry"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -103,8 +103,8 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const config = await setupConfig({ module, env })
 
 	telemetry.capture({
-		event: coreUsedConfigEvent.name,
-		properties: coreUsedConfigEvent.properties(config),
+		event: ecosystemUsedConfigEvent.name,
+		properties: ecosystemUsedConfigEvent.properties(config),
 	})
 	telemetry.capture({
 		event: "IDE-EXTENSION config loaded",

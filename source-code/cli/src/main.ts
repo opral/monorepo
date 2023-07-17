@@ -8,7 +8,7 @@ import { open } from "./commands/open/index.js"
 import { gitOrigin, telemetry } from "./services/telemetry/implementation.js"
 import fetchPolyfill from "node-fetch"
 import { lint } from "./commands/lint/index.js"
-import { coreUsedConfigEvent } from "@inlang/telemetry"
+import { ecosystemUsedConfigEvent } from "@inlang/telemetry"
 import { getConfig } from "./utilities/getConfig.js"
 // --------------- INIT ---------------
 
@@ -77,8 +77,8 @@ try {
 
 	if (inlangConfig) {
 		telemetry.capture({
-			event: coreUsedConfigEvent.name,
-			properties: coreUsedConfigEvent.properties(inlangConfig),
+			event: ecosystemUsedConfigEvent.name,
+			properties: ecosystemUsedConfigEvent.properties(inlangConfig),
 		})
 	}
 } catch (error) {

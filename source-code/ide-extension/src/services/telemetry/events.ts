@@ -1,4 +1,4 @@
-import type { coreUsedConfigEvent } from "@inlang/telemetry"
+import type { ecosystemUsedConfigEvent } from "@inlang/telemetry"
 
 /**
  * Typesafe telemetry events.
@@ -12,4 +12,4 @@ export type TelemetryEvents =
 	| "IDE-EXTENSION completed add to workspace recommendations"
 	| "IDE-EXTENSION completed create config file"
 	| "IDE-EXTENSION config loaded"
-	| typeof coreUsedConfigEvent.name
+	| typeof ecosystemUsedConfigEvent.name
