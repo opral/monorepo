@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 3.0.11
+
+### Patch Changes
+
+- 77a6deed: Added test for unused folder in language dir (fixed ignore at getLanguages)
+
 ## 3.0.10
 
 ### Patch Changes

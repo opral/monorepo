@@ -7,6 +7,8 @@ import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -94,6 +96,13 @@ function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
 	onLinkClick?: () => void
 }) {
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
 	const isSelected = (href: string) => {
 		if (href === currentPageContext.urlParsed.pathname) {
 			return true
@@ -126,7 +135,7 @@ function NavbarCommon(props: {
 													: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											href={document.frontmatter.href}
+											href={getLocale() + document.frontmatter.href}
 										>
 											{document.frontmatter.shortTitle}
 										</a>

@@ -1,5 +1,11 @@
 # @inlang/sdk-js-plugin
 
+## 0.9.0
+
+### Minor Changes
+
+- d0e93f48: add `routing.exclude` option
+
 ## 0.8.1
 
 ## 0.8.0
