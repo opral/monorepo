@@ -79,13 +79,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		}
 		return
 	}
-	telemetry.capture({
-		event: "IDE-EXTENSION config loaded",
-		properties: {
-			vscode_version: vscode.version,
-			version: version,
-		},
-	})
+
 	const closestConfigPath = determineClosestPath({
 		options: potentialConfigFileUris.map((uri) => uri.path),
 		to: activeTextEditor.document.uri.path,
@@ -109,7 +103,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 	const config = await setupConfig({ module, env })
 
 	telemetry.capture({
-		event: coreUsedConfigEvent.name,
+		event: "IDE-EXTENSION config loaded",
 		properties: coreUsedConfigEvent.properties(config),
 	})
 
