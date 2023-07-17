@@ -32,6 +32,9 @@ export const initTransformConfig = (
 					resources: {
 						cache: "build-time",
 					},
+					routing: {
+						exclude: [],
+					},
 				},
 			},
 			svelteKit: {

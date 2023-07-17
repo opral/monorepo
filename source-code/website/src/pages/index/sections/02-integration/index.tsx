@@ -7,17 +7,19 @@ import Python from "./assets/python.jsx"
 import Reactjs from "./assets/reactjs.jsx"
 import Svelte from "./assets/svelte.jsx"
 import Vuejs from "./assets/vuejs.jsx"
-
-const data = {
-	caption: "Tech stack agnostic",
-	title: "Integrates into any codebase",
-	description:
-		"Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
-	button: "Get started",
-	buttonLink: "/documentation/",
-}
+import { useI18n } from "@solid-primitives/i18n"
 
 const Integration = () => {
+	const [t] = useI18n()
+	const getData = () => {
+		return {
+			caption: `${t("landing.integration.caption")}`,
+			title: `${t("landing.integration.title")}`,
+			description: `${t("landing.integration.description")}`,
+			button: `${t("landing.hero.cta")}`,
+			buttonLink: "/documentation/",
+		}
+	}
 	return (
 		<SectionLayout showLines={true} type="white">
 			<div class="relative">
@@ -38,7 +40,7 @@ const Integration = () => {
 						</div>
 						<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
 							<div class="rounded bg-surface-800 absolute mb-36 text-background px-2 py-1 text-sm ">
-								New SDK!
+								{t("landing.integration.tooltip")}
 								<svg
 									width={14}
 									height={7}
@@ -67,18 +69,18 @@ const Integration = () => {
 					<div class="flex flex-col items-center gap-4">
 						<div class="bg-background">
 							<p class="text-xs text-primary bg-primary/10 h-7 flex items-center px-4 rounded-full w-fit">
-								{data.caption}
+								{getData().caption}
 							</p>
 						</div>
 						<h2 class="text-center text-3xl font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
-							{data.title}
+							{getData().title}
 						</h2>
 						<p class="text-base px-10 md:w-[55%] sm:leading-7 text-center text-outline-variant">
-							{data.description}
+							{getData().description}
 						</p>
 						<div class="pt-4">
-							<Button href={data.buttonLink} type="secondary">
-								{data.button}
+							<Button href={getData().buttonLink} type="secondary">
+								{getData().button}
 							</Button>
 						</div>
 					</div>

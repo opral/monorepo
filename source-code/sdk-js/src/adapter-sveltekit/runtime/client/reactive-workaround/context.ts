@@ -8,8 +8,8 @@ import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
-import { goto } from '$app/navigation'
-import { page } from '$app/stores'
+import { goto } from "$app/navigation"
+import { page } from "$app/stores"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const switchLanguage = async (language: Language) => {
 		if (runtime.language === language) return
 
-		localStorage.setItem('language', language)
+		localStorage.setItem("language", language)
 
 		return goto(get(page).url, { invalidateAll: true })
 	}

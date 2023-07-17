@@ -45,7 +45,7 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: index[pageContext.urlPathname],
+				markdown: index[pageContext.urlPathname]!,
 				processedTableOfContents: processedTableOfContents,
 				headings: headings,
 			},

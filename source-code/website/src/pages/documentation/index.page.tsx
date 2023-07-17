@@ -7,6 +7,8 @@ import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -36,6 +38,7 @@ export function Page(props: PageProps) {
 			{/* frontmatter is undefined on first client side nav  */}
 			<Title>{props.markdown?.frontmatter?.title}</Title>
 			<Meta name="description" content={props.markdown?.frontmatter?.description} />
+			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				{/* important: the responsive breakpoints must align throughout the markup! */}
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
@@ -117,6 +120,13 @@ function NavbarCommon(props: {
 	onLinkClick?: () => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
 	const isSelected = (href: string) => {
 		if (href === currentPageContext.urlParsed.pathname) {
 			return true
@@ -166,7 +176,7 @@ function NavbarCommon(props: {
 													: "text-info/80 hover:text-on-background ") +
 												"tracking-wide text-sm block w-full font-normal"
 											}
-											href={document.frontmatter.href}
+											href={getLocale() + document.frontmatter.href}
 										>
 											{document.frontmatter.shortTitle}
 										</a>
