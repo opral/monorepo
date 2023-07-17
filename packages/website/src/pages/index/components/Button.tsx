@@ -1,3 +1,5 @@
+import { useI18n } from "@solid-primitives/i18n"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { JSXElement, Show } from "solid-js"
 import { navigate } from "vite-plugin-ssr/client/router"
 
@@ -29,12 +31,19 @@ interface ButtonProps {
 }
 
 export const Button = (props: ButtonProps) => {
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
 	return (
 		<>
 			<Show when={props?.href?.startsWith("/") && !props.function}>
 				<button
 					onClick={() => {
-						props.href && navigate(props.href)
+						props.href && navigate(getLocale() + props.href)
 					}}
 					class={
 						"flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 " +
