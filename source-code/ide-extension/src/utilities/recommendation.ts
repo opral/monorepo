@@ -9,7 +9,9 @@ import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js
  * @param {vscode.WorkspaceFolder} args.workspaceFolder - The workspace folder.
  * @returns {Promise<void>} - A Promise that resolves once the recommendation process is completed.
  */
-export async function inWorkspacerecommendation(args: { workspaceFolder: vscode.WorkspaceFolder }) {
+export async function isInWorkspaceRecommendation(args: {
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
 	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
@@ -25,7 +27,7 @@ export async function inWorkspacerecommendation(args: { workspaceFolder: vscode.
 	} else if (extensions.recommendations.includes("inlang.vs-code-extension")) {
 		return true
 	}
-	return
+	return undefined
 }
 export const recommendation = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder

@@ -25,6 +25,17 @@ import {
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
+		const gitOrigin = await getGitOrigin()
+		//identify the group after we get the information about the workspaceFolder to get the possibillty to save these  data into the Repo group.
+		if (gitOrigin) {
+			telemetry.groupIdentify({
+				groupType: "repository",
+				groupKey: gitOrigin,
+				properties: {
+					name: gitOrigin,
+				},
+			})
+		}
 		// activation telemetry
 		await telemetry.capture({
 			event: "IDE-EXTENSION activated",
