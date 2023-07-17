@@ -91,6 +91,26 @@ Loads all Resources during build time and adds them to the bundle.
 },
 ```
 
+## routing
+
+### exclude
+
+You can tell `inlang` to ignore certain routes in your project. Those routes will have no i18n code setup, so accessing any `@inlang/sdk-js` imports inside those routes could fail during runtime.
+
+```js
+{
+	routing: {
+		exclude: [
+			"/api",
+			"/login",
+		],
+	},
+},
+```
+
+ - All entries must be defined as a relative path `/`.
+ - If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
+
 ---
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/inlang/inlang/discussions) or an [Issue](https://github.com/inlang/inlang/issues) on [Github](https://github.com/inlang/inlang)._

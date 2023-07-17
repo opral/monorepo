@@ -23,34 +23,34 @@ export const assertNoImportsFromSdkJs = (
 const getSection = (type: FileType, root: boolean) => {
 	if (root) {
 		switch (type) {
-			case '+layout.server.js':
-				return '#/routes/+layout.server.js-(root server layout)'
-			case '+layout.js':
-				return '#/routes/+layout.js-(root layout)'
-			case '+page.js':
-				return '#/routes/+page.js-(root page)'
-			case '+layout.svelte':
-				return '#/routes/+layout.svelte-(root svelte layout)'
+			case "+layout.server.js":
+				return "#/routes/+layout.server.js-(root server layout)"
+			case "+layout.js":
+				return "#/routes/+layout.js-(root layout)"
+			case "+page.js":
+				return "#/routes/+page.js-(root page)"
+			case "+layout.svelte":
+				return "#/routes/+layout.svelte-(root svelte layout)"
 		}
 	}
 
 	switch (type) {
-		case 'hooks.server.js':
-		case '+server.js':
-		case '+layout.server.js':
-		case '+layout.js':
-		case '+page.server.js':
-		case '+page.js':
+		case "hooks.server.js":
+		case "+server.js":
+		case "+layout.server.js":
+		case "+layout.js":
+		case "+page.server.js":
+		case "+page.js":
 			return `#${type}`
-		case '*.server.js':
-		case '*.js':
-			return '#*.js'
-		case '+layout.svelte':
-		case '+page.svelte':
-		case '*.svelte':
-			return '#*.svelte'
-		case '[language].json':
-			return ''
+		case "*.server.js":
+		case "*.js":
+			return "#*.js"
+		case "+layout.svelte":
+		case "+page.svelte":
+		case "*.svelte":
+			return "#*.svelte"
+		case "[language].json":
+			return ""
 		default:
 			return unreachable(type)
 	}

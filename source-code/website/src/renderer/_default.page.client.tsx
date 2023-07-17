@@ -70,7 +70,7 @@ export function render(pageContext: PageContextRenderer) {
 			;(isEditor ? renderApp : hydrate)(
 				() => (
 					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} />
+						<Root page={currentPage()!} pageProps={currentPageProps} locale={pageContext.locale} />
 					</MetaProvider>
 				),
 				rootElement,

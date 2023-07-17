@@ -1,6 +1,8 @@
 import { For, Show, createSignal, onMount } from "solid-js"
 import { SectionLayout } from "../../components/sectionLayout.jsx"
 import SVGConnector from "./assets/connector.jsx"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { useI18n } from "@solid-primitives/i18n"
 
 const code = [
 	<p class="text-surface-500">...</p>,
@@ -25,47 +27,10 @@ const code = [
 	<p>]</p>,
 ]
 
-const data = [
-	{
-		title: "Web Editor",
-		isSoon: false,
-		description: "No-code editor to manage your translations.",
-		benefit: [
-			"No translator needs to touch code",
-			"Push through interface",
-			"No sync pipelines and extra accounts",
-		],
-		link: "/documentation/apps/web-editor",
-		image: "/images/AppSVGs/editor.svg",
-	},
-	{
-		title: "IDE Extension",
-		isSoon: false,
-		description: "Handle translations directly in VSCode through an extension.",
-		benefit: [
-			"Extract messages from code",
-			"Inline annotations behind key",
-			"Auto-update for synced resources",
-		],
-		link: "/documentation/apps/ide-extension",
-		image: "/images/AppSVGs/ide.svg",
-	},
-	{
-		title: "inlang CLI",
-		isSoon: false,
-		description: "CLI to interact with inlang's infastructure.",
-		benefit: [
-			"Automate localization tasks (CI/CD)",
-			"Lint your translations",
-			"Machine translate your resources",
-		],
-		link: "/documentation/apps/inlang-cli",
-		image: "/images/AppSVGs/cli.svg",
-	},
-]
-
 const ConfigPage = () => {
 	const [connectorSizes, setConnectorSizes] = createSignal<Array<number>>([0, 0, 0, 0, 0, 0])
+	const [t, { locale }] = useI18n()
+
 	onMount(() => {
 		const box1 = document.getElementById("connector1")
 		const box2 = document.getElementById("connector2")
@@ -83,31 +48,86 @@ const ConfigPage = () => {
 		])
 	})
 
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
+
+	const getData = () => {
+		return [
+			{
+				title: `${t("landing.config.editor.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.editor.description")}`,
+				benefit: [
+					`${t("landing.config.editor.benefit1")}`,
+					`${t("landing.config.editor.benefit2")}`,
+					`${t("landing.config.editor.benefit3")}`,
+				],
+				link: "/documentation/apps/web-editor",
+				image: "/images/AppSVGs/editor.svg",
+			},
+			{
+				title: `${t("landing.config.extension.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.extension.description")}`,
+				benefit: [
+					`${t("landing.config.extension.benefit1")}`,
+					`${t("landing.config.extension.benefit2")}`,
+					`${t("landing.config.extension.benefit3")}`,
+				],
+				link: "/documentation/apps/ide-extension",
+				image: "/images/AppSVGs/ide.svg",
+			},
+			{
+				title: `${t("landing.config.cli.title")}`,
+				isSoon: false,
+				description: `${t("landing.config.cli.description")}`,
+				benefit: [
+					`${t("landing.config.cli.benefit1")}`,
+					`${t("landing.config.cli.benefit2")}`,
+					`${t("landing.config.cli.benefit3")}`,
+				],
+				link: "/documentation/apps/inlang-cli",
+				image: "/images/AppSVGs/cli.svg",
+			},
+		]
+	}
+
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="flex flex-col items-center gap-8 pt-12 sm:pt-20 px-8 lg:px-0">
 				<h2 class="text-center text-3xl font-semibold text-on-background w-full lg:w-1/2 leading-tight md:leading-relaxed tracking-tight">
-					Multiple{" "}
-					<a href="/documentation/apps/web-editor" class="underline transition link-primary">
-						apps
+					{t("landing.config.title.multiple")}{" "}
+					<a
+						href={getLocale() + "/documentation/apps/web-editor"}
+						class="underline transition link-primary"
+					>
+						{t("landing.config.title.apps")}
 					</a>
-					, endless{" "}
-					<a href="/documentation/plugins/registry" class="underline transition link-primary">
-						plugins
+					{t("landing.config.title.endless")}{" "}
+					<a
+						href={getLocale() + "/documentation/plugins/registry"}
+						class="underline transition link-primary"
+					>
+						{t("landing.config.title.plugins")}
 					</a>
-					, one{" "}
-					<a href="/documentation/quick-start" class="underline transition link-primary">
-						config
+					{t("landing.config.title.one")}{" "}
+					<a
+						href={getLocale() + "/documentation/quick-start"}
+						class="underline transition link-primary"
+					>
+						{t("landing.config.title.config")}
 					</a>
 					.
 				</h2>
 			</div>
 
 			<div class="z-10 relative flex justify-between px-10 pt-10 gap-4 lg:gap-0 flex-col lg:flex-row">
-				<For each={data}>
+				<For each={getData()}>
 					{(card) => (
 						<a
-							href={card.link}
+							href={getLocale() + card.link}
 							class="bg-background w-full lg:w-[calc((100%_-_80px)_/_3)] rounded-2xl border border-surface-3 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-200 hover:text-primary pb-4"
 						>
 							<img width="100%" src={card.image} alt={card.title} />
@@ -170,13 +190,13 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
 				<a
-					href="/documentation/plugins/registry"
+					href={getLocale() + "/documentation/plugins/registry"}
 					class="relative cursor-pointer group"
 					style={{ "box-shadow": "0px 0px 300px 300px #fafafa" }}
 				>
 					<div class="relative z-10 bg-background border border-background rounded-lg overflow-hidden">
 						<pre class="h-14 w-32 flex flex-col justify-center items-center bg-surface-1 text-lg font-medium text-surface-700 transition duration-200 group-hover:text-primary">
-							plugins
+							{t("landing.config.title.plugins")}
 						</pre>
 					</div>
 					<div
@@ -239,7 +259,7 @@ const ConfigPage = () => {
 			</div>
 			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
 				<a
-					href="/documentation/quick-start"
+					href={getLocale() + "/documentation/quick-start"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
 				>
 					<div class="absolute top-5 left-6 flex gap-2">
