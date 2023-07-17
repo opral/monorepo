@@ -107,7 +107,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			groupKey: gitOrigin,
 			properties: {
 				name: gitOrigin,
-				"in-workspace-recommendation": await isInWorkspaceRecommendation({ workspaceFolder }),
+				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
 			},
 		})
 	}
