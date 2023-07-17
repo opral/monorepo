@@ -16,7 +16,7 @@ import { coreUsedConfigEvent } from "@inlang/telemetry"
 import {
 	recommendation,
 	isDisabledRecommendation,
-	inWorkspacerecommendation,
+	isInWorkspaceRecommendation,
 } from "./utilities/recommendation.js"
 import {
 	createInlangConfigFile,
@@ -107,7 +107,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 			groupKey: gitOrigin,
 			properties: {
 				name: gitOrigin,
-				"in-workspace-recommendation": await inWorkspacerecommendation({ workspaceFolder }),
+				"in-workspace-recommendation": await isInWorkspaceRecommendation({ workspaceFolder }),
 			},
 		})
 	}

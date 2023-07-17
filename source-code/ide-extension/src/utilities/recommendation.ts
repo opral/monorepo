@@ -40,7 +40,7 @@ export const recommendation = async (args: {
 	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
 
 	// If not already recommended
-	if ((await inWorkspacerecommendation({ workspaceFolder: args.workspaceFolder })) === false) {
+	if ((await isInWorkspaceRecommendation({ workspaceFolder: args.workspaceFolder })) === false) {
 		// Prompt the user to install the Inlang extension
 		const installInlangExtension = await vscode.window.showInformationMessage(
 			"The Inlang extension is recommended for this project. Do you want to add it to your recommendations?",
