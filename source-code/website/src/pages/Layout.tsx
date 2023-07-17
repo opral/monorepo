@@ -170,7 +170,7 @@ function Header(props: { landingpage?: boolean }) {
 											>
 												<sl-option prop:value="en">🇺🇸 English</sl-option>
 												<sl-option prop:value="de">🇩🇪 German</sl-option>
-												<sl-option prop:value="zh">🇨🇳 Chinese</sl-option>
+												{/* <sl-option prop:value="zh">🇨🇳 Chinese</sl-option> */}
 											</sl-select>
 										</Show>
 									</div>
