@@ -31,7 +31,7 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				</script>
-				{#if language}{#key language}<slot />{/key}{/if}"
+				{#key language}<slot />{/key}"
 			`)
 		})
 
@@ -62,11 +62,11 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				console.info(data);
-				</script>{#if language}{#key language}
+				</script>{#key language}
 
 				<h1>this is a test</h1>
 
-				<p>{JSON.stringify(data, null, 3)}</p>{/key}{/if}"
+				<p>{JSON.stringify(data, null, 3)}</p>{/key}"
 			`)
 		})
 
@@ -103,21 +103,21 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				</script>
-				<svelte:window on:load={onLoad} />{#if language}{#key language}
+				<svelte:window on:load={onLoad} />{#key language}
 
 				test
 
-				{/key}{/if}<svelte:body on:click={onClick} />{#if language}{#key language}
+				{/key}<svelte:body on:click={onClick} />{#key language}
 
 				other test
 
-				{/key}{/if}<svelte:head>
+				{/key}<svelte:head>
 					<title>test</title>
-				</svelte:head>{#if language}{#key language}
+				</svelte:head>{#key language}
 
-				{/key}{/if}<svelte:options tag=\\"test\\" />{#if language}{#key language}
+				{/key}<svelte:options tag=\\"test\\" />{#key language}
 
-				random content{/key}{/if}"
+				random content{/key}"
 			`)
 		})
 
@@ -175,9 +175,9 @@ describe("transformLayoutSvelte", () => {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				}
-				</script>{#if language}{#key language}
+				</script>{#key language}
 
-				{language}{/key}{/if}"
+				{language}{/key}"
 			`)
 		})
 
@@ -205,9 +205,9 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				console.info(i(\\"welcome\\"));
-				</script>{#if language}{#key language}
+				</script>{#key language}
 
-				<slot />{/key}{/if}"
+				<slot />{/key}"
 			`)
 		})
 
@@ -240,9 +240,9 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				console.info(i(\\"welcome\\"));
-				</script>{#if language}{#key language}
+				</script>{#key language}
 
-				<slot />{/key}{/if}"
+				<slot />{/key}"
 			`)
 		})
 
@@ -263,7 +263,7 @@ describe("transformLayoutSvelte", () => {
 				    ({ i, language } = getRuntimeFromContext());
 				}
 				</script>
-				{#if language}{#key language}<slot />{/key}{/if}"
+				{#key language}<slot />{/key}"
 			`)
 		})
 	})

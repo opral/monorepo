@@ -30,6 +30,7 @@ const getOptions = (config: TransformConfig) => {
 	const options = dedent`
 	{
 		inlangConfigModule: import("../inlang.config.js"),
+		excludedRoutes: ${JSON.stringify(config.inlang.sdk.routing.exclude)},
 		getLanguage: ${
 			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
@@ -43,7 +44,7 @@ const getOptions = (config: TransformConfig) => {
 			},
 		`
 				: ""
-		}
+		},
 	}`
 
 	return nodeToCode(codeToNode(`const x = ${options}`))
