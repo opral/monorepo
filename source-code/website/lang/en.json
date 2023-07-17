@@ -1,50 +1,78 @@
 {
-	"landing.hero.keyword": "Globalization",
-	"landing.hero.title": "infrastructure for software",
-	"landing.hero.cta": "Get started",
-	"landing.hero.description.inlangs": "inlang's",
-	"landing.hero.description.ecosystem": "ecosystem",
-	"landing.hero.description.benefit": "makes adapting your application to different markets easy.",
-	"landing.hero.githubLink": "View on GitHub",
-	"landing.hero.usedBy": "Used by devs at",
-	"landing.integration.caption": "Tech stack agnostic",
-	"landing.integration.title": "Integrates into any codebase",
-	"landing.integration.description": "Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
-	"landing.integration.tooltip": "New SDK!",
-	"landing.config.editor.title": "Web Editor",
-	"landing.config.editor.description": "No-code editor to manage your translations.",
-	"landing.config.editor.benefit1": "No translator needs to touch code",
-	"landing.config.editor.benefit2": "Push through interface",
-	"landing.config.editor.benefit3": "No sync pipelines and extra accounts",
-	"landing.config.extension.title": "IDE Extension",
-	"landing.config.extension.description": "Handle translations directly in VSCode through an extension.",
-	"landing.config.extension.benefit1": "Extract messages from code",
-	"landing.config.extension.benefit2": "Inline annotations behind key",
-	"landing.config.extension.benefit3": "Auto-update for synced resources",
-	"landing.config.cli.title": "inlang CLI",
-	"landing.config.cli.description": "CLI to interact with inlang's infastructure.",
-	"landing.config.cli.benefit1": "Automate localization tasks (CI/CD)",
-	"landing.config.cli.benefit2": "Lint your translations",
-	"landing.config.cli.benefit3": "Machine translate your resources",
-	"landing.config.title.multiple": "Multiple",
-	"landing.config.title.apps": "apps",
-	"landing.config.title.plugins": "plugins",
-	"landing.config.title.config": "config",
-	"landing.config.title.endless": ", endless",
-	"landing.config.title.one": ", one",
-	"landing.pricing.title": "Free for individual use and open source",
-	"landing.pricing.caption": "Pricing",
-	"landing.pricing.description": "Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good \"marketing\" that helps us acquiring enterprise customers.",
-	"landing.pricing.free.name": "free",
-	"landing.pricing.free.title": "Individuals and Open Source",
-	"landing.pricing.free.amount": "$0",
-	"landing.pricing.paid.name": "paid",
-	"landing.pricing.paid.title": "Enterprise",
-	"landing.pricing.paid.amount": "soon",
-	"landing.getstarted.caption": "Add inlang to your project",
-	"landing.getstarted.title": "Take your software global",
-	"landing.getstarted.description": "Setup inlang in your code base and start using IDE extension, CLI and web editor.",
-	"landing.getstarted.button": "Get started",
-	"landing.getstarted.toast.text": "Copied command to clipboard",
-	"landing.getstarted.toast.tooltip": "Copy"
+	"landing": {
+		"hero": {
+			"keyword": "Globalization",
+			"title": "infrastructure for software",
+			"cta": "Get started",
+			"description": {
+				"inlangs": "inlang's",
+				"ecosystem": "ecosystem",
+				"benefit": "makes adapting your application to different markets easy."
+			},
+			"githubLink": "View on GitHub",
+			"usedBy": "Used by devs at"
+		},
+		"integration": {
+			"caption": "Tech stack agnostic",
+			"title": "Integrates into any codebase",
+			"description": "Inlang is designed to be stack agnostic. Developers can write their own plugins, or rely on the plugin ecosystem, to adapt inlang to their tech stack (React, Flutter, iOS, Python, etc.).",
+			"tooltip": "New SDK!"
+		},
+		"config": {
+			"editor": {
+				"title": "Web Editor",
+				"description": "No-code editor to manage your translations.",
+				"benefit1": "No translator needs to touch code",
+				"benefit2": "Push through interface",
+				"benefit3": "No sync pipelines and extra accounts"
+			},
+			"extension": {
+				"title": "IDE Extension",
+				"description": "Handle translations directly in VSCode through an extension.",
+				"benefit1": "Extract messages from code",
+				"benefit2": "Inline annotations behind key",
+				"benefit3": "Auto-update for synced resources"
+			},
+			"cli": {
+				"title": "inlang CLI",
+				"description": "CLI to interact with inlang's infrastructure.",
+				"benefit1": "Automate localization tasks (CI/CD)",
+				"benefit2": "Lint your translations",
+				"benefit3": "Machine translate your resources"
+			},
+			"title": {
+				"multiple": "Multiple",
+				"apps": "apps",
+				"plugins": "plugins",
+				"config": "config",
+				"endless": ", endless",
+				"one": ", one"
+			}
+		},
+		"pricing": {
+			"title": "Free for individual use and open source",
+			"caption": "Pricing",
+			"description": "Inlang is a commercial product. But, individual use and open source stays free. We see individual use as good \"marketing\" that helps us acquiring enterprise customers.",
+			"free": {
+				"name": "free",
+				"title": "Individuals and Open Source",
+				"amount": "$0"
+			},
+			"paid": {
+				"name": "paid",
+				"title": "Enterprise",
+				"amount": "soon"
+			}
+		},
+		"getstarted": {
+			"caption": "Add inlang to your project",
+			"title": "Take your software global",
+			"description": "Setup inlang in your code base and start using IDE extension, CLI and web editor.",
+			"button": "Get started",
+			"toast": {
+				"text": "Copied command to clipboard",
+				"tooltip": "Copy"
+			}
+		}
+	}
 }
