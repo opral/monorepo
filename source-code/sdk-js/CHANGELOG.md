@@ -1,5 +1,15 @@
 # @inlang/sdk-js
 
+## 0.9.0
+
+### Minor Changes
+
+- d0e93f48: [feature] allow to exclude certain routes from the i18n setup
+
+### Patch Changes
+
+- 77165c09: [fix] correctly set fallback value of placeholder
+
 ## 0.8.1
 
 ### Patch Changes
