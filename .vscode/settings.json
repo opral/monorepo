@@ -22,5 +22,8 @@
 	},
 	"files.watcherExclude": {
 		"**/dist": true
+	},
+	"[yaml]": {
+		"editor.defaultFormatter": "redhat.vscode-yaml"
 	}
 }

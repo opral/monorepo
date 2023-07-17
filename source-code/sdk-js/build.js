@@ -14,7 +14,7 @@ const options = {
 	sourcemap: !dev,
 	minify: !dev,
 	splitting: false,
-	external: ["svelte", "@sveltejs/kit"],
+	external: ["svelte", "@sveltejs/kit", "typescript", "ts-morph"],
 	plugins: [
 		{
 			name: "logger",

@@ -20,7 +20,7 @@ test("Home page", async ({ page }) => {
 	// Go to english page
 	await page.goto(`${baseURL}/en`)
 	expect(page.url()).toBe(`${baseURL}/en`)
-	await page.evaluate(() => console.log("English page loaded"))
+	await page.evaluate(() => console.info("English page loaded"))
 
 	/* Check the headline */
 	await checkHeadline(page, "Welcome to SvelteKit")
@@ -28,7 +28,7 @@ test("Home page", async ({ page }) => {
 	// Go to german page
 	await page.goto(`${baseURL}/de`)
 	expect(page.url()).toBe(`${baseURL}/de`)
-	await page.evaluate(() => console.log("German page loaded"))
+	await page.evaluate(() => console.info("German page loaded"))
 
 	/* Check the headline */
 	await checkHeadline(page, "Willkommen bei SvelteKit")

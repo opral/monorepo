@@ -14,7 +14,7 @@
 
 <p align="center">
     <b>
-        <a href='/open-positions'>🧑‍💻 Open positions</a>
+        <a href='/careers'>🧑‍💻 Careers</a>
     </b>
 </p>
 
