@@ -34,4 +34,4 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: run inlang lint
-        run: npx inlang lint
+        run: npx @inlang/cli@latest lint

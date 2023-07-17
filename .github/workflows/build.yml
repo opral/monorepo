@@ -23,4 +23,4 @@ jobs:
         run: npm run build
 
       - name: run inlang machine translate
-        run: npx inlang machine translate
+        run: npx @inlang/cli@latest machine translate
