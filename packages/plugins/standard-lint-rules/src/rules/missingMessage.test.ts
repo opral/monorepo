@@ -2,10 +2,11 @@ import { expect, test } from "vitest"
 import { missingMessage } from "./missingMessage.js"
 import { getLintReports, lint } from "@inlang/core/lint"
 import { createMessage, createResource } from "../utils.js"
+import type { InlangConfig } from "@inlang/core/config"
 
-const config = {
-	referenceLanguage: "en",
-	languages: ["en", "de", "fr"],
+const config: Pick<InlangConfig, "lint" | "sourceLanguageTag" | "languageTags"> = {
+	sourceLanguageTag: "en",
+	languageTags: ["en", "de", "fr"],
 	lint: { rules: [missingMessage("error")] },
 }
 
