@@ -76,8 +76,8 @@ it("should throw if the config is invalid", async () => {
 							id: "mock.plugin",
 							config: () => {
 								return {
-									referenceLanguage: "de",
-									languages: ["en", "de"],
+									sourceLanguageTag: "de",
+									languageTags: ["en", "de"],
 								}
 							},
 						},
