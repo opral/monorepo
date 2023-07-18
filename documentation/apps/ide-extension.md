@@ -11,18 +11,31 @@ The VS Code extension provides a seamless integration of Inlang's globalization 
 
 ## Benefits
 
+- 💬 **Context Tooltips** for not having to switch files
 - ✂️ **Extract Messages** easily
+- 📝 **Message Linting** for ensuring quality
 - 🔎 **Inline Annotations** for translations
 - 🔁 **Automatic Updates** for synced resources
-- 🔍 **Lint** your messages (coming soon)
 
 ## Features
+
+### Context Tooltips
+
+See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
+
+![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif)
 
 ### Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
 ![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif)
+
+### Message Linting
+
+Get notified about missing translations and other issues directly in your IDE.
+
+![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif)
 
 ### Inline Annotations
 
@@ -38,7 +51,7 @@ Translations from the resource files are automatically updated when you change t
 
 ## Installation
 
-Create a `inlang.config.js` in the **root** of your project. You can use the following template hen using json files as translation files, if not, please look fo other [supported resource file types](https://github.com/inlang/ecosystem#resources):
+Create a `inlang.config.js` in the **root** of your project. You can use the following template hen using json files as translation files, if not, please look for other [supported resource file types](https://github.com/inlang/ecosystem#resources):
 
 ```js
 export async function defineConfig(env) {
@@ -57,11 +70,18 @@ export async function defineConfig(env) {
 }
 ```
 
+#### Requirements:
+
+- Requires VS Code version 1.80.1 or higher.
+- Node.js version 16.17.1 or higher.
+
 ## Usage
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
+Hover over the message to see the tooltip with the translation.
+
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
 
 ## Configuration
 
