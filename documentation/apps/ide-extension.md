@@ -23,7 +23,7 @@ The VS Code extension provides a seamless integration of Inlang's globalization 
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
 
-![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif)
+![Context Tooltips](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif)
 
 ### Extract Messages (translations)
 
@@ -35,7 +35,7 @@ Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
 Get notified about missing translations and other issues directly in your IDE.
 
-![Extract Messages](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif)
+![Message Linting](https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif)
 
 ### Inline Annotations
 
