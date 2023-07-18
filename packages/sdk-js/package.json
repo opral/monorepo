@@ -12,7 +12,7 @@
 		"unplugin",
 		"vite"
 	],
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:runtime dev:plugin tsc:watch",
 		"build": "rm -rf dist && npm run build:runtime && npm run build:plugin",
