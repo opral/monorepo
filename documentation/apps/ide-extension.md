@@ -9,6 +9,17 @@ description: With the inlang IDE extension you can translate your content direct
 
 The VS Code extension provides a seamless integration of Inlang's globalization infrastructure into Visual Studio Code. It allows you to translate your content directly in your IDE, extract messages and more.
 
+{% QuickLinks %}
+
+    {% QuickLink
+        title="Download for VSCode"
+        icon="vscode"
+        href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension"
+        description="Download the IDE extension from the VSCode marketplace."
+    /%}
+
+{% /QuickLinks %}
+
 ## Benefits
 
 - 💬 **Context Tooltips** for not having to switch files
