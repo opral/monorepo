@@ -33,18 +33,24 @@ export async function setupConfig(args: {
 		throw new Error(dedent`
 			The inlang.config.js is invalid.
 
-			# The following errors occurred during the setup of plugins:
-
-			${pluginErrors ? pluginErrors.map((e) => e.message).join("\n") : "None ✅"}
-
 			# The following errors occurred during the validation of the config:
 
 			${formatErrors(testConfigException)}
 
-			---
+			${
+				// if plugin errors
+				pluginErrors
+					? dedent`
+					---
 
-			If plugins return errors, chances are high that the plugin errors are the root cause
-			for the config errors. Try to fix the plugin errors first.
+					Chances are high that the plugin errors are the root cause
+					for the config errors. Try to fix the plugin errors first.
+					
+					# The following errors occurred during the setup of plugins:
+					
+					` + pluginErrors.map((e) => e.message).join("\n")
+					: ""
+			}
 
 		`)
 	}
