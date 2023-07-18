@@ -3,6 +3,7 @@ import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
+import { getMessageAsString } from '../utilities/query.js'
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -50,18 +51,15 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					documentText: activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = query(refResource).get({
+					const translation = getMessageAsString(query(refResource).get({
 						id: message.messageId,
-					})?.pattern.elements
+					}))
 
-					const translationText =
-						translation && translation.length > 0 ? (translation[0]!.value as string) : undefined
-
-					const truncatedTranslationText =
-						translationText &&
-						(translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
-							? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: translationText)
+					const truncatedTranslation =
+						translation &&
+						(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+							? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: translation)
 					const range = new vscode.Range(
 						// VSCode starts to count lines and columns from zero
 						new vscode.Position(
@@ -75,10 +73,10 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						renderOptions: {
 							after: {
 								contentText:
-									truncatedTranslationText ??
+									truncatedTranslation ??
 									`ERROR: '${message.messageId}' not found in reference language '${referenceLanguage}'`,
-								backgroundColor: translationText ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
-								border: translationText
+								backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
+								border: translation
 									? "1px solid rgb(45 212 191/.50)"
 									: "1px solid rgb(244 63 94/.50)",
 							},
