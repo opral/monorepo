@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js"
+import { For, Show, createRenderEffect, createSignal, createEffect } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -16,10 +16,22 @@ import { useI18n } from "@solid-primitives/i18n"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	headings: any[]
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
+	const [renderedHeadings, setRenderedHeadings] = createSignal<any[]>([])
+
+	createRenderEffect(() => {
+		setRenderedHeadings([])
+
+		if (!props.headings) return
+
+		for (const heading of props.headings) {
+			setRenderedHeadings((prev) => [...prev, heading.children[0]])
+		}
+	})
 
 	return (
 		<>
@@ -32,17 +44,21 @@ export function Page(props: PageProps) {
 				<div class="flex flex-col grow md:grid md:grid-cols-4 gap-10 w-full">
 					{/* desktop navbar */}
 					{/* 
-					hacking the left margins to apply bg-surface-2 with 100rem 
-				    (tested on an ultrawide monitor, works!) 
-				*/}
-					<nav class="hidden md:block -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2 pt-11 pb-4 pr-8">
-						{/* `Show` is a hotfix when client side rendering loaded this page
-						 * filteredTableContents is not available on the client.
-						 */}
-						<Show when={props.processedTableOfContents}>
-							<NavbarCommon {...props} />
-						</Show>
-					</nav>
+          hacking the left margins to apply bg-surface-2 with 100rem 
+              (tested on an ultrawide monitor, works!) 
+          */}
+					<div class="hidden md:block h-full -ml-[100rem] pl-[100rem] border-r-[1px] border-surface-2">
+						<nav class="sticky top-12 max-h-[96vh] overflow-y-scroll overflow-scrollbar">
+							{/* `Show` is a hotfix when client side rendering loaded this page
+							 * filteredTableContents is not available on the client.
+							 */}
+							<div class="py-14 pr-8">
+								<Show when={props.processedTableOfContents}>
+									<NavbarCommon {...props} headings={renderedHeadings()} />
+								</Show>
+							</div>
+						</nav>
+					</div>
 					{/* Mobile navbar */}
 					<nav class="fixed min-w-full z-10 -translate-x-4 sm:-translate-x-10 sm:px-6 md:hidden overflow-y-scroll overflow-auto backdrop-blur-sm">
 						<sl-details ref={mobileDetailMenu}>
@@ -53,7 +69,13 @@ export function Page(props: PageProps) {
 							 * filteredTableContents is not available on the client.
 							 */}
 							<Show when={props.processedTableOfContents}>
-								<NavbarCommon {...props} onLinkClick={() => mobileDetailMenu?.hide()} />
+								<NavbarCommon
+									{...props}
+									headings={renderedHeadings()}
+									onLinkClick={() => {
+										mobileDetailMenu?.hide()
+									}}
+								/>
 							</Show>
 						</sl-details>
 					</nav>
@@ -62,10 +84,10 @@ export function Page(props: PageProps) {
 						fallback={<p class="text-danger">{props.markdown?.error}</p>}
 					>
 						{/* 
-					rendering on the website is broken due to relative paths and 
-					the escaping of html. it is better to show the RFC's on the website
-					and refer to github for the rendered version than to not show them at all. 
-				*/}
+            rendering on the website is broken due to relative paths and 
+            the escaping of html. it is better to show the RFC's on the website
+            and refer to github for the rendered version than to not show them at all. 
+          */}
 						<div class="w-full justify-self-center mb-8 md:p-6 md:col-span-3">
 							<Show when={currentPageContext.urlParsed.pathname.includes("rfc")}>
 								<Callout variant="warning">
@@ -94,8 +116,10 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
+	headings: PageProps["headings"]
 	onLinkClick?: () => void
 }) {
+	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
 	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
@@ -110,6 +134,23 @@ function NavbarCommon(props: {
 			return false
 		}
 	}
+
+	const onAnchorClick = (anchor: string) => {
+		setHighlightedAnchor(anchor)
+	}
+
+	createEffect(() => {
+		if (
+			currentPageContext.urlParsed.hash &&
+			props.headings
+				.toString()
+				.toLowerCase()
+				.replaceAll(" ", "-")
+				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
+		) {
+			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+		}
+	})
 
 	return (
 		<ul role="list" class="w-full">
@@ -139,6 +180,43 @@ function NavbarCommon(props: {
 										>
 											{document.frontmatter.shortTitle}
 										</a>
+										{props.headings &&
+											props.headings.length > 1 &&
+											isSelected(document.frontmatter.href) && (
+												<ul class="my-2">
+													<For each={props.headings}>
+														{(heading) =>
+															heading !== undefined &&
+															heading !== document.frontmatter.shortTitle &&
+															props.headings.filter((h) => h === heading).length < 2 && (
+																<li>
+																	<a
+																		onClick={() => {
+																			onAnchorClick(
+																				heading.toString().toLowerCase().replaceAll(" ", "-"),
+																			)
+																			props.onLinkClick?.()
+																		}}
+																		class={
+																			"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+																			(highlightedAnchor() ===
+																			heading.toString().toLowerCase().replaceAll(" ", "-")
+																				? "font-medium text-info/80 border-l-info/80 "
+																				: "text-info/60 hover:text-info/80 font-normal border-l-info/10 ")
+																		}
+																		href={`#${heading
+																			.toString()
+																			.toLowerCase()
+																			.replaceAll(" ", "-")}`}
+																	>
+																		{heading}
+																	</a>
+																</li>
+															)
+														}
+													</For>
+												</ul>
+											)}
 									</li>
 								)}
 							</For>
