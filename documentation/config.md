@@ -32,8 +32,8 @@ export async function defineConfig(env) {
 	}
 
 	return {
-		referenceLanguage: "en",
-		languages: await plugin.getLanguages({
+		sourceLanguageTag: "en",
+		languageTags: await plugin.getLanguages({
 			...env,
 			pluginConfig,
 		}),

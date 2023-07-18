@@ -49,7 +49,7 @@ The `inlang.config.js` will be extended with a new `linting` property.
  */
 export async function defineConfig(env) {
   	return {
-   	referenceLanguage: 'en,
+   	sourceLanguageTag: 'en',
    	languages: ['en', 'de'],
 		linting: {
 			missing_key: false, // disable this specific lint rule

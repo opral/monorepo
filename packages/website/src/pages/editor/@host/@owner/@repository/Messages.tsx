@@ -14,14 +14,14 @@ export function Messages(props: {
 }) {
 	const {
 		inlangConfig,
-		referenceLanguage,
-		filteredLanguages,
+		sourceLanguageTag,
+		filteredLanguageTags,
 		textSearch,
 		filteredId,
 		filteredLintRules,
 	} = useEditorState()
-	const referenceMessage = () => {
-		return props.messages[referenceLanguage()!]
+	const sourceMessage = () => {
+		return props.messages[sourceLanguageTag()!]
 	}
 
 	/**
@@ -30,8 +30,8 @@ export function Messages(props: {
 	 * If the reference language is not defined, the first message id is used.
 	 */
 	const id: () => ast.Message["id"]["name"] = () => {
-		if (referenceMessage()) {
-			return referenceMessage()!.id.name
+		if (sourceMessage()) {
+			return sourceMessage()!.id.name
 		}
 		for (const message of Object.values(props.messages)) {
 			if (message?.id.name !== undefined) {
@@ -67,7 +67,7 @@ export function Messages(props: {
 				["hidden"]:
 					showFilteredMessage(
 						props.messages,
-						filteredLanguages(),
+						filteredLanguageTags(),
 						textSearch(),
 						filteredLintRules(),
 						filteredId(),
@@ -99,23 +99,24 @@ export function Messages(props: {
 				</div>
 			</div>
 			<div>
-				<For each={inlangConfig()?.languages}>
-					{(language) => {
+				<For each={inlangConfig()?.languageTags}>
+					{(languageTag) => {
 						return (
 							<>
 								<Show
 									when={
-										(filteredLanguages().includes(language) || filteredLanguages().length === 0) &&
+										(filteredLanguageTags().includes(languageTag) ||
+											filteredLanguageTags().length === 0) &&
 										// only render if visible or has been rendered before
 										(elementIsVisible() || hasBeenRendered())
 									}
 								>
 									<PatternEditor
-										referenceLanguage={inlangConfig()!.referenceLanguage}
-										language={language}
+										sourceLanguageTag={inlangConfig()!.sourceLanguageTag}
+										languageTag={languageTag}
 										id={id()}
-										referenceMessage={referenceMessage()}
-										message={props.messages[language]}
+										sourceMessage={sourceMessage()}
+										message={props.messages[languageTag]}
 									/>
 								</Show>
 							</>

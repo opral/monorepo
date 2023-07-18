@@ -26,7 +26,7 @@ it("should fail if the config is invalid", async () => {
 	const [, exception] = await parseConfig({
 		config: {
 			// @ts-expect-error
-			referenceLanguage: 5,
+			sourceLanguageTag: 5,
 		},
 	})
 	expect(exception).toBeDefined()

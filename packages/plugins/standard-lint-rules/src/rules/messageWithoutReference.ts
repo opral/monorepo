@@ -13,7 +13,7 @@ export const messageWithoutReference = createLintRule({
 		return {
 			visitors: {
 				Resource: ({ target }) => {
-					if (target && target.languageTag.name === config.referenceLanguage) {
+					if (target && target.languageTag.name === config.sourceLanguageTag) {
 						return "skip"
 					}
 				},
