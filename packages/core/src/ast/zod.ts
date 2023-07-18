@@ -7,48 +7,43 @@ import { z } from "zod"
  * the AST nodes. Read more at https://zod.dev/
  */
 
-const Node = z.object({
-	type: z.string(),
-	metadata: z.any().optional(),
-})
-
-const Identifier = Node.extend({
+const Identifier = z.object({
 	type: z.literal("Identifier"),
 	name: z.string(),
 })
 
-const LanguageTag = Node.extend({
+const LanguageTag = z.object({
 	type: z.literal("LanguageTag"),
 	name: z.string(),
 })
 
-const Text = Node.extend({
+const Text = z.object({
 	type: z.literal("Text"),
 	value: z.string(),
 })
 
-const VariableReference = Node.extend({
+const VariableReference = z.object({
 	type: z.literal("VariableReference"),
 	name: z.string(),
 })
 
-const Placeholder = Node.extend({
+const Placeholder = z.object({
 	type: z.literal("Placeholder"),
 	body: VariableReference,
 })
 
-const Pattern = Node.extend({
+const Pattern = z.object({
 	type: z.literal("Pattern"),
 	elements: z.array(Text.or(Placeholder)),
 })
 
-const Message = Node.extend({
+const Message = z.object({
 	type: z.literal("Message"),
 	id: Identifier,
 	pattern: Pattern,
 })
 
-export const Resource = Node.extend({
+export const Resource = z.object({
 	type: z.literal("Resource"),
 	languageTag: LanguageTag,
 	body: z.array(Message),
