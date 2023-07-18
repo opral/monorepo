@@ -1,8 +1,14 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": ["src/**/*", "./build.js"],
+	"include": [
+		"src/**/*",
+		"./build.js",
+		"test/test.ts"
+	],
 	"compilerOptions": {
-		"lib": ["ESNext"],
+		"lib": [
+			"ESNext"
+		],
 		"outDir": "./dist",
 		// Not specifying node16 causes https://github.com/rollup/plugins/issues/1224#issuecomment-1242109375
 		// interestingly, extending a base config taht contains module node16 still requires explicit manual

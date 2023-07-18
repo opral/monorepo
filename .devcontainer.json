@@ -1,7 +1,7 @@
 {
 	"name": "inlang-dev-container",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:18-bullseye",
-	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium",
+	"postCreateCommand": "sudo apt update && sudo apt install --no-install-recommends -y chromium xvfb",
 	"customizations": {
 		"vscode": {
 			"extensions": [
