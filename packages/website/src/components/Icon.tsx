@@ -45,4 +45,5 @@ export const icons = {
 	code: import("~icons/material-symbols/code-rounded"),
 	badge: import("~icons/material-symbols/bar-chart-rounded"),
 	external: import("~icons/material-symbols/arrow-outward-rounded"),
+	vscode: import("~icons/cib/visual-studio-code"),
 } as const
