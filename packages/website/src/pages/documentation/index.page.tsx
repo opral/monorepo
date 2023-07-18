@@ -183,7 +183,7 @@ function NavbarCommon(props: {
 										{props.headings &&
 											props.headings.length > 1 &&
 											isSelected(document.frontmatter.href) && (
-												<ul class="mt-2 mb-6">
+												<ul class="my-2">
 													<For each={props.headings}>
 														{(heading) =>
 															heading !== undefined &&
