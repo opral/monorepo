@@ -1,7 +1,5 @@
 // inspired by (https://github.com/unicode-org/message-format-wg/blob/main/spec/syntax.md)
 
-export type Language = string
-
 /**
  * An identifier.
  *

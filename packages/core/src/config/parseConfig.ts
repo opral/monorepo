@@ -23,10 +23,12 @@ export async function parseConfig(args: {
 }): Promise<Result<InlangConfig, ParseConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
+		// migrate the config if necessary
+		maybeLanguageTagBreakingChangeMigration(args.config)
 		// validate the config -> throws if invalid
-		hasSetupAResourcePlugin(args.config)
+		definedReadAndWriteResources(args.config)
 		const parsedConfig = zConfig.passthrough().parse(args.config)
-		referenceLanguageMustBeInLanguages(args.config)
+		sourceLanguageTagMustBeInLanguageTags(args.config)
 		const resources = await args.config.readResources({ config: args.config })
 		validateResources(resources)
 		await languagesMatch(args.config, resources)
@@ -37,19 +39,38 @@ export async function parseConfig(args: {
 	}
 }
 
-function hasSetupAResourcePlugin(config: InlangConfig) {
+function definedReadAndWriteResources(config: InlangConfig) {
 	if (!config.readResources || !config.writeResources) {
 		throw new ParseConfigException(
-			`It seems you didn't set up a plugin to handle Resource files. See https://inlang.com/documentation/plugins/registry.`,
+			`readResources() and writeResources() are undefined. Did you forget to use a plugin? See https://inlang.com/documentation/plugins/registry.`,
 		)
 	}
 }
 
-function referenceLanguageMustBeInLanguages(config: InlangConfig) {
-	if (!config.languages.includes(config.referenceLanguage)) {
+function sourceLanguageTagMustBeInLanguageTags(config: InlangConfig) {
+	if (!config.languageTags.includes(config.sourceLanguageTag)) {
 		throw new ParseConfigException(
-			`The reference language "${config.referenceLanguage}" must be included in the list of languages.`,
+			`The source language tag "${config.sourceLanguageTag}" must be included in the list of language tags.`,
 		)
+	}
+}
+
+function maybeLanguageTagBreakingChangeMigration(config: InlangConfig) {
+	// @ts-expect-error - this is a migration
+	if (config.referenceLanguage && config.sourceLanguageTag === undefined) {
+		// @ts-expect-error - this is a migration
+		config.sourceLanguageTag = config.referenceLanguage
+		//! DO NOT DELETE the old keys, otherwise plugin functionality will break
+		// delete config.referenceLanguage
+	}
+	// @ts-expect-error - this is a migration
+	// Somewhere in the system languageTags might be defined as empty array.
+	// Thus, don't check for undefined languageTags here.
+	if (config.languages) {
+		// @ts-expect-error - this is a migration
+		config.languageTags = [...new Set(config.languages, config.languageTags ?? [])]
+		//! DO NOT DELETE the old keys, otherwise plugin functionality will break
+		// delete config.languages
 	}
 }
 
@@ -64,7 +85,7 @@ async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
 	const languages = resources.map((resource) => resource.languageTag.name)
 	// sort the languages to ensure that the order does not matter
 	// and convert the array to a string to compare the arrays
-	const areEqual = languages.sort().join(",") === config.languages.sort().join(",")
+	const areEqual = languages.sort().join(",") === config.languageTags.sort().join(",")
 	if (areEqual === false) {
 		// TODO error message should contain the languages that are missing
 		throw new ParseConfigException(

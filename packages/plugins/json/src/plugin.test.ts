@@ -1,6 +1,7 @@
 import { mockEnvironment } from "@inlang/core/test"
 import { expect, it } from "vitest"
 import { plugin } from "./plugin.js"
+import type { InlangConfig } from "@inlang/core/config"
 
 it("should throw if the path pattern does not include the {language} placeholder", async () => {
 	const env = await mockEnvironment({})
@@ -29,9 +30,9 @@ it("should work with empty json files", async () => {
 	expect(
 		config.readResources!({
 			config: {
-				referenceLanguage: "en",
-				languages: ["en"],
-			} as any,
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
+			} satisfies Partial<InlangConfig> as any,
 		}),
 	).resolves.toBeTruthy()
 })
@@ -44,9 +45,9 @@ it("should work with not yet existing files", async () => {
 	expect(
 		config.readResources!({
 			config: {
-				referenceLanguage: "en",
-				languages: ["en", "de"],
-			} as any,
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
+			} satisfies Partial<InlangConfig> as any,
 		}),
 	).resolves.toBeTruthy()
 })
@@ -70,11 +71,11 @@ it("should preserve the spacing resources and determine a default based on the m
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en", "de", "fr"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config satisfies Partial<InlangConfig> as any,
 	})
 
 	resources.push({
@@ -138,15 +139,15 @@ it("should remember if a file has a new line at the end or not", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en", "de", "fr"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config satisfies Partial<InlangConfig> as any,
 	})
 
 	await config.writeResources!({
-		config: config as any,
+		config: config satisfies Partial<InlangConfig> as any,
 		resources,
 	})
 
@@ -168,10 +169,10 @@ it("should correctly identify placeholders", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["{", "}"] })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
-		config: config as any,
+		config: config satisfies Partial<InlangConfig> as any,
 	})
 	expect(resources[0]?.body[0]?.pattern?.elements[0]?.type).toBe("Text")
 	expect(resources[0]?.body[0]?.pattern?.elements[1]?.type).toBe("Placeholder")
@@ -190,8 +191,8 @@ it("should parse Placeholders without adding Text elements around it", async () 
 		env,
 	)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as any,
 	})
@@ -214,6 +215,6 @@ it("should pass roundTrip with unused folder in language dir", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json", ignore: ["__tests__"] })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	expect(config.languages).toStrictEqual(["de", "en"])
+	config.sourceLanguageTag = "en"
+	expect(config.languageTags).toStrictEqual(["de", "en"])
 })

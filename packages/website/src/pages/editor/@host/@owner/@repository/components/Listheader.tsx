@@ -6,6 +6,7 @@ import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import { handleMissingMessage } from "../helper/handleMissingMessage.js"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
+import type { BCP47LanguageTag } from "@inlang/core/languageTag"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -28,7 +29,7 @@ export const messageCount = (
 			[language: string]: LintedMessage | undefined
 		}
 	}>,
-	filteredLanguages: string[],
+	filteredLanguageTags: BCP47LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
 	messageId: string,
@@ -38,7 +39,7 @@ export const messageCount = (
 		if (
 			showFilteredMessage(
 				messages()[id]!,
-				filteredLanguages,
+				filteredLanguageTags,
 				textSearch,
 				filteredLintRules,
 				messageId,
@@ -55,7 +56,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 		inlangConfig,
 		setFilteredLintRules,
 		filteredLintRules,
-		filteredLanguages,
+		filteredLanguageTags,
 		filteredId,
 		setFilteredId,
 		textSearch,
@@ -82,12 +83,12 @@ export const ListHeader = (props: ListHeaderProps) => {
 				const filteredReports = getLintReports(
 					showFilteredMessage(
 						props.messages()[id]!,
-						filteredLanguages(),
+						filteredLanguageTags(),
 						textSearch(),
 						[lintId],
 						filteredId(),
 					) as LintedMessage[],
-				).filter((report) => handleMissingMessage(report, filteredLanguages()))
+				).filter((report) => handleMissingMessage(report, filteredLanguageTags()))
 				counter += filteredReports.length
 			}
 			if (
@@ -120,7 +121,7 @@ export const ListHeader = (props: ListHeaderProps) => {
 				<div class="font-medium text-on-surface">
 					{messageCount(
 						props.messages,
-						filteredLanguages(),
+						filteredLanguageTags(),
 						textSearch(),
 						filteredLintRules(),
 						filteredId(),

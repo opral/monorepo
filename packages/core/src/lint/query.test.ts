@@ -8,7 +8,7 @@ import type {
 	LintableNode,
 } from "./rule.js"
 import { getLintReports, hasLintReports } from "./query.js"
-import type { Language } from "../ast/schema.js"
+import type { BCP47LanguageTag } from "../languageTag/index.js"
 
 const createReport = (id: LintRule["id"], level: LintRule["level"]) =>
 	({
@@ -18,7 +18,7 @@ const createReport = (id: LintRule["id"], level: LintRule["level"]) =>
 	} satisfies LintReport)
 
 const createLintedResource = (
-	language: Language,
+	language: BCP47LanguageTag,
 	lint: LintReport[] | undefined,
 	...messages: LintedMessage[]
 ) =>

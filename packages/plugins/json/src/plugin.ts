@@ -76,7 +76,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 		REPO_USES_WILDCARD_STRUCTURE = settings.pathPattern.endsWith("/*.json")
 
 		return {
-			languages: await getLanguages({
+			languageTags: await getLanguages({
 				$fs: env.$fs,
 				settings: withDefaultSettings,
 			}),
@@ -139,7 +139,7 @@ async function readResources(
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
 
-	for (const language of args.config.languages) {
+	for (const language of args.config.languageTags) {
 		let serializedMessages: SerializedMessage[] = []
 		const resourcePath = args.settings.pathPattern.replace("{language}", language)
 		try {

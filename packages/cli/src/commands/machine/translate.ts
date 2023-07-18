@@ -1,7 +1,7 @@
 import { query } from "@inlang/core/query"
 import { Command } from "commander"
 import { countMessagesPerLanguage, getFlag, log } from "../../utilities.js"
-import type { Message } from "@inlang/core/ast"
+import type { Message, Text } from "@inlang/core/ast"
 import { rpc } from "@inlang/rpc"
 import { getConfig } from "../../utilities/getConfig.js"
 import { cli } from "../../main.js"
@@ -42,12 +42,9 @@ async function translateCommandAction() {
 		// Get all resources
 		let resources = await config.readResources({ config })
 
-		// Get reference language from config
-		const referenceLanguage = config.referenceLanguage
-
 		// Get reference language resource
-		const referenceLanguageResource = resources.find(
-			(resource) => resource.languageTag.name === referenceLanguage,
+		const sourceResource = resources.find(
+			(resource) => resource.languageTag.name === config.sourceLanguageTag,
 		)!
 
 		// Count messages per language
@@ -62,7 +59,7 @@ async function translateCommandAction() {
 
 		// Get languages to translate to with the reference language removed
 		const languagesToTranslateTo = resources.filter(
-			(resource) => resource.languageTag.name !== referenceLanguage,
+			(resource) => resource.languageTag.name !== config.sourceLanguageTag,
 		)
 		log.info(
 			"📝 Translating to " +
@@ -76,7 +73,7 @@ async function translateCommandAction() {
 
 		// Translate all messages
 		for (const language of languagesToTranslateTo) {
-			for (const message of referenceLanguageResource.body) {
+			for (const message of sourceResource.body) {
 				// skip if message already exists in language
 				if (language.body.some((langMessage) => langMessage.id.name === message.id.name)) {
 					continue
@@ -84,9 +81,9 @@ async function translateCommandAction() {
 
 				// 🌏 Translation
 				const [translation, exception] = await rpc.machineTranslate({
-					referenceLanguage: referenceLanguage,
-					targetLanguage: language.languageTag.name,
-					text: message.pattern.elements[0]!.value as string,
+					sourceLanguageTag: config.sourceLanguageTag,
+					targetLanguageTag: language.languageTag.name,
+					text: (message.pattern.elements[0]! as Text).value as string,
 				})
 				if (exception) {
 					log.error("Couldn't translate message " + message.id.name + ". ", exception.message)

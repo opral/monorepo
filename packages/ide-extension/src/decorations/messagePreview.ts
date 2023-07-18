@@ -3,7 +3,7 @@ import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
-import { getMessageAsString } from '../utilities/query.js'
+import { getMessageAsString } from "../utilities/query.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -27,15 +27,15 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const { referenceLanguage } = state().config
+		const { sourceLanguageTag } = state().config
 		const messageReferenceMatchers = state().config.ideExtension?.messageReferenceMatchers
 
 		const refResource = state().resources.find(
-			(resource) => resource.languageTag.name === referenceLanguage,
+			(resource) => resource.languageTag.name === sourceLanguageTag,
 		)
 
 		if (
-			referenceLanguage === undefined ||
+			sourceLanguageTag === undefined ||
 			messageReferenceMatchers === undefined ||
 			refResource === undefined
 		) {
@@ -51,9 +51,11 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					documentText: activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = getMessageAsString(query(refResource).get({
-						id: message.messageId,
-					}))
+					const translation = getMessageAsString(
+						query(refResource).get({
+							id: message.messageId,
+						}),
+					)
 
 					const truncatedTranslation =
 						translation &&
@@ -74,7 +76,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 							after: {
 								contentText:
 									truncatedTranslation ??
-									`ERROR: '${message.messageId}' not found in reference language '${referenceLanguage}'`,
+									`ERROR: '${message.messageId}' not found in sourec language tag '${sourceLanguageTag}'`,
 								backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
 								border: translation
 									? "1px solid rgb(45 212 191/.50)"
