@@ -10,7 +10,7 @@
 		"url": "https://github.com/inlang/inlang.git"
 	},
 	"icon": "assets/icon.png",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"engines": {
 		"vscode": "^1.75.0"
 	},

@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.9.3
+
+### Patch Changes
+
+- 1bd24020: Fixes an error so placeholders are displayed in message previews.
+
 ## 0.9.2
 
 ### Patch Changes
