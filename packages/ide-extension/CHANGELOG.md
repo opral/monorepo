@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 0.9.2
+
+### Patch Changes
+
+- 68504fbc: update README
+
 ## 0.9.1
 
 ### Patch Changes
