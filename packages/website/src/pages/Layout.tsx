@@ -14,10 +14,8 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { rpc } from "@inlang/rpc"
-import { defaultLanguage, languages } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { navigate } from "vite-plugin-ssr/client/router"
-import type Placeholder from "@tiptap/extension-placeholder"
 
 /**
  * Ensure that all elements use the same margins.
@@ -168,8 +166,8 @@ function Header(props: { landingpage?: boolean }) {
 													locale(event.target.value)
 												}}
 											>
-												<sl-option prop:value="en">🇺🇸 English</sl-option>
-												<sl-option prop:value="de">🇩🇪 German</sl-option>
+												<sl-option prop:value="en">🇬🇧 English</sl-option>
+												<sl-option prop:value="de">🇩🇪 Deutsch</sl-option>
 												{/* <sl-option prop:value="zh">🇨🇳 Chinese</sl-option> */}
 											</sl-select>
 										</Show>
