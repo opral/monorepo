@@ -3,6 +3,7 @@ import { setState, state } from '../state.js'
 import { msg } from '../utilities/message.js'
 import { EventEmitter, window } from 'vscode'
 import type { Message } from '@inlang/core/ast'
+import { getMessageAsString } from '../utilities/query.js'
 
 const onDidEditMessageEmitter = new EventEmitter<void>()
 export const onDidEditMessage = onDidEditMessageEmitter.event
@@ -17,11 +18,11 @@ export const editMessageCommand = {
       return msg("Couldn't retrieve resource", "warn", "notification")
     }
 
-    const message = query(currentResource).get({ id: messageId })
+    const message = getMessageAsString(query(currentResource).get({ id: messageId }))
 
     const newValue = await window.showInputBox({
       title: "Enter new value:",
-      value: message?.pattern.elements[0]!.value as string
+      value: message
     })
 
     if (newValue === undefined) {
