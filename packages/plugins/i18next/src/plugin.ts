@@ -81,7 +81,7 @@ export const plugin = createPlugin<PluginSettings>(({ settings, env }) => ({
 		}
 
 		return {
-			languages: await getLanguages({
+			languageTags: await getLanguages({
 				$fs: env.$fs,
 				settings: withDefaultSettings,
 			}),
@@ -150,7 +150,7 @@ async function readResources(
 	},
 ): ReturnType<InlangConfig["readResources"]> {
 	const resources: ast.Resource[] = []
-	for (const language of args.config.languages) {
+	for (const language of args.config.languageTags) {
 		const resource: ast.Resource = {
 			type: "Resource",
 			languageTag: {

@@ -106,8 +106,8 @@ it("should work with empty json files", async () => {
 	expect(
 		config.readResources!({
 			config: {
-				referenceLanguage: "en",
-				languages: ["en"],
+				sourceLanguageTag: "en",
+				languageTags: ["en"],
 			} as InlangConfig,
 		}),
 	).resolves.toBeTruthy()
@@ -121,8 +121,8 @@ it("should work with not yet existing files", async () => {
 	expect(
 		config.readResources!({
 			config: {
-				referenceLanguage: "en",
-				languages: ["en", "de"],
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
 			} as InlangConfig,
 		}),
 	).resolves.toBeTruthy()
@@ -147,8 +147,8 @@ it("should preserve the spacing resources and determine a default based on the m
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en", "de", "fr"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
@@ -215,8 +215,8 @@ it("should remember if a file has a new line at the end or not", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en", "de", "fr"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
@@ -247,8 +247,8 @@ it("should correctly identify placeholders", async () => {
 		env,
 	)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -267,8 +267,8 @@ it("should correctly identify placeholders with only no trailing pattern", async
 
 	const x = plugin({ pathPattern: "./{language}.json", variableReferencePattern: ["@:"] })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -296,8 +296,8 @@ it("should parse Placeholders without adding Text elements around it", async () 
 		env,
 	)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -325,8 +325,8 @@ it("should serialize newly added messages", async () => {
 		env,
 	)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -358,9 +358,9 @@ it("should return languages of a pathPattern string", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
-	const languages = config.languages
+	const languages = config.languageTags
 	expect(languages).toStrictEqual(["en"])
 })
 
@@ -384,9 +384,9 @@ it("should return languages of a pathPattern object", async () => {
 		},
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
-	const languages = config.languages
+	const languages = config.languageTags
 	expect(languages).toStrictEqual(["en", "de"])
 })
 
@@ -416,9 +416,9 @@ it("should return languages of a pathPattern object in monorepo", async () => {
 		},
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
-	const languages = config.languages
+	const languages = config.languageTags
 	expect(languages).toStrictEqual(["en", "de", "fr"])
 })
 
@@ -438,7 +438,7 @@ it("should correctly parse resources with pathPattern that contain namespaces", 
 		},
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
@@ -486,8 +486,8 @@ it("should add a new language for pathPattern string", async () => {
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -524,8 +524,8 @@ it("should add a new language for pathPattern with namespaces", async () => {
 		pathPattern: { common: "./{language}/common.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -562,8 +562,8 @@ it("should escape `.` in flattened json structures", async () => {
 		pathPattern: { common: "./{language}/common.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -632,8 +632,8 @@ it("should escape `.` in nested json structures", async () => {
 		pathPattern: { common: "./{language}/common.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
 	})
@@ -722,8 +722,8 @@ it("should correctly detect the nesting in a file and determine a default based 
 
 	const x = plugin({ pathPattern: "./{language}.json" })(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en", "de", "fr"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en", "de", "fr"]
 
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
@@ -807,8 +807,8 @@ it("should throw if element type is not known", async () => {
 		pathPattern: { common: "./{language}.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 
 	try {
 		await config.writeResources!({
@@ -842,8 +842,8 @@ it("should successfully do a roundtrip with complex content", async () => {
 		pathPattern: { common: "./{language}.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 
 	const resources = await config.readResources!({
 		config: config as InlangConfig,
@@ -896,8 +896,8 @@ it("should add default namespace if required by pathPattern", async () => {
 		pathPattern: { common: "./{language}.json" },
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
-	config.languages = ["en"]
+	config.sourceLanguageTag = "en"
+	config.languageTags = ["en"]
 
 	await config.writeResources!({
 		resources: resources,
@@ -930,9 +930,9 @@ it("should not throw an error when read Resources with empty namespaces", async 
 		},
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
-	expect(config.languages).toStrictEqual(["en", "de"])
+	expect(config.languageTags).toStrictEqual(["en", "de"])
 
 	let isThrown = false
 
@@ -962,9 +962,9 @@ it("should get the correct languages, when single namespace is defined as a path
 		pathPattern: "./{language}/common.json",
 	})(env)
 	const config = await x.config({})
-	config.referenceLanguage = "en"
+	config.sourceLanguageTag = "en"
 
-	expect(config.languages).toStrictEqual(["en", "de"])
+	expect(config.languageTags).toStrictEqual(["en", "de"])
 
 	let isThrown = false
 
