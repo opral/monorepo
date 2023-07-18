@@ -47,22 +47,10 @@ type LintInformation = {
 	lint?: LintReport[]
 }
 
-type LintExtension = {
-	Resource: LintInformation
-	Message: LintInformation
-	Pattern: LintInformation
-}
-
-export type LintedResource = Pretty<ast.Resource<LintExtension>>
-export type LintedMessage = Pretty<ast.Message<LintExtension>>
-export type LintedPattern = Pretty<ast.Pattern<LintExtension>>
+export type LintedResource = ast.Resource & LintInformation
+export type LintedMessage = ast.Message & LintInformation
+export type LintedPattern = ast.Pattern & LintInformation
 
 export type LintedNode = LintedResource | LintedMessage | LintedPattern
 
 type MaybePromise<T> = T | Promise<T>
-
-type Pretty<T> = T extends (...args: any[]) => any
-	? T
-	: T extends abstract new (...args: any[]) => any
-	? T
-	: { [K in keyof T]: T[K] }
