@@ -9,7 +9,7 @@ export type LintRule = {
 	id: `${string}.${string}`
 	level: "error" | "warn"
 	setup: (args: {
-		config: Pick<InlangConfig, "referenceLanguage" | "languages">
+		config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags">
 		report: ReturnType<typeof createReportFunction>
 	}) => MaybePromise<{
 		visitors: Visitors

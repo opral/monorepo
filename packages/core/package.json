@@ -9,6 +9,7 @@
 		"./ast": "./dist/ast/index.js",
 		"./config": "./dist/config/index.js",
 		"./environment": "./dist/environment/index.js",
+		"./languageTag": "./dist/languageTag/index.js",
 		"./lint": "./dist/lint/index.js",
 		"./query": "./dist/query/index.js",
 		"./test": "./dist/test/index.js",

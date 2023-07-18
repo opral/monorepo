@@ -48,7 +48,7 @@ test("createLintRule configures lint rule with correct visitors", async () => {
 	const rule = myRule("error")
 	const { visitors } = await rule.setup({
 		report: () => {},
-		config: { referenceLanguage: "en", languages: ["en", "de"] },
+		config: { sourceLanguageTag: "en", languageTags: ["en", "de"] },
 	})
 	expect(typeof visitors.Resource).toBe("function")
 })
@@ -68,7 +68,7 @@ test("createLintRule should accept an async setup function", async () => {
 	expect(typeof rule.setup).toBe("function")
 	const { visitors } = await rule.setup({
 		report: () => {},
-		config: { referenceLanguage: "en", languages: ["en", "de"] },
+		config: { sourceLanguageTag: "en", languageTags: ["en", "de"] },
 	})
 	expect(typeof visitors.Resource).toBe("function")
 })
