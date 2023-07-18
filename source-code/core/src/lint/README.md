@@ -56,8 +56,8 @@ _inlang.config.js_
  */
 export async function defineConfig(env) {
 	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
+		sourceLanguageTag: "en",
+		languagesTgs: ["en", "de"],
 		lint: {
 			rules: [
 				// set's the lint level to 'warn'

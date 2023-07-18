@@ -3,10 +3,11 @@ import { expect, test } from "vitest"
 import { getLintReports, lint } from "@inlang/core/lint"
 
 import { identicalPattern } from "./identicalPattern.js"
+import type { InlangConfig } from "@inlang/core/config"
 
-const config = {
-	referenceLanguage: "en",
-	languages: ["en", "de", "fr"],
+const config: Pick<InlangConfig, "lint" | "sourceLanguageTag" | "languageTags"> = {
+	sourceLanguageTag: "en",
+	languageTags: ["en", "de", "fr"],
 	lint: { rules: [identicalPattern("warn")] },
 }
 
@@ -22,7 +23,7 @@ const [lintedResources, errors] = await lint({
 test("should report if identical message found in another language", async () => {
 	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
 	expect(reports).toHaveLength(1)
-	expect(reports[0].message).toBe(
+	expect(reports[0]?.message).toBe(
 		"Identical message found in language 'fr' with message ID 'test'.",
 	)
 })
@@ -33,7 +34,7 @@ test("it should not throw errors", () => {
 
 test("should not process nodes of the reference language", async () => {
 	const referenceResource = lintedResources.find(
-		(resource) => resource.languageTag.name === config.referenceLanguage,
+		(resource) => resource.languageTag.name === config.sourceLanguageTag,
 	)!
 
 	expect(referenceResource.lint).toBeUndefined()

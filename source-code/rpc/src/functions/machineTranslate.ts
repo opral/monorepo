@@ -3,8 +3,8 @@ import type { Result } from "@inlang/core/utilities"
 
 export async function machineTranslate(args: {
 	text: string
-	targetLanguage: string
-	referenceLanguage: string
+	targetLanguageTag: string
+	sourceLanguageTag: string
 }): Promise<Result<string, Error>> {
 	try {
 		if (!privateEnv.GOOGLE_TRANSLATE_API_KEY) {
@@ -14,8 +14,8 @@ export async function machineTranslate(args: {
 			"https://translation.googleapis.com/language/translate/v2?" +
 				new URLSearchParams({
 					q: args.text,
-					target: args.targetLanguage,
-					source: args.referenceLanguage,
+					target: args.targetLanguageTag,
+					source: args.sourceLanguageTag,
 					format: "text",
 					key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
 				}),

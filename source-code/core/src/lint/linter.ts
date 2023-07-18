@@ -2,7 +2,7 @@ import type { InlangConfig } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
 import type { LintedResource, LintRule, Visitors } from "./rule.js"
 import { createReportFunction } from "./report.js"
-import type { Language } from "@inlang/core/ast"
+import type { BCP47LanguageTag } from "../languageTag/index.js"
 
 const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
 	resources.find(({ languageTag }) => languageTag.name === language)
@@ -23,23 +23,23 @@ const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
  *   const lints = getLintReports(lintedResources, { options })
  */
 export const lint = async (args: {
-	config: Pick<InlangConfig, "lint" | "languages" | "referenceLanguage">
+	config: Pick<InlangConfig, "lint" | "languageTags" | "sourceLanguageTag">
 	resources: ast.Resource[]
 }): Promise<[lintedResources: LintedResource[], errors?: Error[]]> => {
-	const { referenceLanguage, languages, lint } = args.config
+	const { sourceLanguageTag, languageTags, lint } = args.config
 	const resources = structuredClone(args.resources)
 	if (lint === undefined || lint.rules.length === 0) {
 		return [args.resources, []]
 	}
-	const reference = getResourceForLanguage(resources, referenceLanguage)
+	const reference = getResourceForLanguage(resources, sourceLanguageTag)
 	const errors: Error[] = []
 
 	await Promise.all(
 		lint.rules.flat().map((rule) =>
 			processLintRule({
 				rule,
-				referenceLanguage,
-				languages,
+				sourceLanguageTag,
+				languageTags,
 				reference,
 				resources,
 			}).catch((e) =>
@@ -53,20 +53,18 @@ export const lint = async (args: {
 
 const processLintRule = async (args: {
 	rule: LintRule
-	referenceLanguage: Language
-	languages: Language[]
+	sourceLanguageTag: BCP47LanguageTag
+	languageTags: BCP47LanguageTag[]
 	reference: ast.Resource | undefined
 	resources: ast.Resource[]
 }) => {
-	const { referenceLanguage, languages, reference, resources } = args
-
 	const report = createReportFunction(args.rule)
-	const { visitors } = await args.rule.setup({ config: { referenceLanguage, languages }, report })
+	const { visitors } = await args.rule.setup({ config: args, report })
 
-	for (const language of languages) {
+	for (const language of args.languageTags) {
 		await processResource({
-			reference,
-			target: getResourceForLanguage(resources, language),
+			reference: args.reference,
+			target: getResourceForLanguage(args.resources, language),
 			visitors,
 		})
 	}

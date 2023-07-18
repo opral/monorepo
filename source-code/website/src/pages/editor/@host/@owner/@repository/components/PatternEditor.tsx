@@ -15,15 +15,16 @@ import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
 import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
+import type { BCP47LanguageTag } from "@inlang/core/languageTag"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
-	referenceLanguage: ast.Resource["languageTag"]["name"]
-	language: ast.Resource["languageTag"]["name"]
+	sourceLanguageTag: BCP47LanguageTag
+	languageTag: BCP47LanguageTag
 	id: ast.Message["id"]["name"]
-	referenceMessage?: ast.Message
+	sourceMessage?: ast.Message
 	message: ast.Message | undefined
 }) {
 	const [localStorage, setLocalStorage] = useLocalStorage()
@@ -31,10 +32,10 @@ export function PatternEditor(props: {
 		resources,
 		localChanges,
 		setLocalChanges,
-		referenceResource,
+		sourceResource,
 		userIsCollaborator,
 		routeParams,
-		filteredLanguages,
+		filteredLanguageTags,
 	} = useEditorState()
 	const [variableReferences, setVariableReferences] = createSignal<ast.VariableReference[]>([])
 
@@ -60,9 +61,9 @@ export function PatternEditor(props: {
 	}
 
 	onMount(() => {
-		if (props.referenceMessage) {
+		if (props.sourceMessage) {
 			setVariableReferences(
-				props.referenceMessage.pattern.elements
+				props.sourceMessage.pattern.elements
 					.filter((element) => element.type === "Placeholder")
 					.map((element) => element.body) as ast.VariableReference[],
 			)
@@ -79,14 +80,14 @@ export function PatternEditor(props: {
 		if (
 			localChanges().some(
 				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
 			)
 		) {
 			return getEditorConfig(
 				textArea,
 				localChanges().find(
 					(change) =>
-						change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+						change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
 				)?.newCopy,
 				variableReferences(),
 			)
@@ -106,7 +107,8 @@ export function PatternEditor(props: {
 	}
 
 	/** the resource the message belongs to */
-	const resource = () => resources.find((resource) => resource.languageTag.name === props.language)!
+	const resource = () =>
+		resources.find((resource) => resource.languageTag.name === props.languageTag)!
 
 	/** copy of the message to conduct and track changes */
 	const copy: () => ast.Message | undefined = () =>
@@ -150,12 +152,12 @@ export function PatternEditor(props: {
 		if (
 			localChanges().some(
 				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
 			)
 		) {
 			compare_elements = localChanges().find(
 				(change) =>
-					change.languageTag.name === props.language && change.newCopy.id.name === props.id,
+					change.languageTag.name === props.languageTag && change.newCopy.id.name === props.id,
 			)?.newCopy.pattern.elements
 		} else {
 			compare_elements = props.message?.pattern.elements
@@ -217,7 +219,7 @@ export function PatternEditor(props: {
 			textArea.parentElement?.click()
 		}, 500)
 		telemetryBrowser.capture("EDITOR saved changes", {
-			targetLanguage: props.language,
+			targetLanguage: props.languageTag,
 			owner: routeParams().owner,
 			repository: routeParams().repository,
 		})
@@ -226,14 +228,14 @@ export function PatternEditor(props: {
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
-		if (props.referenceMessage === undefined) {
+		if (props.sourceMessage === undefined) {
 			return showToast({
 				variant: "info",
 				title: "Can't translate if the reference message does not exist.",
 			})
 		}
 		const textArr: Array<string> = []
-		props.referenceMessage.pattern.elements.map((element) => {
+		props.sourceMessage.pattern.elements.map((element) => {
 			if (element.type === "Text") {
 				textArr.push(element.value)
 			} else if (element.type === "Placeholder") {
@@ -254,8 +256,8 @@ export function PatternEditor(props: {
 		setMachineTranslationIsLoading(true)
 		const [translation, exception] = await rpc.machineTranslate({
 			text,
-			referenceLanguage: referenceResource()!.languageTag.name,
-			targetLanguage: props.language,
+			sourceLanguageTag: sourceResource()!.languageTag.name,
+			targetLanguageTag: props.languageTag,
 		})
 		if (exception) {
 			showToast({
@@ -280,7 +282,7 @@ export function PatternEditor(props: {
 		if (props.message) {
 			const lintReports = getLintReports(props.message as LintedMessage)
 			const filteredReports = lintReports.filter((report) =>
-				handleMissingMessage(report, filteredLanguages()),
+				handleMissingMessage(report, filteredLanguageTags()),
 			)
 			if (filteredReports) {
 				filteredReports.map((lint) => {
@@ -336,10 +338,10 @@ export function PatternEditor(props: {
 				<div class="flex justify-start items-center flex-grow-0 flex-shrink-0 w-[72px] gap-2 py-0">
 					<div class="flex justify-start items-start flex-grow-0 flex-shrink-0 relative gap-2">
 						<p class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface-variant">
-							{props.language}
+							{props.languageTag}
 						</p>
 					</div>
-					{props.referenceLanguage === props.language && (
+					{props.sourceLanguageTag === props.languageTag && (
 						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>
@@ -355,12 +357,12 @@ export function PatternEditor(props: {
 
 				{/* tiptap editor */}
 				<div
-					id={props.id + "-" + props.language}
+					id={props.id + "-" + props.languageTag}
 					ref={textArea}
 					onKeyDown={(event) => handleShortcut(event)}
 					onFocusIn={() => {
 						telemetryBrowser.capture("EDITOR clicked in field", {
-							targetLanguage: props.language,
+							targetLanguage: props.languageTag,
 							owner: routeParams().owner,
 							repository: routeParams().repository,
 						})

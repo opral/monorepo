@@ -2,6 +2,7 @@ import { it, expect } from "vitest"
 import { createPlugin } from "./createPlugin.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import { expectType } from "tsd"
+import type { InlangConfig } from "../config/schema.js"
 
 it("should be possible to define a plugin without settings and the type should be undefined", () => {
 	createPlugin(({ settings }) => {
@@ -27,7 +28,7 @@ it("should be possible to define a plugin", () => {
 					throw new Error("pathPattern is required")
 				}
 				return {
-					languages: ["en", "de"],
+					languageTags: ["en", "de"],
 				}
 			},
 		}
@@ -36,8 +37,8 @@ it("should be possible to define a plugin", () => {
 	const plugin = myPlugin({ pathPattern: "" })({} as InlangEnvironment)
 	expect(plugin.id).toEqual("samuelstroschein.plugin-json")
 	expect(plugin.config({})).toEqual({
-		languages: ["en", "de"],
-	})
+		languageTags: ["en", "de"],
+	} satisfies Partial<InlangConfig>)
 })
 
 it("config function should receive config object", () => {
@@ -46,14 +47,14 @@ it("config function should receive config object", () => {
 			id: "inlang.identity",
 			config: (config) => {
 				return {
-					referenceLanguage: config.referenceLanguage,
+					sourceLanguageTag: config.sourceLanguageTag,
 				}
 			},
 		}
 	})
 
 	const plugin = myPlugin()({} as InlangEnvironment)
-	expect(plugin.config({ referenceLanguage: "it" })).toEqual({
-		referenceLanguage: "it",
+	expect(plugin.config({ sourceLanguageTag: "it" })).toEqual({
+		sourceLanguageTag: "it",
 	})
 })

@@ -1,11 +1,11 @@
 import type * as ast from "@inlang/core/ast"
 import { expect, it } from "vitest"
 import { parseConfig } from "./parseConfig.js"
-import type { Language } from "@inlang/core/ast"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { InlangConfig } from "../config/index.js"
 import { mockEnvironment } from "../test/mockEnvironment.js"
-import { createResource } from '../test/utils.js'
+import { createResource } from "../test/utils.js"
+import type { BCP47LanguageTag } from "../languageTag/index.js"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
@@ -26,20 +26,52 @@ it("should fail if the config is invalid", async () => {
 	const [, exception] = await parseConfig({
 		config: {
 			// @ts-expect-error
-			referenceLanguage: 5,
+			sourceLanguageTag: 5,
 		},
 	})
 	expect(exception).toBeDefined()
 })
 
-it("should fail if the referenceLanguage is not included in languages", async () => {
+it("should fail if the sourceLanguageTag is not included in languagesTags", async () => {
 	const env = await mockEnvironment({})
 	const config = await mockDefineConfig(env)
-	config.languages = ["de"]
+	config.languageTags = ["de"]
 	const [, exception] = await parseConfig({
 		config,
 	})
 	expect(exception).toBeDefined()
+})
+
+// can be removed eventually
+it("should apply referenceLanguage and languages to sourceLanguageTag and languageTags to avoid a breaking change", async () => {
+	const env = await mockEnvironment({})
+	await env.$fs.writeFile(
+		"./en.json",
+		JSON.stringify({ hello: "Hello from the English resource." }),
+	)
+	await env.$fs.writeFile(
+		"./de.json",
+		JSON.stringify({ hello: "Hallo von der Deutschen Resource." }),
+	)
+	const config = await mockDefineConfig(env)
+	// 	@ts-expect-error - testing a breaking change
+	config.languages = config.languageTags
+	// @ts-expect-error - testing a breaking change
+	config.referenceLanguage = config.sourceLanguageTag
+	// @ts-expect-error - testing a breaking change
+	delete config.languageTags
+	// @ts-expect-error - testing a breaking change
+	delete config.sourceLanguageTag
+	const [, exception] = await parseConfig({
+		config,
+	})
+	expect(exception).toBeUndefined()
+	expect(config.sourceLanguageTag).toBe("en")
+	expect(config.languageTags).toEqual(["de", "en"])
+	// @ts-expect-error - testing a breaking change
+	expect(config.referenceLanguage).toBeUndefined()
+	// @ts-expect-error - testing a breaking change
+	expect(config.languages).toBeUndefined()
 })
 
 // TODO prints an error to the console which is annoying when running tests
@@ -70,8 +102,8 @@ export async function mockDefineConfig(env: InlangEnvironment): Promise<InlangCo
 	} satisfies PluginConfig
 
 	return {
-		referenceLanguage: "en",
-		languages: ["en", "de"],
+		sourceLanguageTag: "en",
+		languageTags: ["en", "de"],
 		readResources: (args) => readResources({ ...args, ...env, pluginConfig }),
 		writeResources: (args) => writeResources({ ...args, ...env, pluginConfig }),
 	}
@@ -105,7 +137,7 @@ async function readResources(
 		InlangEnvironment & { pluginConfig: PluginConfig },
 ): ReturnType<InlangConfig["readResources"]> {
 	const result: ast.Resource[] = []
-	for (const language of args.config.languages) {
+	for (const language of args.config.languageTags) {
 		const resourcePath = args.pluginConfig.pathPattern.replace("{language}", language)
 		// reading the json, and flattening it to avoid nested keys.
 		const json = JSON.parse(
@@ -144,9 +176,12 @@ async function writeResources(
 function parseResource(
 	/** flat JSON refers to the flatten function from https://www.npmjs.com/package/flat */
 	flatJson: Record<string, string>,
-	language: Language,
+	languageTag: BCP47LanguageTag,
 ): ast.Resource {
-	return createResource(language, ...Object.entries(flatJson).map(([id, value]) => parseMessage(id, value)))
+	return createResource(
+		languageTag,
+		...Object.entries(flatJson).map(([id, value]) => parseMessage(id, value)),
+	)
 }
 
 /**

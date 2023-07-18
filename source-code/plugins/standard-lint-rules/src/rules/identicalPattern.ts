@@ -1,4 +1,4 @@
-import type { LanguageTag } from "@inlang/core/ast"
+import type { LanguageTag, Text } from "@inlang/core/ast"
 import { createLintRule } from "@inlang/core/lint"
 
 /**
@@ -17,7 +17,7 @@ export const identicalPattern = createLintRule({
 				Resource: ({ target, reference }) => {
 					targetMessageLanguage = target?.languageTag.name
 					if (
-						(target && target.languageTag.name === config.referenceLanguage) ||
+						(target && target.languageTag.name === config.sourceLanguageTag) ||
 						!target?.body.find((element) => element.pattern) ||
 						!reference?.body.find((element) => element.pattern)
 					) {
@@ -36,7 +36,7 @@ export const identicalPattern = createLintRule({
 						.filter((element) => {
 							return element.type === "Text"
 						})
-						.map((element) => element.value)
+						.map((element) => (element as Text).value)
 						.join(" ")
 						.split(" ").length
 
