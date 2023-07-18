@@ -2,6 +2,7 @@ import type { MessageReferenceMatch } from '@inlang/core/config';
 import { query } from '@inlang/core/query';
 import { MarkdownString, Uri } from 'vscode';
 import { state } from '../state.js';
+import { getMessageAsString } from '../utilities/query.js';
 
 const MISSING_TRANSLATION_MESSAGE = '[missing]'
 
@@ -22,12 +23,12 @@ function renderTranslationRow(row: ContextTableRow) {
 export function contextTooltip(message: MessageReferenceMatch) {
   const resources = state().resources.sort((a, b) => a.languageTag.name.localeCompare(b.languageTag.name))
   const messages = resources.reduce<ContextTableRow[]>((acc, r) => {
-    const m = query(r).get({ id: message.messageId })
+    const m = getMessageAsString(query(r).get({ id: message.messageId }))
     const args = encodeURIComponent(JSON.stringify([{ messageId: message.messageId, resource: r.languageTag.name }]));
 
     return [...acc, {
       language: r.languageTag.name,
-      message: m?.pattern.elements[0]!.value ? m.pattern.elements[0].value as string : MISSING_TRANSLATION_MESSAGE,
+      message: m ?? MISSING_TRANSLATION_MESSAGE,
       editCommand: Uri.parse(`command:inlang.editMessage?${args}`),
       openInEditorCommand: Uri.parse(`command:inlang.openInEditor?${args}`)
     }]
