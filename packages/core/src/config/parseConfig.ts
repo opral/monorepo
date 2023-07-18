@@ -64,9 +64,11 @@ function maybeLanguageTagBreakingChangeMigration(config: InlangConfig) {
 		delete config.referenceLanguage
 	}
 	// @ts-expect-error - this is a migration
-	if (config.languages && config.languageTags === undefined) {
+	// Somewhere in the system languageTags might be defined as empty array.
+	// Thus, don't check for undefined languageTags here.
+	if (config.languages) {
 		// @ts-expect-error - this is a migration
-		config.languageTags = config.languages
+		config.languageTags = [...new Set(config.languages, config.languageTags ?? [])]
 		// @ts-expect-error - this is a migration
 		delete config.languages
 	}
