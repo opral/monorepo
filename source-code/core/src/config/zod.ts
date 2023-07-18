@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { Resource } from "../ast/zod.js"
-import type { Language } from "../ast/schema.js"
 import { zodIdeExtensionConfigSchema } from "./ideExtension/zodSchema.js"
+import type { BCP47LanguageTag } from "../languageTag/types.js"
 
 /**
  * The zod schema for the config.
@@ -11,10 +11,18 @@ import { zodIdeExtensionConfigSchema } from "./ideExtension/zodSchema.js"
  * at https://zod.dev/
  */
 export const zConfig = z.object({
-	referenceLanguage: z.string().transform((value) => value as Language),
-	languages: z.array(z.string()).refine((items) => new Set(items).size === items.length, {
-		message: "Languages contains duplicates. The provided languages must be unique.",
-	}),
+	sourceLanguageTag: z
+		.string()
+		.transform((value) => value as BCP47LanguageTag)
+		// optional as long as interop with old configs is required
+		.optional(),
+	languageTags: z
+		.array(z.string())
+		.refine((items) => new Set(items).size === items.length, {
+			message: "Languages contains duplicates. The provided languages must be unique.",
+		})
+		// optional as long as interop with old configs is required
+		.optional(),
 	lint: z
 		.object({
 			rules: z.array(z.any()),

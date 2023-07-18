@@ -1,20 +1,20 @@
 import { it, expect, vi } from "vitest"
 import { setupConfig } from "./setupConfig.js"
-import { createResource } from '../test/utils.js'
+import { createResource } from "../test/utils.js"
 
 it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
+				readResources: async () => [createResource("en"), createResource("de")],
 				writeResources: async () => undefined,
 				plugins: [
 					{
 						id: "mock.plugin",
 						config: () => {
 							return {
-								referenceLanguage: "de",
-								languages: ["en", "de"],
+								sourceLanguageTag: "de",
+								languageTags: ["en", "de"],
 							}
 						},
 					},
@@ -23,8 +23,8 @@ it("should setup the config with plugins", async () => {
 		},
 		env: {} as any,
 	})
-	expect(config.referenceLanguage).toEqual("de")
-	expect(config.languages).toEqual(["en", "de"])
+	expect(config.sourceLanguageTag).toEqual("de")
+	expect(config.languageTags).toEqual(["en", "de"])
 })
 
 // Zod removes properties
@@ -32,7 +32,7 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
+				readResources: async () => [createResource("en"), createResource("de")],
 				writeResources: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
@@ -40,8 +40,8 @@ it("should not remove properties from the config", async () => {
 						id: "mock.plugin",
 						config: () => {
 							return {
-								referenceLanguage: "de",
-								languages: ["en", "de"],
+								sourceLanguageTag: "de",
+								languageTags: ["en", "de"],
 							}
 						},
 					},
@@ -98,9 +98,9 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 		await setupConfig({
 			module: {
 				defineConfig: async () => ({
-					referenceLanguage: "de",
-					languages: ["de", "en"],
-					readResources: async () => [createResource('en'), createResource('de'),],
+					sourceLanguageTag: "de",
+					languageTags: ["de", "en"],
+					readResources: async () => [createResource("en"), createResource("de")],
 					writeResources: async () => undefined,
 					plugins: [
 						{

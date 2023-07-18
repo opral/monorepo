@@ -46,14 +46,14 @@ it("config function should receive config object", () => {
 			id: "inlang.identity",
 			config: (config) => {
 				return {
-					referenceLanguage: config.referenceLanguage,
+					sourceLanguageTag: config.sourceLanguageTag,
 				}
 			},
 		}
 	})
 
 	const plugin = myPlugin()({} as InlangEnvironment)
-	expect(plugin.config({ referenceLanguage: "it" })).toEqual({
-		referenceLanguage: "it",
+	expect(plugin.config({ sourceLanguageTag: "it" })).toEqual({
+		sourceLanguageTag: "it",
 	})
 })

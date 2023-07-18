@@ -1,9 +1,9 @@
-import type { Language } from "../ast/index.js"
 import type * as ast from "../ast/index.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { LintRule } from "../lint/rule.js"
 import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
 import type { IdeExtensionConfigSchema } from "./ideExtension/schema.js"
+import type { BCP47LanguageTag } from "../languageTag/index.js"
 
 /**
  * The entrypoint for inlang.
@@ -35,24 +35,13 @@ export type InlangConfigModule = {
  */
 export type InlangConfig = {
 	/**
-	 * The reference language that other messages are validated against.
-	 *
-	 * The languages can be named freely. It's advisable to follow the IETF BCP 47 language tag scheme.
-	 * In most cases, the reference language is `en-US` (American English).
-	 *
-	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
-	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+	 * The source language tag in this project.
 	 */
-	referenceLanguage: Language
+	sourceLanguageTag: BCP47LanguageTag
 	/**
-	 * Available languages in this project.
-	 *
-	 * The languages can be named freely. It's advisable to follow the IETF BCP 47 language tag scheme.
-	 *
-	 * @see https://www.ietf.org/rfc/bcp/bcp47.txt
-	 * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+	 * Available language tags in this project.
 	 */
-	languages: Language[]
+	languageTags: BCP47LanguageTag[]
 	readResources: (args: { config: InlangConfig }) => Promise<ast.Resource[]>
 	writeResources: (args: { config: InlangConfig; resources: ast.Resource[] }) => Promise<void>
 

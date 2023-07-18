@@ -3,7 +3,7 @@ import type { Resource } from "@inlang/core/ast"
 import { lint } from "./linter.js"
 import type { LintRule } from "./rule.js"
 import { createLintRule } from "./createLintRule.js"
-import { createMessage, createResource } from '../test/utils.js'
+import { createMessage, createResource } from "../test/utils.js"
 
 vi.spyOn(console, "info").mockImplementation(vi.fn)
 vi.spyOn(console, "warn").mockImplementation(vi.fn)
@@ -12,8 +12,8 @@ vi.spyOn(console, "error").mockImplementation(vi.fn)
 const doLint = (rules: LintRule[], resources: Resource[]) => {
 	const config = {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-		referenceLanguage: resources[0]!.languageTag.name!,
-		languages: resources.map((resource) => resource.languageTag.name),
+		sourceLanguageTag: resources[0]!.languageTag.name!,
+		languageTags: resources.map((resource) => resource.languageTag.name),
 		lint: { rules },
 	}
 	return lint({ config, resources })
@@ -179,8 +179,8 @@ describe("lint", async () => {
 			const fn = vi.fn()
 			await lint({
 				config: {
-					languages: ["en", "de"],
-					referenceLanguage: "en",
+					languageTags: ["en", "de"],
+					sourceLanguageTag: "en",
 					lint: {
 						rules: [
 							{
