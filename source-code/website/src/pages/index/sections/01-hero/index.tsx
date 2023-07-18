@@ -13,8 +13,8 @@ const Hero = () => {
 	return (
 		<SectionLayout showLines={true} type="lightGrey">
 			<div class="w-full flex pt-4 md:pt-16 flex-col xl:flex-row">
-				<div class="w-full xl:w-1/2 flex flex-col gap-8 px-10 py-16 md:pt-16 md:pb-32">
-					<h1 class="text-5xl md:text-6xl font-bold text-surface-900 pr-16 tracking-tight">
+				<div class="w-full xl:w-1/2 flex flex-col gap-8 px-6 md:px-10 py-16 md:pt-16 md:pb-32">
+					<h1 class="text-[40px] leading-tight md:text-6xl font-bold text-surface-900 pr-16 tracking-tight">
 						<span class="bg-clip-text text-[rgba(0,0,0,0)] bg-gradient-to-tl from-[#F1D9FF] via-hover-primary to-[#3B82F6]">
 							{`${t("landing.hero.keyword")} `}
 						</span>
@@ -37,7 +37,7 @@ const Hero = () => {
 					</div>
 					<div class="flex flex-col gap-6 pt-8">
 						<p class="text-md font-normal text-surface-400">{t("landing.hero.usedBy")}</p>
-						<div class="flex flex-wrap items-center gap-6 xl:w-3/4 xl:pb-8 opacity-90">
+						<div class="flex flex-wrap items-center gap-6 xl:w-3/4 opacity-90">
 							<a class="hover:opacity-70" href="https://cal.com" target="_blank">
 								<Calcom />
 							</a>
@@ -77,7 +77,7 @@ const Hero = () => {
 					<div class="w-auto h-full relative z-3 ml-[35px] xl:ml-0">
 						<KeyVisual />
 						{/* Temporary Product Hunt Badge Desktop –– Will be removed after launch */}
-						<div class="ml-32 relative -top-[34px] max-xl:hidden">
+						<div class="relative -top-[34px] max-xl:hidden flex justify-center">
 							<a
 								href="https://www.producthunt.com/posts/inlang-vscode-extension-for-i18n-beta?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-inlang&#0045;vscode&#0045;extension&#0045;for&#0045;i18n&#0045;beta"
 								target="_blank"
@@ -85,10 +85,10 @@ const Hero = () => {
 								<img
 									src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=404697&theme=light"
 									alt="inlang&#0032;VSCode&#0032;extension&#0032;for&#0032;i18n&#0032;&#0040;beta&#0041; - Extension&#0032;for&#0032;i18n&#0032;codebases&#0032;making&#0032;developers&#0032;life&#0039;s&#0032;easier | Product Hunt"
-									style={{ width: "250px", height: "54px" }}
-									class="rounded-[11px] shadow-xl shadow-surface-100"
-									width="250"
-									height="54"
+									style={{ width: "200px", height: "43px" }}
+									class="rounded-[8px] shadow-xl shadow-surface-100"
+									width="200"
+									height="43"
 								/>
 							</a>
 						</div>

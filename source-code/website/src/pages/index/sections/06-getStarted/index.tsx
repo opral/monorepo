@@ -15,7 +15,7 @@ const GetStarted = () => {
 	return (
 		<SectionLayout showLines={true} type="dark">
 			<div class="relative py-24">
-				<div class="flex flex-col items-center gap-12 py-16 overflow-hidden">
+				<div class="flex flex-col items-center gap-12 overflow-hidden">
 					<div class="flex flex-col items-center gap-4">
 						<div class="bg-surface-800">
 							<p class="text-sm text-background bg-background/10 h-7 flex items-center px-4 rounded-full w-fit tracking-relaxed">
@@ -26,7 +26,7 @@ const GetStarted = () => {
 						<h2 class="text-center text-3xl font-semibold text-background leading-tight md:leading-relaxed tracking-tight">
 							{t("landing.getstarted.title")}
 						</h2>
-						<p class="text-normal px-10 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
+						<p class="text-normal px-6 md:px-10 md:w-[65%] sm:leading-7 text-center text-surface-400 pb-8">
 							{t("landing.getstarted.description")}
 						</p>
 						<a href={getLocale() + "/documentation"}>
