@@ -64,6 +64,11 @@
 	background: var(--sl-color-neutral-300);
 }
 
+/* Scroll Offset for Anchor Links */
+article :target {
+	scroll-margin-top: 96px;
+}
+
 .tree-with-lines {
 	--indent-guide-width: 2px;
 }

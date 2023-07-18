@@ -107,7 +107,7 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 									props.children?.toString().replaceAll(" ", "-").toLowerCase()) as string,
 						  )
 				}
-				showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+				showToast({ variant: "success", title: "Copied link to clipboard", duration: 3000 })
 			}}
 		>
 			{props.children}
