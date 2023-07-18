@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.9.1
+
+### Patch Changes
+
+- d01492bd: [fix] exclude SvelteKit internal '/[fallback]' route
+
 ## 0.9.0
 
 ### Minor Changes
