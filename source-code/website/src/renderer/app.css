@@ -39,6 +39,36 @@
 	top: auto !important;
 }
 
+/* Styling the default scrollbars when overflow is set to auto or scroll */
+.overflow-scrollbar::-webkit-scrollbar {
+	width: 8px;
+}
+
+/* Track */
+.overflow-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* Handle */
+.overflow-scrollbar::-webkit-scrollbar-thumb {
+	background: transparent;
+	border-radius: 1000px;
+}
+
+/* Handle on hover */
+.overflow-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: var(--sl-color-neutral-400);
+}
+
+.overflow-scrollbar:hover::-webkit-scrollbar-thumb {
+	background: var(--sl-color-neutral-300);
+}
+
+/* Scroll Offset for Anchor Links */
+article :target {
+	scroll-margin-top: 96px;
+}
+
 .tree-with-lines {
 	--indent-guide-width: 2px;
 }

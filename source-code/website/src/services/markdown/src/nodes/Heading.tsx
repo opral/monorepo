@@ -51,55 +51,6 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 	const [isHovered, setIsHovered] = createSignal(false)
 	let element: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined
 
-	function generateId(
-		element: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined,
-		props: { children: JSXElement },
-	) {
-		const children = props.children?.toString().replace(" ", "-").replace("#", "").toLowerCase()
-
-		if (children?.includes("native code")) {
-			if (typeof element === "object" && element instanceof HTMLDivElement) {
-				return element.innerText?.toString().replace(" ", "-").replace("#", "").toLowerCase().trim()
-			} else {
-				return ""
-			}
-		} else {
-			return children
-		}
-	}
-
-	function handleClick(
-		element: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined,
-		props: { children: JSXElement },
-	) {
-		if (typeof element === "object" && element instanceof HTMLDivElement) {
-			const children = props.children?.toString().replace(" ", "-").replace("#", "").toLowerCase()
-
-			if (children?.includes("native code")) {
-				copy(
-					("https://" +
-						document.location.host +
-						document.location.pathname +
-						"#" +
-						element?.innerText
-							?.toString()
-							.replace(" ", "-")
-							.replace("#", "")
-							.toLowerCase()) as string,
-				)
-			} else {
-				copy(
-					("https://" +
-						document.location.host +
-						document.location.pathname +
-						"#" +
-						children) as string,
-				)
-			}
-		}
-		showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
-	}
-
 	return (
 		<div
 			class="relative cursor-pointer"
@@ -112,8 +63,52 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 					element = el
 				}
 			}}
-			id={generateId(element, props)}
-			onClick={() => handleClick(element, props)}
+			id={
+				props.children
+					?.toString()
+					.replace(" ", "-")
+					.replace("#", "")
+					.toLowerCase()
+					.includes("native code")
+					? typeof element === "object" && element instanceof HTMLDivElement
+						? element.innerText
+								?.toString()
+								.replaceAll(" ", "-")
+								.replace("#", "")
+								.toLowerCase()
+								.trim() // Trim the value to remove any leading/trailing whitespace
+						: ""
+					: props.children?.toString().replaceAll(" ", "-").toLowerCase()
+			}
+			onClick={() => {
+				if (typeof element === "object" && element instanceof HTMLDivElement) {
+					props.children
+						?.toString()
+						.replace(" ", "-")
+						.replace("#", "")
+						.toLowerCase()
+						.includes("native code")
+						? copy(
+								("https://" +
+									document.location.host +
+									document.location.pathname +
+									"#" +
+									element?.innerText
+										?.toString()
+										.replaceAll(" ", "-")
+										.replaceAll("#", "")
+										.toLowerCase()) as string,
+						  )
+						: copy(
+								("https://" +
+									document.location.host +
+									document.location.pathname +
+									"#" +
+									props.children?.toString().replaceAll(" ", "-").toLowerCase()) as string,
+						  )
+				}
+				showToast({ variant: "success", title: "Copied link to clipboard", duration: 3000 })
+			}}
 		>
 			{props.children}
 			<div
