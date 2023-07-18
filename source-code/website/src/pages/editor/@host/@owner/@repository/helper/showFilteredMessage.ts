@@ -1,17 +1,18 @@
 import type * as ast from "@inlang/core/ast"
 import { LintedMessage, getLintReports } from "@inlang/core/lint"
 import { handleMissingMessage } from "./handleMissingMessage.js"
+import type { BCP47LanguageTag } from "@inlang/core/languageTag"
 
 export const showFilteredMessage = (
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
-	filteredLanguages: string[],
+	filteredLanguageTags: BCP47LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
 	messageId: string,
 ) => {
 	// filteredByLanguage
 	const filteredByLanguage = Object.keys(messages)
-		.filter((key) => filteredLanguages.length === 0 || filteredLanguages.includes(key))
+		.filter((key) => filteredLanguageTags.length === 0 || filteredLanguageTags.includes(key))
 		.reduce((filteredMessage, key) => {
 			filteredMessage[key] = messages[key]
 			return filteredMessage
@@ -54,7 +55,7 @@ export const showFilteredMessage = (
 			for (const report of getLintReports(message!)) {
 				if (
 					filteredLintRules.includes(report.id) &&
-					handleMissingMessage(report, filteredLanguages)
+					handleMissingMessage(report, filteredLanguageTags)
 				) {
 					return true
 				}

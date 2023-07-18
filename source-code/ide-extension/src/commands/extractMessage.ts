@@ -12,7 +12,7 @@ export const extractMessageCommand = {
 	id: "inlang.extractMessage",
 	title: "Inlang: Extract Message",
 	callback: async function (textEditor: vscode.TextEditor) {
-		const { ideExtension, referenceLanguage, writeResources } = state().config
+		const { ideExtension, sourceLanguageTag, writeResources } = state().config
 
 		// guards
 		if (!ideExtension) {
@@ -29,9 +29,9 @@ export const extractMessageCommand = {
 				"notification",
 			)
 		}
-		if (referenceLanguage === undefined) {
+		if (sourceLanguageTag === undefined) {
 			return msg(
-				"The `referenceLanguage` is not defined in the inlang.config.js but required to extract a message.",
+				"The `sourceLanguageTag` is not defined in the inlang.config.js but required to extract a message.",
 				"warn",
 				"notification",
 			)
@@ -86,7 +86,7 @@ export const extractMessageCommand = {
 		}
 		// find reference language resource
 		const referenceResource = state().resources.find(
-			(resource) => resource.languageTag.name === referenceLanguage,
+			(resource) => resource.languageTag.name === sourceLanguageTag,
 		)
 		if (referenceResource) {
 			const [newResource, exception] = query(referenceResource).upsert({ message })
@@ -94,7 +94,7 @@ export const extractMessageCommand = {
 				return vscode.window.showErrorMessage("Couldn't upsert new message. ", exception.message)
 			}
 			const resources = state().resources.map((resource) =>
-				resource.languageTag.name === referenceLanguage ? newResource : resource,
+				resource.languageTag.name === sourceLanguageTag ? newResource : resource,
 			)
 			await writeResources({
 				config: state().config,

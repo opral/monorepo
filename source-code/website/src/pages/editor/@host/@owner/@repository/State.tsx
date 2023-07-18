@@ -24,11 +24,11 @@ import { github } from "@src/services/github/index.js"
 import { coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 import { showToast } from "@src/components/Toast.jsx"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
-import type { Language } from "@inlang/core/ast"
 import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { parseOrigin } from "@inlang/telemetry"
 import { setSearchParams } from "./helper/setSearchParams.js"
+import type { BCP47LanguageTag } from "@inlang/core/languageTag"
 
 export type LocalChange = {
 	languageTag: ast.Resource["languageTag"]
@@ -107,10 +107,10 @@ type EditorStateSchema = {
 
 	doesInlangConfigExist: () => boolean
 
-	referenceLanguage: () => Language | undefined
+	sourceLanguageTag: () => BCP47LanguageTag | undefined
 
-	languages: () => Language[]
-	setLanguages: Setter<Language[]>
+	languageTags: () => BCP47LanguageTag[]
+	setLanguageTags: Setter<BCP47LanguageTag[]>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -120,8 +120,8 @@ type EditorStateSchema = {
 	/**
 	 * FilterLanguages show or hide the different messages.
 	 */
-	filteredLanguages: () => Language[]
-	setFilteredLanguages: Setter<Language[]>
+	filteredLanguageTags: () => BCP47LanguageTag[]
+	setFilteredLanguageTags: Setter<BCP47LanguageTag[]>
 
 	/**
 	 * Filtered lint rules.
@@ -145,7 +145,7 @@ type EditorStateSchema = {
 	/**
 	 * The reference resource.
 	 */
-	referenceResource: () => ast.Resource | undefined
+	sourceResource: () => ast.Resource | undefined
 
 	/**
 	 * Whether the user is a collaborator of the repository.
@@ -207,8 +207,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
 	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
-	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
-	const [languages, setLanguages] = createSignal<Language[]>([])
+	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<BCP47LanguageTag>()
+	const [languageTags, setLanguageTags] = createSignal<BCP47LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 
 	//set filter with search params
@@ -224,11 +224,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "search", value: textSearch() })
 	})
 
-	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>(
+	const [filteredLanguageTags, setFilteredLanguageTags] = createSignal<BCP47LanguageTag[]>(
 		params.getAll("lang") as string[],
 	)
 	createEffect(() => {
-		setSearchParams({ key: "lang", value: filteredLanguages() })
+		setSearchParams({ key: "lang", value: filteredLanguageTags() })
 	})
 
 	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
@@ -243,8 +243,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	/**
 	 * The reference resource.
 	 */
-	const referenceResource = () =>
-		resources.find((resource) => resource.languageTag.name === referenceLanguage())
+	const sourceResource = () =>
+		resources.find((resource) => resource.languageTag.name === sourceLanguageTag())
 
 	const [localStorage] = useLocalStorage() ?? []
 
@@ -326,22 +326,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const config = await readInlangConfig(args)
 			if (config) {
-				const languages = // TODO: move this into setter logic
-					config.languages.sort((a: any, b: any) =>
+				const languagesTags = // TODO: move this into setter logic
+					config.languageTags.sort((a: any, b: any) =>
 						// reference language should be first
 						// sort alphabetically otherwise
-						a === config.referenceLanguage
+						a === config.sourceLanguageTag
 							? -1
-							: b === config.referenceLanguage
+							: b === config.sourceLanguageTag
 							? 1
 							: a.localeCompare(b),
 					) || []
 				// initializes the languages to all languages
 				setDoesInlangConfigExist(true)
 				setLint(config.lint)
-				setReferenceLanguage(config.referenceLanguage)
-				setLanguages(languages)
-				//filteredLanguages().length === 0 && setFilteredLanguages(languages)
+				setSourceLanguageTag(config.sourceLanguageTag)
+				setLanguageTags(languagesTags)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
@@ -349,7 +348,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	createEffect(() => {
-		const langs = languages()
+		const langs = languageTags()
 		setInlangConfig.mutate((config) => (config ? { ...config, languages: langs } : undefined))
 	})
 
@@ -359,8 +358,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setTourStep("github-login")
 		} else if (!userIsCollaborator()) {
 			setTourStep("fork-repository")
-		} else if (tourStep() === "fork-repository" && inlangConfig() && filteredLanguages()) {
-			if (filteredLanguages().length > 0) {
+		} else if (tourStep() === "fork-repository" && inlangConfig() && filteredLanguageTags()) {
+			if (filteredLanguageTags().length > 0) {
 				setTourStep("default-languages")
 			} else {
 				setTourStep("default-languages")
@@ -634,20 +633,20 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					inlangConfig,
 					doesInlangConfigExist,
 					lint,
-					referenceLanguage,
-					languages,
-					setLanguages,
+					sourceLanguageTag,
+					languageTags,
+					setLanguageTags,
 					tourStep,
 					setTourStep,
-					filteredLanguages,
-					setFilteredLanguages,
+					filteredLanguageTags,
+					setFilteredLanguageTags,
 					filteredLintRules,
 					setFilteredLintRules,
 					localChanges,
 					setLocalChanges,
 					resources,
 					setResources,
-					referenceResource,
+					sourceResource,
 					userIsCollaborator,
 					repoIsPrivate,
 					setLastPush,

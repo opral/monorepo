@@ -53,7 +53,7 @@ export async function defineConfig(env) {
 	${standardLintRules}
 
 	return {
-		referenceLanguage: 'en',
+		sourceLanguageTag: 'en',
 		plugins: [
 			${pluginFunctions}
 			standardLintRules(),
