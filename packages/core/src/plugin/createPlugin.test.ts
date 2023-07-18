@@ -27,7 +27,7 @@ it("should be possible to define a plugin", () => {
 					throw new Error("pathPattern is required")
 				}
 				return {
-					languages: ["en", "de"],
+					languageTags: ["en", "de"],
 				}
 			},
 		}

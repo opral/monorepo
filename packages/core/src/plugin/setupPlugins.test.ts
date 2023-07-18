@@ -85,7 +85,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test1: true,
-						}
+						} as any
 					},
 				},
 				{
@@ -95,7 +95,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test2: true,
-						}
+						} as any
 					},
 				},
 				{
@@ -107,7 +107,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test3: true,
-						}
+						} as any
 					},
 				},
 			],
