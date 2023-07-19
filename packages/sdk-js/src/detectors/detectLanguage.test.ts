@@ -5,8 +5,8 @@ import type { Detector } from "./types.js"
 
 vi.mock("./matchLanguage.js", () => {
 	return {
-		matchLanguage: vi.fn((detectedLanguages: string[], languages: string[], allowRelated = true) =>
-			languages.find((lang) =>
+		matchLanguage: vi.fn((detectedLanguages: string[], languageTags: string[], allowRelated = true) =>
+			languageTags.find((lang) =>
 				detectedLanguages.some((l) =>
 					allowRelated ? l.startsWith(lang) || lang.startsWith(l) : l === lang,
 				),
@@ -20,22 +20,22 @@ describe("detectLanguage", () => {
 		vi.restoreAllMocks()
 	})
 
-	test("Returns fallback language if no detector gets passed", async () => {
-		const referenceLanguage = "en"
+	test("Returns fallback languageTag if no detector gets passed", async () => {
+		const sourceLanguageTag = "en"
 		const detected = await detectLanguage(
 			{
-				referenceLanguage,
-				languages: ["de", "fr", "en"],
+				sourceLanguageTag,
+				languageTags: ["de", "fr", "en"],
 				allowRelated: false,
 			},
 			...[],
 		)
 		expect(matchLanguage).toBeCalledTimes(0)
-		expect(detected).toBe(referenceLanguage)
+		expect(detected).toBe(sourceLanguageTag)
 	})
 
-	test("Returns fallback language if no detector finds a match", async () => {
-		const referenceLanguage = "en"
+	test("Returns fallback languageTag if no detector finds a match", async () => {
+		const sourceLanguageTag = "en"
 		const detectors: Detector[] = [
 			vi.fn(() => ["it"]),
 			vi.fn(() => Promise.resolve(["de"])),
@@ -43,22 +43,22 @@ describe("detectLanguage", () => {
 		]
 		const detected = await detectLanguage(
 			{
-				referenceLanguage,
-				languages: ["en", "fr"],
+				sourceLanguageTag,
+				languageTags: ["en", "fr"],
 				allowRelated: false,
 			},
 			...detectors,
 		)
 		expect(matchLanguage).toBeCalledTimes(3)
-		expect(detected).toBe(referenceLanguage)
+		expect(detected).toBe(sourceLanguageTag)
 	})
 
 	test("Returns immediately after first match is found", async () => {
 		const detectors: Detector[] = [vi.fn(() => ["de"]), vi.fn(() => []), vi.fn(() => [])]
 		const detected = await detectLanguage(
 			{
-				referenceLanguage: "en",
-				languages: ["de", "en"],
+				sourceLanguageTag: "en",
+				languageTags: ["de", "en"],
 				allowRelated: false,
 			},
 			...detectors,
@@ -75,8 +75,8 @@ describe("detectLanguage", () => {
 		]
 		const detected = await detectLanguage(
 			{
-				referenceLanguage: "en",
-				languages: ["de", "en"],
+				sourceLanguageTag: "en",
+				languageTags: ["de", "en"],
 			},
 			...detectors,
 		)

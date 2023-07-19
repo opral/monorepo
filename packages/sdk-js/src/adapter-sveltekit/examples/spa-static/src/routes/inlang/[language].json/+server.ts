@@ -5,12 +5,12 @@ import { initState } from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const prerender = true
 
-export const GET = (({ params: { language } }) =>
+export const GET = (({ params: { languageTag } }) =>
 	// eslint-disable-next-line unicorn/no-null
-	json(getResource(language) || null)) satisfies RequestHandler
+	json(getResource(languageTag) || null)) satisfies RequestHandler
 
 export const entries = async () => {
-	const { languages } = await initState(await import("../../../../inlang.config.js"))
+	const { languageTags } = await initState(await import("../../../../inlang.config.js"))
 
-	return languages.map((language) => ({ language: `${language}.json` }))
+	return languageTags.map((languageTag) => ({ languageTag: `${languageTag}.json` }))
 }

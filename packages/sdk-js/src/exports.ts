@@ -8,17 +8,17 @@ const error = new InlangException(
 	"You need to use the Inlang plugin to be able to use those imports. See https://inlang.com/documentation/sdk/overview",
 )
 
-export const referenceLanguage: BCP47LanguageTag = error as any
+export const sourceLanguageTag: BCP47LanguageTag = error as any
 
-export const languages: BCP47LanguageTag[] = [error] as any
+export const languageTags: BCP47LanguageTag[] = [error] as any
 
-export const language: BCP47LanguageTag = error as any
+export const languageTag: BCP47LanguageTag = error as any
 
 export const i: InlangFunction = () => {
 	throw error
 }
 
-export const switchLanguage: (language: BCP47LanguageTag) => Promise<void> = () => {
+export const switchLanguage: (languageTag: BCP47LanguageTag) => Promise<void> = () => {
 	throw error
 }
 

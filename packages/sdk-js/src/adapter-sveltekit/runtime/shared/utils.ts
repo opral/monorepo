@@ -43,18 +43,18 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(
 
 // ------------------------------------------------------------------------------------------------
 
-export const replaceLanguageInUrl = (url: URL, language: BCP47LanguageTag) =>
+export const replaceLanguageInUrl = (url: URL, languageTag: BCP47LanguageTag) =>
 	new URL(
-		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
+		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, languageTag)}${url.search}${
 			url.hash
 		}`,
 	)
 
-const replaceLanguageInSlug = (pathname: RelativeUrl, language: BCP47LanguageTag) => {
+const replaceLanguageInSlug = (pathname: RelativeUrl, languageTag: BCP47LanguageTag) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [_, __, ...path] = pathname.split("/")
 
-	return `/${language}${path.length ? `/${path.join("/")}` : ""}`
+	return `/${languageTag}${path.length ? `/${path.join("/")}` : ""}`
 }
 
 // ------------------------------------------------------------------------------------------------

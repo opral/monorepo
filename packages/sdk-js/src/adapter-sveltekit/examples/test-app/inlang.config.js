@@ -8,10 +8,10 @@ export async function defineConfig(env) {
 	const { default: sdkPlugin } = await env.$import("../../../../../sdk-js-plugin/dist/index.js")
 
 	return {
-		referenceLanguage: "en",
+		sourceLanguageTag: "en",
 		plugins: [
 			jsonPlugin({
-				pathPattern: "./languages/{language}.json",
+				pathPattern: "./languageTags/{languageTag}.json",
 			}),
 			sdkPlugin({
 				debug: true,

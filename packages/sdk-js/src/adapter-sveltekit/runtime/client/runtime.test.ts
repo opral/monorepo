@@ -14,15 +14,15 @@ describe("initSvelteKitClientRuntime", () => {
 	test("should initialize a runtime instance", async () => {
 		const runtime = await initSvelteKitClientRuntime({
 			fetch,
-			referenceLanguage: "en",
-			languages: ["en"],
-			language: undefined,
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			languageTag: undefined,
 		})
-		expect(runtime.language).toBeUndefined()
+		expect(runtime.languageTag).toBeUndefined()
 		expect(runtime.i("hello")).toBe("")
 	})
 
-	test("should initialize a runtime instance and fetch the resource for the set language", async () => {
+	test("should initialize a runtime instance and fetch the resource for the set languageTag", async () => {
 		const server = setupServer(
 			rest.get(`${PREFIX}/inlang/en.json`, (_, res, ctx) =>
 				res(
@@ -36,13 +36,13 @@ describe("initSvelteKitClientRuntime", () => {
 
 		const runtime = await initSvelteKitClientRuntime({
 			fetch: patchedFetch,
-			referenceLanguage: "en",
-			languages: ["en"],
-			language: "en",
+			sourceLanguageTag: "en",
+			languageTags: ["en"],
+			languageTag: "en",
 		})
 		server.close()
 
-		expect(runtime.language).toBe("en")
+		expect(runtime.languageTag).toBe("en")
 		expect(runtime.i("hello")).toBe("World!")
 	})
 })

@@ -1,10 +1,10 @@
 <script>
-	import { i, languages, switchLanguage } from "@inlang/sdk-js"
+	import { i, languageTags, switchLanguage } from "@inlang/sdk-js"
 
 	export let data
 </script>
 
-{#each languages as lang}
+{#each languageTags as lang}
 	<button on:click={() =>switchLanguage(lang)}>{lang}</button>
 {/each}
 

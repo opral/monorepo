@@ -19,8 +19,8 @@ const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 	runtime.switchLanguage("en")
 	runtime.switchLanguage("test-1234")
 
-	expectType<(typeof runtime)["language"]>("")
-	expectType<(typeof runtime)["language"]>("test")
+	expectType<(typeof runtime)["languageTag"]>("")
+	expectType<(typeof runtime)["languageTag"]>("test")
 
 	const i = runtime.i
 
@@ -41,22 +41,22 @@ const context: RuntimeContext<string, Promise<Resource | undefined>> = {
 		}
 	>(context)
 
-	// @ts-expect-error must be a valid language
+	// @ts-expect-error must be a valid languageTag
 	runtime.loadResource("")
 	runtime.loadResource("en")
-	// @ts-expect-error must be a valid language
+	// @ts-expect-error must be a valid languageTag
 	runtime.loadResource("test-1234")
 
-	// @ts-expect-error must be a valid language
+	// @ts-expect-error must be a valid languageTag
 	runtime.switchLanguage("")
 	runtime.switchLanguage("en")
-	// @ts-expect-error must be a valid language
+	// @ts-expect-error must be a valid languageTag
 	runtime.switchLanguage("test-1234")
 
-	expectType<(typeof runtime)["language"]>("de")
-	expectType<(typeof runtime)["language"]>("en")
-	// @ts-expect-error must be a valid language
-	expectType<(typeof runtime)["language"]>("test")
+	expectType<(typeof runtime)["languageTag"]>("de")
+	expectType<(typeof runtime)["languageTag"]>("en")
+	// @ts-expect-error must be a valid languageTag
+	expectType<(typeof runtime)["languageTag"]>("test")
 
 	const i = runtime.i
 

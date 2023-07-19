@@ -1,7 +1,7 @@
 export {
-	referenceLanguage,
-	languages,
-	language,
+	sourceLanguageTag,
+	languageTags,
+	languageTag,
 	i,
 	switchLanguage,
 	loadResource,

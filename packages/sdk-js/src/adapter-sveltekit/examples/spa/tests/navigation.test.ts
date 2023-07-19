@@ -10,7 +10,7 @@ test("should keep state consistent throughout navigation", async ({ page }) => {
 
 	// TODO: check if all data from load functions are passed to the rendering process
 
-	// TODO: switch language to 'de'
+	// TODO: switch languageTag to 'de'
 
 	// TODO: test if all logs are executed (server and client)
 
@@ -30,7 +30,7 @@ test("should keep state consistent throughout navigation", async ({ page }) => {
 
 	// TODO: check if Math.random delivers same value than previously
 
-	// TODO: switch language to 'de'
+	// TODO: switch languageTag to 'de'
 
 	// TODO: test if all logs are executed (server and client)
 

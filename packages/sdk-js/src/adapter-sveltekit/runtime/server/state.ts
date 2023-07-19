@@ -10,11 +10,11 @@ let config: InlangConfig
 export const initState = async (module: InlangConfigModule) => {
 	if (!config && !import.meta.env.DEV) {
 		try {
-			const { languages, referenceLanguage, resources } = await import("virtual:inlang-static")
+			const { languageTags, sourceLanguageTag, resources } = await import("virtual:inlang-static")
 
 			config = {
-				sourceLanguageTag: referenceLanguage,
-				languageTags: languages,
+				sourceLanguageTag,
+				languageTags,
 				readResources: async () => resources,
 				writeResources: async () => undefined,
 			} as InlangConfig
@@ -30,8 +30,8 @@ export const initState = async (module: InlangConfigModule) => {
 	await reloadResources()
 
 	return {
-		referenceLanguage: config.sourceLanguageTag,
-		languages: config.languageTags,
+		sourceLanguageTag: config.sourceLanguageTag,
+		languageTags: config.languageTags,
 	}
 }
 
@@ -42,8 +42,8 @@ let _resources: Resource[] = []
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadResources = async () => (_resources = await config.readResources({ config }))
 
-export const getResource = (language: string) =>
-	_resources.find(({ languageTag: { name } }) => name === language)
+export const getResource = (languageTag: string) =>
+	_resources.find(({ languageTag: { name } }) => name === languageTag)
 
 // ------------------------------------------------------------------------------------------------
 

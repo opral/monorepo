@@ -10,14 +10,14 @@ import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	Language extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-	language: Readable<Language>
-	referenceLanguage: Language
-	languages: Language[]
+		languageTag: Readable<LanguageTag>
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
-	switchLanguage: (language: Language) => Promise<void>
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
@@ -25,24 +25,24 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.language as BCP47LanguageTag)
+	const _language = writable(runtime.languageTag as BCP47LanguageTag)
 	const _i = writable(runtime.i)
 
-	const switchLanguage = async (language: BCP47LanguageTag) => {
-		if (runtime.language === language) return
+	const switchLanguage = async (languageTag: BCP47LanguageTag) => {
+		if (runtime.languageTag === languageTag) return
 
-		await runtime.loadResource(language)
+		await runtime.loadResource(languageTag)
 
-		runtime.switchLanguage(language)
+		runtime.switchLanguage(languageTag)
 
 		_i.set(runtime.i)
-		_language.set(language)
+		_language.set(languageTag)
 	}
 
 	setContext<RuntimeContext>(inlangSymbol, {
-		language: readonly(_language),
-		referenceLanguage: runtime.referenceLanguage,
-		languages: runtime.languages,
+		languageTag: readonly(_language),
+		sourceLanguageTag: runtime.sourceLanguageTag,
+		languageTags: runtime.languageTags,
 		i: readonly(_i),
 		loadResource: runtime.loadResource,
 		switchLanguage,

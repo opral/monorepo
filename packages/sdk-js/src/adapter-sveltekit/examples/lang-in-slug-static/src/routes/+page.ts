@@ -10,7 +10,7 @@ export const load = initRootPageLoadWrapper<PageLoad>({
 	initDetectors: () => [navigatorDetector],
 	redirect: {
 		throwable: redirect,
-		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+		getPath: ({ url }, languageTag) => replaceLanguageInUrl(new URL(url), languageTag),
 	},
 }).use(async (_, { i }) => {
 	console.info("+page.ts", i("welcome"))

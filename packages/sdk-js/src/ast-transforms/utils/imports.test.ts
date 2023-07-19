@@ -46,13 +46,13 @@ describe("removeImport", () => {
 
 		test("should not remove import with another name from the same package", () => {
 			const node = codeToSourceFile(`
-				import { languages } from '@inlang/sdk-js'
+				import { languageTags } from '@inlang/sdk-js'
 			`)
 
 			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(
-				"\"import { languages } from '@inlang/sdk-js';\"",
+				"\"import { languageTags } from '@inlang/sdk-js';\"",
 			)
 		})
 	})
@@ -60,13 +60,13 @@ describe("removeImport", () => {
 	describe("modifications", () => {
 		test("should remove named import from a package", () => {
 			const node = codeToSourceFile(`
-				import { i, languages } from '@inlang/sdk-js'
+				import { i, languageTags } from '@inlang/sdk-js'
 			`)
 
 			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"import { languages } from '@inlang/sdk-js';"
+				"import { languageTags } from '@inlang/sdk-js';"
 			`)
 		})
 
@@ -84,7 +84,7 @@ describe("removeImport", () => {
 
 		test("should remove the import correcltly if multiple imports from the same package are present", () => {
 			const node = codeToSourceFile(`
-				import { languages } from '@inlang/sdk-js'
+				import { languageTags } from '@inlang/sdk-js'
 				import { i } from '@inlang/sdk-js'
 				import '@inlang/sdk-js'
 			`)
@@ -92,7 +92,7 @@ describe("removeImport", () => {
 			removeImport(node, "@inlang/sdk-js", "i")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"import { languages } from '@inlang/sdk-js';
+				"import { languageTags } from '@inlang/sdk-js';
 				import '@inlang/sdk-js';"
 			`)
 		})
@@ -100,7 +100,7 @@ describe("removeImport", () => {
 		test("should remove all imports if no names are passed", () => {
 			const node = codeToSourceFile(`
 				import { i } from '@inlang/sdk-js'
-				import { languages, referenceLanguage } from '@inlang/sdk-js'
+				import { languageTags, sourceLanguageTag } from '@inlang/sdk-js'
 			`)
 
 			removeImport(node, "@inlang/sdk-js")
@@ -138,22 +138,22 @@ describe("addImport", () => {
 	test("should add multiple imports", () => {
 		const node = codeToSourceFile(``)
 
-		addImport(node, "@inlang/sdk-js", "i", "language")
+		addImport(node, "@inlang/sdk-js", "i", "languageTag")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			"\"import { i, language } from '@inlang/sdk-js';\"",
+			"\"import { i, languageTag } from '@inlang/sdk-js';\"",
 		)
 	})
 
 	test("should add multiple imports to existing import", () => {
 		const node = codeToSourceFile(`
-			import { languages } from '@inlang/sdk-js'
+			import { languageTags } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "language", "i")
+		addImport(node, "@inlang/sdk-js", "languageTag", "i")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { languages, language, i } from '@inlang/sdk-js';"
+			"import { languageTags, languageTag, i } from '@inlang/sdk-js';"
 		`)
 	})
 
@@ -165,10 +165,10 @@ describe("addImport", () => {
 
 		`)
 
-		addImport(node, "@inlang/sdk-js", "language")
+		addImport(node, "@inlang/sdk-js", "languageTag")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
-			"import { language } from '@inlang/sdk-js';
+			"import { languageTag } from '@inlang/sdk-js';
 			console.info(1234);
 			import './app.css';"
 		`)
@@ -176,13 +176,13 @@ describe("addImport", () => {
 
 	test("should also add import if aliased import is already present", () => {
 		const node = codeToSourceFile(`
-			import { languages as langs } from '@inlang/sdk-js'
+			import { languageTags as langs } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languages")
+		addImport(node, "@inlang/sdk-js", "languageTags")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(
-			"\"import { languages as langs, languages } from '@inlang/sdk-js';\"",
+			"\"import { languageTags as langs, languageTags } from '@inlang/sdk-js';\"",
 		)
 	})
 
@@ -204,14 +204,14 @@ describe("addImport", () => {
 	test("should check multiple import statements", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js'
-			import { languages } from '@inlang/sdk-js'
+			import { languageTags } from '@inlang/sdk-js'
 		`)
 
-		addImport(node, "@inlang/sdk-js", "languages")
+		addImport(node, "@inlang/sdk-js", "languageTags")
 
 		expect(nodeToCode(node)).toMatchInlineSnapshot(`
 			"import { i } from '@inlang/sdk-js';
-			import { languages } from '@inlang/sdk-js';"
+			import { languageTags } from '@inlang/sdk-js';"
 		`)
 	})
 
@@ -250,7 +250,7 @@ describe("findImportDeclarations", () => {
 		const node = codeToSourceFile(`
 			import { i } from '@inlang/sdk-js'
 			const x = false
-			import { languages } from '@inlang/sdk-js'
+			import { languageTags } from '@inlang/sdk-js'
 		`)
 		const result = findImportDeclarations(node, "@inlang/sdk-js")
 		expect(result).toHaveLength(2)

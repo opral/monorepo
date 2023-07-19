@@ -25,7 +25,7 @@ describe("removeHtmlLangAttribute", () => {
 		expect(markup).toBeUndefined()
 	})
 
-	it("should remove the language attribute", () => {
+	it("should remove the languageTag attribute", () => {
 		const markup = removeHtmlLangAttribute(dedent`
 			<html lang="de">
 			</html>
@@ -37,7 +37,7 @@ describe("removeHtmlLangAttribute", () => {
 		`)
 	})
 
-	it("should remove the language attribute if empty", () => {
+	it("should remove the languageTag attribute if empty", () => {
 		const markup = removeHtmlLangAttribute(dedent`
 			<html lang="">
 			</html>
@@ -49,7 +49,7 @@ describe("removeHtmlLangAttribute", () => {
 		`)
 	})
 
-	it("should remove the language attribute with placeholders", () => {
+	it("should remove the languageTag attribute with placeholders", () => {
 		const markup = removeHtmlLangAttribute(dedent`
 			<html lang="%lang%">
 			</html>

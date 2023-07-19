@@ -42,7 +42,7 @@ describe("transformPageJs", () => {
 						    initDetectors: () => [navigatorDetector],
 						    redirect: {
 						        throwable: redirect,
-						        getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
+						        getPath: ({ url }, languageTag) => replaceLanguageInUrl(new URL(url), languageTag),
 						    },
 						}).use(() => { });"
 					`)

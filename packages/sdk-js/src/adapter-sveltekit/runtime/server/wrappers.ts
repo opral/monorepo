@@ -22,7 +22,7 @@ type HandleOptions = {
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Kit.RequestEvent, language: BCP47LanguageTag) => URL | string
+		getPath: (event: Kit.RequestEvent, languageTag: BCP47LanguageTag) => URL | string
 	}
 	excludedRoutes?: RelativeUrl[]
 }
@@ -51,14 +51,14 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 					return resolve(event)
 				}
 
-				const { referenceLanguage, languages } = await initState(await options.inlangConfigModule)
+				const { sourceLanguageTag, languageTags } = await initState(await options.inlangConfigModule)
 
-				let language = options.getLanguage(event)
+				let languageTag = options.getLanguage(event)
 				// TODO: create `isLanguage` helper function
-				if (!language || !languages.includes(language)) {
+				if (!languageTag || !languageTags.includes(languageTag)) {
 					if (options.redirect) {
 						const detectedLanguage = await detectLanguage(
-							{ referenceLanguage, languages },
+							{ sourceLanguageTag, languageTags },
 							...(options.initDetectors ? options.initDetectors(event) : []),
 						)
 
@@ -68,20 +68,20 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 						)
 					}
 
-					language = undefined
+					languageTag = undefined
 				}
 
 				runtime = initSvelteKitServerRuntime({
-					referenceLanguage,
-					languages,
-					language,
+					sourceLanguageTag,
+					languageTags,
+					languageTag,
 				})
 
 				addRuntimeToLocals(event.locals, runtime)
 
 				return resolve(event, {
-					transformPageChunk: language
-						? async ({ html }) => html.replace("<html", `<html lang="${language}"`)
+					transformPageChunk: languageTag
+						? async ({ html }) => html.replace("<html", `<html lang="${languageTag}"`)
 						: undefined,
 				})
 			},
@@ -105,15 +105,15 @@ export const initRootLayoutServerLoadWrapper = <
 			async (event: Parameters<LayoutServerLoad>[0]): Promise<Data & DataPayload> => {
 				const runtime = getRuntimeFromLocals(event.locals)
 
-				// TODO: only insert if language detection strategy url is used
+				// TODO: only insert if languageTag detection strategy url is used
 				event.params.lang
 
 				return {
 					...(await load(event, runtime)),
 					"[inlang]": {
-						referenceLanguage: runtime?.referenceLanguage, // TODO: only pass this if `referenceLanguage` gets used somewhere or detection strategy is on client
-						languages: runtime?.languages, // TODO: only pass this if `languages` get used somewhere
-						language: runtime?.language, // TODO: only pass this if `language` gets detected on server
+						sourceLanguageTag: runtime?.sourceLanguageTag, // TODO: only pass this if `sourceLanguageTag` gets used somewhere or detection strategy is on client
+						languageTags: runtime?.languageTags, // TODO: only pass this if `languageTags` get used somewhere
+						languageTag: runtime?.languageTag, // TODO: only pass this if `languageTag` gets detected on server
 					},
 				}
 			},

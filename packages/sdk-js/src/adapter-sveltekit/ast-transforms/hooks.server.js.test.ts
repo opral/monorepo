@@ -25,7 +25,7 @@ describe("transformHooksServerJs", () => {
 					    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 					    redirect: {
 					        throwable: redirect,
-					        getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+					        getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 					    },
 					}).use(({ resolve, event }) => resolve(event));"
 				`)

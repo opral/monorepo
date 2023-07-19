@@ -14,15 +14,15 @@ beforeEach(async () => {
 	let ctx: ReturnType<typeof getRuntimeFromContext>
 
 	mockedFetch = vi.fn().mockImplementation(async (url) => {
-		const language = url.endsWith("de.json") ? "de" : "en"
-		return new Response(JSON.stringify(createResource(language)))
+		const languageTag = url.endsWith("de.json") ? "de" : "en"
+		return new Response(JSON.stringify(createResource(languageTag)))
 	})
 
 	runtime = await initSvelteKitClientRuntime({
 		fetch: mockedFetch,
-		language: "en",
-		languages: ["en", "de"],
-		referenceLanguage: "en",
+		languageTag: "en",
+		languageTags: ["en", "de"],
+		sourceLanguageTag: "en",
 	})
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
@@ -53,20 +53,20 @@ describe("addRuntimeToContext", () => {
 		expect(r).toBeDefined()
 	})
 
-	test("should not change anything if switchLanguage gets called with the already set language", async () => {
+	test("should not change anything if switchLanguage gets called with the already set languageTag", async () => {
 		expect(addRuntimeToContext(runtime)).toBeUndefined()
 
 		const r = getRuntimeFromContext()
 		const iBefore = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
-		expect(get(r.language)).toBe("en")
+		expect(get(r.languageTag)).toBe("en")
 
 		await r.switchLanguage("en")
 		const iAfter = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
-		expect(get(r.language)).toBe("en")
+		expect(get(r.languageTag)).toBe("en")
 		expect(iAfter).toBe(iBefore)
 	})
 
@@ -77,13 +77,13 @@ describe("addRuntimeToContext", () => {
 		const iBefore = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
-		expect(get(r.language)).toBe("en")
+		expect(get(r.languageTag)).toBe("en")
 
 		await r.switchLanguage("de")
 		const iAfter = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(2)
-		expect(get(r.language)).toBe("de")
+		expect(get(r.languageTag)).toBe("de")
 		expect(iAfter).not.toBe(iBefore)
 	})
 

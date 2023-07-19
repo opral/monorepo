@@ -8,7 +8,7 @@ describe("rootSlugDetector", () => {
 		expect(detector()).toMatchObject(["en"])
 	})
 
-	test("return first slug if found even if it is no language-code", () => {
+	test("return first slug if found even if it is no languageTag-code", () => {
 		const url = new URL("http://localhost:80/blue")
 		const detector = initRootSlugDetector(url)
 		expect(detector()).toMatchObject(["blue"])

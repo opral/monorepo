@@ -18,7 +18,7 @@ const resources = {
 }
 
 const context: RuntimeContext<string, Promise<Resource | undefined>> = {
-	readResource: (language) => Promise.resolve(resources[language as keyof typeof resources]),
+	readResource: (languageTag) => Promise.resolve(resources[languageTag as keyof typeof resources]),
 }
 
 describe("initRuntime", () => {
@@ -27,11 +27,11 @@ describe("initRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.language).toBeUndefined()
+		expect(runtime.languageTag).toBeUndefined()
 		expect(runtime.i).toBeDefined()
 
 		runtime.switchLanguage("")
-		expect(runtime.language)
+		expect(runtime.languageTag)
 	})
 })
 
@@ -41,17 +41,17 @@ describe("initBaseRuntime", () => {
 
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.switchLanguage).toBeDefined()
-		expect(runtime.language).toBeUndefined()
+		expect(runtime.languageTag).toBeUndefined()
 		expect(runtime.i).toBeDefined()
 
 		runtime.switchLanguage("")
-		expect(runtime.language).toBeDefined()
+		expect(runtime.languageTag).toBeDefined()
 	})
 
 	describe("loadResource", () => {
 		test("it should load a resource", async () => {
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
@@ -70,7 +70,7 @@ describe("initBaseRuntime", () => {
 
 		test("it should not fail if a resource was not found", async () => {
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
@@ -85,11 +85,11 @@ describe("initBaseRuntime", () => {
 
 		test("it should be able to load resources sync", async () => {
 			const context: RuntimeContext<string, Resource | undefined> = {
-				readResource: (language) => resources[language as keyof typeof resources],
+				readResource: (languageTag) => resources[languageTag as keyof typeof resources],
 			}
 
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
@@ -114,8 +114,8 @@ describe("initBaseRuntime", () => {
 			const p2 = runtime.loadResource("de")
 			const p3 = runtime.loadResource("it")
 
-			expect(p1).toBe(p2) // same language
-			expect(p1).not.toBe(p3) // different language
+			expect(p1).toBe(p2) // same languageTag
+			expect(p1).not.toBe(p3) // different languageTag
 
 			await p2
 
@@ -125,10 +125,10 @@ describe("initBaseRuntime", () => {
 
 		test("it should return the already loaded resource for multiple loadResource calls with the same params", async () => {
 			const context: RuntimeContext<string, Resource | undefined> = {
-				readResource: (language) => resources[language as keyof typeof resources],
+				readResource: (languageTag) => resources[languageTag as keyof typeof resources],
 			}
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
@@ -143,47 +143,47 @@ describe("initBaseRuntime", () => {
 	})
 
 	describe("switchLanguage", () => {
-		test("it should switch the language", () => {
+		test("it should switch the languageTag", () => {
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
 
-			expect(state.language).toBe("en")
+			expect(state.languageTag).toBe("en")
 
 			runtime.switchLanguage("fr")
 
-			expect(state.language).toBe("fr")
+			expect(state.languageTag).toBe("fr")
 		})
 	})
 
-	describe("language", () => {
-		test("it should return undefined if language was never set", () => {
+	describe("languageTag", () => {
+		test("it should return undefined if languageTag was never set", () => {
 			const runtime = initBaseRuntime(context)
 
-			expect(runtime.language).toBeUndefined()
+			expect(runtime.languageTag).toBeUndefined()
 		})
 
-		test("it should return the current language", () => {
+		test("it should return the current languageTag", () => {
 			const state = {
-				language: "en",
+				languageTag: "en",
 				resources: new Map(),
 				i: undefined,
 			} satisfies RuntimeState
 
 			const runtime = initBaseRuntime(context, state)
 
-			state.language = "de"
+			state.languageTag = "de"
 
-			expect(runtime.language).toBe("de")
+			expect(runtime.languageTag).toBe("de")
 		})
 	})
 
 	describe("i", () => {
-		test("it should not throw if language was never set", () => {
+		test("it should not throw if languageTag was never set", () => {
 			const runtime = initBaseRuntime(context)
 
 			expect(runtime.i("test")).toBe("")
@@ -199,7 +199,7 @@ describe("initBaseRuntime", () => {
 			expect(i1).toBe(i2)
 		})
 
-		test("it should return the inlang function for the current language", async () => {
+		test("it should return the inlang function for the current languageTag", async () => {
 			const runtime = initBaseRuntime(context)
 
 			await runtime.loadResource("en")
@@ -210,15 +210,15 @@ describe("initBaseRuntime", () => {
 	})
 
 	describe("should not share state between instances", () => {
-		test("language", () => {
+		test("languageTag", () => {
 			const runtime1 = initBaseRuntime(context)
 			const runtime2 = initBaseRuntime(context)
 
 			runtime1.switchLanguage("en")
 			runtime2.switchLanguage("de")
 
-			expect(runtime1.language).toBe("en")
-			expect(runtime2.language).toBe("de")
+			expect(runtime1.languageTag).toBe("en")
+			expect(runtime2.languageTag).toBe("de")
 		})
 
 		test("inlang function", async () => {
@@ -244,21 +244,21 @@ describe("initBaseRuntime", () => {
 })
 
 describe("initRuntimeWithLanguageInformation", () => {
-	test("it should create a runtime with the passed language information", async () => {
+	test("it should create a runtime with the passed languageTag information", async () => {
 		const runtime = initRuntimeWithLanguageInformation({
-			referenceLanguage: "fr",
-			languages: ["fr", "it"],
-			readResource: (language) => resources[language as keyof typeof resources],
+			sourceLanguageTag: "fr",
+			languageTags: ["fr", "it"],
+			readResource: (languageTag) => resources[languageTag as keyof typeof resources],
 		})
 
-		expect(runtime.referenceLanguage).toBe("fr")
-		expect(runtime.languages).toEqual(["fr", "it"])
+		expect(runtime.sourceLanguageTag).toBe("fr")
+		expect(runtime.languageTags).toEqual(["fr", "it"])
 		const i = runtime.i
 		expect(i).toBeDefined()
 		expect(i("")).toBe("")
 		expect(runtime.switchLanguage).toBeDefined()
 		runtime.switchLanguage("fr")
 		expect(runtime.loadResource).toBeDefined()
-		expect(runtime.language).toBe("fr")
+		expect(runtime.languageTag).toBe("fr")
 	})
 })

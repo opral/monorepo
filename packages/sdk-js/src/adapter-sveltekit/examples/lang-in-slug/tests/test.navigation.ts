@@ -10,7 +10,7 @@ const checkHeadline = async (page: Page, text: string) => {
 	expect(h1).toContain(text)
 }
 
-test("Switch languages", async ({ page }) => {
+test("Switch languageTags", async ({ page }) => {
 	// Navigate to the English About page
 	await page.goto(`${baseURL}/en/about`)
 	expect(page.url()).toBe(`${baseURL}/en/about`)
@@ -23,7 +23,7 @@ test("Switch languages", async ({ page }) => {
 	await page.click('button:text("de")')
 	await checkHeadline(page, "About page de")
 
-	// Switch to the English language
+	// Switch to the English languageTag
 	await page.click('button:text("en")')
 
 	// Navigate to the English About page
@@ -31,7 +31,7 @@ test("Switch languages", async ({ page }) => {
 	await checkHeadline(page, "About page en")
 	expect(page.url()).toBe(`${baseURL}/en/about`)
 
-	// Switch to the German language
+	// Switch to the German languageTag
 	await page.click('button:text("de")')
 	await checkHeadline(page, "About page de")
 	expect(page.url()).toBe(`${baseURL}/de/about`)
@@ -42,7 +42,7 @@ test("Switch languages", async ({ page }) => {
 	expect(page.url()).toBe(`${baseURL}/de`)
 	await checkHeadline(page, "Willkommen bei SvelteKit")
 
-	// Switch to the English language
+	// Switch to the English languageTag
 	await page.click('button:text("en")')
 	await checkHeadline(page, "Welcome to SvelteKit")
 	expect(page.url()).toBe(`${baseURL}/en`)

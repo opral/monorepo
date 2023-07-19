@@ -7,7 +7,7 @@ export const prerender = true
 
 export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	initDetectors: browser
-		? () => [initLocalStorageDetector("language"), navigatorDetector]
+		? () => [initLocalStorageDetector("languageTag"), navigatorDetector]
 		: undefined,
 }).use(async ({ data }, { i }) => {
 	console.info("+layout.ts", i("welcome"))

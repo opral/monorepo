@@ -20,7 +20,7 @@
 
 ### Patch Changes
 
-- 50fa75e2: [fix] correctly switch language in SPA mode
+- 50fa75e2: [fix] correctly switch languageTag in SPA mode
 
 ## 0.8.0
 
@@ -48,7 +48,7 @@
 
 ### Patch Changes
 
-- 785c3f4e: [feature] change language if browser back button gets pressed
+- 785c3f4e: [feature] change languageTag if browser back button gets pressed
 - 8112e300: [feature] add support for `path.base`
 
 ## 0.6.3
@@ -138,7 +138,7 @@
 ### Patch Changes
 
 - 60fe900a: [feature] detect wrong vite plugin order and throw error
-- 60fe900a: [fix] fix type of `languages` export
+- 60fe900a: [fix] fix type of `languageTags` export
 
 ## 0.3.3
 
