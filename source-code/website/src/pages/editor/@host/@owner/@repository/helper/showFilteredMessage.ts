@@ -1,11 +1,11 @@
 import type * as ast from "@inlang/core/ast"
 import { LintedMessage, getLintReports } from "@inlang/core/lint"
 import { handleMissingMessage } from "./handleMissingMessage.js"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export const showFilteredMessage = (
 	messages: Record<ast.Resource["languageTag"]["name"], LintedMessage | undefined>,
-	filteredLanguageTags: BCP47LanguageTag[],
+	filteredLanguageTags: LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
 	messageId: string,

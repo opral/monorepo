@@ -1,9 +1,9 @@
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 import type { LintReport } from "@inlang/core/lint"
 
 export const handleMissingMessage = (
 	report: LintReport,
-	filteredLanguageTags: BCP47LanguageTag[],
+	filteredLanguageTags: LanguageTag[],
 ) => {
 	if (!report.id.includes("missingMessage")) {
 		return true

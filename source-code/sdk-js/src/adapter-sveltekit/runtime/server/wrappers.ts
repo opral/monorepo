@@ -7,7 +7,7 @@ import { initSvelteKitServerRuntime, type SvelteKitServerRuntime } from "./runti
 import { addRuntimeToLocals, getRuntimeFromLocals, initState } from "./state.js"
 import { sequence } from "@sveltejs/kit/hooks"
 import type { InlangConfigModule } from "@inlang/core/config"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -18,11 +18,11 @@ type WrappedHandle = (
 
 type HandleOptions = {
 	inlangConfigModule: Promise<InlangConfigModule>
-	parseLanguageTag: (event: Kit.RequestEvent) => BCP47LanguageTag | undefined
+	parseLanguageTag: (event: Kit.RequestEvent) => LanguageTag | undefined
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Kit.RequestEvent, languageTag: BCP47LanguageTag) => URL | string
+		getPath: (event: Kit.RequestEvent, languageTag: LanguageTag) => URL | string
 	}
 	excludedRoutes?: RelativeUrl[]
 }

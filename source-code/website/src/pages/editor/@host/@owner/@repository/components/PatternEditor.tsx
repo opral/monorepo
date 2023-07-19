@@ -15,14 +15,14 @@ import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
 import { handleMissingMessage } from "./../helper/handleMissingMessage.js"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 /**
  * The pattern editor is a component that allows the user to edit the pattern of a message.
  */
 export function PatternEditor(props: {
-	sourceLanguageTag: BCP47LanguageTag
-	languageTag: BCP47LanguageTag
+	sourceLanguageTag: LanguageTag
+	languageTag: LanguageTag
 	id: ast.Message["id"]["name"]
 	sourceMessage?: ast.Message
 	message: ast.Message | undefined

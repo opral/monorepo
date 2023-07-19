@@ -5,11 +5,11 @@ import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
 import { createEffect } from "solid-js"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export const TipTapEditor = (props: {
-	sourceLanguageTag: BCP47LanguageTag
-	languageTag: BCP47LanguageTag
+	sourceLanguageTag: LanguageTag
+	languageTag: LanguageTag
 	id: ast.Message["id"]["name"]
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined

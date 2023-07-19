@@ -6,7 +6,7 @@ import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import { handleMissingMessage } from "../helper/handleMissingMessage.js"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 interface ListHeaderProps {
 	messages: Accessor<{
@@ -29,7 +29,7 @@ export const messageCount = (
 			[language: string]: LintedMessage | undefined
 		}
 	}>,
-	filteredLanguageTags: BCP47LanguageTag[],
+	filteredLanguageTags: LanguageTag[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
 	messageId: string,

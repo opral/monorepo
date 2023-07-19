@@ -5,4 +5,4 @@
  * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
  */
 // TODO improve typescript type to be a union of all valid language tags https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-export type BCP47LanguageTag = string
+export type LanguageTag = string

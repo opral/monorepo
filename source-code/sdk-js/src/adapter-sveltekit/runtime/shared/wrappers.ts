@@ -10,11 +10,11 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
-let initializedRuntime: Record<BCP47LanguageTag, SvelteKitClientRuntime> = {}
+let initializedRuntime: Record<LanguageTag, SvelteKitClientRuntime> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -46,7 +46,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
 
 	const runtime =
-		initializedRuntime[languageTag as BCP47LanguageTag] ||
+		initializedRuntime[languageTag as LanguageTag] ||
 		(await initSvelteKitClientRuntime({
 			fetch: event.fetch,
 			languageTag,
@@ -67,9 +67,9 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 export type DataPayload = {
 	"[inlang]": {
-		sourceLanguageTag: BCP47LanguageTag
-		languageTags: BCP47LanguageTag[]
-		languageTag: BCP47LanguageTag | undefined
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
+		languageTag: LanguageTag | undefined
 	}
 }
 
@@ -106,7 +106,7 @@ export const initRootPageLoadWrapper = <
 	initDetectors?: (event: Parameters<PageLoad>[0]) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Parameters<PageLoad>[0], languageTag: BCP47LanguageTag) => URL | string
+		getPath: (event: Parameters<PageLoad>[0], languageTag: LanguageTag) => URL | string
 	}
 }) => ({
 	use:
@@ -119,7 +119,7 @@ export const initRootPageLoadWrapper = <
 		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
 			const data = await event.parent()
 
-			const languageTag: BCP47LanguageTag | undefined = data.languageTag
+			const languageTag: LanguageTag | undefined = data.languageTag
 
 			if (!languageTag && options.browser) {
 				const { sourceLanguageTag, languageTags } = data

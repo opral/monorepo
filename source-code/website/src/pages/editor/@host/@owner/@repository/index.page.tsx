@@ -22,7 +22,7 @@ import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export function Page() {
 	return (
@@ -69,7 +69,7 @@ function TheActualPage() {
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
-				[language: BCP47LanguageTag]: LintedMessage | undefined
+				[language: LanguageTag]: LintedMessage | undefined
 			}
 		} = {}
 		for (const resource of resources) {

@@ -4,7 +4,7 @@ import { parseConfig } from "./parseConfig.js"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { InlangConfig } from "../config/index.js"
 import { mockEnvironment } from "../test/mockEnvironment.js"
-import type { BCP47LanguageTag } from "../languageTag/index.js"
+import type { LanguageTag } from "../languageTag/index.js"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
@@ -157,7 +157,7 @@ async function saveMessages(
 	args: Parameters<InlangConfig["saveMessages"]>[0] &
 		InlangEnvironment & { pluginConfig: PluginConfig },
 ): ReturnType<InlangConfig["saveMessages"]> {
-	const resources: Record<BCP47LanguageTag, Record<ast.Message["id"], string>> = {}
+	const resources: Record<LanguageTag, Record<ast.Message["id"], string>> = {}
 	for (const message of args.messages) {
 		if (resources[message.languageTag] === undefined) {
 			resources[message.languageTag] = {}

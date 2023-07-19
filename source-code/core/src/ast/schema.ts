@@ -1,13 +1,13 @@
 // inspired by (https://github.com/unicode-org/message-format-wg/blob/main/spec/syntax.md)
 
-import type { BCP47LanguageTag } from "../languageTag/types.js"
+import type { LanguageTag } from "../languageTag/types.js"
 
 /**
  * A message is what's rendered to a user.
  */
 export type Message = {
 	id: string
-	languageTag: BCP47LanguageTag
+	languageTag: LanguageTag
 	pattern: Array<Text | Placeholder>
 }
 

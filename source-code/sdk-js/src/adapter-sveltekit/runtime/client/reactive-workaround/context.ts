@@ -9,13 +9,13 @@ import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/
 import type * as Runtime from "../../../../runtime/index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { logDeprecation } from '../../../../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 		sourceLanguageTag: LanguageTag
@@ -36,7 +36,7 @@ export const getRuntimeFromContext = () => getRuntimeFromContextShared() as Runt
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const { languageTag, sourceLanguageTag, languageTags, i, loadResource, referenceLanguage, language, languages } = runtime
 
-	const changeLanguageTag = async (languageTag: BCP47LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
 
 		localStorage.setItem("languageTag", languageTag)

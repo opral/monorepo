@@ -5,13 +5,13 @@ import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { logDeprecation } from '../../../../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 		languageTag: Readable<LanguageTag>
@@ -30,10 +30,10 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.languageTag as BCP47LanguageTag)
+	const _language = writable(runtime.languageTag as LanguageTag)
 	const _i = writable(runtime.i)
 
-	const changeLanguageTag = async (languageTag: BCP47LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
 
 		await runtime.loadResource(languageTag)

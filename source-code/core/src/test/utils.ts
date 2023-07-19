@@ -1,7 +1,7 @@
 import type { Message } from "../ast/schema.js"
-import type { BCP47LanguageTag } from "../languageTag/index.js"
+import type { LanguageTag } from "../languageTag/index.js"
 
-export const createMessage = (id: string, languageTag: BCP47LanguageTag, text: string) =>
+export const createMessage = (id: string, languageTag: LanguageTag, text: string) =>
 	({ id, languageTag, pattern: [
 		{
 			type: "Text",

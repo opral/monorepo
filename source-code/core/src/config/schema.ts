@@ -3,7 +3,7 @@ import type { InlangEnvironment } from "../environment/types.js"
 import type { LintRule } from "../lint/rule.js"
 import type { Plugin, PluginSetupFunction } from "../plugin/types.js"
 import type { IdeExtensionConfigSchema } from "./ideExtension/schema.js"
-import type { BCP47LanguageTag } from "../languageTag/index.js"
+import type { LanguageTag } from "../languageTag/index.js"
 
 /**
  * The entrypoint for inlang.
@@ -37,11 +37,11 @@ export type InlangConfig = {
 	/**
 	 * The source language tag in this project.
 	 */
-	sourceLanguageTag: BCP47LanguageTag
+	sourceLanguageTag: LanguageTag
 	/**
 	 * Available language tags in this project.
 	 */
-	languageTags: BCP47LanguageTag[]
+	languageTags: LanguageTag[]
 
 	// TODO: should be defined in plugin api? https://github.com/inlang/inlang/issues/1140
 	loadMessages: (args: { config: InlangConfig }) => Promise<ast.Message[]>
