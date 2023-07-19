@@ -66,11 +66,7 @@ it("should apply referenceLanguage and languages to sourceLanguageTag and langua
 	})
 	expect(exception).toBeUndefined()
 	expect(config.sourceLanguageTag).toBe("en")
-	expect(config.languageTags).toEqual(["de", "en"])
-	// @ts-expect-error - testing a breaking change
-	expect(config.referenceLanguage).toBeUndefined()
-	// @ts-expect-error - testing a breaking change
-	expect(config.languages).toBeUndefined()
+	expect(config.languageTags).toEqual(["en", "de"])
 })
 
 // TODO prints an error to the console which is annoying when running tests
@@ -103,7 +99,7 @@ export async function mockDefineConfig(env: InlangEnvironment): Promise<InlangCo
 	return {
 		sourceLanguageTag: "en",
 		languageTags: ["en", "de"],
-		getMessages: (args) => getMessages({ ...args, ...env, pluginConfig }),
+		loadMessages: (args) => loadMessages({ ...args, ...env, pluginConfig }),
 		saveMessages: (args) => saveMessages({ ...args, ...env, pluginConfig }),
 	}
 }
@@ -129,12 +125,12 @@ type PluginConfig = {
  * The function merges the args from Config['readResources'] with the pluginConfig
  * and EnvironmentFunctions.
  */
-async function getMessages(
+async function loadMessages(
 	// merging the first argument from config (which contains all arguments)
 	// with the custom pluginConfig argument
-	args: Parameters<InlangConfig["getMessages"]>[0] &
+	args: Parameters<InlangConfig["loadMessages"]>[0] &
 		InlangEnvironment & { pluginConfig: PluginConfig },
-): ReturnType<InlangConfig["getMessages"]> {
+): ReturnType<InlangConfig["loadMessages"]> {
 	const result: ast.Message[] = []
 	for (const languageTag of args.config.languageTags) {
 		const resourcePath = args.pluginConfig.pathPattern.replace("{language}", languageTag)
