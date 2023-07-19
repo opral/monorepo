@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { Message } from "../ast/zod.js"
 import { zodIdeExtensionConfigSchema } from "./ideExtension/zodSchema.js"
-import type { BCP47LanguageTag } from "../languageTag/types.js"
+import type { LanguageTag } from "../languageTag/types.js"
 
 /**
  * The zod schema for the config.
@@ -13,7 +13,7 @@ import type { BCP47LanguageTag } from "../languageTag/types.js"
 export const zConfig = z.object({
 	sourceLanguageTag: z
 		.string()
-		.transform((value) => value as BCP47LanguageTag)
+		.transform((value) => value as LanguageTag)
 		// optional as long as interop with old configs is required
 		.optional(),
 	languageTags: z

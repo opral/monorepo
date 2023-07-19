@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest"
 import { initSessionStorageDetector, sessionStorageDetector } from "./sessionStorageDetector.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 
-const languageTag = "fr" satisfies BCP47LanguageTag
+const languageTag = "fr" satisfies LanguageTag
 
 const storage = {
 	languageTag,

@@ -7,11 +7,11 @@ import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { logDeprecation } from '../../../../utils.js'
 
 type RuntimeContext<
-	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 		sourceLanguageTag: LanguageTag
@@ -32,7 +32,7 @@ export const getRuntimeFromContext = () => getRuntimeFromContextShared() as Runt
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const { languageTag, sourceLanguageTag, languageTags, i, loadResource, referenceLanguage, language, languages } = runtime
 
-	const changeLanguageTag = async (languageTag: BCP47LanguageTag) => {
+	const changeLanguageTag = async (languageTag: LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
 
 		return goto(replaceLanguageInUrl(get(page).url, languageTag), { invalidateAll: true })
@@ -45,7 +45,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		i,
 		loadResource,
 		changeLanguageTag,
-		route: route.bind(undefined, languageTag as BCP47LanguageTag),
+		route: route.bind(undefined, languageTag as LanguageTag),
 		referenceLanguage,
 		language: language!,
 		languages,
@@ -56,7 +56,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-const route = (languageTag: BCP47LanguageTag, href: RelativeUrl) => {
+const route = (languageTag: LanguageTag, href: RelativeUrl) => {
 	if (!href.startsWith("/")) return href as RelativeUrl
 
 	const url = `/${languageTag}${href}`

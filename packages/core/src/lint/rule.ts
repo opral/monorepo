@@ -1,6 +1,6 @@
 import type { InlangConfig } from "../config/index.js"
 import type * as ast from "../ast/index.js"
-import type { BCP47LanguageTag } from "../languageTag/types.js"
+import type { LanguageTag } from "../languageTag/types.js"
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
@@ -24,7 +24,7 @@ export type LintReport = {
 	ruleId: LintRule["id"]
 	level: LintRule["level"]
 	messageId: ast.Message["id"]
-	languageTag: BCP47LanguageTag
+	languageTag: LanguageTag
 	content: string
 }
 

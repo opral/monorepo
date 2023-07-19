@@ -4,7 +4,7 @@ import type { RequestEvent } from "@sveltejs/kit"
 import { initConfig } from "../../../config/config.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 let config: InlangConfig
 
@@ -43,7 +43,7 @@ let _resources: Resource[] = []
 // TODO: fix resources if needed (add missing Keys, etc.)
 export const reloadResources = async () => (_resources = await config.readResources({ config }))
 
-export const getResource = (languageTag: BCP47LanguageTag) =>
+export const getResource = (languageTag: LanguageTag) =>
 	_resources.find(({ languageTag: { name } }) => name === languageTag)
 
 // ------------------------------------------------------------------------------------------------

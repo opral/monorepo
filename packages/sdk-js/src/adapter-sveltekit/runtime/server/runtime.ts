@@ -1,11 +1,11 @@
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import { getResource } from "./index.js"
 
 type InitSvelteKitServerRuntimeArgs = {
-	sourceLanguageTag: BCP47LanguageTag
-	languageTags: BCP47LanguageTag[]
-	languageTag: BCP47LanguageTag | undefined
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	languageTag: LanguageTag | undefined
 }
 
 export const initSvelteKitServerRuntime = ({
@@ -14,7 +14,7 @@ export const initSvelteKitServerRuntime = ({
 	languageTags,
 }: InitSvelteKitServerRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: (languageTag: BCP47LanguageTag) => getResource(languageTag),
+		readResource: (languageTag: LanguageTag) => getResource(languageTag),
 		sourceLanguageTag,
 		languageTags,
 	})

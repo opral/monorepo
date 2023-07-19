@@ -1,4 +1,4 @@
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import type { Detector } from "./types.js"
 
 /**
@@ -12,7 +12,7 @@ import type { Detector } from "./types.js"
  */
 export const matchLanguageTag = (
 	detectedLanguageTags: ReturnType<Detector>,
-	languageTags: BCP47LanguageTag[],
+	languageTags: LanguageTag[],
 	allowRelated = true,
 ) => {
 	for (const detectedLanguageTag of detectedLanguageTags) {

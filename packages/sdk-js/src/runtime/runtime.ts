@@ -6,7 +6,7 @@ import {
 	type InlangFunction,
 	type InlangString,
 } from "./inlang-function.js"
-import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { logDeprecation } from '../utils.js'
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>
@@ -17,7 +17,7 @@ const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 type MaybePromise<T> = T | Promise<T>
 
 export type RuntimeContext<
-	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends LanguageTag = LanguageTag,
 	ReadResourcesMaybePromise extends
 	| (Ast.Resource | undefined)
 	| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
@@ -25,14 +25,14 @@ export type RuntimeContext<
 		readResource: (languageTag: LanguageTag) => ReadResourcesMaybePromise
 }
 
-export type RuntimeState<LanguageTag extends BCP47LanguageTag = BCP47LanguageTag> = {
+export type RuntimeState<LanguageTag extends LanguageTag = LanguageTag> = {
 	resources: Map<LanguageTag, Ast.Resource>
 	languageTag: LanguageTag | undefined
 	i: InlangFunction<any> | undefined
 }
 
 export const initRuntime = <
-	LanguageTag extends BCP47LanguageTag,
+	LanguageTag extends LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
@@ -42,7 +42,7 @@ export const initRuntime = <
 export type Runtime = ReturnType<typeof initRuntime>
 
 export const initBaseRuntime = <
-	LanguageTag extends BCP47LanguageTag,
+	LanguageTag extends LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
@@ -127,7 +127,7 @@ export const initBaseRuntime = <
 }
 
 export const initRuntimeWithLanguageInformation = <
-	LanguageTag extends BCP47LanguageTag,
+	LanguageTag extends LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(

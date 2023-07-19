@@ -1,1 +1,1 @@
-export { BCP47LanguageTag } from "./types.js"
+export { LanguageTag } from "./types.js"

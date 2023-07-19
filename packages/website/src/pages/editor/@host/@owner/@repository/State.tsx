@@ -28,7 +28,7 @@ import { publicEnv } from "@inlang/env-variables"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { parseOrigin } from "@inlang/telemetry"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import type { BCP47LanguageTag } from "@inlang/core/languageTag"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export type LocalChange = {
 	languageTag: ast.Resource["languageTag"]
@@ -107,10 +107,10 @@ type EditorStateSchema = {
 
 	doesInlangConfigExist: () => boolean
 
-	sourceLanguageTag: () => BCP47LanguageTag | undefined
+	sourceLanguageTag: () => LanguageTag | undefined
 
-	languageTags: () => BCP47LanguageTag[]
-	setLanguageTags: Setter<BCP47LanguageTag[]>
+	languageTags: () => LanguageTag[]
+	setLanguageTags: Setter<LanguageTag[]>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -120,8 +120,8 @@ type EditorStateSchema = {
 	/**
 	 * FilterLanguages show or hide the different messages.
 	 */
-	filteredLanguageTags: () => BCP47LanguageTag[]
-	setFilteredLanguageTags: Setter<BCP47LanguageTag[]>
+	filteredLanguageTags: () => LanguageTag[]
+	setFilteredLanguageTags: Setter<LanguageTag[]>
 
 	/**
 	 * Filtered lint rules.
@@ -207,8 +207,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [doesInlangConfigExist, setDoesInlangConfigExist] = createSignal<boolean>(false)
 	const [lint, setLint] = createSignal<InlangConfig["lint"]>()
-	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<BCP47LanguageTag>()
-	const [languageTags, setLanguageTags] = createSignal<BCP47LanguageTag[]>([])
+	const [sourceLanguageTag, setSourceLanguageTag] = createSignal<LanguageTag>()
+	const [languageTags, setLanguageTags] = createSignal<LanguageTag[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
 
 	//set filter with search params
@@ -224,7 +224,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "search", value: textSearch() })
 	})
 
-	const [filteredLanguageTags, setFilteredLanguageTags] = createSignal<BCP47LanguageTag[]>(
+	const [filteredLanguageTags, setFilteredLanguageTags] = createSignal<LanguageTag[]>(
 		params.getAll("lang") as string[],
 	)
 	createEffect(() => {
