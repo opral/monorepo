@@ -80,19 +80,21 @@ const socialMediaLinks = [
 ]
 
 function Header(props: { landingpage?: boolean }) {
-	const links = [
-		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
-		{
-			name: "Feedback",
-			href: "https://github.com/inlang/inlang/discussions",
-			type: "text" as buttonType,
-		},
-	]
+	const getLinks = () => {
+		return [
+			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
+			{ name: `${t("header.link.docs")}`, href: "/documentation", type: "text" as buttonType },
+			{
+				name: `${t("header.link.feedback")}`,
+				href: "https://github.com/inlang/inlang/discussions",
+				type: "text" as buttonType,
+			},
+		]
+	}
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
-	const [, { locale }] = useI18n()
+	const [t, { locale }] = useI18n()
 
 	const getLocale = () => {
 		const language = locale() || defaultLanguage
@@ -130,7 +132,7 @@ function Header(props: { landingpage?: boolean }) {
 											)}
 										</For>
 									</div>
-									<For each={links}>
+									<For each={getLinks()}>
 										{(link) => (
 											<Button type={link.type} href={link.href}>
 												{link.name}
@@ -148,7 +150,7 @@ function Header(props: { landingpage?: boolean }) {
 									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
-											Open Editor
+											{t("header.openEditor")}
 										</Button>
 									</Show>
 									{/* not overwhelming the user by only showing login button when not on landig page */}
@@ -180,7 +182,7 @@ function Header(props: { landingpage?: boolean }) {
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
 							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
-								<For each={links}>
+								<For each={getLinks()}>
 									{(link) => (
 										<sl-tree>
 											<a
@@ -202,37 +204,69 @@ function Header(props: { landingpage?: boolean }) {
 	)
 }
 
-const docLinks = [
-	{ name: "Getting Started", href: "/documentation/quick-start", type: "text" as buttonType },
-	{ name: "Why inlang", href: "/documentation", type: "text" as buttonType },
-	{ name: "Contribute", href: "/documentation/contributing", type: "text" as buttonType },
-]
-const resourceLinks = [
-	{ name: "Blog", href: "/blog", type: "text" as buttonType },
-	{
-		name: "Roadmap",
-		href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
-		type: "text" as buttonType,
-	},
-	{ name: "Github", href: "https://github.com/inlang/inlang", type: "text" as buttonType },
-	{ name: "Twitter", href: "https://twitter.com/inlangHQ", type: "text" as buttonType },
-	{ name: "Discord", href: "https://discord.gg/gdMPPWy57R", type: "text" as buttonType },
-]
-const contactLinks = [
-	{ name: "Get in Touch", href: "mailto:hello@inlang.com", type: "text" as buttonType },
-	{
-		name: "Join the Team",
-		href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
-		type: "text" as buttonType,
-	},
-	{
-		name: "Feedback",
-		href: "https://github.com/inlang/inlang/discussions/categories/feedback",
-		type: "text" as buttonType,
-	},
-]
-
 const Footer = (props: { isLandingPage: boolean }) => {
+	const [t] = useI18n()
+
+	const getDocLinks = () => {
+		return [
+			{
+				name: `${t("footer.docs.gettingStarted")}`,
+				href: "/documentation/quick-start",
+				type: "text" as buttonType,
+			},
+			{ name: `${t("footer.docs.whyInlang")}`, href: "/documentation", type: "text" as buttonType },
+			{
+				name: `${t("footer.docs.contribute")}`,
+				href: "/documentation/contributing",
+				type: "text" as buttonType,
+			},
+		]
+	}
+	const getResourceLinks = () => {
+		return [
+			{ name: `${t("footer.resources.blog")}`, href: "/blog", type: "text" as buttonType },
+			{
+				name: `${t("footer.resources.roadmap")}`,
+				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.github")}`,
+				href: "https://github.com/inlang/inlang",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.twitter")}`,
+				href: "https://twitter.com/inlangHQ",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.discord")}`,
+				href: "https://discord.gg/gdMPPWy57R",
+				type: "text" as buttonType,
+			},
+		]
+	}
+	const getContactLinks = () => {
+		return [
+			{
+				name: `${t("footer.contact.getInTouch")}`,
+				href: "mailto:hello@inlang.com",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.contact.join")}`,
+				href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.contact.feedback")}`,
+				href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+				type: "text" as buttonType,
+			},
+		]
+	}
+
 	return (
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
@@ -244,8 +278,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</a>
 					</div>
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Docs</p>
-						<For each={docLinks}>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.docs.title")}</p>
+						<For each={getDocLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -256,8 +290,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Resources</p>
-						<For each={resourceLinks}>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
+						<For each={getResourceLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -268,8 +302,8 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</For>
 					</div>
 					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Let's talk</p>
-						<For each={contactLinks}>
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.contact.title")}</p>
+						<For each={getContactLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -309,6 +343,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 const Newsletter = () => {
 	const [email, setEmail] = createSignal("")
 	const [loading, setLoading] = createSignal(false)
+	const [t] = useI18n()
 
 	const fetchSubscriber = async (email: any) => {
 		setLoading(true)
@@ -317,19 +352,19 @@ const Newsletter = () => {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "You are already subscribed to our newsletter.",
+				message: `${t("footer.newsletter.error.alreadySubscribed")}`,
 			})
 		} else if (response === "success") {
 			showToast({
 				title: "Success",
 				variant: "success",
-				message: "You have been subscribed to our newsletter.",
+				message: `${t("footer.newsletter.success")}`,
 			})
 		} else {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Something went wrong. Please try again later.",
+				message: `${t("footer.newsletter.error.generic")}`,
 			})
 		}
 
@@ -357,14 +392,14 @@ const Newsletter = () => {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter an email address.",
+				message: `${t("footer.newsletter.error.emptyEmail")}`,
 			})
 			return
 		} else if (checkEmail(emailValue) === "invalid") {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please enter a valid email address.",
+				message: `${t("footer.newsletter.error.invalidEmail")}`,
 			})
 			return
 		}
@@ -374,7 +409,7 @@ const Newsletter = () => {
 
 	return (
 		<div class="flex flex-col items-start justify-center w-full mr-10 max-xl:mb-8">
-			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
+			<p class="text-surface-800 font-semibold mb-3">{t("footer.newsletter.title")}</p>
 			<div
 				class={
 					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
@@ -384,7 +419,7 @@ const Newsletter = () => {
 				<sl-input
 					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
 					prop:size={"medium"}
-					prop:placeholder="E-Mail"
+					prop:placeholder={t("footer.newsletter.placeholder")}
 					// @ts-ignore
 					value={email()}
 					onInput={(event) => {
@@ -409,7 +444,7 @@ const Newsletter = () => {
 					}
 					onClick={handleSubscribe}
 				>
-					Subscribe
+					{t("footer.newsletter.button")}
 				</button>
 			</div>
 		</div>
