@@ -1,31 +1,20 @@
 import { createLintRule } from "./createLintRule.js"
 import { expectType } from "tsd"
 
-const rule = createLintRule({
+const rule = createLintRule(() => ({
 	id: "example.rule",
-	setup: ({ settings }) => {
-		expectType<undefined>(settings)
-		return {
-			visitors: {
-				Resource: () => undefined,
-			},
-		}
-	},
-})
+	message: () => undefined,
+}))
 
-const ruleWithSettings = createLintRule<{ strict: boolean }>({
-	id: "example.rule",
-	setup: ({ settings }) => {
-		// if settings is defined, it must be an object
-		expectType<object>(settings)
-		// if settings is defined, it must have a strict property
-		expectType<boolean>(settings.strict)
-		return {
-			visitors: {
-				Resource: () => undefined,
-			},
-		}
-	},
+const ruleWithSettings = createLintRule<{ strict: boolean }>((settings) => {
+	// if settings is defined, it must be an object
+	expectType<object>(settings)
+	// if settings is defined, it must have a strict property
+	expectType<boolean>(settings.strict)
+	return {
+		id: "example.rule",
+		message: () => undefined,
+	}
 })
 
 // ------------------------ TESTS ------------------------
