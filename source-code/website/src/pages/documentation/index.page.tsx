@@ -212,7 +212,8 @@ function NavbarCommon(props: {
 																		href={`#${heading
 																			.toString()
 																			.toLowerCase()
-																			.replaceAll(" ", "-")}`}
+																			.replaceAll(" ", "-")
+																			.replaceAll("/", "")}`}
 																	>
 																		{heading}
 																	</a>
