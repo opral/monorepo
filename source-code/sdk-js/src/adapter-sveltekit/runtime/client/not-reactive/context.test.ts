@@ -50,10 +50,10 @@ describe("addRuntimeToContext", () => {
 		expect(r).toBeDefined()
 	})
 
-	test("should make a page navigation if switchLanguage gets called", async () => {
+	test("should make a page navigation if changeLanguageTag gets called", async () => {
 		const r = getRuntimeFromContext()
 
-		await r.switchLanguage("de")
+		await r.changeLanguageTag("de")
 
 		const mockedReplaceLanguageInUrl = vi.mocked(sharedUtils.replaceLanguageInUrl)
 		expect(mockedReplaceLanguageInUrl).toHaveBeenCalledOnce()
@@ -64,10 +64,10 @@ describe("addRuntimeToContext", () => {
 		expect(mockedGoto).toHaveBeenCalledWith(undefined, { invalidateAll: true })
 	})
 
-	test("should not make a page navigation if switchLanguage gets called with the already set languageTag", async () => {
+	test("should not make a page navigation if changeLanguageTag gets called with the already set languageTag", async () => {
 		const r = getRuntimeFromContext()
 
-		await r.switchLanguage("en")
+		await r.changeLanguageTag("en")
 
 		const mockedGoto = vi.mocked(navigation.goto)
 		expect(mockedGoto).not.toHaveBeenCalled()

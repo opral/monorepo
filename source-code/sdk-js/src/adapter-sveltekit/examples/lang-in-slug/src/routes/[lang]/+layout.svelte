@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getRuntimeFromContext } from "@inlang/sdk-js/adapter-sveltekit/client/not-reactive"
 
-	const { i, languageTags, route, loadResource, switchLanguage } = getRuntimeFromContext()
+	const { i, languageTags, route, loadResource, changeLanguageTag } = getRuntimeFromContext()
 
 	$: console.info("[lang]/+layout.svelte", i("welcome"))
 </script>
@@ -10,7 +10,7 @@
 	<button
 		on:mouseover={() => loadResource(languageTag)}
 		on:focus={() => loadResource(languageTag)}
-		on:click={() => switchLanguage(languageTag)}>{languageTag}</button
+		on:click={() => changeLanguageTag(languageTag)}>{languageTag}</button
 	>
 {/each}
 

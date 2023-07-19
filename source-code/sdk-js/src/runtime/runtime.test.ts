@@ -26,11 +26,11 @@ describe("initRuntime", () => {
 		const runtime = initRuntime(context)
 
 		expect(runtime.loadResource).toBeDefined()
-		expect(runtime.switchLanguage).toBeDefined()
+		expect(runtime.changeLanguageTag).toBeDefined()
 		expect(runtime.languageTag).toBeUndefined()
 		expect(runtime.i).toBeDefined()
 
-		runtime.switchLanguage("")
+		runtime.changeLanguageTag("")
 		expect(runtime.languageTag)
 	})
 })
@@ -40,11 +40,11 @@ describe("initBaseRuntime", () => {
 		const runtime = initBaseRuntime(context)
 
 		expect(runtime.loadResource).toBeDefined()
-		expect(runtime.switchLanguage).toBeDefined()
+		expect(runtime.changeLanguageTag).toBeDefined()
 		expect(runtime.languageTag).toBeUndefined()
 		expect(runtime.i).toBeDefined()
 
-		runtime.switchLanguage("")
+		runtime.changeLanguageTag("")
 		expect(runtime.languageTag).toBeDefined()
 	})
 
@@ -142,7 +142,7 @@ describe("initBaseRuntime", () => {
 		})
 	})
 
-	describe("switchLanguage", () => {
+	describe("changeLanguageTag", () => {
 		test("it should switch the languageTag", () => {
 			const state = {
 				languageTag: "en",
@@ -154,7 +154,7 @@ describe("initBaseRuntime", () => {
 
 			expect(state.languageTag).toBe("en")
 
-			runtime.switchLanguage("fr")
+			runtime.changeLanguageTag("fr")
 
 			expect(state.languageTag).toBe("fr")
 		})
@@ -192,7 +192,7 @@ describe("initBaseRuntime", () => {
 		test("it should not create multiple instances", async () => {
 			const runtime = initBaseRuntime(context)
 			await runtime.loadResource("de")
-			runtime.switchLanguage("de")
+			runtime.changeLanguageTag("de")
 
 			const i1 = runtime.i
 			const i2 = runtime.i
@@ -203,7 +203,7 @@ describe("initBaseRuntime", () => {
 			const runtime = initBaseRuntime(context)
 
 			await runtime.loadResource("en")
-			runtime.switchLanguage("en")
+			runtime.changeLanguageTag("en")
 
 			expect(runtime.i("hello")).toBe("world")
 		})
@@ -214,8 +214,8 @@ describe("initBaseRuntime", () => {
 			const runtime1 = initBaseRuntime(context)
 			const runtime2 = initBaseRuntime(context)
 
-			runtime1.switchLanguage("en")
-			runtime2.switchLanguage("de")
+			runtime1.changeLanguageTag("en")
+			runtime2.changeLanguageTag("de")
 
 			expect(runtime1.languageTag).toBe("en")
 			expect(runtime2.languageTag).toBe("de")
@@ -226,16 +226,16 @@ describe("initBaseRuntime", () => {
 			const runtime2 = initBaseRuntime(context)
 
 			await runtime1.loadResource("de")
-			runtime1.switchLanguage("de")
+			runtime1.changeLanguageTag("de")
 
 			await runtime2.loadResource("fr")
-			runtime2.switchLanguage("fr")
+			runtime2.changeLanguageTag("fr")
 
 			expect(runtime1.i("hello")).toBe("Welt")
 			expect(runtime2.i("hello")).toBe("monde")
 
-			runtime1.switchLanguage("fr")
-			runtime2.switchLanguage("de")
+			runtime1.changeLanguageTag("fr")
+			runtime2.changeLanguageTag("de")
 
 			expect(runtime1.i("hello")).toBe("")
 			expect(runtime2.i("hello")).toBe("")
@@ -256,8 +256,8 @@ describe("initRuntimeWithLanguageInformation", () => {
 		const i = runtime.i
 		expect(i).toBeDefined()
 		expect(i("")).toBe("")
-		expect(runtime.switchLanguage).toBeDefined()
-		runtime.switchLanguage("fr")
+		expect(runtime.changeLanguageTag).toBeDefined()
+		runtime.changeLanguageTag("fr")
 		expect(runtime.loadResource).toBeDefined()
 		expect(runtime.languageTag).toBe("fr")
 	})

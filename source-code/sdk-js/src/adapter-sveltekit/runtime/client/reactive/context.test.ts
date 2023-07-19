@@ -53,7 +53,7 @@ describe("addRuntimeToContext", () => {
 		expect(r).toBeDefined()
 	})
 
-	test("should not change anything if switchLanguage gets called with the already set languageTag", async () => {
+	test("should not change anything if changeLanguageTag gets called with the already set languageTag", async () => {
 		expect(addRuntimeToContext(runtime)).toBeUndefined()
 
 		const r = getRuntimeFromContext()
@@ -62,7 +62,7 @@ describe("addRuntimeToContext", () => {
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
 		expect(get(r.languageTag)).toBe("en")
 
-		await r.switchLanguage("en")
+		await r.changeLanguageTag("en")
 		const iAfter = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
@@ -70,7 +70,7 @@ describe("addRuntimeToContext", () => {
 		expect(iAfter).toBe(iBefore)
 	})
 
-	test("should change the runtime values if switchLanguage gets called", async () => {
+	test("should change the runtime values if changeLanguageTag gets called", async () => {
 		expect(addRuntimeToContext(runtime)).toBeUndefined()
 
 		const r = getRuntimeFromContext()
@@ -79,7 +79,7 @@ describe("addRuntimeToContext", () => {
 		expect(mockedFetch).toHaveBeenCalledTimes(1)
 		expect(get(r.languageTag)).toBe("en")
 
-		await r.switchLanguage("de")
+		await r.changeLanguageTag("de")
 		const iAfter = get(r.i)
 
 		expect(mockedFetch).toHaveBeenCalledTimes(2)
@@ -97,7 +97,7 @@ describe("addRuntimeToContext", () => {
 		await r.loadResource("de")
 		expect(mockedFetch).toHaveBeenCalledTimes(2)
 
-		await r.switchLanguage("de")
+		await r.changeLanguageTag("de")
 
 		expect(mockedFetch).toHaveBeenCalledTimes(2)
 	})

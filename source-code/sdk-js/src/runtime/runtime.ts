@@ -7,6 +7,7 @@ import {
 	type InlangString,
 } from "./inlang-function.js"
 import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import { logDeprecation } from '../utils.js'
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>
 	!!p && typeof p === "object" && typeof (p as Promise<T>).then === "function"
@@ -89,7 +90,7 @@ export const initBaseRuntime = <
 		return promise
 	}
 
-	const switchLanguage = (languageTag: LanguageTag) => {
+	const changeLanguageTag = (languageTag: LanguageTag) => {
 		state.languageTag = languageTag
 		state.i = undefined
 	}
@@ -105,12 +106,17 @@ export const initBaseRuntime = <
 
 	return {
 		loadResource,
-		switchLanguage,
+		changeLanguageTag,
 		get languageTag() {
 			return state.languageTag
 		},
 		get i() {
 			return getInlangFunction()
+		},
+		/** @deprecated Use `changeLanguageTag` instead. */
+		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
+			logDeprecation('switchLanguage', 'changeLanguageTag')
+			return changeLanguageTag(...args)
 		},
 		/** @deprecated Use `languageTag` instead. */
 		get language() {
@@ -147,8 +153,8 @@ export const initRuntimeWithLanguageInformation = <
 			return context.languageTags
 		},
 		/** @deprecated Use `languageTag` instead. */
-		get language() {
-			return runtime.language
+		get language(): LanguageTag | undefined {
+			return this.languageTag
 		},
 		/** @deprecated Use `sourceLanguageTag` instead. */
 		get referenceLanguage(): LanguageTag {
@@ -162,6 +168,3 @@ export const initRuntimeWithLanguageInformation = <
 		},
 	}
 }
-
-const logDeprecation = (oldName: string, newName: string) =>
-	console.warn(`[INLANG:DEPRECATED] '${oldName}' is deprecated. Use '${newName}' instead.`)
