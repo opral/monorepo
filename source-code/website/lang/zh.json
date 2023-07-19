@@ -1,0 +1,120 @@
+{
+	"landing": {
+		"hero": {
+			"keyword": "全球化",
+			"title": "软件基础设施",
+			"cta": "开始使用",
+			"description": {
+				"inlangs": "英朗的",
+				"ecosystem": "生态系统",
+				"benefit": "使您的应用程序能够轻松适应不同的市场。"
+			},
+			"githubLink": "在 GitHub 上查看",
+			"usedBy": "由开发人员使用"
+		},
+		"integration": {
+			"caption": "技术堆栈不可知",
+			"title": "集成到任何代码库中",
+			"description": "Inlang 被设计为与堆栈无关。开发人员可以编写自己的插件，或者依靠插件生态系统，使 inlang 适应他们的技术堆栈（React、Flutter、iOS、Python 等）。",
+			"tooltip": "新的SDK"
+		},
+		"config": {
+			"editor": {
+				"title": "网页编辑器",
+				"description": "无代码编辑器来管理您的翻译。",
+				"benefit1": "翻译人员无需接触代码",
+				"benefit2": "推送接口",
+				"benefit3": "没有同步管道和额外帐户"
+			},
+			"extension": {
+				"title": "IDE扩展",
+				"description": "通过扩展直接在 VSCode 中处理翻译。",
+				"benefit1": "从代码中提取消息",
+				"benefit2": "键后面的内联注释",
+				"benefit3": "自动更新同步资源"
+			},
+			"cli": {
+				"title": "语言命令行界面",
+				"description": "CLI 与 inlang 的基础设施进行交互。",
+				"benefit1": "自动执行本地化任务 (CI/CD)",
+				"benefit2": "检查您的翻译",
+				"benefit3": "机器翻译您的资源"
+			},
+			"title": {
+				"multiple": "多种的",
+				"apps": "应用",
+				"plugins": "插件",
+				"config": "配置",
+				"endless": "，无穷无尽",
+				"one": "， 一"
+			}
+		},
+		"pricing": {
+			"title": "免费供个人使用且开源",
+			"caption": "价钱",
+			"description": "Inlang 是一种商业产品。但是，个人使用和开源仍然免费。我们将个人使用视为良好的“营销”，有助于我们获取企业客户。",
+			"free": {
+				"name": "自由的",
+				"title": "个人和开源",
+				"amount": "$0"
+			},
+			"paid": {
+				"name": "有薪酬的",
+				"title": "企业",
+				"amount": "很快"
+			}
+		},
+		"getstarted": {
+			"caption": "将 inlang 添加到您的项目中",
+			"title": "让您的软件全球化",
+			"description": "在您的代码库中设置 inlang 并开始使用 IDE 扩展、CLI 和 Web 编辑器。",
+			"button": "开始使用",
+			"toast": {
+				"text": "已将命令复制到剪贴板",
+				"tooltip": "复制"
+			}
+		}
+	},
+	"header": {
+		"openEditor": "打开编辑器",
+		"link": {
+			"blog": "博客",
+			"docs": "文档",
+			"feedback": "反馈"
+		}
+	},
+	"footer": {
+		"docs": {
+			"title": "文档",
+			"gettingStarted": "入门",
+			"whyInlang": "为什么是英朗？",
+			"contribute": "贡献"
+		},
+		"resources": {
+			"title": "资源",
+			"blog": "博客",
+			"roadmap": "路线图",
+			"github": "GitHub",
+			"twitter": "推特",
+			"discord": "不和谐"
+		},
+		"contact": {
+			"title": "我们来谈谈",
+			"getInTouch": "保持联系",
+			"join": "加入团队",
+			"feedback": "反馈"
+		},
+		"newsletter": {
+			"title": "通讯",
+			"placeholder": "输入你的电子邮箱 ...",
+			"button": "订阅",
+			"error": {
+				"invalidEmail": "请输入有效的电子邮件地址。",
+				"emptyEmail": "请输入您的电子邮件地址。",
+				"alreadySubscribed": "您已经订阅了我们的时事通讯。",
+				"generic": "出了些问题。请稍后再试。"
+			},
+			"success": "感谢您的订阅！"
+		}
+	}
+}
