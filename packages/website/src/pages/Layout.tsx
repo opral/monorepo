@@ -531,6 +531,10 @@ function LanguagePicker() {
 			code: "de",
 			name: "Deutsch",
 		},
+		{
+			code: "zh",
+			name: "中文",
+		},
 	]
 
 	const handleSwitchTransltion = (language: { code: string; name: string }) => {
@@ -550,7 +554,7 @@ function LanguagePicker() {
 				<sl-dropdown>
 					<div
 						slot="trigger"
-						class="flex items-center cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
+						class="cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
 					>
 						<p>{locale().toUpperCase()}</p>
 						<IconExpand class="w-5 h-5 opacity-50" />
