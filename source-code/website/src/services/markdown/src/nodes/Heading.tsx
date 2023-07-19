@@ -73,8 +73,11 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 					? typeof element === "object" && element instanceof HTMLDivElement
 						? element.innerText
 								?.toString()
-								.replaceAll(" ", "-")
 								.replace("#", "")
+								.replaceAll("/", "")
+								.replaceAll(/\(.*?\)/g, "")
+								.replaceAll(" ", "-")
+								.replace(/-$/, "")
 								.toLowerCase()
 								.trim() // Trim the value to remove any leading/trailing whitespace
 						: ""
@@ -96,7 +99,10 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 									element?.innerText
 										?.toString()
 										.replaceAll(" ", "-")
+										.replaceAll("/", "")
+										.replaceAll(/\(.*?\)/g, "")
 										.replaceAll("#", "")
+										.replace(/-$/, "")
 										.toLowerCase()) as string,
 						  )
 						: copy(
@@ -104,7 +110,11 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 									document.location.host +
 									document.location.pathname +
 									"#" +
-									props.children?.toString().replaceAll(" ", "-").toLowerCase()) as string,
+									props.children
+										?.toString()
+										.replaceAll(" ", "-")
+										.replace(/-$/, "")
+										.toLowerCase()) as string,
 						  )
 				}
 				showToast({ variant: "success", title: "Copied link to clipboard", duration: 3000 })
