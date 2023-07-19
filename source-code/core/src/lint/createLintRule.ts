@@ -20,28 +20,23 @@ import type { LintRule } from "./rule.js"
  * myRule2("error", { strict: true });
  */
 export const createLintRule = <
-	Settings extends Record<string, unknown> | undefined = undefined,
->(args: {
-	id: LintRule["id"]
-	setup: (
-		args: Parameters<LintRule["setup"]>[0] & {
-			settings: Settings
-		},
-	) => ReturnType<LintRule["setup"]>
-}): ConfigureLintRuleFunction<Settings> => {
-	const { id } = args
-
+	RuleSettings extends Record<string, unknown> | undefined = undefined,
+>(
+	callback: (settings: RuleSettings) => Omit<LintRule, "level">,
+): ConfigureLintRuleFunction<RuleSettings> => {
 	// @ts-expect-error
-	// The settings being dynamically added to the args does not play nicely with TypeScript.
+	// The config being dynamically added to the args does not play nicely with TypeScript.
 	// Given that the settings are optional and this is an implementation issue, we can ignore
 	// this error and avoid more complex types.
-	const configureLintRule: ConfigureLintRuleFunction<Settings> = (level, settings) => {
+	const configureLintRule: ConfigureLintRuleFunction<RuleSettings> = (level, settings) => {
+		// @ts-expect-error
+		const rule = callback(settings)
+
 		return {
-			id,
+			...rule,
+			// overwrite the level with the one provided by the user
 			level,
-			// @ts-expect-error
-			setup: (_args) => args.setup({ ..._args, settings }),
-		}
+		} satisfies LintRule
 	}
 
 	return configureLintRule
@@ -50,9 +45,10 @@ export const createLintRule = <
 /**
  * Type for the function that configures a lint rule.
  */
-type ConfigureLintRuleFunction<Settings extends Record<string, unknown> | undefined = undefined> =
-	Settings extends undefined
-		? // If settings are not defined, the function only takes a level
-		  (level: LintRule["level"]) => LintRule
-		: // Else, the function takes a level and settings
-		  (level: LintRule["level"], settings: Settings) => LintRule
+type ConfigureLintRuleFunction<
+	RuleSettings extends Record<string, unknown> | undefined = undefined,
+> = RuleSettings extends undefined
+	? // If settings are not defined, the function only takes a level
+	  (level: LintRule["level"]) => LintRule
+	: // Else, the function takes a level and config
+	  (level: LintRule["level"], settings: RuleSettings) => LintRule
