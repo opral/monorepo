@@ -1,8 +1,8 @@
 import type { BCP47LanguageTag } from '@inlang/core/languageTag'
-import { matchLanguage } from "./matchLanguage.js"
+import { matchLanguageTag } from "./matchLanguageTag.js"
 import type { Detector } from "./types.js"
 
-type DetectLanguageParams = {
+type DetectLanguageTagParams = {
 	sourceLanguageTag: BCP47LanguageTag
 	languageTags: BCP47LanguageTag[]
 	allowRelated?: boolean
@@ -17,21 +17,21 @@ type DetectLanguageParams = {
  * @param params.sourceLanguageTag The languageTag to fallback to if there is no detection match
  * @param params.languageTags Set of languageTags that are available for matching
  * @param params.allowRelated True if also related languageTags shall be considered a match.
- * detectLanguage will then return "en" from languageTags for a detected "en-GB" if no exact match can be found. It can also return "en-GB" from languageTags for a detected "en")
+ * The function will then return "en" from languageTags for a detected "en-GB" if no exact match can be found. It can also return "en-GB" from languageTags for a detected "en")
  * @returns The detected languageTag
  */
-export const detectLanguage = async (
-	{ sourceLanguageTag, languageTags, allowRelated = true }: DetectLanguageParams,
+export const detectLanguageTag = async (
+	{ sourceLanguageTag, languageTags, allowRelated = true }: DetectLanguageTagParams,
 	...detectors: Detector[]
 ): Promise<BCP47LanguageTag> => {
-	const allDetectedLanguages: BCP47LanguageTag[] = []
+	const allDetectedLanguageTags: BCP47LanguageTag[] = []
 	for (const detector of detectors) {
 		const detectedLanguages = await detector()
-		const matchedLanguage = matchLanguage(detectedLanguages, languageTags, false)
-		if (matchedLanguage) return matchedLanguage
+		const matchedLanguageTag = matchLanguageTag(detectedLanguages, languageTags, false)
+		if (matchedLanguageTag) return matchedLanguageTag
 
-		allDetectedLanguages.push(...detectedLanguages)
+		allDetectedLanguageTags.push(...detectedLanguages)
 	}
 
-	return (allowRelated && matchLanguage(allDetectedLanguages, languageTags)) || sourceLanguageTag
+	return (allowRelated && matchLanguageTag(allDetectedLanguageTags, languageTags)) || sourceLanguageTag
 }

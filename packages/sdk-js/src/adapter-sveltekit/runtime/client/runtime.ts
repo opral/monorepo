@@ -17,7 +17,7 @@ export const initSvelteKitClientRuntime = async ({
 	languageTags,
 }: InitSvelteKitClientRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: async (languageTag: string) =>
+		readResource: async (languageTag: BCP47LanguageTag) =>
 			fetch(`${base}/inlang/${languageTag}.json`).then((response) =>
 				response.ok ? response.json() : undefined,
 			),

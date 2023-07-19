@@ -14,7 +14,7 @@ export const initSvelteKitServerRuntime = ({
 	languageTags,
 }: InitSvelteKitServerRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: (languageTag: string) => getResource(languageTag),
+		readResource: (languageTag: BCP47LanguageTag) => getResource(languageTag),
 		sourceLanguageTag,
 		languageTags,
 	})

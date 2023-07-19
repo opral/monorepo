@@ -94,8 +94,6 @@ export const initBaseRuntime = <
 		state.i = undefined
 	}
 
-	const getLanguage = () => state.languageTag
-
 	const getInlangFunction = () => {
 		if (state.i) return state.i
 
@@ -109,7 +107,7 @@ export const initBaseRuntime = <
 		loadResource,
 		switchLanguage,
 		get languageTag() {
-			return getLanguage()
+			return state.languageTag
 		},
 		get i() {
 			return getInlangFunction()

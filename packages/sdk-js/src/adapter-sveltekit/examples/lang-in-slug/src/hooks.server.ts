@@ -6,7 +6,7 @@ import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
 
 export const handle = initHandleWrapper({
 	inlangConfigModule: import("../inlang.config.js"),
-	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	parseLanguageTag: ({ url }) => url.pathname.split("/")[1],
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {
 		throwable: redirect,
@@ -14,7 +14,6 @@ export const handle = initHandleWrapper({
 	},
 }).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())
-	console.log(111, i);
 
 	console.info("hooks.server.ts", i("welcome"))
 

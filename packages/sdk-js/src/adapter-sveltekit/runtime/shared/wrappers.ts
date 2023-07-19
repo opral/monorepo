@@ -1,6 +1,6 @@
 import { browser } from "$app/environment"
 import type * as Kit from "@sveltejs/kit"
-import { detectLanguage, type Detector } from "../../../detectors/index.js"
+import { detectLanguageTag, type Detector } from "../../../detectors/index.js"
 import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
 import {
 	addRuntimePromiseToEvent,
@@ -43,7 +43,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	const languageTag =
 		data.languageTag || !options.initDetectors
 			? data.languageTag
-			: await detectLanguage({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
+			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
 
 	const runtime =
 		initializedRuntime[languageTag as BCP47LanguageTag] ||
@@ -125,14 +125,14 @@ export const initRootPageLoadWrapper = <
 				const { sourceLanguageTag, languageTags } = data
 
 				if ((!languageTag || !languageTags.includes(languageTag)) && options.redirect) {
-					const detectedLanguage = await detectLanguage(
+					const detectedLanguageTag = await detectLanguageTag(
 						{ sourceLanguageTag, languageTags },
 						...(options.initDetectors ? options.initDetectors(event) : []),
 					)
 
 					throw options.redirect.throwable(
 						307,
-						options.redirect.getPath(event, detectedLanguage).toString(),
+						options.redirect.getPath(event, detectedLanguageTag).toString(),
 					)
 				}
 			}

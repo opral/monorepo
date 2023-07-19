@@ -1,6 +1,6 @@
 import type * as Kit from "@sveltejs/kit"
 import type { RelativeUrl } from "../../../index.js"
-import { detectLanguage } from "../../../detectors/detectLanguage.js"
+import { detectLanguageTag } from "../../../detectors/detectLanguageTag.js"
 import type { Detector } from "../../../detectors/types.js"
 import type { DataPayload } from "../shared/wrappers.js"
 import { initSvelteKitServerRuntime, type SvelteKitServerRuntime } from "./runtime.js"
@@ -18,7 +18,7 @@ type WrappedHandle = (
 
 type HandleOptions = {
 	inlangConfigModule: Promise<InlangConfigModule>
-	getLanguage: (event: Kit.RequestEvent) => BCP47LanguageTag | undefined
+	parseLanguageTag: (event: Kit.RequestEvent) => BCP47LanguageTag | undefined
 	initDetectors?: (event: Kit.RequestEvent) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
@@ -53,18 +53,18 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 
 				const { sourceLanguageTag, languageTags } = await initState(await options.inlangConfigModule)
 
-				let languageTag = options.getLanguage(event)
+				let languageTag = options.parseLanguageTag(event)
 				// TODO: create `isLanguage` helper function
 				if (!languageTag || !languageTags.includes(languageTag)) {
 					if (options.redirect) {
-						const detectedLanguage = await detectLanguage(
+						const detectedLanguageTag = await detectLanguageTag(
 							{ sourceLanguageTag, languageTags },
 							...(options.initDetectors ? options.initDetectors(event) : []),
 						)
 
 						throw options.redirect.throwable(
 							307,
-							options.redirect.getPath(event, detectedLanguage).toString(),
+							options.redirect.getPath(event, detectedLanguageTag).toString(),
 						)
 					}
 
