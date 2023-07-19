@@ -16,20 +16,25 @@ import { useI18n } from "@solid-primitives/i18n"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
-	headings: any[]
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
-	const [renderedHeadings, setRenderedHeadings] = createSignal<any[]>([])
+	const [headings, setHeadings] = createSignal<any[]>([])
 
 	createRenderEffect(() => {
-		setRenderedHeadings([])
+		setHeadings([])
 
-		if (!props.headings) return
+		if (!props.markdown?.renderableTree) return
 
-		for (const heading of props.headings) {
-			setRenderedHeadings((prev) => [...prev, heading.children[0]])
+		for (const heading of props.markdown.renderableTree.children) {
+			if (heading.name === "Heading") {
+				if (heading.children[0].name) {
+					setHeadings((prev) => [...prev, heading.children[0].children[0]])
+				} else {
+					setHeadings((prev) => [...prev, heading.children[0]])
+				}
+			}
 		}
 	})
 
@@ -54,7 +59,7 @@ export function Page(props: PageProps) {
 							 */}
 							<div class="py-14 pr-8">
 								<Show when={props.processedTableOfContents}>
-									<NavbarCommon {...props} headings={renderedHeadings()} />
+									<NavbarCommon {...props} headings={headings()} />
 								</Show>
 							</div>
 						</nav>
@@ -71,7 +76,7 @@ export function Page(props: PageProps) {
 							<Show when={props.processedTableOfContents}>
 								<NavbarCommon
 									{...props}
-									headings={renderedHeadings()}
+									headings={headings()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -116,7 +121,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
-	headings: PageProps["headings"]
+	headings: any[]
 	onLinkClick?: () => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
@@ -188,7 +193,7 @@ function NavbarCommon(props: {
 														{(heading) =>
 															heading !== undefined &&
 															heading !== document.frontmatter.shortTitle &&
-															props.headings.filter((h) => h === heading).length < 2 && (
+															props.headings.filter((h: any) => h === heading).length < 2 && (
 																<li>
 																	<a
 																		onClick={() => {
@@ -207,7 +212,8 @@ function NavbarCommon(props: {
 																		href={`#${heading
 																			.toString()
 																			.toLowerCase()
-																			.replaceAll(" ", "-")}`}
+																			.replaceAll(" ", "-")
+																			.replaceAll("/", "")}`}
 																	>
 																		{heading}
 																	</a>
