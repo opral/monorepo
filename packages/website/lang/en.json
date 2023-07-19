@@ -76,6 +76,10 @@
 		}
 	},
 	"newsletter": {
+		"subscribe": {
+			"title": "Subscribe to our newsletter",
+			"description": "We'll send you updates about inlang and globalization. You can unsubscribe at any time."
+		},
 		"unsubscribed": {
 			"title": "You're unsubscribed",
 			"description": "We're sad to see you go. If you have any feedback, please let us know on our"

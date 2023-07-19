@@ -76,6 +76,10 @@
 		}
 	},
 	"newsletter": {
+		"subscribe": {
+			"title": "Bleiben Sie auf dem Laufenden",
+			"description": "Abonnieren Sie unseren Newsletter, um über die neuesten Entwicklungen auf dem Laufenden zu bleiben."
+		},
 		"unsubscribed": {
 			"title": "Abmeldung erfolgreich",
 			"description": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
