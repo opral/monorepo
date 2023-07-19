@@ -13,7 +13,8 @@ import { onSignOut } from "@src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { rpc } from "@inlang/rpc"
+import { defaultLanguage, extractLocale } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { NewsletterForm } from "@src/components/NewsletterForm.jsx"
 
@@ -85,7 +86,6 @@ function Header(props: { landingpage?: boolean }) {
 		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 		{
 			name: "Feedback",
-			external: currentPageContext.urlParsed.pathname.includes("editor"),
 			href: "https://github.com/inlang/inlang/discussions",
 			type: "text" as buttonType,
 		},
@@ -93,17 +93,12 @@ function Header(props: { landingpage?: boolean }) {
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
-	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
 	const [, { locale }] = useI18n()
 
 	const getLocale = () => {
 		const language = locale() || defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
-
-	onMount(() => {
-		setLocaleIsLoaded(true)
-	})
 
 	return (
 		<>
@@ -138,40 +133,20 @@ function Header(props: { landingpage?: boolean }) {
 									</div>
 									<For each={links}>
 										{(link) => (
-											<Button type={link.type} href={link.href} chevron={Boolean(link.external)}>
+											<Button type={link.type} href={link.href}>
 												{link.name}
 											</Button>
 										)}
 									</For>
-									<div class="text-xl -mr-4 w-[100px]">
-										<Show
-											when={localeIsLoaded()}
-											fallback={
-												<div class="w-full px-4 h-10 flex justify-center items-center border text-base rounded border-surface-300">
-													...
-												</div>
-											}
-										>
-											<sl-select
-												prop:value={locale()}
-												prop:defaultValue={defaultLanguage}
-												on:sl-change={(event: any) => {
-													const language = event.target.value || defaultLanguage
-													window.history.pushState(
-														{},
-														"",
-														(language !== defaultLanguage ? "/" + language : "") +
-															currentPageContext.urlParsed.pathname,
-													)
-													locale(event.target.value)
-												}}
-											>
-												<sl-option prop:value="en">🇬🇧 English</sl-option>
-												<sl-option prop:value="de">🇩🇪 Deutsch</sl-option>
-												{/* <sl-option prop:value="zh">🇨🇳 Chinese</sl-option> */}
-											</sl-select>
-										</Show>
-									</div>
+									<Show
+										when={
+											currentPageContext.urlParsed.pathname.includes("editor") === false &&
+											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
+											currentPageContext.urlParsed.pathname.includes("blog") === false
+										}
+									>
+										<LanguagePicker />
+									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
 											Open Editor
@@ -262,7 +237,7 @@ const Footer = (props: { isLandingPage: boolean }) => {
 	return (
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
-				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
+				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
 					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
@@ -318,12 +293,13 @@ const Footer = (props: { isLandingPage: boolean }) => {
 						</a>
 					</div>
 				</div>
-				<div class="flex flex-col xl:flex-row justify-between items-end gap-8 pb-16 max-xl:px-10">
+				<div class="px-6 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
 						<NewsletterForm />
 					</div>
-					<div class="xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
-						<p class="text-surface-700 font-medium">© inlang 2023</p>
+					<div class="xl:w-1/4 xl:px-10 flex items-center justify-between pt-2 max-xl:w-full">
+						<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
+						<LanguagePicker />
 					</div>
 				</div>
 			</SectionLayout>
@@ -367,7 +343,9 @@ function UserDropdown() {
 								alt="user avatar"
 								class="w-6 h-6 rounded-full"
 							/>
-							<IconExpand />
+							<div class="w-5 h-5 opacity-50">
+								<IconExpand />
+							</div>
 						</div>
 						<sl-menu>
 							<div class="px-7 py-2 bg-surface-1 text-on-surface">
@@ -375,7 +353,10 @@ function UserDropdown() {
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>
 							<sl-menu-item onClick={handleSignOut}>
-								<IconSignOut slot="prefix" />
+								<IconSignOut
+									// @ts-ignore
+									slot="prefix"
+								/>
 								Sign out
 							</sl-menu-item>
 						</sl-menu>
@@ -383,5 +364,72 @@ function UserDropdown() {
 				</Match>
 			</Switch>
 		</>
+	)
+}
+
+/**
+ * Language picker for the landing page.
+ */
+function LanguagePicker() {
+	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
+	const [, { locale }] = useI18n()
+
+	onMount(() => {
+		setLocaleIsLoaded(true)
+	})
+
+	const languages = [
+		{
+			code: "en",
+			name: "English",
+		},
+		{
+			code: "de",
+			name: "Deutsch",
+		},
+	]
+
+	const handleSwitchTransltion = (language: { code: string; name: string }) => {
+		console.log("path", currentPageContext.urlParsed.pathname)
+		window.history.pushState(
+			{},
+			"",
+			(language.code !== defaultLanguage ? "/" + language.code : "") +
+				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale,
+		)
+		locale(language.code)
+	}
+
+	return (
+		<div class="w-fit">
+			<Show when={localeIsLoaded()}>
+				<sl-dropdown>
+					<div
+						slot="trigger"
+						class="flex items-center cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
+					>
+						<p>{locale().toUpperCase()}</p>
+						<IconExpand class="w-5 h-5 opacity-50" />
+					</div>
+					<sl-menu>
+						<For each={languages}>
+							{(language) => (
+								<sl-menu-item
+									prop:type="checkbox"
+									// @ts-ignore
+									checked={locale() === language.code}
+									onClick={() => handleSwitchTransltion(language)}
+								>
+									{language.name}
+									<p class="opacity-50" slot="suffix">
+										{language.code}
+									</p>
+								</sl-menu-item>
+							)}
+						</For>
+					</sl-menu>
+				</sl-dropdown>
+			</Show>
+		</div>
 	)
 }

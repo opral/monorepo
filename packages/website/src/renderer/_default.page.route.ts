@@ -17,7 +17,7 @@ function onBeforeRoute(pageContext: PageContextRenderer) {
 	}
 }
 
-function extractLocale(url: string) {
+export function extractLocale(url: string) {
 	const urlPaths = url.split("/")
 
 	let locale
