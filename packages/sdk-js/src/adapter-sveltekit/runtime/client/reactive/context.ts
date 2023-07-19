@@ -20,6 +20,9 @@ type RuntimeContext<
 		switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
+		referenceLanguage: LanguageTag
+		language: LanguageTag
+		languages: LanguageTag[]
 }
 
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
@@ -47,6 +50,9 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		loadResource: runtime.loadResource,
 		switchLanguage,
 		route,
+		referenceLanguage: runtime.referenceLanguage,
+		language: runtime.language!,
+		languages: runtime.languages,
 	})
 }
 

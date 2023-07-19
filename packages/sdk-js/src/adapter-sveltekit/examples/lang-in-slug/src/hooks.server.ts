@@ -14,6 +14,7 @@ export const handle = initHandleWrapper({
 	},
 }).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())
+	console.log(111, i);
 
 	console.info("hooks.server.ts", i("welcome"))
 

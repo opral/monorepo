@@ -18,8 +18,8 @@ type MaybePromise<T> = T | Promise<T>
 export type RuntimeContext<
 	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
 	ReadResourcesMaybePromise extends
-		| (Ast.Resource | undefined)
-		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
+	| (Ast.Resource | undefined)
+	| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
 		readResource: (languageTag: LanguageTag) => ReadResourcesMaybePromise
 }
@@ -114,6 +114,11 @@ export const initBaseRuntime = <
 		get i() {
 			return getInlangFunction()
 		},
+		/** @deprecated Use `languageTag` instead. */
+		get language() {
+			logDeprecation('language', 'languageTag')
+			return this.languageTag
+		},
 	}
 }
 
@@ -143,5 +148,22 @@ export const initRuntimeWithLanguageInformation = <
 		get languageTags() {
 			return context.languageTags
 		},
+		/** @deprecated Use `languageTag` instead. */
+		get language() {
+			return runtime.language
+		},
+		/** @deprecated Use `sourceLanguageTag` instead. */
+		get referenceLanguage(): LanguageTag {
+			logDeprecation('referenceLanguage', 'sourceLanguageTag')
+			return this.sourceLanguageTag
+		},
+		/** @deprecated Use `languageTags` instead. */
+		get languages(): LanguageTag[] {
+			logDeprecation('languages', 'languageTags')
+			return this.languageTags
+		},
 	}
 }
+
+const logDeprecation = (oldName: string, newName: string) =>
+	console.warn(`[INLANG:DEPRECATED] '${oldName}' is deprecated. Use '${newName}' instead.`)
