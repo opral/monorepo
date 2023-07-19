@@ -1,4 +1,3 @@
-import type * as Ast from "@inlang/core/ast"
 import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
@@ -6,12 +5,12 @@ import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { Language } from "@inlang/core/ast"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	Language extends BCP47LanguageTag = BCP47LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	referenceLanguage: Language
@@ -28,7 +27,7 @@ export const getRuntimeFromContext = () => getRuntimeFromContextShared() as Runt
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const { language, referenceLanguage, languages, i, loadResource } = runtime
 
-	const switchLanguage = async (language: Language) => {
+	const switchLanguage = async (language: BCP47LanguageTag) => {
 		if (runtime.language === language) return
 
 		return goto(replaceLanguageInUrl(get(page).url, language), { invalidateAll: true })
@@ -41,7 +40,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		i,
 		loadResource,
 		switchLanguage,
-		route: route.bind(undefined, language as Language),
+		route: route.bind(undefined, language as BCP47LanguageTag),
 	})
 }
 

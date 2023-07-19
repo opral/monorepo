@@ -1,4 +1,3 @@
-import type * as Ast from "@inlang/core/ast"
 import { setContext } from "svelte"
 import { writable, type Readable } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
@@ -6,12 +5,12 @@ import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { Language } from "@inlang/core/ast"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	Language extends BCP47LanguageTag = BCP47LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	language: Readable<Language>
@@ -26,10 +25,10 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.language as Language)
+	const _language = writable(runtime.language as BCP47LanguageTag)
 	const _i = writable(runtime.i)
 
-	const switchLanguage = async (language: Language) => {
+	const switchLanguage = async (language: BCP47LanguageTag) => {
 		if (runtime.language === language) return
 
 		await runtime.loadResource(language)

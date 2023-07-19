@@ -1,10 +1,10 @@
-import type { Language } from "@inlang/core/ast"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 import { matchLanguage } from "./matchLanguage.js"
 import type { Detector } from "./types.js"
 
 type DetectLanguageParams = {
-	referenceLanguage: Language
-	languages: Array<Language>
+	referenceLanguage: BCP47LanguageTag
+	languages: BCP47LanguageTag[]
 	allowRelated?: boolean
 }
 
@@ -23,8 +23,8 @@ type DetectLanguageParams = {
 export const detectLanguage = async (
 	{ referenceLanguage, languages, allowRelated = true }: DetectLanguageParams,
 	...detectors: Detector[]
-): Promise<Language> => {
-	const allDetectedLanguages: Array<Language> = []
+): Promise<BCP47LanguageTag> => {
+	const allDetectedLanguages: BCP47LanguageTag[] = []
 	for (const detector of detectors) {
 		const detectedLanguages = await detector()
 		const matchedLanguage = matchLanguage(detectedLanguages, languages, false)

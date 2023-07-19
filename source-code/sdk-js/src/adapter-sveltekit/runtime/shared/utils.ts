@@ -1,7 +1,7 @@
-import type { Language } from "@inlang/core/ast"
 import type { LoadEvent } from "@sveltejs/kit"
 import type { RelativeUrl } from "../../../index.js"
 import type { SvelteKitClientRuntime } from "../client/runtime.js"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 export const inlangSymbol = Symbol.for("inlang")
 
@@ -43,14 +43,14 @@ export const getRuntimePromiseFromEvent = <Event extends LoadEvent>(
 
 // ------------------------------------------------------------------------------------------------
 
-export const replaceLanguageInUrl = (url: URL, language: Language) =>
+export const replaceLanguageInUrl = (url: URL, language: BCP47LanguageTag) =>
 	new URL(
 		`${url.origin}${replaceLanguageInSlug(url.pathname as RelativeUrl, language)}${url.search}${
 			url.hash
 		}`,
 	)
 
-const replaceLanguageInSlug = (pathname: RelativeUrl, language: Language) => {
+const replaceLanguageInSlug = (pathname: RelativeUrl, language: BCP47LanguageTag) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [_, __, ...path] = pathname.split("/")
 

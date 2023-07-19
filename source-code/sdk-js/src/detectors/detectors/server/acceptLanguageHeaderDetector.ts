@@ -1,4 +1,3 @@
-import type { Language } from "@inlang/core/ast"
 import type { Detector, DetectorInitializer } from "../../types.js"
 
 type HeadersObject = { get: (key: string) => string | null }
@@ -8,7 +7,7 @@ type DetectorParameters = [HeadersObject]
 const REGEX_ACCEPT_LANGUAGE_SPLIT = /;|,/
 
 const acceptLanguageHeaderDetector = ((headers) =>
-	(headers.get("Accept-Language") as Language)
+	headers.get("Accept-Language")
 		?.split(REGEX_ACCEPT_LANGUAGE_SPLIT)
 		.filter((part) => !part.startsWith("q"))
 		.map((part) => part.trim())

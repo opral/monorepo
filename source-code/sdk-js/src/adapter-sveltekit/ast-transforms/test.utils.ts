@@ -19,8 +19,8 @@ export const initTransformConfig = (
 			sourceFileName: "",
 			sourceMapName: "",
 			inlang: {
-				referenceLanguage: "en",
-				languages: ["en", "de"],
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
 				readResources: async () => [],
 				writeResources: async () => undefined,
 				sdk: {
