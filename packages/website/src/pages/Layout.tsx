@@ -137,7 +137,15 @@ function Header(props: { landingpage?: boolean }) {
 											</Button>
 										)}
 									</For>
-									<LanguagePicker />
+									<Show
+										when={
+											currentPageContext.urlParsed.pathname.includes("editor") === false &&
+											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
+											currentPageContext.urlParsed.pathname.includes("blog") === false
+										}
+									>
+										<LanguagePicker />
+									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
 											Open Editor
