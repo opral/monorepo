@@ -10,7 +10,7 @@ export const handle = initHandleWrapper({
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {
 		throwable: redirect,
-		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+		getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 	},
 }).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())

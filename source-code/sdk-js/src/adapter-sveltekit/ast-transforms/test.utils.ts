@@ -27,7 +27,7 @@ export const initTransformConfig = (
 					debug: false,
 					languageNegotiation: {
 						strict: false,
-						strategies: [{ type: "localStorage", key: "language" }],
+						strategies: [{ type: "localStorage", key: "languageTag" }],
 					},
 					resources: {
 						cache: "build-time",

@@ -5,29 +5,29 @@ import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
-	referenceLanguage: BCP47LanguageTag
-	languages: BCP47LanguageTag[]
-	language: BCP47LanguageTag | undefined
+	sourceLanguageTag: BCP47LanguageTag
+	languageTags: BCP47LanguageTag[]
+	languageTag: BCP47LanguageTag | undefined
 }
 
 export const initSvelteKitClientRuntime = async ({
 	fetch,
-	language,
-	referenceLanguage,
-	languages,
+	languageTag,
+	sourceLanguageTag,
+	languageTags,
 }: InitSvelteKitClientRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: async (language: string) =>
-			fetch(`${base}/inlang/${language}.json`).then((response) =>
+		readResource: async (languageTag: string) =>
+			fetch(`${base}/inlang/${languageTag}.json`).then((response) =>
 				response.ok ? response.json() : undefined,
 			),
-		referenceLanguage,
-		languages,
+		sourceLanguageTag,
+		languageTags,
 	})
 
-	if (language) {
-		await runtime.loadResource(language)
-		runtime.switchLanguage(language)
+	if (languageTag) {
+		await runtime.loadResource(languageTag)
+		runtime.switchLanguage(languageTag)
 	}
 
 	return runtime

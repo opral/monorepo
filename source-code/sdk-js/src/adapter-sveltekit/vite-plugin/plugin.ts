@@ -44,8 +44,8 @@ export const plugin = () => {
 			const config = await getTransformConfig()
 			if (id === resolvedVirtualModuleId) {
 				return dedent`
-					export const referenceLanguage = ${JSON.stringify(config.inlang.sourceLanguageTag)}
-					export const languages = ${JSON.stringify(config.inlang.languageTags)}
+					export const sourceLanguageTag = ${JSON.stringify(config.inlang.sourceLanguageTag)}
+					export const languageTags = ${JSON.stringify(config.inlang.languageTags)}
 					export const resources = ${JSON.stringify(
 						await config.inlang.readResources({ config: config.inlang }),
 					)}

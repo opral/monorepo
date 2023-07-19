@@ -13,13 +13,13 @@
 
 	addRuntimeToContext(getRuntimeFromData(data))
 
-	let { i, language, languages, loadResource, switchLanguage } = getRuntimeFromContext()
+	let { i, languageTag, languageTags, loadResource, switchLanguage } = getRuntimeFromContext()
 
-	$: if (browser && $language) {
-		document.body.parentElement?.setAttribute("lang", $language)
+	$: if (browser && $languageTag) {
+		document.body.parentElement?.setAttribute("lang", $languageTag)
 
 		// TODO: only if localStorageDetector
-		localStorage.setItem('language', $language)
+		localStorage.setItem('languageTag', $languageTag)
 	}
 
 	// ----
@@ -27,12 +27,12 @@
 	$: console.info("+layout.svelte", $i("welcome"))
 </script>
 
-{#if $language}
-	{#each languages as language}
+{#if $languageTag}
+	{#each languageTags as languageTag}
 		<button
-			on:mouseover={() => loadResource(language)}
-			on:focus={() => loadResource(language)}
-			on:click={() => switchLanguage(language)}>{language}</button
+			on:mouseover={() => loadResource(languageTag)}
+			on:focus={() => loadResource(languageTag)}
+			on:click={() => switchLanguage(languageTag)}>{languageTag}</button
 		>
 	{/each}
 

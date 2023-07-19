@@ -37,27 +37,27 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
 	const data = (event.data as DataPayload)["[inlang]"]
-	const { referenceLanguage, languages } = data
+	const { sourceLanguageTag, languageTags } = data
 
 	// TODO: only add this conditional logic if shared detection strategies get used
-	const language =
-		data.language || !options.initDetectors
-			? data.language
-			: await detectLanguage({ referenceLanguage, languages }, ...options.initDetectors(event))
+	const languageTag =
+		data.languageTag || !options.initDetectors
+			? data.languageTag
+			: await detectLanguage({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
 
 	const runtime =
-		initializedRuntime[language as BCP47LanguageTag] ||
+		initializedRuntime[languageTag as BCP47LanguageTag] ||
 		(await initSvelteKitClientRuntime({
 			fetch: event.fetch,
-			language,
-			referenceLanguage,
-			languages,
+			languageTag,
+			sourceLanguageTag,
+			languageTags,
 		}))
 
 	resolveRuntimePromise(runtime)
 
-	if (browser && language) {
-		initializedRuntime = { [language]: runtime }
+	if (browser && languageTag) {
+		initializedRuntime = { [languageTag]: runtime }
 	}
 
 	return runtime
@@ -67,9 +67,9 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 export type DataPayload = {
 	"[inlang]": {
-		referenceLanguage: BCP47LanguageTag
-		languages: BCP47LanguageTag[]
-		language: BCP47LanguageTag | undefined
+		sourceLanguageTag: BCP47LanguageTag
+		languageTags: BCP47LanguageTag[]
+		languageTag: BCP47LanguageTag | undefined
 	}
 }
 
@@ -106,7 +106,7 @@ export const initRootPageLoadWrapper = <
 	initDetectors?: (event: Parameters<PageLoad>[0]) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Parameters<PageLoad>[0], language: BCP47LanguageTag) => URL | string
+		getPath: (event: Parameters<PageLoad>[0], languageTag: BCP47LanguageTag) => URL | string
 	}
 }) => ({
 	use:
@@ -119,14 +119,14 @@ export const initRootPageLoadWrapper = <
 		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
 			const data = await event.parent()
 
-			const language: BCP47LanguageTag | undefined = data.language
+			const languageTag: BCP47LanguageTag | undefined = data.languageTag
 
-			if (!language && options.browser) {
-				const { referenceLanguage, languages } = data
+			if (!languageTag && options.browser) {
+				const { sourceLanguageTag, languageTags } = data
 
-				if ((!language || !languages.includes(language)) && options.redirect) {
+				if ((!languageTag || !languageTags.includes(languageTag)) && options.redirect) {
 					const detectedLanguage = await detectLanguage(
-						{ referenceLanguage, languages },
+						{ sourceLanguageTag, languageTags },
 						...(options.initDetectors ? options.initDetectors(event) : []),
 					)
 

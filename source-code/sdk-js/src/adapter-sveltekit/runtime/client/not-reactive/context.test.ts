@@ -16,9 +16,9 @@ beforeEach(async () => {
 
 	runtime = await initSvelteKitClientRuntime({
 		fetch: vi.fn().mockReturnValue(Promise.resolve({})),
-		language: "en",
-		languages: ["en", "de"],
-		referenceLanguage: "en",
+		languageTag: "en",
+		languageTags: ["en", "de"],
+		sourceLanguageTag: "en",
 	})
 
 	vi.mock("$app/navigation", () => ({ goto: vi.fn() }))
@@ -64,7 +64,7 @@ describe("addRuntimeToContext", () => {
 		expect(mockedGoto).toHaveBeenCalledWith(undefined, { invalidateAll: true })
 	})
 
-	test("should not make a page navigation if switchLanguage gets called with the already set language", async () => {
+	test("should not make a page navigation if switchLanguage gets called with the already set languageTag", async () => {
 		const r = getRuntimeFromContext()
 
 		await r.switchLanguage("en")
@@ -77,7 +77,7 @@ describe("addRuntimeToContext", () => {
 describe("route", () => {
 	beforeEach(() => addRuntimeToContext(runtime))
 
-	test("should return a path with the current language as prefix", async () => {
+	test("should return a path with the current languageTag as prefix", async () => {
 		const r = getRuntimeFromContext()
 
 		expect(r.route("/path/to/page")).toBe("/en/path/to/page")

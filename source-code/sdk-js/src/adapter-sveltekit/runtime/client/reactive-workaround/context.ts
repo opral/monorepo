@@ -14,14 +14,14 @@ import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	Language extends BCP47LanguageTag = BCP47LanguageTag,
+	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-	referenceLanguage: Language
-	languages: Language[]
-	language: Language
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
+		languageTag: LanguageTag
 	i: InlangFunction
-	switchLanguage: (language: Language) => Promise<void>
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
 }
@@ -29,20 +29,20 @@ type RuntimeContext<
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const { language, referenceLanguage, languages, i, loadResource } = runtime
+	const { languageTag, sourceLanguageTag, languageTags, i, loadResource } = runtime
 
-	const switchLanguage = async (language: BCP47LanguageTag) => {
-		if (runtime.language === language) return
+	const switchLanguage = async (languageTag: BCP47LanguageTag) => {
+		if (runtime.languageTag === languageTag) return
 
-		localStorage.setItem("language", language)
+		localStorage.setItem("languageTag", languageTag)
 
 		return goto(get(page).url, { invalidateAll: true })
 	}
 
 	setContext(inlangSymbol, {
-		language,
-		referenceLanguage,
-		languages,
+		languageTag,
+		sourceLanguageTag,
+		languageTags,
 		i,
 		loadResource,
 		switchLanguage,

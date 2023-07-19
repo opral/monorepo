@@ -21,12 +21,12 @@ export type RuntimeContext<
 		| (Ast.Resource | undefined)
 		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
-		readResource: (language: LanguageTag) => ReadResourcesMaybePromise
+		readResource: (languageTag: LanguageTag) => ReadResourcesMaybePromise
 }
 
-export type RuntimeState<Language extends BCP47LanguageTag = BCP47LanguageTag> = {
-	resources: Map<Language, Ast.Resource>
-	language: Language | undefined
+export type RuntimeState<LanguageTag extends BCP47LanguageTag = BCP47LanguageTag> = {
+	resources: Map<LanguageTag, Ast.Resource>
+	languageTag: LanguageTag | undefined
 	i: InlangFunction<any> | undefined
 }
 
@@ -48,26 +48,26 @@ export const initBaseRuntime = <
 	{ readResource }: RuntimeContext<LanguageTag, ReadResourcesMaybePromise>,
 	state: RuntimeState<LanguageTag> = {
 		resources: new Map(),
-		language: undefined,
+		languageTag: undefined,
 		i: undefined,
 	},
 ) => {
 	const loadResourcePromises = new Map<LanguageTag, ReadResourcesMaybePromise>()
 	let isLoadResourceFunctionAsync = false
 
-	const loadResource = (language: LanguageTag): ReadResourcesMaybePromise => {
-		if (state.resources.has(language))
+	const loadResource = (languageTag: LanguageTag): ReadResourcesMaybePromise => {
+		if (state.resources.has(languageTag))
 			return isLoadResourceFunctionAsync
 				? (Promise.resolve() as ReadResourcesMaybePromise)
 				: (undefined as ReadResourcesMaybePromise)
 
-		if (loadResourcePromises.has(language))
-			return loadResourcePromises.get(language) as ReadResourcesMaybePromise
+		if (loadResourcePromises.has(languageTag))
+			return loadResourcePromises.get(languageTag) as ReadResourcesMaybePromise
 
 		const setResource = (resource: Resource | undefined) =>
-			resource && state.resources.set(language, resource)
+			resource && state.resources.set(languageTag, resource)
 
-		const resourceMaybePromise = readResource(language)
+		const resourceMaybePromise = readResource(languageTag)
 		if (!isAsync(resourceMaybePromise)) {
 			setResource(resourceMaybePromise)
 			return undefined as ReadResourcesMaybePromise
@@ -80,26 +80,26 @@ export const initBaseRuntime = <
 			const resource = await resourceMaybePromise
 			setResource(resource as Resource | undefined)
 
-			loadResourcePromises.delete(language)
+			loadResourcePromises.delete(languageTag)
 			resolve()
 		}) as ReadResourcesMaybePromise
 
-		loadResourcePromises.set(language, promise)
+		loadResourcePromises.set(languageTag, promise)
 
 		return promise
 	}
 
-	const switchLanguage = (language: LanguageTag) => {
-		state.language = language
+	const switchLanguage = (languageTag: LanguageTag) => {
+		state.languageTag = languageTag
 		state.i = undefined
 	}
 
-	const getLanguage = () => state.language
+	const getLanguage = () => state.languageTag
 
 	const getInlangFunction = () => {
 		if (state.i) return state.i
 
-		const resource = state.resources.get(state.language as LanguageTag)
+		const resource = state.resources.get(state.languageTag as LanguageTag)
 		if (!resource) return fallbackInlangFunction
 
 		return (state.i = createInlangFunction<InlangFunctionArgs>(resource))
@@ -108,7 +108,7 @@ export const initBaseRuntime = <
 	return {
 		loadResource,
 		switchLanguage,
-		get language() {
+		get languageTag() {
 			return getLanguage()
 		},
 		get i() {
@@ -123,25 +123,25 @@ export const initRuntimeWithLanguageInformation = <
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
 	context: RuntimeContext<LanguageTag, ReadResourcesMaybePromise> & {
-		referenceLanguage: LanguageTag
-		languages: LanguageTag[]
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
 	},
 ) => {
 	const runtime = initBaseRuntime<LanguageTag, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
 
 	return {
 		...runtime,
-		get language() {
-			return runtime.language
+		get languageTag() {
+			return runtime.languageTag
 		},
 		get i() {
 			return runtime.i
 		},
-		get referenceLanguage() {
-			return context.referenceLanguage
+		get sourceLanguageTag() {
+			return context.sourceLanguageTag
 		},
-		get languages() {
-			return context.languages
+		get languageTags() {
+			return context.languageTags
 		},
 	}
 }

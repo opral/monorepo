@@ -54,7 +54,7 @@ describe("transformSvelte", () => {
 			const code = dedent`
 				<script>
 					import { i as u } from "@inlang/sdk-js"
-					import { languages, i } from "@inlang/sdk-js"
+					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
 			const config = initTransformConfig()
@@ -62,7 +62,7 @@ describe("transformSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script>
 					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				const { i: u, languages, i } = getRuntimeFromContext();
+				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
 		})
@@ -71,7 +71,7 @@ describe("transformSvelte", () => {
 			const code = dedent`
 				<script context="module">
 					import { i as u } from "@inlang/sdk-js"
-					import { languages, i } from "@inlang/sdk-js"
+					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
 			const config = initTransformConfig()
@@ -79,7 +79,7 @@ describe("transformSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
 					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/reactive-workaround';
-				const { i: u, languages, i } = getRuntimeFromContext();
+				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
 		})
@@ -88,7 +88,7 @@ describe("transformSvelte", () => {
 			const code = dedent`
 				<script context="module">
 					import { i as u } from "@inlang/sdk-js"
-					import { languages, i } from "@inlang/sdk-js"
+					import { languageTags, i } from "@inlang/sdk-js"
 				</script>
 			`
 			const config = initTransformConfig({ languageInUrl: true })
@@ -96,7 +96,7 @@ describe("transformSvelte", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"<script context=\\"module\\">
 					import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
-				const { i: u, languages, i } = getRuntimeFromContext();
+				const { i: u, languageTags, i } = getRuntimeFromContext();
 				</script>"
 			`)
 		})
@@ -118,7 +118,7 @@ describe("transformSvelte", () => {
 	test.todo("should not generate duplicated import and variable declaration", () => {
 		const code = dedent`
 			<script context="module">
-				import { languages } from "@inlang/sdk-js"
+				import { languageTags } from "@inlang/sdk-js"
 			</script>
 			<script>
 				import { i } from "@inlang/sdk-js"
@@ -129,7 +129,7 @@ describe("transformSvelte", () => {
 		expect(transformed).toMatchInlineSnapshot(`
 			"<script context=\\"module\\">
 				import { getRuntimeFromContext } from '@inlang/sdk-js/adapter-sveltekit/client/not-reactive';
-			const { languages, i } = getRuntimeFromContext();
+			const { languageTags, i } = getRuntimeFromContext();
 			</script>
 			<script>
 			</script>"

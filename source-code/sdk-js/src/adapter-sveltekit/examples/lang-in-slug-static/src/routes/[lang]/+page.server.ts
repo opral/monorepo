@@ -7,7 +7,7 @@ export const load = initServerLoadWrapper<PageServerLoad>().use(async (_, { i })
 })
 
 export const entries = async () => {
-	const { languages } = await initState(await import("../../../inlang.config.js"))
+	const { languageTags } = await initState(await import("../../../inlang.config.js"))
 
-	return languages.map((language) => ({ lang: language }))
+	return languageTags.map((languageTag) => ({ lang: languageTag }))
 }
