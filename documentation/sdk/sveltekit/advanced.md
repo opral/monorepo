@@ -110,23 +110,19 @@ export const load = initRootPageLoadWrapper<LayoutLoad>({
 	export let data: LayoutData
 
 	addRuntimeToContext(getRuntimeFromData(data))
-	let { language } = getRuntimeFromContext()
+	let { languageTag } = getRuntimeFromContext()
 
 	$: if (browser) {
 		addRuntimeToContext(getRuntimeFromData(data))
-		({ language } = getRuntimeFromContext())
+		({ languageTag } = getRuntimeFromContext())
 	}
 </script>
 
-{#key language}
-	{#if language}
+{#key languageTag}
+	<!-- your code goes here -->
 
-		<!-- your code goes here -->
-
-		<slot />
-
-	{/key}
-{/if}
+	<slot />
+{/key}
 ```
 
 ## Usage of the SDK
