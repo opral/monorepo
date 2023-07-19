@@ -121,7 +121,6 @@ async function getLanguages(args: { $fs: InlangEnvironment["$fs"]; settings: Plu
 			filePath.endsWith(".json") &&
 			args.settings.ignore?.some((s) => s === filePath) === false
 		) {
-			console.log("files")
 			languages.push(filePath.replace(".json", ""))
 		}
 	}
