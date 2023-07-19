@@ -29,3 +29,12 @@ export const loadResource: Runtime["loadResource"] = () => {
 export const route: (href: RelativeUrl) => RelativeUrl = () => {
 	throw error
 }
+
+/** @deprecated Use `sourceLanguageTag` instead. */
+export const referenceLanguage: BCP47LanguageTag = error as any
+
+/** @deprecated Use `languageTags` instead. */
+export const languages: BCP47LanguageTag[] = [error] as any
+
+/** @deprecated Use `languageTag` instead. */
+export const language: BCP47LanguageTag = error as any

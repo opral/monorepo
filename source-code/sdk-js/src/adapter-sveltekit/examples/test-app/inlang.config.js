@@ -11,7 +11,7 @@ export async function defineConfig(env) {
 		sourceLanguageTag: "en",
 		plugins: [
 			jsonPlugin({
-				pathPattern: "./languageTags/{languageTag}.json",
+				pathPattern: "./languages/{language}.json",
 			}),
 			sdkPlugin({
 				debug: true,
