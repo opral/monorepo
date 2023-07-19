@@ -40,7 +40,7 @@ body:
    - type: textarea
      id: validate-config-output
      attributes:
-        label: '`npx @inlang/cli config validate` file'
+        label: '`npx @inlang/cli@latest config validate` file'
         description: Please validate the config file with `npx @inlang/cli config validate` and include the output here
         render: sh
    - type: textarea
