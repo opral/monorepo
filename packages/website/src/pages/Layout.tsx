@@ -14,7 +14,7 @@ import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
 import { rpc } from "@inlang/rpc"
-import { defaultLanguage } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage, extractLocale } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 
 /**
@@ -85,7 +85,6 @@ function Header(props: { landingpage?: boolean }) {
 		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
 		{
 			name: "Feedback",
-			external: currentPageContext.urlParsed.pathname.includes("editor"),
 			href: "https://github.com/inlang/inlang/discussions",
 			type: "text" as buttonType,
 		},
@@ -133,7 +132,7 @@ function Header(props: { landingpage?: boolean }) {
 									</div>
 									<For each={links}>
 										{(link) => (
-											<Button type={link.type} href={link.href} chevron={Boolean(link.external)}>
+											<Button type={link.type} href={link.href}>
 												{link.name}
 											</Button>
 										)}
@@ -455,7 +454,10 @@ function UserDropdown() {
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>
 							<sl-menu-item onClick={handleSignOut}>
-								<IconSignOut slot="prefix" />
+								<IconSignOut
+									// @ts-ignore
+									slot="prefix"
+								/>
 								Sign out
 							</sl-menu-item>
 						</sl-menu>
@@ -488,6 +490,17 @@ function LanguagePicker() {
 		},
 	]
 
+	const handleSwitchTransltion = (language: { code: string; name: string }) => {
+		console.log("path", currentPageContext.urlParsed.pathname)
+		window.history.pushState(
+			{},
+			"",
+			(language.code !== defaultLanguage ? "/" + language.code : "") +
+				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale,
+		)
+		locale(language.code)
+	}
+
 	return (
 		<div class="w-fit">
 			<Show when={localeIsLoaded()}>
@@ -506,7 +519,7 @@ function LanguagePicker() {
 									prop:type="checkbox"
 									// @ts-ignore
 									checked={locale() === language.code}
-									onClick={() => locale(language.code)}
+									onClick={() => handleSwitchTransltion(language)}
 								>
 									{language.name}
 									<p class="opacity-50" slot="suffix">
