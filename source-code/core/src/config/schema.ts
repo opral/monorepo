@@ -42,8 +42,10 @@ export type InlangConfig = {
 	 * Available language tags in this project.
 	 */
 	languageTags: BCP47LanguageTag[]
-	readResources: (args: { config: InlangConfig }) => Promise<ast.Resource[]>
-	writeResources: (args: { config: InlangConfig; resources: ast.Resource[] }) => Promise<void>
+
+	getMessages: (args: { config: InlangConfig }) => Promise<ast.Message[]>
+
+	saveMessages: (args: { config: InlangConfig; messages: ast.Message[] }) => Promise<void>
 
 	/**
 	 * Plugins to extend the functionality of inlang.
