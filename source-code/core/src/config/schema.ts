@@ -42,8 +42,11 @@ export type InlangConfig = {
 	 * Available language tags in this project.
 	 */
 	languageTags: BCP47LanguageTag[]
-	readResources: (args: { config: InlangConfig }) => Promise<ast.Resource[]>
-	writeResources: (args: { config: InlangConfig; resources: ast.Resource[] }) => Promise<void>
+
+	// TODO: should be defined in plugin api? https://github.com/inlang/inlang/issues/1140
+	loadMessages: (args: { config: InlangConfig }) => Promise<ast.Message[]>
+	// TODO: should be defined in plugin api? https://github.com/inlang/inlang/issues/1140
+	saveMessages: (args: { config: InlangConfig; messages: ast.Message[] }) => Promise<void>
 
 	/**
 	 * Plugins to extend the functionality of inlang.
@@ -64,15 +67,8 @@ export type InlangConfig = {
 	/**
 	 * The config schema for the ide extension.
 	 */
+	// TODO should be defined in plugin api? https://github.com/inlang/inlang/issues/1140
 	ideExtension?: IdeExtensionConfigSchema
-
-	/**
-	 * WARNING: Experimental properties are not required,
-	 * can change at any time and do not lead to a MAJOR version bump.
-	 *
-	 * Read more under https://inlang.com/documentation/breaking-changes
-	 */
-	experimental?: Record<string, unknown>
 }
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }

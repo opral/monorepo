@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { Resource } from "../ast/zod.js"
+import { Message } from "../ast/zod.js"
 import { zodIdeExtensionConfigSchema } from "./ideExtension/zodSchema.js"
 import type { BCP47LanguageTag } from "../languageTag/types.js"
 
@@ -28,11 +28,11 @@ export const zConfig = z.object({
 			rules: z.array(z.any()),
 		})
 		.optional(),
-	readResources: z
+	loadMessages: z
 		.function()
 		.args(z.any())
-		.returns(z.promise(z.array(Resource))),
-	writeResources: z.function().args(z.any()).returns(z.promise(z.void())),
+		.returns(z.promise(z.array(Message))),
+	saveMessages: z.function().args(z.any()).returns(z.promise(z.void())),
 	ideExtension: zodIdeExtensionConfigSchema.optional(),
 	plugins: z.union([z.undefined(), z.array(z.object({ id: z.string(), config: z.function() }))]),
 	// TODO define lint and experimental

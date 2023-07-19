@@ -1,56 +1,31 @@
 import type { InlangConfig } from "../config/index.js"
 import type * as ast from "../ast/index.js"
-import type { createReportFunction } from "./report.js"
+import type { BCP47LanguageTag } from "../languageTag/types.js"
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
  */
 export type LintRule = {
 	id: `${string}.${string}`
+	// TODO change to 'defaultLevel' for https://github.com/inlang/inlang/issues/1140 ?
+	// a rule can have a default level, but the user can override it in the user config
 	level: "error" | "warn"
-	setup: (args: {
+	message: (args: {
+		message: ast.Message
+		messages: ast.Message[]
 		config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags">
-		report: ReturnType<typeof createReportFunction>
-	}) => MaybePromise<{
-		visitors: Visitors
-	}>
-}
-
-export type Visitors = {
-	Resource?: VisitorFunction<ast.Resource>
-	Message?: VisitorFunction<ast.Message>
-	Pattern?: VisitorFunction<ast.Pattern>
+	}) => MaybePromise<void | Pick<LintReport, "messageId" | "languageTag" | "content">>
 }
 
 /**
  * A report of a given lint rule.
  */
 export type LintReport = {
-	id: LintRule["id"]
+	ruleId: LintRule["id"]
 	level: LintRule["level"]
-	message: string
+	messageId: ast.Message["id"]
+	languageTag: BCP47LanguageTag
+	content: string
 }
 
-/**
- * Nodes that can be linted.
- *
- * The linter will only lint nodes that are of this type.
- */
-export type LintableNode = ast.Resource | ast.Message | ast.Pattern
-
-type VisitorFunction<Node extends LintableNode> = (args: {
-	reference?: Node
-	target?: Node
-}) => MaybePromise<void | "skip">
-
-type LintInformation = {
-	lint?: LintReport[]
-}
-
-export type LintedResource = ast.Resource & LintInformation
-export type LintedMessage = ast.Message & LintInformation
-export type LintedPattern = ast.Pattern & LintInformation
-
-export type LintedNode = LintedResource | LintedMessage | LintedPattern
-
-type MaybePromise<T> = T | Promise<T>
+export type MaybePromise<T> = T | Promise<T>

@@ -7,16 +7,6 @@ import { z } from "zod"
  * the AST nodes. Read more at https://zod.dev/
  */
 
-const Identifier = z.object({
-	type: z.literal("Identifier"),
-	name: z.string(),
-})
-
-const LanguageTag = z.object({
-	type: z.literal("LanguageTag"),
-	name: z.string(),
-})
-
 const Text = z.object({
 	type: z.literal("Text"),
 	value: z.string(),
@@ -32,19 +22,8 @@ const Placeholder = z.object({
 	body: VariableReference,
 })
 
-const Pattern = z.object({
-	type: z.literal("Pattern"),
-	elements: z.array(Text.or(Placeholder)),
-})
-
-const Message = z.object({
-	type: z.literal("Message"),
-	id: Identifier,
-	pattern: Pattern,
-})
-
-export const Resource = z.object({
-	type: z.literal("Resource"),
-	languageTag: LanguageTag,
-	body: z.array(Message),
+export const Message = z.object({
+	id: z.string(),
+	languageTag: z.string(),
+	pattern: z.array(Text.or(Placeholder)),
 })

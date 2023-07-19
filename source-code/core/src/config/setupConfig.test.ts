@@ -1,13 +1,14 @@
 import { it, expect, vi } from "vitest"
 import { setupConfig } from "./setupConfig.js"
-import { createResource } from "../test/utils.js"
+import { createMessage } from "../test/utils.js"
+import type { Message } from "../ast/index.js"
 
 it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource("en"), createResource("de")],
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				plugins: [
 					{
 						id: "mock.plugin",
@@ -32,8 +33,8 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource("en"), createResource("de")],
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
 					{
@@ -100,8 +101,8 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 				defineConfig: async () => ({
 					sourceLanguageTag: "de",
 					languageTags: ["de", "en"],
-					readResources: async () => [createResource("en"), createResource("de")],
-					writeResources: async () => undefined,
+					loadMessages: async () => mockMessages,
+					saveMessages: async () => undefined,
 					plugins: [
 						{
 							id: "mock.plugin",
@@ -119,3 +120,8 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 		expect(error).toBeFalsy()
 	}
 })
+
+const mockMessages: Message[] = [
+	createMessage("first-message", "en", "test"),
+	createMessage("second-message", "de", "test"),
+]
