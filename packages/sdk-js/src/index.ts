@@ -3,10 +3,11 @@ export {
 	languageTags,
 	languageTag,
 	i,
-	switchLanguage,
+	changeLanguageTag,
 	loadResource,
 	route,
 	// deprecated exports
+	switchLanguage,
 	referenceLanguage,
 	languages,
 	language,

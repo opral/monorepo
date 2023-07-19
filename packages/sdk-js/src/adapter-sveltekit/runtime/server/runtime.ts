@@ -21,7 +21,7 @@ export const initSvelteKitServerRuntime = ({
 
 	if (languageTag) {
 		runtime.loadResource(languageTag)
-		runtime.switchLanguage(languageTag)
+		runtime.changeLanguageTag(languageTag)
 	}
 
 	return runtime

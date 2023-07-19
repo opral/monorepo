@@ -13,7 +13,7 @@
 
 	addRuntimeToContext(getRuntimeFromData(data))
 
-	let { i, languageTag, languageTags, loadResource, switchLanguage } = getRuntimeFromContext()
+	let { i, languageTag, languageTags, loadResource, changeLanguageTag } = getRuntimeFromContext()
 
 	$: if (browser && $languageTag) {
 		document.body.parentElement?.setAttribute("lang", $languageTag)
@@ -32,7 +32,7 @@
 		<button
 			on:mouseover={() => loadResource(languageTag)}
 			on:focus={() => loadResource(languageTag)}
-			on:click={() => switchLanguage(languageTag)}>{languageTag}</button
+			on:click={() => changeLanguageTag(languageTag)}>{languageTag}</button
 		>
 	{/each}
 

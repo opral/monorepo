@@ -27,7 +27,7 @@ export const initSvelteKitClientRuntime = async ({
 
 	if (languageTag) {
 		await runtime.loadResource(languageTag)
-		runtime.switchLanguage(languageTag)
+		runtime.changeLanguageTag(languageTag)
 	}
 
 	return runtime

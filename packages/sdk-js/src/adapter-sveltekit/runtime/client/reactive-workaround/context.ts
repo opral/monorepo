@@ -10,6 +10,7 @@ import type * as Runtime from "../../../../runtime/index.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import { logDeprecation } from '../../../../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -21,9 +22,10 @@ type RuntimeContext<
 		languageTags: LanguageTag[]
 		languageTag: LanguageTag
 	i: InlangFunction
-		switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
 		referenceLanguage: LanguageTag
 		language: LanguageTag
 		languages: LanguageTag[]
@@ -34,7 +36,7 @@ export const getRuntimeFromContext = () => getRuntimeFromContextShared() as Runt
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const { languageTag, sourceLanguageTag, languageTags, i, loadResource, referenceLanguage, language, languages } = runtime
 
-	const switchLanguage = async (languageTag: BCP47LanguageTag) => {
+	const changeLanguageTag = async (languageTag: BCP47LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
 
 		localStorage.setItem("languageTag", languageTag)
@@ -48,11 +50,15 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		languageTags,
 		i,
 		loadResource,
-		switchLanguage,
+		changeLanguageTag,
 		route,
 		referenceLanguage,
 		language: language!,
 		languages,
+		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
+			logDeprecation('switchLanguage', 'changeLanguageTag')
+			return changeLanguageTag(...args)
+		},
 	})
 }
 

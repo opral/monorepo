@@ -64,7 +64,7 @@ describe("transformLanguageJson", () => {
 				"import { json } from '@sveltejs/kit';
 				export const entries = async () => {
 				    const { languageTags } = await initState(await import('../../../../inlang.config.js'));
-				    return languageTags.map(languageTag => ({ language }));
+				    return languageTags.map(languageTag => ({ language: languageTag }));
 				};
 				import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { language } }) => {

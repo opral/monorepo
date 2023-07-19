@@ -6,6 +6,7 @@ import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { BCP47LanguageTag } from '@inlang/core/languageTag'
+import { logDeprecation } from '../../../../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 
@@ -17,9 +18,10 @@ type RuntimeContext<
 		sourceLanguageTag: LanguageTag
 		languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
-		switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
 		referenceLanguage: LanguageTag
 		language: LanguageTag
 		languages: LanguageTag[]
@@ -31,12 +33,12 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const _language = writable(runtime.languageTag as BCP47LanguageTag)
 	const _i = writable(runtime.i)
 
-	const switchLanguage = async (languageTag: BCP47LanguageTag) => {
+	const changeLanguageTag = async (languageTag: BCP47LanguageTag) => {
 		if (runtime.languageTag === languageTag) return
 
 		await runtime.loadResource(languageTag)
 
-		runtime.switchLanguage(languageTag)
+		runtime.changeLanguageTag(languageTag)
 
 		_i.set(runtime.i)
 		_language.set(languageTag)
@@ -48,11 +50,15 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		languageTags: runtime.languageTags,
 		i: readonly(_i),
 		loadResource: runtime.loadResource,
-		switchLanguage,
+		changeLanguageTag,
 		route,
 		referenceLanguage: runtime.referenceLanguage,
 		language: runtime.language!,
 		languages: runtime.languages,
+		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
+			logDeprecation('switchLanguage', 'changeLanguageTag')
+			return changeLanguageTag(...args)
+		},
 	})
 }
 

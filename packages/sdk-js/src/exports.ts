@@ -18,7 +18,7 @@ export const i: InlangFunction = () => {
 	throw error
 }
 
-export const switchLanguage: (languageTag: BCP47LanguageTag) => Promise<void> = () => {
+export const changeLanguageTag: (languageTag: BCP47LanguageTag) => Promise<void> = () => {
 	throw error
 }
 
@@ -30,11 +30,11 @@ export const route: (href: RelativeUrl) => RelativeUrl = () => {
 	throw error
 }
 
+/** @deprecated Use `changeLanguageTag` instead. */
+export const switchLanguage = changeLanguageTag
 /** @deprecated Use `sourceLanguageTag` instead. */
-export const referenceLanguage: BCP47LanguageTag = error as any
-
+export const referenceLanguage = sourceLanguageTag
 /** @deprecated Use `languageTags` instead. */
-export const languages: BCP47LanguageTag[] = [error] as any
-
+export const languages = languageTags
 /** @deprecated Use `languageTag` instead. */
-export const language: BCP47LanguageTag = error as any
+export const language = languageTag
