@@ -1,5 +1,4 @@
 import { browser } from "$app/environment"
-import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
 import { detectLanguage, type Detector } from "../../../detectors/index.js"
 import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
@@ -11,10 +10,11 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
-let initializedRuntime: Record<Language, SvelteKitClientRuntime> = {}
+let initializedRuntime: Record<BCP47LanguageTag, SvelteKitClientRuntime> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -46,7 +46,7 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 			: await detectLanguage({ referenceLanguage, languages }, ...options.initDetectors(event))
 
 	const runtime =
-		initializedRuntime[language as Language] ||
+		initializedRuntime[language as BCP47LanguageTag] ||
 		(await initSvelteKitClientRuntime({
 			fetch: event.fetch,
 			language,
@@ -67,9 +67,9 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 export type DataPayload = {
 	"[inlang]": {
-		referenceLanguage: Language
-		languages: Language[]
-		language: Language | undefined
+		referenceLanguage: BCP47LanguageTag
+		languages: BCP47LanguageTag[]
+		language: BCP47LanguageTag | undefined
 	}
 }
 
@@ -106,7 +106,7 @@ export const initRootPageLoadWrapper = <
 	initDetectors?: (event: Parameters<PageLoad>[0]) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Parameters<PageLoad>[0], language: Language) => URL | string
+		getPath: (event: Parameters<PageLoad>[0], language: BCP47LanguageTag) => URL | string
 	}
 }) => ({
 	use:
@@ -119,7 +119,7 @@ export const initRootPageLoadWrapper = <
 		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
 			const data = await event.parent()
 
-			const language: Language | undefined = data.language
+			const language: BCP47LanguageTag | undefined = data.language
 
 			if (!language && options.browser) {
 				const { referenceLanguage, languages } = data

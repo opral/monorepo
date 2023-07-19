@@ -13,8 +13,8 @@ export const initState = async (module: InlangConfigModule) => {
 			const { languages, referenceLanguage, resources } = await import("virtual:inlang-static")
 
 			config = {
-				referenceLanguage,
-				languages,
+				sourceLanguageTag: referenceLanguage,
+				languageTags: languages,
 				readResources: async () => resources,
 				writeResources: async () => undefined,
 			} as InlangConfig
@@ -30,8 +30,8 @@ export const initState = async (module: InlangConfigModule) => {
 	await reloadResources()
 
 	return {
-		referenceLanguage: config.referenceLanguage,
-		languages: config.languages,
+		referenceLanguage: config.sourceLanguageTag,
+		languages: config.languageTags,
 	}
 }
 

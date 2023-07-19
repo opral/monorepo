@@ -1,5 +1,5 @@
 // workaround for https://github.com/inlang/inlang/issues/1091
-import type * as Ast from "@inlang/core/ast"
+
 import { setContext } from "svelte"
 import { get } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
@@ -7,14 +7,14 @@ import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { Language } from "@inlang/core/ast"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	Language extends BCP47LanguageTag = BCP47LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
 	referenceLanguage: Language
@@ -31,7 +31,7 @@ export const getRuntimeFromContext = () => getRuntimeFromContextShared() as Runt
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	const { language, referenceLanguage, languages, i, loadResource } = runtime
 
-	const switchLanguage = async (language: Language) => {
+	const switchLanguage = async (language: BCP47LanguageTag) => {
 		if (runtime.language === language) return
 
 		localStorage.setItem("language", language)

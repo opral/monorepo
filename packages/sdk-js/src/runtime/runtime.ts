@@ -6,6 +6,7 @@ import {
 	type InlangFunction,
 	type InlangString,
 } from "./inlang-function.js"
+import type { BCP47LanguageTag } from '@inlang/core/languageTag'
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>
 	!!p && typeof p === "object" && typeof (p as Promise<T>).then === "function"
@@ -15,46 +16,46 @@ const fallbackInlangFunction: InlangFunction = () => "" as InlangString
 type MaybePromise<T> = T | Promise<T>
 
 export type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	LanguageTag extends BCP47LanguageTag = BCP47LanguageTag,
 	ReadResourcesMaybePromise extends
 		| (Ast.Resource | undefined)
 		| Promise<Ast.Resource | undefined> = MaybePromise<Resource | undefined>,
 > = {
-	readResource: (language: Language) => ReadResourcesMaybePromise
+		readResource: (language: LanguageTag) => ReadResourcesMaybePromise
 }
 
-export type RuntimeState<Language extends Ast.Language = Ast.Language> = {
+export type RuntimeState<Language extends BCP47LanguageTag = BCP47LanguageTag> = {
 	resources: Map<Language, Ast.Resource>
 	language: Language | undefined
 	i: InlangFunction<any> | undefined
 }
 
 export const initRuntime = <
-	Language extends Ast.Language,
+	LanguageTag extends BCP47LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
-	context: RuntimeContext<Language, ReadResourcesMaybePromise>,
-) => initBaseRuntime<Language, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
+	context: RuntimeContext<LanguageTag, ReadResourcesMaybePromise>,
+) => initBaseRuntime<LanguageTag, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
 
 export type Runtime = ReturnType<typeof initRuntime>
 
 export const initBaseRuntime = <
-	Language extends Ast.Language,
+	LanguageTag extends BCP47LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
-	{ readResource }: RuntimeContext<Language, ReadResourcesMaybePromise>,
-	state: RuntimeState<Language> = {
+	{ readResource }: RuntimeContext<LanguageTag, ReadResourcesMaybePromise>,
+	state: RuntimeState<LanguageTag> = {
 		resources: new Map(),
 		language: undefined,
 		i: undefined,
 	},
 ) => {
-	const loadResourcePromises = new Map<Language, ReadResourcesMaybePromise>()
+	const loadResourcePromises = new Map<LanguageTag, ReadResourcesMaybePromise>()
 	let isLoadResourceFunctionAsync = false
 
-	const loadResource = (language: Language): ReadResourcesMaybePromise => {
+	const loadResource = (language: LanguageTag): ReadResourcesMaybePromise => {
 		if (state.resources.has(language))
 			return isLoadResourceFunctionAsync
 				? (Promise.resolve() as ReadResourcesMaybePromise)
@@ -88,7 +89,7 @@ export const initBaseRuntime = <
 		return promise
 	}
 
-	const switchLanguage = (language: Language) => {
+	const switchLanguage = (language: LanguageTag) => {
 		state.language = language
 		state.i = undefined
 	}
@@ -98,7 +99,7 @@ export const initBaseRuntime = <
 	const getInlangFunction = () => {
 		if (state.i) return state.i
 
-		const resource = state.resources.get(state.language as Language)
+		const resource = state.resources.get(state.language as LanguageTag)
 		if (!resource) return fallbackInlangFunction
 
 		return (state.i = createInlangFunction<InlangFunctionArgs>(resource))
@@ -117,16 +118,16 @@ export const initBaseRuntime = <
 }
 
 export const initRuntimeWithLanguageInformation = <
-	Language extends Ast.Language,
+	LanguageTag extends BCP47LanguageTag,
 	ReadResourcesMaybePromise extends (Ast.Resource | undefined) | Promise<Ast.Resource | undefined>,
 	InlangFunctionArgs extends InlangFunctionBaseArgs = InlangFunctionBaseArgs,
 >(
-	context: RuntimeContext<Language, ReadResourcesMaybePromise> & {
-		referenceLanguage: Language
-		languages: Language[]
+	context: RuntimeContext<LanguageTag, ReadResourcesMaybePromise> & {
+		referenceLanguage: LanguageTag
+		languages: LanguageTag[]
 	},
 ) => {
-	const runtime = initBaseRuntime<Language, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
+	const runtime = initBaseRuntime<LanguageTag, ReadResourcesMaybePromise, InlangFunctionArgs>(context)
 
 	return {
 		...runtime,
