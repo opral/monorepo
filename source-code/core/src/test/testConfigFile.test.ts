@@ -27,8 +27,8 @@ it("should allow $import statements", async () => {
       return {
         sourceLanguageTag: "en",
         languageTags: ["en"],
-        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
-        writeResources: () => undefined,
+        loadMessages: () => [],
+        saveMessages: () => undefined,
       }
     }
   `
@@ -47,8 +47,8 @@ it("should allow JSDoc import statements", async () => {
       return {
         sourceLanguageTag: "en",
         languageTags: ["en"],
-        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
-        writeResources: () => undefined,
+        loadMessages: () => [],
+        saveMessages: () => undefined,
       }
     }
   `

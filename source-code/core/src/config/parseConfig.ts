@@ -29,7 +29,7 @@ export async function parseConfig(args: {
 		definedGetAndSaveMessages(args.config)
 		const parsedConfig = zConfig.passthrough().parse(args.config)
 		sourceLanguageTagMustBeInLanguageTags(args.config)
-		const messages = await args.config.getMessages({ config: args.config })
+		const messages = await args.config.loadMessages({ config: args.config })
 		validateMessages(messages)
 		await roundtripTest(args.config, messages)
 		return [parsedConfig as InlangConfig, undefined]
@@ -39,9 +39,9 @@ export async function parseConfig(args: {
 }
 
 function definedGetAndSaveMessages(config: InlangConfig) {
-	if (!config.getMessages || !config.getMessages) {
+	if (!config.loadMessages || !config.saveMessages) {
 		throw new ParseConfigException(
-			`getMessages() or getMessages() are undefined. Did you forget to use a plugin? See https://inlang.com/documentation/plugins/registry.`,
+			`loadMessages() or saveMessages() are undefined. Did you forget to use a plugin? See https://inlang.com/documentation/plugins/registry.`,
 		)
 	}
 }
@@ -93,7 +93,7 @@ async function roundtripTest(config: InlangConfig, initialMessages: ast.Message[
 	const commonErrorMessage =
 		"A roundtrip test of the getMessages and saveMessages functions failed:\n"
 	await config.saveMessages({ config, messages: initialMessages })
-	const getMessagesAgain = await config.getMessages({ config })
+	const getMessagesAgain = await config.loadMessages({ config })
 	// check if the number of messages are identical
 	if (initialMessages.length !== getMessagesAgain.length) {
 		throw new ParseConfigException(commonErrorMessage + "The number of messages do not match.")

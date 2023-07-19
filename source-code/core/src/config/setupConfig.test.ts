@@ -7,8 +7,8 @@ it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				getMessages: async () => mockResource,
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				plugins: [
 					{
 						id: "mock.plugin",
@@ -33,8 +33,8 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => mockResource,
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
 					{
@@ -101,8 +101,8 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 				defineConfig: async () => ({
 					sourceLanguageTag: "de",
 					languageTags: ["de", "en"],
-					readResources: async () => mockResource,
-					writeResources: async () => undefined,
+					loadMessages: async () => mockMessages,
+					saveMessages: async () => undefined,
 					plugins: [
 						{
 							id: "mock.plugin",
@@ -121,7 +121,7 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 	}
 })
 
-const mockResource: Message[] = [
+const mockMessages: Message[] = [
 	createMessage("first-message", "en", "test"),
 	createMessage("second-message", "de", "test"),
 ]

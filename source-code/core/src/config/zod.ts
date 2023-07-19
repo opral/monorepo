@@ -28,7 +28,7 @@ export const zConfig = z.object({
 			rules: z.array(z.any()),
 		})
 		.optional(),
-	getMessages: z
+	loadMessages: z
 		.function()
 		.args(z.any())
 		.returns(z.promise(z.array(Message))),
