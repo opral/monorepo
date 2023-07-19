@@ -27,7 +27,7 @@ export function Page(props: PageProps) {
 
 		if (!props.markdown?.renderableTree) return
 
-		for (const heading of props.markdown?.renderableTree.children) {
+		for (const heading of props.markdown.renderableTree.children) {
 			if (heading.name === "Heading") {
 				if (heading.children[0].name) {
 					setHeadings((prev) => [...prev, heading.children[0].children[0]])
