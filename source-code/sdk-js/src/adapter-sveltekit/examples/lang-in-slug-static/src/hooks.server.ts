@@ -3,7 +3,7 @@ import { serverFn } from "./utils/server.js"
 
 export const handle = initHandleWrapper({
 	inlangConfigModule: import("../inlang.config.js"),
-	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	parseLanguageTag: ({ url }) => url.pathname.split("/")[1],
 }).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())
 

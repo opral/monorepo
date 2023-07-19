@@ -1,2 +1,7 @@
 export type { Detector, DetectorInitializer } from "./types.js"
-export { detectLanguage } from "./detectLanguage.js"
+import { detectLanguageTag } from "./detectLanguageTag.js"
+
+/** @deprecated Use `detectLanguageTag` instead. */
+const detectLanguage = detectLanguageTag
+
+export { detectLanguageTag, detectLanguage }

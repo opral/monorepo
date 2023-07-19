@@ -31,7 +31,7 @@ const getOptions = (config: TransformConfig) => {
 	{
 		inlangConfigModule: import("../inlang.config.js"),
 		excludedRoutes: ${JSON.stringify(config.inlang.sdk.routing.exclude)},
-		getLanguage: ${
+		parseLanguageTag: ${
 			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
 		${

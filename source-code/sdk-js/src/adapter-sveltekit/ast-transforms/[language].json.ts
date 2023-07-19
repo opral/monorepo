@@ -52,7 +52,7 @@ export const transformLanguageJson = (filePath: string, config: TransformConfig,
 			export const entries = async () => {
 				const { languageTags } = await initState(await import('../../../../inlang.config.js'))
 
-				return languageTags.map(languageTag => ({ language }))
+				return languageTags.map(languageTag => ({ language: languageTag }))
 			}
 		`,
 		)

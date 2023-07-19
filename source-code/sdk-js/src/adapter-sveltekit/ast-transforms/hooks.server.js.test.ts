@@ -21,7 +21,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
-					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
+					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
 					    initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 					    redirect: {
 					        throwable: redirect,
@@ -41,7 +41,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
-					    getLanguage: ({ url }) => url.pathname.split(\\"/\\")[1],
+					    parseLanguageTag: ({ url }) => url.pathname.split(\\"/\\")[1],
 					}).use(({ resolve, event }) => resolve(event));"
 				`)
 			})
@@ -58,7 +58,7 @@ describe("transformHooksServerJs", () => {
 					export const handle = initHandleWrapper({
 					    inlangConfigModule: import(\\"../inlang.config.js\\"),
 					    excludedRoutes: [],
-					    getLanguage: () => undefined,
+					    parseLanguageTag: () => undefined,
 					}).use(({ resolve, event }) => resolve(event));"
 				`)
 			})
@@ -104,7 +104,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
-			    getLanguage: () => undefined,
+			    parseLanguageTag: () => undefined,
 			}).use(({ resolve, event }) => resolve(event));"
 		`)
 	})
@@ -126,7 +126,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
-			    getLanguage: () => undefined,
+			    parseLanguageTag: () => undefined,
 			}).use(function handle({ event, resolve }) {
 			    console.info('TADAA!');
 			    return resolve(event);
@@ -163,7 +163,7 @@ describe("transformHooksServerJs", () => {
 			export const handle = initHandleWrapper({
 			    inlangConfigModule: import(\\"../inlang.config.js\\"),
 			    excludedRoutes: [],
-			    getLanguage: () => undefined,
+			    parseLanguageTag: () => undefined,
 			}).use(sequence(handle1, handle2));"
 		`)
 	})

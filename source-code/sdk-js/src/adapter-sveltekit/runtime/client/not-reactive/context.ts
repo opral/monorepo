@@ -50,7 +50,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 	})
 }
 
-const route = (languageTag: string, href: RelativeUrl) => {
+const route = (languageTag: BCP47LanguageTag, href: RelativeUrl) => {
 	if (!href.startsWith("/")) return href as RelativeUrl
 
 	const url = `/${languageTag}${href}`

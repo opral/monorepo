@@ -329,7 +329,7 @@ describe.skip("transformLayoutSvelte", () => {
 
 						({
 						    languageTag,
-						    i: i,
+						    i,
 						    languageTags
 						} = getRuntimeFromContext());
 
@@ -372,7 +372,7 @@ describe.skip("transformLayoutSvelte", () => {
 
 						({
 						    languageTag,
-						    i: i,
+						    i,
 						    languageTags
 						} = getRuntimeFromContext());
 
