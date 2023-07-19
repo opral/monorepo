@@ -74,5 +74,11 @@
 				"tooltip": "Kopieren"
 			}
 		}
+	},
+	"newsletter": {
+		"unsubscribed": {
+			"title": "Abmeldung erfolgreich",
+			"description": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
+		}
 	}
 }

@@ -74,5 +74,11 @@
 				"tooltip": "Copy"
 			}
 		}
+	},
+	"newsletter": {
+		"unsubscribed": {
+			"title": "You're unsubscribed",
+			"description": "We're sad to see you go. If you have any feedback, please let us know on our"
+		}
 	}
 }
