@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.9.2
+
+### Patch Changes
+
+- c9d41796: correctly set `html` `lang` attribute when changing language
+
 ## 0.9.1
 
 ### Patch Changes
