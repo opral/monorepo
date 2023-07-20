@@ -10,6 +10,10 @@ export type LintRule = {
 	// TODO change to 'defaultLevel' for https://github.com/inlang/inlang/issues/1140 ?
 	// a rule can have a default level, but the user can override it in the user config
 	level: "error" | "warn"
+	// TODO add type property with callback instead of message callback
+	// - makes the lint rule agnostic
+	// - doesn't mix 
+	// type: "Message"
 	message: (args: {
 		message: ast.Message
 		messages: ast.Message[]
@@ -21,6 +25,8 @@ export type LintRule = {
  * A report of a given lint rule.
  */
 export type LintReport = {
+	// TODO add type property "Message", "Code", etc.
+	// - makes the lint report agnostic
 	ruleId: LintRule["id"]
 	level: LintRule["level"]
 	messageId: ast.Message["id"]
