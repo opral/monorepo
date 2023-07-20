@@ -29,6 +29,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				{#key language}<slot />{/key}"
@@ -60,6 +61,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(data);
 				</script>{#key language}
@@ -101,6 +103,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				<svelte:window on:load={onLoad} />{#key language}
@@ -174,6 +177,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>{#key language}
 
@@ -203,6 +207,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
 				</script>{#key language}
@@ -238,6 +243,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
 				</script>{#key language}
@@ -261,6 +267,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				{#key language}<slot />{/key}"
