@@ -63,6 +63,11 @@ const exampleInlangConfig: InlangConfig = {
 	plugins: [
 		{ module: "https://example.com/myPlugin.js", options: { pathPattern: "src/**/*.{ts,tsx}" } },
 	],
+  lint: {
+    rules: {
+      "inlang.missingMessage": "warning"
+    }
+  }
 }
 
 // 1. The JSON config needs to be read manually.  
