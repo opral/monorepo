@@ -21,14 +21,15 @@ export async function isInWorkspaceRecommendation(args: {
 	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
 		extensions = JSON.parse(fs.readFileSync(extensionsJsonPath, "utf8"))
 	}
-
-	if (!extensions || !extensions.recommendations.includes("inlang.vs-code-extension")) {
-		return false
-	} else if (extensions.recommendations.includes("inlang.vs-code-extension")) {
+	const extensionsResult =
+		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
+	if (extensionsResult === true) {
 		return true
+	} else {
+		return false
 	}
-	return undefined
 }
+
 export const recommendation = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> => {
