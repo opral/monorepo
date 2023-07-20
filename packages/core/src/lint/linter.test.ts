@@ -39,6 +39,8 @@ describe("lint", async () => {
 		}
 		await doLint([rule], [cloned])
 		expect(cloned).toStrictEqual(mockMessage)
+
+		languageTags = []
 	})
 
 	test("it should not abort the linting process when errors occur", async () => {
