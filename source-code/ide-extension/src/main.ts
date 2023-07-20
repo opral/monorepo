@@ -15,12 +15,12 @@ import { promptToReloadWindow } from "./utilities/promptToReload.js"
 import { coreUsedConfigEvent } from "@inlang/telemetry"
 import {
 	recommendation,
-	isDisabledRecommendation,
+	// isDisabledRecommendation,
 	isInWorkspaceRecommendation,
 } from "./utilities/recommendation.js"
 import {
 	createInlangConfigFile,
-	isDisabledConfigFileCreation,
+	// isDisabledConfigFileCreation,
 } from "./utilities/createInlangConfigFile.js"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -42,13 +42,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			properties: {
 				vscode_version: vscode.version,
 				version: version,
-				$set: {
-					// this information are user based, it will help us to create cohorts and to get a understanding why some projects are exclude
-					"user-IDE-settings": {
-						workspaceRecommendationSettingIsEnabled: !(await isDisabledRecommendation()),
-						autoConfigRecommendationSettingIsEnabled: !(await isDisabledConfigFileCreation()),
-					},
-				},
 			},
 		})
 		msg("Inlang extension activated.", "info")
