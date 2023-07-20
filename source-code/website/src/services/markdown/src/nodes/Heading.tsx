@@ -85,37 +85,38 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 			}
 			onClick={() => {
 				if (typeof element === "object" && element instanceof HTMLDivElement) {
-					props.children
+					const headlineText = props.children
 						?.toString()
 						.replace(" ", "-")
 						.replace("#", "")
 						.toLowerCase()
 						.includes("native code")
-						? copy(
-								("https://" +
-									document.location.host +
-									document.location.pathname +
-									"#" +
-									element?.innerText
-										?.toString()
-										.replaceAll(" ", "-")
-										.replaceAll("/", "")
-										.replaceAll(/\(.*?\)/g, "")
-										.replaceAll("#", "")
-										.replace(/-$/, "")
-										.toLowerCase()) as string,
-						  )
-						: copy(
-								("https://" +
-									document.location.host +
-									document.location.pathname +
-									"#" +
-									props.children
-										?.toString()
-										.replaceAll(" ", "-")
-										.replace(/-$/, "")
-										.toLowerCase()) as string,
-						  )
+						? (element?.innerText
+								?.toString()
+								.replaceAll(" ", "-")
+								.replaceAll("/", "")
+								.replaceAll(/\(.*?\)/g, "")
+								.replaceAll("#", "")
+								.replace(/-$/, "")
+								.toLowerCase() as string)
+						: (props.children
+								?.toString()
+								.replaceAll(" ", "-")
+								.replace(/-$/, "")
+								.toLowerCase() as string)
+
+					console.log(headlineText)
+
+					const link =
+						document.location.protocol +
+						"//" +
+						document.location.host +
+						document.location.pathname +
+						"#" +
+						headlineText
+
+					copy(link)
+					window.history.pushState({}, "", link)
 				}
 				showToast({ variant: "success", title: "Copied link to clipboard", duration: 3000 })
 			}}
