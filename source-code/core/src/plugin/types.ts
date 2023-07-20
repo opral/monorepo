@@ -27,6 +27,7 @@ export type PluginSetupFunction = (env: InlangEnvironment) => Plugin
  */
 export type Plugin = {
 	id: `${string}.${string}`
+	// TODO remove config to use plugin api instead
 	config(config: Readonly<Partial<InlangConfig>>): MaybePromise<Partial<InlangConfig>>
 }
 
