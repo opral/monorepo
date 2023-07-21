@@ -25,14 +25,14 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
-				{#key language}<slot />{/key}"
+				{#key languageTag}<slot />{/key}"
 			`)
 		})
 
@@ -57,14 +57,14 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(data);
-				</script>{#key language}
+				</script>{#key languageTag}
 
 				<h1>this is a test</h1>
 
@@ -99,26 +99,26 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
-				<svelte:window on:load={onLoad} />{#key language}
+				<svelte:window on:load={onLoad} />{#key languageTag}
 
 				test
 
-				{/key}<svelte:body on:click={onClick} />{#key language}
+				{/key}<svelte:body on:click={onClick} />{#key languageTag}
 
 				other test
 
 				{/key}<svelte:head>
 					<title>test</title>
-				</svelte:head>{#key language}
+				</svelte:head>{#key languageTag}
 
-				{/key}<svelte:options tag=\\"test\\" />{#key language}
+				{/key}<svelte:options tag=\\"test\\" />{#key languageTag}
 
 				random content{/key}"
 			`)
@@ -143,14 +143,14 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
-				    ({ i, language } = getRuntimeFromContext());
+				    ({ i, languageTag } = getRuntimeFromContext());
 				}
-				</script>{#if language}{#key language}
+				</script>{#if languageTag}{#key languageTag}
 
-				{/key}{/if}<svelte:head>{#key language}
+				{/key}{/if}<svelte:head>{#key languageTag}
 					<title>{i('title')}</title>
 				{/key}{/if}<</svelte:head>"
 			`)
@@ -159,10 +159,10 @@ describe("transformLayoutSvelte", () => {
 		test("should remove @inlang/sdk-js imports that are used reactively", () => {
 			const code = dedent`
 				<script>
-					import { language } from '@inlang/sdk-js'
+					import { languageTag } from '@inlang/sdk-js'
 				</script>
 
-				{language}
+				{languageTag}
 			`
 			const config = initTransformConfig()
 			const transformed = transformLayoutSvelte("", config, code, true)
@@ -173,15 +173,15 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
-				</script>{#key language}
+				</script>{#key languageTag}
 
-				{language}{/key}"
+				{languageTag}{/key}"
 			`)
 		})
 
@@ -203,14 +203,14 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
-				</script>{#key language}
+				</script>{#key languageTag}
 
 				<slot />{/key}"
 			`)
@@ -239,14 +239,14 @@ describe("transformLayoutSvelte", () => {
 				console.info(123);
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
-				</script>{#key language}
+				</script>{#key languageTag}
 
 				<slot />{/key}"
 			`)
@@ -263,14 +263,14 @@ describe("transformLayoutSvelte", () => {
 				import { getRuntimeFromData } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				export let data;
 				addRuntimeToContext(getRuntimeFromData(data));
-				let { i, language } = getRuntimeFromContext();
+				let { i, languageTag } = getRuntimeFromContext();
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
 				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
-				{#key language}<slot />{/key}"
+				{#key languageTag}<slot />{/key}"
 			`)
 		})
 	})
@@ -317,9 +317,9 @@ describe.skip("transformLayoutSvelte", () => {
 						initTransformConfig(),
 						dedent`
 							<script>
-								import { languages, i } from "@inlang/sdk-js"
+								import { languageTags, i } from "@inlang/sdk-js"
 
-								console.info(languages)
+								console.info(languageTags)
 							</script>
 
 							{i('hello')}
@@ -331,24 +331,24 @@ describe.skip("transformLayoutSvelte", () => {
 						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 						export let data;
-						let language, i, languages;
+						let languageTag, i, languageTags;
 						addRuntimeToContext(getRuntimeFromData(data));
 
 						({
-						    language: language,
-						    i: i,
-						    languages: languages
+						    languageTag,
+						    i,
+						    languageTags
 						} = getRuntimeFromContext());
 
 						$:
-						if (browser && $language) {
-						    document.body.parentElement?.setAttribute(\\"lang\\", $language);
-						    localStorage.setItem(\\"language\\", $language);
+						if (browser && $languageTag) {
+						    document.body.parentElement?.setAttribute(\\"lang\\", $languageTag);
+						    localStorage.setItem(\\"languageTag\\", $languageTag);
 						}
 
-						console.info(languages)</script>
+						console.info(languageTags)</script>
 
-						{#if $language}{$i('hello')}{/if}"
+						{#if $languageTag}{$i('hello')}{/if}"
 					`)
 				})
 
@@ -360,9 +360,9 @@ describe.skip("transformLayoutSvelte", () => {
 						}),
 						dedent`
 							<script>
-								import { languages, i } from "@inlang/sdk-js"
+								import { languageTags, i } from "@inlang/sdk-js"
 
-								console.info(languages)
+								console.info(languageTags)
 							</script>
 
 							{i('hello')}
@@ -374,13 +374,13 @@ describe.skip("transformLayoutSvelte", () => {
 						import { getRuntimeFromContext, addRuntimeToContext } from \\"@inlang/sdk-js/adapter-sveltekit/client/not-reactive\\";
 						import { getRuntimeFromData } from \\"@inlang/sdk-js/adapter-sveltekit/shared\\";
 						export let data;
-						let language, i, languages;
+						let languageTag, i, languageTags;
 						addRuntimeToContext(getRuntimeFromData(data));
 
 						({
-						    language: language,
-						    i: i,
-						    languages: languages
+						    languageTag,
+						    i,
+						    languageTags
 						} = getRuntimeFromContext());
 
 						$:
@@ -388,14 +388,14 @@ describe.skip("transformLayoutSvelte", () => {
 						    addRuntimeToContext(getRuntimeFromData(data));
 
 						    ({
-						        language: language,
+						        languageTag,
 						        i: i
 						    } = getRuntimeFromContext());
 						}
 
-						console.info(languages)</script>
+						console.info(languageTags)</script>
 
-						{#key language}{i('hello')}{/key}"
+						{#key languageTag}{i('hello')}{/key}"
 					`)
 				})
 			})
@@ -408,13 +408,13 @@ describe.skip("transformLayoutSvelte", () => {
 				const config = initTransformConfig()
 				const input = dedent`
 					<script>
-						import { language } from '@inlang/sdk-js'
+						import { languageTag } from '@inlang/sdk-js'
 						export let data
 					</script>
 
 					<h1>Hello {data.name}!</h1>
 
-					{language.toUpperCase()}
+					{languageTag.toUpperCase()}
 				`
 				const transformed = transformLayoutSvelte("", config, input, false)
 				// expect(transformed).toMatch(transformSvelte(config, input))

@@ -31,7 +31,7 @@ const getOptions = (config: TransformConfig) => {
 	{
 		inlangConfigModule: import("../inlang.config.js"),
 		excludedRoutes: ${JSON.stringify(config.inlang.sdk.routing.exclude)},
-		getLanguage: ${
+		parseLanguageTag: ${
 			config.languageInUrl ? `({ url }) => url.pathname.split("/")[1]` : `() => undefined`
 		},
 		${
@@ -40,7 +40,7 @@ const getOptions = (config: TransformConfig) => {
 			initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 			redirect: {
 				throwable: redirect,
-				getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+				getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 			},
 		`
 				: ""

@@ -1,68 +1,37 @@
 import type { InlangConfig } from "../config/index.js"
 import type * as ast from "../ast/index.js"
-import type { createReportFunction } from "./report.js"
+import type { LanguageTag } from "../languageTag/types.js"
 
 /**
  * A lint rule that was configured with the lint level and lint specific settings.
  */
 export type LintRule = {
 	id: `${string}.${string}`
+	// TODO change to 'defaultLevel' for https://github.com/inlang/inlang/issues/1140 ?
+	// a rule can have a default level, but the user can override it in the user config
 	level: "error" | "warn"
-	setup: (args: {
-		config: Pick<InlangConfig, "referenceLanguage" | "languages">
-		report: ReturnType<typeof createReportFunction>
-	}) => MaybePromise<{
-		visitors: Visitors
-	}>
-}
-
-export type Visitors = {
-	Resource?: VisitorFunction<ast.Resource>
-	Message?: VisitorFunction<ast.Message>
-	Pattern?: VisitorFunction<ast.Pattern>
+	// TODO add type property with callback instead of message callback
+	// - makes the lint rule agnostic
+	// - doesn't mix 
+	// type: "Message"
+	message: (args: {
+		message: ast.Message
+		messages: ast.Message[]
+		config: Pick<InlangConfig, "sourceLanguageTag" | "languageTags">
+	}) => MaybePromise<void | Pick<LintReport, "messageId" | "languageTag" | "content">>
 }
 
 /**
  * A report of a given lint rule.
  */
 export type LintReport = {
-	id: LintRule["id"]
+	// TODO add type property "Message", "Code", etc.
+	// - makes the lint report agnostic
+	ruleId: LintRule["id"]
 	level: LintRule["level"]
-	message: string
+	messageId: ast.Message["id"]
+	languageTag: LanguageTag
+	content: string
 }
 
-/**
- * Nodes that can be linted.
- *
- * The linter will only lint nodes that are of this type.
- */
-export type LintableNode = ast.Resource | ast.Message | ast.Pattern
-
-type VisitorFunction<Node extends LintableNode> = (args: {
-	reference?: Node
-	target?: Node
-}) => MaybePromise<void | "skip">
-
-type LintInformation = {
-	lint?: LintReport[]
-}
-
-type LintExtension = {
-	Resource: LintInformation
-	Message: LintInformation
-	Pattern: LintInformation
-}
-
-export type LintedResource = Pretty<ast.Resource<LintExtension>>
-export type LintedMessage = Pretty<ast.Message<LintExtension>>
-export type LintedPattern = Pretty<ast.Pattern<LintExtension>>
-
-export type LintedNode = LintedResource | LintedMessage | LintedPattern
-
-type MaybePromise<T> = T | Promise<T>
-
-type Pretty<T> = T extends (...args: any[]) => any
-	? T
-	: T extends abstract new (...args: any[]) => any
-	? T
-	: { [K in keyof T]: T[K] }
+export type MaybePromise<T> = T | Promise<T>

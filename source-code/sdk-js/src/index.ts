@@ -1,10 +1,15 @@
 export {
+	sourceLanguageTag,
+	languageTags,
+	languageTag,
+	i,
+	changeLanguageTag,
+	loadResource,
+	route,
+	// deprecated exports
+	switchLanguage,
 	referenceLanguage,
 	languages,
 	language,
-	i,
-	switchLanguage,
-	loadResource,
-	route,
 } from "./exports.js"
 export { type RelativeUrl } from "./types.js"

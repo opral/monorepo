@@ -63,8 +63,8 @@ describe("transformLanguageJson", () => {
 			expect(transformed).toMatchInlineSnapshot(`
 				"import { json } from '@sveltejs/kit';
 				export const entries = async () => {
-				    const { languages } = await initState(await import('../../../../inlang.config.js'));
-				    return languages.map(language => ({ language }));
+				    const { languageTags } = await initState(await import('../../../../inlang.config.js'));
+				    return languageTags.map(languageTag => ({ language: languageTag }));
 				};
 				import { initState, getResource, reloadResources } from '@inlang/sdk-js/adapter-sveltekit/server';
 				export const GET = async ({ params: { language } }) => {

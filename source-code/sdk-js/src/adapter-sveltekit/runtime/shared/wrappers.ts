@@ -1,7 +1,6 @@
 import { browser } from "$app/environment"
-import type { Language } from "@inlang/core/ast"
 import type * as Kit from "@sveltejs/kit"
-import { detectLanguage, type Detector } from "../../../detectors/index.js"
+import { detectLanguageTag, type Detector } from "../../../detectors/index.js"
 import { initSvelteKitClientRuntime, type SvelteKitClientRuntime } from "../client/runtime.js"
 import {
 	addRuntimePromiseToEvent,
@@ -11,10 +10,11 @@ import {
 	getRuntimePromiseFromEvent,
 	wait,
 } from "./utils.js"
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 // ------------------------------------------------------------------------------------------------
 
-let initializedRuntime: Record<Language, SvelteKitClientRuntime> = {}
+let initializedRuntime: Record<LanguageTag, SvelteKitClientRuntime> = {}
 
 const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, any>>(
 	event: Parameters<Load>[0],
@@ -37,27 +37,27 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 	addRuntimePromiseToEvent(event, new Promise((resolve) => (resolveRuntimePromise = resolve)))
 
 	const data = (event.data as DataPayload)["[inlang]"]
-	const { referenceLanguage, languages } = data
+	const { sourceLanguageTag, languageTags } = data
 
 	// TODO: only add this conditional logic if shared detection strategies get used
-	const language =
-		data.language || !options.initDetectors
-			? data.language
-			: await detectLanguage({ referenceLanguage, languages }, ...options.initDetectors(event))
+	const languageTag =
+		data.languageTag || !options.initDetectors
+			? data.languageTag
+			: await detectLanguageTag({ sourceLanguageTag, languageTags }, ...options.initDetectors(event))
 
 	const runtime =
-		initializedRuntime[language as Language] ||
+		initializedRuntime[languageTag as LanguageTag] ||
 		(await initSvelteKitClientRuntime({
 			fetch: event.fetch,
-			language,
-			referenceLanguage,
-			languages,
+			languageTag,
+			sourceLanguageTag,
+			languageTags,
 		}))
 
 	resolveRuntimePromise(runtime)
 
-	if (browser && language) {
-		initializedRuntime = { [language]: runtime }
+	if (browser && languageTag) {
+		initializedRuntime = { [languageTag]: runtime }
 	}
 
 	return runtime
@@ -67,9 +67,9 @@ const initRuntimeForWrappers = async <Load extends Kit.Load<any, any, any, any, 
 
 export type DataPayload = {
 	"[inlang]": {
-		referenceLanguage: Language
-		languages: Language[]
-		language: Language | undefined
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
+		languageTag: LanguageTag | undefined
 	}
 }
 
@@ -106,7 +106,7 @@ export const initRootPageLoadWrapper = <
 	initDetectors?: (event: Parameters<PageLoad>[0]) => Detector[]
 	redirect?: {
 		throwable: typeof Kit.redirect
-		getPath: (event: Parameters<PageLoad>[0], language: Language) => URL | string
+		getPath: (event: Parameters<PageLoad>[0], languageTag: LanguageTag) => URL | string
 	}
 }) => ({
 	use:
@@ -119,20 +119,20 @@ export const initRootPageLoadWrapper = <
 		async (event: Parameters<PageLoad>[0]): Promise<Data> => {
 			const data = await event.parent()
 
-			const language: Language | undefined = data.language
+			const languageTag: LanguageTag | undefined = data.languageTag
 
-			if (!language && options.browser) {
-				const { referenceLanguage, languages } = data
+			if (!languageTag && options.browser) {
+				const { sourceLanguageTag, languageTags } = data
 
-				if ((!language || !languages.includes(language)) && options.redirect) {
-					const detectedLanguage = await detectLanguage(
-						{ referenceLanguage, languages },
+				if ((!languageTag || !languageTags.includes(languageTag)) && options.redirect) {
+					const detectedLanguageTag = await detectLanguageTag(
+						{ sourceLanguageTag, languageTags },
 						...(options.initDetectors ? options.initDetectors(event) : []),
 					)
 
 					throw options.redirect.throwable(
 						307,
-						options.redirect.getPath(event, detectedLanguage).toString(),
+						options.redirect.getPath(event, detectedLanguageTag).toString(),
 					)
 				}
 			}

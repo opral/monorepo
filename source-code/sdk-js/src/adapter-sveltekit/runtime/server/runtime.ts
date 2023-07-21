@@ -1,26 +1,27 @@
+import type { LanguageTag } from '@inlang/core/languageTag'
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
 import { getResource } from "./index.js"
 
 type InitSvelteKitServerRuntimeArgs = {
-	referenceLanguage: Language
-	languages: Language[]
-	language: Language | undefined
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	languageTag: LanguageTag | undefined
 }
 
 export const initSvelteKitServerRuntime = ({
-	language,
-	referenceLanguage,
-	languages,
+	languageTag,
+	sourceLanguageTag,
+	languageTags,
 }: InitSvelteKitServerRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: (language: string) => getResource(language),
-		referenceLanguage,
-		languages,
+		readResource: (languageTag: LanguageTag) => getResource(languageTag),
+		sourceLanguageTag,
+		languageTags,
 	})
 
-	if (language) {
-		runtime.loadResource(language)
-		runtime.switchLanguage(language)
+	if (languageTag) {
+		runtime.loadResource(languageTag)
+		runtime.changeLanguageTag(languageTag)
 	}
 
 	return runtime

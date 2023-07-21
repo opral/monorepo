@@ -18,7 +18,9 @@
 		"**/node_modules": true,
 		"**/dist": true,
 		"**/.svelte-kit": true,
-		"**/build": true
+		"**/build": true,
+		"**/coverage": true,
+		"**/.turbo": true,
 	},
 	"files.watcherExclude": {
 		"**/dist": true

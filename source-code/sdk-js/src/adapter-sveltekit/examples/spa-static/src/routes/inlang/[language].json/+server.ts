@@ -10,7 +10,7 @@ export const GET = (({ params: { language } }) =>
 	json(getResource(language) || null)) satisfies RequestHandler
 
 export const entries = async () => {
-	const { languages } = await initState(await import("../../../../inlang.config.js"))
+	const { languageTags } = await initState(await import("../../../../inlang.config.js"))
 
-	return languages.map((language) => ({ language: `${language}.json` }))
+	return languageTags.map((languageTag) => ({ language: languageTag }))
 }

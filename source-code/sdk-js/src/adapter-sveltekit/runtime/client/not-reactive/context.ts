@@ -1,4 +1,3 @@
-import type * as Ast from "@inlang/core/ast"
 import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
@@ -6,49 +5,61 @@ import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { Language } from "@inlang/core/ast"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
+import type { LanguageTag } from '@inlang/core/languageTag'
+import { logDeprecation } from '../../../../utils.js'
 
 type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-	referenceLanguage: Language
-	languages: Language[]
-	language: Language
+		sourceLanguageTag: LanguageTag
+		languageTag: LanguageTag
+		languageTags: LanguageTag[]
 	i: InlangFunction
-	switchLanguage: (language: Language) => Promise<void>
-	loadResource: SvelteKitClientRuntime["loadResource"]
-	route: (href: RelativeUrl) => RelativeUrl
+		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
+		loadResource: SvelteKitClientRuntime["loadResource"]
+		route: (href: RelativeUrl) => RelativeUrl
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		referenceLanguage: LanguageTag
+		language: LanguageTag
+		languages: LanguageTag[]
 }
 
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const { language, referenceLanguage, languages, i, loadResource } = runtime
+	const { languageTag, sourceLanguageTag, languageTags, i, loadResource, referenceLanguage, language, languages } = runtime
 
-	const switchLanguage = async (language: Language) => {
-		if (runtime.language === language) return
+	const changeLanguageTag = async (languageTag: LanguageTag) => {
+		if (runtime.languageTag === languageTag) return
 
-		return goto(replaceLanguageInUrl(get(page).url, language), { invalidateAll: true })
+		return goto(replaceLanguageInUrl(get(page).url, languageTag), { invalidateAll: true })
 	}
 
-	setContext(inlangSymbol, {
-		language,
-		referenceLanguage,
-		languages,
+	setContext<RuntimeContext>(inlangSymbol, {
+		sourceLanguageTag,
+		languageTag: languageTag!,
+		languageTags,
 		i,
 		loadResource,
-		switchLanguage,
-		route: route.bind(undefined, language as Language),
+		changeLanguageTag,
+		route: route.bind(undefined, languageTag as LanguageTag),
+		referenceLanguage,
+		language: language!,
+		languages,
+		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
+			logDeprecation('switchLanguage', 'changeLanguageTag')
+			return changeLanguageTag(...args)
+		},
 	})
 }
 
-const route = (language: string, href: RelativeUrl) => {
+const route = (languageTag: LanguageTag, href: RelativeUrl) => {
 	if (!href.startsWith("/")) return href as RelativeUrl
 
-	const url = `/${language}${href}`
+	const url = `/${languageTag}${href}`
 
 	return (url.endsWith("/") ? url.slice(0, -1) : url) as RelativeUrl
 }

@@ -5,10 +5,11 @@ import Document from "@tiptap/extension-document"
 import Paragraph from "@tiptap/extension-paragraph"
 import Text from "@tiptap/extension-text"
 import { createEffect } from "solid-js"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export const TipTapEditor = (props: {
-	referenceLanguage: ast.Resource["languageTag"]["name"]
-	language: ast.Resource["languageTag"]["name"]
+	sourceLanguageTag: LanguageTag
+	languageTag: LanguageTag
 	id: ast.Message["id"]["name"]
 	referenceMessage?: ast.Message
 	message: ast.Message | undefined
@@ -31,7 +32,7 @@ export const TipTapEditor = (props: {
 
 	return (
 		<div>
-			<div id={props.id + "-" + props.language} ref={ref} />
+			<div id={props.id + "-" + props.languageTag} ref={ref} />
 		</div>
 	)
 }

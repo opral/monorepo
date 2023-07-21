@@ -65,10 +65,10 @@ export const badge = async (url: string) => {
 
 	// find in resources the resource from the preferredLanguage
 	const referenceResource = resources.find(
-		(resource) => resource.languageTag.name === config.referenceLanguage,
+		(resource) => resource.languageTag.name === config.sourceLanguageTag,
 	)
 	if (!referenceResource) {
-		throw new Error("No referenceLanguage found, please add one to your inlang.config.js")
+		throw new Error("No sourceLanguageTag found, please add one to your inlang.config.js")
 	}
 
 	const { percentage, numberOfMissingTranslations } = missingTranslations({

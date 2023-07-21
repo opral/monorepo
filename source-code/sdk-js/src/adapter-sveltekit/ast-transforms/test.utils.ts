@@ -19,15 +19,15 @@ export const initTransformConfig = (
 			sourceFileName: "",
 			sourceMapName: "",
 			inlang: {
-				referenceLanguage: "en",
-				languages: ["en", "de"],
+				sourceLanguageTag: "en",
+				languageTags: ["en", "de"],
 				readResources: async () => [],
 				writeResources: async () => undefined,
 				sdk: {
 					debug: false,
 					languageNegotiation: {
 						strict: false,
-						strategies: [{ type: "localStorage", key: "language" }],
+						strategies: [{ type: "localStorage", key: "languageTag" }],
 					},
 					resources: {
 						cache: "build-time",

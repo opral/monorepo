@@ -1,25 +1,26 @@
 import { describe, expect, test, vi } from "vitest"
 import { initLocalStorageDetector, localStorageDetector } from "./localStorageDetector.js"
+import type { LanguageTag } from '@inlang/core/languageTag'
 
-const language = "de"
+const languageTag = "de" satisfies LanguageTag
 
 const storage = {
-	language,
+	languageTag,
 }
 
 vi.stubGlobal("localStorage", { getItem: (key: string) => storage[key as keyof typeof storage] })
 
 describe("localStorageDetector", () => {
-	test("returns languages from window object", () => {
+	test("returns languageTags from window object", () => {
 		const detector = localStorageDetector
-		expect(detector()).toEqual([language])
+		expect(detector()).toEqual([languageTag])
 	})
 })
 
 describe("initLocalStorageDetector", () => {
-	test("returns the language from the localStorage", () => {
-		const detector = initLocalStorageDetector("language")
-		expect(detector()).toEqual([language])
+	test("returns the languageTag from the localStorage", () => {
+		const detector = initLocalStorageDetector("languageTag")
+		expect(detector()).toEqual([languageTag])
 	})
 
 	test("returns an empty array if not present", () => {

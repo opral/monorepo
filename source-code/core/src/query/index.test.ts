@@ -1,26 +1,26 @@
 import { describe, expect, it } from "vitest"
-import type { Resource } from "../ast/index.js"
+import type { Message } from "../ast/index.js"
 import { query } from "./index.js"
-import { createMessage, createResource } from '../test/utils.js'
+import { createMessage } from "../test/utils.js"
 
 describe("query.create", () => {
 	it("should create a message", () => {
-		const [resource] = query(mockResource).create({
+		const [messages] = query(mockResource).create({
 			message: {
-				type: "Message",
-				id: { type: "Identifier", name: "new-message-123" },
-				pattern: { type: "Pattern", elements: [] },
+				id: "new-message-123",
+				languageTag: "en",
+				pattern: [],
 			},
 		})
-		const message = query(resource!).get({ id: "new-message-123" })
-		expect(message!.id.name).toBe("new-message-123")
+		const message = query(messages!).get({ id: "new-message-123", languageTag: "en" })
+		expect(message!.id).toBe("new-message-123")
 	})
 	it("should return an error is the message already exists", () => {
 		const [, exception] = query(mockResource).create({
 			message: {
-				type: "Message",
-				id: { type: "Identifier", name: "first-message" },
-				pattern: { type: "Pattern", elements: [] },
+				id: "first-message",
+				languageTag: "en",
+				pattern: [],
 			},
 		})
 		expect(exception).toBeDefined()
@@ -29,47 +29,50 @@ describe("query.create", () => {
 
 describe("query.get", () => {
 	it("should return the message if the message exists", () => {
-		const result = query(mockResource).get({ id: "first-message" })
-		expect(result!.id.name).toBe("first-message")
+		const result = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		expect(result!.id).toBe("first-message")
 	})
 	it("should return undefined if the message does not exist", () => {
-		const result = query(mockResource).get({ id: "none-existent-message" })
+		const result = query(mockResource).get({ id: "none-existent-message", languageTag: "en" })
 		expect(result).toBeUndefined()
 	})
 	it("should return a new message object, not a reference (for immutability)", () => {
-		const result = query(mockResource).get({ id: "first-message" })
-		result!.id.name = "changed"
-		const queryAgain = query(mockResource).get({ id: "first-message" })
-		expect(queryAgain!.id.name).toBe("first-message")
+		const result = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		result!.id = "changed"
+		const queryAgain = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		expect(queryAgain!.id).toBe("first-message")
 	})
 })
 
 describe("query.update", () => {
 	it("should update an existing message", () => {
-		const message = query(mockResource).get({ id: "first-message" })
-		message!.pattern.elements = [{ type: "Text", value: "updated" }]
+		const message = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		message!.pattern = [{ type: "Text", value: "updated" }]
 		const [updatedResource] = query(mockResource).update({
 			id: "first-message",
+			languageTag: "en",
 			with: message!,
 		})
-		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
-		expect(updatedMessage!.pattern.elements).toStrictEqual(message!.pattern.elements)
+		const updatedMessage = query(updatedResource!).get({ id: "first-message", languageTag: "en" })
+		expect(updatedMessage!.pattern).toStrictEqual(message!.pattern)
 	})
 
 	it("should be immutable", () => {
-		const message = query(mockResource).get({ id: "first-message" })
-		message!.pattern.elements = [{ type: "Text", value: "updated" }]
+		const message = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		message!.pattern = [{ type: "Text", value: "updated" }]
 		query(mockResource).update({
 			id: "first-message",
+			languageTag: "en",
 			with: message!,
 		})
-		const queryMessageAgain = query(mockResource).get({ id: "first-message" })
-		expect(queryMessageAgain!.pattern.elements).not.toBe(message!.pattern.elements)
+		const queryMessageAgain = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		expect(queryMessageAgain!.pattern).not.toBe(message!.pattern)
 	})
 
 	it("should return an error if the message does not exist", () => {
 		const [, exception] = query(mockResource).update({
 			id: "none-existent-message",
+			languageTag: "en",
 			// @ts-ignore
 			with: "",
 		})
@@ -79,47 +82,50 @@ describe("query.update", () => {
 
 describe("query.upsert", () => {
 	it("should upsert a message if it does not exist", () => {
-		const [resource] = query(mockResource).upsert({
+		const [messages] = query(mockResource).upsert({
 			message: {
-				type: "Message",
-				id: { type: "Identifier", name: "new-message-1234" },
-				pattern: { type: "Pattern", elements: [] },
+				id: "new-message-1234",
+				languageTag: "en",
+				pattern: [],
 			},
 		})
 
-		const message = query(resource!).get({ id: "new-message-1234" })
-		expect(message!.id.name).toBe("new-message-1234")
+		const message = query(messages!).get({ id: "new-message-1234", languageTag: "en" })
+		expect(message!.id).toBe("new-message-1234")
 	})
 
 	it("should update an existing message", () => {
-		const message = query(mockResource).get({ id: "first-message" })
-		message!.pattern.elements = [{ type: "Text", value: "updated" }]
-		const [updatedResource] = query(mockResource).upsert({
+		const message = query(mockResource).get({ id: "first-message", languageTag: "en" })
+		message!.pattern = [{ type: "Text", value: "updated" }]
+		const [updatedMessages] = query(mockResource).upsert({
 			message: message!,
 		})
-		const updatedMessage = query(updatedResource!).get({ id: "first-message" })
-		expect(updatedMessage!.pattern.elements).toStrictEqual(message!.pattern.elements)
+		const updatedMessage = query(updatedMessages!).get({ id: "first-message", languageTag: "en" })
+		expect(updatedMessage!.pattern).toStrictEqual(message!.pattern)
 	})
 })
 
 describe("query.delete", () => {
 	it("should delete a message", () => {
-		const [value, exception] = query(mockResource).delete({ id: "first-message" })
+		const [_message, exception] = query(mockResource).delete({
+			id: "first-message",
+			languageTag: "en",
+		})
 		if (exception) {
 			throw exception
 		}
-		expect(value.type).toBe("Resource")
-		const message = query(value).get({ id: "first-message" })
+		expect(_message).toBeDefined()
+		const message = query(_message).get({ id: "first-message", languageTag: "en" })
 		expect(message).toBeUndefined()
 	})
 	it("should be immutable", () => {
-		const [, exception] = query(mockResource).delete({ id: "first-message" })
+		const [, exception] = query(mockResource).delete({ id: "first-message", languageTag: "en" })
 		expect(exception).toBeUndefined()
-		const message = query(mockResource).get({ id: "first-message" })
+		const message = query(mockResource).get({ id: "first-message", languageTag: "en" })
 		expect(message).toBeDefined()
 	})
 	it("should return an error if the message did not exist", () => {
-		const [, exception] = query(mockResource).delete({ id: "none-existent-message" })
+		const [, exception] = query(mockResource).delete({ id: "none-existent-message", languageTag: "en" })
 		expect(exception).toBeDefined()
 	})
 })
@@ -131,7 +137,7 @@ describe("query.ids", () => {
 	})
 })
 
-const mockResource: Resource = createResource('en',
-	createMessage('first-message', "Welcome to this app."),
-	createMessage('second-message', "You opened the app, congrats!"),
-)
+const mockResource: Message[] = [
+	createMessage("first-message", "en", "Welcome to this app."),
+	createMessage("second-message", "en", "You opened the app, congrats!"),
+]

@@ -1,17 +1,17 @@
 import { test } from "@playwright/test"
 import { baseURL } from "./index.js"
 
-test("root slug should redirect to referenceLanguage slug", async ({ page }) => {
+test("root slug should redirect to sourceLanguageTag slug", async ({ page }) => {
 	await page.goto(baseURL)
 
 	// TODO: test if redirect happens on the client
 })
 
-// TODO: for each language
-const language = "en"
+// TODO: for each languageTag
+const languageTag = "en"
 
-test("should display the correct language on home page", async ({ page }) => {
-	await page.goto(`${baseURL}/${language}`)
+test("should display the correct languageTag on home page", async ({ page }) => {
+	await page.goto(`${baseURL}/${languageTag}`)
 
 	// TODO: test if all logs are executed (server and client)
 
@@ -23,13 +23,13 @@ test("should display the correct language on home page", async ({ page }) => {
 })
 
 test("should SSR the page", async ({ page }) => {
-	await page.goto(`${baseURL}/${language}`)
+	await page.goto(`${baseURL}/${languageTag}`)
 
 	// TODO: check if SSR works (disable JS and reload page?)
 })
 
-test("should display the correct language on the about page", async ({ page }) => {
-	await page.goto(`${baseURL}/${language}/about`)
+test("should display the correct languageTag on the about page", async ({ page }) => {
+	await page.goto(`${baseURL}/${languageTag}/about`)
 
 	// TODO: test if all logs are executed (server and client)
 

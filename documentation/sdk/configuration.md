@@ -21,7 +21,7 @@ export async function defineConfig(env) {
 	)
 
 	return {
-		referenceLanguage: "en",
+		sourceLanguageTag: "en",
 		plugins: [
 			// ... other plugins e.g. to read and write Resources
 			// see https://github.com/inlang/ecosystem#resources
@@ -39,15 +39,15 @@ export async function defineConfig(env) {
 
 ## languageNegotiation
 
-The `languageNegotiation` property makes it possible to customize the behavior how you application detects the language of the user.
+The `languageNegotiation` property makes it possible to customize the behavior how you application detects the languageTag of the user.
 
 ## strategies
 
-You can choose between different strategies to detect the language of the user. You can specify multiple strategies. The first strategy that returns a language will be used.
+You can choose between different strategies to detect the languageTag of the user. You can also specify multiple strategies. The first strategy that returns a languageTag will be used.
 
 - localStorage
 
-Detects if the `language` key is set in the localStorage and uses it as the language for the application.
+Detects if the `languageTag` key is set in the localStorage and uses it as the languageTag for the application.
 
 ```js
 {
@@ -59,7 +59,7 @@ Detects if the `language` key is set in the localStorage and uses it as the lang
 
 - url
 
-Detects the `language` by looking at the first segment of the url e.g. `/en/about`
+Detects the `languageTag` by looking at the first segment of the url e.g. `/en/about`
 
 ```js
 {
@@ -108,8 +108,8 @@ You can tell `inlang` to ignore certain routes in your project. Those routes wil
 },
 ```
 
- - All entries must be defined as a relative path `/`.
- - If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
+- All entries must be defined as a relative path `/`.
+- If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
 
 ---
 

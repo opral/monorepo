@@ -25,10 +25,10 @@ it("should allow $import statements", async () => {
       const shouldPass = env.$import("x").catch(() => undefined)
 
       return {
-        referenceLanguage: "en",
-        languages: ["en"],
-        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
-        writeResources: () => undefined,
+        sourceLanguageTag: "en",
+        languageTags: ["en"],
+        loadMessages: () => [],
+        saveMessages: () => undefined,
       }
     }
   `
@@ -45,10 +45,10 @@ it("should allow JSDoc import statements", async () => {
       const shouldPass = env.$import("x").catch(() => undefined)
 
       return {
-        referenceLanguage: "en",
-        languages: ["en"],
-        readResources: () => [{ type: "Resource", languageTag: { type: "LanguageTag", name: "en" }, body: [] }],
-        writeResources: () => undefined,
+        sourceLanguageTag: "en",
+        languageTags: ["en"],
+        loadMessages: () => [],
+        saveMessages: () => undefined,
       }
     }
   `

@@ -7,7 +7,7 @@ const mockPlugin = createPlugin(() => {
 		id: "mock.plugin",
 		config: () => {
 			return {
-				languages: ["en", "de"],
+				languageTags: ["en", "de"],
 			}
 		},
 	}
@@ -25,15 +25,15 @@ it("should define plugins as an empty array if no plugins are defined", async ()
 it("should be possible to define a config with plugins", async () => {
 	const [config, errors] = await setupPlugins({
 		config: {
-			referenceLanguage: "de",
+			sourceLanguageTag: "de",
 			plugins: [mockPlugin()],
 		},
 		env: {} as any,
 	})
 	expect(errors).toBeUndefined()
-	expect(config.referenceLanguage).toEqual("de")
+	expect(config.sourceLanguageTag).toEqual("de")
 	expect(config.plugins[0]!.id).toEqual("mock.plugin")
-	expect(config.languages).toEqual(["en", "de"])
+	expect(config.languageTags).toEqual(["en", "de"])
 })
 
 // Plugins are unaware of each other, so it's possible to define the same
@@ -42,13 +42,13 @@ it("should be possible to define a config with plugins", async () => {
 it("should merge languages without duplicates", async () => {
 	const [config, errors] = await setupPlugins({
 		config: {
-			languages: ["fr", "nl", "en"],
+			languageTags: ["fr", "nl", "en"],
 			plugins: [mockPlugin()],
 		},
 		env: {} as any,
 	})
 	expect(errors).toBeUndefined()
-	expect(config.languages).toEqual(["fr", "nl", "en", "de"])
+	expect(config.languageTags).toEqual(["fr", "nl", "en", "de"])
 })
 
 it("should not fail if one plugin crashes", async () => {
@@ -66,7 +66,7 @@ it("should not fail if one plugin crashes", async () => {
 		},
 		env: {} as any,
 	})
-	expect(config.languages).toEqual(["en", "de"])
+	expect(config.languageTags).toEqual(["en", "de"])
 	expect(errors).toHaveLength(1)
 })
 
@@ -85,7 +85,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test1: true,
-						}
+						} as any
 					},
 				},
 				{
@@ -95,7 +95,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test2: true,
-						}
+						} as any
 					},
 				},
 				{
@@ -107,7 +107,7 @@ it("should merge config and pass to all plugins in sequence", async () => {
 
 						return {
 							test3: true,
-						}
+						} as any
 					},
 				},
 			],

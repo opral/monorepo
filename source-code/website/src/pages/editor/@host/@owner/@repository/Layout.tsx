@@ -7,9 +7,9 @@ import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
 import IconTranslate from "~icons/material-symbols/translate"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import type { Language } from "@inlang/core/ast"
 import { showToast } from "@src/components/Toast.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 interface Filter {
 	name: string
@@ -25,11 +25,11 @@ export function Layout(props: { children: JSXElement }) {
 		setTextSearch,
 		filteredLintRules,
 		setFilteredLintRules,
-		filteredLanguages,
-		setFilteredLanguages,
+		filteredLanguageTags,
+		setFilteredLanguageTags,
 		userIsCollaborator,
-		languages,
-		setLanguages,
+		languageTags,
+		setLanguageTags,
 		resources,
 		setResources,
 		tourStep,
@@ -104,13 +104,13 @@ export function Layout(props: { children: JSXElement }) {
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
 			inlangConfig()
 		) {
-			if (filteredLanguages().length > 0) {
+			if (filteredLanguageTags().length > 0) {
 				addFilter("Language")
 				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
 				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
 				// 	addFilter("Language")
 			} else {
-				setFilteredLanguages(inlangConfig()!.languages)
+				setFilteredLanguageTags(inlangConfig()!.languageTags)
 			}
 		}
 	})
@@ -127,24 +127,25 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
-	const addLanguage = (language: Language) => {
-		if (languages().includes(language)) {
+	const addLanguage = (languageTag: LanguageTag) => {
+		if (languageTags().includes(languageTag)) {
 			showToast({
 				variant: "warning",
-				title: "Language already exists",
-				message: "This language is already present in this project. Please choose another name.",
+				title: "Language tag already exists",
+				message:
+					"This language tag is already present in this project. Please choose another name.",
 			})
 			return
 		}
-		setLanguages([...languages(), language])
-		setFilteredLanguages([...filteredLanguages(), language])
+		setLanguageTags([...languageTags(), languageTag])
+		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
 		setResources([
 			...resources,
 			{
 				type: "Resource",
 				languageTag: {
 					type: "LanguageTag",
-					name: language,
+					name: languageTag,
 				},
 				body: [],
 			},
@@ -152,6 +153,7 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	const isAddingResourcePossible = () => {
+		// @ts-expect-error - metadata doesn't exist anymore
 		if (resources.some((resource) => !resource.metadata || resource.metadata.space)) {
 			return true
 		} else {
@@ -199,7 +201,9 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-button
 										prop:size="small"
 										onClick={() => {
-											setFilteredLanguages(setFilteredLanguages(() => inlangConfig()!.languages))
+											setFilteredLanguageTags(
+												setFilteredLanguageTags(() => inlangConfig()!.languageTags),
+											)
 											setFilteredLintRules([])
 											setSelectedFilters([])
 										}}
@@ -260,7 +264,7 @@ export function Layout(props: { children: JSXElement }) {
 							onClick={() => setAddLanguageModalOpen(true)}
 							prop:disabled={!userIsCollaborator()}
 						>
-							Add language
+							Add language tag
 						</sl-button>
 					</div>
 				</div>
@@ -268,7 +272,7 @@ export function Layout(props: { children: JSXElement }) {
 				{props.children}
 			</div>
 			<sl-dialog
-				prop:label="Add language"
+				prop:label="Add language tag"
 				prop:open={addLanguageModalOpen()}
 				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
 			>
@@ -388,25 +392,25 @@ function BranchMenu() {
 }
 
 function LanguageFilter(props: { clearFunction: any }) {
-	const { inlangConfig, setFilteredLanguages, filteredLanguages } = useEditorState()
+	const { inlangConfig, setFilteredLanguageTags, filteredLanguageTags } = useEditorState()
 
 	onMount(() => {
-		if (filteredLanguages().length === 0 || filteredLanguages() === undefined) {
-			setFilteredLanguages(() => inlangConfig()!.languages)
+		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
+			setFilteredLanguageTags(() => inlangConfig()!.languageTags)
 		}
 	})
 
 	return (
-		<Show when={inlangConfig() && filteredLanguages() && filteredLanguages().length > 0}>
+		<Show when={inlangConfig() && filteredLanguageTags() && filteredLanguageTags().length > 0}>
 			<sl-select
 				prop:name="Language Select"
 				prop:placeholder="none"
 				prop:size="small"
 				prop:multiple={true}
 				prop:clearable={true}
-				prop:value={filteredLanguages()}
+				prop:value={filteredLanguageTags()}
 				on:sl-change={(event: any) => {
-					setFilteredLanguages(event.target.value)
+					setFilteredLanguageTags(event.target.value)
 				}}
 				on:sl-clear={() => {
 					props.clearFunction
@@ -429,30 +433,30 @@ function LanguageFilter(props: { clearFunction: any }) {
 					<span class="text-left text-outline-variant grow">Select</span>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguages(() => inlangConfig()!.languages)}
+						onClick={() => setFilteredLanguageTags(() => inlangConfig()!.languageTags)}
 					>
 						All
 					</a>
 					<a
 						class="cursor-pointer link link-primary opacity-75"
-						// filter all except the reference language
-						onClick={() => setFilteredLanguages([inlangConfig()!.referenceLanguage])}
+						// filter all except the source language
+						onClick={() => setFilteredLanguageTags([inlangConfig()!.sourceLanguageTag])}
 					>
 						None
 					</a>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
-					<For each={inlangConfig()?.languages}>
+					<For each={inlangConfig()?.languageTags}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
-								prop:selected={filteredLanguages().includes(language)}
-								prop:disabled={language === inlangConfig()?.referenceLanguage}
-								class={language === inlangConfig()?.referenceLanguage ? "opacity-50" : ""}
+								prop:selected={filteredLanguageTags().includes(language)}
+								prop:disabled={language === inlangConfig()?.sourceLanguageTag}
+								class={language === inlangConfig()?.sourceLanguageTag ? "opacity-50" : ""}
 							>
 								{language}
-								{language === inlangConfig()?.referenceLanguage ? (
+								{language === inlangConfig()?.sourceLanguageTag ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>

@@ -1,32 +1,33 @@
 import type { LoadEvent } from "@sveltejs/kit"
 import { base } from "$app/paths"
 import { initRuntimeWithLanguageInformation } from "../../../runtime/index.js"
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 type InitSvelteKitClientRuntimeArgs = {
 	fetch: LoadEvent["fetch"]
-	referenceLanguage: Language
-	languages: Language[]
-	language: Language | undefined
+	sourceLanguageTag: LanguageTag
+	languageTags: LanguageTag[]
+	languageTag: LanguageTag | undefined
 }
 
 export const initSvelteKitClientRuntime = async ({
 	fetch,
-	language,
-	referenceLanguage,
-	languages,
+	languageTag,
+	sourceLanguageTag,
+	languageTags,
 }: InitSvelteKitClientRuntimeArgs) => {
 	const runtime = initRuntimeWithLanguageInformation({
-		readResource: async (language: string) =>
-			fetch(`${base}/inlang/${language}.json`).then((response) =>
+		readResource: async (languageTag: LanguageTag) =>
+			fetch(`${base}/inlang/${languageTag}.json`).then((response) =>
 				response.ok ? response.json() : undefined,
 			),
-		referenceLanguage,
-		languages,
+		sourceLanguageTag,
+		languageTags,
 	})
 
-	if (language) {
-		await runtime.loadResource(language)
-		runtime.switchLanguage(language)
+	if (languageTag) {
+		await runtime.loadResource(languageTag)
+		runtime.changeLanguageTag(languageTag)
 	}
 
 	return runtime

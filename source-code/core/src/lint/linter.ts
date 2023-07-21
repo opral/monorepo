@@ -1,11 +1,10 @@
 import type { InlangConfig } from "@inlang/core/config"
 import type * as ast from "@inlang/core/ast"
-import type { LintedResource, LintRule, Visitors } from "./rule.js"
-import { createReportFunction } from "./report.js"
-import type { Language } from "@inlang/core/ast"
+import type { LintReport } from "./rule.js"
 
-const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
-	resources.find(({ languageTag }) => languageTag.name === language)
+class ExceptionDuringLinting extends Error {
+	readonly #id = "ExceptionDuringLinting"
+}
 
 /**
  * Lints the given resources.
@@ -15,151 +14,45 @@ const getResourceForLanguage = (resources: ast.Resource[], language: string) =>
  * lint errors themselves.
  *
  * @example
- *   const [lintedResources, errors] = await lint({ config, resources })
- *   if (errors) {
+ *   const lints = await lint({ config, resources })
+ *   if (lints.exceptions) {
  *     // handle unexpected errors during the linting process.
  *     // this errors are not lint errors themselves!
  *   }
- *   const lints = getLintReports(lintedResources, { options })
+ *   lints.reports
  */
 export const lint = async (args: {
-	config: Pick<InlangConfig, "lint" | "languages" | "referenceLanguage">
-	resources: ast.Resource[]
-}): Promise<[lintedResources: LintedResource[], errors?: Error[]]> => {
-	const { referenceLanguage, languages, lint } = args.config
-	const resources = structuredClone(args.resources)
-	if (lint === undefined || lint.rules.length === 0) {
-		return [args.resources, []]
+	config: Pick<InlangConfig, "lint" | "languageTags" | "sourceLanguageTag">
+	messages: ast.Message[]
+}): Promise<{ reports: LintReport[]; exceptions?: ExceptionDuringLinting[] }> => {
+	if (args.config.lint === undefined || args.config.lint.rules.length === 0) {
+		return { reports: [], exceptions: undefined }
 	}
-	const reference = getResourceForLanguage(resources, referenceLanguage)
-	const errors: Error[] = []
+	const reports: LintReport[] = []
+	const exceptions: ExceptionDuringLinting[] = []
 
-	await Promise.all(
-		lint.rules.flat().map((rule) =>
-			processLintRule({
-				rule,
-				referenceLanguage,
-				languages,
-				reference,
-				resources,
-			}).catch((e) =>
-				errors.push(new Error(`Unexpected error in lint rule '${rule.id}'`, { cause: e })),
-			),
-		),
-	)
-
-	return [resources as LintedResource[], errors.length > 0 ? errors : undefined]
-}
-
-const processLintRule = async (args: {
-	rule: LintRule
-	referenceLanguage: Language
-	languages: Language[]
-	reference: ast.Resource | undefined
-	resources: ast.Resource[]
-}) => {
-	const { referenceLanguage, languages, reference, resources } = args
-
-	const report = createReportFunction(args.rule)
-	const { visitors } = await args.rule.setup({ config: { referenceLanguage, languages }, report })
-
-	for (const language of languages) {
-		await processResource({
-			reference,
-			target: getResourceForLanguage(resources, language),
-			visitors,
-		})
-	}
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-type ProcessNodeFunction<Node> = (args: {
-	visitors: Visitors
-	reference?: Node
-	target?: Node
-}) => Promise<void>
-
-// --------------------------------------------------------------------------------------------------------------------
-
-const shouldProcessResourceChildren = (visitors: Visitors) =>
-	!!visitors.Message || shouldProcessMessageChildren(visitors)
-
-const processResource: ProcessNodeFunction<ast.Resource> = async ({
-	visitors,
-	target,
-	reference,
-}) => {
-	const payload = visitors.Resource && (await visitors.Resource({ target: target, reference }))
-	if (payload === "skip") {
-		return
-	}
-
-	// process children
-	if (shouldProcessResourceChildren(visitors)) {
-		const processedReferenceMessages = new Set<string>()
-
-		for (const targetMessage of target?.body ?? []) {
-			const referenceMessage = reference?.body.find(({ id }) => id.name === targetMessage.id.name)
-
-			await processMessage({
-				visitors,
-				reference: referenceMessage,
-				target: targetMessage,
-			})
-
-			if (referenceMessage) {
-				processedReferenceMessages.add(referenceMessage.id.name)
+	for (const message of args.messages) {
+		for (const rule of args.config.lint.rules.flat()) {
+			try {
+				const clone = structuredClone(message)
+				const report = await rule.message({
+					message: clone,
+					messages: args.messages,
+					config: args.config,
+				})
+				if (report !== undefined) {
+					const fullReport = { ...report, ruleId: rule.id, level: rule.level } satisfies LintReport
+					reports.push(fullReport)
+				}
+			} catch (e) {
+				exceptions.push(
+					new ExceptionDuringLinting(`Exception in lint rule '${rule.id}'`, {
+						cause: e,
+					}),
+				)
 			}
 		}
-
-		const nonVisitedReferenceMessages = reference?.body.filter(
-			({ id }) => !processedReferenceMessages.has(id.name),
-		)
-		for (const referenceNode of nonVisitedReferenceMessages ?? []) {
-			await processMessage({
-				visitors,
-				reference: referenceNode,
-				target: undefined,
-			})
-			processedReferenceMessages.add(referenceNode.id.name)
-		}
-	}
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-const shouldProcessMessageChildren = (visitors: Visitors) => !!visitors.Pattern
-
-const processMessage: ProcessNodeFunction<ast.Message> = async ({
-	visitors,
-	target,
-	reference,
-}) => {
-	const payload = visitors.Message && (await visitors.Message({ target, reference }))
-	if (payload === "skip") {
-		return
 	}
 
-	// process children
-	if (shouldProcessMessageChildren(visitors)) {
-		await processPattern({
-			visitors,
-			reference: reference?.pattern,
-			target: target?.pattern,
-		})
-	}
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-const processPattern: ProcessNodeFunction<ast.Pattern> = async ({
-	visitors,
-	target,
-	reference,
-}) => {
-	const payload = visitors.Pattern && (await visitors.Pattern({ target, reference }))
-	if (payload === "skip") {
-		return
-	}
+	return { reports, exceptions: exceptions.length > 0 ? exceptions : undefined }
 }

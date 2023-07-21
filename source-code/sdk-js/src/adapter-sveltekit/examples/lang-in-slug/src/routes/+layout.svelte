@@ -12,11 +12,11 @@
 	// ---- no reactivity ----
 
 	addRuntimeToContext(getRuntimeFromData(data))
-	let { i, language } = getRuntimeFromContext()
+	let { i, languageTag } = getRuntimeFromContext()
 
 	$: if (browser) {
 		addRuntimeToContext(getRuntimeFromData(data))
-		;({ i, language } = getRuntimeFromContext())
+		;({ i, languageTag } = getRuntimeFromContext())
 	}
 
 	// ----
@@ -24,7 +24,7 @@
 	$: console.info("+layout.svelte", i("welcome"))
 </script>
 
-{#key language}
+{#key languageTag}
 	<slot />
 
 	<hr />

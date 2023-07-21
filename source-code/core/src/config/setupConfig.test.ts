@@ -1,20 +1,21 @@
 import { it, expect, vi } from "vitest"
 import { setupConfig } from "./setupConfig.js"
-import { createResource } from '../test/utils.js'
+import { createMessage } from "../test/utils.js"
+import type { Message } from "../ast/index.js"
 
 it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				plugins: [
 					{
 						id: "mock.plugin",
 						config: () => {
 							return {
-								referenceLanguage: "de",
-								languages: ["en", "de"],
+								sourceLanguageTag: "de",
+								languageTags: ["en", "de"],
 							}
 						},
 					},
@@ -23,8 +24,8 @@ it("should setup the config with plugins", async () => {
 		},
 		env: {} as any,
 	})
-	expect(config.referenceLanguage).toEqual("de")
-	expect(config.languages).toEqual(["en", "de"])
+	expect(config.sourceLanguageTag).toEqual("de")
+	expect(config.languageTags).toEqual(["en", "de"])
 })
 
 // Zod removes properties
@@ -32,16 +33,16 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
-				writeResources: async () => undefined,
+				loadMessages: async () => mockMessages,
+				saveMessages: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
 					{
 						id: "mock.plugin",
 						config: () => {
 							return {
-								referenceLanguage: "de",
-								languages: ["en", "de"],
+								sourceLanguageTag: "de",
+								languageTags: ["en", "de"],
 							}
 						},
 					},
@@ -76,8 +77,8 @@ it("should throw if the config is invalid", async () => {
 							id: "mock.plugin",
 							config: () => {
 								return {
-									referenceLanguage: "de",
-									languages: ["en", "de"],
+									sourceLanguageTag: "de",
+									languageTags: ["en", "de"],
 								}
 							},
 						},
@@ -98,10 +99,10 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 		await setupConfig({
 			module: {
 				defineConfig: async () => ({
-					referenceLanguage: "de",
-					languages: ["de", "en"],
-					readResources: async () => [createResource('en'), createResource('de'),],
-					writeResources: async () => undefined,
+					sourceLanguageTag: "de",
+					languageTags: ["de", "en"],
+					loadMessages: async () => mockMessages,
+					saveMessages: async () => undefined,
 					plugins: [
 						{
 							id: "mock.plugin",
@@ -119,3 +120,8 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 		expect(error).toBeFalsy()
 	}
 })
+
+const mockMessages: Message[] = [
+	createMessage("first-message", "en", "test"),
+	createMessage("second-message", "de", "test"),
+]

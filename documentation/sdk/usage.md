@@ -11,7 +11,7 @@ With `@inlang/sdk-js` you get many useful functions to help you implement intern
 
 ## `i`
 
-Use the inlang function (`i`) to get a language dependent text. The function takes the key of the text as a parameter and returns the string according to the current language.
+Use the inlang function (`i`) to get a language dependent text. The function takes the key of the text as a parameter and returns the string according to the current languageTag.
 
 #### Example
 
@@ -24,85 +24,85 @@ Use the inlang function (`i`) to get a language dependent text. The function tak
 <!-- => e.g. 'Welcome to inlang!' -->
 ```
 
-## `language`
+## `languageTag`
 
-The `language` variable contains the current selected language.
+The `languageTag` variable contains the current selected languageTag.
 
 #### Example
 
 ```svelte
 <script>
-	import { language } from "@inlang/sdk-js"
+	import { languageTag } from "@inlang/sdk-js"
 
-	console.log(language) // => e.g 'en'
+	console.log(languageTag) // => e.g 'en'
 </script>
 ```
 
-## `languages`
+## `languageTags`
 
-The `languages` array returns all languages that are available for this application.
+The `languageTags` array returns all languageTags that are available for this application.
 
 #### Example
 
 ```svelte
 <script>
-	import { languages } from "@inlang/sdk-js"
+	import { languageTags } from "@inlang/sdk-js"
 </script>
 
 <ul>
-	{#each languages as language}
-		<li>{language}</li>
+	{#each languageTags as languageTag}
+		<li>{languageTag}</li>
 	{/each}
 </ul>
 ```
 
-## `referenceLanguage`
+## `sourceLanguageTag`
 
-The `referenceLanguage` function returns the reference language that is used to translate the texts.
+The `sourceLanguageTag` function returns the source languageTag that is used to translate the texts.
 
 #### Example
 
 ```svelte
 <script>
-	import { referenceLanguage } from "@inlang/sdk-js"
+	import { sourceLanguageTag } from "@inlang/sdk-js"
 
-	console.log(referenceLanguage) // => e.g 'en'
+	console.log(sourceLanguageTag) // => e.g 'en'
 </script>
 ```
 
-## `switchLanguage`
+## `changeLanguageTag`
 
-The `switchLanguage` function allows you to change the language of the application. The function takes the language as a parameter and returns a promise that resolves when the language has been changed.
+The `changeLanguageTag` function allows you to change the languageTag of the application. The function takes the languageTag as a parameter and returns a promise that resolves when the languageTag has been changed.
 
 #### Example
 
 ```svelte
 <script>
-	import { switchLanguage } from "@inlang/sdk-js"
+	import { changeLanguageTag } from "@inlang/sdk-js"
 
-	async function switchLanguageToGerman() {
-		console.log('switching language to german ...')
-		await switchLanguage('de')
-		console.log('... language switched to german')
+	async function changeLanguageTagToGerman() {
+		console.log('changing languageTag to german ...')
+		await changeLanguageTag('de')
+		console.log('... languageTag changes to german')
 	}
 </script>
 
-<button on:click={switchLanguageToGerman}>
+<button on:click={changeLanguageTagToGerman}>
 	Show page in german
 </button>
 ```
 
 ## `loadResource`
 
-The `loadResource` function allows you to load the resource file for a specific language. The function takes the language as a parameter and returns a promise that resolves when the resource file has been loaded.
+The `loadResource` function allows you to load the resource file for a specific languageTag. The function takes the languageTag as a parameter and returns a promise that resolves when the resource file has been loaded.
 
-> Resources are loaded automatically, but you can already preload them to reduce the loading time when switching the language.
+> Resources are loaded automatically, but you can already preload them to reduce the loading time when changing the languageTag.
 
 #### Example
 
 ```svelte
 <script>
-	import { loadResource, switchLanguage } from "@inlang/sdk-js"
+	import { loadResource, changeLanguageTag } from "@inlang/sdk-js"
 
 	async function preloadGermanResource() {
 		console.log('preloading german resource ...')
@@ -111,7 +111,7 @@ The `loadResource` function allows you to load the resource file for a specific 
 	}
 </script>
 
-<button on:mouseover={preloadGermanResource} on:click={() => switchLanguage('de')}>
+<button on:mouseover={preloadGermanResource} on:click={() => changeLanguageTag('de')}>
 	Show page in german
 </button>
 ```

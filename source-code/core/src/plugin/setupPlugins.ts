@@ -83,7 +83,7 @@ export async function setupPlugins(args: {
 	}
 
 	// remove duplicates from languages in case multiple plugins add the same language.
-	mergedConfig.languages = [...new Set(mergedConfig.languages)]
+	mergedConfig.languageTags = [...new Set(mergedConfig.languageTags)]
 
 	return [mergedConfig as ConfigWithSetupPlugins, errors.length > 0 ? errors : undefined]
 }

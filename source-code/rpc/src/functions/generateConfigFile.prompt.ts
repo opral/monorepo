@@ -56,7 +56,7 @@ export function prompt(filePaths: string[]): string {
     );
 
     return {
-      referenceLanguage: "en",
+      sourceLanguageTag: "en",
       plugins: [
         pluginJson({
           pathPattern: "src/locales/{locale}.json",

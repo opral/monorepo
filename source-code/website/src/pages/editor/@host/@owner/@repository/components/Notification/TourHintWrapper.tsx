@@ -28,7 +28,7 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 	return (
 		<div class="relative max-content">
 			<TourStepWrapper position={props.position} offset={props.offset} isVisible={props.isVisible}>
-				{() => {
+				{(() => {
 					switch (props.currentId) {
 						case "github-login":
 							return <GithubLogin />
@@ -41,7 +41,7 @@ export const TourHintWrapper = (props: TourHintWrapperProps) => {
 						case "textfield":
 							return <Textfield />
 					}
-				}}
+				})()}
 			</TourStepWrapper>
 			{props.children}
 		</div>
@@ -178,7 +178,7 @@ const ForkRepository = () => {
 }
 
 const DefaultLanguages = () => {
-	const { setTourStep, filteredLanguages } = useEditorState()
+	const { setTourStep, filteredLanguageTags } = useEditorState()
 	return (
 		<div class="w-full flex flex-col gap-2">
 			<div class="w-full overflow-hidden">
@@ -196,7 +196,7 @@ const DefaultLanguages = () => {
 				</div>
 				<div
 					onClick={() =>
-						filteredLanguages().length > 0
+						filteredLanguageTags().length > 0
 							? setTourStep("missing-message-rule")
 							: setTourStep("textfield")
 					}

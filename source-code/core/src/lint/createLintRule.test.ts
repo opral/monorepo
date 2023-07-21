@@ -3,72 +3,30 @@ import { expect, test } from "vitest"
 import { createLintRule } from "./createLintRule.js"
 
 test("createLintRule returns a function", () => {
-	const myRule = createLintRule({
+	const myRule = createLintRule(() => ({
 		id: "example.rule",
-		setup: () => {
-			return {
-				visitors: {
-					Resource: () => {},
-				},
-			}
-		},
-	})
+		message: () => undefined,
+	}))
 
 	expect(typeof myRule).toBe("function")
 })
 
 test("createLintRule configures lint rule with correct id and level", async () => {
-	const myRule = createLintRule({
+	const myRule = createLintRule(() => ({
 		id: "example.rule",
-		setup: () => {
-			return {
-				visitors: {
-					Resource: () => {},
-				},
-			}
-		},
-	})
+		message: () => undefined,
+	}))
 
 	const rule = myRule("error")
 	expect(rule.id).toBe("example.rule")
 	expect(rule.level).toBe("error")
 })
 
-test("createLintRule configures lint rule with correct visitors", async () => {
-	const myRule = createLintRule({
+test("createLintRule configures lint rule with correct callbacks", async () => {
+	const myRule = createLintRule(() => ({
 		id: "example.rule",
-		setup: () => {
-			return {
-				visitors: {
-					Resource: () => {},
-				},
-			}
-		},
-	})
+		message: () => undefined,
+	}))
 	const rule = myRule("error")
-	const { visitors } = await rule.setup({
-		report: () => {},
-		config: { referenceLanguage: "en", languages: ["en", "de"] },
-	})
-	expect(typeof visitors.Resource).toBe("function")
-})
-
-test("createLintRule should accept an async setup function", async () => {
-	const myRule = createLintRule({
-		id: "example.rule",
-		setup: () => {
-			return {
-				visitors: {
-					Resource: () => {},
-				},
-			}
-		},
-	})
-	const rule = myRule("error")
-	expect(typeof rule.setup).toBe("function")
-	const { visitors } = await rule.setup({
-		report: () => {},
-		config: { referenceLanguage: "en", languages: ["en", "de"] },
-	})
-	expect(typeof visitors.Resource).toBe("function")
+	expect(typeof rule.message).toBe("function")
 })

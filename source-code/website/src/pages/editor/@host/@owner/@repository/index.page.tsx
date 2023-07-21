@@ -16,13 +16,13 @@ import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-ou
 import { Meta, Title } from "@solidjs/meta"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-import type { Language } from "@inlang/core/ast"
 import type { LintedMessage } from "@inlang/core/lint"
 import { rpc } from "@inlang/rpc"
 import { ListHeader, messageCount } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
 import type { RecentProjectType } from "@src/services/local-storage/src/schema.js"
+import type { LanguageTag } from "@inlang/core/languageTag"
 
 export function Page() {
 	return (
@@ -47,7 +47,7 @@ function TheActualPage() {
 		routeParams,
 		repositoryIsCloned,
 		doesInlangConfigExist,
-		filteredLanguages,
+		filteredLanguageTags,
 		textSearch,
 		filteredId,
 		filteredLintRules,
@@ -69,7 +69,7 @@ function TheActualPage() {
 	const messages = createMemo(() => {
 		const result: {
 			[id: string]: {
-				[language: Language]: LintedMessage | undefined
+				[language: LanguageTag]: LintedMessage | undefined
 			}
 		} = {}
 		for (const resource of resources) {
@@ -200,7 +200,7 @@ function TheActualPage() {
 								["hidden"]:
 									messageCount(
 										messages,
-										filteredLanguages(),
+										filteredLanguageTags(),
 										textSearch(),
 										filteredLintRules(),
 										filteredId(),

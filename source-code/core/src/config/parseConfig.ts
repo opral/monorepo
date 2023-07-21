@@ -1,9 +1,9 @@
 import type { InlangConfig } from "./schema.js"
-import { Resource } from "../ast/zod.js"
 import type * as ast from "../ast/schema.js"
 import type { Result } from "../utilities/result.js"
 import { dedent } from "ts-dedent"
 import { zConfig } from "./zod.js"
+import { Message } from "../ast/zod.js"
 
 export class ParseConfigException extends Error {
 	readonly #id = "ParseConfigException"
@@ -23,100 +23,105 @@ export async function parseConfig(args: {
 }): Promise<Result<InlangConfig, ParseConfigException>> {
 	// each function throws an error if the validation fails.
 	try {
+		// migrate the config if necessary
+		maybeLanguageTagBreakingChangeMigration(args.config)
 		// validate the config -> throws if invalid
-		hasSetupAResourcePlugin(args.config)
+		definedGetAndSaveMessages(args.config)
 		const parsedConfig = zConfig.passthrough().parse(args.config)
-		referenceLanguageMustBeInLanguages(args.config)
-		const resources = await args.config.readResources({ config: args.config })
-		validateResources(resources)
-		await languagesMatch(args.config, resources)
-		await roundtripTest(args.config, resources)
+		sourceLanguageTagMustBeInLanguageTags(args.config)
+		const messages = await args.config.loadMessages({ config: args.config })
+		validateMessages(messages)
+		await roundtripTest(args.config, messages)
 		return [parsedConfig as InlangConfig, undefined]
 	} catch (error) {
 		return [undefined, error as ParseConfigException]
 	}
 }
 
-function hasSetupAResourcePlugin(config: InlangConfig) {
-	if (!config.readResources || !config.writeResources) {
+function definedGetAndSaveMessages(config: InlangConfig) {
+	if (!config.loadMessages || !config.saveMessages) {
 		throw new ParseConfigException(
-			`It seems you didn't set up a plugin to handle Resource files. See https://inlang.com/documentation/plugins/registry.`,
+			`loadMessages() or saveMessages() are undefined. Did you forget to use a plugin? See https://inlang.com/documentation/plugins/registry.`,
 		)
 	}
 }
 
-function referenceLanguageMustBeInLanguages(config: InlangConfig) {
-	if (!config.languages.includes(config.referenceLanguage)) {
+function sourceLanguageTagMustBeInLanguageTags(config: InlangConfig) {
+	if (!config.languageTags.includes(config.sourceLanguageTag)) {
 		throw new ParseConfigException(
-			`The reference language "${config.referenceLanguage}" must be included in the list of languages.`,
+			`The source language tag "${config.sourceLanguageTag}" must be included in the list of language tags.`,
 		)
 	}
 }
 
-function validateResources(resources: ast.Resource[]) {
-	for (const resource of resources) {
+function maybeLanguageTagBreakingChangeMigration(config: InlangConfig) {
+	// @ts-expect-error - this is a migration
+	if (config.referenceLanguage && config.sourceLanguageTag === undefined) {
+		// @ts-expect-error - this is a migration
+		config.sourceLanguageTag = config.referenceLanguage
+		//! DO NOT DELETE the old keys, otherwise plugin functionality will break
+		// delete config.referenceLanguage
+	}
+	// @ts-expect-error - this is a migration
+	// Somewhere in the system languageTags might be defined as empty array.
+	// Thus, don't check for undefined languageTags here.
+	if (config.languages) {
+		// @ts-expect-error - this is a migration
+		config.languageTags = [...new Set(config.languages, config.languageTags ?? [])]
+		//! DO NOT DELETE the old keys, otherwise plugin functionality will break
+		// delete config.languages
+	}
+}
+
+function validateMessages(messages: ast.Message[]) {
+	for (const message of messages) {
 		// parse throws an error if any resource is invalid
-		Resource.parse(resource)
-	}
-}
-
-async function languagesMatch(config: InlangConfig, resources: ast.Resource[]) {
-	const languages = resources.map((resource) => resource.languageTag.name)
-	// sort the languages to ensure that the order does not matter
-	// and convert the array to a string to compare the arrays
-	const areEqual = languages.sort().join(",") === config.languages.sort().join(",")
-	if (areEqual === false) {
-		// TODO error message should contain the languages that are missing
-		throw new ParseConfigException(
-			`The list of languages in the config file does not match the returned resources from \`readResources()\`.`,
-		)
+		Message.parse(message)
 	}
 }
 
 /**
- * Testing a roundtrip of reading and writing resources.
+ * Testing a roundtrip of getting and saving messages.
  *
- * readResources -> AST (1) -> writeResources -> readResources -> AST (2).
- * AST (1) and AST (2) must be equal if the AST is not modified.
+ * getMessages -> State (1) -> saveMessages -> getMessages -> State (2).
  *
- * Otherwise, the defined readResources and writeResources functions are not
- * implemented correctly e.g. by missing messages in the roundtrip.
+ * State (1) and State (2) must be equal. Otherwise, the defined getMessages
+ * and saveMessages functions are not implemented correctly e.g. by missing messages
+ * in the roundtrip.
  */
-async function roundtripTest(config: InlangConfig, initialResources: ast.Resource[]) {
+async function roundtripTest(config: InlangConfig, initialMessages: ast.Message[]) {
 	const commonErrorMessage =
-		"A roundtrip test of the readResources and writeResources functions failed:\n"
-	await config.writeResources({ config, resources: initialResources })
-	const readResourcesAgain = await config.readResources({ config })
-	// check if the number of resources is the same
-	if (initialResources.length !== readResourcesAgain.length) {
-		throw new ParseConfigException(commonErrorMessage + "The number of resources don't match.")
+		"A roundtrip test of the getMessages and saveMessages functions failed:\n"
+	await config.saveMessages({ config, messages: initialMessages })
+	const getMessagesAgain = await config.loadMessages({ config })
+	// check if the number of messages are identical
+	if (initialMessages.length !== getMessagesAgain.length) {
+		throw new ParseConfigException(commonErrorMessage + "The number of messages do not match.")
 	}
 	// check if the resources match
-	for (const intialResource of initialResources) {
+	for (const initialMessage of initialMessages) {
 		// find the matching resource
-		const matchingReadResourceAgain = readResourcesAgain.find(
-			(readResourceAgain) => readResourceAgain.languageTag.name === intialResource.languageTag.name,
+		const matchingGetMessagesAgain = getMessagesAgain.find(
+			(getMessageAgain) => getMessageAgain.languageTag === initialMessage.languageTag,
 		)
 		// check if the resource exists
-		if (matchingReadResourceAgain === undefined) {
+		if (matchingGetMessagesAgain === undefined) {
 			throw new ParseConfigException(
-				commonErrorMessage + `Missing the resource "${intialResource.languageTag.name}"`,
+				commonErrorMessage +
+					`Missing the message with id "${initialMessage.id}" and language tag "${initialMessage.languageTag}"`,
 			)
 		}
 		// check if the messages are identical
-		for (const [messageIndex, initialMessage] of intialResource.body.entries()) {
-			if (
-				JSON.stringify(initialMessage) !==
-				JSON.stringify(matchingReadResourceAgain.body[messageIndex])
-			)
+		for (const [messageIndex, initialMessage] of initialMessages.entries()) {
+			if (JSON.stringify(initialMessage) !== JSON.stringify(getMessagesAgain[messageIndex]))
 				throw new ParseConfigException(
 					dedent(`
 ${commonErrorMessage}
-The message with id "${initialMessage.id.name}" does not match for the resource
-with languageTag.name "${intialResource.languageTag.name}".
+The messages with id "${initialMessage.id}" and language tag 
+"${initialMessage.languageTag}" do not match".
 
 Received:
-${JSON.stringify(matchingReadResourceAgain.body[messageIndex], undefined, 2)}
+${JSON.stringify(getMessagesAgain[messageIndex], undefined, 2)}
 
 Expected:
 ${JSON.stringify(initialMessage, undefined, 2)}

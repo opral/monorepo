@@ -1,4 +1,3 @@
-import type * as Ast from "@inlang/core/ast"
 import { setContext } from "svelte"
 import { writable, type Readable } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
@@ -6,48 +5,60 @@ import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
 import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
-import type { Language } from "@inlang/core/ast"
+import type { LanguageTag } from '@inlang/core/languageTag'
+import { logDeprecation } from '../../../../utils.js'
 
 // ------------------------------------------------------------------------------------------------
 
 type RuntimeContext<
-	Language extends Ast.Language = Ast.Language,
+	LanguageTag extends LanguageTag = LanguageTag,
 	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
 > = {
-	language: Readable<Language>
-	referenceLanguage: Language
-	languages: Language[]
+		languageTag: Readable<LanguageTag>
+		sourceLanguageTag: LanguageTag
+		languageTags: LanguageTag[]
 	i: Readable<InlangFunction>
-	switchLanguage: (language: Language) => Promise<void>
+		changeLanguageTag: (languageTag: LanguageTag) => Promise<void>
 	loadResource: SvelteKitClientRuntime["loadResource"]
 	route: (href: RelativeUrl) => RelativeUrl
+		switchLanguage: (languageTag: LanguageTag) => Promise<void>
+		referenceLanguage: LanguageTag
+		language: LanguageTag
+		languages: LanguageTag[]
 }
 
 export const getRuntimeFromContext = () => getRuntimeFromContextShared() as RuntimeContext
 
 export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
-	const _language = writable(runtime.language as Language)
+	const _language = writable(runtime.languageTag as LanguageTag)
 	const _i = writable(runtime.i)
 
-	const switchLanguage = async (language: Language) => {
-		if (runtime.language === language) return
+	const changeLanguageTag = async (languageTag: LanguageTag) => {
+		if (runtime.languageTag === languageTag) return
 
-		await runtime.loadResource(language)
+		await runtime.loadResource(languageTag)
 
-		runtime.switchLanguage(language)
+		runtime.changeLanguageTag(languageTag)
 
 		_i.set(runtime.i)
-		_language.set(language)
+		_language.set(languageTag)
 	}
 
 	setContext<RuntimeContext>(inlangSymbol, {
-		language: readonly(_language),
-		referenceLanguage: runtime.referenceLanguage,
-		languages: runtime.languages,
+		languageTag: readonly(_language),
+		sourceLanguageTag: runtime.sourceLanguageTag,
+		languageTags: runtime.languageTags,
 		i: readonly(_i),
 		loadResource: runtime.loadResource,
-		switchLanguage,
+		changeLanguageTag,
 		route,
+		referenceLanguage: runtime.referenceLanguage,
+		language: runtime.language!,
+		languages: runtime.languages,
+		switchLanguage: (...args: Parameters<typeof changeLanguageTag>) => {
+			logDeprecation('switchLanguage', 'changeLanguageTag')
+			return changeLanguageTag(...args)
+		},
 	})
 }
 

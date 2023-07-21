@@ -1,13 +1,14 @@
 import { describe, expect, test, vi } from "vitest"
 import { navigatorDetector } from "./navigatorDetector.js"
+import type { LanguageTag } from '@inlang/core/languageTag'
 
-const languages = ["en", "de", "en-GB"]
+const languageTags = ["en", "de", "en-GB"] satisfies LanguageTag[]
 
-vi.stubGlobal("window", { navigator: { languages } })
+vi.stubGlobal("window", { navigator: { languages: languageTags } })
 
 describe("navigatorDetector", () => {
-	test("returns languages from window object", () => {
+	test("returns languageTags from window object", () => {
 		const detector = navigatorDetector
-		expect(detector()).toEqual(languages)
+		expect(detector()).toEqual(languageTags)
 	})
 })

@@ -6,11 +6,11 @@ import { replaceLanguageInUrl } from "@inlang/sdk-js/adapter-sveltekit/shared"
 
 export const handle = initHandleWrapper({
 	inlangConfigModule: import("../inlang.config.js"),
-	getLanguage: ({ url }) => url.pathname.split("/")[1],
+	parseLanguageTag: ({ url }) => url.pathname.split("/")[1],
 	initDetectors: ({ request }) => [initAcceptLanguageHeaderDetector(request.headers)],
 	redirect: {
 		throwable: redirect,
-		getPath: ({ url }, language) => replaceLanguageInUrl(url, language),
+		getPath: ({ url }, languageTag) => replaceLanguageInUrl(url, languageTag),
 	},
 }).use(async ({ event, resolve }, { i }) => {
 	console.info("--- new request", event.url.toString())

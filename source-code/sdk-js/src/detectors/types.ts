@@ -1,11 +1,11 @@
-import type { Language } from "@inlang/core/ast"
+import type { LanguageTag } from '@inlang/core/languageTag'
 
 type MaybePromise<T> = T | Promise<T>
 
-export type Detector<Parameters extends Array<unknown> = Array<never>> = (
+export type Detector<Parameters extends unknown[] = never[]> = (
 	...parameters: Parameters
-) => MaybePromise<Array<Language>>
+) => MaybePromise<LanguageTag[]>
 
-export type DetectorInitializer<Parameters extends Array<unknown> = Array<never>> = (
+export type DetectorInitializer<Parameters extends unknown[] = never[]> = (
 	...parameters: Parameters
 ) => Detector<Parameters>
