@@ -6,12 +6,15 @@ import {
 	VariableDeclaration,
 	FunctionDeclaration,
 	ExportSpecifier,
+	ArrowFunction,
+	FunctionExpression,
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
 import { InlangException } from "../../exceptions.js"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { dedent } from "ts-dedent"
+import { findImportDeclarations, getImportSpecifiers, getImportSpecifiersAsStrings, isSdkImportPresent, removeImport } from './imports.js'
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -23,7 +26,8 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		Node.isFunctionExpression(node) ||
 		Node.isIdentifier(node) ||
 		Node.isCallExpression(node) ||
-		Node.isSatisfiesExpression(node)
+		Node.isSatisfiesExpression(node) ||
+		Node.isParenthesizedExpression(node)
 	) {
 		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
 	}
@@ -129,6 +133,23 @@ export const wrapExportedFunction = (
 	const fn = findFunctionExpression(fnExport)
 	if (!fn) {
 		throw new InlangSdkException(`Could not find exported function '${exportName}'`)
+	}
+
+	// inject SDK imports as parameters
+	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
+	if (imports.length) {
+		console.log(11, fn.getKindName());
+
+		if (ArrowFunction.isArrowFunction(fn) ||
+			FunctionExpression.isFunctionExpression(fn)) {
+			if (!fn.getParameters().length) {
+				fn.insertParameters(0, [{ name: '_' }])
+			}
+
+			fn.insertParameters(1, [{ name: `{ ${imports} }` }])
+		}
+
+		removeImport(sourceFile, "@inlang/sdk-js")
 	}
 
 	const wrapped = wrapWithPlaceholder(fn)

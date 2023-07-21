@@ -82,7 +82,7 @@ export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 		.forEachChildAsArray()
 		.map((node) =>
 			Node.isImportDeclaration(node) &&
-			textWithoutQuotes(node.getModuleSpecifier().getText()) === path
+				textWithoutQuotes(node.getModuleSpecifier().getText()) === path
 				? node
 				: undefined,
 		)
@@ -104,6 +104,19 @@ export const findNamedImportSpecifier = (importDeclaration: ImportDeclaration, n
 export const getImportSpecifiers = (importDeclaration: ImportDeclaration) =>
 	getNamedImportSpecifiers(importDeclaration)
 
+// ------------------------------------------------------------------------------------------------
+
+export const getImportSpecifiersAsStrings = (sourceFile: SourceFile, path: string) => {
+	const importDeclarations = findImportDeclarations(sourceFile, path)
+	const importSpecifiers = []
+	for (const importDeclaration of importDeclarations) {
+		importSpecifiers.push(...getImportSpecifiers(importDeclaration))
+	}
+
+	return importSpecifiers.map((importSpecifier) =>
+		importSpecifier.getText().replace("as", ":"),
+	)
+}
 // ------------------------------------------------------------------------------------------------
 
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
