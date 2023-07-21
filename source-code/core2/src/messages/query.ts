@@ -12,37 +12,18 @@ type FilterType = {
 	//variant?: string -> in the future
 }
 
-type GetType = {
-	where: UniqueFilterType
-}
-
-type GetManyType = {
-	where: FilterType
-}
-
-type UpdateType = {
-	where: UniqueFilterType
-	pattern: Message["pattern"]
-}
-
-type UpsertType = {
-	where: UniqueFilterType
-	pattern: Message["pattern"]
-	message: Message
-}
-
-type DeleteType = {
-	where: FilterType
-}
-
 // inspiration: Prisma CRUD https://www.prisma.io/docs/concepts/components/prisma-client/crud
 export type MessagesQueryApi_1 = {
 	create: (args: Message) => Message
-	get: (args: GetType) => Message
-	getMany: (args: GetManyType) => Message[]
-	update: (args: UpdateType) => Message
-	upsert: (args: UpsertType) => Message
-	delete: (args: DeleteType) => Message
+	get: (args: { where: UniqueFilterType }) => Message
+	getMany: (args: { where: FilterType }) => Message[]
+	update: (args: { where: UniqueFilterType; pattern: Message["pattern"] }) => Message
+	upsert: (args: {
+		where: UniqueFilterType
+		pattern: Message["pattern"]
+		message: Message
+	}) => Message
+	delete: (args: { where: UniqueFilterType }) => Message
 }
 
 const inlang = createInlang({
@@ -51,21 +32,21 @@ const inlang = createInlang({
 })
 
 // example usage
-const message = inlang.messages.query.create({
+const message1 = inlang.messages.query.create({
 	id: "myMessageId",
 	languageTag: "en",
 	pattern: [{ type: "Text", value: "Hello World" }],
 })
 
-const message = inlang.messages.query.get({ where: { id: "myMessageId", languageTag: "en" } })
+const message2 = inlang.messages.query.get({ where: { id: "myMessageId", languageTag: "en" } })
 const messages = inlang.messages.query.getMany({ where: { id: "myMessageId" } })
 
-const message = inlang.messages.query.update({
+const message3 = inlang.messages.query.update({
 	where: { id: "myMessageId", languageTag: "en" },
 	pattern: [{ type: "Text", value: "Hello World" }],
 })
 
-const message = inlang.messages.query.upsert({
+const message4 = inlang.messages.query.upsert({
 	where: { id: "myMessageId", languageTag: "en" },
 	pattern: [{ type: "Text", value: "Hello World" }],
 	message: {
@@ -75,4 +56,4 @@ const message = inlang.messages.query.upsert({
 	},
 })
 
-const message = inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
+const message5 = inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
