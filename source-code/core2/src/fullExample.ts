@@ -1,4 +1,4 @@
-import { createApp } from "./app/createApp.js"
+import { createInlang } from "./app/createInlang.js"
 import type { InlangConfig } from "./config/schema.js"
 import type {  MessageLintRule } from "./lint/api.js"
 import type { Plugin_Proposal_2 } from "./plugin/api.js"
@@ -68,8 +68,8 @@ const exampleInlangConfig: InlangConfig = {
 
 // 1. Create the app instance
 //    - env needs be created
-const inlang = createApp({
-	configPath: "/hello/inlang.config.json",
+const inlang = createInlang({
+	config,
 	env: { fs: undefined as any, import: undefined as any },
 })
 
