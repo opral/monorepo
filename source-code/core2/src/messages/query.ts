@@ -1,47 +1,51 @@
+import { createInlang } from "../app/createInlang.js"
 import type { Message } from "./schema.js"
-const inlang: any = {}
-
 /* --------------------- TYPES --------------------- */
 
-type UniqueFilterType = {
+type FilterType = {
 	id: string
 	languageTag: string
 	// more properties in the future
 }
 
 type QueryOptions = {
-	where?: Partial<UniqueFilterType>[]
+	where: Partial<FilterType>[]
 }
 
-export type MessagesQuery = {
-	get: (args: QueryOptions) => Message[]
+export type MessagesQueryApi_1 = {
+	get: (args?: QueryOptions) => Message[]
 	update: (data: Message[]) => Message[]
 }
 
 /* --------------------- CRUD --------------------- */
 
+const inlang = createInlang({
+	configPath: "/hello/inlang.config.json",
+	env: { fs: undefined as any, import: undefined as any },
+})
+
 // - create
 const message = inlang.messages.update([
 	{ id: "myMessageId", languageTag: "en", pattern: [{ type: "Text", value: "Hello World" }] },
-]) as ReturnType<MessagesQuery["update"]>
+])
 
 // - get
 const messageOrMessages = inlang.messages.get({
-	where: { id: "myMessageId", languageTag: "en" },
-}) as ReturnType<MessagesQuery["get"]>
+	where: [{ id: "myMessageId", languageTag: "en" }],
+})
 
 // - update
 const messageOrMessagesUpdated = inlang.messages.update([
 	{ id: "myMessageId", languageTag: "en", pattern: [{ type: "Text", value: "Hello World" }] },
-]) as ReturnType<MessagesQuery["update"]>
+])
 
 // - delete
-const messageDeleted = inlang.messages.update({
-	where: { id: "myMessageId", languageTag: "en", pattern: undefined },
-}) as ReturnType<MessagesQuery["update"]>
+const messageDeleted = inlang.messages.update([
+	{ id: "myMessageId", languageTag: "en", pattern: [] },
+])
 
 // - list
-const messagesAll = inlang.messages.get() as ReturnType<MessagesQuery["get"]>
+const messagesAll = inlang.messages.get()
 
 // hide warnings
 console.log(message, messageOrMessages, messageOrMessagesUpdated, messageDeleted, messagesAll)

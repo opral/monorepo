@@ -6,9 +6,7 @@ import type { InlangInstanceEnv } from "./env/types.js"
 export type InlangInstance = {
 	config: InlangConfig
 	env: InlangInstanceEnv
-	messages: {
-		query: MessagesQueryApi_1
-	}
+	messages: MessagesQueryApi_1
 	lint: {
 		// for now, only simply array that can be improved in the future
 		// see https://github.com/inlang/inlang/issues/1098
