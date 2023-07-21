@@ -22,9 +22,10 @@ export type MessagesQuery = {
 /* --------------------- CRUD --------------------- */
 
 // - create
-inlang.messages.update([
+const message = inlang.messages.update([
 	{ id: "myMessageId", languageTag: "en", pattern: [{ type: "Text", value: "Hello World" }] },
-])
+]) as ReturnType<MessagesQuery["update"]>
+
 // - get
 const messageOrMessages = inlang.messages.get({
 	where: { id: "myMessageId", languageTag: "en" },
@@ -44,4 +45,4 @@ const messageDeleted = inlang.messages.update({
 const messagesAll = inlang.messages.list() as ReturnType<MessagesQuery["list"]>
 
 // hide warnings
-console.log(messageOrMessages, messageOrMessagesUpdated, messageDeleted, messagesAll)
+console.log(message, messageOrMessages, messageOrMessagesUpdated, messageDeleted, messagesAll)
