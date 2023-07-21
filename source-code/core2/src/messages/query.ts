@@ -1,14 +1,15 @@
 import { createInlang } from "../app/createInlang.js"
+import type { LanguageTag } from "../languageTag.js"
 import type { Message } from "./schema.js"
 
 type UniqueFilterType = {
-	id: string
-	languageTag: string
+	id: Message["id"]
+	languageTag: LanguageTag
 	//variant: string -> in the future
 }
 type FilterType = {
-	id?: string
-	languageTag?: string
+	id?: Message["id"]
+	languageTag?: LanguageTag
 	//variant?: string -> in the future
 }
 
