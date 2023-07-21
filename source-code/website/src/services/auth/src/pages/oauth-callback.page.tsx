@@ -18,9 +18,15 @@ export function Page() {
 
 	createEffect(() => {
 		if (userInfo()) {
-			window.close()
+			closeWindow()
 		}
 	})
+
+	// Firefox doesn't allow to close a window that wasn't opened by a script
+	function closeWindow() {
+		window.open("", "_parent", "")
+		window.close()
+	}
 
 	return (
 		<div class="h-screen flex justify-center items-center">
@@ -45,7 +51,7 @@ export function Page() {
 								prop:variant="primary"
 								onClick={() => {
 									// this pattern will break if the last opened window is not the login window
-									window.close()
+									closeWindow()
 								}}
 							>
 								<MaterialSymbolsArrowBackRounded slot="prefix" />
