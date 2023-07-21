@@ -115,7 +115,7 @@ export const wrapExportedFunction = (
 	options: string | undefined,
 	wrapperFunctionName: string,
 	exportName: string,
-	defaultImplementation?: string | undefined,
+	defaultImplementation = "() => { }",
 ) => {
 	const fnExport = findOrCreateExport(sourceFile, exportName, defaultImplementation)
 

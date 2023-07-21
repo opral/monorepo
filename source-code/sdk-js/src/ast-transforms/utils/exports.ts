@@ -53,7 +53,7 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 export const findOrCreateExport = (
 	sourceFile: SourceFile,
 	name: string,
-	defaultImplementation = "() => { }",
+	defaultImplementation: string,
 ) => {
 	const fnExport = findExport(sourceFile, name)
 	if (fnExport) return fnExport
