@@ -103,18 +103,6 @@
 			"getInTouch": "In Kontakt treten",
 			"join": "Bewerben",
 			"feedback": "Rückmeldung"
-		},
-		"newsletter": {
-			"title": "Newsletter",
-			"placeholder": "Eingabe der E-Mail ...",
-			"button": "Abschicken",
-			"error": {
-				"invalidEmail": "Bitte geben Sie eine gültige E-Mail Adresse ein.",
-				"emptyEmail": "Bitte geben Sie Ihre E-Mail Adresse ein.",
-				"alreadySubscribed": "Sie haben sich bereits für unseren Newsletter angemeldet.",
-				"generic": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
-			},
-			"success": "Vielen Dank für Ihr Abonnement!"
 		}
 	},
 	"newsletter": {
@@ -125,6 +113,16 @@
 		"unsubscribed": {
 			"title": "Abmeldung erfolgreich",
 			"description": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
-		}
+		},
+		"title": "Newsletter",
+		"placeholder": "Eingabe der E-Mail ...",
+		"button": "Abschicken",
+		"error": {
+			"invalidEmail": "Bitte geben Sie eine gültige E-Mail Adresse ein.",
+			"emptyEmail": "Bitte geben Sie Ihre E-Mail Adresse ein.",
+			"alreadySubscribed": "Sie haben sich bereits für unseren Newsletter angemeldet.",
+			"generic": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
+		},
+		"success": "Vielen Dank für Ihr Abonnement!"
 	}
 }
