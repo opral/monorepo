@@ -12,25 +12,20 @@ const missingMessage: MessageLintRule = {
 		de: "Fehlende Nachricht",
 	},
 	defaultLevel: "error",
-	type: "Message",
-	message: ({ message, inlang }) => {
+	message: ({ message, inlang, report }) => {
 		if (message.languageTag !== inlang.config.sourceLanguageTag) {
 			return
 		}
-		// TODO pain to make reports typesafe...
-		// - MessageLintReport has a lot of duplicate information
-		const reports = []
 		for (const languageTag of inlang.config.languageTags) {
 			const translation = inlang.messages.query.get({ where: { id: message.id, languageTag } })
 			if (!translation) {
-				reports.push({
+				report({
 					languageTag,
 					messageId: message.id,
 					content: `Message "${message.id}" is missing in language tag "${languageTag}".`,
 				})
 			}
 		}
-		return reports
 	},
 }
 

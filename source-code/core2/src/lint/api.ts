@@ -13,16 +13,15 @@ export type LintRule = {
 	defaultLevel: "error" | "warn"
 }
 
-// TODO better "message" agnostic way for linting system?
-// - Trying to make the lint system "message" agnostic.
-//
 export type MessageLintRule = LintRule & {
-	type: "Message"
-	message: (args: {
-		message: Message
-		inlang: InlangApp
-	}) => MaybeArray<Omit<MessageLintReport, "ruleId" | "level" | "type">> | undefined | void
+	message: (args: { message: Message; inlang: InlangApp; report: ReportMessageLint }) => void
 }
+
+export type ReportMessageLint = (args: {
+	messageId: Message["id"]
+	languageTag: LanguageTag
+	content: LintReport["content"]
+}) => MessageLintReport
 
 export type LintReport = {
 	ruleId: LintRule["id"]
@@ -42,5 +41,3 @@ export class LintException extends Error {
 		this.name = "LintException"
 	}
 }
-
-type MaybeArray<T> = T | T[]
