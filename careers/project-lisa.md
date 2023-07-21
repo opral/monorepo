@@ -2,6 +2,8 @@
 
 **Opportunity**
 
+Watch this video 45 sec video https://www.youtube.com/watch?v=bCcluZriRnc
+
 - build the version control system for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
 - hands-down deep CS work
 - small team, overproportional impact

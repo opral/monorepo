@@ -75,6 +75,48 @@
 			}
 		}
 	},
+	"header": {
+		"openEditor": "Open Editor",
+		"link": {
+			"blog": "Blog",
+			"docs": "Docs",
+			"feedback": "Feedback"
+		}
+	},
+	"footer": {
+		"docs": {
+			"title": "Docs",
+			"gettingStarted": "Getting Started",
+			"whyInlang": "Why inlang?",
+			"contribute": "Contribute"
+		},
+		"resources": {
+			"title": "Resources",
+			"blog": "Blog",
+			"roadmap": "Roadmap",
+			"github": "GitHub",
+			"twitter": "Twitter",
+			"discord": "Discord"
+		},
+		"contact": {
+			"title": "Let's talk",
+			"getInTouch": "Get in Touch",
+			"join": "Join the Team",
+			"feedback": "Feedback"
+		},
+		"newsletter": {
+			"title": "Newsletter",
+			"placeholder": "Enter your email ...",
+			"button": "Subscribe",
+			"error": {
+				"invalidEmail": "Please enter a valid email address.",
+				"emptyEmail": "Please enter your email address.",
+				"alreadySubscribed": "You are already subscribed to our newsletter.",
+				"generic": "Something went wrong. Please try again later."
+			},
+			"success": "Thank you for subscribing!"
+		}
+	},
 	"newsletter": {
 		"subscribe": {
 			"title": "Subscribe to our newsletter",
