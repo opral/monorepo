@@ -1,4 +1,4 @@
-import type { InlangApp } from "../app/api.js"
+import type { InlangInstance } from "../app/api.js"
 import type { LanguageTag } from "../languageTag.js"
 import type { Message } from "../messages/schema.js"
 
@@ -14,7 +14,7 @@ export type LintRule = {
 }
 
 export type MessageLintRule = LintRule & {
-	message: (args: { message: Message; inlang: InlangApp; report: ReportMessageLint }) => void
+	message: (args: { message: Message; inlang: InlangInstance; report: ReportMessageLint }) => void
 }
 
 export type ReportMessageLint = (args: {

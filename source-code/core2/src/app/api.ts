@@ -4,7 +4,7 @@ import type { MessagesQueryApi_1 } from "../messages/query.js"
 import type { InlangInstanceEnv } from "./env/types.js"
 
 export type InlangInstance = {
-	config: Readonly<InlangConfig>
+	config: InlangConfig
 	env: InlangInstanceEnv
 	// TODO: exception handling
 	exceptions: InlangInstanceException[]

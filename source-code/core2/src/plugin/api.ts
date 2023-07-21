@@ -1,4 +1,4 @@
-import type { InlangApp } from "../app/api.js"
+import type { InlangInstance } from "../app/api.js"
 import type { LanguageTag } from "../languageTag.js"
 import type { LintRule } from "../lint/api.js"
 import type { Message } from "../messages/schema.js"
@@ -13,7 +13,7 @@ import type { Message } from "../messages/schema.js"
  *   if a plugin crashes during setup -> complicated to show plugin with "id" crashed.
  */
 export type Plugin_Proposal_1<Options extends Record<string, string> = Record<string, never>> =
-	(args: { options: Options; inlang: InlangApp }) => {
+	(args: { options: Options; inlang: InlangInstance }) => {
 		id: `${string}.${string}`
 		displayName: string
 		extendLanguageTags?: () => LanguageTag[]
@@ -54,7 +54,7 @@ export type Plugin_Proposal_2<Options extends Record<string, string> = Record<st
 		id: `${string}.${string}`
 		displayName: string
 	}
-	setup: (args: { options: Options; inlang: InlangApp }) => {
+	setup: (args: { options: Options; inlang: InlangInstance }) => {
 		extendLanguageTags?: () => LanguageTag[]
 		loadMessages?: () => Message[]
 		saveMessages?: (args: { messages: Message[] }) => void
