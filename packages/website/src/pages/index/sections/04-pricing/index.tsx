@@ -14,7 +14,7 @@ const Pricing = () => {
 					<h2 class="text-3xl text-center lg:text-start  font-semibold text-on-background leading-tight md:leading-relaxed tracking-tight">
 						{t("landing.pricing.title")}
 					</h2>
-					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant sm:leading-7">
+					<p class="text-base text-center lg:text-start md:w-[80%] text-outline-variant sm:leading-7 pb-16">
 						{t("landing.pricing.description")}
 					</p>
 				</div>

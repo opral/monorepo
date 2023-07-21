@@ -8,6 +8,7 @@ RFC stands for _request for comments_. RFCs are written proposals that seek feed
 
 **RFC's**
 
+- [RFC-007 Message first architecture](message-first-architecture/RFC.md)
 - [RFC-006 Plugin API](plugin-api/RFC.md)
 - [RFC-005 git-sdk-requirements](git-sdk-requirements/RFC.md)
 - [RFC-004 JavaScript SDK](sdk-js/RFC.md)
