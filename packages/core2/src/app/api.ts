@@ -1,13 +1,13 @@
 import type { InlangConfig } from "../config/schema.js"
 import type { LintException, LintReport } from "../lint/api.js"
 import type { MessagesQueryApi_1 } from "../messages/query.js"
-import type { InlangAppEnvironment } from "./env/types.js"
+import type { InlangInstanceEnv } from "./env/types.js"
 
-export type InlangApp = {
+export type InlangInstance = {
 	config: Readonly<InlangConfig>
-	env: InlangAppEnvironment
+	env: InlangInstanceEnv
 	// TODO: exception handling
-	exceptions: InlangAppException[]
+	exceptions: InlangInstanceException[]
 	messages: {
 		query: MessagesQueryApi_1
 	}
@@ -19,9 +19,9 @@ export type InlangApp = {
 	}
 }
 
-class InlangAppException extends Error {
+class InlangInstanceException extends Error {
 	constructor(message: string) {
 		super(message)
-		this.name = "InlangAppException"
+		this.name = "InlangInstanceException"
 	}
 }
