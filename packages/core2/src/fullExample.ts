@@ -89,8 +89,6 @@ inlang.messages.query.update({ where: { id: "myMessageId", languageTag: "en" }, 
 inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
 
 // --- CONFIG ACCESS ---
-//   - config is static. adjusting the config requires a re-initialization of the app.
-//     IMHO (@samuelstroschein) that okay. 
 
 inlang.config.sourceLanguageTag
 inlang.config.languageTags
