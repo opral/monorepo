@@ -95,6 +95,9 @@ inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } }
 inlang.config.sourceLanguageTag
 inlang.config.languageTags
 
+// adding a language tag via an app
+inlang.config.languageTags = [...inlang.config.languageTags, "de-AT"]
+
 // --- LINT ---
 inlang.lint.reports.filter((report) => report.level === "error")
 inlang.lint.exceptions
