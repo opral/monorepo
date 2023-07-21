@@ -103,18 +103,6 @@
 			"getInTouch": "Get in Touch",
 			"join": "Join the Team",
 			"feedback": "Feedback"
-		},
-		"newsletter": {
-			"title": "Newsletter",
-			"placeholder": "Enter your email ...",
-			"button": "Subscribe",
-			"error": {
-				"invalidEmail": "Please enter a valid email address.",
-				"emptyEmail": "Please enter your email address.",
-				"alreadySubscribed": "You are already subscribed to our newsletter.",
-				"generic": "Something went wrong. Please try again later."
-			},
-			"success": "Thank you for subscribing!"
 		}
 	},
 	"newsletter": {
@@ -125,6 +113,16 @@
 		"unsubscribed": {
 			"title": "You're unsubscribed",
 			"description": "We're sad to see you go. If you have any feedback, please let us know on our"
-		}
+		},
+		"title": "Newsletter",
+		"placeholder": "Enter your email ...",
+		"button": "Subscribe",
+		"error": {
+			"invalidEmail": "Please enter a valid email address.",
+			"emptyEmail": "Please enter your email address.",
+			"alreadySubscribed": "You are already subscribed to our newsletter.",
+			"generic": "Something went wrong. Please try again later."
+		},
+		"success": "Thank you for subscribing!"
 	}
 }
