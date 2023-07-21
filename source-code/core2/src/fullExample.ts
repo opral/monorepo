@@ -52,6 +52,7 @@ export const myPlugin: Plugin_Proposal_2<{ pathPattern: string }> = {
 // --- SETUP ---
 
 // 0. Example config on disk
+//   "/hello/inlang.config.json"
 const exampleInlangConfig: InlangConfig = {
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
@@ -65,12 +66,7 @@ const exampleInlangConfig: InlangConfig = {
   }
 }
 
-// 1. The JSON config needs to be read manually.  
-//    - an app instance can't know where a config is located
-//    - gives apps more freedom to load different configs if desired (testing, etc.)
-const config = fs.readFile("./inlang.config.json")
-
-// 2. Create the app instance
+// 1. Create the app instance
 //    - env needs be created
 const inlang = createInlang({
 	config,
@@ -88,11 +84,12 @@ inlang.messages.query.update({ where: { id: "myMessageId", languageTag: "en" }, 
 inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
 
 // --- CONFIG ACCESS ---
-//   - config is static. adjusting the config requires a re-initialization of the app.
-//     IMHO (@samuelstroschein) that okay. 
 
 inlang.config.sourceLanguageTag
 inlang.config.languageTags
+
+// adding a language tag via an app
+inlang.config.languageTags = [...inlang.config.languageTags, "de-AT"]
 
 // --- LINT ---
 inlang.lint.reports.filter((report) => report.level === "error")
