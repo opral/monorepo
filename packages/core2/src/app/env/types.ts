@@ -3,7 +3,7 @@
  *
  * Read more https://inlang.com/documentation/inlang-environment
  */
-export type InlangAppEnvironment = {
+export type InlangInstanceEnv = {
 	fs: any
 	import: any
 }
