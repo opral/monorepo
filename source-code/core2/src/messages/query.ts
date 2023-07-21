@@ -16,7 +16,6 @@ type QueryOptions = {
 export type MessagesQuery = {
 	get: (args: QueryOptions) => Message[]
 	update: (data: Message[]) => Message[]
-	list: () => Message[]
 }
 
 /* --------------------- CRUD --------------------- */
@@ -42,7 +41,7 @@ const messageDeleted = inlang.messages.update({
 }) as ReturnType<MessagesQuery["update"]>
 
 // - list
-const messagesAll = inlang.messages.list() as ReturnType<MessagesQuery["list"]>
+const messagesAll = inlang.messages.get() as ReturnType<MessagesQuery["get"]>
 
 // hide warnings
 console.log(message, messageOrMessages, messageOrMessagesUpdated, messageDeleted, messagesAll)
