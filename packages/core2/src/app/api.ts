@@ -6,8 +6,6 @@ import type { InlangInstanceEnv } from "./env/types.js"
 export type InlangInstance = {
 	config: InlangConfig
 	env: InlangInstanceEnv
-	// TODO: exception handling
-	exceptions: InlangInstanceException[]
 	messages: {
 		query: MessagesQueryApi_1
 	}
@@ -16,12 +14,5 @@ export type InlangInstance = {
 		// see https://github.com/inlang/inlang/issues/1098
 		reports: LintReport[]
 		exceptions: LintException[]
-	}
-}
-
-class InlangInstanceException extends Error {
-	constructor(message: string) {
-		super(message)
-		this.name = "InlangInstanceException"
 	}
 }
