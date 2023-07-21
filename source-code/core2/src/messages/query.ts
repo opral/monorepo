@@ -17,8 +17,6 @@ export type MessagesQueryApi_1 = {
 	create: (args: Message) => Message
 	get: (args: { where: UniqueFilterType }) => [Message, Error]
 	getMany: (args: { where: FilterType }) => [Message[], Error]
-	update: (args: Message) => Message
-	updateMany: (args: Message[]) => [Message[], Error]
 	upsert: (args: Message) => [Message, Error]
 	upsertMany: (args: Message[]) => [Message[], Error]
 	delete: (args: { where: UniqueFilterType }) => [Message, Error]
@@ -40,19 +38,10 @@ const message1 = inlang.messages.query.create({
 const message2 = inlang.messages.query.get({ where: { id: "myMessageId", languageTag: "en" } })
 const messages = inlang.messages.query.getMany({ where: { id: "myMessageId" } })
 
-const message3 = inlang.messages.query.update({
-	where: { id: "myMessageId", languageTag: "en" },
-	pattern: [{ type: "Text", value: "Hello World" }],
-})
-
 const message4 = inlang.messages.query.upsert({
-	where: { id: "myMessageId", languageTag: "en" },
+	id: "myMessageId",
+	languageTag: "en",
 	pattern: [{ type: "Text", value: "Hello World" }],
-	message: {
-		id: "myMessageId",
-		languageTag: "en",
-		pattern: [{ type: "Text", value: "Hello World" }],
-	},
 })
 
 const message5 = inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
