@@ -17,6 +17,7 @@ export function Page() {
 				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="robots" content="noindex" />
 			<RootLayout>
 				<div class="relative max-w-screen-xl w-full mx-auto bg-background">
 					<div class="invisible xl:visible absolute top-0 left-0 h-full w-full z-0">
