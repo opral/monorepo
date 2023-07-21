@@ -19,3 +19,13 @@ export type MessagesQueryApi_1 = {
 	update: (where: UniqueFilterType, data: Message["pattern"]) => Message
 	delete: (where: UniqueFilterType) => Message
 }
+
+// example usage
+const message = inlang.messages.query.create({ id: "myMessageId", languageTag: "en", pattern: [{"type": "Text", value:  "Hello World" }]})
+
+const message = inlang.messages.query.get({ where: { id: "myMessageId", languageTag: "en" })
+const messages = inlang.messages.query.getMany({ where: { id: "myMessageId" })
+
+const message = inlang.messages.query.update({ where: { id: "myMessageId", languageTag: "en" }, data: { pattern: [{"type": "Text", value:  "Hello World" }] } })
+
+const message = inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
