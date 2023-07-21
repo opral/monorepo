@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, Match, onMount, Show, Switch } from "solid-js"
+import { createSignal, For, JSXElement, Match, onMount, Show, Switch } from "solid-js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
