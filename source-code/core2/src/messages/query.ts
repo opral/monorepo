@@ -1,15 +1,47 @@
 import type { Message } from "./schema.js"
+const inlang: any = {}
 
-// TODO
-// 1. Query builder?
-// 2. Filtering etc how?
-//
-// inspiration: Prisma CRUD https://www.prisma.io/docs/concepts/components/prisma-client/crud
-export type MessagesQueryApi_1 = {
-	create: (message: Message) => void
-	get: () => Message[]
-	update: () => void
-	delete: () => void
+/* --------------------- TYPES --------------------- */
+
+type UniqueFilterType = {
+	id: string
+	languageTag: string
+	// more properties in the future
 }
 
-// query.
+type QueryOptions = {
+	where?: Partial<UniqueFilterType>[]
+}
+
+export type MessagesQuery = {
+	get: (args: QueryOptions) => Message[]
+	update: (data: Message[]) => Message[]
+	list: () => Message[]
+}
+
+/* --------------------- CRUD --------------------- */
+
+// - create
+inlang.messages.update([
+	{ id: "myMessageId", languageTag: "en", pattern: [{ type: "Text", value: "Hello World" }] },
+])
+// - get
+const messageOrMessages = inlang.messages.get({
+	where: { id: "myMessageId", languageTag: "en" },
+}) as ReturnType<MessagesQuery["get"]>
+
+// - update
+const messageOrMessagesUpdated = inlang.messages.update([
+	{ id: "myMessageId", languageTag: "en", pattern: [{ type: "Text", value: "Hello World" }] },
+]) as ReturnType<MessagesQuery["update"]>
+
+// - delete
+const messageDeleted = inlang.messages.update({
+	where: { id: "myMessageId", languageTag: "en", pattern: undefined },
+}) as ReturnType<MessagesQuery["update"]>
+
+// - list
+const messagesAll = inlang.messages.list() as ReturnType<MessagesQuery["list"]>
+
+// hide warnings
+console.log(messageOrMessages, messageOrMessagesUpdated, messageDeleted, messagesAll)
