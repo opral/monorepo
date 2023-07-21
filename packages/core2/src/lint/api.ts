@@ -47,4 +47,4 @@ export class LintException extends Error {
  *
  * The language tag `en` is always required.
  */
-type TranslatedStrings = Record<string, string> & { en: string }
+type TranslatedStrings = Record<LanguageTag, string> & { en: string }
