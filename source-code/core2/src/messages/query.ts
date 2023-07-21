@@ -15,15 +15,14 @@ type FilterType = {
 // inspiration: Prisma CRUD https://www.prisma.io/docs/concepts/components/prisma-client/crud
 export type MessagesQueryApi_1 = {
 	create: (args: Message) => Message
-	get: (args: { where: UniqueFilterType }) => Message
-	getMany: (args: { where: FilterType }) => Message[]
-	update: (args: { where: UniqueFilterType; pattern: Message["pattern"] }) => Message
-	upsert: (args: {
-		where: UniqueFilterType
-		pattern: Message["pattern"]
-		message: Message
-	}) => Message
-	delete: (args: { where: UniqueFilterType }) => Message
+	get: (args: { where: UniqueFilterType }) => [Message, Error]
+	getMany: (args: { where: FilterType }) => [Message[], Error]
+	update: (args: Message) => Message
+	updateMany: (args: Message[]) => [Message[], Error]
+	upsert: (args: Message) => [Message, Error]
+	upsertMany: (args: Message[]) => [Message[], Error]
+	delete: (args: { where: UniqueFilterType }) => [Message, Error]
+	deleteMany: (args: { where: FilterType }) => [Message[], Error]
 }
 
 const inlang = createInlang({
