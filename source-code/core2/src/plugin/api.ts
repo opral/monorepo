@@ -3,58 +3,25 @@ import type { LanguageTag } from "../languageTag.js"
 import type { LintRule } from "../lint/api.js"
 import type { Message } from "../messages/schema.js"
 
-/**
- * Proposal 1
- *
- * Setup function everything in one.
- *
- * + simple to use
- * - no access to static props.
- *   if a plugin crashes during setup -> complicated to show plugin with "id" crashed.
- */
-export type Plugin_Proposal_1<Options extends Record<string, string> = Record<string, never>> =
-	(args: { options: Options; inlang: InlangInstance }) => {
+type JSONSerializable<T extends Record<string, string | string[]>> = T
+
+export type Plugin<
+	PluginOptions extends Record<string, string | string[]> = Record<string, never>,
+> = {
+	// * Must be JSON serializable if we want an external plugin manifest in the future.
+	meta: JSONSerializable<{
 		id: `${string}.${string}`
 		displayName: string
-		extendLanguageTags?: () => LanguageTag[]
-		loadMessages?: () => Message[]
-		saveMessages?: (args: { messages: Message[] }) => void
-		addLintRules?: () => LintRule[]
-	}
-
-export const example1: Plugin_Proposal_1<{ pathPattern: string }> = ({ options, inlang }) => {
-	return {
-		id: "inlang.myPlugin",
-		displayName: "My Plugin",
-		extendLanguageTags: () => {
-			return ["en-US"]
-		},
-		loadMessages: () => {
-			for (const languageTag of inlang.config.languageTags) {
-				console.log(languageTag + options.pathPattern)
-			}
-			return []
-		},
-		saveMessages: ({ messages }) => {
-			console.log(messages)
-		},
-	}
-}
-
-/**
- * Proposal 2
- *
- * Split static meta data from setup function.
- *
- * + access to static without crash chance
- * - arguably not so nice API.
- */
-export type Plugin_Proposal_2<Options extends Record<string, string> = Record<string, never>> = {
-	meta: {
-		id: `${string}.${string}`
-		displayName: string
-	}
-	setup: (args: { options: Options; inlang: InlangInstance }) => {
+		// TODO make translatable after https://github.com/inlang/inlang/pull/1155
+		description: string
+		keywords: string[]
+	}>
+	/**
+	 * The setup function is the first function that is called when inlang loads the plugin.
+	 *
+	 * Use the setup function to initialize state, handle the options and more.
+	 */
+	setup: (args: { options: PluginOptions; inlang: InlangInstance }) => {
 		extendLanguageTags?: () => LanguageTag[]
 		loadMessages?: () => Message[]
 		saveMessages?: (args: { messages: Message[] }) => void
@@ -62,12 +29,23 @@ export type Plugin_Proposal_2<Options extends Record<string, string> = Record<st
 	}
 }
 
-export const example2: Plugin_Proposal_2<{ pathPattern: string }> = {
+// ----------------- EXAMPLE PLUGIN -----------------
+
+type PluginOptions = {
+	pathPattern: string
+}
+
+export const examplePlugin: Plugin<PluginOptions> = {
 	meta: {
-		id: "inlang.myPlugin",
-		displayName: "My Plugin",
+		id: "inlang.plugin-i18next",
+		displayName: "i18next",
+		description: "i18next plugin for inlang",
+		keywords: ["i18next", "react", "nextjs"],
 	},
-	setup: ({ inlang, options }) => {
+	setup: ({ options, inlang }) => {
+		if (options.pathPattern === undefined) {
+			throw Error("Path pattern is undefined")
+		}
 		return {
 			extendLanguageTags: () => {
 				return ["en-US"]
