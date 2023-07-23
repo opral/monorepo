@@ -1,6 +1,9 @@
 import type { OnBeforeRender } from "@src/renderer/types.js"
 import type { PageProps } from "./index.page.jsx"
-import { tableOfContents, FrontmatterSchema } from "../../../../../documentation/tableOfContents.js"
+import {
+	FrontmatterSchema,
+	tableOfContentsPromise,
+} from "../../../../../documentation/tableOfContents.js"
 import { parseMarkdown } from "@src/services/markdown/index.js"
 import { RenderErrorPage } from "vite-plugin-ssr/RenderErrorPage"
 
@@ -22,14 +25,10 @@ export type ProcessedTableOfContents = Record<
  * 		"/documentation/intro": document,
  * 	}
  */
-const index: Record<string, Awaited<ReturnType<typeof parseMarkdown>>> = {}
 /**
  * the table of contents without the html for each document
  * saving bandwith and speeding up the site)
  */
-const processedTableOfContents: ProcessedTableOfContents = {}
-
-await generateIndexAndTableOfContents()
 
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
@@ -51,21 +50,33 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 }
 
 /**
- * Generates the index and table of contents.
+ * Generates the index and table of contents using async/await.
  */
 async function generateIndexAndTableOfContents() {
-	for (const [category, documents] of Object.entries(tableOfContents)) {
-		const frontmatters: { frontmatter: any }[] = []
-		for (const document of documents) {
+	try {
+		const tableOfContents = await tableOfContentsPromise
+
+		const processedTableOfContents: { [key: string]: { frontmatter: any }[] } = {}
+		const index: { [key: string]: any } = {}
+
+		for (const { category, content } of tableOfContents) {
 			const markdown = parseMarkdown({
-				text: document,
+				text: content,
 				FrontmatterSchema,
 			})
-			// not pushing to processedTableOfContents directly in case
-			// the category is undefined so far
-			frontmatters.push({ frontmatter: markdown.frontmatter })
+			if (!processedTableOfContents[category]) {
+				processedTableOfContents[category] = []
+			}
+			processedTableOfContents[category].push({ frontmatter: markdown.frontmatter })
 			index[markdown.frontmatter.href] = markdown
 		}
-		processedTableOfContents[category] = frontmatters
+
+		return { processedTableOfContents, index }
+	} catch (error) {
+		console.error("Error generating index and table of contents:", error)
+		throw error
 	}
 }
+
+// Call the function to generate the index and table of contents.
+const { processedTableOfContents, index } = await generateIndexAndTableOfContents()
