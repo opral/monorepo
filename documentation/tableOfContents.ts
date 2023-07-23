@@ -1,3 +1,5 @@
+// Separate file: ../../../../../documentation/tableOfContents.js
+
 import { RequiredFrontmatter } from "@inlang/website/markdown"
 
 /**
@@ -5,44 +7,63 @@ import { RequiredFrontmatter } from "@inlang/website/markdown"
  */
 export const FrontmatterSchema = RequiredFrontmatter
 
-/**
- * The table of contents split by categories.
- */
-export const tableOfContents: Record<string, string[]> = {
+const fileSources = {
 	"Getting started": [
-		(await import("./getting-started/introduction.md?raw")).default,
-		(await import("./getting-started/quick-start.md?raw")).default,
+		"./getting-started/introduction.md?raw",
+		"./getting-started/quick-start.md?raw",
 	],
-	Apps: [
-		(await import("./apps/editor.md?raw")).default,
-		(await import("./apps/ide-extension.md?raw")).default,
-		(await import("../source-code/cli/README.md?raw")).default,
-	],
-	Plugins: [
-		(await import("./plugins/registry.md?raw")).default,
-		(await import("./plugins/custom-plugins.md?raw")).default,
-	],
+	Apps: ["./apps/editor.md?raw", "./apps/ide-extension.md?raw", "../source-code/cli/README.md?raw"],
+	Plugins: ["./plugins/registry.md?raw", "./plugins/custom-plugins.md?raw"],
 	SDK: [
-		(await import("./sdk/general.md?raw")).default,
-		(await import("./sdk/usage.md?raw")).default,
-		(await import("./sdk/configuration.md?raw")).default,
-		(await import("./sdk/sveltekit/overview.md?raw")).default,
-		(await import("./sdk/sveltekit/advanced.md?raw")).default,
-		// (await import("./sdk/custom.md?raw")).default,
+		"./sdk/general.md?raw",
+		"./sdk/usage.md?raw",
+		"./sdk/configuration.md?raw",
+		"./sdk/sveltekit/overview.md?raw",
+		"./sdk/sveltekit/advanced.md?raw",
+		// "./sdk/custom.md?raw"
 	],
 	Guide: [
-		(await import("./badge.md?raw")).default,
-		// (await import("./ci-cd.md?raw")).default,
-		(await import("./build-on-inlang.md?raw")).default,
+		"./badge.md?raw",
+		// "./ci-cd.md?raw"
+		"./build-on-inlang.md?raw",
 	],
 	Core: [
-		(await import("./ast.md?raw")).default,
-		(await import("../source-code/core/src/environment/README.md?raw")).default,
-		(await import("./query.md?raw")).default,
-		(await import("../source-code/core/src/lint/README.md?raw")).default,
+		"./ast.md?raw",
+		"../source-code/core/src/environment/README.md?raw",
+		"./query.md?raw",
+		"../source-code/core/src/lint/README.md?raw",
 	],
-	Community: [
-		(await import("../CONTRIBUTING.md?raw")).default,
-		(await import("./code-organization.md?raw")).default,
-	],
+	Community: ["../CONTRIBUTING.md?raw", "./code-organization.md?raw"],
 }
+
+interface TableOfContentsItem {
+	category: string
+	content: string
+}
+
+/**
+ * The table of contents as an array of objects.
+ */
+export async function buildTableOfContents(): Promise<TableOfContentsItem[]> {
+	const tableOfContents: TableOfContentsItem[] = []
+
+	for (const category in fileSources) {
+		const contents = await Promise.all(
+			fileSources[category].map(async (file: any) => {
+				const module = await import(
+					/* @vite-ignore */
+					file
+				)
+				return module.default
+			}),
+		)
+
+		for (const content of contents) {
+			tableOfContents.push({ category, content })
+		}
+	}
+
+	return tableOfContents
+}
+
+export const tableOfContentsPromise = buildTableOfContents()
