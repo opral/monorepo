@@ -58,30 +58,3 @@ export const examplePlugin: Plugin<PluginOptions> = {
 		console.log(messages)
 	},
 }
-
-export const examplePlugin2NotWorking: Plugin<PluginOptions> = {
-	id: "inlang.plugin-i18next",
-	displayName: "i18next",
-	description: "i18next plugin for inlang",
-	keywords: ["i18next", "react", "nextjs"],
-	setup: ({ options, inlang }) => {
-		//! The following line will crash any static access to plugin functions
-		if (options.pathPattern === undefined) {
-			throw Error("Path pattern is undefined")
-		}
-		return {
-			extendLanguageTags: () => {
-				return ["en-US"]
-			},
-			loadMessages: () => {
-				for (const languageTag of inlang.config.languageTags) {
-					console.log(languageTag + options.pathPattern)
-				}
-				return []
-			},
-			saveMessages: ({ messages }) => {
-				console.log(messages)
-			},
-		}
-	},
-}
