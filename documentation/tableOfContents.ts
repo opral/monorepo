@@ -7,7 +7,7 @@ import { RequiredFrontmatter } from "@inlang/website/markdown"
  */
 export const FrontmatterSchema = RequiredFrontmatter
 
-const fileSources = {
+export const fileSources = {
 	"Getting started": [
 		"./getting-started/introduction.md?raw",
 		"./getting-started/quick-start.md?raw",

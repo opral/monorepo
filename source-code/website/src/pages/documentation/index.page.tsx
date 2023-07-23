@@ -9,6 +9,7 @@ import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
+import { fileSources } from "../../../../../documentation/tableOfContents.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -16,11 +17,52 @@ import { useI18n } from "@solid-primitives/i18n"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
+	currentFileSource: string | undefined
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [headings, setHeadings] = createSignal<any[]>([])
+
+	function findCurrentSection(fileSources: any, currentPage: any) {
+		for (const section in fileSources) {
+			const files = fileSources[section]
+			for (const file of files) {
+				// Remove the query parameters from the file path to compare with currentPage
+				const fileName = file
+					.split("?")[0]
+					.replaceAll(".md", "")
+					.replaceAll(".", "")
+					.replaceAll("-", "")
+
+				if (currentPage.includes("-")) {
+					const currentPageParts = currentPage.split("-")
+					for (const part of currentPageParts) {
+						if (fileName.includes(part)) {
+							return (
+								"https://github.com/inlang/inlang/tree/main/documentation" + file.replace(".", "")
+							)
+						}
+					}
+				}
+
+				if (
+					fileName.includes(
+						currentPage.replaceAll("/", "").replaceAll("-", "").toLowerCase().replaceAll(" ", ""),
+					)
+				) {
+					return "https://github.com/inlang/inlang/tree/main/documentation" + file.replace(".", "")
+				}
+			}
+		}
+		return undefined
+	}
+
+	createEffect(() => {
+		const currentPage = currentPageContext.urlParsed.pathname.replace("/documentation", "")
+		const currentSection = findCurrentSection(fileSources, currentPage)
+		console.log("Current Section:", currentSection)
+	})
 
 	createRenderEffect(() => {
 		setHeadings([])
