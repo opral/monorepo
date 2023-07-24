@@ -29,7 +29,7 @@ export const transformCode = (
 		case "[language].json":
 			return transformLanguageJson(filePath, config, code)
 		case "+server.js":
-			return transformServerRequestJs(filePath, config, code, root)
+			return transformServerRequestJs(filePath, config, code)
 		case "+layout.server.js":
 			return transformLayoutServerJs(filePath, config, code, root)
 		case "+layout.js":
@@ -37,7 +37,7 @@ export const transformCode = (
 		case "+layout.svelte":
 			return transformLayoutSvelte(filePath, config, code, root)
 		case "+page.server.js":
-			return transformPageServerJs(filePath, config, code, root)
+			return transformPageServerJs(filePath, config, code)
 		case "+page.js":
 			return transformPageJs(filePath, config, code, root)
 		case "+page.svelte":

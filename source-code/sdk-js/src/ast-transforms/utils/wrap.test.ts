@@ -24,6 +24,16 @@ describe("wrapWithPlaceholder", () => {
 		expect(nodeToCode(wrapped)).toMatchInlineSnapshot('"$$_INLANG_WRAP_$$(() => { })"')
 	})
 
+	test("parenthized arrow function", () => {
+		const node = codeToNode(`const x =
+			(() => { })
+		`)
+
+		const wrapped = wrapWithPlaceholder(node)
+
+		expect(nodeToCode(wrapped)).toMatchInlineSnapshot('"$$_INLANG_WRAP_$$((() => { }))"')
+	})
+
 	test("async arrow function", () => {
 		const node = codeToNode(`const x =
 			async () => { }
@@ -306,5 +316,145 @@ describe("wrapExportedFunction", () => {
 			    return resolve(event);
 			}) satisfies Handle);"
 		`)
+	})
+
+	describe('SDK imports', () => {
+		test("arrow function", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+
+				export const load = ({ params }) => {
+					return { language };
+				}
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use(({ params }, { language }) => {
+				    return { language };
+				});"
+			`)
+		})
+
+		test("parenthized arrow function", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+
+				export const load = (async ({ params }) => {
+					return { language };
+				})
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use((async ({ params }, { language }) => {
+				    return { language };
+				}));"
+			`)
+		})
+
+		test("regular async function", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+
+				export async function load({ params }) {
+					return { language };
+				}
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use(async function load({ params }, { language }) {
+				    return { language };
+				});"
+			`)
+		})
+
+		test("with type information", () => {
+			const node = codeToSourceFile(`
+				import { setLanguage } from '@inlang/sdk-js'
+				import type { Handle } from '@sveltejs/kit'
+
+				export const handle: Handle = ({ resolve, event }) => {
+					setLanguage('de')
+					return resolve(event);
+				}
+			`)
+			wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { setLanguage } from '@inlang/sdk-js';
+				import type { Handle } from '@sveltejs/kit';
+				export const handle: Handle = initHandleWrapper().use(({ resolve, event }, { setLanguage }) => {
+				    setLanguage('de');
+				    return resolve(event);
+				});"
+			`)
+		})
+
+		test("satisfies", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+				import type { Handle } from '@sveltejs/kit'
+
+				export const handle = (({ resolve, event }) => {
+					console.info(langauge)
+					return resolve(event);
+				}) satisfies Handle
+			`)
+			wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				import type { Handle } from '@sveltejs/kit';
+				export const handle = initHandleWrapper().use((({ resolve, event }, { language }) => {
+				    console.info(langauge);
+				    return resolve(event);
+				}) satisfies Handle);"
+			`)
+		})
+
+		test("multiple imports", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+				import { i } from '@inlang/sdk-js'
+
+				export const load = ({ params }) => {
+					return { [language]: i('test') };
+				}
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				import { i } from '@inlang/sdk-js';
+				export const load = initWrapper().use(({ params }, { language, i }) => {
+				    return { [language]: i('test') };
+				});"
+			`)
+		})
+
+		test("no parameters", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+				import { i } from '@inlang/sdk-js'
+
+				export const load = () => {
+					return { language };
+				}
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				import { i } from '@inlang/sdk-js';
+				export const load = initWrapper().use((_, { language, i }) => {
+				    return { language };
+				});"
+			`)
+		})
 	})
 })
