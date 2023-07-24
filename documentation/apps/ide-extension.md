@@ -81,7 +81,7 @@ export async function defineConfig(env) {
 }
 ```
 
-#### Requirements:
+#### Requirements
 
 - Requires VS Code version 1.80.1 or higher.
 - Node.js version 16.17.1 or higher.

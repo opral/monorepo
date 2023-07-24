@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createSignal, createEffect } from "solid-js"
+import { For, Show, createRenderEffect, createSignal, createEffect, onMount } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -144,7 +144,7 @@ function NavbarCommon(props: {
 		setHighlightedAnchor(anchor)
 	}
 
-	createEffect(() => {
+	onMount(() => {
 		if (
 			currentPageContext.urlParsed.hash &&
 			props.headings
@@ -154,6 +154,20 @@ function NavbarCommon(props: {
 				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
 		) {
 			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+
+			const targetElement = document.getElementById(
+				currentPageContext.urlParsed.hash.replace("#", ""),
+			)
+			if (targetElement) {
+				requestAnimationFrame(() => {
+					const elementRect = targetElement.getBoundingClientRect()
+					const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
+
+					window.scrollBy({
+						top: offsetPosition,
+					})
+				})
+			}
 		}
 	})
 
