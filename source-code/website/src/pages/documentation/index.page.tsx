@@ -206,8 +206,8 @@ function NavbarCommon(props: {
 																			"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																			(highlightedAnchor() ===
 																			heading.toString().toLowerCase().replaceAll(" ", "-")
-																				? "font-medium text-info/80 border-l-info/80 "
-																				: "text-info/60 hover:text-info/80 font-normal border-l-info/10 ")
+																				? "font-medium text-on-background border-l-text-on-background "
+																				: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																		}
 																		href={`#${heading
 																			.toString()
