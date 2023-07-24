@@ -7,6 +7,7 @@ import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
+import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
 import { fileSources } from "../../../../../documentation/tableOfContents.js"
@@ -23,45 +24,30 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [headings, setHeadings] = createSignal<any[]>([])
+	const [editLink, setEditLink] = createSignal<string | undefined>("")
 
-	function findCurrentSection(fileSources: any, currentPage: any) {
-		for (const section in fileSources) {
-			const files = fileSources[section]
-			for (const file of files) {
-				// Remove the query parameters from the file path to compare with currentPage
-				const fileName = file
-					.split("?")[0]
-					.replaceAll(".md", "")
-					.replaceAll(".", "")
-					.replaceAll("-", "")
+	createEffect(() => {
+		if (props.markdown && props.markdown.frontmatter) {
+			const markdownHref = props.markdown.frontmatter.href
 
-				if (currentPage.includes("-")) {
-					const currentPageParts = currentPage.split("-")
-					for (const part of currentPageParts) {
-						if (fileName.includes(part)) {
-							return (
-								"https://github.com/inlang/inlang/tree/main/documentation" + file.replace(".", "")
-							)
+			for (const section of Object.keys(props.processedTableOfContents)) {
+				const documents = props.processedTableOfContents[section]
+
+				if (documents) {
+					for (const document of documents) {
+						if (document.frontmatter && document.frontmatter.href === markdownHref) {
+							const index = documents.indexOf(document)
+							const fileSource = fileSources[section][index]
+
+							const gitHubLink =
+								"https://github.com/inlang/inlang/blob/main/documentation" + "/" + fileSource
+
+							setEditLink(gitHubLink)
 						}
 					}
 				}
-
-				if (
-					fileName.includes(
-						currentPage.replaceAll("/", "").replaceAll("-", "").toLowerCase().replaceAll(" ", ""),
-					)
-				) {
-					return "https://github.com/inlang/inlang/tree/main/documentation" + file.replace(".", "")
-				}
 			}
 		}
-		return undefined
-	}
-
-	createEffect(() => {
-		const currentPage = currentPageContext.urlParsed.pathname.replace("/documentation", "")
-		const currentSection = findCurrentSection(fileSources, currentPage)
-		console.log("Current Section:", currentSection)
 	})
 
 	createRenderEffect(() => {
@@ -151,6 +137,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
 						</div>
