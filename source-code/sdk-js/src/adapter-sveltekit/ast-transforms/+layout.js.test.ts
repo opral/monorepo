@@ -83,9 +83,9 @@ describe("transformLayoutJs", () => {
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
-			"import { initLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+			"import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 			import type { LayoutLoad } from '@sveltejs/kit';
-			export const load = initLayoutLoadWrapper().use(async((_, { languages }) => {
+			export const load = initLoadWrapper().use(async((_, { languages }) => {
 			    return { languages };
 			}) satisfies LayoutLoad);"
 		`)

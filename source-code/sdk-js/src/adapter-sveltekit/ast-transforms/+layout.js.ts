@@ -60,7 +60,7 @@ export const transformLayoutJs = (
 	if (isOptOutImportPresent(sourceFile)) return code
 	if (!root && !isSdkImportPresent(sourceFile)) return code
 
-	const wrapperFunctionName = root ? "initRootLayoutLoadWrapper" : "initLayoutLoadWrapper"
+	const wrapperFunctionName = root ? "initRootLayoutLoadWrapper" : "initLoadWrapper"
 
 	addImports(sourceFile, config, root, wrapperFunctionName)
 
