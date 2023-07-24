@@ -17,7 +17,7 @@ import addTreeToStore from "./store/addTreeToStore.js"
  * Creates a mapped object store with data from the git object store located in
  * `gitdir`, where `gitdir` is the path to a `.git` directory on `_fs`.
  */
-export default async function createMappedGitObjectStore(
+export default async function createMappedObjectStore(
 	treeOid: string,
 	gitdir: string,
 	_fs: NodeishFilesystem,

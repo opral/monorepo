@@ -8,10 +8,11 @@ export function extractPackedObject(packfile: Uint8Array) {
 
 	// The object type is encoded in the last 3 bits (excluding the
 	// continuation bit) of the first (last) byte of the variable length
-	// bitstring encoding the object size
-	const type = (packfile[12] ?? 0 & 0b01110000) === 0b00100000 
-		? new Uint8Array([ 0x74, 0x72, 0x65, 0x65, 0x20 ]) // "tree "
-		: new Uint8Array([ 0x62, 0x6C, 0x6F, 0x62, 0x20 ]) // "blob "
+	// bitstring encoding the object size. confusing? yes.
+	const type =
+		(packfile[12] ?? 0 & 0b01110000) === 0b00100000
+			? new Uint8Array([0x74, 0x72, 0x65, 0x65, 0x20]) // "tree "
+			: new Uint8Array([0x62, 0x6c, 0x6f, 0x62, 0x20]) // "blob "
 
 	// Find the index where the object size bitstring ends
 	let i
@@ -19,7 +20,9 @@ export function extractPackedObject(packfile: Uint8Array) {
 
 	// The only difference between a packed loose object and a single object in
 	// a packfile is the packfile data surrounding it, so strip that off
-	const data = inflateRaw(packfile.subarray(i+1, -20))
+	// First 2 bytes are the zlib header, and last 20 bytes are the pack checksum
+	const data = inflateRaw(packfile.subarray(i + 3, -20))
+
 	const lenString = new TextEncoder().encode(data.length.toString())
 
 	const object = new Uint8Array(type.length + lenString.length + 1 + data.length)

@@ -1,6 +1,5 @@
 import { it, expect, describe } from "vitest"
 import { fetchPackedObject } from "./fetchPackedObject.js"
-import { demuxPackfile } from "./demuxPackfile.js"
 import { extractPackedObject } from "./extractPackedObject.js"
 import fs from "node:fs/promises"
 
@@ -8,15 +7,15 @@ import fs from "node:fs/promises"
 // ceeca803bd2d28347a46cf1ee967bb66ae56c117 - root tree
 describe("git remote", () => {
 	it("read packfile", async () => {
-		const muxedPackfile = await fetchPackedObject(
+		const packfile = await fetchPackedObject(
 			"ceeca803bd2d28347a46cf1ee967bb66ae56c117",
-			"https://github.com/araknast/AppFlowy"
-		) 
+			"https://github.com/araknast/AppFlowy",
+		)
 
-		expect(muxedPackfile).toBeDefined()
-		if (!muxedPackfile) return
+		expect(packfile).toBeDefined()
+		if (!packfile) return
 
-		const object = extractPackedObject(demuxPackfile(muxedPackfile))
-		fs.writeFile("./onetree2", object)
+		const object = extractPackedObject(packfile)
+		expect(object).toBeDefined()
 	})
 })
