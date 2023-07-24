@@ -14,8 +14,8 @@ export function NewsletterForm() {
 		const [response] = await rpc.subscribeNewsletter({ email })
 		if (response === "already subscribed") {
 			showToast({
-				title: "Error",
-				variant: "danger",
+				title: "Could not subscribe",
+				variant: "success",
 				message: t("newsletter.error.alreadySubscribed"),
 			})
 		} else if (response === "success") {
