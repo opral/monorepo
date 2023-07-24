@@ -1,6 +1,6 @@
 import { createInlang } from "./app/createInlang.js"
 import type { InlangConfig } from "./config/schema.js"
-import type {  MessageLintRule } from "./lint/api.js"
+import type { MessageLintRule } from "./lint/api.js"
 import type { Plugin_Proposal_2 } from "./plugin/api.js"
 
 // --------------------- LINT RULE ---------------------
@@ -13,11 +13,8 @@ const missingMessage: MessageLintRule = {
 	},
 	defaultLevel: "error",
 	message: ({ message, inlang, report }) => {
-		if (message.languageTag !== inlang.config.sourceLanguageTag) {
-			return
-		}
 		for (const languageTag of inlang.config.languageTags) {
-			const translation = inlang.messages.query.get({ where: { id: message.id, languageTag } })
+			const translation = message.body[languageTag]
 			if (!translation) {
 				report({
 					languageTag,
@@ -36,7 +33,7 @@ export const myPlugin: Plugin_Proposal_2<{ pathPattern: string }> = {
 		id: "inlang.myPlugin",
 		displayName: "My Plugin",
 	},
-	setup: ({ inlang, options }) => {
+	setup: () => {
 		return {
 			extendLanguageTags: () => {
 				return ["de"]
@@ -59,11 +56,11 @@ const exampleInlangConfig: InlangConfig = {
 	plugins: [
 		{ module: "https://example.com/myPlugin.js", options: { pathPattern: "src/**/*.{ts,tsx}" } },
 	],
-  lint: {
-    rules: {
-      "inlang.missingMessage": "warning"
-    }
-  }
+	lint: {
+		rules: {
+			"inlang.missingMessage": "warning",
+		},
+	},
 }
 
 // 1. Create the app instance
@@ -74,24 +71,42 @@ const inlang = createInlang({
 })
 
 // --- CRUD ---
-inlang.messages.query.create({ id: "myMessageId", languageTag: "en", pattern: [{"type": "Text", value:  "Hello World" }]})
+inlang.messages.query.create({
+	data: {
+		id: "myMessageId",
+		body: {
+			en: { pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello World" }] } },
+		},
+	},
+})
 
 // assuming that get is reactive
-const message = inlang.messages.query.get({ where: { id: "myMessageId", languageTag: "en" })
+const message = inlang.messages.query.get({ where: { id: "myMessageId" } })!
 
-inlang.messages.query.update({ where: { id: "myMessageId", languageTag: "en" }, data: { pattern: [{"type": "Text", value:  "Hello World" }] } })
+message.body["en-US"] = {
+	pattern: {
+		type: "Pattern",
+		elements: [
+			{
+				type: "Text",
+				value: "Hello World",
+			},
+		],
+	},
+}
 
-inlang.messages.query.delete({ where: { id: "myMessageId", languageTag: "en" } })
+inlang.messages.query.update({
+	where: { id: "myMessageId" },
+	data: message,
+})
+
+inlang.messages.query.delete({ where: { id: "myMessageId" } })
 
 // --- CONFIG ACCESS ---
 
 inlang.config.sourceLanguageTag
 inlang.config.languageTags
 
-// adding a language tag via an app
-inlang.config.languageTags = [...inlang.config.languageTags, "de-AT"]
-
 // --- LINT ---
 inlang.lint.reports.filter((report) => report.level === "error")
 inlang.lint.exceptions
-
