@@ -52,7 +52,7 @@ describe("findExport", () => {
 		const exportNode = findExport(node, "load")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"export function load() { }"')
 	})
 
 	test("should find named exports", () => {
@@ -88,7 +88,7 @@ describe("findOrCreateExport", () => {
 		const exportNode = findOrCreateExport(node, "load", "() => { }")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"export function load() { }"')
 	})
 
 	test("should throw an error if a non-exWported variable with the same name already exists", () => {

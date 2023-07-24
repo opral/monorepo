@@ -1,6 +1,6 @@
 import {
 	Node,
-	type CallExpression,
+	CallExpression,
 	SyntaxKind,
 	SourceFile,
 	VariableDeclaration,
@@ -8,13 +8,15 @@ import {
 	ExportSpecifier,
 	ArrowFunction,
 	FunctionExpression,
+	ParenthesizedExpression,
+	SatisfiesExpression,
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
 import { InlangException } from "../../exceptions.js"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { dedent } from "ts-dedent"
-import { findImportDeclarations, getImportSpecifiers, getImportSpecifiersAsStrings, isSdkImportPresent, removeImport } from './imports.js'
+import { getImportSpecifiersAsStrings } from './imports.js'
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -114,6 +116,21 @@ const findFunctionExpression = (
 	`)
 }
 
+const findFunction = (node: Node): ArrowFunction | FunctionExpression => {
+	if (ArrowFunction.isArrowFunction(node) || FunctionExpression.isFunctionExpression(node))
+		return node
+
+	if (ParenthesizedExpression.isParenthesizedExpression(node) || SatisfiesExpression.isSatisfiesExpression(node)) {
+		return findFunction(node.getExpression())
+	}
+
+	if (CallExpression.isCallExpression(node)) {
+		return findFunction(node.getArguments()[0]!)
+	}
+
+	throw new InlangException(`Could not find function for type '${node.getKindName()}'`)
+}
+
 export const wrapExportedFunction = (
 	sourceFile: SourceFile,
 	options: string | undefined,
@@ -125,6 +142,7 @@ export const wrapExportedFunction = (
 
 	// if export is a function declaration, convert it to a function expression
 	if (Node.isFunctionDeclaration(fnExport)) {
+		fnExport.toggleModifier('export', false)
 		fnExport.replaceWithText(`export const ${exportName} = ${nodeToCode(fnExport)}`)
 		wrapExportedFunction(sourceFile, options, wrapperFunctionName, exportName)
 		return
@@ -138,18 +156,13 @@ export const wrapExportedFunction = (
 	// inject SDK imports as parameters
 	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
 	if (imports.length) {
-		console.log(11, fn.getKindName());
-
-		if (ArrowFunction.isArrowFunction(fn) ||
-			FunctionExpression.isFunctionExpression(fn)) {
-			if (!fn.getParameters().length) {
-				fn.insertParameters(0, [{ name: '_' }])
-			}
-
-			fn.insertParameters(1, [{ name: `{ ${imports} }` }])
+		const func = findFunction(fn)
+		if (!func.getParameters().length) {
+			func.insertParameters(0, [{ name: '_' }])
 		}
 
-		removeImport(sourceFile, "@inlang/sdk-js")
+		// TODO: only add params that get used inside that function
+		func.insertParameters(1, [{ name: `{ ${imports} }` }])
 	}
 
 	const wrapped = wrapWithPlaceholder(fn)

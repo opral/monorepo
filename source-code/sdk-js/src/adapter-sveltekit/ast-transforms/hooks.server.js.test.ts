@@ -176,17 +176,31 @@ describe("transformHooksServerJs", () => {
 	})
 
 	describe("'@inlang/sdk-js' imports", () => {
-		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
-			const code = "import { i } from '@inlang/sdk-js'"
-			const config = initTransformConfig()
-			expect(() => transformHooksServerJs("", config, code)).toThrow()
-		})
+		test("should transform imports correctly", () => {
+			const transformed = transformHooksServerJs(
+				"",
+				initTransformConfig(),
+				dedent`
+					import { i } from '@inlang/sdk-js'
 
-		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code =
-				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
-			const config = initTransformConfig()
-			expect(() => transformHooksServerJs("", config, code)).not.toThrow()
+					export const handle = ({ event, resolve }) => {
+						console.log(i('hi'))
+						return resolve(event)
+					}
+			`,
+			)
+
+			expect(transformed).toMatchInlineSnapshot(`
+				"import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+				export const handle = initHandleWrapper({
+				    inlangConfigModule: import(\\"../inlang.config.js\\"),
+				    excludedRoutes: [],
+				    getLanguage: () => undefined,
+				}).use(({ event, resolve }, { i }) => {
+				    console.log(i('hi'));
+				    return resolve(event);
+				});"
+			`)
 		})
 	})
 })

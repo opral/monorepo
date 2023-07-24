@@ -1,11 +1,9 @@
 import { dedent } from "ts-dedent"
 import type { SourceFile } from "ts-morph"
-import { assertNoImportsFromSdkJs } from "../../ast-transforms/assertions.js"
-import { addImport, isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
+import { addImport, isOptOutImportPresent, removeImport } from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { nodeToCode, codeToNode, codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
-import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 
 // TODO: test
 const addImports = (
@@ -64,8 +62,6 @@ export const transformHooksServerJs = (filePath: string, config: TransformConfig
 
 	if (isOptOutImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), "hooks.server.js") // TODO: implement functionality
-
 	const wrapperFunctionName = "initHandleWrapper"
 
 	addImports(sourceFile, config, wrapperFunctionName)
@@ -78,6 +74,7 @@ export const transformHooksServerJs = (filePath: string, config: TransformConfig
 		"handle",
 		"({ resolve, event }) => resolve(event)",
 	)
+	removeImport(sourceFile, "@inlang/sdk-js")
 
 	return nodeToCode(sourceFile)
 }

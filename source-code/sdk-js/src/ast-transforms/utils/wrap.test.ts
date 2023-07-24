@@ -330,9 +330,28 @@ describe("wrapExportedFunction", () => {
 			wrapExportedFunction(node, "", "initWrapper", "load")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"export const load = initWrapper().use(({ params }, { language }) => {
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use(({ params }, { language }) => {
 				    return { language };
 				});"
+			`)
+		})
+
+		test("parenthized arrow function", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+
+				export const load = (async ({ params }) => {
+					return { language };
+				})
+			`)
+			wrapExportedFunction(node, "", "initWrapper", "load")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use((async ({ params }, { language }) => {
+				    return { language };
+				}));"
 			`)
 		})
 
@@ -340,16 +359,61 @@ describe("wrapExportedFunction", () => {
 			const node = codeToSourceFile(`
 				import { language } from '@inlang/sdk-js'
 
-				export async function load({ params })  {
+				export async function load({ params }) {
 					return { language };
 				}
 			`)
 			wrapExportedFunction(node, "", "initWrapper", "load")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"export const load = initWrapper().use(async function load({ params }, { language }) {
+				"import { language } from '@inlang/sdk-js';
+				export const load = initWrapper().use(async function load({ params }, { language }) {
 				    return { language };
 				});"
+			`)
+		})
+
+		test("with type information", () => {
+			const node = codeToSourceFile(`
+				import { setLanguage } from '@inlang/sdk-js'
+				import type { Handle } from '@sveltejs/kit'
+
+				export const handle: Handle = ({ resolve, event }) => {
+					setLanguage('de')
+					return resolve(event);
+				}
+			`)
+			wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { setLanguage } from '@inlang/sdk-js';
+				import type { Handle } from '@sveltejs/kit';
+				export const handle: Handle = initHandleWrapper().use(({ resolve, event }, { setLanguage }) => {
+				    setLanguage('de');
+				    return resolve(event);
+				});"
+			`)
+		})
+
+		test("satisfies", () => {
+			const node = codeToSourceFile(`
+				import { language } from '@inlang/sdk-js'
+				import type { Handle } from '@sveltejs/kit'
+
+				export const handle = (({ resolve, event }) => {
+					console.info(langauge)
+					return resolve(event);
+				}) satisfies Handle
+			`)
+			wrapExportedFunction(node, "", "initHandleWrapper", "handle")
+
+			expect(nodeToCode(node)).toMatchInlineSnapshot(`
+				"import { language } from '@inlang/sdk-js';
+				import type { Handle } from '@sveltejs/kit';
+				export const handle = initHandleWrapper().use((({ resolve, event }, { language }) => {
+				    console.info(langauge);
+				    return resolve(event);
+				}) satisfies Handle);"
 			`)
 		})
 
@@ -365,7 +429,9 @@ describe("wrapExportedFunction", () => {
 			wrapExportedFunction(node, "", "initWrapper", "load")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"export const load = initWrapper().use(({ params }, { language, i }) => {
+				"import { language } from '@inlang/sdk-js';
+				import { i } from '@inlang/sdk-js';
+				export const load = initWrapper().use(({ params }, { language, i }) => {
 				    return { [language]: i('test') };
 				});"
 			`)
@@ -383,7 +449,9 @@ describe("wrapExportedFunction", () => {
 			wrapExportedFunction(node, "", "initWrapper", "load")
 
 			expect(nodeToCode(node)).toMatchInlineSnapshot(`
-				"export const load = initWrapper().use((_, { language, i }) => {
+				"import { language } from '@inlang/sdk-js';
+				import { i } from '@inlang/sdk-js';
+				export const load = initWrapper().use((_, { language, i }) => {
 				    return { language };
 				});"
 			`)
