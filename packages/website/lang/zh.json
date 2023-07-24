@@ -103,18 +103,26 @@
 			"getInTouch": "联系我们",
 			"join": "加入团队",
 			"feedback": "反馈"
-		},
-		"newsletter": {
-			"title": "订阅邮件",
-			"placeholder": "输入您的电子邮箱 ...",
-			"button": "订阅",
-			"error": {
-				"invalidEmail": "请输入有效的电子邮件地址。",
-				"emptyEmail": "请输入您的电子邮件地址。",
-				"alreadySubscribed": "您已经订阅了我们的通讯。",
-				"generic": "出了点问题，请稍后再试。"
-			},
-			"success": "感谢您的订阅！"
 		}
+	},
+	"newsletter": {
+		"subscribe": {
+			"title": "订阅我们的通讯",
+			"description": "我们将向您发送有关 inlang 和全球化的最新信息。您可以随时取消订阅。"
+		},
+		"unsubscribed": {
+			"title": "您已退订",
+			"description": "我们很舍不得你离开。如果您有任何反馈意见，请在我们的"
+		},
+		"title": "订阅邮件",
+		"placeholder": "输入您的电子邮箱 ...",
+		"button": "订阅",
+		"error": {
+			"invalidEmail": "请输入有效的电子邮件地址。",
+			"emptyEmail": "请输入您的电子邮件地址。",
+			"alreadySubscribed": "您已经订阅了我们的通讯。",
+			"generic": "出了点问题，请稍后再试。"
+		},
+		"success": "感谢您的订阅！"
 	}
 }
