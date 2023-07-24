@@ -12,7 +12,7 @@ export type Message = {
 }
 
 export type MessageVariant = {
-	name: string
+	name: string | "default"
 	pattern: Array<Text | Placeholder>
 }
 
