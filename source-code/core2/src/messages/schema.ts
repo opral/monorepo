@@ -8,6 +8,11 @@ import type { LanguageTag } from "../languageTag.js"
 export type Message = {
 	id: string
 	languageTag: LanguageTag
+	body: Array<MessageVariant>
+}
+
+export type MessageVariant = {
+	name: string
 	pattern: Array<Text | Placeholder>
 }
 
