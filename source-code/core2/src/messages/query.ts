@@ -4,6 +4,7 @@ export type MessageQueryApi = {
 	create: (args: { data: Message }) => void
 	get: (args: { where: { id: Message["id"] } }) => Message | undefined
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => void
+	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => void
 }
 
@@ -24,6 +25,13 @@ export function createQuery(messages: Array<Message>): MessageQueryApi {
 		update: ({ where, data }) => {
 			const message = index.get(where.id)
 			if (message === undefined) return
+			index.set(where.id, { ...message, ...data })
+		},
+		upsert: ({ where, data }) => {
+			const message = index.get(where.id)
+			if (message === undefined) {
+				return index.set(where.id, data)
+			}
 			index.set(where.id, { ...message, ...data })
 		},
 		delete: ({ where }) => {
