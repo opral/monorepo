@@ -8,7 +8,7 @@ describe("create", () => {
 	const query = createQuery([])
 
 	it("should return an object, not an array", () => {
-		assert.equal(query.get({ where: { id: "first-message" } }), undefined)
+		assert.equal(query.get({ id: "first-message" }), undefined)
 
 		const mockMessage = createMessage({ id: "first-message", text: "Hello World" })
 
@@ -22,7 +22,7 @@ describe("get", () => {
 	const query = createQuery([])
 
 	it("should return undefined if a message does not exist", () => {
-		const message = query.get({ where: { id: "none-existent-message" } })
+		const message = query.get({ id: "none-existent-message" })
 
 		assert.equal(typeof message, "object")
 	})
@@ -32,7 +32,7 @@ describe("get", () => {
 	it("should return an object, not an array", () => {
 		query.create({ data: createMessage({ id: "first-message", text: "Hello World" }) })
 
-		const message = query.get({ where: { id: "first-message" } })
+		const message = query.get({ id: "first-message" })
 
 		assert.equal(typeof message, "object")
 	})
@@ -42,20 +42,20 @@ describe("update", () => {
 	const query = createQuery([createMessage({ id: "first-message", text: "Hello World" })])
 
 	it("should update a message without modifying the internal object", () => {
-		const message = query.get({ where: { id: "first-message" } })
+		const message = query.get({ id: "first-message" })
 		// @ts-expect-error
 		message!.body!.en!.pattern!.elements[0]!.value = "Hello World 2"
 
-		const updatedMessage = query.update({ where: { id: "first-message" }, data: message! })
+		const updatedMessage = query.update({ id: "first-message", data: message! })
 		assert.equal(updatedMessage, message)
 	})
 
 	it("should update a message without modifying the internal object", () => {
-		const message = query.get({ where: { id: "first-message" } })
+		const message = query.get({ id: "first-message" })
 		// @ts-expect-error
 		message!.body!.en!.pattern!.elements[0]!.value = "Hello World 2"
 
-		const message2 = query.get({ where: { id: "first-message" } })
+		const message2 = query.get({ id: "first-message" })
 		assert.notEqual(message, message2)
 	})
 })

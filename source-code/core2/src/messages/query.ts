@@ -2,10 +2,10 @@ import type { Message } from "./schema.js"
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => void
-	get: (args: { where: { id: Message["id"] } }) => Message | undefined
-	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => void
-	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
-	delete: (args: { where: { id: Message["id"] } }) => void
+	get: (args: { id: Message["id"] }) => Message | undefined
+	update: (args: { id: Message["id"]; data: Partial<Message> }) => void
+	upsert: (args: { id: Message["id"]; data: Message }) => void
+	delete: (args: { id: Message["id"] }) => void
 }
 
 /**
@@ -19,23 +19,24 @@ export function createQuery(messages: Array<Message>): MessageQueryApi {
 		create: ({ data }) => {
 			index.set(data.id, data)
 		},
-		get: ({ where }) => {
-			return index.get(where.id)
+		get: ({ id }) => {
+			return index.get(id)
 		},
-		update: ({ where, data }) => {
-			const message = index.get(where.id)
+		update: ({ id, data }) => {
+			const message = index.get(id)
 			if (message === undefined) return
-			index.set(where.id, { ...message, ...data })
+			index.set(id, { ...message, ...data })
 		},
-		upsert: ({ where, data }) => {
-			const message = index.get(where.id)
+		upsert: ({ id, data }) => {
+			const message = index.get(id)
 			if (message === undefined) {
-				return index.set(where.id, data)
+				return index.set(id, data)
 			}
-			index.set(where.id, { ...message, ...data })
+			index.set(id, { ...message, ...data })
+			return
 		},
-		delete: ({ where }) => {
-			index.delete(where.id)
+		delete: ({ id }) => {
+			index.delete(id)
 		},
 	}
 }

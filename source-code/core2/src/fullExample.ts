@@ -81,7 +81,7 @@ inlang.messages.query.create({
 })
 
 // assuming that get is reactive
-const message = inlang.messages.query.get({ where: { id: "myMessageId" } })!
+const message = inlang.messages.query.get({ id: "myMessageId" })!
 
 message.body["en-US"] = {
 	pattern: {
@@ -96,11 +96,11 @@ message.body["en-US"] = {
 }
 
 inlang.messages.query.update({
-	where: { id: "myMessageId" },
+	id: "myMessageId",
 	data: message,
 })
 
-inlang.messages.query.delete({ where: { id: "myMessageId" } })
+inlang.messages.query.delete({ id: "myMessageId" })
 
 // --- CONFIG ACCESS ---
 
