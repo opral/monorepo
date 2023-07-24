@@ -1,5 +1,11 @@
 # @inlang/sdk-js
 
+## 0.10.0
+
+### Minor Changes
+
+- 3b811085: support `@inlang/sdk-js` imports in `+*.js` files
+
 ## 0.9.2
 
 ### Patch Changes
