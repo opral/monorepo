@@ -14,14 +14,14 @@
 		},
 		"integration": {
 			"caption": "Tech-Stack-Agnostik",
-			"title": "Integriert sich in jedes Codeprojekt",
+			"title": "Intergrierbar in jede Codebase",
 			"description": "Inlang ist Technologieunabhängig konzipiert. Entwickler können ihre eigenen Plugins schreiben oder sich auf das Plugin-Ökosystem verlassen, um Inlang an ihren Tech-Stack (React, Flutter, iOS, Python usw.) anzupassen.",
 			"tooltip": "Neues SDK!"
 		},
 		"config": {
 			"editor": {
 				"title": "Web-Editor",
-				"description": "No-Code-Editor zur Verwaltung Ihrer Übersetzungen.",
+				"description": "Editor zur Verwaltung der Übersetzungen.",
 				"benefit1": "Kein Übersetzer muss Code berühren",
 				"benefit2": "Push-Through-Schnittstelle",
 				"benefit3": "Keine Synchronisierungspipelines und zusätzliche Konten"
@@ -45,7 +45,7 @@
 				"apps": "Apps",
 				"plugins": "Plugins",
 				"config": "Konfiguration",
-				"endless": ", endlos",
+				"endless": ", endlose",
 				"one": ", eine"
 			}
 		},
@@ -61,7 +61,7 @@
 			"paid": {
 				"name": "bezahlt",
 				"title": "Unternehmen",
-				"amount": "bald"
+				"amount": "in Zukunft"
 			}
 		},
 		"getstarted": {
@@ -78,7 +78,7 @@
 	"header": {
 		"openEditor": "Editor öffnen",
 		"link": {
-			"blog": "Beiträge",
+			"blog": "Blog",
 			"docs": "Dokumentation",
 			"feedback": "Feedback"
 		}
@@ -92,7 +92,7 @@
 		},
 		"resources": {
 			"title": "Ressourcen",
-			"blog": "Beiträge",
+			"blog": "Blog",
 			"roadmap": "Produktplan",
 			"github": "GitHub",
 			"twitter": "Twitter",

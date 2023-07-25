@@ -21,7 +21,7 @@
 		"config": {
 			"editor": {
 				"title": "Web Editor",
-				"description": "No-code editor to manage your translations.",
+				"description": "Editor to manage translations.",
 				"benefit1": "No translator needs to touch code",
 				"benefit2": "Push through interface",
 				"benefit3": "No sync pipelines and extra accounts"
