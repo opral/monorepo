@@ -35,10 +35,10 @@ describe("readBlob", () => {
       "#!/usr/bin/env node
       const minimisted = require('minimisted')
       const git = require('.')
-      
+
       // This really isn't much of a CLI. It's mostly for testing.
       // But it's very versatile and works surprisingly well.
-      
+
       minimisted(async function ({ _: [command, ...args], ...opts }) {
         const dir = process.cwd()
         const repo = git(dir)
@@ -54,10 +54,10 @@ describe("readBlob", () => {
           }
         }
         cmd += \`.\${command}(\${args.map(x => \`'\${x}'\`).join(', ')})\`
-        console.log(cmd)
+        console.info(cmd)
         let result = await repo[command](...args)
         if (result === undefined) return
-        console.log(JSON.stringify(result, null, 2))
+        console.info(JSON.stringify(result, null, 2))
       })
       "
     `)

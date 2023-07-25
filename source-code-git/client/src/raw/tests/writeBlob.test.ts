@@ -46,10 +46,10 @@ minimisted(async function ({ _: [command, ...args], ...opts }) {
     }
   }
   cmd += \`.\${command}(\${args.map(x => \`'\${x}'\`).join(', ')})\`
-  console.log(cmd)
+  console.info(cmd)
   let result = await repo[command](...args)
   if (result === undefined) return
-  console.log(JSON.stringify(result, null, 2))
+  console.info(JSON.stringify(result, null, 2))
 })
 `,
 				"utf8",
