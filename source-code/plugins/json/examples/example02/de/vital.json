@@ -1,7 +1,6 @@
 {
-    "title": "{{appName}}",
-    "nav": {
-        "home": "Startseite"
-    }
+	"title": "{{appName}}",
+	"nav": {
+		"home": "Startseite"
+	}
 }
-  

@@ -2,7 +2,7 @@
 
 ### 1. File-based.
 
-#### The filesystem is the universal data API. 
+#### The filesystem is the universal data API.
 
 If apps A (e.g. CLI) and B (e.g. IDE) operate on files, both apps have interop.
 Read a file, write a file, simple. The moment project lisa breaks this
@@ -15,7 +15,7 @@ operates on files" https://www.loom.com/share/f3beba7d8ee444c5bc0dde8b5ad41624.
 
 Git is the most widely used version control system. If project lisa is not git
 compatible, the wide ecosystem of git repositories can't be leveraged, and
-inlang wouldn't exist. 
+inlang wouldn't exist.
 
 ### 3. Host Agnostic.
 
@@ -39,7 +39,7 @@ game-changing version control system.
 
 ### 5. Flexible, then fast.
 
-####  Iteration speed should be valued over (premature) optimization.
+#### Iteration speed should be valued over (premature) optimization.
 
 Iteration speed is crucial to de-risk design decisions that could de-rail the
 project. One of the reasons why using TypeScript is the primary language. Using
@@ -47,4 +47,3 @@ TypeScript as the primary language ensures compatibility with the rest of the
 codebase, is higher level (faster to iterate), and cross-app debugging is
 easier. If performance is needed, WebAssembly can be used to offload
 performance-limiting computations.
-

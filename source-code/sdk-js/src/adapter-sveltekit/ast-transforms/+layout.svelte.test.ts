@@ -411,9 +411,7 @@ describe.skip("transformLayoutSvelte", () => {
 				// 		import { language } from '@inlang/sdk-js'
 				// 		export let data
 				// 	</script>
-
 				// 	<h1>Hello {data.name}!</h1>
-
 				// 	{language.toUpperCase()}
 				// `
 				// const transformed = transformLayoutSvelte("", config, input, false)

@@ -14,7 +14,7 @@ It may be the case that you encounter a bug or reach a point where our automatio
 In order to opt-out of the SDK magic, just add the following import anywhere in your file:
 
 ```js
-import '@inlang/sdk-js/no-transforms'
+import "@inlang/sdk-js/no-transforms"
 ```
 
 By adding this line, the code in that file will not be transformed and you need to make sure you manually add the necessary functionality.
@@ -26,13 +26,12 @@ Those files require to be set up if you want to use any functionality of the SDK
 ### `hooks.server.js`
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initHandleWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import "@inlang/sdk-js/no-transforms"
+import { initHandleWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 
 export const handle = initHandleWrapper({
 	// ... see TypeScript definition or source code for all parameters
 }).use(({ resolve, event }) => {
-
 	// your code goes here
 
 	return resolve(event)
@@ -42,12 +41,11 @@ export const handle = initHandleWrapper({
 ### `/routes/+layout.server.js` (root server layout)
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initRootLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import "@inlang/sdk-js/no-transforms"
+import { initRootLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
 export const load = initRootLayoutServerLoadWrapper<LayoutServerLoad>().use(() => {
-
 	// your code goes here
 
 	return {
@@ -59,14 +57,13 @@ export const load = initRootLayoutServerLoadWrapper<LayoutServerLoad>().use(() =
 ### `/routes/+layout.js` (root layout)
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initRootLayoutLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import "@inlang/sdk-js/no-transforms"
+import { initRootLayoutLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { LayoutLoad } from "./$types.js"
 
 export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	// ... see TypeScript definition or source code for all parameters
 }).use(() => {
-
 	// your code goes here
 
 	return {
@@ -78,14 +75,13 @@ export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 ### `/routes/+page.js` (root page)
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import "@inlang/sdk-js/no-transforms"
+import { initRootPageLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { LayoutLoad } from "./$types.js"
 
 export const load = initRootPageLoadWrapper<LayoutLoad>({
 	// ... see TypeScript definition or source code for all parameters
 }).use(() => {
-
 	// your code goes here
 
 	return {
@@ -155,7 +151,7 @@ If you want to use an import from the SDK inside a file where you have opted out
 You need to pass the `i` function to the function you want to call it from.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
+import "@inlang/sdk-js/no-transforms"
 import type { InlangFunction } from "@inlang/sdk-js/runtime"
 
 const getPageTitle = (i: InlangFunction, page: string) => {
@@ -181,17 +177,16 @@ And then call it from somewhere like this:
 The first parameter of the `use` function is the Event you usually get on a `load` function. You can access any import from the SDK through the second parameter.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initLayoutServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import "@inlang/sdk-js/no-transforms"
+import { initLayoutServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { LayoutServerLoad } from "./$types.js"
 
-export const load = initLayoutServerLoadWrapper<LayoutServerLoad>()
-	.use(({ params }, { i }) => {
-		return {
-			id: params.id,
-			title: i('title', { name: 'inlang' }),
-		}
-	})
+export const load = initLayoutServerLoadWrapper<LayoutServerLoad>().use(({ params }, { i }) => {
+	return {
+		id: params.id,
+		title: i("title", { name: "inlang" }),
+	}
+})
 ```
 
 > You need to replace `initLayoutServerLoadWrapper` with `initRootLayoutServerLoadWrapper` of it is your root server layout file.
@@ -201,17 +196,16 @@ export const load = initLayoutServerLoadWrapper<LayoutServerLoad>()
 The first parameter of the `use` function is the Event you usually get on a `load` function. You can access any import from the SDK through the second parameter.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import "@inlang/sdk-js/no-transforms"
+import { initLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { LayoutLoad } from "./$types.js"
 
-export const load = initLoadWrapper<LayoutLoad>()
-	.use(({ params }, { i }) => {
-		return {
-			id: params.id,
-			title: i('title', { name: 'inlang' }),
-		}
-	})
+export const load = initLoadWrapper<LayoutLoad>().use(({ params }, { i }) => {
+	return {
+		id: params.id,
+		title: i("title", { name: "inlang" }),
+	}
+})
 ```
 
 > You need to replace `initLoadWrapper` with `initRootLayoutLoadWrapper` of it is your root layout file.
@@ -221,17 +215,16 @@ export const load = initLoadWrapper<LayoutLoad>()
 The first parameter of the `use` function is the Event you usually get on a `load` function. You can access any import from the SDK through the second parameter.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initPageServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import "@inlang/sdk-js/no-transforms"
+import { initPageServerLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { PageServerLoad } from "./$types.js"
 
-export const load = initPageServerLoadWrapper<PageServerLoad>()
-	.use(({ params }, { i }) => {
-		return {
-			id: params.id,
-			title: i('title', { name: 'inlang' }),
-		}
-	})
+export const load = initPageServerLoadWrapper<PageServerLoad>().use(({ params }, { i }) => {
+	return {
+		id: params.id,
+		title: i("title", { name: "inlang" }),
+	}
+})
 ```
 
 > You need to replace `initPageServerLoadWrapper` with `initRootPageServerLoadWrapper` of it is your root server page file.
@@ -257,17 +250,16 @@ export const actions = { delete }
 The first parameter of the `use` function is the Event you usually get on a `load` function. You can access any import from the SDK through the second parameter.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared'
+import "@inlang/sdk-js/no-transforms"
+import { initLoadWrapper } from "@inlang/sdk-js/adapter-sveltekit/shared"
 import type { PageLoad } from "./$types.js"
 
-export const load = initLoadWrapper<PageLoad>()
-	.use(({ params }, { i }) => {
-		return {
-			id: params.id,
-			title: i('title', { name: 'inlang' }),
-		}
-	})
+export const load = initLoadWrapper<PageLoad>().use(({ params }, { i }) => {
+	return {
+		id: params.id,
+		title: i("title", { name: "inlang" }),
+	}
+})
 ```
 
 > You need to replace `initLoadWrapper` with `initRootPageLoadWrapper` of it is your root page file.
@@ -277,15 +269,14 @@ export const load = initLoadWrapper<PageLoad>()
 The first parameter of the `use` function is the Event you usually get on a `ReqestHandler` function. You can access any import from the SDK through the second parameter.
 
 ```ts
-import '@inlang/sdk-js/no-transforms'
-import { initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server'
+import "@inlang/sdk-js/no-transforms"
+import { initRequestHandlerWrapper } from "@inlang/sdk-js/adapter-sveltekit/server"
 import type { PageLoad } from "./$types.js"
 
-export const GET = initRequestHandlerWrapper<PageLoad>()
-	.use(({ params }, { i }) => {
-		const text = i('title', { name: 'inlang' })
-		return new Response(text)
-	})
+export const GET = initRequestHandlerWrapper<PageLoad>().use(({ params }, { i }) => {
+	const text = i("title", { name: "inlang" })
+	return new Response(text)
+})
 
 // same goes for POST, PATCH, PUT, DELETE, OPTIONS and HEAD
 ```

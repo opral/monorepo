@@ -82,7 +82,7 @@ export const findImportDeclarations = (sourceFile: SourceFile, path: string) =>
 		.forEachChildAsArray()
 		.map((node) =>
 			Node.isImportDeclaration(node) &&
-				textWithoutQuotes(node.getModuleSpecifier().getText()) === path
+			textWithoutQuotes(node.getModuleSpecifier().getText()) === path
 				? node
 				: undefined,
 		)
@@ -113,9 +113,7 @@ export const getImportSpecifiersAsStrings = (sourceFile: SourceFile, path: strin
 		importSpecifiers.push(...getImportSpecifiers(importDeclaration))
 	}
 
-	return importSpecifiers.map((importSpecifier) =>
-		importSpecifier.getText().replace("as", ":"),
-	)
+	return importSpecifiers.map((importSpecifier) => importSpecifier.getText().replace("as", ":"))
 }
 // ------------------------------------------------------------------------------------------------
 

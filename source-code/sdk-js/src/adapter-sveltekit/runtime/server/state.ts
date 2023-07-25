@@ -40,7 +40,8 @@ export const initState = async (module: InlangConfigModule) => {
 let _resources: Resource[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadResources = async () => (_resources = await config?.readResources({ config }) || [])
+export const reloadResources = async () =>
+	(_resources = (await config?.readResources({ config })) || [])
 
 export const getResource = (language: string) =>
 	_resources.find(({ languageTag: { name } }) => name === language)
