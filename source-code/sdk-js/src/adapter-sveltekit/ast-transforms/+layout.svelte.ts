@@ -35,7 +35,8 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/shared", "getRuntimeFromData")
 	addImport(
 		sourceFile,
-		`@inlang/sdk-js/adapter-sveltekit/client/${config.languageInUrl ? "not-reactive" : "reactive-workaround"
+		`@inlang/sdk-js/adapter-sveltekit/client/${
+			config.languageInUrl ? "not-reactive" : "reactive-workaround"
 		}`,
 		"addRuntimeToContext",
 		"getRuntimeFromContext",
@@ -55,7 +56,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 				;({ i, language } = getRuntimeFromContext())
 				document.body.parentElement?.setAttribute('lang', language)
 			}
-		`
+		`,
 	)
 
 	sourceFile.insertStatements(
@@ -63,7 +64,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 		dedent`
 			addRuntimeToContext(getRuntimeFromData(data))
 			let { i, language } = getRuntimeFromContext()
-		`
+		`,
 	)
 
 	return nodeToCode(sourceFile)

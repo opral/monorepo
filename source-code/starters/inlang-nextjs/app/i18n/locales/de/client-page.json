@@ -1,8 +1,8 @@
 {
-  "title": "Client Seite",
-  "counter_one": "eines ausgewählt",
-  "counter_other": "{{count}} ausgewählt",
-  "counter_zero": "keines ausgewählt",
-  "back-to-home": "Zurück zur Hauptseite",
-  "to-second-page": "das ist die zweite seite"
+	"title": "Client Seite",
+	"counter_one": "eines ausgewählt",
+	"counter_other": "{{count}} ausgewählt",
+	"counter_zero": "keines ausgewählt",
+	"back-to-home": "Zurück zur Hauptseite",
+	"to-second-page": "das ist die zweite seite"
 }

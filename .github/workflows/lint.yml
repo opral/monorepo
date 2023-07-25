@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
       - name: install node
         uses: actions/setup-node@v3
@@ -20,10 +23,13 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - run: npm install --no-save
+      - run: npm install
+
+      - name: run formatters
+        run: npm run format:fix
 
       - name: run linters
-        run: npm run lint
+        run: npm run lint:fix
 
       - name: run link checker
         uses: lycheeverse/lychee-action@v1.8.0
@@ -35,3 +41,9 @@ jobs:
 
       - name: run inlang lint
         run: npx @inlang/cli@latest lint
+
+      - name: commit & push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: "chore: autofix lint issues"

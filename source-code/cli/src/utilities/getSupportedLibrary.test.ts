@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
 import { getSupportedLibrary } from "./getSupportedLibrary.js"
 
-// Mock console.log to suppress logs during testing
-console.log = () => undefined
+// Mock console.info to suppress logs during testing
+console.info = () => undefined
 
 const testData = [
 	{

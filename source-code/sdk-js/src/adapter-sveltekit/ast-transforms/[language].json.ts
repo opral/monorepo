@@ -5,7 +5,7 @@ import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util
 import type { TransformConfig } from "../vite-plugin/config.js"
 import { InlangSdkException } from "../vite-plugin/exceptions.js"
 import { filePathForOutput } from "../vite-plugin/fileInformation.js"
-import { transformServerRequestJs } from './+server.js.js'
+import { transformServerRequestJs } from "./+server.js.js"
 
 export const transformLanguageJson = (filePath: string, config: TransformConfig, code: string) => {
 	const sourceFile = codeToSourceFile(code, filePath)

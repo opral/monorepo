@@ -414,8 +414,7 @@ function LanguagePicker() {
 		},
 	]
 
-	const handleSwitchTransltion = (language: { code: string; name: string }) => {
-		console.log("path", currentPageContext.urlParsed.pathname)
+	const handleSwitchTranslation = (language: { code: string; name: string }) => {
 		window.history.pushState(
 			{},
 			"",
@@ -443,7 +442,7 @@ function LanguagePicker() {
 									prop:type="checkbox"
 									// @ts-ignore
 									checked={locale() === language.code}
-									onClick={() => handleSwitchTransltion(language)}
+									onClick={() => handleSwitchTranslation(language)}
 								>
 									{language.name}
 									<p class="opacity-50" slot="suffix">

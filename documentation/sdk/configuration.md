@@ -108,8 +108,8 @@ You can tell `inlang` to ignore certain routes in your project. Those routes wil
 },
 ```
 
- - All entries must be defined as a relative path `/`.
- - If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
+- All entries must be defined as a relative path `/`.
+- If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
 
 ---
 

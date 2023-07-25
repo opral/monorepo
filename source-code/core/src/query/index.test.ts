@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { Resource } from "../ast/index.js"
 import { query } from "./index.js"
-import { createMessage, createResource } from '../test/utils.js'
+import { createMessage, createResource } from "../test/utils.js"
 
 describe("query.create", () => {
 	it("should create a message", () => {
@@ -131,7 +131,8 @@ describe("query.ids", () => {
 	})
 })
 
-const mockResource: Resource = createResource('en',
-	createMessage('first-message', "Welcome to this app."),
-	createMessage('second-message', "You opened the app, congrats!"),
+const mockResource: Resource = createResource(
+	"en",
+	createMessage("first-message", "Welcome to this app."),
+	createMessage("second-message", "You opened the app, congrats!"),
 )
