@@ -3,7 +3,7 @@ import type { Resource } from "@inlang/core/ast"
 import { lint } from "./linter.js"
 import type { LintRule } from "./rule.js"
 import { createLintRule } from "./createLintRule.js"
-import { createMessage, createResource } from '../test/utils.js'
+import { createMessage, createResource } from "../test/utils.js"
 
 vi.spyOn(console, "info").mockImplementation(vi.fn)
 vi.spyOn(console, "warn").mockImplementation(vi.fn)

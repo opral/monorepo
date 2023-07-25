@@ -1,6 +1,11 @@
 import { dedent } from "ts-dedent"
 import type { SourceFile } from "ts-morph"
-import { addImport, isOptOutImportPresent, isSdkImportPresent, removeImport } from "../../ast-transforms/utils/imports.js"
+import {
+	addImport,
+	isOptOutImportPresent,
+	isSdkImportPresent,
+	removeImport,
+} from "../../ast-transforms/utils/imports.js"
 import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
@@ -15,19 +20,16 @@ const addImports = (
 	wrapperFunctionName: string,
 ) => {
 	addImport(ast, "$app/environment", "browser")
-	addImport(
-		ast,
-		"@inlang/sdk-js/adapter-sveltekit/shared",
-		wrapperFunctionName,
-	)
+	addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", wrapperFunctionName)
 
 	if (config.languageInUrl && config.isStatic) {
+		addImport(ast, "@inlang/sdk-js/adapter-sveltekit/shared", "replaceLanguageInUrl")
 		addImport(
 			ast,
-			"@inlang/sdk-js/adapter-sveltekit/shared",
-			"replaceLanguageInUrl",
+			"@inlang/sdk-js/detectors/client",
+			"initLocalStorageDetector",
+			"navigatorDetector",
 		)
-		addImport(ast, "@inlang/sdk-js/detectors/client", "initLocalStorageDetector", "navigatorDetector")
 		addImport(ast, "@sveltejs/kit", "redirect")
 	}
 }

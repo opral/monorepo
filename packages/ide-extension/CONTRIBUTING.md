@@ -6,7 +6,7 @@ This package is a special case, because it needs compatibility with additional p
 
 If you are on a POSIX-like system, you can stick to the repositories CONTRIBUTING.md file.
 
- - It is convenient to set a inlang project, which is opened upon debugging the ide-extension. This can be done `.vscode/launch.json` in the second line of `args`.
+- It is convenient to set a inlang project, which is opened upon debugging the ide-extension. This can be done `.vscode/launch.json` in the second line of `args`.
 
 ### Windows
 

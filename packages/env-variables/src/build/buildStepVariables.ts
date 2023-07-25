@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'node:url'
-import path from 'node:path';
+import { fileURLToPath } from "node:url"
+import path from "node:path"
 
 export const rootEnvFilePath = path.join(fileURLToPath(import.meta.url), "../../../../../.env")
 

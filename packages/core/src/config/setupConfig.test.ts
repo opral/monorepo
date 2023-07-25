@@ -1,12 +1,12 @@
 import { it, expect, vi } from "vitest"
 import { setupConfig } from "./setupConfig.js"
-import { createResource } from '../test/utils.js'
+import { createResource } from "../test/utils.js"
 
 it("should setup the config with plugins", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
+				readResources: async () => [createResource("en"), createResource("de")],
 				writeResources: async () => undefined,
 				plugins: [
 					{
@@ -32,7 +32,7 @@ it("should not remove properties from the config", async () => {
 	const config = await setupConfig({
 		module: {
 			defineConfig: async () => ({
-				readResources: async () => [createResource('en'), createResource('de'),],
+				readResources: async () => [createResource("en"), createResource("de")],
 				writeResources: async () => undefined,
 				someProperty: "someValue",
 				plugins: [
@@ -100,7 +100,7 @@ it("should NOT throw if the config is valid but a plugin has an error", async ()
 				defineConfig: async () => ({
 					referenceLanguage: "de",
 					languages: ["de", "en"],
-					readResources: async () => [createResource('en'), createResource('de'),],
+					readResources: async () => [createResource("en"), createResource("de")],
 					writeResources: async () => undefined,
 					plugins: [
 						{

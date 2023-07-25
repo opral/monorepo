@@ -16,7 +16,7 @@ import { findOrCreateExport } from "./exports.js"
 import { InlangException } from "../../exceptions.js"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { dedent } from "ts-dedent"
-import { getImportSpecifiersAsStrings } from './imports.js'
+import { getImportSpecifiersAsStrings } from "./imports.js"
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -120,7 +120,10 @@ const findFunction = (node: Node): ArrowFunction | FunctionExpression => {
 	if (ArrowFunction.isArrowFunction(node) || FunctionExpression.isFunctionExpression(node))
 		return node
 
-	if (ParenthesizedExpression.isParenthesizedExpression(node) || SatisfiesExpression.isSatisfiesExpression(node)) {
+	if (
+		ParenthesizedExpression.isParenthesizedExpression(node) ||
+		SatisfiesExpression.isSatisfiesExpression(node)
+	) {
 		return findFunction(node.getExpression())
 	}
 
@@ -142,7 +145,7 @@ export const wrapExportedFunction = (
 
 	// if export is a function declaration, convert it to a function expression
 	if (Node.isFunctionDeclaration(fnExport)) {
-		fnExport.toggleModifier('export', false)
+		fnExport.toggleModifier("export", false)
 		fnExport.replaceWithText(`export const ${exportName} = ${nodeToCode(fnExport)}`)
 		wrapExportedFunction(sourceFile, options, wrapperFunctionName, exportName)
 		return
@@ -158,7 +161,7 @@ export const wrapExportedFunction = (
 	if (imports.length) {
 		const func = findFunction(fn)
 		if (!func.getParameters().length) {
-			func.insertParameters(0, [{ name: '_' }])
+			func.insertParameters(0, [{ name: "_" }])
 		}
 
 		// TODO: only add params that get used inside that function
