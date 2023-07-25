@@ -405,18 +405,18 @@ describe.skip("transformLayoutSvelte", () => {
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
-				const config = initTransformConfig()
-				const input = dedent`
-					<script>
-						import { language } from '@inlang/sdk-js'
-						export let data
-					</script>
+				// const config = initTransformConfig()
+				// const input = dedent`
+				// 	<script>
+				// 		import { language } from '@inlang/sdk-js'
+				// 		export let data
+				// 	</script>
 
-					<h1>Hello {data.name}!</h1>
+				// 	<h1>Hello {data.name}!</h1>
 
-					{language.toUpperCase()}
-				`
-				const transformed = transformLayoutSvelte("", config, input, false)
+				// 	{language.toUpperCase()}
+				// `
+				// const transformed = transformLayoutSvelte("", config, input, false)
 				// expect(transformed).toMatch(transformSvelte(config, input))
 			})
 		})

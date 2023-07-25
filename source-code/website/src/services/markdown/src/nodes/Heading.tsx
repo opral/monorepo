@@ -105,8 +105,6 @@ const CopyWrapper = (props: { children: JSXElement }) => {
 								.replace(/-$/, "")
 								.toLowerCase() as string)
 
-					console.log(headlineText)
-
 					const link =
 						document.location.protocol +
 						"//" +

@@ -28,6 +28,38 @@
 		"unicorn/prefer-node-protocol": "error",
 		"@typescript-eslint/ban-ts-comment": "off",
 		"@typescript-eslint/no-explicit-any": "off",
+		"no-console": [
+			"error",
+			{
+				// allow everything except `console.log`
+				"allow": [
+					"debug",
+					"error",
+					"info",
+					"warn",
+					"dir",
+					"dirxml",
+					"table",
+					"trace",
+					"group",
+					"groupCollapsed",
+					"groupEnd",
+					"clear",
+					"count",
+					"countReset",
+					"assert",
+					"profile",
+					"profileEnd",
+					"time",
+					"timeLog",
+					"timeEnd",
+					"timeStamp",
+					"context",
+					"createTask",
+					"memory"
+				]
+			}
+		],
 		// conflicts with SolidJS
 		"@typescript-eslint/no-non-null-assertion": "off"
 	}

@@ -49,7 +49,7 @@ describe("readObject", () => {
           },
           "gpgsig": "-----BEGIN PGP SIGNATURE-----
       Version: GnuPG v1
-      
+
       iQIcBAABAgAGBQJZjhboAAoJEJYJuKWSi6a5V5UP/040SfemJ13PRBXst2eB59gs
       3hPx29DRKBhFtvk+uS+8523/hUfry2oeWWd6YRkcnkxxAUtBnfzVkI9AgRIc1NTM
       h5XtLMQubCAKw8JWvVvoXETzwVAODmdmvC4WSQCLu+opoe6/W7RvkrTD0pbkwH4E
@@ -169,10 +169,10 @@ describe("readObject", () => {
       "#!/usr/bin/env node
       const minimisted = require('minimisted')
       const git = require('.')
-      
+
       // This really isn't much of a CLI. It's mostly for testing.
       // But it's very versatile and works surprisingly well.
-      
+
       minimisted(async function ({ _: [command, ...args], ...opts }) {
         const dir = process.cwd()
         const repo = git(dir)
