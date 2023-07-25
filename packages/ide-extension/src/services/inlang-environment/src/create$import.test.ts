@@ -1,7 +1,7 @@
 import { it, expect, afterAll } from "vitest"
 import fs from "node:fs"
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
 import { create$import } from "./create$import.js"
 
 const currentDirectoryPath = dirname(fileURLToPath(import.meta.url))

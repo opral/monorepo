@@ -318,7 +318,7 @@ describe("wrapExportedFunction", () => {
 		`)
 	})
 
-	describe('SDK imports', () => {
+	describe("SDK imports", () => {
 		test("arrow function", () => {
 			const node = codeToSourceFile(`
 				import { language } from '@inlang/sdk-js'

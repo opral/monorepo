@@ -7,7 +7,7 @@ import { getSetting, updateSetting } from "./index.js"
  *
  * @example
  * const userId = await getUserId()
- * console.log(userId) // 123e4567-e89b-12d3-a456-426614174000
+ * console.info(userId) // 123e4567-e89b-12d3-a456-426614174000
  */
 export async function getUserId() {
 	const persistedId = await getPersistedId()
