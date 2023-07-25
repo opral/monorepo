@@ -2,7 +2,6 @@ import { expect, test } from "vitest"
 import { getSupportedLibrary } from "./getSupportedLibrary.js"
 
 // Mock console.info to suppress logs during testing
-// eslint-disable-next-line no-console
 console.info = () => undefined
 
 const testData = [
