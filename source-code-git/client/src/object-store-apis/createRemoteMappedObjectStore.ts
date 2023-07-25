@@ -1,6 +1,6 @@
 import type { MappedObjectStore } from "./store/types.js"
 
-import { fetchPackedObject } from "./remote/fetchPackedObject.js"
+import { fetchRemoteObject } from "./remote/index.js"
 
 /*
  * Creates an interface to a remote object store from a mapped object store. If
@@ -10,12 +10,12 @@ import { fetchPackedObject } from "./remote/fetchPackedObject.js"
 export default async function createRemoteMappedObjectStore(
 	objectStore: MappedObjectStore,
 	remoteUrl: string,
-	headers: Record<string, string>
+	headers?: Record<string, string>
 ) {
 	return {
 		...objectStore,
 		readObject: (oid: string) => 
 			objectStore.readObject(oid)
-			.catch((e) => fetchPackedObject(oid, remoteUrl, headers))
+			.catch((e) => fetchRemoteObject(oid, remoteUrl, headers))
 	}
 }

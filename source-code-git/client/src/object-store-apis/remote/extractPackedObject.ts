@@ -3,7 +3,7 @@ import { inflateRaw } from "pako"
  * Given a packfile containing only one object, extract that object from the
  * packfile and return the object in uncompressed loose object format
  */
-export function extractPackedObject(packfile: Uint8Array) {
+export default function extractPackedObject(packfile: Uint8Array) {
 	if (packfile[7] !== 2) throw new Error(`Incorrect packfile version: ${packfile[7]}`)
 
 	// The object type is encoded in the last 3 bits (excluding the
