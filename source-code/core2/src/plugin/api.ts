@@ -2,8 +2,11 @@ import type { InlangInstance } from "../app/api.js"
 import type { LanguageTag } from "../languageTag.js"
 import type { LintRule } from "../lint/api.js"
 import type { Message } from "../messages/schema.js"
+import type { TranslatedStrings } from "../types.js"
 
-type JSONSerializable<T extends Record<string, string | string[]>> = T
+type JSONSerializable<
+	T extends Record<string, string | string[] | Record<string, string | string[]>>,
+> = T
 
 export type Plugin<
 	PluginOptions extends Record<string, string | string[]> = Record<string, never>,
@@ -11,9 +14,8 @@ export type Plugin<
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
 	meta: JSONSerializable<{
 		id: `${string}.${string}`
-		displayName: string
-		// TODO make translatable after https://github.com/inlang/inlang/pull/1155
-		description: string
+		displayName: TranslatedStrings
+		description: TranslatedStrings
 		keywords: string[]
 	}>
 	/**
@@ -38,8 +40,8 @@ type PluginOptions = {
 export const examplePlugin: Plugin<PluginOptions> = {
 	meta: {
 		id: "inlang.plugin-i18next",
-		displayName: "i18next",
-		description: "i18next plugin for inlang",
+		displayName: { en: "i18next" },
+		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
 	},
 	setup: ({ options, inlang }) => {
