@@ -184,7 +184,7 @@ describe("transformHooksServerJs", () => {
 					import { i } from '@inlang/sdk-js'
 
 					export const handle = ({ event, resolve }) => {
-						console.log(i('hi'))
+						console.info(i('hi'))
 						return resolve(event)
 					}
 			`,
@@ -197,7 +197,7 @@ describe("transformHooksServerJs", () => {
 				    excludedRoutes: [],
 				    getLanguage: () => undefined,
 				}).use(({ event, resolve }, { i }) => {
-				    console.log(i('hi'));
+				    console.info(i('hi'));
 				    return resolve(event);
 				});"
 			`)
