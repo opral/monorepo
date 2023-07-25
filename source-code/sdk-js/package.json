@@ -62,7 +62,8 @@
 		"./detectors": "./dist/detectors/index.js",
 		"./detectors/*": "./dist/detectors/detectors/*/index.js",
 		"./runtime": "./dist/runtime/index.js",
-		"./no-transforms": "./dist/no-transforms.js"
+		"./no-transforms": "./dist/no-transforms.js",
+		"./debug": "./dist/debug.js"
 	},
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
