@@ -20,8 +20,9 @@ import "@inlang/sdk-js/no-transforms"
 By adding this line, the code in that file will not be transformed and you need to make sure you manually add the necessary functionality.
 
 > You can add the following import to any file to log the transforms that got applied to that file by the SDK:
+>
 > ```js
-> import '@inlang/sdk-js/debug'
+> import "@inlang/sdk-js/debug"
 > ```
 
 ## Required Setup
