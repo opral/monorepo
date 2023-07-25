@@ -17,19 +17,6 @@ export type ProcessedTableOfContents = Record<
 	Omit<(typeof index)[keyof typeof index], "html">[]
 >
 
-/**
- * The index of documentation markdown files. The href's acts as id.
- *
- * @example
- * 	{
- * 		"/documentation/intro": document,
- * 	}
- */
-/**
- * the table of contents without the html for each document
- * saving bandwith and speeding up the site)
- */
-
 // should only run server side
 export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => {
 	// dirty way to get reload of markdown (not hot reload though)
@@ -57,6 +44,15 @@ async function generateIndexAndTableOfContents() {
 		const tableOfContents = await tableOfContentsPromise
 
 		const processedTableOfContents: { [key: string]: { frontmatter: any }[] } = {}
+
+		/**
+		 * The index of documentation markdown files. The href's acts as id.
+		 *
+		 * @example
+		 * 	{
+		 * 		"/documentation/intro": document,
+		 * 	}
+		 */
 		const index: { [key: string]: any } = {}
 
 		for (const { category, content } of tableOfContents) {
@@ -67,7 +63,7 @@ async function generateIndexAndTableOfContents() {
 			if (!processedTableOfContents[category]) {
 				processedTableOfContents[category] = []
 			}
-			processedTableOfContents[category].push({ frontmatter: markdown.frontmatter })
+			processedTableOfContents[category]?.push({ frontmatter: markdown.frontmatter })
 			index[markdown.frontmatter.href] = markdown
 		}
 

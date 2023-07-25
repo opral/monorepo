@@ -18,7 +18,6 @@ import { fileSources } from "../../../../../documentation/tableOfContents.js"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
-	currentFileSource: string | undefined
 }
 
 export function Page(props: PageProps) {
@@ -30,6 +29,10 @@ export function Page(props: PageProps) {
 		if (props.markdown && props.markdown.frontmatter) {
 			const markdownHref = props.markdown.frontmatter.href
 
+			const files = fileSources as {
+				[key: string]: string[]
+			}
+
 			for (const section of Object.keys(props.processedTableOfContents)) {
 				const documents = props.processedTableOfContents[section]
 
@@ -37,7 +40,7 @@ export function Page(props: PageProps) {
 					for (const document of documents) {
 						if (document.frontmatter && document.frontmatter.href === markdownHref) {
 							const index = documents.indexOf(document)
-							const fileSource = fileSources[section][index]
+							const fileSource = files[section]?.[index] || undefined
 
 							const gitHubLink =
 								"https://github.com/inlang/inlang/blob/main/documentation" + "/" + fileSource
