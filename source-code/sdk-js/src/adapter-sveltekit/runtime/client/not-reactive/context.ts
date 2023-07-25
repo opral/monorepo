@@ -1,13 +1,12 @@
 import type * as Ast from "@inlang/core/ast"
-import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
+import { replaceLanguageInUrl } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
-import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
+import { getRuntimeFromContext as getRuntimeFromContextShared, addRuntimeToContext as addRuntimeToContextShared } from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
 
 type RuntimeContext<
@@ -34,8 +33,8 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		return goto(replaceLanguageInUrl(get(page).url, language), { invalidateAll: true })
 	}
 
-	setContext(inlangSymbol, {
-		language,
+	addRuntimeToContextShared<RuntimeContext>({
+		language: language!, // TODO: check
 		referenceLanguage,
 		languages,
 		i,
