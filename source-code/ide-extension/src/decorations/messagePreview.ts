@@ -3,7 +3,7 @@ import { query } from "@inlang/core/query"
 import { state } from "../state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { onDidEditMessage } from "../commands/editMessage.js"
-import { getMessageAsString } from '../utilities/query.js'
+import { getMessageAsString } from "../utilities/query.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -51,9 +51,11 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					documentText: activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = getMessageAsString(query(refResource).get({
-						id: message.messageId,
-					}))
+					const translation = getMessageAsString(
+						query(refResource).get({
+							id: message.messageId,
+						}),
+					)
 
 					const truncatedTranslation =
 						translation &&

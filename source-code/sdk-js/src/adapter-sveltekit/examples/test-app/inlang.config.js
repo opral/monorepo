@@ -14,7 +14,6 @@ export async function defineConfig(env) {
 				pathPattern: "./languages/{language}.json",
 			}),
 			sdkPlugin({
-				debug: true,
 				languageNegotiation: {
 					strategies: [{ type: "url" }],
 				},

@@ -35,9 +35,10 @@ export function SignInDialog(props: {
 				<sl-button
 					slot="footer"
 					prop:variant="primary"
-					prop:target="_blank"
-					prop:href={githubAuthUrl(props.githubAppClientId)}
-					onClick={() => props.onClickOnSignInButton()}
+					onClick={() => {
+						props.onClickOnSignInButton()
+						window.open(githubAuthUrl(props.githubAppClientId), "_blank")
+					}}
 				>
 					<IconGithub slot="prefix" />
 					Sign in with GitHub

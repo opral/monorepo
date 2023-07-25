@@ -11,8 +11,13 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: install node
         uses: actions/setup-node@v3
@@ -20,10 +25,13 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - run: npm install --no-save
+      - run: npm install
+
+      - name: run formatters
+        run: npm run format:fix
 
       - name: run linters
-        run: npm run lint
+        run: npm run lint:fix
 
       - name: run link checker
         uses: lycheeverse/lychee-action@v1.8.0
@@ -35,3 +43,8 @@ jobs:
 
       - name: run inlang lint
         run: npx @inlang/cli@latest lint
+
+      - name: commit & push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: autofix lint issues"

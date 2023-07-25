@@ -25,7 +25,7 @@ it("should validate a valid config object", () => {
 		extractMessageOptions: [
 			{
 				callback: (messageId: string, selection: string) =>
-					`console.log(\`${messageId}: ${selection}\`)`,
+					`console.info(\`${messageId}: ${selection}\`)`,
 			},
 		],
 	}
@@ -47,7 +47,7 @@ it("should throw an error for a config object with invalid extractMessageOptions
 		extractMessageOptions: [
 			{
 				callback: (messageId: string, selection: string) =>
-					`console.log(\`${messageId}: ${selection}\`)`,
+					`console.info(\`${messageId}: ${selection}\`)`,
 			},
 			{ callback: {} },
 		],
@@ -64,7 +64,7 @@ it("should throw an error for a config object with invalid messageReferenceMatch
 		extractMessageOptions: [
 			{
 				callback: (messageId: string, selection: string) =>
-					`console.log(\`${messageId}: ${selection}\`)`,
+					`console.info(\`${messageId}: ${selection}\`)`,
 			},
 		],
 	}
