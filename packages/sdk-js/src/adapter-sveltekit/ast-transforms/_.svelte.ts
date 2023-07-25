@@ -2,10 +2,10 @@ import type { SourceFile } from "ts-morph"
 import { dedent } from "ts-dedent"
 import {
 	findImportDeclarations,
-	getImportSpecifiers,
 	addImport,
 	removeImport,
 	isSdkImportPresent,
+	getImportSpecifiersAsStrings,
 } from "../../ast-transforms/utils/imports.js"
 import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
@@ -43,12 +43,6 @@ const transformScriptTag = (filePath: string, config: TransformConfig, script: s
 const transformSdkImports = (config: TransformConfig, sourceFile: SourceFile) => {
 	if (!isSdkImportPresent(sourceFile)) return
 
-	const importDeclarations = findImportDeclarations(sourceFile, "@inlang/sdk-js")
-	const importSpecifiers = []
-	for (const importDeclaration of importDeclarations) {
-		importSpecifiers.push(...getImportSpecifiers(importDeclaration))
-	}
-
 	addImport(
 		sourceFile,
 		`@inlang/sdk-js/adapter-sveltekit/client/${
@@ -57,9 +51,9 @@ const transformSdkImports = (config: TransformConfig, sourceFile: SourceFile) =>
 		"getRuntimeFromContext",
 	)
 
-	const imports = importSpecifiers.map((importSpecifier) =>
-		importSpecifier.getText().replace("as", ":"),
-	)
+	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
+
+	const importDeclarations = findImportDeclarations(sourceFile, "@inlang/sdk-js")
 
 	importDeclarations[0]!.replaceWithText(dedent`
 		const { ${imports} } = getRuntimeFromContext()

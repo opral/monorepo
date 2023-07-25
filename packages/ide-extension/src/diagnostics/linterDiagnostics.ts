@@ -22,7 +22,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 		const [resourcesWithLints, errors] = await lint({ resources, config: state().config })
 
 		if (errors) {
-			console.log(errors)
+			console.error(errors)
 		}
 
 		// Use `getLintReports` to get lint reports

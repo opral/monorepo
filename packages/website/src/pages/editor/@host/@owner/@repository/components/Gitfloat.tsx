@@ -232,7 +232,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (localChanges().length > 0) {
+		if (localChanges().length > 0 && localStorage?.user !== undefined) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {

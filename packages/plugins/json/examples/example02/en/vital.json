@@ -1,6 +1,6 @@
 {
-    "title": "{{appName}}",
-    "nav": {
-        "home": "Home"
-    }
+	"title": "{{appName}}",
+	"nav": {
+		"home": "Home"
+	}
 }

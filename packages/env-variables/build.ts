@@ -18,14 +18,14 @@ config({ path: rootEnvFilePath, override: true })
 const [, errors] = validateEnvVariables({ forProduction: false })
 
 if (errors) {
-	console.log("💡 Some env variables are not defined. Fetching public env variables remotely...")
-	console.log(errors)
+	console.error("💡 Some env variables are not defined. Fetching public env variables remotely...")
+	console.error(errors)
 	// some required env variables are missing. fetch public env variables from the server
 	await fetchPublicEnv()
 	const [, stillErrors] = validateEnvVariables({ forProduction: false })
 	if (stillErrors) {
-		console.log("🚨 Some env variables are still not defined, even after fetching. Exiting...")
-		console.log(stillErrors)
+		console.error("🚨 Some env variables are still not defined, even after fetching. Exiting...")
+		console.error(stillErrors)
 		process.exit(1)
 	}
 }

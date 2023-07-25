@@ -1,5 +1,18 @@
 # @inlang/sdk-js
 
+## 0.10.1
+
+### Patch Changes
+
+- 7cf3e86b: don't minify plugin bundle
+- cd4754e1: don't throw error on first start of the application
+
+## 0.10.0
+
+### Minor Changes
+
+- 3b811085: support `@inlang/sdk-js` imports in `+*.js` files
+
 ## 0.9.2
 
 ### Patch Changes
