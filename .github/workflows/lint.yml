@@ -20,7 +20,7 @@ jobs:
           node-version: 18
           cache: "npm"
 
-      - run: npm install --no-save
+      - run: npm install
 
       - name: run formatters
         run: npm run format:fix
