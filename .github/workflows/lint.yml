@@ -11,11 +11,13 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+      - uses: actions/checkout@v3
 
       - name: install node
         uses: actions/setup-node@v3
@@ -43,7 +45,6 @@ jobs:
         run: npx @inlang/cli@latest lint
 
       - name: commit & push changes
-        uses: actions-js/push@master
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: "chore: autofix lint issues"
+          commit_message: "chore: autofix lint issues"
