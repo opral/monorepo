@@ -17,7 +17,7 @@ const options = {
 	external: ["svelte", "@sveltejs/kit", "typescript", "ts-morph"],
 	plugins: [
 		{
-			name: "logger",
+				name: "logger",
 			setup: ({ onEnd }) => onEnd(() => console.info("🎉 changes processed")),
 		},
 	],
