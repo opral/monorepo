@@ -188,10 +188,10 @@ describe("readObject", () => {
           }
         }
         cmd += \`.\${command}(\${args.map(x => \`'\${x}'\`).join(', ')})\`
-        console.info(cmd)
+        console.log(cmd)
         let result = await repo[command](...args)
         if (result === undefined) return
-        console.info(JSON.stringify(result, null, 2))
+        console.log(JSON.stringify(result, null, 2))
       })
       "
     `)
