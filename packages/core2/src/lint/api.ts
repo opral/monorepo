@@ -1,6 +1,7 @@
 import type { InlangInstance } from "../app/api.js"
 import type { LanguageTag } from "../languageTag.js"
 import type { Message } from "../messages/schema.js"
+import type { TranslatedStrings } from "../types.js"
 
 export type LintRule = {
 	id: `${string}.${string}`
@@ -41,10 +42,3 @@ export class LintException extends Error {
 		this.name = "LintException"
 	}
 }
-
-/**
- * Translated strings for a given language tag.
- *
- * The language tag `en` is always required.
- */
-type TranslatedStrings = Record<LanguageTag, string> & { en: string }
