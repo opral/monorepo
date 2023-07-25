@@ -80,7 +80,7 @@
 		"link": {
 			"blog": "Beiträge",
 			"docs": "Dokumentation",
-			"feedback": "Rückmeldung"
+			"feedback": "Feedback"
 		}
 	},
 	"footer": {
@@ -102,7 +102,7 @@
 			"title": "Kontakt",
 			"getInTouch": "In Kontakt treten",
 			"join": "Bewerben",
-			"feedback": "Rückmeldung"
+			"feedback": "Feedback"
 		}
 	},
 	"newsletter": {
