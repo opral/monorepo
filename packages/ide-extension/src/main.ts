@@ -74,7 +74,7 @@ async function main(args: { context: vscode.ExtensionContext }): Promise<void> {
 		if (!_workspaceFolder) {
 			console.warn("No workspace folder found.")
 		} else {
-			console.log("Creating inlang.config.js file.")
+			console.info("Creating inlang.config.js file.")
 			await createInlangConfigFile({ workspaceFolder: _workspaceFolder })
 		}
 		return
