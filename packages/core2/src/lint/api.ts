@@ -4,7 +4,7 @@ import type { Message } from "../messages/schema.js"
 
 export type LintRule = {
 	id: `${string}.${string}`
-	displayName: Record<string, string>
+	displayName: TranslatedStrings
 	/**
 	 * The default level of the lint rule.
 	 *
@@ -20,13 +20,13 @@ export type MessageLintRule = LintRule & {
 export type ReportMessageLint = (args: {
 	messageId: Message["id"]
 	languageTag: LanguageTag
-	content: LintReport["content"]
+	body: LintReport["body"]
 }) => MessageLintReport
 
 export type LintReport = {
 	ruleId: LintRule["id"]
 	level: "error" | "warn"
-	content: string
+	body: TranslatedStrings
 }
 
 export type MessageLintReport = LintReport & {
@@ -41,3 +41,10 @@ export class LintException extends Error {
 		this.name = "LintException"
 	}
 }
+
+/**
+ * Translated strings for a given language tag.
+ *
+ * The language tag `en` is always required.
+ */
+type TranslatedStrings = Record<LanguageTag, string> & { en: string }

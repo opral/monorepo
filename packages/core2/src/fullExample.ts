@@ -22,7 +22,10 @@ const missingMessage: MessageLintRule = {
 				report({
 					languageTag,
 					messageId: message.id,
-					content: `Message "${message.id}" is missing in language tag "${languageTag}".`,
+					body: {
+						'en':`Message "${message.id}" is missing in language tag "${languageTag}".`,
+						'de':`Nachricht "${message.id}" fehlt für Sprachtag "${languageTag}".`,
+					}
 				})
 			}
 		}
