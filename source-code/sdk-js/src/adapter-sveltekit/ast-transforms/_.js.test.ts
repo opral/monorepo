@@ -31,7 +31,7 @@ describe("transformJs", () => {
 
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { getRuntimeFromGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
-			export const test = () => console.log(getRuntimeFromGlobalThis().i('hi'))
+			export const test = () => console.log(getRuntimeFromGlobalThis().i('hi'));"
 		`)
 	})
 
