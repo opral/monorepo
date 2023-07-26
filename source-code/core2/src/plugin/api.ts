@@ -16,6 +16,13 @@ export type Plugin<
 		displayName: TranslatedStrings
 		description: TranslatedStrings
 		keywords: string[]
+		/**
+		 * The APIs that the plugin uses.
+		 *
+		 * If the plugin uses an API that is not listed here, the plugin will not be loaded.
+		 * Mainly used for the plugin marketplace.
+		 */
+		usedApis: ("loadMessages" | "saveMessages" | "addLintRules")[]
 	}>
 	/**
 	 * The setup function is the first function that is called when inlang loads the plugin.
@@ -48,6 +55,7 @@ export const examplePlugin: Plugin<PluginOptions> = {
 		displayName: { en: "i18next" },
 		description: { en: "i18next plugin for inlang" },
 		keywords: ["i18next", "react", "nextjs"],
+		usedApis: ["addLintRules", "loadMessages", "saveMessages"],
 	},
 	setup: ({ options, inlang }) => {
 		if (options.pathPattern === undefined) {
