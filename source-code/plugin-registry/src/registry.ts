@@ -8,7 +8,7 @@ export const plugins: InlangPluginManifest[] = [
 		keywords: ["json", "i18next", "placeholder"],
 	},
 	{
-		id: "standard-lint-rules",
+		id: "@inlang/plugin-standard-lint-rules",
 		icon: "https://raw.githubusercontent.com/inlang/inlang/main/source-code/plugins/standard-lint-rules/assets/icon.png",
 		repository:
 			"https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules/",
@@ -21,7 +21,7 @@ export const plugins: InlangPluginManifest[] = [
 		keywords: ["typescript", "typesafe", "svelte", "react", "vue", "angular", "ivan hofer"],
 	},
 	{
-		id: "inlang-plugin-json",
+		id: "@inlang/plugin-json",
 		icon: "https://github.com/inlang/inlang/blob/main/source-code/plugins/json/assets/icon.png?raw=true",
 		repository: "https://github.com/inlang/inlang/tree/main/source-code/plugins/json/",
 		keywords: ["json", "placeholder"],

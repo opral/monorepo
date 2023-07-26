@@ -31,7 +31,11 @@ export const initHandleWrapper = (options: HandleOptions) => ({
 	use: (handle: WrappedHandle) => {
 		let runtime: SvelteKitServerRuntime
 
-		const excludedRoutes = ["/inlang", ...(options.excludedRoutes || [])]
+		const excludedRoutes = [
+			"/inlang", // inlang internal route
+			"/[fallback]", // SvelteKit internal fallback route
+			...(options.excludedRoutes || []), // user defined excluded routes
+		]
 
 		return sequence(
 			async ({ event, resolve }: Parameters<Kit.Handle>[0]) => {

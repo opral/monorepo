@@ -157,14 +157,17 @@ describe("validateSdkConfig", () => {
 		})
 	})
 
-
 	describe("routing", () => {
-		const baseConfig = { languageNegotiation: { strategies: [{ type: "navigator" }] } } as SdkConfigInput
+		const baseConfig = {
+			languageNegotiation: { strategies: [{ type: "navigator" }] },
+		} as SdkConfigInput
 
 		test("should not require a 'routing' prop", () => {
-			expect(validateSdkConfig({
-				...baseConfig,
-			})).toMatchInlineSnapshot(`
+			expect(
+				validateSdkConfig({
+					...baseConfig,
+				}),
+			).toMatchInlineSnapshot(`
 				{
 				  "debug": false,
 				  "languageNegotiation": {
@@ -187,10 +190,12 @@ describe("validateSdkConfig", () => {
 
 		describe("exclude", () => {
 			test("should not require an 'exclude' prop", () => {
-				expect(validateSdkConfig({
-					...baseConfig,
-					routing: {},
-				})).toMatchInlineSnapshot(`
+				expect(
+					validateSdkConfig({
+						...baseConfig,
+						routing: {},
+					}),
+				).toMatchInlineSnapshot(`
 					{
 					  "debug": false,
 					  "languageNegotiation": {
@@ -212,12 +217,14 @@ describe("validateSdkConfig", () => {
 			})
 
 			test("should accept relative urls", () => {
-				expect(validateSdkConfig({
-					...baseConfig,
-					routing: {
-						exclude: ['/assets', '/api'],
-					},
-				})).toMatchInlineSnapshot(`
+				expect(
+					validateSdkConfig({
+						...baseConfig,
+						routing: {
+							exclude: ["/assets", "/api"],
+						},
+					}),
+				).toMatchInlineSnapshot(`
 					{
 					  "debug": false,
 					  "languageNegotiation": {
@@ -242,12 +249,14 @@ describe("validateSdkConfig", () => {
 			})
 
 			test("should fail if entry is not a relative url", () => {
-				expect(() => validateSdkConfig({
-					...baseConfig,
-					routing: {
-						exclude: ['api'],
-					},
-				})).toThrow()
+				expect(() =>
+					validateSdkConfig({
+						...baseConfig,
+						routing: {
+							exclude: ["api"],
+						},
+					}),
+				).toThrow()
 			})
 		})
 	})

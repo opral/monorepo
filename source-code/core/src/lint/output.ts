@@ -48,5 +48,6 @@ export const printReport = (
 
 	const { id, level, message } = report
 	const method = methodOverride ?? (level === "error" ? "error" : "warn")
+	// eslint-disable-next-line no-console
 	console[method](`[${level}] (${id}) ${message}`)
 }

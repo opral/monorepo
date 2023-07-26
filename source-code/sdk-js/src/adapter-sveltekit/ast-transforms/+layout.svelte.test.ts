@@ -29,6 +29,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				{#key language}<slot />{/key}"
@@ -60,6 +61,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(data);
 				</script>{#key language}
@@ -101,6 +103,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				<svelte:window on:load={onLoad} />{#key language}
@@ -174,6 +177,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>{#key language}
 
@@ -203,6 +207,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
 				</script>{#key language}
@@ -238,6 +243,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				console.info(i(\\"welcome\\"));
 				</script>{#key language}
@@ -261,6 +267,7 @@ describe("transformLayoutSvelte", () => {
 				$: if (browser) {
 				    addRuntimeToContext(getRuntimeFromData(data));
 				    ({ i, language } = getRuntimeFromContext());
+				    document.body.parentElement?.setAttribute('lang', language);
 				}
 				</script>
 				{#key language}<slot />{/key}"
@@ -398,18 +405,16 @@ describe.skip("transformLayoutSvelte", () => {
 
 		describe("root=false", () => {
 			it("is a proxy for transformSvelte", async () => {
-				const config = initTransformConfig()
-				const input = dedent`
-					<script>
-						import { language } from '@inlang/sdk-js'
-						export let data
-					</script>
-
-					<h1>Hello {data.name}!</h1>
-
-					{language.toUpperCase()}
-				`
-				const transformed = transformLayoutSvelte("", config, input, false)
+				// const config = initTransformConfig()
+				// const input = dedent`
+				// 	<script>
+				// 		import { language } from '@inlang/sdk-js'
+				// 		export let data
+				// 	</script>
+				// 	<h1>Hello {data.name}!</h1>
+				// 	{language.toUpperCase()}
+				// `
+				// const transformed = transformLayoutSvelte("", config, input, false)
 				// expect(transformed).toMatch(transformSvelte(config, input))
 			})
 		})

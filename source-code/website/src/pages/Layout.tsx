@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, Match, onMount, Show, Switch } from "solid-js"
+import { createSignal, For, JSXElement, Match, onMount, Show, Switch } from "solid-js"
 import IconTwitter from "~icons/cib/twitter"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
@@ -13,11 +13,9 @@ import { onSignOut } from "@src/services/auth/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { Button, buttonType } from "./index/components/Button.jsx"
 import { SectionLayout } from "./index/components/sectionLayout.jsx"
-import { rpc } from "@inlang/rpc"
-import { defaultLanguage, languages } from "@src/renderer/_default.page.route.js"
+import { defaultLanguage, extractLocale } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { navigate } from "vite-plugin-ssr/client/router"
-import type Placeholder from "@tiptap/extension-placeholder"
+import { NewsletterForm } from "@src/components/NewsletterForm.jsx"
 
 /**
  * Ensure that all elements use the same margins.
@@ -82,30 +80,26 @@ const socialMediaLinks = [
 ]
 
 function Header(props: { landingpage?: boolean }) {
-	const links = [
-		{ name: "Blog", href: "/blog", type: "text" as buttonType },
-		{ name: "Docs", href: "/documentation", type: "text" as buttonType },
-		{
-			name: "Feedback",
-			external: currentPageContext.urlParsed.pathname.includes("editor"),
-			href: "https://github.com/inlang/inlang/discussions",
-			type: "text" as buttonType,
-		},
-	]
+	const getLinks = () => {
+		return [
+			{ name: `${t("header.link.blog")}`, href: "/blog", type: "text" as buttonType },
+			{ name: `${t("header.link.docs")}`, href: "/documentation", type: "text" as buttonType },
+			{
+				name: `${t("header.link.feedback")}`,
+				href: "https://github.com/inlang/inlang/discussions",
+				type: "text" as buttonType,
+			},
+		]
+	}
 
 	const [localStorage] = useLocalStorage()
 	const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
-	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
-	const [, { locale }] = useI18n()
+	const [t, { locale }] = useI18n()
 
 	const getLocale = () => {
 		const language = locale() || defaultLanguage
 		return language !== defaultLanguage ? "/" + language : ""
 	}
-
-	onMount(() => {
-		setLocaleIsLoaded(true)
-	})
 
 	return (
 		<>
@@ -138,45 +132,25 @@ function Header(props: { landingpage?: boolean }) {
 											)}
 										</For>
 									</div>
-									<For each={links}>
+									<For each={getLinks()}>
 										{(link) => (
-											<Button type={link.type} href={link.href} chevron={Boolean(link.external)}>
+											<Button type={link.type} href={link.href}>
 												{link.name}
 											</Button>
 										)}
 									</For>
-									<div class="text-xl -mr-4 w-[100px]">
-										<Show
-											when={localeIsLoaded()}
-											fallback={
-												<div class="w-full px-4 h-10 flex justify-center items-center border text-base rounded border-surface-300">
-													...
-												</div>
-											}
-										>
-											<sl-select
-												prop:value={locale()}
-												prop:defaultValue={defaultLanguage}
-												on:sl-change={(event: any) => {
-													const language = event.target.value || defaultLanguage
-													window.history.pushState(
-														{},
-														"",
-														(language !== defaultLanguage ? "/" + language : "") +
-															currentPageContext.urlParsed.pathname,
-													)
-													locale(event.target.value)
-												}}
-											>
-												<sl-option prop:value="en">🇺🇸 English</sl-option>
-												<sl-option prop:value="de">🇩🇪 German</sl-option>
-												{/* <sl-option prop:value="zh">🇨🇳 Chinese</sl-option> */}
-											</sl-select>
-										</Show>
-									</div>
+									<Show
+										when={
+											currentPageContext.urlParsed.pathname.includes("editor") === false &&
+											currentPageContext.urlParsed.pathname.includes("documentation") === false &&
+											currentPageContext.urlParsed.pathname.includes("blog") === false
+										}
+									>
+										<LanguagePicker />
+									</Show>
 									<Show when={currentPageContext.urlParsed.pathname.includes("editor") === false}>
 										<Button type="secondary" href="/editor">
-											Open Editor
+											{t("header.openEditor")}
 										</Button>
 									</Show>
 									{/* not overwhelming the user by only showing login button when not on landig page */}
@@ -208,7 +182,7 @@ function Header(props: { landingpage?: boolean }) {
 						{/* MobileNavbar includes the Navigation for the Documentations sites  */}
 						<Show when={mobileMenuIsOpen()}>
 							<ol class="space-y-1 relativ w-full min-h-full pt-3 pl-[10px] overflow">
-								<For each={links}>
+								<For each={getLinks()}>
 									{(link) => (
 										<sl-tree>
 											<a
@@ -230,50 +204,82 @@ function Header(props: { landingpage?: boolean }) {
 	)
 }
 
-const docLinks = [
-	{ name: "Getting Started", href: "/documentation/quick-start", type: "text" as buttonType },
-	{ name: "Why inlang", href: "/documentation", type: "text" as buttonType },
-	{ name: "Contribute", href: "/documentation/contributing", type: "text" as buttonType },
-]
-const resourceLinks = [
-	{ name: "Blog", href: "/blog", type: "text" as buttonType },
-	{
-		name: "Roadmap",
-		href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
-		type: "text" as buttonType,
-	},
-	{ name: "Github", href: "https://github.com/inlang/inlang", type: "text" as buttonType },
-	{ name: "Twitter", href: "https://twitter.com/inlangHQ", type: "text" as buttonType },
-	{ name: "Discord", href: "https://discord.gg/gdMPPWy57R", type: "text" as buttonType },
-]
-const contactLinks = [
-	{ name: "Get in Touch", href: "mailto:hello@inlang.com", type: "text" as buttonType },
-	{
-		name: "Join the Team",
-		href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
-		type: "text" as buttonType,
-	},
-	{
-		name: "Feedback",
-		href: "https://github.com/inlang/inlang/discussions/categories/feedback",
-		type: "text" as buttonType,
-	},
-]
-
 const Footer = (props: { isLandingPage: boolean }) => {
+	const [t] = useI18n()
+
+	const getDocLinks = () => {
+		return [
+			{
+				name: `${t("footer.docs.gettingStarted")}`,
+				href: "/documentation/quick-start",
+				type: "text" as buttonType,
+			},
+			{ name: `${t("footer.docs.whyInlang")}`, href: "/documentation", type: "text" as buttonType },
+			{
+				name: `${t("footer.docs.contribute")}`,
+				href: "/documentation/contributing",
+				type: "text" as buttonType,
+			},
+		]
+	}
+	const getResourceLinks = () => {
+		return [
+			{ name: `${t("footer.resources.blog")}`, href: "/blog", type: "text" as buttonType },
+			{
+				name: `${t("footer.resources.roadmap")}`,
+				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.github")}`,
+				href: "https://github.com/inlang/inlang",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.twitter")}`,
+				href: "https://twitter.com/inlangHQ",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.resources.discord")}`,
+				href: "https://discord.gg/gdMPPWy57R",
+				type: "text" as buttonType,
+			},
+		]
+	}
+	const getContactLinks = () => {
+		return [
+			{
+				name: `${t("footer.contact.getInTouch")}`,
+				href: "mailto:hello@inlang.com",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.contact.join")}`,
+				href: "https://inlang.notion.site/Careers-82277169d07a4d30b9c9b5a625a6a0ef",
+				type: "text" as buttonType,
+			},
+			{
+				name: `${t("footer.contact.feedback")}`,
+				href: "https://github.com/inlang/inlang/discussions/categories/feedback",
+				type: "text" as buttonType,
+			},
+		]
+	}
+
 	return (
 		<footer class="border-t border-surface-100 overflow-hidden">
 			<SectionLayout showLines={props.isLandingPage} type="lightGrey">
-				<div class="flex flex-row flex-wrap-reverse py-16 px-10 xl:px-0 gap-10 md:gap-x-0 md:gap-y-10 xl:gap-0">
-					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-row items-center md:items-start md:flex-col justify-between">
+				<div class="flex flex-row flex-wrap-reverse py-16 px-6 md:px-10 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
+					<div class="w-full md:w-1/4 xl:px-10 flex flex-row items-center sm:items-start md:flex-col justify-between">
 						<a href="/" class="flex items-center w-fit">
 							<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
 							<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
 						</a>
 					</div>
-					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Docs</p>
-						<For each={docLinks}>
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.docs.title")}</p>
+						<For each={getDocLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -283,9 +289,9 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							)}
 						</For>
 					</div>
-					<div class="w-full md:w-1/3 xl:w-1/4 xl:px-10 flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Resources</p>
-						<For each={resourceLinks}>
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.resources.title")}</p>
+						<For each={getResourceLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -295,9 +301,9 @@ const Footer = (props: { isLandingPage: boolean }) => {
 							)}
 						</For>
 					</div>
-					<div class="hidden invisible xl:visible xl:w-1/4 xl:px-10 xl:flex flex-col pt-2">
-						<p class="font-semibold text-surface-900 pb-3">Let's talk</p>
-						<For each={contactLinks}>
+					<div class="w-full sm:w-1/3 md:w-1/4 xl:px-10 xl:flex flex-col pt-2">
+						<p class="font-semibold text-surface-900 pb-3">{t("footer.contact.title")}</p>
+						<For each={getContactLinks()}>
 							{(link) => (
 								<div class="w-fit opacity-80">
 									<Button type={link.type} href={link.href}>
@@ -306,140 +312,19 @@ const Footer = (props: { isLandingPage: boolean }) => {
 								</div>
 							)}
 						</For>
-					</div>
-					<div class="flex visible xl:invisible w-full xl:w-1/4 px-10 bg-surface-100 border border-surface-200 xl:hidden flex-col gap-6 py-10 rounded">
-						<p class="text-lg text-surface-800 font-semibold">Let's talk</p>
-						<p class="text-surface-600">
-							We welcome your input, feedback, and ideas! If you would like to get in touch with us,
-							please don't hesitate to send us an email.
-						</p>
-						<a href="mailto:hello@inlang.com">
-							<button class="h-10 text-sm text-background px-4 bg-surface-700 w-full rounded-md font-medium">
-								Get in Touch
-							</button>
-						</a>
 					</div>
 				</div>
-				<div class="flex flex-col xl:flex-row justify-between items-end gap-8 pb-16 max-xl:px-10">
+				<div class="px-6 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
 					<div class="xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
-						<Newsletter />
+						<NewsletterForm />
 					</div>
-					<div class="xl:w-1/4 xl:px-10 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
-						<p class="text-surface-700 font-medium">© inlang 2023</p>
+					<div class="xl:w-1/4 xl:px-10 flex items-center justify-between pt-2 max-xl:w-full">
+						<p class="text-surface-700 font-medium w-fit">© inlang 2023</p>
+						<LanguagePicker />
 					</div>
 				</div>
 			</SectionLayout>
 		</footer>
-	)
-}
-
-const Newsletter = () => {
-	const [email, setEmail] = createSignal("")
-	const [loading, setLoading] = createSignal(false)
-
-	const fetchSubscriber = async (email: any) => {
-		setLoading(true)
-		const [response] = await rpc.subscribeNewsletter({ email })
-		if (response === "already subscribed") {
-			showToast({
-				title: "Error",
-				variant: "danger",
-				message: "You are already subscribed to our newsletter.",
-			})
-		} else if (response === "success") {
-			showToast({
-				title: "Success",
-				variant: "success",
-				message: "You have been subscribed to our newsletter.",
-			})
-		} else {
-			showToast({
-				title: "Error",
-				variant: "danger",
-				message: "Something went wrong. Please try again later.",
-			})
-		}
-
-		setLoading(false)
-		setEmail("")
-	}
-
-	function handleSubscribe() {
-		if (loading()) return
-
-		function checkEmail(email: any) {
-			const re = /\S+@\S+\.\S+/
-
-			if (email.trim() === "") {
-				return "empty"
-			} else if (!re.test(email)) {
-				return "invalid"
-			} else {
-				return "valid"
-			}
-		}
-
-		const emailValue = email()
-		if (checkEmail(emailValue) === "empty") {
-			showToast({
-				title: "Error",
-				variant: "danger",
-				message: "Please enter an email address.",
-			})
-			return
-		} else if (checkEmail(emailValue) === "invalid") {
-			showToast({
-				title: "Error",
-				variant: "danger",
-				message: "Please enter a valid email address.",
-			})
-			return
-		}
-
-		fetchSubscriber(emailValue)
-	}
-
-	return (
-		<div class="flex flex-col items-start justify-center w-full mr-10 max-xl:mb-8">
-			<p class="text-surface-800 font-semibold mb-3">Newsletter</p>
-			<div
-				class={
-					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
-					(loading() ? "opacity-70 cursor-not-allowed" : "")
-				}
-			>
-				<sl-input
-					class={"border-none p-0 md:w-[312px] w-full " + (loading() ? "pointer-events-none" : "")}
-					prop:size={"medium"}
-					prop:placeholder="E-Mail"
-					// @ts-ignore
-					value={email()}
-					onInput={(event) => {
-						// @ts-ignore
-						setEmail(event.target.value)
-					}}
-					onPaste={(event) => {
-						// @ts-ignore
-						setEmail(event.target.value)
-					}}
-					// on enter press
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							handleSubscribe()
-						}
-					}}
-				/>
-				<button
-					class={
-						"h-10 text-sm text-background px-4 bg-surface-700 hover:bg-surface-800 max-md:w-full rounded-md font-medium transition-all duration-200 " +
-						(loading() ? "pointer-events-none" : "")
-					}
-					onClick={handleSubscribe}
-				>
-					Subscribe
-				</button>
-			</div>
-		</div>
 	)
 }
 
@@ -479,7 +364,9 @@ function UserDropdown() {
 								alt="user avatar"
 								class="w-6 h-6 rounded-full"
 							/>
-							<IconExpand />
+							<div class="w-5 h-5 opacity-50">
+								<IconExpand />
+							</div>
 						</div>
 						<sl-menu>
 							<div class="px-7 py-2 bg-surface-1 text-on-surface">
@@ -487,7 +374,10 @@ function UserDropdown() {
 								<p class="font-medium">{localStorage.user?.username}</p>
 							</div>
 							<sl-menu-item onClick={handleSignOut}>
-								<IconSignOut slot="prefix" />
+								<IconSignOut
+									// @ts-ignore
+									slot="prefix"
+								/>
 								Sign out
 							</sl-menu-item>
 						</sl-menu>
@@ -495,5 +385,75 @@ function UserDropdown() {
 				</Match>
 			</Switch>
 		</>
+	)
+}
+
+/**
+ * Language picker for the landing page.
+ */
+function LanguagePicker() {
+	const [localeIsLoaded, setLocaleIsLoaded] = createSignal(false)
+	const [, { locale }] = useI18n()
+
+	onMount(() => {
+		setLocaleIsLoaded(true)
+	})
+
+	const languages = [
+		{
+			code: "en",
+			name: "English",
+		},
+		{
+			code: "de",
+			name: "Deutsch",
+		},
+		{
+			code: "zh",
+			name: "中文",
+		},
+	]
+
+	const handleSwitchTranslation = (language: { code: string; name: string }) => {
+		window.history.pushState(
+			{},
+			"",
+			(language.code !== defaultLanguage ? "/" + language.code : "") +
+				extractLocale(currentPageContext.urlParsed.pathname).urlWithoutLocale,
+		)
+		locale(language.code)
+	}
+
+	return (
+		<div class="w-fit">
+			<Show when={localeIsLoaded()}>
+				<sl-dropdown>
+					<div
+						slot="trigger"
+						class="cursor-pointer h-10 flex items-center text-surface-700 font-medium link-primary text-sm"
+					>
+						<p>{locale().toUpperCase()}</p>
+						<IconExpand class="w-5 h-5 opacity-50" />
+					</div>
+					<sl-menu>
+						<For each={languages}>
+							{(language) => (
+								<sl-menu-item
+									prop:type="checkbox"
+									// @ts-ignore
+									checked={locale() === language.code}
+									onClick={() => handleSwitchTranslation(language)}
+								>
+									{language.name}
+									<p class="opacity-50" slot="suffix">
+										{language.code}
+									</p>
+								</sl-menu-item>
+							)}
+						</For>
+					</sl-menu>
+				</sl-dropdown>
+			</Show>
+		</div>
 	)
 }

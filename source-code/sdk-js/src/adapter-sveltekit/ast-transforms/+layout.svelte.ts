@@ -51,18 +51,20 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 	sourceFile.insertStatements(
 		index + 1,
 		dedent`
-		$: if (browser) {
-			addRuntimeToContext(getRuntimeFromData(data))
-			;({ i, language } = getRuntimeFromContext())
-		}
-	`,
+			$: if (browser) {
+				addRuntimeToContext(getRuntimeFromData(data))
+				;({ i, language } = getRuntimeFromContext())
+				document.body.parentElement?.setAttribute('lang', language)
+			}
+		`,
 	)
+
 	sourceFile.insertStatements(
 		index + 1,
 		dedent`
-		addRuntimeToContext(getRuntimeFromData(data))
-		let { i, language } = getRuntimeFromContext()
-	`,
+			addRuntimeToContext(getRuntimeFromData(data))
+			let { i, language } = getRuntimeFromContext()
+		`,
 	)
 
 	return nodeToCode(sourceFile)

@@ -6,29 +6,29 @@
 			"description": {
 				"inlangs": "inlangs",
 				"ecosystem": "Ökosystem",
-				"benefit": "macht die Anpassung deiner Anwendung an verschiedene Märkte einfach."
+				"benefit": "vereinfacht die Anpassung deiner Anwendung an verschiedene Märkte."
 			},
 			"cta": "Loslegen",
-			"githubLink": "Anzeigen auf GitHub",
+			"githubLink": "Auf GitHub anzeigen",
 			"usedBy": "Verwendet von Entwicklern bei"
 		},
 		"integration": {
 			"caption": "Tech-Stack-Agnostik",
-			"title": "Integriert sich in jedes Codeprojekt",
+			"title": "Intergrierbar in jede Codebase",
 			"description": "Inlang ist Technologieunabhängig konzipiert. Entwickler können ihre eigenen Plugins schreiben oder sich auf das Plugin-Ökosystem verlassen, um Inlang an ihren Tech-Stack (React, Flutter, iOS, Python usw.) anzupassen.",
 			"tooltip": "Neues SDK!"
 		},
 		"config": {
 			"editor": {
 				"title": "Web-Editor",
-				"description": "No-Code-Editor zur Verwaltung Ihrer Übersetzungen.",
+				"description": "Editor zur Verwaltung der Übersetzungen.",
 				"benefit1": "Kein Übersetzer muss Code berühren",
 				"benefit2": "Push-Through-Schnittstelle",
 				"benefit3": "Keine Synchronisierungspipelines und zusätzliche Konten"
 			},
 			"extension": {
-				"title": "IDE-Erweiterung",
-				"description": "Behandeln Sie Übersetzungen direkt in VSCode über eine Erweiterung.",
+				"title": "IDE-Extension",
+				"description": "Behandeln Sie Übersetzungen direkt in VSCode über eine Extension.",
 				"benefit1": "Extrahieren Sie Nachrichten aus Code",
 				"benefit2": "Inline-Anmerkungen hinter dem Key",
 				"benefit3": "Automatische Aktualisierung für synchronisierte Ressourcen"
@@ -45,7 +45,7 @@
 				"apps": "Apps",
 				"plugins": "Plugins",
 				"config": "Konfiguration",
-				"endless": ", endlos",
+				"endless": ", endlose",
 				"one": ", eine"
 			}
 		},
@@ -61,18 +61,68 @@
 			"paid": {
 				"name": "bezahlt",
 				"title": "Unternehmen",
-				"amount": "bald"
+				"amount": "in Zukunft"
 			}
 		},
 		"getstarted": {
 			"caption": "Fügen Sie Inlang zu Ihrem Projekt hinzu",
 			"title": "Führen Sie Ihre Software global aus",
-			"description": "Richte Inlang in deinem Codeprojekt ein und beginne mit der Verwendung der IDE-Erweiterung, der CLI und des Web-Editors.",
+			"description": "Richte Inlang in deinem Codeprojekt ein und beginne mit der Verwendung der IDE-Extension, der CLI und des Web-Editors.",
 			"button": "Loslegen",
 			"toast": {
 				"text": "Befehl in die Zwischenablage kopiert",
 				"tooltip": "Kopieren"
 			}
 		}
+	},
+	"header": {
+		"openEditor": "Editor öffnen",
+		"link": {
+			"blog": "Blog",
+			"docs": "Dokumentation",
+			"feedback": "Feedback"
+		}
+	},
+	"footer": {
+		"docs": {
+			"title": "Dokumentation",
+			"gettingStarted": "Loslegen",
+			"whyInlang": "Warum inlang?",
+			"contribute": "Mitwirken"
+		},
+		"resources": {
+			"title": "Ressourcen",
+			"blog": "Blog",
+			"roadmap": "Produktplan",
+			"github": "GitHub",
+			"twitter": "Twitter",
+			"discord": "Discord"
+		},
+		"contact": {
+			"title": "Kontakt",
+			"getInTouch": "In Kontakt treten",
+			"join": "Bewerben",
+			"feedback": "Feedback"
+		}
+	},
+	"newsletter": {
+		"subscribe": {
+			"title": "Bleiben Sie auf dem Laufenden",
+			"description": "Abonnieren Sie unseren Newsletter, um über die neuesten Entwicklungen auf dem Laufenden zu bleiben."
+		},
+		"unsubscribed": {
+			"title": "Abmeldung erfolgreich",
+			"description": "Sie haben sich erfolgreich von unserem Newsletter abgemeldet. Besuchen Sie uns bei Fragen auf"
+		},
+		"title": "Newsletter",
+		"placeholder": "Eingabe der E-Mail ...",
+		"button": "Abschicken",
+		"error": {
+			"invalidEmail": "Bitte geben Sie eine gültige E-Mail Adresse ein.",
+			"emptyEmail": "Bitte geben Sie Ihre E-Mail Adresse ein.",
+			"alreadySubscribed": "Sie haben sich bereits für unseren Newsletter angemeldet.",
+			"generic": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
+		},
+		"success": "Vielen Dank für Ihr Abonnement!"
 	}
 }

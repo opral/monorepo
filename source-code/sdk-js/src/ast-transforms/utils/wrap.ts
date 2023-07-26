@@ -1,17 +1,22 @@
 import {
 	Node,
-	type CallExpression,
+	CallExpression,
 	SyntaxKind,
 	SourceFile,
 	VariableDeclaration,
 	FunctionDeclaration,
 	ExportSpecifier,
+	ArrowFunction,
+	FunctionExpression,
+	ParenthesizedExpression,
+	SatisfiesExpression,
 } from "ts-morph"
 import { codeToNode, nodeToCode } from "./js.util.js"
 import { findOrCreateExport } from "./exports.js"
 import { InlangException } from "../../exceptions.js"
 import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
 import { dedent } from "ts-dedent"
+import { getImportSpecifiersAsStrings } from "./imports.js"
 
 const WRAP_IDENTIFIER = "$$_INLANG_WRAP_$$"
 
@@ -23,7 +28,8 @@ export function wrapWithPlaceholder(node: Node): CallExpression {
 		Node.isFunctionExpression(node) ||
 		Node.isIdentifier(node) ||
 		Node.isCallExpression(node) ||
-		Node.isSatisfiesExpression(node)
+		Node.isSatisfiesExpression(node) ||
+		Node.isParenthesizedExpression(node)
 	) {
 		return node.replaceWithText(`$$_INLANG_WRAP_$$(${nodeToCode(node)})`) as CallExpression
 	}
@@ -110,17 +116,36 @@ const findFunctionExpression = (
 	`)
 }
 
+const findFunction = (node: Node): ArrowFunction | FunctionExpression => {
+	if (ArrowFunction.isArrowFunction(node) || FunctionExpression.isFunctionExpression(node))
+		return node
+
+	if (
+		ParenthesizedExpression.isParenthesizedExpression(node) ||
+		SatisfiesExpression.isSatisfiesExpression(node)
+	) {
+		return findFunction(node.getExpression())
+	}
+
+	if (CallExpression.isCallExpression(node)) {
+		return findFunction(node.getArguments()[0]!)
+	}
+
+	throw new InlangException(`Could not find function for type '${node.getKindName()}'`)
+}
+
 export const wrapExportedFunction = (
 	sourceFile: SourceFile,
 	options: string | undefined,
 	wrapperFunctionName: string,
 	exportName: string,
-	defaultImplementation?: string | undefined,
+	defaultImplementation = "() => { }",
 ) => {
 	const fnExport = findOrCreateExport(sourceFile, exportName, defaultImplementation)
 
 	// if export is a function declaration, convert it to a function expression
 	if (Node.isFunctionDeclaration(fnExport)) {
+		fnExport.toggleModifier("export", false)
 		fnExport.replaceWithText(`export const ${exportName} = ${nodeToCode(fnExport)}`)
 		wrapExportedFunction(sourceFile, options, wrapperFunctionName, exportName)
 		return
@@ -129,6 +154,18 @@ export const wrapExportedFunction = (
 	const fn = findFunctionExpression(fnExport)
 	if (!fn) {
 		throw new InlangSdkException(`Could not find exported function '${exportName}'`)
+	}
+
+	// inject SDK imports as parameters
+	const imports = getImportSpecifiersAsStrings(sourceFile, "@inlang/sdk-js")
+	if (imports.length) {
+		const func = findFunction(fn)
+		if (!func.getParameters().length) {
+			func.insertParameters(0, [{ name: "_" }])
+		}
+
+		// TODO: only add params that get used inside that function
+		func.insertParameters(1, [{ name: `{ ${imports} }` }])
 	}
 
 	const wrapped = wrapWithPlaceholder(fn)

@@ -123,7 +123,7 @@ const ConfigPage = () => {
 				</h2>
 			</div>
 
-			<div class="z-10 relative flex justify-between px-10 pt-10 gap-4 lg:gap-0 flex-col lg:flex-row">
+			<div class="z-10 relative flex justify-between px-6 md:px-10 pt-10 gap-4 lg:gap-0 flex-col lg:flex-row">
 				<For each={getData()}>
 					{(card) => (
 						<a
@@ -151,7 +151,7 @@ const ConfigPage = () => {
 					)}
 				</For>
 			</div>
-			<div class="z-10 relative flex justify-center px-10 gap-10 overflow-hidden transition-all duration-200 transform -scale-y-100">
+			<div class="z-10 relative flex justify-center px-6 md:px-10 gap-10 overflow-hidden transition-all duration-200 transform -scale-y-100">
 				<div id="connector1" class="w-[calc(100%_/_2_-_40px_-_((100%_-_80px)_/_3)_/_2)]">
 					<div class={"translate-x-[" + connectorSizes()[0] + "] -scale-x-100"}>
 						<SVGConnector
@@ -188,7 +188,7 @@ const ConfigPage = () => {
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-col items-center gap-8 px-8 lg:px-0">
+			<div class="flex flex-col items-center gap-8 px-6 md:px-8 lg:px-0">
 				<a
 					href={getLocale() + "/documentation/plugins/registry"}
 					class="relative cursor-pointer group"
@@ -222,7 +222,7 @@ const ConfigPage = () => {
 					/>
 				</a>
 			</div>
-			<div class="z-10 relative flex justify-center px-10 gap-10 overflow-hidden transition-all duration-200">
+			<div class="z-10 relative flex justify-center px-6 md:px-10 gap-10 overflow-hidden transition-all duration-200">
 				<div id="connector4" class="w-[1px]">
 					<div>
 						<SVGConnector
@@ -257,7 +257,7 @@ const ConfigPage = () => {
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-col items-center gap-8 px-8 pb-16 sm:pb-28 lg:px-0">
+			<div class="flex flex-col items-center gap-8 px-6 md:px-10 pb-16 sm:pb-28 lg:px-0">
 				<a
 					href={getLocale() + "/documentation/quick-start"}
 					class="w-full lg:w-fit overflow-x-scroll sm:overflow-x-hidden relative flex flex-col gap-2 bg-gradient-to-b from-inverted-surface to-surface-700 text-on-inverted-surface py-3 rounded-lg shadow-lg group"
