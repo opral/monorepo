@@ -7,8 +7,10 @@ import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
+import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
+import { fileSources } from "../../../../../documentation/tableOfContents.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -21,6 +23,35 @@ export type PageProps = {
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [headings, setHeadings] = createSignal<any[]>([])
+	const [editLink, setEditLink] = createSignal<string | undefined>("")
+
+	createEffect(() => {
+		if (props.markdown && props.markdown.frontmatter) {
+			const markdownHref = props.markdown.frontmatter.href
+
+			const files = fileSources as {
+				[key: string]: string[]
+			}
+
+			for (const section of Object.keys(props.processedTableOfContents)) {
+				const documents = props.processedTableOfContents[section]
+
+				if (documents) {
+					for (const document of documents) {
+						if (document.frontmatter && document.frontmatter.href === markdownHref) {
+							const index = documents.indexOf(document)
+							const fileSource = files[section]?.[index] || undefined
+
+							const gitHubLink =
+								"https://github.com/inlang/inlang/blob/main/documentation" + "/" + fileSource
+
+							setEditLink(gitHubLink)
+						}
+					}
+				}
+			}
+		}
+	})
 
 	createRenderEffect(() => {
 		setHeadings([])
@@ -109,6 +140,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
 						</div>
