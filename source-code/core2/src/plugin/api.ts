@@ -1,5 +1,4 @@
 import type { InlangInstance } from "../app/api.js"
-import type { LanguageTag } from "../languageTag.js"
 import type { LintRule } from "../lint/api.js"
 import type { Message } from "../messages/schema.js"
 import type { TranslatedStrings } from "../types.js"
@@ -24,7 +23,13 @@ export type Plugin<
 	 * Use the setup function to initialize state, handle the options and more.
 	 */
 	setup: (args: { options: PluginOptions; inlang: InlangInstance }) => {
-		extendLanguageTags?: () => LanguageTag[]
+		/**
+		 * Load messages.
+		 *
+		 * - if messages with language tags that are not defined in the config.languageTags
+		 *   are returned, the user config will be automatically updated to include the
+		 *   new language tags.
+		 */
 		loadMessages?: () => Message[]
 		saveMessages?: (args: { messages: Message[] }) => void
 		addLintRules?: () => LintRule[]
