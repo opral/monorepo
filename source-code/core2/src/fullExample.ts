@@ -38,12 +38,10 @@ export const myPlugin: Plugin<{ pathPattern: string }> = {
 		displayName: { en: "My Plugin" },
 		description: { en: "My plugin description" },
 		keywords: [],
+		usedApis: ["addLintRules"],
 	},
 	setup: () => {
 		return {
-			extendLanguageTags: () => {
-				return ["de"]
-			},
 			// OMG really nice API. Just pass an array of lint rule objects <3
 			addLintRules: () => [missingMessage],
 		}
