@@ -24,7 +24,7 @@ async function lintCommandAction() {
 		if (config.lint?.rules === undefined) {
 			log.error(
 				`🚫 For this command to work, you need lint rules configured in your inlang.config.js – for example, the ${bold(
-					"standard-lint-rule",
+					"@inlang/plugin-standard-lint-rule",
 				)} plugin: https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules. ${italic(
 					"Learn more about lints here:",
 				)} https://inlang.com/documentation/lint`,

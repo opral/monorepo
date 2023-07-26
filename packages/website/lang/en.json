@@ -21,7 +21,7 @@
 		"config": {
 			"editor": {
 				"title": "Web Editor",
-				"description": "No-code editor to manage your translations.",
+				"description": "Editor to manage translations.",
 				"benefit1": "No translator needs to touch code",
 				"benefit2": "Push through interface",
 				"benefit3": "No sync pipelines and extra accounts"
@@ -74,5 +74,55 @@
 				"tooltip": "Copy"
 			}
 		}
+	},
+	"header": {
+		"openEditor": "Open Editor",
+		"link": {
+			"blog": "Blog",
+			"docs": "Docs",
+			"feedback": "Feedback"
+		}
+	},
+	"footer": {
+		"docs": {
+			"title": "Docs",
+			"gettingStarted": "Getting Started",
+			"whyInlang": "Why inlang?",
+			"contribute": "Contribute"
+		},
+		"resources": {
+			"title": "Resources",
+			"blog": "Blog",
+			"roadmap": "Roadmap",
+			"github": "GitHub",
+			"twitter": "Twitter",
+			"discord": "Discord"
+		},
+		"contact": {
+			"title": "Let's talk",
+			"getInTouch": "Get in Touch",
+			"join": "Join the Team",
+			"feedback": "Feedback"
+		}
+	},
+	"newsletter": {
+		"subscribe": {
+			"title": "Subscribe to our newsletter",
+			"description": "We'll send you updates about inlang and globalization. You can unsubscribe at any time."
+		},
+		"unsubscribed": {
+			"title": "You're unsubscribed",
+			"description": "We're sad to see you go. If you have any feedback, please let us know on our"
+		},
+		"title": "Newsletter",
+		"placeholder": "Enter your email ...",
+		"button": "Subscribe",
+		"error": {
+			"invalidEmail": "Please enter a valid email address.",
+			"emptyEmail": "Please enter your email address.",
+			"alreadySubscribed": "You are already subscribed to our newsletter.",
+			"generic": "Something went wrong. Please try again later."
+		},
+		"success": "Thank you for subscribing!"
 	}
 }

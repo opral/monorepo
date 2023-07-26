@@ -52,7 +52,7 @@ describe("findExport", () => {
 		const exportNode = findExport(node, "load")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"export function load() { }"')
 	})
 
 	test("should find named exports", () => {
@@ -85,10 +85,10 @@ describe("findOrCreateExport", () => {
 			export function load() {}
 		`)
 
-		const exportNode = findOrCreateExport(node, "load")!
+		const exportNode = findOrCreateExport(node, "load", "() => { }")!
 
 		expect(Node.isFunctionDeclaration(exportNode)).toBe(true)
-		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"function load() { }"')
+		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"export function load() { }"')
 	})
 
 	test("should throw an error if a non-exWported variable with the same name already exists", () => {
@@ -96,13 +96,13 @@ describe("findOrCreateExport", () => {
 			const load = () => { }
 		`)
 
-		expect(() => findOrCreateExport(node, "load")).toThrow()
+		expect(() => findOrCreateExport(node, "load", "() => { }")).toThrow()
 	})
 
 	test("should create an export if export is missing", () => {
 		const node = codeToSourceFile("")
 
-		const exportNode = findOrCreateExport(node, "load")!
+		const exportNode = findOrCreateExport(node, "load", "() => { }")!
 
 		expect(Node.isVariableDeclaration(exportNode)).toBe(true)
 		expect(nodeToCode(exportNode)).toMatchInlineSnapshot('"load = () => { }"')

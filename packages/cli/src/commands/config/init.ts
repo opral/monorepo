@@ -65,7 +65,7 @@ export async function initCommandAction() {
 		// Plugin specific logs
 		if (plugin === "@inlang/sdk-js") {
 			log.warn(
-				"📦 Using plugin: @inlang/sdk-js. You have to add a plugin which reads and writes resources e.g. the inlang-plugin-json. See: https://inlang.com/documentation/plugins/registry",
+				"📦 Using plugin: @inlang/sdk-js. You have to add a plugin which reads and writes resources e.g. the @inlang/plugin-json. See: https://inlang.com/documentation/plugins/registry",
 			)
 		}
 	} else {

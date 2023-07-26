@@ -7,8 +7,10 @@ import { Callout } from "@src/services/markdown/src/tags/Callout.jsx"
 import type SlDetails from "@shoelace-style/shoelace/dist/components/details/details.js"
 import { Meta, Title } from "@solidjs/meta"
 import { Feedback } from "./Feedback.jsx"
+import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
+import { fileSources } from "../../../../../documentation/tableOfContents.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -16,20 +18,54 @@ import { useI18n } from "@solid-primitives/i18n"
 export type PageProps = {
 	processedTableOfContents: ProcessedTableOfContents
 	markdown: Awaited<ReturnType<typeof parseMarkdown>>
-	headings: any[]
 }
 
 export function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
-	const [renderedHeadings, setRenderedHeadings] = createSignal<any[]>([])
+	const [headings, setHeadings] = createSignal<any[]>([])
+	const [editLink, setEditLink] = createSignal<string | undefined>("")
+
+	createEffect(() => {
+		if (props.markdown && props.markdown.frontmatter) {
+			const markdownHref = props.markdown.frontmatter.href
+
+			const files = fileSources as {
+				[key: string]: string[]
+			}
+
+			for (const section of Object.keys(props.processedTableOfContents)) {
+				const documents = props.processedTableOfContents[section]
+
+				if (documents) {
+					for (const document of documents) {
+						if (document.frontmatter && document.frontmatter.href === markdownHref) {
+							const index = documents.indexOf(document)
+							const fileSource = files[section]?.[index] || undefined
+
+							const gitHubLink =
+								"https://github.com/inlang/inlang/blob/main/documentation" + "/" + fileSource
+
+							setEditLink(gitHubLink)
+						}
+					}
+				}
+			}
+		}
+	})
 
 	createRenderEffect(() => {
-		setRenderedHeadings([])
+		setHeadings([])
 
-		if (!props.headings) return
+		if (!props.markdown?.renderableTree) return
 
-		for (const heading of props.headings) {
-			setRenderedHeadings((prev) => [...prev, heading.children[0]])
+		for (const heading of props.markdown.renderableTree.children) {
+			if (heading.name === "Heading") {
+				if (heading.children[0].name) {
+					setHeadings((prev) => [...prev, heading.children[0].children[0]])
+				} else {
+					setHeadings((prev) => [...prev, heading.children[0]])
+				}
+			}
 		}
 	})
 
@@ -54,7 +90,7 @@ export function Page(props: PageProps) {
 							 */}
 							<div class="py-14 pr-8">
 								<Show when={props.processedTableOfContents}>
-									<NavbarCommon {...props} headings={renderedHeadings()} />
+									<NavbarCommon {...props} headings={headings()} />
 								</Show>
 							</div>
 						</nav>
@@ -71,7 +107,7 @@ export function Page(props: PageProps) {
 							<Show when={props.processedTableOfContents}>
 								<NavbarCommon
 									{...props}
-									headings={renderedHeadings()}
+									headings={headings()}
 									onLinkClick={() => {
 										mobileDetailMenu?.hide()
 									}}
@@ -104,6 +140,7 @@ export function Page(props: PageProps) {
 								class="w-full justify-self-center md:col-span-3"
 							>
 								<Markdown renderableTree={props.markdown.renderableTree!} />
+								<EditButton href={editLink()} />
 								<Feedback />
 							</div>
 						</div>
@@ -116,7 +153,7 @@ export function Page(props: PageProps) {
 
 function NavbarCommon(props: {
 	processedTableOfContents: PageProps["processedTableOfContents"]
-	headings: PageProps["headings"]
+	headings: any[]
 	onLinkClick?: () => void
 }) {
 	const [highlightedAnchor, setHighlightedAnchor] = createSignal<string | undefined>("")
@@ -188,7 +225,7 @@ function NavbarCommon(props: {
 														{(heading) =>
 															heading !== undefined &&
 															heading !== document.frontmatter.shortTitle &&
-															props.headings.filter((h) => h === heading).length < 2 && (
+															props.headings.filter((h: any) => h === heading).length < 2 && (
 																<li>
 																	<a
 																		onClick={() => {
@@ -201,13 +238,14 @@ function NavbarCommon(props: {
 																			"text-sm tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
 																			(highlightedAnchor() ===
 																			heading.toString().toLowerCase().replaceAll(" ", "-")
-																				? "font-medium text-info/80 border-l-info/80 "
-																				: "text-info/60 hover:text-info/80 font-normal border-l-info/10 ")
+																				? "font-medium text-on-background border-l-text-on-background "
+																				: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
 																		}
 																		href={`#${heading
 																			.toString()
 																			.toLowerCase()
-																			.replaceAll(" ", "-")}`}
+																			.replaceAll(" ", "-")
+																			.replaceAll("/", "")}`}
 																	>
 																		{heading}
 																	</a>

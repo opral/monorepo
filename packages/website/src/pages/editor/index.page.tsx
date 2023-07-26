@@ -1,14 +1,22 @@
-import { createSignal, Show } from "solid-js"
+import { createSignal } from "solid-js"
 import { Layout as RootLayout } from "../Layout.jsx"
 import { navigate } from "vite-plugin-ssr/client/router"
 import { z } from "zod"
 import { Meta, Title } from "@solidjs/meta"
 import { CommunityProjects } from "../index/CommunityProjects.jsx"
+import { Button } from "../index/components/Button.jsx"
+import { useI18n } from "@solid-primitives/i18n"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 export function Page() {
 	/** is not reactive because window is not reactive */
-	const isMobile = () => window.screen.width < 640
 	const [input, setInput] = createSignal("")
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 	const isValidUrl = () =>
 		z
 			.string()
@@ -32,57 +40,90 @@ export function Page() {
 			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
 			<RootLayout>
 				{/* START search bar */}
-				<div class="flex flex-col items-center justify-center py-24">
+				<div class="flex flex-col items-center justify-center py-16 md:py-20">
 					{/* negative margin as a dirty way of centering the search bar */}
-					<div class="flex p-10 items-center justify-center gap-4">
-						<img src="/favicon/android-chrome-256x256.png" alt="inlang logo" class="w-20 h-20" />
-						<h2 class="text-6xl font-bold">inlang</h2>
+					<div class="flex flex-col p-2 md:p-10 items-center tracking-tight">
+						<h2 class="text-[40px] leading-tight md:text-6xl font-bold pb-6 md:pb-8 text-center">
+							Open the Editor
+						</h2>
+						<p class="text-xl text-surface-600 w-full md:w-[600px] text-center leading-relaxed">
+							To access the editor, you must have the{" "}
+							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
+								inlang.config.js
+							</span>{" "}
+							file in your repository. Use the{" "}
+							<span
+								class="text-hover-primary hover:opacity-70 cursor-pointer"
+								onClick={() => navigate(getLocale() + "/documentation/quick-start")}
+							>
+								inlang CLI
+							</span>{" "}
+							to create this file.
+						</p>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
 					<form
-						class="flex flex-col pb-8 lg:pb-0 gap-4 justify-center items-center w-full"
+						class="relative w-full md:w-[600px] flex items-center group mt-4"
 						onSubmit={(event) => navigateToEditor(event)}
 					>
-						<sl-input
-							class="border-none p-0 w-full max-w-xl"
-							prop:size={isMobile() ? "medium" : "large"}
-							prop:placeholder="Link of a repository on GitHub ..."
-							// when pressing enter
-							on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
-							onInput={(event) => {
-								// @ts-ignore
-								setInput(event.target.value)
-							}}
-							onPaste={(event) => {
-								// @ts-ignore
-								setInput(event.target.value)
-							}}
-						>
-							<Show when={input().length > 10 && isValidUrl() === false}>
-								<p slot="help-text" class="text-danger p-2">
-									The url must be a link to a GitHub repository like
-									https://github.com/inlang/example
-								</p>
-							</Show>
-						</sl-input>
-						<div class="flex gap-2">
-							{/* the button is on the left to resemble a google search */}
-							<sl-button
-								class="w-32"
-								prop:variant={isValidUrl() ? "primary" : "default"}
-								prop:size={isMobile() ? "small" : "medium"}
-								prop:disabled={isValidUrl() === false}
+						<div class="pl-5 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg focus-within:border-primary transition-all ">
+							<input
+								class="active:outline-0 focus:outline-0 h-14 grow placeholder:text-surface-500 placeholder:font-normal placeholder:text-base"
+								placeholder="Enter repository url ..."
+								onInput={(event) => {
+									// @ts-ignore
+									setInput(event.target.value)
+								}}
+								onPaste={(event) => {
+									// @ts-ignore
+									setInput(event.target.value)
+								}}
+								on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
+							/>
+							<button
+								disabled={isValidUrl() === false}
 								onClick={(event) => navigateToEditor(event)}
+								class={
+									(isValidUrl()
+										? "bg-surface-800 text-background hover:bg-on-background"
+										: "bg-background text-surface-600 border") +
+									" flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
+								}
 							>
 								Open
-							</sl-button>
-							<a href="/documentation">
-								<sl-button prop:variant="text" prop:size={isMobile() ? "small" : "medium"}>
-									How to get started?
-								</sl-button>
-							</a>
+							</button>
 						</div>
+						<div
+							style={{
+								background:
+									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+								transition: "all .3s ease-in-out",
+							}}
+							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-3xl group-hover:opacity-50 group-focus-within:opacity-50"
+						/>
+						<div
+							style={{
+								background:
+									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+								transition: "all .3s ease-in-out",
+							}}
+							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-5 blur-xl group-hover:opacity-15 group-focus-within:opacity-15"
+						/>
+						<div
+							style={{
+								background:
+									"linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
+								transition: "all .3s ease-in-out",
+							}}
+							class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
+						/>
 					</form>
+
+					<div class="pt-3">
+						<Button type="text" href="/documentation">
+							How to get started?
+						</Button>
+					</div>
 				</div>
 				{/* END search bar */}
 				<CommunityProjects />

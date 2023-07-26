@@ -31,7 +31,6 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 	for (const declaration of exportFunctionDeclarations) {
 		const nameNode = declaration.getNameNode()
 		if (nameNode && nameNode.getText() === name) {
-			declaration.toggleModifier("export", false)
 			return declaration
 		}
 	}
@@ -53,7 +52,7 @@ export const findExport = (sourceFile: SourceFile, name: string) => {
 export const findOrCreateExport = (
 	sourceFile: SourceFile,
 	name: string,
-	defaultImplementation = "() => { }",
+	defaultImplementation: string,
 ) => {
 	const fnExport = findExport(sourceFile, name)
 	if (fnExport) return fnExport

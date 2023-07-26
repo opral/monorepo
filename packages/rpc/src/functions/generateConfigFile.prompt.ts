@@ -20,11 +20,11 @@ export function prompt(filePaths: string[]): string {
 
   Only reply with the code. Don't wrap the code in \`\`\`. Don't write explanations.
 
-  ## Available plugins 
+  ## Available plugins
 
-  ### samuelstroschein/inlang-plugin-json 
+  ### samuelstroschein/@inlang/plugin-json
 
-  url: "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
+  url: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js"
 
   type PluginSettings = {
     pathPattern: string;
@@ -39,20 +39,20 @@ export function prompt(filePaths: string[]): string {
 
   ## Examples
 
-  ### Example 1 
+  ### Example 1
 
   This example works well for repositories that use the json format for their translation files.
-  
+
 	\`\`\`
   export async function defineConfig(env) {
     // import plugins via the following links and replace {owner}, {repo} and {version}
     const { default: jsonPlugin } = await env.$import(
-      "https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@2/dist/index.js"
+      "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js"
     );
 
     // always include the standard lint rules plugin
     const { default: standardLintRules } = await env.$import(
-      "https://cdn.jsdelivr.net/gh/inlang/standard-lint-rules@2/dist/index.js"
+      "https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js"
     );
 
     return {
@@ -65,6 +65,6 @@ export function prompt(filePaths: string[]): string {
       ]
     };
   }
-  \`\`\`  
+  \`\`\`
 `
 }

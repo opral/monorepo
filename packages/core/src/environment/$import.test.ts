@@ -12,7 +12,7 @@ describe("$import", async () => {
 		export function hello() {
 			return "hello";
 		}
-		`
+		`,
 	)
 
 	// mock module in a directory
@@ -23,7 +23,7 @@ describe("$import", async () => {
 		export function hello() {
 			return "world";
 		}
-		`
+		`,
 	)
 
 	const $import = initialize$import({

@@ -39,8 +39,8 @@ const Integration = () => {
 							<InlangWordIcon />
 						</div>
 						<div class="relative z-10 w-24 h-24 flex justify-center items-center bg-surface-1 rounded-full border border-surface-2">
-							<div class="rounded bg-surface-800 absolute mb-36 text-background px-2 py-1 text-sm ">
-								{t("landing.integration.tooltip")}
+							<div class="rounded bg-surface-800 absolute mb-36 text-background px-2 py-1 -mx-2 text-sm flex flex-col items-center">
+								<p class="text-center mx-auto">{t("landing.integration.tooltip")}</p>
 								<svg
 									width={14}
 									height={7}
