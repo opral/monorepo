@@ -1,7 +1,8 @@
 import { createInlang } from "./app/createInlang.js"
 import type { InlangConfig } from "./config/schema.js"
 import type { MessageLintRule } from "./lint/api.js"
-import type { Plugin_Proposal_2 } from "./plugin/api.js"
+import { createVariant } from "./messages/utilities.js"
+import type { Plugin } from "./plugin/api.js"
 
 // --------------------- LINT RULE ---------------------
 
@@ -13,16 +14,16 @@ const missingMessage: MessageLintRule = {
 	},
 	defaultLevel: "error",
 	message: ({ message, inlang, report }) => {
-		for (const languageTag of inlang.config.languageTags) {
+		for (const languageTag of inlang.config.get().languageTags) {
 			const translation = message.body[languageTag]
 			if (!translation) {
 				report({
 					languageTag,
 					messageId: message.id,
 					body: {
-						'en':`Message "${message.id}" is missing in language tag "${languageTag}".`,
-						'de':`Nachricht "${message.id}" fehlt für Sprachtag "${languageTag}".`,
-					}
+						en: `Message "${message.id}" is missing in language tag "${languageTag}".`,
+						de: `Nachricht "${message.id}" fehlt für Sprachtag "${languageTag}".`,
+					},
 				})
 			}
 		}
@@ -31,10 +32,12 @@ const missingMessage: MessageLintRule = {
 
 // --------------------- PLUGIN ---------------------
 
-export const myPlugin: Plugin_Proposal_2<{ pathPattern: string }> = {
+export const myPlugin: Plugin<{ pathPattern: string }> = {
 	meta: {
 		id: "inlang.myPlugin",
-		displayName: "My Plugin",
+		displayName: { en: "My Plugin" },
+		description: { en: "My plugin description" },
+		keywords: [],
 	},
 	setup: () => {
 		return {
@@ -74,42 +77,40 @@ const inlang = createInlang({
 })
 
 // --- CRUD ---
-inlang.messages.query.create({
+inlang.query.messages.create({
 	data: {
 		id: "myMessageId",
+		expressions: [],
+		selectors: [],
 		body: {
-			en: { pattern: { type: "Pattern", elements: [{ type: "Text", value: "Hello World" }] } },
+			en: [{ match: {}, pattern: [{ type: "Text", value: "Hello World" }] }],
 		},
 	},
 })
 
 // assuming that get is reactive
-const message = inlang.messages.query.get({ where: { id: "myMessageId" } })!
+const message = inlang.query.messages.get({ where: { id: "myMessageId" } })!
 
-message.body["en-US"] = {
-	pattern: {
-		type: "Pattern",
-		elements: [
-			{
-				type: "Text",
-				value: "Hello World",
-			},
-		],
-	},
-}
-
-inlang.messages.query.update({
-	where: { id: "myMessageId" },
-	data: message,
+//add variant to existing message
+const updatedMessage = createVariant(message, {
+	languageTag: "en-US",
+	data: { match: {}, pattern: [{ type: "Text", value: "Hello World" }] },
 })
 
-inlang.messages.query.delete({ where: { id: "myMessageId" } })
+inlang.query.messages.update({
+	where: { id: "myMessageId" },
+	data: updatedMessage,
+})
+
+inlang.query.messages.delete({ where: { id: "myMessageId" } })
 
 // --- CONFIG ACCESS ---
 
-inlang.config.sourceLanguageTag
-inlang.config.languageTags
+const config = inlang.config.get()
+
+config.sourceLanguageTag
+config.languageTags
 
 // --- LINT ---
-inlang.lint.reports.filter((report) => report.level === "error")
-inlang.lint.exceptions
+inlang.lint.reports().filter((report) => report.level === "error")
+inlang.lint.exceptions()

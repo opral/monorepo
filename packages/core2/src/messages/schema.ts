@@ -2,12 +2,15 @@ import type { LanguageTag } from "../languageTag.js"
 
 export type Message = {
 	id: string
-	body: Record<LanguageTag, MessageBody>
+	expressions: Expression[]
+	selectors: Expression[]
+	body: Record<LanguageTag, Variant[]>
 }
 
-type MessageBody = {
+export type Variant = {
+	// a match can always only be string-based because a string is what is rendered to the UI
+	match: Record<string, string>
 	pattern: Pattern
-	// variants: Array<Variant>
 }
 
 // ------ Pattern AST Nodes ------
@@ -18,20 +21,15 @@ type MessageBody = {
 /**
  * A pattern is a sequence of translatable elements.
  */
-// A pattern can contain nested patterns in the future (pluralization).
-// Hence, a pattern is a node on its own.
-export type Pattern = {
-	type: "Pattern"
-	elements: Array<Text | Placeholder>
-}
+export type Pattern = Array<Text | Expression>
 
 export type Text = {
 	type: "Text"
 	value: string
 }
 
-export type Placeholder = {
-	type: "Placeholder"
+export type Expression = {
+	type: "Expression"
 	// only variable reference for now, but will be extended in the future
 	body: VariableReference
 }
@@ -40,3 +38,10 @@ export type VariableReference = {
 	type: "VariableReference"
 	name: string
 }
+
+// export type FunctionReference = {
+// 	type: "function"
+// 	name: string
+// 	operand?: Text | VariableReference
+// 	options?: Option[]
+// }

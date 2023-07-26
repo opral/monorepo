@@ -58,7 +58,7 @@ export const examplePlugin: Plugin<PluginOptions> = {
 				return ["en-US"]
 			},
 			loadMessages: () => {
-				for (const languageTag of inlang.config.languageTags) {
+				for (const languageTag of inlang.config.get().languageTags) {
 					console.log(languageTag + options.pathPattern)
 				}
 				return []
