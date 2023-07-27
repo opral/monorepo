@@ -1,11 +1,12 @@
 // workaround for https://github.com/inlang/inlang/issues/1091
 import type * as Ast from "@inlang/core/ast"
-import { setContext } from "svelte"
 import { get } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
-import { inlangSymbol } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../index.js"
-import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
+import {
+	getRuntimeFromContext as getRuntimeFromContextShared,
+	addRuntimeToContext as addRuntimeToContextShared,
+} from "../shared/context.js"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
 import { goto } from "$app/navigation"
@@ -39,8 +40,8 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 		return goto(get(page).url, { invalidateAll: true })
 	}
 
-	setContext(inlangSymbol, {
-		language,
+	addRuntimeToContextShared<RuntimeContext>({
+		language: language!, // TODO: check
 		referenceLanguage,
 		languages,
 		i,

@@ -1,8 +1,8 @@
 import type { SourceFile } from "ts-morph"
-import { isSdkImportPresent } from "./utils/imports.js"
+import { isSdkImportPresent } from "./imports.js"
 import { dedent } from "ts-dedent"
-import { InlangSdkException } from "../adapter-sveltekit/vite-plugin/exceptions.js"
-import type { FileType } from "../adapter-sveltekit/vite-plugin/fileInformation.js"
+import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
+import type { FileType } from "../../adapter-sveltekit/vite-plugin/fileInformation.js"
 
 // TODO: test
 export const assertNoImportsFromSdkJs = (
