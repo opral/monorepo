@@ -8,4 +8,4 @@ import { z } from "zod"
  */
 export type TranslatedStrings = Record<LanguageTag, string> & { en: string }
 
-export const TranslatedStrings = z.record(z.string()).refine((record) => "en" in record)
+export const TranslatedStrings = z.union([z.object({ en: z.string() }), z.record(z.string())])
