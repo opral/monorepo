@@ -1,14 +1,14 @@
 import type { InlangConfig } from "@inlang/config"
 import type { LintException, LintReport } from "../lint/api.js"
-import type { MessageQueryApi } from "../messages/query.js"
-import type { InlangInstanceEnv } from "./env/types.js"
+import type { MessageQueryApi } from "../message/query.js"
+import type { InlangInstanceEnvironment } from "./environment/api.js"
 
 export type InlangInstance = {
 	config: {
 		get: () => InlangConfig
 		set: (config: InlangConfig) => void
 	}
-	env: InlangInstanceEnv
+	env: InlangInstanceEnvironment
 	query: {
 		messages: MessageQueryApi
 	}
