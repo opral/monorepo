@@ -14,12 +14,14 @@
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
 		"_build": "node ./build.js",
+		"---- TEST ----------------------------------------------------------": "",
 		"test": "vitest run",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/core": "*",
+		"@inlang/lint-api": "*",
+		"@inlang/plugin-api": "*",
 		"concurrently": "^8.0.1",
 		"esbuild": "^0.17.19",
 		"tsd": "^0.28.1",
