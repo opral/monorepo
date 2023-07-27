@@ -1,0 +1,80 @@
+{
+	"name": "@inlang/core",
+	"type": "module",
+	"version": "0.9.2",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		"./ast": "./dist/ast/index.js",
+		"./config": "./dist/config/index.js",
+		"./environment": "./dist/environment/index.js",
+		"./languageTag": "./dist/languageTag/index.js",
+		"./lint": "./dist/lint/index.js",
+		"./query": "./dist/query/index.js",
+		"./test": "./dist/test/index.js",
+		"./utilities": "./dist/utilities/index.js",
+		"./plugin": "./dist/plugin/index.js"
+	},
+	"typesVersions": {
+		"*": {
+			"ast": [
+				"./dist/ast/index.d.ts"
+			],
+			"config": [
+				"./dist/config/index.d.ts"
+			],
+			"environment": [
+				"./dist/environment/index.d.ts"
+			],
+			"lint": [
+				"./dist/lint/index.d.ts"
+			],
+			"query": [
+				"./dist/query/index.d.ts"
+			],
+			"test": [
+				"./dist/test/index.d.ts"
+			],
+			"utilities": [
+				"./dist/utilities/index.d.ts"
+			],
+			"plugin": [
+				"./dist/plugin/index.d.ts"
+			]
+		}
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest watch --passWithNoTests --coverage",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
+	"dependencies": {
+		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+		"@inlang-git/fs": "^0.0.4",
+		"deepmerge-ts": "^5.1.0",
+		"ts-dedent": "^2.2.0",
+		"zod": "^3.21.4"
+	},
+	"devDependencies": {
+		"esbuild": "^0.17.14",
+		"tsd": "^0.25.0"
+	},
+	"license": "Apache-2.0"
+}
