@@ -28,7 +28,7 @@
 	"scripts": {
 		"dev": "npm-run-all --print-label --parallel dev:watch tsc:watch",
 		"dev:watch": "DEV=true node ./build.js",
-		"build": "node ./build.js && tsc -p tsconfig.build.json",
+		"_build": "node ./build.js && tsc -p tsconfig.build.json",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit --emitDeclarationOnly false && vitest run --passWithNoTests --coverage",
 		"test:watch": "npm-run-all --print-label --parallel tsc:watch vitest:watch tsc:watch:plugin",

@@ -7,7 +7,7 @@
 		"./markdown": "./src/services/markdown/index.js"
 	},
 	"scripts": {
-		"build": "vite build",
+		"_build": "vite build",
 		"---- TEST ----------------------------------------------------------": "",
 		"_COMMENT": "TESTS ARE NOT WORKING BECAUSE 'window is not defined'. not important for now.",
 		"_test": "vitest run --coverage",

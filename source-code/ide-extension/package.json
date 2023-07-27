@@ -58,7 +58,7 @@
 		}
 	},
 	"scripts": {
-		"build": "node ./build.js",
+		"_build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "npx @vscode/vsce package",
 		"---- TEST ----------------------------------------------------------": "",

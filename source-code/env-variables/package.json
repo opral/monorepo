@@ -11,7 +11,7 @@
 	],
 	"scripts": {
 		"- CAREFUL build can have caching issues. Resolve the issue by running npm run clean in the root of the repo": "",
-		"build": "tsx ./build.ts",
+		"_build": "tsx ./build.ts",
 		"dev": "DEV=true npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
