@@ -35,4 +35,15 @@ describe("transformJs", () => {
 		`)
 	})
 
+	test("should throw an error if SDK import get's used outside of a function scope", () => {
+		expect(() => transformJs(
+			"/test.js",
+			initTransformConfig(),
+			dedent`
+				import { i } from '@inlang/sdk-js'
+
+				i()
+			`,
+		)).toThrow()
+	})
 })
