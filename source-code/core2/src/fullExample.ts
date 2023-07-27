@@ -71,7 +71,7 @@ const exampleInlangConfig: InlangConfig = {
 //    - env needs be created
 const inlang = createInlang({
 	configPath: "/hello/inlang.config.json",
-	env: { fs: undefined as any, import: undefined as any },
+	env: { $fs: undefined as any, $import: undefined as any },
 })
 
 // --- CRUD ---
