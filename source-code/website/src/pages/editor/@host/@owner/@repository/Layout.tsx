@@ -112,7 +112,7 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
-	const addLanguage = (language: Language) => {
+	const addLanguage = async (language: Language) => {
 		if (languages().includes(language)) {
 			showToast({
 				variant: "warning",
@@ -121,9 +121,7 @@ export function Layout(props: { children: JSXElement }) {
 			})
 			return
 		}
-		setLanguages([...languages(), language])
-		setFilteredLanguages([...filteredLanguages(), language])
-		setResources([
+		await setResources([
 			...resources,
 			{
 				type: "Resource",
@@ -134,6 +132,8 @@ export function Layout(props: { children: JSXElement }) {
 				body: [],
 			},
 		])
+		setLanguages([...languages(), language])
+		setFilteredLanguages([...filteredLanguages(), language])
 	}
 
 	const isAddingResourcePossible = () => {
