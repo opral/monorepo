@@ -151,7 +151,7 @@ If you want to use an import from the SDK inside a file where you have opted out
 </h2>
 ```
 
-### `*.js` (server)
+### `*.js` (called from server)
 
 You need to pass the `i` function to the function you want to call it from.
 
@@ -177,7 +177,7 @@ And then call it from somewhere like this:
 </svelte:head>
 ```
 
-### `*.js` (client)
+### `*.js` (called from client)
 
 If you create a function that only runs on the client, you don't need to pass the `i` function. Instead you can do the following:
 
@@ -188,6 +188,8 @@ const getPageTitle = (page: string) => {
 	return getRuntimeFromGlobalThis().i(`title.${page}`)
 }
 ```
+
+> Note: you can only do that inside a function and not on the top level of a file.
 
 ### `+layout.server.js`
 
