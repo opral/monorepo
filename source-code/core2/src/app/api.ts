@@ -1,4 +1,4 @@
-import type { InlangConfig } from "../config/schema.js"
+import type { InlangConfig } from "@inlang/config"
 import type { LintException, LintReport } from "../lint/api.js"
 import type { MessageQueryApi } from "../messages/query.js"
 import type { InlangInstanceEnv } from "./env/types.js"
