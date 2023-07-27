@@ -1,7 +1,7 @@
 import { createInlang } from "./app/createInlang.js"
 import type { InlangConfig } from "@inlang/config"
 import type { MessageLintRule } from "./lint/api.js"
-import { createVariant } from "./messages/utilities.js"
+import { createVariant } from "./message/utilities.js"
 import type { Plugin } from "./plugin/api.js"
 
 // --------------------- LINT RULE ---------------------

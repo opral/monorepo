@@ -1,7 +1,6 @@
 import type { InlangInstance } from "../app/api.js"
-import type { LanguageTag } from "../languageTag.js"
-import type { Message } from "../messages/schema.js"
-import type { TranslatedStrings } from "../types.js"
+import type { Message } from "../message/schema.js"
+import type { LanguageTag, TranslatedStrings } from "../types.js"
 
 export type LintRule = {
 	id: `${string}.${string}`
