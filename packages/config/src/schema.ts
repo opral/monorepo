@@ -6,7 +6,9 @@ const PluginSchema = z.object({
 })
 
 export const InlangConfigSchema = z.object({
+	// TODO validate valid language tag
 	sourceLanguageTag: z.string(),
+	// TODO validate valid language tags
 	languageTags: z.array(z.string()),
 	plugins: z.array(PluginSchema),
 	lint: z.object({
