@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest"
-import { initialize$import } from "./$import.js"
+import { create$import } from "./$import.js"
 import { createMemoryFs } from "@inlang-git/fs"
 
 describe("$import", async () => {
@@ -12,7 +12,7 @@ describe("$import", async () => {
 		export function hello() {
 			return "hello";
 		}
-		`
+		`,
 	)
 
 	// mock module in a directory
@@ -23,10 +23,10 @@ describe("$import", async () => {
 		export function hello() {
 			return "world";
 		}
-		`
+		`,
 	)
 
-	const $import = initialize$import({
+	const $import = create$import({
 		// @ts-ignore
 		fs,
 		fetch,

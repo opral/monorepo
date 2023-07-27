@@ -1,20 +1,18 @@
-/* eslint-disable no-restricted-imports */
-import { createQuery, type MessageQueryApi } from "./query.js"
-import { it, describe } from "node:test"
-import assert from "node:assert/strict"
-import type { Message, Text } from "./schema.js"
+import { createQuery } from "./query.js"
+import { it, describe, expect } from "vitest"
+import type { Message } from "./schema.js"
 
 describe("create", () => {
 	const query = createQuery([])
 
 	it("should return an object, not an array", () => {
-		assert.equal(query.get({ where: { id: "first-message" } }), undefined)
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
 		const mockMessage = createMessage({ id: "first-message", text: "Hello World" })
 
 		const message = query.create({ data: mockMessage })
 
-		assert.equal(message, mockMessage)
+		expect(message).toEqual(mockMessage)
 	})
 })
 
@@ -24,7 +22,7 @@ describe("get", () => {
 	it("should return undefined if a message does not exist", () => {
 		const message = query.get({ where: { id: "none-existent-message" } })
 
-		assert.equal(typeof message, "object")
+		expect(typeof message).toBe("object")
 	})
 
 	// we assume that each message has a unique id
@@ -34,7 +32,7 @@ describe("get", () => {
 
 		const message = query.get({ where: { id: "first-message" } })
 
-		assert.equal(typeof message, "object")
+		expect(typeof message).toBe("object")
 	})
 })
 
@@ -47,7 +45,7 @@ describe("update", () => {
 		message!.body!.en!.pattern!.elements[0]!.value = "Hello World 2"
 
 		const updatedMessage = query.update({ where: { id: "first-message" }, data: message! })
-		assert.equal(updatedMessage, message)
+		expect(updatedMessage).toEqual(message)
 	})
 
 	it("should update a message without modifying the internal object", () => {
@@ -56,7 +54,7 @@ describe("update", () => {
 		message!.body!.en!.pattern!.elements[0]!.value = "Hello World 2"
 
 		const message2 = query.get({ where: { id: "first-message" } })
-		assert.notEqual(message, message2)
+		expect(message).not.toEqual(message2)
 	})
 })
 
@@ -65,13 +63,15 @@ describe("update", () => {
 function createMessage(args: { id: string; text: string }): Message {
 	return {
 		id: args.id,
+		expressions: [],
+		selectors: [],
 		body: {
-			en: {
-				pattern: {
-					type: "Pattern",
-					elements: [{ type: "Text", value: args.text }],
+			en: [
+				{
+					match: {},
+					pattern: [{ type: "Text", value: args.text }],
 				},
-			},
+			],
 		},
 	}
 }
