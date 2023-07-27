@@ -1,8 +1,6 @@
-import { expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
-import type { InlangEnvironment } from "@inlang/environment"
 import type { InlangConfig } from "@inlang/config"
-import { describe } from "node:test"
 import {
 	PluginImportError,
 	PluginIncorrectlyDefinedUsedApisError,
@@ -10,23 +8,43 @@ import {
 	PluginUsesReservedNamespaceError,
 	PluginUsesUnavailableApiError,
 } from "./errors.js"
+import { createMemoryFs } from "@inlang-git/fs"
+import type { InlangEnvironment } from "@inlang/environment"
+import type { PluginApi } from "./api.js"
 
-const mockEnv = {} as InlangEnvironment
-const mockConfig = {} as InlangConfig
-const mockArgs = { env: mockEnv, config: mockConfig }
+const mockConfig: InlangConfig = {
+	sourceLanguageTag: "en",
+	languageTags: ["en", "de"],
+	plugins: [
+		{
+			options: {
+				tagMatchers: "{{}}",
+			},
+			module: "https://myplugin.com/index.js",
+		},
+	],
+	lint: {
+		rules: {},
+	},
+}
+
+const mockArgs = { config: mockConfig, env: {} as any }
 
 describe("generally", () => {
-	it("should resolve a remote plugin", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-	})
-
-	it("should resolve a local plugin", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-	})
-
 	// namespace is required, only kebap-case allowed
 	it("should return errors if plugins use invalid ids", async () => {
-		const resolved = await resolvePlugins(mockArgs)
+		const env = mockEnvWithPlugin({
+			meta: {
+				// @ts-expect-error the id is invalid
+				id: "no-namespace",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: [],
+			},
+			setup: () => undefined as any,
+		})
+		const resolved = await resolvePlugins({ env, config: mockConfig })
 		expect(resolved.errors.length).length(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
 	})
@@ -95,3 +113,14 @@ describe("addAppSpecificApi", () => {
 		const resolved = await resolvePlugins(mockArgs)
 	})
 })
+
+// ---------------
+
+function mockEnvWithPlugin(plugin: PluginApi): InlangEnvironment {
+	return {
+		$fs: () => undefined,
+		$import: () => {
+			return { default: plugin }
+		},
+	} as unknown as InlangEnvironment
+}
