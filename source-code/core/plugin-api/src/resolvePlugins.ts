@@ -5,8 +5,11 @@ import {
 	PluginApiAlreadyDefinedError,
 	PluginError,
 	PluginImportError,
+	PluginInvalidIdError,
 	PluginUsesReservedNamespaceError,
 } from "./errors.js"
+import { tryCatch } from "@inlang/result"
+import { z } from "zod"
 
 /**
  * Plugin ids that should be excluded by namespace reserving.
@@ -40,9 +43,28 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			 * -------------- BEGIN SETUP --------------
 			 */
 
-			const module = await args.env.$import(pluginInConfig.module)
-			console.log("module", module.default.meta)
-			const plugin = PluginApi.parse(module.default)
+			const module = await tryCatch(() => args.env.$import(pluginInConfig.module))
+
+			if (module.error) {
+				throw new PluginImportError(`Couldn't import the plugin "${pluginInConfig.module}"`, {
+					module: pluginInConfig.module,
+					cause: module.error as Error,
+				})
+			}
+
+			const parsed = tryCatch(() => PluginApi.parse(module.data.default))
+
+			if (parsed.error) {
+				throw new PluginInvalidIdError(
+					`The id of the plugin '${module.data.default.meta.id}' is invalid. The plugin id must be in the format "namespace.my-plugin". Hence, lowercase with a namespaces and dashes for separation.`,
+					{
+						module: pluginInConfig.module,
+						cause: parsed.error,
+					},
+				)
+			}
+
+			const plugin = parsed.data!
 			const api = plugin.setup({ config: args.config, options: pluginInConfig.options })
 			const lintRules = api.addLintRules?.() ?? []
 			const appSpecificApi = api.addAppSpecificApi?.() ?? {}
@@ -92,19 +114,16 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			 */
 			if (e instanceof PluginError) {
 				result.errors.push(e)
-			} else if (e instanceof $ImportError) {
+			} else if (e instanceof Error) {
+				result.errors.push(new PluginError(e.message, { module: pluginInConfig.module, cause: e }))
+			} else {
 				result.errors.push(
-					new PluginImportError(`Couldn't import the module "${pluginInConfig.module}"`, {
+					new PluginError("Unhandled and unknown error", {
 						module: pluginInConfig.module,
 						cause: e,
 					}),
 				)
-			} else if (e instanceof Error) {
-				result.errors.push(new PluginError(e.message, { module: pluginInConfig.module, cause: e }))
 			}
-			result.errors.push(
-				new PluginError("Unhandled and unknown error", { module: pluginInConfig.module, cause: e }),
-			)
 			continue
 		}
 	}

@@ -111,9 +111,13 @@ export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 
 export const PluginApi = z.object({
 	meta: z.object({
-		id: z.custom<PluginApi["meta"]["id"]>((value) =>
-			/^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value as string),
-		),
+		id: z
+			.custom<PluginApi["meta"]["id"]>((value) =>
+				/^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value as string),
+			)
+			.describe(
+				'The plugin id must be in the format "namespace.my-plugin". Hence, lowercase with a namespaces and dashes for separation.',
+			),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
