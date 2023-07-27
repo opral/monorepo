@@ -30,7 +30,7 @@ export type LintReport = {
 }
 
 export type MessageLintReport = LintReport & {
-	type: "Message"
+	type: "MessageLint"
 	messageId: Message["id"]
 	languageTag: LanguageTag
 }
