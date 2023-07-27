@@ -31,6 +31,7 @@
 	},
 	"dependencies": {
 		"@inlang/environment": "*",
+		"@inlang/result": "*",
 		"@inlang/messages": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/lint-api": "*",

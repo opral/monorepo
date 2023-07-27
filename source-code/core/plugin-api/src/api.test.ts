@@ -58,11 +58,11 @@ expectType<PluginApi<PluginOptions, AppSpecificApis>>(plugin1)
 
 const resolvePlugins: ResolvePlugins = {} as any
 
-const resolvedWithoutAppSpecific = await resolvePlugins({} as any)
+const { data: resolvedWithoutAppSpecific, errors } = await resolvePlugins({} as any)
 
 expectType<{}>(resolvedWithoutAppSpecific.appSpecificApi)
 
-const resolvedWithApps = await resolvePlugins<AppSpecificApis>({} as any)
+const { data: resolvedWithApps, errors: error2 } = await resolvePlugins<AppSpecificApis>({} as any)
 
 expectType<AppSpecificApi1>(resolvedWithApps.appSpecificApi["inlang.ide-extension"])
 expectType<AppSpecificApi2>(resolvedWithApps.appSpecificApi["inlang.cli"])
