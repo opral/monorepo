@@ -1,5 +1,4 @@
-import type { LanguageTag } from "@inlang/core/ast"
-import { createLintRule } from "@inlang/core/lint"
+import type { MessageLintRule } from '@inlang/lint-api'
 
 /**
  * Checks for missing messages (translations).
@@ -8,40 +7,49 @@ import { createLintRule } from "@inlang/core/lint"
  * in a target resource, it is likely that the message has not
  * been translated yet.
  */
-export const missingMessage = createLintRule({
-	id: "inlang.missingMessage",
-	setup: ({ report }) => {
-		let targetMessageLanguage: LanguageTag["name"] | undefined
-		return {
-			visitors: {
-				Resource: ({ target }) => {
-					// we need to derive the target language from the resource
-					// because the message is missing.
-					targetMessageLanguage = target?.languageTag.name
-				},
-				Message: ({ target, reference }) => {
-					if (target === undefined && reference) {
-						report({
-							node: reference,
-							message: `Message with id '${reference.id.name}' is missing for '${targetMessageLanguage}'.`,
-						})
-					} else if (target?.pattern.elements.length === 0) {
-						report({
-							node: target,
-							message: `Empty pattern (length 0).`,
-						})
-					} else if (
-						target?.pattern.elements.length === 1 &&
-						target.pattern.elements[0].type === "Text" &&
-						target.pattern.elements[0].value === ""
-					) {
-						report({
-							node: target,
-							message: `The pattern contains only only one element which is an empty string.`,
-						})
+export const missingMessage = () => ({
+	id: 'inlang.missingMessage',
+	displayName: {
+		en: 'Missing Message'
+	},
+	defaultLevel: 'warn', // TODO: how to override level?
+	message: ({ message: { id, body }, config, report }) => {
+		const languageTags = config.languageTags.filter(languageTag => languageTag !== config.sourceLanguageTag)
+		for (const languageTag of languageTags) {
+			const variants = body[languageTag] || []
+			if (!variants.length) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Message with id '${id}' is missing for '${languageTag}'.`, // TODO: simplify message as information is redundant
 					}
-				},
-			},
+				})
+				return
+			}
+
+			const patterns = variants.flatMap(({ pattern }) => pattern)
+			if (patterns.length) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `Empty pattern (length 0).`,
+					}
+				})
+			} else if (
+				patterns.length === 1 &&
+				patterns[0]!.type === "Text" &&
+				patterns[0]!.value === ""
+			) {
+				report({
+					messageId: id,
+					languageTag,
+					body: {
+						en: `The pattern contains only only one element which is an empty string.`,
+					}
+				})
+			}
 		}
 	},
-})
+}) satisfies MessageLintRule
