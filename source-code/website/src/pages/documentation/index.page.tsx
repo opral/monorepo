@@ -10,7 +10,7 @@ import { Feedback } from "./Feedback.jsx"
 import { EditButton } from "./EditButton.jsx"
 import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 import { useI18n } from "@solid-primitives/i18n"
-import { fileSources } from "../../../../../documentation/tableOfContents.js"
+import { tableOfContents } from "../../../../../documentation/tableOfContents.js"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -29,8 +29,10 @@ export function Page(props: PageProps) {
 		if (props.markdown && props.markdown.frontmatter) {
 			const markdownHref = props.markdown.frontmatter.href
 
-			const files = fileSources as {
-				[key: string]: string[]
+			const files: Record<string, string[]> = {}
+			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
+				const rawPaths = documentsArray.map((document) => document.raw)
+				files[category] = rawPaths
 			}
 
 			for (const section of Object.keys(props.processedTableOfContents)) {
