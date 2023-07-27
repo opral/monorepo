@@ -17,6 +17,7 @@
 import type { $fs } from "./$fs.js"
 import { dedent } from "ts-dedent"
 import { normalizePath } from "@inlang-git/fs"
+import { $ImportError } from "./errors.js"
 
 export type $import = (uri: string) => Promise<any>
 
@@ -35,18 +36,6 @@ export function create$import(args: {
 }): (uri: string) => ReturnType<typeof $import> {
 	// resembles a native import api
 	return (uri: string) => $import(uri, args)
-}
-
-/**
- * Error thrown when the $import function fails.
- *
- * Dedicated class to make it easier to identify this error.
- */
-class $ImportError extends Error {
-	constructor(message: string) {
-		super(message)
-		this.name = "$ImportError"
-	}
 }
 
 /**
