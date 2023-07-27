@@ -1,7 +1,9 @@
+import type { InlangConfig } from "@inlang/config"
 import type { InlangInstance } from "../app/api.js"
 import type { LintRule } from "../lint/api.js"
 import type { Message } from "../message/schema.js"
-import type { TranslatedStrings } from "../types.js"
+import { TranslatedStrings } from "../types.js"
+import { z } from "zod"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>>,
@@ -22,7 +24,7 @@ export type Plugin<
 		 * If the plugin uses an API that is not listed here, the plugin will not be loaded.
 		 * Mainly used for the plugin marketplace.
 		 */
-		usedApis: ("loadMessages" | "saveMessages" | "addLintRules")[]
+		usedApis: z.infer<typeof Plugin>["meta"]["usedApis"]
 	}>
 	/**
 	 * The setup function is the first function that is called when inlang loads the plugin.
@@ -42,3 +44,29 @@ export type Plugin<
 		addLintRules?: () => LintRule[]
 	}
 }
+
+export const Plugin = z.object({
+	meta: z.object({
+		id: z.string(),
+		displayName: TranslatedStrings,
+		description: TranslatedStrings,
+		keywords: z.array(z.string()),
+		usedApis: z.array(
+			z.union([z.literal("loadMessages"), z.literal("saveMessages"), z.literal("addLintRules")]),
+		),
+	}),
+	setup: z
+		.function()
+		.args(z.object({ options: z.record(z.string()), inlang: z.any() }))
+		.returns(
+			z.object({
+				loadMessages: z.function().returns(z.array(z.any())).optional(),
+				saveMessages: z
+					.function()
+					.args(z.object({ messages: z.array(z.any()) }))
+					.returns(z.void())
+					.optional(),
+				addLintRules: z.function().returns(z.array(z.any())).optional(),
+			}),
+		),
+})
