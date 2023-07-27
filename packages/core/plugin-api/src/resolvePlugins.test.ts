@@ -45,13 +45,22 @@ describe("generally", () => {
 			setup: () => undefined as any,
 		})
 		const resolved = await resolvePlugins({ env, config: mockConfig })
-		expect(resolved.errors.length).length(1)
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
 	})
 
 	it("should return an error if a plugin cannot be imported", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-		expect(resolved.errors.length).length(1)
+		const resolved = await resolvePlugins({
+			env: {
+				$fs: {} as any,
+				$import: () => {
+					throw Error("Could not import")
+				},
+			},
+			config: mockConfig,
+		})
+
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginImportError)
 	})
 
