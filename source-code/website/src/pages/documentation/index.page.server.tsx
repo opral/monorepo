@@ -56,9 +56,9 @@ export const onBeforeRender: OnBeforeRender<PageProps> = async (pageContext) => 
 async function generateIndexAndTableOfContents() {
 	for (const [category, documents] of Object.entries(tableOfContents)) {
 		const frontmatters: { frontmatter: any }[] = []
-		for (const document of documents.import) {
+		for (const document of documents) {
 			const markdown = parseMarkdown({
-				text: document,
+				text: document.import,
 				FrontmatterSchema,
 			})
 			// not pushing to processedTableOfContents directly in case
