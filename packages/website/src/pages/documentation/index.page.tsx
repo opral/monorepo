@@ -30,8 +30,9 @@ export function Page(props: PageProps) {
 			const markdownHref = props.markdown.frontmatter.href
 
 			const files: Record<string, string[]> = {}
-			for (const [category, documents] of Object.entries(tableOfContents)) {
-				files[category] = documents.raw
+			for (const [category, documentsArray] of Object.entries(tableOfContents)) {
+				const rawPaths = documentsArray.map((document) => document.raw)
+				files[category] = rawPaths
 			}
 
 			for (const section of Object.keys(props.processedTableOfContents)) {
