@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createSignal, createEffect } from "solid-js"
+import { For, Show, createRenderEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
@@ -176,7 +176,7 @@ function NavbarCommon(props: {
 		setHighlightedAnchor(anchor)
 	}
 
-	createEffect(() => {
+	onMount(() => {
 		if (
 			currentPageContext.urlParsed.hash &&
 			props.headings
@@ -186,6 +186,19 @@ function NavbarCommon(props: {
 				.includes(currentPageContext.urlParsed.hash.replace("#", ""))
 		) {
 			setHighlightedAnchor(currentPageContext.urlParsed.hash.replace("#", ""))
+
+			const targetElement = document.getElementById(
+				currentPageContext.urlParsed.hash.replace("#", ""),
+			)
+
+			checkLoadedImgs(() => {
+				const elementRect = targetElement!.getBoundingClientRect()
+				const offsetPosition = elementRect.top - 96 // The offset because of the fixed navbar
+
+				window.scrollBy({
+					top: offsetPosition,
+				})
+			})
 		}
 	})
 
@@ -264,4 +277,30 @@ function NavbarCommon(props: {
 			</For>
 		</ul>
 	)
+}
+
+function checkLoadedImgs(anchorScroll: () => void) {
+	let imgElementsLoaded = 0
+	const imgElements = document.querySelectorAll("img")
+	const imgElementsLength = imgElements.length
+
+	if (imgElementsLength === 0) {
+		anchorScroll()
+	} else {
+		for (const img of imgElements) {
+			if (img.complete) {
+				imgElementsLoaded++
+				if (imgElementsLoaded === imgElementsLength) {
+					anchorScroll()
+				}
+			} else {
+				img.addEventListener("load", () => {
+					imgElementsLoaded++
+					if (imgElementsLoaded === imgElementsLength) {
+						anchorScroll()
+					}
+				})
+			}
+		}
+	}
 }
