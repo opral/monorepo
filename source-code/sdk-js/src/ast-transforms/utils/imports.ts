@@ -106,6 +106,18 @@ export const getImportSpecifiers = (importDeclaration: ImportDeclaration) =>
 
 // ------------------------------------------------------------------------------------------------
 
+export const getImportSpecifiersAsStrings = (sourceFile: SourceFile, path: string) => {
+	const importDeclarations = findImportDeclarations(sourceFile, path)
+	const importSpecifiers = []
+	for (const importDeclaration of importDeclarations) {
+		importSpecifiers.push(...getImportSpecifiers(importDeclaration))
+	}
+
+	return importSpecifiers.map((importSpecifier) => importSpecifier.getText().replace("as", ":"))
+}
+
+// ------------------------------------------------------------------------------------------------
+
 export const isOptOutImportPresent = (sourceFile: SourceFile) =>
 	!!findImportDeclarations(sourceFile, "@inlang/sdk-js/no-transforms").length
 

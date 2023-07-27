@@ -1,8 +1,8 @@
 import type { SourceFile } from "ts-morph"
-import { isSdkImportPresent } from "./utils/imports.js"
+import { isSdkImportPresent } from "./imports.js"
 import { dedent } from "ts-dedent"
-import { InlangSdkException } from "../adapter-sveltekit/vite-plugin/exceptions.js"
-import type { FileType } from "../adapter-sveltekit/vite-plugin/fileInformation.js"
+import { InlangSdkException } from "../../adapter-sveltekit/vite-plugin/exceptions.js"
+import type { FileType } from "../../adapter-sveltekit/vite-plugin/fileInformation.js"
 
 // TODO: test
 export const assertNoImportsFromSdkJs = (
@@ -35,13 +35,6 @@ const getSection = (type: FileType, root: boolean) => {
 	}
 
 	switch (type) {
-		case "hooks.server.js":
-		case "+server.js":
-		case "+layout.server.js":
-		case "+layout.js":
-		case "+page.server.js":
-		case "+page.js":
-			return `#${type}`
 		case "*.server.js":
 		case "*.js":
 			return "#*.js"
@@ -50,6 +43,12 @@ const getSection = (type: FileType, root: boolean) => {
 		case "*.svelte":
 			return "#*.svelte"
 		case "[language].json":
+		case "+layout.server.js":
+		case "+layout.js":
+		case "hooks.server.js":
+		case "+server.js":
+		case "+page.server.js":
+		case "+page.js":
 			return ""
 		default:
 			return unreachable(type)

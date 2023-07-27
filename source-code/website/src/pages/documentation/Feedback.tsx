@@ -23,7 +23,7 @@ export function Feedback() {
 	})
 
 	return (
-		<div class="relative flex justify-center items-center pt-2 pb-10 sm:pt-10 sm:pb-20">
+		<div class="relative flex justify-center items-center pt-2 pb-8 sm:pt-10 sm:pb-8">
 			<div class="flex border border-surface-1 py-1 px-3 rounded-full items-center">
 				<p class="text-sm text-info pr-2">Was this helpful?</p>
 				<For each={feedbackEmojis}>

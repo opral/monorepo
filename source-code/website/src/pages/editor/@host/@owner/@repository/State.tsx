@@ -842,7 +842,7 @@ async function readResources(config: InlangConfig) {
 
 	const [lintedResources] = await lint({ config, resources })
 	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
-	// console.log(allLints)
+	// console.info(allLints)
 	return lintedResources
 }
 

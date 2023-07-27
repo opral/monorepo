@@ -1,11 +1,13 @@
-import { inlangSymbol, replaceLanguageInUrl } from "../../shared/utils.js"
+import { replaceLanguageInUrl } from "../../shared/utils.js"
 import type { SvelteKitClientRuntime } from "../runtime.js"
 import { goto } from "$app/navigation"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import { setContext } from "svelte"
 import type * as Runtime from "../../../../runtime/index.js"
-import { getRuntimeFromContext as getRuntimeFromContextShared } from "../shared/context.js"
+import {
+	getRuntimeFromContext as getRuntimeFromContextShared,
+	addRuntimeToContext as addRuntimeToContextShared,
+} from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
 import type { LanguageTag } from '@inlang/core/languageTag'
 import { logDeprecation } from '../../../../utils.js'

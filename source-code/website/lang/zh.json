@@ -1,0 +1,128 @@
+{
+	"landing": {
+		"hero": {
+			"keyword": "全球通用的",
+			"title": "软件基础设施",
+			"cta": "开始使用",
+			"description": {
+				"inlangs": "inlang的",
+				"ecosystem": "生态系统",
+				"benefit": "使您的应用程序能够轻松适应不同的市场。"
+			},
+			"githubLink": "在GitHub上浏览",
+			"usedBy": "我们的用户"
+		},
+		"integration": {
+			"caption": "不受技术栈限制",
+			"title": "可融入到任何代码库中",
+			"description": "Inlang的设计旨在不受任何技术栈的限制。这意味着开发人员可以编写自己的插件，或者依赖插件的生态系统，使Inlang轻松地与不同的技术栈集成（React、Flutter、iOS、Python 等）。",
+			"tooltip": "全新软件开发套件（SDK）！"
+		},
+		"config": {
+			"editor": {
+				"title": "网页编辑器",
+				"description": "使用无代码编辑器来处理您的翻译流程。",
+				"benefit1": "翻译人员无需接触代码",
+				"benefit2": "通过界面进行推送",
+				"benefit3": "不需要同步管道或使用额外帐户"
+			},
+			"extension": {
+				"title": "集成开发环境（IDE）扩展",
+				"description": "通过扩展直接实现在VSCode中处理翻译。",
+				"benefit1": "从代码中提取消息",
+				"benefit2": "在键后添加内联注释",
+				"benefit3": "自动更新同步资源"
+			},
+			"cli": {
+				"title": "Inlang命令行界面（CLI）",
+				"description": "用于与inlang基础设施交互的命令行界面（CLI）。",
+				"benefit1": "自动执行本地化任务 (CI/CD)",
+				"benefit2": "检查您的翻译",
+				"benefit3": "机器翻译您的资源"
+			},
+			"title": {
+				"multiple": "多种",
+				"apps": "应用",
+				"plugins": "插件",
+				"config": "配置",
+				"endless": "，无尽",
+				"one": "， 同一"
+			}
+		},
+		"pricing": {
+			"title": "个人使用免费且开源",
+			"caption": "价格",
+			"description": "尽管Inlang是一款商业产品，个人使用和开源版本仍然是免费的。我们视个人使用为一种有益的“市场营销”方式来吸引企业客户。",
+			"free": {
+				"name": "免费",
+				"title": "个人用户和开源",
+				"amount": "$0"
+			},
+			"paid": {
+				"name": "付费",
+				"title": "企业用户",
+				"amount": "即将推出"
+			}
+		},
+		"getstarted": {
+			"caption": "将inlang添加到您的项目中",
+			"title": "让您的软件全球通用",
+			"description": "在您的代码库中设置并安装inlang, 并开始使用IDE扩展、命令行界面（CLI）和网页编辑器。",
+			"button": "开始使用",
+			"toast": {
+				"text": "已将命令复制到剪贴板",
+				"tooltip": "复制"
+			}
+		}
+	},
+	"header": {
+		"openEditor": "打开编辑器",
+		"link": {
+			"blog": "博客",
+			"docs": "文档",
+			"feedback": "反馈"
+		}
+	},
+	"footer": {
+		"docs": {
+			"title": "文档",
+			"gettingStarted": "使用入门指南",
+			"whyInlang": "为什么是inlang？",
+			"contribute": "贡献指南"
+		},
+		"resources": {
+			"title": "资源",
+			"blog": "博客",
+			"roadmap": "发展计划",
+			"github": "GitHub",
+			"twitter": "推特",
+			"discord": "Discord"
+		},
+		"contact": {
+			"title": "联系",
+			"getInTouch": "联系我们",
+			"join": "加入团队",
+			"feedback": "反馈"
+		}
+	},
+	"newsletter": {
+		"subscribe": {
+			"title": "订阅我们的通讯",
+			"description": "我们将向您发送有关 inlang 和全球化的最新信息。您可以随时取消订阅。"
+		},
+		"unsubscribed": {
+			"title": "您已退订",
+			"description": "我们很舍不得你离开。如果您有任何反馈意见，请在我们的"
+		},
+		"title": "订阅邮件",
+		"placeholder": "输入您的电子邮箱 ...",
+		"button": "订阅",
+		"error": {
+			"invalidEmail": "请输入有效的电子邮件地址。",
+			"emptyEmail": "请输入您的电子邮件地址。",
+			"alreadySubscribed": "您已经订阅了我们的通讯。",
+			"generic": "出了点问题，请稍后再试。"
+		},
+		"success": "感谢您的订阅！"
+	}
+}

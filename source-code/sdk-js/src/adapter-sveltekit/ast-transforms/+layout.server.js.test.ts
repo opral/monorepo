@@ -44,18 +44,27 @@ describe("transformLayoutServerJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	describe("'@inlang/sdk-js' imports", () => {
-		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
-			const code = "import { i } from '@inlang/sdk-js'"
-			const config = initTransformConfig()
-			expect(() => transformLayoutServerJs("", config, code, true)).toThrow()
-		})
+	test("should transform '@inlang/sdk-js' imports correctly", () => {
+		const transformed = transformLayoutServerJs(
+			"",
+			initTransformConfig(),
+			dedent`
+				import { language } from '@inlang/sdk-js'
+				import type { LayoutServerLoad } from '@sveltejs/kit'
 
-		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code =
-				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
-			const config = initTransformConfig()
-			expect(() => transformLayoutServerJs("", config, code, true)).not.toThrow()
-		})
+				export const load: LayoutServerLoad = (async (() => {
+					return { language }
+				}))
+			`,
+			false,
+		)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			import type { LayoutServerLoad } from '@sveltejs/kit';
+			export const load: LayoutServerLoad = initServerLoadWrapper().use((async((_, { language }) => {
+			    return { language };
+			})));"
+		`)
 	})
 })

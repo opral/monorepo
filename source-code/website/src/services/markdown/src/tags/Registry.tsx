@@ -85,6 +85,8 @@ const Search = (props: SearchInputProps) => {
 	)
 }
 
+import { markdownToTxt } from "markdown-to-txt"
+
 const Description = (props: { repository: string }) => {
 	const [description, setDescription] = createSignal<undefined | string>(undefined)
 
@@ -94,7 +96,16 @@ const Description = (props: { repository: string }) => {
 				const pattern = /(?<=\n\n|^)(?![###|####])((?!\n\n).)+/g
 				const paragraphs = data.match(pattern)
 				if (paragraphs?.length !== 0 && paragraphs !== null) {
-					setDescription(paragraphs[0].slice(0, 80) + "...")
+					const REGEX_STARTS_WITH_CHARACTER = /^\w+/
+
+					const description = markdownToTxt(
+						(paragraphs.find((p) => REGEX_STARTS_WITH_CHARACTER.test(p)) || "").replace(
+							/\.\\/g,
+							".",
+						),
+					)
+
+					setDescription(description.length < 80 ? description : description.slice(0, 80) + "...")
 				}
 			}
 		})

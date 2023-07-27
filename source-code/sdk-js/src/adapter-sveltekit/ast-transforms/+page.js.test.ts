@@ -15,8 +15,7 @@ describe("transformPageJs", () => {
 					const transformed = transformPageJs("", config, code, true)
 
 					expect(transformed).toMatchInlineSnapshot(`
-						"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-						import { initRootPageLoadWrapper, replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
+						"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 						import { browser } from '$app/environment';
 						export const load = initRootPageLoadWrapper({
 						    browser
@@ -58,8 +57,7 @@ describe("transformPageJs", () => {
 			const transformed = transformPageJs("", config, code, true)
 
 			expect(transformed).toMatchInlineSnapshot(`
-				"import { initLocalStorageDetector, navigatorDetector } from '@inlang/sdk-js/detectors/client';
-				import { initRootPageLoadWrapper, replaceLanguageInUrl } from '@inlang/sdk-js/adapter-sveltekit/shared';
+				"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
 				import { browser } from '$app/environment';
 				export const load = initRootPageLoadWrapper({
 				    browser
@@ -84,18 +82,28 @@ describe("transformPageJs", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	describe("'@inlang/sdk-js' imports", () => {
-		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
-			const code = "import { i } from '@inlang/sdk-js'"
-			const config = initTransformConfig()
-			expect(() => transformPageJs("", config, code, true)).toThrow()
-		})
+	test("should transform '@inlang/sdk-js' imports correctly", () => {
+		const transformed = transformPageJs(
+			"",
+			initTransformConfig(),
+			dedent`
+				import { languages } from '@inlang/sdk-js'
 
-		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code =
-				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
-			const config = initTransformConfig()
-			expect(() => transformPageJs("", config, code, true)).not.toThrow()
-		})
+				export const load = async (() => {
+					return { languages }
+				})
+			`,
+			true,
+		)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { initRootPageLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/shared';
+			import { browser } from '$app/environment';
+			export const load = initRootPageLoadWrapper({
+			    browser
+			}).use(async((_, { languages }) => {
+			    return { languages };
+			}));"
+		`)
 	})
 })

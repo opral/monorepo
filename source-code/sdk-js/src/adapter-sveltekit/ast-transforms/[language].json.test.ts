@@ -104,18 +104,29 @@ describe("transformLanguageJson", () => {
 		expect(transformed).toEqual(code)
 	})
 
-	describe("'@inlang/sdk-js' imports", () => {
-		test("should throw an error if an import from '@inlang/sdk-js' gets detected", () => {
-			const code = "import { i } from '@inlang/sdk-js'"
-			const config = initTransformConfig()
-			expect(() => transformLanguageJson("", config, code)).toThrow()
-		})
+	test("should transform '@inlang/sdk-js' imports correctly", () => {
+		const transformed = transformLanguageJson(
+			"",
+			initTransformConfig(),
+			dedent`
+				import { languages } from '@inlang/sdk-js'
 
-		test("should not thorw an error if an import from a suppath of '@inlang/sdk-js' gets detected", () => {
-			const code =
-				"import { initServerLoadWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';"
-			const config = initTransformConfig()
-			expect(() => transformLanguageJson("", config, code)).not.toThrow()
-		})
+				export async function POST() {
+					return { languages }
+				}
+			`,
+		)
+
+		expect(transformed).toMatchInlineSnapshot(`
+			"import { json } from '@sveltejs/kit';
+			import { getResource, reloadResources, initRequestHandlerWrapper } from '@inlang/sdk-js/adapter-sveltekit/server';
+			export const GET = initRequestHandlerWrapper().use(async ({ params: { language } }, { languages }) => {
+			    await reloadResources();
+			    return json(getResource(language) || null);
+			});
+			export const POST = initRequestHandlerWrapper().use(async function POST(_, { languages }) {
+			    return { languages };
+			});"
+		`)
 	})
 })

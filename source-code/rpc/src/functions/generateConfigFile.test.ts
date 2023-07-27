@@ -19,7 +19,7 @@ describe.skip("generating config files", () => {
 			})
 			if (exception) {
 				console.error(exception)
-				console.log(file)
+				console.error(file)
 			}
 			expect(exception).toBeUndefined()
 		},
@@ -44,7 +44,7 @@ describe.skip("generating config files", () => {
 			})
 			if (exception) {
 				console.error(exception)
-				console.log(file)
+				console.error(file)
 			}
 			expect(exception).toBeUndefined()
 		},

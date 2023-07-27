@@ -1,4 +1,12 @@
-import { Accessor, Component, createEffect, ErrorBoundary, onMount } from "solid-js"
+import {
+	Accessor,
+	Component,
+	createEffect,
+	createSignal,
+	ErrorBoundary,
+	onMount,
+	Show,
+} from "solid-js"
 import type { PageContextRenderer } from "./types.js"
 import { Dynamic } from "solid-js/web"
 import { LocalStorageProvider } from "@src/services/local-storage/index.js"
@@ -43,11 +51,19 @@ function RootWithProviders(props: {
 	locale: string
 }) {
 	const [, { locale }] = useI18n()
+	const [isLoaded, setIsLoaded] = createSignal(false)
 
 	onMount(() => {
 		locale(props.locale)
+		setIsLoaded(true)
 	})
-	return <Dynamic component={props.page} {...props.pageProps} />
+
+	return (
+		// <div>Hallo Welt</div>
+		<Show when={isLoaded()}>
+			<Dynamic component={props.page} {...props.pageProps} />
+		</Show>
+	)
 }
 
 function ErrorMessage(props: { error: Error }) {

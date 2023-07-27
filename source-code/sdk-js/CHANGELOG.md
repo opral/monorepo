@@ -1,5 +1,34 @@
 # @inlang/sdk-js
 
+## 0.11.0
+
+### Minor Changes
+
+- 7fb3e322: support for `.js` files called from `.svelte` components on the client
+
+### Patch Changes
+
+- 348eeb8c: allow to debug the applied transformations of a single file
+
+## 0.10.1
+
+### Patch Changes
+
+- 7cf3e86b: don't minify plugin bundle
+- cd4754e1: don't throw error on first start of the application
+
+## 0.10.0
+
+### Minor Changes
+
+- 3b811085: support `@inlang/sdk-js` imports in `+*.js` files
+
+## 0.9.2
+
+### Patch Changes
+
+- c9d41796: correctly set `html` `lang` attribute when changing language
+
 ## 0.9.1
 
 ### Patch Changes
