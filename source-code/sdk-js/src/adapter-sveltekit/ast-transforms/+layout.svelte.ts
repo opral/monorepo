@@ -49,6 +49,7 @@ const transformScript = (filePath: string, config: TransformConfig, code: string
 
 	const index = addDataExportIfMissingAndReturnInsertionIndex(sourceFile)
 
+	// TODO: add `addRuntimeToGlobalThis` code only if needed
 	sourceFile.insertStatements(
 		index + 1,
 		dedent`

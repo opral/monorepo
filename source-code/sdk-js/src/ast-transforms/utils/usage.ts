@@ -15,9 +15,9 @@ const isIdentifierComingFromAnImport = (identifier: Identifier, path: string) =>
 			nodes = [...nodes, ...currentNode.getPreviousSiblings(), ...currentNode.getNextSiblings()]
 		}
 
-		const x = nodes.map((node => checkIfImport(node, path, identifierName)))
-		if (x.includes(false)) return false
-		if (x.includes(true)) return true
+		const checkedNodes = nodes.map((node => checkIfImportStatementReached(node, path, identifierName)))
+		if (checkedNodes.includes(false)) return false
+		if (checkedNodes.includes(true)) return true
 
 		currentNode = currentNode.getParent()
 	}
@@ -25,8 +25,8 @@ const isIdentifierComingFromAnImport = (identifier: Identifier, path: string) =>
 	return false
 }
 
-const checkIfImport = (node: Node, path: string, identifierName: string) => {
-	if (shouldAbort(node, identifierName)) return false
+const checkIfImportStatementReached = (node: Node, path: string, identifierName: string) => {
+	if (shouldAbortProcessing(node, identifierName)) return false
 
 	if (
 		Node.isImportDeclaration(node)
@@ -40,7 +40,7 @@ const checkIfImport = (node: Node, path: string, identifierName: string) => {
 	return undefined
 }
 
-const shouldAbort = (node: Node, identifierName: string) => {
+const shouldAbortProcessing = (node: Node, identifierName: string) => {
 	if (Node.isVariableStatement(node) && node.getDeclarations().some(declaration => declaration.getName() === identifierName)) {
 		return true
 	}

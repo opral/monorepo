@@ -43,10 +43,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 			import { i } from '@inlang/sdk-js'
 
 			for (const i of [1, 2, 3]) {
-				console.log(i)
+				console.info(i)
 			}
 
-			const x = () => console.log(i('test'))
+			const x = () => console.info(i('test'))
 		`
 		const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
 		expect(identifiers).toHaveLength(1)
@@ -85,7 +85,7 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 				import { i } from '@inlang/sdk-js'
 
 				for (const i of [1, 2, 3]) {
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
@@ -97,7 +97,7 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 				import { i } from '@inlang/sdk-js'
 
 				for (const i in { a: 1, b: 2, c: 3 }) {
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
@@ -109,7 +109,7 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 				import { i } from '@inlang/sdk-js'
 
 				for (let i; i < 3; i++) {
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
@@ -123,7 +123,7 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 
 				const x = () => {
 					let i = 1
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
@@ -136,7 +136,7 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 
 				{
 					let i = 1
-					console.log(i)
+					console.info(i)
 				}
 			`
 			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')

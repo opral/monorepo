@@ -5,7 +5,7 @@ import { dedent } from 'ts-dedent'
 
 describe("transformJs", () => {
 	test("should not do anything if no SDK import is found", () => {
-		const code = "export const GET = () => new Repsonse('hi')"
+		const code = "export const fn = () => 'hi'"
 		const config = initTransformConfig()
 		const transformed = transformJs("", config, code)
 		expect(transformed).toEqual(code)
@@ -25,13 +25,13 @@ describe("transformJs", () => {
 			dedent`
 				import { i } from '@inlang/sdk-js'
 
-				export const test = () => console.log(i('hi'))
+				export const test = () => console.info(i('hi'))
 			`,
 		)
 
 		expect(transformed).toMatchInlineSnapshot(`
 			"import { getRuntimeFromGlobalThis } from '@inlang/sdk-js/adapter-sveltekit/client/shared';
-			export const test = () => console.log(getRuntimeFromGlobalThis().i('hi'));"
+			export const test = () => console.info(getRuntimeFromGlobalThis().i('hi'));"
 		`)
 	})
 
