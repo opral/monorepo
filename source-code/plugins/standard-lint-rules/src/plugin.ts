@@ -13,7 +13,7 @@ type StandardLintRulePluginOptions = Partial<Record<keyof typeof rules, "off" | 
  *  plugins: [
  *    standardLintRules({
  *      identicalPattern: "warn",
- *      messageWithoutReference: "error",
+ *      messageWithoutSource: "error",
  *      missingMessage: "off",
  *    })
  *  ]
@@ -34,7 +34,7 @@ export const standardLintRules = {
 		return {
 			addLintRules: () => [
 				withDefaultLevel("identicalPattern", "warn", options),
-				withDefaultLevel("messageWithoutReference", "error", options),
+				withDefaultLevel("messageWithoutSource", "error", options),
 				withDefaultLevel("missingMessage", "error", options),
 			]
 		}
