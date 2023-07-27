@@ -33,6 +33,7 @@ export function createQuery(messages: Array<Message>): MessageQueryApi {
 				return index.set(where.id, data)
 			}
 			index.set(where.id, { ...message, ...data })
+			return
 		},
 		delete: ({ where }) => {
 			index.delete(where.id)
