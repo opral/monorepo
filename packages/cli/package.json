@@ -40,7 +40,7 @@
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "NODE_ENV=production node ./build.js",
+		"_build": "NODE_ENV=production node ./build.js",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"test:watch": "vitest watch --passWithNoTests --coverage --test-timeout=10000",

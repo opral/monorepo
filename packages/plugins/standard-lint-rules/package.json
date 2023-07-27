@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
-		"build": "node ./build.js",
+		"_build": "node ./build.js",
 		"test": "vitest run",
 		"---- OTHER ---------------------------------------------------------": "",
 		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"

@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"dev": "DEV=true node ./build.js",
-		"build": "node ./build.js && size-limit",
+		"_build": "node ./build.js && size-limit",
 		"--- Pretest is required to build the plugin before testing. ---": "",
 		"pretest": "node ./build.js",
 		"test": "vitest run --coverage",
