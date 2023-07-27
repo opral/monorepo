@@ -86,9 +86,9 @@ export const plugin = () => {
 				throw new InlangTransformException(filePath, error as Error)
 			}
 
-			if (config.debug) {
+			if (config.debug || includesDebugImport(code)) {
 				console.info(dedent`
-					-- INLANG DEBUG START-----------------------------------------------------------
+					-- INLANG DEBUG START ----------------------------------------------------------
 
 					transformed file '${filePath}' (${fileInformation.type})
 
@@ -108,6 +108,10 @@ export const plugin = () => {
 		},
 	} satisfies Plugin
 }
+
+const REGEX_DEBUG_IMPORT = /import\s+["']@inlang\/sdk-js\/debug["']/
+
+const includesDebugImport = (code: string) => REGEX_DEBUG_IMPORT.test(code)
 
 export class InlangTransformException extends InlangSdkException {
 	constructor(path: string, override readonly cause: Error) {

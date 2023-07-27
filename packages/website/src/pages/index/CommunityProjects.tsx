@@ -2,27 +2,49 @@ import { For, Show } from "solid-js"
 import { repositories } from "./repositories.js"
 import MaterialSymbolsArrowOutward from "~icons/material-symbols/arrow-outward"
 import { useLocalStorage } from "@src/services/local-storage/index.js"
+import { useI18n } from "@solid-primitives/i18n"
+import { defaultLanguage } from "@src/renderer/_default.page.route.js"
 
 export function CommunityProjects() {
 	const [store] = useLocalStorage()
+	const [, { locale }] = useI18n()
+
+	const getLocale = () => {
+		const language = locale() || defaultLanguage
+		return language !== defaultLanguage ? "/" + language : ""
+	}
 
 	return (
 		<div class="pb-16">
 			{/* Recent projects */}
 			<Show when={store?.recentProjects.length > 0}>
-				<div class="w-full flex justify-between items-end pb-6">
-					<h2 class="text-2xl font-medium text-slate-900">Recent projects</h2>
+				<div class="w-full flex flex-col md:flex-row justify-between items-end pb-6">
+					<div class="flex flex-col gap-2 grow">
+						<h2 class="text-2xl font-medium text-slate-900">Recent</h2>
+						<p class="text-md font-regular text-outline-variant">
+							Projects that you recently opened with the editor.
+						</p>
+					</div>
+					<a href={getLocale() + "/documentation"} class="w-full md:w-auto">
+						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
+							Get started
+							<MaterialSymbolsArrowOutward
+								// @ts-ignore
+								slot="suffix"
+							/>
+						</sl-button>
+					</a>
 				</div>
-				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min pb-12">
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4 w-full auto-rows-min pb-24">
 					<For each={store.recentProjects}>
 						{(recentProject) => <RepositoryCard repository={recentProject} />}
 					</For>
 				</div>
 			</Show>
 			{/* START repository grid */}
-			<div class="w-full flex justify-between items-end pb-6">
+			<div class="w-full flex flex-col md:flex-row justify-between items-end pb-6">
 				<div class="flex flex-col gap-2 grow">
-					<h2 class="text-2xl font-medium text-slate-900">Projects that use inlang</h2>
+					<h2 class="text-2xl font-medium text-slate-900">Community</h2>
 					<p class="text-md font-regular text-outline-variant">
 						Explore projects in the inlang community or contribute translations.
 					</p>
@@ -30,14 +52,14 @@ export function CommunityProjects() {
 				<a
 					href="https://github.com/inlang/inlang/tree/main/source-code/website/src/pages/index/repositories.ts"
 					target="_blank"
+					class="w-full md:w-auto"
 				>
-					<sl-button
-						prop:variant="default"
-						prop:size="medium"
-						onClick={(event) => console.log(event)}
-					>
+					<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 						Add your repository
-						<MaterialSymbolsArrowOutward slot="suffix" />
+						<MaterialSymbolsArrowOutward
+							// @ts-ignore
+							slot="suffix"
+						/>
 					</sl-button>
 				</a>
 			</div>

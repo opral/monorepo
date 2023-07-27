@@ -1,33 +1,36 @@
-import { assertNoImportsFromSdkJs } from "../../ast-transforms/assertions.js"
-import { isOptOutImportPresent } from "../../ast-transforms/utils/imports.js"
-import { codeToSourceFile } from "../../ast-transforms/utils/js.util.js"
+import { findExport } from "../../ast-transforms/utils/exports.js"
+import {
+	addImport,
+	isOptOutImportPresent,
+	isSdkImportPresent,
+	removeImport,
+} from "../../ast-transforms/utils/imports.js"
+import { codeToSourceFile, nodeToCode } from "../../ast-transforms/utils/js.util.js"
+import { wrapExportedFunction } from "../../ast-transforms/utils/wrap.js"
 import type { TransformConfig } from "../vite-plugin/config.js"
-import { filePathForOutput } from "../vite-plugin/fileInformation.js"
 
 export const transformServerRequestJs = (
 	filePath: string,
 	config: TransformConfig,
 	code: string,
-	root: boolean,
 ) => {
 	const sourceFile = codeToSourceFile(code, filePath)
 
 	if (isOptOutImportPresent(sourceFile)) return code
+	if (!isSdkImportPresent(sourceFile)) return code
 
-	assertNoImportsFromSdkJs(sourceFile, filePathForOutput(config, filePath), "+server.js", root) // TODO: implement functionality
+	const wrapperFunctionName = "initRequestHandlerWrapper"
 
-	return code // for now we don't need to transform any files
+	addImport(sourceFile, "@inlang/sdk-js/adapter-sveltekit/server", wrapperFunctionName)
 
-	// const wrapperFunctionName = 'initRequestHandlerWrapper'
+	const exports = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+	for (const exportName of exports) {
+		if (findExport(sourceFile, exportName)) {
+			// TODO: only transform exports that actually use SDK imports
+			wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, exportName)
+		}
+	}
+	removeImport(sourceFile, "@inlang/sdk-js")
 
-	// addImport(sourceFile, '@inlang/sdk-js/adapter-sveltekit/server', initRequestHandlerWrapper)
-
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'GET')
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'POST')
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'PUT')
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'PATCH')
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'DELETE')
-	// wrapExportedFunction(sourceFile, undefined, wrapperFunctionName, 'OPTIONS')
-
-	// return nodeToCode(sourceFile)
+	return nodeToCode(sourceFile)
 }

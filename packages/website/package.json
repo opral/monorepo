@@ -56,6 +56,7 @@
 		"dotenv": "^16.0.3",
 		"flat": "^5.0.2",
 		"jose": "^4.11.1",
+		"markdown-to-txt": "^2.0.1",
 		"marked": "^4.2.4",
 		"mermaid": "^9.3.0",
 		"octokit": "^2.0.14",

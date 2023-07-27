@@ -6,7 +6,7 @@ import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 import type { LanguageTag } from '@inlang/core/languageTag'
 
-let config: InlangConfig
+let config: InlangConfig | undefined
 
 export const initState = async (module: InlangConfigModule) => {
 	if (!config && !import.meta.env.DEV) {
@@ -41,7 +41,8 @@ export const initState = async (module: InlangConfigModule) => {
 let _resources: Resource[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadResources = async () => (_resources = await config.readResources({ config }))
+export const reloadResources = async () =>
+	(_resources = (await config?.readResources({ config })) || [])
 
 export const getResource = (languageTag: LanguageTag) =>
 	_resources.find(({ languageTag: { name } }) => name === languageTag)

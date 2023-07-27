@@ -85,7 +85,7 @@ const zSdkConfig = object({
 	}),
 	resources: zResources.default({ cache: "build-time" }),
 	routing: object({
-		exclude: array(string().startsWith('/')).default([]),
+		exclude: array(string().startsWith("/")).default([]),
 	}).default({ exclude: [] }),
 })
 
