@@ -1,4 +1,4 @@
-import type { LanguageTag } from "../languageTag.js"
+import type { LanguageTag } from "../types.js"
 import type { Message, Variant } from "./schema.js"
 
 export function getVariant(

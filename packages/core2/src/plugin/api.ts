@@ -1,6 +1,6 @@
 import type { InlangInstance } from "../app/api.js"
 import type { LintRule } from "../lint/api.js"
-import type { Message } from "../messages/schema.js"
+import type { Message } from "../message/schema.js"
 import type { TranslatedStrings } from "../types.js"
 
 type JSONSerializable<
