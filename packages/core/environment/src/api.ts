@@ -6,7 +6,7 @@ import type { $import } from "./$import.js"
  *
  * Read more https://inlang.com/documentation/inlang-environment
  */
-export type InlangInstanceEnvironment = {
+export type InlangEnvironment = {
 	$fs: $fs
 	$import: $import
 }

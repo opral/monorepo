@@ -1,12 +1,12 @@
 import { expect, it } from "vitest"
 import { createMemoryFs, fromJson } from "@inlang-git/fs"
 import { createMockEnvironment } from "./mockEnvironment.js"
-import type { InlangInstanceEnvironment } from "../api.js"
+import type { InlangEnvironment } from "../api.js"
 
 it("should copy a directory into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	const fs = createMemoryFs() as InlangInstanceEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.txt", "Hello World!")
 	await fs.mkdir("./test/subdir")
@@ -22,7 +22,7 @@ it("should copy a directory into the environment", async () => {
 it("should copy multiple directories into the environment", async () => {
 	// to test with node (a real filesystem), outcomment this line and
 	// import fs from "node:fs/promises" above.
-	const fs = createMemoryFs() as InlangInstanceEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	await fs.mkdir("./one")
 	await fs.writeFile("./one/file.txt", "Hello from one")
 	await fs.mkdir("./two/subdir", { recursive: true })
@@ -34,7 +34,7 @@ it("should copy multiple directories into the environment", async () => {
 })
 
 it("should be able to import JavaScript from the environment", async () => {
-	const fs = createMemoryFs() as InlangInstanceEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	await fs.mkdir("./test")
 	await fs.writeFile("./test/file.js", "export const x = 'hello'")
 	const env = await createMockEnvironment({ copyDirectory: { fs, paths: ["./test"] } })
@@ -43,7 +43,7 @@ it("should be able to import JavaScript from the environment", async () => {
 })
 
 it("should give an error if the path does not exist (hinting at a current working directory problem)", async () => {
-	const fs = createMemoryFs() as InlangInstanceEnvironment["$fs"]
+	const fs = createMemoryFs() as InlangEnvironment["$fs"]
 	// relative imports are relative to the current working directory, not the file.
 	// thus, if you run the tests from the root of the project, the path will be wrong.
 	try {
