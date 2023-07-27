@@ -1,14 +1,13 @@
-import { createMessage, createResource } from "../utils.js"
 import { expect, test } from "vitest"
 import { getLintReports, lint } from "@inlang/core/lint"
 
-import { identicalPattern } from "./identicalPattern.js"
+import { initIdenticalPatternRule } from "./identicalPattern.js"
 import type { InlangConfig } from "@inlang/core/config"
 
 const config: Pick<InlangConfig, "lint" | "sourceLanguageTag" | "languageTags"> = {
 	sourceLanguageTag: "en",
 	languageTags: ["en", "de", "fr"],
-	lint: { rules: [identicalPattern("warn")] },
+	lint: { rules: [initIdenticalPatternRule("warn")] },
 }
 
 const [lintedResources, errors] = await lint({

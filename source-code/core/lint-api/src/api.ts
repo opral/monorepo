@@ -2,16 +2,17 @@ import type { Message, MessageQueryApi } from "@inlang/messages"
 import type { LanguageTag, TranslatedStrings } from "@inlang/language-tag"
 import type { InlangConfig } from "@inlang/config"
 
+export type LintLevel = "error" | "warn"
+
 export type LintRule = {
 	id: `${string}.${string}`
 	displayName: TranslatedStrings
-	description: TranslatedStrings
 	/**
 	 * The default level of the lint rule.
 	 *
 	 * Can be overwritten by the user config.
 	 */
-	defaultLevel: "error" | "warn"
+	defaultLevel: LintLevel
 }
 
 export type MessageLintRule = LintRule & {
@@ -31,7 +32,7 @@ export type ReportMessageLint = (args: {
 
 export type LintReport = {
 	ruleId: LintRule["id"]
-	level: "error" | "warn"
+	level: LintLevel
 	body: TranslatedStrings
 }
 
