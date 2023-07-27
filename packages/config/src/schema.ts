@@ -5,7 +5,7 @@ const PluginSchema = z.object({
 	options: z.record(z.string()),
 })
 
-export const InlangConfigSchema = z.object({
+export const InlangConfig = z.object({
 	// TODO validate valid language tag
 	sourceLanguageTag: z.string(),
 	// TODO validate valid language tags
@@ -16,4 +16,4 @@ export const InlangConfigSchema = z.object({
 	}),
 })
 
-export type InlangConfig = z.infer<typeof InlangConfigSchema>
+export type InlangConfig = z.infer<typeof InlangConfig>
