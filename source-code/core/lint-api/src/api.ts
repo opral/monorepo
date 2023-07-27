@@ -5,6 +5,7 @@ import type { InlangConfig } from "@inlang/config"
 export type LintRule = {
 	id: `${string}.${string}`
 	displayName: TranslatedStrings
+	description: TranslatedStrings
 	/**
 	 * The default level of the lint rule.
 	 *
