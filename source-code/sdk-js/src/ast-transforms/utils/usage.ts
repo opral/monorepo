@@ -1,8 +1,8 @@
-import { Node, type Identifier, SourceFile, SyntaxKind } from 'ts-morph'
+import { Node, type Identifier, SourceFile, SyntaxKind } from "ts-morph"
 
 export const findAllIdentifiersComingFromAnImport = (sourceFile: SourceFile, path: string) => {
 	const allIdentifiers = sourceFile.getDescendantsOfKind(SyntaxKind.Identifier)
-	return allIdentifiers.filter(identifier => isIdentifierComingFromAnImport(identifier, path))
+	return allIdentifiers.filter((identifier) => isIdentifierComingFromAnImport(identifier, path))
 }
 
 const isIdentifierComingFromAnImport = (identifier: Identifier, path: string) => {
@@ -15,7 +15,9 @@ const isIdentifierComingFromAnImport = (identifier: Identifier, path: string) =>
 			nodes = [...nodes, ...currentNode.getPreviousSiblings(), ...currentNode.getNextSiblings()]
 		}
 
-		const checkedNodes = nodes.map((node => checkIfImportStatementReached(node, path, identifierName)))
+		const checkedNodes = nodes.map((node) =>
+			checkIfImportStatementReached(node, path, identifierName),
+		)
 		if (checkedNodes.includes(false)) return false
 		if (checkedNodes.includes(true)) return true
 
@@ -29,10 +31,14 @@ const checkIfImportStatementReached = (node: Node, path: string, identifierName:
 	if (shouldAbortProcessing(node, identifierName)) return false
 
 	if (
-		Node.isImportDeclaration(node)
-		&& node.getModuleSpecifier().getLiteralText() === path
-		&& node.getNamedImports()
-			.some((namedImport) => (namedImport.getAliasNode()?.getText() || namedImport.getName()) === identifierName)
+		Node.isImportDeclaration(node) &&
+		node.getModuleSpecifier().getLiteralText() === path &&
+		node
+			.getNamedImports()
+			.some(
+				(namedImport) =>
+					(namedImport.getAliasNode()?.getText() || namedImport.getName()) === identifierName,
+			)
 	) {
 		return true
 	}
@@ -41,7 +47,10 @@ const checkIfImportStatementReached = (node: Node, path: string, identifierName:
 }
 
 const shouldAbortProcessing = (node: Node, identifierName: string) => {
-	if (Node.isVariableStatement(node) && node.getDeclarations().some(declaration => declaration.getName() === identifierName)) {
+	if (
+		Node.isVariableStatement(node) &&
+		node.getDeclarations().some((declaration) => declaration.getName() === identifierName)
+	) {
 		return true
 	}
 
@@ -51,15 +60,14 @@ const shouldAbortProcessing = (node: Node, identifierName: string) => {
 	if (Node.isImportSpecifier(parent)) return true
 
 	if (
-		Node.isForOfStatement(parent)
-		|| Node.isForInStatement(parent)
-		|| Node.isForStatement(parent)
+		Node.isForOfStatement(parent) ||
+		Node.isForInStatement(parent) ||
+		Node.isForStatement(parent)
 	) {
 		const initializer = parent.getInitializer()
 		if (
-			Node.isVariableDeclarationList(initializer)
-			&& initializer.getDeclarations()
-				.some(identifier => identifier.getName() === identifierName)
+			Node.isVariableDeclarationList(initializer) &&
+			initializer.getDeclarations().some((identifier) => identifier.getName() === identifierName)
 		) {
 			return true
 		}

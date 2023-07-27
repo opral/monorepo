@@ -6,7 +6,10 @@ import { page } from "$app/stores"
 import { get } from "svelte/store"
 import type * as Runtime from "../../../../runtime/index.js"
 import type { Language } from "@inlang/core/ast"
-import { getRuntimeFromContext as getRuntimeFromContextShared, addRuntimeToContext as addRuntimeToContextShared } from "../shared/context.js"
+import {
+	getRuntimeFromContext as getRuntimeFromContextShared,
+	addRuntimeToContext as addRuntimeToContextShared,
+} from "../shared/context.js"
 import type { RelativeUrl } from "../../../../types.js"
 
 type RuntimeContext<

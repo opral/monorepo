@@ -1,1 +1,1 @@
-export { addRuntimeToGlobalThis, getRuntimeFromGlobalThis } from './globalThis.js'
+export { addRuntimeToGlobalThis, getRuntimeFromGlobalThis } from "./globalThis.js"

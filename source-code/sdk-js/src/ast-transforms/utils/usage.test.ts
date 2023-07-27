@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
-import { codeToSourceFile } from './js.util.js'
-import { findAllIdentifiersComingFromAnImport } from './usage.js'
-import { dedent } from 'ts-dedent'
+import { codeToSourceFile } from "./js.util.js"
+import { findAllIdentifiersComingFromAnImport } from "./usage.js"
+import { dedent } from "ts-dedent"
 
 describe("findAllIdentifiersComingFromAnImport", () => {
 	test("regular usage", () => {
@@ -9,9 +9,12 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 			import { i } from '@inlang/sdk-js'
 			i
 		`
-		const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+		const identifiers = findAllIdentifiersComingFromAnImport(
+			codeToSourceFile(code),
+			"@inlang/sdk-js",
+		)
 		expect(identifiers).toHaveLength(1)
-		expect(identifiers[0]!.getText()).toEqual('i')
+		expect(identifiers[0]!.getText()).toEqual("i")
 	})
 
 	test("multiple imports", () => {
@@ -23,9 +26,12 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 			const x = () => u()
 			const y = () => language
 		`
-		const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+		const identifiers = findAllIdentifiersComingFromAnImport(
+			codeToSourceFile(code),
+			"@inlang/sdk-js",
+		)
 		expect(identifiers).toHaveLength(1)
-		expect(identifiers[0]!.getText()).toEqual('language')
+		expect(identifiers[0]!.getText()).toEqual("language")
 	})
 
 	test("alias", () => {
@@ -33,9 +39,12 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 			import { i as u } from '@inlang/sdk-js'
 			const x = () => u('test')
 		`
-		const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+		const identifiers = findAllIdentifiersComingFromAnImport(
+			codeToSourceFile(code),
+			"@inlang/sdk-js",
+		)
 		expect(identifiers).toHaveLength(1)
-		expect(identifiers[0]!.getText()).toEqual('u')
+		expect(identifiers[0]!.getText()).toEqual("u")
 	})
 
 	test("ignore other scopes", () => {
@@ -48,15 +57,21 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 
 			const x = () => console.info(i('test'))
 		`
-		const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+		const identifiers = findAllIdentifiersComingFromAnImport(
+			codeToSourceFile(code),
+			"@inlang/sdk-js",
+		)
 		expect(identifiers).toHaveLength(1)
-		expect(identifiers[0]!.getText()).toEqual('i')
+		expect(identifiers[0]!.getText()).toEqual("i")
 	})
 
 	describe("no false positives", () => {
 		test("empty code", () => {
 			const code = ""
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -66,7 +81,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 
 				ii('test')
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -76,7 +94,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 
 				i('test')
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -88,7 +109,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 					console.info(i)
 				}
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -100,7 +124,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 					console.info(i)
 				}
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -112,10 +139,12 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 					console.info(i)
 				}
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
-
 
 		test("variable declaration inside function scope", () => {
 			const code = dedent`
@@ -126,7 +155,10 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 					console.info(i)
 				}
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 
@@ -139,9 +171,11 @@ describe("findAllIdentifiersComingFromAnImport", () => {
 					console.info(i)
 				}
 			`
-			const identifiers = findAllIdentifiersComingFromAnImport(codeToSourceFile(code), '@inlang/sdk-js')
+			const identifiers = findAllIdentifiersComingFromAnImport(
+				codeToSourceFile(code),
+				"@inlang/sdk-js",
+			)
 			expect(identifiers).toHaveLength(0)
 		})
 	})
-
 })

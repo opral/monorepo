@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { transformJs } from "./_.js.js"
 import { initTransformConfig } from "./test.utils.js"
-import { dedent } from 'ts-dedent'
+import { dedent } from "ts-dedent"
 
 describe("transformJs", () => {
 	test("should not do anything if no SDK import is found", () => {
@@ -36,14 +36,16 @@ describe("transformJs", () => {
 	})
 
 	test("should throw an error if SDK import get's used outside of a function scope", () => {
-		expect(() => transformJs(
-			"/test.js",
-			initTransformConfig(),
-			dedent`
+		expect(() =>
+			transformJs(
+				"/test.js",
+				initTransformConfig(),
+				dedent`
 				import { i } from '@inlang/sdk-js'
 
 				i()
 			`,
-		)).toThrow()
+			),
+		).toThrow()
 	})
 })

@@ -1,6 +1,6 @@
-import { InlangSdkException } from '../../../vite-plugin/exceptions.js'
+import { InlangSdkException } from "../../../vite-plugin/exceptions.js"
 import { inlangSymbol } from "../../shared/utils.js"
-import type { SvelteKitClientRuntime } from '../runtime.js'
+import type { SvelteKitClientRuntime } from "../runtime.js"
 
 export const getRuntimeFromGlobalThis = (): SvelteKitClientRuntime => {
 	if (import.meta.env.DEV) {
@@ -11,7 +11,7 @@ export const getRuntimeFromGlobalThis = (): SvelteKitClientRuntime => {
 			throw new InlangSdkException(
 				`You cannot directly access any '@inlang/sdk-js' imports in this scope.
 Please read the docs for more information on how to workaround this temporary limitation:
-https://inlang.com/documentation/sdk/sveltekit/advanced`
+https://inlang.com/documentation/sdk/sveltekit/advanced`,
 			)
 		}
 	}
@@ -20,4 +20,4 @@ https://inlang.com/documentation/sdk/sveltekit/advanced`
 }
 
 export const addRuntimeToGlobalThis = (context: SvelteKitClientRuntime) =>
-	(globalThis as any)[inlangSymbol] = context
+	((globalThis as any)[inlangSymbol] = context)
