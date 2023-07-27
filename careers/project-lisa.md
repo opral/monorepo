@@ -2,11 +2,10 @@
 
 **Opportunity**
 
-Watch this video 45 sec video https://www.youtube.com/watch?v=bCcluZriRnc
-
 - build the version control system for next-gen apps like inlang and successors to Figma, Excel, Word, Adobe Premiere, et al.
 - hands-down deep CS work
 - small team, overproportional impact
+- watch this video 45 sec video https://www.youtube.com/watch?v=bCcluZriRnc
 
 **Requirements**
 
@@ -14,13 +13,6 @@ Watch this video 45 sec video https://www.youtube.com/watch?v=bCcluZriRnc
 - web engineer (JS/TS) with systems knowledge (C/Rust)
 - senior level
 - located in the EU
-
-**Nice to have**
-
-- experience with local-first software
-- experience with building version control systems
-- presentation skills (you will likely present lisa at conferences etc.)
-- end-to-end product building experience
 
 **Additional information**
 
