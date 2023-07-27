@@ -1,0 +1,34 @@
+{
+	"name": "@inlang/result",
+	"type": "module",
+	"version": "1.0.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build ./tsconfig.build.json",
+		"dev": "tsc --watch",
+		"---- TEST ----------------------------------------------------------": "",
+		"test": "tsc --noEmit",
+		"test:watch": "",
+		"---- LINT ----------------------------------------------------------": "",
+		"lint": "cd ../.. && npm run lint:base ./source-code/core",
+		"lint:fix": "cd ../.. && npm run lint:fix:base ./source-code/core",
+		"format": "cd ../.. && npm run format:base ./source-code/core",
+		"format:fix": "cd ../.. && npm run format:fix:base ./source-code/core",
+		"---- OTHER ---------------------------------------------------------": "",
+		"clean": "rm -rf ./dist ./.turbo ./coverage ./node_modules"
+	},
+	"engines": {
+		"node": ">=16.15.0"
+	},
+	"dependencies": {},
+	"license": "Apache-2.0"
+}
