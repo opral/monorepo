@@ -41,6 +41,7 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			 */
 
 			const module = await args.env.$import(pluginInConfig.module)
+			console.log("module", module.default.meta)
 			const plugin = PluginApi.parse(module.default)
 			const api = plugin.setup({ config: args.config, options: pluginInConfig.options })
 			const lintRules = api.addLintRules?.() ?? []
