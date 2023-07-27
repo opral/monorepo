@@ -1,5 +1,8 @@
-import type { PluginApi, ResolvePlugins } from "./api.js"
+import { PluginApi, ResolvePlugins } from "./api.js"
 import { expectType } from "tsd"
+
+// the zod schema must be identical to the types
+expectType<PluginApi>(PluginApi.parse({} as any))
 
 type PluginOptions = {
 	pathPattern: string
