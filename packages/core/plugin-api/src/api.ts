@@ -61,10 +61,13 @@ export type PluginApi<
 	}
 }
 
+/**
+ * Function that resolves (imports and initializes) the plugins.
+ */
 export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 	config: InlangConfig
 	env: InlangEnvironment
-}) => Promise<ResolvedPluginsApi<AppSpecificApis>>
+}) => Promise<{ data: ResolvedPluginsApi<AppSpecificApis>; errors: Error[] }>
 
 /**
  * The API after resolving the plugins.
