@@ -1,4 +1,4 @@
-import { For, Show, createRenderEffect, createSignal, onMount } from "solid-js"
+import { For, Show, createRenderEffect, createEffect, createSignal, onMount } from "solid-js"
 import { Layout as RootLayout } from "@src/pages/Layout.jsx"
 import { Markdown, parseMarkdown } from "@src/services/markdown/index.js"
 import type { ProcessedTableOfContents } from "./index.page.server.jsx"
