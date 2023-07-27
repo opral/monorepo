@@ -1,0 +1,16 @@
+{
+	"extends": ["../../.eslintrc.json"],
+	"rules": {
+		"no-restricted-imports": [
+			"error",
+			{
+				"patterns": [
+					{
+						"group": ["node:*"],
+						"message": "Keep in mind that node API's don't work inside the browser"
+					}
+				]
+			}
+		]
+	}
+}
