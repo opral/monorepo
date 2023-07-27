@@ -30,6 +30,7 @@
 		"node": ">=16.15.0"
 	},
 	"dependencies": {
+		"@inlang/environment": "*",
 		"@inlang/messages": "*",
 		"@inlang/language-tag": "*",
 		"@inlang/lint-api": "*",

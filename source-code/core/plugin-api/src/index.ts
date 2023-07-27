@@ -1,2 +1,2 @@
-export type { Plugin } from "./api.js"
+export type { PluginApi, ResolvedPluginsApi } from "./api.js"
 export { pluginBuildConfig } from "./pluginBuildConfig.js"

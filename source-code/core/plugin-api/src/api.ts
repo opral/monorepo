@@ -1,4 +1,5 @@
 import type { InlangConfig } from "@inlang/config"
+import type { InlangEnvironment } from "@inlang/environment"
 import { TranslatedStrings } from "@inlang/language-tag"
 import type { LintRule } from "@inlang/lint-api"
 import type { Message } from "@inlang/messages"
@@ -8,8 +9,12 @@ type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>>,
 > = T
 
-export type Plugin<
+/**
+ * The plugin API is used to extend inlang's functionality.
+ */
+export type PluginApi<
 	PluginOptions extends Record<string, string | string[]> = Record<string, never>,
+	AppSpecificApis extends object = {},
 > = {
 	// * Must be JSON serializable if we want an external plugin manifest in the future.
 	meta: JSONSerializable<{
@@ -38,12 +43,46 @@ export type Plugin<
 		 *   are returned, the user config will be automatically updated to include the
 		 *   new language tags.
 		 */
-		loadMessages?: () => Message[]
-		saveMessages?: (args: { messages: Message[] }) => void
+		loadMessages?: (args: {}) => Promise<Message[]> | Message[]
+		saveMessages?: (args: { messages: Message[] }) => Promise<void> | void
 		addLintRules?: () => LintRule[]
+		/**
+		 * Define app specific APIs.
+		 *
+		 * @example
+		 * addAppSpecificApi: () => ({
+		 * 	 "inlang.ide-extension": {
+		 * 	   messageReferenceMatcher: () => {}
+		 * 	 }
+		 *  })
+		 */
+		addAppSpecificApi?: () => AppSpecificApis
 		// afterSetup: () => {}
 	}
 }
+
+export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
+	config: InlangConfig
+	env: InlangEnvironment
+}) => Promise<ResolvedPluginsApi<AppSpecificApis>>
+
+/**
+ * The API after resolving the plugins.
+ */
+export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
+	loadMessages: () => Promise<Message[]>
+	saveMessages: (args: { messages: Message[] }) => Promise<void>
+	lintRules: LintRule[]
+	/**
+	 * App specific APIs.
+	 *
+	 * @example
+	 *  appSpecificApi["inlang.ide-extension"].messageReferenceMatcher()
+	 */
+	appSpecificApi: AppSpecificApis
+}
+
+// --------------------------------------------- ZOD ---------------------------------------------
 
 export const Plugin = z.object({
 	meta: z.object({
@@ -52,7 +91,12 @@ export const Plugin = z.object({
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
 		usedApis: z.array(
-			z.union([z.literal("loadMessages"), z.literal("saveMessages"), z.literal("addLintRules")]),
+			z.union([
+				z.literal("loadMessages"),
+				z.literal("saveMessages"),
+				z.literal("addLintRules"),
+				z.literal("addAppSpecificApi"),
+			]),
 		),
 	}),
 	setup: z
