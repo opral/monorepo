@@ -4,6 +4,14 @@ import { TranslatedStrings } from "@inlang/language-tag"
 import type { LintRule } from "@inlang/lint-api"
 import type { Message } from "@inlang/messages"
 import { z } from "zod"
+import type {
+	PluginApiAlreadyDefinedError,
+	PluginError,
+	PluginImportError,
+	PluginIncorrectlyDefinedUsedApisError,
+	PluginUsesReservedNamespaceError,
+	PluginUsesUnavailableApiError,
+} from "./errors.js"
 
 type JSONSerializable<
 	T extends Record<string, string | string[] | Record<string, string | string[]>>,
@@ -28,7 +36,7 @@ export type PluginApi<
 		 * If the plugin uses an API that is not listed here, the plugin will not be loaded.
 		 * Mainly used for the plugin marketplace.
 		 */
-		usedApis: z.infer<typeof Plugin>["meta"]["usedApis"]
+		usedApis: z.infer<typeof PluginApi>["meta"]["usedApis"]
 	}>
 	/**
 	 * The setup function is the first function that is called when inlang loads the plugin.
@@ -67,7 +75,17 @@ export type PluginApi<
 export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 	config: InlangConfig
 	env: InlangEnvironment
-}) => Promise<{ data: ResolvedPluginsApi<AppSpecificApis>; errors: Error[] }>
+}) => Promise<{
+	data: ResolvedPluginsApi<AppSpecificApis>
+	errors: Array<
+		| PluginError
+		| PluginImportError
+		| PluginApiAlreadyDefinedError
+		| PluginUsesUnavailableApiError
+		| PluginUsesReservedNamespaceError
+		| PluginIncorrectlyDefinedUsedApisError
+	>
+}>
 
 /**
  * The API after resolving the plugins.
@@ -83,13 +101,19 @@ export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 	 *  appSpecificApi["inlang.ide-extension"].messageReferenceMatcher()
 	 */
 	appSpecificApi: AppSpecificApis
+	/**
+	 * Meta information about the imported plugins.
+	 */
+	plugins: Array<PluginApi["meta"] & { module: string }>
 }
 
 // --------------------------------------------- ZOD ---------------------------------------------
 
-export const Plugin = z.object({
+export const PluginApi = z.object({
 	meta: z.object({
-		id: z.string(),
+		id: z.custom<PluginApi["meta"]["id"]>((value) =>
+			/^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value as string),
+		),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
@@ -104,16 +128,13 @@ export const Plugin = z.object({
 	}),
 	setup: z
 		.function()
-		.args(z.object({ options: z.record(z.string()), inlang: z.any() }))
+		.args(z.object({ options: z.record(z.string()), config: z.any(), env: z.any() }))
 		.returns(
 			z.object({
-				loadMessages: z.function().returns(z.array(z.any())).optional(),
-				saveMessages: z
-					.function()
-					.args(z.object({ messages: z.array(z.any()) }))
-					.returns(z.void())
-					.optional(),
-				addLintRules: z.function().returns(z.array(z.any())).optional(),
+				loadMessages: z.custom<ReturnType<PluginApi["setup"]>["loadMessages"]>(),
+				saveMessages: z.custom<ReturnType<PluginApi["setup"]>["saveMessages"]>(),
+				addLintRules: z.custom<ReturnType<PluginApi["setup"]>["addLintRules"]>(),
+				addAppSpecificApi: z.custom<ReturnType<PluginApi["setup"]>["addAppSpecificApi"]>(),
 			}),
 		),
 })
