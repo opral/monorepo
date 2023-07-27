@@ -210,7 +210,9 @@ export function Layout(props: { children: JSXElement }) {
 							>
 								<sl-dropdown prop:distance={8}>
 									<sl-button prop:size="small" slot="trigger">
-										<IconAdd slot="prefix" />
+										<button slot="prefix">
+											<IconAdd class="w-4 h-4" />
+										</button>
 										Filter
 									</sl-button>
 									<sl-menu>
@@ -421,8 +423,8 @@ function LanguageFilter(props: { clearFunction: any }) {
 						is
 					</p>
 				</div>
-				<button slot="clear-icon">
-					<IconClose />
+				<button slot="clear-icon" class="p-0.5">
+					<IconClose class="w-4 h-4" />
 				</button>
 
 				<div class="flex px-3 gap-2 text-sm font-medium">
@@ -514,8 +516,8 @@ function LintFilter(props: { clearFunction: any }) {
 					</button>
 				</Show>
 			</div>
-			<button slot="clear-icon">
-				<IconClose />
+			<button slot="clear-icon" class="p-0.5">
+				<IconClose class="w-4 h-4" />
 			</button>
 
 			<div class="flex px-3 gap-2 text-sm font-medium">
