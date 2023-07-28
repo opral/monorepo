@@ -1,7 +1,7 @@
 import type { InlangConfig } from "@inlang/config"
 import type { InlangEnvironment } from "@inlang/environment"
 import { TranslatedStrings } from "@inlang/language-tag"
-import type { LintRule } from "@inlang/lint-api"
+import type { LintRule } from "../../lint/dist/index.js"
 import type { Message } from "@inlang/messages"
 import { z } from "zod"
 import type {

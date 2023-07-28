@@ -1,4 +1,4 @@
-import type { MessageLintRule } from '@inlang/lint-api'
+import type { MessageLintRule } from "@inlang/plugin"
 
 /**
  * Checks for missing messages (translations).
@@ -7,14 +7,16 @@ import type { MessageLintRule } from '@inlang/lint-api'
  * in a target resource, it is likely that the message has not
  * been translated yet.
  */
-export const missingMessage = () => ({
-	id: 'inlang.missingMessage',
+export const missingMessage = (): MessageLintRule => ({
+	id: "inlang.missingMessage",
 	displayName: {
-		en: 'Missing Message'
+		en: "Missing Message",
 	},
-	defaultLevel: 'warn', // TODO: how to override level?
+	defaultLevel: "warn", // TODO: how to override level?
 	message: ({ message: { id, body }, config, report }) => {
-		const languageTags = config.languageTags.filter(languageTag => languageTag !== config.sourceLanguageTag)
+		const languageTags = config.languageTags.filter(
+			(languageTag) => languageTag !== config.sourceLanguageTag,
+		)
 		for (const languageTag of languageTags) {
 			const variants = body[languageTag] || []
 			if (!variants.length) {
@@ -23,7 +25,7 @@ export const missingMessage = () => ({
 					languageTag,
 					body: {
 						en: `Message with id '${id}' is missing for '${languageTag}'.`, // TODO: simplify message as information is redundant
-					}
+					},
 				})
 				return
 			}
@@ -35,7 +37,7 @@ export const missingMessage = () => ({
 					languageTag,
 					body: {
 						en: `Empty pattern (length 0).`,
-					}
+					},
 				})
 			} else if (
 				patterns.length === 1 &&
@@ -47,9 +49,9 @@ export const missingMessage = () => ({
 					languageTag,
 					body: {
 						en: `The pattern contains only only one element which is an empty string.`,
-					}
+					},
 				})
 			}
 		}
 	},
-}) satisfies MessageLintRule
+})

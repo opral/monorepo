@@ -1,24 +1,10 @@
-import type { PluginApi } from "@inlang/plugin-api"
+import type { PluginApi } from "@inlang/plugin"
 import * as rules from "./rules/index.js"
-
-type StandardLintRulePluginOptions = Partial<Record<keyof typeof rules, "off" | "warn" | "error">>
 
 /**
  * This plugin provides a set of standard lint rules.
- *
- * All lint rules have a default level that can be overwritten
- * in the plugin settings.
- *
- * @example
- *  plugins: [
- *    standardLintRules({
- *      identicalPattern: "warn",
- *      messageWithoutSource: "error",
- *      missingMessage: "off",
- *    })
- *  ]
  */
-export const standardLintRules = {
+export const standardLintRules: PluginApi = {
 	meta: {
 		id: "inlang.standardLintRules",
 		displayName: {
@@ -28,31 +14,18 @@ export const standardLintRules = {
 			en: "This plugin provides a set of standard lint rules.",
 		},
 		keywords: ["lint"],
-		usedApis: ["addLintRules"], // TODO: why do we need to specify this?
+		usedApis: ["addLintRules"], // TODO: why do we need to specify this? // reply from @samuelstroschein: because the plugin registry and debugging can be improved by knowing which apis are used
 	},
-	setup: ({ options }) => {
+	setup: () => {
 		return {
 			addLintRules: () => [
-				withDefaultLevel("identicalPattern", "warn", options),
-				withDefaultLevel("messageWithoutSource", "error", options),
-				withDefaultLevel("missingMessage", "error", options),
-			]
+				rules.identicalPattern({ ignore: [] }),
+				rules.messageWithoutSource(),
+				rules.missingMessage(),
+			],
 		}
 	},
-} satisfies PluginApi<StandardLintRulePluginOptions>
-
-function withDefaultLevel(
-	name: keyof typeof rules,
-	defaultLevel: "off" | "warn" | "error",
-	options: StandardLintRulePluginOptions,
-) {
-	const level = options?.[name] ?? defaultLevel
-	if (level === "off") {
-		return "off"
-	}
-	return rules[name](level)
 }
-
 
 // TODO: reintroduce `createPlugin` and `creteLintRule` helper functions
 // standardLintRules.setup({options: { identicalPattern: ['warn'] as const}})

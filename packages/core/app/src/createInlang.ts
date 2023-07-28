@@ -1,7 +1,7 @@
 import { InlangConfig } from "@inlang/config"
 import type { InlangInstance } from "./api.js"
 import type { InlangEnvironment } from "@inlang/environment"
-import { resolvePlugins } from "@inlang/plugin-api"
+import { resolvePlugins } from "@inlang/plugin"
 
 export async function createInlang(args: {
 	configPath: string

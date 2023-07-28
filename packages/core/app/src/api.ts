@@ -1,6 +1,6 @@
 import type { InlangConfig } from "@inlang/config"
 import type { InlangEnvironment } from "@inlang/environment"
-import type { LintException, LintReport } from "@inlang/lint-api"
+import type { LintException, LintReport } from "@inlang/lint"
 import type { MessageQueryApi } from "@inlang/messages"
 import type { Result } from "@inlang/result"
 import type { InvalidConfigError } from "./errors.js"
