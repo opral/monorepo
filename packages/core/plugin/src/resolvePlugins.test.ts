@@ -399,25 +399,193 @@ describe("saveMessages", () => {
 	})
 })
 
-// describe("addLintRules", () => {
-// 	it("should resolve a single lint rule", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
+describe("addLintRules", () => {
+	it("should resolve a single lint rule", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["addLintRules"],
+			},
+			setup: () => {
+				return {
+					addLintRules: () => [
+						{
+							id: "test.test",
+							displayName: { en: "" },
+							defaultLevel: "error",
+						},
+					],
+				}
+			},
+		}
+		const pluginModule = "https://myplugin10.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
-// 	it("should resolve multiple lint rules", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
-// })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
 
-// describe("addAppSpecificApi", () => {
-// 	it("it should resolve app specific configs", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
+		expect(resolved.data.lintRules).toHaveLength(1)
+	})
 
-// 	it("it should resolve app specific configs", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
-// })
+	it("should resolve multiple lint rules", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["addLintRules"],
+			},
+			setup: () => {
+				return {
+					addLintRules: () => [
+						{
+							id: "test.test",
+							displayName: { en: "" },
+							defaultLevel: "error",
+						},
+						{
+							id: "test2.test",
+							displayName: { en: "" },
+							defaultLevel: "error",
+						},
+					],
+				}
+			},
+		}
+		const pluginModule = "https://myplugin11.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.data.lintRules).toHaveLength(2)
+	})
+})
+
+describe("addAppSpecificApi", () => {
+	it("it should resolve app specific configs", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["addAppSpecificApi"],
+			},
+			setup: () => {
+				return {
+					addAppSpecificApi: () => ({
+						"my-app": {
+							messageReferenceMatcher: () => undefined as any,
+						},
+					}),
+				}
+			},
+		}
+		const pluginModule = "https://myplugin12.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.data.appSpecificApi).toHaveProperty("my-app")
+	})
+
+	it("it should resolve app specific configs", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["addAppSpecificApi"],
+			},
+			setup: () => {
+				return {
+					addAppSpecificApi: () => ({
+						"my-app-1": {
+							functionOfMyApp1: () => undefined as any,
+						},
+					}),
+				}
+			},
+		}
+		const mockPlugin2: PluginApi = {
+			meta: {
+				id: "plugin.plugin2",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["addAppSpecificApi"],
+			},
+			setup: () => {
+				return {
+					addAppSpecificApi: () => ({
+						"my-app-2": {
+							functionOfMyApp2: () => undefined as any,
+						},
+					}),
+				}
+			},
+		}
+		const pluginModule = "https://myplugin13.com/index.js"
+		const pluginModule2 = "https://myplugin14.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+			[pluginModule2]: mockPlugin2,
+		})
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+					{
+						options: {},
+						module: pluginModule2,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-1")
+		expect(resolved.data.appSpecificApi).toHaveProperty("my-app-2")
+	})
+})
 
 // ---------------
 
