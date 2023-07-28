@@ -716,8 +716,8 @@ async function cloneRepository(args: {
 	await raw.addRemote({
 		fs: args.fs,
 		gitdir,
-		remote: 'origin',
-		url: hostUrl
+		remote: "origin",
+		url: hostUrl,
 	})
 
 	const corsProxy = publicEnv.PUBLIC_GIT_PROXY_PATH
