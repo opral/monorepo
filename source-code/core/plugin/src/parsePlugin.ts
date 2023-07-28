@@ -7,6 +7,8 @@ import {
 	PluginUsesUnavailableApiError,
 	PluginInvalidIdError,
 	PluginApiAlreadyDefinedError,
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
 } from "./errors.js"
 import type { ResolvePluginResult } from "./resolvePlugins.js"
 
@@ -27,6 +29,7 @@ export const parsePlugin = (args: {
 }) => {
 	const api = args.plugin.setup({ config: args.config, options: args.pluginInConfig.options })
 
+	// console.log(args.plugin, args.result.data)
 	/**
 	 * -------------- BEGIN VALIDATION --------------
 	 */
@@ -44,6 +47,26 @@ export const parsePlugin = (args: {
 		throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
 			module: args.pluginInConfig.module,
 		})
+	}
+
+	// -- MULTIPLE PLUGINS DEFINE LOADMESSAGES --
+	if (args.plugin.meta.usedApis.includes("loadMessages")) {
+		if (args.result.data.loadMessages !== undefined) {
+			throw new PluginFunctionLoadMessagesAlreadyDefinedError(
+				`Plugin ${args.pluginInConfig.module} defines loadMessages but another plugin already defined it.`,
+				{ module: args.pluginInConfig.module },
+			)
+		}
+	}
+
+	// -- MULTIPLE PLUGINS DEFINE SAVEMESSAGES --
+	if (args.plugin.meta.usedApis.includes("saveMessages")) {
+		if (args.result.data.saveMessages !== undefined) {
+			throw new PluginFunctionSaveMessagesAlreadyDefinedError(
+				`Plugin ${args.pluginInConfig.module} defines saveMessages but another plugin already defined it.`,
+				{ module: args.pluginInConfig.module },
+			)
+		}
 	}
 
 	for (const returnedApi of Object.keys(api)) {

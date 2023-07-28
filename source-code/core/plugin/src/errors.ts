@@ -59,3 +59,17 @@ export class PluginApiAlreadyDefinedError extends PluginError {
 		this.name = "PluginApiAlreadyDefinedError"
 	}
 }
+
+export class PluginFunctionLoadMessagesAlreadyDefinedError extends PluginError {
+	constructor(message: string, options: PluginErrorOptions) {
+		super(message, options)
+		this.name = "PluginFunctionLoadMessagesAlreadyDefinedError"
+	}
+}
+
+export class PluginFunctionSaveMessagesAlreadyDefinedError extends PluginError {
+	constructor(message: string, options: PluginErrorOptions) {
+		super(message, options)
+		this.name = "PluginFunctionSaveMessagesAlreadyDefinedError"
+	}
+}
