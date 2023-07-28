@@ -12,8 +12,24 @@ import type { InlangEnvironment } from "@inlang/environment"
 import type { PluginApi } from "./api.js"
 
 describe("generally", () => {
-	// namespace is required, only kebap-case allowed
-	it("should return errors if plugins use invalid ids", async () => {
+	it("should return an error if a plugin cannot be imported", async () => {
+		const resolved = await resolvePlugins({
+			env: {
+				$fs: {} as any,
+				$import: () => {
+					throw Error("Could not import")
+				},
+			},
+			config: {
+				plugins: [{ module: "https://myplugin.com/index.js", options: {} }],
+			} as InlangConfig,
+		})
+
+		expect(resolved.errors.length).toBe(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginImportError)
+	})
+
+	it("should return an error if a plugin uses an invalid id", async () => {
 		const mockPlugin: PluginApi = {
 			meta: {
 				// @ts-expect-error the id is invalid
@@ -23,7 +39,18 @@ describe("generally", () => {
 				keywords: [],
 				usedApis: [],
 			},
-			setup: () => undefined as any,
+			setup: () => {
+				return {
+					loadMessages: () => undefined as any,
+					saveMessages: () => undefined as any,
+					addAppSpecificApi() {
+						return undefined as any
+					},
+					addLintRules() {
+						return undefined as any
+					},
+				}
+			},
 		}
 		const pluginModule = "https://myplugin.com/index.js"
 		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
@@ -40,23 +67,6 @@ describe("generally", () => {
 		})
 		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
-	})
-
-	it("should return an error if a plugin cannot be imported", async () => {
-		const resolved = await resolvePlugins({
-			env: {
-				$fs: {} as any,
-				$import: () => {
-					throw Error("Could not import")
-				},
-			},
-			config: {
-				plugins: [{ module: "https://myplugin.com/index.js", options: {} }],
-			} as InlangConfig,
-		})
-
-		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginImportError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
@@ -93,7 +103,6 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		console.log(resolved.errors)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiError)
 	})
 
@@ -171,7 +180,7 @@ describe("generally", () => {
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
 		const mockPlugin: PluginApi = {
 			meta: {
-				id: "inlang.notWhitelistedPlugin",
+				id: "inlang.not-whitelisted-plugin",
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],

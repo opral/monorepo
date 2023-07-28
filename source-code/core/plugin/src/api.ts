@@ -18,6 +18,11 @@ type JSONSerializable<
 > = T
 
 /**
+ * Regex for valid plugin ids.
+ */
+export const pluginIdRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+/**
  * The plugin API is used to extend inlang's functionality.
  */
 export type PluginApi<
@@ -109,45 +114,9 @@ export type ResolvedPluginsApi<AppSpecificApis extends object = {}> = {
 
 // --------------------------------------------- ZOD ---------------------------------------------
 
-/**
- * Plugin ids that should be excluded by namespace reserving.
- */
-const whitelistedPlugins = [
-	"inlang.plugin-json",
-	"inlang.plugin-standard-lint-rules",
-	"inlang.plugin-i18next",
-]
-
 export const PluginApi = z.object({
 	meta: z.object({
-		id: z
-			.custom<PluginApi["meta"]["id"]>(
-				(value) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value as string),
-				{
-					params: {
-						errorName: "PluginInvalidIdError",
-					},
-					message:
-						'The plugin id must be in the format "namespace.my-plugin". Hence, lowercase with a namespaces and dashes for separation.',
-				},
-			)
-			.refine(
-				(value) => {
-					if (value.startsWith("inlang.") === false) {
-						return true
-					} else if (whitelistedPlugins.includes(value)) {
-						return true
-					}
-					return false
-				},
-				{
-					params: {
-						errorName: "PluginUsesReservedNamespaceError",
-					},
-					message:
-						"The plugin id must not start with 'inlang.' as this namespace is reserved for inlang's official plugins.",
-				},
-			),
+		id: z.custom<PluginApi["meta"]["id"]>((value) => pluginIdRegex.test(value as string)),
 		displayName: TranslatedStrings,
 		description: TranslatedStrings,
 		keywords: z.array(z.string()),
