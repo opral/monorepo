@@ -47,6 +47,7 @@
 		"eslint-plugin-solid": "^0.9.3",
 		"eslint-plugin-unicorn": "^45.0.2",
 		"husky": "^8.0.3",
+		"istanbul-lib-source-maps": "^4.0.1",
 		"lint-staged": "^13.1.2",
 		"patch-package": "^6.5.1",
 		"prettier": "2.8.3",
