@@ -624,6 +624,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				await writeResources({
 					config,
 					resources: args[0],
+					setFsChange,
 				})
 
 				resolve() // Resolve after writeResources is completed
@@ -710,6 +711,14 @@ async function cloneRepository(args: {
 	const gitdir = ".git"
 
 	const hostUrl = `https://${host}/${owner}/${repository}`
+
+	await raw.init({ fs: args.fs, bare: true, gitdir })
+	await raw.addRemote({
+		fs: args.fs,
+		gitdir,
+		remote: 'origin',
+		url: hostUrl
+	})
 
 	const corsProxy = publicEnv.PUBLIC_GIT_PROXY_PATH
 	const fullUrl = corsProxy.endsWith("?")
@@ -917,6 +926,7 @@ async function pull(args: {
 			dir: "/",
 			corsProxy: publicEnv.PUBLIC_GIT_PROXY_PATH,
 			singleBranch: true,
+			ref: "HEAD",
 			author: {
 				name: args.user?.username,
 			},
