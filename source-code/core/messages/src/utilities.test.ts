@@ -1,4 +1,11 @@
-import { VariantDoesNotExistException, getVariant } from "./utilities.js"
+import {
+	PatternsForLanguageTagDoNotExistException,
+	VariantAlreadyExistsException,
+	VariantDoesNotExistException,
+	createVariant,
+	getVariant,
+	updateVariant,
+} from "./utilities.js"
 import { describe, test, expect } from "vitest"
 import type { Message } from "./api.js"
 
@@ -98,6 +105,155 @@ describe("getVariant", () => {
 		// should return the female variant
 		expect(variant.data).toBeUndefined()
 		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
+	})
+
+	test("should return error if set of variants for specific language does not exist", () => {
+		let mockMessage: Message = getMockMessage()
+
+		const variant = getVariant(mockMessage, {
+			languageTag: "de",
+			selectors: { gender: "female", guestOther: "1" },
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+	})
+})
+
+describe("createVariant", () => {
+	test("should create a variant for a message", () => {
+		const mockMessage: Message = getMockMessage()
+
+		const message = createVariant(mockMessage, {
+			languageTag: "en",
+			data: {
+				match: { gender: "female", guestOther: "0" },
+				pattern: [],
+			},
+		})
+		// should return the female variant
+		expect(
+			message.data!.body["en"]?.find(
+				(v) => v.match.gender === "female" && v.match.guestOther === "0",
+			)?.pattern,
+		).toStrictEqual([])
+	})
+
+	test("should create a variant, also if matcher are not full defined", () => {
+		const mockMessage: Message = getMockMessage()
+		mockMessage.body["en"] = [
+			...mockMessage.body["en"]!.filter(
+				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
+			),
+		]
+
+		const message = createVariant(mockMessage, {
+			languageTag: "en",
+			data: {
+				match: {},
+				pattern: [],
+			},
+		})
+		// should return the female variant
+		expect(
+			message.data!.body["en"]?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
+				?.pattern,
+		).toStrictEqual([])
+	})
+
+	test("should return error if variant matches", () => {
+		let mockMessage: Message = getMockMessage()
+
+		const variant = createVariant(mockMessage, {
+			languageTag: "en",
+			data: {
+				match: { gender: "male", guestOther: "1" },
+				pattern: [],
+			},
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(VariantAlreadyExistsException)
+	})
+
+	test("should return error if set of variants for specific language does not exist", () => {
+		let mockMessage: Message = getMockMessage()
+
+		const variant = createVariant(mockMessage, {
+			languageTag: "de",
+			data: {
+				match: { gender: "female", guestOther: "1" },
+				pattern: [],
+			},
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
+	})
+})
+
+describe("updateVariant", () => {
+	test("should update a variant of a message", () => {
+		const mockMessage: Message = getMockMessage()
+
+		const message = updateVariant(mockMessage, {
+			languageTag: "en",
+			selectors: { gender: "female", guestOther: "1" },
+			pattern: [],
+		})
+		// should return the female variant
+		expect(
+			message.data!.body["en"]?.find(
+				(v) => v.match.gender === "female" && v.match.guestOther === "1",
+			)?.pattern,
+		).toStrictEqual([])
+	})
+
+	test("should update a variant, also if matcher are not full defined", () => {
+		const mockMessage: Message = getMockMessage()
+
+		const message = updateVariant(mockMessage, {
+			languageTag: "en",
+			selectors: {},
+			pattern: [],
+		})
+		// should return the female variant
+		expect(
+			message.data!.body["en"]?.find((v) => v.match.gender === "*" && v.match.guestOther === "*")
+				?.pattern,
+		).toStrictEqual([])
+	})
+
+	test("should return error if no variant matches", () => {
+		let mockMessage: Message = getMockMessage()
+
+		mockMessage.body["en"] = [
+			...mockMessage.body["en"]!.filter(
+				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
+			),
+		]
+
+		const variant = updateVariant(mockMessage, {
+			languageTag: "en",
+			selectors: {},
+			pattern: [],
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
+	})
+
+	test("should return error if set of variants for specific language does not exist", () => {
+		let mockMessage: Message = getMockMessage()
+
+		const variant = updateVariant(mockMessage, {
+			languageTag: "de",
+			selectors: {},
+			pattern: [],
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(PatternsForLanguageTagDoNotExistException)
 	})
 })
 

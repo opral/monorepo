@@ -48,13 +48,20 @@ export function createVariant(
 	},
 ): Result<Message, VariantAlreadyExistsException | PatternsForLanguageTagDoNotExistException> {
 	const copy: Message = structuredClone(message)
-	if (getVariant(copy, { languageTag: options.languageTag, selectors: options.data.match })) {
-		return { error: new VariantAlreadyExistsException(message.id, options.languageTag) }
-	}
+	// check if languageTag exists
 	if (copy.body[options.languageTag] === undefined) {
 		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
 	}
-	copy.body[options.languageTag]!.push(options.data)
+	// check if variant already exists
+	if (matchVariant(copy, options.languageTag, options.data.match)) {
+		return { error: new VariantAlreadyExistsException(message.id, options.languageTag) }
+	}
+
+	// need to resolve selectors to match length and order of message selectors
+	copy.body[options.languageTag]!.push({
+		...options.data,
+		match: resolveSelector(copy.selectors, options.data.match),
+	})
 	return { data: copy }
 }
 
@@ -78,12 +85,41 @@ export function updateVariant(
 	if (copy.body[options.languageTag] === undefined) {
 		return { error: new PatternsForLanguageTagDoNotExistException(message.id, options.languageTag) }
 	}
-	const variant = matchMostSpecificVariant(copy, options.languageTag, options.selectors)
+	const variant = matchVariant(copy, options.languageTag, options.selectors)
 	if (variant) {
 		variant.pattern = options.pattern
 		return { data: copy }
 	}
 	return { error: new VariantDoesNotExistException(message.id, options.languageTag) }
+}
+
+/**
+ * Returns the specific variant definied by selectors or undefined
+ *
+ * @example
+ *  const variant = matchVariant(message, languageTag: "en", selectors: { gender: "male" })
+ */
+const matchVariant = (
+	message: Message,
+	languageTag: LanguageTag,
+	selectors: Record<string, string>,
+): Variant | undefined => {
+	// resolve preferenceSelectors to match length and order of message selectors
+	const resolvedSelectors = resolveSelector(message.selectors, selectors)
+
+	for (const variant of message.body[languageTag]!) {
+		let isMatch = true
+		//check if vaiant is a match
+		for (const [key, value] of Object.entries(variant.match)) {
+			if (resolvedSelectors[key] !== value) {
+				isMatch = false
+			}
+		}
+		if (isMatch) {
+			return variant
+		}
+	}
+	return undefined
 }
 
 /**
@@ -98,11 +134,7 @@ const matchMostSpecificVariant = (
 	selectors: Record<string, string>,
 ): Variant | undefined => {
 	// resolve preferenceSelectors to match length and order of message selectors
-	const resolvedSelectors: Record<string, string> = {}
-	for (const messageSelector of message.selectors) {
-		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
-	}
-
+	const resolvedSelectors = resolveSelector(message.selectors, selectors)
 	const index: Record<string, any> = {}
 
 	for (const variant of message.body[languageTag]!) {
@@ -160,6 +192,24 @@ const matchMostSpecificVariant = (
 	}
 
 	return findOptimalMatch(index, Object.values(resolvedSelectors))
+}
+
+/**
+ * Returns resolved selector.
+ * -> Adds all posible selectors, if not defined it adds '*'. Order is determined by messageSelectors
+ *
+ * @example
+ *  const variant = resolveSelector(["gender","count"], selector: {count: "2"})
+ */
+const resolveSelector = (
+	messageSelectors: string[],
+	selectors: Record<string, string>,
+): Record<string, string> => {
+	const resolvedSelectors: Record<string, string> = {}
+	for (const messageSelector of messageSelectors) {
+		resolvedSelectors[messageSelector] = selectors[messageSelector] ?? "*"
+	}
+	return resolvedSelectors
 }
 
 export class VariantDoesNotExistException extends Error {
