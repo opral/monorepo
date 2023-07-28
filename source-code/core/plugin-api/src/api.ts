@@ -132,13 +132,6 @@ export const PluginApi = z.object({
 	}),
 	setup: z
 		.function()
-		.args(z.object({ options: z.record(z.string()), config: z.any(), env: z.any() }))
-		.returns(
-			z.object({
-				loadMessages: z.custom<ReturnType<PluginApi["setup"]>["loadMessages"]>(),
-				saveMessages: z.custom<ReturnType<PluginApi["setup"]>["saveMessages"]>(),
-				addLintRules: z.custom<ReturnType<PluginApi["setup"]>["addLintRules"]>(),
-				addAppSpecificApi: z.custom<ReturnType<PluginApi["setup"]>["addAppSpecificApi"]>(),
-			}),
-		),
+		.args(z.custom<Parameters<PluginApi["setup"]>[0]>())
+		.returns(z.custom<ReturnType<PluginApi["setup"]>>()),
 })
