@@ -3,6 +3,7 @@ import type { Message } from "./api.js"
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => void
 	get: (args: { where: { id: Message["id"] } }) => Message | undefined
+	getAll: () => Array<Message>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => void
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => void
@@ -21,6 +22,9 @@ export function createQuery(messages: Array<Message>): MessageQueryApi {
 		},
 		get: ({ where }) => {
 			return index.get(where.id)
+		},
+		getAll: () => {
+			return Array.from(index.values())
 		},
 		update: ({ where, data }) => {
 			const message = index.get(where.id)
