@@ -10,7 +10,7 @@ export type LintRule = {
 	/**
 	 * The default level of the lint rule.
 	 *
-	 * Can be overwritten by the user config.
+	 * The lint level can be adjusted by the user in the config file.
 	 */
 	defaultLevel: LintLevel
 }
