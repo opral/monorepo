@@ -1,4 +1,4 @@
-import { getVariant } from "./utilities.js"
+import { VariantDoesNotExistException, getVariant } from "./utilities.js"
 import { describe, test, expect } from "vitest"
 import type { Message } from "./api.js"
 
@@ -27,7 +27,7 @@ describe("getVariant", () => {
 		// should return the female variant
 		expect(variant.data![0]).toStrictEqual({
 			type: "Text",
-			value: "{$hostName} does not give a party.",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
 		})
 	})
 
@@ -72,15 +72,32 @@ describe("getVariant", () => {
 			value: "{$hostName} invites {$guestName} and one other person to their party.",
 		})
 
-		// const variant2 = getVariant(mockMessage, {
-		// 	languageTag: "en",
-		// 	selectors: { gender: "male", guestOther: "8" },
-		// })
-		// // should return the female variant
-		// expect(variant2.data![0]).toStrictEqual({
-		// 	type: "Text",
-		// 	value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
-		// })
+		const variant2 = getVariant(mockMessage, {
+			languageTag: "en",
+			selectors: { gender: "male", guestOther: "8" },
+		})
+		// should return the female variant
+		expect(variant2.data![0]).toStrictEqual({
+			type: "Text",
+			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
+		})
+	})
+
+	test("should return error of no variant matches", () => {
+		let mockMessage: Message = getMockMessage()
+		mockMessage.body["en"] = [
+			...mockMessage.body["en"]!.filter(
+				(v) => v.match.gender !== "*" || v.match.guestOther !== "*",
+			),
+		]
+
+		const variant = getVariant(mockMessage, {
+			languageTag: "en",
+			selectors: {},
+		})
+		// should return the female variant
+		expect(variant.data).toBeUndefined()
+		expect(variant.error).toBeInstanceOf(VariantDoesNotExistException)
 	})
 })
 
