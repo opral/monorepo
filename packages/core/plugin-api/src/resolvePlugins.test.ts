@@ -8,9 +8,9 @@ import {
 	PluginUsesReservedNamespaceError,
 	PluginUsesUnavailableApiError,
 } from "./errors.js"
-import { createMemoryFs } from "@inlang-git/fs"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { PluginApi } from "./api.js"
+import { log } from "console"
 
 const mockConfig: InlangConfig = {
 	sourceLanguageTag: "en",
@@ -28,23 +28,44 @@ const mockConfig: InlangConfig = {
 	},
 }
 
+const mockConfigWithPlugins = {
+	...mockConfig,
+	plugins: [
+		{
+			options: {
+				tagMatchers: "{{}}",
+			},
+			module: "https://myplugin1.com/index.js",
+		},
+		{
+			options: {
+				tagMatchers: "{{}}",
+			},
+			module: "https://myplugin2.com/index.js",
+		},
+	],
+}
+
 const mockArgs = { config: mockConfig, env: {} as any }
 
 describe("generally", () => {
 	// namespace is required, only kebap-case allowed
 	it("should return errors if plugins use invalid ids", async () => {
-		const env = mockEnvWithPlugin({
-			meta: {
-				// @ts-expect-error the id is invalid
-				id: "no-namespace",
-				description: { en: "" },
-				displayName: { en: "" },
-				keywords: [],
-				usedApis: [],
+		const env = mockEnvWithPlugins([
+			{
+				meta: {
+					// @ts-expect-error the id is invalid
+					id: "no-namespace",
+					description: { en: "" },
+					displayName: { en: "" },
+					keywords: [],
+					usedApis: [],
+				},
+				setup: () => undefined as any,
 			},
-			setup: () => undefined as any,
-		})
+		])
 		const resolved = await resolvePlugins({ env, config: mockConfig })
+		console.log(resolved.errors)
 		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
 	})
@@ -65,26 +86,90 @@ describe("generally", () => {
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-		expect(resolved.errors.length).length(1)
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.myplugin1",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				// @ts-expect-error
+				usedApis: ["nonExistentApi"], // Using an API that doesn't exist
+			},
+			setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
+		}
+
+		const env = mockEnvWithPlugins([mockPlugin])
+		const resolved = await resolvePlugins({ env, config: mockConfig })
+
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiError)
 	})
 
 	it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-		expect(resolved.errors.length).length(1)
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.myplugin1",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				// @ts-expect-error
+				usedApis: ["nonExistentApi"], // API not defined in meta.usedApis
+			},
+			setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
+		}
+
+		const mockConfigWithUsedApis = {
+			...mockConfig,
+			usedApis: ["someOtherApi"], // Define some other API in meta.usedApis
+		}
+
+		const env = mockEnvWithPlugins([mockPlugin])
+		const resolved = await resolvePlugins({ env, config: mockConfigWithUsedApis })
+
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
 	})
 
 	it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-		expect(resolved.errors.length).length(1)
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.myplugin1",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: [], // Empty usedApis array, not using any APIs
+			},
+			setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
+		}
+
+		const mockConfigWithUsedApis = {
+			...mockConfig,
+			usedApis: ["someApi"], // Define some API in meta.usedApis
+		}
+
+		const env = mockEnvWithPlugins([mockPlugin])
+		const resolved = await resolvePlugins({ env, config: mockConfigWithUsedApis })
+
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
-		const resolved = await resolvePlugins(mockArgs)
-		expect(resolved.errors.length).length(1)
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "inlang.myplugin", // Using 'inlang' namespace, but not whitelisted
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: [],
+			},
+			setup: () => ({ addAppSpecificApi: () => undefined as any, addLintRules: () => [] }),
+		}
+
+		const env = mockEnvWithPlugins([mockPlugin])
+		const resolved = await resolvePlugins({ env, config: mockConfig })
+
+		expect(resolved.errors.length).toBe(1)
 		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
 	})
 })
@@ -125,11 +210,18 @@ describe("addAppSpecificApi", () => {
 
 // ---------------
 
-function mockEnvWithPlugin(plugin: PluginApi): InlangEnvironment {
+function mockEnvWithPlugins(plugins: PluginApi[]): InlangEnvironment {
+	const pluginModules = plugins.reduce((acc, plugin) => {
+		// @ts-expect-error
+		acc[plugin.meta.id] = { default: plugin }
+		return acc
+	}, {})
+
 	return {
 		$fs: () => undefined,
-		$import: () => {
-			return { default: plugin }
+		$import: (moduleUrl: string) => {
+			// @ts-expect-error
+			return pluginModules[moduleUrl]
 		},
 	} as unknown as InlangEnvironment
 }

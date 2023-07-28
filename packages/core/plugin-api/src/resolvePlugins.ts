@@ -5,8 +5,10 @@ import {
 	PluginApiAlreadyDefinedError,
 	PluginError,
 	PluginImportError,
+	PluginIncorrectlyDefinedUsedApisError,
 	PluginInvalidIdError,
 	PluginUsesReservedNamespaceError,
+	PluginUsesUnavailableApiError,
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { z } from "zod"
@@ -90,6 +92,39 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 						{ module: pluginInConfig.module },
 					)
 				}
+			}
+
+			for (const usedApi of plugin.meta.usedApis) {
+				// -- USES UNAVAILABLE API --
+				if (api[usedApi as keyof typeof api] === undefined) {
+					throw new PluginUsesUnavailableApiError(
+						`Plugin ${pluginInConfig.module} uses unavailable api ${usedApi}.`,
+						{ module: pluginInConfig.module },
+					)
+				}
+
+				// -- USES INCORRECTLY DEFINED API --
+				if (typeof api[usedApi as keyof typeof api] === "function") {
+					throw new PluginIncorrectlyDefinedUsedApisError(
+						`Plugin ${pluginInConfig.module} uses api ${usedApi} but doesn't define it in meta.usedApis.`,
+						{ module: pluginInConfig.module },
+					)
+				}
+
+				// -- DOES NOT USE DEFINED API --
+				if (typeof api[usedApi as keyof typeof api] === "undefined") {
+					throw new PluginIncorrectlyDefinedUsedApisError(
+						`Plugin ${pluginInConfig.module} defines api ${usedApi} in meta.usedApis but doesn't use it.`,
+						{ module: pluginInConfig.module },
+					)
+				}
+			}
+
+			// -- USES RESERVED NAMESPACE --
+			if (plugin.meta.id.startsWith("inlang.") && !whitelistedPlugins.includes(plugin.meta.id)) {
+				throw new PluginUsesReservedNamespaceError("Plugin uses reserved namespace 'inlang'.", {
+					module: pluginInConfig.module,
+				})
 			}
 
 			/**
