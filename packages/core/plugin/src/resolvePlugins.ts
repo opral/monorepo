@@ -54,6 +54,14 @@ export const resolvePlugins: ResolvePlugins = async (args) => {
 			 * -------------- BEGIN ADDING TO RESULT --------------
 			 */
 
+			if (typeof api.loadMessages === "function") {
+				result.data.loadMessages = async () => await api.loadMessages!(args)
+			}
+
+			if (typeof api.saveMessages === "function") {
+				result.data.saveMessages = async (args) => await api.saveMessages!(args)
+			}
+
 			result.data.appSpecificApi = {
 				...result.data.appSpecificApi,
 				...appSpecificApi,

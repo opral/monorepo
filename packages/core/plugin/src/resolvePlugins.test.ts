@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
+	PluginFunctionLoadMessagesAlreadyDefinedError,
+	PluginFunctionSaveMessagesAlreadyDefinedError,
 	PluginImportError,
 	PluginIncorrectlyDefinedUsedApisError,
 	PluginInvalidIdError,
@@ -76,8 +78,8 @@ describe("generally", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				// @ts-expect-error
-				usedApis: ["nonExistentApi"], // Plugin is using an API that is not available
+				// @ts-expect-error plugin is using an API that is not available
+				usedApis: ["nonExistentApi"],
 			},
 			// @ts-expect-error
 			setup: () => {
@@ -113,7 +115,7 @@ describe("generally", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: [], // Empty list of used APIs, but the plugin is using an API in the implementation
+				usedApis: [], // Empty list of used APIs
 			},
 			setup: () => {
 				return {
@@ -184,7 +186,7 @@ describe("generally", () => {
 				description: { en: "" },
 				displayName: { en: "" },
 				keywords: [],
-				usedApis: ["loadMessages"], // Whitelisted plugin using the 'inlang' namespace
+				usedApis: ["loadMessages"],
 			},
 			setup: () => {
 				return {
@@ -213,19 +215,189 @@ describe("generally", () => {
 	})
 })
 
-// describe("loadMessages", () => {
-// 	it("should load messages from a local source", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
-// 	it("should collect an error if function is defined twice", async () => {})
-// })
+describe("loadMessages", () => {
+	it("should load messages from a local source", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["loadMessages"],
+			},
+			setup: () => {
+				return {
+					loadMessages: async () => [
+						{ id: "test", expressions: [], selectors: [], body: { en: [] } },
+					],
+				}
+			},
+		}
+		const pluginModule = "https://myplugin4.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
 
-// describe("saveMessages", () => {
-// 	it("should save messages to a local source", async () => {
-// 		const resolved = await resolvePlugins(mockArgs)
-// 	})
-// 	it("should collect an error if function is defined twice", async () => {})
-// })
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.errors).toHaveLength(0)
+	})
+
+	it("should collect an error if function is defined twice in multiple plugins", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin-load-messages",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["loadMessages"],
+			},
+			setup: () => {
+				return {
+					loadMessages: async () => undefined as any,
+				}
+			},
+		}
+		const mockPlugin2: PluginApi = {
+			meta: {
+				id: "plugin.plugin-load-messages2",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["loadMessages"],
+			},
+			setup: () => {
+				return {
+					loadMessages: async () => undefined as any,
+				}
+			},
+		}
+		const pluginModule = "https://myplugin5.com/index.js"
+		const pluginModule2 = "https://myplugin6.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+			[pluginModule2]: mockPlugin2,
+		})
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+					{
+						options: {},
+						module: pluginModule2,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedError)
+	})
+})
+
+describe("saveMessages", () => {
+	it("should save messages to a local source", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				return {
+					saveMessages: async () => undefined as any,
+				}
+			},
+		}
+		const pluginModule = "https://myplugin7.com/index.js"
+		const env = mockEnvWithPlugins({ [pluginModule]: mockPlugin })
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.errors).toHaveLength(0)
+	})
+
+	it("should collect an error if function is defined twice in multiple plugins", async () => {
+		const mockPlugin: PluginApi = {
+			meta: {
+				id: "plugin.plugin-save-messages",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				return {
+					saveMessages: async () => undefined as any,
+				}
+			},
+		}
+		const mockPlugin2: PluginApi = {
+			meta: {
+				id: "plugin.plugin-save-messages2",
+				description: { en: "" },
+				displayName: { en: "" },
+				keywords: [],
+				usedApis: ["saveMessages"],
+			},
+			setup: () => {
+				return {
+					saveMessages: async () => undefined as any,
+				}
+			},
+		}
+		const pluginModule = "https://myplugin8.com/index.js"
+		const pluginModule2 = "https://myplugin9.com/index.js"
+		const env = mockEnvWithPlugins({
+			[pluginModule]: mockPlugin,
+			[pluginModule2]: mockPlugin2,
+		})
+
+		const resolved = await resolvePlugins({
+			env,
+			config: {
+				plugins: [
+					{
+						options: {},
+						module: pluginModule,
+					},
+					{
+						options: {},
+						module: pluginModule2,
+					},
+				],
+			} as unknown as InlangConfig,
+		})
+
+		expect(resolved.errors).toHaveLength(1)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
+	})
+})
 
 // describe("addLintRules", () => {
 // 	it("should resolve a single lint rule", async () => {
