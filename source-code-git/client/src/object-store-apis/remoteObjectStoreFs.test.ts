@@ -2,38 +2,24 @@ import { it, expect, describe } from "vitest"
 import { raw, http } from "@inlang-git/client/raw"
 import { createMemoryFs } from "@inlang-git/fs"
 import { createObjectStoreFs } from "./objectStoreFs.js"
-import initMappedObjectStore from "./initMappedObjectStore.js"
 import createMappedObjectStore from "./createMappedObjectStore.js"
+import initMappedObjectStore from "./initMappedObjectStore.js"
+import createRemoteMappedObjectStore from "./createRemoteMappedObjectStore.js"
+import resolveRemoteRef from "./remote/resolveRemoteRef.js"
 
+// TODO: Merge this into one test file
 describe("git fs", async () => {
 	const fs = createMemoryFs()
 	const dir = "/"
-	await raw.init({ fs, dir })
-	await raw.addRemote({
-		fs,
-		dir,
-		remote: "origin",
-		url: "https://github.com/araknast/AppFlowy",
-	})
 
-	await raw.fetch({
-		fs,
-		http,
-		dir: "/",
-		remote: "origin",
-		singleBranch: true,
-		depth: 1,
-	})
+	const remoteUrl = "https://github.com/araknast/AppFlowy"
 
-	const main = await raw.resolveRef({
-		fs,
-		dir,
-		ref: "origin/main",
-		depth: 1,
-	})
+	const remoteHead = await resolveRemoteRef("HEAD", remoteUrl)
 
-	const objectStore = 
-		await initMappedObjectStore(await createMappedObjectStore(`${dir}/.git`, fs), main)
+	const objectStore = await createMappedObjectStore(`${dir}/.git`, fs)
+	.then((store) => createRemoteMappedObjectStore(store, remoteUrl))
+	.then((store) => initMappedObjectStore(store, remoteHead))
+
 	const gitFs = await createObjectStoreFs(objectStore)
 
 	const readWrite = async (path: string, content: string) => {

@@ -5,8 +5,9 @@ import { fetchObjectPack, demuxPackfile, extractPackedObject } from "./index.js"
  * containing a single object, demultiplexes, then extracts the single object
  * in raw object format.
  */
-const fetchRemoteObject = async (
+const fetchRemoteObject = (
 	oid: string, url: string, headers?: Record<string, string>,
-) => extractPackedObject(await demuxPackfile(await fetchObjectPack(oid, url, headers)))
+) => fetchObjectPack(oid, url, headers).then(demuxPackfile).then(extractPackedObject)
+
 
 export default fetchRemoteObject
