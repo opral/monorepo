@@ -21,6 +21,7 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
 	if (json && json !== "undefined") {
 		return JSON.parse(json)
 	}
+	return undefined
 }
 
 /**

@@ -25,11 +25,11 @@ test("it should not throw errors", () => {
 test("should report if a message is missing", async () => {
 	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
 	expect(reports).toHaveLength(1)
-	expect(reports[0].message).toBe("Message with id 'test' is missing for 'de'.")
+	expect(reports[0]!.message).toBe("Message with id 'test' is missing for 'de'.")
 })
 
 test("should report if a message has an empty pattern", async () => {
-	const [lintedResources, errors] = await lint({
+	const [lintedResources] = await lint({
 		config,
 		resources: [
 			createResource("en", createMessage("test", "1")),
@@ -43,7 +43,7 @@ test("should report if a message has an empty pattern", async () => {
 	})
 	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
 	expect(reports).toHaveLength(1)
-	expect(reports[0].message).toBe("Empty pattern (length 0).")
+	expect(reports[0]!.message).toBe("Empty pattern (length 0).")
 })
 
 test("should report if a message has a pattern with only one text element that is an empty string", async () => {
@@ -61,7 +61,7 @@ test("should report if a message has a pattern with only one text element that i
 	})
 	const reports = lintedResources.flatMap((resource) => getLintReports(resource))
 	expect(reports).toHaveLength(1)
-	expect(reports[0].message).toBe(
+	expect(reports[0]!.message).toBe(
 		"The pattern contains only only one element which is an empty string.",
 	)
 })

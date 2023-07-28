@@ -29,7 +29,6 @@ import type { Result } from "@inlang/core/utilities"
 import { lint, LintedResource, LintRule } from "@inlang/core/lint"
 
 import { publicEnv } from "@inlang/env-variables"
-
 import { parseOrigin, coreUsedConfigEvent, telemetryBrowser } from "@inlang/telemetry"
 
 import type { LocalStorageSchema } from "@src/services/local-storage/index.js"
@@ -37,6 +36,14 @@ import { getLocalStorage, useLocalStorage } from "@src/services/local-storage/in
 
 import { github } from "@src/services/github/index.js"
 import { showToast } from "@src/components/Toast.jsx"
+import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
+import { parseOrigin } from "@inlang/telemetry"
+import { setSearchParams } from "./helper/setSearchParams.js"
+
+export type LocalChange = {
+	languageTag: ast.Resource["languageTag"]
+	newCopy: ast.Message
+}
 
 type EditorStateSchema = {
 	/**
@@ -84,6 +91,10 @@ type EditorStateSchema = {
 	 * Object Store interface
 	 */
 	objectFs: () => ObjectStoreFilesystem
+	 * Id to filter messages
+	 */
+	filteredId: () => string
+	setFilteredId: Setter<string>
 
 	/**
 	 * TextSearch to filter messages
@@ -134,8 +145,9 @@ type EditorStateSchema = {
 	/**
 	 * Unpushed changes in the repository.
 	 */
-	localChanges: () => any[]
-	setLocalChanges: Setter<any[]>
+
+	localChanges: () => LocalChange[]
+	setLocalChanges: Setter<LocalChange[]>
 
 	/**
 	 * The resources in a given repository.
@@ -198,13 +210,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	 */
 	const [lastPush, setLastPush] = createSignal<Date>()
 
-	const [localChanges, setLocalChanges] = createSignal<Array<ast.Text | ast.Placeholder>[]>([])
+	const [localChanges, setLocalChanges] = createSignal<LocalChange[]>([])
 
 	const routeParams = () => currentPageContext.routeParams as EditorRouteParams
 
 	const searchParams = () => currentPageContext.urlParsed.search as EditorSearchParams
-
-	const [textSearch, setTextSearch] = createSignal<string>("")
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
@@ -213,9 +223,33 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [referenceLanguage, setReferenceLanguage] = createSignal<Language>()
 	const [languages, setLanguages] = createSignal<Language[]>([])
 	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
-	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>([])
 
-	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>([])
+	//set filter with search params
+	const params = new URL(document.URL).searchParams
+
+	const [filteredId, setFilteredId] = createSignal<string>((params.get("id") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "id", value: filteredId() })
+	})
+
+	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "search", value: textSearch() })
+	})
+
+	const [filteredLanguages, setFilteredLanguages] = createSignal<Language[]>(
+		params.getAll("lang") as string[],
+	)
+	createEffect(() => {
+		setSearchParams({ key: "lang", value: filteredLanguages() })
+	})
+
+	const [filteredLintRules, setFilteredLintRules] = createSignal<LintRule["id"][]>(
+		params.getAll("lint") as `${string}.${string}`[],
+	)
+	createEffect(() => {
+		setSearchParams({ key: "lint", value: filteredLintRules() })
+	})
 
 	const [fs, setFs] = createSignal<NodeishFilesystem>(createMemoryFs())
 	const [objectFs, setObjectFs] = createSignal<ObjectStoreFilesystem | undefined>()
@@ -322,7 +356,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setLint(config.lint)
 				setReferenceLanguage(config.referenceLanguage)
 				setLanguages(languages)
-				setFilteredLanguages(languages)
+				//filteredLanguages().length === 0 && setFilteredLanguages(languages)
 				telemetryBrowser.capture(coreUsedConfigEvent.name, coreUsedConfigEvent.properties(config))
 			}
 			return config
@@ -574,7 +608,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			try {
 				const localStorage = getLocalStorage()
 				const config = inlangConfig()
-
 				if (config === undefined || localStorage?.user === undefined) {
 					resolve() // Resolve immediately if conditions are not met
 					return
@@ -616,6 +649,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
+					filteredId,
+					setFilteredId,
 					textSearch,
 					setTextSearch,
 					fsChange,
@@ -821,12 +856,17 @@ async function readResources(config: InlangConfig) {
 
 	const [lintedResources] = await lint({ config, resources })
 	// const allLints = getLintReports(lintedResources ? lintedResources : ([] as LintedResource[]))
-	// console.log(allLints)
+	// console.info(allLints)
 	return lintedResources
 }
 
-async function writeResources(args: { config: InlangConfig; resources: ast.Resource[] }) {
+async function writeResources(args: {
+	config: InlangConfig
+	resources: ast.Resource[]
+	setFsChange: (date: Date) => void
+}) {
 	await args.config.writeResources({ config: args.config, resources: args.resources })
+	args.setFsChange(new Date())
 
 	// showToast({
 	// 	variant: "info",

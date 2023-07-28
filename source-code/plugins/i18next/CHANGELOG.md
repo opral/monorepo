@@ -1,5 +1,29 @@
 # @inlang/plugin-i18next
 
+## 3.0.2
+
+### Patch Changes
+
+- 1672ec38: Throw error when using wildcard in version 3
+
+## 3.0.1
+
+### Patch Changes
+
+- 6c7e2077: Single namespace path defined without object syntax
+
+## 3.0.0
+
+### Major Changes
+
+- 66fd1a55: The pathPattern has a different type now. Old: `pathPattern: string` new: `pathPattern: string | {[key: string]: string}`
+
+## 2.2.4
+
+### Patch Changes
+
+- 12fe1943: support language folders and addLanguage button
+
 ## 2.2.3
 
 ### Patch Changes

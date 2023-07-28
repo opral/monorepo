@@ -6,13 +6,12 @@ import { createPlugin } from "@inlang/core/plugin"
 
 export const sdkPlugin = createPlugin<SdkConfigInput>(({ settings }) => ({
 	id: "inlang.sdk-js",
-	config: async (config) => {
+	config: async () => {
 		const parsedConfig = validateSdkConfig(settings)
 
 		return {
 			sdk: parsedConfig,
-			// if the user has not defined an ideExtension config, use the default
-			ideExtension: config.ideExtension ? config.ideExtension : ideExtensionDefaultConfig,
+			ideExtension: ideExtensionDefaultConfig,
 		}
 	},
 }))

@@ -1,5 +1,5 @@
 import type * as ast from "@inlang/core/ast"
-import { For, Show, createSignal } from "solid-js"
+import { For } from "solid-js"
 
 export const FloatingMenu = (props: {
 	variableReferences: ast.VariableReference[]

@@ -25,7 +25,7 @@ export const TipTapEditor = (props: {
 	createEffect(() => {
 		if (editor) {
 			const json = useEditorJSON(() => editor())
-			console.log(json())
+			console.debug(json())
 		}
 	})
 

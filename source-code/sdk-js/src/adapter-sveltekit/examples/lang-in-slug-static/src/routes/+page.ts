@@ -12,6 +12,6 @@ export const load = initRootPageLoadWrapper<PageLoad>({
 		throwable: redirect,
 		getPath: ({ url }, language) => replaceLanguageInUrl(new URL(url), language),
 	},
-}).wrap(async (_, { i }) => {
+}).use(async (_, { i }) => {
 	console.info("+page.ts", i("welcome"))
 })

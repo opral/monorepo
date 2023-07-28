@@ -1,10 +1,11 @@
 ---
-title: Web Editor
+title: Edit translations with inlang's web editor
+shortTitle: Web Editor
 href: /documentation/apps/web-editor
-description: This is the editor description
+description: inlang's web editor is a simple and easy to use no-code tool to manage your translations.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 The inlang web editor is a simple and easy to use no-code tool to manage your translations. It let's translators work on translations without having to touch the code and pushes changes directly to your git repository.
 
@@ -23,7 +24,7 @@ You can use the editor with any git repository. The only requirement is that you
 A plugin to read and write your translation files. To find the correct plugin for your project, check out the [plugin registry](/documentation/plugins/registry).
 
 **Recommended:**
-A plugin to enable linting feature for your translation files. For example, you can use the [standard-lint-rules](https://github.com/inlang/plugin-standard-lint-rules) plugin.
+A plugin to enable linting feature for your translation files. For example, you can use the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/inlang/tree/main/source-code/plugins/standard-lint-rules) plugin.
 
 {% QuickLinks %}
 
@@ -48,14 +49,24 @@ A plugin to enable linting feature for your translation files. For example, you 
 
 **Note:** If you have write access, you can skip the forking step and push directly to the repository.
 
-## Features
+## Linkability
 
-**Machine translation**
+In order to reference specific messages within the editor, it is possible to utilize `searchParams` to apply particular filters. You can stack these parameters behind each other.
 
-**Linting**
+Example: `https://inlang.com/editor/github.com/orga/project?search='common'&lint='missingMessage'`
 
-**Filter languages & search**
+- **🆔 id**
 
-**Add new languages**
+  `?id='myId'` The id parameter links to only one specific message. Make sure to provide the correct id, as only one message will be displayed. If the id is incorrect, no message will be shown. The parameter should be provided only once.
 
-**Placeholder**
+- **🔎 search**
+
+  `?search='mySearch'` The search parameter filters messages by search string. The parameter should be provided only once.
+
+- **🚨 lint**
+
+  `?lint='missingMessage&lint=messageWithoutReference'` The lint parameter filters the messages by lint rule. The parameter could be provided multiple times.
+
+- **🌎 lang**
+
+  `?lang='en'&lang='de'` The lang parameter filters the messages by languages. The parameter could be provided multiple times.

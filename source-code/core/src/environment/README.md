@@ -1,10 +1,11 @@
 ---
-title: Environment
+title: Environment overview
+shortTitle: Environment
 href: /documentation/inlang-environment
 description: Learn more about the inlang environment.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 **The inlang environment contains functions that are injected by the host application (e.g. the browser or VSCode).**
 

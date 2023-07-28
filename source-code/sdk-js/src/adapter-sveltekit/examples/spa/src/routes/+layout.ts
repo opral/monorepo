@@ -7,7 +7,7 @@ export const load = initRootLayoutLoadWrapper<LayoutLoad>({
 	initDetectors: browser
 		? () => [initLocalStorageDetector("language"), navigatorDetector]
 		: undefined,
-}).wrap(async ({ data }, { i }) => {
+}).use(async ({ data }, { i }) => {
 	console.info("+layout.ts", i("welcome"))
 
 	return { ...data, "+layout.ts": Math.random() }

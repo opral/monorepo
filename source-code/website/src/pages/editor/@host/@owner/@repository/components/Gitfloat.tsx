@@ -84,7 +84,10 @@ export const Gitfloat = () => {
 				message: `Don't forget to open a pull request`,
 			})
 			setIsLoading(false)
-			// full name is owner/repo
+			await github.rest.repos.get({
+				owner: routeParams().owner,
+				repo: routeParams().repository,
+			})
 			return navigate(`/editor/github.com/${response.data.full_name}`)
 		} else {
 			showToast({
@@ -231,7 +234,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (localChanges().length > 0) {
+		if (localChanges().length > 0 && localStorage?.user !== undefined) {
 			const gitfloat = document.querySelector(".gitfloat")
 			gitfloat?.classList.add("animate-jump")
 			setTimeout(() => {

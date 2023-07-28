@@ -18,8 +18,6 @@
 	],
 	"scripts": {
 		"---- BUILD AND DEV--------------------------------------------------": "",
-		"isogit-clone": "rm -rf node_modules/isomorphic-git && git clone --depth=1 https://github.com/inlang/isomorphic-git node_modules/isomorphic-git",
-		"prebuild": "npm run isogit-clone",
 		"build": "tsc --build ./tsconfig.build.json",
 		"dev": "tsc --watch",
 		"---- TEST SETUP ----------------------------------------------------": "",
@@ -41,8 +39,8 @@
 	},
 	"dependencies": {
 		"@inlang-git/fs": "^0.0.4",
-		"isomorphic-git": "^1.21.0",
-		"pako": "^2.1.0"
+		"pako": "^2.1.0",
+		"isomorphic-git": "github:inlang/isomorphic-git"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {

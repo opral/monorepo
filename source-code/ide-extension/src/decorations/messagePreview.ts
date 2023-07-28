@@ -1,32 +1,28 @@
 import * as vscode from "vscode"
-import { debounce } from "throttle-debounce"
 import { query } from "@inlang/core/query"
 import { state } from "../state.js"
+import { contextTooltip } from "./contextTooltip.js"
+import { onDidEditMessage } from "../commands/editMessage.js"
+import { getMessageAsString } from "../utilities/query.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
-export async function messagePreview(args: {
-	activeTextEditor: vscode.TextEditor
-	context: vscode.ExtensionContext
-}) {
-	const { context } = args
-	let activeTextEditor = vscode.window.activeTextEditor
-
+export async function messagePreview(args: { context: vscode.ExtensionContext }) {
 	const messagePreview = vscode.window.createTextEditorDecorationType({
 		after: {
 			margin: "0 0.5rem",
 		},
 	})
 
-	updateDecorations()
-
 	async function updateDecorations() {
+		const activeTextEditor = vscode.window.activeTextEditor
+
 		if (!activeTextEditor) {
 			return
 		}
 
 		// TODO: this is a hack to prevent the message preview from showing up in the inlang.config.js file
-		if (args.activeTextEditor.document.fileName.includes("inlang.config.js")) {
+		if (activeTextEditor.document.fileName.includes("inlang.config.js")) {
 			return activeTextEditor.setDecorations(messagePreview, [])
 		}
 
@@ -52,21 +48,20 @@ export async function messagePreview(args: {
 		const wrappedDecorations = (state().config.ideExtension?.messageReferenceMatchers ?? []).map(
 			async (matcher) => {
 				const messages = await matcher({
-					documentText: args.activeTextEditor.document.getText(),
+					documentText: activeTextEditor.document.getText(),
 				})
 				return messages.map((message) => {
-					const translation = query(refResource).get({
-						id: message.messageId,
-					})?.pattern.elements
+					const translation = getMessageAsString(
+						query(refResource).get({
+							id: message.messageId,
+						}),
+					)
 
-					const translationText =
-						translation && translation.length > 0 ? (translation[0]!.value as string) : undefined
-
-					const truncatedTranslationText =
-						translationText &&
-						(translationText.length > (MAXIMUM_PREVIEW_LENGTH || 0)
-							? `${translationText.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
-							: translationText)
+					const truncatedTranslation =
+						translation &&
+						(translation.length > (MAXIMUM_PREVIEW_LENGTH || 0)
+							? `${translation.slice(0, MAXIMUM_PREVIEW_LENGTH)}...`
+							: translation)
 					const range = new vscode.Range(
 						// VSCode starts to count lines and columns from zero
 						new vscode.Position(
@@ -80,15 +75,15 @@ export async function messagePreview(args: {
 						renderOptions: {
 							after: {
 								contentText:
-									truncatedTranslationText ??
+									truncatedTranslation ??
 									`ERROR: '${message.messageId}' not found in reference language '${referenceLanguage}'`,
-								backgroundColor: translationText ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
-								border: translationText
+								backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
+								border: translation
 									? "1px solid rgb(45 212 191/.50)"
 									: "1px solid rgb(244 63 94/.50)",
 							},
 						},
-						hoverMessage: translationText,
+						hoverMessage: contextTooltip(message),
 					}
 					return decoration
 				})
@@ -98,26 +93,27 @@ export async function messagePreview(args: {
 		activeTextEditor.setDecorations(messagePreview, decorations)
 	}
 
-	const debouncedUpdateDecorations = debounce(500, updateDecorations)
+	// in case the active text editor is already open, update decorations
+	updateDecorations()
 
+	// immediately update decorations when the active text editor changes
 	vscode.window.onDidChangeActiveTextEditor(
-		(editor) => {
-			if (editor) {
-				activeTextEditor = editor
-				debouncedUpdateDecorations()
-			}
-		},
+		() => updateDecorations(),
 		undefined,
-		context.subscriptions,
+		args.context.subscriptions,
 	)
 
+	// update decorations when the text changes in a document
 	vscode.workspace.onDidChangeTextDocument(
 		(event) => {
-			if (activeTextEditor && event.document === activeTextEditor.document) {
+			if (event.document === vscode.window.activeTextEditor?.document) {
 				updateDecorations()
 			}
 		},
 		undefined,
-		context.subscriptions,
+		args.context.subscriptions,
 	)
+
+	// update decorations, when message was edited
+	onDidEditMessage(() => updateDecorations())
 }

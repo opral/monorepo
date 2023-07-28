@@ -11,10 +11,10 @@ const options = {
 	platform: "node",
 	format: "esm",
 	target: "esnext",
-	sourcemap: !dev,
-	minify: !dev,
+	sourcemap: true,
+	minify: false,
 	splitting: false,
-	external: ["svelte", "@sveltejs/kit"],
+	external: ["svelte", "@sveltejs/kit", "typescript", "ts-morph"],
 	plugins: [
 		{
 			name: "logger",

@@ -35,19 +35,16 @@ export function Layout(props: { children: JSXElement }) {
 		tourStep,
 	} = useEditorState()
 
-	const onlyLanguagesTheUserSpeaks = () => {
-		const languages = inlangConfig()?.languages.filter(
-			(language) =>
-				navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
-		)
-		return languages ?? []
-	}
+	// const onlyLanguagesTheUserSpeaks = () => {
+	// 	const languages = inlangConfig()?.languages.filter(
+	// 		(language) =>
+	// 			navigator.languages.includes(language) || language === inlangConfig()!.referenceLanguage,
+	// 	)
+	// 	return languages ?? []
+	// }
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-	const handleSearchText = (text: string) => {
-		setTextSearch(text)
-	}
 	const filters: Filter[] = [
 		{
 			name: "Language",
@@ -105,10 +102,28 @@ export function Layout(props: { children: JSXElement }) {
 			repositoryIsCloned.error === undefined &&
 			repositoryIsCloned.loading === false &&
 			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
-			onlyLanguagesTheUserSpeaks().length > 1
+			inlangConfig()
 		) {
-			setFilteredLanguages(onlyLanguagesTheUserSpeaks())
-			addFilter("Language")
+			if (filteredLanguages().length > 0) {
+				addFilter("Language")
+				// } else if (onlyLanguagesTheUserSpeaks().length > 1) {
+				// 	setFilteredLanguages(onlyLanguagesTheUserSpeaks())
+				// 	addFilter("Language")
+			} else {
+				setFilteredLanguages(inlangConfig()!.languages)
+			}
+		}
+	})
+
+	//add initial lintRule filter
+	createEffect(() => {
+		if (
+			repositoryIsCloned.error === undefined &&
+			repositoryIsCloned.loading === false &&
+			isLessThanHalfASecondAgo(repositoryIsCloned()!) &&
+			filteredLintRules().length > 0
+		) {
+			addFilter("Linting")
 		}
 	})
 
@@ -195,7 +210,9 @@ export function Layout(props: { children: JSXElement }) {
 							>
 								<sl-dropdown prop:distance={8}>
 									<sl-button prop:size="small" slot="trigger">
-										<IconAdd slot="prefix" />
+										<button slot="prefix">
+											<IconAdd class="w-4 h-4" />
+										</button>
 										Filter
 									</sl-button>
 									<sl-menu>
@@ -236,7 +253,10 @@ export function Layout(props: { children: JSXElement }) {
 						</Show>
 					</div>
 					<div class="flex gap-2">
-						<SearchInput placeholder="Search ..." handleChange={handleSearchText} />
+						<SearchInput
+							placeholder="Search ..."
+							handleChange={(text: string) => setTextSearch(text)}
+						/>
 						<sl-button
 							prop:size={"small"}
 							onClick={() => setAddLanguageModalOpen(true)}
@@ -403,8 +423,8 @@ function LanguageFilter(props: { clearFunction: any }) {
 						is
 					</p>
 				</div>
-				<button slot="clear-icon">
-					<IconClose />
+				<button slot="clear-icon" class="p-0.5">
+					<IconClose class="w-4 h-4" />
 				</button>
 
 				<div class="flex px-3 gap-2 text-sm font-medium">
@@ -496,8 +516,8 @@ function LintFilter(props: { clearFunction: any }) {
 					</button>
 				</Show>
 			</div>
-			<button slot="clear-icon">
-				<IconClose />
+			<button slot="clear-icon" class="p-0.5">
+				<IconClose class="w-4 h-4" />
 			</button>
 
 			<div class="flex px-3 gap-2 text-sm font-medium">

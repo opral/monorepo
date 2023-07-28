@@ -1,12 +1,15 @@
 ---
-title: Configuration
+title: Configuration Options for the inlang SDK
+shortTitle: Configuration
 href: /documentation/sdk/configuration
-description: TODO write some description
+description: Configure the inlang SDK to your needs.
 ---
 
-# {% $frontmatter.title %} Options
+# {% $frontmatter.shortTitle %} Options
 
 You can configure the SDK behavior to your needs with the `inlang.config.js` file. This file is located in the root of your project. Just add the `sdkPlugin` and configure it to your project's needs.
+
+If you don't have a `inlang.config.js` file yet, you can create one by following our [Quickstart-Guide](/documentation/quick-start).
 
 ```js
 /**
@@ -87,6 +90,26 @@ Loads all Resources during build time and adds them to the bundle.
 	},
 },
 ```
+
+## routing
+
+### exclude
+
+You can tell `inlang` to ignore certain routes in your project. Those routes will have no i18n code setup, so accessing any `@inlang/sdk-js` imports inside those routes could fail during runtime.
+
+```js
+{
+	routing: {
+		exclude: [
+			"/api",
+			"/login",
+		],
+	},
+},
+```
+
+- All entries must be defined as a relative path `/`.
+- If `/api` get's specified, all subpaths (e.g. `/api/users`) will also match (`startsWith`).
 
 ---
 

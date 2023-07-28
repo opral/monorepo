@@ -16,11 +16,23 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 ## Features
 
+### Context Tooltips
+
+See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/tooltip.gif"/>
+
 ### ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
 <img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/extract.gif"/>
+
+### Message Linting
+
+Get notified about missing translations and other issues directly in your IDE.
+
+<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/inlang/assets/ide-extension/lint.gif"/>
 
 ### 🔎 Inline Annotations
 
@@ -55,11 +67,18 @@ export async function defineConfig(env) {
 }
 ```
 
+#### Requirements:
+
+- Requires VS Code version 1.80.1 or higher.
+- Node.js version 16.17.1 or higher.
+
 ## 2️⃣ Usage
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/inlang/issues/new/choose)>). We are happy to help!
+Hover over the message to see the tooltip with the translation.
+
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/inlang/issues/new/choose). We are happy to help!
 
 ## 3️⃣ Configuration
 

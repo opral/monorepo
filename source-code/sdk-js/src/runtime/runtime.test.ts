@@ -5,8 +5,8 @@ import {
 	initBaseRuntime,
 	initRuntime,
 	initRuntimeWithLanguageInformation,
-	RuntimeContext,
-	RuntimeState,
+	type RuntimeContext,
+	type RuntimeState,
 } from "./runtime.js"
 
 // --------------------------------------------------------------------------------------------------------------------

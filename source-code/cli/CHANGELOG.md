@@ -1,5 +1,51 @@
 # @inlang/cli
 
+## 0.13.3
+
+### Patch Changes
+
+- 1b7a054e: improve error DX and update links
+
+## 0.13.2
+
+### Patch Changes
+
+- e7546f74: add nodejs minimum support
+
+## 0.13.1
+
+### Patch Changes
+
+- 9171a188: fix lint table and config update plugin link quotes
+
+## 0.13.0
+
+### Minor Changes
+
+- 1bc427b7: add `config update` command
+
+### Patch Changes
+
+- 74e18d43: fix typos and add one edge case
+
+## 0.12.0
+
+### Minor Changes
+
+- 7bad2441: add `--no-fail` flag to lint command and output lint messages in tables
+
+## 0.11.7
+
+### Patch Changes
+
+- 1cff6e4d: fix btoa with Buffer.from
+
+## 0.11.6
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.11.5
 
 ### Patch Changes

@@ -41,3 +41,13 @@ jobs:
         with:
           token: ${{ secrets.NPM_PUBLISH_TOKEN }}
           package: source-code/plugins/json/package.json
+  purge-jsdelivr-cache:
+    runs-on: ubuntu-latest
+    steps:
+      # purge all plugins, needs to be updated after maijor version bumps
+      - uses: gacts/purge-jsdelivr-cache@v1
+        with:
+          url: |
+            https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js
+            https://cdn.jsdelivr.net/npm/@inlang/plugin-json@3/dist/index.js
+            https://cdn.jsdelivr.net/npm/@inlang/plugin-standard-lint-rules@3/dist/index.js

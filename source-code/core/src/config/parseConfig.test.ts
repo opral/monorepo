@@ -5,7 +5,7 @@ import type { Language } from "@inlang/core/ast"
 import type { InlangEnvironment } from "../environment/types.js"
 import type { InlangConfig } from "../config/index.js"
 import { mockEnvironment } from "../test/mockEnvironment.js"
-import { createResource } from '../test/utils.js'
+import { createResource } from "../test/utils.js"
 
 it("should succeed if the config is valid", async () => {
 	const env = await mockEnvironment({})
@@ -146,7 +146,10 @@ function parseResource(
 	flatJson: Record<string, string>,
 	language: Language,
 ): ast.Resource {
-	return createResource(language, ...Object.entries(flatJson).map(([id, value]) => parseMessage(id, value)))
+	return createResource(
+		language,
+		...Object.entries(flatJson).map(([id, value]) => parseMessage(id, value)),
+	)
 }
 
 /**

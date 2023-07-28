@@ -1,5 +1,47 @@
 # inlang-vs-code-extension
 
+## 0.9.3
+
+### Patch Changes
+
+- 1bd24020: Fixes an error so placeholders are displayed in message previews.
+
+## 0.9.2
+
+### Patch Changes
+
+- 68504fbc: update README
+
+## 0.9.1
+
+### Patch Changes
+
+- ce0c2566: add jsonc parser for extensions.json parsing
+
+## 0.9.0
+
+### Minor Changes
+
+- 9ff20754: Add context tooltip, which lets you view all localizations of a message, edit and open them in the editor.
+- 823cec8a: add lints to ide extension
+
+## 0.8.1
+
+### Patch Changes
+
+- 06b12597: Adjust loading inlangs config so it is compatible with Windows
+- 543231e4: Fixes telemtry in ide-extension, so it won't crash if there is no git.
+
+## 0.8.0
+
+### Minor Changes
+
+- 283f5764: Several performance improvements.
+
+### Patch Changes
+
+- 943e29c1: added a missing group identifier event
+
 ## 0.7.6
 
 ### Patch Changes

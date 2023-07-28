@@ -58,7 +58,7 @@ async function generateIndexAndTableOfContents() {
 		const frontmatters: { frontmatter: any }[] = []
 		for (const document of documents) {
 			const markdown = parseMarkdown({
-				text: document,
+				text: document.import,
 				FrontmatterSchema,
 			})
 			// not pushing to processedTableOfContents directly in case

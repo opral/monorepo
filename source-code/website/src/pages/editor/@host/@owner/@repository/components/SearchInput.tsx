@@ -1,5 +1,6 @@
 import { createEffect } from "solid-js"
 import { createSignal } from "solid-js"
+import { useEditorState } from "../State.jsx"
 
 interface SearchInputProps {
 	placeholder: string
@@ -7,7 +8,9 @@ interface SearchInputProps {
 }
 
 export const SearchInput = (props: SearchInputProps) => {
-	const [textValue, setTextValue] = createSignal<string>("")
+	const { textSearch } = useEditorState()
+	const [textValue, setTextValue] = createSignal<string>(textSearch())
+
 	createEffect(() => props.handleChange(textValue()))
 
 	return (

@@ -1,10 +1,11 @@
 ---
-title: Build apps on inlang
+title: Build apps on inlang's infrastructure
+shortTitle: Build apps
 href: /documentation/build-on-inlang
-description: Learn how to build your own inlang app.
+description: Learn how to build your own inlang app for your use case.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 ## Introduction
 

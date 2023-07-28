@@ -1,4 +1,4 @@
-# inlang standard-lint-rules
+# @inlang/standard-lint-rules
 
 High-quality lint rules maintained by inlang.
 

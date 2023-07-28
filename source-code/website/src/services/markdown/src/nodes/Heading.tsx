@@ -49,21 +49,74 @@ const Wrapper = (props: { children: JSXElement }) => {
 
 const CopyWrapper = (props: { children: JSXElement }) => {
 	const [isHovered, setIsHovered] = createSignal(false)
+	let element: HTMLDivElement | ((el: HTMLDivElement) => void) | undefined
+
 	return (
 		<div
 			class="relative cursor-pointer"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			id={props.children?.toString().replace(" ", "-").toLowerCase()}
+			ref={(el) => {
+				if (typeof el === "function") {
+					element = el
+				} else if (el instanceof HTMLDivElement) {
+					element = el
+				}
+			}}
+			id={
+				props.children
+					?.toString()
+					.replace(" ", "-")
+					.replace("#", "")
+					.toLowerCase()
+					.includes("native code")
+					? typeof element === "object" && element instanceof HTMLDivElement
+						? element.innerText
+								?.toString()
+								.replace("#", "")
+								.replaceAll("/", "")
+								.replaceAll(/\(.*?\)/g, "")
+								.replaceAll(" ", "-")
+								.replace(/-$/, "")
+								.toLowerCase()
+								.trim() // Trim the value to remove any leading/trailing whitespace
+						: ""
+					: props.children?.toString().replaceAll(" ", "-").toLowerCase()
+			}
 			onClick={() => {
-				copy(
-					(	"https://" +
+				if (typeof element === "object" && element instanceof HTMLDivElement) {
+					const headlineText = props.children
+						?.toString()
+						.replace(" ", "-")
+						.replace("#", "")
+						.toLowerCase()
+						.includes("native code")
+						? (element?.innerText
+								?.toString()
+								.replaceAll(" ", "-")
+								.replaceAll("/", "")
+								.replaceAll(/\(.*?\)/g, "")
+								.replaceAll("#", "")
+								.replace(/-$/, "")
+								.toLowerCase() as string)
+						: (props.children
+								?.toString()
+								.replaceAll(" ", "-")
+								.replace(/-$/, "")
+								.toLowerCase() as string)
+
+					const link =
+						document.location.protocol +
+						"//" +
 						document.location.host +
 						document.location.pathname +
 						"#" +
-						props.children?.toString().replace(" ", "-").toLowerCase()) as string,
-				),
-					showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+						headlineText
+
+					copy(link)
+					window.history.pushState({}, "", link)
+				}
+				showToast({ variant: "success", title: "Copied link to clipboard", duration: 3000 })
 			}}
 		>
 			{props.children}

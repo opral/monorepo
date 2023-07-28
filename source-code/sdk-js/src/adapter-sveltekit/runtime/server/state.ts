@@ -5,24 +5,22 @@ import { initConfig } from "../../../config/config.js"
 import { inlangSymbol } from "../shared/utils.js"
 import type { SvelteKitServerRuntime } from "./runtime.js"
 
-let config: InlangConfig
+let config: InlangConfig | undefined
 
 export const initState = async (module: InlangConfigModule) => {
 	if (!config && !import.meta.env.DEV) {
 		try {
-			const {
-				languages,
-				referenceLanguage,
-				resources,
-			} = await import("virtual:inlang-static")
+			const { languages, referenceLanguage, resources } = await import("virtual:inlang-static")
 
-			config = ({
+			config = {
 				referenceLanguage,
 				languages,
 				readResources: async () => resources,
 				writeResources: async () => undefined,
-			} as InlangConfig)
-		} catch { /* empty */ }
+			} as InlangConfig
+		} catch {
+			/* empty */
+		}
 	}
 
 	if (!config) {
@@ -42,7 +40,8 @@ export const initState = async (module: InlangConfigModule) => {
 let _resources: Resource[] = []
 
 // TODO: fix resources if needed (add missing Keys, etc.)
-export const reloadResources = async () => (_resources = await config.readResources({ config }))
+export const reloadResources = async () =>
+	(_resources = (await config?.readResources({ config })) || [])
 
 export const getResource = (language: string) =>
 	_resources.find(({ languageTag: { name } }) => name === language)

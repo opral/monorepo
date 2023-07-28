@@ -1,8 +1,9 @@
 ---
 # the frontmatter is only relevant for rendering this site on the website
-title: Contributing
+title: Contributing to inlang
+shortTitle: Contributing
 href: /documentation/contributing
-description: Learn on how to contribute to inlang.
+description: Learn on how to contribute to inlang and its ecosystem.
 ---
 
 # Contributing

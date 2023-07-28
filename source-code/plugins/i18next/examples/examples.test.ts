@@ -2,9 +2,11 @@ import { expect } from "vitest"
 import { mockEnvironment } from "@inlang/core/test"
 import { setupConfig } from "@inlang/core/config"
 import fs from "node:fs/promises"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
 import { it, describe } from "vitest"
 
-const thisDirectoryPath = new URL("./", import.meta.url).pathname
+const thisDirectoryPath = dirname(fileURLToPath(import.meta.url))
 
 const exampleDirectories = (await fs.readdir(thisDirectoryPath)).filter(
 	// filtering the test file

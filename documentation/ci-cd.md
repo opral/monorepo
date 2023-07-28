@@ -1,10 +1,11 @@
 ---
 title: Automation via CI/CD
+shortTitle: CI/CD
 href: /documentation/automation
 description: Learn how to automate localization processes with CI/CD.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 **Inlang being file and git-based (read the [design-principles](/documentation/design-principles)) entails the possbility to leverage CI/CD to automate localization.**
 

@@ -22,6 +22,11 @@ export const repositories: Repositories = [
 			"OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.",
 	},
 	{
+		owner: "jitsi",
+		repository: "jitsi-meet",
+		description: "Jitsi Meet - Secure, Simple and Scalable Video Conferences.",
+	},
+	{
 		owner: "AppFlowy-IO",
 		repository: "AppFlowy",
 		description:
@@ -30,8 +35,7 @@ export const repositories: Repositories = [
 	{
 		owner: "remnoteio",
 		repository: "translation",
-		description:
-			"The all-in-one tool forthinking and learning",
+		description: "The all-in-one tool forthinking and learning",
 	},
 	{
 		owner: "osmosis-labs",

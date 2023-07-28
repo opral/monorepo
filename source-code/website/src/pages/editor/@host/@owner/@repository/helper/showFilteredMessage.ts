@@ -7,6 +7,7 @@ export const showFilteredMessage = (
 	filteredLanguages: string[],
 	textSearch: string,
 	filteredLintRules: `${string}.${string}`[],
+	messageId: string,
 ) => {
 	// filteredByLanguage
 	const filteredByLanguage = Object.keys(messages)
@@ -16,8 +17,20 @@ export const showFilteredMessage = (
 			return filteredMessage
 		}, {} as { [key: string]: LintedMessage | undefined })
 
+	// filteredById
+	const filteredById = Object.values(filteredByLanguage).filter((message) => {
+		if (messageId === "") {
+			return true
+		} else {
+			if (message !== undefined && message.id.name === messageId) {
+				return true
+			}
+		}
+		return false
+	})
+
 	// filteredBySearch
-	const filteredBySearch = Object.values(filteredByLanguage).filter((message) => {
+	const filteredBySearch = filteredById.filter((message) => {
 		if (textSearch.length === 0) {
 			return true
 		} else {

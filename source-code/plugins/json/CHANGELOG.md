@@ -1,5 +1,29 @@
 # @inlang/plugin-json
 
+## 3.0.11
+
+### Patch Changes
+
+- 77a6deed: Added test for unused folder in language dir (fixed ignore at getLanguages)
+
+## 3.0.10
+
+### Patch Changes
+
+- 61ec4dac: chore: fix the id of the plugin from `inlang.plugin-i18next` to `inlang.plugin-json`
+
+## 3.0.9
+
+### Patch Changes
+
+- 0c82623d: fix ignore folder at getLanguage function
+
+## 3.0.8
+
+### Patch Changes
+
+- 12fe1943: support language folders and addLanguage button
+
 ## 3.0.7
 
 ### Patch Changes

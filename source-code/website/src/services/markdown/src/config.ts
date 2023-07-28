@@ -115,6 +115,7 @@ export const config: Config = {
 				title: { type: "String" },
 				description: { type: "String" },
 				icon: { type: "String", matches: Object.keys(icons) },
+				logo: { type: "String" },
 				href: { type: "String" },
 			},
 		},

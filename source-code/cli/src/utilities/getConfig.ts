@@ -67,8 +67,9 @@ export async function getConfig(args: {
 	// Need to manually import the config because CJS projects
 	// might fail otherwise. See https://github.com/inlang/inlang/issues/789
 	const file = fs.readFileSync(filePath, "utf-8")
+	const base64Data = Buffer.from(file.toString(), "binary").toString("base64")
 	const module: InlangConfigModule = await import(
-		"data:application/javascript;base64," + btoa(file.toString())
+		"data:application/javascript;base64," + base64Data
 	)
 
 	const config = await setupConfig({

@@ -17,8 +17,6 @@ export const Registry = () => {
 		setFilteredPlugins(filteredPlugins)
 	})
 
-	console.log()
-
 	return (
 		<div class="flex flex-col gap-4 pt-4">
 			<Search
@@ -29,8 +27,6 @@ export const Registry = () => {
 			<div class="grid grid-cols-1 md:grid-cols-2 flex-col gap-4 ">
 				<For each={filteredPlugins()}>
 					{(plugin) => {
-						// const description = fetch(plugin.repository + "/master/README.md")
-						// console.log(description)
 						const user = plugin.repository.split("/")[3]
 						return (
 							<a href={plugin.repository} target="_blanc" class="relative no-underline">
@@ -89,17 +85,27 @@ const Search = (props: SearchInputProps) => {
 	)
 }
 
+import { markdownToTxt } from "markdown-to-txt"
+
 const Description = (props: { repository: string }) => {
 	const [description, setDescription] = createSignal<undefined | string>(undefined)
 
 	const fetchReadMeFromRepoURL = async function (repository: string) {
 		await fetchDataFromRepo(repository).then((data) => {
-			//console.log(data)
 			if (data) {
 				const pattern = /(?<=\n\n|^)(?![###|####])((?!\n\n).)+/g
 				const paragraphs = data.match(pattern)
 				if (paragraphs?.length !== 0 && paragraphs !== null) {
-					setDescription(paragraphs[0].slice(0, 80) + "...")
+					const REGEX_STARTS_WITH_CHARACTER = /^\w+/
+
+					const description = markdownToTxt(
+						(paragraphs.find((p) => REGEX_STARTS_WITH_CHARACTER.test(p)) || "").replace(
+							/\.\\/g,
+							".",
+						),
+					)
+
+					setDescription(description.length < 80 ? description : description.slice(0, 80) + "...")
 				}
 			}
 		})
@@ -119,7 +125,6 @@ const Description = (props: { repository: string }) => {
 }
 
 const fetchDataFromRepo = async (url: string) => {
-	console.log(url)
 	let _data: string | undefined
 	await fetch(url)
 		.then((response) => {

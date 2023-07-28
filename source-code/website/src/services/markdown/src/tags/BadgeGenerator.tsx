@@ -7,7 +7,6 @@ export function BadgeGenerator() {
 
 	const getBadge = (url: string) => {
 		const repo = url.split("github.com/")[1]
-		console.log(repo)
 		if (repo) {
 			return `[![translation badge](https://inlang.com/badge?url=github.com/${repo})](https://inlang.com/editor/github.com/${repo}?ref=badge)`
 		} else {

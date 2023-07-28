@@ -15,7 +15,7 @@ import {
 } from "typescript"
 
 export function recursive(node: Node, result: MessageReferenceMatch[]) {
-	// console.log(node.kind, SyntaxKind[node.kind])
+	// console.debug(node.kind, SyntaxKind[node.kind])
 	switch (node.kind) {
 		// regular function call matching e.g. t("some-id")
 		case SyntaxKind.CallExpression: {

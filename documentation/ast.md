@@ -1,10 +1,11 @@
 ---
-title: Ast
+title: Abstract Syntax Tree (AST) of inlang
+shortTitle: AST
 href: /documentation/ast
-description: The reference for the AST.
+description: Learn about the inlang AST and how it is used to represent messages.
 ---
 
-# {% $frontmatter.title %}
+# {% $frontmatter.shortTitle %}
 
 **Inlang operates on an AST (Abstract Syntax Tree). Using an AST gives inlang flexibility to adapt to different message syntaxes like ICU, formats such as JSON, ARB or JS, build linters for localization, and deliver an outstanding editing experience for translators.**
 

@@ -1,5 +1,33 @@
 # @inlang/sdk-js-plugin
 
+## 0.11.0
+
+## 0.10.1
+
+## 0.10.0
+
+## 0.9.2
+
+## 0.9.1
+
+## 0.9.0
+
+### Minor Changes
+
+- d0e93f48: add `routing.exclude` option
+
+## 0.8.1
+
+## 0.8.0
+
+## 0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 16190aa2: fix config override behavior
+
 ## 0.6.6
 
 ## 0.6.5

@@ -1,10 +1,10 @@
 import type { Resource } from "@inlang/core/ast"
 import type * as Ast from "@inlang/core/ast"
 import {
-	InlangFunctionBaseArgs,
+	type InlangFunctionBaseArgs,
 	createInlangFunction,
-	InlangFunction,
-	InlangString,
+	type InlangFunction,
+	type InlangString,
 } from "./inlang-function.js"
 
 export const isAsync = <T>(p: unknown): p is Promise<T> =>

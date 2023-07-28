@@ -22,11 +22,12 @@ const ctx = await context({
 			isProduction: isProduction,
 		}),
 	},
+	external: ["vscode"],
 })
 
 if (isProduction === false) {
 	await ctx.watch()
-	console.log("Watching for changes...")
+	console.info("Watching for changes...")
 } else {
 	await ctx.rebuild()
 	await ctx.dispose()

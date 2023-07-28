@@ -35,17 +35,17 @@ export async function fetchPublicEnv() {
 			)
 			const [, errors] = validateEnvVariables({ forProduction: false })
 			if (errors === undefined) {
-				console.log("✅ Fetched public env variables remotely.")
+				console.info("✅ Fetched public env variables remotely.")
 			} else {
 				console.warn(
 					"⚠️ Fetched public env variables remotely but some are missing or invalid. Contact the maintainers.",
 				)
-				console.log(errors)
+				console.error(errors)
 			}
 		} else {
-			console.log("❌ Failed to fetch public env variables remotely. ", data.messages)
+			console.error("❌ Failed to fetch public env variables remotely. ", data.messages)
 		}
 	} catch (error) {
-		console.log("❌ Failed to fetch public env variables remotely. ", error)
+		console.error("❌ Failed to fetch public env variables remotely. ", error)
 	}
 }

@@ -7,9 +7,10 @@ import { Root } from "./Root.jsx"
 // import the css
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
+import { defaultLanguage, languages } from "./_default.page.route.js"
 
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ["pageProps", "routeParams"] as const
+export const passToClient = ["pageProps", "routeParams", "locale"] as const
 
 export async function render(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
@@ -38,7 +39,11 @@ export async function render(pageContext: PageContextRenderer): Promise<unknown>
 		? undefined
 		: renderToString(() => (
 				<MetaProvider tags={tags}>
-					<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+					<Root
+						page={pageContext.Page}
+						pageProps={pageContext.pageProps}
+						locale={pageContext.locale}
+					/>
 				</MetaProvider>
 		  ))
 
@@ -85,3 +90,28 @@ gtag('js', new Date());
 gtag('config', 'G-5H3SDF7TVZ');
 </script>
 `
+
+export function onBeforePrerender(prerenderContext: any) {
+	const pageContexts: any = []
+	for (const pageContext of prerenderContext.pageContexts) {
+		// Duplicate pageContext for each locale
+		for (const locale of languages) {
+			// Localize URL
+			let { urlOriginal } = pageContext
+			if (locale !== defaultLanguage) {
+				urlOriginal = `/${locale}${pageContext.urlOriginal}`
+			}
+			pageContexts.push({
+				...pageContext,
+				urlOriginal,
+				// Set pageContext.locale
+				locale,
+			})
+		}
+	}
+	return {
+		prerenderContext: {
+			pageContexts,
+		},
+	}
+}
