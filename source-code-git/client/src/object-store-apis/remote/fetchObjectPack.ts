@@ -39,8 +39,9 @@ export default async function fetchObjectPack(
 		0x30, 0x30, 0x30, 0x64, 0x70, 0x61, 0x63, 0x6b, 0x66, 0x69, 0x6c, 0x65, 0x0a,
 	]) // "000dpackfile\n"
 
-	for (let i = 0; i < validHeader.length; ++i) {
-		if (object[i] !== validHeader[i])
+	// eslint-disable-line unicorn/no-for-loop
+	for (const [i, element] of validHeader.entries()) {
+		if (object[i] !== element)
 			throw new Error(`Invalid header: ${new TextDecoder().decode(object.subarray(0, 13))}}`)
 	}
 

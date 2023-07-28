@@ -6,7 +6,7 @@ import { lsRefs, fetchRemoteObject } from "./index.js"
 const resolveRemoteRef = async (targetRef: string, url: string, headers?: Record<string, string>) =>
 	lsRefs(url, headers)
 		.then((refs) => fetchRemoteObject(refs[targetRef] as string, url, headers))
-		.catch((e) => {
+		.catch(() => {
 			throw new Error(`Could not fetch remote ref '${targetRef}'`)
 		})
 		.then(({ object, type }) => {

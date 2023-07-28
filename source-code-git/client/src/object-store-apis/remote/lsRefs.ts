@@ -23,9 +23,7 @@ export default async function lsRefs(
 		.split("\n")
 		.reduce(
 			(refsObj, ref) =>
-				ref[3] !== "0"
-					? Object.assign(refsObj, { [ref.substring(45)]: ref.substring(4, 44) })
-					: refsObj,
+				ref[3] !== "0" ? Object.assign(refsObj, { [ref.slice(45)]: ref.slice(4, 44) }) : refsObj,
 			{},
 		)
 }

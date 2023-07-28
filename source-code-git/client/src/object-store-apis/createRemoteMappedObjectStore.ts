@@ -17,8 +17,8 @@ export default async function createRemoteMappedObjectStore(
 		readObject: (oid: string) =>
 			objectStore
 				.readObject(oid)
-				.catch((e) => fetchRemoteObject(oid, remoteUrl, headers))
+				.catch(() => fetchRemoteObject(oid, remoteUrl, headers))
 				.then((obj) => objectStore.writeObject(obj.object, obj.type))
-				.then((o) => objectStore.readObject(oid)),
+				.then(() => objectStore.readObject(oid)),
 	}
 }

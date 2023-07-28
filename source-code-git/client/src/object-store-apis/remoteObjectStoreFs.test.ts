@@ -1,5 +1,4 @@
 import { it, expect, describe } from "vitest"
-import { raw, http } from "@inlang-git/client/raw"
 import { createMemoryFs } from "@inlang-git/fs"
 import { createObjectStoreFs } from "./objectStoreFs.js"
 import createMappedObjectStore from "./createMappedObjectStore.js"
