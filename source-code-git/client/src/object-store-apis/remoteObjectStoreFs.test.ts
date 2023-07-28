@@ -17,8 +17,8 @@ describe("git fs", async () => {
 	const remoteHead = await resolveRemoteRef("HEAD", remoteUrl)
 
 	const objectStore = await createMappedObjectStore(`${dir}/.git`, fs)
-	.then((store) => createRemoteMappedObjectStore(store, remoteUrl))
-	.then((store) => initMappedObjectStore(store, remoteHead))
+		.then((store) => createRemoteMappedObjectStore(store, remoteUrl))
+		.then((store) => initMappedObjectStore(store, remoteHead))
 
 	const gitFs = await createObjectStoreFs(objectStore)
 

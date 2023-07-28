@@ -10,14 +10,15 @@ import { fetchRemoteObject } from "./remote/index.js"
 export default async function createRemoteMappedObjectStore(
 	objectStore: MappedObjectStore,
 	remoteUrl: string,
-	headers?: Record<string, string>
+	headers?: Record<string, string>,
 ): Promise<MappedObjectStore> {
 	return {
 		...objectStore,
-		readObject: (oid: string) => 
-			objectStore.readObject(oid)
-			.catch((e) => fetchRemoteObject(oid, remoteUrl, headers))
-			.then((obj) => objectStore.writeObject(obj.object, obj.type))
-			.then((o) => objectStore.readObject(oid))
+		readObject: (oid: string) =>
+			objectStore
+				.readObject(oid)
+				.catch((e) => fetchRemoteObject(oid, remoteUrl, headers))
+				.then((obj) => objectStore.writeObject(obj.object, obj.type))
+				.then((o) => objectStore.readObject(oid)),
 	}
 }

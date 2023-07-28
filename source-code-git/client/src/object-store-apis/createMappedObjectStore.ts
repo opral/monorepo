@@ -1,11 +1,7 @@
 import type { MappedObjectStore } from "./store/types.js"
 import type { NodeishFilesystem } from "@inlang-git/fs"
 
-import {
-	_readObject,
-	_writeObject,
-	FileSystem,
-} from "./git-internal/internal-apis.js"
+import { _readObject, _writeObject, FileSystem } from "./git-internal/internal-apis.js"
 
 /*
  * Creates a mapped object store with data from the git object store located in

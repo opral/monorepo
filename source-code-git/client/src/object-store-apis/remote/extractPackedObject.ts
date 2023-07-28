@@ -13,16 +13,16 @@ export default function extractPackedObject(packfile: Uint8Array) {
 	switch ((packfile[12] ?? 0) & 0b01110000) {
 		case 0b00010000:
 			type = "commit"
-		break
+			break
 		case 0b00100000:
 			type = "tree"
-		break
+			break
 		case 0b00110000:
 			type = "blob"
-		break
+			break
 		case 0b01000000:
 			type = "tag"
-		break
+			break
 		default:
 			throw new Error(`Invalid object type:, ${((packfile[12] ?? 0) & 0b01110000) >> 4}`)
 	}

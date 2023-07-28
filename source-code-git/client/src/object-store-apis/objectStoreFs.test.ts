@@ -32,8 +32,10 @@ describe("git fs", async () => {
 		depth: 1,
 	})
 
-	const objectStore = 
-		await initMappedObjectStore(await createMappedObjectStore(`${dir}/.git`, fs), main)
+	const objectStore = await initMappedObjectStore(
+		await createMappedObjectStore(`${dir}/.git`, fs),
+		main,
+	)
 	const gitFs = await createObjectStoreFs(objectStore)
 
 	const readWrite = async (path: string, content: string) => {

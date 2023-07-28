@@ -1,9 +1,6 @@
 import type { MappedObjectStore } from "./store/types.js"
 
-import {
-	GitAnnotatedTag,
-	GitCommit,
-} from "./git-internal/internal-apis.js"
+import { GitAnnotatedTag, GitCommit } from "./git-internal/internal-apis.js"
 
 import { stringToOid } from "./util.js"
 
