@@ -5,12 +5,12 @@ import type { LintRule } from "../../lint/dist/index.js"
 import type { Message } from "@inlang/messages"
 import { z } from "zod"
 import type {
-	PluginApiAlreadyDefinedError,
-	PluginError,
-	PluginImportError,
-	PluginIncorrectlyDefinedUsedApisError,
-	PluginUsesReservedNamespaceError,
-	PluginUsesUnavailableApiError,
+	PluginApiAlreadyDefinedException,
+	PluginException,
+	PluginImportException,
+	PluginIncorrectlyDefinedUsedApisException,
+	PluginUsesReservedNamespaceException,
+	PluginUsesUnavailableApiException,
 } from "./errors.js"
 
 type JSONSerializable<
@@ -83,12 +83,12 @@ export type ResolvePlugins = <AppSpecificApis extends object = {}>(args: {
 }) => Promise<{
 	data: ResolvedPluginsApi<AppSpecificApis>
 	errors: Array<
-		| PluginError
-		| PluginImportError
-		| PluginApiAlreadyDefinedError
-		| PluginUsesUnavailableApiError
-		| PluginUsesReservedNamespaceError
-		| PluginIncorrectlyDefinedUsedApisError
+		| PluginException
+		| PluginImportException
+		| PluginApiAlreadyDefinedException
+		| PluginUsesUnavailableApiException
+		| PluginUsesReservedNamespaceException
+		| PluginIncorrectlyDefinedUsedApisException
 	>
 }>
 

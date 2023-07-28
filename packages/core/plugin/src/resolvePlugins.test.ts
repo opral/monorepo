@@ -2,14 +2,14 @@ import { describe, expect, it, vi } from "vitest"
 import { resolvePlugins } from "./resolvePlugins.js"
 import type { InlangConfig } from "@inlang/config"
 import {
-	PluginError,
-	PluginFunctionLoadMessagesAlreadyDefinedError,
-	PluginFunctionSaveMessagesAlreadyDefinedError,
-	PluginImportError,
-	PluginIncorrectlyDefinedUsedApisError,
-	PluginInvalidIdError,
-	PluginUsesReservedNamespaceError,
-	PluginUsesUnavailableApiError,
+	PluginException,
+	PluginFunctionLoadMessagesAlreadyDefinedException,
+	PluginFunctionSaveMessagesAlreadyDefinedException,
+	PluginImportException,
+	PluginIncorrectlyDefinedUsedApisException,
+	PluginInvalidIdException,
+	PluginUsesReservedNamespaceException,
+	PluginUsesUnavailableApiException,
 } from "./errors.js"
 import type { InlangEnvironment } from "@inlang/environment"
 import type { PluginApi } from "./api.js"
@@ -29,7 +29,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginImportError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginImportException)
 	})
 
 	it("should return an error if a plugin uses an invalid id", async () => {
@@ -69,7 +69,7 @@ describe("generally", () => {
 			} as unknown as InlangConfig,
 		})
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginInvalidIdException)
 	})
 
 	it("should return an error if a plugin uses APIs that are not available", async () => {
@@ -106,7 +106,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesUnavailableApiException)
 	})
 
 	it("should return an error if a plugin uses APIs that are not defined in meta.usedApis", async () => {
@@ -141,7 +141,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisException)
 	})
 
 	it("should return an error if a plugin DOES NOT use APIs that are defined in meta.usedApis", async () => {
@@ -177,7 +177,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginIncorrectlyDefinedUsedApisException)
 	})
 
 	it("should not initialize a plugin that uses the 'inlang' namespace except for inlang whitelisted plugins", async () => {
@@ -212,7 +212,7 @@ describe("generally", () => {
 		})
 
 		expect(resolved.errors.length).toBe(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginUsesReservedNamespaceException)
 	})
 })
 
@@ -305,7 +305,7 @@ describe("loadMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionLoadMessagesAlreadyDefinedException)
 	})
 })
 
@@ -396,7 +396,7 @@ describe("saveMessages", () => {
 		})
 
 		expect(resolved.errors).toHaveLength(1)
-		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedError)
+		expect(resolved.errors[0]).toBeInstanceOf(PluginFunctionSaveMessagesAlreadyDefinedException)
 	})
 })
 
@@ -589,7 +589,7 @@ describe("addAppSpecificApi", () => {
 })
 
 describe("error handling", () => {
-	it("should handle PluginError instances thrown during plugin setup", async () => {
+	it("should handle PluginException instances thrown during plugin setup", async () => {
 		const mockPlugin: PluginApi = {
 			meta: {
 				id: "plugin.plugin-save-messages",
@@ -599,7 +599,7 @@ describe("error handling", () => {
 				usedApis: ["saveMessages"],
 			},
 			setup: () => {
-				throw new PluginError("Plugin error", { module: "https://myplugin15.com/index.js" })
+				throw new PluginException("Plugin error", { module: "https://myplugin15.com/index.js" })
 			},
 		}
 
@@ -621,7 +621,7 @@ describe("error handling", () => {
 		})
 
 		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginError)
+		expect(result.errors[0]).toBeInstanceOf(PluginException)
 	})
 
 	it("should handle generic Error instances thrown during plugin setup", async () => {
@@ -656,7 +656,7 @@ describe("error handling", () => {
 		})
 
 		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginError)
+		expect(result.errors[0]).toBeInstanceOf(PluginException)
 	})
 
 	it("should handle unhandled and unknown errors during plugin setup", async () => {
@@ -691,7 +691,7 @@ describe("error handling", () => {
 		})
 
 		expect(result.errors).toHaveLength(1)
-		expect(result.errors[0]).toBeInstanceOf(PluginError)
+		expect(result.errors[0]).toBeInstanceOf(PluginException)
 	})
 })
 
